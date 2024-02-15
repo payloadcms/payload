@@ -66,44 +66,42 @@ export const RouteError = async ({
   err: APIError
   collection?: Collection
 }) => {
-  return Response.json(err, { status: 500 })
+  const { config, logger } = req.payload
+  let response = formatErrors(err)
+  let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
 
-  // const { config, logger } = req.payload
-  // let response = formatErrors(err)
-  // let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
+  logger.error(err.stack)
 
-  // logger.error(err.stack)
+  // Internal server errors can contain anything, including potentially sensitive data.
+  // Therefore, error details will be hidden from the response unless `config.debug` is `true`
+  if (!config.debug && status === httpStatus.INTERNAL_SERVER_ERROR) {
+    response = formatErrors(new APIError('Something went wrong.'))
+  }
 
-  // // Internal server errors can contain anything, including potentially sensitive data.
-  // // Therefore, error details will be hidden from the response unless `config.debug` is `true`
-  // if (!config.debug && status === httpStatus.INTERNAL_SERVER_ERROR) {
-  //   response = formatErrors(new APIError('Something went wrong.'))
-  // }
+  if (config.debug && config.debug === true) {
+    response.stack = err.stack
+  }
 
-  // if (config.debug && config.debug === true) {
-  //   response.stack = err.stack
-  // }
+  if (collection && typeof collection.config.hooks.afterError === 'function') {
+    ;({ response, status } = (await collection.config.hooks.afterError(
+      err,
+      response,
+      req.context,
+      collection.config,
+    )) || { response, status })
+  }
 
-  // if (collection && typeof collection.config.hooks.afterError === 'function') {
-  //   ;({ response, status } = (await collection.config.hooks.afterError(
-  //     err,
-  //     response,
-  //     req.context,
-  //     collection.config,
-  //   )) || { response, status })
-  // }
+  if (typeof config.hooks.afterError === 'function') {
+    ;({ response, status } = (await config.hooks.afterError(
+      err,
+      response,
+      req.context,
+      collection?.config,
+    )) || {
+      response,
+      status,
+    })
+  }
 
-  // if (typeof config.hooks.afterError === 'function') {
-  //   ;({ response, status } = (await config.hooks.afterError(
-  //     err,
-  //     response,
-  //     req.context,
-  //     collection?.config,
-  //   )) || {
-  //     response,
-  //     status,
-  //   })
-  // }
-
-  // return Response.json(response, { status })
+  return Response.json(response, { status })
 }

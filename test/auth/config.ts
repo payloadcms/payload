@@ -158,16 +158,16 @@ export default buildConfigWithDefaults({
           label: 'Custom',
           type: 'text',
         },
-        {
-          name: 'authDebug',
-          label: 'Auth Debug',
-          type: 'ui',
-          admin: {
-            components: {
-              Field: AuthDebug,
-            },
-          },
-        },
+        // {
+        //   name: 'authDebug',
+        //   label: 'Auth Debug',
+        //   type: 'ui',
+        //   admin: {
+        //     components: {
+        //       Field: AuthDebug,
+        //     },
+        //   },
+        // },
       ],
     },
     {

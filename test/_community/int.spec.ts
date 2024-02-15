@@ -1,20 +1,15 @@
 import type { Payload } from '../../packages/payload/src'
 
-import { GET as createGET, POST as createPOST } from '../../packages/next/src/routes/rest/index'
 import { getPayload } from '../../packages/payload/src'
 import { devUser } from '../credentials'
+import { NextRESTClient } from '../helpers/NextRESTClient'
 import { postsSlug } from './collections/Posts'
-import config from './config'
+import configPromise from './config'
 
 let payload: Payload
-let jwt
+let token: string
+let restClient: NextRESTClient
 
-const GET = createGET(config)
-const POST = createPOST(config)
-
-const headers = {
-  'Content-Type': 'application/json',
-}
 const { email, password } = devUser
 
 describe('_Community Tests', () => {
@@ -22,28 +17,19 @@ describe('_Community Tests', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    payload = await getPayload({ config })
+    payload = await getPayload({ config: configPromise })
+    restClient = new NextRESTClient(payload.config)
 
-    const req = new Request('http://localhost:3000/api/users/login', {
-      method: 'POST',
-      headers: new Headers(headers),
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    })
+    const data = await restClient
+      .POST('/users/login', {
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
+      .then((res) => res.json())
 
-    const data = await POST(req, {
-      params: {
-        slug: ['users', 'login'],
-      },
-    }).then((res) => res.json())
-
-    jwt = data.token
-  })
-
-  beforeEach(() => {
-    jest.resetModules()
+    token = data.token
   })
 
   afterAll(async () => {
@@ -69,22 +55,16 @@ describe('_Community Tests', () => {
   })
 
   it('rest API example', async () => {
-    const req = new Request(`http://localhost:3000/posts`, {
-      method: 'POST',
-      headers: new Headers({
-        ...headers,
-        Authorization: `JWT ${jwt}`,
-      }),
-      body: JSON.stringify({
-        text: 'REST API EXAMPLE',
-      }),
-    })
-
-    const data = await POST(req, {
-      params: {
-        slug: ['posts'],
-      },
-    }).then((res) => res.json())
+    const data = await restClient
+      .POST(`/${postsSlug}`, {
+        body: JSON.stringify({
+          text: 'REST API EXAMPLE',
+        }),
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      })
+      .then((res) => res.json())
 
     expect(data.doc.text).toEqual('REST API EXAMPLE')
   })
