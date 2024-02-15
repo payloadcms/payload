@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from '../../packages/payload/types'
+import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 
 import { GRAPHQL_POST as createGraphqlPOST } from '../../packages/next/src/routes/graphql'
 import {
