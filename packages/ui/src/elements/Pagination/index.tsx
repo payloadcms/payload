@@ -21,7 +21,7 @@ const baseClass = 'paginator'
 
 export const Pagination: React.FC<Props> = (props) => {
   const router = useRouter()
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
   const pathname = usePathname()
 
   const {

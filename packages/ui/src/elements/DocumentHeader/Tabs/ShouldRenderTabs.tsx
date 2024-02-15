@@ -1,13 +1,13 @@
 'use client'
 import React from 'react'
-import { useSearchParams } from '../../../providers/SearchParams'
+import { useParams } from '../../../providers/Params'
 
 export const ShouldRenderTabs: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
   const {
     params: { collection: collectionSlug, global: globalSlug, segments: [idFromParam] = [] },
-  } = useSearchParams()
+  } = useParams()
 
   const id = idFromParam !== 'create' ? idFromParam : null
 

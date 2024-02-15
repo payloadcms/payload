@@ -22,7 +22,7 @@ const SearchFilter: React.FC<Props> = (props) => {
     modifySearchQuery = true,
   } = props
 
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
   const history = useHistory()
   const { i18n, t } = useTranslation()
 
