@@ -82,7 +82,7 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
-  const pgAdapter = payload.db
+  const pgAdapter = payload.db as PostgresAdapter
   const drizzleJSON = generateDrizzleJson(pgAdapter.schema)
 
   try {

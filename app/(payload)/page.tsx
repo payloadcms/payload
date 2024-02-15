@@ -3,6 +3,4 @@
 import { RootPage } from '@payloadcms/next/pages/Root'
 import config from 'payload-config'
 
-import './test.scss'
-
 export default () => RootPage({ config })
