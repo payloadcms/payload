@@ -51,7 +51,13 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     showHiddenFields,
   }
 
-  return loginOperation<TSlug>(args)
+  const result = await loginOperation<TSlug>(args)
+
+  if (collection.config.auth.removeTokenFromResponses) {
+    delete result.token
+  }
+
+  return result
 }
 
 export default localLogin

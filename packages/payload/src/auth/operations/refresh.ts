@@ -116,9 +116,5 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
   // Return results
   // /////////////////////////////////////
 
-  if (collectionConfig.auth.removeTokenFromResponses) {
-    delete result.refreshedToken
-  }
-
   return result
 }

@@ -27,6 +27,7 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
+    "bson": "^6.3.0",
     "bson-ext": "^4.0.3",
     "bson-objectid": "2.0.4",
     "deepmerge": "4.3.1",

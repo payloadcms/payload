@@ -105,10 +105,12 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     })
     if (shouldCommit) await commitTransaction(req)
 
-    return {
-      token: collectionConfig.auth.removeTokenFromResponses ? undefined : token,
+    const result = {
+      token,
       user: fullUser,
     }
+
+    return result
   } catch (error: unknown) {
     await killTransaction(req)
     throw error

@@ -1,4 +1,4 @@
-import ObjectID from 'bson-objectid'
+import { ObjectId } from 'bson'
 
 export const isValidID = (
   value: number | string,
@@ -8,6 +8,6 @@ export const isValidID = (
   if (typeof value === 'number' && !Number.isNaN(value)) return true
 
   if (type === 'ObjectID') {
-    return ObjectID.isValid(String(value))
+    return ObjectId.isValid(String(value))
   }
 }

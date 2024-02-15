@@ -55,7 +55,7 @@ export const meOperation = async ({
     if (currentToken) {
       const decoded = jwt.decode(currentToken) as jwt.JwtPayload
       if (decoded) result.exp = decoded.exp
-      if (!collection.config.auth.removeTokenFromResponses) result.token = currentToken
+      result.token = currentToken
     }
   }
 

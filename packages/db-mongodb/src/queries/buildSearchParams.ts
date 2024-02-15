@@ -2,7 +2,7 @@ import type { PathToQuery } from 'payload/database'
 import type { Field, Payload } from 'payload/types'
 import type { Operator } from 'payload/types'
 
-import objectID from 'bson-objectid'
+import { ObjectId } from 'bson'
 import mongoose from 'mongoose'
 import { getLocalizedPaths } from 'payload/database'
 import { fieldAffectsData } from 'payload/types'
@@ -196,7 +196,7 @@ export async function buildSearchParam({
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } })
+            result.value.$or.push({ [path]: { [operatorKey]: new ObjectId(formattedValue) } })
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
               (relationTo) => {

@@ -29,6 +29,11 @@ function refreshResolver(collection: Collection) {
       collectionConfig: collection.config,
     })
     context.headers['Set-Cookie'] = cookie
+
+    if (collection.config.auth.removeTokenFromResponses) {
+      delete result.refreshedToken
+    }
+
     return result
   }
 

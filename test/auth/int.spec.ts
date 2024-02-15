@@ -10,7 +10,6 @@ import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
 import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
-let apiUrl
 let restClient: NextRESTClient
 let payload: Payload
 
@@ -333,7 +332,7 @@ describe('Auth', () => {
         let data
 
         beforeAll(async () => {
-          const response = await restClient.POST(`/${slug}/payload-preferences/${key}`, {
+          const response = await restClient.POST(`/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property },
             }),
@@ -350,7 +349,7 @@ describe('Auth', () => {
         })
 
         it('should read', async () => {
-          const response = await restClient.GET(`/${slug}/payload-preferences/${key}`, {
+          const response = await restClient.GET(`/payload-preferences/${key}`, {
             headers: {
               Authorization: `JWT ${token}`,
             },
@@ -361,7 +360,7 @@ describe('Auth', () => {
         })
 
         it('should update', async () => {
-          const response = await restClient.POST(`/${slug}/payload-preferences/${key}`, {
+          const response = await restClient.POST(`/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property: 'updated', property2: 'test' },
             }),
@@ -388,7 +387,7 @@ describe('Auth', () => {
         })
 
         it('should delete', async () => {
-          const response = await restClient.DELETE(`/${slug}/payload-preferences/${key}`, {
+          const response = await restClient.DELETE(`/payload-preferences/${key}`, {
             headers: {
               Authorization: `JWT ${token}`,
             },
@@ -603,14 +602,6 @@ describe('Auth', () => {
 
       expect(response.status).toBe(403)
       expect(data.token).toBeUndefined()
-    })
-  })
-
-  describe('REST API', () => {
-    it('should respond from route handlers', async () => {
-      const test = await fetch(`${apiUrl}/api/test`)
-
-      expect(test.status).toStrictEqual(200)
     })
   })
 

@@ -301,6 +301,9 @@ importers:
 
   packages/db-mongodb:
     dependencies:
+      bson:
+        specifier: ^6.3.0
+        version: 6.3.0
       bson-ext:
         specifier: ^4.0.3
         version: 4.0.3
@@ -595,9 +598,9 @@ importers:
       '@payloadcms/translations':
         specifier: workspace:^
         version: link:../translations
-      bson-objectid:
-        specifier: 2.0.4
-        version: 2.0.4
+      bson:
+        specifier: ^6.3.0
+        version: 6.3.0
       conf:
         specifier: 10.2.0
         version: 10.2.0
@@ -1273,9 +1276,9 @@ importers:
       body-scroll-lock:
         specifier: 4.0.0-beta.0
         version: 4.0.0-beta.0
-      bson-objectid:
-        specifier: 2.0.4
-        version: 2.0.4
+      bson:
+        specifier: ^6.3.0
+        version: 6.3.0
       date-fns:
         specifier: 2.30.0
         version: 2.30.0
@@ -7106,6 +7109,11 @@ packages:
   /bson@5.5.1:
     resolution: {integrity: sha512-ix0EwukN2EpC0SRWIj/7B5+A6uQMQy6KMREI9qQqvgpkV2frH63T0UDVd1SYedL6dNCmDBYB3QtXi4ISk9YT+g==}
     engines: {node: '>=14.20.1'}
+    dev: false
+
+  /bson@6.3.0:
+    resolution: {integrity: sha512-balJfqwwTBddxfnidJZagCBPP/f48zj9Sdp3OJswREOgsJzHiQSaOIAtApSgDQFYgHqAvFkp53AFSqjMDZoTFw==}
+    engines: {node: '>=16.20.1'}
     dev: false
 
   /buffer-crc32@0.2.13:

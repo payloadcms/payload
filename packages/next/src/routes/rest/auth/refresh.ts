@@ -31,13 +31,15 @@ export const refresh: CollectionRouteHandler = async ({ req, collection }) => {
     collectionConfig: collection.config,
   })
 
+  if (collection.config.auth.removeTokenFromResponses) {
+    delete result.refreshedToken
+  }
+
   return Response.json(
     {
-      exp: result.exp,
       // TODO(translate)
       message: 'Token refresh successful',
-      token: result.refreshedToken,
-      user: result.user,
+      ...result,
     },
     {
       headers: new Headers({
