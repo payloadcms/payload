@@ -19,7 +19,7 @@ const SortComplex: React.FC<Props> = (props) => {
   const { collection, handleChange, modifySearchQuery = true } = props
 
   const history = useHistory()
-  const params = useSearchParams()
+  const { searchParams } = useSearchParams()
   const { i18n, t } = useTranslation()
   const [sortOptions, setSortOptions] = useState<OptionObject[]>()
 
@@ -45,11 +45,11 @@ const SortComplex: React.FC<Props> = (props) => {
 
       if (handleChange) handleChange(newSortValue)
 
-      if (params.sort !== newSortValue && modifySearchQuery) {
+      if (searchParams.sort !== newSortValue && modifySearchQuery) {
         history.replace({
           search: queryString.stringify(
             {
-              ...params,
+              ...searchParams,
               sort: newSortValue,
             },
             { addQueryPrefix: true },
@@ -57,7 +57,7 @@ const SortComplex: React.FC<Props> = (props) => {
         })
       }
     }
-  }, [history, params, sortField, sortOrder, modifySearchQuery, handleChange])
+  }, [history, searchParams, sortField, sortOrder, modifySearchQuery, handleChange])
 
   useEffect(() => {
     setSortOptions([

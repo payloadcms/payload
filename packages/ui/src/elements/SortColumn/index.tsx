@@ -15,11 +15,11 @@ const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<Props> = (props) => {
   const { name, disable = false, label } = props
-  const params = useSearchParams()
+  const { searchParams } = useSearchParams()
   const history = useHistory()
   const { i18n, t } = useTranslation()
 
-  const { sort } = params
+  const { sort } = searchParams
 
   const desc = `-${name}`
   const asc = name
@@ -35,14 +35,14 @@ export const SortColumn: React.FC<Props> = (props) => {
       history.push({
         search: queryString.stringify(
           {
-            ...params,
+            ...searchParams,
             sort: newSort,
           },
           { addQueryPrefix: true },
         ),
       })
     },
-    [params, history],
+    [searchParams, history],
   )
 
   return (
