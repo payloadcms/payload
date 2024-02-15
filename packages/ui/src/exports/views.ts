@@ -1,6 +1,6 @@
 export { DefaultList } from '../views/List'
 export { DefaultEditView } from '../views/Edit'
-export type { DefaultEditViewProps } from '../views/Edit/types'
 export type { DefaultListViewProps } from '../views/List/types'
 export { default as Auth } from '../views/Edit/Auth'
 export type { EditViewProps } from '../views/types'
+export type { ServerSideEditViewProps } from '../views/types'

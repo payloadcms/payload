@@ -71,7 +71,6 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({
   version,
   i18n,
   locale,
-  config: { collections },
 }) => {
   let placeholder = ''
 

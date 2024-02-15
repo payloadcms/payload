@@ -1,27 +1,27 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { ArrayField, BlockField, Field } from 'payload/types'
+import type { Field } from 'payload/types'
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
-import { fieldAffectsData } from 'payload/types'
 import { getUniqueListBy } from 'payload/utilities'
 import Label from '../../Label'
+import { MappedField } from '@payloadcms/ui'
+
 import './index.scss'
 
 const baseClass = 'iterable-diff'
 
-const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
+const Iterable: React.FC<Props> = ({
   comparison,
   field,
-  fieldComponents,
   locale,
   locales,
   permissions,
   version,
   i18n,
-  config,
+  diffComponents,
 }) => {
   const versionRowCount = Array.isArray(version) ? version.length : 0
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
@@ -41,28 +41,30 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
             const versionRow = version?.[i] || {}
             const comparisonRow = comparison?.[i] || {}
 
-            let subFields: Field[] = []
+            let subFields: MappedField[] = []
 
-            if (field.type === 'array') subFields = field.fields
+            if (field.type === 'array') subFields = field.subfields
 
             if (field.type === 'blocks') {
               subFields = [
-                {
-                  name: 'blockType',
-                  label: i18n.t('fields:blockType'),
-                  type: 'text',
-                },
+                // {
+                //   name: 'blockType',
+                //   label: i18n.t('fields:blockType'),
+                //   type: 'text',
+                // },
               ]
 
               if (versionRow?.blockType === comparisonRow?.blockType) {
                 const matchedBlock = field.blocks.find(
                   (block) => block.slug === versionRow?.blockType,
                 ) || { fields: [] }
+
                 subFields = [...subFields, ...matchedBlock.fields]
               } else {
                 const matchedVersionBlock = field.blocks.find(
                   (block) => block.slug === versionRow?.blockType,
                 ) || { fields: [] }
+
                 const matchedComparisonBlock = field.blocks.find(
                   (block) => block.slug === comparisonRow?.blockType,
                 ) || { fields: [] }
@@ -78,17 +80,12 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
               <div className={`${baseClass}__wrap`} key={i}>
                 <RenderFieldsToDiff
                   comparison={comparisonRow}
-                  fieldComponents={fieldComponents}
+                  fieldMap={subFields}
                   fieldPermissions={permissions}
-                  fields={subFields.filter(
-                    (subField) =>
-                      !(fieldAffectsData(subField) && 'name' in subField && subField.name === 'id'),
-                  )}
                   locales={locales}
                   version={versionRow}
                   i18n={i18n}
-                  locale={locale}
-                  config={config}
+                  diffComponents={diffComponents}
                 />
               </div>
             )

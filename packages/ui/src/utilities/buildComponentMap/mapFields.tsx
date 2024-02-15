@@ -250,6 +250,7 @@ export const mapFields = (args: {
         const reducedField: MappedField = {
           name: 'name' in field ? field.name : '',
           label: 'label' in field && typeof field.label !== 'function' ? field.label : undefined,
+          labels: 'labels' in field ? field.labels : undefined,
           type: field.type,
           Field,
           Cell: (
@@ -283,6 +284,9 @@ export const mapFields = (args: {
           isSidebar: field.admin?.position === 'sidebar',
           subfields: nestedFieldMap,
           tabs,
+          options: 'options' in field ? field.options : undefined,
+          hasMany: 'hasMany' in field ? field.hasMany : undefined,
+          localized: 'localized' in field ? field.localized : false,
         }
 
         if (FieldComponent) {
@@ -294,7 +298,8 @@ export const mapFields = (args: {
     return acc
   }, [])
 
-  const hasID = result.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1
+  const hasID =
+    result.findIndex(({ isFieldAffectingData, name }) => isFieldAffectingData && name === 'id') > -1
 
   if (!hasID) {
     result.push({

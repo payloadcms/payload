@@ -1,7 +1,6 @@
 import React from 'react'
 import { getTranslation } from '@payloadcms/translations'
 
-import type { FieldWithSubFields } from 'payload/types'
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
@@ -10,17 +9,17 @@ import './index.scss'
 
 const baseClass = 'nested-diff'
 
-const Nested: React.FC<Props & { field: FieldWithSubFields }> = ({
+const Nested: React.FC<Props> = ({
   comparison,
   disableGutter = false,
   field,
-  fieldComponents,
   locale,
   locales,
   permissions,
   version,
   i18n,
-  config,
+  fieldMap,
+  diffComponents,
 }) => {
   return (
     <div className={baseClass}>
@@ -37,14 +36,12 @@ const Nested: React.FC<Props & { field: FieldWithSubFields }> = ({
       >
         <RenderFieldsToDiff
           comparison={comparison}
-          fieldComponents={fieldComponents}
+          fieldMap={fieldMap}
           fieldPermissions={permissions}
-          fields={field.fields}
           locales={locales}
           version={version}
           i18n={i18n}
-          locale={locale}
-          config={config}
+          diffComponents={diffComponents}
         />
       </div>
     </div>
