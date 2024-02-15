@@ -5,19 +5,19 @@ import { getCustomViews } from './getCustomViews'
 import { getViewConfig } from './getViewConfig'
 import { tabs as defaultViews } from './tabs'
 import { DocumentTabProps } from 'payload/types'
+import { ShouldRenderTabs } from './ShouldRenderTabs'
 
 import './index.scss'
 
 const baseClass = 'doc-tabs'
 
 export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
-  const { collectionConfig, globalConfig, isEditing } = props
+  const { collectionConfig, globalConfig } = props
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
 
-  // Don't show tabs when creating new documents
-  if ((collectionConfig && isEditing) || global) {
-    return (
+  return (
+    <ShouldRenderTabs>
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
@@ -69,8 +69,6 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
           </ul>
         </div>
       </div>
-    )
-  }
-
-  return null
+    </ShouldRenderTabs>
+  )
 }

@@ -12,8 +12,6 @@ export type DocumentTabProps = {
   config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
-  id: string
-  isEditing?: boolean
 }
 
 export type DocumentTabCondition = (args: {

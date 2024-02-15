@@ -5,9 +5,6 @@ export type Props = {
   useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
   globalLabel?: SanitizedGlobalConfig['label']
   globalSlug?: SanitizedGlobalConfig['slug']
-  data?: {
-    id?: string
-  }
   element?: React.ElementType
   fallback?: string
   title?: string

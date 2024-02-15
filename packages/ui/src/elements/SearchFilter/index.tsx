@@ -22,11 +22,13 @@ const SearchFilter: React.FC<Props> = (props) => {
     modifySearchQuery = true,
   } = props
 
-  const params = useSearchParams()
+  const { searchParams } = useSearchParams()
   const history = useHistory()
   const { i18n, t } = useTranslation()
 
-  const [search, setSearch] = useState(typeof params?.search === 'string' ? params?.search : '')
+  const [search, setSearch] = useState(
+    typeof searchParams?.search === 'string' ? searchParams?.search : '',
+  )
   const [previousSearch, setPreviousSearch] = useState('')
 
   const placeholder = useRef(t('general:searchBy', { label: getTranslation(fieldLabel, i18n) }))
@@ -40,7 +42,7 @@ const SearchFilter: React.FC<Props> = (props) => {
       if (modifySearchQuery) {
         history.replace({
           search: queryString.stringify({
-            ...params,
+            ...searchParams,
             page: 1,
             search: debouncedSearch || undefined,
           }),
@@ -54,7 +56,7 @@ const SearchFilter: React.FC<Props> = (props) => {
     previousSearch,
     history,
     fieldName,
-    params,
+    searchParams,
     handleChange,
     modifySearchQuery,
     listSearchableFields,

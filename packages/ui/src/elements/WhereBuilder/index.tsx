@@ -66,28 +66,32 @@ const WhereBuilder: React.FC<Props> = (props) => {
   const collection = config.collections.find((c) => c.slug === collectionSlug)
   const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
 
-  const params = useSearchParams()
+  const { searchParams } = useSearchParams()
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
   // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
-  const [conditions, dispatchConditions] = useReducer(reducer, params.where, (whereFromSearch) => {
-    if (modifySearchQuery && whereFromSearch) {
-      if (validateWhereQuery(whereFromSearch)) {
-        return whereFromSearch.or
+  const [conditions, dispatchConditions] = useReducer(
+    reducer,
+    searchParams.where,
+    (whereFromSearch) => {
+      if (modifySearchQuery && whereFromSearch) {
+        if (validateWhereQuery(whereFromSearch)) {
+          return whereFromSearch.or
+        }
+
+        // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
+        const transformedWhere = transformWhereQuery(whereFromSearch)
+
+        if (validateWhereQuery(transformedWhere)) {
+          return transformedWhere.or
+        }
+
+        console.warn('Invalid where query in URL. Ignoring.')
       }
-
-      // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
-      const transformedWhere = transformWhereQuery(whereFromSearch)
-
-      if (validateWhereQuery(transformedWhere)) {
-        return transformedWhere.or
-      }
-
-      console.warn('Invalid where query in URL. Ignoring.')
-    }
-    return []
-  })
+      return []
+    },
+  )
 
   // This handles updating the search query (URL) when the where conditions change
   // useThrottledEffect(

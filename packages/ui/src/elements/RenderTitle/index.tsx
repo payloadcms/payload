@@ -5,6 +5,7 @@ import type { Props } from './types'
 
 import useTitle from '../../hooks/useTitle'
 import IDLabel from '../IDLabel'
+import { useDocumentInfo } from '../../providers/DocumentInfo'
 import './index.scss'
 
 const baseClass = 'render-title'
@@ -15,11 +16,12 @@ const RenderTitle: React.FC<Props> = (props) => {
     useAsTitle,
     globalLabel,
     globalSlug,
-    data,
     element = 'h1',
     fallback = '[untitled]',
     title: titleFromProps,
   } = props
+
+  const { id } = useDocumentInfo()
 
   const titleFromForm = useTitle({
     useAsTitle: useAsTitle,
@@ -28,11 +30,11 @@ const RenderTitle: React.FC<Props> = (props) => {
   })
 
   let title = titleFromForm
-  if (!title) title = data?.id
+  if (!title) title = id?.toString()
   if (!title) title = fallback
   title = titleFromProps || title
 
-  const idAsTitle = title === data?.id
+  const idAsTitle = title === id
 
   const Tag = element
 
@@ -43,7 +45,7 @@ const RenderTitle: React.FC<Props> = (props) => {
         .join(' ')}
       title={title}
     >
-      {idAsTitle ? <IDLabel className={`${baseClass}__id`} id={data?.id} /> : title}
+      {idAsTitle ? <IDLabel className={`${baseClass}__id`} id={id} /> : title}
     </Tag>
   )
 }

@@ -16,27 +16,13 @@ import './index.scss'
 const baseClass = `doc-header`
 
 export const DocumentHeader: React.FC<{
-  apiURL?: string
   config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
   customHeader?: React.ReactNode
-  data?: any
   globalConfig?: SanitizedGlobalConfig
-  id?: string
-  isEditing?: boolean
   i18n: I18n
 }> = (props) => {
-  const {
-    id,
-    apiURL,
-    config,
-    collectionConfig,
-    customHeader,
-    data,
-    globalConfig,
-    isEditing,
-    i18n,
-  } = props
+  const { config, collectionConfig, customHeader, globalConfig, i18n } = props
 
   const titleFieldConfig = collectionConfig?.fields?.find(
     (f) => 'name' in f && f?.name === collectionConfig?.admin?.useAsTitle,
@@ -52,7 +38,6 @@ export const DocumentHeader: React.FC<{
             useAsTitle={collectionConfig?.admin?.useAsTitle}
             globalLabel={globalConfig?.label}
             globalSlug={globalConfig?.slug}
-            data={data}
             isDate={titleFieldConfig?.type === 'date'}
             dateFormat={
               titleFieldConfig && 'date' in titleFieldConfig?.admin
@@ -62,12 +47,9 @@ export const DocumentHeader: React.FC<{
             fallback={`[${i18n.t('general:untitled')}]`}
           />
           <DocumentTabs
-            apiURL={apiURL}
             config={config}
             collectionConfig={collectionConfig}
             globalConfig={globalConfig}
-            id={id}
-            isEditing={isEditing}
             i18n={i18n}
           />
         </Fragment>
