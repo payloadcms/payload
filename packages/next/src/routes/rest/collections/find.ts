@@ -1,10 +1,10 @@
 import httpStatus from 'http-status'
 
+import { isNumber } from 'payload/utilities'
 import { findOperation } from 'payload/operations'
 import { CollectionRouteHandler } from '../types'
 import qs from 'qs'
 import { Where } from 'payload/types'
-import { isNumber } from 'payload/utilities'
 
 export const find: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req

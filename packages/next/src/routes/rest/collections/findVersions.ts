@@ -2,9 +2,9 @@ import httpStatus from 'http-status'
 
 import { Where } from 'payload/types'
 import { findVersionsOperation } from 'payload/operations'
+import { isNumber } from 'payload/utilities'
 import { CollectionRouteHandler } from '../types'
 import qs from 'qs'
-import { isNumber } from 'payload/utilities'
 
 export const findVersions: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req

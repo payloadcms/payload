@@ -1,11 +1,11 @@
 import httpStatus from 'http-status'
 
 import type { Where } from 'payload/types'
+import { isNumber } from 'payload/utilities'
 import { getTranslation } from '@payloadcms/translations'
 import { deleteOperation } from 'payload/operations'
 import { CollectionRouteHandler } from '../types'
 import qs from 'qs'
-import { isNumber } from 'payload/utilities'
 
 export const deleteDoc: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req
