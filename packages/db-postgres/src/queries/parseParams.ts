@@ -169,6 +169,7 @@ export async function parseParams({
                 }
 
                 const sanitizedQueryValue = sanitizeQueryValue({
+                  adapter,
                   field,
                   operator,
                   relationOrPath,

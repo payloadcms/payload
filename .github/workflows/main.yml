@@ -2,9 +2,9 @@ name: build
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [ opened, reopened, synchronize ]
   push:
-    branches: ['main']
+    branches: [ 'main' ]
 
 jobs:
   changes:
@@ -15,25 +15,25 @@ jobs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       templates: ${{ steps.filter.outputs.templates }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 25
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          needs_build:
-            - '.github/workflows/**'
-            - 'packages/**'
-            - 'test/**'
-            - 'pnpm-lock.yaml'
-            - 'package.json'
-          templates:
-            - 'templates/**'
-    - name: Log all filter results
-      run: |
-        echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
-        echo "templates: ${{ steps.filter.outputs.templates }}"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            needs_build:
+              - '.github/workflows/**'
+              - 'packages/**'
+              - 'test/**'
+              - 'pnpm-lock.yaml'
+              - 'package.json'
+            templates:
+              - 'templates/**'
+      - name: Log all filter results
+        run: |
+          echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
+          echo "templates: ${{ steps.filter.outputs.templates }}"
 
   core-build:
     needs: changes
@@ -85,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        database: [mongoose, postgres, supabase]
+        database: [ mongoose, postgres, postgres-uuid, supabase ]
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -116,7 +116,7 @@ jobs:
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
-        if: matrix.database == 'postgres'
+        if: matrix.database == 'postgres' || matrix.database == 'postgres-uuid'
 
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
@@ -132,14 +132,14 @@ jobs:
 
       - name: Wait for PostgreSQL
         run: sleep 30
-        if: matrix.database == 'postgres'
+        if: matrix.database == 'postgres' || matrix.database == 'postgres-uuid'
 
       - name: Configure PostgreSQL
         run: |
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: matrix.database == 'postgres'
+        if: matrix.database == 'postgres' || matrix.database == 'postgres-uuid'
 
       - name: Configure Supabase
         run: |
@@ -162,7 +162,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        part: [1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
+        part: [ 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8 ]
 
     steps:
       - name: Use Node.js 18
@@ -310,7 +310,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        template: [blank, website, ecommerce]
+        template: [ blank, website, ecommerce ]
 
     steps:
       - uses: actions/checkout@v4

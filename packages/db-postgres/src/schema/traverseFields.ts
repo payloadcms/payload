@@ -6,6 +6,7 @@ import type { Field, TabAsField } from 'payload/types'
 import { relations } from 'drizzle-orm'
 import {
   PgNumericBuilder,
+  PgUUIDBuilder,
   PgVarcharBuilder,
   boolean,
   index,
@@ -21,7 +22,7 @@ import { InvalidConfiguration } from 'payload/errors'
 import { fieldAffectsData, optionIsObject } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { GenericColumns, PostgresAdapter } from '../types'
+import type { GenericColumns, IDType, PostgresAdapter } from '../types'
 
 import { hasLocalesTable } from '../utilities/hasLocalesTable'
 import { buildTable } from './build'
@@ -93,7 +94,8 @@ export const traverseFields = ({
   let hasManyNumberField: 'index' | boolean = false
   let hasLocalizedManyNumberField = false
 
-  let parentIDColType = 'integer'
+  let parentIDColType: IDType = 'integer'
+  if (columns.id instanceof PgUUIDBuilder) parentIDColType = 'uuid'
   if (columns.id instanceof PgNumericBuilder) parentIDColType = 'numeric'
   if (columns.id instanceof PgVarcharBuilder) parentIDColType = 'varchar'
 
