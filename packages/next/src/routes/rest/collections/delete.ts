@@ -5,6 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { deleteOperation } from 'payload/operations'
 import { CollectionRouteHandler } from '../types'
 import qs from 'qs'
+import { isNumber } from 'payload/utilities'
 
 export const deleteDoc: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req
@@ -17,7 +18,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ req, collection }) => 
 
   const result = await deleteOperation({
     collection,
-    depth: depth ? Number(depth) : undefined,
+    depth: isNumber(depth) ? Number(depth) : undefined,
     req,
     where,
   })
