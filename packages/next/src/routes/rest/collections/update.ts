@@ -6,19 +6,25 @@ import { isNumber } from 'payload/utilities'
 import { updateOperation } from 'payload/operations'
 import { getTranslation } from '@payloadcms/translations'
 import { CollectionRouteHandler } from '../types'
+import qs from 'qs'
 
 export const update: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req
-  const depth = searchParams.get('depth')
-  const where = searchParams.get('where')
+
+  // parse using `qs` to handle `where` queries
+  const { where, depth, draft } = qs.parse(searchParams.toString()) as {
+    where?: Where
+    depth?: string
+    draft?: string
+  }
 
   const result = await updateOperation({
     collection,
     data: req.data,
     depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: searchParams.get('draft') === 'true',
+    draft: draft === 'true',
     req,
-    where: where ? (JSON.parse(where) as Where) : undefined,
+    where,
   })
 
   if (result.errors.length === 0) {

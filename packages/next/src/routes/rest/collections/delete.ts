@@ -5,17 +5,22 @@ import { isNumber } from 'payload/utilities'
 import { getTranslation } from '@payloadcms/translations'
 import { deleteOperation } from 'payload/operations'
 import { CollectionRouteHandler } from '../types'
+import qs from 'qs'
 
 export const deleteDoc: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req
-  const depth = searchParams.get('depth')
-  const where = searchParams.get('where')
+
+  // parse using `qs` to handle `where` queries
+  const { where, depth } = qs.parse(searchParams.toString()) as {
+    where?: Where
+    depth?: string
+  }
 
   const result = await deleteOperation({
     collection,
-    depth: isNumber(depth) ? depth : undefined,
+    depth: isNumber(depth) ? Number(depth) : undefined,
     req,
-    where: where ? (JSON.parse(where) as Where) : {},
+    where,
   })
 
   if (result.errors.length === 0) {
@@ -39,6 +44,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ req, collection }) => 
   }
 
   const total = result.docs.length + result.errors.length
+
   const message = req.t('error:unableToDeleteCount', {
     count: result.errors.length,
     label: getTranslation(collection.config.labels[total > 1 ? 'plural' : 'singular'], req.i18n),
