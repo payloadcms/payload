@@ -30,7 +30,7 @@ export const PerPage: React.FC<Props> = ({
   modifySearchParams = true,
   resetPage = false,
 }) => {
-  const params = useSearchParams()
+  const { searchParams } = useSearchParams()
   const history = useHistory()
   const { t } = useTranslation()
 
@@ -63,9 +63,9 @@ export const PerPage: React.FC<Props> = ({
                     history.replace({
                       search: qs.stringify(
                         {
-                          ...params,
+                          ...searchParams,
                           limit: limitNumber,
-                          page: resetPage ? 1 : params.page,
+                          page: resetPage ? 1 : searchParams.page,
                         },
                         { addQueryPrefix: true },
                       ),

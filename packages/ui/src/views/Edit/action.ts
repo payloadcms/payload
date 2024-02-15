@@ -32,7 +32,11 @@ export const getFormStateFromServer = async (
     config: configPromise,
   })
 
-  const collectionConfig = payload.collections[collectionSlug].config
+  const collectionConfig = payload.collections[collectionSlug]?.config
+
+  if (!collectionConfig) {
+    throw new Error(`Collection with slug "${collectionSlug}" not found`)
+  }
 
   const data = reduceFieldsToValues(formState, true)
 
