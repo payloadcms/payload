@@ -1,37 +1,24 @@
-import { GraphQLClient } from 'graphql-request'
 import jwtDecode from 'jwt-decode'
 
 import type { Payload } from '../../packages/payload/src'
 import type { User } from '../../packages/payload/src/auth'
 
-import configPromise from '../collections-graphql/config'
+import { getPayload } from '../../packages/payload/src'
 import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import configPromise from './config'
 import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
-require('isomorphic-fetch')
-
 let apiUrl
-let client: GraphQLClient
+let restClient: NextRESTClient
 let payload: Payload
-
-const headers = {
-  'Content-Type': 'application/json',
-}
 
 const { email, password } = devUser
 
 describe('Auth', () => {
   beforeAll(async () => {
-    const { serverURL, payload: payloadClient } = await initPayloadTest({
-      __dirname,
-      init: { local: false },
-    })
-    payload = payloadClient
-    apiUrl = `${serverURL}/api`
-    const config = await configPromise
-    const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`
-    client = new GraphQLClient(url)
+    payload = await getPayload({ config: configPromise, disableOnInit: true })
+    restClient = new NextRESTClient(payload.config)
   })
 
   afterAll(async () => {
@@ -40,27 +27,28 @@ describe('Auth', () => {
     }
   })
 
-  beforeEach(() => {
-    jest.resetModules()
-  })
-
   describe('GraphQL - admin user', () => {
     let token
     let user
     beforeAll(async () => {
-      // language=graphQL
-      const query = `mutation {
-          loginUser(email: "${devUser.email}", password: "${devUser.password}") {
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `mutation {
+            loginUser(email: "${devUser.email}", password: "${devUser.password}") {
               token
               user {
                   id
                   email
               }
-          }
-      }`
-      const response = await client.request(query)
-      user = response.loginUser.user
-      token = response.loginUser.token
+            }
+          }`,
+          }),
+        })
+        .then((res) => res.json())
+
+      user = data.loginUser.user
+      token = data.loginUser.token
     })
 
     it('should login', async () => {
@@ -83,37 +71,31 @@ describe('Auth', () => {
 
   describe('REST - admin user', () => {
     beforeAll(async () => {
-      await fetch(`${apiUrl}/${slug}/first-register`, {
+      await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({
           email,
           password,
         }),
-        headers,
-        method: 'post',
       })
     })
 
     it('should prevent registering a new first user', async () => {
-      const response = await fetch(`${apiUrl}/${slug}/first-register`, {
+      const response = await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({
-          email: 'thisuser@shouldbeprevented.com',
-          password: 'get-out',
+          email,
+          password,
         }),
-        headers,
-        method: 'post',
       })
 
       expect(response.status).toBe(403)
     })
 
     it('should login a user successfully', async () => {
-      const response = await fetch(`${apiUrl}/${slug}/login`, {
+      const response = await restClient.POST(`/${slug}/login`, {
         body: JSON.stringify({
           email,
           password,
         }),
-        headers,
-        method: 'post',
       })
 
       const data = await response.json()
@@ -127,13 +109,11 @@ describe('Auth', () => {
       let loggedInUser: User | undefined
 
       beforeAll(async () => {
-        const response = await fetch(`${apiUrl}/${slug}/login`, {
+        const response = await restClient.POST(`/${slug}/login`, {
           body: JSON.stringify({
             email,
             password,
           }),
-          headers,
-          method: 'post',
         })
 
         const data = await response.json()
@@ -155,9 +135,8 @@ describe('Auth', () => {
       })
 
       it('should return a logged in user from /me', async () => {
-        const response = await fetch(`${apiUrl}/${slug}/me`, {
+        const response = await restClient.GET(`/${slug}/me`, {
           headers: {
-            ...headers,
             Authorization: `JWT ${token}`,
           },
         })
@@ -218,9 +197,8 @@ describe('Auth', () => {
           },
         })
 
-        const response = await fetch(`${apiUrl}/${slug}/me`, {
+        const response = await restClient.GET(`/${slug}/me`, {
           headers: {
-            ...headers,
             Authorization: `${slug} API-Key ${user?.apiKey}`,
           },
         })
@@ -233,11 +211,10 @@ describe('Auth', () => {
       })
 
       it('should refresh a token and reset its expiration', async () => {
-        const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+        const response = await restClient.POST(`/${slug}/refresh-token`, {
           headers: {
             Authorization: `JWT ${token}`,
           },
-          method: 'post',
         })
 
         const data = await response.json()
@@ -257,11 +234,10 @@ describe('Auth', () => {
           },
         })
 
-        const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+        const response = await restClient.POST(`/${slug}/refresh-token`, {
           headers: {
             Authorization: `JWT ${token}`,
           },
-          method: 'post',
         })
 
         const data = await response.json()
@@ -271,7 +247,7 @@ describe('Auth', () => {
       })
 
       it('should allow a user to be created', async () => {
-        const response = await fetch(`${apiUrl}/${slug}`, {
+        const response = await restClient.POST(`/${slug}`, {
           body: JSON.stringify({
             email: 'name@test.com',
             password,
@@ -279,9 +255,7 @@ describe('Auth', () => {
           }),
           headers: {
             Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
           },
-          method: 'post',
         })
 
         const data = await response.json()
@@ -299,7 +273,7 @@ describe('Auth', () => {
 
       it('should allow verification of a user', async () => {
         const emailToVerify = 'verify@me.com'
-        const response = await fetch(`${apiUrl}/public-users`, {
+        const response = await restClient.POST(`/public-users`, {
           body: JSON.stringify({
             email: emailToVerify,
             password,
@@ -307,9 +281,7 @@ describe('Auth', () => {
           }),
           headers: {
             Authorization: `JWT ${token}`,
-            'Content-Type': 'application/json',
           },
-          method: 'post',
         })
 
         expect(response.status).toBe(201)
@@ -330,14 +302,8 @@ describe('Auth', () => {
         expect(_verified).toBe(false)
         expect(_verificationToken).toBeDefined()
 
-        const verificationResponse = await fetch(
-          `${apiUrl}/public-users/verify/${_verificationToken}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            method: 'post',
-          },
+        const verificationResponse = await restClient.POST(
+          `/public-users/verify/${_verificationToken}`,
         )
 
         expect(verificationResponse.status).toBe(200)
@@ -365,15 +331,13 @@ describe('Auth', () => {
         let data
 
         beforeAll(async () => {
-          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+          const response = await restClient.POST(`/${slug}/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property },
             }),
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'post',
           })
           data = await response.json()
         })
@@ -384,12 +348,10 @@ describe('Auth', () => {
         })
 
         it('should read', async () => {
-          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+          const response = await restClient.GET(`/${slug}/payload-preferences/${key}`, {
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'get',
           })
           data = await response.json()
           expect(data.key).toStrictEqual(key)
@@ -397,15 +359,13 @@ describe('Auth', () => {
         })
 
         it('should update', async () => {
-          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+          const response = await restClient.POST(`/${slug}/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property: 'updated', property2: 'test' },
             }),
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'post',
           })
 
           data = await response.json()
@@ -426,14 +386,11 @@ describe('Auth', () => {
         })
 
         it('should delete', async () => {
-          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+          const response = await restClient.DELETE(`/${slug}/payload-preferences/${key}`, {
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'delete',
           })
-
           data = await response.json()
 
           const result = await payload.find({
@@ -452,43 +409,34 @@ describe('Auth', () => {
         const userEmail = 'lock@me.com'
 
         const tryLogin = async () => {
-          await fetch(`${apiUrl}/${slug}/login`, {
+          await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify({
               email: userEmail,
               password: 'bad',
             }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            method: 'post',
           })
-          // expect(loginRes.status).toEqual(401);
         }
 
         beforeAll(async () => {
-          const response = await fetch(`${apiUrl}/${slug}/login`, {
+          const response = await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify({
               email,
               password,
             }),
-            headers,
-            method: 'post',
           })
 
           const data = await response.json()
           token = data.token
 
           // New user to lock
-          await fetch(`${apiUrl}/${slug}`, {
+          await restClient.POST(`/${slug}`, {
             body: JSON.stringify({
               email: userEmail,
               password,
             }),
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'post',
           })
         })
 
@@ -531,16 +479,14 @@ describe('Auth', () => {
           })
 
           // login
-          await fetch(`${apiUrl}/${slug}/login`, {
+          await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify({
               email: userEmail,
               password,
             }),
             headers: {
               Authorization: `JWT ${token}`,
-              'Content-Type': 'application/json',
             },
-            method: 'post',
           })
 
           const userResult = await payload.find({
@@ -564,16 +510,11 @@ describe('Auth', () => {
 
     it('should allow forgot-password by email', async () => {
       // TODO: Spy on payload sendEmail function
-      const response = await fetch(`${apiUrl}/${slug}/forgot-password`, {
+      const response = await restClient.POST(`/${slug}/forgot-password`, {
         body: JSON.stringify({
           email,
         }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'post',
       })
-
       // expect(mailSpy).toHaveBeenCalled();
 
       expect(response.status).toBe(200)
@@ -613,21 +554,22 @@ describe('Auth', () => {
         },
       })
 
-      const response = await fetch(`${apiUrl}/${slug}/login`, {
+      const response = await restClient.POST(`/${slug}/login`, {
         body: JSON.stringify({
           email: 'insecure@me.com',
           password: 'test',
         }),
-        headers,
-        method: 'post',
       })
 
       const data = await response.json()
-      const adminMe = await fetch(`${apiUrl}/${slug}/me`, {
-        headers: {
-          Authorization: `JWT ${data.token}`,
-        },
-      }).then((res) => res.json())
+      const adminMe = await restClient
+        .GET(`/${slug}/me`, {
+          headers: {
+            Authorization: `JWT ${data.token}`,
+          },
+        })
+        .then((res) => res.json())
+
       expect(adminMe.user.adminOnlyField).toEqual('admin secret')
 
       await payload.update({
@@ -638,21 +580,21 @@ describe('Auth', () => {
         },
       })
 
-      const editorMe = await fetch(`${apiUrl}/${slug}/me`, {
-        headers: {
-          Authorization: `JWT ${adminMe?.token}`,
-        },
-      }).then((res) => res.json())
+      const editorMe = await restClient
+        .GET(`/${slug}/me`, {
+          headers: {
+            Authorization: `JWT ${data.token}`,
+          },
+        })
+        .then((res) => res.json())
       expect(editorMe.user.adminOnlyField).toBeUndefined()
     })
 
     it('should not allow refreshing an invalid token', async () => {
-      const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+      const response = await restClient.POST(`/${slug}/refresh-token`, {
         body: JSON.stringify({
           token: 'INVALID',
         }),
-        headers,
-        method: 'post',
       })
 
       const data = await response.json()
@@ -678,19 +620,19 @@ describe('Auth', () => {
 
       const [user1, user2] = usersQuery.docs
 
-      const success = await fetch(`${apiUrl}/api-keys/${user2.id}`, {
-        headers: {
-          Authorization: `api-keys API-Key ${user2.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      }).then((res) => res.json())
+      const success = await restClient
+        .GET(`/api-keys/${user2.id}`, {
+          headers: {
+            Authorization: `api-keys API-Key ${user2.apiKey}`,
+          },
+        })
+        .then((res) => res.json())
 
       expect(success.apiKey).toStrictEqual(user2.apiKey)
 
-      const fail = await fetch(`${apiUrl}/api-keys/${user1.id}`, {
+      const fail = await restClient.GET(`/api-keys/${user1.id}`, {
         headers: {
           Authorization: `api-keys API-Key ${user2.apiKey}`,
-          'Content-Type': 'application/json',
         },
       })
 

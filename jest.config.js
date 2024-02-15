@@ -15,9 +15,6 @@ const customJestConfig = {
   // testEnvironment: 'node',
   testMatch: ['<rootDir>/packages/payload/src/**/*.spec.ts', '<rootDir>/test/**/*int.spec.ts'],
   testTimeout: 90000,
-  // transform: {
-  //   '^.+\\.(t|j)sx?$': ['@swc/jest'],
-  // },
   verbose: true,
 }
 
