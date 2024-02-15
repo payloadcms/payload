@@ -17,8 +17,8 @@
     "allowImportingTsExtensions": true,
     "plugins": [
       {
-        "name": "next",
-      },
+        "name": "next"
+      }
     ],
     "paths": {
       "payload": ["../payload/src"],
@@ -30,18 +30,40 @@
       "@payloadcms/translations/client": ["../translations/src/all"],
       "@payloadcms/translations/api": ["../translations/src/all"],
       "@payloadcms/next/*": ["../next/src/*"],
-    },
+      "payload-config": ["../../src/payload.config.ts"]
+    }
   },
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  // "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"],
   "composite": true, // Make sure typescript knows that this module depends on their references
   "references": [
-    { "path": "../payload" },
-    { "path": "../next" },
-    { "path": "../ui" },
-    { "path": "../translations" },
-    { "path": "../db-mongodb" },
-    { "path": "../db-postgres" },
-    { "path": "../richtext-lexical" },
+    {
+      "path": "../payload"
+    },
+    {
+      "path": "../next"
+    },
+    {
+      "path": "../ui"
+    },
+    {
+      "path": "../translations"
+    },
+    {
+      "path": "../db-mongodb"
+    },
+    {
+      "path": "../db-postgres"
+    },
+    {
+      "path": "../richtext-lexical"
+    }
   ],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "../../src/payload.config.ts"
+  ]
 }

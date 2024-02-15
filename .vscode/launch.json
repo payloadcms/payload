@@ -5,7 +5,6 @@
     {
       "command": "pnpm dev",
       "name": "Run Dev 3.0",
-      "cwd": "${workspaceFolder}/packages/dev",
       "request": "launch",
       "type": "node-terminal"
     },
