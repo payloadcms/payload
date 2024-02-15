@@ -1,6 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { Where } from 'payload/types'
+import { isNumber } from 'payload/utilities'
 import { getTranslation } from '@payloadcms/translations'
 import { deleteOperation } from 'payload/operations'
 import { CollectionRouteHandler } from '../types'
@@ -17,7 +18,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ req, collection }) => 
 
   const result = await deleteOperation({
     collection,
-    depth: depth ? Number(depth) : undefined,
+    depth: isNumber(depth) ? Number(depth) : undefined,
     req,
     where,
   })
