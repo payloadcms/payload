@@ -21,6 +21,7 @@ import { CustomProvider } from '../CustomProvider'
 import { ComponentMap } from '../../utilities/buildComponentMap/types'
 import { ComponentMapProvider } from '../ComponentMapProvider'
 import { SearchParamsProvider } from '../SearchParams'
+import { ParamsProvider } from '../Params'
 
 type Props = {
   config: ClientConfig
@@ -64,21 +65,23 @@ export const RootProvider: React.FC<Props> = ({
                   <AuthProvider>
                     <PreferencesProvider>
                       <ThemeProvider>
-                        <SearchParamsProvider>
-                          <LocaleProvider>
-                            <StepNavProvider>
-                              <LoadingOverlayProvider>
-                                <DocumentEventsProvider>
-                                  <ActionsProvider>
-                                    <NavProvider>
-                                      <CustomProvider>{children}</CustomProvider>
-                                    </NavProvider>
-                                  </ActionsProvider>
-                                </DocumentEventsProvider>
-                              </LoadingOverlayProvider>
-                            </StepNavProvider>
-                          </LocaleProvider>
-                        </SearchParamsProvider>
+                        <ParamsProvider>
+                          <SearchParamsProvider>
+                            <LocaleProvider>
+                              <StepNavProvider>
+                                <LoadingOverlayProvider>
+                                  <DocumentEventsProvider>
+                                    <ActionsProvider>
+                                      <NavProvider>
+                                        <CustomProvider>{children}</CustomProvider>
+                                      </NavProvider>
+                                    </ActionsProvider>
+                                  </DocumentEventsProvider>
+                                </LoadingOverlayProvider>
+                              </StepNavProvider>
+                            </LocaleProvider>
+                          </SearchParamsProvider>
+                        </ParamsProvider>
                       </ThemeProvider>
                     </PreferencesProvider>
                     <ModalContainer />

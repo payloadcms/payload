@@ -19,7 +19,7 @@ const SortComplex: React.FC<Props> = (props) => {
   const { collection, handleChange, modifySearchQuery = true } = props
 
   const history = useHistory()
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
   const { i18n, t } = useTranslation()
   const [sortOptions, setSortOptions] = useState<OptionObject[]>()
 

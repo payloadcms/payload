@@ -1,27 +1,17 @@
 'use client'
-import { Params } from 'next/dist/shared/lib/router/utils/route-matcher'
-import { useSearchParams as useNextSearchParams, useParams as useNextParams } from 'next/navigation'
+import { useSearchParams as useNextSearchParams } from 'next/navigation'
 import qs from 'qs'
 import React, { createContext, useContext } from 'react'
 
-interface IParamsContext {
-  searchParams: qs.ParsedQs
-  params: Params
-}
+interface ISearchParamsContext extends qs.ParsedQs {}
 
-const Context = createContext<IParamsContext>({
-  searchParams: {},
-  params: {},
-} as IParamsContext)
+const Context = createContext<ISearchParamsContext>({} as ISearchParamsContext)
 
 // TODO: abstract the `next/navigation` dependency out from this provider so that it can be used in other contexts
 export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const nextSearchParams = useNextSearchParams()
-  const params = useNextParams()
-
   const searchParams = qs.parse(nextSearchParams.toString(), { depth: 10, ignoreQueryPrefix: true })
-
-  return <Context.Provider value={{ searchParams, params }}>{children}</Context.Provider>
+  return <Context.Provider value={searchParams}>{children}</Context.Provider>
 }
 
-export const useSearchParams = (): IParamsContext => useContext(Context)
+export const useSearchParams = (): ISearchParamsContext => useContext(Context)
