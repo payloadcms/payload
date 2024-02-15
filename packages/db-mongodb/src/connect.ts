@@ -24,27 +24,6 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
     useFacet: undefined,
   }
 
-  // if ([process.env.APP_ENV, process.env.NODE_ENV].includes('test')) {
-  //   if (process.env.PAYLOAD_TEST_MONGO_URL) {
-  //     urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL
-  //   } else {
-  //     connectionOptions.dbName = 'payloadmemory'
-  //     const { MongoMemoryServer } = require('mongodb-memory-server')
-  //     const getPort = require('get-port')
-
-  //     const port = await getPort()
-  //     this.mongoMemoryServer = await MongoMemoryServer.create({
-  //       instance: {
-  //         dbName: 'payloadmemory',
-  //         port,
-  //       },
-  //     })
-
-  //     urlToConnect = this.mongoMemoryServer.getUri()
-  //     successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!'
-  //   }
-  // }
-
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
 

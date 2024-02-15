@@ -159,6 +159,9 @@ importers:
       minimist:
         specifier: 1.2.8
         version: 1.2.8
+      mongodb-memory-server:
+        specifier: 8.13.0
+        version: 8.13.0
       next:
         specifier: 14.1.1-canary.26
         version: 14.1.1-canary.26(@babel/core@7.22.20)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)

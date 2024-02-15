@@ -34,11 +34,14 @@
       "@payloadcms/db-mongodb": ["./packages/db-mongodb/src"],
       "@payloadcms/richtext-lexical": ["./packages/richtext-lexical/src"],
       "@payloadcms/ui/*": ["./packages/ui/src/exports/*"],
+      "@payloadcms/ui/scss": ["./packages/ui/src/scss/styles.scss"],
+      "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
       "@payloadcms/translations": ["./packages/translations/src/exports/index.ts"],
       "@payloadcms/translations/client": ["./packages/translations/src/all"],
       "@payloadcms/translations/api": ["./packages/translations/src/all"],
       "@payloadcms/next/*": ["./packages/next/src/*"],
-      "@payloadcms/graphql": ["./packages/graphql/src"]
+      "@payloadcms/graphql": ["./packages/graphql/src"],
+      "payload-config": ["./test/_community/config.ts"]
     }
   },
   "exclude": ["dist", "build", "temp", "node_modules"],
