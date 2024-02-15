@@ -1,26 +1,33 @@
 import httpStatus from 'http-status'
 
-import { isNumber } from 'payload/utilities'
 import { findOperation } from 'payload/operations'
 import { CollectionRouteHandler } from '../types'
+import qs from 'qs'
+import { Where } from 'payload/types'
+import { isNumber } from 'payload/utilities'
 
 export const find: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req
 
-  const depth = searchParams.get('depth')
-  const limit = searchParams.get('limit')
-  const page = searchParams.get('page')
-  const where = searchParams.get('where')
+  // parse using `qs` to handle `where` queries
+  const { where, page, depth, limit, sort, draft } = qs.parse(searchParams.toString()) as {
+    where?: Where
+    page?: string
+    depth?: string
+    limit?: string
+    sort?: string
+    draft?: string
+  }
 
   const result = await findOperation({
     collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: searchParams.get('draft') === 'true',
+    draft: draft === 'true',
     limit: isNumber(limit) ? Number(limit) : undefined,
     page: isNumber(page) ? Number(page) : undefined,
     req,
-    sort: searchParams.get('sort'),
-    where: where ? JSON.parse(where) : undefined,
+    sort,
+    where,
   })
 
   return Response.json(result, {
