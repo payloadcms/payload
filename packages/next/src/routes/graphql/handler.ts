@@ -48,7 +48,7 @@ if (!cached) {
   cached = global._payload_graphql = { graphql: null, promise: null }
 }
 
-export const getGraphql = async (config: Promise<SanitizedConfig>) => {
+export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedConfig) => {
   if (cached.graphql) {
     return cached.graphql
   }
@@ -71,53 +71,54 @@ export const getGraphql = async (config: Promise<SanitizedConfig>) => {
   return cached.graphql
 }
 
-export const POST = (config: Promise<SanitizedConfig>) => async (request: Request) => {
-  const originalRequest = request.clone()
-  const req = await createPayloadRequest({
-    request,
-    config,
-  })
-  const { schema, validationRules } = await getGraphql(config)
+export const POST =
+  (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
+    const originalRequest = request.clone()
+    const req = await createPayloadRequest({
+      request,
+      config,
+    })
+    const { schema, validationRules } = await getGraphql(config)
 
-  const { payload } = req
+    const { payload } = req
 
-  const afterErrorHook =
-    typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null
+    const afterErrorHook =
+      typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null
 
-  const headers = {}
-  const apiResponse = await createHandler({
-    context: { req, headers },
-    onOperation: async (request, args, result) => {
-      const response =
-        typeof payload.extensions === 'function'
-          ? await payload.extensions({
-              args,
-              req: request,
-              result,
-            })
-          : result
-      if (response.errors) {
-        const errors = (await Promise.all(
-          result.errors.map((error) => {
-            return handleError(payload, error, payload.config.debug, afterErrorHook)
-          }),
-        )) as GraphQLError[]
-        // errors type should be FormattedGraphQLError[] but onOperation has a return type of ExecutionResult instead of FormattedExecutionResult
-        return { ...response, errors }
-      }
-      return response
-    },
-    schema: schema,
-    validationRules: (request, args, defaultRules) => defaultRules.concat(validationRules(args)),
-  })(originalRequest)
+    const headers = {}
+    const apiResponse = await createHandler({
+      context: { req, headers },
+      onOperation: async (request, args, result) => {
+        const response =
+          typeof payload.extensions === 'function'
+            ? await payload.extensions({
+                args,
+                req: request,
+                result,
+              })
+            : result
+        if (response.errors) {
+          const errors = (await Promise.all(
+            result.errors.map((error) => {
+              return handleError(payload, error, payload.config.debug, afterErrorHook)
+            }),
+          )) as GraphQLError[]
+          // errors type should be FormattedGraphQLError[] but onOperation has a return type of ExecutionResult instead of FormattedExecutionResult
+          return { ...response, errors }
+        }
+        return response
+      },
+      schema: schema,
+      validationRules: (request, args, defaultRules) => defaultRules.concat(validationRules(args)),
+    })(originalRequest)
 
-  const resHeaders = new Headers(apiResponse.headers)
-  for (let key in headers) {
-    resHeaders.append(key, headers[key])
+    const resHeaders = new Headers(apiResponse.headers)
+    for (let key in headers) {
+      resHeaders.append(key, headers[key])
+    }
+
+    return new Response(apiResponse.body, {
+      status: apiResponse.status,
+      headers: new Headers(resHeaders),
+    })
   }
-
-  return new Response(apiResponse.body, {
-    status: apiResponse.status,
-    headers: new Headers(resHeaders),
-  })
-}

@@ -15,7 +15,7 @@ import { getDataAndFile } from './getDataAndFile'
 
 type Args = {
   request: Request
-  config: Promise<SanitizedConfig>
+  config: Promise<SanitizedConfig> | SanitizedConfig
   params?: {
     collection: string
   }

@@ -145,7 +145,7 @@ const RouteNotFoundResponse = (slug: string[]) =>
   )
 
 export const GET =
-  (config: Promise<SanitizedConfig>) =>
+  (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2, slug3, slug4] = slug
     let req: PayloadRequest
@@ -261,7 +261,7 @@ export const GET =
   }
 
 export const POST =
-  (config: Promise<SanitizedConfig>) =>
+  (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2, slug3, slug4] = slug
     let req: PayloadRequest
@@ -370,7 +370,7 @@ export const POST =
   }
 
 export const DELETE =
-  (config: Promise<SanitizedConfig>) =>
+  (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2] = slug
     let req: PayloadRequest
@@ -427,7 +427,7 @@ export const DELETE =
   }
 
 export const PATCH =
-  (config: Promise<SanitizedConfig>) =>
+  (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2] = slug
     let req: PayloadRequest
