@@ -94,6 +94,13 @@ export const createClientConfig = async (
 
   delete clientConfig.endpoints
   delete clientConfig.db
+
+  'localization' in clientConfig &&
+    clientConfig.localization &&
+    clientConfig.localization.locales.forEach((locale) => {
+      delete locale.toString
+    })
+
   clientConfig.onInit = undefined
 
   clientConfig.collections = sanitizeCollections(clientConfig.collections)
