@@ -18,8 +18,8 @@ const { email, password } = devUser
 
 describe('Auth', () => {
   beforeAll(async () => {
-    // const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config: configPromise })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
   })
 

@@ -26,7 +26,7 @@ export default buildConfigWithDefaults({
         depth: 0,
         cookies: {
           secure: false,
-          sameSite: 'lax',
+          sameSite: 'Lax',
           domain: undefined,
         },
       },

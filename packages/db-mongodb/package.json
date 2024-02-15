@@ -31,7 +31,7 @@
     "bson-objectid": "2.0.4",
     "deepmerge": "4.3.1",
     "get-port": "5.1.1",
-    "mongoose": "6.12.0",
+    "mongoose": "7.6.8",
     "mongoose-paginate-v2": "1.7.22",
     "prompts": "2.4.2",
     "uuid": "9.0.0"
