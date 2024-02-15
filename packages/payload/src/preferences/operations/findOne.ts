@@ -8,6 +8,7 @@ async function findOne(
   const {
     key,
     req: { payload },
+    req,
     user,
   } = args
 
@@ -21,17 +22,11 @@ async function findOne(
     ],
   }
 
-  const { docs } = await payload.find({
+  return await payload.db.findOne({
     collection: 'payload-preferences',
-    depth: 0,
-    pagination: false,
-    user,
+    req,
     where,
   })
-
-  if (docs.length === 0) return null
-
-  return docs[0]
 }
 
 export default findOne

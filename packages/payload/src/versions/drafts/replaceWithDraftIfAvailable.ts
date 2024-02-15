@@ -65,6 +65,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     global: entity.slug,
     limit: 1,
     locale,
+    pagination: false,
     req,
     sort: '-updatedAt',
     where: combineQueries(queryToBuild, versionAccessResult),
