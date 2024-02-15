@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test'
 import { initPageConsoleErrorCatch } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import config from './config'
 
 const { beforeAll, describe } = test
 
@@ -13,7 +14,7 @@ describe('Admin Panel', () => {
   let url: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname)
+    const { serverURL } = await initPayloadE2E(config)
     url = new AdminUrlUtil(serverURL, 'posts')
 
     const context = await browser.newContext()
