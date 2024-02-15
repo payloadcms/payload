@@ -14,7 +14,7 @@ export type DefaultVersionsViewProps = {
   doc: Document
   mostRecentDoc: Document
   publishedDoc: Document
-  comparisonDoc: Document
+  initialComparisonDoc: Document
   localeOptions: Option[]
   user: User
   permissions: Permissions

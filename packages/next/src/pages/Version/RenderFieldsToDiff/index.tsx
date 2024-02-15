@@ -52,11 +52,12 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               field,
               // isRichText: isRichText,
               locales: locales,
-              // permissions: subFieldPermissions,
+              fieldPermissions: subFieldPermissions,
               i18n,
               fieldMap: 'subfields' in field ? field.subfields : fieldMap,
               diffComponents,
               comparison: comparisonValue,
+              version: versionValue,
             }
 
             if (field.localized) {

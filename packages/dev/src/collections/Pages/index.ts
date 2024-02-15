@@ -45,16 +45,16 @@ export const Pages: CollectionConfig = {
     //     },
     //   },
     // },
-    // {
-    //   name: 'title',
-    //   label: 'Title',
-    //   type: 'text',
-    //   required: true,
-    //   defaultValue: 'This is a default value',
-    //   admin: {
-    //     description: 'This is a description',
-    //   },
-    // },
+    {
+      name: 'title',
+      label: 'Title',
+      type: 'text',
+      required: true,
+      defaultValue: 'This is a default value',
+      admin: {
+        description: 'This is a description',
+      },
+    },
     // {
     //   name: 'titleWithCustomField',
     //   label: 'Title With Custom Field',
@@ -163,20 +163,20 @@ export const Pages: CollectionConfig = {
     //     },
     //   ],
     // },
-    {
-      name: 'group',
-      label: 'Group',
-      type: 'group',
-      fields: [
-        {
-          name: 'groupText',
-          label: 'Group Text',
-          type: 'text',
-          required: true,
-          defaultValue: 'This is a default value',
-        },
-      ],
-    },
+    // {
+    //   name: 'group',
+    //   label: 'Group',
+    //   type: 'group',
+    //   fields: [
+    //     {
+    //       name: 'groupText',
+    //       label: 'Group Text',
+    //       type: 'text',
+    //       required: true,
+    //       defaultValue: 'This is a default value',
+    //     },
+    //   ],
+    // },
     // {
     //   name: 'upload',
     //   label: 'Upload',
@@ -243,57 +243,57 @@ export const Pages: CollectionConfig = {
     //     },
     //   ],
     // },
-    {
-      label: 'Tabs',
-      type: 'tabs',
-      tabs: [
-        {
-          name: 'tab1',
-          label: 'Tab 1 (Named)',
-          validate: (value) => true,
-          fields: [
-            {
-              name: 'tab1Text',
-              label: 'Tab 1 Text',
-              type: 'text',
-              required: true,
-            },
-          ],
-        },
-        {
-          label: 'Tab 2 (Unnamed)',
-          fields: [
-            {
-              name: 'tab2Text',
-              label: 'Tab 2 Text',
-              type: 'text',
-              required: true,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'rowText1',
-          label: 'Row Text',
-          type: 'text',
-          admin: {
-            width: '50%',
-          },
-        },
-        {
-          name: 'rowText2',
-          label: 'Row Text',
-          type: 'text',
-          admin: {
-            width: '50%',
-          },
-        },
-      ],
-    },
+    // {
+    //   label: 'Tabs',
+    //   type: 'tabs',
+    //   tabs: [
+    //     {
+    //       name: 'tab1',
+    //       label: 'Tab 1 (Named)',
+    //       validate: (value) => true,
+    //       fields: [
+    //         {
+    //           name: 'tab1Text',
+    //           label: 'Tab 1 Text',
+    //           type: 'text',
+    //           required: true,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       label: 'Tab 2 (Unnamed)',
+    //       fields: [
+    //         {
+    //           name: 'tab2Text',
+    //           label: 'Tab 2 Text',
+    //           type: 'text',
+    //           required: true,
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    // {
+    //   type: 'row',
+    //   fields: [
+    //     {
+    //       name: 'rowText1',
+    //       label: 'Row Text',
+    //       type: 'text',
+    //       admin: {
+    //         width: '50%',
+    //       },
+    //     },
+    //     {
+    //       name: 'rowText2',
+    //       label: 'Row Text',
+    //       type: 'text',
+    //       admin: {
+    //         width: '50%',
+    //       },
+    //     },
+    //   ],
+    // },
     // {
     //   name: 'json',
     //   label: 'JSON',

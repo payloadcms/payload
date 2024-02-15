@@ -58,6 +58,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
       }
 
       const search = qs.stringify(query)
+
       const response = await fetch(`${baseURL}?${search}`, {
         credentials: 'include',
         headers: {
@@ -67,6 +68,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
 
       if (response.ok) {
         const data: PaginatedDocs = await response.json()
+
         if (data.docs.length > 0) {
           setOptions((existingOptions) => [
             ...existingOptions,
@@ -75,6 +77,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
               value: doc.id,
             })),
           ])
+
           setLastLoadedPage(data.page)
         }
       } else {

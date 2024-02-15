@@ -26,7 +26,6 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
   let doc: Document
   let publishedDoc: Document
   let mostRecentDoc: Document
-  let comparisonDoc: Document
 
   if (collectionSlug) {
     slug = collectionSlug
@@ -49,16 +48,6 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
       })
 
       mostRecentDoc = await payload.findByID({
-        collection: slug,
-        id,
-        depth: 1,
-        draft: true,
-        locale: '*',
-      })
-
-      // TODO: this `id` will be dynamic based on the user's selection
-      // Use URL params to achieve this
-      comparisonDoc = await payload.findByID({
         collection: slug,
         id,
         depth: 1,
@@ -95,15 +84,6 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
         draft: true,
         locale: '*',
       })
-
-      // TODO: this `slug` will be dynamic based on the user's selection
-      // Use URL params to achieve this
-      comparisonDoc = payload.findGlobal({
-        slug,
-        depth: 1,
-        draft: true,
-        locale: '*',
-      })
     } catch (error) {
       return notFound()
     }
@@ -125,7 +105,7 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
     <DefaultVersionView
       collectionSlug={collectionSlug}
       globalSlug={globalSlug}
-      comparisonDoc={comparisonDoc}
+      initialComparisonDoc={mostRecentDoc}
       doc={doc}
       localeOptions={localeOptions}
       mostRecentDoc={mostRecentDoc}

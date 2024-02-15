@@ -5,7 +5,6 @@ import type { Field } from 'payload/types'
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
-import { fieldAffectsData } from 'payload/types'
 import { getUniqueListBy } from 'payload/utilities'
 import Label from '../../Label'
 import { MappedField } from '@payloadcms/ui'
@@ -48,22 +47,24 @@ const Iterable: React.FC<Props> = ({
 
             if (field.type === 'blocks') {
               subFields = [
-                {
-                  name: 'blockType',
-                  label: i18n.t('fields:blockType'),
-                  type: 'text',
-                },
+                // {
+                //   name: 'blockType',
+                //   label: i18n.t('fields:blockType'),
+                //   type: 'text',
+                // },
               ]
 
               if (versionRow?.blockType === comparisonRow?.blockType) {
                 const matchedBlock = field.blocks.find(
                   (block) => block.slug === versionRow?.blockType,
                 ) || { fields: [] }
+
                 subFields = [...subFields, ...matchedBlock.fields]
               } else {
                 const matchedVersionBlock = field.blocks.find(
                   (block) => block.slug === versionRow?.blockType,
                 ) || { fields: [] }
+
                 const matchedComparisonBlock = field.blocks.find(
                   (block) => block.slug === comparisonRow?.blockType,
                 ) || { fields: [] }
@@ -77,20 +78,15 @@ const Iterable: React.FC<Props> = ({
 
             return (
               <div className={`${baseClass}__wrap`} key={i}>
-                {/* <RenderFieldsToDiff
+                <RenderFieldsToDiff
                   comparison={comparisonRow}
                   fieldMap={subFields}
                   fieldPermissions={permissions}
-                  fields={subFields.filter(
-                    (subField) =>
-                      !(fieldAffectsData(subField) && 'name' in subField && subField.name === 'id'),
-                  )}
                   locales={locales}
                   version={versionRow}
                   i18n={i18n}
-                  locale={locale}
                   diffComponents={diffComponents}
-                /> */}
+                />
               </div>
             )
           })}

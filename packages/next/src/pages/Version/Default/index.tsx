@@ -26,7 +26,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   doc,
   mostRecentDoc,
   publishedDoc,
-  comparisonDoc,
+  initialComparisonDoc,
   localeOptions,
   docPermissions,
   collectionSlug,
@@ -85,8 +85,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       ? originalDocFetchURL
       : `${compareBaseURL}/${compareValue.value}`
 
-  const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, {
+  const [{ data: currentComparisonDoc }] = usePayloadAPI(compareFetchURL, {
     initialParams: { depth: 1, draft: 'true', locale: '*' },
+    initialData: initialComparisonDoc,
   })
 
   const comparison =
@@ -94,7 +95,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       ? mostRecentDoc
       : compareValue?.value === 'published'
       ? publishedDoc
-      : comparisonDoc?.version // the `version` key is only present on `versions` documents
+      : currentComparisonDoc?.version // the `version` key is only present on `versions` documents
 
   const canUpdate = docPermissions?.update?.permission
 
