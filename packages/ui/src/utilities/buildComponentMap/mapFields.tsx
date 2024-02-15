@@ -250,6 +250,7 @@ export const mapFields = (args: {
         const reducedField: MappedField = {
           name: 'name' in field ? field.name : '',
           label: 'label' in field && typeof field.label !== 'function' ? field.label : undefined,
+          labels: 'labels' in field ? field.labels : undefined,
           type: field.type,
           Field,
           Cell: (

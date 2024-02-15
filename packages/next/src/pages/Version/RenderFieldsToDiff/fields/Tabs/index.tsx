@@ -47,7 +47,6 @@ const Tabs: React.FC<Props> = ({
               locales={locales}
               version={version}
               i18n={i18n}
-              locale={locale}
               diffComponents={diffComponents}
             />
           )

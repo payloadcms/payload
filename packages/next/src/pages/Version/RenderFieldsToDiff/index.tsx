@@ -48,9 +48,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             if (hasPermission === false) return null
 
             const baseCellProps: FieldDiffProps = {
-              // diffMethod: diffMethod,
+              diffMethod,
               field,
-              // isRichText: isRichText,
+              isRichText,
               locales: locales,
               fieldPermissions: subFieldPermissions,
               i18n,

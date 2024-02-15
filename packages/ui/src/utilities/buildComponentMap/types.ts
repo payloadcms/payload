@@ -6,6 +6,7 @@ import {
   SanitizedGlobalConfig,
   TabsField,
   Option,
+  Labels,
 } from 'payload/types'
 import { fieldTypes } from '../../forms/fields'
 
@@ -35,6 +36,7 @@ export type MappedField = {
   readOnly: boolean
   isSidebar: boolean
   label: FieldBase['label']
+  labels: Labels
   fieldMap?: FieldMap
   localized: boolean
   /**
