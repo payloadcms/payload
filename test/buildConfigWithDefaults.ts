@@ -25,6 +25,7 @@ const databaseAdapters = {
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
   const config: Config = {
     secret: 'TEST_SECRET',
+    // editor: slateEditor({}),
     editor: undefined,
     rateLimit: {
       max: 9999999999,

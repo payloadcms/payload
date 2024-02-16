@@ -1,16 +1,15 @@
-import { GraphQLClient } from 'graphql-request'
-
-import { initPayloadTest } from '../helpers/configHelpers'
+import { getPayload } from '../../packages/payload/src'
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
 
-let client: GraphQLClient
+let restClient: NextRESTClient
 
 describe('Custom GraphQL', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    const config = await configPromise
-    const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`
-    client = new GraphQLClient(url)
+    const config = await startMemoryDB(configPromise)
+    const payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
   })
 
   describe('Isolated Transaction ID', () => {
@@ -19,11 +18,15 @@ describe('Custom GraphQL', () => {
           TransactionID1
           TransactionID2
       }`
-      const response = await client.request(query)
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
       // either no transactions at all or they are different
       expect(
-        (response.TransactionID2 === null && response.TransactionID1 === null) ||
-          response.TransactionID2 !== response.TransactionID1,
+        (data.TransactionID2 === null && data.TransactionID1 === null) ||
+          data.TransactionID2 !== data.TransactionID1,
       ).toBe(true)
     })
     it('should isolate transaction IDs between mutations in the same request', async () => {
@@ -31,11 +34,15 @@ describe('Custom GraphQL', () => {
           MutateTransactionID1
           MutateTransactionID2
       }`
-      const response = await client.request(query)
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
       // either no transactions at all or they are different
       expect(
-        (response.MutateTransactionID2 === null && response.MutateTransactionID1 === null) ||
-          response.MutateTransactionID2 !== response.MutateTransactionID1,
+        (data.MutateTransactionID2 === null && data.MutateTransactionID1 === null) ||
+          data.MutateTransactionID2 !== data.MutateTransactionID1,
       ).toBe(true)
     })
   })

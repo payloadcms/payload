@@ -1,28 +1,25 @@
-import { GraphQLClient } from 'graphql-request'
-
+import type { Payload } from '../../packages/payload/src'
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types'
 import type { PayloadRequest } from '../../packages/payload/src/types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction'
 import { initTransaction } from '../../packages/payload/src/utilities/initTransaction'
 import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
+
+let payload: Payload
+let user: TypeWithID & Record<string, unknown>
+let useTransactions = true
+const collection = 'posts'
+const title = 'title'
 
 describe('database', () => {
-  let serverURL
-  let client: GraphQLClient
-  let token: string
-  const collection = 'posts'
-  const title = 'title'
-  let user: TypeWithID & Record<string, unknown>
-  let useTransactions = true
-
   beforeAll(async () => {
-    const init = await initPayloadTest({ __dirname, init: { local: false } })
-    serverURL = init.serverURL
-    const url = `${serverURL}/api/graphql`
-    client = new GraphQLClient(url)
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+
     if (payload.db.name === 'mongoose') {
       useTransactions = false
     }
@@ -35,7 +32,6 @@ describe('database', () => {
       },
     })
 
-    if (loginResult.token) token = loginResult.token
     user = loginResult.user
   })
 
