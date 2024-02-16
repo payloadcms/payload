@@ -19,17 +19,16 @@ describe('collections-graphql', () => {
     payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
 
-    // TODO: reenable when we migrate back to mongoose v6
     // Wait for indexes to be created,
     // as we need them to query by point
-    // if (payload.db.name === 'mongoose') {
-    //   await new Promise((resolve, reject) => {
-    //     payload.db?.collections?.point?.ensureIndexes(function (err) {
-    //       if (err) reject(err)
-    //       resolve(true)
-    //     })
-    //   })
-    // }
+    if (payload.db.name === 'mongoose') {
+      await new Promise((resolve, reject) => {
+        payload.db?.collections?.point?.ensureIndexes(function (err) {
+          if (err) reject(err)
+          resolve(true)
+        })
+      })
+    }
   })
 
   afterAll(async () => {
