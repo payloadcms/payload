@@ -3,7 +3,7 @@ import type { PathToQuery } from 'payload/database'
 import type { Field } from 'payload/types'
 import type { Operator } from 'payload/types'
 
-import { ObjectId } from 'bson'
+import ObjectId from 'bson-objectid'
 import mongoose from 'mongoose'
 import { getLocalizedPaths } from 'payload/database'
 import { fieldAffectsData } from 'payload/types'

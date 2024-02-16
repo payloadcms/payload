@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { TFunction } from '@payloadcms/translations'
 
-import { ObjectId } from 'bson'
+import ObjectId from 'bson-objectid'
 
 import type { User } from 'payload/auth'
 import type { NonPresentationalField, Data, SanitizedConfig } from 'payload/types'
