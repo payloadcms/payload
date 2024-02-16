@@ -73,20 +73,25 @@ async function clearTestBucket() {
 }
 
 async function verifyUploads(uploadId: number | string) {
-  const uploadData = (await payload.findByID({
-    collection: 'media',
-    id: uploadId,
-  })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+  try {
+    const uploadData = (await payload.findByID({
+      collection: 'media',
+      id: uploadId,
+    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
-  const fileKeys = Object.keys(uploadData.sizes).map((key) => uploadData.sizes[key].filename)
-  fileKeys.push(uploadData.filename)
+    const fileKeys = Object.keys(uploadData.sizes).map((key) => uploadData.sizes[key].filename)
+    fileKeys.push(uploadData.filename)
 
-  for (const key of fileKeys) {
-    const { $metadata } = await client.send(
-      new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
-    )
+    for (const key of fileKeys) {
+      const { $metadata } = await client.send(
+        new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+      )
 
-    // Verify each size was properly uploaded
-    expect($metadata.httpStatusCode).toBe(200)
+      // Verify each size was properly uploaded
+      expect($metadata.httpStatusCode).toBe(200)
+    }
+  } catch (error: unknown) {
+    console.error('Error verifying uploads:', error)
+    throw error
   }
 }

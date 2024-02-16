@@ -16,7 +16,7 @@ let adapter: Adapter
 let uploadOptions
 
 dotenv.config({
-  path: path.resolve(__dirname, '.env'),
+  path: path.resolve(__dirname, '.env.emulated'),
 })
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'azure') {
