@@ -85,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        database: [mongoose, postgres, supabase]
+        database: [mongoose, postgres, postgres-custom-schema, supabase]
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -116,7 +116,7 @@ jobs:
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
-        if: matrix.database == 'postgres'
+        if: startsWith(matrix.database, 'postgres')
 
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
@@ -139,7 +139,7 @@ jobs:
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: matrix.database == 'postgres'
+        if: startsWith(matrix.database, 'postgres')
 
       - name: Configure Supabase
         run: |
