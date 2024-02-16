@@ -11,6 +11,9 @@ import {
   GlobalRouteHandlerWithID,
 } from './types'
 
+import { RouteError } from './RouteError'
+import { endpointsAreDisabled } from './checkEndpoints'
+
 import { me } from './auth/me'
 import { init } from './auth/init'
 import { login } from './auth/login'
@@ -41,7 +44,6 @@ import { docAccess as docAccessGlobal } from './globals/docAccess'
 import { findVersions as findVersionsGlobal } from './globals/findVersions'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion'
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID'
-import { RouteError } from './RouteError'
 
 const endpoints = {
   root: {
@@ -161,13 +163,25 @@ export const GET =
         },
       })
 
+      const disableEndpoints = endpointsAreDisabled({
+        request,
+        endpoints: req.payload.config.endpoints,
+      })
+      if (disableEndpoints) return disableEndpoints
+
       collection = req.payload.collections?.[slug1]
 
       if (collection) {
+        const disableEndpoints = endpointsAreDisabled({
+          request,
+          endpoints: collection.config.endpoints,
+        })
+        if (disableEndpoints) return disableEndpoints
+
         const customEndpointResponse = await handleCustomEndpoints({
           entitySlug: slug1,
           payloadRequest: req,
-          endpoints: collection.config?.endpoints || [],
+          endpoints: collection.config.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 
@@ -202,10 +216,17 @@ export const GET =
         }
       } else if (slug1 === 'globals') {
         const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
+
+        const disableEndpoints = endpointsAreDisabled({
+          request,
+          endpoints: globalConfig.endpoints,
+        })
+        if (disableEndpoints) return disableEndpoints
+
         const customEndpointResponse = await handleCustomEndpoints({
           entitySlug: `${slug1}/${slug2}`,
           payloadRequest: req,
-          endpoints: globalConfig?.endpoints || [],
+          endpoints: globalConfig.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 
@@ -276,11 +297,23 @@ export const POST =
       })
       collection = req.payload.collections?.[slug1]
 
+      const disableEndpoints = endpointsAreDisabled({
+        request,
+        endpoints: req.payload.config.endpoints,
+      })
+      if (disableEndpoints) return disableEndpoints
+
       if (collection) {
+        const disableEndpoints = endpointsAreDisabled({
+          request,
+          endpoints: collection.config.endpoints,
+        })
+        if (disableEndpoints) return disableEndpoints
+
         const customEndpointResponse = await handleCustomEndpoints({
           entitySlug: slug1,
           payloadRequest: req,
-          endpoints: collection.config?.endpoints || [],
+          endpoints: collection.config.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 
@@ -318,6 +351,18 @@ export const POST =
         }
       } else if (slug1 === 'globals' && slug2) {
         const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
+        const disableEndpoints = endpointsAreDisabled({
+          request,
+          endpoints: globalConfig.endpoints,
+        })
+        if (disableEndpoints) return disableEndpoints
+
+        const customEndpointResponse = await handleCustomEndpoints({
+          entitySlug: `${slug1}/${slug2}`,
+          payloadRequest: req,
+          endpoints: globalConfig.endpoints,
+        })
+        if (customEndpointResponse) return customEndpointResponse
 
         switch (slug.length) {
           case 2:
@@ -387,11 +432,23 @@ export const DELETE =
       })
       collection = req.payload.collections?.[slug1]
 
+      const disableEndpoints = endpointsAreDisabled({
+        request,
+        endpoints: req.payload.config.endpoints,
+      })
+      if (disableEndpoints) return disableEndpoints
+
       if (collection) {
+        const disableEndpoints = endpointsAreDisabled({
+          request,
+          endpoints: collection.config.endpoints,
+        })
+        if (disableEndpoints) return disableEndpoints
+
         const customEndpointResponse = await handleCustomEndpoints({
           entitySlug: slug1,
           payloadRequest: req,
-          endpoints: collection.config?.endpoints || [],
+          endpoints: collection.config.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 
@@ -444,11 +501,23 @@ export const PATCH =
       })
       collection = req.payload.collections?.[slug1]
 
+      const disableEndpoints = endpointsAreDisabled({
+        request,
+        endpoints: req.payload.config.endpoints,
+      })
+      if (disableEndpoints) return disableEndpoints
+
       if (collection) {
+        const disableEndpoints = endpointsAreDisabled({
+          request,
+          endpoints: collection.config.endpoints,
+        })
+        if (disableEndpoints) return disableEndpoints
+
         const customEndpointResponse = await handleCustomEndpoints({
           entitySlug: slug1,
           payloadRequest: req,
-          endpoints: collection.config?.endpoints || [],
+          endpoints: collection.config.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 

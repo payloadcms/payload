@@ -7,6 +7,7 @@ import { APIError, Forbidden } from 'payload/errors'
 import { RouteError } from '../../../RouteError'
 import { createPayloadRequest } from '../../../../../utilities/createPayloadRequest'
 import httpStatus from 'http-status'
+import { endpointsAreDisabled } from '../../../checkEndpoints'
 
 async function checkFileAccess({
   req,
@@ -18,6 +19,9 @@ async function checkFileAccess({
   collection: Collection
 }) {
   const { config } = collection
+  const disableEndpoints = endpointsAreDisabled({ request: req, endpoints: config.endpoints })
+  if (disableEndpoints) return disableEndpoints
+
   const accessResult = await executeAccess({ isReadingStaticFile: true, req }, config.access.read)
 
   if (typeof accessResult === 'object') {

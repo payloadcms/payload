@@ -1,36 +1,34 @@
-import { GraphQLClient } from 'graphql-request'
+import type { Payload } from '../../packages/payload/src'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
 import { postDoc } from './config'
 
+let restClient: NextRESTClient
+let payload: Payload
+let token: string
+
 describe('dataloader', () => {
-  let serverURL
   beforeAll(async () => {
-    const init = await initPayloadTest({ __dirname, init: { local: false } })
-    serverURL = init.serverURL
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
+
+    const loginResult = await payload.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+
+    if (loginResult.token) token = loginResult.token
   })
 
   describe('graphql', () => {
-    let client: GraphQLClient
-    let token: string
-
-    beforeAll(async () => {
-      const url = `${serverURL}/api/graphql`
-      client = new GraphQLClient(url)
-
-      const loginResult = await payload.login({
-        collection: 'users',
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-      })
-
-      if (loginResult.token) token = loginResult.token
-    })
-
     it('should allow querying via graphql', async () => {
       const query = `query {
         Posts {
@@ -43,11 +41,16 @@ describe('dataloader', () => {
         }
       }`
 
-      const response = await client.request(query, null, {
-        Authorization: `JWT ${token}`,
-      })
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
 
-      const { docs } = response.Posts
+      const { docs } = data.Posts
       expect(docs[0].title).toStrictEqual(postDoc.title)
     })
 

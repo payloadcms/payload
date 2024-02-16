@@ -1,33 +1,30 @@
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
-import { GraphQLClient } from 'graphql-request'
 import path from 'path'
 
 import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
+import type { Payload } from '../../packages/payload/src'
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types'
 import type { PayloadRequest } from '../../packages/payload/src/types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { migrate } from '../../packages/payload/src/bin/migrate'
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction'
 import { initTransaction } from '../../packages/payload/src/utilities/initTransaction'
 import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
 import removeFiles from '../helpers/removeFiles'
 
-describe('database', () => {
-  let serverURL
-  let client: GraphQLClient
-  let token: string
-  const collection = 'posts'
-  const title = 'title'
-  let user: TypeWithID & Record<string, unknown>
+let payload: Payload
+let user: TypeWithID & Record<string, unknown>
+const collection = 'posts'
+const title = 'title'
 
+describe('database', () => {
   beforeAll(async () => {
-    const init = await initPayloadTest({ __dirname, init: { local: false } })
-    serverURL = init.serverURL
-    const url = `${serverURL}/api/graphql`
-    client = new GraphQLClient(url)
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -37,7 +34,6 @@ describe('database', () => {
       },
     })
 
-    if (loginResult.token) token = loginResult.token
     user = loginResult.user
   })
 
