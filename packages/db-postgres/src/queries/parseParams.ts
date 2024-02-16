@@ -63,11 +63,7 @@ export async function parseParams({
             where: condition,
           })
           if (builtConditions.length > 0) {
-            if (result) {
-              result = operatorMap[conditionOperator](result, ...builtConditions)
-            } else {
-              result = operatorMap[conditionOperator](...builtConditions)
-            }
+            result = operatorMap[conditionOperator](...builtConditions)
           }
         } else {
           // It's a path - and there can be multiple comparisons on a single path.
@@ -77,6 +73,7 @@ export async function parseParams({
           if (typeof pathOperators === 'object') {
             for (const operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
+                const val = where[relationOrPath][operator]
                 const {
                   columnName,
                   constraints: queryConstraints,
@@ -95,9 +92,8 @@ export async function parseParams({
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
                   tableName,
+                  value: val,
                 })
-
-                const val = where[relationOrPath][operator]
 
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   if (typeof value === 'string' && value.indexOf('%') > -1) {
@@ -169,6 +165,7 @@ export async function parseParams({
                 }
 
                 const sanitizedQueryValue = sanitizeQueryValue({
+                  adapter,
                   field,
                   operator,
                   relationOrPath,

@@ -76,6 +76,7 @@ const buildQuery = async function buildQuery({
         pathSegments: sortPath.replace(/__/g, '.').split('.'),
         selectFields,
         tableName,
+        value: sortPath,
       })
       orderBy.column = sortTable?.[sortTableColumnName]
     } catch (err) {

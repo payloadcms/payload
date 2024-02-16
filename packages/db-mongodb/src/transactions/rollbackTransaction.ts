@@ -17,7 +17,11 @@ export const rollbackTransaction: RollbackTransaction = async function rollbackT
   }
 
   // the first call for rollback should be aborted and deleted causing any other operations with the same transaction to fail
-  await this.sessions[id].abortTransaction()
-  await this.sessions[id].endSession()
+  try {
+    await this.sessions[id].abortTransaction()
+    await this.sessions[id].endSession()
+  } catch (error) {
+    // ignore the error as it is likely a race condition from multiple errors
+  }
   delete this.sessions[id]
 }
