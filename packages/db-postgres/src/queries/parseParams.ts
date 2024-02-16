@@ -63,11 +63,6 @@ export async function parseParams({
             where: condition,
           })
           if (builtConditions.length > 0) {
-            // if (result) {
-            //   result = operatorMap[conditionOperator](result, ...builtConditions)
-            // } else {
-            //   result = operatorMap[conditionOperator](...builtConditions)
-            // }
             result = operatorMap[conditionOperator](...builtConditions)
           }
         } else {
