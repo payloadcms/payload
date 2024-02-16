@@ -33,32 +33,24 @@ describe('Auth', () => {
     let token
     let user
     beforeAll(async () => {
-      const result = await payload.login({
-        collection: 'users',
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-      })
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `mutation {
+            loginUser(email: "${devUser.email}", password: "${devUser.password}") {
+              token
+              user {
+                  id
+                  email
+              }
+            }
+          }`,
+          }),
+        })
+        .then((res) => res.json())
 
-      // const { data } = await restClient
-      //   .GRAPHQL_POST({
-      //     body: JSON.stringify({
-      //       query: `mutation {
-      //       loginUser(email: "${devUser.email}", password: "${devUser.password}") {
-      //         token
-      //         user {
-      //             id
-      //             email
-      //         }
-      //       }
-      //     }`,
-      //     }),
-      //   })
-      //   .then((res) => res.json())
-
-      user = result.user
-      token = result.token
+      user = data.loginUser.user
+      token = data.loginUser.token
     })
 
     it('should login', async () => {
