@@ -139,7 +139,7 @@ jobs:
 
       - name: Wait for PostgreSQL
         run: sleep 30
-        if: matrix.database == 'postgres' || matrix.database == 'postgres-uuid'
+        if: startsWith(matrix.database, 'postgres')
 
       - name: Configure PostgreSQL
         run: |
