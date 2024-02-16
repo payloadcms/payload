@@ -116,6 +116,10 @@ const BlockFields: CollectionConfig = {
   fields: [
     getBlocksField(),
     {
+      ...getBlocksField(),
+      name: 'duplicate',
+    },
+    {
       ...getBlocksField('localized'),
       name: 'collapsedByDefaultBlocks',
       admin: {
