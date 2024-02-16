@@ -6,6 +6,7 @@ dist
 
 test-results
 .devcontainer
+.localstack
 /migrations
 .localstack
 
