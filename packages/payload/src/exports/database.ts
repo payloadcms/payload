@@ -84,3 +84,7 @@ export type { EntityPolicies, PathToQuery } from '../database/queryValidation/ty
 export { validateQueryPaths } from '../database/queryValidation/validateQueryPaths'
 
 export { validateSearchParam } from '../database/queryValidation/validateSearchParams'
+
+export { commitTransaction } from '../utilities/commitTransaction'
+export { initTransaction } from '../utilities/initTransaction'
+export { killTransaction } from '../utilities/killTransaction'

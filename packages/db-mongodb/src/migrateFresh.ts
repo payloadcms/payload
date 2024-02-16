@@ -1,9 +1,11 @@
 import type { PayloadRequest } from 'payload/types'
 
-import { readMigrationFiles } from 'payload/database'
-import { commitTransaction } from 'payload/dist/utilities/commitTransaction'
-import { initTransaction } from 'payload/dist/utilities/initTransaction'
-import { killTransaction } from 'payload/dist/utilities/killTransaction'
+import {
+  commitTransaction,
+  initTransaction,
+  killTransaction,
+  readMigrationFiles,
+} from 'payload/database'
 import prompts from 'prompts'
 
 import type { MongooseAdapter } from '.'
@@ -21,9 +23,9 @@ export async function migrateFresh(
     const { confirm: acceptWarning } = await prompts(
       {
         name: 'confirm',
-        type: 'confirm',
         initial: false,
         message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
+        type: 'confirm',
       },
       {
         onCancel: () => {
