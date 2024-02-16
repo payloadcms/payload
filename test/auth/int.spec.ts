@@ -71,15 +71,6 @@ describe('Auth', () => {
   })
 
   describe('REST - admin user', () => {
-    beforeAll(async () => {
-      await restClient.POST(`/${slug}/first-register`, {
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
-    })
-
     it('should prevent registering a new first user', async () => {
       const response = await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({

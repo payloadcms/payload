@@ -1,14 +1,16 @@
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
-import configPromise from './config'
+import type { Payload } from '../../packages/payload/src'
 
-let collection: string
+import { getPayload } from '../../packages/payload/src'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
+import { arraySlug } from './shared'
+
+let payload: Payload
 
 describe('array-update', () => {
   beforeAll(async () => {
-    const config = await configPromise
-    collection = config.collections[0]?.slug
-    await initPayloadTest({ __dirname })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
   })
 
   afterAll(async () => {
@@ -21,7 +23,7 @@ describe('array-update', () => {
     const originalText = 'some optional text'
 
     const doc = await payload.create({
-      collection,
+      collection: arraySlug,
       data: {
         arrayOfFields: [
           {
@@ -47,7 +49,7 @@ describe('array-update', () => {
 
     const updatedDoc = await payload.update({
       id: doc.id,
-      collection,
+      collection: arraySlug,
       data: {
         arrayOfFields: arrayWithExistingValues,
       },
@@ -68,7 +70,7 @@ describe('array-update', () => {
     }
 
     const doc = await payload.create({
-      collection,
+      collection: arraySlug,
       data: {
         arrayOfFields: [
           {
@@ -82,7 +84,7 @@ describe('array-update', () => {
 
     const updatedDoc = await payload.update({
       id: doc.id,
-      collection,
+      collection: arraySlug,
       data: {
         arrayOfFields: [
           {
