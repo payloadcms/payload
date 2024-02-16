@@ -594,6 +594,23 @@ describe('Fields', () => {
         return result.error
       }).toBeDefined()
     })
+
+    it('should not throw validation error saving multiple null values unique fields', async () => {
+      const data = {
+        text: 'a',
+        // uniqueText omitted on purpose
+      }
+      await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+      const result = await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+
+      expect(result.id).toBeDefined()
+    })
   })
 
   describe('array', () => {
