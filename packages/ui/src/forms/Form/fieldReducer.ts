@@ -1,4 +1,4 @@
-import { ObjectId } from 'bson'
+import ObjectId from 'bson-objectid'
 import equal from 'deep-equal'
 
 import type { FieldAction, FormState, FormField, Row } from './types'

@@ -1,4 +1,4 @@
-import { ObjectId } from 'bson'
+import ObjectId from 'bson-objectid'
 
 export const isValidID = (
   value: number | string,
