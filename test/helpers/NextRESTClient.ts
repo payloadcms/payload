@@ -61,14 +61,17 @@ export class NextRESTClient {
   }
 
   async GRAPHQL_POST(options: RequestInit): Promise<Response> {
-    const request = new Request(`${this.serverURL}${this.config.routes.graphQL}`, {
-      ...options,
-      method: 'POST',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      }),
-    })
+    const request = new Request(
+      `${this.serverURL}${this.config.routes.api}${this.config.routes.graphQL}`,
+      {
+        ...options,
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          ...(options?.headers || {}),
+        }),
+      },
+    )
     return this._GRAPHQL_POST(request)
   }
 

@@ -66,7 +66,10 @@ export type CustomPayloadRequest<U = any> = {
   transactionIDPromise?: Promise<void>
   /** The signed in user */
   user: (U & User) | null
-} & Pick<URL, 'host' | 'origin' | 'pathname' | 'protocol' | 'searchParams'>
+} & Pick<
+  URL,
+  'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
+>
 export type PayloadRequest<U = any> = Partial<Request> &
   Required<Pick<Request, 'headers'>> &
   CustomPayloadRequest<U>

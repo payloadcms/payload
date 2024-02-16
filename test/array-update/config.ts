@@ -1,10 +1,11 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
+import { arraySlug } from './shared'
 
 export default buildConfigWithDefaults({
   collections: [
     {
-      slug: 'arrays',
+      slug: arraySlug,
       fields: [
         {
           name: 'arrayOfFields',

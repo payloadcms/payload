@@ -12,6 +12,7 @@ import { initI18n } from '@payloadcms/translations'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 import { getDataAndFile } from './getDataAndFile'
+import { getDataLoader } from 'payload/utilities'
 
 type Args = {
   request: Request
@@ -38,7 +39,8 @@ export const createPayloadRequest = async ({
   const urlProperties = new URL(request.url)
   const { searchParams, pathname } = urlProperties
 
-  const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
+  const isGraphQL =
+    !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
 
   const { data, file } = await getDataAndFile({
     request,
@@ -96,6 +98,7 @@ export const createPayloadRequest = async ({
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)
+  req.payloadDataLoader = getDataLoader(req)
 
   req.user = await getAuthenticatedUser({
     payload,
