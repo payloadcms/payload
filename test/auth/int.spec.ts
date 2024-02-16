@@ -6,7 +6,7 @@ import type { User } from '../../packages/payload/src/auth'
 import { getPayload } from '../../packages/payload/src'
 import { devUser } from '../credentials'
 import { NextRESTClient } from '../helpers/NextRESTClient'
-// import { startMemoryDB } from '../startMemoryDB'
+import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
 import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
@@ -17,8 +17,8 @@ const { email, password } = devUser
 
 describe('Auth', () => {
   beforeAll(async () => {
-    // const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config: configPromise })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
   })
 
