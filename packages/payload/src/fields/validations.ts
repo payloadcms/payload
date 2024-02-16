@@ -332,8 +332,8 @@ const validateFilterOptions: Validate = async (
             err,
             msg: `Error validating filter options for collection ${collection}`,
           })
+          options[collection] = []
         }
-        options[collection] = []
       }),
     )
 
