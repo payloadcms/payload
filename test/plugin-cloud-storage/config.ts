@@ -89,8 +89,7 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'gcs') {
   })
 }
 console.log(
-  'Using plugin-cloud-storage adapter:',
-  process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER || 's3',
+  `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
 )
 
 export default buildConfigWithDefaults({
