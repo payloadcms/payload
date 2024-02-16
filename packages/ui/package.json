@@ -45,7 +45,7 @@
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/translations": "workspace:^",
     "body-scroll-lock": "4.0.0-beta.0",
-    "bson": "^6.3.0",
+    "bson-objectid": "2.0.4",
     "date-fns": "2.30.0",
     "deep-equal": "2.2.2",
     "flatley": "5.2.0",
