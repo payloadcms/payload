@@ -1,3 +1,7 @@
+import type { Where } from 'payload/types'
+
+import QueryString from 'qs'
+
 import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 
 import { GRAPHQL_POST as createGraphqlPOST } from '../../packages/next/src/routes/graphql'
@@ -9,6 +13,28 @@ import {
 } from '../../packages/next/src/routes/rest'
 
 type ValidPath = `/${string}`
+type RequestQuery = {
+  query?: {
+    limit?: number
+    page?: number
+    sort?: string
+    where?: Where
+  }
+}
+
+function generateQueryString(query: RequestQuery['query']): string {
+  return QueryString.stringify(
+    {
+      ...(query?.where ? { where: query.where } : {}),
+      limit: query?.limit,
+      page: query?.page,
+      sort: query?.sort,
+    },
+    {
+      addQueryPrefix: true,
+    },
+  )
+}
 
 export class NextRESTClient {
   private _DELETE: (request: Request, args: { params: { slug: string[] } }) => Promise<Response>
@@ -48,15 +74,38 @@ export class NextRESTClient {
     }
   }
 
-  async DELETE(path: ValidPath, options: RequestInit): Promise<Response> {
+  async DELETE(path: ValidPath, options: RequestInit & RequestQuery = {}): Promise<Response> {
     const { url, slug } = this.generateRequestParts(path)
-    const request = new Request(url, { ...options, method: 'DELETE' })
+    const { query, ...rest } = options || {}
+    const whereQuery = generateQueryString(query)
+
+    const request = new Request(`${url}${whereQuery}`, {
+      ...rest,
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      },
+    })
     return this._DELETE(request, { params: { slug } })
   }
 
-  async GET(path: ValidPath, options?: Omit<RequestInit, 'body'>): Promise<Response> {
+  async GET(
+    path: ValidPath,
+    options: Omit<RequestInit, 'body'> & RequestQuery = {},
+  ): Promise<Response> {
     const { url, slug } = this.generateRequestParts(path)
-    const request = new Request(url, { ...options, method: 'GET' })
+    const { query, ...rest } = options || {}
+    const whereQuery = generateQueryString(query)
+
+    const request = new Request(`${url}${whereQuery}`, {
+      ...rest,
+      method: 'GET',
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      }),
+    })
     return this._GET(request, { params: { slug } })
   }
 
@@ -75,13 +124,23 @@ export class NextRESTClient {
     return this._GRAPHQL_POST(request)
   }
 
-  async PATCH(path: ValidPath, options: RequestInit): Promise<Response> {
+  async PATCH(path: ValidPath, options: RequestInit & RequestQuery): Promise<Response> {
     const { url, slug } = this.generateRequestParts(path)
-    const request = new Request(url, { ...options, method: 'PATCH' })
+    const { query, ...rest } = options
+    const whereQuery = generateQueryString(query)
+
+    const request = new Request(`${url}${whereQuery}`, {
+      ...rest,
+      method: 'PATCH',
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      }),
+    })
     return this._PATCH(request, { params: { slug } })
   }
 
-  async POST(path: ValidPath, options?: RequestInit): Promise<Response> {
+  async POST(path: ValidPath, options: RequestInit = {}): Promise<Response> {
     const { url, slug } = this.generateRequestParts(path)
 
     const request = new Request(url, {
