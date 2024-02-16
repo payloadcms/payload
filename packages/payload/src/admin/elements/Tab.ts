@@ -3,6 +3,14 @@ import type { SanitizedConfig } from '../../config/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { DocumentInfoContext } from '../providers/DocumentInfo'
 
+export type DocumentTabProps = {
+  apiURL?: string
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
+  id: string
+  isEditing?: boolean
+}
+
 export type DocumentTabCondition = (args: {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig

@@ -1,9 +1,9 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import { DocumentTab } from './Tab'
 import { getCustomViews } from './getCustomViews'
 import { getViewConfig } from './getViewConfig'
-import { tabs as defaultTabs } from './tabs'
+import { tabs as defaultViews } from './tabs'
 import { DocumentTabProps } from 'payload/types'
 import { ShouldRenderTabs } from './ShouldRenderTabs'
 
@@ -21,7 +21,7 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {Object.entries(defaultTabs)
+            {Object.entries(defaultViews)
               // sort `defaultViews` based on `order` property from smallest to largest
               // if no `order`, append the view to the end
               // TODO: open `order` to the config and merge `defaultViews` with `customViews`
@@ -31,26 +31,16 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
                 else if (b.order === undefined) return -1
                 return a.order - b.order
               })
-              ?.map(([name, tab], index) => {
-                const DefaultTab = tab.Tab
+              ?.map(([name, Tab], index) => {
                 const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
-                const tabFromConfig = viewConfig && 'Tab' in viewConfig ? viewConfig.Tab : undefined
-
-                let CustomTab =
-                  typeof tabFromConfig === 'object' && typeof tabFromConfig.Tab === 'function'
-                    ? tabFromConfig.Tab
-                    : undefined
-
-                const TabComponent = CustomTab || DefaultTab
-
-                if (!TabComponent) return null
+                const tabOverrides = viewConfig && 'Tab' in viewConfig ? viewConfig.Tab : undefined
 
                 return (
-                  <TabComponent
+                  <DocumentTab
                     {...{
                       ...props,
-                      ...(tab || {}),
-                      ...(tabFromConfig || {}),
+                      ...(Tab || {}),
+                      ...(tabOverrides || {}),
                     }}
                     key={`tab-${index}`}
                   />
