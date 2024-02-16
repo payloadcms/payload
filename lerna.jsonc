@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
+  "version": "3.0.0-alpha.1",
+  "packages": [
+    "packages/*"
+  ],
+  "ignore": "['packages/eslint-config-payload']",
+  "command": {
+    "version": {
+      "conventionalCommits": true,
+      "createRelease": "github",
+      "changelogIncludeCommitsClientLogin": " - by @%l",
+      "forcePublish": true,
+      "message": "chore(release): %v"
+    }
+  },
+  "changelogPreset": "conventional-changelog-conventionalcommits",
+  "npmClient": "pnpm"
+}

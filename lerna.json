@@ -1,8 +1,0 @@
-{
-  "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
-  "version": "0.0.1",
-  "packages": [
-    "packages/*"
-  ],
-  "ignore": "['packages/eslint-config-payload']"
-}
