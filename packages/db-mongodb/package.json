@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "1.1.0",
+  "version": "1.4.1",
   "description": "The officially supported MongoDB database adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -11,13 +11,6 @@
     "url": "https://payloadcms.com"
   },
   "main": "./dist/index.js",
-  "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
-    }
-  },
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
@@ -27,18 +20,17 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
-    "bson-ext": "^4.0.3",
     "bson-objectid": "2.0.4",
     "deepmerge": "4.3.1",
     "get-port": "5.1.1",
-    "mongoose": "7.6.8",
+    "mongoose": "6.12.3",
     "mongoose-paginate-v2": "1.7.22",
     "prompts": "2.4.2",
+    "http-status": "1.6.2",
     "uuid": "9.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "mongodb-memory-server": "8.13.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

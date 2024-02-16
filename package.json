@@ -34,6 +34,7 @@
     "prepare": "husky install"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^14.1.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@playwright/test": "1.40.1",
     "@swc/cli": "^0.1.62",
@@ -81,7 +82,7 @@
     "lexical": "0.12.5",
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
-    "mongodb-memory-server": "8.13.0",
+    "mongodb-memory-server": "^9",
     "next": "14.1.1-canary.26",
     "node-fetch": "2.6.12",
     "node-mocks-http": "^1.14.1",
@@ -126,7 +127,9 @@
   },
   "pnpm": {
     "overrides": {
-      "graphql": "^16.8.1"
+      "graphql": "^16.8.1",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0"
     }
   }
 }

@@ -17,7 +17,11 @@ export const sanitizeQueryValue = ({
   operator,
   path,
   val,
-}: SanitizeQueryValueArgs): { operator: string; val: unknown } => {
+}: SanitizeQueryValueArgs): {
+  operator?: string
+  rawQuery?: unknown
+  val?: unknown
+} => {
   let formattedValue = val
   let formattedOperator = operator
 
@@ -70,6 +74,24 @@ export const sanitizeQueryValue = ({
       formattedValue = null
     }
 
+    // Object equality requires the value to be the first key in the object that is being queried.
+    if (
+      operator === 'equals' &&
+      formattedValue &&
+      typeof formattedValue === 'object' &&
+      formattedValue.value &&
+      formattedValue.relationTo
+    ) {
+      return {
+        rawQuery: {
+          $and: [
+            { [`${path}.value`]: { $eq: formattedValue.value } },
+            { [`${path}.relationTo`]: { $eq: formattedValue.relationTo } },
+          ],
+        },
+      }
+    }
+
     if (operator === 'in' && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.reduce((formattedValues, inVal) => {
         const newValues = [inVal]
@@ -104,7 +126,7 @@ export const sanitizeQueryValue = ({
       formattedValue = undefined
     } else {
       formattedValue = {
-        $geometry: { coordinates: [parseFloat(lng), parseFloat(lat)], type: 'Point' },
+        $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       }
 
       if (maxDistance) formattedValue.$maxDistance = parseFloat(maxDistance)
@@ -135,6 +157,23 @@ export const sanitizeQueryValue = ({
 
   if (operator === 'exists') {
     formattedValue = formattedValue === 'true' || formattedValue === true
+
+    // Clearable fields
+    if (['relationship', 'select', 'upload'].includes(field.type)) {
+      if (formattedValue) {
+        return {
+          rawQuery: {
+            $and: [{ [path]: { $exists: true } }, { [path]: { $ne: null } }],
+          },
+        }
+      } else {
+        return {
+          rawQuery: {
+            $or: [{ [path]: { $exists: false } }, { [path]: { $eq: null } }],
+          },
+        }
+      }
+    }
   }
 
   return { operator: formattedOperator, val: formattedValue }

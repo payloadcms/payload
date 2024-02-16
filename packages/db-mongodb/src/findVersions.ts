@@ -63,7 +63,6 @@ export const findVersions: FindVersions = async function findVersions(
     lean: true,
     leanWithId: true,
     limit,
-    offset: skip || 0,
     options,
     page,
     pagination,
@@ -71,21 +70,30 @@ export const findVersions: FindVersions = async function findVersions(
     useEstimatedCount,
   }
 
-  if (!useEstimatedCount && this.disableIndexHints !== true) {
-    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding a hint.
+  if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
+    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
+    // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
+    // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
+    // the correct indexed field
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
+          ...options,
           hint: { _id: 1 },
         }),
       )
     }
   }
 
-  if (limit > 0) {
+  if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
     paginationOptions.options.limit = limit
+
+    // Disable pagination if limit is 0
+    if (limit === 0) {
+      paginationOptions.pagination = false
+    }
   }
 
   const result = await Model.paginate(query, paginationOptions)

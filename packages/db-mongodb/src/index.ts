@@ -1,13 +1,12 @@
+import type { TransactionOptions } from 'mongodb'
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { Payload } from 'payload'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj } from 'payload/database'
+import type { BaseDatabaseAdapter } from 'payload/database'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
 import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
-
-export type { MigrateDownArgs, MigrateUpArgs } from './types'
 
 import type { CollectionModel, GlobalModel } from './types'
 
@@ -37,6 +36,9 @@ import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateOne } from './updateOne'
 import { updateVersion } from './updateVersion'
 
+export type { MigrateDownArgs, MigrateUpArgs } from './types'
+import type { DatabaseAdapterObj } from 'payload/database'
+
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
@@ -48,6 +50,7 @@ export interface Args {
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
   migrationDir?: string
+  transactionOptions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
@@ -76,7 +79,8 @@ declare module 'payload' {
     connection: Connection
     globals: GlobalModel
     mongoMemoryServer: any
-    // sessions: Record<number | string, ClientSession>
+    sessions: Record<number | string, ClientSession>
+    transactionOptions: TransactionOptions
     versions: {
       [slug: string]: CollectionModel
     }
@@ -88,8 +92,9 @@ export function mongooseAdapter({
   connectOptions,
   disableIndexHints = false,
   migrationDir: migrationDirArg,
+  transactionOptions = {},
   url,
-}: Args): DatabaseAdapterObj<MongooseAdapter> {
+}: Args): DatabaseAdapterObj {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
     mongoose.set('strictQuery', false)
@@ -106,11 +111,12 @@ export function mongooseAdapter({
       globals: undefined,
       mongoMemoryServer: undefined,
       sessions: {},
+      transactionOptions: transactionOptions === false ? undefined : transactionOptions,
       url,
       versions: {},
 
       // DatabaseAdapter
-      beginTransaction,
+      beginTransaction: transactionOptions ? beginTransaction : undefined,
       commitTransaction,
       connect,
       create,
