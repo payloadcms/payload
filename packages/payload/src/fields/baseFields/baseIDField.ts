@@ -1,9 +1,9 @@
-import ObjectID from 'bson-objectid'
+import { ObjectId } from 'bson'
 
 import type { Field, FieldHook } from '../config/types'
 
 const generateID: FieldHook = ({ operation, value }) =>
-  (operation !== 'create' ? value : false) || new ObjectID().toHexString()
+  (operation !== 'create' ? value : false) || new ObjectId().toHexString()
 
 export const baseIDField: Field = {
   name: 'id',

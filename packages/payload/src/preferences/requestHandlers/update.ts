@@ -16,7 +16,7 @@ export const updateHandler: PayloadHandler = async ({ req, routeParams }) => {
 
   return Response.json(
     {
-      ...doc,
+      doc,
       message: payloadRequest.t('general:updatedSuccessfully'),
     },
     {

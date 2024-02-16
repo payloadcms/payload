@@ -26,6 +26,10 @@ function loginResolver(collection: Collection) {
 
     context.headers['Set-Cookie'] = cookie
 
+    if (collection.config.auth.removeTokenFromResponses) {
+      delete result.token
+    }
+
     return result
   }
 

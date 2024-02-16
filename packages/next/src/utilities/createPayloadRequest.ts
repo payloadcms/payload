@@ -12,6 +12,7 @@ import { initI18n } from '@payloadcms/translations'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 import { getDataAndFile } from './getDataAndFile'
+import { getDataLoader } from 'payload/utilities'
 
 type Args = {
   request: Request
@@ -36,23 +37,10 @@ export const createPayloadRequest = async ({
   }
 
   const urlProperties = new URL(request.url)
+  const { searchParams, pathname } = urlProperties
 
-  // NOTE: URL properties are not enumerable, so we need to convert them to an object
-  const urlPropertiesObject = {
-    searchParams: urlProperties.searchParams,
-    pathname: urlProperties.pathname,
-    port: urlProperties.port,
-    protocol: urlProperties.protocol,
-    search: urlProperties.search,
-    origin: urlProperties.origin,
-    href: urlProperties.href,
-    host: urlProperties.host,
-    hash: urlProperties.hash,
-  }
-
-  const { searchParams, pathname } = urlPropertiesObject
-
-  const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
+  const isGraphQL =
+    !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
 
   const { data, file } = await getDataAndFile({
     request,
@@ -98,14 +86,19 @@ export const createPayloadRequest = async ({
     transactionID: undefined,
     payloadDataLoader: undefined,
     payloadUploadSizes: {},
-    host: urlProperties.host,
-    protocol: urlProperties.protocol,
-    pathname: urlProperties.pathname,
     searchParams: urlProperties.searchParams,
+    pathname: urlProperties.pathname,
+    port: urlProperties.port,
+    protocol: urlProperties.protocol,
+    search: urlProperties.search,
     origin: urlProperties.origin,
+    href: urlProperties.href,
+    host: urlProperties.host,
+    hash: urlProperties.hash,
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)
+  req.payloadDataLoader = getDataLoader(req)
 
   req.user = await getAuthenticatedUser({
     payload,

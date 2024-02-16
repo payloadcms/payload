@@ -1,9 +1,11 @@
+import type { Payload } from '../../packages/payload/src'
 import type { PayloadRequest } from '../../packages/payload/src/types'
 import type { Post, RelyOnRequestHeader, Restricted } from './payload-types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { Forbidden } from '../../packages/payload/src/errors'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
 import { requestHeaders } from './config'
 import {
   firstArrayText,
@@ -17,12 +19,15 @@ import {
   slug,
 } from './shared'
 
+let payload: Payload
+
 describe('Access Control', () => {
   let post1: Post
   let restricted: Restricted
 
   beforeAll(async () => {
-    await initPayloadTest({ __dirname })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
   })
 
   beforeEach(async () => {

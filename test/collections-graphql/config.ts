@@ -286,6 +286,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'payload-api-test-ones',
       access: {
         read: () => true,
       },
@@ -298,9 +299,9 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
-      slug: 'payload-api-test-ones',
     },
     {
+      slug: 'payload-api-test-twos',
       access: {
         read: () => true,
       },
@@ -318,7 +319,6 @@ export default buildConfigWithDefaults({
           type: 'relationship',
         },
       ],
-      slug: 'payload-api-test-twos',
     },
     {
       access: {
@@ -328,7 +328,7 @@ export default buildConfigWithDefaults({
         {
           name: 'contentType',
           hooks: {
-            afterRead: [({ req }) => req.headers?.['content-type']],
+            afterRead: [({ req }) => req.headers?.get('content-type')],
           },
           type: 'text',
         },
@@ -483,7 +483,7 @@ export default buildConfigWithDefaults({
       data: {},
     })
 
-    await payload.create({
+    const t = await payload.create({
       collection: 'payload-api-test-twos',
       data: {
         relation: payloadAPITest1.id,

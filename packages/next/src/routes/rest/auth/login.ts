@@ -24,13 +24,15 @@ export const login: CollectionRouteHandler = async ({ req, collection }) => {
     collectionConfig: collection.config,
   })
 
+  if (collection.config.auth.removeTokenFromResponses) {
+    delete result.token
+  }
+
   return Response.json(
     {
-      exp: result.exp,
       // TODO(translate)
       message: 'Auth Passed',
-      token: result.token,
-      user: result.user,
+      ...result,
     },
     {
       headers: new Headers({

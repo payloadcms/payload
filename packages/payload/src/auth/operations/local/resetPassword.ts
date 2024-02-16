@@ -34,12 +34,18 @@ async function localResetPassword<T extends keyof GeneratedTypes['collections']>
     )
   }
 
-  return resetPasswordOperation({
+  const result = await resetPasswordOperation({
     collection,
     data,
     overrideAccess,
     req: await createLocalReq(options, payload),
   })
+
+  if (collection.config.auth.removeTokenFromResponses) {
+    delete result.token
+  }
+
+  return result
 }
 
 export default localResetPassword

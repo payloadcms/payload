@@ -21,7 +21,7 @@ const baseClass = 'paginator'
 
 export const Pagination: React.FC<Props> = (props) => {
   const router = useRouter()
-  const params = useSearchParams()
+  const searchParams = useSearchParams()
   const pathname = usePathname()
 
   const {
@@ -41,7 +41,7 @@ export const Pagination: React.FC<Props> = (props) => {
   const updatePage = (page) => {
     if (!disableHistoryChange) {
       const newParams = {
-        ...params,
+        ...searchParams,
       }
 
       newParams.page = page

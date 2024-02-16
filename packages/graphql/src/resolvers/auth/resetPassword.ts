@@ -25,6 +25,11 @@ function resetPasswordResolver(collection: Collection) {
       collectionConfig: collection.config,
     })
     context.headers['Set-Cookie'] = cookie
+
+    if (collection.config.auth.removeTokenFromResponses) {
+      delete result.token
+    }
+
     return result
   }
 
