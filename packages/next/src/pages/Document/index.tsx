@@ -15,6 +15,7 @@ import {
   QueryParamTypes,
   HydrateClientUser,
   DocumentInfoProvider,
+  SetDocumentInfo,
 } from '@payloadcms/ui'
 import queryString from 'qs'
 import { notFound } from 'next/navigation'
@@ -200,23 +201,21 @@ export const Document = async ({
   return (
     <Fragment>
       <HydrateClientUser user={user} permissions={permissions} />
-      <DocumentInfoProvider
+      <SetDocumentInfo
         collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
-        key={`${collectionSlug || globalSlug}-${locale}`}
         versionsConfig={collectionConfig?.versions || globalConfig?.versions}
-      >
-        <EditDepthProvider depth={1}>
-          <FormQueryParamsProvider formQueryParams={formQueryParams}>
-            <RenderCustomComponent
-              CustomComponent={typeof CustomView === 'function' ? CustomView : undefined}
-              DefaultComponent={DefaultView}
-              componentProps={componentProps}
-            />
-          </FormQueryParamsProvider>
-        </EditDepthProvider>
-      </DocumentInfoProvider>
+      />
+      <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale}`}>
+        <FormQueryParamsProvider formQueryParams={formQueryParams}>
+          <RenderCustomComponent
+            CustomComponent={typeof CustomView === 'function' ? CustomView : undefined}
+            DefaultComponent={DefaultView}
+            componentProps={componentProps}
+          />
+        </FormQueryParamsProvider>
+      </EditDepthProvider>
     </Fragment>
   )
 }

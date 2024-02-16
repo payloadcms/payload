@@ -22,6 +22,7 @@ import { ComponentMap } from '../../utilities/buildComponentMap/types'
 import { ComponentMapProvider } from '../ComponentMapProvider'
 import { SearchParamsProvider } from '../SearchParams'
 import { ParamsProvider } from '../Params'
+import { DocumentInfoProvider } from '../DocumentInfo'
 
 type Props = {
   config: ClientConfig
@@ -70,13 +71,15 @@ export const RootProvider: React.FC<Props> = ({
                             <LocaleProvider>
                               <StepNavProvider>
                                 <LoadingOverlayProvider>
-                                  <DocumentEventsProvider>
-                                    <ActionsProvider>
-                                      <NavProvider>
-                                        <CustomProvider>{children}</CustomProvider>
-                                      </NavProvider>
-                                    </ActionsProvider>
-                                  </DocumentEventsProvider>
+                                  <DocumentInfoProvider>
+                                    <DocumentEventsProvider>
+                                      <ActionsProvider>
+                                        <NavProvider>
+                                          <CustomProvider>{children}</CustomProvider>
+                                        </NavProvider>
+                                      </ActionsProvider>
+                                    </DocumentEventsProvider>
+                                  </DocumentInfoProvider>
                                 </LoadingOverlayProvider>
                               </StepNavProvider>
                             </LocaleProvider>

@@ -3,27 +3,20 @@ import React from 'react'
 
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
-import { SanitizedConfig } from 'payload/types'
+import { useConfig } from '../../../../providers/Config'
 
 export const DocumentTabLink: React.FC<{
-  adminRoute: SanitizedConfig['routes']['admin']
   isCollection?: boolean
   newTab?: boolean
   href: string
   baseClass: string
   children?: React.ReactNode
-  isActive?: boolean
-}> = ({
-  isActive: isActiveFromProps,
-  baseClass,
-  href: hrefFromProps,
-  newTab,
-  children,
-  adminRoute,
-  isCollection,
-}) => {
+}> = ({ baseClass, href: hrefFromProps, newTab, children, isCollection }) => {
   const pathname = usePathname()
   const params = useParams()
+  const {
+    routes: { admin: adminRoute },
+  } = useConfig()
 
   const docHref = `${adminRoute}/${isCollection ? 'collections' : 'globals'}${
     isCollection ? `/${params.collection}` : `/${params.global}`
@@ -32,9 +25,7 @@ export const DocumentTabLink: React.FC<{
   const href = `${docHref}${hrefFromProps}`
 
   const isActive =
-    (href === docHref && pathname === docHref) ||
-    (href !== docHref && pathname.startsWith(href)) ||
-    isActiveFromProps
+    (href === docHref && pathname === docHref) || (href !== docHref && pathname.startsWith(href))
 
   return (
     <li className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}>

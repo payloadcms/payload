@@ -20,5 +20,6 @@ export const PostsCollection: CollectionConfig = {
       type: 'upload',
     },
   ],
+  versions: true,
   slug: postsSlug,
 }

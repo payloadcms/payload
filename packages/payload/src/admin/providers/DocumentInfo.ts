@@ -18,6 +18,7 @@ export type DocumentInfoContext = {
   preferencesKey?: string
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
+  setDocumentInfo: (info: Partial<DocumentInfoContext>) => void
   slug?: string
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
   versions?: PaginatedDocs<TypeWithVersion<any>>
