@@ -15,9 +15,13 @@
     "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
     "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
     "dev:postgres": "pnpm --filter payload run dev:postgres",
+    "docker:restart": "pnpm docker:stop --remove-orphans && pnpm docker:start",
+    "docker:start": "docker-compose -f packages/plugin-cloud-storage/docker-compose.yml up -d",
+    "docker:stop": "docker-compose -f packages/plugin-cloud-storage/docker-compose.yml down",
     "fix": "eslint \"packages/**/*.ts\" --fix",
     "lint": "eslint \"packages/**/*.ts\"",
     "lint-staged": "lint-staged",
+    "prepare": "husky install",
     "pretest": "pnpm build",
     "reinstall": "pnpm clean:unix && pnpm install",
     "script:list-packages": "tsx ./scripts/list-packages.ts",
@@ -29,10 +33,10 @@
     "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
     "test:int:postgres": "cross-env PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
-    "translateNewKeys": "pnpm --filter payload run translateNewKeys",
-    "prepare": "husky install"
+    "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.142.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@playwright/test": "1.40.1",
     "@swc/cli": "^0.1.62",
@@ -77,12 +81,12 @@
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "jwt-decode": "3.1.2",
-    "lexical": "0.12.5",
+    "lexical": "0.13.1",
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9",
     "node-fetch": "2.6.12",
-    "nodemon": "3.0.2",
+    "nodemon": "3.0.3",
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
@@ -106,12 +110,12 @@
   },
   "pnpm": {
     "overrides": {
-      "copyfiles": "2.4.1",
-      "cross-env": "7.0.3",
-      "dotenv": "8.6.0",
-      "drizzle-orm": "0.29.3",
-      "ts-node": "10.9.2",
-      "typescript": "5.2.2"
+      "copyfiles": "$copyfiles",
+      "cross-env": "$cross-env",
+      "dotenv": "$dotenv",
+      "drizzle-orm": "$drizzle-orm",
+      "ts-node": "$ts-node",
+      "typescript": "$typescript"
     }
   },
   "engines": {

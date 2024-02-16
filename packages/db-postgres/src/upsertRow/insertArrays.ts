@@ -36,7 +36,7 @@ export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): P
         }
       }
 
-      const parentID = parentRows[parentRowIndex].id || parentRows[parentRowIndex]._parentID
+      const parentID = parentRows[parentRowIndex].id
 
       // Add any sub arrays that need to be created
       // We will call this recursively below
@@ -61,8 +61,10 @@ export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): P
   // Insert all corresponding arrays
   // (one insert per array table)
   for (const [tableName, row] of Object.entries(rowsByTable)) {
+    // the nested arrays need the ID for the parentID foreign key
+    let insertedRows: Args['parentRows']
     if (row.rows.length > 0) {
-      await db.insert(adapter.tables[tableName]).values(row.rows).returning()
+      insertedRows = await db.insert(adapter.tables[tableName]).values(row.rows).returning()
     }
 
     // Insert locale rows
@@ -79,7 +81,7 @@ export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): P
         adapter,
         arrays: row.arrays,
         db,
-        parentRows: row.rows,
+        parentRows: insertedRows,
       })
     }
   }

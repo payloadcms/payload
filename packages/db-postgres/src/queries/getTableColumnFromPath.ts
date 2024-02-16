@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { SQL } from 'drizzle-orm'
-import type { Field, FieldAffectingData, TabAsField } from 'payload/types'
+import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload/types'
 
 import { and, eq, like, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
@@ -95,8 +95,8 @@ export const getTableColumnFromPath = ({
       constraints,
       field: {
         name: 'id',
-        type: 'number',
-      },
+        type: adapter.idType === 'uuid' ? 'text' : 'number',
+      } as NumberField | TextField,
       table: adapter.tables[newTableName],
     }
   }
@@ -367,9 +367,6 @@ export const getTableColumnFromPath = ({
             table: blockTableColumn.table,
           }
         }
-        // if (pathSegments[1] === 'blockType') {
-        //   throw new APIError('Querying on blockType is not supported')
-        // }
         break
       }
 

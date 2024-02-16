@@ -16,7 +16,7 @@ let adapter: Adapter
 let uploadOptions
 
 dotenv.config({
-  path: path.resolve(__dirname, '.env'),
+  path: path.resolve(__dirname, '.env.emulated'),
 })
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'azure') {
@@ -31,7 +31,20 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'azure') {
   // }
 }
 
-if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 's3') {
+if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'gcs') {
+  adapter = gcsAdapter({
+    options: {
+      apiEndpoint: process.env.GCS_ENDPOINT,
+      projectId: process.env.GCS_PROJECT_ID,
+    },
+    bucket: process.env.GCS_BUCKET,
+  })
+}
+
+if (
+  process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 's3' ||
+  !process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER
+) {
   // The s3 adapter supports using temp files for uploads
   uploadOptions = {
     useTempFiles: true,
@@ -66,15 +79,9 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'r2') {
   })
 }
 
-if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'gcs') {
-  adapter = gcsAdapter({
-    options: {
-      apiEndpoint: process.env.GCS_ENDPOINT,
-      projectId: process.env.GCS_PROJECT_ID,
-    },
-    bucket: process.env.GCS_BUCKET,
-  })
-}
+console.log(
+  `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
+)
 
 export default buildConfigWithDefaults({
   collections: [Media, Users],
@@ -120,6 +127,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-    console.log(process.env.S3_ENDPOINT)
   },
 })

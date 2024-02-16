@@ -16,11 +16,12 @@ import {
 } from 'drizzle-orm/pg-core'
 import { fieldAffectsData } from 'payload/types'
 
-import type { GenericColumns, GenericTable, PostgresAdapter } from '../types'
+import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types'
 
 import { getConfigIDType } from './getConfigIDType'
 import { getTableName } from './getTableName'
 import { parentIDColumnMap } from './parentIDColumnMap'
+import { setColumnID } from './setColumnID'
 import { traverseFields } from './traverseFields'
 
 type Args = {
@@ -91,15 +92,8 @@ export const buildTable = ({
   // Drizzle relations
   const relationsToBuild: Map<string, string> = new Map()
 
-  const idColType = getConfigIDType(fields)
+  const idColType: IDType = setColumnID({ adapter, columns, fields })
 
-  const idColTypeMap = {
-    integer: serial,
-    numeric,
-    varchar,
-  }
-
-  columns.id = idColTypeMap[idColType]('id').primaryKey()
   ;({
     hasLocalizedField,
     hasLocalizedManyNumberField,
@@ -307,7 +301,7 @@ export const buildTable = ({
           adapter,
           config: relationshipConfig,
         })
-        let colType = 'integer'
+        let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
         const relatedCollectionCustomID = relationshipConfig.fields.find(
           (field) => fieldAffectsData(field) && field.name === 'id',
         )

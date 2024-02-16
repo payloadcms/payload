@@ -22,6 +22,8 @@ import {
 
 import type { LinkPayload } from '../plugins/floatingLinkEditor/types'
 
+import { $isAutoLinkNode } from './AutoLinkNode'
+
 export type LinkFields = {
   // unknown, custom fields:
   [key: string]: unknown
@@ -140,8 +142,8 @@ export class LinkNode extends ElementNode {
   exportJSON(): SerializedLinkNode {
     return {
       ...super.exportJSON(),
-      fields: this.getFields(),
       type: this.getType(),
+      fields: this.getFields(),
       version: 2,
     }
   }

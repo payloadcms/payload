@@ -46,8 +46,6 @@ export const init: Init = async function init(this: PostgresAdapter) {
       })
       const versionFields = buildVersionCollectionFields(collection)
 
-      const versionsParentIDColType = getConfigIDType(collection.fields)
-
       buildTable({
         adapter: this,
         buildNumbers: true,

@@ -11,6 +11,7 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
 
   const newConfig: CollectionConfig = {
     ...(formConfig?.formSubmissionOverrides || {}),
+    slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
     access: {
       create: () => true,
       read: ({ req: { user } }) => !!user, // logged-in users,
@@ -24,13 +25,13 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
     fields: [
       {
         name: 'form',
+        type: 'relationship',
         admin: {
           readOnly: true,
         },
         relationTo: formSlug,
         required: true,
-        type: 'relationship',
-        validate: async (value, { payload }) => {
+        validate: async (value, { payload, req }) => {
           /* Don't run in the client side */
           if (!payload) return true
 
@@ -41,6 +42,7 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
               existingForm = await payload.findByID({
                 id: value,
                 collection: formSlug,
+                req,
               })
 
               return true
@@ -52,19 +54,20 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
       },
       {
         name: 'submissionData',
+        type: 'array',
         admin: {
           readOnly: true,
         },
         fields: [
           {
             name: 'field',
-            required: true,
             type: 'text',
+            required: true,
           },
           {
             name: 'value',
-            required: true,
             type: 'text',
+            required: true,
             validate: (value: unknown) => {
               // TODO:
               // create a validation function that dynamically
@@ -84,7 +87,6 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
             },
           },
         ],
-        type: 'array',
       },
       ...(formConfig?.formSubmissionOverrides?.fields || []),
     ],
@@ -96,7 +98,6 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
       ],
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),
     },
-    slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
   }
 
   const paymentFieldConfig = formConfig?.fields?.payment
@@ -104,26 +105,27 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
   if (paymentFieldConfig) {
     newConfig.fields.push({
       name: 'payment',
+      type: 'group',
       admin: {
         readOnly: true,
       },
       fields: [
         {
           name: 'field',
-          label: 'Field',
           type: 'text',
+          label: 'Field',
         },
         {
           name: 'status',
-          label: 'Status',
           type: 'text',
+          label: 'Status',
         },
         {
           name: 'amount',
+          type: 'number',
           admin: {
             description: 'Amount in cents',
           },
-          type: 'number',
         },
         {
           name: 'paymentProcessor',
@@ -131,28 +133,27 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
         },
         {
           name: 'creditCard',
+          type: 'group',
           fields: [
             {
               name: 'token',
-              label: 'token',
               type: 'text',
+              label: 'token',
             },
             {
               name: 'brand',
-              label: 'Brand',
               type: 'text',
+              label: 'Brand',
             },
             {
               name: 'number',
-              label: 'Number',
               type: 'text',
+              label: 'Number',
             },
           ],
           label: 'Credit Card',
-          type: 'group',
         },
       ],
-      type: 'group',
     })
   }
 
