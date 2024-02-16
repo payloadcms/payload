@@ -333,6 +333,7 @@ const validateFilterOptions: Validate = async (
             msg: `Error validating filter options for collection ${collection}`,
           })
         }
+        options[collection] = []
       }),
     )
 
