@@ -48,7 +48,7 @@
   "dependencies": {
     "@payloadcms/graphql": "workspace:^",
     "@payloadcms/translations": "workspace:^",
-    "bson": "^6.3.0",
+    "bson-objectid": "2.0.4",
     "conf": "10.2.0",
     "console-table-printer": "2.11.2",
     "dataloader": "2.2.2",
