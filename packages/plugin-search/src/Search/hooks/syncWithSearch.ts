@@ -55,7 +55,6 @@ const syncWithSearch: SyncWithSearch = async (args) => {
   try {
     if (operation === 'create') {
       if (doSync) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         await payload.create({
           collection: 'search',
           data: {
@@ -93,7 +92,6 @@ const syncWithSearch: SyncWithSearch = async (args) => {
         if (duplicativeDocs.length > 0) {
           try {
             const duplicativeDocIDs = duplicativeDocs.map(({ id }) => id)
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             await payload.delete({
               collection: 'search',
               req,
@@ -110,7 +108,6 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           if (doSync) {
             // update the doc normally
             try {
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               await payload.update({
                 id: searchDocID,
                 collection: 'search',
@@ -127,7 +124,6 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           if (deleteDrafts && status === 'draft') {
             // do not include draft docs in search results, so delete the record
             try {
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               await payload.delete({
                 id: searchDocID,
                 collection: 'search',
@@ -139,7 +135,6 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           }
         } else if (doSync) {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             await payload.create({
               collection: 'search',
               data: {
