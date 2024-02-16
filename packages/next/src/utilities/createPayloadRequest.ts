@@ -36,21 +36,7 @@ export const createPayloadRequest = async ({
   }
 
   const urlProperties = new URL(request.url)
-
-  // NOTE: URL properties are not enumerable, so we need to convert them to an object
-  const urlPropertiesObject = {
-    searchParams: urlProperties.searchParams,
-    pathname: urlProperties.pathname,
-    port: urlProperties.port,
-    protocol: urlProperties.protocol,
-    search: urlProperties.search,
-    origin: urlProperties.origin,
-    href: urlProperties.href,
-    host: urlProperties.host,
-    hash: urlProperties.hash,
-  }
-
-  const { searchParams, pathname } = urlPropertiesObject
+  const { searchParams, pathname } = urlProperties
 
   const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
 
@@ -98,11 +84,15 @@ export const createPayloadRequest = async ({
     transactionID: undefined,
     payloadDataLoader: undefined,
     payloadUploadSizes: {},
-    host: urlProperties.host,
-    protocol: urlProperties.protocol,
-    pathname: urlProperties.pathname,
     searchParams: urlProperties.searchParams,
+    pathname: urlProperties.pathname,
+    port: urlProperties.port,
+    protocol: urlProperties.protocol,
+    search: urlProperties.search,
     origin: urlProperties.origin,
+    href: urlProperties.href,
+    host: urlProperties.host,
+    hash: urlProperties.hash,
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)
