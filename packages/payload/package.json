@@ -101,7 +101,6 @@
     "jwt-decode": "3.1.2",
     "md5": "2.3.0",
     "method-override": "3.0.0",
-    "micro-memoize": "4.1.2",
     "minimist": "1.2.8",
     "mkdirp": "1.0.4",
     "monaco-editor": "0.38.0",
