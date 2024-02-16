@@ -148,6 +148,11 @@ jobs:
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: startsWith(matrix.database, 'postgres')
 
+      - name: Configure PostgreSQL with custom schema
+        run: |
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
+        if: matrix.database == 'postgres-custom-schema'
+
       - name: Configure Supabase
         run: |
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
