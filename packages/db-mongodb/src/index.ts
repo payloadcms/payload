@@ -1,7 +1,7 @@
 import type { TransactionOptions } from 'mongodb'
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { Payload } from 'payload'
-import type { BaseDatabaseAdapter, DatabaseAdapterObj } from 'payload/database'
+import type { BaseDatabaseAdapter } from 'payload/database'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
@@ -37,6 +37,7 @@ import { updateOne } from './updateOne'
 import { updateVersion } from './updateVersion'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types'
+import type { DatabaseAdapterObj } from 'payload/database'
 
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
@@ -93,7 +94,7 @@ export function mongooseAdapter({
   migrationDir: migrationDirArg,
   transactionOptions = {},
   url,
-}: Args): DatabaseAdapterObj<MongooseAdapter> {
+}: Args): DatabaseAdapterObj {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
     mongoose.set('strictQuery', false)

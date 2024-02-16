@@ -6,7 +6,7 @@ import type { User } from '../../packages/payload/src/auth'
 import { getPayload } from '../../packages/payload/src'
 import { devUser } from '../credentials'
 import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
+// import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
 import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
@@ -18,8 +18,8 @@ const { email, password } = devUser
 
 describe('Auth', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
+    // const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config: configPromise })
     restClient = new NextRESTClient(payload.config)
   })
 
@@ -33,24 +33,32 @@ describe('Auth', () => {
     let token
     let user
     beforeAll(async () => {
-      const { data } = await restClient
-        .GRAPHQL_POST({
-          body: JSON.stringify({
-            query: `mutation {
-            loginUser(email: "${devUser.email}", password: "${devUser.password}") {
-              token
-              user {
-                  id
-                  email
-              }
-            }
-          }`,
-          }),
-        })
-        .then((res) => res.json())
+      const result = await payload.login({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
 
-      user = data.loginUser.user
-      token = data.loginUser.token
+      // const { data } = await restClient
+      //   .GRAPHQL_POST({
+      //     body: JSON.stringify({
+      //       query: `mutation {
+      //       loginUser(email: "${devUser.email}", password: "${devUser.password}") {
+      //         token
+      //         user {
+      //             id
+      //             email
+      //         }
+      //       }
+      //     }`,
+      //     }),
+      //   })
+      //   .then((res) => res.json())
+
+      user = result.user
+      token = result.token
     })
 
     it('should login', async () => {

@@ -48,7 +48,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
         versionModelName,
         versionSchema,
         this.autoPluralization === true ? undefined : versionModelName,
-      ) as unknown as CollectionModel
+      ) as CollectionModel
       // this.payload.versions[collection.slug] = model;
       this.versions[collection.slug] = model
     }
@@ -57,9 +57,11 @@ export const init: Init = async function init(this: MongooseAdapter) {
       collection.slug,
       schema,
       this.autoPluralization === true ? undefined : collection.slug,
-    ) as unknown as CollectionModel
+    ) as CollectionModel
     this.collections[collection.slug] = model
 
+    // TS expect error only needed until we launch 2.0.0
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     this.payload.collections[collection.slug] = {
       config: collection,
     }
@@ -92,7 +94,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
         versionModelName,
         versionSchema,
         versionModelName,
-      ) as unknown as CollectionModel
+      ) as CollectionModel
       this.versions[global.slug] = versionsModel
     }
   })

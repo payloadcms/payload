@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.142.0",
+    "@next/bundle-analyzer": "^14.1.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@playwright/test": "1.40.1",
     "@swc/cli": "^0.1.62",
@@ -142,7 +143,9 @@
   },
   "pnpm": {
     "overrides": {
-      "graphql": "^16.8.1"
+      "graphql": "^16.8.1",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0"
     }
   }
 }

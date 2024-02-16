@@ -1,5 +1,6 @@
+import type { Payload } from 'payload'
 import type { PathToQuery } from 'payload/database'
-import type { Field, Payload } from 'payload/types'
+import type { Field } from 'payload/types'
 import type { Operator } from 'payload/types'
 
 import objectID from 'bson-objectid'
