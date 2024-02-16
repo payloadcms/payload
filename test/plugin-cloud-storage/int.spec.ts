@@ -10,34 +10,47 @@ const TEST_BUCKET = 'payload-bucket'
 
 let client: AWS.S3Client
 describeIfInCIOrHasLocalstack()('plugin-cloud-storage', () => {
-  beforeAll(async () => {
-    client = new AWS.S3({
-      endpoint: 'http://localhost:4566',
-      region: 'us-east-1',
-      forcePathStyle: true, // required for localstack
+  describe('S3', () => {
+    beforeAll(async () => {
+      client = new AWS.S3({
+        endpoint: 'http://localhost:4566',
+        region: 'us-east-1',
+        forcePathStyle: true, // required for localstack
+      })
+
+      await createTestBucket()
+
+      await initPayloadTest({ __dirname, init: { local: true } })
     })
 
-    await createTestBucket()
-
-    process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER = 's3'
-    await initPayloadTest({ __dirname, init: { local: true } })
-  })
-
-  afterEach(async () => {
-    await clearTestBucket()
-  })
-
-  it('can upload', async () => {
-    const upload = await payload.create({
-      collection: 'media',
-      data: {},
-      filePath: path.resolve(__dirname, '../uploads/image.png'),
+    afterEach(async () => {
+      await clearTestBucket()
     })
 
-    expect(upload.id).toBeTruthy()
+    it('can upload', async () => {
+      const upload = await payload.create({
+        collection: 'media',
+        data: {},
+        filePath: path.resolve(__dirname, '../uploads/image.png'),
+      })
 
-    await verifyUploads(upload.id)
+      expect(upload.id).toBeTruthy()
+
+      await verifyUploads(upload.id)
+    })
   })
+})
+
+describe('Azure', () => {
+  it.todo('can upload')
+})
+
+describe('GCS', () => {
+  it.todo('can upload')
+})
+
+describe('R2', () => {
+  it.todo('can upload')
 })
 
 async function createTestBucket() {

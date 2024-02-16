@@ -144,8 +144,11 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
   const { code } = shelljs.exec(`docker ps | grep localstack`)
 
   if (code !== 0) {
+    console.warn('Localstack is not running. Skipping test suite.')
     return describe.skip
   }
+
+  console.log('Localstack is running. Running test suite.')
 
   return describe
 }

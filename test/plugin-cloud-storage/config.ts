@@ -79,15 +79,6 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'r2') {
   })
 }
 
-if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'gcs') {
-  adapter = gcsAdapter({
-    options: {
-      apiEndpoint: process.env.GCS_ENDPOINT,
-      projectId: process.env.GCS_PROJECT_ID,
-    },
-    bucket: process.env.GCS_BUCKET,
-  })
-}
 console.log(
   `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
 )
