@@ -1,8 +1,8 @@
-import { GraphQLClient } from 'graphql-request'
+import type { Payload } from '../../packages/payload/src'
 
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
+import { getPayload } from '../../packages/payload/src'
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
 import configPromise, {
   accessControlSlug,
   arraySlug,
@@ -12,27 +12,28 @@ import configPromise, {
   spanishLocale,
 } from './config'
 
+let payload: Payload
+let restClient: NextRESTClient
+
 describe('globals', () => {
-  let serverURL
   beforeAll(async () => {
-    const init = await initPayloadTest({ __dirname, init: { local: false } })
-    serverURL = init.serverURL
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(config)
   })
   describe('REST', () => {
-    let client: RESTClient
-    beforeAll(async () => {
-      const config = await configPromise
-      client = new RESTClient(config, { defaultSlug: slug, serverURL })
-    })
     it('should create', async () => {
       const title = 'update'
       const data = {
         title,
       }
-      const { doc, status } = await client.updateGlobal({ data })
+      const response = await restClient.POST(`/globals/${slug}`, {
+        body: JSON.stringify(data),
+      })
+      const { result } = await response.json()
 
-      expect(status).toEqual(200)
-      expect(doc).toMatchObject(data)
+      expect(response.status).toEqual(200)
+      expect(result).toMatchObject(data)
     })
 
     it('should read', async () => {
@@ -40,12 +41,15 @@ describe('globals', () => {
       const data = {
         title,
       }
-      await client.updateGlobal({ data })
-      const { doc, status } = await client.findGlobal()
+      await restClient.POST(`/globals/${slug}`, {
+        body: JSON.stringify(data),
+      })
+      const response = await restClient.GET(`/globals/${slug}`)
+      const globalDoc = await response.json()
 
-      expect(status).toEqual(200)
-      expect(doc.globalType).toEqual(slug)
-      expect(doc).toMatchObject(data)
+      expect(response.status).toEqual(200)
+      expect(globalDoc.globalType).toEqual(slug)
+      expect(globalDoc).toMatchObject(data)
     })
 
     it('should update with localization', async () => {
@@ -55,17 +59,17 @@ describe('globals', () => {
         },
       ]
 
-      const { doc, status } = await client.updateGlobal({
-        data: {
+      const response = await restClient.POST(`/globals/${arraySlug}`, {
+        body: JSON.stringify({
           array,
-        },
-        slug: arraySlug,
+        }),
       })
+      const { result } = await response.json()
 
-      expect(status).toBe(200)
-      expect(doc.array).toHaveLength(1)
-      expect(doc.array).toMatchObject(array)
-      expect(doc.id).toBeDefined()
+      expect(response.status).toBe(200)
+      expect(result.array).toHaveLength(1)
+      expect(result.array).toMatchObject(array)
+      expect(result.id).toBeDefined()
     })
   })
 
@@ -194,13 +198,6 @@ describe('globals', () => {
   })
 
   describe('graphql', () => {
-    let client: GraphQLClient
-    beforeAll(async () => {
-      const config = await configPromise
-      const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`
-      client = new GraphQLClient(url)
-    })
-
     it('should create', async () => {
       const title = 'graphql-title'
       const query = `mutation {
@@ -209,10 +206,13 @@ describe('globals', () => {
         }
       }`
 
-      const response = await client.request(query)
-      const doc = response.updateGlobal
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
 
-      expect(doc).toMatchObject({ title })
+      expect(data.updateGlobal).toMatchObject({ title })
     })
 
     it('should read', async () => {
@@ -230,18 +230,28 @@ describe('globals', () => {
         }
       }`
 
-      const response = await client.request(query)
-      const doc = response.Global
+      const { data: queryResult } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
 
-      expect(doc).toMatchObject(data)
+      expect(queryResult.Global).toMatchObject(data)
     })
 
     it('should not show globals with disabled graphql', async () => {
       const query = `query {
         WithoutGraphql { __typename }
       }`
+      const response = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
 
-      await expect(client.request(query)).rejects.toHaveProperty('message')
+      expect(response.errors[0].message).toMatch(
+        'Cannot query field "WithoutGraphql" on type "Query".',
+      )
     })
   })
 })
