@@ -13,28 +13,17 @@ import type {
 } from 'payload/types'
 import type { Props } from './types'
 
-import { useTranslation } from '../../providers/Translation'
+import { useTranslation } from '../Translation'
 import { useAuth } from '../Auth'
 import { useConfig } from '../Config'
 import { useLocale } from '../Locale'
 import { usePreferences } from '../Preferences'
-import { useParams } from 'next/navigation'
 
 const Context = createContext({} as DocumentInfoContext)
 
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
-export const DocumentInfoProvider: React.FC<Props> = ({
-  id: idFromProps,
-  children,
-  collectionSlug,
-  globalSlug,
-  idFromParams: getIDFromParams,
-  versionsConfig,
-}) => {
-  const { id: idFromParams } = useParams()
-  const id = idFromProps || (getIDFromParams ? (idFromParams as string) : null)
-
+export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => {
   const {
     routes: { api },
     serverURL,
@@ -45,9 +34,17 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const { code } = useLocale()
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
+
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
+
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
+
+  const [propsToUse, setPropsToUse] = useState<Props>({
+    ...rest,
+  })
+
+  const { globalSlug, collectionSlug, id, versionsConfig } = propsToUse
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -275,6 +272,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     unpublishedVersions,
     versionsConfig,
     versions,
+    setDocumentInfo: setPropsToUse,
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>
