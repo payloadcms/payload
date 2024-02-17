@@ -61,7 +61,8 @@ export const generateFileData = async <T>({
 
   let staticPath = staticDir
   if (staticDir.indexOf('/') !== 0) {
-    staticPath = path.resolve(config.paths.configDir, staticDir)
+    staticPath = path.resolve(staticDir)
+    // staticPath = path.resolve(config.paths.configDir, staticDir)
   }
 
   if (!file && uploadEdits && data) {

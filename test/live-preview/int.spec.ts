@@ -1,26 +1,25 @@
 import path from 'path'
 
+import type { Payload } from '../../packages/payload/src'
 import type { Media, Page, Post, Tenant } from './payload-types'
 
 import { handleMessage } from '../../packages/live-preview/src/handleMessage'
 import { mergeData } from '../../packages/live-preview/src/mergeData'
 import { traverseRichText } from '../../packages/live-preview/src/traverseRichText'
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
+import { startMemoryDB } from '../startMemoryDB'
 import { Pages } from './collections/Pages'
 import { postsSlug } from './collections/Posts'
 import configPromise from './config'
-import { pagesSlug, tenantsSlug } from './shared'
-
-require('isomorphic-fetch')
+import { tenantsSlug } from './shared'
 
 const schemaJSON = fieldSchemaToJSON(Pages.fields)
 
+let payload: Payload
+
 describe('Collections - Live Preview', () => {
-  let client
   let serverURL
 
   let testPost: Post
@@ -28,15 +27,8 @@ describe('Collections - Live Preview', () => {
   let media: Media
 
   beforeAll(async () => {
-    const { serverURL: incomingServerURL } = await initPayloadTest({
-      __dirname,
-      init: { local: false },
-    })
-
-    serverURL = incomingServerURL
-    const config = await configPromise
-    client = new RESTClient(config, { serverURL, defaultSlug: pagesSlug })
-    await client.login()
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
 
     tenant = await payload.create({
       collection: tenantsSlug,
