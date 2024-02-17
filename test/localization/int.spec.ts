@@ -1,15 +1,12 @@
-import { GraphQLClient } from 'graphql-request'
-
-import type { Config } from '../../packages/payload/src/config/types'
+import type { Payload } from '../../packages/payload/src'
 import type { Where } from '../../packages/payload/src/types'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types'
 
-import payload from '../../packages/payload/src'
-import { devUser } from '../credentials'
+import { getPayload } from '../../packages/payload/src'
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
 import { englishLocale } from '../globals/config'
-import { initPayloadTest } from '../helpers/configHelpers'
 import { idToString } from '../helpers/idToString'
-import { RESTClient } from '../helpers/rest'
 import { arrayCollectionSlug } from './collections/Array'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock'
 import configPromise from './config'
@@ -30,27 +27,17 @@ import {
 } from './shared'
 
 const collection = localizedPostsSlug
-let config: Config
-let client: RESTClient
-
-let serverURL
+let payload: Payload
+let restClient: NextRESTClient
 
 describe('Localization', () => {
   let post1: LocalizedPost
   let postWithLocalizedData: LocalizedPost
 
   beforeAll(async () => {
-    ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
-    client = new RESTClient(config, { defaultSlug: collection, serverURL })
-    await client.create({
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-    await client.login()
-
-    config = await configPromise
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
 
     // @ts-expect-error Force typing
     post1 = await payload.create({
@@ -708,12 +695,6 @@ describe('Localization', () => {
     let token
     let client
 
-    beforeAll(() => {
-      // Defining locale=en in graphQL string should not break JWT strategy
-      const url = `${serverURL}${config?.routes?.api}${config?.routes?.graphQL}?locale=en`
-      client = new GraphQLClient(url)
-    })
-
     it('should allow user to login and retrieve populated localized field', async () => {
       const query = `mutation {
         loginUser(email: "dev@payloadcms.com", password: "test") {
@@ -726,8 +707,13 @@ describe('Localization', () => {
         }
       }`
 
-      const response = await client.request(query)
-      const result = response.loginUser
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+          query: { locale: 'en' },
+        })
+        .then((res) => res.json())
+      const result = data.loginUser
 
       expect(typeof result.token).toStrictEqual('string')
       expect(typeof result.user.relation.title).toStrictEqual('string')
@@ -747,19 +733,21 @@ describe('Localization', () => {
         }
       }`
 
-      const response = await client.request(query, null, {
-        Authorization: `JWT ${token}`,
-      })
-
-      const result = response.meUser
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+          query: { locale: 'en' },
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
+      const result = data.meUser
 
       expect(typeof result.user.relation.title).toStrictEqual('string')
     })
 
     it('should create and update collections', async () => {
-      const url = `${serverURL}${config?.routes?.api}${config?.routes?.graphQL}`
-      const client = new GraphQLClient(url)
-
       const create = `mutation {
         createLocalizedPost(
           data: {
@@ -772,9 +760,16 @@ describe('Localization', () => {
         }
       }`
 
-      const { createLocalizedPost: createResult } = await client.request(create, null, {
-        Authorization: `JWT ${token}`,
-      })
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query: create }),
+          query: { locale: 'en' },
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
+      const createResult = data.createLocalizedPost
 
       const update = `mutation {
         updateLocalizedPost(
@@ -788,9 +783,16 @@ describe('Localization', () => {
         }
       }`
 
-      const { updateLocalizedPost: updateResult } = await client.request(update, null, {
-        Authorization: `JWT ${token}`,
-      })
+      const { data: updateData } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query: update }),
+          query: { locale: 'en' },
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
+      const updateResult = updateData.updateLocalizedPost
 
       const result = await payload.findByID({
         id: createResult.id,
@@ -920,27 +922,33 @@ describe('Localization', () => {
         },
       })
 
-      const { result: relationshipRes } = await client.find({
-        auth: true,
-        query: {
-          children: {
-            in: post1.id,
+      const { docs: relationshipDocs } = await restClient
+        .GET(`/${collection}`, {
+          query: {
+            where: {
+              children: {
+                in: post1.id,
+              },
+            },
           },
-        },
-      })
+        })
+        .then((res) => res.json())
 
-      expect(relationshipRes.docs.map(({ id }) => id)).toContain(post1.id)
+      expect(relationshipDocs.map(({ id }) => id)).toContain(post1.id)
 
-      const { result: nestedFieldRes } = await client.find({
-        auth: true,
-        query: {
-          'group.children': {
-            contains: 'some',
+      const { docs: nestedFieldDocs } = await restClient
+        .GET(`/${collection}`, {
+          query: {
+            where: {
+              'group.children': {
+                contains: 'some',
+              },
+            },
           },
-        },
-      })
+        })
+        .then((res) => res.json())
 
-      expect(nestedFieldRes.docs.map(({ id }) => id)).toContain(post1.id)
+      expect(nestedFieldDocs.map(({ id }) => id)).toContain(post1.id)
     })
   })
 
