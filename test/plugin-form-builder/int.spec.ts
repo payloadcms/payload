@@ -1,14 +1,18 @@
+import type { Payload } from '../../packages/payload/src'
 import type { Form } from './payload-types'
 
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { getPayload } from '../../packages/payload/src'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
 import { formSubmissionsSlug, formsSlug } from './shared'
 
-describe('Form Builder Plugin', () => {
-  let form: Form
+let payload: Payload
+let form: Form
 
+describe('@payloadcms/plugin-form-builder', () => {
   beforeAll(async () => {
-    await initPayloadTest({ __dirname, init: { local: true } })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
 
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
       title: 'Test Form',

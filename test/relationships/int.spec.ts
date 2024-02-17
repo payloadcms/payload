@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto'
 
+import type { Payload } from '../../packages/payload/src'
 import type { PayloadRequest } from '../../packages/payload/src/types'
 import type {
   ChainedRelation,
@@ -10,28 +11,34 @@ import type {
   Relation,
 } from './payload-types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
-import config, {
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
+import {
   chainedRelSlug,
   customIdNumberSlug,
   customIdSlug,
   defaultAccessRelSlug,
+  polymorphicRelationshipsSlug,
   relationSlug,
   slug,
-} from './config'
+  usersSlug,
+} from './shared'
 
-let client: RESTClient
+let restClient: NextRESTClient
+let payload: Payload
+let token: string
 
 type EasierChained = { id: string; relation: EasierChained }
 
 describe('Relationships', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    client = new RESTClient(config, { serverURL, defaultSlug: slug })
-    await client.login()
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
+    ;({ token } = await restClient.login({ slug: usersSlug }).then((res) => res.json()))
   })
 
   afterAll(async () => {
@@ -146,43 +153,51 @@ describe('Relationships', () => {
       })
 
       it('should prevent an unauthorized population of strict access', async () => {
-        const { doc } = await client.findByID<Post>({ id: post.id, auth: false })
+        const doc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
         expect(doc.defaultAccessRelation).toEqual(defaultAccessRelation.id)
       })
 
       it('should populate strict access when authorized', async () => {
-        const { doc } = await client.findByID<Post>({ id: post.id })
+        const doc = await restClient
+          .GET(`/${slug}/${post.id}`, {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
         expect(doc.defaultAccessRelation).toEqual(defaultAccessRelation)
       })
 
       it('should use filterOptions to limit relationship options', async () => {
-        const { doc } = await client.findByID<Post>({ id: post.id })
+        const doc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
 
         expect(doc.filteredRelation).toMatchObject({ id: filteredRelation.id })
 
-        await client.update<Relation>({
-          id: filteredRelation.id,
-          slug: relationSlug,
-          data: { disableRelation: true },
+        await restClient.PATCH(`/${relationSlug}/${filteredRelation.id}`, {
+          body: JSON.stringify({
+            disableRelation: true,
+          }),
         })
 
-        const { doc: docAfterUpdatingRel } = await client.findByID<Post>({ id: post.id })
+        const updatedDoc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
 
         // No change to existing relation
-        expect(docAfterUpdatingRel.filteredRelation).toMatchObject({ id: filteredRelation.id })
+        expect(updatedDoc.filteredRelation).toMatchObject({ id: filteredRelation.id })
 
         // Attempt to update post with a now filtered relation
-        const { status, errors } = await client.update<Post>({
-          id: post.id,
-          data: { filteredRelation: filteredRelation.id },
+        const response = await restClient.PATCH(`/${slug}/${post.id}`, {
+          body: JSON.stringify({
+            filteredRelation: filteredRelation.id,
+          }),
         })
+        const result = await response.json()
 
-        expect(errors?.[0]).toMatchObject({
+        expect(result.errors?.[0]).toMatchObject({
           name: 'ValidationError',
           message: expect.any(String),
           data: expect.anything(),
         })
-        expect(status).toEqual(400)
+        expect(response.status).toEqual(400)
       })
 
       it('should count totalDocs correctly when using or in where query and relation contains hasMany relationship fields', async () => {
@@ -254,13 +269,25 @@ describe('Relationships', () => {
 
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id })
-          expect(doc?.customIdRelation).toMatchObject({ id: generatedCustomId })
+          const { customIdRelation } = await restClient
+            .GET(`/${slug}/${post.id}`, {
+              headers: {
+                Authorization: `JWT ${token}`,
+              },
+            })
+            .then((res) => res.json())
+          expect(customIdRelation).toMatchObject({ id: generatedCustomId })
         })
 
         it('should query a custom id number relation', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id })
-          expect(doc?.customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber })
+          const { customIdNumberRelation } = await restClient
+            .GET(`/${slug}/${post.id}`, {
+              headers: {
+                Authorization: `JWT ${token}`,
+              },
+            })
+            .then((res) => res.json())
+          expect(customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber })
         })
 
         it('should validate the format of text id relationships', async () => {
@@ -284,22 +311,30 @@ describe('Relationships', () => {
         })
 
         it('should allow update removing a relationship', async () => {
-          const result = await client.update<Post>({
-            slug,
-            id: post.id,
-            data: {
-              relationField: null,
+          const response = await restClient.PATCH(`/${slug}/${post.id}`, {
+            headers: {
+              Authorization: `JWT ${token}`,
             },
+            body: JSON.stringify({
+              customIdRelation: null,
+            }),
           })
+          const doc = await response.json()
 
-          expect(result.status).toEqual(200)
-          expect(result.doc.relationField).toBeFalsy()
+          expect(response.status).toEqual(200)
+          expect(doc.relationField).toBeFalsy()
         })
       })
 
       describe('depth', () => {
         it('should populate to depth', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id, options: { depth: 2 } })
+          const doc = await restClient
+            .GET(`/${slug}/${post.id}`, {
+              query: {
+                depth: 2,
+              },
+            })
+            .then((res) => res.json())
           const depth0 = doc?.chainedRelation as EasierChained
           expect(depth0.id).toEqual(chained.id)
           expect(depth0.relation.id).toEqual(chained2.id)
@@ -308,12 +343,24 @@ describe('Relationships', () => {
         })
 
         it('should only populate ID if depth 0', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id, options: { depth: 0 } })
+          const doc = await restClient
+            .GET(`/${slug}/${post.id}`, {
+              query: {
+                depth: 0,
+              },
+            })
+            .then((res) => res.json())
           expect(doc?.chainedRelation).toEqual(chained.id)
         })
 
         it('should respect maxDepth at field level', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id, options: { depth: 1 } })
+          const doc = await restClient
+            .GET(`/${slug}/${post.id}`, {
+              query: {
+                depth: 1,
+              },
+            })
+            .then((res) => res.json())
           expect(doc?.maxDepthRelation).toEqual(relation.id)
           expect(doc?.maxDepthRelation).not.toHaveProperty('name')
           // should not affect other fields
@@ -573,7 +620,7 @@ describe('Relationships', () => {
         },
       })
       await payload.create({
-        collection: 'polymorphic-relationships',
+        collection: polymorphicRelationshipsSlug,
         data: {
           polymorphic: {
             value: movie.id,
@@ -582,25 +629,31 @@ describe('Relationships', () => {
         },
       })
 
-      const query = await client.find({
-        slug: 'polymorphic-relationships',
-        query: {
-          and: [
-            {
-              'polymorphic.value': {
-                equals: movie.id,
-              },
+      const result = await restClient
+        .GET(`/${polymorphicRelationshipsSlug}`, {
+          query: {
+            where: {
+              and: [
+                {
+                  'polymorphic.value': {
+                    equals: movie.id,
+                  },
+                },
+                {
+                  'polymorphic.relationTo': {
+                    equals: 'movies',
+                  },
+                },
+              ],
             },
-            {
-              'polymorphic.relationTo': {
-                equals: 'movies',
-              },
-            },
-          ],
-        },
-      })
+          },
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
 
-      expect(query.result.docs).toHaveLength(1)
+      expect(result.docs).toHaveLength(1)
     })
   })
 })

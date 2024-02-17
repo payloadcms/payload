@@ -1,10 +1,16 @@
-import payload from '../../packages/payload/src'
-import wait from '../../packages/payload/src/utilities/wait'
-import { initPayloadTest } from '../helpers/configHelpers'
+import type { Payload } from '../../packages/payload/src'
 
-describe('Search Plugin', () => {
+import { getPayload } from '../../packages/payload/src'
+import wait from '../../packages/payload/src/utilities/wait'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
+
+let payload: Payload
+
+describe('@payloadcms/plugin-search', () => {
   beforeAll(async () => {
-    await initPayloadTest({ __dirname, init: { local: true } })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
   })
 
   it('should add a search collection', async () => {

@@ -1,9 +1,15 @@
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
+import type { Payload } from '../../packages/payload/src'
+
+import { getPayload } from '../../packages/payload/src'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
+
+let payload: Payload
 
 describe('Stripe Plugin', () => {
   beforeAll(async () => {
-    await initPayloadTest({ __dirname, init: { local: true } })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
   })
 
   it('should create products', async () => {

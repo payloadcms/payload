@@ -1,12 +1,17 @@
 import path from 'path'
 
-import payload from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src'
+
+import { getPayload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
-import { initPayloadTest } from '../helpers/configHelpers'
 import removeFiles from '../helpers/removeFiles'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
 import { mediaSlug } from './shared'
 
-describe('SEO Plugin', () => {
+let payload: Payload
+
+describe('@payloadcms/plugin-seo', () => {
   let page = null
   let mediaDoc = null
 
@@ -14,7 +19,8 @@ describe('SEO Plugin', () => {
     const uploadsDir = path.resolve(__dirname, './media')
     removeFiles(path.normalize(uploadsDir))
 
-    await initPayloadTest({ __dirname, init: { local: true } })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
 
     // Create image
     const filePath = path.resolve(__dirname, './image-1.jpg')

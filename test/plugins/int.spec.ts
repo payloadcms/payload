@@ -1,18 +1,15 @@
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
+import type { Payload } from '../../packages/payload/src'
+
+import { getPayload } from '../../packages/payload/src'
+import { startMemoryDB } from '../startMemoryDB'
 import configPromise, { pagesSlug } from './config'
 
-require('isomorphic-fetch')
-
-let client
+let payload: Payload
 
 describe('Collections - Plugins', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    const config = await configPromise
-    client = new RESTClient(config, { serverURL, defaultSlug: pagesSlug })
-    await client.login()
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
   })
 
   it('created pages collection', async () => {

@@ -2,6 +2,15 @@ import type { CollectionConfig } from '../../packages/payload/src/collections/co
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
+import {
+  chainedRelSlug,
+  customIdNumberSlug,
+  customIdSlug,
+  defaultAccessRelSlug,
+  polymorphicRelationshipsSlug,
+  relationSlug,
+  slug,
+} from './shared'
 
 const openAccess = {
   create: () => true,
@@ -35,14 +44,6 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
     ],
   }
 }
-
-export const slug = 'posts'
-export const relationSlug = 'relation'
-export const defaultAccessRelSlug = 'strict-access'
-export const chainedRelSlug = 'chained'
-export const customIdSlug = 'custom-id'
-export const customIdNumberSlug = 'custom-id-number'
-export const polymorphicRelationshipsSlug = 'polymorphic-relationships'
 
 export default buildConfigWithDefaults({
   collections: [
@@ -202,6 +203,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'movieReviews',
       fields: [
         {
           name: 'movieReviewer',
@@ -231,8 +233,6 @@ export default buildConfigWithDefaults({
           type: 'radio',
         },
       ],
-
-      slug: 'movieReviews',
     },
     {
       slug: polymorphicRelationshipsSlug,
