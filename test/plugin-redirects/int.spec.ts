@@ -1,12 +1,18 @@
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
+import type { Payload } from '../../packages/payload/src'
+import type { Page } from './payload-types'
+
+import { getPayload } from '../../packages/payload/src'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
 import { pagesSlug } from './shared'
 
-describe('Redirects Plugin', () => {
-  let page: Page
+let payload: Payload
+let page: Page
 
+describe('@payloadcms/plugin-redirects', () => {
   beforeAll(async () => {
-    await initPayloadTest({ __dirname, init: { local: true } })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
 
     page = await payload.create({
       collection: 'pages',

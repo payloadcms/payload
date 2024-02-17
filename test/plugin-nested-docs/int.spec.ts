@@ -1,11 +1,16 @@
+import type { Payload } from '../../packages/payload/src'
+
+import { getPayload } from '../../packages/payload/src'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
 import type { ArrayField, RelationshipField } from '../../packages/payload/src/fields/config/types'
 
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
+let payload: Payload
 
-describe('Nested Docs', () => {
+describe('@payloadcms/plugin-nested-docs', () => {
   beforeAll(async () => {
-    await initPayloadTest({ __dirname, init: { local: true } })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
   })
 
   describe('seed', () => {

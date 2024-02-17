@@ -2,10 +2,20 @@
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 
-import payload from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src'
 import { describeIfInCIOrHasLocalstack } from '../helpers'
-import { initPayloadTest } from '../helpers/configHelpers'
 
+import { getPayload } from '../../packages/payload/src'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
+
+let payload: Payload
+
+describe('@payloadcms/plugin-cloud-storage', () => {
+  beforeAll(async () => {
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+  })
 const TEST_BUCKET = 'payload-bucket'
 
 let client: AWS.S3Client
@@ -19,8 +29,6 @@ describeIfInCIOrHasLocalstack()('plugin-cloud-storage', () => {
       })
 
       await createTestBucket()
-
-      await initPayloadTest({ __dirname, init: { local: true } })
     })
 
     afterEach(async () => {

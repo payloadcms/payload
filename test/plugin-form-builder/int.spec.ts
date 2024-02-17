@@ -1,17 +1,21 @@
+import type { Payload } from '../../packages/payload/src'
 import type { Form } from './payload-types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical'
 import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise from './config'
 import { formSubmissionsSlug, formsSlug } from './shared'
 import { ValidationError } from '../../packages/payload/src/errors'
 
-describe('Form Builder Plugin', () => {
-  let form: Form
+let payload: Payload
+let form: Form
 
+describe('@payloadcms/plugin-form-builder', () => {
   beforeAll(async () => {
-    await initPayloadTest({ __dirname, init: { local: true } })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
 
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
       title: 'Test Form',

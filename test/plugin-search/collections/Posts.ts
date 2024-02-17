@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload/dist/collections/config/types'
 
 import { postsSlug } from '../shared'
 

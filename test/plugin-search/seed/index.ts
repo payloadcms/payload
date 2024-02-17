@@ -1,4 +1,4 @@
-import type { Payload } from '../../../packages/payload/src'
+import type { Payload } from 'payload'
 import type { PayloadRequest } from '../../../packages/payload/types'
 
 export const seed = async (payload: Payload): Promise<boolean> => {

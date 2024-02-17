@@ -10,39 +10,28 @@ export const updateByID: CollectionRouteHandlerWithID = async ({ req, collection
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
 
-  try {
-    const doc = await updateByIDOperation({
-      id,
-      autosave,
-      collection,
-      data: req.data,
-      depth: isNumber(depth) ? Number(depth) : undefined,
-      draft,
-      req,
-    })
+  const doc = await updateByIDOperation({
+    id,
+    autosave,
+    collection,
+    data: req.data,
+    depth: isNumber(depth) ? Number(depth) : undefined,
+    draft,
+    req,
+  })
 
-    let message = req.t('general:updatedSuccessfully')
+  let message = req.t('general:updatedSuccessfully')
 
-    if (draft) message = req.t('version:draftSavedSuccessfully')
-    if (autosave) message = req.t('version:autosavedSuccessfully')
+  if (draft) message = req.t('version:draftSavedSuccessfully')
+  if (autosave) message = req.t('version:autosavedSuccessfully')
 
-    return Response.json(
-      {
-        message,
-        doc,
-      },
-      {
-        status: httpStatus.OK,
-      },
-    )
-  } catch (error) {
-    return Response.json(
-      {
-        message: error.message,
-      },
-      {
-        status: error.status || httpStatus.INTERNAL_SERVER_ERROR,
-      },
-    )
-  }
+  return Response.json(
+    {
+      message,
+      doc,
+    },
+    {
+      status: httpStatus.OK,
+    },
+  )
 }

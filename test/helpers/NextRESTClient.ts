@@ -17,6 +17,7 @@ import { devUser } from '../credentials'
 type ValidPath = `/${string}`
 type RequestQuery = {
   query?: {
+    depth?: number
     fallbackLocale?: string
     limit?: number
     locale?: string
@@ -27,15 +28,10 @@ type RequestQuery = {
 }
 
 function generateQueryString(query: RequestQuery['query'], params: ParsedQs): string {
-  const { where, limit, page, sort, ...rest } = params || {}
-  const whereFilter = query?.where || where
   return QueryString.stringify(
     {
-      ...(rest || {}),
-      ...(whereFilter ? { where: whereFilter } : {}),
-      limit: query?.limit || limit || undefined,
-      page: query?.page || page || undefined,
-      sort: query?.sort || sort || undefined,
+      ...(params || {}),
+      ...(query || {}),
     },
     {
       addQueryPrefix: true,
