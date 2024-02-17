@@ -1,4 +1,5 @@
 import type { Where } from 'payload/types'
+import type { ParsedQs } from 'qs'
 
 import QueryString from 'qs'
 
@@ -22,13 +23,16 @@ type RequestQuery = {
   }
 }
 
-function generateQueryString(query: RequestQuery['query']): string {
+function generateQueryString(query: RequestQuery['query'], params: ParsedQs): string {
+  const { where, limit, page, sort, ...rest } = params || {}
+  const whereFilter = query?.where || where
   return QueryString.stringify(
     {
-      ...(query?.where ? { where: query.where } : {}),
-      limit: query?.limit,
-      page: query?.page,
-      sort: query?.sort,
+      ...(rest || {}),
+      ...(whereFilter ? { where: whereFilter } : {}),
+      limit: query?.limit || limit || undefined,
+      page: query?.page || page || undefined,
+      sort: query?.sort || sort || undefined,
     },
     {
       addQueryPrefix: true,
@@ -61,25 +65,27 @@ export class NextRESTClient {
     this._GRAPHQL_POST = createGraphqlPOST(config)
   }
 
-  private generateRequestParts(path: string): {
+  private generateRequestParts(path: ValidPath): {
+    params?: ParsedQs
     slug: string[]
     url: string
   } {
-    const safePath = path.slice(1)
-    const slug = safePath.split('/')
-    const url = `${this.serverURL}${this.config.routes.api}/${safePath}`
+    const [slugs, params] = path.slice(1).split('?')
+    const url = `${this.serverURL}${this.config.routes.api}/${slugs}`
+
     return {
       url,
-      slug,
+      slug: slugs.split('/'),
+      params: params ? QueryString.parse(params) : undefined,
     }
   }
 
   async DELETE(path: ValidPath, options: RequestInit & RequestQuery = {}): Promise<Response> {
-    const { url, slug } = this.generateRequestParts(path)
+    const { url, slug, params } = this.generateRequestParts(path)
     const { query, ...rest } = options || {}
-    const whereQuery = generateQueryString(query)
+    const queryParams = generateQueryString(query, params)
 
-    const request = new Request(`${url}${whereQuery}`, {
+    const request = new Request(`${url}${queryParams}`, {
       ...rest,
       method: 'DELETE',
       headers: {
@@ -94,11 +100,11 @@ export class NextRESTClient {
     path: ValidPath,
     options: Omit<RequestInit, 'body'> & RequestQuery = {},
   ): Promise<Response> {
-    const { url, slug } = this.generateRequestParts(path)
+    const { url, slug, params } = this.generateRequestParts(path)
     const { query, ...rest } = options || {}
-    const whereQuery = generateQueryString(query)
+    const queryParams = generateQueryString(query, params)
 
-    const request = new Request(`${url}${whereQuery}`, {
+    const request = new Request(`${url}${queryParams}`, {
       ...rest,
       method: 'GET',
       headers: new Headers({
@@ -125,11 +131,11 @@ export class NextRESTClient {
   }
 
   async PATCH(path: ValidPath, options: RequestInit & RequestQuery): Promise<Response> {
-    const { url, slug } = this.generateRequestParts(path)
+    const { url, slug, params } = this.generateRequestParts(path)
     const { query, ...rest } = options
-    const whereQuery = generateQueryString(query)
+    const queryParams = generateQueryString(query, params)
 
-    const request = new Request(`${url}${whereQuery}`, {
+    const request = new Request(`${url}${queryParams}`, {
       ...rest,
       method: 'PATCH',
       headers: new Headers({
@@ -141,9 +147,10 @@ export class NextRESTClient {
   }
 
   async POST(path: ValidPath, options: RequestInit = {}): Promise<Response> {
-    const { url, slug } = this.generateRequestParts(path)
+    const { url, slug, params } = this.generateRequestParts(path)
+    const queryParams = generateQueryString({}, params)
 
-    const request = new Request(url, {
+    const request = new Request(`${url}${queryParams}`, {
       ...options,
       method: 'POST',
       headers: new Headers({

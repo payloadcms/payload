@@ -13,20 +13,20 @@ const ContextHooks: CollectionConfig = {
   },
   hooks: {
     beforeOperation: [
-      async ({ context, args }) => {
+      ({ context, args }) => {
         // eslint-disable-next-line prefer-destructuring
         const req: PayloadRequest = args.req
 
-        if (!req.query || !Object.keys(req.query).length) {
+        if (req.searchParams.size === 0) {
           return args
         }
 
-        Object.keys(req.query).forEach((key) => {
+        req.searchParams.forEach((value, key) => {
           if (key.startsWith('context_')) {
             // Strip 'context_' from key, add it to context object and remove it from query params
             const newKey = key.substring('context_'.length)
-            context[newKey] = req.query[key]
-            delete req.query[key]
+            context[newKey] = value
+            req.searchParams.delete(key)
           }
         })
 

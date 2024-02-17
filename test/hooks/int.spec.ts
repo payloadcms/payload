@@ -1,9 +1,11 @@
+import type { Payload } from '../../packages/payload/src'
 import type { NestedAfterReadHook } from './payload-types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { AuthenticationError } from '../../packages/payload/src/errors'
 import { devUser, regularUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
 import { afterOperationSlug } from './collections/AfterOperation'
 import { chainingHooksSlug } from './collections/ChainingHooks'
 import { contextHooksSlug } from './collections/ContextHooks'
@@ -16,15 +18,17 @@ import {
 import { relationsSlug } from './collections/Relations'
 import { transformSlug } from './collections/Transform'
 import { hooksUsersSlug } from './collections/Users'
-import { HooksConfig } from './config'
+import configPromise, { HooksConfig } from './config'
 import { dataHooksGlobalSlug } from './globals/Data'
 
-let apiUrl
+let restClient: NextRESTClient
+let payload: Payload
 
 describe('Hooks', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    apiUrl = `${serverURL}/api`
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
   })
 
   afterAll(async () => {
@@ -268,18 +272,17 @@ describe('Hooks', () => {
         context_secretValue: 'data from rest API',
       })
       // send context as query params. It will be parsed by the beforeOperation hook
-      const response = await fetch(`${apiUrl}/${contextHooksSlug}?${params.toString()}`, {
-        body: JSON.stringify({
-          value: 'wrongvalue',
-        }),
-        method: 'post',
-      })
-
-      const document = (await response.json()).doc
+      const { doc } = await restClient
+        .POST(`/${contextHooksSlug}?${params.toString()}`, {
+          body: JSON.stringify({
+            value: 'wrongvalue',
+          }),
+        })
+        .then((res) => res.json())
 
       const retrievedDoc = await payload.findByID({
         collection: contextHooksSlug,
-        id: document.id,
+        id: doc.id,
       })
 
       expect(retrievedDoc.value).toEqual('data from rest API')
