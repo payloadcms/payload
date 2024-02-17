@@ -1,10 +1,6 @@
 ## [2.11.1](https://github.com/payloadcms/payload/compare/v2.11.0...v2.11.1) (2024-02-16)
 
 
-### ⚠ BREAKING CHANGES
-
-* **richtext-lexical:** Update lexical from 0.12.6 to 0.13.1, port over all useful changes from playground (#5066)
-
 ### Features
 
 * **db-postgres:** adds idType to use uuid or serial id columns ([#3864](https://github.com/payloadcms/payload/issues/3864)) ([d6c2578](https://github.com/payloadcms/payload/commit/d6c25783cfa97983bf9db27ceb5ccd39a62c62f1))
@@ -24,6 +20,14 @@
 * remove collection findByID caching ([#5034](https://github.com/payloadcms/payload/issues/5034)) ([1ac943e](https://github.com/payloadcms/payload/commit/1ac943ed5e8416883b863147fdf3c23380955559))
 * **richtext-lexical:** do not remove adjacent paragraph node when inserting certain nodes in empty editor ([#5061](https://github.com/payloadcms/payload/issues/5061)) ([6323965](https://github.com/payloadcms/payload/commit/6323965c652ea68dffeb716957b124d165b9ce96))
 * **uploads:** account for serverURL when retrieving external file ([#5102](https://github.com/payloadcms/payload/issues/5102)) ([25cee8b](https://github.com/payloadcms/payload/commit/25cee8bb102bf80b3a4bfb4b4e46712722cc7f0d))
+
+
+### ⚠ BREAKING CHANGES: @payloadcms/richtext-lexical
+
+* **richtext-lexical:** Update lexical from 0.12.6 to 0.13.1, port over all useful changes from playground (#5066)
+
+- You HAVE to make sure that any versions of the lexical packages (IF you have any installed) match the lexical version which richtext-lexical uses: v0.13.1. If you do not do this, you may be plagued by React useContext / "cannot find active editor state" errors
+- Updates to lexical's API, e.g. the removal of INTERNAL_isPointSelection, could be breaking depending on your code. Please consult the [lexical changelog](https://github.com/facebook/lexical/blob/main/CHANGELOG.md).
 
 ## [2.11.0](https://github.com/payloadcms/payload/compare/v2.10.1...v2.11.0) (2024-02-09)
 
