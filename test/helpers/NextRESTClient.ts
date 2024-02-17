@@ -12,11 +12,14 @@ import {
   PATCH as createPATCH,
   POST as createPOST,
 } from '../../packages/next/src/routes/rest'
+import { devUser } from '../credentials'
 
 type ValidPath = `/${string}`
 type RequestQuery = {
   query?: {
+    fallbackLocale?: string
     limit?: number
+    locale?: string
     page?: number
     sort?: string
     where?: Where
@@ -115,11 +118,13 @@ export class NextRESTClient {
     return this._GET(request, { params: { slug } })
   }
 
-  async GRAPHQL_POST(options: RequestInit): Promise<Response> {
+  async GRAPHQL_POST(options: RequestInit & RequestQuery): Promise<Response> {
+    const { query, ...rest } = options
+    const queryParams = generateQueryString(query, {})
     const request = new Request(
-      `${this.serverURL}${this.config.routes.api}${this.config.routes.graphQL}`,
+      `${this.serverURL}${this.config.routes.api}${this.config.routes.graphQL}${queryParams}`,
       {
-        ...options,
+        ...rest,
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json',
@@ -159,5 +164,22 @@ export class NextRESTClient {
       }),
     })
     return this._POST(request, { params: { slug } })
+  }
+
+  async login({
+    slug,
+    credentials,
+  }: {
+    credentials?: {
+      email: string
+      password: string
+    }
+    slug: string
+  }): Promise<Response> {
+    return this.POST(`/${slug}/login`, {
+      body: JSON.stringify(
+        credentials ? { ...credentials } : { email: devUser.email, password: devUser.password },
+      ),
+    })
   }
 }
