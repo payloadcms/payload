@@ -26,7 +26,9 @@ export type DocumentInfoContext = {
       versionsConfig: SanitizedCollectionConfig['versions'] | SanitizedGlobalConfig['versions']
     }>,
   ) => void
+  setDocumentTitle: (title: string) => void
   slug?: string
+  title?: string
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
   versions?: PaginatedDocs<TypeWithVersion<any>>
   versionsConfig?: SanitizedCollectionConfig['versions'] | SanitizedGlobalConfig['versions']
