@@ -58,7 +58,7 @@ exports.getTranslationString = getTranslationString;
  * @returns string
  */
 const replaceVars = ({ translationString, vars, }) => {
-    const parts = translationString.split(/({{.*?}})/);
+    const parts = translationString.split(/(\{\{.*?\}\})/);
     return parts
         .map((part) => {
         if (part.startsWith('{{') && part.endsWith('}}')) {
@@ -166,25 +166,7 @@ function memoize(fn, keys) {
         return cacheMap.get(cacheKey);
     };
 }
-// type GetTranslationsByKey = ({ context }: { context: 'client' | 'api' }) => Promise<Translations>
-// const getTranslationsByKey: GetTranslationsByKey = memoize(
-//   <GetTranslationsByKey>(async ({ context }): Promise<Translations> => {
-//     const cachedTranslations = new Map<string, Translations>()
-//     if (cachedTranslations.has(context)) {
-//       return cachedTranslations.get(context)
-//     }
-//     let translations = {}
-//     if (context === 'api') {
-//       translations = await import('@payloadcms/translations/api')
-//       cachedTranslations.set(context, translations)
-//     } else if (context === 'client') {
-//       translations = await import('@payloadcms/translations/client')
-//       cachedTranslations.set(context, translations)
-//     }
-//     return translations
-//   }),
-//   ['context'] satisfies Array<keyof Parameters<GetTranslationsByKey>[0]>,
-// )
+
 exports.initI18n = memoize((async ({ config, language = 'en', translations }) => {
     const i18n = {
         fallbackLanguage: config.fallbackLanguage,

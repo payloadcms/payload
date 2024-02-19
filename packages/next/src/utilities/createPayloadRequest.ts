@@ -9,6 +9,7 @@ import { getPayload } from 'payload'
 import { URL } from 'url'
 import { parseCookies } from 'payload/auth'
 import { initI18n } from '@payloadcms/translations'
+import { translations } from '@payloadcms/translations/api'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 import { getDataAndFile } from './getDataAndFile'
@@ -69,7 +70,7 @@ export const createPayloadRequest = async ({
   const i18n = await initI18n({
     config: config.i18n,
     language,
-    translationsContext: 'api',
+    translations,
   })
 
   const customRequest: CustomPayloadRequest = {
