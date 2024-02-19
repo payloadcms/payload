@@ -9,7 +9,7 @@ import { DocumentPreferences } from 'payload/types'
 import { Locale } from 'payload/config'
 import { User } from 'payload/auth'
 import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/all'
+import { translations } from '@payloadcms/translations/api'
 
 export const getFormStateFromServer = async (
   args: {

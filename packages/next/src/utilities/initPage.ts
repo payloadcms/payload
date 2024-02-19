@@ -12,7 +12,8 @@ import { redirect } from 'next/navigation'
 import { parseCookies } from 'payload/auth'
 import { getRequestLanguage } from './getRequestLanguage'
 import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
-import { I18n } from '@payloadcms/translations/types'
+import type { I18n } from '@payloadcms/translations'
+import { translations } from '@payloadcms/translations/all'
 import { initI18n } from '@payloadcms/translations'
 
 export const initPage = async ({
@@ -63,7 +64,7 @@ export const initPage = async ({
   const i18n = await initI18n({
     config: config.i18n,
     language,
-    translationsContext: 'client',
+    translations,
   })
   let collectionConfig: SanitizedCollectionConfig
   let globalConfig: SanitizedGlobalConfig
