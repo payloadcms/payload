@@ -42,7 +42,7 @@
       "@payloadcms/translations/all": ["./packages/translations/dist/all/index.js"],
       "@payloadcms/next/*": ["./packages/next/src/*"],
       "@payloadcms/graphql": ["./packages/graphql/src"],
-      "payload-config": ["./test/auth/config.ts"]
+      "payload-config": ["./test/_community/config.ts"]
     }
   },
   "exclude": ["dist", "build", "temp", "node_modules"],

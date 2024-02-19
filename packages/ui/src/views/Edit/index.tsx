@@ -18,6 +18,7 @@ import { Upload } from './Upload'
 import { useConfig } from '../../providers/Config'
 import { useTranslation } from '../../providers/Translation'
 import { useComponentMap } from '../../providers/ComponentMapProvider'
+import { SetDocumentTitle } from './SetDocumentTitle'
 
 import './index.scss'
 
@@ -41,7 +42,9 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     locale,
   } = props
 
-  const { collections, globals } = useConfig()
+  const config = useConfig()
+  const { collections, globals } = config
+
   const { i18n } = useTranslation()
   const { getFieldMap } = useComponentMap()
 
@@ -188,6 +191,11 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
             id={id}
             isEditing={isEditing || false}
             pluralLabel={collectionConfig?.labels?.plural}
+          />
+          <SetDocumentTitle
+            config={config}
+            collectionConfig={collectionConfig}
+            globalConfig={globalConfig}
           />
           <DocumentControls
             apiURL={apiURL}
