@@ -66,6 +66,16 @@ export const RouteError = async ({
   err: APIError
   collection?: Collection
 }) => {
+  if (!req?.payload) {
+    return Response.json(
+      {
+        message: err.message,
+        stack: err.stack,
+      },
+      { status: httpStatus.INTERNAL_SERVER_ERROR },
+    )
+  }
+
   const { config, logger } = req.payload
   let response = formatErrors(err)
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
