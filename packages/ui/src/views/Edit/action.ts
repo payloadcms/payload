@@ -45,6 +45,7 @@ export const getFormStateFromServer = async (
     translations,
     language: language,
     config: payload.config.i18n,
+    context: 'api',
   })
 
   const result = await buildStateFromSchema({

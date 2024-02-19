@@ -11,11 +11,6 @@ const nextConfig = {
       '**/*': ['drizzle-kit', 'drizzle-kit/utils'],
     },
     serverComponentsExternalPackages: ['drizzle-kit', 'drizzle-kit/utils', 'pino', 'pino-pretty'],
-    turbo: {
-      resolveAlias: {
-        '@payloadcms/ui/scss': path.resolve(__dirname, './packages/ui/src/scss/styles.scss'),
-      },
-    },
   },
   // typescript: {
   //   ignoreBuildErrors: true,
@@ -30,7 +25,6 @@ const nextConfig = {
         'pino',
         'pino-pretty',
         'sharp',
-        'mongodb-memory-server',
       ],
       ignoreWarnings: [
         ...(config.ignoreWarnings || []),

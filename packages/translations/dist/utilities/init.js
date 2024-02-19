@@ -58,7 +58,7 @@ exports.getTranslationString = getTranslationString;
  * @returns string
  */
 const replaceVars = ({ translationString, vars, }) => {
-    const parts = translationString.split(/(\{\{.*?\}\})/);
+    const parts = translationString.split(/({{.*?}})/);
     return parts
         .map((part) => {
         if (part.startsWith('{{') && part.endsWith('}}')) {
@@ -166,7 +166,6 @@ function memoize(fn, keys) {
         return cacheMap.get(cacheKey);
     };
 }
-
 exports.initI18n = memoize((async ({ config, language = 'en', translations }) => {
     const i18n = {
         fallbackLanguage: config.fallbackLanguage,
