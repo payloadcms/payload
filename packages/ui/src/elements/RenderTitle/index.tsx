@@ -3,7 +3,6 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import useTitle from '../../hooks/useTitle'
 import IDLabel from '../IDLabel'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import './index.scss'
@@ -11,28 +10,11 @@ import './index.scss'
 const baseClass = 'render-title'
 
 const RenderTitle: React.FC<Props> = (props) => {
-  const {
-    className,
-    useAsTitle,
-    globalLabel,
-    globalSlug,
-    element = 'h1',
-    fallback = '[untitled]',
-    title: titleFromProps,
-  } = props
+  const { className, element = 'h1', title: titleFromProps } = props
 
-  const { id } = useDocumentInfo()
+  const { title: titleFromContext, id } = useDocumentInfo()
 
-  const titleFromForm = useTitle({
-    useAsTitle: useAsTitle,
-    globalLabel: globalLabel,
-    globalSlug: globalSlug,
-  })
-
-  let title = titleFromForm
-  if (!title) title = id?.toString()
-  if (!title) title = fallback
-  title = titleFromProps || title
+  const title = titleFromProps || titleFromContext
 
   const idAsTitle = title === id
 

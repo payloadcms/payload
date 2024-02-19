@@ -2,9 +2,6 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/t
 
 export type Props = {
   className?: string
-  useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
-  globalLabel?: SanitizedGlobalConfig['label']
-  globalSlug?: SanitizedGlobalConfig['slug']
   element?: React.ElementType
   fallback?: string
   title?: string

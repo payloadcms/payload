@@ -1,15 +1,15 @@
 'use client'
 import { useEffect } from 'react'
-import { useTranslation } from '../../providers/Translation'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
-import type { StepNavItem } from '../../elements/StepNav/types'
+import type { StepNavItem } from '../../../elements/StepNav/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useStepNav } from '../../elements/StepNav'
-import { useConfig } from '../../providers/Config'
-import { useEditDepth } from '../../providers/EditDepth'
-import useTitle from '../../hooks/useTitle'
+import { useStepNav } from '../../../elements/StepNav'
+import { useConfig } from '../../../providers/Config'
+import { useEditDepth } from '../../../providers/EditDepth'
+import { useDocumentInfo } from '../../../providers/DocumentInfo'
 
 export const SetStepNav: React.FC<{
   collectionSlug?: SanitizedCollectionConfig['slug']
@@ -21,23 +21,11 @@ export const SetStepNav: React.FC<{
   isEditing?: boolean
   view?: string
 }> = (props) => {
-  const {
-    collectionSlug,
-    globalSlug,
-    pluralLabel,
-    useAsTitle,
-    id,
-    isEditing = true,
-    globalLabel,
-  } = props
+  const { collectionSlug, globalSlug, pluralLabel, useAsTitle, id, isEditing = true } = props
 
   const view: string | undefined = props?.view || undefined
 
-  const title = useTitle({
-    useAsTitle,
-    globalLabel,
-    globalSlug,
-  })
+  const { title } = useDocumentInfo()
 
   const { setStepNav } = useStepNav()
 
