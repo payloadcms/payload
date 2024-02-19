@@ -42,7 +42,9 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     locale,
   } = props
 
-  const { collections, globals } = useConfig()
+  const config = useConfig()
+  const { collections, globals } = config
+
   const { i18n } = useTranslation()
   const { getFieldMap } = useComponentMap()
 
@@ -191,9 +193,9 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
             pluralLabel={collectionConfig?.labels?.plural}
           />
           <SetDocumentTitle
-            useAsTitle={collectionConfig?.admin?.useAsTitle}
-            globalSlug={globalConfig?.slug}
-            globalLabel={globalConfig?.label}
+            config={config}
+            collectionConfig={collectionConfig}
+            globalConfig={globalConfig}
           />
           <DocumentControls
             apiURL={apiURL}

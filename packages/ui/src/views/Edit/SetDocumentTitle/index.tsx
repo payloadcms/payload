@@ -2,40 +2,50 @@
 import { useEffect } from 'react'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { useTranslation } from '../../../providers/Translation'
-import { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import { ClientConfig } from 'payload/types'
 import { useFormFields } from '../../../forms/Form/context'
-import { formatDocTitle } from '../../../utilities/formatDocTitle'
+import { formatDate } from '../../..'
+import { getTranslation } from '@payloadcms/translations'
 
 export const SetDocumentTitle: React.FC<{
-  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
-  globalLabel?: SanitizedGlobalConfig['label']
-  globalSlug?: SanitizedGlobalConfig['slug']
+  config?: ClientConfig
+  globalConfig?: ClientConfig['globals'][0]
+  collectionConfig?: ClientConfig['collections'][0]
 }> = (props) => {
-  const { useAsTitle, globalLabel, globalSlug } = props
+  const { config, globalConfig, collectionConfig } = props
+
+  const dateFormatFromConfig = config?.admin?.dateFormat
+
+  const useAsTitle = collectionConfig?.admin?.useAsTitle
+
+  const field = useFormFields(([fields]) => (useAsTitle && fields && fields?.[useAsTitle]) || null)
 
   const { i18n } = useTranslation()
 
   const { setDocumentTitle } = useDocumentInfo()
 
-  let title: string = ''
+  let title: string
 
-  const field = useFormFields(([fields]) => (fields && fields?.[useAsTitle]) || null)
-
-  if (useAsTitle) {
-    title = formatDocTitle({
-      useAsTitle,
-      field,
-      // TODO: Fix this
-      // @ts-ignore-next-line
-      i18n,
-    })
+  if (typeof field === 'string') {
+    title = field
+  } else if (typeof field === 'number') {
+    title = String(field)
+  } else {
+    title = field?.value as string
   }
 
-  if (globalLabel) {
-    title = typeof globalLabel === 'string' ? globalLabel : globalSlug
-    // TODO: Fix this
-    // @ts-ignore-next-line
-    title = getTranslation(globalLabel, i18n) || globalSlug
+  if (collectionConfig && useAsTitle) {
+    const fieldConfig = collectionConfig.fields.find((f) => 'name' in f && f.name === useAsTitle)
+    const isDate = fieldConfig?.type === 'date'
+
+    if (title && isDate) {
+      const dateFormat = fieldConfig?.admin?.date?.displayFormat || dateFormatFromConfig
+      title = formatDate(title, dateFormat, i18n.language)
+    }
+  }
+
+  if (globalConfig) {
+    title = getTranslation(globalConfig?.label, i18n) || globalConfig?.slug
   }
 
   useEffect(() => {
