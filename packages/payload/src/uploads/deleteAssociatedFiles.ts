@@ -28,8 +28,7 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
 }) => {
   if (!collectionConfig.upload) return
   if (overrideDelete || files.length > 0) {
-    const staticPath = path.resolve(collectionConfig.upload.staticDir)
-    // const staticPath = path.resolve(config.paths.configDir, collectionConfig.upload.staticDir)
+    const staticPath = path.resolve(config.paths.configDir, collectionConfig.upload.staticDir)
 
     const fileToDelete = `${staticPath}/${doc.filename}`
 

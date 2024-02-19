@@ -9,20 +9,10 @@ import Uploads2 from './collections/Upload2'
 import AdminThumbnailCol from './collections/admin-thumbnail'
 import { audioSlug, enlargeSlug, mediaSlug, reduceSlug, relationSlug, versionSlug } from './shared'
 
-const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
-
 export default buildConfigWithDefaults({
-  admin: {
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          fs: mockModulePath,
-        },
-      },
-    }),
+  serverURL: undefined,
+  paths: {
+    configDir: __dirname,
   },
   collections: [
     {
@@ -545,5 +535,4 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  serverURL: undefined,
 })

@@ -32,7 +32,6 @@ let apiUrl
 let jwt
 let restClient: NextRESTClient
 let payload: Payload
-let token: string
 
 const headers = {
   'Content-Type': 'application/json',
@@ -46,7 +45,7 @@ describe('Relationships', () => {
     const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
-    ;({ token } = await restClient.login({ slug: usersSlug }).then((res) => res.json()))
+    await restClient.login({ slug: usersSlug })
   })
 
   afterAll(async () => {
@@ -161,18 +160,14 @@ describe('Relationships', () => {
       })
 
       it('should prevent an unauthorized population of strict access', async () => {
-        const doc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
+        const doc = await restClient
+          .GET(`/${slug}/${post.id}`, { auth: false })
+          .then((res) => res.json())
         expect(doc.defaultAccessRelation).toEqual(defaultAccessRelation.id)
       })
 
       it('should populate strict access when authorized', async () => {
-        const doc = await restClient
-          .GET(`/${slug}/${post.id}`, {
-            headers: {
-              Authorization: `JWT ${token}`,
-            },
-          })
-          .then((res) => res.json())
+        const doc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
         expect(doc.defaultAccessRelation).toEqual(defaultAccessRelation)
       })
 
@@ -346,22 +341,14 @@ describe('Relationships', () => {
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
           const { customIdRelation } = await restClient
-            .GET(`/${slug}/${post.id}`, {
-              headers: {
-                Authorization: `JWT ${token}`,
-              },
-            })
+            .GET(`/${slug}/${post.id}`)
             .then((res) => res.json())
           expect(customIdRelation).toMatchObject({ id: generatedCustomId })
         })
 
         it('should query a custom id number relation', async () => {
           const { customIdNumberRelation } = await restClient
-            .GET(`/${slug}/${post.id}`, {
-              headers: {
-                Authorization: `JWT ${token}`,
-              },
-            })
+            .GET(`/${slug}/${post.id}`)
             .then((res) => res.json())
           expect(customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber })
         })
@@ -388,9 +375,6 @@ describe('Relationships', () => {
 
         it('should allow update removing a relationship', async () => {
           const response = await restClient.PATCH(`/${slug}/${post.id}`, {
-            headers: {
-              Authorization: `JWT ${token}`,
-            },
             body: JSON.stringify({
               customIdRelation: null,
               relationField: null,
@@ -752,9 +736,6 @@ describe('Relationships', () => {
                 },
               ],
             },
-          },
-          headers: {
-            Authorization: `JWT ${token}`,
           },
         })
         .then((res) => res.json())

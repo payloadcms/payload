@@ -1,43 +1,94 @@
-import FormData from 'form-data'
+import { File as FileBuffer } from 'buffer'
+import NodeFormData from 'form-data'
 import fs from 'fs'
 import path from 'path'
 import { promisify } from 'util'
 
+import type { Payload } from '../../packages/payload/src'
 import type { Enlarge, Media } from './payload-types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
-import { enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './shared'
+import { enlargeSlug, mediaSlug, reduceSlug, relationSlug, usersSlug } from './shared'
+
+const getMimeType = (
+  filePath: string,
+): {
+  filename: string
+  type: string
+} => {
+  const ext = path.extname(filePath).slice(1)
+  let type: string
+  switch (ext) {
+    case 'png':
+      type = 'image/png'
+      break
+    case 'jpg':
+      type = 'image/jpeg'
+      break
+    case 'jpeg':
+      type = 'image/jpeg'
+      break
+    case 'svg':
+      type = 'image/svg+xml'
+      break
+    default:
+      type = 'image/png'
+  }
+
+  return {
+    filename: path.basename(filePath),
+    type,
+  }
+}
+const bufferToFileBlob = async (filePath: string): Promise<File> =>
+  new Promise((resolve, reject) => {
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        console.error(`Error reading file at ${filePath}:`, err)
+        reject(err)
+        return
+      }
+
+      const { filename, type } = getMimeType(filePath)
+
+      // Convert type FileBuffer > unknown > File
+      // The File type expects webkitRelativePath, we don't have that
+      resolve(new FileBuffer([data], filename, { type: type }) as unknown as File)
+    })
+  })
 
 const stat = promisify(fs.stat)
 
-require('isomorphic-fetch')
+let restClient: NextRESTClient
+let payload: Payload
 
 describe('Collections - Uploads', () => {
-  let client: RESTClient
-
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    const config = await configPromise
-    client = new RESTClient(config, { serverURL, defaultSlug: mediaSlug })
-    await client.login()
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
+    await restClient.login({ slug: usersSlug })
   })
 
   describe('REST', () => {
     describe('create', () => {
       it('creates from form data given a png', async () => {
         const formData = new FormData()
-        formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')))
+        const filePath = path.join(__dirname, './image.png')
 
-        const { status, doc } = await client.create({
+        formData.append('file', await bufferToFileBlob(filePath))
+
+        const response = await restClient.POST(`/${mediaSlug}`, {
+          body: formData,
           file: true,
-          data: formData,
         })
+        const { doc } = await response.json()
 
-        expect(status).toBe(201)
+        expect(response.status).toBe(201)
 
         const { sizes } = doc
         const expectedPath = path.join(__dirname, './media')
@@ -64,14 +115,16 @@ describe('Collections - Uploads', () => {
 
       it('creates from form data given an svg', async () => {
         const formData = new FormData()
-        formData.append('file', fs.createReadStream(path.join(__dirname, './image.svg')))
+        const filePath = path.join(__dirname, './image.svg')
+        formData.append('file', await bufferToFileBlob(filePath))
 
-        const { status, doc } = await client.create({
+        const response = await restClient.POST(`/${mediaSlug}`, {
+          body: formData,
           file: true,
-          data: formData,
         })
+        const { doc } = await response.json()
 
-        expect(status).toBe(201)
+        expect(response.status).toBe(201)
 
         // Check for files
         expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(true)
@@ -86,14 +139,16 @@ describe('Collections - Uploads', () => {
 
     it('should have valid image url', async () => {
       const formData = new FormData()
-      formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')))
+      const fileBlob = await bufferToFileBlob(path.join(__dirname, './image.svg'))
+      formData.append('file', fileBlob)
 
-      const { status, doc } = await client.create({
+      const response = await restClient.POST(`/${mediaSlug}`, {
+        body: formData,
         file: true,
-        data: formData,
       })
+      const { doc } = await response.json()
 
-      expect(status).toBe(201)
+      expect(response.status).toBe(201)
       const expectedPath = path.join(__dirname, './media')
       expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
 
@@ -102,14 +157,16 @@ describe('Collections - Uploads', () => {
 
     it('creates images that do not require all sizes', async () => {
       const formData = new FormData()
-      formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')))
+      const fileBlob = await bufferToFileBlob(path.join(__dirname, './small.png'))
+      formData.append('file', fileBlob)
 
-      const { status, doc } = await client.create({
+      const response = await restClient.POST(`/${mediaSlug}`, {
+        body: formData,
         file: true,
-        data: formData,
       })
+      const { doc } = await response.json()
 
-      expect(status).toBe(201)
+      expect(response.status).toBe(201)
 
       const expectedPath = path.join(__dirname, './media')
 
@@ -125,14 +182,16 @@ describe('Collections - Uploads', () => {
 
     it('creates images from a different format', async () => {
       const formData = new FormData()
-      formData.append('file', fs.createReadStream(path.join(__dirname, './image.jpg')))
+      const fileBlob = await bufferToFileBlob(path.join(__dirname, './image.jpg'))
+      formData.append('file', fileBlob)
 
-      const { status, doc } = await client.create({
+      const response = await restClient.POST(`/${mediaSlug}`, {
+        body: formData,
         file: true,
-        data: formData,
       })
+      const { doc } = await response.json()
 
-      expect(status).toBe(201)
+      expect(response.status).toBe(201)
 
       const expectedPath = path.join(__dirname, './media')
 
@@ -151,16 +210,17 @@ describe('Collections - Uploads', () => {
 
     it('creates media without storing a file', async () => {
       const formData = new FormData()
-      formData.append('file', fs.createReadStream(path.join(__dirname, './unstored.png')))
+      const fileBlob = await bufferToFileBlob(path.join(__dirname, './unstored.png'))
+      formData.append('file', fileBlob)
 
       // unstored media
-      const { status, doc } = await client.create({
-        slug: 'unstored-media',
+      const response = await restClient.POST(`/${mediaSlug}`, {
+        body: formData,
         file: true,
-        data: formData,
       })
+      const { doc } = await response.json()
 
-      expect(status).toBe(201)
+      expect(response.status).toBe(201)
 
       // Check for files
       expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(false)
@@ -242,7 +302,7 @@ describe('Collections - Uploads', () => {
     })
 
     it('should not reduce images if resize options `withoutReduction` is set to true', async () => {
-      const formData = new FormData()
+      const formData = new NodeFormData()
       formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')))
       const small = await getFileByPath(path.resolve(__dirname, './small.png'))
 
@@ -296,14 +356,14 @@ describe('Collections - Uploads', () => {
     })) as unknown as Media
 
     const formData = new FormData()
-    formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')))
+    formData.append('file', await bufferToFileBlob(path.join(__dirname, './small.png')))
 
-    const { status } = await client.update({
-      id: mediaDoc.id,
-      data: formData,
+    const response = await restClient.PATCH(`/${mediaSlug}/${mediaDoc.id}`, {
+      body: formData,
+      file: true,
     })
 
-    expect(status).toBe(200)
+    expect(response.status).toBe(200)
 
     const expectedPath = path.join(__dirname, './media')
 
@@ -325,17 +385,21 @@ describe('Collections - Uploads', () => {
     })) as unknown as Media
 
     const formData = new FormData()
-    formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')))
+    formData.append('file', await bufferToFileBlob(path.join(__dirname, './small.png')))
 
-    const { status } = await client.updateMany({
-      // id: mediaDoc.id,
-      where: {
-        id: { equals: mediaDoc.id },
+    const response = await restClient.PATCH(`/${mediaSlug}`, {
+      body: formData,
+      file: true,
+      query: {
+        where: {
+          id: {
+            equals: mediaDoc.id,
+          },
+        },
       },
-      data: formData,
     })
 
-    expect(status).toBe(200)
+    expect(response.status).toBe(200)
 
     const expectedPath = path.join(__dirname, './media')
 
@@ -522,37 +586,43 @@ describe('Collections - Uploads', () => {
 
   it('delete', async () => {
     const formData = new FormData()
-    formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')))
+    formData.append('file', await bufferToFileBlob(path.join(__dirname, './image.png')))
 
-    const { doc } = await client.create({
+    const response = await restClient.POST(`/${mediaSlug}`, {
+      body: formData,
       file: true,
-      data: formData,
     })
+    expect(response.status).toBe(200)
 
-    const { status } = await client.delete(doc.id, {
-      id: doc.id,
-    })
-
-    expect(status).toBe(200)
+    const { doc } = await response.json()
+    const response2 = await restClient.DELETE(`/${mediaSlug}/${doc.id}`)
+    expect(response2.status).toBe(200)
 
     expect(await fileExists(path.join(__dirname, doc.filename))).toBe(false)
   })
 
   it('delete - update many', async () => {
     const formData = new FormData()
-    formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')))
+    formData.append('file', await bufferToFileBlob(path.join(__dirname, './image.png')))
 
-    const { doc } = await client.create({
+    const response = await restClient.POST(`/${mediaSlug}`, {
+      body: formData,
       file: true,
-      data: formData,
     })
+    expect(response.status).toBe(200)
+    const { doc } = await response.json()
 
-    const { errors } = await client.deleteMany({
-      slug: mediaSlug,
-      where: {
-        id: { equals: doc.id },
-      },
-    })
+    const { errors } = await restClient
+      .DELETE(`/${mediaSlug}`, {
+        query: {
+          where: {
+            id: {
+              equals: doc.id,
+            },
+          },
+        },
+      })
+      .then((res) => res.json())
 
     expect(errors).toHaveLength(0)
 

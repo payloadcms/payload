@@ -15,7 +15,9 @@ import {
 import { devUser } from '../credentials'
 
 type ValidPath = `/${string}`
-type RequestQuery = {
+type RequestOptions = {
+  auth?: boolean
+  file?: boolean
   query?: {
     depth?: number
     fallbackLocale?: string
@@ -27,7 +29,7 @@ type RequestQuery = {
   }
 }
 
-function generateQueryString(query: RequestQuery['query'], params: ParsedQs): string {
+function generateQueryString(query: RequestOptions['query'], params: ParsedQs): string {
   return QueryString.stringify(
     {
       ...(params || {}),
@@ -52,6 +54,8 @@ export class NextRESTClient {
 
   private readonly config: SanitizedConfig
 
+  private token: string
+
   serverURL: string = 'http://localhost:3000'
 
   constructor(config: SanitizedConfig) {
@@ -62,6 +66,22 @@ export class NextRESTClient {
     this._DELETE = createDELETE(config)
     this._PATCH = createPATCH(config)
     this._GRAPHQL_POST = createGraphqlPOST(config)
+  }
+
+  private buildHeaders(options: RequestInit & RequestOptions): Headers {
+    const defaultHeaders = {
+      'Content-Type': 'application/json',
+    }
+    const headers = new Headers({
+      ...(options?.file ? {} : defaultHeaders),
+      ...(options?.headers || {}),
+    })
+
+    if (options.auth !== false && this.token) {
+      headers.set('Authorization', `JWT ${this.token}`)
+    }
+
+    return headers
   }
 
   private generateRequestParts(path: ValidPath): {
@@ -79,7 +99,7 @@ export class NextRESTClient {
     }
   }
 
-  async DELETE(path: ValidPath, options: RequestInit & RequestQuery = {}): Promise<Response> {
+  async DELETE(path: ValidPath, options: RequestInit & RequestOptions = {}): Promise<Response> {
     const { url, slug, params } = this.generateRequestParts(path)
     const { query, ...rest } = options || {}
     const queryParams = generateQueryString(query, params)
@@ -87,17 +107,14 @@ export class NextRESTClient {
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
+      headers: this.buildHeaders(options),
     })
     return this._DELETE(request, { params: { slug } })
   }
 
   async GET(
     path: ValidPath,
-    options: Omit<RequestInit, 'body'> & RequestQuery = {},
+    options: Omit<RequestInit, 'body'> & RequestOptions = {},
   ): Promise<Response> {
     const { url, slug, params } = this.generateRequestParts(path)
     const { query, ...rest } = options || {}
@@ -106,15 +123,12 @@ export class NextRESTClient {
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
       method: 'GET',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      }),
+      headers: this.buildHeaders(options),
     })
     return this._GET(request, { params: { slug } })
   }
 
-  async GRAPHQL_POST(options: RequestInit & RequestQuery): Promise<Response> {
+  async GRAPHQL_POST(options: RequestInit & RequestOptions): Promise<Response> {
     const { query, ...rest } = options
     const queryParams = generateQueryString(query, {})
     const request = new Request(
@@ -122,16 +136,13 @@ export class NextRESTClient {
       {
         ...rest,
         method: 'POST',
-        headers: new Headers({
-          'Content-Type': 'application/json',
-          ...(options?.headers || {}),
-        }),
+        headers: this.buildHeaders(options),
       },
     )
     return this._GRAPHQL_POST(request)
   }
 
-  async PATCH(path: ValidPath, options: RequestInit & RequestQuery): Promise<Response> {
+  async PATCH(path: ValidPath, options: RequestInit & RequestOptions): Promise<Response> {
     const { url, slug, params } = this.generateRequestParts(path)
     const { query, ...rest } = options
     const queryParams = generateQueryString(query, params)
@@ -139,25 +150,19 @@ export class NextRESTClient {
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
       method: 'PATCH',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      }),
+      headers: this.buildHeaders(options),
     })
     return this._PATCH(request, { params: { slug } })
   }
 
-  async POST(path: ValidPath, options: RequestInit = {}): Promise<Response> {
+  async POST(path: ValidPath, options: RequestInit & { file?: boolean } = {}): Promise<Response> {
     const { url, slug, params } = this.generateRequestParts(path)
     const queryParams = generateQueryString({}, params)
 
     const request = new Request(`${url}${queryParams}`, {
       ...options,
       method: 'POST',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      }),
+      headers: this.buildHeaders(options),
     })
     return this._POST(request, { params: { slug } })
   }
@@ -171,11 +176,15 @@ export class NextRESTClient {
       password: string
     }
     slug: string
-  }): Promise<Response> {
-    return this.POST(`/${slug}/login`, {
+  }): Promise<string> {
+    this.token = await this.POST(`/${slug}/login`, {
       body: JSON.stringify(
         credentials ? { ...credentials } : { email: devUser.email, password: devUser.password },
       ),
     })
+      .then((res) => res.json())
+      .then((data) => data.token)
+
+    return this.token
   }
 }
