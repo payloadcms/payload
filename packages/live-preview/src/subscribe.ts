@@ -12,7 +12,6 @@ export const subscribe = <T>(args: {
   const onMessage = async (event: MessageEvent) => {
     if (
       event.origin === serverURL &&
-      event.data &&
       typeof event.data === 'object' &&
       event.data.type === 'payload-live-preview'
     ) {
