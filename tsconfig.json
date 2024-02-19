@@ -37,8 +37,9 @@
       "@payloadcms/ui/scss": ["./packages/ui/src/scss/styles.scss"],
       "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
       "@payloadcms/translations": ["./packages/translations/src/exports/index.ts"],
-      "@payloadcms/translations/client": ["./packages/translations/src/all"],
-      "@payloadcms/translations/api": ["./packages/translations/src/all"],
+      "@payloadcms/translations/client": ["./packages/translations/src/client"],
+      "@payloadcms/translations/api": ["./packages/translations/src/api"],
+      "@payloadcms/translations/all": ["./packages/translations/src/all"],
       "@payloadcms/next/*": ["./packages/next/src/*"],
       "@payloadcms/graphql": ["./packages/graphql/src"],
       "payload-config": ["./test/auth/config.ts"]

@@ -1,0 +1,530 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "authentication": {
+      "additionalProperties": false,
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "enableAPIKey": {
+          "type": "string"
+        },
+        "newAccountCreated": {
+          "type": "string"
+        },
+        "resetYourPassword": {
+          "type": "string"
+        },
+        "verifyYourEmail": {
+          "type": "string"
+        },
+        "youAreReceivingResetPassword": {
+          "type": "string"
+        },
+        "youDidNotRequestPassword": {
+          "type": "string"
+        },
+        "verified": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "apiKey",
+        "enableAPIKey",
+        "newAccountCreated",
+        "resetYourPassword",
+        "verifyYourEmail",
+        "youAreReceivingResetPassword",
+        "youDidNotRequestPassword",
+        "verified"
+      ],
+      "type": "object"
+    },
+    "error": {
+      "additionalProperties": false,
+      "properties": {
+        "deletingFile": {
+          "type": "string"
+        },
+        "emailOrPasswordIncorrect": {
+          "type": "string"
+        },
+        "followingFieldsInvalid_one": {
+          "type": "string"
+        },
+        "followingFieldsInvalid_other": {
+          "type": "string"
+        },
+        "noFilesUploaded": {
+          "type": "string"
+        },
+        "notAllowedToPerformAction": {
+          "type": "string"
+        },
+        "problemUploadingFile": {
+          "type": "string"
+        },
+        "unableToDeleteCount": {
+          "type": "string"
+        },
+        "unableToUpdateCount": {
+          "type": "string"
+        },
+        "unauthorized": {
+          "type": "string"
+        },
+        "userLocked": {
+          "type": "string"
+        },
+        "valueMustBeUnique": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deletingFile",
+        "emailOrPasswordIncorrect",
+        "followingFieldsInvalid_one",
+        "followingFieldsInvalid_other",
+        "noFilesUploaded",
+        "notAllowedToPerformAction",
+        "problemUploadingFile",
+        "unableToDeleteCount",
+        "unableToUpdateCount",
+        "unauthorized",
+        "userLocked",
+        "valueMustBeUnique"
+      ],
+      "type": "object"
+    },
+    "fields": {
+      "additionalProperties": false,
+      "properties": {
+        "addLabel": {
+          "type": "string"
+        },
+        "addLink": {
+          "type": "string"
+        },
+        "addNew": {
+          "type": "string"
+        },
+        "addNewLabel": {
+          "type": "string"
+        },
+        "addRelationship": {
+          "type": "string"
+        },
+        "addUpload": {
+          "type": "string"
+        },
+        "block": {
+          "type": "string"
+        },
+        "blockType": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "string"
+        },
+        "chooseBetweenCustomTextOrDocument": {
+          "type": "string"
+        },
+        "chooseDocumentToLink": {
+          "type": "string"
+        },
+        "chooseFromExisting": {
+          "type": "string"
+        },
+        "chooseLabel": {
+          "type": "string"
+        },
+        "collapseAll": {
+          "type": "string"
+        },
+        "customURL": {
+          "type": "string"
+        },
+        "editLabelData": {
+          "type": "string"
+        },
+        "editLink": {
+          "type": "string"
+        },
+        "editRelationship": {
+          "type": "string"
+        },
+        "enterURL": {
+          "type": "string"
+        },
+        "internalLink": {
+          "type": "string"
+        },
+        "itemsAndMore": {
+          "type": "string"
+        },
+        "labelRelationship": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "string"
+        },
+        "linkType": {
+          "type": "string"
+        },
+        "linkedTo": {
+          "type": "string"
+        },
+        "longitude": {
+          "type": "string"
+        },
+        "newLabel": {
+          "type": "string"
+        },
+        "openInNewTab": {
+          "type": "string"
+        },
+        "passwordsDoNotMatch": {
+          "type": "string"
+        },
+        "relatedDocument": {
+          "type": "string"
+        },
+        "relationTo": {
+          "type": "string"
+        },
+        "removeRelationship": {
+          "type": "string"
+        },
+        "removeUpload": {
+          "type": "string"
+        },
+        "saveChanges": {
+          "type": "string"
+        },
+        "searchForBlock": {
+          "type": "string"
+        },
+        "selectExistingLabel": {
+          "type": "string"
+        },
+        "selectFieldsToEdit": {
+          "type": "string"
+        },
+        "showAll": {
+          "type": "string"
+        },
+        "swapRelationship": {
+          "type": "string"
+        },
+        "swapUpload": {
+          "type": "string"
+        },
+        "textToDisplay": {
+          "type": "string"
+        },
+        "toggleBlock": {
+          "type": "string"
+        },
+        "uploadNewLabel": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "block",
+        "blocks",
+        "chooseBetweenCustomTextOrDocument",
+        "chooseDocumentToLink",
+        "customURL",
+        "editLink",
+        "editRelationship",
+        "enterURL",
+        "internalLink",
+        "linkType",
+        "openInNewTab",
+        "textToDisplay",
+        "addLabel",
+        "addLink",
+        "addNew",
+        "addNewLabel",
+        "addRelationship",
+        "addUpload",
+        "blockType",
+        "chooseFromExisting",
+        "chooseLabel",
+        "collapseAll",
+        "editLabelData",
+        "itemsAndMore",
+        "labelRelationship",
+        "latitude",
+        "linkedTo",
+        "longitude",
+        "newLabel",
+        "passwordsDoNotMatch",
+        "relatedDocument",
+        "relationTo",
+        "removeRelationship",
+        "removeUpload",
+        "saveChanges",
+        "searchForBlock",
+        "selectExistingLabel",
+        "selectFieldsToEdit",
+        "showAll",
+        "swapRelationship",
+        "swapUpload",
+        "toggleBlock",
+        "uploadNewLabel"
+      ],
+      "type": "object"
+    },
+    "general": {
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": {
+          "type": "string"
+        },
+        "deletedCountSuccessfully": {
+          "type": "string"
+        },
+        "deletedSuccessfully": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "notFound": {
+          "type": "string"
+        },
+        "successfullyCreated": {
+          "type": "string"
+        },
+        "thisLanguage": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
+        },
+        "users": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        },
+        "updatedCountSuccessfully": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "createdAt",
+        "deletedCountSuccessfully",
+        "deletedSuccessfully",
+        "email",
+        "notFound",
+        "successfullyCreated",
+        "thisLanguage",
+        "user",
+        "users",
+        "updatedAt",
+        "updatedCountSuccessfully",
+        "value"
+      ],
+      "type": "object"
+    },
+    "operators": {
+      "additionalProperties": false,
+      "properties": {
+        "contains": {
+          "type": "string"
+        },
+        "equals": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "string"
+        },
+        "isGreaterThan": {
+          "type": "string"
+        },
+        "isGreaterThanOrEqualTo": {
+          "type": "string"
+        },
+        "isIn": {
+          "type": "string"
+        },
+        "isLessThan": {
+          "type": "string"
+        },
+        "isLessThanOrEqualTo": {
+          "type": "string"
+        },
+        "isLike": {
+          "type": "string"
+        },
+        "isNotEqualTo": {
+          "type": "string"
+        },
+        "isNotIn": {
+          "type": "string"
+        },
+        "near": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "equals",
+        "isNotEqualTo",
+        "isIn",
+        "isNotIn",
+        "exists",
+        "isGreaterThan",
+        "isLessThan",
+        "isLessThanOrEqualTo",
+        "isGreaterThanOrEqualTo",
+        "near",
+        "isLike",
+        "contains"
+      ],
+      "type": "object"
+    },
+    "upload": {
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "string"
+        },
+        "height": {
+          "type": "string"
+        },
+        "fileSize": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "sizes": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "fileSize",
+        "fileName",
+        "sizes"
+      ],
+      "type": "object"
+    },
+    "validation": {
+      "additionalProperties": false,
+      "properties": {
+        "emailAddress": {
+          "type": "string"
+        },
+        "enterNumber": {
+          "type": "string"
+        },
+        "greaterThanMax": {
+          "type": "string"
+        },
+        "invalidInput": {
+          "type": "string"
+        },
+        "invalidSelection": {
+          "type": "string"
+        },
+        "invalidSelections": {
+          "type": "string"
+        },
+        "lessThanMin": {
+          "type": "string"
+        },
+        "longerThanMin": {
+          "type": "string"
+        },
+        "notValidDate": {
+          "type": "string"
+        },
+        "requiresNoMoreThan": {
+          "type": "string"
+        },
+        "requiresTwoNumbers": {
+          "type": "string"
+        },
+        "shorterThanMax": {
+          "type": "string"
+        },
+        "trueOrFalse": {
+          "type": "string"
+        },
+        "validUploadID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "emailAddress",
+        "enterNumber",
+        "greaterThanMax",
+        "invalidInput",
+        "invalidSelection",
+        "invalidSelections",
+        "lessThanMin",
+        "longerThanMin",
+        "notValidDate",
+        "requiresNoMoreThan",
+        "requiresTwoNumbers",
+        "shorterThanMax",
+        "trueOrFalse",
+        "validUploadID"
+      ],
+      "type": "object"
+    },
+    "version": {
+      "additionalProperties": false,
+      "properties": {
+        "autosavedSuccessfully": {
+          "type": "string"
+        },
+        "draftSavedSuccessfully": {
+          "type": "string"
+        },
+        "restoredSuccessfully": {
+          "type": "string"
+        },
+        "draft": {
+          "type": "string"
+        },
+        "published": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "autosavedSuccessfully",
+        "draftSavedSuccessfully",
+        "restoredSuccessfully",
+        "draft",
+        "published",
+        "status"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "authentication",
+    "general",
+    "error",
+    "upload",
+    "validation",
+    "version"
+  ],
+  "type": "object"
+}

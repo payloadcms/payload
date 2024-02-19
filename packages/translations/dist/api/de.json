@@ -1,0 +1,72 @@
+{
+  "$schema": "./translation-schema.json",
+  "authentication": {
+    "apiKey": "API-Key",
+    "enableAPIKey": "API-Key aktivieren",
+    "newAccountCreated": "Ein neues Konto wurde gerade für dich auf <a href=\"{{serverURL}}\">{{serverURL}}</a> erstellt. Bitte klicke auf den folgenden Link oder kopiere die URL in deinen Browser um deine E-Mail-Adresse zu verifizieren: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Nachdem du deine E-Mail-Adresse verifiziert hast, kannst du dich erfolgreich anmelden.",
+    "resetYourPassword": "Dein Passwort zurücksetzen",
+    "verified": "Verifiziert",
+    "verifyYourEmail": "Deine E-Mail-Adresse verifizieren",
+    "youAreReceivingResetPassword": "Du erhältst diese Nachricht, weil du (oder jemand anderes) das Zurücksetzen deines Passworts für dein Benutzerkonto angefordert hat. Bitte klicke auf den folgenden Link, oder kopiere die URL in deinen Browser den Prozess abzuschließen:",
+    "youDidNotRequestPassword": "Solltest du dies nicht angefordert haben, ignoriere diese E-Mail und dein Passwort bleibt unverändert."
+  },
+  "error": {
+    "deletingFile": "Beim Löschen der Datei ist ein Fehler aufgetreten.",
+    "emailOrPasswordIncorrect": "Die E-Mail-Adresse oder das Passwort sind nicht korrekt.",
+    "followingFieldsInvalid_one": "Das folgende Feld ist nicht korrekt:",
+    "followingFieldsInvalid_other": "Die folgenden Felder sind nicht korrekt:",
+    "noFilesUploaded": "Es wurden keine Dateien hochgeladen.",
+    "notAllowedToPerformAction": "Du hast keine Berechtigung, diese Aktion auszuführen.",
+    "problemUploadingFile": "Es gab ein Problem während des Hochladens der Datei.",
+    "unableToDeleteCount": "{{count}} von {{total}} {{label}} konnte nicht gelöscht werden.",
+    "unableToUpdateCount": "{{count}} von {{total}} {{label}} konnte nicht aktualisiert werden.",
+    "unauthorized": "Nicht autorisiert - du musst angemeldet sein, um diese Anfrage zu stellen.",
+    "userLocked": "Dieser Benutzer ist auf Grund zu vieler unerfolgreicher Anmelde-Versuche gesperrt.",
+    "valueMustBeUnique": "Wert muss einzigartig sein"
+  },
+  "general": {
+    "createdAt": "Erstellt am",
+    "deletedCountSuccessfully": "{{count}} {{label}} erfolgreich gelöscht.",
+    "deletedSuccessfully": "Erfolgreich gelöscht.",
+    "email": "E-Mail",
+    "notFound": "Nicht gefunden",
+    "successfullyCreated": "{{label}} erfolgreich erstellt.",
+    "thisLanguage": "Deutsch",
+    "updatedAt": "Aktualisiert am",
+    "updatedCountSuccessfully": "{{count}} {{label}} erfolgreich aktualisiert.",
+    "user": "Benutzer",
+    "users": "Benutzer",
+    "value": "Wert"
+  },
+  "upload": {
+    "fileName": "Dateiname",
+    "fileSize": "Dateigröße",
+    "height": "Höhe",
+    "sizes": "Größen",
+    "width": "Breite"
+  },
+  "validation": {
+    "emailAddress": "Bitte gib eine korrekte E-Mail-Adresse an.",
+    "enterNumber": "Bitte gib eine gültige Nummer an,",
+    "greaterThanMax": "{{value}} ist größer als der maximal erlaubte {{label}} von {{max}}.",
+    "invalidInput": "Dieses Feld hat einen inkorrekten Wert.",
+    "invalidSelection": "Dieses Feld hat eine inkorrekte Auswahl.",
+    "invalidSelections": "'Dieses Feld enthält die folgenden inkorrekten Auswahlen:'",
+    "lessThanMin": "{{value}} ist kleiner als der minimal erlaubte {{label}} von {{min}}.",
+    "longerThanMin": "Dieser Wert muss länger als die minimale Länge von {{minLength}} Zeichen sein.",
+    "notValidDate": "\"{{value}}\" ist kein gültiges Datum.",
+    "requiresNoMoreThan": "Dieses Feld kann nicht mehr als {{count}} {{label}} enthalten.",
+    "requiresTwoNumbers": "Dieses Feld muss zwei Nummern enthalten.",
+    "shorterThanMax": "Dieser Wert muss kürzer als die maximale Länge von {{maxLength}} sein.",
+    "trueOrFalse": "Dieses Feld kann nur wahr oder falsch sein.",
+    "validUploadID": "'Dieses Feld enthält keine valide Upload-ID.'"
+  },
+  "version": {
+    "autosavedSuccessfully": "Erfolgreich automatisch gespeichert.",
+    "draft": "Entwurf",
+    "draftSavedSuccessfully": "Entwurf erfolgreich gespeichert.",
+    "published": "Veröffentlicht",
+    "restoredSuccessfully": "Erfolgreich wiederhergestellt.",
+    "status": "Status"
+  }
+}
