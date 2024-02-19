@@ -30,5 +30,5 @@
     "src/**/*.json",
     "../next/src/utilities/createClientConfig.ts"
   ],
-  "references": [{ "path": "../payload" }] // db-postgres depends on payload
+  "references": [{ "path": "../payload" }, { "path": "../translations" }] // db-postgres depends on payload
 }
