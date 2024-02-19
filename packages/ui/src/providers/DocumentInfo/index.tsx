@@ -28,6 +28,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
     routes: { api },
     serverURL,
   } = useConfig()
+
   const { getPreference, setPreference } = usePreferences()
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
@@ -43,6 +44,8 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
   const [propsToUse, setPropsToUse] = useState<Props>({
     ...rest,
   })
+
+  const [title, setTitle] = useState<string>('')
 
   const { globalSlug, collectionSlug, id, versionsConfig } = propsToUse
 
@@ -257,6 +260,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
     getDocPermissions()
   }, [getDocPermissions])
 
+  const setDocumentTitle = useCallback<DocumentInfoContext['setDocumentTitle']>(
+    (title) => {
+      setTitle(title || id?.toString() || '[untitled]')
+    },
+    [setPropsToUse, id],
+  )
+
   const value: DocumentInfoContext = {
     id,
     collectionSlug,
@@ -273,6 +283,8 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
     versionsConfig,
     versions,
     setDocumentInfo: setPropsToUse,
+    setDocumentTitle,
+    title,
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>
