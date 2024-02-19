@@ -1,6 +1,7 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "account": "Fiók",
     "apiKey": "API-kulcs",
     "enableAPIKey": "API-kulcs engedélyezése",
     "newAccountCreated": "Létrehoztunk egy új fiókot, amellyel hozzáférhet a következőhöz <a href=\"{{serverURL}}\"> {{serverURL}} </a> Kérjük, kattintson a következő linkre, vagy illessze be az alábbi URL-t a böngészőbe az e-mail-cím ellenőrzéséhez : <a href=\"{{verificationURL}}\"> {{verificationURL}} </a> <br> Az e-mail-cím ellenőrzése után sikeresen be tud majd jelentkezni.",

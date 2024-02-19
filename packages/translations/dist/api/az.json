@@ -1,6 +1,7 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "account": "Hesab",
     "apiKey": "API Açarı",
     "enableAPIKey": "API açarını aktivləşdir",
     "newAccountCreated": "Sizin üçün yeni hesab yaradıldı. Zəhmət olmasa, e-poçtunuzu doğrulamaq üçün aşağıdakı linke klikləyin: <a href=\"{{verificationURL}}\">{{verificationURL}}</a>. E-poçtunuzu doğruladıqdan sonra uğurla daxil ola bilərsiniz.",
