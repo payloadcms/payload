@@ -19,41 +19,32 @@ export const handleMessage = async <T>(args: {
 }): Promise<T> => {
   const { apiRoute, depth, event, initialData, serverURL } = args
 
-  if (
-    event.origin === serverURL &&
-    event.data &&
-    typeof event.data === 'object' &&
-    event.data.type === 'payload-live-preview'
-  ) {
-    const { data, externallyUpdatedRelationship, fieldSchemaJSON } = event.data
+  const { data, externallyUpdatedRelationship, fieldSchemaJSON } = event.data
 
-    if (!payloadLivePreviewFieldSchema && fieldSchemaJSON) {
-      payloadLivePreviewFieldSchema = fieldSchemaJSON
-    }
-
-    if (!payloadLivePreviewFieldSchema) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        'Payload Live Preview: No `fieldSchemaJSON` was received from the parent window. Unable to merge data.',
-      )
-
-      return initialData
-    }
-
-    const mergedData = await mergeData<T>({
-      apiRoute,
-      depth,
-      externallyUpdatedRelationship,
-      fieldSchema: payloadLivePreviewFieldSchema,
-      incomingData: data,
-      initialData: payloadLivePreviewPreviousData || initialData,
-      serverURL,
-    })
-
-    payloadLivePreviewPreviousData = mergedData
-
-    return mergedData
+  if (!payloadLivePreviewFieldSchema && fieldSchemaJSON) {
+    payloadLivePreviewFieldSchema = fieldSchemaJSON
   }
 
-  return initialData
+  if (!payloadLivePreviewFieldSchema) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      'Payload Live Preview: No `fieldSchemaJSON` was received from the parent window. Unable to merge data.',
+    )
+
+    return initialData
+  }
+
+  const mergedData = await mergeData<T>({
+    apiRoute,
+    depth,
+    externallyUpdatedRelationship,
+    fieldSchema: payloadLivePreviewFieldSchema,
+    incomingData: data,
+    initialData: payloadLivePreviewPreviousData || initialData,
+    serverURL,
+  })
+
+  payloadLivePreviewPreviousData = mergedData
+
+  return mergedData
 }
