@@ -13,7 +13,7 @@ import type {
 } from 'payload/types'
 import type { Props } from './types'
 
-import { useTranslation } from '../../providers/Translation'
+import { useTranslation } from '../Translation'
 import { useAuth } from '../Auth'
 import { useConfig } from '../Config'
 import { useLocale } from '../Locale'

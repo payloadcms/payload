@@ -1,23 +1,23 @@
-import { GraphQLClient } from 'graphql-request'
-
+import type { Payload } from '../../packages/payload/src'
 import type { Post } from './payload-types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { NextRESTClient } from '../helpers/NextRESTClient'
 import { idToString } from '../helpers/idToString'
+import { startMemoryDB } from '../startMemoryDB'
 import configPromise, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config'
 
 const title = 'title'
 
-let client: GraphQLClient
+let restClient: NextRESTClient
+let payload: Payload
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    const config = await configPromise
-    const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`
-    client = new GraphQLClient(url)
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
 
     // Wait for indexes to be created,
     // as we need them to query by point
@@ -53,8 +53,11 @@ describe('collections-graphql', () => {
           title
         }
       }`
-      const response = await client.request(query)
-      const doc: Post = response.createPost
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      const doc: Post = data.createPost
 
       expect(doc).toMatchObject({ title })
       expect(doc.id).toBeDefined()
@@ -67,8 +70,16 @@ describe('collections-graphql', () => {
           title
         }
       }`
-      const response = (await client.request(query, { title })) as any
-      const doc: Post = response.createPost
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query,
+            variables: { title },
+          }),
+        })
+        .then((res) => res.json())
+
+      const doc: Post = data.createPost
 
       expect(doc).toMatchObject({ title })
       expect(doc.id).toBeDefined()
@@ -81,8 +92,10 @@ describe('collections-graphql', () => {
           title
         }
       }`
-      const response = await client.request(query)
-      const doc: Post = response.Post
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const doc: Post = data.Post
 
       expect(doc).toMatchObject({ id: existingDoc.id, title })
     })
@@ -96,8 +109,10 @@ describe('collections-graphql', () => {
           }
         }
       }`
-      const response = await client.request(query)
-      const { docs } = response.Posts
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { docs } = data.Posts
 
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
     })
@@ -120,8 +135,10 @@ describe('collections-graphql', () => {
             title
           }
       }`
-      const response = await client.request(query)
-      const { postIDs, posts, singlePost } = response
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { postIDs, posts, singlePost } = data
       expect(postIDs.docs).toBeDefined()
       expect(posts.docs).toBeDefined()
       expect(singlePost.id).toBeDefined()
@@ -167,12 +184,12 @@ describe('collections-graphql', () => {
           }
       }`
 
-      client.requestConfig.errorPolicy = 'all'
-      const response = await client.request(query)
-      client.requestConfig.errorPolicy = 'none'
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
 
       const createdResult = await payload.findByID({
-        id: response.createPost.id,
+        id: data.createPost.id,
         collection: slug,
       })
       const updateFirstResult = await payload.findByID({
@@ -184,11 +201,11 @@ describe('collections-graphql', () => {
         collection: errorOnHookSlug,
       })
 
-      expect(response?.createPost.id).toBeDefined()
-      expect(response?.updateFirst).toBeNull()
-      expect(response?.updateSecond).toBeNull()
+      expect(data?.createPost.id).toBeDefined()
+      expect(data?.updateFirst).toBeNull()
+      expect(data?.updateSecond).toBeNull()
 
-      expect(createdResult).toMatchObject(response.createPost)
+      expect(createdResult).toMatchObject(data.createPost)
       expect(updateFirstResult).toMatchObject(first)
       expect(updateSecondResult).toStrictEqual(second)
     })
@@ -198,6 +215,7 @@ describe('collections-graphql', () => {
         query {
           PayloadApiTestTwos {
             docs {
+              id
               payloadAPI
               relation {
                 payloadAPI
@@ -206,9 +224,10 @@ describe('collections-graphql', () => {
           }
         }
       `
-
-      const response = await client.request(query)
-      const res = response.PayloadApiTestTwos
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const res = data.PayloadApiTestTwos
 
       expect(res.docs[0].relation.payloadAPI).toStrictEqual('GraphQL')
     })
@@ -221,8 +240,10 @@ describe('collections-graphql', () => {
           }
         }
       }`
-      const response = await client.request(query)
-      expect(response.ContentTypes?.docs[0]?.contentType).toEqual('application/json')
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      expect(data.ContentTypes?.docs[0]?.contentType).toEqual('application/json')
     })
 
     it('should update existing', async () => {
@@ -234,8 +255,10 @@ describe('collections-graphql', () => {
           title
         }
       }`
-      const response = await client.request(query)
-      const doc: Post = response.updatePost
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const doc: Post = data.updatePost
 
       expect(doc).toMatchObject({ id: existingDoc.id, title: updatedTitle })
     })
@@ -247,8 +270,14 @@ describe('collections-graphql', () => {
           title
         }
       }`
-      const response = await client.request(query)
-      const doc: Post = response.deletePost
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query,
+          }),
+        })
+        .then((res) => res.json())
+      const doc: Post = data.deletePost
 
       expect(doc).toMatchObject({ id: existingDoc.id })
     })
@@ -266,32 +295,35 @@ describe('collections-graphql', () => {
 
       it('equals', async () => {
         const query = `query {
-        Posts(where:{title: {equals:"${post1.title}"}}) {
-          docs {
-            id
-            title
+          Posts(where:{title: {equals:"${post1.title}"}}) {
+            docs {
+              id
+              title
+            }
           }
-        }
-      }`
-
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        }`
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs).toContainEqual(expect.objectContaining({ id: post1.id, title: post1.title }))
       })
 
       it('not_equals', async () => {
         const query = `query {
-        Posts(where:{title: {not_equals:"${post1.title}"}}) {
-          docs {
-            id
-            title
+          Posts(where:{title: {not_equals:"${post1.title}"}}) {
+            docs {
+              id
+              title
+            }
           }
-        }
-      }`
+        }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
         const docsWithWhereTitleNotEqualPostTitle = docs.filter(
           (post) => post.title === post1.title,
         )
@@ -302,32 +334,36 @@ describe('collections-graphql', () => {
       it('like', async () => {
         const postWithWords = await createPost({ title: 'the quick brown fox' })
         const query = `query {
-        Posts(where:{title: {like:"${postWithWords.title?.split(' ')[1]}"}}) {
-          docs {
-            id
-            title
+          Posts(where:{title: {like:"${postWithWords.title?.split(' ')[1]}"}}) {
+            docs {
+              id
+              title
+            }
           }
-        }
-      }`
+        }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs[0]).toMatchObject({ id: postWithWords.id, title: postWithWords.title })
       })
 
       it('contains', async () => {
         const query = `query {
-        Posts(where:{title: {contains:"${post1.title?.slice(0, 4)}"}}) {
-          docs {
-            id
-            title
+          Posts(where:{title: {contains:"${post1.title?.slice(0, 4)}"}}) {
+            docs {
+              id
+              title
+            }
           }
-        }
-      }`
+        }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs).toContainEqual(expect.objectContaining({ id: post1.id, title: post1.title }))
         expect(docs).toContainEqual(expect.objectContaining({ id: post2.id, title: post2.title }))
@@ -336,16 +372,18 @@ describe('collections-graphql', () => {
       it('exists - true', async () => {
         const withDescription = await createPost({ description: 'description' })
         const query = `query {
-        Posts(where:{description: {exists:true}}) {
-          docs {
-            id
-            title
+          Posts(where:{description: {exists:true}}) {
+            docs {
+              id
+              title
+            }
           }
-        }
-      }`
+        }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs).toContainEqual(
           expect.objectContaining({ id: withDescription.id, title: withDescription.title }),
@@ -355,16 +393,17 @@ describe('collections-graphql', () => {
       it('exists - false', async () => {
         const withDescription = await createPost({ description: 'description' })
         const query = `query {
-        Posts(where:{description: {exists:false}}) {
-          docs {
-            id
-            title
+          Posts(where:{description: {exists:false}}) {
+            docs {
+              id
+              title
+            }
           }
-        }
-      }`
-
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        }`
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs).not.toContainEqual(expect.objectContaining({ id: withDescription.id }))
         expect(docs).toContainEqual(expect.objectContaining({ id: post1.id }))
@@ -381,32 +420,34 @@ describe('collections-graphql', () => {
 
         it('greater_than', async () => {
           const query = `query {
-          Posts(where:{number: {greater_than:1}}) {
-            docs {
-              id
-              title
-              number
+            Posts(where:{number: {greater_than:1}}) {
+              docs {
+                id
+                title
+                number
+              }
             }
-          }
-        }`
-
-          const response = await client.request(query)
-          const { docs } = response.Posts
+          }`
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+            .then((res) => res.json())
+          const { docs } = data.Posts
           expect(docs.map(({ id }) => id)).toContain(numPost2.id)
         })
 
         it('greater_than_equal', async () => {
           const query = `query {
-          Posts(where:{number: {greater_than_equal:1}}) {
-            docs {
-              id
-              title
+            Posts(where:{number: {greater_than_equal:1}}) {
+              docs {
+                id
+                title
+              }
             }
-          }
-        }`
-
-          const response = await client.request(query)
-          const { docs } = response.Posts
+          }`
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+            .then((res) => res.json())
+          const { docs } = data.Posts
 
           expect(docs).toContainEqual(expect.objectContaining({ id: numPost1.id }))
           expect(docs).toContainEqual(expect.objectContaining({ id: numPost2.id }))
@@ -414,32 +455,36 @@ describe('collections-graphql', () => {
 
         it('less_than', async () => {
           const query = `query {
-          Posts(where:{number: {less_than:2}}) {
-            docs {
-              id
-              title
+            Posts(where:{number: {less_than:2}}) {
+              docs {
+                id
+                title
+              }
             }
-          }
-        }`
+          }`
 
-          const response = await client.request(query)
-          const { docs } = response.Posts
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+            .then((res) => res.json())
+          const { docs } = data.Posts
 
           expect(docs).toContainEqual(expect.objectContaining({ id: numPost1.id }))
         })
 
         it('less_than_equal', async () => {
           const query = `query {
-          Posts(where:{number: {less_than_equal:2}}) {
-            docs {
-              id
-              title
+            Posts(where:{number: {less_than_equal:2}}) {
+              docs {
+                id
+                title
+              }
             }
-          }
-        }`
+          }`
 
-          const response = await client.request(query)
-          const { docs } = response.Posts
+          const { data } = await restClient
+            .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+            .then((res) => res.json())
+          const { docs } = data.Posts
 
           expect(docs).toContainEqual(expect.objectContaining({ id: numPost1.id }))
           expect(docs).toContainEqual(expect.objectContaining({ id: numPost2.id }))
@@ -448,18 +493,20 @@ describe('collections-graphql', () => {
 
       it('or', async () => {
         const query = `query {
-        Posts(
-          where: {OR: [{ title: { equals: "${post1.title}" } }, { title: { equals: "${post2.title}" } }]
-        }) {
-          docs {
-            id
-            title
+          Posts(
+            where: {OR: [{ title: { equals: "${post1.title}" } }, { title: { equals: "${post2.title}" } }]
+          }) {
+            docs {
+              id
+              title
+            }
           }
-        }
-      }`
+        }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs).toContainEqual(expect.objectContaining({ id: post1.id }))
         expect(docs).toContainEqual(expect.objectContaining({ id: post2.id }))
@@ -467,18 +514,20 @@ describe('collections-graphql', () => {
 
       it('or - 1 result', async () => {
         const query = `query {
-        Posts(
-          where: {OR: [{ title: { equals: "${post1.title}" } }, { title: { equals: "nope" } }]
-        }) {
-          docs {
-            id
-            title
+          Posts(
+            where: {OR: [{ title: { equals: "${post1.title}" } }, { title: { equals: "nope" } }]
+          }) {
+            docs {
+              id
+              title
+            }
           }
-        }
-      }`
+        }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs).toContainEqual(expect.objectContaining({ id: post1.id }))
         expect(docs).not.toContainEqual(expect.objectContaining({ id: post2.id }))
@@ -488,22 +537,24 @@ describe('collections-graphql', () => {
         const specialPost = await createPost({ description: 'special-123123' })
 
         const query = `query {
-        Posts(
-          where: {
-            AND: [
-              { title: { equals: "${specialPost.title}" } }
-              { description: { equals: "${specialPost.description}" } }
-            ]
-        }) {
-          docs {
-            id
-            title
+          Posts(
+            where: {
+              AND: [
+                { title: { equals: "${specialPost.title}" } }
+                { description: { equals: "${specialPost.description}" } }
+              ]
+          }) {
+            docs {
+              id
+              title
+            }
           }
-        }
-      }`
+        }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }))
       })
@@ -530,8 +581,10 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const response = await client.request(nearQuery)
-            const { docs } = response.Points
+            const { data } = await restClient
+              .GRAPHQL_POST({ body: JSON.stringify({ query: nearQuery }) })
+              .then((res) => res.json())
+            const { docs } = data.Points
 
             expect(docs).toHaveLength(1)
           })
@@ -553,8 +606,10 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const response = await client.request(nearQuery)
-            const { docs } = response.Points
+            const { data } = await restClient
+              .GRAPHQL_POST({ body: JSON.stringify({ query: nearQuery }) })
+              .then((res) => res.json())
+            const { docs } = data.Points
 
             expect(docs).toHaveLength(0)
           })
@@ -591,8 +646,10 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const response = await client.request(nearQuery)
-            const { docs } = response.Points
+            const { data } = await restClient
+              .GRAPHQL_POST({ body: JSON.stringify({ query: nearQuery }) })
+              .then((res) => res.json())
+            const { docs } = data.Points
 
             let previous = 0
             docs.forEach(({ point: coordinates }) => {
@@ -632,8 +689,10 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const response = await client.request(query)
-            const { docs } = response.Points
+            const { data } = await restClient
+              .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+              .then((res) => res.json())
+            const { docs } = data.Points
 
             expect(docs).toHaveLength(1)
             expect(docs[0].point).toEqual([10, 20])
@@ -659,8 +718,10 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const response = await client.request(query)
-            const { docs } = response.Points
+            const { data } = await restClient
+              .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+              .then((res) => res.json())
+            const { docs } = data.Points
 
             expect(docs).toHaveLength(0)
           })
@@ -695,8 +756,10 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const response = await client.request(query)
-            const { docs } = response.Points
+            const { data } = await restClient
+              .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+              .then((res) => res.json())
+            const { docs } = data.Points
 
             expect(docs).toHaveLength(1)
             expect(docs[0].point).toEqual([10, 20])
@@ -722,8 +785,10 @@ describe('collections-graphql', () => {
                 }
               }`
 
-            const response = await client.request(query)
-            const { docs } = response.Points
+            const { data } = await restClient
+              .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+              .then((res) => res.json())
+            const { docs } = data.Points
 
             expect(docs).toHaveLength(0)
           })
@@ -746,8 +811,10 @@ describe('collections-graphql', () => {
             }
           }
         }`
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs).toContainEqual(
           expect.objectContaining({
@@ -773,8 +840,10 @@ describe('collections-graphql', () => {
           }
         }`
 
-        const response = await client.request(query)
-        const { docs, totalDocs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs, totalDocs } = data.Posts
 
         expect(totalDocs).toStrictEqual(1)
         expect(docs[0].relationToCustomID.id).toStrictEqual(1)
@@ -814,8 +883,10 @@ describe('collections-graphql', () => {
           }
         }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs[0].relationField).toBeFalsy()
       })
@@ -854,8 +925,10 @@ describe('collections-graphql', () => {
           }
         }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { docs } = data.Posts
 
         expect(docs[0].relationHasManyField).toHaveLength(0)
       })
@@ -864,9 +937,6 @@ describe('collections-graphql', () => {
 
   describe('Error Handler', () => {
     it('should return have an array of errors when making a bad request', async () => {
-      let error
-
-      // language=graphQL
       const query = `query {
           Posts(where: { title: { exists: true }}) {
               docs {
@@ -874,16 +944,16 @@ describe('collections-graphql', () => {
               }
           }
       }`
-      await client.request(query).catch((err) => {
-        error = err
-      })
-      expect(Array.isArray(error.response.errors)).toBe(true)
-      expect(typeof error.response.errors[0].message).toBe('string')
+      const { errors } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+      expect(Array.isArray(errors)).toBe(true)
+      expect(typeof errors[0].message).toBe('string')
     })
 
     it('should return have an array of errors when failing to pass validation', async () => {
-      let error
-      // language=graphQL
       const query = `mutation {
           createPost(data: {min: 1}) {
               id
@@ -893,17 +963,17 @@ describe('collections-graphql', () => {
           }
       }`
 
-      await client.request(query).catch((err) => {
-        error = err
-      })
-      expect(Array.isArray(error.response.errors)).toBe(true)
-      expect(error.response.errors[0].message).toEqual('The following field is invalid: min')
-      expect(typeof error.response.errors[0].locations).toBeDefined()
+      const { errors } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+      expect(Array.isArray(errors)).toBe(true)
+      expect(errors[0].message).toEqual('The following field is invalid: min')
+      expect(typeof errors[0].locations).toBeDefined()
     })
 
     it('should return have an array of errors when failing multiple mutations', async () => {
-      let error
-      // language=graphQL
       const query = `mutation createTest {
           test1:createUser(data: { email: "test@test.com", password: "test" }) {
               email
@@ -922,36 +992,36 @@ describe('collections-graphql', () => {
           }
       }`
 
-      await client.request(query).catch((err) => {
-        error = err
-      })
+      const { errors } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
 
-      expect(Array.isArray(error.response.errors)).toBe(true)
+      expect(Array.isArray(errors)).toBe(true)
 
-      expect(Array.isArray(error.response.errors[0].locations)).toEqual(true)
-      expect(error.response.errors[0].message).toEqual('The following field is invalid: password')
-      expect(error.response.errors[0].path[0]).toEqual('test2')
-      expect(error.response.errors[0].extensions.name).toEqual('ValidationError')
-      expect(error.response.errors[0].extensions.data[0].message).toEqual('No password was given')
-      expect(error.response.errors[0].extensions.data[0].field).toEqual('password')
+      expect(Array.isArray(errors[0].locations)).toEqual(true)
+      expect(errors[0].message).toEqual('The following field is invalid: password')
+      expect(errors[0].path[0]).toEqual('test2')
+      expect(errors[0].extensions.name).toEqual('ValidationError')
+      expect(errors[0].extensions.data[0].message).toEqual('No password was given')
+      expect(errors[0].extensions.data[0].field).toEqual('password')
 
-      expect(Array.isArray(error.response.errors[1].locations)).toEqual(true)
-      expect(error.response.errors[1].message).toEqual('The following field is invalid: email')
-      expect(error.response.errors[1].path[0]).toEqual('test3')
-      expect(error.response.errors[1].extensions.name).toEqual('ValidationError')
-      expect(error.response.errors[1].extensions.data[0].message).toEqual(
+      expect(Array.isArray(errors[1].locations)).toEqual(true)
+      expect(errors[1].message).toEqual('The following field is invalid: email')
+      expect(errors[1].path[0]).toEqual('test3')
+      expect(errors[1].extensions.name).toEqual('ValidationError')
+      expect(errors[1].extensions.data[0].message).toEqual(
         'A user with the given email is already registered',
       )
-      expect(error.response.errors[1].extensions.data[0].field).toEqual('email')
+      expect(errors[1].extensions.data[0].field).toEqual('email')
 
-      expect(Array.isArray(error.response.errors[2].locations)).toEqual(true)
-      expect(error.response.errors[2].message).toEqual('The following field is invalid: email')
-      expect(error.response.errors[2].path[0]).toEqual('test4')
-      expect(error.response.errors[2].extensions.name).toEqual('ValidationError')
-      expect(error.response.errors[2].extensions.data[0].message).toEqual(
-        'Please enter a valid email address.',
-      )
-      expect(error.response.errors[2].extensions.data[0].field).toEqual('email')
+      expect(Array.isArray(errors[2].locations)).toEqual(true)
+      expect(errors[2].message).toEqual('The following field is invalid: email')
+      expect(errors[2].path[0]).toEqual('test4')
+      expect(errors[2].extensions.name).toEqual('ValidationError')
+      expect(errors[2].extensions.data[0].message).toEqual('Please enter a valid email address.')
+      expect(errors[2].extensions.data[0].field).toEqual('email')
     })
 
     it('should return the minimum allowed information about internal errors', async () => {
@@ -963,16 +1033,18 @@ describe('collections-graphql', () => {
           }
       }`
 
-      await client.request(query).catch((err) => {
-        error = err
-      })
+      const { errors } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
 
-      expect(Array.isArray(error.response.errors)).toBe(true)
-      expect(Array.isArray(error.response.errors[0].locations)).toEqual(true)
-      expect(error.response.errors[0].message).toEqual('Something went wrong.')
-      expect(error.response.errors[0].path[0]).toEqual('QueryWithInternalError')
-      expect(error.response.errors[0].extensions.statusCode).toEqual(500)
-      expect(error.response.errors[0].extensions.name).toEqual('Error')
+      expect(Array.isArray(errors)).toBe(true)
+      expect(Array.isArray(errors[0].locations)).toEqual(true)
+      expect(errors[0].message).toEqual('Something went wrong.')
+      expect(errors[0].path[0]).toEqual('QueryWithInternalError')
+      expect(errors[0].extensions.statusCode).toEqual(500)
+      expect(errors[0].extensions.name).toEqual('Error')
     })
   })
 })

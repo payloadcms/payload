@@ -35,12 +35,8 @@ export default buildConfigWithDefaults({
           name: 'adminOnlyField',
           type: 'text',
           access: {
-            read: ({
-              req: {
-                user: { roles = [] },
-              },
-            }) => {
-              return roles.includes('admin')
+            read: ({ req: { user } }) => {
+              return user?.roles?.includes('admin')
             },
           },
         },
@@ -177,7 +173,8 @@ export default buildConfigWithDefaults({
       },
       access: {
         read: ({ req: { user } }) => {
-          if (user.collection === 'api-keys') {
+          if (!user) return false
+          if (user?.collection === 'api-keys') {
             return {
               id: {
                 equals: user.id,

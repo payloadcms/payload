@@ -1,8 +1,9 @@
+import type { Payload } from 'payload'
 import type { PathToQuery } from 'payload/database'
-import type { Field, Payload } from 'payload/types'
+import type { Field } from 'payload/types'
 import type { Operator } from 'payload/types'
 
-import { ObjectId } from 'bson'
+import ObjectId from 'bson-objectid'
 import mongoose from 'mongoose'
 import { getLocalizedPaths } from 'payload/database'
 import { fieldAffectsData } from 'payload/types'
@@ -15,7 +16,8 @@ import { sanitizeQueryValue } from './sanitizeQueryValue'
 
 type SearchParam = {
   path?: string
-  value: unknown
+  rawQuery?: unknown
+  value?: unknown
 }
 
 const subQueryOptions = {
@@ -91,13 +93,19 @@ export async function buildSearchParam({
   const [{ field, path }] = paths
 
   if (path) {
-    const { operator: formattedOperator, val: formattedValue } = sanitizeQueryValue({
+    const {
+      operator: formattedOperator,
+      rawQuery,
+      val: formattedValue,
+    } = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
       path,
       val,
     })
+
+    if (rawQuery) return { value: rawQuery }
 
     // If there are multiple collections to search through,
     // Recursively build up a list of query constraints

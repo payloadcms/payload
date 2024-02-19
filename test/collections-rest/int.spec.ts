@@ -1,13 +1,14 @@
 import { randomBytes } from 'crypto'
 
+import type { Payload } from '../../packages/payload/src'
 import type { Relation } from './config'
-import type { ErrorOnHook, Post } from './payload-types'
+import type { Post } from './payload-types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
-import config, {
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
+import configPromise, {
   customIdNumberSlug,
   customIdSlug,
   errorOnHookSlug,
@@ -16,12 +17,14 @@ import config, {
   slug,
 } from './config'
 
-let client: RESTClient
+let restClient: NextRESTClient
+let payload: Payload
 
 describe('collections-rest', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    client = new RESTClient(await config, { defaultSlug: slug, serverURL })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
 
     // Wait for indexes to be created,
     // as we need them to query by point
@@ -58,9 +61,10 @@ describe('collections-rest', () => {
     it('should find', async () => {
       const post1 = await createPost()
       const post2 = await createPost()
-      const { result, status } = await client.find<Post>()
+      const response = await restClient.GET(`/${slug}`)
+      const result = await response.json()
 
-      expect(status).toEqual(200)
+      expect(response.status).toEqual(200)
       expect(result.totalDocs).toEqual(2)
       const expectedDocs = [post1, post2]
       expect(result.docs).toHaveLength(expectedDocs.length)
@@ -70,13 +74,14 @@ describe('collections-rest', () => {
     it('should find where id', async () => {
       const post1 = await createPost()
       await createPost()
-      const { result, status } = await client.find<Post>({
+      const response = await restClient.GET(`/${slug}`, {
         query: {
-          id: { equals: post1.id },
+          where: { id: { equals: post1.id } },
         },
       })
+      const result = await response.json()
 
-      expect(status).toEqual(200)
+      expect(response.status).toEqual(200)
       expect(result.totalDocs).toEqual(1)
       expect(result.docs[0].id).toEqual(post1.id)
     })
@@ -102,14 +107,14 @@ describe('collections-rest', () => {
       const { id, description } = await createPost({ description: 'desc' })
       const updatedTitle = 'updated-title'
 
-      const { doc: updated, status } = await client.update<Post>({
-        id,
-        data: { title: updatedTitle },
+      const response = await restClient.PATCH(`/${slug}/${id}`, {
+        body: JSON.stringify({ title: updatedTitle }),
       })
+      const { doc } = await response.json()
 
-      expect(status).toEqual(200)
-      expect(updated.title).toEqual(updatedTitle)
-      expect(updated.description).toEqual(description) // Check was not modified
+      expect(response.status).toEqual(200)
+      expect(doc.title).toEqual(updatedTitle)
+      expect(doc.description).toEqual(description) // Check was not modified
     })
 
     describe('Bulk operations', () => {
@@ -119,13 +124,16 @@ describe('collections-rest', () => {
         })
 
         const description = 'updated'
-        const { docs, errors, status } = await client.updateMany({
-          data: { description },
-          where: { title: { equals: 'title' } },
+        const response = await restClient.PATCH(`/${slug}`, {
+          query: { where: { title: { equals: 'title' } } },
+          body: JSON.stringify({
+            description,
+          }),
         })
+        const { docs, errors } = await response.json()
 
         expect(errors).toHaveLength(0)
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(docs[0].title).toEqual('title') // Check was not modified
         expect(docs[0].description).toEqual(description)
         expect(docs.pop().description).toEqual(description)
@@ -138,16 +146,15 @@ describe('collections-rest', () => {
 
         const description = 'updated'
 
-        const {
-          docs: noDocs,
-          errors,
-          status,
-        } = await client.updateMany<Post>({
-          data: { description },
-          where: { missing: { equals: 'title' } },
+        const response = await restClient.PATCH(`/${slug}`, {
+          query: { where: { missing: { equals: 'title' } } },
+          body: JSON.stringify({
+            description,
+          }),
         })
+        const { docs: noDocs, errors } = await response.json()
 
-        expect(status).toEqual(400)
+        expect(response.status).toEqual(400)
         expect(noDocs).toBeUndefined()
         expect(errors).toHaveLength(1)
 
@@ -165,26 +172,26 @@ describe('collections-rest', () => {
         })
 
         const description = 'updated'
-        const {
-          docs: relationFieldDocs,
-          errors: relationFieldErrors,
-          status: relationFieldStatus,
-        } = await client.updateMany<Post>({
-          data: { description },
-          where: { 'relationField.missing': { equals: 'title' } },
+        const relationFieldResponse = await restClient.PATCH(`/${slug}`, {
+          query: { where: { 'relationField.missing': { equals: 'title' } } },
+          body: JSON.stringify({
+            description,
+          }),
         })
+        expect(relationFieldResponse.status).toEqual(400)
 
-        const { status: relationMultiRelationToStatus } = await client.updateMany<Post>({
-          data: { description },
-          where: { 'relationMultiRelationTo.missing': { equals: 'title' } },
+        const relationMultiRelationToResponse = await restClient.PATCH(`/${slug}`, {
+          query: { where: { 'relationMultiRelationTo.missing': { equals: 'title' } } },
+          body: JSON.stringify({
+            description,
+          }),
         })
+        expect(relationMultiRelationToResponse.status).toEqual(400)
 
         const { docs } = await payload.find({
           collection: slug,
         })
 
-        expect(relationFieldStatus).toEqual(400)
-        expect(relationMultiRelationToStatus).toEqual(400)
         expect(docs[0].description).not.toEqual(description)
         expect(docs.pop().description).not.toEqual(description)
       })
@@ -198,17 +205,20 @@ describe('collections-rest', () => {
         })
 
         const description = 'description'
-        const result = await client.updateMany({
-          data: { description },
-          where: { restrictedField: { equals: 'restricted' } },
+        const response = await restClient.PATCH(`/${slug}`, {
+          query: { where: { restrictedField: { equals: 'restricted' } } },
+          body: JSON.stringify({
+            description,
+          }),
         })
+        const result = await response.json()
 
         const doc = await payload.findByID({
           id,
           collection: slug,
         })
 
-        expect(result.status).toEqual(400)
+        expect(response.status).toEqual(400)
         expect(result.errors).toHaveLength(1)
         expect(result.errors[0].message).toEqual(
           'The following path cannot be queried: restrictedField',
@@ -234,14 +244,15 @@ describe('collections-rest', () => {
         })
 
         const update = 'update'
-
-        const result = await client.updateMany<ErrorOnHook>({
-          data: { text: update },
-          slug: errorOnHookSlug,
-          where: { text: { equals: text } },
+        const response = await restClient.PATCH(`/${errorOnHookSlug}`, {
+          query: { where: { text: { equals: text } } },
+          body: JSON.stringify({
+            text: update,
+          }),
         })
+        const result = await response.json()
 
-        expect(result.status).toEqual(400)
+        expect(response.status).toEqual(400)
         expect(result.docs).toHaveLength(1)
         expect(result.docs[0].id).toEqual(successDoc.id)
         expect(result.errors).toHaveLength(1)
@@ -256,11 +267,12 @@ describe('collections-rest', () => {
           await createPost({ description: `desc ${i}` })
         })
 
-        const { docs, status } = await client.deleteMany<Post>({
-          where: { title: { equals: 'title' } },
+        const response = await restClient.DELETE(`/${slug}`, {
+          query: { where: { title: { equals: 'title' } } },
         })
+        const { docs } = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(docs[0].title).toEqual('title') // Check was not modified
         expect(docs).toHaveLength(count)
       })
@@ -281,12 +293,12 @@ describe('collections-rest', () => {
           },
         })
 
-        const result = await client.deleteMany({
-          slug: errorOnHookSlug,
-          where: { text: { equals: 'test' } },
+        const response = await restClient.DELETE(`/${errorOnHookSlug}`, {
+          query: { where: { text: { equals: 'test' } } },
         })
+        const result = await response.json()
 
-        expect(result.status).toEqual(400)
+        expect(response.status).toEqual(400)
         expect(result.docs).toHaveLength(1)
         expect(result.errors).toHaveLength(1)
         expect(result.errors[0].message).toBeDefined()
@@ -299,64 +311,78 @@ describe('collections-rest', () => {
         it('should create', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
           const customIdName = 'custom-id-name'
-          const { doc } = await client.create({
-            data: { id: customId, name: customIdName },
-            slug: customIdSlug,
-          })
+          const { doc } = await restClient
+            .POST(`/${customIdSlug}`, {
+              body: JSON.stringify({ id: customId, name: customIdName }),
+            })
+            .then((res) => res.json())
           expect(doc.id).toEqual(customId)
           expect(doc.name).toEqual(customIdName)
         })
 
         it('should find', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
-          const { doc } = await client.create({
-            data: { id: customId, name: 'custom-id-name' },
-            slug: customIdSlug,
-          })
-          const { doc: foundDoc } = await client.findByID({ id: customId, slug: customIdSlug })
+          const { doc } = await restClient
+            .POST(`/${customIdSlug}`, {
+              body: JSON.stringify({ id: customId, name: 'custom-id-name' }),
+            })
+            .then((res) => res.json())
+          const { id } = await restClient
+            .GET(`/${customIdSlug}/${customId}`)
+            .then((res) => res.json())
 
-          expect(foundDoc.id).toEqual(doc.id)
+          expect(id).toEqual(doc.id)
         })
 
         it('should query - equals', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
-          const { doc } = await client.create({
-            data: { id: customId, name: 'custom-id-name' },
-            slug: customIdSlug,
-          })
-          const { result } = await client.find({
-            query: { id: { equals: customId } },
-            slug: customIdSlug,
-          })
+          const { doc } = await restClient
+            .POST(`/${customIdSlug}`, {
+              body: JSON.stringify({ id: customId, name: 'custom-id-name' }),
+            })
+            .then((res) => res.json())
+          const { docs } = await restClient
+            .GET(`/${customIdSlug}`, {
+              query: {
+                where: { id: { equals: customId } },
+              },
+            })
+            .then((res) => res.json())
 
-          expect(result.docs.map(({ id }) => id)).toContain(doc.id)
+          expect(docs.map(({ id }) => id)).toContain(doc.id)
         })
 
         it('should query - like', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
-          const { doc } = await client.create({
-            data: { id: customId, name: 'custom-id-name' },
-            slug: customIdSlug,
-          })
-          const { result } = await client.find({
-            query: { id: { like: 'custom' } },
-            slug: customIdSlug,
-          })
+          const { doc } = await restClient
+            .POST(`/${customIdSlug}`, {
+              body: JSON.stringify({ id: customId, name: 'custom-id-name' }),
+            })
+            .then((res) => res.json())
+          const { docs } = await restClient
+            .GET(`/${customIdSlug}`, {
+              query: {
+                where: { id: { like: 'custom' } },
+              },
+            })
+            .then((res) => res.json())
 
-          expect(result.docs.map(({ id }) => id)).toContain(doc.id)
+          expect(docs.map(({ id }) => id)).toContain(doc.id)
         })
 
         it('should update', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
-          const { doc } = await client.create({
-            data: { id: customId, data: { name: 'custom-id-name' } },
-            slug: customIdSlug,
-          })
-          const { doc: updatedDoc } = await client.update({
-            id: doc.id,
-            data: { name: 'updated' },
-            slug: customIdSlug,
-          })
+          const { doc } = await restClient
+            .POST(`/${customIdSlug}`, {
+              body: JSON.stringify({ id: customId, name: 'custom-id-name' }),
+            })
+            .then((res) => res.json())
+          const { doc: updatedDoc } = await restClient
+            .PATCH(`/${customIdSlug}/${doc.id}`, {
+              body: JSON.stringify({ name: 'updated' }),
+            })
+            .then((res) => res.json())
+
           expect(updatedDoc.name).toEqual('updated')
         })
       })
@@ -364,57 +390,54 @@ describe('collections-rest', () => {
       describe('number', () => {
         it('should create', async () => {
           const customId = Math.floor(Math.random() * 1_000_000) + 1
-          const { doc } = await client.create({
-            data: { id: customId, name: 'custom-id-number-name' },
-            slug: customIdNumberSlug,
-          })
+          const { doc } = await restClient
+            .POST(`/${customIdNumberSlug}`, {
+              body: JSON.stringify({ id: customId, name: 'custom-id-number-name' }),
+            })
+            .then((res) => res.json())
           expect(doc.id).toEqual(customId)
         })
 
         it('should find', async () => {
           const customId = Math.floor(Math.random() * 1_000_000) + 1
-          const { doc } = await client.create({
-            data: { id: customId, name: 'custom-id-number-name' },
-            slug: customIdNumberSlug,
-          })
-          const { doc: foundDoc } = await client.findByID({
-            id: customId,
-            slug: customIdNumberSlug,
-          })
-          expect(foundDoc.id).toEqual(doc.id)
+          const { doc } = await restClient
+            .POST(`/${customIdNumberSlug}`, {
+              body: JSON.stringify({ id: customId, name: 'custom-id-number-name' }),
+            })
+            .then((res) => res.json())
+          const { id } = await restClient
+            .GET(`/${customIdNumberSlug}/${customId}`)
+            .then((res) => res.json())
+          expect(id).toEqual(doc.id)
         })
 
         it('should update', async () => {
           const customId = Math.floor(Math.random() * 1_000_000) + 1
-          const { doc } = await client.create({
-            data: { id: customId, name: 'custom-id-number-name' },
-            slug: customIdNumberSlug,
-          })
-          const { doc: updatedDoc } = await client.update({
-            id: doc.id,
-            data: { name: 'updated' },
-            slug: customIdNumberSlug,
-          })
+          const { doc } = await restClient
+            .POST(`/${customIdNumberSlug}`, {
+              body: JSON.stringify({ id: customId, name: 'custom-id-number-name' }),
+            })
+            .then((res) => res.json())
+          const { doc: updatedDoc } = await restClient
+            .PATCH(`/${customIdNumberSlug}/${doc.id}`, {
+              body: JSON.stringify({ name: 'updated' }),
+            })
+            .then((res) => res.json())
           expect(updatedDoc.name).toEqual('updated')
         })
 
         it('should allow querying by in', async () => {
           const id = 98234698237
-          await client.create({
-            data: { id, name: 'query using in operator' },
-            slug: customIdNumberSlug,
+          await restClient.POST(`/${customIdNumberSlug}`, {
+            body: JSON.stringify({ id, name: 'query using in operator' }),
           })
-
-          const {
-            result: { docs },
-          } = await client.find({
-            query: {
-              id: {
-                in: `${id}, ${2349856723948764}`,
+          const { docs } = await restClient
+            .GET(`/${customIdNumberSlug}`, {
+              query: {
+                where: { id: { in: `${id}, ${2349856723948764}` } },
               },
-            },
-            slug: customIdNumberSlug,
-          })
+            })
+            .then((res) => res.json())
 
           expect(docs).toHaveLength(1)
         })
@@ -424,16 +447,17 @@ describe('collections-rest', () => {
     it('should delete', async () => {
       const { id } = await createPost()
 
-      const { doc, status } = await client.delete<Post>(id)
+      const response = await restClient.DELETE(`/${slug}/${id}`)
+      const { doc } = await response.json()
 
-      expect(status).toEqual(200)
+      expect(response.status).toEqual(200)
       expect(doc.id).toEqual(id)
     })
 
     it('should include metadata', async () => {
       await createPosts(11)
 
-      const { result } = await client.find<Post>()
+      const result = await restClient.GET(`/${slug}`).then((res) => res.json())
 
       expect(result.totalDocs).toBeGreaterThan(0)
       expect(result.limit).toBe(10)
@@ -456,18 +480,16 @@ describe('collections-rest', () => {
       const nameToQuery2 = 'name2'
 
       beforeEach(async () => {
-        ;({ doc: relation } = await client.create<Relation>({
-          data: {
-            name: nameToQuery,
-          },
-          slug: relationSlug,
-        }))
-        ;({ doc: relation2 } = await client.create<Relation>({
-          data: {
-            name: nameToQuery2,
-          },
-          slug: relationSlug,
-        }))
+        ;({ doc: relation } = await restClient
+          .POST(`/${relationSlug}`, {
+            body: JSON.stringify({ name: nameToQuery }),
+          })
+          .then((res) => res.json()))
+        ;({ doc: relation2 } = await restClient
+          .POST(`/${relationSlug}`, {
+            body: JSON.stringify({ name: nameToQuery2 }),
+          })
+          .then((res) => res.json()))
 
         post = await createPost({
           relationField: relation.id,
@@ -478,29 +500,27 @@ describe('collections-rest', () => {
 
       describe('regular relationship', () => {
         it('query by property value', async () => {
-          const { result, status } = await client.find<Post>({
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              'relationField.name': {
-                equals: relation.name,
-              },
+              where: { relationField: { equals: relation.id } },
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.docs).toEqual([post])
           expect(result.totalDocs).toEqual(1)
         })
 
         it('query by id', async () => {
-          const { result, status } = await client.find<Post>({
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              relationField: {
-                equals: relation.id,
-              },
+              where: { relationField: { equals: relation.id } },
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.docs).toEqual([post])
           expect(result.totalDocs).toEqual(1)
         })
@@ -511,28 +531,26 @@ describe('collections-rest', () => {
           relationHasManyField: [relation.id, relation2.id],
         })
 
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            'relationHasManyField.name': {
-              equals: relation.name,
-            },
+            where: { 'relationHasManyField.name': { equals: relation.name } },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toEqual([post1])
         expect(result.totalDocs).toEqual(1)
 
         // Query second relationship
-        const { result: result2, status: status2 } = await client.find<Post>({
+        const response2 = await restClient.GET(`/${slug}`, {
           query: {
-            'relationHasManyField.name': {
-              equals: relation2.name,
-            },
+            where: { 'relationHasManyField.name': { equals: relation2.name } },
           },
         })
+        const result2 = await response2.json()
 
-        expect(status2).toEqual(200)
+        expect(response2.status).toEqual(200)
         expect(result2.docs).toEqual([post1])
         expect(result2.totalDocs).toEqual(1)
       })
@@ -544,15 +562,14 @@ describe('collections-rest', () => {
           })
           await createPost()
 
-          const { result, status } = await client.find<Post>({
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              'relationMultiRelationTo.value': {
-                equals: relation.id,
-              },
+              where: { 'relationMultiRelationTo.value': { equals: relation.id } },
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.docs).toEqual([post1])
           expect(result.totalDocs).toEqual(1)
         })
@@ -568,28 +585,26 @@ describe('collections-rest', () => {
           })
           await createPost()
 
-          const { result, status } = await client.find<Post>({
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              'relationMultiRelationToHasMany.value': {
-                equals: relation.id,
-              },
+              where: { 'relationMultiRelationToHasMany.value': { equals: relation.id } },
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.docs).toEqual([post1])
           expect(result.totalDocs).toEqual(1)
 
           // Query second relation
-          const { result: result2, status: status2 } = await client.find<Post>({
+          const response2 = await restClient.GET(`/${slug}`, {
             query: {
-              'relationMultiRelationToHasMany.value': {
-                equals: relation.id,
-              },
+              where: { 'relationMultiRelationToHasMany.value': { equals: relation.id } },
             },
           })
+          const result2 = await response2.json()
 
-          expect(status2).toEqual(200)
+          expect(response2.status).toEqual(200)
           expect(result2.docs).toEqual([post1])
           expect(result2.totalDocs).toEqual(1)
         })
@@ -603,24 +618,25 @@ describe('collections-rest', () => {
         const test = 'test'
         await createPost({ fakeLocalization: test })
 
-        const { result, status } = await client.find({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            fakeLocalization: {
-              equals: test,
-            },
+            where: { fakeLocalization: { equals: test } },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toHaveLength(1)
       })
 
       it('should not error when attempting to sort on a field that does not exist', async () => {
-        const { status } = await client.find({
-          sort: 'fake',
+        const response = await restClient.GET(`/${slug}`, {
+          query: {
+            sort: 'fake',
+          },
         })
 
-        expect(status).toStrictEqual(200)
+        expect(response.status).toStrictEqual(200)
       })
     })
 
@@ -629,15 +645,14 @@ describe('collections-rest', () => {
         const valueToQuery = 'valueToQuery'
         const post1 = await createPost({ title: valueToQuery })
         await createPost()
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            title: {
-              equals: valueToQuery,
-            },
+            where: { title: { equals: valueToQuery } },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.totalDocs).toEqual(1)
         expect(result.docs).toEqual([post1])
       })
@@ -646,15 +661,14 @@ describe('collections-rest', () => {
         const post1 = await createPost({ title: 'not-equals' })
         const post2 = await createPost()
         const post3 = await createPost({ title: undefined })
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            title: {
-              not_equals: post1.title,
-            },
+            where: { title: { not_equals: post1.title } },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.totalDocs).toEqual(2)
         expect(result.docs).toEqual([post3, post2])
       })
@@ -662,15 +676,14 @@ describe('collections-rest', () => {
       it('in', async () => {
         const post1 = await createPost({ title: 'my-title' })
         await createPost()
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            title: {
-              in: [post1.title],
-            },
+            where: { title: { in: [post1.title] } },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toEqual([post1])
         expect(result.totalDocs).toEqual(1)
       })
@@ -678,15 +691,14 @@ describe('collections-rest', () => {
       it('not_in', async () => {
         const post1 = await createPost({ title: 'not-me' })
         const post2 = await createPost()
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            title: {
-              not_in: [post1.title],
-            },
+            where: { title: { not_in: [post1.title] } },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toEqual([post2])
         expect(result.totalDocs).toEqual(1)
       })
@@ -700,28 +712,25 @@ describe('collections-rest', () => {
         await createPost({ relationField: relationship.id, title: 'not-me' })
         // await createPost({ relationMultiRelationTo: relationship.id, title: 'not-me' })
         const post2 = await createPost({ title: 'me' })
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            relationField: {
-              not_in: [relationship.id],
-            },
+            where: { relationField: { not_in: [relationship.id] } },
           },
         })
+        const result = await response.json()
 
-        // do not want to error for empty arrays
-        const { status: emptyNotInStatus } = await client.find<Post>({
-          query: {
-            relationField: {
-              not_in: [],
-            },
-          },
-        })
-
-        expect(emptyNotInStatus).toEqual(200)
-
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toEqual([post2])
         expect(result.totalDocs).toEqual(1)
+
+        // do not want to error for empty arrays
+        const emptyNotInResponse = await restClient.GET(`/${slug}`, {
+          query: {
+            where: { relationField: { not_in: [] } },
+          },
+        })
+
+        expect(emptyNotInResponse.status).toEqual(200)
       })
 
       it('in (relationships)', async () => {
@@ -733,42 +742,38 @@ describe('collections-rest', () => {
         const post1 = await createPost({ relationField: relationship.id, title: 'me' })
         // await createPost({ relationMultiRelationTo: relationship.id, title: 'not-me' })
         await createPost({ title: 'not-me' })
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            relationField: {
-              in: [relationship.id],
-            },
+            where: { relationField: { in: [relationship.id] } },
           },
         })
+        const result = await response.json()
 
-        // do not want to error for empty arrays
-        const { status: emptyNotInStatus } = await client.find<Post>({
-          query: {
-            relationField: {
-              in: [],
-            },
-          },
-        })
-
-        expect(emptyNotInStatus).toEqual(200)
-
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toEqual([post1])
         expect(result.totalDocs).toEqual(1)
+
+        // do not want to error for empty arrays
+        const emptyNotInResponse = await restClient.GET(`/${slug}`, {
+          query: {
+            where: { relationField: { in: [] } },
+          },
+        })
+
+        expect(emptyNotInResponse.status).toEqual(200)
       })
 
       it('like', async () => {
         const post1 = await createPost({ title: 'prefix-value' })
 
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            title: {
-              like: post1.title?.substring(0, 6),
-            },
+            where: { title: { like: 'prefix' } },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toEqual([post1])
         expect(result.totalDocs).toEqual(1)
       })
@@ -783,17 +788,18 @@ describe('collections-rest', () => {
               title: specialCharacters,
             })
 
-            const query = {
+            const response = await restClient.GET(`/${slug}`, {
               query: {
-                title: {
-                  like: character,
+                where: {
+                  title: {
+                    like: character,
+                  },
                 },
               },
-            }
+            })
+            const result = await response.json()
 
-            const { result, status } = await client.find<Post>(query)
-
-            expect(status).toEqual(200)
+            expect(response.status).toEqual(200)
             expect(result.docs).toEqual([post1])
             expect(result.totalDocs).toEqual(1)
           },
@@ -803,15 +809,18 @@ describe('collections-rest', () => {
       it('like - cyrillic characters', async () => {
         const post1 = await createPost({ title: 'Тест' })
 
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            title: {
-              like: 'Тест',
+            where: {
+              title: {
+                like: 'Тест',
+              },
             },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toEqual([post1])
         expect(result.totalDocs).toEqual(1)
       })
@@ -819,31 +828,36 @@ describe('collections-rest', () => {
       it('like - cyrillic characters in multiple words', async () => {
         const post1 = await createPost({ title: 'привет, это тест полезной нагрузки' })
 
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            title: {
-              like: 'привет нагрузки',
+            where: {
+              title: {
+                like: 'привет нагрузки',
+              },
             },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toEqual([post1])
         expect(result.totalDocs).toEqual(1)
       })
 
       it('like - partial word match', async () => {
         const post = await createPost({ title: 'separate words should partially match' })
-
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            title: {
-              like: 'words partial',
+            where: {
+              title: {
+                like: 'words partial',
+              },
             },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.docs).toEqual([post])
         expect(result.totalDocs).toEqual(1)
       })
@@ -851,15 +865,18 @@ describe('collections-rest', () => {
       it('exists - true', async () => {
         const postWithDesc = await createPost({ description: 'exists' })
         await createPost({ description: undefined })
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            description: {
-              exists: true,
+            where: {
+              description: {
+                exists: true,
+              },
             },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.totalDocs).toEqual(1)
         expect(result.docs).toEqual([postWithDesc])
       })
@@ -867,15 +884,18 @@ describe('collections-rest', () => {
       it('exists - false', async () => {
         const postWithoutDesc = await createPost({ description: undefined })
         await createPost({ description: 'exists' })
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            description: {
-              exists: false,
+            where: {
+              description: {
+                exists: false,
+              },
             },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.totalDocs).toEqual(1)
         expect(result.docs).toEqual([postWithoutDesc])
       })
@@ -889,29 +909,35 @@ describe('collections-rest', () => {
         })
 
         it('greater_than', async () => {
-          const { result, status } = await client.find<Post>({
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              number: {
-                greater_than: 1,
+              where: {
+                number: {
+                  greater_than: 1,
+                },
               },
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.totalDocs).toEqual(1)
           expect(result.docs).toEqual([post2])
         })
 
         it('greater_than_equal', async () => {
-          const { result, status } = await client.find<Post>({
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              number: {
-                greater_than_equal: 1,
+              where: {
+                number: {
+                  greater_than_equal: 1,
+                },
               },
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.totalDocs).toEqual(2)
           const expectedDocs = [post1, post2]
           expect(result.docs).toHaveLength(expectedDocs.length)
@@ -919,29 +945,35 @@ describe('collections-rest', () => {
         })
 
         it('less_than', async () => {
-          const { result, status } = await client.find<Post>({
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              number: {
-                less_than: 2,
+              where: {
+                number: {
+                  less_than: 2,
+                },
               },
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.totalDocs).toEqual(1)
           expect(result.docs).toEqual([post1])
         })
 
         it('less_than_equal', async () => {
-          const { result, status } = await client.find<Post>({
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              number: {
-                less_than_equal: 2,
+              where: {
+                number: {
+                  less_than_equal: 2,
+                },
               },
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.totalDocs).toEqual(2)
           const expectedDocs = [post1, post2]
           expect(result.docs).toHaveLength(expectedDocs.length)
@@ -955,31 +987,35 @@ describe('collections-rest', () => {
           const [lat, lng] = point
           it('should return a document near a point', async () => {
             const near = `${lat + 0.01}, ${lng + 0.01}, 10000`
-            const { result, status } = await client.find({
+            const response = await restClient.GET(`/${pointSlug}`, {
               query: {
-                point: {
-                  near,
+                where: {
+                  point: {
+                    near,
+                  },
                 },
               },
-              slug: pointSlug,
             })
+            const result = await response.json()
 
-            expect(status).toEqual(200)
+            expect(response.status).toEqual(200)
             expect(result.docs).toHaveLength(1)
           })
 
           it('should not return a point far away', async () => {
             const near = `${lng + 1}, ${lat - 1}, 5000`
-            const { result, status } = await client.find({
+            const response = await restClient.GET(`/${pointSlug}`, {
               query: {
-                point: {
-                  near,
+                where: {
+                  point: {
+                    near,
+                  },
                 },
               },
-              slug: pointSlug,
             })
+            const result = await response.json()
 
-            expect(status).toEqual(200)
+            expect(response.status).toEqual(200)
             expect(result.docs).toHaveLength(0)
           })
 
@@ -998,15 +1034,20 @@ describe('collections-rest', () => {
               }, Math.random())
             })
 
-            const { result } = await client.find({
-              limit: 5,
-              query: {
-                // querying large enough range to include all docs
-                point: { near: '0, 0, 100000, 0' },
-              },
-              slug: pointSlug,
-            })
-            const { docs } = result
+            const { docs } = await restClient
+              .GET(`/${pointSlug}`, {
+                query: {
+                  where: {
+                    point: {
+                      // querying large enough range to include all docs
+                      near: '0, 0, 100000, 0',
+                    },
+                  },
+                  limit: 5,
+                },
+              })
+              .then((res) => res.json())
+
             let previous = 0
             docs.forEach(({ point: coordinates }) => {
               // the next document point should always be greater than the one before
@@ -1027,36 +1068,40 @@ describe('collections-rest', () => {
           ]
           it('should return a document with the point inside the polygon', async () => {
             // There should be 1 total points document populated by default with the point [10, 20]
-            const { result, status } = await client.find({
+            const response = await restClient.GET(`/${pointSlug}`, {
               query: {
-                point: {
-                  within: {
-                    coordinates: [polygon],
-                    type: 'Polygon',
+                where: {
+                  point: {
+                    within: {
+                      coordinates: [polygon],
+                      type: 'Polygon',
+                    },
                   },
                 },
               },
-              slug: pointSlug,
             })
+            const result = await response.json()
 
-            expect(status).toEqual(200)
+            expect(response.status).toEqual(200)
             expect(result.docs).toHaveLength(1)
           })
 
           it('should not return a document with the point outside a smaller polygon', async () => {
-            const { result, status } = await client.find({
+            const response = await restClient.GET(`/${pointSlug}`, {
               query: {
-                point: {
-                  within: {
-                    coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
-                    type: 'Polygon',
+                where: {
+                  point: {
+                    within: {
+                      coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                      type: 'Polygon',
+                    },
                   },
                 },
               },
-              slug: pointSlug,
             })
+            const result = await response.json()
 
-            expect(status).toEqual(200)
+            expect(response.status).toEqual(200)
             expect(result.docs).toHaveLength(0)
           })
         })
@@ -1073,36 +1118,40 @@ describe('collections-rest', () => {
 
           it('should return a document with the point intersecting the polygon', async () => {
             // There should be 1 total points document populated by default with the point [10, 20]
-            const { result, status } = await client.find({
+            const response = await restClient.GET(`/${pointSlug}`, {
               query: {
-                point: {
-                  intersects: {
-                    coordinates: [polygon],
-                    type: 'Polygon',
+                where: {
+                  point: {
+                    intersects: {
+                      coordinates: [polygon],
+                      type: 'Polygon',
+                    },
                   },
                 },
               },
-              slug: pointSlug,
             })
+            const result = await response.json()
 
-            expect(status).toEqual(200)
+            expect(response.status).toEqual(200)
             expect(result.docs).toHaveLength(1)
           })
 
           it('should not return a document with the point not intersecting a smaller polygon', async () => {
-            const { result, status } = await client.find({
+            const response = await restClient.GET(`/${pointSlug}`, {
               query: {
-                point: {
-                  intersects: {
-                    coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
-                    type: 'Polygon',
+                where: {
+                  point: {
+                    intersects: {
+                      coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                      type: 'Polygon',
+                    },
                   },
                 },
               },
-              slug: pointSlug,
             })
+            const result = await response.json()
 
-            expect(status).toEqual(200)
+            expect(response.status).toEqual(200)
             expect(result.docs).toHaveLength(0)
           })
         })
@@ -1113,24 +1162,27 @@ describe('collections-rest', () => {
         const post2 = await createPost({ title: 'post2' })
         await createPost()
 
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            or: [
-              {
-                title: {
-                  equals: post1.title,
+            where: {
+              or: [
+                {
+                  title: {
+                    equals: post1.title,
+                  },
                 },
-              },
-              {
-                title: {
-                  equals: post2.title,
+                {
+                  title: {
+                    equals: post2.title,
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         const expectedDocs = [post1, post2]
         expect(result.totalDocs).toEqual(expectedDocs.length)
         expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
@@ -1140,24 +1192,27 @@ describe('collections-rest', () => {
         const post1 = await createPost({ title: 'post1' })
         await createPost()
 
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            or: [
-              {
-                title: {
-                  equals: post1.title,
+            where: {
+              or: [
+                {
+                  title: {
+                    equals: post1.title,
+                  },
                 },
-              },
-              {
-                title: {
-                  equals: 'non-existent',
+                {
+                  title: {
+                    equals: 'non-existent',
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         const expectedDocs = [post1]
         expect(result.totalDocs).toEqual(expectedDocs.length)
         expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
@@ -1169,24 +1224,27 @@ describe('collections-rest', () => {
         await createPost({ description, title: 'post2' }) // Diff title, same desc
         await createPost()
 
-        const { result, status } = await client.find<Post>({
+        const response = await restClient.GET(`/${slug}`, {
           query: {
-            and: [
-              {
-                title: {
-                  equals: post1.title,
+            where: {
+              and: [
+                {
+                  title: {
+                    equals: post1.title,
+                  },
                 },
-              },
-              {
-                description: {
-                  equals: description,
+                {
+                  description: {
+                    equals: description,
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         })
+        const result = await response.json()
 
-        expect(status).toEqual(200)
+        expect(response.status).toEqual(200)
         expect(result.totalDocs).toEqual(1)
         expect(result.docs).toEqual([post1])
       })
@@ -1199,30 +1257,36 @@ describe('collections-rest', () => {
         })
 
         it('should query a limited set of docs', async () => {
-          const { result, status } = await client.find<Post>({
-            limit: 15,
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              title: {
-                equals: 'limit-test',
+              where: {
+                title: {
+                  equals: 'limit-test',
+                },
               },
+              limit: 15,
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.docs).toHaveLength(15)
         })
 
         it('should query all docs when limit=0', async () => {
-          const { result, status } = await client.find<Post>({
-            limit: 0,
+          const response = await restClient.GET(`/${slug}`, {
             query: {
-              title: {
-                equals: 'limit-test',
+              where: {
+                title: {
+                  equals: 'limit-test',
+                },
               },
+              limit: 0,
             },
           })
+          const result = await response.json()
 
-          expect(status).toEqual(200)
+          expect(response.status).toEqual(200)
           expect(result.totalDocs).toEqual(50)
         })
       })
@@ -1232,13 +1296,17 @@ describe('collections-rest', () => {
           D1: { D2: { D3: { D4: 'nested message' } } },
         })
 
-        const { result } = await client.find<Post>({
-          query: {
-            'D1.D2.D3.D4': {
-              equals: 'nested message',
+        const result = await restClient
+          .GET(`/${slug}`, {
+            query: {
+              where: {
+                'D1.D2.D3.D4': {
+                  equals: 'nested message',
+                },
+              },
             },
-          },
-        })
+          })
+          .then((res) => res.json())
 
         expect(result.totalDocs).toEqual(1)
         expect(result.docs).toEqual([withDeeplyNestedField])
@@ -1248,16 +1316,21 @@ describe('collections-rest', () => {
 
   describe('Error Handler', () => {
     it('should return the minimum allowed information about internal errors', async () => {
-      const { data, status } = await client.endpoint('/api/internal-error-here')
-      expect(status).toBe(500)
-      expect(Array.isArray(data.errors)).toEqual(true)
-      expect(data.errors[0].message).toStrictEqual('Something went wrong.')
+      const response = await restClient.GET('/internal-error-here')
+      const result = await response.json()
+      expect(response.status).toBe(500)
+      expect(Array.isArray(result.errors)).toEqual(true)
+      expect(result.errors[0].message).toStrictEqual('Something went wrong.')
     })
   })
 })
 
 async function createPost(overrides?: Partial<Post>) {
-  const { doc } = await client.create<Post>({ data: { title: 'title', ...overrides } })
+  const { doc } = await restClient
+    .POST(`/${slug}`, {
+      body: JSON.stringify({ title: 'title', ...overrides }),
+    })
+    .then((res) => res.json())
   return doc
 }
 

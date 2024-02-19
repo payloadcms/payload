@@ -13,6 +13,11 @@ export const SetDocumentInfo: React.FC<{
 
   useEffect(() => {
     setDocumentInfo({ collectionSlug, globalSlug, id, versionsConfig })
+
+    return () => {
+      // reset on navigation away
+      setDocumentInfo({})
+    }
   }, [collectionSlug, globalSlug, id, setDocumentInfo, versionsConfig])
 
   return null

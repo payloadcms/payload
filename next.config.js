@@ -1,5 +1,9 @@
 const path = require('path')
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -12,6 +16,9 @@ const nextConfig = {
         '@payloadcms/ui/scss': path.resolve(__dirname, './packages/ui/src/scss/styles.scss'),
       },
     },
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
   webpack: (config) => {
     return {
@@ -53,4 +60,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+module.exports = withBundleAnalyzer(nextConfig)

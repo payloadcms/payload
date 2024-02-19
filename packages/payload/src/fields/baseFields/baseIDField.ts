@@ -1,4 +1,4 @@
-import { ObjectId } from 'bson'
+import ObjectId from 'bson-objectid'
 
 import type { Field, FieldHook } from '../config/types'
 

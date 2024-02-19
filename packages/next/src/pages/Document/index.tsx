@@ -14,7 +14,6 @@ import {
   FormQueryParamsProvider,
   QueryParamTypes,
   HydrateClientUser,
-  DocumentInfoProvider,
   SetDocumentInfo,
 } from '@payloadcms/ui'
 import queryString from 'qs'

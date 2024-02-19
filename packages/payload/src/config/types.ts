@@ -261,7 +261,7 @@ export type Endpoint<U = User> = {
    * Please add "root" routes under the /api folder in the Payload Project.
    * https://nextjs.org/docs/app/api-reference/file-conventions/route
    */
-  root: never
+  root?: never
 }
 
 export type AdminViewConfig = {
