@@ -1,6 +1,7 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "account": "Account",
     "apiKey": "API-sleutel",
     "enableAPIKey": "Activeer API-sleutel",
     "newAccountCreated": "Er is zojuist een nieuw account voor u aangemaakt waarmee u toegang krijgt tot <a href=\"{{serverURL}}\">{{serverURL}}</a>. Klik op de volgende link, of plak onderstaande URL in uw browser om uw e-mailadres te verifiëren: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Na de verificatie van uw e-mail kunt u succesvol inloggen.",

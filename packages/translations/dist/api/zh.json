@@ -1,6 +1,7 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "account": "帐户",
     "apiKey": "API密钥",
     "enableAPIKey": "启用API密钥",
     "newAccountCreated": "刚刚为您创建了一个可以访问 <a href=\"{{serverURL}}\">{{serverURL}}</a> 的新帐户 请点击以下链接或在浏览器中粘贴以下网址，以验证您的电子邮件: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> 验证您的电子邮件后，您将能够成功登录。",

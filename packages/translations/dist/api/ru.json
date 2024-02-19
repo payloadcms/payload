@@ -1,6 +1,7 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "account": "Аккаунт",
     "apiKey": "API ключ",
     "enableAPIKey": "Активировать API ключ",
     "newAccountCreated": "Новый аккаунт был создан для доступа к <a href=\"{{serverURL}}\">{{serverURL}}</a> Пожалуйста, кликните по следующей ссылке или вставьте в адресную строку браузера чтобы подтвердить email: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> После подтверждения вашего email, вы сможете успешно войти в систему.",

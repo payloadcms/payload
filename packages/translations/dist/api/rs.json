@@ -1,6 +1,7 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "account": "Налог",
     "apiKey": "АПИ кључ",
     "enableAPIKey": "Омогући API кључ",
     "newAccountCreated": "Нови налог је креиран. Приступите налогу кликом на <a href=\"{{serverURL}}\">{{serverURL}}</a>. Молимо Вас кликните на следећи линк или залепите адресу која се налази испод у претраживач да бисте потврдили адресу е-поште: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Након што потврдите адресу е-поште можете се улоговати.",

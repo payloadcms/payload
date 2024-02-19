@@ -1,6 +1,7 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "account": "الحساب",
     "apiKey": "مفتاح API",
     "enableAPIKey": "تفعيل مفتاح API",
     "newAccountCreated": "تمّ إنشاء حساب جديد لتتمكّن من الوصول إلى <a href=\"{{serverURL}}\"> {{serverURL}} </a> الرّجاء النّقر فوق الرّابط التّالي أو لصق عنوان URL أدناه في متصفّحّك لتأكيد بريدك الإلكتروني : <a href=\"{{verificationURL}}\"> {{verificationURL}} </a> <br> بعد التّحقّق من بريدك الإلكتروني ، ستتمكّن من تسجيل الدّخول بنجاح.",

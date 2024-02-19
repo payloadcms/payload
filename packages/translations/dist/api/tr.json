@@ -1,6 +1,7 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "account": "Hesap",
     "apiKey": "API Anahtarı",
     "enableAPIKey": "Api anahtarını etkinleştir",
     "newAccountCreated": "<0>{{serverURL}}</0> sitesinde adınıza yeni bir hesap oluşturuldu. E-postanızı doğrulamak için bağlantıya tıklayabilirsiniz: <1>{{verificationURL}}</1><br> E-postanızı doğruladıktan sonra siteye hesap bilgilerinizle giriş yapabilirsiniz.",

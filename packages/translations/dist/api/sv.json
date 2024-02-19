@@ -1,6 +1,7 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "account": "Konto",
     "apiKey": "API Nyckel",
     "enableAPIKey": "Aktivera API nyckel",
     "newAccountCreated": "Ett nytt konto har precis skapats som du kan komma åt <a href=\"{{serverURL}}\">{{serverURL}}</a> Klicka på följande länk eller klistra in webbadressen nedan i din webbläsare för att verifiera din e-post: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Efter att ha verifierat din e-post kommer du att kunna logga in framgångsrikt.",

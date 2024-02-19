@@ -28,6 +28,7 @@ const path = __importStar(require("path"));
 const transpileAndCopy_1 = require("./utilities/transpileAndCopy");
 const ensureDirExists_1 = require("./utilities/ensureDirExists");
 const serverTranslationKeys = [
+    'authentication:account',
     'authentication:api',
     'authentication:apiKey',
     'authentication:enableAPIKey',
