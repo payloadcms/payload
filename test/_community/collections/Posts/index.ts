@@ -21,7 +21,4 @@ export const PostsCollection: CollectionConfig = {
     },
   ],
   slug: postsSlug,
-  admin: {
-    useAsTitle: 'text',
-  },
 }

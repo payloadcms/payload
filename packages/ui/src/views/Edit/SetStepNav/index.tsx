@@ -9,7 +9,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useStepNav } from '../../../elements/StepNav'
 import { useConfig } from '../../../providers/Config'
 import { useEditDepth } from '../../../providers/EditDepth'
-import { useDocumentInfo } from '../../..'
+import { useDocumentInfo } from '../../../providers/DocumentInfo'
 
 export const SetStepNav: React.FC<{
   collectionSlug?: SanitizedCollectionConfig['slug']

@@ -1,6 +1,7 @@
 'use client'
 import { useEffect } from 'react'
-import { useDocumentInfo } from '../../..'
+import { useDocumentInfo } from '../../../providers/DocumentInfo'
+import { useTranslation } from '../../../providers/Translation'
 import { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 import { useFormFields } from '../../../forms/Form/context'
 import { formatDocTitle } from '../../../utilities/formatDocTitle'
@@ -11,6 +12,8 @@ export const SetDocumentTitle: React.FC<{
   globalSlug?: SanitizedGlobalConfig['slug']
 }> = (props) => {
   const { useAsTitle, globalLabel, globalSlug } = props
+
+  const { i18n } = useTranslation()
 
   const { setDocumentTitle } = useDocumentInfo()
 
