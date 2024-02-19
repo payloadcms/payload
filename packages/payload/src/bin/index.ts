@@ -56,30 +56,33 @@ const args = minimist(process.argv.slice(2))
 const scriptIndex = args._.findIndex((x) => x === 'build')
 
 const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex]
+if (script) {
+  if (script.startsWith('migrate')) {
+    migrate(args).then(() => process.exit(0))
+  } else {
+    switch (script.toLowerCase()) {
+      case 'build': {
+        build()
+        break
+      }
 
-if (script.startsWith('migrate')) {
-  migrate(args).then(() => process.exit(0))
-} else {
-  switch (script.toLowerCase()) {
-    case 'build': {
-      build()
-      break
+      case 'generate:types': {
+        generateTypes()
+        break
+      }
+
+      case 'generate:graphqlschema': {
+        generateGraphQLSchema()
+        break
+      }
+
+      default:
+        console.log(`Unknown script "${script}".`)
+        break
     }
-
-    case 'generate:types': {
-      generateTypes()
-      break
-    }
-
-    case 'generate:graphqlschema': {
-      generateGraphQLSchema()
-      break
-    }
-
-    default:
-      console.log(`Unknown script "${script}".`)
-      break
   }
+} else {
+  console.error('No payload script specified. Did you mean to run `payload migrate`?')
 }
 
 /**
