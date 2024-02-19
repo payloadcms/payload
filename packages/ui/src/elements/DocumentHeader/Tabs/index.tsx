@@ -45,7 +45,7 @@ export const DocumentTabs: React.FC<{
                 const { condition } = tabConfig || {}
 
                 const meetsCondition =
-                  condition || (condition && condition({ collectionConfig, config, globalConfig }))
+                  !condition || (condition && condition({ collectionConfig, config, globalConfig }))
 
                 if (meetsCondition) {
                   return (

@@ -10,14 +10,13 @@ export const baseClass = 'doc-tab'
 
 export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (props) => {
   const {
-    id,
     apiURL,
     config,
     collectionConfig,
     condition,
     globalConfig,
     href: tabHref,
-    isActive,
+    isActive: tabIsActive,
     label,
     newTab,
     Pill,
@@ -27,14 +26,20 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
   const { routes } = config
 
   let href = typeof tabHref === 'string' ? tabHref : ''
+  let isActive = typeof tabIsActive === 'boolean' ? tabIsActive : false
 
   if (typeof tabHref === 'function') {
     href = tabHref({
-      id,
       apiURL,
       collection: collectionConfig,
       global: globalConfig,
       routes,
+    })
+  }
+
+  if (typeof tabIsActive === 'function') {
+    isActive = tabIsActive({
+      href,
     })
   }
 

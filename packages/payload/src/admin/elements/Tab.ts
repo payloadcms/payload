@@ -1,3 +1,5 @@
+import type { I18n } from '@payloadcms/translations'
+
 import type { SanitizedCollectionConfig } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
@@ -7,8 +9,7 @@ export type DocumentTabProps = {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
-  id: string
-  isEditing?: boolean
+  i18n: I18n
 }
 
 export type DocumentTabCondition = (args: {
@@ -28,17 +29,10 @@ export type DocumentTabConfig = {
         collection: SanitizedCollectionConfig
         global: SanitizedGlobalConfig
         id?: string
-        match: ReturnType<typeof useRouteMatch>
-        routes: ReturnType<typeof useConfig>['routes']
+        routes: SanitizedConfig['routes']
       }) => string)
     | string
-  isActive?:
-    | ((args: {
-        href: string
-        location: ReturnType<typeof useLocation>
-        match: ReturnType<typeof useRouteMatch>
-      }) => boolean)
-    | boolean
+  isActive?: ((args: { href: string }) => boolean) | boolean
   label?: ((args: { t: (key: string) => string }) => string) | string
   newTab?: boolean
 }
