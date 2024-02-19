@@ -18,6 +18,7 @@ export const getNextT = async ({
     translations,
     language: language || getRequestLanguage({ cookies: cookies(), headers: headers() }),
     config: config.i18n,
+    context: 'client',
   })
 
   return i18n.t

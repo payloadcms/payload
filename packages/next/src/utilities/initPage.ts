@@ -65,6 +65,7 @@ export const initPage = async ({
     config: config.i18n,
     language,
     translations,
+    context: 'all',
   })
   let collectionConfig: SanitizedCollectionConfig
   let globalConfig: SanitizedGlobalConfig

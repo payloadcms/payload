@@ -12,6 +12,7 @@ export const getLocalI18n = async ({
 }) =>
   initI18n({
     config: config.i18n,
+    context: 'api',
     language,
     translations,
   })
