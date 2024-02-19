@@ -10,6 +10,10 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "exports": {
+    ".": {
+      "import": "./dist/exports/index.js",
+      "require": "./dist/exports/index.js"
+    },
     "./api": {
       "import": "./dist/api/index.js",
       "require": "./dist/api/index.js"
