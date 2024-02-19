@@ -1,0 +1,72 @@
+{
+  "$schema": "./translation-schema.json",
+  "authentication": {
+    "apiKey": "API Key",
+    "enableAPIKey": "API Keyを許可",
+    "newAccountCreated": "<a href=\"{{serverURL}}\">{{serverURL}}</a>にアクセスするための新しいアカウントが作成されました。以下のリンクをクリックするか、ブラウザに以下のURLを貼り付けて、メールアドレスの確認を行ってください。<a href=\"{{verificationURL}}\">{{verificationURL}}</a><br>メールアドレスの確認後に、正常にログインできるようになります。",
+    "resetYourPassword": "パスワードの再設定",
+    "verified": "検証済み",
+    "verifyYourEmail": "メールアドレスの確認",
+    "youAreReceivingResetPassword": "アカウントのパスワードリセットがリクエストされました。次のリンクをクリックする、または、ブラウザにリンクを貼り付けて、手続きを行ってください:",
+    "youDidNotRequestPassword": "もし望まない場合は、このメールを無視してください。パスワードは変更されません。"
+  },
+  "error": {
+    "deletingFile": "ファイルの削除中にエラーが発生しました。",
+    "emailOrPasswordIncorrect": "メールアドレス、または、パスワードが正しくありません。",
+    "followingFieldsInvalid_one": "次のフィールドは無効です:",
+    "followingFieldsInvalid_other": "次のフィールドは無効です:",
+    "noFilesUploaded": "ファイルがアップロードされていません。",
+    "notAllowedToPerformAction": "このアクションは許可されていません。",
+    "problemUploadingFile": "ファイルのアップロード中に問題が発生しました。",
+    "unableToDeleteCount": "{{total}} {{label}} から {{count}} を削除できません。",
+    "unableToUpdateCount": "{{total}} {{label}} のうち {{count}} 個を更新できません。",
+    "unauthorized": "認証されていません。このリクエストを行うにはログインが必要です。",
+    "userLocked": "このユーザーは、ログイン試行回数が多すぎるため、ロックされています。",
+    "valueMustBeUnique": "ユニークな値である必要があります。"
+  },
+  "general": {
+    "createdAt": "作成日",
+    "deletedCountSuccessfully": "{{count}}つの{{label}}を正常に削除しました。",
+    "deletedSuccessfully": "正常に削除されました。",
+    "email": "メールアドレス",
+    "notFound": "Not Found",
+    "successfullyCreated": "{{label}} が作成されました。",
+    "thisLanguage": "Japanese",
+    "updatedAt": "更新日",
+    "updatedCountSuccessfully": "{{count}}つの{{label}}を正常に更新しました。",
+    "user": "ユーザー",
+    "users": "ユーザー",
+    "value": "値"
+  },
+  "upload": {
+    "fileName": "ファイル名",
+    "fileSize": "ファイル容量",
+    "height": "高さ",
+    "sizes": "容量",
+    "width": "横幅"
+  },
+  "validation": {
+    "emailAddress": "有効なメールアドレスを入力してください。",
+    "enterNumber": "有効な数値を入力してください。",
+    "greaterThanMax": "{{value}}は許容最大{{label}}の{{max}}を超えています。",
+    "invalidInput": "無効な入力値です。",
+    "invalidSelection": "無効な選択です。",
+    "invalidSelections": "次の無効な選択があります: ",
+    "lessThanMin": "{{value}}は許容最小{{label}}の{{min}}未満です。",
+    "longerThanMin": "{{minLength}} 文字以上にする必要があります。",
+    "notValidDate": "\"{{value}}\" は有効な日付ではありません。",
+    "requiresNoMoreThan": "最大で {{count}} {{label}} 以下にする必要があります。",
+    "requiresTwoNumbers": "2つの数値が必要です。",
+    "shorterThanMax": "{{maxLength}} 文字以下にする必要があります。",
+    "trueOrFalse": "\"true\" または \"false\" の値にする必要があります。",
+    "validUploadID": "有効なアップロードIDではありません。"
+  },
+  "version": {
+    "autosavedSuccessfully": "自動保存に成功しました。",
+    "draft": "ドラフト",
+    "draftSavedSuccessfully": "下書きは正常に保存されました。",
+    "published": "公開済み",
+    "restoredSuccessfully": "正常に復元されました。",
+    "status": "ステータス"
+  }
+}

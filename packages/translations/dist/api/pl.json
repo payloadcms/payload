@@ -1,0 +1,72 @@
+{
+  "$schema": "./translation-schema.json",
+  "authentication": {
+    "apiKey": "Klucz API",
+    "enableAPIKey": "Aktywuj klucz API",
+    "newAccountCreated": "Właśnie utworzono nowe konto, w celu uzyskania dostępu do <a href=\"{{serverURL}}\">{{serverURL}}</a>. Kliknij poniższy link lub wklej go do przeglądarki, aby zweryfikować swój adres email: <a href=\"{{verificationURL}}\">{{verificationURL}}</a>.<br> Po zweryfikowaniu adresu email będziesz mógł się pomyślnie zalogować.",
+    "resetYourPassword": "Zresetuj swoje hasło",
+    "verified": "Zweryfikowano",
+    "verifyYourEmail": "Zweryfikuj swój email",
+    "youAreReceivingResetPassword": "Otrzymałeś tę wiadomość, ponieważ Ty (lub ktoś inny) poprosiłeś o zresetowanie hasła do Twojego konta. Kliknij poniższy link lub wklej go w przeglądarce, aby zakończyć proces:",
+    "youDidNotRequestPassword": "Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione."
+  },
+  "error": {
+    "deletingFile": "",
+    "emailOrPasswordIncorrect": "Podany adres e-mail lub hasło jest nieprawidłowe.",
+    "followingFieldsInvalid_one": "To pole jest nieprawidłowe:",
+    "followingFieldsInvalid_other": "Następujące pola są nieprawidłowe:",
+    "noFilesUploaded": "Nie przesłano żadnych plików.",
+    "notAllowedToPerformAction": "Nie możesz wykonać tej akcji.",
+    "problemUploadingFile": "Wystąpił problem podczas przesyłania pliku.",
+    "unableToDeleteCount": "Nie można usunąć {{count}} z {{total}} {{label}}.",
+    "unableToUpdateCount": "Nie można zaktualizować {{count}} z {{total}} {{label}}.",
+    "unauthorized": "Brak dostępu, musisz być zalogowany.",
+    "userLocked": "Ten użytkownik został zablokowany z powodu zbyt wielu nieudanych prób logowania.",
+    "valueMustBeUnique": "Wartość musi być unikalna"
+  },
+  "general": {
+    "createdAt": "Data utworzenia",
+    "deletedCountSuccessfully": "Pomyślnie usunięto {{count}} {{label}}.",
+    "deletedSuccessfully": "Pomyślnie usunięto.",
+    "email": "Email",
+    "notFound": "Nie znaleziono",
+    "successfullyCreated": "Pomyślnie utworzono {{label}}.",
+    "thisLanguage": "Polski",
+    "updatedAt": "Data edycji",
+    "updatedCountSuccessfully": "Pomyślnie zaktualizowano {{count}} {{label}}.",
+    "user": "użytkownik",
+    "users": "użytkownicy",
+    "value": "Wartość"
+  },
+  "upload": {
+    "fileName": "Nazwa pliku",
+    "fileSize": "Rozmiar pliku",
+    "height": "Wysokość",
+    "sizes": "Rozmiary",
+    "width": "Szerokość"
+  },
+  "validation": {
+    "emailAddress": "Wprowadź poprawny adres email.",
+    "enterNumber": "Wprowadź poprawny numer telefonu.",
+    "greaterThanMax": "{{value}} jest większe niż maksymalnie dozwolony {{label}} wynoszący {{max}}.",
+    "invalidInput": "To pole zawiera nieprawidłowe dane.",
+    "invalidSelection": "To pole ma nieprawidłowy wybór.",
+    "invalidSelections": "To pole zawiera następujące, nieprawidłowe wybory:",
+    "lessThanMin": "{{value}} jest mniejsze niż minimalnie dozwolony {{label}} wynoszący {{min}}.",
+    "longerThanMin": "Ta wartość musi być dłuższa niż minimalna długość znaków: {{minLength}}.",
+    "notValidDate": "\"{{value}}\" nie jest prawidłową datą.",
+    "requiresNoMoreThan": "To pole może posiadać co najmniej {{count}} {{label}}.",
+    "requiresTwoNumbers": "To pole wymaga dwóch liczb.",
+    "shorterThanMax": "Ta wartość musi być krótsza niż maksymalna długość znaków: {{maxLength}}.",
+    "trueOrFalse": "To pole może mieć wartość tylko 'true' lub 'false'.",
+    "validUploadID": "To pole nie jest prawidłowym identyfikatorem przesyłania."
+  },
+  "version": {
+    "autosavedSuccessfully": "Pomyślnie zapisano automatycznie.",
+    "draft": "Szkic",
+    "draftSavedSuccessfully": "Wersja robocza została pomyślnie zapisana.",
+    "published": "Opublikowano",
+    "restoredSuccessfully": "Przywrócono pomyślnie.",
+    "status": "Status"
+  }
+}

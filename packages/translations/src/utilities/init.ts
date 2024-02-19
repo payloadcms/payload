@@ -219,32 +219,31 @@ function memoize<T>(fn: Function, keys: string[]): T {
   }
 }
 
-type GetTranslationsByKey = ({ context }: { context: 'client' | 'api' }) => Promise<Translations>
-const getTranslationsByKey: GetTranslationsByKey = memoize(
-  <GetTranslationsByKey>(async ({ context }): Promise<Translations> => {
-    const cachedTranslations = new Map<string, Translations>()
-    if (cachedTranslations.has(context)) {
-      return cachedTranslations.get(context)
-    }
+// type GetTranslationsByKey = ({ context }: { context: 'client' | 'api' }) => Promise<Translations>
 
-    let translations = {}
-    if (context === 'api') {
-      translations = await import('@payloadcms/translations/api')
-      cachedTranslations.set(context, translations)
-    } else if (context === 'client') {
-      translations = await import('@payloadcms/translations/client')
-      cachedTranslations.set(context, translations)
-    }
+// const getTranslationsByKey: GetTranslationsByKey = memoize(
+//   <GetTranslationsByKey>(async ({ context }): Promise<Translations> => {
+//     const cachedTranslations = new Map<string, Translations>()
+//     if (cachedTranslations.has(context)) {
+//       return cachedTranslations.get(context)
+//     }
 
-    return translations
-  }),
-  ['context'] satisfies Array<keyof Parameters<GetTranslationsByKey>[0]>,
-)
+//     let translations = {}
+//     if (context === 'api') {
+//       translations = await import('@payloadcms/translations/api')
+//       cachedTranslations.set(context, translations)
+//     } else if (context === 'client') {
+//       translations = await import('@payloadcms/translations/client')
+//       cachedTranslations.set(context, translations)
+//     }
+
+//     return translations
+//   }),
+//   ['context'] satisfies Array<keyof Parameters<GetTranslationsByKey>[0]>,
+// )
 
 export const initI18n: InitI18n = memoize(
-  <InitI18n>(async ({ config, language = 'en', translationsContext }) => {
-    const translations = await getTranslationsByKey({ context: translationsContext })
-
+  <InitI18n>(async ({ config, language = 'en', translations }) => {
     const i18n = {
       fallbackLanguage: config.fallbackLanguage,
       language: language || config.fallbackLanguage,
@@ -257,5 +256,5 @@ export const initI18n: InitI18n = memoize(
 
     return i18n
   }),
-  ['language', 'translationsContext'] satisfies Array<keyof Parameters<InitI18n>[0]>,
+  ['language'] satisfies Array<keyof Parameters<InitI18n>[0]>,
 )
