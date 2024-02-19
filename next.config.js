@@ -30,6 +30,8 @@ const nextConfig = {
         ...(config.ignoreWarnings || []),
         { module: /node_modules\/mongodb\/lib\/utils\.js/ },
         { file: /node_modules\/mongodb\/lib\/utils\.js/ },
+        { module: /node_modules\/mongodb\/lib\/bson\.js/ },
+        { file: /node_modules\/mongodb\/lib\/bson\.js/ },
       ],
       resolve: {
         ...config.resolve,
