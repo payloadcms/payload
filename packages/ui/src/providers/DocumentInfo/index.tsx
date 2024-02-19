@@ -24,10 +24,23 @@ const Context = createContext({} as DocumentInfoContext)
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
 export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => {
+  const [propsToUse, setPropsToUse] = useState<Props>({
+    ...rest,
+  })
+
+  const { globalSlug, collectionSlug, id } = propsToUse
+
   const {
     routes: { api },
     serverURL,
+    collections,
+    globals,
   } = useConfig()
+
+  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
+  const globalConfig = globals.find((g) => g.slug === globalSlug)
+  const docConfig = collectionConfig || globalConfig
+  const versionsConfig = docConfig?.versions
 
   const { getPreference, setPreference } = usePreferences()
   const { i18n } = useTranslation()
@@ -39,13 +52,8 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
-  const [propsToUse, setPropsToUse] = useState<Props>({
-    ...rest,
-  })
 
   const [title, setTitle] = useState<string>('')
-
-  const { globalSlug, collectionSlug, id, versionsConfig } = propsToUse
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -279,7 +287,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
     publishedDoc,
     setDocFieldPreferences,
     unpublishedVersions,
-    versionsConfig,
+    docConfig,
     versions,
     setDocumentInfo: setPropsToUse,
     setDocumentTitle,

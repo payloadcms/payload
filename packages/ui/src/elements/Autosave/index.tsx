@@ -23,7 +23,9 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
     routes: { admin, api },
     serverURL,
   } = useConfig()
-  const { getVersions, versionsConfig, versions } = useDocumentInfo()
+  const { getVersions, docConfig, versions } = useDocumentInfo()
+  const versionsConfig = docConfig?.versions
+
   const [fields] = useAllFormFields()
   const modified = useFormModified()
   const { code: locale } = useLocale()

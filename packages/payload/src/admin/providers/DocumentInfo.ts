@@ -9,6 +9,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types'
 
 export type DocumentInfoContext = {
   collectionSlug?: SanitizedCollectionConfig['slug']
+  docConfig?: SanitizedCollectionConfig | SanitizedGlobalConfig
   docPermissions: DocumentPermissions
   getDocPermissions: () => Promise<void>
   getDocPreferences: () => Promise<{ [key: string]: unknown }>
@@ -23,7 +24,6 @@ export type DocumentInfoContext = {
       collectionSlug: SanitizedCollectionConfig['slug']
       globalSlug: SanitizedGlobalConfig['slug']
       id: number | string
-      versionsConfig: SanitizedCollectionConfig['versions'] | SanitizedGlobalConfig['versions']
     }>,
   ) => void
   setDocumentTitle: (title: string) => void
@@ -31,6 +31,5 @@ export type DocumentInfoContext = {
   title?: string
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
   versions?: PaginatedDocs<TypeWithVersion<any>>
-  versionsConfig?: SanitizedCollectionConfig['versions'] | SanitizedGlobalConfig['versions']
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
 }

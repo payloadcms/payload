@@ -34,5 +34,4 @@ export type Props = {
   globalSlug?: SanitizedGlobalConfig['slug']
   id?: number | string
   idFromParams?: boolean
-  versionsConfig?: SanitizedCollectionConfig['versions'] | SanitizedGlobalConfig['versions']
 }
