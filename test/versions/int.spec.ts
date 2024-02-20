@@ -1,20 +1,21 @@
-import { GraphQLClient, request } from 'graphql-request'
+import type { Payload } from '../../packages/payload/src'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
 import AutosavePosts from './collections/Autosave'
 import configPromise from './config'
 import AutosaveGlobal from './globals/Autosave'
 import { clearAndSeedEverything } from './seed'
 import { autosaveCollectionSlug, draftCollectionSlug } from './slugs'
 
+let payload: Payload
+let restClient: NextRESTClient
+
 let collectionLocalPostID: string
 let collectionLocalVersionID
 
-let graphQLURL
-
-let graphQLClient
 let token
 
 let collectionGraphQLPostID
@@ -34,10 +35,9 @@ const formatGraphQLID = (id: number | string) =>
 
 describe('Versions', () => {
   beforeAll(async () => {
-    const config = await configPromise
-
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
 
     const login = `
       mutation {
@@ -48,10 +48,11 @@ describe('Versions', () => {
           token
         }
       }`
+    const { data } = await restClient
+      .GRAPHQL_POST({ body: JSON.stringify({ query: login }) })
+      .then((res) => res.json())
 
-    const response = await request(graphQLURL, login)
-    token = response.loginUser.token
-    graphQLClient = new GraphQLClient(graphQLURL, { headers: { Authorization: `JWT ${token}` } })
+    token = data.loginUser.token
   })
 
   beforeEach(async () => {
@@ -67,10 +68,7 @@ describe('Versions', () => {
     })
     collectionLocalPostID = autosavePost.id
 
-    const updatedPost: {
-      _status?: string
-      title: string
-    } = await payload.update({
+    await payload.update({
       id: collectionLocalPostID,
       collection,
       data: {
@@ -788,10 +786,16 @@ describe('Versions', () => {
         }
       }`
 
-      const response = await graphQLClient.request(query)
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
 
-      const data = response.createAutosavePost
-      collectionGraphQLPostID = data.id
+      collectionGraphQLPostID = data.createAutosavePost.id
     })
     describe('Create', () => {
       it('should allow a new doc to be created with draft status', async () => {
@@ -808,11 +812,16 @@ describe('Versions', () => {
           }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.createAutosavePost
-
-        expect(data._status).toStrictEqual('draft')
+        expect(data.createAutosavePost._status).toStrictEqual('draft')
       })
     })
 
@@ -831,7 +840,12 @@ describe('Versions', () => {
                 createdAt
             }
         }`
-        await graphQLClient.request(update)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: update }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         // language=graphQL
         const query = `query {
@@ -844,9 +858,16 @@ describe('Versions', () => {
             }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        collectionGraphQLVersionID = response.versionsAutosavePosts.docs[0].id
+        collectionGraphQLVersionID = data.versionsAutosavePosts.docs[0].id
       })
 
       it('should allow read of versions by version id', async () => {
@@ -862,13 +883,18 @@ describe('Versions', () => {
           }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.versionAutosavePost
-
-        expect(data.id).toBeDefined()
-        expect(data.parent.id).toStrictEqual(collectionGraphQLPostID)
-        expect(data.version.title).toStrictEqual(updatedTitle2)
+        expect(data.versionAutosavePost.id).toBeDefined()
+        expect(data.versionAutosavePost.parent.id).toStrictEqual(collectionGraphQLPostID)
+        expect(data.versionAutosavePost.version.title).toStrictEqual(updatedTitle2)
       })
 
       it('should allow read of versions by querying version content', async () => {
@@ -887,10 +913,16 @@ describe('Versions', () => {
             }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.versionsAutosavePosts
-        const doc = data.docs[0]
+        const doc = data.versionsAutosavePosts.docs[0]
 
         expect(doc.id).toBeDefined()
         expect(doc.parent.id).toStrictEqual(collectionGraphQLPostID)
@@ -911,7 +943,12 @@ describe('Versions', () => {
                 createdAt
             }
         }`
-        await graphQLClient.request(update)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: update }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         // language=graphQL
         const query = `query {
@@ -924,9 +961,16 @@ describe('Versions', () => {
             }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        collectionGraphQLVersionID = response.versionsAutosavePosts.docs[0].id
+        collectionGraphQLVersionID = data.versionsAutosavePosts.docs[0].id
       })
       it('should allow a version to be restored', async () => {
         // Update it
@@ -939,7 +983,12 @@ describe('Versions', () => {
             createdAt
           }
         }`
-        await graphQLClient.request(update)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: update }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         // restore a versionsPost
         const restore = `mutation {
@@ -948,7 +997,12 @@ describe('Versions', () => {
           }
         }`
 
-        await graphQLClient.request(restore)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: restore }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         const query = `query {
           AutosavePost(id: ${formatGraphQLID(collectionGraphQLPostID)}) {
@@ -956,9 +1010,16 @@ describe('Versions', () => {
           }
         }`
 
-        const response = await graphQLClient.request(query)
-        const data = response.AutosavePost
-        expect(data.title).toStrictEqual(collectionGraphQLOriginalTitle)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
+
+        expect(data.AutosavePost.title).toStrictEqual(collectionGraphQLOriginalTitle)
       })
     })
   })
@@ -973,7 +1034,7 @@ describe('Versions', () => {
         slug: globalSlug,
       })
 
-      const updatedGlobal = await payload.updateGlobal({
+      await payload.updateGlobal({
         data: {
           title: title2,
         },
@@ -1179,7 +1240,12 @@ describe('Versions', () => {
               title
           }
       }`
-      await graphQLClient.request(update)
+      await restClient.GRAPHQL_POST({
+        body: JSON.stringify({ query: update }),
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+      })
 
       // language=graphQL
       const query = `query {
@@ -1193,9 +1259,16 @@ describe('Versions', () => {
           }
       }`
 
-      const response = await graphQLClient.request(query)
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
 
-      globalGraphQLVersionID = response.versionsAutosaveGlobal.docs[0].id
+      globalGraphQLVersionID = data.versionsAutosaveGlobal.docs[0].id
     })
     describe('Read', () => {
       it('should allow read of versions by version id', async () => {
@@ -1209,12 +1282,17 @@ describe('Versions', () => {
             }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.versionAutosaveGlobal
-
-        expect(data.id).toBeDefined()
-        expect(data.version.title).toStrictEqual(globalGraphQLOriginalTitle)
+        expect(data.versionAutosaveGlobal.id).toBeDefined()
+        expect(data.versionAutosaveGlobal.version.title).toStrictEqual(globalGraphQLOriginalTitle)
       })
 
       it('should allow read of versions by querying version content', async () => {
@@ -1230,10 +1308,16 @@ describe('Versions', () => {
             }
         }`
 
-        const response = await graphQLClient.request(query)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
 
-        const data = response.versionsAutosaveGlobal
-        const doc = data.docs[0]
+        const doc = data.versionsAutosaveGlobal.docs[0]
 
         expect(doc.id).toBeDefined()
         expect(doc.version.title).toStrictEqual(globalGraphQLOriginalTitle)
@@ -1249,7 +1333,12 @@ describe('Versions', () => {
             }
         }`
 
-        await graphQLClient.request(restore)
+        await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: restore }),
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
 
         const query = `query {
           AutosaveGlobal {
@@ -1257,9 +1346,15 @@ describe('Versions', () => {
           }
         }`
 
-        const response = await graphQLClient.request(query)
-        const data = response.AutosaveGlobal
-        expect(data.title).toStrictEqual(globalGraphQLOriginalTitle)
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+          .then((res) => res.json())
+        expect(data.AutosaveGlobal.title).toStrictEqual(globalGraphQLOriginalTitle)
       })
     })
   })

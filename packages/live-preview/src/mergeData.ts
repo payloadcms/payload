@@ -5,8 +5,27 @@ import type { PopulationsByCollection, UpdatedDocument } from './types'
 
 import { traverseFields } from './traverseFields'
 
+const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
+  const url = `${serverURL}${apiPath}/${endpoint}`
+  return fetch(url, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+}
+
 export const mergeData = async <T>(args: {
   apiRoute?: string
+  collectionPopulationRequestHandler?: ({
+    apiPath,
+    endpoint,
+    serverURL,
+  }: {
+    apiPath: string
+    endpoint: string
+    serverURL: string
+  }) => Promise<Response>
   depth?: number
   externallyUpdatedRelationship?: UpdatedDocument
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
@@ -44,19 +63,16 @@ export const mergeData = async <T>(args: {
 
   await Promise.all(
     Object.entries(populationsByCollection).map(async ([collection, populations]) => {
-      const ids = new Set(populations.map(({ id }) => id))
-      const url = `${serverURL}${
-        apiRoute || '/api'
-      }/${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}`
-
       let res: PaginatedDocs
 
+      const ids = new Set(populations.map(({ id }) => id))
+      const requestHandler = args.collectionPopulationRequestHandler || defaultRequestHandler
+
       try {
-        res = await fetch(url, {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        res = await requestHandler({
+          apiPath: apiRoute || '/api',
+          endpoint: `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}`,
+          serverURL,
         }).then((res) => res.json())
 
         if (res?.docs?.length > 0) {

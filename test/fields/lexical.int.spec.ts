@@ -1,8 +1,6 @@
 import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
 
-import { GraphQLClient } from 'graphql-request'
-
-import type { SanitizedConfig } from '../../packages/payload/src/config/types'
+import type { Payload } from '../../packages/payload/src'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type {
   SerializedBlockNode,
@@ -12,10 +10,10 @@ import type {
 } from '../../packages/richtext-lexical/src'
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types'
 
-import payload from '../../packages/payload/src'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
-import configPromise from '../uploads/config'
+import { getPayload } from '../../packages/payload/src'
+import { devUser } from '../credentials'
+import { NextRESTClient } from '../helpers/NextRESTClient'
+import { startMemoryDB } from '../startMemoryDB'
 import { arrayDoc } from './collections/Array/shared'
 import { lexicalDocData } from './collections/Lexical/data'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data'
@@ -23,6 +21,7 @@ import { richTextDocData } from './collections/RichText/data'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText'
 import { textDoc } from './collections/Text/shared'
 import { uploadsDoc } from './collections/Upload/shared'
+import configPromise from './config'
 import { clearAndSeedEverything } from './seed'
 import {
   arrayFieldsSlug,
@@ -33,10 +32,8 @@ import {
   uploadsSlug,
 } from './slugs'
 
-let client: RESTClient
-let graphQLClient: GraphQLClient
-let serverURL: string
-let config: SanitizedConfig
+let payload: Payload
+let restClient: NextRESTClient
 let token: string
 
 let createdArrayDocID: number | string = null
@@ -46,19 +43,17 @@ let createdRichTextDocID: number | string = null
 
 describe('Lexical', () => {
   beforeAll(async () => {
-    ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
-    config = await configPromise
-
-    client = new RESTClient(config, { defaultSlug: richTextFieldsSlug, serverURL })
-    const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
-    graphQLClient = new GraphQLClient(graphQLURL)
-    token = await client.login()
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
   })
 
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
-    client = new RESTClient(config, { defaultSlug: richTextFieldsSlug, serverURL })
-    await client.login()
+    await restClient.login({
+      slug: 'users',
+      credentials: devUser,
+    })
 
     createdArrayDocID = (
       await payload.find({

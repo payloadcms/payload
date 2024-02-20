@@ -9,7 +9,7 @@ export const withCondition = <P extends Record<string, unknown>>(
 ): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
     const { name } = props
-    const pathFromContext = useFieldPath()
+    const { path: pathFromContext } = useFieldPath()
     const path = pathFromContext || name
 
     return (

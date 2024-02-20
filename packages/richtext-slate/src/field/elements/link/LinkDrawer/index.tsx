@@ -9,7 +9,7 @@ import {
   useEditDepth,
   useTranslation,
 } from '@payloadcms/ui'
-import { useHotkey } from 'payload/components/hooks'
+import { useHotkey } from '@payloadcms/ui/hooks'
 import React, { useRef } from 'react'
 
 import type { Props } from './types'

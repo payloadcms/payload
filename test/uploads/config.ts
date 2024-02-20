@@ -7,13 +7,17 @@ import removeFiles from '../helpers/removeFiles'
 import { Uploads1 } from './collections/Upload1'
 import Uploads2 from './collections/Upload2'
 import AdminThumbnailCol from './collections/admin-thumbnail'
-import { audioSlug, enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './shared'
+import {
+  audioSlug,
+  enlargeSlug,
+  mediaSlug,
+  reduceSlug,
+  relationSlug,
+  unstoredMediaSlug,
+} from './shared'
 
 export default buildConfigWithDefaults({
   serverURL: undefined,
-  paths: {
-    configDir: __dirname,
-  },
   collections: [
     {
       slug: relationSlug,
@@ -44,7 +48,7 @@ export default buildConfigWithDefaults({
       slug: 'gif-resize',
       upload: {
         staticURL: '/media-gif',
-        staticDir: './media-gif',
+        staticDir: path.resolve(__dirname, './media-gif'),
         mimeTypes: ['image/gif'],
         resizeOptions: {
           position: 'center',
@@ -75,7 +79,7 @@ export default buildConfigWithDefaults({
       slug: 'no-image-sizes',
       upload: {
         staticURL: '/no-image-sizes',
-        staticDir: './no-image-sizes',
+        staticDir: path.resolve(__dirname, './no-image-sizes'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         resizeOptions: {
           position: 'center',
@@ -89,7 +93,7 @@ export default buildConfigWithDefaults({
       slug: 'object-fit',
       upload: {
         staticURL: '/object-fit',
-        staticDir: './object-fit',
+        staticDir: path.resolve(__dirname, './object-fit'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
@@ -125,7 +129,7 @@ export default buildConfigWithDefaults({
       upload: {
         focalPoint: false,
         staticURL: '/crop-only',
-        staticDir: './crop-only',
+        staticDir: path.resolve(__dirname, './crop-only'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
@@ -152,7 +156,7 @@ export default buildConfigWithDefaults({
       upload: {
         crop: false,
         staticURL: '/focal-only',
-        staticDir: './focal-only',
+        staticDir: path.resolve(__dirname, './focal-only'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
@@ -178,7 +182,7 @@ export default buildConfigWithDefaults({
       slug: mediaSlug,
       upload: {
         staticURL: '/media',
-        staticDir: './media',
+        staticDir: path.resolve(__dirname, './media'),
         // crop: false,
         // focalPoint: false,
         mimeTypes: [
@@ -284,7 +288,7 @@ export default buildConfigWithDefaults({
       slug: enlargeSlug,
       upload: {
         staticURL: '/enlarge',
-        staticDir: './media/enlarge',
+        staticDir: path.resolve(__dirname, './media/enlarge'),
         mimeTypes: [
           'image/png',
           'image/jpg',
@@ -332,7 +336,7 @@ export default buildConfigWithDefaults({
       slug: reduceSlug,
       upload: {
         staticURL: '/reduce',
-        staticDir: './media/reduce',
+        staticDir: path.resolve(__dirname, './media/reduce'),
         mimeTypes: [
           'image/png',
           'image/jpg',
@@ -374,7 +378,7 @@ export default buildConfigWithDefaults({
       slug: 'media-trim',
       upload: {
         staticURL: '/media-trim',
-        staticDir: './media-trim',
+        staticDir: path.resolve(__dirname, './media-trim'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         trimOptions: 0,
         imageSizes: [
@@ -404,7 +408,7 @@ export default buildConfigWithDefaults({
       fields: [],
     },
     {
-      slug: 'unstored-media',
+      slug: unstoredMediaSlug,
       upload: {
         staticURL: '/media',
         disableLocalStorage: true,
@@ -416,7 +420,7 @@ export default buildConfigWithDefaults({
       upload: {
         // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://localhost:3000/media)
         staticURL: 'http://localhost:3000/media',
-        staticDir: './media',
+        staticDir: path.resolve(__dirname, './media'),
       },
       fields: [],
     },
@@ -427,7 +431,7 @@ export default buildConfigWithDefaults({
       slug: 'optional-file',
       upload: {
         staticURL: '/optional',
-        staticDir: './optional',
+        staticDir: path.resolve(__dirname, './optional'),
         filesRequiredOnCreate: false,
       },
       fields: [],
@@ -436,7 +440,7 @@ export default buildConfigWithDefaults({
       slug: 'required-file',
       upload: {
         staticURL: '/required',
-        staticDir: './required',
+        staticDir: path.resolve(__dirname, './required'),
         filesRequiredOnCreate: true,
       },
       fields: [],

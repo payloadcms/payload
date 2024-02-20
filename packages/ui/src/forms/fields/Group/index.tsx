@@ -30,12 +30,12 @@ const Group: React.FC<Props> = (props) => {
     Label: LabelFromProps,
     label,
     required,
+    name,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
-  const path = useFieldPath()
-
+  const { path, schemaPath } = useFieldPath()
   const { i18n } = useTranslation()
   const isWithinCollapsible = useCollapsible()
   const isWithinGroup = useGroup()
@@ -70,7 +70,7 @@ const Group: React.FC<Props> = (props) => {
           width,
         }}
       >
-        <FieldPathProvider path={path}>
+        <FieldPathProvider path={path} schemaPath={schemaPath}>
           <GroupProvider>
             <div className={`${baseClass}__wrap`}>
               <div className={`${baseClass}__header`}>

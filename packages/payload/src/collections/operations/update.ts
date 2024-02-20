@@ -164,6 +164,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
     const promises = docs.map(async (doc) => {
       const { id } = doc
       let data = {
+        ...newFileData,
         ...bulkUpdateData,
       }
 

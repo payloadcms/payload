@@ -1,21 +1,25 @@
-import payload from '../../../packages/payload/src'
+import type { Payload } from '../../../packages/payload/src'
+
+import { getPayload } from '../../../packages/payload/src'
 import { devUser } from '../../credentials'
-import { initPayloadTest } from '../../helpers/configHelpers'
-import { RESTClient } from '../../helpers/rest'
+import { NextRESTClient } from '../../helpers/NextRESTClient'
+import { startMemoryDB } from '../../startMemoryDB'
 import { collectionSlug } from './config'
+import configPromise from './config'
 
-require('isomorphic-fetch')
-
-let client: RESTClient
+let restClient: NextRESTClient
+let payload: Payload
 
 describe('Remove token from auth responses', () => {
   beforeAll(async () => {
-    const config = await initPayloadTest({ __dirname, init: { local: false } })
-    const { serverURL } = config
-    client = new RESTClient(config, { serverURL, defaultSlug: collectionSlug })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
 
-    await client.endpoint(`/api/${collectionSlug}/first-register`, 'post', devUser)
-    await client.login()
+    await restClient.POST(`/${collectionSlug}/first-register`, {
+      body: JSON.stringify(devUser),
+    })
+    await restClient.login({ slug: collectionSlug, credentials: devUser })
   })
 
   afterAll(async () => {
@@ -25,27 +29,28 @@ describe('Remove token from auth responses', () => {
   })
 
   it('should not include token in response from /login', async () => {
-    const { status, data } = await client.endpoint(`/api/${collectionSlug}/login`, 'post', devUser)
-    expect(status).toBe(200)
-    expect(data.token).not.toBeDefined()
-    expect(data.user.email).toBeDefined()
+    const result = await restClient.login({
+      slug: collectionSlug,
+      credentials: devUser,
+    })
+    expect(result.token).not.toBeDefined()
+    expect(result.user.email).toBeDefined()
   })
 
   it('should not include token in response from /me', async () => {
-    const { status, data } = await client.endpointWithAuth(`/api/${collectionSlug}/me`)
-    expect(status).toBe(200)
-    expect(data.token).not.toBeDefined()
-    expect(data.user.email).toBeDefined()
+    const response = await restClient.GET(`/${collectionSlug}/me`)
+    const result = await response.json()
+    expect(response.status).toBe(200)
+    expect(result.token).not.toBeDefined()
+    expect(result.user.email).toBeDefined()
   })
 
   it('should not include token in response from /refresh-token', async () => {
-    const { status, data } = await client.endpointWithAuth(
-      `/api/${collectionSlug}/refresh-token`,
-      'post',
-    )
-    expect(status).toBe(200)
-    expect(data.refreshedToken).not.toBeDefined()
-    expect(data.user.email).toBeDefined()
+    const response = await restClient.POST(`/${collectionSlug}/refresh-token`)
+    const result = await response.json()
+    expect(response.status).toBe(200)
+    expect(result.refreshedToken).not.toBeDefined()
+    expect(result.user.email).toBeDefined()
   })
 
   it('should not include token in response from /reset-password', async () => {
@@ -55,17 +60,13 @@ describe('Remove token from auth responses', () => {
       disableEmail: true,
     })
 
-    const { status, data } = await client.endpoint(
-      `/api/${collectionSlug}/reset-password`,
-      'post',
-      {
-        token,
-        password: devUser.password,
-      },
-    )
+    const response = await restClient.POST(`/${collectionSlug}/reset-password`, {
+      body: JSON.stringify({ token, password: devUser.password }),
+    })
+    const result = await response.json()
 
-    expect(status).toBe(200)
-    expect(data.token).not.toBeDefined()
-    expect(data.user.email).toBeDefined()
+    expect(response.status).toBe(200)
+    expect(result.token).not.toBeDefined()
+    expect(result.user.email).toBeDefined()
   })
 })

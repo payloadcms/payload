@@ -6,4 +6,5 @@ export type Props = FormFieldBase & {
   indexPath: string
   permissions: FieldPermissions
   hideGutter?: boolean
+  name?: string
 }

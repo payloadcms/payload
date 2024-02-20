@@ -22,4 +22,5 @@ export type FieldType<T> = {
   valid?: boolean
   value: T
   path: string
+  schemaPath: string
 }

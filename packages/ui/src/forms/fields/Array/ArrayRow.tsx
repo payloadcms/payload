@@ -126,7 +126,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        <FieldPathProvider path={path}>
+        <FieldPathProvider path={path} schemaPath={parentPath}>
           <RenderFields
             className={`${baseClass}__fields`}
             fieldMap={fieldMap}

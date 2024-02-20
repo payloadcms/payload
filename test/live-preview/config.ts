@@ -13,8 +13,6 @@ import { seed } from './seed'
 import { mobileBreakpoint } from './shared'
 import { formatLivePreviewURL } from './utilities/formatLivePreviewURL'
 
-const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
-
 export default buildConfigWithDefaults({
   admin: {
     livePreview: {
@@ -25,16 +23,6 @@ export default buildConfigWithDefaults({
       collections: ['pages', 'posts'],
       globals: ['header', 'footer'],
     },
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          fs: mockModulePath,
-        },
-      },
-    }),
   },
   cors: ['http://localhost:3001'],
   csrf: ['http://localhost:3001'],

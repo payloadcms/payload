@@ -1,18 +1,16 @@
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
-import { GraphQLClient } from 'graphql-request'
-
 import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
-import type { SanitizedConfig } from '../../packages/payload/src/config/types'
+import type { Payload } from '../../packages/payload/src'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { RichTextField } from './payload-types'
+import type { GroupField } from './payload-types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { NextRESTClient } from '../helpers/NextRESTClient'
 import { isMongoose } from '../helpers/isMongoose'
-import { RESTClient } from '../helpers/rest'
-import configPromise from '../uploads/config'
+import { startMemoryDB } from '../startMemoryDB'
 import { arrayDefaultValue } from './collections/Array'
 import { blocksDoc } from './collections/Blocks/shared'
 import { dateDoc } from './collections/Date/shared'
@@ -28,8 +26,8 @@ import {
 } from './collections/Tabs/constants'
 import { tabsDoc } from './collections/Tabs/shared'
 import { defaultText } from './collections/Text/shared'
+import configPromise from './config'
 import { clearAndSeedEverything } from './seed'
-import { GroupField } from './payload-types'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -39,22 +37,19 @@ import {
   textFieldsSlug,
 } from './slugs'
 
-let client: RESTClient
-let graphQLClient: GraphQLClient
-let serverURL: string
-let config: SanitizedConfig
-let token: string
+let restClient: NextRESTClient
 let user: any
+let payload: Payload
 
 describe('Fields', () => {
   beforeAll(async () => {
-    ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
-    config = await configPromise
-
-    client = new RESTClient(config, { defaultSlug: 'point-fields', serverURL })
-    const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
-    graphQLClient = new GraphQLClient(graphQLURL)
-    token = await client.login()
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
+    await restClient.login({
+      slug: 'users',
+      credentials: devUser,
+    })
 
     user = await payload.login({
       collection: 'users',
@@ -67,8 +62,10 @@ describe('Fields', () => {
 
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
-    client = new RESTClient(config, { defaultSlug: 'point-fields', serverURL })
-    await client.login()
+    await restClient.login({
+      slug: 'users',
+      credentials: devUser,
+    })
   })
 
   describe('text', () => {
@@ -1061,14 +1058,12 @@ describe('Fields', () => {
           }
         }
       }`
-      const response = await graphQLClient.request(
-        query,
-        {},
-        {
-          Authorization: `JWT ${token}`,
-        },
-      )
-      const { docs }: PaginatedDocs<RichTextField> = response.RichTextFields
+      const { data } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+      const { docs }: PaginatedDocs<RichTextField> = data.RichTextFields
       const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any
       expect(uploadElement.value.media.filename).toStrictEqual('payload.png')
     })

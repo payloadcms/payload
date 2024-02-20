@@ -132,7 +132,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        <FieldPathProvider path={path}>
+        <FieldPathProvider path={path} schemaPath={`${parentPath}.${block.slug}`}>
           <RenderFields
             className={`${baseClass}__fields`}
             fieldMap={block.subfields}

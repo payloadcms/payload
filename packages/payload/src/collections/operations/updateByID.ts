@@ -88,7 +88,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     }
 
     let { data } = args
-    const { password } = data
+    const password = data?.password
     const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
     const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
 

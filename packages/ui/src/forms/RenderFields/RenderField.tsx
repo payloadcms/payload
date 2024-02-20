@@ -7,7 +7,12 @@ export const RenderField: React.FC<{
   Field: React.ReactNode
 }> = (props) => {
   const { name, Field } = props
-  const pathFromContext = useFieldPath()
+  const { path: pathFromContext, schemaPath: schemaPathFromContext } = useFieldPath()
   const path = `${pathFromContext ? `${pathFromContext}.` : ''}${name || ''}`
-  return <FieldPathProvider path={path}>{Field}</FieldPathProvider>
+  const schemaPath = `${schemaPathFromContext ? `${schemaPathFromContext}.` : ''}${name || ''}`
+  return (
+    <FieldPathProvider path={path} schemaPath={schemaPath}>
+      {Field}
+    </FieldPathProvider>
+  )
 }

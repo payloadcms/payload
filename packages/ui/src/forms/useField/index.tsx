@@ -20,7 +20,7 @@ import { useFieldPath } from '../FieldPathProvider'
 const useField = <T,>(options: Options): FieldType<T> => {
   const { disableFormData = false, hasRows, validate } = options
 
-  const pathFromContext = useFieldPath()
+  const { path: pathFromContext, schemaPath } = useFieldPath()
 
   const path = options.path || pathFromContext
 
@@ -87,6 +87,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
       valid: field?.valid,
       value,
       path,
+      schemaPath,
     }),
     [
       field?.errorMessage,
@@ -99,6 +100,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
       value,
       initialValue,
       path,
+      schemaPath,
     ],
   )
 

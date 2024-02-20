@@ -12,7 +12,14 @@ import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { NextRESTClient } from '../helpers/NextRESTClient'
 import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
-import { enlargeSlug, mediaSlug, reduceSlug, relationSlug, usersSlug } from './shared'
+import {
+  enlargeSlug,
+  mediaSlug,
+  reduceSlug,
+  relationSlug,
+  unstoredMediaSlug,
+  usersSlug,
+} from './shared'
 
 const getMimeType = (
   filePath: string,
@@ -214,7 +221,7 @@ describe('Collections - Uploads', () => {
       formData.append('file', fileBlob)
 
       // unstored media
-      const response = await restClient.POST(`/${mediaSlug}`, {
+      const response = await restClient.POST(`/${unstoredMediaSlug}`, {
         body: formData,
         file: true,
       })
@@ -368,8 +375,8 @@ describe('Collections - Uploads', () => {
     const expectedPath = path.join(__dirname, './media')
 
     // Check that previously existing files were removed
-    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true)
-    expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(true)
+    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+    expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(false)
   })
 
   it('update - update many', async () => {
@@ -404,8 +411,8 @@ describe('Collections - Uploads', () => {
     const expectedPath = path.join(__dirname, './media')
 
     // Check that previously existing files were removed
-    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true)
-    expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(true)
+    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+    expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(false)
   })
 
   it('should remove existing media on re-upload', async () => {
@@ -462,7 +469,7 @@ describe('Collections - Uploads', () => {
     // Replace the temp file with a new one
     const newFilePath = path.resolve(__dirname, './temp-renamed.png')
     const newFile = await getFileByPath(newFilePath)
-    newFile.name = 'temp-renamed.png'
+    newFile.name = 'temp-renamed-second.png'
 
     const updatedMediaDoc = (await payload.update({
       collection: mediaSlug,
@@ -474,6 +481,7 @@ describe('Collections - Uploads', () => {
     })) as unknown as { docs: Media[] }
 
     // Check that the replacement file was created and the old one was removed
+    expect(updatedMediaDoc.docs[0].filename).toEqual(newFile.name)
     expect(await fileExists(path.join(expectedPath, updatedMediaDoc.docs[0].filename))).toBe(true)
     expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
   })
@@ -588,13 +596,13 @@ describe('Collections - Uploads', () => {
     const formData = new FormData()
     formData.append('file', await bufferToFileBlob(path.join(__dirname, './image.png')))
 
-    const response = await restClient.POST(`/${mediaSlug}`, {
-      body: formData,
-      file: true,
-    })
-    expect(response.status).toBe(200)
+    const { doc } = await restClient
+      .POST(`/${mediaSlug}`, {
+        body: formData,
+        file: true,
+      })
+      .then((res) => res.json())
 
-    const { doc } = await response.json()
     const response2 = await restClient.DELETE(`/${mediaSlug}/${doc.id}`)
     expect(response2.status).toBe(200)
 
@@ -605,12 +613,12 @@ describe('Collections - Uploads', () => {
     const formData = new FormData()
     formData.append('file', await bufferToFileBlob(path.join(__dirname, './image.png')))
 
-    const response = await restClient.POST(`/${mediaSlug}`, {
-      body: formData,
-      file: true,
-    })
-    expect(response.status).toBe(200)
-    const { doc } = await response.json()
+    const { doc } = await restClient
+      .POST(`/${mediaSlug}`, {
+        body: formData,
+        file: true,
+      })
+      .then((res) => res.json())
 
     const { errors } = await restClient
       .DELETE(`/${mediaSlug}`, {

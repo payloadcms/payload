@@ -19,6 +19,27 @@ export const PostsCollection: CollectionConfig = {
       relationTo: mediaSlug,
       type: 'upload',
     },
+    {
+      name: 'blocksField',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block1',
+          fields: [
+            {
+              type: 'group',
+              name: 'group1',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'group1Text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   slug: postsSlug,
 }
