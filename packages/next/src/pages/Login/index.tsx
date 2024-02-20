@@ -35,7 +35,7 @@ export const Login: React.FC<{
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }> = async ({ config: configPromise, searchParams }) => {
-  const { config, user } = await initPage({ config: configPromise })
+  const { config, user } = await initPage({ config: configPromise, searchParams, route: '/login' })
 
   const {
     admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },

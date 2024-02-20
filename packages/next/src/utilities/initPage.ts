@@ -1,4 +1,5 @@
 import { headers as getHeaders } from 'next/headers'
+import qs from 'qs'
 
 import { auth } from './auth'
 
@@ -22,12 +23,16 @@ export const initPage = async ({
   collectionSlug,
   globalSlug,
   localeParam,
+  searchParams,
+  route,
 }: {
   config: SanitizedConfig | Promise<SanitizedConfig>
   redirectUnauthenticatedUser?: boolean
   collectionSlug?: string
   globalSlug?: string
   localeParam?: string
+  searchParams?: { [key: string]: string | string[] | undefined }
+  route?: string
 }): Promise<{
   payload: Awaited<ReturnType<typeof getPayload>>
   permissions: Awaited<ReturnType<typeof auth>>['permissions']
@@ -46,15 +51,18 @@ export const initPage = async ({
     config: configPromise,
     cookies,
   })
+
   const language = getRequestLanguage({ cookies, headers })
 
   const config = await configPromise
 
   const { localization, routes, collections, globals } = config
 
-  if (redirectUnauthenticatedUser && !user) {
-    // `redirect(`${payload.config.routes.admin}/unauthorized`)` is not built yet
-    redirect(`${routes.admin}/login`)
+  if (redirectUnauthenticatedUser && !user && route !== '/login') {
+    console.log({ route, searchParams })
+    redirect(
+      `${routes.admin}/login?redirect=${routes.admin + route + '?' + qs.stringify(searchParams)}`,
+    )
   }
 
   const payload = await getPayload({

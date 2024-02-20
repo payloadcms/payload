@@ -15,15 +15,19 @@ export const CollectionList = async ({
   collectionSlug,
   config: configPromise,
   searchParams,
+  route,
 }: {
   collectionSlug: string
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
+  route
 }) => {
   const { config, payload, permissions, user, collectionConfig } = await initPage({
     config: configPromise,
     redirectUnauthenticatedUser: true,
     collectionSlug,
+    route,
+    searchParams,
   })
 
   let listPreferences: ListPreferences

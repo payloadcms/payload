@@ -22,6 +22,8 @@ export const Account = async ({
   const { config, payload, permissions, user, i18n, locale } = await initPage({
     config: configPromise,
     redirectUnauthenticatedUser: true,
+    searchParams,
+    route: `/account`,
   })
 
   const {
