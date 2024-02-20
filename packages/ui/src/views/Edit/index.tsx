@@ -20,6 +20,7 @@ import { Props as FormProps, FormState } from '../../forms/Form/types'
 
 import './index.scss'
 import { BuildFormStateArgs } from '../..'
+import { getFormState } from './getFormState'
 
 const baseClass = 'collection-edit'
 
@@ -123,34 +124,19 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   // }, [id, location.pathname, collectionConfig?.admin?.components?.views?.Edit, setViewActions])
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
-      const args: BuildFormStateArgs = {
-        id,
-        formState: prevFormState,
-        operation,
-        docPreferences,
-      }
-
-      const res = await fetch(
-        `${serverURL}${apiRoute}/${
-          collectionConfig ? collectionConfig.slug : globalConfig?.slug
-        }/form-state`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(args),
+    async ({ formState: prevFormState }) =>
+      getFormState({
+        serverURL,
+        apiRoute,
+        collectionSlug: collectionConfig?.slug,
+        globalSlug: globalConfig?.slug,
+        body: {
+          id,
+          operation,
+          formState: prevFormState,
+          docPreferences,
         },
-      )
-
-      if (res.ok) {
-        const json = (await res.json()) as FormState
-        return json
-      }
-
-      return prevFormState
-    },
+      }),
     [serverURL, apiRoute, collectionConfig, globalConfig, id, operation, docPreferences],
   )
 
