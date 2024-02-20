@@ -620,6 +620,51 @@ describe('Fields', () => {
       expect(doc.localized).toMatchObject(arrayDefaultValue)
     })
 
+    it('should create and update localized subfields with versions', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              localizedText: 'test',
+              text: 'required',
+            },
+          ],
+          localized: [
+            {
+              text: 'english',
+            },
+          ],
+        },
+      })
+
+      const spanish = await payload.update({
+        id: doc.id,
+        collection,
+        data: {
+          items: [
+            {
+              id: doc.items[0].id,
+              localizedText: 'spanish',
+              text: 'required',
+            },
+          ],
+        },
+        locale: 'es',
+      })
+
+      const result = await payload.findByID({
+        id: doc.id,
+        collection,
+        locale: 'all',
+      })
+
+      expect(doc.items[0].localizedText).toStrictEqual('test')
+      expect(spanish.items[0].localizedText).toStrictEqual('spanish')
+      expect(result.items[0].localizedText.en).toStrictEqual('test')
+      expect(result.items[0].localizedText.es).toStrictEqual('spanish')
+    })
+
     it('should create with nested array', async () => {
       const subArrayText = 'something expected'
       const doc = await payload.create({
