@@ -11,7 +11,7 @@ import type { AuthContext } from './types'
 import { requests } from '../../utilities/api'
 import useDebounce from '../../hooks/useDebounce'
 import { useConfig } from '../Config'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 // import { useLocale } from '../Locale'
 
 const Context = createContext({} as AuthContext)
@@ -19,6 +19,7 @@ const Context = createContext({} as AuthContext)
 const maxTimeoutTime = 2147483647
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const searchParams = useSearchParams()
   const [user, setUser] = useState<User | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
@@ -209,6 +210,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (autoLoginJson?.token) {
               setTokenAndExpiration(autoLoginJson)
             }
+            push(searchParams.get('redirect') || admin)
           } else {
             setUser(null)
             revokeTokenAndExpire()
