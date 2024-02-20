@@ -42,6 +42,8 @@ import { findVersions as findVersionsGlobal } from './globals/findVersions'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion'
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID'
 import { RouteError } from './RouteError'
+import { buildFormStateGlobal } from './globals/buildFormState'
+import { buildFormStateCollection } from './collections/buildFormState'
 
 const endpoints = {
   root: {
@@ -67,6 +69,7 @@ const endpoints = {
       access: docAccess,
       'first-register': registerFirstUser,
       'forgot-password': forgotPassword,
+      'form-state': buildFormStateCollection,
       'reset-password': resetPassword,
       'refresh-token': refresh,
       'doc-access-by-id': docAccess,
@@ -93,6 +96,7 @@ const endpoints = {
       update: updateGlobal,
       'doc-access': docAccessGlobal,
       'doc-versions-by-id': restoreVersionGlobal,
+      'form-state': buildFormStateGlobal,
     },
   },
 }
@@ -291,6 +295,7 @@ export const POST =
             break
           case 2:
             if (slug2 in endpoints.collection.POST) {
+              // /:collection/form-state
               // /:collection/login
               // /:collection/logout
               // /:collection/unlock
