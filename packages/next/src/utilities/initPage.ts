@@ -58,7 +58,7 @@ export const initPage = async ({
 
   const { localization, routes, collections, globals } = config
 
-  if (redirectUnauthenticatedUser && !user && route !== '/admin') {
+  if (redirectUnauthenticatedUser && !user && route !== '/login') {
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
       ? `?${qs.stringify(searchParams)}`
       : ''

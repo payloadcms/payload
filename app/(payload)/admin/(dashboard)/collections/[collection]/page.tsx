@@ -8,5 +8,5 @@ export default ({ params, searchParams }) =>
     collectionSlug: params.collection,
     searchParams,
     config,
-    route: `/${params.collection + '/' + params.segments.join('/')}`,
+    route: `/${params.collection + '/' + params.segments?.join('/')}`,
   })
