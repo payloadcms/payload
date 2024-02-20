@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 
 import { initPageConsoleErrorCatch } from '../helpers'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import config from './config'
 
 const { beforeAll, describe } = test
 
@@ -12,7 +13,7 @@ describe('field error states', () => {
   let page: Page
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL } = await initPayloadE2E(__dirname))
+    ;({ serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)

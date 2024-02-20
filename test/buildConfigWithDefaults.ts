@@ -5,7 +5,6 @@ import type { Config, SanitizedConfig } from '../packages/payload/src/config/typ
 import { mongooseAdapter } from '../packages/db-mongodb/src'
 import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
-import { slateEditor } from '../packages/richtext-slate/src'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 

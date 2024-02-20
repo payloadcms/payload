@@ -43,7 +43,7 @@ export const Document = async ({
 
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
-  const route = `/${collectionSlug || globalSlug + '/' + params.segments.join('/')}`
+  const route = `/${collectionSlug || globalSlug + (params.segments?.length ? `/${params.segments.join('/')}` : '')}`
 
   const { config, payload, permissions, user, collectionConfig, globalConfig, locale, i18n } =
     await initPage({

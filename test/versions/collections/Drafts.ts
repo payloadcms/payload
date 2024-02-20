@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-import { extractTranslations } from 'payload/dist/translations-new/extractTranslations'
+import { extractTranslations } from '../../../packages/payload/src/translations/extractTranslations'
 import CollectionVersionButton from '../elements/CollectionVersionButton'
 import CollectionVersionsButton from '../elements/CollectionVersionsButton'
 import { CustomPublishButton } from '../elements/CustomSaveButton'

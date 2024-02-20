@@ -12,6 +12,7 @@ const nextConfig = {
     },
     serverComponentsExternalPackages: ['drizzle-kit', 'drizzle-kit/utils', 'pino', 'pino-pretty'],
   },
+  reactStrictMode: false,
   // typescript: {
   //   ignoreBuildErrors: true,
   // },
