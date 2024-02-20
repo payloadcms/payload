@@ -3,7 +3,6 @@ import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 import { fromBuffer } from 'file-type'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
-import path from 'path'
 import sanitize from 'sanitize-filename'
 import sharp from 'sharp'
 
@@ -38,7 +37,6 @@ type Result<T> = Promise<{
 
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
-  config,
   data,
   overwriteExistingFiles,
   req,
@@ -59,10 +57,7 @@ export const generateFileData = async <T>({
   const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
     collectionConfig.upload
 
-  let staticPath = staticDir
-  if (staticDir.indexOf('/') !== 0) {
-    staticPath = path.resolve(config.paths.configDir, staticDir)
-  }
+  const staticPath = staticDir
 
   if (!file && uploadEdits && data) {
     const { filename, url } = data as FileData

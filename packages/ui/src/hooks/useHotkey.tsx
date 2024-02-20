@@ -1,3 +1,4 @@
+'use client'
 /* eslint-disable no-shadow */
 import { useModal } from '@faceless-ui/modal'
 import { useCallback, useEffect } from 'react'

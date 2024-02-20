@@ -1,10 +1,15 @@
-import payload from '../../../packages/payload/src'
-import { initPayloadTest } from '../../helpers/configHelpers'
-import { slug } from './config'
+import type { Payload } from '../../../packages/payload/src'
+
+import { getPayload } from '../../../packages/payload/src'
+import { NextRESTClient } from '../../helpers/NextRESTClient'
+import { startMemoryDB } from '../../startMemoryDB'
+import configPromise from './config'
+import { usersSlug } from './shared'
 
 require('isomorphic-fetch')
 
-let apiUrl
+let payload: Payload
+let restClient: NextRESTClient
 
 const [code, secret, name] = ['test', 'strategy', 'Tester']
 
@@ -14,8 +19,9 @@ const headers = {
 
 describe('AuthStrategies', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    apiUrl = `${serverURL}/api`
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
+    restClient = new NextRESTClient(payload.config)
   })
 
   afterAll(async () => {
@@ -26,21 +32,19 @@ describe('AuthStrategies', () => {
 
   describe('create user', () => {
     beforeAll(async () => {
-      await fetch(`${apiUrl}/${slug}`, {
+      await restClient.POST(`/${usersSlug}`, {
         body: JSON.stringify({
           code,
           secret,
           name,
         }),
         headers,
-        method: 'post',
       })
     })
 
     it('should return a logged in user from /me', async () => {
-      const response = await fetch(`${apiUrl}/${slug}/me`, {
+      const response = await restClient.GET(`/${usersSlug}/me`, {
         headers: {
-          ...headers,
           code,
           secret,
         },

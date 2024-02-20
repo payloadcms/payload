@@ -1,5 +1,4 @@
 import fs from 'fs'
-import path from 'path'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { SanitizedConfig } from '../config/types'
@@ -20,7 +19,6 @@ type Args = {
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   collectionConfig,
-  config,
   doc,
   files = [],
   overrideDelete,
@@ -28,9 +26,9 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
 }) => {
   if (!collectionConfig.upload) return
   if (overrideDelete || files.length > 0) {
-    const staticPath = path.resolve(config.paths.configDir, collectionConfig.upload.staticDir)
+    const { staticDir: staticPath } = collectionConfig.upload
 
-    const fileToDelete = `${staticPath}/${doc.filename}`
+    const fileToDelete = `${staticPath}/${doc.filename as string}`
 
     try {
       if (await fileExists(fileToDelete)) {

@@ -36,7 +36,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
-  const pathFromContext = useFieldPath()
+  const { path: pathFromContext } = useFieldPath()
   const path = pathFromProps || pathFromContext
 
   const { i18n } = useTranslation()

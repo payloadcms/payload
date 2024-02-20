@@ -18,7 +18,7 @@ const Error: React.FC<ErrorProps> = (props) => {
     path: pathFromProps,
   } = props
 
-  const pathFromContext = useFieldPath()
+  const { path: pathFromContext } = useFieldPath()
   const path = pathFromProps || pathFromContext
 
   const hasSubmitted = useFormSubmitted()

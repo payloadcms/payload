@@ -34,7 +34,7 @@ const TabsField: React.FC<Props> = (props) => {
     name,
   } = props
 
-  const pathFromContext = useFieldPath()
+  const { path: pathFromContext, schemaPath } = useFieldPath()
   const path = pathFromContext || pathFromProps || name
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
@@ -132,7 +132,10 @@ const TabsField: React.FC<Props> = (props) => {
                   .join(' ')}
               >
                 {Description}
-                <FieldPathProvider path={'name' in activeTabConfig ? activeTabConfig.name : ''}>
+                <FieldPathProvider
+                  path={'name' in activeTabConfig ? activeTabConfig.name : ''}
+                  schemaPath={schemaPath}
+                >
                   <RenderFields
                     fieldMap={activeTabConfig.subfields}
                     forceRender={forceRender}

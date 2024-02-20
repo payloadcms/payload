@@ -58,7 +58,7 @@ const Text: React.FC<Props> = (props) => {
     [validate, minLength, maxLength, required],
   )
 
-  const { setValue, value, path, showError } = useField({
+  const { setValue, value, path, showError, schemaPath } = useField({
     validate: memoizedValidate,
     path: pathFromProps || name,
   })

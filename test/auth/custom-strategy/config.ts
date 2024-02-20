@@ -2,11 +2,11 @@ import type { Request } from 'express'
 
 import { Strategy } from 'passport-strategy'
 
-import type { Payload } from '../../../packages/payload/src/payload'
+import type { Payload } from '../../../packages/payload/src'
 
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults'
+import { usersSlug } from './shared'
 
-export const slug = 'users'
 export const strategyName = 'test-local'
 
 export class CustomStrategy extends Strategy {
@@ -23,7 +23,7 @@ export class CustomStrategy extends Strategy {
     }
     this.ctx
       .find({
-        collection: slug,
+        collection: usersSlug,
         where: {
           code: {
             equals: req.headers.code,
@@ -36,8 +36,8 @@ export class CustomStrategy extends Strategy {
       .then((users) => {
         if (users.docs && users.docs.length) {
           const user = users.docs[0]
-          user.collection = slug
-          user._strategy = `${slug}-${strategyName}`
+          user.collection = usersSlug
+          user._strategy = `${usersSlug}-${strategyName}`
           this.success(user)
         } else {
           this.error(null)
@@ -52,7 +52,7 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
-      slug,
+      slug: usersSlug,
       auth: {
         disableLocalStrategy: true,
         strategies: [

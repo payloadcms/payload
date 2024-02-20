@@ -155,7 +155,10 @@ export class NextRESTClient {
     return this._PATCH(request, { params: { slug } })
   }
 
-  async POST(path: ValidPath, options: RequestInit & { file?: boolean } = {}): Promise<Response> {
+  async POST(
+    path: ValidPath,
+    options: RequestInit & RequestOptions & { file?: boolean } = {},
+  ): Promise<Response> {
     const { url, slug, params } = this.generateRequestParts(path)
     const queryParams = generateQueryString({}, params)
 
@@ -176,15 +179,23 @@ export class NextRESTClient {
       password: string
     }
     slug: string
-  }): Promise<string> {
-    this.token = await this.POST(`/${slug}/login`, {
+  }): Promise<{ [key: string]: any }> {
+    const response = await this.POST(`/${slug}/login`, {
       body: JSON.stringify(
         credentials ? { ...credentials } : { email: devUser.email, password: devUser.password },
       ),
     })
-      .then((res) => res.json())
-      .then((data) => data.token)
+    const result = await response.json()
 
-    return this.token
+    this.token = result.token
+
+    if (!result.token) {
+      // If the token is not in the response body, then we can extract it from the cookies
+      const setCookie = response.headers.get('Set-Cookie')
+      const tokenMatchResult = setCookie?.match(/payload-token=(?<token>.+?);/)
+      this.token = tokenMatchResult?.groups?.token
+    }
+
+    return result
   }
 }
