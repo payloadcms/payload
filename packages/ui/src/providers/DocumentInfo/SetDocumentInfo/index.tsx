@@ -7,13 +7,12 @@ export const SetDocumentInfo: React.FC<{
   collectionSlug: string
   globalSlug: string
   id: string
-  versionsConfig?: any
-}> = ({ collectionSlug, globalSlug, id, versionsConfig }) => {
+}> = ({ collectionSlug, globalSlug, id }) => {
   const { setDocumentInfo } = useDocumentInfo()
 
   useEffect(() => {
-    setDocumentInfo({ collectionSlug, globalSlug, id, versionsConfig })
-  }, [collectionSlug, globalSlug, id, setDocumentInfo, versionsConfig])
+    setDocumentInfo({ collectionSlug, globalSlug, id })
+  }, [collectionSlug, globalSlug, id, setDocumentInfo])
 
   return null
 }

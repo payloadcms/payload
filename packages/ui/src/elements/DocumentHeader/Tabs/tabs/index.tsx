@@ -1,4 +1,5 @@
 import type { DocumentTabConfig } from 'payload/types'
+import { VersionsPill } from './VersionsPill'
 
 export const documentViewKeys = [
   'API',
@@ -70,9 +71,6 @@ export const tabs: Record<
     href: '/versions',
     label: ({ t }) => t('version:versions'),
     order: 200,
-    pillLabel: ({ versions }) =>
-      typeof versions?.totalDocs === 'number' && versions?.totalDocs > 0
-        ? versions?.totalDocs.toString()
-        : '',
+    Pill: VersionsPill,
   },
 }

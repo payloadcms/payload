@@ -208,7 +208,6 @@ export const Document = async ({
         collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
-        versionsConfig={collectionConfig?.versions || globalConfig?.versions}
       />
       <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale}`}>
         <FormQueryParamsProvider formQueryParams={formQueryParams}>
