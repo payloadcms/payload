@@ -58,11 +58,11 @@ export const initPage = async ({
 
   const { localization, routes, collections, globals } = config
 
-  if (redirectUnauthenticatedUser && !user && route !== '/login') {
-    console.log({ route, searchParams })
-    redirect(
-      `${routes.admin}/login?redirect=${routes.admin + route + '?' + qs.stringify(searchParams)}`,
-    )
+  if (redirectUnauthenticatedUser && !user && route !== '/admin') {
+    const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
+      ? `?${qs.stringify(searchParams)}`
+      : ''
+    redirect(`${routes.admin}/login?redirect=${routes.admin + route + stringifiedSearchParams}`)
   }
 
   const payload = await getPayload({
