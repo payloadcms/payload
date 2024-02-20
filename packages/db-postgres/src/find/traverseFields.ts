@@ -78,7 +78,7 @@ export const traverseFields = ({
             with: {},
           }
 
-          const arrayTableName = `${currentTableName}_${toSnakeCase(field.name)}`
+          const arrayTableName = `${currentTableName}_${path}${toSnakeCase(field.name)}`
 
           if (adapter.tables[`${arrayTableName}_locales`]) withArray.with._locales = _locales
           currentArgs.with[`${path}${field.name}`] = withArray

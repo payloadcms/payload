@@ -21,8 +21,13 @@ const ArrayFields: CollectionConfig = {
       fields: [
         {
           name: 'text',
-          required: true,
           type: 'text',
+          required: true,
+        },
+        {
+          name: 'localizedText',
+          type: 'text',
+          localized: true,
         },
         {
           name: 'subArray',
