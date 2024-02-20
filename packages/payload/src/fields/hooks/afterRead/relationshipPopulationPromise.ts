@@ -8,9 +8,11 @@ type PopulateArgs = {
   data: Record<string, unknown>
   dataReference: Record<string, any>
   depth: number
+  fallbackLocale: null | string
   field: RelationshipField | UploadField
   index?: number
   key?: string
+  locale: null | string
   overrideAccess: boolean
   req: PayloadRequest
   showHiddenFields: boolean
@@ -21,9 +23,11 @@ const populate = async ({
   data,
   dataReference,
   depth,
+  fallbackLocale,
   field,
   index,
   key,
+  locale,
   overrideAccess,
   req,
   showHiddenFields,
@@ -54,8 +58,8 @@ const populate = async ({
           id,
           depth,
           currentDepth + 1,
-          req.locale,
-          req.fallbackLocale,
+          locale,
+          fallbackLocale,
           overrideAccess,
           showHiddenFields,
         ]),
@@ -90,7 +94,9 @@ const populate = async ({
 type PromiseArgs = {
   currentDepth: number
   depth: number
+  fallbackLocale: null | string
   field: RelationshipField | UploadField
+  locale: null | string
   overrideAccess: boolean
   req: PayloadRequest
   showHiddenFields: boolean
@@ -100,7 +106,9 @@ type PromiseArgs = {
 const relationshipPopulationPromise = async ({
   currentDepth,
   depth,
+  fallbackLocale,
   field,
+  locale,
   overrideAccess,
   req,
   showHiddenFields,
@@ -112,7 +120,7 @@ const relationshipPopulationPromise = async ({
 
   if (fieldSupportsMany(field) && field.hasMany) {
     if (
-      req.locale === 'all' &&
+      locale === 'all' &&
       typeof siblingDoc[field.name] === 'object' &&
       siblingDoc[field.name] !== null
     ) {
@@ -125,9 +133,11 @@ const relationshipPopulationPromise = async ({
                 data: siblingDoc[field.name][key][index],
                 dataReference: resultingDoc,
                 depth: populateDepth,
+                fallbackLocale,
                 field,
                 index,
                 key,
+                locale,
                 overrideAccess,
                 req,
                 showHiddenFields,
@@ -146,8 +156,10 @@ const relationshipPopulationPromise = async ({
               data: relatedDoc,
               dataReference: resultingDoc,
               depth: populateDepth,
+              fallbackLocale,
               field,
               index,
+              locale,
               overrideAccess,
               req,
               showHiddenFields,
@@ -161,7 +173,7 @@ const relationshipPopulationPromise = async ({
   } else if (
     typeof siblingDoc[field.name] === 'object' &&
     siblingDoc[field.name] !== null &&
-    req.locale === 'all'
+    locale === 'all'
   ) {
     Object.keys(siblingDoc[field.name]).forEach((key) => {
       const rowPromise = async () => {
@@ -170,8 +182,10 @@ const relationshipPopulationPromise = async ({
           data: siblingDoc[field.name][key],
           dataReference: resultingDoc,
           depth: populateDepth,
+          fallbackLocale,
           field,
           key,
+          locale,
           overrideAccess,
           req,
           showHiddenFields,
@@ -187,7 +201,9 @@ const relationshipPopulationPromise = async ({
       data: siblingDoc[field.name],
       dataReference: resultingDoc,
       depth: populateDepth,
+      fallbackLocale,
       field,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,

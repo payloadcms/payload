@@ -31,7 +31,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     disableErrors,
     globalConfig,
     overrideAccess,
-    req: { locale, payload, t },
+    req: { fallbackLocale, locale, payload, t },
     req,
     showHiddenFields,
   } = args
@@ -108,7 +108,9 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       currentDepth,
       depth,
       doc: result.version,
+      fallbackLocale,
       global: globalConfig,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,

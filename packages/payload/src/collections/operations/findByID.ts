@@ -56,7 +56,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
       disableErrors,
       draft: draftEnabled = false,
       overrideAccess = false,
-      req: { locale, t },
+      req: { fallbackLocale, locale, t },
       req,
       showHiddenFields,
     } = args
@@ -139,7 +139,9 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
       currentDepth,
       depth,
       doc: result,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
