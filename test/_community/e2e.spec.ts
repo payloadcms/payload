@@ -14,7 +14,7 @@ describe('Admin Panel', () => {
   let url: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(config)
+    const { serverURL } = await initPayloadE2E({ config, dirname: __dirname })
     url = new AdminUrlUtil(serverURL, 'posts')
 
     const context = await browser.newContext()

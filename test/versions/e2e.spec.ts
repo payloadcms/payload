@@ -24,10 +24,10 @@
  */
 
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 
-import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
 import { globalSlug } from '../admin/slugs'
 import {
@@ -39,6 +39,7 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import config from './config'
 import { clearAndSeedEverything } from './seed'
 import { titleToDelete } from './shared'
 import {
@@ -54,6 +55,8 @@ import {
 
 const { beforeAll, beforeEach, describe } = test
 
+let payload: Payload
+
 describe('versions', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -64,8 +67,7 @@ describe('versions', () => {
   let postURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
-    const config = await initPayloadE2E(__dirname)
-    serverURL = config.serverURL
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
     const context = await browser.newContext()
     page = await context.newPage()
 

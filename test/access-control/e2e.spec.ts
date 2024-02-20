@@ -1,14 +1,15 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types'
 
-import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
 import { exactText, initPageConsoleErrorCatch, openDocControls, openNav } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import config from './config'
 import {
   docLevelAccessSlug,
   readOnlySlug,
@@ -28,6 +29,7 @@ import {
  */
 
 const { beforeAll, describe } = test
+let payload: Payload
 describe('access control', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -37,8 +39,7 @@ describe('access control', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    const config = await initPayloadE2E(__dirname)
-    serverURL = config.serverURL
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug)

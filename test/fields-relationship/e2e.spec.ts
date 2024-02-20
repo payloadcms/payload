@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
+import type { Payload } from '../../packages/payload/src'
 import type {
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,
@@ -10,7 +11,6 @@ import type {
   RelationWithTitle,
 } from './payload-types'
 
-import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
 import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
@@ -25,8 +25,11 @@ import {
   relationWithTitleSlug,
   slug,
 } from './collectionSlugs'
+import config from './config'
 
 const { beforeAll, beforeEach, describe } = test
+
+let payload: Payload
 
 describe('fields - relationship', () => {
   let url: AdminUrlUtil
@@ -41,8 +44,7 @@ describe('fields - relationship', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    const { serverURL: serverURLFromConfig } = await initPayloadE2E(__dirname)
-    serverURL = serverURLFromConfig
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
 

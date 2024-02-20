@@ -6,6 +6,7 @@ import payload from '../../packages/payload/src'
 import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import config from './config'
 import { apiKeysSlug, slug } from './shared'
 
 /**
@@ -28,8 +29,8 @@ describe('auth', () => {
   let apiURL: string
 
   beforeAll(async ({ browser }) => {
-    serverURL = (await initPayloadE2E(__dirname)).serverURL
-    apiURL = `${serverURL}/api`
+    const { serverURL } = await initPayloadE2E({ config, dirname: __dirname })
+    url = new AdminUrlUtil(serverURL, slug)
 
     const context = await browser.newContext()
     page = await context.newPage()

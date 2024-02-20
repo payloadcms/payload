@@ -3,20 +3,22 @@ import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode
 
 import { expect, test } from '@playwright/test'
 
+import type { Payload } from '../../packages/payload/src'
 import type { SerializedBlockNode } from '../../packages/richtext-lexical/src'
 import type { LexicalField } from './payload-types'
 
-import payload from '../../packages/payload/src'
 import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { lexicalDocData } from './collections/Lexical/data'
+import config from './config'
 import { clearAndSeedEverything } from './seed'
 import { lexicalFieldsSlug } from './slugs'
 
 const { beforeAll, describe, beforeEach } = test
 
+let payload: Payload
 let client: RESTClient
 let page: Page
 let serverURL: string
@@ -35,8 +37,7 @@ async function navigateToLexicalFields() {
 
 describe('lexical', () => {
   beforeAll(async ({ browser }) => {
-    const config = await initPayloadE2E(__dirname)
-    serverURL = config.serverURL
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
     client = new RESTClient(null, { serverURL, defaultSlug: 'rich-text-fields' })
     await client.login()
 

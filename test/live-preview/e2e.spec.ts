@@ -1,14 +1,18 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import config from './config'
 import { mobileBreakpoint } from './shared'
 import { startLivePreviewDemo } from './startLivePreviewDemo'
 
 const { beforeAll, describe } = test
+
+let payload: Payload
 
 describe('Live Preview', () => {
   let page: Page
@@ -34,9 +38,8 @@ describe('Live Preview', () => {
   }
 
   beforeAll(async ({ browser }) => {
-    const { serverURL: incomingServerURL, payload } = await initPayloadE2E(__dirname)
-    url = new AdminUrlUtil(incomingServerURL, 'pages')
-    serverURL = incomingServerURL
+    ;({ serverURL, payload } = await initPayloadE2E({ config, dirname: __dirname }))
+    url = new AdminUrlUtil(serverURL, 'pages')
     const context = await browser.newContext()
     page = await context.newPage()
 

@@ -1,22 +1,25 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 
 import type { Media } from './payload-types'
 
-import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
 import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { adminThumbnailSrc } from './collections/admin-thumbnail'
+import config from './config'
 import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared'
 
 const { beforeAll, describe } = test
 
+let payload: Payload
 let client: RESTClient
+let serverURL: string
 let mediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
@@ -28,7 +31,7 @@ describe('uploads', () => {
   let audioDoc: Media
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname)
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 

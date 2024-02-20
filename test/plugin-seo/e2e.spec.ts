@@ -1,54 +1,56 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import path from 'path'
+
 import type { Page as PayloadPage } from './payload-types'
+
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
+import { initPageConsoleErrorCatch } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import payload from '../../packages/payload/src'
-import { initPageConsoleErrorCatch } from '../helpers'
-import path from 'path'
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
+import config from '../uploads/config'
 import { mediaSlug } from './shared'
 
 const { beforeAll, describe } = test
 let url: AdminUrlUtil
 let page: Page
 let id: string
-
-async function createPage(overrides?: Partial<PayloadPage>): Promise<PayloadPage> {
-  const filePath = path.resolve(__dirname, './image-1.jpg')
-  const file = await getFileByPath(filePath)
-
-  const mediaDoc = await payload.create({
-    collection: mediaSlug,
-    data: {},
-    file,
-  })
-
-  return payload.create({
-    collection: 'pages',
-    data: {
-      title: 'Test Page',
-      slug: 'test-page',
-      meta: {
-        title: 'This is a test meta title',
-        description: 'This is a test meta description',
-        ogTitle: 'This is a custom og:title field',
-        image: mediaDoc.id,
-      },
-    },
-  }) as unknown as Promise<PayloadPage>
-}
+let payload: Payload
 
 describe('SEO Plugin', () => {
+
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname)
+    const { serverURL } = await initPayloadE2E({config, dirname: __dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    const createdPage = await createPage()
+
+    const filePath = path.resolve(__dirname, './image-1.jpg')
+    const file = await getFileByPath(filePath)
+
+    const mediaDoc = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file,
+    })
+
+    const createdPage = await payload.create({
+      collection: 'pages',
+      data: {
+        slug: 'test-page',
+        meta: {
+          description: 'This is a test meta description',
+          image: mediaDoc.id,
+          ogTitle: 'This is a custom og:title field',
+          title: 'This is a test meta title',
+        },
+        title: 'Test Page',
+      },
+    }) as unknown as Promise<PayloadPage>
     id = createdPage.id
   })
 

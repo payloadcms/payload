@@ -1272,6 +1272,9 @@ importers:
       '@types/react':
         specifier: ^18
         version: 18.2.15
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
 
   packages/ui:
     dependencies:

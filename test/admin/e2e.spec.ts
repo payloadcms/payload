@@ -3,9 +3,9 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import qs from 'qs'
 
+import type { Payload } from '../../packages/payload/src'
 import type { Geo, Post } from './payload-types'
 
-import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
 import {
@@ -20,6 +20,7 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import config from './config'
 import { clearAndSeedEverything } from './seed'
 import {
   customEditLabel,
@@ -52,6 +53,8 @@ const { beforeAll, beforeEach, describe } = test
 const title = 'Title'
 const description = 'Description'
 
+let payload: Payload
+
 describe('admin', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
@@ -60,7 +63,7 @@ describe('admin', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    serverURL = (await initPayloadE2E(__dirname)).serverURL
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     url = new AdminUrlUtil(serverURL, postsCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)

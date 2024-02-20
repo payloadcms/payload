@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 
 import type { LocalizedPost } from './payload-types'
 
-import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
 import {
   changeLocale,
@@ -13,7 +13,8 @@ import {
   saveDocAndAssert,
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadTest } from '../helpers/configHelpers'
+import { initPayloadE2E } from '../helpers/configHelpers'
+import config from './config'
 import {
   englishTitle,
   localizedPostsSlug,
@@ -41,15 +42,15 @@ const arabicTitle = 'arabic title'
 const description = 'description'
 
 let page: Page
+let payload: Payload
+let serverURL: string
 
 describe('Localization', () => {
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadTest({
-      __dirname,
-      init: {
-        local: false,
-      },
-    })
+    ;({ payload, serverURL } = await initPayloadE2E({
+      config,
+      dirname: __dirname,
+    }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
