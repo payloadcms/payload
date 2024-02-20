@@ -148,7 +148,7 @@ const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawer
     user,
     updatedAt: data?.updatedAt,
     locale,
-    initializeFormState: true,
+    initialState: {}, // TODO: build initial state
   }
 
   return (

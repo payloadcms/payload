@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback } from 'react'
 
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
@@ -9,18 +9,17 @@ import { OperationProvider } from '../../providers/OperationProvider'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentFields } from '../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
-// import Meta from '../../../../utilities/Meta'
 import Auth from './Auth'
 import { SetStepNav } from './SetStepNav'
 import { EditViewProps } from '../types'
-import { getFormStateFromServer } from './action'
 import { Upload } from './Upload'
 import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
 import { useComponentMap } from '../../providers/ComponentMapProvider'
 import { SetDocumentTitle } from './SetDocumentTitle'
+import { Props as FormProps, FormState } from '../../forms/Form/types'
 
 import './index.scss'
+import { BuildFormStateArgs } from '../..'
 
 const baseClass = 'collection-edit'
 
@@ -32,20 +31,22 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     AfterDocument,
     AfterFields,
     data,
-    formState: initialStateFromProps,
-    initializeFormState,
+    initialState,
     // isLoading,
     onSave: onSaveFromProps,
-    docPreferences,
     docPermissions,
+    docPreferences,
     user,
-    locale,
   } = props
 
   const config = useConfig()
-  const { collections, globals } = config
+  const {
+    serverURL,
+    collections,
+    globals,
+    routes: { api: apiRoute },
+  } = config
 
-  const { i18n } = useTranslation()
   const { getFieldMap } = useComponentMap()
 
   const collectionConfig =
@@ -63,22 +64,6 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const id = 'id' in props ? props.id : undefined
   const isEditing = 'isEditing' in props ? props.isEditing : undefined
   const operation = isEditing ? 'update' : 'create'
-
-  const [initialState] = useState(() => {
-    if (initializeFormState) {
-      const initializedState = getFormStateFromServer.bind(null, {
-        collectionSlug: collectionConfig?.slug,
-        id: id || undefined,
-        locale,
-        language: i18n.language,
-        operation,
-        docPreferences,
-        user,
-      })({ formState: {} })
-
-      return initializedState
-    } else return initialStateFromProps
-  })
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
   const upload = collectionConfig ? collectionConfig.upload : undefined
@@ -137,15 +122,37 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   //   setViewActions(defaultActions)
   // }, [id, location.pathname, collectionConfig?.admin?.components?.views?.Edit, setViewActions])
 
-  const rebuildFormState = getFormStateFromServer.bind(null, {
-    collectionSlug: collectionConfig?.slug,
-    id: id || undefined,
-    locale,
-    language: i18n.language,
-    operation,
-    docPreferences,
-    user,
-  })
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      const args: BuildFormStateArgs = {
+        id,
+        formState: prevFormState,
+        operation,
+        docPreferences,
+      }
+
+      const res = await fetch(
+        `${serverURL}${apiRoute}/${
+          collectionConfig ? collectionConfig.slug : globalConfig?.slug
+        }/form-state`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(args),
+        },
+      )
+
+      if (res.ok) {
+        const json = (await res.json()) as FormState
+        return json
+      }
+
+      return prevFormState
+    },
+    [serverURL, apiRoute, collectionConfig, globalConfig, id, operation, docPreferences],
+  )
 
   return (
     <main className={classes}>
@@ -156,8 +163,7 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
           disabled={!hasSavePermission}
           initialState={initialState}
           method={id ? 'PATCH' : 'POST'}
-          beforeSubmit={[rebuildFormState]}
-          onChange={[rebuildFormState]}
+          onChange={[onChange]}
           onSuccess={onSave}
         >
           <FormLoadingOverlayToggle

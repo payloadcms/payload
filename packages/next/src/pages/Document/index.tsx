@@ -149,7 +149,7 @@ export const Document = async ({
     limit: 1,
   })) as any as { docs: { value: DocumentPreferences }[] }
 
-  const formState = await buildStateFromSchema({
+  const initialState = await buildStateFromSchema({
     id,
     data: data || {},
     fieldSchema: formatFields(fields, isEditing),
@@ -176,13 +176,11 @@ export const Document = async ({
     globalSlug,
     data,
     hasSavePermission,
-    formState,
+    initialState,
     isEditing,
     docPermissions,
-    docPreferences,
     updatedAt: data?.updatedAt?.toString(),
     user,
-    locale,
     payload,
     config,
     searchParams,

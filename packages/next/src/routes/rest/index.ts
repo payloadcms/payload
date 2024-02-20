@@ -278,6 +278,7 @@ export const POST =
         config,
         params: { collection: slug1 },
       })
+
       collection = req.payload.collections?.[slug1]
 
       if (collection) {
@@ -286,6 +287,7 @@ export const POST =
           payloadRequest: req,
           endpoints: collection.config?.endpoints || [],
         })
+
         if (customEndpointResponse) return customEndpointResponse
 
         switch (slug.length) {
