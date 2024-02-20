@@ -46,5 +46,6 @@ export type InitTFunction = (args: {
 export type InitI18n = (args: {
   config: I18nOptions
   language?: string
-  translationsContext: 'client' | 'api'
+  translations: Translations
+  context: 'all' | 'api' | 'client'
 }) => Promise<I18n>

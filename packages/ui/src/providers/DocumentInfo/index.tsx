@@ -24,10 +24,24 @@ const Context = createContext({} as DocumentInfoContext)
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
 export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => {
+  const [propsToUse, setPropsToUse] = useState<Props>({
+    ...rest,
+  })
+
+  const { globalSlug, collectionSlug, id } = propsToUse
+
   const {
     routes: { api },
     serverURL,
+    collections,
+    globals,
   } = useConfig()
+
+  const collectionConfig = collections.find((c) => c.slug === collectionSlug)
+  const globalConfig = globals.find((g) => g.slug === globalSlug)
+  const docConfig = collectionConfig || globalConfig
+  const versionsConfig = docConfig?.versions
+
   const { getPreference, setPreference } = usePreferences()
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
@@ -40,11 +54,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
 
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
-  const [propsToUse, setPropsToUse] = useState<Props>({
-    ...rest,
-  })
-
-  const { globalSlug, collectionSlug, id, versionsConfig } = propsToUse
+  const [title, setTitle] = useState<string>('')
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -257,6 +267,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
     getDocPermissions()
   }, [getDocPermissions])
 
+  const setDocumentTitle = useCallback<DocumentInfoContext['setDocumentTitle']>(
+    (title) => {
+      setTitle(title || id?.toString() || '[untitled]')
+    },
+    [setPropsToUse, id],
+  )
+
   const value: DocumentInfoContext = {
     id,
     collectionSlug,
@@ -270,9 +287,11 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
     setDocFieldPreferences,
     slug,
     unpublishedVersions,
-    versionsConfig,
+    docConfig,
     versions,
     setDocumentInfo: setPropsToUse,
+    setDocumentTitle,
+    title,
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>

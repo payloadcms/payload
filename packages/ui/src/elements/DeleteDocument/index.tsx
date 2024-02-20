@@ -7,16 +7,17 @@ import type { Props } from './types'
 
 import { getTranslation } from '@payloadcms/translations'
 // import { requests } from '../../../api'
-import useTitle from '../../hooks/useTitle'
 import { useForm } from '../../forms/Form/context'
 import { MinimalTemplate } from '../../templates/Minimal'
 import { useTranslation } from '../../providers/Translation'
 import { useConfig } from '../../providers/Config'
 import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
-import './index.scss'
 import { useRouter } from 'next/navigation'
 import { Translation } from '../Translation'
+import { useDocumentInfo } from '../../providers/DocumentInfo'
+
+import './index.scss'
 
 const baseClass = 'delete-document'
 
@@ -33,9 +34,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const { toggleModal } = useModal()
   const history = useRouter()
   const { i18n, t } = useTranslation()
-  const title = useTitle({
-    useAsTitle,
-  })
+  const { title } = useDocumentInfo()
 
   const titleToRender = titleFromProps || title || id
 

@@ -9,6 +9,7 @@ import { DocumentPreferences } from 'payload/types'
 import { Locale } from 'payload/config'
 import { User } from 'payload/auth'
 import { initI18n } from '@payloadcms/translations'
+import { translations } from '@payloadcms/translations/api'
 
 export const getFormStateFromServer = async (
   args: {
@@ -41,9 +42,10 @@ export const getFormStateFromServer = async (
   const data = reduceFieldsToValues(formState, true)
 
   const { t } = await initI18n({
-    translationsContext: 'client',
+    translations,
     language: language,
     config: payload.config.i18n,
+    context: 'api',
   })
 
   const result = await buildStateFromSchema({

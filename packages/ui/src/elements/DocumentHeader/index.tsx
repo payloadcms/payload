@@ -35,9 +35,6 @@ export const DocumentHeader: React.FC<{
         <Fragment>
           <RenderTitle
             className={`${baseClass}__title`}
-            useAsTitle={collectionConfig?.admin?.useAsTitle}
-            globalLabel={globalConfig?.label}
-            globalSlug={globalConfig?.slug}
             isDate={titleFieldConfig?.type === 'date'}
             dateFormat={
               titleFieldConfig && 'date' in titleFieldConfig?.admin

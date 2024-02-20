@@ -1,0 +1,1033 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "authentication": {
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "accountOfCurrentUser": {
+          "type": "string"
+        },
+        "alreadyActivated": {
+          "type": "string"
+        },
+        "alreadyLoggedIn": {
+          "type": "string"
+        },
+        "backToLogin": {
+          "type": "string"
+        },
+        "beginCreateFirstUser": {
+          "type": "string"
+        },
+        "changePassword": {
+          "type": "string"
+        },
+        "confirmGeneration": {
+          "type": "string"
+        },
+        "confirmPassword": {
+          "type": "string"
+        },
+        "emailNotValid": {
+          "type": "string"
+        },
+        "emailSent": {
+          "type": "string"
+        },
+        "enableAPIKey": {
+          "type": "string"
+        },
+        "failedToUnlock": {
+          "type": "string"
+        },
+        "forceUnlock": {
+          "type": "string"
+        },
+        "forgotPassword": {
+          "type": "string"
+        },
+        "forgotPasswordEmailInstructions": {
+          "type": "string"
+        },
+        "forgotPasswordQuestion": {
+          "type": "string"
+        },
+        "generate": {
+          "type": "string"
+        },
+        "generateNewAPIKey": {
+          "type": "string"
+        },
+        "logBackIn": {
+          "type": "string"
+        },
+        "loggedOutInactivity": {
+          "type": "string"
+        },
+        "loggedOutSuccessfully": {
+          "type": "string"
+        },
+        "login": {
+          "type": "string"
+        },
+        "logOut": {
+          "type": "string"
+        },
+        "logout": {
+          "type": "string"
+        },
+        "logoutUser": {
+          "type": "string"
+        },
+        "newAPIKeyGenerated": {
+          "type": "string"
+        },
+        "newPassword": {
+          "type": "string"
+        },
+        "resetPassword": {
+          "type": "string"
+        },
+        "stayLoggedIn": {
+          "type": "string"
+        },
+        "successfullyUnlocked": {
+          "type": "string"
+        },
+        "unableToVerify": {
+          "type": "string"
+        },
+        "verified": {
+          "type": "string"
+        },
+        "verifiedSuccessfully": {
+          "type": "string"
+        },
+        "verify": {
+          "type": "string"
+        },
+        "verifyUser": {
+          "type": "string"
+        },
+        "youAreInactive": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "account",
+        "accountOfCurrentUser",
+        "alreadyActivated",
+        "alreadyLoggedIn",
+        "backToLogin",
+        "beginCreateFirstUser",
+        "changePassword",
+        "confirmGeneration",
+        "confirmPassword",
+        "emailNotValid",
+        "emailSent",
+        "enableAPIKey",
+        "failedToUnlock",
+        "forceUnlock",
+        "forgotPassword",
+        "forgotPasswordEmailInstructions",
+        "forgotPasswordQuestion",
+        "generate",
+        "generateNewAPIKey",
+        "logBackIn",
+        "loggedOutInactivity",
+        "loggedOutSuccessfully",
+        "login",
+        "logOut",
+        "logout",
+        "logoutUser",
+        "newAPIKeyGenerated",
+        "newPassword",
+        "resetPassword",
+        "stayLoggedIn",
+        "successfullyUnlocked",
+        "unableToVerify",
+        "verified",
+        "verifiedSuccessfully",
+        "verify",
+        "verifyUser",
+        "youAreInactive"
+      ],
+      "type": "object"
+    },
+    "error": {
+      "additionalProperties": false,
+      "properties": {
+        "autosaving": {
+          "type": "string"
+        },
+        "correctInvalidFields": {
+          "type": "string"
+        },
+        "deletingTitle": {
+          "type": "string"
+        },
+        "loadingDocument": {
+          "type": "string"
+        },
+        "localesNotSaved_one": {
+          "type": "string"
+        },
+        "localesNotSaved_other": {
+          "type": "string"
+        },
+        "noMatchedField": {
+          "type": "string"
+        },
+        "notAllowedToAccessPage": {
+          "type": "string"
+        },
+        "previewing": {
+          "type": "string"
+        },
+        "unableToDeleteCount": {
+          "type": "string"
+        },
+        "unableToUpdateCount": {
+          "type": "string"
+        },
+        "unknown": {
+          "type": "string"
+        },
+        "unspecific": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "autosaving",
+        "correctInvalidFields",
+        "deletingTitle",
+        "loadingDocument",
+        "localesNotSaved_one",
+        "localesNotSaved_other",
+        "noMatchedField",
+        "notAllowedToAccessPage",
+        "previewing",
+        "unableToDeleteCount",
+        "unableToUpdateCount",
+        "unknown",
+        "unspecific"
+      ],
+      "type": "object"
+    },
+    "fields": {
+      "additionalProperties": false,
+      "properties": {
+        "addLabel": {
+          "type": "string"
+        },
+        "addNew": {
+          "type": "string"
+        },
+        "addNewLabel": {
+          "type": "string"
+        },
+        "block": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "string"
+        },
+        "blockType": {
+          "type": "string"
+        },
+        "chooseFromExisting": {
+          "type": "string"
+        },
+        "collapseAll": {
+          "type": "string"
+        },
+        "itemsAndMore": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "string"
+        },
+        "longitude": {
+          "type": "string"
+        },
+        "passwordsDoNotMatch": {
+          "type": "string"
+        },
+        "searchForBlock": {
+          "type": "string"
+        },
+        "selectFieldsToEdit": {
+          "type": "string"
+        },
+        "showAll": {
+          "type": "string"
+        },
+        "swapRelationship": {
+          "type": "string"
+        },
+        "uploadNewLabel": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "addLabel",
+        "addNew",
+        "addNewLabel",
+        "block",
+        "blocks",
+        "blockType",
+        "chooseFromExisting",
+        "collapseAll",
+        "itemsAndMore",
+        "latitude",
+        "longitude",
+        "passwordsDoNotMatch",
+        "searchForBlock",
+        "selectFieldsToEdit",
+        "showAll",
+        "swapRelationship",
+        "uploadNewLabel"
+      ],
+      "type": "object"
+    },
+    "general": {
+      "additionalProperties": false,
+      "properties": {
+        "aboutToDeleteCount_one": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_many": {
+          "type": "string"
+        },
+        "aboutToDeleteCount_other": {
+          "type": "string"
+        },
+        "addBelow": {
+          "type": "string"
+        },
+        "addFilter": {
+          "type": "string"
+        },
+        "adminTheme": {
+          "type": "string"
+        },
+        "and": {
+          "type": "string"
+        },
+        "applyChanges": {
+          "type": "string"
+        },
+        "ascending": {
+          "type": "string"
+        },
+        "automatic": {
+          "type": "string"
+        },
+        "backToDashboard": {
+          "type": "string"
+        },
+        "cancel": {
+          "type": "string"
+        },
+        "changesNotSaved": {
+          "type": "string"
+        },
+        "close": {
+          "type": "string"
+        },
+        "collapse": {
+          "type": "string"
+        },
+        "collections": {
+          "type": "string"
+        },
+        "columns": {
+          "type": "string"
+        },
+        "columnToSort": {
+          "type": "string"
+        },
+        "confirm": {
+          "type": "string"
+        },
+        "confirmDeletion": {
+          "type": "string"
+        },
+        "confirmDuplication": {
+          "type": "string"
+        },
+        "copied": {
+          "type": "string"
+        },
+        "copy": {
+          "type": "string"
+        },
+        "create": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string"
+        },
+        "createNew": {
+          "type": "string"
+        },
+        "createNewLabel": {
+          "type": "string"
+        },
+        "creating": {
+          "type": "string"
+        },
+        "creatingNewLabel": {
+          "type": "string"
+        },
+        "dark": {
+          "type": "string"
+        },
+        "dashboard": {
+          "type": "string"
+        },
+        "delete": {
+          "type": "string"
+        },
+        "deletedCountSuccessfully": {
+          "type": "string"
+        },
+        "deleting": {
+          "type": "string"
+        },
+        "descending": {
+          "type": "string"
+        },
+        "deselectAllRows": {
+          "type": "string"
+        },
+        "duplicate": {
+          "type": "string"
+        },
+        "duplicateWithoutSaving": {
+          "type": "string"
+        },
+        "edit": {
+          "type": "string"
+        },
+        "editing": {
+          "type": "string"
+        },
+        "editingLabel_one": {
+          "type": "string"
+        },
+        "editingLabel_many": {
+          "type": "string"
+        },
+        "editingLabel_other": {
+          "type": "string"
+        },
+        "editLabel": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "emailAddress": {
+          "type": "string"
+        },
+        "enterAValue": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "errors": {
+          "type": "string"
+        },
+        "fallbackToDefaultLocale": {
+          "type": "string"
+        },
+        "filters": {
+          "type": "string"
+        },
+        "filterWhere": {
+          "type": "string"
+        },
+        "globals": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "lastModified": {
+          "type": "string"
+        },
+        "leaveAnyway": {
+          "type": "string"
+        },
+        "leaveWithoutSaving": {
+          "type": "string"
+        },
+        "light": {
+          "type": "string"
+        },
+        "livePreview": {
+          "type": "string"
+        },
+        "loading": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "menu": {
+          "type": "string"
+        },
+        "moveDown": {
+          "type": "string"
+        },
+        "moveUp": {
+          "type": "string"
+        },
+        "noFiltersSet": {
+          "type": "string"
+        },
+        "noLabel": {
+          "type": "string"
+        },
+        "none": {
+          "type": "string"
+        },
+        "noOptions": {
+          "type": "string"
+        },
+        "noResults": {
+          "type": "string"
+        },
+        "notFound": {
+          "type": "string"
+        },
+        "nothingFound": {
+          "type": "string"
+        },
+        "noValue": {
+          "type": "string"
+        },
+        "of": {
+          "type": "string"
+        },
+        "open": {
+          "type": "string"
+        },
+        "or": {
+          "type": "string"
+        },
+        "order": {
+          "type": "string"
+        },
+        "pageNotFound": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "payloadSettings": {
+          "type": "string"
+        },
+        "perPage": {
+          "type": "string"
+        },
+        "remove": {
+          "type": "string"
+        },
+        "reset": {
+          "type": "string"
+        },
+        "row": {
+          "type": "string"
+        },
+        "rows": {
+          "type": "string"
+        },
+        "save": {
+          "type": "string"
+        },
+        "saving": {
+          "type": "string"
+        },
+        "searchBy": {
+          "type": "string"
+        },
+        "selectAll": {
+          "type": "string"
+        },
+        "selectAllRows": {
+          "type": "string"
+        },
+        "selectedCount": {
+          "type": "string"
+        },
+        "selectValue": {
+          "type": "string"
+        },
+        "showAllLabel": {
+          "type": "string"
+        },
+        "sorryNotFound": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "string"
+        },
+        "sortByLabelDirection": {
+          "type": "string"
+        },
+        "stayOnThisPage": {
+          "type": "string"
+        },
+        "submissionSuccessful": {
+          "type": "string"
+        },
+        "submit": {
+          "type": "string"
+        },
+        "successfullyCreated": {
+          "type": "string"
+        },
+        "successfullyDuplicated": {
+          "type": "string"
+        },
+        "thisLanguage": {
+          "type": "string"
+        },
+        "titleDeleted": {
+          "type": "string"
+        },
+        "unauthorized": {
+          "type": "string"
+        },
+        "unsavedChangesDuplicate": {
+          "type": "string"
+        },
+        "untitled": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        },
+        "updatedCountSuccessfully": {
+          "type": "string"
+        },
+        "updatedSuccessfully": {
+          "type": "string"
+        },
+        "updating": {
+          "type": "string"
+        },
+        "welcome": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "aboutToDeleteCount_one",
+        "aboutToDeleteCount_many",
+        "aboutToDeleteCount_other",
+        "addBelow",
+        "addFilter",
+        "adminTheme",
+        "and",
+        "ascending",
+        "automatic",
+        "backToDashboard",
+        "cancel",
+        "changesNotSaved",
+        "close",
+        "collections",
+        "columns",
+        "columnToSort",
+        "confirm",
+        "confirmDeletion",
+        "confirmDuplication",
+        "copied",
+        "copy",
+        "create",
+        "created",
+        "createNew",
+        "createNewLabel",
+        "creating",
+        "creatingNewLabel",
+        "dark",
+        "dashboard",
+        "delete",
+        "deletedCountSuccessfully",
+        "deleting",
+        "descending",
+        "duplicate",
+        "duplicateWithoutSaving",
+        "edit",
+        "editing",
+        "editingLabel_one",
+        "editingLabel_many",
+        "editingLabel_other",
+        "editLabel",
+        "email",
+        "emailAddress",
+        "enterAValue",
+        "error",
+        "errors",
+        "fallbackToDefaultLocale",
+        "filters",
+        "filterWhere",
+        "globals",
+        "language",
+        "lastModified",
+        "leaveAnyway",
+        "leaveWithoutSaving",
+        "light",
+        "loading",
+        "moveDown",
+        "moveUp",
+        "noFiltersSet",
+        "noLabel",
+        "none",
+        "noResults",
+        "notFound",
+        "nothingFound",
+        "noValue",
+        "of",
+        "or",
+        "order",
+        "pageNotFound",
+        "password",
+        "payloadSettings",
+        "perPage",
+        "remove",
+        "row",
+        "rows",
+        "save",
+        "saving",
+        "searchBy",
+        "selectAll",
+        "selectedCount",
+        "selectValue",
+        "sorryNotFound",
+        "sort",
+        "stayOnThisPage",
+        "submissionSuccessful",
+        "submit",
+        "successfullyCreated",
+        "successfullyDuplicated",
+        "thisLanguage",
+        "titleDeleted",
+        "unauthorized",
+        "unsavedChangesDuplicate",
+        "untitled",
+        "updatedAt",
+        "updatedCountSuccessfully",
+        "updatedSuccessfully",
+        "updating",
+        "welcome"
+      ],
+      "type": "object"
+    },
+    "operators": {
+      "additionalProperties": false,
+      "properties": {
+        "contains": {
+          "type": "string"
+        },
+        "equals": {
+          "type": "string"
+        },
+        "exists": {
+          "type": "string"
+        },
+        "isGreaterThan": {
+          "type": "string"
+        },
+        "isGreaterThanOrEqualTo": {
+          "type": "string"
+        },
+        "isIn": {
+          "type": "string"
+        },
+        "isLessThan": {
+          "type": "string"
+        },
+        "isLessThanOrEqualTo": {
+          "type": "string"
+        },
+        "isLike": {
+          "type": "string"
+        },
+        "isNotEqualTo": {
+          "type": "string"
+        },
+        "isNotIn": {
+          "type": "string"
+        },
+        "near": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "equals",
+        "isNotEqualTo",
+        "isIn",
+        "isNotIn",
+        "exists",
+        "isGreaterThan",
+        "isLessThan",
+        "isLessThanOrEqualTo",
+        "isGreaterThanOrEqualTo",
+        "near",
+        "isLike",
+        "contains"
+      ],
+      "type": "object"
+    },
+    "upload": {
+      "additionalProperties": false,
+      "properties": {
+        "crop": {
+          "type": "string"
+        },
+        "cropToolDescription": {
+          "type": "string"
+        },
+        "dragAndDrop": {
+          "type": "string"
+        },
+        "editImage": {
+          "type": "string"
+        },
+        "focalPoint": {
+          "type": "string"
+        },
+        "focalPointDescription": {
+          "type": "string"
+        },
+        "height": {
+          "type": "string"
+        },
+        "previewSizes": {
+          "type": "string"
+        },
+        "selectCollectionToBrowse": {
+          "type": "string"
+        },
+        "selectFile": {
+          "type": "string"
+        },
+        "setCropArea": {
+          "type": "string"
+        },
+        "setFocalPoint": {
+          "type": "string"
+        },
+        "sizesFor": {
+          "type": "string"
+        },
+        "width": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dragAndDrop",
+        "height",
+        "selectCollectionToBrowse",
+        "selectFile",
+        "width"
+      ],
+      "type": "object"
+    },
+    "validation": {
+      "additionalProperties": false,
+      "properties": {
+        "fieldHasNo": {
+          "type": "string"
+        },
+        "limitReached": {
+          "type": "string"
+        },
+        "required": {
+          "type": "string"
+        },
+        "requiresAtLeast": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "fieldHasNo",
+        "required",
+        "requiresAtLeast"
+      ],
+      "type": "object"
+    },
+    "version": {
+      "additionalProperties": false,
+      "properties": {
+        "aboutToPublishSelection": {
+          "type": "string"
+        },
+        "aboutToRestore": {
+          "type": "string"
+        },
+        "aboutToRestoreGlobal": {
+          "type": "string"
+        },
+        "aboutToUnpublishSelection": {
+          "type": "string"
+        },
+        "autosave": {
+          "type": "string"
+        },
+        "autosavedSuccessfully": {
+          "type": "string"
+        },
+        "compareVersion": {
+          "type": "string"
+        },
+        "confirmPublish": {
+          "type": "string"
+        },
+        "confirmUnpublish": {
+          "type": "string"
+        },
+        "confirmVersionRestoration": {
+          "type": "string"
+        },
+        "draft": {
+          "type": "string"
+        },
+        "draftSavedSuccessfully": {
+          "type": "string"
+        },
+        "noFurtherVersionsFound": {
+          "type": "string"
+        },
+        "noRowsFound": {
+          "type": "string"
+        },
+        "preview": {
+          "type": "string"
+        },
+        "problemRestoringVersion": {
+          "type": "string"
+        },
+        "publish": {
+          "type": "string"
+        },
+        "publishChanges": {
+          "type": "string"
+        },
+        "published": {
+          "type": "string"
+        },
+        "restoredSuccessfully": {
+          "type": "string"
+        },
+        "restoreThisVersion": {
+          "type": "string"
+        },
+        "restoring": {
+          "type": "string"
+        },
+        "saveDraft": {
+          "type": "string"
+        },
+        "selectLocales": {
+          "type": "string"
+        },
+        "selectVersionToCompare": {
+          "type": "string"
+        },
+        "showLocales": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "unpublish": {
+          "type": "string"
+        },
+        "unpublishing": {
+          "type": "string"
+        },
+        "versionCreatedOn": {
+          "type": "string"
+        },
+        "versionID": {
+          "type": "string"
+        },
+        "versions": {
+          "type": "string"
+        },
+        "viewingVersion": {
+          "type": "string"
+        },
+        "viewingVersionGlobal": {
+          "type": "string"
+        },
+        "viewingVersions": {
+          "type": "string"
+        },
+        "viewingVersionsGlobal": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "aboutToPublishSelection",
+        "aboutToRestore",
+        "aboutToRestoreGlobal",
+        "aboutToUnpublishSelection",
+        "autosave",
+        "autosavedSuccessfully",
+        "compareVersion",
+        "confirmPublish",
+        "confirmUnpublish",
+        "confirmVersionRestoration",
+        "draft",
+        "draftSavedSuccessfully",
+        "noFurtherVersionsFound",
+        "noRowsFound",
+        "preview",
+        "problemRestoringVersion",
+        "publish",
+        "publishChanges",
+        "published",
+        "restoredSuccessfully",
+        "restoreThisVersion",
+        "restoring",
+        "saveDraft",
+        "selectLocales",
+        "selectVersionToCompare",
+        "showLocales",
+        "type",
+        "unpublish",
+        "unpublishing",
+        "versionCreatedOn",
+        "versionID",
+        "versions",
+        "viewingVersion",
+        "viewingVersionGlobal",
+        "viewingVersions",
+        "viewingVersionsGlobal"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "authentication",
+    "error",
+    "fields",
+    "general",
+    "upload",
+    "validation",
+    "version"
+  ],
+  "type": "object"
+}

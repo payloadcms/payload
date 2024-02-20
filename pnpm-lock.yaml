@@ -1248,6 +1248,9 @@ importers:
       '@types/react':
         specifier: ^18
         version: 18.2.15
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
 
   packages/ui:
     dependencies:
@@ -12897,7 +12900,7 @@ packages:
       got: 12.6.1
       registry-auth-token: 5.0.2
       registry-url: 6.0.1
-      semver: 7.5.4
+      semver: 7.6.0
     dev: true
 
   /packet-reader@1.0.0:
@@ -14324,7 +14327,7 @@ packages:
     resolution: {integrity: sha512-0Ju4+6A8iOnpL/Thra7dZsSlOHYAHIeMxfhWQRI1/VLcT3WDBZKKtQt/QkBOsiIN9ZpuvHE6cGZ0x4glCMmfiA==}
     engines: {node: '>=12'}
     dependencies:
-      semver: 7.5.4
+      semver: 7.6.0
     dev: true
 
   /semver-regex@4.0.5:

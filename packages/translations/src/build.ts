@@ -4,6 +4,7 @@ import { transpileAndCopy } from './utilities/transpileAndCopy'
 import { ensureDirectoryExists } from './utilities/ensureDirExists'
 
 const serverTranslationKeys = [
+  'authentication:account',
   'authentication:api',
   'authentication:apiKey',
   'authentication:enableAPIKey',

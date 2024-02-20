@@ -11,15 +11,10 @@ const nextConfig = {
       '**/*': ['drizzle-kit', 'drizzle-kit/utils'],
     },
     serverComponentsExternalPackages: ['drizzle-kit', 'drizzle-kit/utils', 'pino', 'pino-pretty'],
-    turbo: {
-      resolveAlias: {
-        '@payloadcms/ui/scss': path.resolve(__dirname, './packages/ui/src/scss/styles.scss'),
-      },
-    },
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // typescript: {
+  //   ignoreBuildErrors: true,
+  // },
   webpack: (config) => {
     return {
       ...config,
@@ -30,12 +25,13 @@ const nextConfig = {
         'pino',
         'pino-pretty',
         'sharp',
-        'mongodb-memory-server',
       ],
       ignoreWarnings: [
         ...(config.ignoreWarnings || []),
         { module: /node_modules\/mongodb\/lib\/utils\.js/ },
         { file: /node_modules\/mongodb\/lib\/utils\.js/ },
+        { module: /node_modules\/mongodb\/lib\/bson\.js/ },
+        { file: /node_modules\/mongodb\/lib\/bson\.js/ },
       ],
       resolve: {
         ...config.resolve,

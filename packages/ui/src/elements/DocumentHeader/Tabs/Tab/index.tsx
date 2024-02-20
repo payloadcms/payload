@@ -2,35 +2,34 @@ import React, { Fragment } from 'react'
 
 import { DocumentTabLink } from './TabLink'
 
-import './index.scss'
 import { DocumentTabConfig, DocumentTabProps } from 'payload/types'
 
-const baseClass = 'doc-tab'
+import './index.scss'
+
+export const baseClass = 'doc-tab'
 
 export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (props) => {
   const {
-    id,
     apiURL,
     config,
     collectionConfig,
     condition,
     globalConfig,
     href: tabHref,
-    isActive: checkIsActive,
+    isActive: tabIsActive,
     label,
     newTab,
-    pillLabel,
+    Pill,
     i18n,
   } = props
 
   const { routes } = config
-  // const { versions } = documentInfo
 
   let href = typeof tabHref === 'string' ? tabHref : ''
+  let isActive = typeof tabIsActive === 'boolean' ? tabIsActive : false
 
   if (typeof tabHref === 'function') {
     href = tabHref({
-      id,
       apiURL,
       collection: collectionConfig,
       global: globalConfig,
@@ -38,10 +37,13 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     })
   }
 
-  if (
-    !condition ||
-    (condition && condition({ collectionConfig, config, documentInfo: undefined, globalConfig }))
-  ) {
+  if (typeof tabIsActive === 'function') {
+    isActive = tabIsActive({
+      href,
+    })
+  }
+
+  if (!condition || (condition && condition({ collectionConfig, config, globalConfig }))) {
     const labelToRender =
       typeof label === 'function'
         ? label({
@@ -49,24 +51,21 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
           })
         : label
 
-    const pillToRender =
-      typeof pillLabel === 'function' ? pillLabel({ versions: undefined }) : pillLabel
-
     return (
       <DocumentTabLink
         href={href}
         newTab={newTab}
         baseClass={baseClass}
-        isActive={checkIsActive}
+        isActive={isActive}
         adminRoute={routes.admin}
         isCollection={!!collectionConfig && !globalConfig}
       >
         <span className={`${baseClass}__label`}>
           {labelToRender}
-          {pillToRender && (
+          {Pill && (
             <Fragment>
               &nbsp;
-              <span className={`${baseClass}__count`}>{pillToRender}</span>
+              <Pill />
             </Fragment>
           )}
         </span>

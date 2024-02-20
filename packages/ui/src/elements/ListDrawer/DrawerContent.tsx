@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react'
 import { useTranslation } from '../../providers/Translation'
 
 import type { SanitizedCollectionConfig } from 'payload/types'
-import type { Where, Field } from 'payload/types'
+import type { Where } from 'payload/types'
 import type { ListDrawerProps } from './types'
 
 import { baseClass } from '.'
@@ -305,10 +305,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       ]}
       collectionSlug={selectedCollectionConfig.slug}
     >
-      <DocumentInfoProvider
-        collectionSlug={selectedCollectionConfig.slug}
-        versionsConfig={selectedCollectionConfig?.versions}
-      >
+      <DocumentInfoProvider collectionSlug={selectedCollectionConfig.slug}>
         <RenderCustomComponent
           CustomComponent={ListToRender}
           DefaultComponent={DefaultList}
