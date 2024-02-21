@@ -15,7 +15,7 @@ import type { RichTextAdapter } from '../../admin/components/forms/field-types/R
 import type { User } from '../../auth'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'
-import type { CustomName } from '../../database/types'
+import type { DBIdentifierName } from '../../database/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { Payload } from '../../payload'
@@ -439,7 +439,7 @@ export type JSONField = Omit<FieldBase, 'admin'> & {
   type: 'json'
 }
 
-export type BaseSelectField = FieldBase & {
+export type SelectField = FieldBase & {
   admin?: Admin & {
     components?: {
       Error?: React.ComponentType<ErrorProps>
@@ -449,15 +449,17 @@ export type BaseSelectField = FieldBase & {
     isSortable?: boolean
   }
   /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
+  /**
    * Customize the DB enum name
    */
-  enumName?: CustomName
+  enumName?: DBIdentifierName
   hasMany?: boolean
   options: Option[]
   type: 'select'
 }
-
-export type SelectField = BaseSelectField
 
 type SharedRelationshipProperties = FieldBase & {
   filterOptions?: FilterOptions
@@ -542,13 +544,17 @@ export type RichTextField<
   type: 'richText'
 } & ExtraProperties
 
-export type BaseArrayField = FieldBase & {
+export type ArrayField = FieldBase & {
   admin?: Admin & {
     components?: {
       RowLabel?: RowLabel
     } & Admin['components']
     initCollapsed?: boolean | false
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
    * By default it is bound to the collection.
@@ -563,9 +569,7 @@ export type BaseArrayField = FieldBase & {
   type: 'array'
 }
 
-export type ArrayField = BaseArrayField
-
-export type BaseRadioField = FieldBase & {
+export type RadioField = FieldBase & {
   admin?: Admin & {
     components?: {
       Error?: React.ComponentType<ErrorProps>
@@ -574,32 +578,15 @@ export type BaseRadioField = FieldBase & {
     layout?: 'horizontal' | 'vertical'
   }
   /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
+  /**
    * Customize the DB enum name
    */
-  enumName?: CustomName
+  enumName?: DBIdentifierName
   options: Option[]
   type: 'radio'
-}
-
-export type RadioField = BaseRadioField
-
-export type BaseBlock = {
-  fields: Field[]
-  /** @deprecated - please migrate to the interfaceName property instead. */
-  graphQL?: {
-    singularName?: string
-  }
-  imageAltText?: string
-  imageURL?: string
-  /** Customize generated GraphQL and Typescript schema names.
-   * The slug is used by default.
-   *
-   * This is useful if you would like to generate a top level type to share amongst collections/fields.
-   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
-   */
-  interfaceName?: string
-  labels?: Labels
-  slug: string
 }
 
 export type Block = {

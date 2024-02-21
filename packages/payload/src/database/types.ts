@@ -404,7 +404,7 @@ export type PaginatedDocs<T = any> = {
   totalPages: number
 }
 
-export type CustomName =
+export type DBIdentifierName =
   | ((Args: {
       /** The name of the parent table when using relational DBs */
       tableName?: string

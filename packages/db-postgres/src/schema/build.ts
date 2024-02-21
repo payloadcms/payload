@@ -18,7 +18,6 @@ import { fieldAffectsData } from 'payload/types'
 
 import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types'
 
-import { getConfigIDType } from './getConfigIDType'
 import { getTableName } from './getTableName'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { setColumnID } from './setColumnID'

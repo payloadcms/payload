@@ -1,4 +1,4 @@
-import type { CustomName } from 'payload/database'
+import type { DBIdentifierName } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -8,8 +8,8 @@ type Args = {
   adapter: PostgresAdapter
   /** The collection, global or field config **/
   config: {
-    dbName?: CustomName
-    enumName?: CustomName
+    dbName?: DBIdentifierName
+    enumName?: DBIdentifierName
     name?: string
     slug?: string
   }

@@ -21,7 +21,7 @@ import type {
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types'
-import type { CustomName } from '../../database/types'
+import type { DBIdentifierName } from '../../database/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { IncomingUploadType, Upload } from '../../uploads/types'
@@ -370,7 +370,7 @@ export type BaseCollectionConfig = {
    * Used to override the default naming of the database table or collection with your using a function or string
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
    */
-  dbName?: CustomName
+  dbName?: DBIdentifierName
   /**
    * Default field to sort by in collection list view
    */

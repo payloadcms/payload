@@ -1,9 +1,9 @@
-import type { CustomName } from 'payload/database'
+import type { DBIdentifierName } from 'payload/database'
 
 type Args = {
   config: {
-    dbName?: CustomName
-    enumName?: CustomName
+    dbName?: DBIdentifierName
+    enumName?: DBIdentifierName
     name?: string
     slug?: string
   }

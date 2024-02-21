@@ -17,8 +17,8 @@ import type {
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types'
-import type { PayloadRequest } from '../../express/types'
-import type { RequestContext } from '../../express/types'
+import type { DBIdentifierName } from '../../database/types'
+import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { Where } from '../../types'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
@@ -160,7 +160,7 @@ export type GlobalAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
-export type BaseGlobalConfig = {
+export type GlobalConfig = {
   access?: {
     read?: Access
     readDrafts?: Access
@@ -170,6 +170,10 @@ export type BaseGlobalConfig = {
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   endpoints?: Omit<Endpoint, 'root'>[] | false
   fields: Field[]
   graphQL?:
@@ -197,8 +201,6 @@ export type BaseGlobalConfig = {
   }
   versions?: IncomingGlobalVersions | boolean
 }
-
-export type GlobalConfig = BaseGlobalConfig
 
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'versions'> {

@@ -10,9 +10,6 @@ import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-post
 import type { PgColumn, PgEnum, PgTableWithColumns, PgTransaction } from 'drizzle-orm/pg-core'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
-import type { CustomName } from 'payload/dist/database/types'
-import type { BaseArrayField, BaseBlock, BaseSelectField } from 'payload/dist/fields/config/types'
-import type { BaseGlobalConfig } from 'payload/dist/globals/config/types'
 import type { PayloadRequest } from 'payload/types'
 import type { Pool, PoolConfig } from 'pg'
 
