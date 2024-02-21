@@ -2,13 +2,15 @@ import type { RichTextAdapter } from 'payload/types'
 
 import { withMergedProps } from '@payloadcms/ui/utilities'
 import { withNullableJSONSchemaType } from 'payload/utilities'
+import React from 'react'
 
-import type { AdapterArguments } from './types'
+import type { AdapterArguments, RichTextCustomLeaf } from './types'
 
 import RichTextCell from './cell'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
 import { richTextValidate } from './data/validation'
 import RichTextField from './field'
+import leafTypes from './field/leaves'
 
 export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], AdapterArguments, any> {
   return {
@@ -20,6 +22,29 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
       Component: RichTextField,
       toMergeIntoProps: args,
     }),
+    generateComponentMap: () => {
+      const componentMap = new Map()
+
+      ;(args?.admin?.leaves || Object.values(leafTypes)).forEach((leaf) => {
+        let leafObject: RichTextCustomLeaf
+
+        if (typeof leaf === 'object' && leaf !== null) {
+          leafObject = leaf
+        } else if (typeof leaf === 'string' && leafTypes[leaf]) {
+          leafObject = leafTypes[leaf]
+        }
+
+        if (leafObject) {
+          const LeafButton = leafObject.Button
+          const LeafComponent = leafObject.Leaf
+
+          componentMap.set(`leaf.button.${leafObject.name}`, <LeafButton />)
+          componentMap.set(`leaf.component.${leafObject.name}`, <LeafComponent />)
+        }
+      })
+
+      return componentMap
+    },
     outputSchema: ({ isRequired }) => {
       return {
         items: {

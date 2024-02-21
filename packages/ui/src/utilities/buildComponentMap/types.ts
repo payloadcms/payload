@@ -7,6 +7,7 @@ import {
   TabsField,
   Option,
   Labels,
+  RichTextField,
 } from 'payload/types'
 import { fieldTypes } from '../../forms/fields'
 
@@ -52,6 +53,10 @@ export type MappedField = {
    */
   options?: Option[]
   hasMany?: boolean
+  /**
+   * On `richText` fields only
+   */
+  editor?: RichTextField['editor']
 }
 
 export type FieldMap = MappedField[]

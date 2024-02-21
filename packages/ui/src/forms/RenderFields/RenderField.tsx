@@ -10,6 +10,7 @@ export const RenderField: React.FC<{
   const { path: pathFromContext, schemaPath: schemaPathFromContext } = useFieldPath()
   const path = `${pathFromContext ? `${pathFromContext}.` : ''}${name || ''}`
   const schemaPath = `${schemaPathFromContext ? `${schemaPathFromContext}.` : ''}${name || ''}`
+
   return (
     <FieldPathProvider path={path} schemaPath={schemaPath}>
       {Field}

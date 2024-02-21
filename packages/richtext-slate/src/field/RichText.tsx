@@ -5,22 +5,23 @@ import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Error,
-  FieldDescription,
-  Label,
-  useEditDepth,
-  useField,
-  useTranslation,
-} from '@payloadcms/ui'
+import { useEditDepth, useField, useTranslation } from '@payloadcms/ui'
 import isHotkey from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
-import type { ElementNode, FieldProps, RichTextElement, RichTextLeaf, TextNode } from '../types'
+import type { FormFieldBase } from '../../../ui/src/forms/fields/shared'
+import type {
+  ElementNode,
+  RichTextCustomLeaf,
+  RichTextElement,
+  RichTextLeaf,
+  TextNode,
+} from '../types'
 
+import { withCondition } from '../../../ui/src/forms/withCondition'
 import { defaultRichTextValue } from '../data/defaultValue'
 import { richTextValidate } from '../data/validation'
 import elementTypes from './elements'
@@ -33,6 +34,8 @@ import toggleLeaf from './leaves/toggle'
 import mergeCustomFunctions from './mergeCustomFunctions'
 import withEnterBreakOut from './plugins/withEnterBreakOut'
 import withHTML from './plugins/withHTML'
+import { LeafButtonProvider } from './providers/LeafButtonProvider'
+import { LeafProvider } from './providers/LeafProvider'
 
 const defaultElements: RichTextElement[] = [
   'h1',
@@ -60,127 +63,163 @@ declare module 'slate' {
   }
 }
 
-const RichText: React.FC<FieldProps> = (props) => {
+const RichText: React.FC<
+  FormFieldBase & {
+    name: string
+    richTextComponentMap: Map<string, React.ReactNode>
+  }
+> = (props) => {
   const {
     name,
-    admin: {
-      className,
-      condition,
-      description,
-      hideGutter,
-      placeholder,
-      readOnly,
-      style,
-      width,
-    } = {
-      className: undefined,
-      condition: undefined,
-      description: undefined,
-      hideGutter: undefined,
-      placeholder: undefined,
-      readOnly: undefined,
-      style: undefined,
-      width: undefined,
-    },
-    admin,
-    defaultValue: defaultValueFromProps,
-    label,
+    Description,
+    Error,
+    Label,
+    className,
     path: pathFromProps,
+    placeholder,
+    readOnly,
     required,
+    richTextComponentMap,
+    style,
     validate = richTextValidate,
+    width,
   } = props
 
-  const elements: RichTextElement[] = admin?.elements || defaultElements
-  const leaves: RichTextLeaf[] = admin?.leaves || defaultLeaves
+  const [leaves] = useState(() => {
+    const enabledLeaves: Record<
+      string,
+      {
+        Button: React.ReactNode
+        Leaf: React.ReactNode
+        name: string
+      }
+    > = {}
 
-  const path = pathFromProps || name
+    for (const [key, value] of richTextComponentMap) {
+      if (key.startsWith('leaf.button') || key.startsWith('leaf.component')) {
+        const leafName = key.replace('leaf.button', '').replace('leaf.component', '')
+        if (!enabledLeaves[leafName]) {
+          enabledLeaves[leafName] = {
+            name: leafName,
+            Button: null,
+            Leaf: null,
+          }
+        }
+
+        if (key.startsWith('leaf.button')) enabledLeaves[leafName].Button = value
+        if (key.startsWith('leaf.component')) enabledLeaves[leafName].Leaf = value
+      }
+    }
+
+    return enabledLeaves
+  })
+
+  const elements: RichTextElement[] = defaultElements
 
   const { i18n } = useTranslation()
-  const [loaded, setLoaded] = useState(false)
-  const [enabledElements, setEnabledElements] = useState({})
-  const [enabledLeaves, setEnabledLeaves] = useState({})
   const editorRef = useRef(null)
   const toolbarRef = useRef(null)
 
   const drawerDepth = useEditDepth()
   const drawerIsOpen = drawerDepth > 1
 
-  const renderElement = useCallback(
-    ({ attributes, children, element }) => {
-      const matchedElement = enabledElements[element.type]
-      const Element = matchedElement?.Element
-
-      let attr = { ...attributes }
-
-      // this converts text alignment to margin when dealing with void elements
-      if (element.textAlign) {
-        if (element.type === 'relationship' || element.type === 'upload') {
-          switch (element.textAlign) {
-            case 'left':
-              attr = { ...attr, style: { marginRight: 'auto' } }
-              break
-            case 'right':
-              attr = { ...attr, style: { marginLeft: 'auto' } }
-              break
-            case 'center':
-              attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
-              break
-            default:
-              attr = { ...attr, style: { textAlign: element.textAlign } }
-              break
-          }
-        } else if (element.type === 'li') {
-          switch (element.textAlign) {
-            case 'right':
-              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
-              break
-            case 'center':
-              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'center' } }
-              break
-            case 'left':
-            default:
-              attr = { ...attr, style: { listStylePosition: 'outside', textAlign: 'left' } }
-              break
-          }
-        } else {
-          attr = { ...attr, style: { textAlign: element.textAlign } }
-        }
+  const memoizedValidate = useCallback(
+    (value, validationOptions) => {
+      if (typeof validate === 'function') {
+        return validate(value, { ...validationOptions, required })
       }
-
-      if (Element) {
-        const el = (
-          <Element
-            attributes={attr}
-            editorRef={editorRef}
-            element={element}
-            fieldProps={props}
-            path={path}
-          >
-            {children}
-          </Element>
-        )
-
-        return el
-      }
-
-      return <div {...attr}>{children}</div>
     },
-    [enabledElements, path, props],
+    [validate, required],
   )
+
+  const { initialValue, path, schemaPath, setValue, showError, value } = useField({
+    path: pathFromProps || name,
+    validate: memoizedValidate,
+  })
+
+  const renderElement = useCallback(({ attributes, children, element }) => {
+    // const matchedElement = enabledElements[element.type]
+    // const Element = matchedElement?.Element
+
+    const attr = { ...attributes }
+
+    // // this converts text alignment to margin when dealing with void elements
+    // if (element.textAlign) {
+    //   if (element.type === 'relationship' || element.type === 'upload') {
+    //     switch (element.textAlign) {
+    //       case 'left':
+    //         attr = { ...attr, style: { marginRight: 'auto' } }
+    //         break
+    //       case 'right':
+    //         attr = { ...attr, style: { marginLeft: 'auto' } }
+    //         break
+    //       case 'center':
+    //         attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
+    //         break
+    //       default:
+    //         attr = { ...attr, style: { textAlign: element.textAlign } }
+    //         break
+    //     }
+    //   } else if (element.type === 'li') {
+    //     switch (element.textAlign) {
+    //       case 'right':
+    //         attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
+    //         break
+    //       case 'center':
+    //         attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'center' } }
+    //         break
+    //       case 'left':
+    //       default:
+    //         attr = { ...attr, style: { listStylePosition: 'outside', textAlign: 'left' } }
+    //         break
+    //     }
+    //   } else {
+    //     attr = { ...attr, style: { textAlign: element.textAlign } }
+    //   }
+    // }
+
+    // if (Element) {
+    //   const el = (
+    //     <Element
+    //       attributes={attr}
+    //       editorRef={editorRef}
+    //       element={element}
+    //       fieldProps={props}
+    //       path={path}
+    //     >
+    //       {children}
+    //     </Element>
+    //   )
+
+    //   return el
+    // }
+
+    return <div {...attr}>{children}</div>
+  }, [])
 
   const renderLeaf = useCallback(
     ({ attributes, children, leaf }) => {
-      const matchedLeaves = Object.entries(enabledLeaves).filter(([leafName]) => leaf[leafName])
-
+      const matchedLeaves = Object.entries(leaves).filter(([leafName]) => leaf[leafName])
+      console.log(matchedLeaves, leaf)
       if (matchedLeaves.length > 0) {
         return matchedLeaves.reduce(
-          (result, [leafName], i) => {
-            if (enabledLeaves[leafName]?.Leaf) {
-              const Leaf = enabledLeaves[leafName]?.Leaf
+          (result, [, leafConfig], i) => {
+            if (leafConfig?.Leaf) {
+              const Leaf = leafConfig.Leaf
+
               return (
-                <Leaf editorRef={editorRef} fieldProps={props} key={i} leaf={leaf} path={path}>
-                  {result}
-                </Leaf>
+                <LeafProvider
+                  attributes={attributes}
+                  editorRef={editorRef}
+                  fieldProps={props}
+                  key={i}
+                  leaf={leaf}
+                  path={path}
+                  result={result}
+                  schemaPath={schemaPath}
+                >
+                  {Leaf}
+                </LeafProvider>
               )
             }
 
@@ -192,23 +231,8 @@ const RichText: React.FC<FieldProps> = (props) => {
 
       return <span {...attributes}>{children}</span>
     },
-    [enabledLeaves, path, props],
+    [path, props, schemaPath, richTextComponentMap],
   )
-
-  const memoizedValidate = useCallback(
-    (value, validationOptions) => {
-      return validate(value, { ...validationOptions, required })
-    },
-    [validate, required],
-  )
-
-  const fieldType = useField({
-    condition,
-    path,
-    validate: memoizedValidate,
-  })
-
-  const { errorMessage, initialValue, setValue, showError, value } = fieldType
 
   const classes = [
     baseClass,
@@ -216,7 +240,6 @@ const RichText: React.FC<FieldProps> = (props) => {
     className,
     showError && 'error',
     readOnly && `${baseClass}--read-only`,
-    !hideGutter && `${baseClass}--gutter`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -225,12 +248,12 @@ const RichText: React.FC<FieldProps> = (props) => {
     let CreatedEditor = withEnterBreakOut(withHistory(withReact(createEditor())))
 
     CreatedEditor = withHTML(CreatedEditor)
-    CreatedEditor = enablePlugins(CreatedEditor, elements)
-    CreatedEditor = enablePlugins(CreatedEditor, leaves)
+    // CreatedEditor = enablePlugins(CreatedEditor, elements)
+    // CreatedEditor = enablePlugins(CreatedEditor, leaves)
 
     return CreatedEditor
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements, leaves, path])
+  }, [path])
 
   // All slate changes fire the onChange event
   // including selection changes
@@ -255,18 +278,6 @@ const RichText: React.FC<FieldProps> = (props) => {
   )
 
   useEffect(() => {
-    if (!loaded) {
-      const mergedElements = mergeCustomFunctions(elements, elementTypes)
-      const mergedLeaves = mergeCustomFunctions(leaves, leafTypes)
-
-      setEnabledElements(mergedElements)
-      setEnabledLeaves(mergedLeaves)
-
-      setLoaded(true)
-    }
-  }, [loaded, elements, leaves])
-
-  useEffect(() => {
     function setClickableState(clickState: 'disabled' | 'enabled') {
       const selectors = 'button, a, [role="button"]'
       const toolbarButtons: (HTMLAnchorElement | HTMLButtonElement)[] =
@@ -280,16 +291,16 @@ const RichText: React.FC<FieldProps> = (props) => {
       })
     }
 
-    if (loaded && readOnly) {
+    if (readOnly) {
       setClickableState('disabled')
     }
 
     return () => {
-      if (loaded && readOnly) {
+      if (readOnly) {
         setClickableState('enabled')
       }
     }
-  }, [loaded, readOnly])
+  }, [readOnly])
 
   // useEffect(() => {
   //   // If there is a change to the initial value, we need to reset Slate history
@@ -300,10 +311,6 @@ const RichText: React.FC<FieldProps> = (props) => {
   //     ReactEditor.deselect(editor);
   //   }
   // }, [path, editor]);
-
-  if (!loaded) {
-    return null
-  }
 
   let valueToRender = value
 
@@ -316,7 +323,7 @@ const RichText: React.FC<FieldProps> = (props) => {
     }
   }
 
-  if (!valueToRender) valueToRender = defaultValueFromProps || defaultRichTextValue
+  if (!valueToRender) valueToRender = defaultRichTextValue
 
   return (
     <div
@@ -327,8 +334,8 @@ const RichText: React.FC<FieldProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__wrap`}>
-        <Error message={errorMessage} showError={showError} />
-        <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+        {Error}
+        {Label}
         <Slate
           editor={editor}
           key={JSON.stringify({ initialValue, path })}
@@ -336,7 +343,7 @@ const RichText: React.FC<FieldProps> = (props) => {
           value={valueToRender as any[]}
         >
           <div className={`${baseClass}__wrapper`}>
-            {elements?.length + leaves?.length > 0 && (
+            {elements?.length + Object.keys(leaves)?.length > 0 && (
               <div
                 className={[`${baseClass}__toolbar`, drawerIsOpen && `${baseClass}__drawerIsOpen`]
                   .filter(Boolean)
@@ -344,7 +351,7 @@ const RichText: React.FC<FieldProps> = (props) => {
                 ref={toolbarRef}
               >
                 <div className={`${baseClass}__toolbar-wrap`}>
-                  {elements.map((element, i) => {
+                  {/* {elements.map((element, i) => {
                     let elementName: string
                     if (typeof element === 'object' && element?.name) elementName = element.name
                     if (typeof element === 'string') elementName = element
@@ -357,17 +364,21 @@ const RichText: React.FC<FieldProps> = (props) => {
                     }
 
                     return null
-                  })}
-                  {leaves.map((leaf, i) => {
-                    let leafName: string
-                    if (typeof leaf === 'object' && leaf?.name) leafName = leaf.name
-                    if (typeof leaf === 'string') leafName = leaf
-
-                    const leafType = enabledLeaves[leafName]
-                    const Button = leafType?.Button
+                  })} */}
+                  {Object.values(leaves).map((leaf, i) => {
+                    const Button = leaf?.Button
 
                     if (Button) {
-                      return <Button fieldProps={props} key={i} path={path} />
+                      return (
+                        <LeafButtonProvider
+                          fieldProps={props}
+                          key={i}
+                          path={path}
+                          schemaPath={schemaPath}
+                        >
+                          {Button}
+                        </LeafButtonProvider>
+                      )
                     }
 
                     return null
@@ -450,9 +461,10 @@ const RichText: React.FC<FieldProps> = (props) => {
             </div>
           </div>
         </Slate>
-        <FieldDescription description={description} path={path} value={value} />
+        {Description}
       </div>
     </div>
   )
 }
+
 export default withCondition(RichText)

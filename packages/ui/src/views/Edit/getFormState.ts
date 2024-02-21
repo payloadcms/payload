@@ -14,6 +14,7 @@ export const getFormState = async (args: {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     body: JSON.stringify(body),
   })
 
