@@ -121,33 +121,3 @@ declare module 'payload' {
     versionsSuffix?: string
   }
 }
-
-declare module 'payload/types' {
-  export interface GlobalConfig extends BaseGlobalConfig {
-    /**
-     * Customize the SQL table name
-     */
-    dbName?: CustomName
-  }
-
-  export interface ArrayField extends BaseArrayField {
-    /**
-     * Customize the SQL table name
-     */
-    dbName?: CustomName
-  }
-
-  export interface Block extends BaseBlock {
-    /**
-     * Customize the SQL table name
-     */
-    dbName?: CustomName
-  }
-
-  export interface SelectField extends BaseSelectField {
-    /**
-     * Customize the SQL table name when using `hasMany: true`
-     */
-    dbName?: CustomName
-  }
-}
