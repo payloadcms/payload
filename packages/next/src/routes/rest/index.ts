@@ -263,8 +263,8 @@ export const GET =
             }
             break
         }
-      } else if (slug.length === 1 && slug1 === 'access') {
-        res = await endpoints.root.GET.access({ req })
+      } else if (slug.length === 1 && slug1 in endpoints.root.GET) {
+        res = await endpoints.root.GET[slug1]({ req })
       }
 
       if (res instanceof Response) return res
@@ -401,6 +401,8 @@ export const POST =
           default:
             res = new Response('Route Not Found', { status: 404 })
         }
+      } else if (slug.length === 1 && slug1 in endpoints.root.POST) {
+        res = await endpoints.root.POST[slug1]({ req })
       }
 
       if (res instanceof Response) return res
