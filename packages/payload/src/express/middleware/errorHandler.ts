@@ -56,7 +56,7 @@ const errorHandler =
         err,
         response,
         req.context,
-        req.collection.config,
+        null,
       )) || {
         response,
         status,

@@ -462,4 +462,13 @@ describe('Hooks', () => {
       expect(doc.field_globalAndField).toStrictEqual(globalAndFieldString + globalAndFieldString)
     })
   })
+
+  describe('config level after error hook', () => {
+    it('should handle error', async () => {
+      const response = await fetch(`${apiUrl}/throw-to-after-error`)
+      const body = await response.json()
+      expect(response.status).toEqual(418)
+      expect(body).toEqual({ errors: [{ message: "I'm a teapot" }] })
+    })
+  })
 })
