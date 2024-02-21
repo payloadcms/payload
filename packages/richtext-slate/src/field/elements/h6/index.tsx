@@ -1,17 +1,21 @@
 import React from 'react'
 
+import type { RichTextCustomElement } from '../../..'
+
 import H6Icon from '../../icons/headings/H6'
 import ElementButton from '../Button'
+import { Heading6 } from './Heading6'
 
-const H6 = ({ attributes, children }) => <h6 {...attributes}>{children}</h6>
+const name = 'h6'
 
-const h6 = {
+const h6: RichTextCustomElement = {
+  name,
   Button: () => (
-    <ElementButton format="h6">
+    <ElementButton format={name}>
       <H6Icon />
     </ElementButton>
   ),
-  Element: H6,
+  Element: Heading6,
 }
 
 export default h6

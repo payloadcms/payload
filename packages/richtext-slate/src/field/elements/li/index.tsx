@@ -1,25 +1,10 @@
-import React from 'react'
+import type { RichTextCustomElement } from '../../..'
 
-import listTypes from '../listTypes'
+import { ListItemElement } from './ListItem'
 
-const LI = (props) => {
-  const { attributes, children, element } = props
-  const disableListStyle =
-    element.children.length >= 1 && listTypes.includes(element.children?.[0]?.type)
-
-  return (
-    <li
-      style={{
-        listStyle: disableListStyle ? 'none' : undefined,
-        listStylePosition: disableListStyle ? 'outside' : undefined,
-      }}
-      {...attributes}
-    >
-      {children}
-    </li>
-  )
+const listItem: RichTextCustomElement = {
+  name: 'li',
+  Element: ListItemElement,
 }
 
-export default {
-  Element: LI,
-}
+export default listItem

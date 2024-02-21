@@ -14,7 +14,7 @@ export function nodeIsTextNode(node: ElementNode | TextNode): node is TextNode {
 type RichTextPlugin = (editor: Editor) => Editor
 
 export type RichTextCustomElement = {
-  Button: React.ComponentType<any>
+  Button?: React.ComponentType<any>
   Element: React.ComponentType<any>
   name: string
   plugins?: RichTextPlugin[]

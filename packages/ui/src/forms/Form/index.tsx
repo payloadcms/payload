@@ -51,7 +51,6 @@ const Form: React.FC<Props> = (props) => {
     className,
     disableSuccessStatus,
     disabled,
-    fields: fieldsFromProps,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state

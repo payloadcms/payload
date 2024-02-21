@@ -1,18 +1,17 @@
 import React from 'react'
 
+import type { RichTextCustomElement } from '../../..'
+
 import BlockquoteIcon from '../../icons/Blockquote'
 import ElementButton from '../Button'
-import './index.scss'
+import { Blockquote } from './Blockquote'
 
-const Blockquote = ({ attributes, children }) => (
-  <blockquote className="rich-text-blockquote" {...attributes}>
-    {children}
-  </blockquote>
-)
+const name = 'blockquote'
 
-const blockquote = {
+const blockquote: RichTextCustomElement = {
+  name,
   Button: () => (
-    <ElementButton format="blockquote">
+    <ElementButton format={name}>
       <BlockquoteIcon />
     </ElementButton>
   ),

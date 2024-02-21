@@ -1,6 +1,7 @@
 import type { JSONSchema4 } from 'json-schema'
 
-import type { RichTextField, Validate } from '../fields/config/types'
+import type { SanitizedConfig } from '../config/types'
+import type { Field, RichTextField, Validate } from '../fields/config/types'
 import type { PayloadRequest, RequestContext } from '../types'
 import type { CellComponentProps } from './elements/Cell'
 
@@ -26,7 +27,15 @@ type RichTextAdapterBase<
     incomingEditorState: Value
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
-  generateComponentMap: () => Map<string, React.ReactNode> | Promise<Map<string, React.ReactNode>>
+  generateComponentMap: (args: {
+    config: SanitizedConfig
+    schemaPath: string
+  }) => Map<string, React.ReactNode>
+  generateSchemaMap: (args: {
+    config: SanitizedConfig
+    schemaMap: Map<string, Field[]>
+    schemaPath: string
+  }) => Map<string, Field[]>
   outputSchema?: ({
     field,
     isRequired,

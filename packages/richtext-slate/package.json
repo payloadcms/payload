@@ -18,8 +18,6 @@
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
-    "@payloadcms/translations": "workspace:^",
-    "@payloadcms/ui": "workspace:^",
     "is-hotkey": "0.2.0",
     "react": "18.2.0",
     "slate": "0.91.4",
@@ -34,7 +32,9 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.3.0"
+    "payload": "^2.3.0",
+    "@payloadcms/translations": "workspace:^",
+    "@payloadcms/ui": "workspace:^"
   },
   "exports": {
     ".": {

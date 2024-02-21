@@ -7,6 +7,7 @@ export const buildFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => 
 
   config.collections.forEach((collection) => {
     traverseFields({
+      config,
       schemaPath: collection.slug,
       fields: collection.fields,
       schemaMap: result,
@@ -15,6 +16,7 @@ export const buildFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => 
 
   config.globals.forEach((global) => {
     traverseFields({
+      config,
       schemaPath: global.slug,
       fields: global.fields,
       schemaMap: result,

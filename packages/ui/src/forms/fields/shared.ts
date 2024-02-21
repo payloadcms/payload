@@ -15,7 +15,12 @@ import {
 } from 'payload/types'
 import { Option } from 'payload/types'
 import { FormState } from '../..'
-import type { FieldMap, ReducedBlock, MappedTab } from '../../utilities/buildComponentMap/types'
+import type {
+  FieldMap,
+  ReducedBlock,
+  MappedTab,
+  MappedField,
+} from '../../utilities/buildComponentMap/types'
 
 export const fieldBaseClass = 'field-type'
 
@@ -111,7 +116,7 @@ export type FormFieldBase = {
     }
   | {
       // For `richText` fields
-      richTextComponentMap?: Map<string, React.ReactNode>
+      richTextComponentMap?: Map<string, React.ReactNode | MappedField[]>
     }
 )
 

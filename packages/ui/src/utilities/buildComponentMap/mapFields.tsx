@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
 
 import type { FieldPermissions } from 'payload/auth'
-import type { CellProps, Field, FieldWithPath, LabelProps } from 'payload/types'
+import type { CellProps, Field, FieldWithPath, LabelProps, SanitizedConfig } from 'payload/types'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import { fieldTypes } from '../../forms/fields'
 import { FormFieldBase } from '../../forms/fields/shared'
@@ -14,9 +14,9 @@ import DefaultLabel from '../../forms/Label'
 import DefaultError from '../../forms/Error'
 import DefaultDescription from '../../forms/FieldDescription'
 import { HiddenInput } from '../..'
-import { richText } from 'payload/fields/validations'
 
 export const mapFields = (args: {
+  config: SanitizedConfig
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
   operation?: 'create' | 'update'
@@ -29,6 +29,7 @@ export const mapFields = (args: {
   parentPath?: string
 }): FieldMap => {
   const {
+    config,
     fieldSchema,
     filter,
     operation = 'update',
@@ -95,6 +96,7 @@ export const mapFields = (args: {
           field.fields &&
           Array.isArray(field.fields) &&
           mapFields({
+            config,
             fieldSchema: field.fields,
             filter,
             operation,
@@ -110,6 +112,7 @@ export const mapFields = (args: {
           Array.isArray(field.tabs) &&
           field.tabs.map((tab) => {
             const tabFieldMap = mapFields({
+              config,
               fieldSchema: tab.fields,
               filter,
               operation,
@@ -134,12 +137,13 @@ export const mapFields = (args: {
           Array.isArray(field.blocks) &&
           field.blocks.map((block) => {
             const blockFieldMap = mapFields({
+              config,
               fieldSchema: block.fields,
               filter,
               operation,
               permissions,
               readOnly: readOnlyOverride,
-              parentPath: path,
+              parentPath: `${path}.${block.slug}`,
             })
 
             const reducedBlock: ReducedBlock = {
@@ -267,7 +271,7 @@ export const mapFields = (args: {
           }
 
           if (typeof field.editor.generateComponentMap === 'function') {
-            const result = field.editor.generateComponentMap()
+            const result = field.editor.generateComponentMap({ config, schemaPath: path })
             // @ts-ignore-next-line // TODO: the `richTextComponentMap` is not found on the union type
             fieldComponentProps.richTextComponentMap = result
           }

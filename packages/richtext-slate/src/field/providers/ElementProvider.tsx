@@ -1,27 +1,45 @@
 'use client'
+import type { Element } from 'slate'
+
 import React from 'react'
 
-type ElementContextType = {
+import type { FormFieldBase } from '../../../../ui/src/forms/fields/shared'
+
+type ElementContextType<T> = {
+  attributes: Record<string, unknown>
+  children: React.ReactNode
+  editorRef: React.MutableRefObject<HTMLDivElement>
+  element: T
+  fieldProps: FormFieldBase & {
+    name: string
+    richTextComponentMap: Map<string, React.ReactNode>
+  }
   path: string
   schemaPath: string
 }
 
-const ElementContext = React.createContext<ElementContextType>({
+const ElementContext = React.createContext<ElementContextType<Element>>({
+  attributes: {},
+  children: null,
+  editorRef: null,
+  element: {} as Element,
+  fieldProps: {} as any,
   path: '',
   schemaPath: '',
 })
 
-export const ElementProvider: React.FC<{
-  children: React.ReactNode
-  path: string
-  schemaPath: string
-}> = (props) => {
-  const { children, ...rest } = props
+export const ElementProvider: React.FC<
+  ElementContextType<Element> & {
+    childNodes: React.ReactNode
+  }
+> = (props) => {
+  const { childNodes, children, ...rest } = props
 
   return (
     <ElementContext.Provider
       value={{
         ...rest,
+        children: childNodes,
       }}
     >
       {children}
@@ -29,7 +47,6 @@ export const ElementProvider: React.FC<{
   )
 }
 
-export const useElement = () => {
-  const path = React.useContext(ElementContext)
-  return path
+export const useElement = <T,>(): ElementContextType<T> => {
+  return React.useContext(ElementContext) as ElementContextType<T>
 }

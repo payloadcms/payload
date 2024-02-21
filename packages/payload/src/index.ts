@@ -4,7 +4,6 @@ import type { SendMailOptions } from 'nodemailer'
 import type pino from 'pino'
 
 import crypto from 'crypto'
-import path from 'path'
 
 import type { AuthStrategy } from './auth'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword'

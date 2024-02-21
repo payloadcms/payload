@@ -1,17 +1,21 @@
 import React from 'react'
 
+import type { RichTextCustomElement } from '../../..'
+
 import H3Icon from '../../icons/headings/H3'
 import ElementButton from '../Button'
+import { Heading3 } from './Heading3'
 
-const H3 = ({ attributes, children }) => <h3 {...attributes}>{children}</h3>
+const name = 'h3'
 
-const h3 = {
+const h3: RichTextCustomElement = {
+  name,
   Button: () => (
-    <ElementButton format="h3">
+    <ElementButton format={name}>
       <H3Icon />
     </ElementButton>
   ),
-  Element: H3,
+  Element: Heading3,
 }
 
 export default h3
