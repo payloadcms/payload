@@ -424,7 +424,7 @@ describe('Fields', () => {
       const definitions: Record<string, IndexDirection> = {}
       const options: Record<string, IndexOptions> = {}
 
-      beforeEach(() => {
+      beforeAll(() => {
         indexes = (payload.db as MongooseAdapter).collections[
           'indexed-fields'
         ].schema.indexes() as [Record<string, IndexDirection>, IndexOptions]
@@ -447,7 +447,7 @@ describe('Fields', () => {
       })
 
       it('should have unique indexes that are not sparse when field is required', () => {
-        expect(definitions.uniqueRequired).toEqual(1)
+        expect(definitions.uniqueRequiredText).toEqual(1)
         expect(options.uniqueText).toMatchObject({ unique: true })
       })
 
