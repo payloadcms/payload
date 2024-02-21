@@ -92,6 +92,7 @@ export type Reset = (fieldSchema: FieldConfig[], data: unknown) => Promise<void>
 export type REPLACE_STATE = {
   state: FormState
   type: 'REPLACE_STATE'
+  optimize?: boolean
 }
 
 export type REMOVE = {

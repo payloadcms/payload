@@ -474,7 +474,7 @@ const Form: React.FC<Props> = (props) => {
     if (!isDeepEqual(debouncedFormState, prevFormState.current)) {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState
+          let revalidatedFormState: FormState
 
           await onChange.reduce(async (priorOnChange, onChangeFn) => {
             await priorOnChange
@@ -486,9 +486,25 @@ const Form: React.FC<Props> = (props) => {
             revalidatedFormState = result
           }, Promise.resolve())
 
-          prevFormState.current = revalidatedFormState
+          const stateWithOldValues: FormState = Object.entries(revalidatedFormState).reduce(
+            (newState, [path, field]) => {
+              const oldField = debouncedFormState[path]
+              const newField = {
+                ...field,
+                value: oldField?.value,
+                initialValue: oldField?.initialValue,
+              }
 
-          dispatchFields({ state: revalidatedFormState, type: 'REPLACE_STATE' })
+              newState[path] = newField
+
+              return newState
+            },
+            {},
+          )
+
+          prevFormState.current = stateWithOldValues
+
+          dispatchFields({ state: stateWithOldValues, type: 'REPLACE_STATE', optimize: false })
         }
       }
 
