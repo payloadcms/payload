@@ -12,7 +12,7 @@ import type { TypeWithVersion } from '../../../../versions/types'
 
 export type Version = TypeWithVersion<any>
 
-export type DocumentPermissions = CollectionPermission | GlobalPermission | null
+export type DocumentPermissions = CollectionPermission | GlobalPermission
 
 export type ContextType = {
   collection?: SanitizedCollectionConfig

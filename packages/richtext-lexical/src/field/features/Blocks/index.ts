@@ -1,7 +1,7 @@
-import type { Block } from 'payload/types'
+import type { Block, BlockField } from 'payload/types'
 
 import { baseBlockFields } from 'payload/config'
-import { formatLabels, getTranslation } from 'payload/utilities'
+import { fieldsToJSONSchema, formatLabels, getTranslation } from 'payload/utilities'
 
 import type { FeatureProvider } from '../types'
 
@@ -31,6 +31,20 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
   return {
     feature: () => {
       return {
+        generatedTypes: {
+          modifyOutputSchema: ({ currentSchema, field, interfaceNameDefinitions }) => {
+            const blocksField: BlockField = {
+              name: field?.name + '_lexical_blocks',
+              blocks: props.blocks,
+              type: 'blocks',
+            }
+            // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
+            // we don't actually use the JSON Schema itself in the generated types yet.
+            fieldsToJSONSchema({}, [blocksField], interfaceNameDefinitions)
+
+            return currentSchema
+          },
+        },
         nodes: [
           {
             node: BlockNode,

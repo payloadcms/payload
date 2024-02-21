@@ -1,25 +1,31 @@
+import type { Request } from 'express'
+
 import type { File, FileData } from './types'
-import { Request } from 'express'
+
 import { APIError } from '../errors'
 
 type Args = {
-  req: Request
   data: FileData
+  req: Request
 }
-export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
-  const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
-  const { url, filename } = data
+export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
+  const { filename, url } = data
 
   if (typeof url === 'string') {
-    const fileURL = `${baseUrl}${url}`
+    let fileURL = url
+    if (!url.startsWith('http')) {
+      const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
+      fileURL = `${baseUrl}${url}`
+    }
+
     const { default: fetch } = (await import('node-fetch')) as any
 
     const res = await fetch(fileURL, {
       credentials: 'include',
-      method: 'GET',
       headers: {
         ...req.headers,
       },
+      method: 'GET',
     })
 
     if (!res.ok) throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)

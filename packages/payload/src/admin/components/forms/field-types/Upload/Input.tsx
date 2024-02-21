@@ -137,6 +137,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
         fieldBaseClass,
         baseClass,
         className,
+        `field-${path.replace(/\./g, '__')}`,
         showError && 'error',
         readOnly && 'read-only',
       ]

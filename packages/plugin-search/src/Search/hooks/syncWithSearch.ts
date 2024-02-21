@@ -6,6 +6,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     doc,
     operation,
     req: { payload },
+    req,
     // @ts-expect-error
     searchConfig,
   } = args
@@ -28,6 +29,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     dataToSave = await beforeSync({
       originalDoc: doc,
       payload,
+      req,
       searchDoc: dataToSave,
     })
   }
@@ -55,13 +57,13 @@ const syncWithSearch: SyncWithSearch = async (args) => {
   try {
     if (operation === 'create') {
       if (doSync) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        payload.create({
+        await payload.create({
           collection: searchCollectionSlug,
           data: {
             ...dataToSave,
             priority: defaultPriority,
           },
+          req,
         })
       }
     }
@@ -72,6 +74,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
         const searchDocQuery = await payload.find({
           collection: searchCollectionSlug,
           depth: 0,
+          req,
           where: {
             'doc.value': {
               equals: id,
@@ -90,15 +93,12 @@ const syncWithSearch: SyncWithSearch = async (args) => {
         // to ensure the same, out-of-date result does not appear twice (where only syncing the first found doc)
         if (duplicativeDocs.length > 0) {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            Promise.all(
-              duplicativeDocs.map(({ id: duplicativeDocID }) =>
-                payload.delete({
-                  id: duplicativeDocID,
-                  collection: searchCollectionSlug,
-                }),
-              ), // eslint-disable-line function-paren-newline
-            )
+            const duplicativeDocIDs = duplicativeDocs.map(({ id }) => id)
+            await payload.delete({
+              collection: searchCollectionSlug,
+              req,
+              where: { id: { in: duplicativeDocIDs } },
+            })
           } catch (err: unknown) {
             payload.logger.error(`Error deleting duplicative search documents.`)
           }
@@ -110,14 +110,14 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           if (doSync) {
             // update the doc normally
             try {
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
-              payload.update({
+              await payload.update({
                 id: searchDocID,
                 collection: searchCollectionSlug,
                 data: {
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
                 },
+                req,
               })
             } catch (err: unknown) {
               payload.logger.error(`Error updating search document.`)
@@ -126,10 +126,10 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           if (deleteDrafts && status === 'draft') {
             // do not include draft docs in search results, so delete the record
             try {
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
-              payload.delete({
+              await payload.delete({
                 id: searchDocID,
                 collection: searchCollectionSlug,
+                req,
               })
             } catch (err: unknown) {
               payload.logger.error(`Error deleting search document: ${err}`)
@@ -137,13 +137,13 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           }
         } else if (doSync) {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            payload.create({
+            await payload.create({
               collection: searchCollectionSlug,
               data: {
                 ...dataToSave,
                 priority: defaultPriority,
               },
+              req,
             })
           } catch (err: unknown) {
             payload.logger.error(`Error creating search document: ${err}`)

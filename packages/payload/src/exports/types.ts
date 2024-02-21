@@ -109,6 +109,7 @@ export {
   fieldHasSubFields,
   fieldIsArrayType,
   fieldIsBlockType,
+  fieldIsGroupType,
   fieldIsLocalized,
   fieldIsPresentationalOnly,
   fieldSupportsMany,

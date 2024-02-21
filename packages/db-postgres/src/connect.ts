@@ -1,3 +1,4 @@
+import type { Payload } from 'payload'
 import type { Connect } from 'payload/database'
 
 import { eq, sql } from 'drizzle-orm'
@@ -8,6 +9,43 @@ import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types'
 
+const connectWithReconnect = async function ({
+  adapter,
+  payload,
+  reconnect = false,
+}: {
+  adapter: PostgresAdapter
+  payload: Payload
+  reconnect?: boolean
+}) {
+  let result
+
+  if (!reconnect) {
+    result = await adapter.pool.connect()
+  } else {
+    try {
+      result = await adapter.pool.connect()
+    } catch (err) {
+      setTimeout(() => {
+        payload.logger.info('Reconnecting to postgres')
+        void connectWithReconnect({ adapter, payload, reconnect: true })
+      }, 1000)
+    }
+  }
+  if (!result) {
+    return
+  }
+  result.prependListener('error', (err) => {
+    try {
+      if (err.code === 'ECONNRESET') {
+        void connectWithReconnect({ adapter, payload, reconnect: true })
+      }
+    } catch (err) {
+      // swallow error
+    }
+  })
+}
+
 export const connect: Connect = async function connect(this: PostgresAdapter, payload) {
   this.schema = {
     ...this.tables,
@@ -17,10 +55,11 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
 
   try {
     this.pool = new Pool(this.poolOptions)
-    await this.pool.connect()
+    await connectWithReconnect({ adapter: this, payload })
+
     const logger = this.logger || false
 
-    this.drizzle = drizzle(this.pool, { schema: this.schema, logger })
+    this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       this.payload.logger.info('---- DROPPING TABLES ----')
       await this.drizzle.execute(sql`drop schema public cascade;

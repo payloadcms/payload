@@ -14,25 +14,30 @@ import { parseError } from './utilities/parseError'
 /**
  * Drop the current database and run all migrate up functions
  */
-export async function migrateFresh(this: PostgresAdapter): Promise<void> {
+export async function migrateFresh(
+  this: PostgresAdapter,
+  { forceAcceptWarning = false },
+): Promise<void> {
   const { payload } = this
 
-  const { confirm: acceptWarning } = await prompts(
-    {
-      name: 'confirm',
-      type: 'confirm',
-      initial: false,
-      message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
-    },
-    {
-      onCancel: () => {
-        process.exit(0)
+  if (forceAcceptWarning === false) {
+    const { confirm: acceptWarning } = await prompts(
+      {
+        name: 'confirm',
+        type: 'confirm',
+        initial: false,
+        message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
       },
-    },
-  )
+      {
+        onCancel: () => {
+          process.exit(0)
+        },
+      },
+    )
 
-  if (!acceptWarning) {
-    process.exit(0)
+    if (!acceptWarning) {
+      process.exit(0)
+    }
   }
 
   payload.logger.info({

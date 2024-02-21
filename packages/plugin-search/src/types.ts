@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload/types'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig, PayloadRequest } from 'payload/types'
 
 export interface DocToSync {
   [key: string]: any
@@ -15,6 +15,7 @@ export type BeforeSync = (args: {
     [key: string]: any
   }
   payload: Payload
+  req: PayloadRequest
   searchDoc: DocToSync
 }) => DocToSync | Promise<DocToSync>
 
@@ -40,6 +41,6 @@ export type SyncWithSearch = (
 // Extend the `CollectionAfterDeleteHook` with more function args
 export type DeleteFromSearch = (
   Args: Parameters<CollectionAfterDeleteHook>[0] & {
-    searchConfig: SearchConfig 
+    searchConfig: SearchConfig
   },
 ) => ReturnType<CollectionAfterDeleteHook>

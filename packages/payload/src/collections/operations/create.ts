@@ -55,44 +55,45 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'create',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    autosave = false,
-    collection: { config: collectionConfig },
-    collection,
-    depth,
-    disableVerificationEmail,
-    draft = false,
-    overrideAccess,
-    overwriteExistingFiles = false,
-    req: {
-      payload,
-      payload: { config, emailOptions },
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
+
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'create',
+            req: args.req,
+          })) || args
+      },
+      Promise.resolve(),
+    )
+
+    const {
+      autosave = false,
+      collection: { config: collectionConfig },
+      collection,
+      depth,
+      disableVerificationEmail,
+      draft = false,
+      overrideAccess,
+      overwriteExistingFiles = false,
+      req: {
+        payload,
+        payload: { config, emailOptions },
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     let { data } = args
 
@@ -367,7 +368,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

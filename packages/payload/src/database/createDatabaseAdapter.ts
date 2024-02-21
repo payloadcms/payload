@@ -39,7 +39,7 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     createMigration,
     migrate,
     migrateDown,
-    migrateFresh: async () => null,
+    migrateFresh: async ({ forceAcceptWarning = null }) => null,
     migrateRefresh,
     migrateReset,
     migrateStatus,

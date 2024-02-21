@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/plugin-cloud-storage",
   "description": "The official cloud storage plugin for Payload CMS",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -52,7 +52,7 @@
     "@types/find-node-modules": "^2.1.2",
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
-    "nodemon": "^2.0.6",
+    "nodemon": "3.0.3",
     "payload": "workspace:*",
     "rimraf": "^4.1.2",
     "ts-node": "^9.1.1",
