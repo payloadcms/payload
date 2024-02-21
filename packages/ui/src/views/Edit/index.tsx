@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback } from 'react'
 
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
@@ -9,18 +9,19 @@ import { OperationProvider } from '../../providers/OperationProvider'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentFields } from '../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
-// import Meta from '../../../../utilities/Meta'
 import Auth from './Auth'
 import { SetStepNav } from './SetStepNav'
 import { EditViewProps } from '../types'
-import { getFormStateFromServer } from './action'
 import { Upload } from './Upload'
 import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
 import { useComponentMap } from '../../providers/ComponentMapProvider'
 import { SetDocumentTitle } from './SetDocumentTitle'
+import { Props as FormProps, FormState } from '../../forms/Form/types'
 
 import './index.scss'
+import { BuildFormStateArgs } from '../..'
+import { getFormState } from './getFormState'
+import { FieldPathProvider } from '../../forms/FieldPathProvider'
 
 const baseClass = 'collection-edit'
 
@@ -32,20 +33,22 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     AfterDocument,
     AfterFields,
     data,
-    formState: initialStateFromProps,
-    initializeFormState,
+    initialState,
     // isLoading,
     onSave: onSaveFromProps,
-    docPreferences,
     docPermissions,
+    docPreferences,
     user,
-    locale,
   } = props
 
   const config = useConfig()
-  const { collections, globals } = config
+  const {
+    serverURL,
+    collections,
+    globals,
+    routes: { api: apiRoute },
+  } = config
 
-  const { i18n } = useTranslation()
   const { getFieldMap } = useComponentMap()
 
   const collectionConfig =
@@ -55,6 +58,8 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const globalConfig =
     'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
 
+  const [schemaPath] = React.useState(collectionConfig?.slug || globalConfig?.slug)
+
   const fieldMap = getFieldMap({
     collectionSlug: collectionConfig?.slug,
     globalSlug: globalConfig?.slug,
@@ -63,22 +68,6 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const id = 'id' in props ? props.id : undefined
   const isEditing = 'isEditing' in props ? props.isEditing : undefined
   const operation = isEditing ? 'update' : 'create'
-
-  const [initialState] = useState(() => {
-    if (initializeFormState) {
-      const initializedState = getFormStateFromServer.bind(null, {
-        collectionSlug: collectionConfig?.slug,
-        id: id || undefined,
-        locale,
-        language: i18n.language,
-        operation,
-        docPreferences,
-        user,
-      })({ formState: {} })
-
-      return initializedState
-    } else return initialStateFromProps
-  })
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
   const upload = collectionConfig ? collectionConfig.upload : undefined
@@ -137,41 +126,56 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   //   setViewActions(defaultActions)
   // }, [id, location.pathname, collectionConfig?.admin?.components?.views?.Edit, setViewActions])
 
-  const rebuildFormState = getFormStateFromServer.bind(null, {
-    collectionSlug: collectionConfig?.slug,
-    id: id || undefined,
-    locale,
-    language: i18n.language,
-    operation,
-    docPreferences,
-    user,
-  })
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) =>
+      getFormState({
+        serverURL,
+        apiRoute,
+        body: {
+          id,
+          operation,
+          formState: prevFormState,
+          docPreferences,
+          schemaPath,
+        },
+      }),
+    [
+      serverURL,
+      apiRoute,
+      collectionConfig,
+      globalConfig,
+      id,
+      operation,
+      docPreferences,
+      schemaPath,
+    ],
+  )
 
   return (
     <main className={classes}>
-      <OperationProvider operation={operation}>
-        <Form
-          action={action}
-          className={`${baseClass}__form`}
-          disabled={!hasSavePermission}
-          initialState={initialState}
-          method={id ? 'PATCH' : 'POST'}
-          beforeSubmit={[rebuildFormState]}
-          onChange={[rebuildFormState]}
-          onSuccess={onSave}
-        >
-          <FormLoadingOverlayToggle
-            action={operation}
-            // formIsLoading={isLoading}
-            // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
-            name={`collection-edit--${
-              typeof collectionConfig?.labels?.singular === 'string'
-                ? collectionConfig.labels.singular
-                : 'document'
-            }`}
-            type="withoutNav"
-          />
-          {/* <Meta
+      <FieldPathProvider path="" schemaPath={schemaPath}>
+        <OperationProvider operation={operation}>
+          <Form
+            action={action}
+            className={`${baseClass}__form`}
+            disabled={!hasSavePermission}
+            initialState={initialState}
+            method={id ? 'PATCH' : 'POST'}
+            onChange={[onChange]}
+            onSuccess={onSave}
+          >
+            <FormLoadingOverlayToggle
+              action={operation}
+              // formIsLoading={isLoading}
+              // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
+              name={`collection-edit--${
+                typeof collectionConfig?.labels?.singular === 'string'
+                  ? collectionConfig.labels.singular
+                  : 'document'
+              }`}
+              type="withoutNav"
+            />
+            {/* <Meta
         description={`${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
           collection.labels.singular,
           i18n,
@@ -182,61 +186,62 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
           i18n,
         )}`}
       /> */}
-          {BeforeDocument}
-          {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <SetStepNav
-            collectionSlug={collectionConfig?.slug}
-            globalSlug={globalConfig?.slug}
-            useAsTitle={collectionConfig?.admin?.useAsTitle}
-            id={id}
-            isEditing={isEditing || false}
-            pluralLabel={collectionConfig?.labels?.plural}
-          />
-          <SetDocumentTitle
-            config={config}
-            collectionConfig={collectionConfig}
-            globalConfig={globalConfig}
-          />
-          <DocumentControls
-            apiURL={apiURL}
-            slug={collectionConfig?.slug}
-            data={data}
-            disableActions={disableActions}
-            hasSavePermission={hasSavePermission}
-            id={id}
-            isEditing={isEditing}
-            permissions={docPermissions}
-          />
-          <DocumentFields
-            BeforeFields={
-              <Fragment>
-                {auth && (
-                  <Auth
-                    className={`${baseClass}__auth`}
-                    collectionSlug={collectionConfig.slug}
-                    email={data?.email}
-                    operation={operation}
-                    readOnly={!hasSavePermission}
-                    requirePassword={!isEditing}
-                    useAPIKey={auth.useAPIKey}
-                    verify={auth.verify}
-                  />
-                )}
-                {upload && (
-                  <Upload
-                    uploadConfig={upload}
-                    collectionSlug={collectionConfig.slug}
-                    initialState={initialState}
-                  />
-                )}
-              </Fragment>
-            }
-            fieldMap={fieldMap}
-            AfterFields={AfterFields}
-          />
-          {AfterDocument}
-        </Form>
-      </OperationProvider>
+            {BeforeDocument}
+            {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
+            <SetStepNav
+              collectionSlug={collectionConfig?.slug}
+              globalSlug={globalConfig?.slug}
+              useAsTitle={collectionConfig?.admin?.useAsTitle}
+              id={id}
+              isEditing={isEditing || false}
+              pluralLabel={collectionConfig?.labels?.plural}
+            />
+            <SetDocumentTitle
+              config={config}
+              collectionConfig={collectionConfig}
+              globalConfig={globalConfig}
+            />
+            <DocumentControls
+              apiURL={apiURL}
+              slug={collectionConfig?.slug}
+              data={data}
+              disableActions={disableActions}
+              hasSavePermission={hasSavePermission}
+              id={id}
+              isEditing={isEditing}
+              permissions={docPermissions}
+            />
+            <DocumentFields
+              BeforeFields={
+                <Fragment>
+                  {auth && (
+                    <Auth
+                      className={`${baseClass}__auth`}
+                      collectionSlug={collectionConfig.slug}
+                      email={data?.email}
+                      operation={operation}
+                      readOnly={!hasSavePermission}
+                      requirePassword={!isEditing}
+                      useAPIKey={auth.useAPIKey}
+                      verify={auth.verify}
+                    />
+                  )}
+                  {upload && (
+                    <Upload
+                      uploadConfig={upload}
+                      collectionSlug={collectionConfig.slug}
+                      initialState={initialState}
+                    />
+                  )}
+                </Fragment>
+              }
+              fieldMap={fieldMap}
+              AfterFields={AfterFields}
+            />
+            {AfterDocument}
+          </Form>
+        </OperationProvider>
+      </FieldPathProvider>
     </main>
   )
 }

@@ -39,7 +39,6 @@ import getSiblingDataFunc from './getSiblingData'
 import initContextState from './initContextState'
 import reduceFieldsToValues from './reduceFieldsToValues'
 import useDebounce from '../../hooks/useDebounce'
-import { FieldPathProvider } from '../FieldPathProvider'
 
 const baseClass = 'form'
 
@@ -514,7 +513,7 @@ const Form: React.FC<Props> = (props) => {
             <ProcessingContext.Provider value={processing}>
               <ModifiedContext.Provider value={modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
-                  <FieldPathProvider path="">{children}</FieldPathProvider>
+                  {children}
                 </FormFieldsContext.Provider>
               </ModifiedContext.Provider>
             </ProcessingContext.Provider>

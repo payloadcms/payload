@@ -39,6 +39,7 @@ type BlockFieldProps = UseDraggableSortableReturn & {
   path: string
   labels: Labels
   permissions: FieldPermissions
+  schemaPath: string
 }
 
 export const BlockRow: React.FC<BlockFieldProps> = ({
@@ -54,6 +55,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   listeners,
   moveRow,
   path: parentPath,
+  schemaPath,
   permissions,
   readOnly,
   removeRow,
@@ -132,7 +134,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        <FieldPathProvider path={path} schemaPath={`${parentPath}.${block.slug}`}>
+        <FieldPathProvider path={path} schemaPath={`${schemaPath}.${block.slug}`}>
           <RenderFields
             className={`${baseClass}__fields`}
             fieldMap={block.subfields}

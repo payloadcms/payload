@@ -96,6 +96,7 @@ const BlocksField: React.FC<Props> = (props) => {
     valid,
     value,
     path,
+    schemaPath,
   } = useField<number>({
     hasRows: true,
     path: pathFromProps || name,
@@ -248,6 +249,7 @@ const BlocksField: React.FC<Props> = (props) => {
                       labels={labels}
                       moveRow={moveRow}
                       path={path}
+                      schemaPath={schemaPath}
                       permissions={permissions}
                       readOnly={readOnly}
                       removeRow={removeRow}

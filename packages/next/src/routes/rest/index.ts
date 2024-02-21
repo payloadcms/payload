@@ -12,6 +12,7 @@ import {
 } from './types'
 
 import { RouteError } from './RouteError'
+import { buildFormState } from './buildFormState'
 import { endpointsAreDisabled } from './checkEndpoints'
 
 import { me } from './auth/me'
@@ -49,6 +50,9 @@ const endpoints = {
   root: {
     GET: {
       access,
+    },
+    POST: {
+      'form-state': buildFormState,
     },
   },
   collection: {
@@ -295,6 +299,7 @@ export const POST =
         config,
         params: { collection: slug1 },
       })
+
       collection = req.payload.collections?.[slug1]
 
       const disableEndpoints = endpointsAreDisabled({
@@ -315,6 +320,7 @@ export const POST =
           payloadRequest: req,
           endpoints: collection.config.endpoints,
         })
+
         if (customEndpointResponse) return customEndpointResponse
 
         switch (slug.length) {
@@ -324,6 +330,7 @@ export const POST =
             break
           case 2:
             if (slug2 in endpoints.collection.POST) {
+              // /:collection/form-state
               // /:collection/login
               // /:collection/logout
               // /:collection/unlock

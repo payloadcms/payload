@@ -43,12 +43,16 @@ export const Document = async ({
 
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
+  const route = `/${collectionSlug || globalSlug + '/' + params.segments.join('/')}`
+
   const { config, payload, permissions, user, collectionConfig, globalConfig, locale, i18n } =
     await initPage({
       config: configPromise,
       redirectUnauthenticatedUser: true,
       collectionSlug,
       globalSlug,
+      searchParams,
+      route,
     })
 
   if (!collectionConfig && !globalConfig) {
@@ -149,7 +153,7 @@ export const Document = async ({
     limit: 1,
   })) as any as { docs: { value: DocumentPreferences }[] }
 
-  const formState = await buildStateFromSchema({
+  const initialState = await buildStateFromSchema({
     id,
     data: data || {},
     fieldSchema: formatFields(fields, isEditing),
@@ -176,13 +180,11 @@ export const Document = async ({
     globalSlug,
     data,
     hasSavePermission,
-    formState,
+    initialState,
     isEditing,
     docPermissions,
-    docPreferences,
     updatedAt: data?.updatedAt?.toString(),
     user,
-    locale,
     payload,
     config,
     searchParams,

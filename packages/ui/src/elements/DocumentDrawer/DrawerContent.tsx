@@ -25,6 +25,9 @@ import IDLabel from '../IDLabel'
 import type { EditViewProps } from '../../views/types'
 import { DefaultEditView } from '../../views/Edit'
 import { Gutter } from '../Gutter'
+import { LoadingOverlay } from '../Loading'
+import { getFormState } from '../../views/Edit/getFormState'
+import { useFieldPath } from '../../forms/FieldPathProvider'
 
 const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawerSlug, onSave }) => {
   const config = useConfig()
@@ -37,7 +40,7 @@ const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawer
   const { closeModal, modalState, toggleModal } = useModal()
   const locale = useLocale()
   const { user } = useAuth()
-  const [internalState, setInternalState] = useState<FormState>()
+  const [initialState, setInitialState] = useState<FormState>()
   const { i18n, t } = useTranslation()
   const hasInitializedState = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
@@ -48,6 +51,7 @@ const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawer
   const { admin: { components: { views: { Edit } = {} } = {} } = {}, fields: fieldsFromConfig } =
     collectionConfig
 
+  const { schemaPath } = useFieldPath()
   const { id, docPermissions } = useDocumentInfo()
 
   // The component definition could come from multiple places in the config
@@ -105,7 +109,33 @@ const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawer
     (isEditing && docPermissions?.update?.permission) ||
     (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
 
-  const isLoading = !internalState || !docPermissions || isLoadingDocument
+  useEffect(() => {
+    if (!hasInitializedState.current && data) {
+      const getInitialState = async () => {
+        const result = await getFormState({
+          serverURL,
+          apiRoute: api,
+          body: {
+            id,
+            operation: isEditing ? 'update' : 'create',
+            formState: data,
+            docPreferences: null, // TODO: get this
+            schemaPath,
+          },
+        })
+
+        setInitialState(result)
+      }
+
+      getInitialState()
+    }
+  }, [])
+
+  const isLoading = !initialState || !docPermissions || isLoadingDocument
+
+  if (isLoading) {
+    return <LoadingOverlay />
+  }
 
   const componentProps: EditViewProps = {
     id,
@@ -144,11 +174,10 @@ const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawer
     onSave,
     collectionSlug: collectionConfig.slug,
     docPermissions: docPermissions as CollectionPermission,
-    docPreferences: null,
+    docPreferences: null, // TODO: get this
     user,
     updatedAt: data?.updatedAt,
-    locale,
-    initializeFormState: true,
+    initialState,
   }
 
   return (
