@@ -67,11 +67,10 @@ const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSc
     schema.unique &&
     (field.localized ||
       draftsEnabled ||
-      ('required' in field && !field.required) ||
-      (field.type !== 'group' &&
-        fieldAffectsData(field) &&
+      (fieldAffectsData(field) &&
+        field.type !== 'group' &&
         field.type !== 'tab' &&
-        field?.required !== true))
+        field.required !== true))
   ) {
     schema.sparse = true
   }

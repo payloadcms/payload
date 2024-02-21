@@ -249,6 +249,7 @@ describe('fields', () => {
             unique: uniqueText,
           },
           text: 'text',
+          uniqueRequiredText: 'text',
           uniqueText,
         },
       })
