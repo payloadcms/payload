@@ -90,6 +90,7 @@ const Form: React.FC<Props> = (props) => {
   const [fields, dispatchFields] = fieldsReducer
 
   const debouncedFormState = useDebounce(fields, 150)
+  const prevFormState = useRef<FormState>(null)
 
   contextRef.current.fields = fields
 
@@ -471,27 +472,29 @@ const Form: React.FC<Props> = (props) => {
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
   useEffect(() => {
-    const executeOnChange = async () => {
-      if (Array.isArray(onChange)) {
-        let revalidatedFormState
+    if (!isDeepEqual(debouncedFormState, prevFormState.current)) {
+      const executeOnChange = async () => {
+        if (Array.isArray(onChange)) {
+          let revalidatedFormState
 
-        await onChange.reduce(async (priorOnChange, onChangeFn) => {
-          await priorOnChange
+          await onChange.reduce(async (priorOnChange, onChangeFn) => {
+            await priorOnChange
 
-          const result = await onChangeFn({
-            formState: debouncedFormState,
-          })
+            const result = await onChangeFn({
+              formState: debouncedFormState,
+            })
 
-          revalidatedFormState = result
-        }, Promise.resolve())
+            revalidatedFormState = result
+          }, Promise.resolve())
 
-        if (!isDeepEqual(debouncedFormState, revalidatedFormState)) {
+          prevFormState.current = revalidatedFormState
+
           dispatchFields({ state: revalidatedFormState, type: 'REPLACE_STATE' })
         }
       }
-    }
 
-    executeOnChange()
+      executeOnChange()
+    }
   }, [debouncedFormState])
 
   return (
