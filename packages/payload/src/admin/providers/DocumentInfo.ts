@@ -6,13 +6,14 @@ import type {
 } from '../../collections/config/types'
 import type { PaginatedDocs, TypeWithVersion } from '../../exports/database'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
+import type { DocumentPreferences } from '../../preferences/types'
 
 export type DocumentInfoContext = {
   collectionSlug?: SanitizedCollectionConfig['slug']
   docConfig?: SanitizedCollectionConfig | SanitizedGlobalConfig
   docPermissions: DocumentPermissions
   getDocPermissions: () => Promise<void>
-  getDocPreferences: () => Promise<{ [key: string]: unknown }>
+  getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
   globalSlug?: SanitizedGlobalConfig['slug']
   id?: number | string

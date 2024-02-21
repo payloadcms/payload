@@ -1,30 +1,26 @@
 'use client'
 
-import type { Fields } from '@payloadcms/ui'
+import type { FormState } from '@payloadcms/ui'
 
 import { useModal } from '@faceless-ui/modal'
 import {
-  buildStateFromSchema,
+  getFormState,
   reduceFieldsToValues,
-  useAuth,
   useConfig,
   useDocumentInfo,
   useDrawerSlug,
-  useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { sanitizeFields } from 'payload/config'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { FieldProps } from '../../../../types'
-
 import LinkIcon from '../../../icons/Link'
+import { useElementButton } from '../../../providers/ElementButtonProvider'
 import ElementButton from '../../Button'
 import isElementActive from '../../isActive'
 import { LinkDrawer } from '../LinkDrawer'
-import { transformExtraFields, unwrapLink } from '../utilities'
+import { unwrapLink } from '../utilities'
 
 /**
  * This function is called when an new link is created - not when an existing link is edited.
@@ -64,35 +60,23 @@ const insertLink = (editor, fields) => {
   ReactEditor.focus(editor)
 }
 
-export const LinkButton: React.FC<{
-  fieldProps: FieldProps
-  path: string
-}> = ({ fieldProps }) => {
-  const customFieldSchema = fieldProps?.admin?.link?.fields
-  const { user } = useAuth()
-  const { code: locale } = useLocale()
-  const [initialState, setInitialState] = useState<Fields>({})
+export const LinkButton: React.FC = () => {
+  const { fieldProps } = useElementButton()
+  const [initialState, setInitialState] = useState<FormState>({})
 
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
   const editor = useSlate()
   const config = useConfig()
 
-  const [fieldSchema] = useState(() => {
-    const fieldsUnsanitized = transformExtraFields(customFieldSchema, config, i18n)
-    // Sanitize custom fields here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    const fields = sanitizeFields({
-      config: config,
-      fields: fieldsUnsanitized,
-      validRelationships,
-    })
-
-    return fields
-  })
-
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
-  const { getDocPreferences } = useDocumentInfo()
+  const { id, getDocPreferences } = useDocumentInfo()
+
+  const { richTextComponentMap } = fieldProps
+
+  const linkFieldsSchemaPath = `link.fields`
+
+  const fieldMap = richTextComponentMap.get(linkFieldsSchemaPath)
 
   return (
     <Fragment>
@@ -104,24 +88,22 @@ export const LinkButton: React.FC<{
             unwrapLink(editor)
           } else {
             openModal(drawerSlug)
-
             const isCollapsed = editor.selection && Range.isCollapsed(editor.selection)
-
             if (!isCollapsed) {
               const data = {
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               }
-
-              const preferences = await getDocPreferences()
-              const state = await buildStateFromSchema({
-                config,
-                data,
-                fieldSchema,
-                locale,
-                operation: 'create',
-                preferences,
-                t,
-                user,
+              const docPreferences = await getDocPreferences()
+              const state = await getFormState({
+                apiRoute: config.routes.api,
+                body: {
+                  id,
+                  data,
+                  docPreferences,
+                  operation: 'update',
+                  schemaPath: linkFieldsSchemaPath,
+                },
+                serverURL: config.serverURL,
               })
               setInitialState(state)
             }
@@ -133,7 +115,7 @@ export const LinkButton: React.FC<{
       </ElementButton>
       <LinkDrawer
         drawerSlug={drawerSlug}
-        fieldSchema={fieldSchema}
+        fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
         handleClose={() => {
           closeModal(drawerSlug)
         }}

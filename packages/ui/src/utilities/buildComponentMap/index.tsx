@@ -45,6 +45,7 @@ export const buildComponentMap = (args: {
       afterListTable?.map((Component) => <Component />)
 
     const mappedFields = mapFields({
+      config,
       fieldSchema: fields,
       operation,
       permissions,
@@ -70,6 +71,7 @@ export const buildComponentMap = (args: {
     const { fields, slug } = globalConfig
 
     const mappedFields = mapFields({
+      config,
       fieldSchema: fields,
       operation,
       permissions,

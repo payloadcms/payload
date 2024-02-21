@@ -1,9 +1,9 @@
-import type { Field, Fields } from 'payload/types'
+import type { FieldMap, FormState } from '@payloadcms/ui'
 
 export type Props = {
   drawerSlug: string
-  fieldSchema: Field[]
+  fieldMap: FieldMap
   handleClose: () => void
-  handleModalSubmit: (fields: Fields, data: Record<string, unknown>) => void
-  initialState?: Fields
+  handleModalSubmit: (fields: FormState, data: Record<string, unknown>) => void
+  initialState?: FormState
 }

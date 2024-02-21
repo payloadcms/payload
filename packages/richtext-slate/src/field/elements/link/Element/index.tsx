@@ -1,15 +1,13 @@
 'use client'
 
-import type { Fields } from '@payloadcms/ui'
-import type { HTMLAttributes } from 'react'
-
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
+  FormState,
   Popup,
   Translation,
-  buildStateFromSchema,
+  getFormState,
   reduceFieldsToValues,
   useAuth,
   useConfig,
@@ -18,17 +16,16 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { sanitizeFields } from 'payload/config'
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { FieldProps } from '../../../../types'
-
+import { useElement } from '../../../providers/ElementProvider'
 import { LinkDrawer } from '../LinkDrawer'
-import { transformExtraFields, unwrapLink } from '../utilities'
+import { unwrapLink } from '../utilities'
 import './index.scss'
+import { LinkElementType } from '../types'
 
 const baseClass = 'rich-text-link'
 
@@ -36,7 +33,7 @@ const baseClass = 'rich-text-link'
  * This function is called when an existing link is edited.
  * When a link is first created, another function is called: {@link ../Button/index.tsx#insertLink}
  */
-const insertChange = (editor, fields, customFieldSchema) => {
+const insertChange = (editor, fields) => {
   const data = reduceFieldsToValues(fields, true)
 
   const [, parentPath] = Editor.above(editor)
@@ -48,10 +45,6 @@ const insertChange = (editor, fields, customFieldSchema) => {
     url: data.url,
   }
 
-  if (customFieldSchema) {
-    newNode.fields = data.fields
-  }
-
   Transforms.setNodes(editor, newNode, { at: parentPath })
 
   Transforms.delete(editor, { at: editor.selection.focus.path, unit: 'block' })
@@ -61,16 +54,14 @@ const insertChange = (editor, fields, customFieldSchema) => {
   ReactEditor.focus(editor)
 }
 
-export const LinkElement: React.FC<{
-  attributes: HTMLAttributes<HTMLDivElement>
-  children: React.ReactNode
-  editorRef: React.RefObject<HTMLDivElement>
-  element: any
-  fieldProps: FieldProps
-}> = (props) => {
-  const { attributes, children, editorRef, element, fieldProps } = props
+export const LinkElement = () => {
+  const { attributes, children, editorRef, element, fieldProps, schemaPath } =
+    useElement<LinkElementType>()
 
-  const customFieldSchema = fieldProps?.admin?.link?.fields
+  const linkFieldsSchemaPath = `${schemaPath}.link.fields`
+
+  const { richTextComponentMap } = fieldProps
+  const fieldMap = richTextComponentMap.get(linkFieldsSchemaPath)
 
   const editor = useSlate()
   const config = useConfig()
@@ -80,20 +71,8 @@ export const LinkElement: React.FC<{
   const { closeModal, openModal, toggleModal } = useModal()
   const [renderModal, setRenderModal] = useState(false)
   const [renderPopup, setRenderPopup] = useState(false)
-  const [initialState, setInitialState] = useState<Fields>({})
-  const { getDocPreferences } = useDocumentInfo()
-  const [fieldSchema] = useState(() => {
-    const fieldsUnsanitized = transformExtraFields(customFieldSchema, config, i18n)
-    // Sanitize custom fields here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    const fields = sanitizeFields({
-      config: config,
-      fields: fieldsUnsanitized,
-      validRelationships,
-    })
-
-    return fields
-  })
+  const [initialState, setInitialState] = useState<FormState>({})
+  const { id, getDocPreferences } = useDocumentInfo()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -114,22 +93,25 @@ export const LinkElement: React.FC<{
         url: element.url,
       }
 
-      const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        config,
-        data,
-        fieldSchema,
-        locale,
-        operation: 'update',
-        preferences,
-        t,
-        user,
+      const docPreferences = await getDocPreferences()
+
+      const state = await getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          data,
+          docPreferences,
+          operation: 'update',
+          schemaPath: linkFieldsSchemaPath,
+        },
+        serverURL: config.serverURL,
       })
+
       setInitialState(state)
     }
 
     awaitInitialState()
-  }, [renderModal, element, fieldSchema, user, locale, t, getDocPreferences, config])
+  }, [renderModal, element, user, locale, t, getDocPreferences, config])
 
   return (
     <span className={baseClass} {...attributes}>
@@ -137,13 +119,13 @@ export const LinkElement: React.FC<{
         {renderModal && (
           <LinkDrawer
             drawerSlug={drawerSlug}
-            fieldSchema={fieldSchema}
+            fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
             handleClose={() => {
               toggleModal(drawerSlug)
               setRenderModal(false)
             }}
             handleModalSubmit={(fields) => {
-              insertChange(editor, fields, customFieldSchema)
+              insertChange(editor, fields)
               closeModal(drawerSlug)
             }}
             initialState={initialState}

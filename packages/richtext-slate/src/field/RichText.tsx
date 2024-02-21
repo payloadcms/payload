@@ -13,7 +13,8 @@ import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
 import type { FormFieldBase } from '../../../ui/src/forms/fields/shared'
-import type { ElementNode, RichTextElement, RichTextLeaf, TextNode } from '../types'
+import type { ElementNode, TextNode } from '../types'
+import type { EnabledFeatures } from './types'
 
 import { withCondition } from '../../../ui/src/forms/withCondition'
 import { defaultRichTextValue } from '../data/defaultValue'
@@ -24,24 +25,10 @@ import './index.scss'
 import toggleLeaf from './leaves/toggle'
 import withEnterBreakOut from './plugins/withEnterBreakOut'
 import withHTML from './plugins/withHTML'
+import { ElementButtonProvider } from './providers/ElementButtonProvider'
+import { ElementProvider } from './providers/ElementProvider'
 import { LeafButtonProvider } from './providers/LeafButtonProvider'
 import { LeafProvider } from './providers/LeafProvider'
-
-const defaultElements: RichTextElement[] = [
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-  'ul',
-  'ol',
-  'indent',
-  'link',
-  'relationship',
-  'upload',
-]
-const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code']
 
 const baseClass = 'rich-text'
 
@@ -75,37 +62,46 @@ const RichText: React.FC<
     width,
   } = props
 
-  const [leaves] = useState(() => {
-    const enabledLeaves: Record<
-      string,
-      {
-        Button: React.ReactNode
-        Leaf: React.ReactNode
-        name: string
-      }
-    > = {}
+  const [{ elements, leaves }] = useState<EnabledFeatures>(() => {
+    const features: EnabledFeatures = {
+      elements: {},
+      leaves: {},
+    }
 
     for (const [key, value] of richTextComponentMap) {
       if (key.startsWith('leaf.button.') || key.startsWith('leaf.component.')) {
         const leafName = key.replace('leaf.button.', '').replace('leaf.component.', '')
 
-        if (!enabledLeaves[leafName]) {
-          enabledLeaves[leafName] = {
+        if (!features.leaves[leafName]) {
+          features.leaves[leafName] = {
             name: leafName,
             Button: null,
             Leaf: null,
           }
         }
 
-        if (key.startsWith('leaf.button.')) enabledLeaves[leafName].Button = value
-        if (key.startsWith('leaf.component.')) enabledLeaves[leafName].Leaf = value
+        if (key.startsWith('leaf.button.')) features.leaves[leafName].Button = value
+        if (key.startsWith('leaf.component.')) features.leaves[leafName].Leaf = value
+      }
+
+      if (key.startsWith('element.button.') || key.startsWith('element.component.')) {
+        const elementName = key.replace('element.button.', '').replace('element.component.', '')
+
+        if (!features.elements[elementName]) {
+          features.elements[elementName] = {
+            name: elementName,
+            Button: null,
+            Element: null,
+          }
+        }
+
+        if (key.startsWith('element.button.')) features.elements[elementName].Button = value
+        if (key.startsWith('element.component.')) features.elements[elementName].Element = value
       }
     }
 
-    return enabledLeaves
+    return features
   })
-
-  const elements: RichTextElement[] = defaultElements
 
   const { i18n } = useTranslation()
   const editorRef = useRef(null)
@@ -128,65 +124,72 @@ const RichText: React.FC<
     validate: memoizedValidate,
   })
 
-  const renderElement = useCallback(({ attributes, children, element }) => {
-    // const matchedElement = enabledElements[element.type]
-    // const Element = matchedElement?.Element
+  const renderElement = useCallback(
+    ({ attributes, children, element }) => {
+      // return <div {...attributes}>{children}</div>
 
-    const attr = { ...attributes }
+      const matchedElement = elements[element.type]
+      const Element = matchedElement?.Element
 
-    // // this converts text alignment to margin when dealing with void elements
-    // if (element.textAlign) {
-    //   if (element.type === 'relationship' || element.type === 'upload') {
-    //     switch (element.textAlign) {
-    //       case 'left':
-    //         attr = { ...attr, style: { marginRight: 'auto' } }
-    //         break
-    //       case 'right':
-    //         attr = { ...attr, style: { marginLeft: 'auto' } }
-    //         break
-    //       case 'center':
-    //         attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
-    //         break
-    //       default:
-    //         attr = { ...attr, style: { textAlign: element.textAlign } }
-    //         break
-    //     }
-    //   } else if (element.type === 'li') {
-    //     switch (element.textAlign) {
-    //       case 'right':
-    //         attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
-    //         break
-    //       case 'center':
-    //         attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'center' } }
-    //         break
-    //       case 'left':
-    //       default:
-    //         attr = { ...attr, style: { listStylePosition: 'outside', textAlign: 'left' } }
-    //         break
-    //     }
-    //   } else {
-    //     attr = { ...attr, style: { textAlign: element.textAlign } }
-    //   }
-    // }
+      let attr = { ...attributes }
 
-    // if (Element) {
-    //   const el = (
-    //     <Element
-    //       attributes={attr}
-    //       editorRef={editorRef}
-    //       element={element}
-    //       fieldProps={props}
-    //       path={path}
-    //     >
-    //       {children}
-    //     </Element>
-    //   )
+      // this converts text alignment to margin when dealing with void elements
+      if (element.textAlign) {
+        if (element.type === 'relationship' || element.type === 'upload') {
+          switch (element.textAlign) {
+            case 'left':
+              attr = { ...attr, style: { marginRight: 'auto' } }
+              break
+            case 'right':
+              attr = { ...attr, style: { marginLeft: 'auto' } }
+              break
+            case 'center':
+              attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } }
+              break
+            default:
+              attr = { ...attr, style: { textAlign: element.textAlign } }
+              break
+          }
+        } else if (element.type === 'li') {
+          switch (element.textAlign) {
+            case 'right':
+              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } }
+              break
+            case 'center':
+              attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'center' } }
+              break
+            case 'left':
+            default:
+              attr = { ...attr, style: { listStylePosition: 'outside', textAlign: 'left' } }
+              break
+          }
+        } else {
+          attr = { ...attr, style: { textAlign: element.textAlign } }
+        }
+      }
 
-    //   return el
-    // }
+      if (Element) {
+        const el = (
+          <ElementProvider
+            attributes={attr}
+            childNodes={children}
+            editorRef={editorRef}
+            element={element}
+            fieldProps={props}
+            path={path}
+            schemaPath={schemaPath}
+          >
+            {Element}
+          </ElementProvider>
+        )
 
-    return <div {...attr}>{children}</div>
-  }, [])
+        return el
+      }
+
+      return <div {...attr}>{children}</div>
+    },
+    [elements, path, props, schemaPath],
+  )
 
   const renderLeaf = useCallback(
     ({ attributes, children, leaf }) => {
@@ -334,7 +337,7 @@ const RichText: React.FC<
           value={valueToRender as any[]}
         >
           <div className={`${baseClass}__wrapper`}>
-            {elements?.length + Object.keys(leaves)?.length > 0 && (
+            {Object.keys(elements)?.length + Object.keys(leaves)?.length > 0 && (
               <div
                 className={[`${baseClass}__toolbar`, drawerIsOpen && `${baseClass}__drawerIsOpen`]
                   .filter(Boolean)
@@ -342,20 +345,24 @@ const RichText: React.FC<
                 ref={toolbarRef}
               >
                 <div className={`${baseClass}__toolbar-wrap`}>
-                  {/* {elements.map((element, i) => {
-                    let elementName: string
-                    if (typeof element === 'object' && element?.name) elementName = element.name
-                    if (typeof element === 'string') elementName = element
-
-                    const elementType = enabledElements[elementName]
-                    const Button = elementType?.Button
+                  {Object.values(elements).map((element, i) => {
+                    const Button = element?.Button
 
                     if (Button) {
-                      return <Button fieldProps={props} key={i} path={path} />
+                      return (
+                        <ElementButtonProvider
+                          fieldProps={props}
+                          key={element.name}
+                          path={path}
+                          schemaPath={schemaPath}
+                        >
+                          {Button}
+                        </ElementButtonProvider>
+                      )
                     }
 
                     return null
-                  })} */}
+                  })}
                   {Object.values(leaves).map((leaf, i) => {
                     const Button = leaf?.Button
 
@@ -363,7 +370,7 @@ const RichText: React.FC<
                       return (
                         <LeafButtonProvider
                           fieldProps={props}
-                          key={i}
+                          key={leaf.name}
                           path={path}
                           schemaPath={schemaPath}
                         >

@@ -1,22 +1,21 @@
 import React from 'react'
 
+import type { RichTextCustomElement } from '../../..'
+
 import ULIcon from '../../icons/UnorderedList'
 import ListButton from '../ListButton'
-import './index.scss'
+import { UnorderedList } from './UnorderedList'
 
-const UL = ({ attributes, children }) => (
-  <ul className="rich-text-ul" {...attributes}>
-    {children}
-  </ul>
-)
+const name = 'ul'
 
-const ul = {
+const ul: RichTextCustomElement = {
+  name,
   Button: () => (
-    <ListButton format="ul">
+    <ListButton format={name}>
       <ULIcon />
     </ListButton>
   ),
-  Element: UL,
+  Element: UnorderedList,
 }
 
 export default ul

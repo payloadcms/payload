@@ -5,7 +5,6 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  fieldTypes,
   useEditDepth,
   useTranslation,
 } from '@payloadcms/ui'
@@ -20,7 +19,7 @@ const baseClass = 'rich-text-link-edit-modal'
 
 export const LinkDrawer: React.FC<Props> = ({
   drawerSlug,
-  fieldSchema,
+  fieldMap,
   handleModalSubmit,
   initialState,
 }) => {
@@ -28,13 +27,8 @@ export const LinkDrawer: React.FC<Props> = ({
 
   return (
     <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
-      <Form fields={fieldSchema} initialState={initialState} onSubmit={handleModalSubmit}>
-        <RenderFields
-          fieldSchema={fieldSchema}
-          fieldTypes={fieldTypes}
-          forceRender
-          readOnly={false}
-        />
+      <Form initialState={initialState} onSubmit={handleModalSubmit}>
+        <RenderFields fieldMap={fieldMap} forceRender readOnly={false} />
         <LinkSubmit />
       </Form>
     </Drawer>

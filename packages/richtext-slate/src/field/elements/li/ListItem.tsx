@@ -1,0 +1,30 @@
+'use client'
+
+import React, { isValidElement } from 'react'
+
+import { useElement } from '../../providers/ElementProvider'
+import listTypes from '../listTypes'
+import { Element } from 'slate'
+
+export const ListItemElement: React.FC = () => {
+  const { attributes, children, element } = useElement<Element>()
+
+  if (!isValidElement(element)) {
+    return null
+  }
+
+  const listType = typeof element.children?.[0]?.type === 'string' ? element.children[0].type : ''
+  const disableListStyle = element.children.length >= 1 && listTypes.includes(listType)
+
+  return (
+    <li
+      style={{
+        listStyle: disableListStyle ? 'none' : undefined,
+        listStylePosition: disableListStyle ? 'outside' : undefined,
+      }}
+      {...attributes}
+    >
+      {children}
+    </li>
+  )
+}

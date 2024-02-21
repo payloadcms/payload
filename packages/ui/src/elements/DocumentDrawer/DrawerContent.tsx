@@ -26,7 +26,8 @@ import type { EditViewProps } from '../../views/types'
 import { DefaultEditView } from '../../views/Edit'
 import { Gutter } from '../Gutter'
 import { LoadingOverlay } from '../Loading'
-import { getFormState } from '../../views/Edit/getFormState'
+import { getFormState } from '../../utilities/getFormState'
+import { useFieldPath } from '../../forms/FieldPathProvider'
 
 const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawerSlug, onSave }) => {
   const config = useConfig()
@@ -50,6 +51,7 @@ const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawer
   const { admin: { components: { views: { Edit } = {} } = {} } = {}, fields: fieldsFromConfig } =
     collectionConfig
 
+  const { schemaPath } = useFieldPath()
   const { id, docPermissions } = useDocumentInfo()
 
   // If they are replacing the entire edit view, use that.

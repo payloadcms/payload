@@ -11,7 +11,7 @@ export const extractTranslations = (keys: string[]): Record<string, Record<strin
       if (resource?.[section]?.[target]) {
         result[key][language] = resource[section][target]
       } else {
-        console.error(`Missing translation for ${key} in ${language}`)
+        // console.error(`Missing translation for ${key} in ${language}`)
       }
     })
   })

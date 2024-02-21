@@ -1,22 +1,21 @@
 import React from 'react'
 
+import type { RichTextCustomElement } from '../../..'
+
 import OLIcon from '../../icons/OrderedList'
 import ListButton from '../ListButton'
-import './index.scss'
+import { OrderedList } from './OrderedList'
 
-const OL = ({ attributes, children }) => (
-  <ol className="rich-text-ol" {...attributes}>
-    {children}
-  </ol>
-)
+const name = 'ol'
 
-const ol = {
+const ol: RichTextCustomElement = {
+  name,
   Button: () => (
-    <ListButton format="ol">
+    <ListButton format={name}>
       <OLIcon />
     </ListButton>
   ),
-  Element: OL,
+  Element: OrderedList,
 }
 
 export default ol

@@ -26,6 +26,8 @@ export type BuildFormStateArgs = {
   operation?: 'create' | 'update'
   docPreferences: DocumentPreferences
   formState?: FormState
+  data?: Record<string, unknown>
+  schemaPath: string
 }
 
 const buildStateFromSchema = async (args: Args): Promise<FormState> => {

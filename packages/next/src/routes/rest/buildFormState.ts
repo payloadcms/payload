@@ -33,7 +33,14 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
 
   const fieldSchemaMap = getFieldSchemaMap(req.payload.config)
 
-  const { id, operation, docPreferences, formState, schemaPath } = reqData as BuildFormStateArgs
+  const {
+    id,
+    operation,
+    docPreferences,
+    formState,
+    data: incomingData,
+    schemaPath,
+  } = reqData as BuildFormStateArgs
   const schemaPathSegments = schemaPath.split('.')
 
   let fieldSchema: Field[]
@@ -59,7 +66,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
     )
   }
 
-  const data = reduceFieldsToValues(formState, true)
+  const data = incomingData || reduceFieldsToValues(formState, true)
 
   const result = await buildStateFromSchema({
     id,

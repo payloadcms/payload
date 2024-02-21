@@ -1,0 +1,42 @@
+'use client'
+import React from 'react'
+
+import type { FormFieldBase } from '../../../../ui/src/forms/fields/shared'
+
+type ElementButtonContextType = {
+  fieldProps: FormFieldBase & {
+    name: string
+    richTextComponentMap: Map<string, React.ReactNode>
+  }
+  path: string
+  schemaPath: string
+}
+
+const ElementButtonContext = React.createContext<ElementButtonContextType>({
+  fieldProps: {} as any,
+  path: '',
+  schemaPath: '',
+})
+
+export const ElementButtonProvider: React.FC<
+  ElementButtonContextType & {
+    children: React.ReactNode
+  }
+> = (props) => {
+  const { children, ...rest } = props
+
+  return (
+    <ElementButtonContext.Provider
+      value={{
+        ...rest,
+      }}
+    >
+      {children}
+    </ElementButtonContext.Provider>
+  )
+}
+
+export const useElementButton = () => {
+  const path = React.useContext(ElementButtonContext)
+  return path
+}

@@ -1,6 +1,6 @@
 import { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
-import { FormState } from '../../forms/Form/types'
-import { BuildFormStateArgs } from '../..'
+import { FormState } from '../forms/Form/types'
+import { BuildFormStateArgs } from '..'
 
 export const getFormState = async (args: {
   serverURL: SanitizedConfig['serverURL']

@@ -20,7 +20,7 @@ import { Props as FormProps, FormState } from '../../forms/Form/types'
 
 import './index.scss'
 import { BuildFormStateArgs } from '../..'
-import { getFormState } from './getFormState'
+import { getFormState } from '../../utilities/getFormState'
 
 const baseClass = 'collection-edit'
 
