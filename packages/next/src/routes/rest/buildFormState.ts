@@ -42,10 +42,21 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
     if (req.payload.collections[schemaPath]) {
       fieldSchema = req.payload.collections[schemaPath].config.fields
     } else if (req.payload.globals[schemaPath]) {
-      fieldSchema = req.payload.globals[schemaPath].config.fields
+      fieldSchema = req.payload.config.globals.find((global) => global.slug === schemaPath)?.fields
     }
   } else if (fieldSchemaMap.has(schemaPath)) {
     fieldSchema = fieldSchemaMap.get(schemaPath)
+  }
+
+  if (!fieldSchema) {
+    return Response.json(
+      {
+        message: 'Could not find field schema for given path',
+      },
+      {
+        status: httpStatus.INTERNAL_SERVER_ERROR,
+      },
+    )
   }
 
   const data = reduceFieldsToValues(formState, true)
