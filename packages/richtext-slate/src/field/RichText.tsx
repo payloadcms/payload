@@ -13,25 +13,15 @@ import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
 import type { FormFieldBase } from '../../../ui/src/forms/fields/shared'
-import type {
-  ElementNode,
-  RichTextCustomLeaf,
-  RichTextElement,
-  RichTextLeaf,
-  TextNode,
-} from '../types'
+import type { ElementNode, RichTextElement, RichTextLeaf, TextNode } from '../types'
 
 import { withCondition } from '../../../ui/src/forms/withCondition'
 import { defaultRichTextValue } from '../data/defaultValue'
 import { richTextValidate } from '../data/validation'
-import elementTypes from './elements'
 import listTypes from './elements/listTypes'
-import enablePlugins from './enablePlugins'
 import hotkeys from './hotkeys'
 import './index.scss'
-import leafTypes from './leaves'
 import toggleLeaf from './leaves/toggle'
-import mergeCustomFunctions from './mergeCustomFunctions'
 import withEnterBreakOut from './plugins/withEnterBreakOut'
 import withHTML from './plugins/withHTML'
 import { LeafButtonProvider } from './providers/LeafButtonProvider'
@@ -96,8 +86,9 @@ const RichText: React.FC<
     > = {}
 
     for (const [key, value] of richTextComponentMap) {
-      if (key.startsWith('leaf.button') || key.startsWith('leaf.component')) {
-        const leafName = key.replace('leaf.button', '').replace('leaf.component', '')
+      if (key.startsWith('leaf.button.') || key.startsWith('leaf.component.')) {
+        const leafName = key.replace('leaf.button.', '').replace('leaf.component.', '')
+
         if (!enabledLeaves[leafName]) {
           enabledLeaves[leafName] = {
             name: leafName,
@@ -106,8 +97,8 @@ const RichText: React.FC<
           }
         }
 
-        if (key.startsWith('leaf.button')) enabledLeaves[leafName].Button = value
-        if (key.startsWith('leaf.component')) enabledLeaves[leafName].Leaf = value
+        if (key.startsWith('leaf.button.')) enabledLeaves[leafName].Button = value
+        if (key.startsWith('leaf.component.')) enabledLeaves[leafName].Leaf = value
       }
     }
 
@@ -200,7 +191,7 @@ const RichText: React.FC<
   const renderLeaf = useCallback(
     ({ attributes, children, leaf }) => {
       const matchedLeaves = Object.entries(leaves).filter(([leafName]) => leaf[leafName])
-      console.log(matchedLeaves, leaf)
+
       if (matchedLeaves.length > 0) {
         return matchedLeaves.reduce(
           (result, [, leafConfig], i) => {
@@ -231,7 +222,7 @@ const RichText: React.FC<
 
       return <span {...attributes}>{children}</span>
     },
-    [path, props, schemaPath, richTextComponentMap],
+    [path, props, schemaPath, leaves],
   )
 
   const classes = [
