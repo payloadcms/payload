@@ -11,9 +11,12 @@ const encryptKey: FieldHook = ({ req, value }) =>
 const decryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.decrypt(value as string) : undefined
 
+const clearKey: FieldHook = ({ data, value }) => (data.enableAPIKey === false ? null : value)
+
 export default [
   {
     name: 'enableAPIKey',
+    type: 'checkbox',
     admin: {
       components: {
         Field: () => null,
@@ -21,10 +24,10 @@ export default [
     },
     defaultValue: false,
     label: labels['authentication:enableAPIKey'],
-    type: 'checkbox',
   },
   {
     name: 'apiKey',
+    type: 'text',
     admin: {
       components: {
         Field: () => null,
@@ -32,18 +35,19 @@ export default [
     },
     hooks: {
       afterRead: [decryptKey],
-      beforeChange: [encryptKey],
+      beforeChange: [encryptKey, clearKey],
     },
     label: labels['authentication:apiKey'],
-    type: 'text',
   },
   {
     name: 'apiKeyIndex',
+    type: 'text',
     admin: {
       disabled: true,
     },
     hidden: true,
     hooks: {
+      beforeChange: [clearKey],
       beforeValidate: [
         async ({ data, req, value }) => {
           if (data.apiKey) {
@@ -59,6 +63,5 @@ export default [
         },
       ],
     },
-    type: 'text',
   },
 ] as Field[]
