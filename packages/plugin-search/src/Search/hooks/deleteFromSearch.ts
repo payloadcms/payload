@@ -1,6 +1,6 @@
-import { CollectionAfterDeleteHook } from 'payload/types';
+import { DeleteFromSearch } from '../../types'
 
-const deleteFromSearch: CollectionAfterDeleteHook = async ({ doc, req: { payload }, req, searchConfig }) => {
+const deleteFromSearch: DeleteFromSearch = async ({ doc, req: { payload }, req, searchConfig }) => {
   const searchCollectionSlug = searchConfig.searchOverrides?.slug || 'search';
 
   try {
