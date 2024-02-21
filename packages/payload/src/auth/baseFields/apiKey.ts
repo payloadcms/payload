@@ -7,11 +7,9 @@ import { extractTranslations } from '../../translations/extractTranslations'
 const labels = extractTranslations(['authentication:enableAPIKey', 'authentication:apiKey'])
 
 const encryptKey: FieldHook = ({ req, value }) =>
-  value ? req.payload.encrypt(value as string) : undefined
+  value ? req.payload.encrypt(value as string) : null
 const decryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.decrypt(value as string) : undefined
-
-const clearKey: FieldHook = ({ data, value }) => (data.enableAPIKey === false ? null : value)
 
 export default [
   {
@@ -35,7 +33,7 @@ export default [
     },
     hooks: {
       afterRead: [decryptKey],
-      beforeChange: [encryptKey, clearKey],
+      beforeChange: [encryptKey],
     },
     label: labels['authentication:apiKey'],
   },
@@ -47,7 +45,6 @@ export default [
     },
     hidden: true,
     hooks: {
-      beforeChange: [clearKey],
       beforeValidate: [
         async ({ data, req, value }) => {
           if (data.apiKey) {
