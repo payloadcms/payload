@@ -62,6 +62,7 @@ export const initPage = async ({
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
       ? `?${qs.stringify(searchParams)}`
       : ''
+
     redirect(`${routes.admin}/login?redirect=${routes.admin + route + stringifiedSearchParams}`)
   }
 

@@ -1,9 +1,9 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 
-import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
 import {
@@ -18,6 +18,7 @@ import { RESTClient } from '../helpers/rest'
 import { jsonDoc } from './collections/JSON/shared'
 import { numberDoc } from './collections/Number/shared'
 import { textDoc } from './collections/Text/shared'
+import config from './config'
 import { clearAndSeedEverything } from './seed'
 import {
   collapsibleFieldsSlug,
@@ -29,6 +30,7 @@ import {
 
 const { afterEach, beforeAll, beforeEach, describe } = test
 
+let payload: Payload
 let client: RESTClient
 let page: Page
 let serverURL: string
@@ -36,8 +38,8 @@ let serverURL: string
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
-    const config = await initPayloadE2E(__dirname)
-    serverURL = config.serverURL
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
+
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 

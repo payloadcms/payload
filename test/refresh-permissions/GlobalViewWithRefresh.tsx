@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react'
 
-import type { Props } from '../../packages/payload/src/admin/components/views/Global/types'
+import type { EditViewProps as Props } from '../../packages/ui/src'
 
-import { useAuth } from '../../packages/payload/src/admin/components/utilities/Auth'
-import DefaultGlobalView from '../../packages/payload/src/admin/components/views/Global/Default'
+import { useAuth } from '../../packages/ui/src/providers/Auth'
+import { DefaultEditView } from '../../packages/ui/src/views/Edit'
 
 const GlobalView: React.FC<Props> = (props) => {
   const { onSave } = props
@@ -16,7 +16,7 @@ const GlobalView: React.FC<Props> = (props) => {
     [onSave, refreshPermissions],
   )
 
-  return <DefaultGlobalView {...props} onSave={modifiedOnSave} />
+  return <DefaultEditView {...props} onSave={modifiedOnSave} />
 }
 
 export default GlobalView

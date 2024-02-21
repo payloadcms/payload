@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test'
 import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import config from './config'
 import { slug } from './shared'
 
 /**
@@ -22,7 +23,7 @@ describe('auth', () => {
   let url: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname)
+    const { serverURL } = await initPayloadE2E({ config, dirname: __dirname })
     url = new AdminUrlUtil(serverURL, slug)
 
     const context = await browser.newContext()
