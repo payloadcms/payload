@@ -13,6 +13,10 @@ export const sanitizeField = (f) => {
     field.fields = sanitizeFields(field.fields)
   }
 
+  if ('editor' in field) {
+    delete field.editor
+  }
+
   if ('blocks' in field) {
     field.blocks = field.blocks.map((block) => {
       const sanitized = { ...block }
@@ -94,6 +98,7 @@ export const createClientConfig = async (
 
   delete clientConfig.endpoints
   delete clientConfig.db
+  delete clientConfig.editor
 
   'localization' in clientConfig &&
     clientConfig.localization &&

@@ -14,6 +14,7 @@ import DefaultLabel from '../../forms/Label'
 import DefaultError from '../../forms/Error'
 import DefaultDescription from '../../forms/FieldDescription'
 import { HiddenInput } from '../..'
+import { richText } from 'payload/fields/validations'
 
 export const mapFields = (args: {
   fieldSchema: FieldWithPath[]
@@ -224,9 +225,10 @@ export const mapFields = (args: {
           tabs,
           blocks,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
+          richTextComponentMap: undefined,
         }
 
-        const Field = <FieldComponent {...fieldComponentProps} />
+        let Field = <FieldComponent {...fieldComponentProps} />
 
         const cellComponentProps: CellProps = {
           fieldType: field.type,
@@ -245,6 +247,34 @@ export const mapFields = (args: {
               slug: b.slug,
             })),
           options: 'options' in field ? field.options : undefined,
+        }
+
+        if (field.type === 'richText' && 'editor' in field) {
+          let RichTextComponent
+
+          const isLazy = 'LazyFieldComponent' in field.editor
+
+          if (isLazy) {
+            RichTextComponent = React.lazy(() => {
+              return 'LazyFieldComponent' in field.editor
+                ? field.editor.LazyFieldComponent().then((resolvedComponent) => ({
+                    default: resolvedComponent,
+                  }))
+                : null
+            })
+          } else if ('FieldComponent' in field.editor) {
+            RichTextComponent = field.editor.FieldComponent
+          }
+
+          if (typeof field.editor.generateComponentMap === 'function') {
+            const result = field.editor.generateComponentMap()
+            // @ts-ignore-next-line // TODO: the `richTextComponentMap` is not found on the union type
+            fieldComponentProps.richTextComponentMap = result
+          }
+
+          if (RichTextComponent) {
+            Field = <RichTextComponent {...fieldComponentProps} />
+          }
         }
 
         const reducedField: MappedField = {
@@ -271,8 +301,8 @@ export const mapFields = (args: {
                 'label' in field && field.label && typeof field.label !== 'function'
                   ? field.label
                   : 'name' in field
-                  ? field.name
-                  : undefined
+                    ? field.name
+                    : undefined
               }
               name={'name' in field ? field.name : undefined}
             />

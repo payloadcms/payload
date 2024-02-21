@@ -11,6 +11,10 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'richText',
+      type: 'richText',
+    },
+    {
       name: 'associatedMedia',
       access: {
         create: () => true,

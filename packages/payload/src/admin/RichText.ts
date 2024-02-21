@@ -26,6 +26,7 @@ type RichTextAdapterBase<
     incomingEditorState: Value
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
+  generateComponentMap: () => Map<string, React.ReactNode> | Promise<Map<string, React.ReactNode>>
   outputSchema?: ({
     field,
     interfaceNameDefinitions,

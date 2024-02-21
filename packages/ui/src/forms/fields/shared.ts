@@ -8,6 +8,7 @@ import {
   DocumentPreferences,
   JSONField,
   RelationshipField,
+  RichTextField,
   RowLabel,
   UploadField,
   Validate,
@@ -107,6 +108,10 @@ export type FormFieldBase = {
   | {
       // For `relationship` fields
       relationTo?: RelationshipField['relationTo']
+    }
+  | {
+      // For `richText` fields
+      richTextComponentMap?: Map<string, React.ReactNode>
     }
 )
 
