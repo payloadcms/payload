@@ -54,21 +54,9 @@ const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawer
   const { schemaPath } = useFieldPath()
   const { id, docPermissions } = useDocumentInfo()
 
-  // The component definition could come from multiple places in the config
-  // we need to cascade into the proper component from the top-down
-  // 1. "components.Edit"
-  // 2. "components.Edit.Default"
-  // 3. "components.Edit.Default.Component"
-  // const CustomEditView =
-  //   typeof Edit === 'function'
-  //     ? Edit
-  //     : typeof Edit === 'object' && typeof Edit.Default === 'function'
-  //     ? Edit.Default
-  //     : typeof Edit?.Default === 'object' &&
-  //       'Component' in Edit.Default &&
-  //       typeof Edit.Default.Component === 'function'
-  //     ? Edit.Default.Component
-  //     : undefined
+  // If they are replacing the entire edit view, use that.
+  // Else let the DefaultEdit determine what to render.
+  // const CustomEditView = typeof Edit === 'function' ? Edit : undefined
 
   const [fields, setFields] = useState(() => formatFields(fieldsFromConfig, true))
 
