@@ -175,6 +175,8 @@ const NumberField: React.FC<Props> = (props) => {
             }}
             placeholder={getTranslation(placeholder, i18n)}
             step={step}
+            min={min}
+            max={max}
             type="number"
             value={typeof value === 'number' ? value : ''}
           />
