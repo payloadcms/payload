@@ -1,6 +1,6 @@
 'use client'
 
-import type { BaseEditor, BaseOperation } from 'slate'
+import type { BaseEditor, BaseOperation, Editor } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
@@ -13,12 +13,20 @@ import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
 import type { FormFieldBase } from '../../../ui/src/forms/fields/shared'
-import type { ElementNode, TextNode } from '../types'
+import type {
+  ElementNode,
+  RichTextCustomElement,
+  RichTextPlugin,
+  RichTextPluginComponent,
+  TextNode,
+} from '../types'
 import type { EnabledFeatures } from './types'
 
 import { withCondition } from '../../../ui/src/forms/withCondition'
+import { useClientFunctions } from '../../../ui/src/providers/ClientFunction'
 import { defaultRichTextValue } from '../data/defaultValue'
 import { richTextValidate } from '../data/validation'
+import { createFeatureMap } from './createFeatureMap'
 import listTypes from './elements/listTypes'
 import hotkeys from './hotkeys'
 import './index.scss'
@@ -42,7 +50,10 @@ declare module 'slate' {
 
 const RichText: React.FC<
   FormFieldBase & {
+    elements: EnabledFeatures['elements']
+    leaves: EnabledFeatures['leaves']
     name: string
+    plugins: RichTextPlugin[]
     richTextComponentMap: Map<string, React.ReactNode>
   }
 > = (props) => {
@@ -52,56 +63,17 @@ const RichText: React.FC<
     Error,
     Label,
     className,
+    elements,
+    leaves,
     path: pathFromProps,
     placeholder,
+    plugins,
     readOnly,
     required,
-    richTextComponentMap,
     style,
     validate = richTextValidate,
     width,
   } = props
-
-  const [{ elements, leaves }] = useState<EnabledFeatures>(() => {
-    const features: EnabledFeatures = {
-      elements: {},
-      leaves: {},
-    }
-
-    for (const [key, value] of richTextComponentMap) {
-      if (key.startsWith('leaf.button.') || key.startsWith('leaf.component.')) {
-        const leafName = key.replace('leaf.button.', '').replace('leaf.component.', '')
-
-        if (!features.leaves[leafName]) {
-          features.leaves[leafName] = {
-            name: leafName,
-            Button: null,
-            Leaf: null,
-          }
-        }
-
-        if (key.startsWith('leaf.button.')) features.leaves[leafName].Button = value
-        if (key.startsWith('leaf.component.')) features.leaves[leafName].Leaf = value
-      }
-
-      if (key.startsWith('element.button.') || key.startsWith('element.component.')) {
-        const elementName = key.replace('element.button.', '').replace('element.component.', '')
-
-        if (!features.elements[elementName]) {
-          features.elements[elementName] = {
-            name: elementName,
-            Button: null,
-            Element: null,
-          }
-        }
-
-        if (key.startsWith('element.button.')) features.elements[elementName].Button = value
-        if (key.startsWith('element.component.')) features.elements[elementName].Element = value
-      }
-    }
-
-    return features
-  })
 
   const { i18n } = useTranslation()
   const editorRef = useRef(null)
@@ -123,6 +95,20 @@ const RichText: React.FC<
     path: pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const editor = useMemo(() => {
+    let CreatedEditor = withEnterBreakOut(withHistory(withReact(createEditor())))
+
+    CreatedEditor = withHTML(CreatedEditor)
+
+    if (plugins.length) {
+      CreatedEditor = plugins.reduce((editorWithPlugins, plugin) => {
+        return plugin(editorWithPlugins)
+      }, CreatedEditor)
+    }
+
+    return CreatedEditor
+  }, [plugins])
 
   const renderElement = useCallback(
     ({ attributes, children, element }) => {
@@ -228,34 +214,13 @@ const RichText: React.FC<
     [path, props, schemaPath, leaves],
   )
 
-  const classes = [
-    baseClass,
-    'field-type',
-    className,
-    showError && 'error',
-    readOnly && `${baseClass}--read-only`,
-  ]
-    .filter(Boolean)
-    .join(' ')
-
-  const editor = useMemo(() => {
-    let CreatedEditor = withEnterBreakOut(withHistory(withReact(createEditor())))
-
-    CreatedEditor = withHTML(CreatedEditor)
-    // CreatedEditor = enablePlugins(CreatedEditor, elements)
-    // CreatedEditor = enablePlugins(CreatedEditor, leaves)
-
-    return CreatedEditor
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path])
-
   // All slate changes fire the onChange event
   // including selection changes
   // so we will filter the set_selection operations out
   // and only fire setValue when onChange is because of value
   const handleChange = useCallback(
     (val: unknown) => {
-      const ops = editor.operations.filter((o: BaseOperation) => {
+      const ops = editor?.operations.filter((o: BaseOperation) => {
         if (o) {
           return o.type !== 'set_selection'
         }
@@ -268,7 +233,7 @@ const RichText: React.FC<
         }
       }
     },
-    [editor.operations, readOnly, setValue, value],
+    [editor?.operations, readOnly, setValue, value],
   )
 
   useEffect(() => {
@@ -305,6 +270,16 @@ const RichText: React.FC<
   //     ReactEditor.deselect(editor);
   //   }
   // }, [path, editor]);
+
+  const classes = [
+    baseClass,
+    'field-type',
+    className,
+    showError && 'error',
+    readOnly && `${baseClass}--read-only`,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   let valueToRender = value
 
@@ -345,7 +320,7 @@ const RichText: React.FC<
                 ref={toolbarRef}
               >
                 <div className={`${baseClass}__toolbar-wrap`}>
-                  {Object.values(elements).map((element, i) => {
+                  {Object.values(elements).map((element) => {
                     const Button = element?.Button
 
                     if (Button) {
@@ -363,7 +338,7 @@ const RichText: React.FC<
 
                     return null
                   })}
-                  {Object.values(leaves).map((leaf, i) => {
+                  {Object.values(leaves).map((leaf) => {
                     const Button = leaf?.Button
 
                     if (Button) {
