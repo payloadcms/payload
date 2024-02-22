@@ -3,7 +3,6 @@ import type React from 'react'
 
 export type Props = {
   'aria-label'?: string
-  buttonId?: string
   buttonStyle?: 'error' | 'icon-label' | 'none' | 'primary' | 'secondary' | 'transparent'
   children?: React.ReactNode
   className?: string

@@ -86,12 +86,13 @@ const Restore: React.FC<Props> = ({
           <p>{restoreMessage}</p>
           <Button
             buttonStyle="secondary"
+            id="cancel-restore-version"
             onClick={processing ? undefined : () => toggleModal(modalSlug)}
             type="button"
           >
             {t('general:cancel')}
           </Button>
-          <Button onClick={processing ? undefined : handleRestore}>
+          <Button id="confirm-restore-version" onClick={processing ? undefined : handleRestore}>
             {processing ? t('restoring') : t('general:confirm')}
           </Button>
         </MinimalTemplate>

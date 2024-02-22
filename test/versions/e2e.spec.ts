@@ -410,7 +410,36 @@ describe('versions', () => {
 
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
+
+    test('should correctly load form data when restoring a version', async () => {
+      // create published version
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('title')
+      await page.locator('#field-description').fill('description')
+      await page.locator('#action-save').click()
+      await wait(500)
+
+      // update and save draft version
+      await page.locator('#field-title').fill('updated title')
+      await page.locator('#field-description').fill('updated description')
+      await page.locator('#action-save').click()
+
+      // navigate to versions and restore the published version
+      await page.goto(`${page.url()}/versions`)
+      await page.locator('.versions tbody tr:nth-child(2) td a').click()
+      await page.locator('.restore-version').click()
+      await wait(500)
+
+      // confirm the restore
+      await page.locator('#confirm-restore-version').click()
+      await wait(500)
+
+      // verify that the form data has been restored properly
+      await expect(page.locator('#field-title')).toHaveValue('title')
+      await expect(page.locator('#field-description')).toHaveValue('description')
+    })
   })
+
   describe('posts collection', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
