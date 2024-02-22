@@ -2,7 +2,7 @@
 
 import type { TextField } from 'payload/dist/fields/config/types'
 
-import { Select, useForm } from 'payload/components/forms'
+import { Select, useForm } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 import type { SelectFieldOption } from '../../types'

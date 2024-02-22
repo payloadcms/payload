@@ -1,10 +1,11 @@
 'use client'
 
-import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
+// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
+// import Textarea from 'payload/dist/admin/components/forms/field-types/Textarea/Input'
+import type { FieldType, Options } from '@payloadcms/ui'
 import type { TextareaField } from 'payload/types'
 
-import { TextareaInput, useAllFormFields, useField } from 'payload/components/forms'
-import { useDocumentInfo, useLocale } from 'payload/components/utilities'
+import { Textarea, useAllFormFields, useDocumentInfo, useField, useLocale } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -121,7 +122,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
           position: 'relative',
         }}
       >
-        <TextareaInput
+        <Textarea
           name={name}
           onChange={setValue}
           path={name}

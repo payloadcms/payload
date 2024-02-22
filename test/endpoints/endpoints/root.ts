@@ -13,7 +13,7 @@ export const endpoints: Config['endpoints'] = [
   {
     path: `/${applicationEndpoint}`,
     method: 'get',
-    handler: ({ req }) => {
+    handler: () => {
       return Response.json({ message: 'Hello, world!' })
     },
   },
@@ -21,13 +21,12 @@ export const endpoints: Config['endpoints'] = [
     path: `/${applicationEndpoint}/i18n`,
     method: 'get',
     handler: ({ req }) => {
-      return Response.json({ message: req.t('general:backToDashboard') })
+      return Response.json({ message: req.t('general:updatedSuccessfully') })
     },
   },
   {
     path: `/${rootEndpoint}`,
     method: 'get',
-    root: true,
     handler: () => {
       return Response.json({ message: 'Hello, world!' })
     },
@@ -35,7 +34,6 @@ export const endpoints: Config['endpoints'] = [
   {
     path: `/${rootEndpoint}`,
     method: 'post',
-    root: true,
     handler: ({ req }) => {
       return Response.json(req.body)
     },
