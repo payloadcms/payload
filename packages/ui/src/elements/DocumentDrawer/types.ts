@@ -20,7 +20,7 @@ export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   id?: string
 }
 
-export type UseDocumentDrawer = (args: { collectionSlug: string; id?: string }) => [
+export type UseDocumentDrawer = (args: { collectionSlug: string; id?: string | number }) => [
   React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
   React.FC<Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>>, // toggler
   {

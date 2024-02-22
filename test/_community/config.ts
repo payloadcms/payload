@@ -1,3 +1,6 @@
+import path from 'path'
+
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { MediaCollection } from './collections/Media'
@@ -33,6 +36,16 @@ export default buildConfigWithDefaults({
       data: {
         text: 'example post',
       },
+    })
+
+    // Create image
+    const imageFilePath = path.resolve(process.cwd(), './test/uploads/image.png')
+    const imageFile = await getFileByPath(imageFilePath)
+
+    const { id: uploadedImage } = await payload.create({
+      collection: 'media',
+      data: {},
+      file: imageFile,
     })
   },
 })

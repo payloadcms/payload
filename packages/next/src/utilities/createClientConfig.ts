@@ -58,6 +58,8 @@ const sanitizeCollections = (
     delete sanitized.access
     delete sanitized.endpoints
 
+    if ('editor' in sanitized) delete sanitized.editor
+
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
 

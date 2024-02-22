@@ -14,7 +14,7 @@ import ol from './ol'
 // import relationship from './relationship'
 // import textAlign from './textAlign'
 import ul from './ul'
-// import upload from './upload'
+import upload from './upload'
 
 const elements: Record<string, RichTextCustomElement> = {
   blockquote,
@@ -31,7 +31,7 @@ const elements: Record<string, RichTextCustomElement> = {
   // relationship,
   // textAlign,
   ul,
-  // upload,
+  upload,
 }
 
 export default elements

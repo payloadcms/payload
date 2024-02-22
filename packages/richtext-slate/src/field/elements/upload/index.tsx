@@ -1,9 +1,15 @@
+import type { RichTextCustomElement } from '../../..'
+
 import Button from './Button'
 import Element from './Element'
-import plugin from './plugin'
+import { WithUpload } from './plugin'
+import { uploadName } from './shared'
 
-export default {
+const upload: RichTextCustomElement = {
+  name: uploadName,
   Button,
   Element,
-  plugins: [plugin],
+  plugins: [WithUpload],
 }
+
+export default upload

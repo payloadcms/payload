@@ -9,6 +9,7 @@ import type { AdapterArguments, RichTextCustomElement } from '.'
 import elementTypes from './field/elements'
 import { linkFieldsSchemaPath } from './field/elements/link/shared'
 import { transformExtraFields } from './field/elements/link/utilities'
+import { uploadFieldsSchemaPath } from './field/elements/upload/shared'
 
 export const getGenerateSchemaMap =
   (args: AdapterArguments): RichTextAdapter['generateSchemaMap'] =>
@@ -29,18 +30,44 @@ export const getGenerateSchemaMap =
         switch (element.name) {
           case 'link': {
             const linkFields = sanitizeFields({
-              config: config,
+              config,
               fields: transformExtraFields(args.admin?.link?.fields, config, i18n),
               validRelationships,
             })
 
             schemaMap.set(`${schemaPath}.${linkFieldsSchemaPath}`, linkFields)
 
-            return
+            break
           }
 
-          case 'upload':
+          case 'upload': {
+            const uploadEnabledCollections = config.collections.filter(
+              ({ admin: { enableRichTextRelationship, hidden }, upload }) => {
+                if (hidden === true) {
+                  return false
+                }
+
+                return enableRichTextRelationship && Boolean(upload) === true
+              },
+            )
+
+            uploadEnabledCollections.forEach((collection) => {
+              if (args?.admin?.upload?.collections[collection.slug]?.fields) {
+                const uploadFields = sanitizeFields({
+                  config,
+                  fields: args?.admin?.upload?.collections[collection.slug]?.fields,
+                  validRelationships,
+                })
+
+                schemaMap.set(
+                  `${schemaPath}.${uploadFieldsSchemaPath}.${collection.slug}`,
+                  uploadFields,
+                )
+              }
+            })
+
             break
+          }
 
           case 'relationship':
             break

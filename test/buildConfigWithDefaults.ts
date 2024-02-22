@@ -25,7 +25,22 @@ const databaseAdapters = {
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
   const config: Config = {
     secret: 'TEST_SECRET',
-    editor: slateEditor({}),
+    editor: slateEditor({
+      admin: {
+        upload: {
+          collections: {
+            media: {
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'text',
+                },
+              ],
+            },
+          },
+        },
+      },
+    }),
     rateLimit: {
       max: 9999999999,
       window: 15 * 60 * 1000, // 15min default,
