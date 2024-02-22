@@ -25,6 +25,16 @@
     "userLocked": "该用户由于有太多次失败的登录尝试而被锁定。",
     "valueMustBeUnique": "值必须是唯一的"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "选择输入一个自定义的文本URL或链接到另一个文档。",
+    "chooseDocumentToLink": "选择一个要链接的文档",
+    "customURL": "自定义URL",
+    "enterURL": "输入一个URL",
+    "internalLink": "内部链接",
+    "linkType": "链接类型",
+    "openInNewTab": "在新标签中打开",
+    "textToDisplay": "要显示的文本"
+  },
   "general": {
     "createdAt": "创建于",
     "deletedCountSuccessfully": "已成功删除 {{count}} {{label}}。",
@@ -35,6 +45,7 @@
     "thisLanguage": "中文 (简体)",
     "updatedAt": "更新于",
     "updatedCountSuccessfully": "已成功更新 {{count}} {{label}}。",
+    "updatedSuccessfully": "更新成功。",
     "user": "用户",
     "users": "用户",
     "value": "值"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}}小于允许的最小{{label}}，该最小值为{{min}}。",
     "longerThanMin": "该值必须大于{{minLength}}字符的最小长度",
     "notValidDate": "\"{{value}}\"不是一个有效的日期。",
+    "required": "该字段为必填项目。",
     "requiresNoMoreThan": "该字段要求不超过{{count}} {{label}。",
     "requiresTwoNumbers": "该字段需要两个数字。",
     "shorterThanMax": "该值必须小于{{maxLength}}字符的最大长度",

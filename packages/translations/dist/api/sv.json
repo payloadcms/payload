@@ -25,6 +25,16 @@
     "userLocked": "Den här användaren är låst på grund av för många misslyckade inloggningsförsök.",
     "valueMustBeUnique": "Värdet måste vara unikt"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Välj mellan att ange en anpassad text-URL eller länka till ett annat dokument.",
+    "chooseDocumentToLink": "Välj ett dokument att länka till",
+    "customURL": "Anpassad URL",
+    "enterURL": "Ange en URL",
+    "internalLink": "Intern länk",
+    "linkType": "Länktyp",
+    "openInNewTab": "Öppna i ny flik",
+    "textToDisplay": "Text att visa"
+  },
   "general": {
     "createdAt": "Skapad Vid",
     "deletedCountSuccessfully": "Raderade {{count}} {{label}} framgångsrikt.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Svenska",
     "updatedAt": "Uppdaterades Vid",
     "updatedCountSuccessfully": "Uppdaterade {{count}} {{label}} framgångsrikt.",
+    "updatedSuccessfully": "Uppdaterades framgångsrikt.",
     "user": "Användare",
     "users": "Användare",
     "value": "Värde"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} är mindre än den minst tillåtna {{label}} av {{min}}.",
     "longerThanMin": "Detta värde måste vara längre än minimilängden på {{minLength}} tecken.",
     "notValidDate": "\"{{value}}\" är inte ett giltigt datum.",
+    "required": "Detta fält är obligatoriskt.",
     "requiresNoMoreThan": "Detta fält kräver inte mer än {{count}} {{label}}.",
     "requiresTwoNumbers": "Detta fält kräver två nummer.",
     "shorterThanMax": "Detta värde måste vara kortare än maxlängden på {{maxLength}} tecken.",

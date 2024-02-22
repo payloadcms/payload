@@ -25,6 +25,16 @@
     "userLocked": "Цей користувач заблокований через велику кількість невдалих спроб входу.",
     "valueMustBeUnique": "Значення має бути унікальним."
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Виберіть між введенням власної текстової URL-адреси і посиланням на інший документ.",
+    "chooseDocumentToLink": "Виберіть документ, на який потрібно зробити посилання",
+    "customURL": "Власний URL",
+    "enterURL": "Введіть URL",
+    "internalLink": "Внутрішнє посилання",
+    "linkType": "Тип посилання",
+    "openInNewTab": "Відкривати в новій вкладці",
+    "textToDisplay": "Текст для відображення"
+  },
   "general": {
     "createdAt": "Дата створення",
     "deletedCountSuccessfully": "Успішно видалено {{count}} {{label}}.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Українська",
     "updatedAt": "Змінено",
     "updatedCountSuccessfully": "Успішно оновлено {{count}} {{label}}.",
+    "updatedSuccessfully": "Успішно відредаговано.",
     "user": "Користувач",
     "users": "Користувачі",
     "value": "Значення"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} менше, ніж дозволено мінімуму {{label}} в {{min}}.",
     "longerThanMin": "Це значення має бути більше, ніж мінімальна довжина {{minLength}} characters.",
     "notValidDate": "\"{{value}}\" - некоректна дата.",
+    "required": "Це поле є обов'язковим.",
     "requiresNoMoreThan": "Це поле потребує не більше {{count}} {{label}}.",
     "requiresTwoNumbers": "У цьому полі потрібно ввести два числа.",
     "shorterThanMax": "Це значення має бути меншим за максимальну довжину символів {{maxLength}}.",

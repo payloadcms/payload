@@ -25,6 +25,16 @@
     "userLocked": "Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.",
     "valueMustBeUnique": "Değer benzersiz olmalıdır"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Choose between entering a custom text URL or linking to another document.",
+    "chooseDocumentToLink": "Bağlantı verilecek bir döküman seçin.",
+    "customURL": "Özel URL",
+    "enterURL": "Bir URL girin",
+    "internalLink": "İç bağlantı",
+    "linkType": "Bağlantı türü",
+    "openInNewTab": "Yeni sekmede aç",
+    "textToDisplay": "Görüntülenecek metin"
+  },
   "general": {
     "createdAt": "Oluşturma tarihi",
     "deletedCountSuccessfully": "{{count}} {{label}} başarıyla silindi.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Türkçe",
     "updatedAt": "Güncellenme tarihi",
     "updatedCountSuccessfully": "{{count}} {{label}} başarıyla güncellendi.",
+    "updatedSuccessfully": "Başarıyla güncellendi.",
     "user": "kullanıcı",
     "users": "kullanıcı",
     "value": "Değer"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} izin verilen minimum {{label}} değerinden daha küçük.",
     "longerThanMin": "Bu değer minimum {{minLength}} karakterden uzun olmalıdır.",
     "notValidDate": "\"{{value}}\" geçerli bir tarih değil.",
+    "required": "Bu alan gereklidir.",
     "requiresNoMoreThan": "Bu alana {{count}} adetten fazla {{label}} girilemez.",
     "requiresTwoNumbers": "Bu alana en az iki rakam girilmesi zorunludur.",
     "shorterThanMax": "Bu alan {{maxLength}} karakterden daha kısa olmalıdır.",

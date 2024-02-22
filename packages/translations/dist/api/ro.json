@@ -25,6 +25,16 @@
     "userLocked": "Acest utilizator este blocat din cauza unui număr prea mare de încercări de autentificare eșuate.",
     "valueMustBeUnique": "Valoarea trebuie să fie unică"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Alegeți între a introduce un text URL personalizat sau a crea un link către un alt document.",
+    "chooseDocumentToLink": "Alegeți un document către care să creați un link",
+    "customURL": "URL personalizat",
+    "enterURL": "Introduceți un URL",
+    "internalLink": "Link intern",
+    "linkType": "Tip de link",
+    "openInNewTab": "Deschideți în tab nou",
+    "textToDisplay": "Text de afișat"
+  },
   "general": {
     "createdAt": "Creat la",
     "deletedCountSuccessfully": "Șterse cu succes {{count}} {{label}}.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Română",
     "updatedAt": "Actualizat la",
     "updatedCountSuccessfully": "Actualizate {{count}} {{label}} cu succes.",
+    "updatedSuccessfully": "Actualizat cu succes.",
     "user": "Utilizator",
     "users": "Utilizatori",
     "value": "Valoare"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} este mai mic decât valoarea minimă permisă pentru {{label}} de {{min}}.",
     "longerThanMin": "Această valoare trebuie să fie mai mare decât lungimea minimă de {{minLength}} caractere.",
     "notValidDate": "\"{{value}}\" nu este o dată valabilă.",
+    "required": "Acest câmp este obligatoriu.",
     "requiresNoMoreThan": "Acest câmp nu necesită mai mult de {{count}} {{label}}.",
     "requiresTwoNumbers": "Acest câmp necesită două numere.",
     "shorterThanMax": "Această valoare trebuie să fie mai scurtă decât lungimea maximă de {{maxLength}} caractere.",

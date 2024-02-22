@@ -25,6 +25,16 @@
     "userLocked": "Questo utente è bloccato a causa di troppi tentativi di accesso non riusciti.",
     "valueMustBeUnique": "Il valore deve essere univoco"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Scegli tra l'inserimento di un URL di testo personalizzato o il collegamento a un altro documento.",
+    "chooseDocumentToLink": "Scegli un documento a cui collegarti",
+    "customURL": "URL personalizzato",
+    "enterURL": "Inserisci un URL",
+    "internalLink": "Collegamento interno",
+    "linkType": "Tipo di collegamento",
+    "openInNewTab": "Apri in una nuova scheda",
+    "textToDisplay": "Testo da visualizzare"
+  },
   "general": {
     "createdAt": "Creato il",
     "deletedCountSuccessfully": "{{count}} {{label}} eliminato con successo.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Italiano",
     "updatedAt": "Aggiornato il",
     "updatedCountSuccessfully": "{{count}} {{label}} aggiornato con successo.",
+    "updatedSuccessfully": "Aggiornato con successo.",
     "user": "Utente",
     "users": "Utenti",
     "value": "Valore"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} è inferiore al minimo consentito {{label}} di {{min}}.",
     "longerThanMin": "Questo valore deve essere più lungo della lunghezza minima di {{minLength}} caratteri.",
     "notValidDate": "\"{{value}}\" non è una data valida.",
+    "required": "Questo campo è obbligatorio.",
     "requiresNoMoreThan": "Questo campo richiede non più di {{count}} {{label}}.",
     "requiresTwoNumbers": "Questo campo richiede due numeri.",
     "shorterThanMax": "Questo valore deve essere inferiore alla lunghezza massima di {{maxLength}} caratteri.",

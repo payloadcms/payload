@@ -25,6 +25,16 @@
     "userLocked": "Ten użytkownik został zablokowany z powodu zbyt wielu nieudanych prób logowania.",
     "valueMustBeUnique": "Wartość musi być unikalna"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Wybierz między wprowadzeniem niestandardowego tekstowego adresu URL a linkiem do innego dokumentu.",
+    "chooseDocumentToLink": "Wybierz dokument, do którego chcesz utworzyć łącze",
+    "customURL": "Niestandardowy adres URL",
+    "enterURL": "Wpisz adres URL",
+    "internalLink": "Link wewnętrzny",
+    "linkType": "Typ łącza",
+    "openInNewTab": "Otwórz w nowej karcie",
+    "textToDisplay": "Tekst do wyświetlenia"
+  },
   "general": {
     "createdAt": "Data utworzenia",
     "deletedCountSuccessfully": "Pomyślnie usunięto {{count}} {{label}}.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Polski",
     "updatedAt": "Data edycji",
     "updatedCountSuccessfully": "Pomyślnie zaktualizowano {{count}} {{label}}.",
+    "updatedSuccessfully": "Aktualizacja zakończona sukcesem.",
     "user": "użytkownik",
     "users": "użytkownicy",
     "value": "Wartość"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} jest mniejsze niż minimalnie dozwolony {{label}} wynoszący {{min}}.",
     "longerThanMin": "Ta wartość musi być dłuższa niż minimalna długość znaków: {{minLength}}.",
     "notValidDate": "\"{{value}}\" nie jest prawidłową datą.",
+    "required": "To pole jest wymagane.",
     "requiresNoMoreThan": "To pole może posiadać co najmniej {{count}} {{label}}.",
     "requiresTwoNumbers": "To pole wymaga dwóch liczb.",
     "shorterThanMax": "Ta wartość musi być krótsza niż maksymalna długość znaków: {{maxLength}}.",

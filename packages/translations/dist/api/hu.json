@@ -25,6 +25,16 @@
     "userLocked": "Ez a felhasználó túl sok sikertelen bejelentkezési kísérlet miatt zárolva van.",
     "valueMustBeUnique": "Az értéknek egyedinek kell lennie"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Válasszon egy egyéni szöveges URL-cím megadása vagy egy másik dokumentumra való hivatkozás között.",
+    "chooseDocumentToLink": "Válassza ki a dokumentumot, amelyre hivatkozni kíván",
+    "customURL": "Egyéni URL",
+    "enterURL": "Adjon meg egy URL-t",
+    "internalLink": "Belső link",
+    "linkType": "Link típusa",
+    "openInNewTab": "Megnyitás új lapon",
+    "textToDisplay": "Megjelenítendő szöveg"
+  },
   "general": {
     "createdAt": "Létrehozva:",
     "deletedCountSuccessfully": "{{count}} {{label}} sikeresen törölve.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Magyar",
     "updatedAt": "Frissítve:",
     "updatedCountSuccessfully": "{{count}} {{label}} sikeresen frissítve.",
+    "updatedSuccessfully": "Sikeresen frissítve.",
     "user": "Felhasználó",
     "users": "Felhasználók",
     "value": "Érték"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} kisebb, mint a megengedett minimum {{label}} érték, ami {{min}}.",
     "longerThanMin": "Ennek az értéknek hosszabbnak kell lennie, mint a minimális {{minLength}} karakter hosszúság.",
     "notValidDate": "\" {{value}} \" nem érvényes dátum.",
+    "required": "Ez a mező kötelező.",
     "requiresNoMoreThan": "Ehhez a mezőhöz legfeljebb {{count}} {{label}} szükséges.",
     "requiresTwoNumbers": "Ehhez a mezőhöz két szám szükséges.",
     "shorterThanMax": "Ennek az értéknek rövidebbnek kell lennie, mint a maximálisan megengedett {{maxLength}} karakter.",

@@ -25,6 +25,16 @@
     "userLocked": "Ovaj korisnik je zaključan zbog previše neuspješnih pokušaja prijave.",
     "valueMustBeUnique": "Vrijednost mora biti jedinstvena."
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Izaberite između unošenja prilagođenog teksta URL ili poveznice na drugi dokument.",
+    "chooseDocumentToLink": "Odaberite dokument koji želite povezati.",
+    "customURL": "Prilagođeni URL",
+    "enterURL": "Unesi URL",
+    "internalLink": "Interna poveznika",
+    "linkType": "Tip poveznce",
+    "openInNewTab": "Otvori u novoj kartici.",
+    "textToDisplay": "Tekst za prikaz"
+  },
   "general": {
     "createdAt": "Kreirano u",
     "deletedCountSuccessfully": "Uspješno izbrisano {{count}} {{label}}.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Hrvatski",
     "updatedAt": "Ažurirano u",
     "updatedCountSuccessfully": "Uspješno ažurirano {{count}} {{label}}.",
+    "updatedSuccessfully": "Uspješno ažurirano.",
     "user": "Korisnik",
     "users": "Korisnici",
     "value": "Attribute"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} is below the minimum allowable {{label}} limit of {{min}}.",
     "longerThanMin": "Ova vrijednost mora biti duža od minimalne dužine od {{minLength}} znakova",
     "notValidDate": "\"{{value}}\" nije valjan datum.",
+    "required": "Ovo polje je obvezno.",
     "requiresNoMoreThan": "Ovo polje zahtjeva ne više od {{count}} {{label}}.",
     "requiresTwoNumbers": "Ovo polje zahtjeva dva broja.",
     "shorterThanMax": "Ova vrijednost mora biti kraća od maksimalne dužine od {{maxLength}} znakova",
