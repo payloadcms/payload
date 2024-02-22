@@ -26,6 +26,16 @@
     "userLocked": "Bu istifadəçi çoxsaylı uğursuz giriş cəhdləri səbəbindən kilidlənib.",
     "valueMustBeUnique": "Dəyər təkrar olmamalıdır"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Xüsusi mətn URL'si daxil etmək və ya başqa bir sənədə keçid yaratmaq arasında seçim edin.",
+    "chooseDocumentToLink": "Keçid yaratmaq üçün sənəd seçin",
+    "customURL": "Xüsusi URL",
+    "enterURL": "URL daxil edin",
+    "internalLink": "Daxili Keçid",
+    "linkType": "Keçid Növü",
+    "openInNewTab": "Yeni sekmede aç",
+    "textToDisplay": "Göstəriləcək mətn"
+  },
   "general": {
     "createdAt": "Yaradıldığı tarix",
     "deletedCountSuccessfully": "{{count}} {{label}} uğurla silindi.",
@@ -36,6 +46,7 @@
     "thisLanguage": "Azərbaycan dili",
     "updatedAt": "Yeniləndiyi tarix",
     "updatedCountSuccessfully": "{{count}} {{label}} uğurla yeniləndi.",
+    "updatedSuccessfully": "Uğurla yeniləndi.",
     "user": "İstifadəçi",
     "users": "İstifadəçilər",
     "value": "Dəyər"
@@ -57,6 +68,7 @@
     "lessThanMin": "{{value}} icazə verilən minimal {{label}} olan {{min}}-dən kiçikdir.",
     "longerThanMin": "Bu dəyər {{minLength}} simvoldan uzun olmalıdır.",
     "notValidDate": "\"{{value}}\" doğru tarix deyil.",
+    "required": "Bu sahə mütləq doldurulmalıdır.",
     "requiresNoMoreThan": "Bu sahə {{count}} {{label}}-dan çox olmamalıdır.",
     "requiresTwoNumbers": "Bu sahə iki nömrə tələb edir.",
     "shorterThanMax": "Bu dəyər {{maxLength}} simvoldan qısa olmalıdır.",

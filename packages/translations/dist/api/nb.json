@@ -25,6 +25,16 @@
     "userLocked": "Denne brukeren er låst på grunn av for mange mislykkede innloggingsforsøk.",
     "valueMustBeUnique": "Verdien må være unik"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Velg mellom å skrive inn en egen tekst-URL eller å lenke til et annet dokument.",
+    "chooseDocumentToLink": "Velg et dokument å lenke til",
+    "customURL": "Egendefinert URL",
+    "enterURL": "Skriv inn en URL",
+    "internalLink": "Intern lenke",
+    "linkType": "Lenketype",
+    "openInNewTab": "Åpne i ny fane",
+    "textToDisplay": "Tekst som skal vises"
+  },
   "general": {
     "createdAt": "Opprettet",
     "deletedCountSuccessfully": "Slettet {{count}} {{label}}.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Norsk",
     "updatedAt": "Oppdatert",
     "updatedCountSuccessfully": "Oppdaterte {{count}} {{label}} vellykket.",
+    "updatedSuccessfully": "Oppdatert.",
     "user": "Bruker",
     "users": "Brukere",
     "value": "Verdi"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} er mindre enn den tillatte minimale {{label}} på {{min}}.",
     "longerThanMin": "Denne verdien må være lengre enn minimumslengden på {{minLength}} tegn.",
     "notValidDate": "\"{{value}}\" er ikke en gyldig dato.",
+    "required": "Dette feltet er påkrevd.",
     "requiresNoMoreThan": "Dette feltet krever maksimalt {{count}} {{label}}.",
     "requiresTwoNumbers": "Dette feltet krever to tall.",
     "shorterThanMax": "Denne verdien må være kortere enn maksimal lengde på {{maxLength}} tegn.",

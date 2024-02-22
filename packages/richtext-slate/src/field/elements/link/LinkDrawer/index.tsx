@@ -13,6 +13,7 @@ import React, { useRef } from 'react'
 
 import type { Props } from './types'
 
+import { FieldPathProvider } from '../../../../../../ui/src/forms/FieldPathProvider'
 import './index.scss'
 
 const baseClass = 'rich-text-link-edit-modal'
@@ -26,12 +27,14 @@ export const LinkDrawer: React.FC<Props> = ({
   const { t } = useTranslation()
 
   return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
-      <Form initialState={initialState} onSubmit={handleModalSubmit}>
-        <RenderFields fieldMap={fieldMap} forceRender readOnly={false} />
-        <LinkSubmit />
-      </Form>
-    </Drawer>
+    <FieldPathProvider path="" schemaPath="">
+      <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
+        <Form initialState={initialState} onSubmit={handleModalSubmit}>
+          <RenderFields fieldMap={fieldMap} forceRender readOnly={false} />
+          <LinkSubmit />
+        </Form>
+      </Drawer>
+    </FieldPathProvider>
   )
 }
 

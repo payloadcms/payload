@@ -25,6 +25,16 @@
     "userLocked": "تمّ قفل هذا المستخدم نظرًا لوجود عدد كبير من محاولات تسجيل الدّخول الغير ناجحة.",
     "valueMustBeUnique": "على القيمة أن تكون فريدة"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "اختر بين إدخال عنوان URL نصّي مخصّص أو الرّبط بمستند آخر.",
+    "chooseDocumentToLink": "اختر مستندًا للربط",
+    "customURL": "URL مخصّص",
+    "enterURL": "ادخل عنوان URL",
+    "internalLink": "رابط داخلي",
+    "linkType": "نوع الرّابط",
+    "openInNewTab": "الفتح في علامة تبويب جديدة",
+    "textToDisplay": "النصّ الذي تريد إظهاره"
+  },
   "general": {
     "createdAt": "تمّ الإنشاء في",
     "deletedCountSuccessfully": "تمّ حذف {{count}} {{label}} بنجاح.",
@@ -35,6 +45,7 @@
     "thisLanguage": "العربية",
     "updatedAt": "تم التحديث في",
     "updatedCountSuccessfully": "تم تحديث {{count}} {{label}} بنجاح.",
+    "updatedSuccessfully": "تم التحديث بنجاح.",
     "user": "المستخدم",
     "users": "المستخدمين",
     "value": "القيمة"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} أقل من الحد الأدنى المسموح به {{label}} الذي يبلغ {{min}}.",
     "longerThanMin": "يجب أن يكون هذا القيمة أطول من الحد الأدنى للطول الذي هو {{minLength}} أحرف.",
     "notValidDate": "\"{{value}}\" ليس تاريخا صالحا.",
+    "required": "هذا الحقل مطلوب.",
     "requiresNoMoreThan": "هذا الحقل يتطلب عدم تجاوز {{count}} {{label}}.",
     "requiresTwoNumbers": "هذا الحقل يتطلب رقمين.",
     "shorterThanMax": "يجب أن تكون هذه القيمة أقصر من الحد الأقصى للطول الذي هو {{maxLength}} أحرف.",

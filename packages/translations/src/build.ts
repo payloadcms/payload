@@ -15,6 +15,15 @@ const serverTranslationKeys = [
   'authentication:youDidNotRequestPassword',
   'authentication:verified',
 
+  'fields:textToDisplay',
+  'fields:linkType',
+  'fields:chooseBetweenCustomTextOrDocument',
+  'fields:customURL',
+  'fields:internalLink',
+  'fields:enterURL',
+  'fields:chooseDocumentToLink',
+  'fields:openInNewTab',
+
   'general:createdAt',
   'general:deletedCountSuccessfully',
   'general:deletedSuccessfully',
@@ -25,6 +34,7 @@ const serverTranslationKeys = [
   'general:user',
   'general:users',
   'general:updatedAt',
+  'general:updatedSuccessfully',
   'general:updatedCountSuccessfully',
   'general:value',
 
@@ -55,6 +65,7 @@ const serverTranslationKeys = [
   'validation:lessThanMin',
   'validation:longerThanMin',
   'validation:notValidDate',
+  'validation:required',
   'validation:requiresNoMoreThan',
   'validation:requiresTwoNumbers',
   'validation:shorterThanMax',

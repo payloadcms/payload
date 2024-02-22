@@ -25,6 +25,16 @@
     "userLocked": "အကောင့်ထဲကို ဝင်ရန် အရမ်းအရမ်းကို ကြိုးပမ်းနေသောကြောင့် အကောင့်အား လော့ခ်ချလိုက်ပါသည်။",
     "valueMustBeUnique": "value သည် အဓိပ္ပာယ်ရှိရပါမည်။"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "စိတ်ကြိုက်စာသား URL ကိုထည့်ခြင်း သို့မဟုတ် အခြားစာရွက်စာတမ်းတစ်ခုသို့ လင့်ခ်ချိတ်ခြင်းအကြား ရွေးချယ်ပါ။",
+    "chooseDocumentToLink": "ချိတ်ဆက်ရန် စာရွက်စာတမ်းကို ရွေးပါ။",
+    "customURL": "စိတ်ကြိုက် URL",
+    "enterURL": "URL တစ်ခုထည့်ပါ။",
+    "internalLink": "Internal Link",
+    "linkType": "လင့်အမျိုးအစား",
+    "openInNewTab": "တက်ဘ်အသစ်တွင် ဖွင့်ပါ။",
+    "textToDisplay": "ပြသရန် စာသား"
+  },
   "general": {
     "createdAt": "ဖန်တီးခဲ့သည့်အချိန်",
     "deletedCountSuccessfully": "{{count}} {{label}} ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။",
@@ -35,6 +45,7 @@
     "thisLanguage": "မြန်မာစာ",
     "updatedAt": "ပြင်ဆင်ခဲ့သည့်အချိန်",
     "updatedCountSuccessfully": "{{count}} {{label}} ကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ခဲ့သည်။",
+    "updatedSuccessfully": "အပ်ဒိတ်လုပ်ပြီးပါပြီ။",
     "user": "အသုံးပြုသူ",
     "users": "အသုံးပြုသူများ",
     "value": "တန်ဖိုး"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} သည် {{min}} ထက် ပိုမိုနိမ့်သည်။ ဤသည်ဖြင့် {{label}} အနည်းဆုံးခွင့်ပြုထားသော တန်ဖိုးထက် နိမ့်သည်။",
     "longerThanMin": "ဤတန်ဖိုးသည် အနိမ့်ဆုံးအရှည် {{minLength}} စာလုံးထက် ပိုရှည်ရမည်။",
     "notValidDate": "\"{{value}}\" သည် တရားဝင်ရက်စွဲမဟုတ်ပါ။",
+    "required": "ဤအကွက်ကို လိုအပ်သည်။",
     "requiresNoMoreThan": "ဤအကွက်တွင် {{count}} {{label}} ထက် မပိုရပါ။",
     "requiresTwoNumbers": "ဤအကွက်သည် နံပါတ်နှစ်ခု လိုအပ်ပါသည်။",
     "shorterThanMax": "ဤတန်ဖိုးသည် စာလုံး {{maxLength}} လုံး၏ အမြင့်ဆုံးအရှည်ထက် ပိုတိုရပါမည်။",

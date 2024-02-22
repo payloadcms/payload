@@ -25,6 +25,16 @@
     "userLocked": "This user is locked due to having too many failed login attempts.",
     "valueMustBeUnique": "Value must be unique"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Choose between entering a custom text URL or linking to another document.",
+    "chooseDocumentToLink": "Choose a document to link to",
+    "customURL": "Custom URL",
+    "enterURL": "Enter a URL",
+    "internalLink": "Internal Link",
+    "linkType": "Link Type",
+    "openInNewTab": "Open in new tab",
+    "textToDisplay": "Text to display"
+  },
   "general": {
     "createdAt": "Created At",
     "deletedCountSuccessfully": "Deleted {{count}} {{label}} successfully.",
@@ -35,6 +45,7 @@
     "thisLanguage": "English",
     "updatedAt": "Updated At",
     "updatedCountSuccessfully": "Updated {{count}} {{label}} successfully.",
+    "updatedSuccessfully": "Updated successfully.",
     "user": "User",
     "users": "Users",
     "value": "Value"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} is less than the min allowed {{label}} of {{min}}.",
     "longerThanMin": "This value must be longer than the minimum length of {{minLength}} characters.",
     "notValidDate": "\"{{value}}\" is not a valid date.",
+    "required": "This field is required.",
     "requiresNoMoreThan": "This field requires no more than {{count}} {{label}}.",
     "requiresTwoNumbers": "This field requires two numbers.",
     "shorterThanMax": "This value must be shorter than the max length of {{maxLength}} characters.",

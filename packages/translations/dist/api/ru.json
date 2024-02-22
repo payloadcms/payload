@@ -25,6 +25,16 @@
     "userLocked": "Этот пользователь заблокирован из-за слишком большого количества неудачных попыток входа.",
     "valueMustBeUnique": "Значение должно быть уникальным"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Выберите между вводом пользовательского текстового URL и ссылкой на другой документ.",
+    "chooseDocumentToLink": "Выберите документ для ссылки",
+    "customURL": "Пользовательский URL",
+    "enterURL": "Введите URL",
+    "internalLink": "Внутренняя ссылка",
+    "linkType": "Тип ссылки",
+    "openInNewTab": "Открывать в новой вкладке",
+    "textToDisplay": "Текст для отображения"
+  },
   "general": {
     "createdAt": "Дата создания",
     "deletedCountSuccessfully": "Удалено {{count}} {{label}} успешно.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Русский",
     "updatedAt": "Дата правки",
     "updatedCountSuccessfully": "Обновлено {{count}} {{label}} успешно.",
+    "updatedSuccessfully": "Успешно Обновлено.",
     "user": "пользователь",
     "users": "пользователи",
     "value": "Значение"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} меньше минимально допустимого значения {{label}} {{min}}.",
     "longerThanMin": "Это значение должно быть больше минимальной длины символов: {{minLength}}.",
     "notValidDate": "\"{{value}}\" это не действительная дата.",
+    "required": "Это обязательное поле.",
     "requiresNoMoreThan": "Это поле требует не более {{count}} {{label}}",
     "requiresTwoNumbers": "В этом поле требуется два числа.",
     "shorterThanMax": "Это значение должно быть короче максимальной длины символов {{maxLength}}.",

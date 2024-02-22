@@ -25,6 +25,16 @@
     "userLocked": "Lỗi- Tài khoản đã bị khóa do đăng nhập thất bại nhiều lần.",
     "valueMustBeUnique": "Lỗi - Giá trị không được trùng lặp."
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Chọn giữa nhập URL văn bản tùy chỉnh hoặc liên kết đến tài liệu khác.",
+    "chooseDocumentToLink": "Chọn một tài liệu để liên kết đến",
+    "customURL": "URL tùy chỉnh",
+    "enterURL": "Nhập một URL",
+    "internalLink": "Liên kết nội bộ",
+    "linkType": "Loại liên kết",
+    "openInNewTab": "Mở trong trang mới",
+    "textToDisplay": "Văn bản để hiển thị"
+  },
   "general": {
     "createdAt": "Ngày tạo",
     "deletedCountSuccessfully": "Đã xóa thành công {{count}} {{label}}.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Vietnamese (Tiếng Việt)",
     "updatedAt": "Ngày cập nhật",
     "updatedCountSuccessfully": "Đã cập nhật thành công {{count}} {{label}}.",
+    "updatedSuccessfully": "Cập nhật thành công.",
     "user": "Người dùng",
     "users": "Người dùng",
     "value": "Giá trị"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} nhỏ hơn giá trị tối thiểu cho phép của {{label}} là {{min}}.",
     "longerThanMin": "Giá trị này cần có độ dài tối thiểu {{minLength}} ký tự.",
     "notValidDate": "\"{{value}}\" không phải là một ngày (date) hợp lệ.",
+    "required": "Field này cần được diền.",
     "requiresNoMoreThan": "Field này không thể vượt quá {{count}} {{label}}.",
     "requiresTwoNumbers": "Field này cần tối thiểu 2 chữ số.",
     "shorterThanMax": "Giá trị phải ngắn hơn hoặc bằng {{maxLength}} ký tự.",

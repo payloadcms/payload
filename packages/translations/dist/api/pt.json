@@ -25,6 +25,16 @@
     "userLocked": "Esse usuário está bloqueado devido a muitas tentativas de login malsucedidas.",
     "valueMustBeUnique": "Valor deve ser único"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Escolha entre inserir um URL de texto personalizado ou vincular a outro documento.",
+    "chooseDocumentToLink": "Escolha um documento para vincular",
+    "customURL": "URL personalizado",
+    "enterURL": "Insira um URL",
+    "internalLink": "Link Interno",
+    "linkType": "Tipo de link",
+    "openInNewTab": "Abrir em nova aba",
+    "textToDisplay": "Texto a ser exibido"
+  },
   "general": {
     "createdAt": "Criado Em",
     "deletedCountSuccessfully": "Excluído {{count}} {{label}} com sucesso.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Português",
     "updatedAt": "Atualizado Em",
     "updatedCountSuccessfully": "Atualizado {{count}} {{label}} com sucesso.",
+    "updatedSuccessfully": "Atualizado com sucesso.",
     "user": "usuário",
     "users": "usuários",
     "value": "Valor"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} é menor que o mínimo permitido de {{label}} que é {{min}}.",
     "longerThanMin": "Esse valor deve ser maior do que o mínimo de {{minLength}} characters.",
     "notValidDate": "\"{{value}}\" não é uma data válida.",
+    "required": "Esse campo é obrigatório.",
     "requiresNoMoreThan": "Esse campo requer pelo menos {{count}} {{label}}.",
     "requiresTwoNumbers": "Esse campo requer dois números.",
     "shorterThanMax": "Esse valor deve ser menor do que o máximo de {{maxLength}} caracteres.",

@@ -25,6 +25,16 @@
     "userLocked": "該使用者由於有太多次失敗的登錄嘗試而被鎖定。",
     "valueMustBeUnique": "數值必須是唯一的"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "選擇自定義文件或連結到另一個文件。",
+    "chooseDocumentToLink": "選擇要連結的文件",
+    "customURL": "自定義連結",
+    "enterURL": "輸入連結",
+    "internalLink": "內部連結",
+    "linkType": "連結類型",
+    "openInNewTab": "在新標籤中打開",
+    "textToDisplay": "要顯示的文字"
+  },
   "general": {
     "createdAt": "建立於",
     "deletedCountSuccessfully": "已成功刪除 {{count}} 個 {{label}}。",
@@ -35,6 +45,7 @@
     "thisLanguage": "中文 (繁體)",
     "updatedAt": "更新於",
     "updatedCountSuccessfully": "已成功更新 {{count}} 個 {{label}}。",
+    "updatedSuccessfully": "更新成功。",
     "user": "使用者",
     "users": "使用者",
     "value": "值"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}}小於允許的最小{{label}}，該最小值為{{min}}。",
     "longerThanMin": "該值必須大於{{minLength}}字串的最小長度",
     "notValidDate": "\"{{value}}\"不是一個有效的日期。",
+    "required": "該字串為必填項目。",
     "requiresNoMoreThan": "該字串要求不超過 {{count}} 個 {{label}。",
     "requiresTwoNumbers": "該字串需要兩個數字。",
     "shorterThanMax": "該值長度必須小於{{maxLength}}個字元",

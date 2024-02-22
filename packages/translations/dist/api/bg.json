@@ -25,6 +25,16 @@
     "userLocked": "Този потребител има прекалено много невалидни опити за влизане и е заключен.",
     "valueMustBeUnique": "Стойността трябва да е уникална"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Избери между това да въведеш текстова връзка или да свържеш с друг документ.",
+    "chooseDocumentToLink": "Избери документ, с който да свържеш",
+    "customURL": "Връзка",
+    "enterURL": "Въведи връзка",
+    "internalLink": "Вътрешна връзка",
+    "linkType": "Тип на връзката",
+    "openInNewTab": "Отвори в нов раздел",
+    "textToDisplay": "Текст към дисплей"
+  },
   "general": {
     "createdAt": "Създаден на",
     "deletedCountSuccessfully": "Изтрити {{count}} {{label}} успешно.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Български",
     "updatedAt": "Обновен на",
     "updatedCountSuccessfully": "Обновени {{count}} {{label}} успешно.",
+    "updatedSuccessfully": "Обновен успешно.",
     "user": "Потребител",
     "users": "Потребители",
     "value": "Стойност"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} е по-малко от минимално допустимото {{label}} от {{min}}.",
     "longerThanMin": "Тази стойност трябва да е по-голяма от минималната стойност от {{minLength}} символа.",
     "notValidDate": "\"{{value}}\" не е валидна дата.",
+    "required": "Това поле е задължително.",
     "requiresNoMoreThan": "Това поле изисква не повече от {{count}} {{label}}.",
     "requiresTwoNumbers": "Това поле изисква 2 числа.",
     "shorterThanMax": "Тази стойност трябва да е по-малка от максималната стойност от {{maxLength}} символа.",

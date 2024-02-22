@@ -25,6 +25,16 @@
     "userLocked": "این کاربر به دلیل تلاش های زیاد برای ورود ناموفق قفل شده است.",
     "valueMustBeUnique": "مقدار باید منحصر به فرد باشد"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "بین یک نشانی وب یا پیوند دادن به سندی دیگری یکی را انتخاب کنید.",
+    "chooseDocumentToLink": "یک سند را برای پیوند دادن برگزینید",
+    "customURL": "URL سفارشی",
+    "enterURL": "یک نشانی وب وارد کنید",
+    "internalLink": "پیوند درونی",
+    "linkType": "نوع پیوند",
+    "openInNewTab": "بازکردن درزبانه تازه",
+    "textToDisplay": "متن برای نمایش"
+  },
   "general": {
     "createdAt": "ساخته شده در",
     "deletedCountSuccessfully": "تعداد {{count}} {{label}} با موفقیت پاک گردید.",
@@ -35,6 +45,7 @@
     "thisLanguage": "فارسی",
     "updatedAt": "بروز شده در",
     "updatedCountSuccessfully": "تعداد {{count}} با عنوان {{label}} با موفقیت بروزرسانی شدند.",
+    "updatedSuccessfully": "با موفقیت به‌روز شد.",
     "user": "کاربر",
     "users": "کاربران",
     "value": "مقدار"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} کمتر از حداقل مجاز برای {{label}} است که {{min}} است.",
     "longerThanMin": "ورودی باید بیش از حداقل {{minLength}} واژه باشد.",
     "notValidDate": "\"{{value}}\" یک تاریخ معتبر نیست.",
+    "required": "این کادر اجباری است.",
     "requiresNoMoreThan": "این رشته به بیش از {{count}} {{label}} نیاز دارد.",
     "requiresTwoNumbers": "این کادر به دو عدد نیاز دارد.",
     "shorterThanMax": "ورودی باید کمتر از {{maxLength}} واژه باشد.",

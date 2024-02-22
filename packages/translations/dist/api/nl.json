@@ -25,6 +25,16 @@
     "userLocked": "Deze gebruiker is vergrendeld wegens te veel mislukte inlogpogingen.",
     "valueMustBeUnique": "De waarde moet uniek zijn"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Kies tussen het invoeren van een aangepaste tekst-URL of een koppeling naar een ander document.",
+    "chooseDocumentToLink": "Kies een document om naar te linken",
+    "customURL": "Eigen URL",
+    "enterURL": "Voer een URL in",
+    "internalLink": "Interne koppeling",
+    "linkType": "Koppelingstype",
+    "openInNewTab": "Openen in nieuw tabblad",
+    "textToDisplay": "Tekst om weer te geven"
+  },
   "general": {
     "createdAt": "Aangemaakt op",
     "deletedCountSuccessfully": "{{count}} {{label}} succesvol verwijderd.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Nederlands",
     "updatedAt": "Aangepast op",
     "updatedCountSuccessfully": "{{count}} {{label}} succesvol bijgewerkt.",
+    "updatedSuccessfully": "Succesvol aangepast.",
     "user": "Gebruiker",
     "users": "Gebruikers",
     "value": "Waarde"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} is kleiner dan de minimaal toegestane {{label}} van {{min}}.",
     "longerThanMin": "Deze waarde moet langer zijn dan de minimale lengte van {{minLength}} tekens.",
     "notValidDate": "\"{{value}}\" is geen geldige datum.",
+    "required": "Dit veld is verplicht.",
     "requiresNoMoreThan": "Dit veld vereist niet meer dan {{count}} {{label}}.",
     "requiresTwoNumbers": "Dit veld vereist twee nummers.",
     "shorterThanMax": "Dit veld moet korter zijn dan de maximale lengte van {{maxLength}} tekens.",

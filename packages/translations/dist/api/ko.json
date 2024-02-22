@@ -24,6 +24,16 @@
     "userLocked": "이 사용자는 로그인 실패 횟수가 너무 많아 잠겼습니다.",
     "valueMustBeUnique": "값은 고유해야 합니다."
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "사용자 지정 텍스트 URL 또는 다른 문서에 링크 중 선택하세요.",
+    "chooseDocumentToLink": "연결할 문서 선택",
+    "customURL": "사용자 지정 URL",
+    "enterURL": "URL 입력",
+    "internalLink": "내부 링크",
+    "linkType": "링크 유형",
+    "openInNewTab": "새 탭에서 열기",
+    "textToDisplay": "표시할 텍스트"
+  },
   "general": {
     "createdAt": "생성 일시",
     "deletedCountSuccessfully": "{{count}}개의 {{label}}를 삭제했습니다.",
@@ -34,6 +44,7 @@
     "thisLanguage": "한국어",
     "updatedAt": "업데이트 일시",
     "updatedCountSuccessfully": "{{count}}개의 {{label}}을(를) 업데이트했습니다.",
+    "updatedSuccessfully": "성공적으로 업데이트되었습니다.",
     "user": "사용자",
     "users": "사용자",
     "value": "값"
@@ -55,6 +66,7 @@
     "lessThanMin": "{{value}}은(는) 최소 허용된 {{label}}인 {{min}}개보다 작습니다.",
     "longerThanMin": "이 값은 최소 길이인 {{minLength}}자보다 길어야 합니다.",
     "notValidDate": "\"{{value}}\"은(는) 유효한 날짜가 아닙니다.",
+    "required": "이 입력란은 필수입니다.",
     "requiresNoMoreThan": "이 입력란은 최대 {{count}} {{label}} 이하이어야 합니다.",
     "requiresTwoNumbers": "이 입력란은 두 개의 숫자가 필요합니다.",
     "shorterThanMax": "이 값은 최대 길이인 {{maxLength}}자보다 짧아야 합니다.",

@@ -25,6 +25,16 @@
     "userLocked": "Tento uživatel je uzamčen kvůli příliš mnoha neúspěšným pokusům o přihlášení.",
     "valueMustBeUnique": "Hodnota musí být jedinečná"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Zvolte mezi vložením vlastního textového URL nebo odkazováním na jiný dokument.",
+    "chooseDocumentToLink": "Vyberte dokument, na který se chcete odkázat",
+    "customURL": "Vlastní URL",
+    "enterURL": "Zadejte URL",
+    "internalLink": "Interní odkaz",
+    "linkType": "Typ odkazu",
+    "openInNewTab": "Otevřít v nové záložce",
+    "textToDisplay": "Text k zobrazení"
+  },
   "general": {
     "createdAt": "Vytvořeno v",
     "deletedCountSuccessfully": "Úspěšně smazáno {{count}} {{label}}.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Čeština",
     "updatedAt": "Aktualizováno v",
     "updatedCountSuccessfully": "Úspěšně aktualizováno {{count}} {{label}}.",
+    "updatedSuccessfully": "Úspěšně aktualizováno.",
     "user": "Uživatel",
     "users": "Uživatelé",
     "value": "Hodnota"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} je nižší než minimálně povolená {{label}} {{min}}.",
     "longerThanMin": "Tato hodnota musí být delší než minimální délka {{minLength}} znaků.",
     "notValidDate": "\"{{value}}\" není platné datum.",
+    "required": "Toto pole je povinné.",
     "requiresNoMoreThan": "Toto pole vyžaduje ne více než {{count}} {{label}}.",
     "requiresTwoNumbers": "Toto pole vyžaduje dvě čísla.",
     "shorterThanMax": "Tato hodnota musí být kratší než maximální délka {{maxLength}} znaků.",

@@ -25,6 +25,16 @@
     "userLocked": "Dieser Benutzer ist auf Grund zu vieler unerfolgreicher Anmelde-Versuche gesperrt.",
     "valueMustBeUnique": "Wert muss einzigartig sein"
   },
+  "fields": {
+    "chooseBetweenCustomTextOrDocument": "Wähle zwischen einer eigenen Text-URL oder verlinke zu einem anderen Dokument.",
+    "chooseDocumentToLink": "Wähle ein Dokument zum Verlinken",
+    "customURL": "Eigene URL",
+    "enterURL": "URL eingeben",
+    "internalLink": "Interner Link",
+    "linkType": "Linktyp",
+    "openInNewTab": "Öffne im neuen Tab",
+    "textToDisplay": "Angezeigter Text"
+  },
   "general": {
     "createdAt": "Erstellt am",
     "deletedCountSuccessfully": "{{count}} {{label}} erfolgreich gelöscht.",
@@ -35,6 +45,7 @@
     "thisLanguage": "Deutsch",
     "updatedAt": "Aktualisiert am",
     "updatedCountSuccessfully": "{{count}} {{label}} erfolgreich aktualisiert.",
+    "updatedSuccessfully": "Erfolgreich aktualisiert.",
     "user": "Benutzer",
     "users": "Benutzer",
     "value": "Wert"
@@ -56,6 +67,7 @@
     "lessThanMin": "{{value}} ist kleiner als der minimal erlaubte {{label}} von {{min}}.",
     "longerThanMin": "Dieser Wert muss länger als die minimale Länge von {{minLength}} Zeichen sein.",
     "notValidDate": "\"{{value}}\" ist kein gültiges Datum.",
+    "required": "Pflichtfeld",
     "requiresNoMoreThan": "Dieses Feld kann nicht mehr als {{count}} {{label}} enthalten.",
     "requiresTwoNumbers": "Dieses Feld muss zwei Nummern enthalten.",
     "shorterThanMax": "Dieser Wert muss kürzer als die maximale Länge von {{maxLength}} sein.",
