@@ -88,7 +88,7 @@ describe('Endpoints', () => {
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(data.message).toStrictEqual('Back to Dashboard')
+      expect(data.message).toStrictEqual('Updated successfully.')
     })
   })
 

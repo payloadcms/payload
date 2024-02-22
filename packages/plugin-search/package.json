@@ -30,6 +30,7 @@
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
+    "@payloadcms/ui": "workspace:^",
     "ts-deepmerge": "^2.0.1"
   },
   "devDependencies": {

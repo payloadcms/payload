@@ -19,9 +19,15 @@ export { default as CheckboxInput } from '../forms/fields/Checkbox'
 export { default as Select } from '../forms/fields/Select'
 export { default as SelectInput } from '../forms/fields/Select'
 export { default as Number } from '../forms/fields/Number'
-export { useAllFormFields } from '../forms/Form/context'
+export { default as Textarea } from '../forms/fields/Textarea'
+export {
+  useAllFormFields,
+  useWatchForm,
+  useFormSubmitted,
+  useFormFields,
+  useForm,
+} from '../forms/Form/context'
 export { default as reduceFieldsToValues } from '../forms/Form/reduceFieldsToValues'
-export { useFormSubmitted } from '../forms/Form/context'
 export { default as SectionTitle } from '../forms/fields/Blocks/SectionTitle'
 export { createNestedFieldPath } from '../forms/Form/createNestedFieldPath'
 export { default as buildInitialState } from '../forms/Form'
@@ -30,3 +36,4 @@ export { default as useField } from '../forms/useField'
 export { default as Error } from '../forms/Error'
 export type { BuildFormStateArgs } from '../forms/utilities/buildStateFromSchema'
 export { FieldPathProvider } from '../forms/FieldPathProvider'
+export type { Options, FieldType } from '../forms/useField/types'
