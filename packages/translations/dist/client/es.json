@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Añadir {{label}}",
+    "addLink": "Añadir Enlace",
     "addNew": "Añadir nuevo",
     "addNewLabel": "Añadir {{label}}",
     "block": "bloque",
@@ -61,6 +62,7 @@
     "blocks": "bloques",
     "chooseFromExisting": "Elegir existente",
     "collapseAll": "Colapsar todo",
+    "editLink": "Editar Enlace",
     "itemsAndMore": "{{items}} y {{count}} más",
     "latitude": "Latitud",
     "longitude": "Longitud",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Subir nuevo {{label}}"
   },
   "general": {
+    "aboutToDelete": "Estás por eliminar el {{label}} <1>{{title}}</1>. ¿Estás seguro?",
     "aboutToDeleteCount_many": "Está a punto de eliminar {{count}} {{label}}",
     "aboutToDeleteCount_one": "Está a punto de eliminar {{count}} {{label}}",
     "aboutToDeleteCount_other": "Está a punto de eliminar {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Actualizado con éxito.",
     "updating": "Actualizando",
     "welcome": "Bienvenido"
+  },
+  "operators": {
+    "contains": "contiene",
+    "equals": "igual",
+    "exists": "existe",
+    "isGreaterThan": "es mayor que",
+    "isGreaterThanOrEqualTo": "es mayor o igual que",
+    "isIn": "está en",
+    "isLessThan": "es menor que",
+    "isLessThanOrEqualTo": "es menor o igual que",
+    "isLike": "es como",
+    "isNotEqualTo": "no es igual a",
+    "isNotIn": "no está en",
+    "near": "cerca"
   },
   "upload": {
     "crop": "Cultivo",

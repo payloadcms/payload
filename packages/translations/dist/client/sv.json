@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Lägg till {{label}}",
+    "addLink": "Lägg till Länk",
     "addNew": "Lägg till ny",
     "addNewLabel": "Lägg till ny {{label}}",
     "block": "block",
@@ -61,6 +62,7 @@
     "blocks": "block",
     "chooseFromExisting": "Välj bland befintliga",
     "collapseAll": "kollapsa Alla",
+    "editLink": "Redigera Länk",
     "itemsAndMore": "{{items}} och {{count}} mer",
     "latitude": "Latitud",
     "longitude": "Longitud",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Ladda upp ny {{label}}"
   },
   "general": {
+    "aboutToDelete": "Du är på väg att ta bort {{label}} <1>{{title}}</1>. Är du säker?",
     "aboutToDeleteCount_many": "Du är på väg att ta bort {{count}} {{label}}",
     "aboutToDeleteCount_one": "Du är på väg att ta bort {{count}} {{label}}",
     "aboutToDeleteCount_other": "Du är på väg att ta bort {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Uppdaterades framgångsrikt.",
     "updating": "Uppdatering",
     "welcome": "Välkommen"
+  },
+  "operators": {
+    "contains": "innehåller",
+    "equals": "likar med",
+    "exists": "finns",
+    "isGreaterThan": "är större än",
+    "isGreaterThanOrEqualTo": "är större än eller lika med",
+    "isIn": "är med",
+    "isLessThan": "är mindre än",
+    "isLessThanOrEqualTo": "är mindre än eller lika med",
+    "isLike": "är som",
+    "isNotEqualTo": "är inte lika med",
+    "isNotIn": "är inte med",
+    "near": "nära"
   },
   "upload": {
     "crop": "Skörd",

@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "أضف {{label}}",
+    "addLink": "أضف رابط",
     "addNew": "أضف جديد",
     "addNewLabel": "أضف {{label}} جديد",
     "block": "وحدة محتوى",
@@ -61,6 +62,7 @@
     "blocks": "وحدات المحتوى",
     "chooseFromExisting": "اختر من القائمة",
     "collapseAll": "طيّ الكلّ",
+    "editLink": "عدّل الرّابط",
     "itemsAndMore": "{{items}} و {{count}} أخرى",
     "latitude": "خطّ العرض",
     "longitude": "خطّ الطّول",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "رفع {{label}} جديد"
   },
   "general": {
+    "aboutToDelete": "أنت على وشك حذف {{label}} <1>{{title}}</1>. هل أنت متأكّد؟",
     "aboutToDeleteCount_many": "أنت على وشك حذف {{count}} {{label}}",
     "aboutToDeleteCount_one": "أنت على وشك حذف {{count}} {{label}}",
     "aboutToDeleteCount_other": "أنت على وشك حذف {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "تم التحديث بنجاح.",
     "updating": "جار التحديث",
     "welcome": "مرحبًا"
+  },
+  "operators": {
+    "contains": "يحتوي",
+    "equals": "يساوي",
+    "exists": "موجود",
+    "isGreaterThan": "أكبر من",
+    "isGreaterThanOrEqualTo": "أكبر أو يساوي",
+    "isIn": "موجود في",
+    "isLessThan": "أصغر من",
+    "isLessThanOrEqualTo": "أصغر أو يساوي",
+    "isLike": "هو مثل",
+    "isNotEqualTo": "لا يساوي",
+    "isNotIn": "غير موجود في",
+    "near": "قريب من"
   },
   "upload": {
     "crop": "محصول",

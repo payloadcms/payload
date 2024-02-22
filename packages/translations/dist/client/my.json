@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "{{label}} ထည့်သွင်းမည်။",
+    "addLink": "လင့်ခ်ထည့်ပါ။",
     "addNew": "အသစ် ထည့်သွင်းမည်။",
     "addNewLabel": "{{label}} အားအသစ် ထည့်သွင်းမည်။",
     "block": "ဘလောက်",
@@ -61,6 +62,7 @@
     "blocks": "ဘလောက်များ",
     "chooseFromExisting": "ရှိပြီးသားထဲကပဲ ရွေးချယ်ပါ။",
     "collapseAll": "အားလုံးကို ခေါက်သိမ်းပါ။",
+    "editLink": "လင့်ခ်ကို တည်းဖြတ်ပါ။",
     "itemsAndMore": "{{items}} နှင့် နောက်ထပ် {{count}} ခု",
     "latitude": "vĩ độ",
     "longitude": "လောင်ဂျီကျု",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "{{label}} အသစ်တင်မည်။"
   },
   "general": {
+    "aboutToDelete": "{{label}} <1>{{title}}</1> ကို ဖျက်ပါတော့မည်။ သေချာပြီလား။ ဖျက်ပြီးရင် ပြန်မရဘူးနော်။",
     "aboutToDeleteCount_many": "သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။",
     "aboutToDeleteCount_one": "သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။",
     "aboutToDeleteCount_other": "သင်သည် {{count}} {{label}} ကို ဖျက်ပါတော့မည်။",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "အပ်ဒိတ်လုပ်ပြီးပါပြီ။",
     "updating": "ပြင်ဆင်ရန်",
     "welcome": "ကြိုဆိုပါတယ်။"
+  },
+  "operators": {
+    "contains": "ပါဝင်သည်",
+    "equals": "ညီမျှ",
+    "exists": "တည်ရှိသည်",
+    "isGreaterThan": "ထက်ကြီးသည်",
+    "isGreaterThanOrEqualTo": "ထက်ကြီးသည် သို့မဟုတ် ညီမျှသည်",
+    "isIn": "ရှိ",
+    "isLessThan": "ထက်နည်းသည်",
+    "isLessThanOrEqualTo": "ထက်နည်းသည် သို့မဟုတ် ညီမျှသည်",
+    "isLike": "တူသည်",
+    "isNotEqualTo": "ညီမျှသည်",
+    "isNotIn": "မဝင်ပါ",
+    "near": "နီး"
   },
   "upload": {
     "crop": "သုန်း",

@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "เพิ่ม {{label}}",
+    "addLink": "เพิ่มลิงค์",
     "addNew": "เพิ่ม",
     "addNewLabel": "เพิ่ม {{label}} ใหม่",
     "block": "Block",
@@ -61,6 +62,7 @@
     "blocks": "Blocks",
     "chooseFromExisting": "เลือกจากที่มีอยู่",
     "collapseAll": "ยุบทั้งหมด",
+    "editLink": "แก้ไขลิงก์",
     "itemsAndMore": "{{items}} และเพิ่มเติมอีก {{count}}",
     "latitude": "ละติจูด",
     "longitude": "ลองติจูด",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "อัปโหลด {{label}} ใหม่"
   },
   "general": {
+    "aboutToDelete": "คุณกำลังจะลบ {{label}} <1>{{title}}</1> ต้องการดำเนินการต่อหรือไม่?",
     "aboutToDeleteCount_many": "คุณกำลังจะลบ {{count}} {{label}}",
     "aboutToDeleteCount_one": "คุณกำลังจะลบ {{count}} {{label}}",
     "aboutToDeleteCount_other": "คุณกำลังจะลบ {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "แก้ไขสำเร็จ",
     "updating": "กำลังอัปเดต",
     "welcome": "ยินดีต้อนรับ"
+  },
+  "operators": {
+    "contains": "มี",
+    "equals": "เท่ากับ",
+    "exists": "มีอยู่",
+    "isGreaterThan": "มากกว่า",
+    "isGreaterThanOrEqualTo": "มากกว่าหรือเท่ากับ",
+    "isIn": "อยู่ใน",
+    "isLessThan": "น้อยกว่า",
+    "isLessThanOrEqualTo": "น้อยกว่าหรือเท่ากับ",
+    "isLike": "เหมือน",
+    "isNotEqualTo": "ไม่เท่ากับ",
+    "isNotIn": "ไม่ได้อยู่ใน",
+    "near": "ใกล้"
   },
   "upload": {
     "crop": "พืชผล",

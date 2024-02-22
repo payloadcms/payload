@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Adăugați {{label}}",
+    "addLink": "Adăugați un link",
     "addNew": "Adăugați un nou",
     "addNewLabel": "Adăugați un nou {{label}}",
     "block": "bloc",
@@ -61,6 +62,7 @@
     "blocks": "Blocuri",
     "chooseFromExisting": "Alegeți dintre cele existente",
     "collapseAll": "Colapsează toate",
+    "editLink": "Editați Link-ul",
     "itemsAndMore": "{{items}} şi {{count}} mai multe",
     "latitude": "Latitudine",
     "longitude": "Longitudine",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Încărcați un nou {{label}}"
   },
   "general": {
+    "aboutToDelete": "Sunteți pe cale să ștergeți {{label}} <1>{{title}}</1>. Sunteți sigur?",
     "aboutToDeleteCount_many": "Sunteți pe cale să ștergeți {{count}} {{label}}",
     "aboutToDeleteCount_one": "Sunteți pe cale să ștergeți {{count}} {{label}}",
     "aboutToDeleteCount_other": "Sunteți pe cale să ștergeți {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Actualizat cu succes.",
     "updating": "Actualizare",
     "welcome": "Bine ați venit"
+  },
+  "operators": {
+    "contains": "conține",
+    "equals": "egal cu",
+    "exists": "există",
+    "isGreaterThan": "este mai mare decât",
+    "isGreaterThanOrEqualTo": "este mai mare sau egal cu",
+    "isIn": "este în",
+    "isLessThan": "este mai mic decât",
+    "isLessThanOrEqualTo": "este mai mic decât sau egal cu",
+    "isLike": "este ca",
+    "isNotEqualTo": "nu este egal cu",
+    "isNotIn": "nu este în",
+    "near": "în apropiere de"
   },
   "upload": {
     "crop": "Cultură",

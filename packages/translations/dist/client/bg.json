@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Добави {{label}}",
+    "addLink": "Добави нова връзка",
     "addNew": "Добави нов",
     "addNewLabel": "Добави нов {{label}}",
     "block": "блок",
@@ -61,6 +62,7 @@
     "blocks": "блокове",
     "chooseFromExisting": "Избери от съществуващите",
     "collapseAll": "Свий всички",
+    "editLink": "Редактирай връзка",
     "itemsAndMore": "{{items}} и {{count}} повече",
     "latitude": "Географска ширина",
     "longitude": "Географска дължина",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Качи нов {{label}}"
   },
   "general": {
+    "aboutToDelete": "На път си да изтриеш {{label}} <1>{{title}}</1>. Сигурен ли си?",
     "aboutToDeleteCount_many": "На път си да изтриеш {{count}} {{label}}",
     "aboutToDeleteCount_one": "На път си да изтриеш {{count}} {{label}}",
     "aboutToDeleteCount_other": "На път си да изтриеш {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Обновен успешно.",
     "updating": "Обновява се",
     "welcome": "Добре дошъл"
+  },
+  "operators": {
+    "contains": "съдържа",
+    "equals": "е равно на",
+    "exists": "съществува",
+    "isGreaterThan": "е по-голямо от",
+    "isGreaterThanOrEqualTo": "е по-голямо от или равно на",
+    "isIn": "е в",
+    "isLessThan": "е по-малко от",
+    "isLessThanOrEqualTo": "е по-малко от или равно на",
+    "isLike": "е като",
+    "isNotEqualTo": "не е равно на",
+    "isNotIn": "не е в",
+    "near": "близко"
   },
   "upload": {
     "crop": "Изрязване",

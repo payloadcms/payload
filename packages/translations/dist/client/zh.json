@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "添加{{label}}",
+    "addLink": "添加链接",
     "addNew": "添加新的",
     "addNewLabel": "添加新的{{label}}",
     "block": "区块",
@@ -61,6 +62,7 @@
     "blocks": "区块",
     "chooseFromExisting": "从现有中选择",
     "collapseAll": "全部折叠",
+    "editLink": "编辑链接",
     "itemsAndMore": "{{items}}和{{count}}更多",
     "latitude": "纬度",
     "longitude": "经度",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "上传新的{{label}}"
   },
   "general": {
+    "aboutToDelete": "您即将删除{{label}} <1>{{title}}</1>。您确定要继续吗？",
     "aboutToDeleteCount_many": "您即将删除 {{count}} {{label}}",
     "aboutToDeleteCount_one": "您即将删除 {{count}} {{label}}",
     "aboutToDeleteCount_other": "您即将删除 {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "更新成功。",
     "updating": "更新中",
     "welcome": "欢迎"
+  },
+  "operators": {
+    "contains": "包含",
+    "equals": "等于",
+    "exists": "存在",
+    "isGreaterThan": "大于",
+    "isGreaterThanOrEqualTo": "大于等于",
+    "isIn": "在",
+    "isLessThan": "小于",
+    "isLessThanOrEqualTo": "小于或等于",
+    "isLike": "就像",
+    "isNotEqualTo": "不等于",
+    "isNotIn": "不在",
+    "near": "附近"
   },
   "upload": {
     "crop": "作物",
