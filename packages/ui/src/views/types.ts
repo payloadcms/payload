@@ -1,7 +1,13 @@
-import type { Permissions } from 'payload/auth'
-import type { Payload, SanitizedConfig } from 'payload/types'
+import type { Permissions, User } from 'payload/auth'
+import type {
+  DocumentPermissions,
+  DocumentPreferences,
+  Payload,
+  SanitizedConfig,
+} from 'payload/types'
 import { I18n } from '@payloadcms/translations'
 import { EditViewProps } from 'payload/config'
+import { FormState } from '../forms/Form/types'
 
 export type ServerSideEditViewProps = EditViewProps & {
   payload: Payload
@@ -16,4 +22,19 @@ export type ServerSideEditViewProps = EditViewProps & {
     global?: string
   }
   permissions: Permissions
+  user: User
+  id?: string
+  disableActions?: boolean
+  disableLeaveWithoutSaving?: boolean
+  hasSavePermission?: boolean
+  isEditing?: boolean
+  docPermissions: DocumentPermissions
+  action?: string
+  apiURL: string
+  canAccessAdmin?: boolean
+  docPreferences: DocumentPreferences
+  data: Document
+  // isLoading: boolean
+  updatedAt: string
+  initialState?: FormState
 }

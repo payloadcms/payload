@@ -192,6 +192,8 @@ export const Document = async ({
     globalConfig,
     params,
     permissions,
+    user,
+    initialState,
   }
 
   if (!DefaultView && !CustomView) {

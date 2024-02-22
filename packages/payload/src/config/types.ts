@@ -286,6 +286,7 @@ export type EditViewProps = {
   collectionSlug?: string
   globalSlug?: string
 }
+
 export type EditViewComponent = React.ComponentType<EditViewProps>
 
 export type EditViewConfig =
