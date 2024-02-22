@@ -5,12 +5,13 @@ import { useCallback } from 'react'
 import { LoadingOverlay } from '../../../../ui/src/elements/Loading'
 
 export const DefaultEditViewClient: React.FC = () => {
-  const { id, getVersions, getDocPermissions, collectionSlug } = useDocumentInfo()
+  const { id, getVersions, getDocPermissions, collectionSlug, globalSlug } = useDocumentInfo()
 
   const { componentMap } = useComponentMap()
 
   const { Edit } =
-    componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug] || {}
+    componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug || globalSlug] ||
+    {}
 
   const isEditing = Boolean(id && collectionSlug)
 
