@@ -2,13 +2,13 @@ import type { RichTextCustomElement } from '../../..'
 
 import { LinkButton } from './Button'
 import { LinkElement } from './Element'
-import { withLinks } from './utilities'
+import { WithLinks } from './WithLinks'
 
 const link: RichTextCustomElement = {
   name: 'link',
   Button: LinkButton,
   Element: LinkElement,
-  plugins: [withLinks],
+  plugins: [WithLinks],
 }
 
 export default link

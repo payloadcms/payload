@@ -13,4 +13,5 @@ export type EnabledFeatures = {
       name: string
     }
   }
+  plugins: React.ReactNode[]
 }

@@ -48,6 +48,12 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
 
           componentMap.set(`leaf.button.${leafObject.name}`, <LeafButton />)
           componentMap.set(`leaf.component.${leafObject.name}`, <LeafComponent />)
+
+          if (Array.isArray(leafObject.plugins)) {
+            leafObject.plugins.forEach((Plugin, i) => {
+              componentMap.set(`leaf.plugin.${leafObject.name}.${i}`, <Plugin />)
+            })
+          }
         }
       })
       ;(args?.admin?.elements || Object.values(elementTypes)).forEach((el) => {
@@ -65,6 +71,12 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
 
           if (ElementButton) componentMap.set(`element.button.${element.name}`, <ElementButton />)
           componentMap.set(`element.component.${element.name}`, <ElementComponent />)
+
+          if (Array.isArray(element.plugins)) {
+            element.plugins.forEach((Plugin, i) => {
+              componentMap.set(`element.plugin.${element.name}.${i}`, <Plugin />)
+            })
+          }
 
           switch (element.name) {
             case 'link': {
@@ -84,7 +96,7 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
 
               componentMap.set('link.fields', mappedFields)
 
-              return
+              break
             }
 
             case 'upload':

@@ -30,21 +30,6 @@ export const wrapLink = (editor: Editor): void => {
   }
 }
 
-export const withLinks = (incomingEditor: Editor): Editor => {
-  const editor = incomingEditor
-  const { isInline } = editor
-
-  editor.isInline = (element) => {
-    if (element.type === 'link') {
-      return true
-    }
-
-    return isInline(element)
-  }
-
-  return editor
-}
-
 /**
  * This function is run to enrich the basefields which every link has with potential, custom user-added fields.
  */
