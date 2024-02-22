@@ -10,7 +10,7 @@ import type { DeepRequired } from 'ts-essentials'
 // @ts-ignore-next-line
 
 import type { Payload } from '..'
-import type { DocumentInfoContext, DocumentTab, RichTextAdapter } from '../admin/types'
+import type { DocumentTab, RichTextAdapter } from '../admin/types'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
@@ -59,7 +59,7 @@ export type LivePreviewConfig = {
   url?:
     | ((args: {
         data: Record<string, any>
-        documentInfo: DocumentInfoContext
+        documentInfo: any // TODO: remove or populate this
         locale: Locale
       }) => Promise<string> | string)
     | string
@@ -282,6 +282,12 @@ export type AdminViewComponent = React.ComponentType<AdminViewProps>
 
 export type AdminView = AdminViewComponent | AdminViewConfig
 
+export type EditViewProps = {
+  collectionSlug?: string
+  globalSlug?: string
+}
+export type EditViewComponent = React.ComponentType<EditViewProps>
+
 export type EditViewConfig =
   | {
       /**
@@ -294,7 +300,7 @@ export type EditViewConfig =
       path?: string
     }
   | {
-      Component: AdminViewComponent
+      Component: AdminViewComponent // TODO: The `Edit` view Component is of type `React.FC<EditViewProps>`
       path: string
     }
   | {

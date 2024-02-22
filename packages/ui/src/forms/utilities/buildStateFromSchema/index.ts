@@ -26,7 +26,7 @@ export type BuildFormStateArgs = {
   operation?: 'create' | 'update'
   docPreferences: DocumentPreferences
   formState?: FormState
-  data?: Record<string, unknown>
+  data?: Data
   schemaPath: string
 }
 

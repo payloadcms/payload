@@ -180,11 +180,10 @@ export const Document = async ({
     globalSlug,
     data,
     hasSavePermission,
-    initialState,
     isEditing,
     docPermissions,
+    docPreferences,
     updatedAt: data?.updatedAt?.toString(),
-    user,
     payload,
     config,
     searchParams,
@@ -206,6 +205,14 @@ export const Document = async ({
         collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
+        initialData={data}
+        initialState={initialState}
+        docPermissions={docPermissions}
+        docPreferences={docPreferences}
+        apiURL={apiURL}
+        action={action}
+        hasSavePermission={hasSavePermission}
+        disableActions={false}
       />
       <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale}`}>
         <FormQueryParamsProvider formQueryParams={formQueryParams}>

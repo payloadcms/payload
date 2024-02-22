@@ -11,6 +11,7 @@ import type { User } from '../../auth/types'
 import type {
   Access,
   AdminViewComponent,
+  EditViewComponent,
   EditViewConfig,
   Endpoint,
   EntityDescription,
@@ -118,7 +119,7 @@ export type GlobalAdminOptions = {
                  * + `CustomView` - `/admin/globals/:id/:path`
                  */
                 API?: AdminViewComponent | Partial<EditViewConfig>
-                Default?: AdminViewComponent | Partial<EditViewConfig>
+                Default?: EditViewComponent | Partial<EditViewConfig>
                 LivePreview?: AdminViewComponent | Partial<EditViewConfig>
                 Version?: AdminViewComponent | Partial<EditViewConfig>
                 Versions?: AdminViewComponent | Partial<EditViewConfig>
@@ -130,7 +131,7 @@ export type GlobalAdminOptions = {
                 [name: string]: EditViewConfig
               }
           )
-        | AdminViewComponent
+        | EditViewComponent
     }
   }
   /**

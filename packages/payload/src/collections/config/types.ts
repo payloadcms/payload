@@ -12,6 +12,7 @@ import type { Auth, IncomingAuthType, User } from '../../auth/types'
 import type {
   Access,
   AdminViewComponent,
+  EditViewComponent,
   EditViewConfig,
   Endpoint,
   EntityDescription,
@@ -255,7 +256,7 @@ export type CollectionAdminOptions = {
                  * + `CustomView` - `/admin/collections/:collection/:id/:path`
                  */
                 API?: AdminViewComponent | Partial<EditViewConfig>
-                Default?: AdminViewComponent | Partial<EditViewConfig>
+                Default?: EditViewComponent | Partial<EditViewConfig>
                 LivePreview?: AdminViewComponent | Partial<EditViewConfig>
                 Version?: AdminViewComponent | Partial<EditViewConfig>
                 Versions?: AdminViewComponent | Partial<EditViewConfig>
@@ -267,7 +268,7 @@ export type CollectionAdminOptions = {
                 [key: string]: EditViewConfig
               }
           )
-        | AdminViewComponent
+        | EditViewComponent
       List?:
         | {
             Component?: React.ComponentType<any>

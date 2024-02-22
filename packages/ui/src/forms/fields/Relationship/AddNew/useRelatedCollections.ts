@@ -1,13 +1,14 @@
 import { useState } from 'react'
 
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientConfig, SanitizedCollectionConfig } from 'payload/types'
 
 import { useConfig } from '../../../../providers/Config'
 
 export const useRelatedCollections = (
   relationTo: string | string[],
-): SanitizedCollectionConfig[] => {
+): ClientConfig['collections'] => {
   const config = useConfig()
+
   const [relatedCollections] = useState(() => {
     if (relationTo) {
       const relations = typeof relationTo === 'string' ? [relationTo] : relationTo
