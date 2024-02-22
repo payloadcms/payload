@@ -15,19 +15,18 @@ import { useAuth } from '../../../providers/Auth'
 import { useConfig } from '../../../providers/Config'
 import { GetFilterOptions } from '../../../elements/GetFilterOptions'
 import { useLocale } from '../../../providers/Locale'
-import DefaultError from '../../Error'
-import FieldDescription from '../../FieldDescription'
 import { useFormProcessing } from '../../Form/context'
-import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
 import { AddNewRelation } from './AddNew'
 import { createRelationMap } from './createRelationMap'
 import { findOptionsByValue } from './findOptionsByValue'
-import './index.scss'
 import optionsReducer from './optionsReducer'
 import { MultiValueLabel } from './select-components/MultiValueLabel'
 import { SingleValue } from './select-components/SingleValue'
+import { withCondition } from '../../withCondition'
+
+import './index.scss'
 
 const maxResultsPerRequest = 10
 
@@ -36,29 +35,17 @@ const baseClass = 'relationship'
 const Relationship: React.FC<Props> = (props) => {
   const {
     name,
-    admin: {
-      allowCreate = true,
-      className,
-      components: { Error, Label } = {},
-      condition,
-      description,
-      isSortable = true,
-      readOnly,
-      sortOptions,
-      style,
-      width,
-    } = {},
-    filterOptions,
-    hasMany,
-    label,
-    path,
-    relationTo,
+    className,
+    style,
+    width,
+    readOnly,
+    Description,
+    Error,
+    Label,
+    path: pathFromProps,
     required,
     validate,
   } = props
-
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
 
   const config = useConfig()
 
@@ -67,6 +54,13 @@ const Relationship: React.FC<Props> = (props) => {
     routes: { api },
     serverURL,
   } = config
+
+  const relationTo = 'relationTo' in props ? props?.relationTo : undefined
+  const hasMany = 'hasMany' in props ? props?.hasMany : undefined
+  const filterOptions = 'filterOptions' in props ? props?.filterOptions : undefined
+  const sortOptions = 'sortOptions' in props ? props?.sortOptions : undefined
+  const isSortable = 'isSortable' in props ? props?.isSortable : true
+  const allowCreate = 'allowCreate' in props ? props?.allowCreate : true
 
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
@@ -83,17 +77,18 @@ const Relationship: React.FC<Props> = (props) => {
   const [hasLoadedFirstPage, setHasLoadedFirstPage] = useState(false)
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
   const firstRun = useRef(true)
-  const pathOrName = path || name
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      return validate(value, { ...validationOptions, required })
+      if (typeof validate === 'function') {
+        return validate(value, { ...validationOptions, required })
+      }
     },
     [validate, required],
   )
 
-  const { errorMessage, initialValue, setValue, showError, value } = useField<Value | Value[]>({
-    path: pathOrName,
+  const { initialValue, setValue, showError, value, path } = useField<Value | Value[]>({
+    path: pathFromProps || name,
     validate: memoizedValidate,
   })
 
@@ -430,19 +425,19 @@ const Relationship: React.FC<Props> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      id={`field-${pathOrName.replace(/\./g, '__')}`}
+      id={`field-${path.replace(/\./g, '__')}`}
       style={{
         ...style,
         width,
       }}
     >
-      <ErrorComp message={errorMessage} showError={showError} />
-      <LabelComp htmlFor={pathOrName} label={label} required={required} />
+      {Error}
+      {Label}
       <GetFilterOptions
         {...{
           filterOptions,
           filterOptionsResult,
-          path: pathOrName,
+          path,
           relationTo,
           setFilterOptionsResult,
         }}
@@ -528,7 +523,7 @@ const Relationship: React.FC<Props> = (props) => {
                 dispatchOptions,
                 hasMany,
                 options,
-                path: pathOrName,
+                path,
                 relationTo,
                 setValue,
                 value,
@@ -538,9 +533,9 @@ const Relationship: React.FC<Props> = (props) => {
         </div>
       )}
       {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-      <FieldDescription description={description} path={path} value={value} />
+      {Description}
     </div>
   )
 }
 
-export default Relationship
+export default withCondition(Relationship)
