@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "0.0.1",
+  "version": "2.11.0",
   "private": true,
   "workspaces:": [
     "packages/*"
@@ -63,6 +63,7 @@
     "@lerna-lite/cli": "^3.3.0",
     "@lerna-lite/list": "^3.3.0",
     "@lerna-lite/version": "^3.3.0",
+    "@octokit/core": "^5.1.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@playwright/test": "1.40.1",
     "@swc/cli": "^0.1.62",
