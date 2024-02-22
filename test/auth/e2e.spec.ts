@@ -30,20 +30,20 @@ describe('auth', () => {
   beforeAll(async ({ browser }) => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
     apiURL = `${serverURL}/api`
+
+    const context = await browser.newContext()
+    page = await context.newPage()
+    initPageConsoleErrorCatch(page)
+
+    await login({
+      page,
+      serverURL,
+    })
   })
 
   describe('authenticated users', () => {
     beforeAll(async ({ browser }) => {
       url = new AdminUrlUtil(serverURL, slug)
-
-      const context = await browser.newContext()
-      page = await context.newPage()
-      initPageConsoleErrorCatch(page)
-
-      await login({
-        page,
-        serverURL,
-      })
     })
 
     test('should allow change password', async () => {
@@ -76,17 +76,8 @@ describe('auth', () => {
   describe('api-keys', () => {
     let user
 
-    beforeAll(async ({ browser }) => {
+    beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, apiKeysSlug)
-
-      const context = await browser.newContext()
-      page = await context.newPage()
-      initPageConsoleErrorCatch(page)
-
-      await login({
-        page,
-        serverURL,
-      })
 
       user = await payload.create({
         collection: apiKeysSlug,
