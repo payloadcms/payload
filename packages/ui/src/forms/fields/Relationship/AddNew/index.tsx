@@ -1,3 +1,4 @@
+'use client'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from '../../../../providers/Translation'
 
@@ -15,8 +16,9 @@ import { Tooltip } from '../../../../elements/Tooltip'
 import { Plus } from '../../../../icons/Plus'
 import { useAuth } from '../../../../providers/Auth'
 import { useConfig } from '../../../../providers/Config'
-import './index.scss'
 import { useRelatedCollections } from './useRelatedCollections'
+
+import './index.scss'
 
 const baseClass = 'relationship-add-new'
 

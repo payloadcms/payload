@@ -1,3 +1,4 @@
+'use client'
 import type { MultiValueProps } from 'react-select'
 
 import React, { Fragment, useEffect, useState } from 'react'

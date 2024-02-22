@@ -1,11 +1,11 @@
 import { I18n } from '@payloadcms/translations'
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
-import type { RelationshipField } from 'payload/types'
 import type { Where } from 'payload/types'
+import { FormFieldBase } from '../shared'
 
-export type Props = Omit<RelationshipField, 'type'> & {
-  path?: string
+export type Props = FormFieldBase & {
+  name: string
 }
 
 export type Option = {
