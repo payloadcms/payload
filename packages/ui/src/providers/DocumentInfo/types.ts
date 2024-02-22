@@ -1,37 +1,53 @@
 import type React from 'react'
 
-import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { SanitizedCollectionConfig, TypeWithID, SanitizedGlobalConfig } from 'payload/types'
-import type { PaginatedDocs } from 'payload/database'
-import type { TypeWithTimestamps } from 'payload/dist/collections/config/types'
-import { TypeWithVersion } from 'payload/database'
+import type {
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+  FormState,
+  TypeWithTimestamps,
+  TypeWithID,
+  DocumentPermissions,
+  DocumentPreferences,
+  Data,
+} from 'payload/types'
 
-export type Version = TypeWithVersion<any>
+import { PaginatedDocs, TypeWithVersion } from 'payload/database'
 
-export type DocumentPermissions = CollectionPermission | GlobalPermission
-
-export type ContextType = {
+export type DocumentInfoProps = {
+  AfterDocument?: React.ReactNode
+  AfterFields?: React.ReactNode
+  BeforeDocument?: React.ReactNode
+  BeforeFields?: React.ReactNode
   collectionSlug?: SanitizedCollectionConfig['slug']
   docPermissions: DocumentPermissions
+  globalSlug?: SanitizedGlobalConfig['slug']
+  id?: number | string
+  initialData?: Data
+  initialState?: FormState
+  onSave?: (data: Record<string, unknown>) => Promise<void>
+  action?: string
+  apiURL?: string
+  docPreferences?: DocumentPreferences
+  hasSavePermission?: boolean
+  disableActions?: boolean
+}
+
+export type DocumentInfo = DocumentInfoProps & {
+  docConfig?: SanitizedCollectionConfig | SanitizedGlobalConfig
+  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
+  slug?: string
+  title?: string
+  unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
+  versions?: PaginatedDocs<TypeWithVersion<any>>
+  versionsCount?: PaginatedDocs<TypeWithVersion<any>>
+  preferencesKey?: string
+}
+
+export type DocumentInfoContext = DocumentInfo & {
   getDocPermissions: () => Promise<void>
   getDocPreferences: () => Promise<{ [key: string]: unknown }>
   getVersions: () => Promise<void>
-  globalSlug?: SanitizedGlobalConfig['slug']
-  id?: number | string
-  preferencesKey?: string
-  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
-  slug?: string
-  unpublishedVersions?: PaginatedDocs<Version>
-  versionsCount?: PaginatedDocs<Version>
-  draftsEnabled?: boolean
-  versionsEnabled?: boolean
-}
-
-export type Props = {
-  children?: React.ReactNode
-  collectionSlug?: SanitizedCollectionConfig['slug']
-  globalSlug?: SanitizedGlobalConfig['slug']
-  id?: number | string
-  idFromParams?: boolean
+  setDocumentInfo?: (info: DocumentInfo) => void
+  setDocumentTitle: (title: string) => void
 }

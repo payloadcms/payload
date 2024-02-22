@@ -1,37 +1,7 @@
-import type { CollectionPermission, GlobalPermission, Permissions, User } from 'payload/auth'
-import type { Document, DocumentPreferences, Payload, SanitizedConfig } from 'payload/types'
-import type { FormState } from '../forms/Form/types'
+import type { Permissions } from 'payload/auth'
+import type { Payload, SanitizedConfig } from 'payload/types'
 import { I18n } from '@payloadcms/translations'
-
-export type EditViewProps = (
-  | {
-      collectionSlug?: string
-      disableActions?: boolean
-      disableLeaveWithoutSaving?: boolean
-      hasSavePermission?: boolean
-      id: number | string
-      isEditing?: boolean
-      docPermissions: CollectionPermission | null
-    }
-  | {
-      globalSlug?: string
-      docPermissions: GlobalPermission | null
-    }
-) & {
-  action?: string
-  apiURL: string
-  canAccessAdmin?: boolean
-  docPreferences: DocumentPreferences
-  data: Document
-  // isLoading: boolean
-  onSave?: (json: any) => void
-  updatedAt: string
-  user: User | null | undefined
-  initialState?: FormState
-  BeforeDocument?: React.ReactNode
-  AfterDocument?: React.ReactNode
-  AfterFields?: React.ReactNode
-}
+import { EditViewProps } from 'payload/config'
 
 export type ServerSideEditViewProps = EditViewProps & {
   payload: Payload

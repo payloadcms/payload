@@ -3,6 +3,8 @@ import type { FieldPermissions } from 'payload/auth'
 import type { SanitizedConfig } from 'payload/types'
 import { mapFields } from './mapFields'
 import { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
+import { DefaultEditView } from '../../views/Edit'
+import { EditViewProps } from '../..'
 
 export const buildComponentMap = (args: {
   config: SanitizedConfig
@@ -19,6 +21,21 @@ export const buildComponentMap = (args: {
   // Collections
   const collections = config.collections.reduce((acc, collectionConfig) => {
     const { fields, slug } = collectionConfig
+
+    const editViewFromConfig = collectionConfig?.admin?.components?.views?.Edit
+
+    const CustomEditView =
+      typeof editViewFromConfig === 'function'
+        ? editViewFromConfig
+        : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
+          ? editViewFromConfig.Default
+          : typeof editViewFromConfig?.Default === 'object' &&
+              'Component' in editViewFromConfig.Default &&
+              typeof editViewFromConfig.Default.Component === 'function'
+            ? (editViewFromConfig.Default.Component as React.FC<EditViewProps>)
+            : undefined
+
+    const Edit = CustomEditView || DefaultEditView
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList
 
@@ -57,6 +74,7 @@ export const buildComponentMap = (args: {
       AfterList,
       BeforeListTable,
       AfterListTable,
+      Edit: <Edit collectionSlug={collectionConfig.slug} />,
       fieldMap: mappedFields,
     }
 
@@ -78,8 +96,24 @@ export const buildComponentMap = (args: {
       readOnly: readOnlyOverride,
     })
 
+    const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
+
+    const CustomEditView =
+      typeof editViewFromConfig === 'function'
+        ? editViewFromConfig
+        : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
+          ? editViewFromConfig.Default
+          : typeof editViewFromConfig?.Default === 'object' &&
+              'Component' in editViewFromConfig.Default &&
+              typeof editViewFromConfig.Default.Component === 'function'
+            ? (editViewFromConfig.Default.Component as React.FC<EditViewProps>)
+            : undefined
+
+    const Edit = CustomEditView || DefaultEditView
+
     const componentMap: GlobalComponentMap = {
       fieldMap: mappedFields,
+      Edit: <Edit globalSlug={globalConfig.slug} />,
     }
 
     return {

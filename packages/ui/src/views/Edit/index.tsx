@@ -11,36 +11,45 @@ import { DocumentFields } from '../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
 import Auth from './Auth'
 import { SetStepNav } from './SetStepNav'
-import { EditViewProps } from '../types'
 import { Upload } from './Upload'
 import { useConfig } from '../../providers/Config'
 import { useComponentMap } from '../../providers/ComponentMapProvider'
 import { SetDocumentTitle } from './SetDocumentTitle'
-import { Props as FormProps, FormState } from '../../forms/Form/types'
+import { Props as FormProps } from '../../forms/Form/types'
+import { getFormState } from '../../utilities/getFormState'
+import { FieldPathProvider } from '../../forms/FieldPathProvider'
+import { useDocumentInfo } from '../../providers/DocumentInfo'
+import { useAuth } from '../../providers/Auth'
 
 import './index.scss'
-import { BuildFormStateArgs } from '../..'
-import { getFormState } from '../../utilities/getFormState'
 
 const baseClass = 'collection-edit'
 
-export const DefaultEditView: React.FC<EditViewProps> = (props) => {
+// This component receives props only on _pages_
+// When rendered within a drawer, props are empty
+// This is solely to support custom edit views which get server-rendered
+export const DefaultEditView: React.FC = (props) => {
   const {
     action,
-    apiURL,
     BeforeDocument,
     AfterDocument,
+    BeforeFields,
     AfterFields,
-    data,
+    apiURL,
     initialState,
-    // isLoading,
-    onSave: onSaveFromProps,
+    initialData: data,
     docPermissions,
     docPreferences,
-    user,
-  } = props
+    onSave: onSaveFromProps,
+    id,
+    hasSavePermission,
+    disableActions,
+  } = useDocumentInfo()
+
+  const { user } = useAuth()
 
   const config = useConfig()
+
   const {
     serverURL,
     collections,
@@ -57,26 +66,25 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const globalConfig =
     'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
 
+  const [schemaPath] = React.useState(collectionConfig?.slug || globalConfig?.slug)
+
   const fieldMap = getFieldMap({
     collectionSlug: collectionConfig?.slug,
     globalSlug: globalConfig?.slug,
   })
 
-  const id = 'id' in props ? props.id : undefined
   const isEditing = 'isEditing' in props ? props.isEditing : undefined
-  const operation = isEditing ? 'update' : 'create'
+  const operation = id ? 'update' : 'create'
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
   const upload = collectionConfig ? collectionConfig.upload : undefined
-  const hasSavePermission = 'hasSavePermission' in props ? props.hasSavePermission : undefined
-  const disableActions = 'disableActions' in props ? props.disableActions : undefined
 
   const preventLeaveWithoutSaving =
     (!(collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
       !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
     !('disableLeaveWithoutSaving' in props && props.disableLeaveWithoutSaving)
 
-  const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
+  const classes = [baseClass, id && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
   const onSave = useCallback(
     async (json) => {
@@ -128,42 +136,51 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
       getFormState({
         serverURL,
         apiRoute,
-        collectionSlug: collectionConfig?.slug,
-        globalSlug: globalConfig?.slug,
         body: {
           id,
           operation,
           formState: prevFormState,
           docPreferences,
+          schemaPath,
         },
       }),
-    [serverURL, apiRoute, collectionConfig, globalConfig, id, operation, docPreferences],
+    [
+      serverURL,
+      apiRoute,
+      collectionConfig,
+      globalConfig,
+      id,
+      operation,
+      docPreferences,
+      schemaPath,
+    ],
   )
 
   return (
     <main className={classes}>
-      <OperationProvider operation={operation}>
-        <Form
-          action={action}
-          className={`${baseClass}__form`}
-          disabled={!hasSavePermission}
-          initialState={initialState}
-          method={id ? 'PATCH' : 'POST'}
-          onChange={[onChange]}
-          onSuccess={onSave}
-        >
-          <FormLoadingOverlayToggle
-            action={operation}
-            // formIsLoading={isLoading}
-            // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
-            name={`collection-edit--${
-              typeof collectionConfig?.labels?.singular === 'string'
-                ? collectionConfig.labels.singular
-                : 'document'
-            }`}
-            type="withoutNav"
-          />
-          {/* <Meta
+      <FieldPathProvider path="" schemaPath={schemaPath}>
+        <OperationProvider operation={operation}>
+          <Form
+            action={action}
+            className={`${baseClass}__form`}
+            disabled={!hasSavePermission}
+            initialState={initialState}
+            method={id ? 'PATCH' : 'POST'}
+            onChange={[onChange]}
+            onSuccess={onSave}
+          >
+            <FormLoadingOverlayToggle
+              action={operation}
+              // formIsLoading={isLoading}
+              // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
+              name={`collection-edit--${
+                typeof collectionConfig?.labels?.singular === 'string'
+                  ? collectionConfig.labels.singular
+                  : 'document'
+              }`}
+              type="withoutNav"
+            />
+            {/* <Meta
         description={`${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
           collection.labels.singular,
           i18n,
@@ -174,61 +191,64 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
           i18n,
         )}`}
       /> */}
-          {BeforeDocument}
-          {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <SetStepNav
-            collectionSlug={collectionConfig?.slug}
-            globalSlug={globalConfig?.slug}
-            useAsTitle={collectionConfig?.admin?.useAsTitle}
-            id={id}
-            isEditing={isEditing || false}
-            pluralLabel={collectionConfig?.labels?.plural}
-          />
-          <SetDocumentTitle
-            config={config}
-            collectionConfig={collectionConfig}
-            globalConfig={globalConfig}
-          />
-          <DocumentControls
-            apiURL={apiURL}
-            slug={collectionConfig?.slug}
-            data={data}
-            disableActions={disableActions}
-            hasSavePermission={hasSavePermission}
-            id={id}
-            isEditing={isEditing}
-            permissions={docPermissions}
-          />
-          <DocumentFields
-            BeforeFields={
-              <Fragment>
-                {auth && (
-                  <Auth
-                    className={`${baseClass}__auth`}
-                    collectionSlug={collectionConfig.slug}
-                    email={data?.email}
-                    operation={operation}
-                    readOnly={!hasSavePermission}
-                    requirePassword={!isEditing}
-                    useAPIKey={auth.useAPIKey}
-                    verify={auth.verify}
-                  />
-                )}
-                {upload && (
-                  <Upload
-                    uploadConfig={upload}
-                    collectionSlug={collectionConfig.slug}
-                    initialState={initialState}
-                  />
-                )}
-              </Fragment>
-            }
-            fieldMap={fieldMap}
-            AfterFields={AfterFields}
-          />
-          {AfterDocument}
-        </Form>
-      </OperationProvider>
+            {BeforeDocument}
+            {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
+            <SetStepNav
+              collectionSlug={collectionConfig?.slug}
+              globalSlug={globalConfig?.slug}
+              useAsTitle={collectionConfig?.admin?.useAsTitle}
+              id={id}
+              isEditing={isEditing || false}
+              pluralLabel={collectionConfig?.labels?.plural}
+            />
+            <SetDocumentTitle
+              config={config}
+              collectionConfig={collectionConfig}
+              globalConfig={globalConfig}
+            />
+            <DocumentControls
+              apiURL={apiURL}
+              slug={collectionConfig?.slug}
+              data={data}
+              disableActions={disableActions}
+              hasSavePermission={hasSavePermission}
+              id={id}
+              isEditing={isEditing}
+              permissions={docPermissions}
+            />
+            <DocumentFields
+              BeforeFields={
+                BeforeFields || (
+                  <Fragment>
+                    {auth && (
+                      <Auth
+                        className={`${baseClass}__auth`}
+                        collectionSlug={collectionConfig.slug}
+                        email={data?.email}
+                        operation={operation}
+                        readOnly={!hasSavePermission}
+                        requirePassword={!Boolean(id)}
+                        useAPIKey={auth.useAPIKey}
+                        verify={auth.verify}
+                      />
+                    )}
+                    {upload && (
+                      <Upload
+                        uploadConfig={upload}
+                        collectionSlug={collectionConfig.slug}
+                        initialState={initialState}
+                      />
+                    )}
+                  </Fragment>
+                )
+              }
+              fieldMap={fieldMap}
+              AfterFields={AfterFields}
+            />
+            {AfterDocument}
+          </Form>
+        </OperationProvider>
+      </FieldPathProvider>
     </main>
   )
 }
