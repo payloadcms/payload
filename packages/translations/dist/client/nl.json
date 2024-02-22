@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Voeg {{label}} toe",
+    "addLink": "Voeg een link toe",
     "addNew": "Nieuw(e)",
     "addNewLabel": "Nieuw(e) {{label}} toevoegen",
     "block": "blok",
@@ -61,6 +62,7 @@
     "blocks": "blokken",
     "chooseFromExisting": "Kies uit bestaande",
     "collapseAll": "Alles samenvouwen",
+    "editLink": "Link bewerken",
     "itemsAndMore": "{{items}} en {{count}} meer",
     "latitude": "Breedtegraad",
     "longitude": "Lengtegraad",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Upload nieuw(e) {{label}}"
   },
   "general": {
+    "aboutToDelete": "U staat op het punt om {{label}} <1>{{title}}</1> te verwijderen. Weet u het zeker?",
     "aboutToDeleteCount_many": "Je staat op het punt {{count}} {{label}} te verwijderen",
     "aboutToDeleteCount_one": "Je staat op het punt {{count}} {{label}} te verwijderen",
     "aboutToDeleteCount_other": "Je staat op het punt {{count}} {{label}} te verwijderen",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Succesvol aangepast.",
     "updating": "Bijwerken",
     "welcome": "Welkom"
+  },
+  "operators": {
+    "contains": "bevat",
+    "equals": "is gelijk aan",
+    "exists": "bestaat",
+    "isGreaterThan": "is groter dan",
+    "isGreaterThanOrEqualTo": "is groter dan of gelijk aan",
+    "isIn": "is binnen",
+    "isLessThan": "is kleiner dan",
+    "isLessThanOrEqualTo": "is kleiner dan of gelijk aan",
+    "isLike": "is als",
+    "isNotEqualTo": "is niet gelijk aan",
+    "isNotIn": "zit er niet in",
+    "near": "nabij"
   },
   "upload": {
     "crop": "Gewas",

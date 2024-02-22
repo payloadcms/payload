@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Thêm: {{label}}",
+    "addLink": "Thêm liên kết",
     "addNew": "Thêm mới",
     "addNewLabel": "Thêm mới: {{label}}",
     "block": "block",
@@ -61,6 +62,7 @@
     "blocks": "blocks",
     "chooseFromExisting": "Chọn từ thư viện",
     "collapseAll": "Ẩn toàn bộ",
+    "editLink": "Chỉnh sửa liên kết",
     "itemsAndMore": "{{items}} và {{count}} món nữa",
     "latitude": "Vĩ độ",
     "longitude": "Kinh độ",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Tải lên bản mới: {{label}}"
   },
   "general": {
+    "aboutToDelete": "Chuẩn bị xóa {{label}} <1>{{title}}</1>. Bạn có muốn tiếp tục không?",
     "aboutToDeleteCount_many": "Bạn sắp xóa {{count}} {{label}}",
     "aboutToDeleteCount_one": "Bạn sắp xóa {{count}} {{label}}",
     "aboutToDeleteCount_other": "Bạn sắp xóa {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Cập nhật thành công.",
     "updating": "Đang cập nhật",
     "welcome": "Xin chào"
+  },
+  "operators": {
+    "contains": "có chứa",
+    "equals": "bằng",
+    "exists": "tồn tại",
+    "isGreaterThan": "lớn hơn",
+    "isGreaterThanOrEqualTo": "lớn hơn hoặc bằng",
+    "isIn": "có trong",
+    "isLessThan": "nhỏ hơn",
+    "isLessThanOrEqualTo": "nhỏ hơn hoặc bằng",
+    "isLike": "gần giống",
+    "isNotEqualTo": "không bằng",
+    "isNotIn": "không có trong",
+    "near": "gần"
   },
   "upload": {
     "crop": "Mùa vụ",

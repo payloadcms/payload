@@ -53,6 +53,7 @@
   },
   "fields": {
     "addLabel": "{{label}} 추가",
+    "addLink": "링크 추가",
     "addNew": "새로 추가",
     "addNewLabel": "새로운 {{label}} 추가",
     "block": "블록",
@@ -60,6 +61,7 @@
     "blocks": "블록",
     "chooseFromExisting": "기존 항목 중 선택",
     "collapseAll": "모두 접기",
+    "editLink": "링크 수정",
     "itemsAndMore": "{{items}} 및 {{count}}개 더",
     "latitude": "위도",
     "longitude": "경도",
@@ -71,6 +73,7 @@
     "uploadNewLabel": "새로운 {{label}} 업로드"
   },
   "general": {
+    "aboutToDelete": "{{label}} <1>{{title}}</1>를 삭제하려고 합니다. 계속하시겠습니까?",
     "aboutToDeleteCount_many": "{{label}}를 {{count}}개 삭제하려고 합니다.",
     "aboutToDeleteCount_one": "{{label}}를 {{count}}개 삭제하려고 합니다.",
     "aboutToDeleteCount_other": "{{label}}를 {{count}}개 삭제하려고 합니다.",
@@ -181,6 +184,20 @@
     "updatedSuccessfully": "성공적으로 업데이트되었습니다.",
     "updating": "업데이트 중",
     "welcome": "환영합니다"
+  },
+  "operators": {
+    "contains": "포함",
+    "equals": "같음",
+    "exists": "존재",
+    "isGreaterThan": "보다 큼",
+    "isGreaterThanOrEqualTo": "보다 크거나 같음",
+    "isIn": "포함됨",
+    "isLessThan": "보다 작음",
+    "isLessThanOrEqualTo": "보다 작거나 같음",
+    "isLike": "유사",
+    "isNotEqualTo": "같지 않음",
+    "isNotIn": "포함되지 않음",
+    "near": "근처"
   },
   "upload": {
     "crop": "자르기",

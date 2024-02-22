@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Добавить {{label}}",
+    "addLink": "Добавить ссылку",
     "addNew": "Добавить новый",
     "addNewLabel": "Добавить {{label}}",
     "block": "Блок",
@@ -61,6 +62,7 @@
     "blocks": "Блоки",
     "chooseFromExisting": "Выбрать из существующих",
     "collapseAll": "Свернуть все",
+    "editLink": "Редактировать ссылку",
     "itemsAndMore": "{{items}} и ещё {{count}}",
     "latitude": "Широта",
     "longitude": "Долгота",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Загрузить новый {{label}}"
   },
   "general": {
+    "aboutToDelete": "Вы собираетесь удалить {{label}} <1>{{title}}</1>. Вы уверены?",
     "aboutToDeleteCount_many": "Вы собираетесь удалить {{count}} {{label}}",
     "aboutToDeleteCount_one": "Вы собираетесь удалить {{count}} {{label}}",
     "aboutToDeleteCount_other": "Вы собираетесь удалить {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Успешно Обновлено.",
     "updating": "Обновление",
     "welcome": "Добро пожаловать"
+  },
+  "operators": {
+    "contains": "содержит",
+    "equals": "равно",
+    "exists": "существует",
+    "isGreaterThan": "больше чем",
+    "isGreaterThanOrEqualTo": "больше или равно",
+    "isIn": "находится",
+    "isLessThan": "меньше чем",
+    "isLessThanOrEqualTo": "меньше или равно",
+    "isLike": "похоже",
+    "isNotEqualTo": "не равно",
+    "isNotIn": "нет в",
+    "near": "рядом"
   },
   "upload": {
     "crop": "Обрезать",

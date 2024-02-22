@@ -44,7 +44,11 @@ export const traverseFields = ({ config, fields, schemaMap, schemaPath }: Args) 
 
       case 'richText':
         if (typeof field.editor.generateSchemaMap === 'function') {
-          field.editor.generateSchemaMap({ schemaPath, config, schemaMap })
+          field.editor.generateSchemaMap({
+            schemaPath: `${schemaPath}.${field.name}`,
+            config,
+            schemaMap,
+          })
         }
 
         break

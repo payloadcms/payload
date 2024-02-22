@@ -15,11 +15,13 @@ import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
+import { useFieldPath } from '../../../../../../ui/src/forms/FieldPathProvider'
 import LinkIcon from '../../../icons/Link'
 import { useElementButton } from '../../../providers/ElementButtonProvider'
 import ElementButton from '../../Button'
 import isElementActive from '../../isActive'
 import { LinkDrawer } from '../LinkDrawer'
+import { linkFieldsSchemaPath } from '../shared'
 import { unwrapLink } from '../utilities'
 
 /**
@@ -71,10 +73,9 @@ export const LinkButton: React.FC = () => {
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
   const { id, getDocPreferences } = useDocumentInfo()
+  const { schemaPath } = useFieldPath()
 
   const { richTextComponentMap } = fieldProps
-
-  const linkFieldsSchemaPath = `link.fields`
 
   const fieldMap = richTextComponentMap.get(linkFieldsSchemaPath)
 
@@ -101,7 +102,7 @@ export const LinkButton: React.FC = () => {
                   data,
                   docPreferences,
                   operation: 'update',
-                  schemaPath: linkFieldsSchemaPath,
+                  schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
                 },
                 serverURL: config.serverURL,
               })

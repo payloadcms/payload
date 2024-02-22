@@ -56,6 +56,7 @@
   },
   "fields": {
     "addLabel": "Add {{label}}",
+    "addLink": "Add Link",
     "addNew": "Add new",
     "addNewLabel": "Add new {{label}}",
     "block": "block",
@@ -63,6 +64,7 @@
     "blocks": "blocks",
     "chooseFromExisting": "Choose from existing",
     "collapseAll": "Collapse All",
+    "editLink": "Edit Link",
     "itemsAndMore": "{{items}} and {{count}} more",
     "latitude": "Latitude",
     "longitude": "Longitude",
@@ -74,6 +76,7 @@
     "uploadNewLabel": "Upload new {{label}}"
   },
   "general": {
+    "aboutToDelete": "You are about to delete the {{label}} <1>{{title}}</1>. Are you sure?",
     "aboutToDeleteCount_many": "You are about to delete {{count}} {{label}}",
     "aboutToDeleteCount_one": "You are about to delete {{count}} {{label}}",
     "aboutToDeleteCount_other": "You are about to delete {{count}} {{label}}",
@@ -184,6 +187,20 @@
     "updatedSuccessfully": "Updated successfully.",
     "updating": "Updating",
     "welcome": "Welcome"
+  },
+  "operators": {
+    "contains": "contains",
+    "equals": "equals",
+    "exists": "exists",
+    "isGreaterThan": "is greater than",
+    "isGreaterThanOrEqualTo": "is greater than or equal to",
+    "isIn": "is in",
+    "isLessThan": "is less than",
+    "isLessThanOrEqualTo": "is less than or equal to",
+    "isLike": "is like",
+    "isNotEqualTo": "is not equal to",
+    "isNotIn": "is not in",
+    "near": "near"
   },
   "upload": {
     "crop": "Crop",

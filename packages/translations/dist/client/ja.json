@@ -56,6 +56,7 @@
   },
   "fields": {
     "addLabel": "{{label}} を追加",
+    "addLink": "リンクを追加",
     "addNew": "新規追加",
     "addNewLabel": "{{label}} を新規追加",
     "block": "ブロック",
@@ -63,6 +64,7 @@
     "blocks": "ブロック",
     "chooseFromExisting": "既存から選択",
     "collapseAll": "すべて閉じる",
+    "editLink": "リンクを編集",
     "itemsAndMore": "{{items}} 他{{count}}件",
     "latitude": "緯度",
     "longitude": "経度",
@@ -74,6 +76,7 @@
     "uploadNewLabel": "新規 {{label}} アップロード"
   },
   "general": {
+    "aboutToDelete": "{{label}} <1>{{title}}</1> を削除します。よろしいですか？",
     "aboutToDeleteCount_many": "{{label}}を{{count}}つ削除しようとしています",
     "aboutToDeleteCount_one": "{{label}}を{{count}}つ削除しようとしています",
     "aboutToDeleteCount_other": "{{label}}を{{count}}つ削除しようとしています",
@@ -184,6 +187,20 @@
     "updatedSuccessfully": "更新成功。",
     "updating": "更新中",
     "welcome": "ようこそ"
+  },
+  "operators": {
+    "contains": "含む",
+    "equals": "等しい",
+    "exists": "存在す",
+    "isGreaterThan": "より大きい",
+    "isGreaterThanOrEqualTo": "以上",
+    "isIn": "あります",
+    "isLessThan": "より小さい",
+    "isLessThanOrEqualTo": "以下",
+    "isLike": "のような",
+    "isNotEqualTo": "等しくない",
+    "isNotIn": "入っていません",
+    "near": "近く"
   },
   "upload": {
     "crop": "クロップ",

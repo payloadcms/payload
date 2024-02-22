@@ -41,6 +41,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
     data: incomingData,
     schemaPath,
   } = reqData as BuildFormStateArgs
+
   const schemaPathSegments = schemaPath.split('.')
 
   let fieldSchema: Field[]
@@ -61,7 +62,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
         message: 'Could not find field schema for given path',
       },
       {
-        status: httpStatus.INTERNAL_SERVER_ERROR,
+        status: httpStatus.BAD_REQUEST,
       },
     )
   }

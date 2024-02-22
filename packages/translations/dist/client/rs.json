@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Додај {{label}}",
+    "addLink": "Додај линк",
     "addNew": "Додај нови",
     "addNewLabel": "Додај нови {{label}}",
     "block": "блокирање",
@@ -61,6 +62,7 @@
     "blocks": "блокирања",
     "chooseFromExisting": "Одаберите из постојећих.",
     "collapseAll": "Скупи све",
+    "editLink": "Измени линк",
     "itemsAndMore": "{{items}} и {{count}} више",
     "latitude": "Географска ширина",
     "longitude": "Географска дужина",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Учитај нови {{label}}"
   },
   "general": {
+    "aboutToDelete": "Избрисаћете {{label}} <1>{{title}}</1>. Да ли сте сигурни?",
     "aboutToDeleteCount_many": "Избрисаћете {{count}} {{label}}",
     "aboutToDeleteCount_one": "Избрисаћете {{count}} {{label}}",
     "aboutToDeleteCount_other": "Избрисаћете {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Успешно ажурирано.",
     "updating": "Ажурирање",
     "welcome": "Добродошли"
+  },
+  "operators": {
+    "contains": "садржи",
+    "equals": "једнако",
+    "exists": "постоји",
+    "isGreaterThan": "је веће од",
+    "isGreaterThanOrEqualTo": "је веће од или једнако",
+    "isIn": "је у",
+    "isLessThan": "мање је од",
+    "isLessThanOrEqualTo": "мање је или једнако",
+    "isLike": "је као",
+    "isNotEqualTo": "није једнако",
+    "isNotIn": "није у",
+    "near": "близу"
   },
   "upload": {
     "crop": "Исеците слику",

@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "{{label}} hozzáadása",
+    "addLink": "Link hozzáadása",
     "addNew": "Új hozzáadása",
     "addNewLabel": "Új {{label}} hozzáadása",
     "block": "blokk",
@@ -61,6 +62,7 @@
     "blocks": "blokkok",
     "chooseFromExisting": "Válasszon a meglévők közül",
     "collapseAll": "Mindet összecsuk",
+    "editLink": "Link szerkesztése",
     "itemsAndMore": "{{items}} és további {{count}}",
     "latitude": "Szélesség",
     "longitude": "Hosszúság",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Új {{label}} feltöltése"
   },
   "general": {
+    "aboutToDelete": "A {{label}} <1>{{title}}</1> törlésére készül. Biztos benne?",
     "aboutToDeleteCount_many": "Törölni készül {{count}} {{label}}",
     "aboutToDeleteCount_one": "Törölni készül {{count}} {{label}}",
     "aboutToDeleteCount_other": "Törölni készül {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Sikeresen frissítve.",
     "updating": "Frissítés",
     "welcome": "Üdvözöljük"
+  },
+  "operators": {
+    "contains": "tartalmaz",
+    "equals": "egyenlő",
+    "exists": "létezik",
+    "isGreaterThan": "nagyobb, mint",
+    "isGreaterThanOrEqualTo": "nagyobb vagy egyenlő, mint",
+    "isIn": "benne van",
+    "isLessThan": "kisebb, mint",
+    "isLessThanOrEqualTo": "kisebb vagy egyenlő, mint",
+    "isLike": "olyan, mint",
+    "isNotEqualTo": "nem egyenlő",
+    "isNotIn": "nincs benne",
+    "near": "közel"
   },
   "upload": {
     "crop": "Termés",

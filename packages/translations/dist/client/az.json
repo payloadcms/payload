@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "{{label}} əlavə et",
+    "addLink": "Keçid əlavə et",
     "addNew": "Yenisini əlavə et",
     "addNewLabel": "Yeni {{label}} əlavə et",
     "block": "blok",
@@ -61,6 +62,7 @@
     "blocks": "bloklar",
     "chooseFromExisting": "Mövcuddan seçin",
     "collapseAll": "Hamısını Bağla",
+    "editLink": "Keçidi redaktə et",
     "itemsAndMore": "{{items}} və daha {{count}} nəfər",
     "latitude": "Enlik",
     "longitude": "Uzunluq",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Yeni {{label}} yüklə"
   },
   "general": {
+    "aboutToDelete": "Siz {{label}} <1>{{title}}</1> silməyə hazırsınız. Eminsiniz?",
     "aboutToDeleteCount_many": "Siz {{count}} {{label}} silməyə hazırsınız.",
     "aboutToDeleteCount_one": "Siz {{count}} {{label}} silməyə hazırsınız.",
     "aboutToDeleteCount_other": "Siz {{count}} {{label}} silməyə hazırsınız.",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Uğurla yeniləndi.",
     "updating": "Yenilənir",
     "welcome": "Xoş gəldiniz"
+  },
+  "operators": {
+    "contains": "daxilində",
+    "equals": "bərabərdir",
+    "exists": "mövcuddur",
+    "isGreaterThan": "dən böyük",
+    "isGreaterThanOrEqualTo": "böyük və ya bərabər",
+    "isIn": "daxildir",
+    "isLessThan": "dən kiçik",
+    "isLessThanOrEqualTo": "kiçik və ya bərabər",
+    "isLike": "kimi",
+    "isNotEqualTo": "bərabər deyil",
+    "isNotIn": "daxil deyil",
+    "near": "yaxın"
   },
   "upload": {
     "crop": "Məhsul",

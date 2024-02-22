@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "{{label}} hinzufügen",
+    "addLink": "Link Hinzufügen",
     "addNew": "Neu erstellen",
     "addNewLabel": "{{label}} erstellen",
     "block": "Block",
@@ -61,6 +62,7 @@
     "blocks": "Blöcke",
     "chooseFromExisting": "Aus vorhandenen auswählen",
     "collapseAll": "Alle einklappen",
+    "editLink": "Bearbeite Link",
     "itemsAndMore": "{{items}} und {{count}} mehr",
     "latitude": "Breitengrad",
     "longitude": "Längengrad",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "{{label}} neu hochladen"
   },
   "general": {
+    "aboutToDelete": "Du bist dabei {{label}} <1>{{title}}</1> zu löschen. Bist du dir sicher?",
     "aboutToDeleteCount_many": "Sie sind dabei, {{count}} {{label}} zu löschen",
     "aboutToDeleteCount_one": "Sie sind dabei, {{count}} {{label}} zu löschen",
     "aboutToDeleteCount_other": "Sie sind dabei, {{count}} {{label}} zu löschen",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Erfolgreich aktualisiert.",
     "updating": "Aktualisierung",
     "welcome": "Willkommen"
+  },
+  "operators": {
+    "contains": "enthält",
+    "equals": "gleich",
+    "exists": "existiert",
+    "isGreaterThan": "ist größer als",
+    "isGreaterThanOrEqualTo": "ist größer oder gleich",
+    "isIn": "ist drin",
+    "isLessThan": "ist kleiner als",
+    "isLessThanOrEqualTo": "ist kleiner oder gleich",
+    "isLike": "ist wie",
+    "isNotEqualTo": "ist nicht gleich",
+    "isNotIn": "ist nicht drin",
+    "near": "in der Nähe"
   },
   "upload": {
     "crop": "Zuschneiden",

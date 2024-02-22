@@ -248,6 +248,12 @@
         "collapseAll": {
           "type": "string"
         },
+        "editLink": {
+          "type": "string"
+        },
+        "addLink": {
+          "type": "string"
+        },
         "itemsAndMore": {
           "type": "string"
         },
@@ -285,6 +291,8 @@
         "blockType",
         "chooseFromExisting",
         "collapseAll",
+        "editLink",
+        "addLink",
         "itemsAndMore",
         "latitude",
         "longitude",
@@ -307,6 +315,9 @@
           "type": "string"
         },
         "aboutToDeleteCount_other": {
+          "type": "string"
+        },
+        "aboutToDelete": {
           "type": "string"
         },
         "addBelow": {
@@ -635,6 +646,7 @@
         "aboutToDeleteCount_one",
         "aboutToDeleteCount_many",
         "aboutToDeleteCount_other",
+        "aboutToDelete",
         "addBelow",
         "addFilter",
         "adminTheme",
@@ -736,28 +748,19 @@
     "operators": {
       "additionalProperties": false,
       "properties": {
-        "contains": {
-          "type": "string"
-        },
         "equals": {
           "type": "string"
         },
         "exists": {
           "type": "string"
         },
-        "isGreaterThan": {
-          "type": "string"
-        },
-        "isGreaterThanOrEqualTo": {
+        "isNotIn": {
           "type": "string"
         },
         "isIn": {
           "type": "string"
         },
-        "isLessThan": {
-          "type": "string"
-        },
-        "isLessThanOrEqualTo": {
+        "contains": {
           "type": "string"
         },
         "isLike": {
@@ -766,26 +769,35 @@
         "isNotEqualTo": {
           "type": "string"
         },
-        "isNotIn": {
+        "near": {
           "type": "string"
         },
-        "near": {
+        "isGreaterThan": {
+          "type": "string"
+        },
+        "isLessThan": {
+          "type": "string"
+        },
+        "isGreaterThanOrEqualTo": {
+          "type": "string"
+        },
+        "isLessThanOrEqualTo": {
           "type": "string"
         }
       },
       "required": [
         "equals",
-        "isNotEqualTo",
-        "isIn",
-        "isNotIn",
         "exists",
+        "isNotIn",
+        "isIn",
+        "contains",
+        "isLike",
+        "isNotEqualTo",
+        "near",
         "isGreaterThan",
         "isLessThan",
-        "isLessThanOrEqualTo",
         "isGreaterThanOrEqualTo",
-        "near",
-        "isLike",
-        "contains"
+        "isLessThanOrEqualTo"
       ],
       "type": "object"
     },
@@ -1025,6 +1037,7 @@
     "error",
     "fields",
     "general",
+    "operators",
     "upload",
     "validation",
     "version"

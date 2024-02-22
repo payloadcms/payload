@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Přidat {{label}}",
+    "addLink": "Přidat Odkaz",
     "addNew": "Přidat nový",
     "addNewLabel": "Přidat nový {{label}}",
     "block": "blok",
@@ -61,6 +62,7 @@
     "blocks": "bloky",
     "chooseFromExisting": "Vybrat z existujících",
     "collapseAll": "Sbalit vše",
+    "editLink": "Upravit odkaz",
     "itemsAndMore": "{{items}} a {{count}} dalších",
     "latitude": "Zeměpisná šířka",
     "longitude": "Zeměpisná délka",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Nahrát nový {{label}}"
   },
   "general": {
+    "aboutToDelete": "Chystáte se odstranit {{label}} <1>{{title}}</1>. Jste si jisti?",
     "aboutToDeleteCount_many": "Chystáte se smazat {{count}} {{label}}",
     "aboutToDeleteCount_one": "Chystáte se smazat {{count}} {{label}}",
     "aboutToDeleteCount_other": "Chystáte se smazat {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Úspěšně aktualizováno.",
     "updating": "Aktualizace",
     "welcome": "Vítejte"
+  },
+  "operators": {
+    "contains": "obsahuje",
+    "equals": "rovná se",
+    "exists": "existuje",
+    "isGreaterThan": "je větší než",
+    "isGreaterThanOrEqualTo": "je větší nebo rovno",
+    "isIn": "je v",
+    "isLessThan": "je menší než",
+    "isLessThanOrEqualTo": "je menší nebo rovno",
+    "isLike": "je jako",
+    "isNotEqualTo": "není rovno",
+    "isNotIn": "není in",
+    "near": "blízko"
   },
   "upload": {
     "crop": "Plodina",

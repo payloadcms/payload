@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "افزودن {{label}}",
+    "addLink": "افزودن پیوند",
     "addNew": "افزودن",
     "addNewLabel": "افزودن {{label}} تازه",
     "block": "بلوک",
@@ -61,6 +62,7 @@
     "blocks": "بلوک‌ها",
     "chooseFromExisting": "برگزیدن از بین ورودی‌ها",
     "collapseAll": "بستن همه",
+    "editLink": "نگارش پیوند",
     "itemsAndMore": "{{items}} و {{count}} بیش‌تر",
     "latitude": "عرض جغرافیایی",
     "longitude": "طول جغرافیایی",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "بارگذاری تازه {{label}}"
   },
   "general": {
+    "aboutToDelete": "شما در حال پاک کردن {{label}} <1>{{title}}</1> هستید. اطمینان دارید؟",
     "aboutToDeleteCount_many": "شما در حال پاک کردن {{count}} تعداد {{label}} هستید",
     "aboutToDeleteCount_one": "شما در حال پاک کردن {{count}} تعداد {{label}} هستید",
     "aboutToDeleteCount_other": "شما در شرف حذف هستید {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "با موفقیت به‌روز شد.",
     "updating": "در حال به‌روزرسانی",
     "welcome": "خوش‌آمدید"
+  },
+  "operators": {
+    "contains": "شامل",
+    "equals": "برابر با",
+    "exists": "وجود دارد",
+    "isGreaterThan": "بزرگتر است از",
+    "isGreaterThanOrEqualTo": "بزرگتر یا مساوی است",
+    "isIn": "هست در",
+    "isLessThan": "کمتر است از",
+    "isLessThanOrEqualTo": "کمتر یا مساوی است",
+    "isLike": "مانند این است",
+    "isNotEqualTo": "برابر نیست",
+    "isNotIn": "در این نیست",
+    "near": "نزدیک"
   },
   "upload": {
     "crop": "محصول",

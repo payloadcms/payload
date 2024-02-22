@@ -166,7 +166,7 @@ function memoize(fn, keys) {
         return cacheMap.get(cacheKey);
     };
 }
-exports.initI18n = memoize((async ({ config, language = 'en', translations }) => {
+exports.initI18n = memoize((async ({ config, language = 'en', translations, context }) => {
     const i18n = {
         fallbackLanguage: config.fallbackLanguage,
         language: language || config.fallbackLanguage,
@@ -177,4 +177,4 @@ exports.initI18n = memoize((async ({ config, language = 'en', translations }) =>
         }),
     };
     return i18n;
-}), ['language']);
+}), ['language', 'context']);

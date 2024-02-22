@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Ajouter {{label}}",
+    "addLink": "Ajouter un Lien",
     "addNew": "Ajouter nouveau ou nouvelle",
     "addNewLabel": "Ajouter nouveau ou nouvelle {{label}}",
     "block": "bloc",
@@ -61,6 +62,7 @@
     "blocks": "blocs",
     "chooseFromExisting": "Choisir parmi les existant(e)s",
     "collapseAll": "Tout réduire",
+    "editLink": "Modifier le lien",
     "itemsAndMore": "{{items}} et {{count}} de plus",
     "latitude": "Latitude",
     "longitude": "Longitude",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Téléverser un(e) nouveau ou nouvelle {{label}}"
   },
   "general": {
+    "aboutToDelete": "Vous êtes sur le point de supprimer ce ou cette {{label}} <1>{{title}}</1>. Êtes-vous sûr ?",
     "aboutToDeleteCount_many": "Vous êtes sur le point de supprimer {{count}} {{label}}",
     "aboutToDeleteCount_one": "Vous êtes sur le point de supprimer {{count}} {{label}}",
     "aboutToDeleteCount_other": "Vous êtes sur le point de supprimer {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Mis à jour avec succés.",
     "updating": "Mise à jour",
     "welcome": "Bienvenu(e)"
+  },
+  "operators": {
+    "contains": "contient",
+    "equals": "est égal à",
+    "exists": "existe",
+    "isGreaterThan": "est supérieur à",
+    "isGreaterThanOrEqualTo": "est supérieur ou égal à",
+    "isIn": "est dans",
+    "isLessThan": "est inférieur à",
+    "isLessThanOrEqualTo": "est inférieur ou égal à",
+    "isLike": "est comme",
+    "isNotEqualTo": "n'est pas égal à",
+    "isNotIn": "n'est pas dans",
+    "near": "proche"
   },
   "upload": {
     "crop": "Récolte",

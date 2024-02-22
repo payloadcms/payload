@@ -54,6 +54,7 @@
   },
   "fields": {
     "addLabel": "Dodaj {{label}}",
+    "addLink": "Dodaj poveznicu",
     "addNew": "Dodaj novi",
     "addNewLabel": "Dodaj novi {{label}}",
     "block": "blokiranje",
@@ -61,6 +62,7 @@
     "blocks": "blokiranja",
     "chooseFromExisting": "Odaberite iz postojećih.",
     "collapseAll": "Sažmi sve",
+    "editLink": "Uredi poveznicu",
     "itemsAndMore": "{{items}} i {{count}} više",
     "latitude": "Zemljopisna širina",
     "longitude": "Zemljopisna dužina",
@@ -72,6 +74,7 @@
     "uploadNewLabel": "Učitaj novi {{label}}"
   },
   "general": {
+    "aboutToDelete": "Izbrisat ćete {{label}} <1>{{title}}</1>. Jeste li sigurni?",
     "aboutToDeleteCount_many": "Upravo ćete izbrisati {{count}} {{label}}",
     "aboutToDeleteCount_one": "Upravo ćete izbrisati {{count}} {{label}}",
     "aboutToDeleteCount_other": "Upravo ćete izbrisati {{count}} {{label}}",
@@ -182,6 +185,20 @@
     "updatedSuccessfully": "Uspješno ažurirano.",
     "updating": "Ažuriranje",
     "welcome": "Dobrodošli"
+  },
+  "operators": {
+    "contains": "sadrži",
+    "equals": "jednako",
+    "exists": "postoji",
+    "isGreaterThan": "je veće od",
+    "isGreaterThanOrEqualTo": "je veće od ili jednako",
+    "isIn": "je u",
+    "isLessThan": "manje je od",
+    "isLessThanOrEqualTo": "manje je ili jednako",
+    "isLike": "je kao",
+    "isNotEqualTo": "nije jednako",
+    "isNotIn": "nije unutra",
+    "near": "blizu"
   },
   "upload": {
     "crop": "Usjev",
