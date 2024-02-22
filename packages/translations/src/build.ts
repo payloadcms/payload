@@ -156,6 +156,9 @@ const clientTranslationKeys = [
   'fields:editRelationship',
   'fields:removeUpload',
   'fields:saveChanges',
+  'fields:addRelationship',
+  'fields:removeRelationship',
+  'fields:labelRelationship',
 
   'general:aboutToDeleteCount',
   'general:aboutToDelete',

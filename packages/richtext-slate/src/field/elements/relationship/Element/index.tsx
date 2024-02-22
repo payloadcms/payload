@@ -1,6 +1,6 @@
 'use client'
 
-import type { HTMLAttributes } from 'react'
+import type { FormFieldBase } from '@payloadcms/ui/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -15,8 +15,9 @@ import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { FieldProps } from '../../../../types'
+import type { RelationshipElementType } from '../types'
 
+import { useElement } from '../../../providers/ElementProvider'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
 import './index.scss'
 
@@ -26,20 +27,19 @@ const initialParams = {
   depth: 0,
 }
 
-type Props = {
-  attributes: HTMLAttributes<HTMLDivElement>
-  children: React.ReactNode
-  element: any
-  fieldProps: FieldProps
+type Props = FormFieldBase & {
+  name: string
+  richTextComponentMap: Map<string, React.ReactNode>
 }
-const Element: React.FC<Props> = (props) => {
+
+const Element: React.FC<Props> = () => {
   const {
     attributes,
     children,
     element,
     element: { relationTo, value },
     fieldProps,
-  } = props
+  } = useElement<RelationshipElementType>()
 
   const {
     collections,
@@ -107,21 +107,21 @@ const Element: React.FC<Props> = (props) => {
   )
 
   const swapRelationship = React.useCallback(
-    ({ collectionConfig, docID }) => {
+    ({ collectionSlug, docID }) => {
       const elementPath = ReactEditor.findPath(editor, element)
 
       Transforms.setNodes(
         editor,
         {
           children: [{ text: ' ' }],
-          relationTo: collectionConfig.slug,
+          relationTo: collectionSlug,
           type: 'relationship',
           value: { id: docID },
         },
         { at: elementPath },
       )
 
-      setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug))
+      setRelatedCollection(collections.find((coll) => coll.slug === collectionSlug))
 
       setParams({
         ...initialParams,
@@ -157,11 +157,11 @@ const Element: React.FC<Props> = (props) => {
       <div className={`${baseClass}__actions`}>
         <ListDrawerToggler
           className={`${baseClass}__list-drawer-toggler`}
-          disabled={fieldProps?.admin?.readOnly}
+          disabled={fieldProps?.readOnly}
         >
           <Button
             buttonStyle="icon-label"
-            disabled={fieldProps?.admin?.readOnly}
+            disabled={fieldProps?.readOnly}
             el="div"
             icon="swap"
             onClick={() => {
@@ -174,7 +174,7 @@ const Element: React.FC<Props> = (props) => {
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__removeButton`}
-          disabled={fieldProps?.admin?.readOnly}
+          disabled={fieldProps?.readOnly}
           icon="x"
           onClick={(e) => {
             e.preventDefault()

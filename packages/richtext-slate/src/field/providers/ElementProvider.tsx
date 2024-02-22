@@ -1,9 +1,8 @@
 'use client'
+import type { FormFieldBase } from '@payloadcms/ui/types'
 import type { Element } from 'slate'
 
 import React from 'react'
-
-import type { FormFieldBase } from '../../../../ui/src/forms/fields/shared'
 
 type ElementContextType<T> = {
   attributes: Record<string, unknown>
