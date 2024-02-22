@@ -1,3 +1,4 @@
+'use client'
 import type { SingleValueProps } from 'react-select'
 
 import React, { Fragment, useEffect, useState } from 'react'

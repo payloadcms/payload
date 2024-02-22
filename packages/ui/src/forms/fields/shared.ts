@@ -107,6 +107,9 @@ export type FormFieldBase = {
   | {
       // For `relationship` fields
       relationTo?: RelationshipField['relationTo']
+      filterOptions?: RelationshipField['filterOptions']
+      sortOptions?: RelationshipField['admin']['sortOptions']
+      allowCreate?: RelationshipField['admin']['allowCreate']
     }
 )
 
