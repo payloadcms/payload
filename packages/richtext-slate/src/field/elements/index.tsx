@@ -11,7 +11,7 @@ import h6 from './h6'
 import li from './li'
 import link from './link'
 import ol from './ol'
-// import relationship from './relationship'
+import relationship from './relationship'
 // import textAlign from './textAlign'
 import ul from './ul'
 import upload from './upload'
@@ -28,7 +28,7 @@ const elements: Record<string, RichTextCustomElement> = {
   li,
   link,
   ol,
-  // relationship,
+  relationship,
   // textAlign,
   ul,
   upload,

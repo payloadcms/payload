@@ -8,12 +8,12 @@ import {
   useEditDepth,
   useTranslation,
 } from '@payloadcms/ui'
+import { FieldPathProvider } from '@payloadcms/ui/forms'
 import { useHotkey } from '@payloadcms/ui/hooks'
 import React, { useRef } from 'react'
 
 import type { Props } from './types'
 
-import { FieldPathProvider } from '../../../../../../ui/src/forms/FieldPathProvider'
 import './index.scss'
 
 const baseClass = 'rich-text-link-edit-modal'

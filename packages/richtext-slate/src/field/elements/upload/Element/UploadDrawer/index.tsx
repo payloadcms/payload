@@ -1,5 +1,6 @@
 'use client'
 
+import type { FormFieldBase } from '@payloadcms/ui/types'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
@@ -16,15 +17,14 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
+import { FieldPathProvider } from '@payloadcms/ui/forms'
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 
-import type { FormFieldBase } from '../../../../../../../ui/src/forms/fields/shared'
 import type { UploadElementType } from '../../types'
 
-import { FieldPathProvider } from '../../../../../../../ui/src/forms/FieldPathProvider'
 import { uploadFieldsSchemaPath } from '../../shared'
 
 export const UploadDrawer: React.FC<{

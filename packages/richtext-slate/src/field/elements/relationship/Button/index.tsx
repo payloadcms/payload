@@ -43,9 +43,9 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   })
 
   const onSelect = useCallback(
-    ({ collectionConfig, docID }) => {
+    ({ collectionSlug, docID }) => {
       insertRelationship(editor, {
-        relationTo: collectionConfig.slug,
+        relationTo: collectionSlug,
         value: {
           id: docID,
         },

@@ -6,3 +6,4 @@ import React from 'react'
 // @example
 // import { Link } from 'next/link'
 export type LinkType = React.ElementType
+export type { FormFieldBase } from '../forms/fields/shared'

@@ -1,5 +1,6 @@
 'use client'
 
+import type { FormFieldBase } from '@payloadcms/ui/types'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -19,7 +20,6 @@ import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { FormFieldBase } from '../../../../../../ui/src/forms/fields/shared'
 import type { UploadElementType } from '../types'
 
 import { useElement } from '../../../providers/ElementProvider'

@@ -1,32 +1,24 @@
 'use client'
 
-import type { BaseEditor, BaseOperation, Editor } from 'slate'
+import type { FormFieldBase } from '@payloadcms/ui/types'
+import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useEditDepth, useField, useTranslation } from '@payloadcms/ui'
 import isHotkey from 'is-hotkey'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
-import type { FormFieldBase } from '../../../ui/src/forms/fields/shared'
-import type {
-  ElementNode,
-  RichTextCustomElement,
-  RichTextPlugin,
-  RichTextPluginComponent,
-  TextNode,
-} from '../types'
+import type { ElementNode, RichTextPlugin, TextNode } from '../types'
 import type { EnabledFeatures } from './types'
 
 import { withCondition } from '../../../ui/src/forms/withCondition'
-import { useClientFunctions } from '../../../ui/src/providers/ClientFunction'
 import { defaultRichTextValue } from '../data/defaultValue'
 import { richTextValidate } from '../data/validation'
-import { createFeatureMap } from './createFeatureMap'
 import listTypes from './elements/listTypes'
 import hotkeys from './hotkeys'
 import './index.scss'

@@ -1,8 +1,9 @@
 'use client'
+import type { FormFieldBase } from '@payloadcms/ui/types'
+
 import { ShimmerEffect } from '@payloadcms/ui'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
-import type { FormFieldBase } from '../../../ui/src/forms/fields/shared'
 import type { RichTextPlugin } from '../types'
 import type { EnabledFeatures } from './types'
 

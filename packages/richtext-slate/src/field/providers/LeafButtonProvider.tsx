@@ -1,7 +1,7 @@
 'use client'
-import React from 'react'
+import type { FormFieldBase } from '@payloadcms/ui/types'
 
-import type { FormFieldBase } from '../../../../ui/src/forms/fields/shared'
+import React from 'react'
 
 type LeafButtonContextType = {
   fieldProps: FormFieldBase & {

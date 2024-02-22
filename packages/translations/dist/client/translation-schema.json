@@ -295,6 +295,15 @@
         },
         "saveChanges": {
           "type": "string"
+        },
+        "addRelationship": {
+          "type": "string"
+        },
+        "removeRelationship": {
+          "type": "string"
+        },
+        "labelRelationship": {
+          "type": "string"
         }
       },
       "required": [
@@ -321,7 +330,10 @@
         "addUpload",
         "editRelationship",
         "removeUpload",
-        "saveChanges"
+        "saveChanges",
+        "addRelationship",
+        "removeRelationship",
+        "labelRelationship"
       ],
       "type": "object"
     },
