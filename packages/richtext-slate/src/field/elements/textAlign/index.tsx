@@ -1,11 +1,13 @@
 import React from 'react'
 
+import type { RichTextCustomElement } from '../../..'
+
 import AlignCenterIcon from '../../icons/AlignCenter'
 import AlignLeftIcon from '../../icons/AlignLeft'
 import AlignRightIcon from '../../icons/AlignRight'
 import ElementButton from '../Button'
 
-export default {
+const alignment: RichTextCustomElement = {
   name: 'alignment',
   Button: () => {
     return (
@@ -22,4 +24,7 @@ export default {
       </React.Fragment>
     )
   },
+  Element: () => null,
 }
+
+export default alignment

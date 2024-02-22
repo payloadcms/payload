@@ -7,12 +7,12 @@ import h3 from './h3'
 import h4 from './h4'
 import h5 from './h5'
 import h6 from './h6'
-// import indent from './indent'
+import indent from './indent'
 import li from './li'
 import link from './link'
 import ol from './ol'
 import relationship from './relationship'
-// import textAlign from './textAlign'
+import textAlign from './textAlign'
 import ul from './ul'
 import upload from './upload'
 
@@ -24,12 +24,12 @@ const elements: Record<string, RichTextCustomElement> = {
   h4,
   h5,
   h6,
-  // indent,
+  indent,
   li,
   link,
   ol,
   relationship,
-  // textAlign,
+  textAlign,
   ul,
   upload,
 }

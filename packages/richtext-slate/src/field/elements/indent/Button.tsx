@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React from 'react'
+import { useCallback } from 'react'
 import { Editor, Element, Text, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
 import type { ElementNode } from '../../../types'
 
-import { indentType } from '.'
 import IndentLeft from '../../icons/IndentLeft'
 import IndentRight from '../../icons/IndentRight'
 import { baseClass } from '../Button'
@@ -15,6 +15,7 @@ import isElementActive from '../isActive'
 import { isBlockElement } from '../isBlockElement'
 import listTypes from '../listTypes'
 import { unwrapList } from '../unwrapList'
+import { indentType } from './shared'
 
 export const IndentButton: React.FC = () => {
   const editor = useSlate()
