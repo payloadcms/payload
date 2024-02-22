@@ -57,8 +57,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         if (typeof where === 'object') {
           const paginatedRes = await req.payload.find({
             collection: entity.slug,
+            depth: 0,
             limit: 1,
             overrideAccess: true,
+            pagination: false,
             req,
             where: {
               ...where,
@@ -79,6 +81,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         return req.payload.findByID({
           id,
           collection: entity.slug,
+          depth: 0,
           overrideAccess: true,
           req,
         })
@@ -98,7 +101,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     const mutablePolicies = policiesObj
 
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
-      docBeingAccessed = await getEntityDoc()
+      docBeingAccessed = getEntityDoc()
+      await docBeingAccessed
     }
 
     const data = req?.body
