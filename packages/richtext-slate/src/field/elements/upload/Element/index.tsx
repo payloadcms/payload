@@ -1,7 +1,6 @@
 'use client'
 
 import type { SanitizedCollectionConfig } from 'payload/types'
-import type { HTMLAttributes } from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -20,9 +19,12 @@ import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { FieldProps } from '../../../../types'
+import type { FormFieldBase } from '../../../../../../ui/src/forms/fields/shared'
+import type { UploadElementType } from '../types'
 
+import { useElement } from '../../../providers/ElementProvider'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
+import { uploadFieldsSchemaPath, uploadName } from '../shared'
 import { UploadDrawer } from './UploadDrawer'
 import './index.scss'
 
@@ -32,23 +34,22 @@ const initialParams = {
   depth: 0,
 }
 
-export type ElementProps = {
-  attributes: HTMLAttributes<HTMLDivElement>
-  children: React.ReactNode
-  element: any
-  enabledCollectionSlugs: string[]
-  fieldProps: FieldProps
+type Props = FormFieldBase & {
+  name: string
+  richTextComponentMap: Map<string, React.ReactNode>
 }
 
-const Element: React.FC<ElementProps> = (props) => {
+const Element: React.FC<Props & { enabledCollectionSlugs?: string[] }> = ({
+  enabledCollectionSlugs,
+}) => {
   const {
     attributes,
     children,
     element: { relationTo, value },
     element,
-    enabledCollectionSlugs,
     fieldProps,
-  } = props
+    schemaPath,
+  } = useElement<UploadElementType>()
 
   const {
     collections,
@@ -83,7 +84,7 @@ const Element: React.FC<ElementProps> = (props) => {
     { initialParams },
   )
 
-  const thumbnailSRC = useThumbnail(relatedCollection, data)
+  const thumbnailSRC = useThumbnail(relatedCollection.upload, data)
 
   const removeUpload = useCallback(() => {
     const elementPath = ReactEditor.findPath(editor, element)
@@ -103,8 +104,6 @@ const Element: React.FC<ElementProps> = (props) => {
 
       Transforms.setNodes(editor, newNode, { at: elementPath })
 
-      // setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
-
       setParams({
         ...initialParams,
         cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
@@ -117,17 +116,17 @@ const Element: React.FC<ElementProps> = (props) => {
   )
 
   const swapUpload = React.useCallback(
-    ({ collectionConfig, docID }) => {
+    ({ collectionSlug, docID }) => {
       const newNode = {
         children: [{ text: ' ' }],
-        relationTo: collectionConfig.slug,
-        type: 'upload',
+        relationTo: collectionSlug,
+        type: uploadName,
         value: { id: docID },
       }
 
       const elementPath = ReactEditor.findPath(editor, element)
 
-      setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug))
+      setRelatedCollection(collections.find((coll) => coll.slug === collectionSlug))
 
       Transforms.setNodes(editor, newNode, { at: elementPath })
 
@@ -137,7 +136,8 @@ const Element: React.FC<ElementProps> = (props) => {
     [closeListDrawer, editor, element, collections],
   )
 
-  const customFields = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields
+  const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
+  const customFieldsMap = fieldProps.richTextComponentMap.get(relatedFieldSchemaPath)
 
   return (
     <div
@@ -157,10 +157,10 @@ const Element: React.FC<ElementProps> = (props) => {
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             <div className={`${baseClass}__actions`}>
-              {customFields?.length > 0 && (
+              {Boolean(customFieldsMap) && (
                 <DrawerToggler
                   className={`${baseClass}__upload-drawer-toggler`}
-                  disabled={fieldProps?.admin?.readOnly}
+                  disabled={fieldProps?.readOnly}
                   slug={drawerSlug}
                 >
                   <Button
@@ -177,11 +177,11 @@ const Element: React.FC<ElementProps> = (props) => {
               )}
               <ListDrawerToggler
                 className={`${baseClass}__list-drawer-toggler`}
-                disabled={fieldProps?.admin?.readOnly}
+                disabled={fieldProps?.readOnly}
               >
                 <Button
                   buttonStyle="icon-label"
-                  disabled={fieldProps?.admin?.readOnly}
+                  disabled={fieldProps?.readOnly}
                   el="div"
                   icon="swap"
                   onClick={() => {
@@ -194,7 +194,7 @@ const Element: React.FC<ElementProps> = (props) => {
               <Button
                 buttonStyle="icon-label"
                 className={`${baseClass}__removeButton`}
-                disabled={fieldProps?.admin?.readOnly}
+                disabled={fieldProps?.readOnly}
                 icon="x"
                 onClick={(e) => {
                   e.preventDefault()
@@ -215,12 +215,12 @@ const Element: React.FC<ElementProps> = (props) => {
       {children}
       {value?.id && <DocumentDrawer onSave={updateUpload} />}
       <ListDrawer onSelect={swapUpload} />
-      <UploadDrawer drawerSlug={drawerSlug} relatedCollection={relatedCollection} {...props} />
+      <UploadDrawer {...{ drawerSlug, element, fieldProps, relatedCollection, schemaPath }} />
     </div>
   )
 }
 
-export default (props: ElementProps): React.ReactNode => {
+export default (props: Props): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
       <Element {...props} />

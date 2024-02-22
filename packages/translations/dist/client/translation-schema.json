@@ -280,6 +280,21 @@
         },
         "uploadNewLabel": {
           "type": "string"
+        },
+        "swapUpload": {
+          "type": "string"
+        },
+        "addUpload": {
+          "type": "string"
+        },
+        "editRelationship": {
+          "type": "string"
+        },
+        "removeUpload": {
+          "type": "string"
+        },
+        "saveChanges": {
+          "type": "string"
         }
       },
       "required": [
@@ -301,7 +316,12 @@
         "selectFieldsToEdit",
         "showAll",
         "swapRelationship",
-        "uploadNewLabel"
+        "uploadNewLabel",
+        "swapUpload",
+        "addUpload",
+        "editRelationship",
+        "removeUpload",
+        "saveChanges"
       ],
       "type": "object"
     },

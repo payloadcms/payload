@@ -9,7 +9,9 @@ import React from 'react'
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from '.'
 
 import elementTypes from './field/elements'
+import { linkFieldsSchemaPath } from './field/elements/link/shared'
 import { transformExtraFields } from './field/elements/link/utilities'
+import { uploadFieldsSchemaPath } from './field/elements/upload/shared'
 import leafTypes from './field/leaves'
 
 export const getGenerateComponentMap =
@@ -81,13 +83,44 @@ export const getGenerateComponentMap =
               readOnly: false,
             })
 
-            componentMap.set('link.fields', mappedFields)
+            componentMap.set(linkFieldsSchemaPath, mappedFields)
 
             break
           }
 
-          case 'upload':
+          case 'upload': {
+            const uploadEnabledCollections = config.collections.filter(
+              ({ admin: { enableRichTextRelationship, hidden }, upload }) => {
+                if (hidden === true) {
+                  return false
+                }
+
+                return enableRichTextRelationship && Boolean(upload) === true
+              },
+            )
+
+            uploadEnabledCollections.forEach((collection) => {
+              if (args?.admin?.upload?.collections[collection.slug]?.fields) {
+                const uploadFields = sanitizeFields({
+                  config,
+                  fields: args?.admin?.upload?.collections[collection.slug]?.fields,
+                  validRelationships,
+                })
+
+                const mappedFields = mapFields({
+                  config,
+                  fieldSchema: uploadFields,
+                  operation: 'update',
+                  permissions: {},
+                  readOnly: false,
+                })
+
+                componentMap.set(`${uploadFieldsSchemaPath}.${collection.slug}`, mappedFields)
+              }
+            })
+
             break
+          }
 
           case 'relationship':
             break

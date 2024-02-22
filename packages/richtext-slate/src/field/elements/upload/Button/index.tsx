@@ -42,9 +42,9 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
   })
 
   const onSelect = useCallback(
-    ({ collectionConfig, docID }) => {
+    ({ collectionSlug, docID }) => {
       insertUpload(editor, {
-        relationTo: collectionConfig.slug,
+        relationTo: collectionSlug,
         value: {
           id: docID,
         },

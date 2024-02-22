@@ -1,10 +1,11 @@
 'use client'
 
+import type { FormState } from '@payloadcms/ui'
+
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
-  FormState,
   Popup,
   Translation,
   getFormState,
@@ -21,11 +22,13 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
+import type { LinkElementType } from '../types'
+
 import { useElement } from '../../../providers/ElementProvider'
 import { LinkDrawer } from '../LinkDrawer'
+import { linkFieldsSchemaPath } from '../shared'
 import { unwrapLink } from '../utilities'
 import './index.scss'
-import { LinkElementType } from '../types'
 
 const baseClass = 'rich-text-link'
 
@@ -58,10 +61,10 @@ export const LinkElement = () => {
   const { attributes, children, editorRef, element, fieldProps, schemaPath } =
     useElement<LinkElementType>()
 
-  const linkFieldsSchemaPath = `${schemaPath}.link.fields`
+  const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
 
   const { richTextComponentMap } = fieldProps
-  const fieldMap = richTextComponentMap.get(linkFieldsSchemaPath)
+  const fieldMap = richTextComponentMap.get(fieldMapPath)
 
   const editor = useSlate()
   const config = useConfig()
@@ -102,7 +105,7 @@ export const LinkElement = () => {
           data,
           docPreferences,
           operation: 'update',
-          schemaPath: linkFieldsSchemaPath,
+          schemaPath: fieldMapPath,
         },
         serverURL: config.serverURL,
       })
@@ -111,7 +114,7 @@ export const LinkElement = () => {
     }
 
     awaitInitialState()
-  }, [renderModal, element, user, locale, t, getDocPreferences, config])
+  }, [renderModal, element, user, locale, t, getDocPreferences, config, id, fieldMapPath])
 
   return (
     <span className={baseClass} {...attributes}>

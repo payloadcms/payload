@@ -9,49 +9,50 @@ import {
   Form,
   FormSubmit,
   RenderFields,
-  buildStateFromSchema,
-  fieldTypes,
+  getFormState,
   useAuth,
   useConfig,
   useDocumentInfo,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { sanitizeFields } from 'payload/config'
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 
-import type { ElementProps } from '..'
+import type { FormFieldBase } from '../../../../../../../ui/src/forms/fields/shared'
+import type { UploadElementType } from '../../types'
 
-export const UploadDrawer: React.FC<
-  ElementProps & {
-    drawerSlug: string
-    relatedCollection: SanitizedCollectionConfig
+import { FieldPathProvider } from '../../../../../../../ui/src/forms/FieldPathProvider'
+import { uploadFieldsSchemaPath } from '../../shared'
+
+export const UploadDrawer: React.FC<{
+  drawerSlug: string
+  element: UploadElementType
+  fieldProps: FormFieldBase & {
+    name: string
+    richTextComponentMap: Map<string, React.ReactNode>
   }
-> = (props) => {
+  relatedCollection: SanitizedCollectionConfig
+  schemaPath: string
+}> = (props) => {
   const editor = useSlateStatic()
 
-  const { drawerSlug, element, fieldProps, relatedCollection } = props
+  const { drawerSlug, element, fieldProps, relatedCollection, schemaPath } = props
 
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
   const { user } = useAuth()
   const { closeModal } = useModal()
-  const { getDocPreferences } = useDocumentInfo()
+  const { id, getDocPreferences } = useDocumentInfo()
   const [initialState, setInitialState] = useState({})
-  const fieldSchemaUnsanitized =
-    fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields
-  const config = useConfig()
+  const { richTextComponentMap } = fieldProps
 
-  // Sanitize custom fields here
-  const validRelationships = config.collections.map((c) => c.slug) || []
-  const fieldSchema = sanitizeFields({
-    config: config,
-    fields: fieldSchemaUnsanitized,
-    validRelationships,
-  })
+  const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`
+  const fieldMap = richTextComponentMap.get(relatedFieldSchemaPath)
+
+  const config = useConfig()
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -68,31 +69,38 @@ export const UploadDrawer: React.FC<
   )
 
   useEffect(() => {
-    // Sanitize custom fields here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    const fieldSchema = sanitizeFields({
-      config: config,
-      fields: fieldSchemaUnsanitized,
-      validRelationships,
-    })
+    const data = deepCopyObject(element?.fields || {})
 
     const awaitInitialState = async () => {
-      const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        config,
-        data: deepCopyObject(element?.fields || {}),
-        fieldSchema,
-        locale,
-        operation: 'update',
-        preferences,
-        t,
-        user,
+      const docPreferences = await getDocPreferences()
+
+      const state = await getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          data,
+          docPreferences,
+          operation: 'update',
+          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+        },
+        serverURL: config.serverURL,
       })
+
       setInitialState(state)
     }
 
     awaitInitialState()
-  }, [fieldSchemaUnsanitized, config, element.fields, user, locale, t, getDocPreferences])
+  }, [
+    config,
+    element?.fields,
+    user,
+    locale,
+    t,
+    getDocPreferences,
+    id,
+    schemaPath,
+    relatedCollection.slug,
+  ])
 
   return (
     <Drawer
@@ -101,10 +109,12 @@ export const UploadDrawer: React.FC<
         label: getTranslation(relatedCollection.labels.singular, i18n),
       })}
     >
-      <Form initialState={initialState} onSubmit={handleUpdateEditData}>
-        <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} />
-        <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-      </Form>
+      <FieldPathProvider path="" schemaPath="">
+        <Form initialState={initialState} onSubmit={handleUpdateEditData}>
+          <RenderFields fieldMap={Array.isArray(fieldMap) ? fieldMap : []} />
+          <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+        </Form>
+      </FieldPathProvider>
     </Drawer>
   )
 }
