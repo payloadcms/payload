@@ -1,15 +1,14 @@
 import type { CreateGlobalArgs } from 'payload/database'
 import type { PayloadRequest, TypeWithID } from 'payload/types'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { PostgresAdapter } from './types'
 
+import { getTableName } from './schema/getTableName'
 import { upsertRow } from './upsertRow'
 
 export async function createGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
-  { data, req = {} as PayloadRequest, slug }: CreateGlobalArgs,
+  { slug, data, req = {} as PayloadRequest }: CreateGlobalArgs,
 ): Promise<T> {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
@@ -20,8 +19,11 @@ export async function createGlobal<T extends TypeWithID>(
     db,
     fields: globalConfig.fields,
     operation: 'create',
-    tableName: toSnakeCase(slug),
     req,
+    tableName: getTableName({
+      adapter: this,
+      config: globalConfig,
+    }),
   })
 
   return result

@@ -1,12 +1,11 @@
 import type { DeleteOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { PostgresAdapter } from './types'
 
 import { buildFindManyArgs } from './find/buildFindManyArgs'
 import buildQuery from './queries/buildQuery'
+import { getTableName } from './schema/getTableName'
 import { transform } from './transform/read'
 
 export const deleteOne: DeleteOne = async function deleteOne(
@@ -15,7 +14,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig = this.payload.collections[collection].config
-  const tableName = toSnakeCase(collection)
+  const tableName = getTableName({
+    adapter: this,
+    config: collectionConfig,
+  })
 
   const { where } = await buildQuery({
     adapter: this,

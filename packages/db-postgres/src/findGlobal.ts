@@ -1,17 +1,19 @@
 import type { FindGlobal } from 'payload/database'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
+import { getTableName } from './schema/getTableName'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: PostgresAdapter,
-  { locale, req, slug, where },
+  { slug, locale, req, where },
 ) {
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
-  const tableName = toSnakeCase(slug)
+  const tableName = getTableName({
+    adapter: this,
+    config: globalConfig,
+  })
 
   const {
     docs: [doc],

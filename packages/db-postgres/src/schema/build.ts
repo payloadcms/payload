@@ -15,10 +15,10 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 import { fieldAffectsData } from 'payload/types'
-import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types'
 
+import { getTableName } from './getTableName'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { setColumnID } from './setColumnID'
 import { traverseFields } from './traverseFields'
@@ -39,6 +39,7 @@ type Args = {
   rootTableName?: string
   tableName: string
   timestamps?: boolean
+  versions: boolean
 }
 
 type Result = {
@@ -63,6 +64,7 @@ export const buildTable = ({
   rootTableName: incomingRootTableName,
   tableName,
   timestamps,
+  versions,
 }: Args): Result => {
   const rootTableName = incomingRootTableName || tableName
   const columns: Record<string, PgColumnBuilder> = baseColumns
@@ -117,6 +119,7 @@ export const buildTable = ({
     rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
+    versions,
   }))
 
   if (timestamps) {
@@ -151,7 +154,7 @@ export const buildTable = ({
   adapter.tables[tableName] = table
 
   if (hasLocalizedField) {
-    const localeTableName = `${tableName}_locales`
+    const localeTableName = `${tableName}${adapter.localesSuffix}`
     localesColumns.id = serial('id').primaryKey()
     localesColumns._locale = adapter.enums.enum__locales('_locale').notNull()
     localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id')
@@ -292,11 +295,15 @@ export const buildTable = ({
       }
 
       relationships.forEach((relationTo) => {
-        const formattedRelationTo = toSnakeCase(relationTo)
+        const relationshipConfig = adapter.payload.collections[relationTo].config
+        const formattedRelationTo = getTableName({
+          adapter,
+          config: relationshipConfig,
+        })
         let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
-        const relatedCollectionCustomID = adapter.payload.collections[
-          relationTo
-        ].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+        const relatedCollectionCustomID = relationshipConfig.fields.find(
+          (field) => fieldAffectsData(field) && field.name === 'id',
+        )
         if (relatedCollectionCustomID?.type === 'number') colType = 'numeric'
         if (relatedCollectionCustomID?.type === 'text') colType = 'varchar'
 
@@ -305,7 +312,7 @@ export const buildTable = ({
         ).references(() => adapter.tables[formattedRelationTo].id, { onDelete: 'cascade' })
       })
 
-      const relationshipsTableName = `${tableName}_rels`
+      const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
 
       relationshipsTable = pgTable(relationshipsTableName, relationshipColumns, (cols) => {
         const result: Record<string, unknown> = {
@@ -333,7 +340,10 @@ export const buildTable = ({
         }
 
         relationships.forEach((relationTo) => {
-          const relatedTableName = toSnakeCase(relationTo)
+          const relatedTableName = getTableName({
+            adapter,
+            config: adapter.payload.collections[relationTo].config,
+          })
           const idColumnName = `${relationTo}ID`
           result[idColumnName] = one(adapter.tables[relatedTableName], {
             fields: [relationshipsTable[idColumnName]],
