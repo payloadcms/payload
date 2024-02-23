@@ -7,7 +7,7 @@ import AutosavePosts from './collections/Autosave'
 import configPromise from './config'
 import AutosaveGlobal from './globals/Autosave'
 import { clearAndSeedEverything } from './seed'
-import { autosaveCollectionSlug, draftCollectionSlug } from './slugs'
+import { autosaveCollectionSlug, draftCollectionSlug, versionCollectionSlug } from './slugs'
 
 let collectionLocalPostID: string
 let collectionLocalVersionID
@@ -289,6 +289,35 @@ describe('Versions', () => {
         expect(draftsAscending.docs[0]).toMatchObject(
           draftsDescending.docs[draftsDescending.docs.length - 1],
         )
+      })
+
+      it('should save to version table with correct hasMany select field value (fix #5157)', async () => {
+        // save draft
+        const post = await payload.create({
+          collection: versionCollectionSlug,
+          draft: true,
+          data: {
+            title: 'this is title',
+            description: 'this is description',
+          },
+        })
+        // publish
+        await payload.update({
+          collection: versionCollectionSlug,
+          id: post.id,
+          data: { title: 'this is updated title', tags: ['tag1'], _status: 'published' },
+        })
+
+        const versions = await payload.findVersions({
+          collection: versionCollectionSlug,
+          draft: true,
+          where: { parent: { equals: post.id } },
+          sort: 'id',
+        })
+        expect(versions.docs.map(({ id, version: { tags } }) => ({ id, tags }))).toStrictEqual([
+          { id: 1, tags: [] },
+          { id: 2, tags: ['tag1'] },
+        ])
       })
     })
 

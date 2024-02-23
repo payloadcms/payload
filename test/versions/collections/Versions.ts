@@ -51,6 +51,12 @@ const VersionPosts: CollectionConfig = {
       type: 'textarea',
       required: true,
     },
+    {
+      name: 'tags',
+      type: 'select',
+      hasMany: true,
+      options: ['tag1', 'tag2', 'tag3'],
+    },
   ],
 }
 
