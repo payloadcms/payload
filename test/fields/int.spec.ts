@@ -424,7 +424,7 @@ describe('Fields', () => {
       const definitions: Record<string, IndexDirection> = {}
       const options: Record<string, IndexOptions> = {}
 
-      beforeEach(() => {
+      beforeAll(() => {
         indexes = (payload.db as MongooseAdapter).collections[
           'indexed-fields'
         ].schema.indexes() as [Record<string, IndexDirection>, IndexOptions]
@@ -441,8 +441,13 @@ describe('Fields', () => {
         expect(definitions.text).toEqual(1)
       })
 
-      it('should have unique indexes', () => {
+      it('should have unique sparse indexes when field is not required', () => {
         expect(definitions.uniqueText).toEqual(1)
+        expect(options.uniqueText).toMatchObject({ sparse: true, unique: true })
+      })
+
+      it('should have unique indexes that are not sparse when field is required', () => {
+        expect(definitions.uniqueRequiredText).toEqual(1)
         expect(options.uniqueText).toMatchObject({ unique: true })
       })
 
@@ -593,6 +598,25 @@ describe('Fields', () => {
         })
         return result.error
       }).toBeDefined()
+    })
+
+    it('should not throw validation error saving multiple null values for unique fields', async () => {
+      const data = {
+        text: 'a',
+        uniqueRequiredText: 'a',
+        // uniqueText omitted on purpose
+      }
+      await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+      data.uniqueRequiredText = 'b'
+      const result = await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+
+      expect(result.id).toBeDefined()
     })
   })
 
