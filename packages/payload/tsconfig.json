@@ -32,6 +32,5 @@
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
   "ts-node": {
     "swc": true
-  },
-  "references": [{ "path": "../graphql" }]
+  }
 }
