@@ -101,9 +101,13 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     const mutablePolicies = policiesObj
 
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
-      docBeingAccessed = getEntityDoc()
-      await docBeingAccessed
+      // assign docBeingAccessed first as the promise to avoid multiple calls to getEntityDoc
+      docBeingAccessed = getEntityDoc().then((doc) => {
+        docBeingAccessed = doc
+      })
     }
+    // awaiting the promise to ensure docBeingAccessed is assigned before it is used
+    await docBeingAccessed
 
     const data = req?.body
 
