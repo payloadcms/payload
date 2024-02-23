@@ -9,17 +9,17 @@ import tempfile from 'tempfile'
 
 import { Octokit } from '@octokit/core'
 import simpleGit from 'simple-git'
+import { once } from 'events'
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 const git = simpleGit()
 
 type Args = {
-  bump: ReleaseType
-  debug?: boolean
-  preId?: string
+  newVersion: string
+  dryRun?: boolean
 }
 
-export const updateChangelog = async ({ bump = 'patch', preId, debug }: Args) => {
+export const updateChangelog = async ({ newVersion, dryRun }: Args) => {
   const monorepoVersion = fse.readJSONSync('package.json')?.version
 
   if (!monorepoVersion) {
@@ -62,8 +62,6 @@ export const updateChangelog = async ({ bump = 'patch', preId, debug }: Args) =>
     return context
   }
 
-  const nextReleaseVersion = semver.inc(monorepoVersion, bump, undefined, preId) as string
-
   const changelogStream = conventionalChangelog(
     // Options
     {
@@ -71,7 +69,7 @@ export const updateChangelog = async ({ bump = 'patch', preId, debug }: Args) =>
     },
     // Context
     {
-      version: nextReleaseVersion, // next release
+      version: newVersion, // next release
     },
     // GitRawCommitsOptions
     {
@@ -87,28 +85,28 @@ export const updateChangelog = async ({ bump = 'patch', preId, debug }: Args) =>
 
   const changelogFile = 'CHANGELOG.md'
   const readStream = fse.createReadStream(changelogFile)
-
   const tmp = tempfile()
 
-  if (debug) {
-    // output only updated changelog from tmp
-    changelogStream.pipe(createWriteStream(tmp)).on('finish', () => {
-      createReadStream(tmp).pipe(process.stdout)
-    })
-  } else {
-    changelogStream
-      .pipe(addStream(readStream))
-      .pipe(createWriteStream(tmp))
-      .on('finish', () => {
-        createReadStream(tmp).pipe(createWriteStream(changelogFile))
+  // Output to stdout if debug is true
+  const emitter = dryRun
+    ? changelogStream.pipe(createWriteStream(tmp)).on('finish', () => {
+        createReadStream(tmp).pipe(process.stdout)
       })
-  }
+    : changelogStream
+        .pipe(addStream(readStream))
+        .pipe(createWriteStream(tmp))
+        .on('finish', () => {
+          createReadStream(tmp).pipe(createWriteStream(changelogFile))
+        })
+
+  // Wait for the stream to finish
+  await once(emitter, 'finish')
 }
 
 // If file is executed directly, run the function
 if (require.main === module) {
-  const { bump, preId } = minimist(process.argv.slice(2))
-  updateChangelog({ bump, preId, debug: true })
+  const { newVersion } = minimist(process.argv.slice(2))
+  updateChangelog({ newVersion, dryRun: true })
 }
 
 async function createContributorSection(lastTag: string): Promise<string> {

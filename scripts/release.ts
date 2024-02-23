@@ -1,22 +1,46 @@
-import fse from 'fs-extra'
-import path from 'path'
-import { ExecSyncOptions, execSync } from 'child_process'
 import chalk from 'chalk'
-import prompts from 'prompts'
-import minimist from 'minimist'
 import chalkTemplate from 'chalk-template'
-import { PackageDetails, getPackageDetails, showPackageDetails } from './lib/getPackageDetails'
+import { ExecSyncOptions, execSync } from 'child_process'
+import execa from 'execa'
+import fse from 'fs-extra'
+import minimist from 'minimist'
+import path from 'path'
+import prompts from 'prompts'
 import semver from 'semver'
-import { updateChangelog } from './utils/updateChangelog'
 import simpleGit from 'simple-git'
+import { getPackageDetails } from './lib/getPackageDetails'
+import { updateChangelog } from './utils/updateChangelog'
 
 const git = simpleGit(path.resolve(__dirname, '..'))
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
 
+const { tag = 'latest', bump = 'patch', 'dry-run': dryRun = true } = args
+
+const logPrefix = dryRun ? chalk.bold.magenta('[dry-run] >') : ''
+
+const cmdRunner = (dryRun: boolean) => (cmd: string, execOpts: ExecSyncOptions) => {
+  if (dryRun) {
+    console.log(logPrefix, cmd)
+  } else {
+    execSync(cmd, execOpts)
+  }
+}
+
+const cmdRunnerAsync =
+  (dryRun: boolean) => async (cmd: string, args: string[], options?: execa.Options) => {
+    if (dryRun) {
+      console.log(logPrefix, cmd, args.join(' '))
+      return { exitCode: 0 }
+    } else {
+      return await execa(cmd, args, options ?? { stdio: 'inherit' })
+    }
+  }
+
 async function main() {
-  const { tag = 'latest', bump = 'patch', pkg } = args
+  const runCmd = cmdRunner(dryRun)
+  const runCmdAsync = cmdRunnerAsync(dryRun)
 
   if (!semver.RELEASE_TYPES.includes(bump)) {
     abort(`Invalid bump type: ${bump}.\n\nMust be one of: ${semver.RELEASE_TYPES.join(', ')}`)
@@ -26,151 +50,138 @@ async function main() {
     abort(`Prerelease bumps must have tag: beta or canary`)
   }
 
-  const packageDetails = await getPackageDetails(pkg)
-  showPackageDetails(packageDetails)
+  const monorepoVersion = fse.readJSONSync('package.json')?.version
 
-  let packagesToRelease: string[] = []
-  if (packageDetails.length > 1 && !pkg) {
-    ;({ packagesToRelease } = (await prompts({
-      type: 'multiselect',
-      name: 'packagesToRelease',
-      message: 'Select packages to release',
-      instructions: 'Space to select. Enter to submit.',
-      choices: packageDetails.map((p) => {
-        const title = p?.newCommits ? chalk.bold.green(p?.shortName) : p?.shortName
-        return {
-          title,
-          value: p.shortName,
-        }
-      }),
-    })) as { packagesToRelease: string[] })
-
-    if (!packagesToRelease) {
-      abort()
-    }
-
-    if (packagesToRelease.length === 0) {
-      abort('Please specify a package to publish')
-    }
-
-    if (packagesToRelease.find((p) => p === 'payload' && packagesToRelease.length > 1)) {
-      abort('Cannot publish payload with other packages. Release Payload first.')
-    }
-  } else {
-    packagesToRelease = [packageDetails[0].shortName]
+  if (!monorepoVersion) {
+    throw new Error('Could not find version in package.json')
   }
 
-  const packageMap = packageDetails.reduce(
-    (acc, p) => {
-      acc[p.shortName] = p
-      return acc
-    },
-    {} as Record<string, PackageDetails>,
-  )
+  const lastTag = (await git.tags()).all.reverse().filter((t) => t.startsWith('v'))?.[0]
+
+  if (monorepoVersion !== lastTag.replace('v', '')) {
+    throw new Error(
+      `Version in package.json (${monorepoVersion}) does not match last tag (${lastTag})`,
+    )
+  }
+  const nextReleaseVersion = semver.inc(monorepoVersion, bump, undefined, tag) as string
+
+  const packageDetails = await getPackageDetails()
 
   console.log(chalkTemplate`
-  {bold.green Publishing packages:}
+  {bold Version: ${monorepoVersion} => {green ${nextReleaseVersion}}}
 
   {bold.yellow Bump: ${bump}}
   {bold.yellow Tag: ${tag}}
 
-${packagesToRelease
+  {bold.green Changes (${packageDetails.length} packages):}
+
+${packageDetails
   .map((p) => {
-    const { shortName, version } = packageMap[p]
-    return `  ${shortName.padEnd(24)} ${version} -> ${semver.inc(version, bump, tag)}`
+    return `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}`
   })
   .join('\n')}
 `)
 
-  const confirmPublish = await confirm(`Publish ${packagesToRelease.length} package(s)?`)
+  const confirmPublish = await confirm('Are you sure your want to create these versions?')
 
   if (!confirmPublish) {
     abort()
   }
 
-  const results: { name: string; success: boolean }[] = []
+  // Prebuild all packages
+  header(`\n🔨 Prebuilding all packages...`)
+  runCmd('pnpm build:all --output-logs=errors-only', execOpts)
 
-  for (const pkg of packagesToRelease) {
-    const { packagePath, shortName, name: registryName } = packageMap[pkg]
+  // Update changelog
 
-    try {
-      console.log(chalk.bold(`\n\n🚀 Publishing ${shortName}...\n\n`))
-      let npmVersionCmd = `npm --no-git-tag-version --prefix ${packagePath} version ${bump}`
-      if (tag !== 'latest') {
-        npmVersionCmd += ` --preid ${tag}`
+  header(`${logPrefix}📝 Updating changelog...`)
+  await updateChangelog({ newVersion: nextReleaseVersion, dryRun })
+
+  // Increment all package versions
+  header(`${logPrefix}📦 Updating package.json versions...`)
+  await Promise.all(
+    packageDetails.map(async (pkg) => {
+      const packageJson = await fse.readJSON(`${pkg.packagePath}/package.json`)
+      packageJson.version = nextReleaseVersion
+      if (!dryRun) {
+        await fse.writeJSON(`${pkg.packagePath}/package.json`, packageJson, { spaces: 2 })
       }
-      execSync(npmVersionCmd, execOpts)
+    }),
+  )
 
-      const packageObj = await fse.readJson(`${packagePath}/package.json`)
-      const newVersion = packageObj.version
-
-      if (pkg === 'payload') {
-        const shouldUpdateChangelog = await confirm(`🧑‍💻 Update Changelog?`)
-        if (shouldUpdateChangelog) {
-          updateChangelog({ pkg: packageMap[pkg], bump })
-        }
-      }
-
-      const tagName = `${shortName}/${newVersion}`
-      const shouldCommit = await confirm(`🧑‍💻 Commit Release?`)
-      if (shouldCommit) {
-        if (pkg === 'payload') {
-          execSync(`git add CHANGELOG.md`, execOpts)
-        }
-        execSync(`git add ${packagePath}/package.json`, execOpts)
-        execSync(`git commit -m "chore(release): ${tagName} [skip ci]" `, execOpts)
-      }
-
-      const shouldTag = await confirm(`🏷️  Tag ${tagName}?`)
-      if (shouldTag) {
-        execSync(`git tag -a ${tagName} -m "${tagName}"`, execOpts)
-
-        if (pkg === 'payload') {
-          execSync(`git tag -a v${newVersion} -m "v${newVersion}"`, execOpts)
-        }
-      }
-
-      let publishCmd = `pnpm publish -C ${packagePath} --no-git-checks`
-      if (tag !== 'latest') {
-        publishCmd += ` --tag ${tag}`
-      }
-      const shouldPublish = await confirm(`🚢 Publish ${registryName}${chalk.yellow('@' + tag)}?`)
-      if (shouldPublish) {
-        execSync(publishCmd, execOpts)
-      }
-
-      results.push({ name: shortName, success: true })
-    } catch (error) {
-      console.error(chalk.bold.red(`ERROR: ${error.message}`))
-      results.push({ name: shortName, success: false })
-    }
+  // Set version in root package.json
+  header(`${logPrefix}📦 Updating root package.json...`)
+  const rootPackageJsonPath = path.resolve(__dirname, '../package.json')
+  const rootPackageJson = await fse.readJSON(rootPackageJsonPath)
+  rootPackageJson.version = nextReleaseVersion
+  if (!dryRun) {
+    await fse.writeJSON(rootPackageJsonPath, rootPackageJson, { spaces: 2 })
   }
+
+  // Commit
+  header(`🧑‍💻 Committing changes...`)
+
+  // Commit all staged changes
+  runCmd(`git add CHANGELOG.md packages package.json`, execOpts)
+  runCmd(`git commit -m "chore(release): v${nextReleaseVersion} [skip ci]"`, execOpts)
+
+  // Tag
+  header(`🏷️  Tagging release v${nextReleaseVersion}`)
+  runCmd(`git tag -a v${nextReleaseVersion} -m "v${nextReleaseVersion}"`, execOpts)
+
+  // Publish
+  const results: { name: string; success: boolean }[] = await Promise.all(
+    packageDetails.map(async (pkg) => {
+      try {
+        console.log(logPrefix, chalk.bold(`🚀 ${pkg.name} publishing...`))
+        const cmdArgs = [
+          'publish',
+          '-C',
+          pkg.packagePath,
+          '--no-git-checks',
+          '--tag',
+          tag,
+          '--dry-run',
+        ] // TODO: remove this
+        // if (dryRun) cmdArgs.push('--dry-run')
+        const { exitCode } = await execa('pnpm', cmdArgs, {
+          cwd: path.resolve(__dirname, '..'),
+          stdio: ['ignore', 'ignore', 'pipe'],
+          // stdio: 'inherit',
+        })
+        if (exitCode !== 0) {
+          console.log(chalk.bold.red(`\n\np❌ ${pkg.name} ERROR: pnpm publish failed\n\n`))
+          return { name: pkg.name, success: false }
+        }
+
+        console.log(chalk.green(`✅ ${pkg.name} published`))
+        return { name: pkg.name, success: true }
+      } catch (error) {
+        console.error(chalk.bold.red(`\n\np❌ ${pkg.name} ERROR: ${error.message}\n\n`))
+        return { name: pkg.name, success: false }
+      }
+    }),
+  )
 
   console.log(chalkTemplate`
 
   {bold.green Results:}
 
 ${results
-  .map(({ name, success }) => `  ${success ? chalk.bold.green('✔') : chalk.bold.red('✘')} ${name}`)
+  .map(
+    ({ name, success }) => `  ${success ? chalk.bold.green('✅') : chalk.bold.red('❌')} ${name}`,
+  )
   .join('\n')}
 `)
 
-  // Show unpushed commits and tags
-  execSync(
-    `git log --oneline $(git rev-parse --abbrev-ref --symbolic-full-name @{u})..HEAD`,
-    execOpts,
-  )
+  // TODO: Push commit and tag
+  // const push = await confirm(`Push commits and tags?`)
+  // if (push) {
+  //   header(`Pushing commits and tags...`)
+  //   execSync(`git push --follow-tags`, execOpts)
+  // }
 
-  console.log('\n')
-
-  const push = await confirm(`Push commits and tags?`)
-
-  if (push) {
-    console.log(chalk.bold(`\n\nPushing commits and tags...\n\n`))
-    execSync(`git push --follow-tags`, execOpts)
-  }
-
-  console.log(chalk.bold.green(`\n\nDone!\n\n`))
+  header('🎉 Done!')
 }
 
 main().catch((error) => {
@@ -199,4 +210,8 @@ async function confirm(message: string): Promise<boolean> {
   )
 
   return confirm
+}
+
+async function header(message: string) {
+  console.log(chalk.bold.green(`${message}\n`))
 }

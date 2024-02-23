@@ -20,13 +20,8 @@ export type PackageDetails = {
   version: string
 }
 
-export const getPackageDetails = async (pkg?: string): Promise<PackageDetails[]> => {
-  let packageDirs: string[] = []
-  if (pkg) {
-    packageDirs = fse.readdirSync(packagesDir).filter((d) => d === pkg)
-  } else {
-    packageDirs = fse.readdirSync(packagesDir).filter((d) => d !== 'eslint-config-payload')
-  }
+export const getPackageDetails = async (): Promise<PackageDetails[]> => {
+  const packageDirs = fse.readdirSync(packagesDir).filter((d) => d !== 'eslint-config-payload')
 
   const packageDetails = await Promise.all(
     packageDirs.map(async (dirName) => {
