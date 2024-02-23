@@ -1,15 +1,16 @@
-import { DocumentPreferences, SanitizedConfig, TypeWithID } from 'payload/types'
+import { Data, DocumentPreferences, SanitizedConfig } from 'payload/types'
 import React, { Fragment } from 'react'
 import {
   RenderCustomComponent,
   HydrateClientUser,
   buildStateFromSchema,
   formatFields,
-  DefaultEditView,
-  EditViewProps,
+  ServerSideEditViewProps,
+  SetDocumentInfo,
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
+import { EditView } from '../Edit'
 import { Settings } from './Settings'
 
 export const Account = async ({
@@ -39,7 +40,7 @@ export const Account = async ({
   if (collectionConfig) {
     const { fields } = collectionConfig
 
-    let data: TypeWithID & Record<string, unknown>
+    let data: Data
 
     try {
       data = await payload.findByID({
@@ -71,7 +72,7 @@ export const Account = async ({
       limit: 1,
     })) as any as { docs: { value: DocumentPreferences }[] }
 
-    const formState = await buildStateFromSchema({
+    const initialState = await buildStateFromSchema({
       id: user?.id,
       data: data || {},
       fieldSchema,
@@ -82,30 +83,45 @@ export const Account = async ({
       user,
     })
 
-    const componentProps: EditViewProps = {
+    const componentProps: ServerSideEditViewProps = {
       action: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
       apiURL: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
       collectionSlug: userSlug,
       data,
       hasSavePermission: collectionPermissions?.update?.permission,
-      formState,
+      initialState,
       docPermissions: collectionPermissions,
       docPreferences,
       user,
       updatedAt: '', // TODO
       id: user?.id,
-      locale,
-      AfterFields: <Settings />,
+      config,
+      i18n,
+      payload,
+      permissions,
+      searchParams,
     }
 
     return (
       <Fragment>
         <HydrateClientUser user={user} permissions={permissions} />
+        <SetDocumentInfo
+          action={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`}
+          apiURL={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`}
+          collectionSlug={userSlug}
+          initialData={data}
+          hasSavePermission={collectionPermissions?.update?.permission}
+          initialState={initialState}
+          docPermissions={collectionPermissions}
+          docPreferences={docPreferences}
+          id={user?.id}
+          AfterFields={<Settings />}
+        />
         <RenderCustomComponent
           CustomComponent={
             typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
           }
-          DefaultComponent={DefaultEditView}
+          DefaultComponent={EditView}
           componentProps={componentProps}
         />
       </Fragment>

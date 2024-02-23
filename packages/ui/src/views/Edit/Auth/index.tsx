@@ -1,6 +1,5 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from '../../../providers/Translation'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
@@ -12,8 +11,8 @@ import ConfirmPassword from '../../../forms/fields/ConfirmPassword'
 import { Email } from '../../../forms/fields/Email'
 import { Password } from '../../../forms/fields/Password'
 import { useConfig } from '../../../providers/Config'
+import { useTranslation } from '../../../providers/Translation'
 import APIKey from './APIKey'
-
 import './index.scss'
 
 const baseClass = 'auth-fields'
@@ -21,8 +20,8 @@ const baseClass = 'auth-fields'
 const Auth: React.FC<Props> = (props) => {
   const {
     className,
-    disableLocalStrategy,
     collectionSlug,
+    disableLocalStrategy,
     email,
     operation,
     readOnly,
@@ -91,9 +90,9 @@ const Auth: React.FC<Props> = (props) => {
         <React.Fragment>
           <Email
             autoComplete="email"
-            readOnly={readOnly}
             label={t('general:email')}
             name="email"
+            readOnly={readOnly}
             required
           />
           {(changingPassword || requirePassword) && (
@@ -148,15 +147,15 @@ const Auth: React.FC<Props> = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
-            readOnly={readOnly}
             label={t('authentication:enableAPIKey')}
             name="enableAPIKey"
+            readOnly={readOnly}
           />
           {enableAPIKey?.value && <APIKey readOnly={readOnly} />}
         </div>
       )}
       {verify && (
-        <Checkbox readOnly={readOnly} label={t('authentication:verified')} name="_verified" />
+        <Checkbox label={t('authentication:verified')} name="_verified" readOnly={readOnly} />
       )}
     </div>
   )
