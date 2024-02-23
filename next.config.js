@@ -17,7 +17,6 @@ const nextConfig = {
   //   ignoreBuildErrors: true,
   // },
   webpack: (config) => {
-    console.log(process.env.PAYLOAD_CONFIG_PATH)
     return {
       ...config,
       externals: [
