@@ -17,6 +17,7 @@ const nextConfig = {
   //   ignoreBuildErrors: true,
   // },
   webpack: (config) => {
+    console.log(process.env.PAYLOAD_CONFIG_PATH)
     return {
       ...config,
       externals: [
@@ -39,7 +40,7 @@ const nextConfig = {
         alias: {
           ...config.resolve.alias,
           '@payloadcms/ui/scss': path.resolve(__dirname, './packages/ui/src/scss/styles.scss'),
-          // 'payload-config': process.env.PAYLOAD_CONFIG_PATH,
+          'payload-config': path.resolve(__dirname, process.env.PAYLOAD_CONFIG_PATH),
         },
         fallback: {
           ...config.resolve.fallback,
