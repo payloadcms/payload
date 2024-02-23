@@ -9,12 +9,12 @@ import {
   Form,
   Select,
   Number as NumberInput,
-  EditViewProps,
   useConfig,
   MinimizeMaximize,
   useActions,
   useTranslation,
   useLocale,
+  ServerSideEditViewProps,
 } from '@payloadcms/ui'
 import { RenderJSON } from './RenderJSON'
 import { useSearchParams } from 'next/navigation'
@@ -24,7 +24,7 @@ import './index.scss'
 
 const baseClass = 'query-inspector'
 
-export const APIViewClient: React.FC<EditViewProps> = (props) => {
+export const APIViewClient: React.FC<ServerSideEditViewProps> = (props) => {
   const { data: initialData } = props
 
   const searchParams = useSearchParams()
@@ -133,8 +133,8 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
     >
       <SetStepNav
         collectionSlug={collectionSlug}
-        useAsTitle={collectionConfig?.admin?.useAsTitle}
-        pluralLabel={collectionConfig?.labels.plural}
+        useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
+        pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
         globalLabel={globalConfig?.label}
         globalSlug={globalSlug}
         id={id}

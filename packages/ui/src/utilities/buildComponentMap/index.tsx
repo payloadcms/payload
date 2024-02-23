@@ -4,7 +4,8 @@ import type { SanitizedConfig } from 'payload/types'
 import { mapFields } from './mapFields'
 import { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
 import { DefaultEditView } from '../../views/Edit'
-import { EditViewProps } from '../..'
+import { DefaultList } from '../../views/List'
+import { EditViewProps } from 'payload/config'
 
 export const buildComponentMap = (args: {
   config: SanitizedConfig
@@ -23,6 +24,7 @@ export const buildComponentMap = (args: {
     const { fields, slug } = collectionConfig
 
     const editViewFromConfig = collectionConfig?.admin?.components?.views?.Edit
+    const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
 
     const CustomEditView =
       typeof editViewFromConfig === 'function'
@@ -35,7 +37,16 @@ export const buildComponentMap = (args: {
             ? (editViewFromConfig.Default.Component as React.FC<EditViewProps>)
             : undefined
 
+    const CustomListView =
+      typeof listViewFromConfig === 'function'
+        ? listViewFromConfig
+        : typeof listViewFromConfig === 'object' &&
+            typeof listViewFromConfig.Component === 'function'
+          ? listViewFromConfig.Component
+          : undefined
+
     const Edit = CustomEditView || DefaultEditView
+    const List = CustomListView || DefaultList
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList
 
@@ -75,6 +86,7 @@ export const buildComponentMap = (args: {
       BeforeListTable,
       AfterListTable,
       Edit: <Edit collectionSlug={collectionConfig.slug} />,
+      List: <List collectionSlug={collectionConfig.slug} />,
       fieldMap: mappedFields,
     }
 

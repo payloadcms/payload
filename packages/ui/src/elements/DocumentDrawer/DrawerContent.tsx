@@ -98,7 +98,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   //   (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
 
   useEffect(() => {
-    if (!hasInitializedState.current && data) {
+    if (!hasInitializedState.current && (!initialID.current || (initialID.current && data))) {
       const getInitialState = async () => {
         const result = await getFormState({
           serverURL,
@@ -106,7 +106,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
           body: {
             id,
             operation: isEditing ? 'update' : 'create',
-            data,
+            data: data || {},
             docPreferences: null, // TODO: get this
             schemaPath,
           },
@@ -119,9 +119,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
     }
   }, [apiRoute, data, id, isEditing, schemaPath, serverURL])
 
-  const isLoading = !initialState || isLoadingDocument
-
-  if (isLoading) {
+  if (!initialState || isLoadingDocument) {
     return <LoadingOverlay />
   }
 
@@ -155,7 +153,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
       }
       initialData={data}
       disableActions
-      // disableLeaveWithoutSaving
+      disableLeaveWithoutSaving
       // hasSavePermission={hasSavePermission}
       // isEditing={isEditing}
       // isLoading,
@@ -164,7 +162,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
       collectionSlug={collectionConfig.slug}
       docPermissions={{} as CollectionPermission} // TODO; get this
       docPreferences={null} // TODO: get this
-      initialState
+      initialState={initialState}
     >
       {Edit}
     </DocumentInfoProvider>
@@ -178,10 +176,10 @@ const Content: React.FC<DocumentDrawerProps> = ({
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
   const { id: idFromProps, collectionSlug, onSave: onSaveFromProps } = props
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const [id, setId] = useState<null | string>(idFromProps)
+  const [id, setId] = useState<null | string | number>(idFromProps)
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
-    (args) => {
+    async (args) => {
       setId(args.doc.id)
 
       if (typeof onSaveFromProps === 'function') {

@@ -3,7 +3,6 @@ import type React from 'react'
 import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-  FormState,
   TypeWithTimestamps,
   TypeWithID,
   DocumentPermissions,
@@ -12,6 +11,7 @@ import type {
 } from 'payload/types'
 
 import { PaginatedDocs, TypeWithVersion } from 'payload/database'
+import { FormState } from '../../forms/Form/types'
 
 export type DocumentInfoProps = {
   AfterDocument?: React.ReactNode
@@ -24,12 +24,13 @@ export type DocumentInfoProps = {
   id?: number | string
   initialData?: Data
   initialState?: FormState
-  onSave?: (data: Record<string, unknown>) => Promise<void>
+  onSave?: (data: Data) => Promise<void> | void
   action?: string
   apiURL?: string
   docPreferences?: DocumentPreferences
   hasSavePermission?: boolean
   disableActions?: boolean
+  disableLeaveWithoutSaving?: boolean
 }
 
 export type DocumentInfo = DocumentInfoProps & {
