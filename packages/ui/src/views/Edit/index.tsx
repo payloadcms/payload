@@ -28,7 +28,7 @@ const baseClass = 'collection-edit'
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
-export const DefaultEditView: React.FC = (props) => {
+export const DefaultEditView: React.FC = () => {
   const {
     action,
     BeforeDocument,
@@ -44,6 +44,9 @@ export const DefaultEditView: React.FC = (props) => {
     id,
     hasSavePermission,
     disableActions,
+    collectionSlug,
+    globalSlug,
+    disableLeaveWithoutSaving,
   } = useDocumentInfo()
 
   const { user } = useAuth()
@@ -60,11 +63,9 @@ export const DefaultEditView: React.FC = (props) => {
   const { getFieldMap } = useComponentMap()
 
   const collectionConfig =
-    'collectionSlug' in props &&
-    collections.find((collection) => collection.slug === props.collectionSlug)
+    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
 
-  const globalConfig =
-    'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
+  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
 
   const [schemaPath] = React.useState(collectionConfig?.slug || globalConfig?.slug)
 
@@ -82,7 +83,7 @@ export const DefaultEditView: React.FC = (props) => {
   const preventLeaveWithoutSaving =
     (!(collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
       !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
-    !('disableLeaveWithoutSaving' in props && props.disableLeaveWithoutSaving)
+    !disableLeaveWithoutSaving
 
   const classes = [baseClass, id && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
