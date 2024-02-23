@@ -1,3 +1,21 @@
+## [2.11.2](https://github.com/payloadcms/payload/compare/v2.11.1...v2.11.2) (2024-02-23)
+
+
+### Features
+
+* **db-postgres:** configurable custom schema to use ([#5047](https://github.com/payloadcms/payload/issues/5047)) ([e8f2ca4](https://github.com/payloadcms/payload/commit/e8f2ca484ee56cd7767d5111e46ebd24752ff8de))
+
+
+### Bug Fixes
+
+* Add Context Provider in EditMany Component ([#5005](https://github.com/payloadcms/payload/issues/5005)) ([70e57fe](https://github.com/payloadcms/payload/commit/70e57fef184f7fcf56344ea755465f246f2253a5))
+* **db-mongodb:** unique sparse for not required fields ([#5114](https://github.com/payloadcms/payload/issues/5114)) ([815bdfa](https://github.com/payloadcms/payload/commit/815bdfac0b0afbff2a20e54d5aee64b90f6b3a77))
+* **db-postgres:** set _parentID for array nested localized fields ([#5117](https://github.com/payloadcms/payload/issues/5117)) ([ceca5c4](https://github.com/payloadcms/payload/commit/ceca5c4e97f53f1346797a31b6abfc0375e98215))
+* disabling API Key does not remove the key ([#5145](https://github.com/payloadcms/payload/issues/5145)) ([7a7f0ed](https://github.com/payloadcms/payload/commit/7a7f0ed7e8132253be607c111c160163b84bd770))
+* handle thrown errors in config-level afterError hook ([#5147](https://github.com/payloadcms/payload/issues/5147)) ([32ed95e](https://github.com/payloadcms/payload/commit/32ed95e1ee87409db234f1b7bd6d2e462fd9ed5d))
+* only replace the drawer content with full edit component if it exists ([#5144](https://github.com/payloadcms/payload/issues/5144)) ([0a07f60](https://github.com/payloadcms/payload/commit/0a07f607b9fb1217ad956cd05b2a84a4042a19ca))
+* transaction error from access endpoint ([#5156](https://github.com/payloadcms/payload/issues/5156)) ([ad42d54](https://github.com/payloadcms/payload/commit/ad42d541b342ed56463b81cee6d6307df6f06d7f))
+
 ## [2.11.1](https://github.com/payloadcms/payload/compare/v2.11.0...v2.11.1) (2024-02-16)
 
 
