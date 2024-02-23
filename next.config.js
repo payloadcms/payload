@@ -11,13 +11,19 @@ const nextConfig = {
       '**/*': ['drizzle-kit', 'drizzle-kit/utils'],
     },
     serverComponentsExternalPackages: ['drizzle-kit', 'drizzle-kit/utils', 'pino', 'pino-pretty'],
+    turbo: {
+      resolveAlias: {
+        '@payloadcms/ui/scss': path.resolve(__dirname, './packages/ui/src/scss/styles.scss'),
+        'payload-config': path.resolve(__dirname, process.env.PAYLOAD_CONFIG_PATH),
+      },
+    },
   },
   reactStrictMode: false,
   // typescript: {
   //   ignoreBuildErrors: true,
   // },
+
   webpack: (config) => {
-    console.log(process.env.PAYLOAD_CONFIG_PATH)
     return {
       ...config,
       externals: [
