@@ -3,6 +3,7 @@ export { default as buildStateFromSchema } from '../forms/utilities/buildStateFr
 export { buildComponentMap } from '../utilities/buildComponentMap'
 export { default as Form } from '../forms/Form'
 export { default as FormSubmit } from '../forms/Submit'
+export type { FormState } from '../forms/Form/types'
 export { default as ConfirmPassword } from '../forms/fields/ConfirmPassword'
 export { default as HiddenInput } from '../forms/fields/HiddenInput'
 export { default as Password } from '../forms/fields/Password'
