@@ -1,10 +1,9 @@
 import addStream from 'add-stream'
 import conventionalChangelog from 'conventional-changelog'
-import util from 'util'
-import fs from 'fs'
+import { default as getConventionalPreset } from 'conventional-changelog-conventionalcommits'
+import { GitRawCommitsOptions, ParserOptions, WriterOptions } from 'conventional-changelog-core'
 import fse, { createReadStream, createWriteStream } from 'fs-extra'
 import minimist from 'minimist'
-import path from 'path'
 import semver, { ReleaseType } from 'semver'
 import tempfile from 'tempfile'
 
@@ -35,40 +34,40 @@ export const updateChangelog = async ({ bump = 'patch', preId, debug }: Args) =>
     )
   }
 
-  const commits = await simpleGit().log({ from: lastTag, to: 'HEAD' })
+  // Load conventional commits preset and modify it
+  const conventionalPreset = (await getConventionalPreset()) as {
+    gitRawCommitsOpts: GitRawCommitsOptions
+    parserOpts: ParserOptions
+    writerOpts: WriterOptions
+    recommmendBumpOpts: unknown
+    conventionalChangelog: unknown
+  }
 
-  const authorHashMap: Record<string, string> = Object.fromEntries(
-    await Promise.all(
-      commits.all.map((c) =>
-        octokit
-          .request('GET /repos/{owner}/{repo}/commits/{ref}', {
-            owner: 'denolfe',
-            repo: 'payload-fork',
-            ref: c.hash,
-          })
-          .then(({ data }) => [c.hash, data.author?.login] as [string, string]),
-      ),
-    ),
+  // Unbold scope
+  conventionalPreset.writerOpts.commitPartial =
+    conventionalPreset.writerOpts?.commitPartial?.replace('**{{scope}}:**', '{{scope}}:')
+
+  // Add footer to end of main template
+  conventionalPreset.writerOpts.mainTemplate = conventionalPreset.writerOpts?.mainTemplate?.replace(
+    /\n*$/,
+    '{{footer}}\n',
   )
 
-  console.log({ authorHashMap })
+  // Fetch commits from last tag to HEAD
+  const credits = await createContributorSection(lastTag)
+
+  // Add Credits to footer
+  conventionalPreset.writerOpts.finalizeContext = (context) => {
+    context.footer = credits
+    return context
+  }
 
   const nextReleaseVersion = semver.inc(monorepoVersion, bump, undefined, preId) as string
-  const commitPartial = fs.readFileSync(path.resolve(__dirname, 'commit.hbs'), 'utf-8')
 
   const changelogStream = conventionalChangelog(
     // Options
     {
       preset: 'conventionalcommits',
-      // tagPrefix: 'v',
-      transform: (commit, cb) => {
-        // Populate username property on each commit
-        const found = commits.all.find((c) => c.hash === commit.hash)
-        if (found) {
-          commit.username = authorHashMap[found.hash]
-        }
-        cb(null, commit)
-      },
     },
     // Context
     {
@@ -79,11 +78,7 @@ export const updateChangelog = async ({ bump = 'patch', preId, debug }: Args) =>
       path: 'packages',
     },
     undefined,
-    // WriterOptions
-    {
-      // Default commit.hbs with a 'by @username' at the end
-      commitPartial,
-    },
+    conventionalPreset.writerOpts,
   ).on('error', (err) => {
     console.error(err.stack)
     console.error(err.toString())
@@ -110,17 +105,41 @@ export const updateChangelog = async ({ bump = 'patch', preId, debug }: Args) =>
   }
 }
 
-// if file is executed directly, run the function
+// If file is executed directly, run the function
 if (require.main === module) {
-  const { pkg, bump, preId } = minimist(process.argv.slice(2))
+  const { bump, preId } = minimist(process.argv.slice(2))
   updateChangelog({ bump, preId, debug: true })
 }
 
-export function logDeep(obj: any, message?: string): void {
-  if (message) {
-    // eslint-disable-next-line no-console
-    console.log(`:>> ${message}`)
+async function createContributorSection(lastTag: string): Promise<string> {
+  const commits = await git.log({ from: lastTag, to: 'HEAD' })
+  const usernames = await Promise.all(
+    commits.all.map((c) =>
+      octokit
+        .request('GET /repos/{owner}/{repo}/commits/{ref}', {
+          owner: 'denolfe', // TODO: Set this safely
+          repo: 'payload-fork', // TODO: Set this safely
+          ref: c.hash,
+        })
+        .then(({ data }) => data.author?.login as string),
+    ),
+  )
+
+  if (!usernames.length) return ''
+
+  // List of unique contributors
+  const contributors = Array.from(new Set(usernames)).map((c) => `@${c}`)
+
+  const formats = {
+    1: (contributors: string[]) => contributors[0],
+    2: (contributors: string[]) => contributors.join(' and '),
+    // Oxford comma ;)
+    default: (contributors: string[]) => contributors.join(', ').replace(/,([^,]*)$/, ', and$1'),
   }
-  // eslint-disable-next-line no-console
-  console.log(util.inspect(obj, false, null, true /* enable colors */))
+
+  const formattedContributors =
+    formats[contributors.length]?.(contributors) || formats['default'](contributors)
+
+  const credits = `### Credits\n\nThanks to ${formattedContributors} for their contributions!\n`
+  return credits
 }
