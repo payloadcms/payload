@@ -3,7 +3,7 @@ import fs from 'fs'
 import { GraphQLClient } from 'graphql-request'
 import path from 'path'
 
-import type { DrizzleDB } from '../../packages/db-postgres/src/types'
+import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types'
 import type { PayloadRequest } from '../../packages/payload/src/express/types'
 
@@ -44,10 +44,14 @@ describe('database', () => {
   describe('migrations', () => {
     beforeAll(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
-        const drizzle = payload.db.drizzle as DrizzleDB
-        // @ts-expect-error drizzle raw sql typing
-        await drizzle.execute(sql`drop schema public cascade;
-        create schema public;`)
+        const db = payload.db as unknown as PostgresAdapter
+        const drizzle = db.drizzle
+        const schemaName = db.schemaName || 'public'
+
+        await drizzle.execute(
+          sql.raw(`drop schema ${schemaName} cascade;
+        create schema ${schemaName};`),
+        )
       }
     })
 

@@ -39,7 +39,7 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
       latestBatch = Number(migrationsInDB[0]?.batch)
     }
   } else {
-    await createMigrationTable(this.drizzle)
+    await createMigrationTable(this)
   }
 
   if (migrationsInDB.find((m) => m.batch === -1)) {
