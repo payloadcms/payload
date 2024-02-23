@@ -10,8 +10,9 @@ import {
 import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
 import { ListPreferences } from '../../../../ui/src/views/List/types'
+import { ListInfoProvider } from '../../../../ui/src/providers/ListInfo'
 
-export const CollectionList = async ({
+export const ListView = async ({
   collectionSlug,
   config: configPromise,
   searchParams,
@@ -74,23 +75,27 @@ export const CollectionList = async ({
     })
 
     const componentProps: DefaultListViewProps = {
-      data,
-      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-      limit,
-      newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
       collectionSlug,
     }
 
     return (
       <Fragment>
         <HydrateClientUser user={user} permissions={permissions} />
-        <TableColumnsProvider collectionSlug={collectionSlug} listPreferences={listPreferences}>
-          <RenderCustomComponent
-            CustomComponent={ListToRender}
-            DefaultComponent={DefaultList}
-            componentProps={componentProps}
-          />
-        </TableColumnsProvider>
+        <ListInfoProvider
+          data={data}
+          hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
+          limit={limit}
+          newDocumentURL={`${admin}/collections/${collectionSlug}/create`}
+          collectionSlug={collectionSlug}
+        >
+          <TableColumnsProvider collectionSlug={collectionSlug} listPreferences={listPreferences}>
+            <RenderCustomComponent
+              CustomComponent={ListToRender}
+              DefaultComponent={DefaultList}
+              componentProps={componentProps}
+            />
+          </TableColumnsProvider>
+        </ListInfoProvider>
       </Fragment>
     )
   }

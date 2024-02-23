@@ -128,7 +128,6 @@ export const Upload: React.FC<Props> = (props) => {
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <Error message={errorMessage} showError={showError} />
-
       {doc.filename && !replacingFile && (
         <FileDetails
           canEdit={showCrop || showFocalPoint}
@@ -140,7 +139,6 @@ export const Upload: React.FC<Props> = (props) => {
           imageCacheTag={lastSubmittedTime}
         />
       )}
-
       {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
           {!value && (
@@ -184,7 +182,6 @@ export const Upload: React.FC<Props> = (props) => {
           )}
         </div>
       )}
-
       {(value || doc.filename) && (
         <Drawer Header={null} slug={editDrawerSlug}>
           <EditUpload

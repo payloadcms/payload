@@ -1,7 +1,6 @@
 'use client'
 import React, { Fragment, useEffect } from 'react'
 
-import type { DefaultListViewProps } from './types'
 import { SelectionProvider } from './SelectionProvider'
 import { Gutter } from '../../elements/Gutter'
 import { getTranslation } from '@payloadcms/translations'
@@ -17,12 +16,13 @@ import { useComponentMap } from '../../providers/ComponentMapProvider'
 import { Table } from '../../elements/Table'
 import { ListControls } from '../../elements/ListControls'
 import { useStepNav } from '../../elements/StepNav'
+import { useListInfo } from '../../providers/ListInfo'
 
 import './index.scss'
 
 const baseClass = 'collection-list'
 
-export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
+export const DefaultList: React.FC = () => {
   const {
     Header,
     data,
@@ -35,10 +35,10 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
     limit,
     modifySearchParams,
     newDocumentURL,
-    resetParams,
+    // resetParams,
     titleField,
     collectionSlug,
-  } = props
+  } = useListInfo()
 
   const config = useConfig()
 

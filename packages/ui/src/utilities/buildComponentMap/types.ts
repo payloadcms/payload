@@ -66,6 +66,7 @@ export type CollectionComponentMap = ConfigComponentMapBase & {
   AfterList: React.ReactNode
   BeforeListTable: React.ReactNode
   AfterListTable: React.ReactNode
+  List: React.ReactNode
 }
 
 export type GlobalComponentMap = ConfigComponentMapBase

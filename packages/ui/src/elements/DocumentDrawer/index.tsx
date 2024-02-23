@@ -69,6 +69,7 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
   const uuid = useId()
   const { closeModal, modalState, openModal, toggleModal } = useModal()
   const [isOpen, setIsOpen] = useState(false)
+
   const drawerSlug = formatDocumentDrawerSlug({
     id,
     collectionSlug,

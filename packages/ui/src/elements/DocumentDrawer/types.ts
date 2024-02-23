@@ -1,14 +1,14 @@
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
-import type { EditViewProps } from '../../views/types'
 import type { Props as DrawerProps } from '../Drawer/types'
+import { DocumentInfoContext } from '../../providers/DocumentInfo/types'
 
 export type DocumentDrawerProps = Pick<DrawerProps, 'Header'> & {
   collectionSlug: string
   drawerSlug?: string
-  id?: string
-  onSave?: EditViewProps['onSave']
+  id?: string | number
+  onSave?: DocumentInfoContext['onSave']
 }
 
 export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
