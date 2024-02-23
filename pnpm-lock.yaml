@@ -591,9 +591,6 @@ importers:
 
   packages/payload:
     dependencies:
-      '@payloadcms/graphql':
-        specifier: workspace:^
-        version: link:../graphql
       '@payloadcms/translations':
         specifier: workspace:^
         version: link:../translations

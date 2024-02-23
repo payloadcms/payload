@@ -17,6 +17,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       titleSuffix: '- Payload',
     },
   },
+  bin: [],
   collections: [],
   cookiePrefix: 'payload',
   cors: [],
