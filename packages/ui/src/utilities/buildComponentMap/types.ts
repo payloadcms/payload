@@ -61,15 +61,17 @@ export type MappedField = {
 
 export type FieldMap = MappedField[]
 
-export type CollectionComponentMap = {
+export type CollectionComponentMap = ConfigComponentMapBase & {
   BeforeList: React.ReactNode
   AfterList: React.ReactNode
   BeforeListTable: React.ReactNode
   AfterListTable: React.ReactNode
-  fieldMap: FieldMap
 }
 
-export type GlobalComponentMap = {
+export type GlobalComponentMap = ConfigComponentMapBase
+
+export type ConfigComponentMapBase = {
+  Edit: React.ReactNode
   fieldMap: FieldMap
 }
 

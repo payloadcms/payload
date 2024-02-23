@@ -1,13 +1,12 @@
-import type { Fields } from 'payload/dist/admin/components/forms/Form/types'
-import type { UIField } from 'payload/dist/fields/config/types'
+import type { FormState } from '@payloadcms/ui'
+import type { UIField } from 'payload/types'
 
-import { useWatchForm } from 'payload/components/forms'
-import { useConfig } from 'payload/components/utilities'
+import { useConfig, useWatchForm } from '@payloadcms/ui'
+import React from 'react'
 // TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
 // import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
-import React from 'react'
 
-type FieldsWithDoc = Fields & {
+type FieldsWithDoc = FormState & {
   doc: {
     value: {
       relationTo: string
@@ -31,7 +30,7 @@ export const LinkToDoc: React.FC<UIField> = () => {
   const {
     routes: {
       admin: adminRoute, // already includes leading slash
-    } = {},
+    },
     serverURL,
   } = config
 

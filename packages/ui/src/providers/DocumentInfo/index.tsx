@@ -4,14 +4,8 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 
 import type { TypeWithTimestamps } from 'payload/types'
 import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
-import type {
-  TypeWithID,
-  DocumentPreferences,
-  Where,
-  DocumentPermissions,
-  DocumentInfoContext,
-} from 'payload/types'
-import type { Props } from './types'
+import type { TypeWithID, DocumentPreferences, Where, DocumentPermissions } from 'payload/types'
+import type { DocumentInfo, DocumentInfoContext, DocumentInfoProps } from './types'
 
 import { useTranslation } from '../Translation'
 import { useAuth } from '../Auth'
@@ -23,12 +17,16 @@ const Context = createContext({} as DocumentInfoContext)
 
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
-export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => {
-  const [propsToUse, setPropsToUse] = useState<Props>({
+export const DocumentInfoProvider: React.FC<
+  DocumentInfoProps & {
+    children: React.ReactNode
+  }
+> = ({ children, ...rest }) => {
+  const [documentInfo, setDocumentInfo] = useState<DocumentInfo>({
     ...rest,
   })
 
-  const { globalSlug, collectionSlug, id } = propsToUse
+  const { globalSlug, collectionSlug, id } = documentInfo
 
   const {
     routes: { api },
@@ -271,26 +269,21 @@ export const DocumentInfoProvider: React.FC<Props> = ({ children, ...rest }) => 
     (title) => {
       setTitle(title || id?.toString() || '[untitled]')
     },
-    [setPropsToUse, id],
+    [id],
   )
 
   const value: DocumentInfoContext = {
-    id,
-    collectionSlug,
-    docPermissions,
+    ...documentInfo,
     getDocPermissions,
     getDocPreferences,
     getVersions,
-    globalSlug,
-    preferencesKey,
-    publishedDoc,
     setDocFieldPreferences,
-    slug,
-    unpublishedVersions,
-    docConfig,
-    versions,
-    setDocumentInfo: setPropsToUse,
+    setDocumentInfo,
     setDocumentTitle,
+    publishedDoc,
+    docPermissions,
+    versions,
+    unpublishedVersions,
     title,
   }
 

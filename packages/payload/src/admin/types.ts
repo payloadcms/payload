@@ -26,4 +26,3 @@ export type {
 export type { Data } from './forms/Form'
 export type { LabelProps } from './forms/Label'
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel'
-export type { DocumentInfoContext } from './providers/DocumentInfo'

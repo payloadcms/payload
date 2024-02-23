@@ -1,14 +1,19 @@
 'use client'
-import React from 'react'
-import { DefaultEditView, EditViewProps, useDocumentInfo } from '@payloadcms/ui'
+import React, { Fragment } from 'react'
+import { useComponentMap, useDocumentInfo } from '@payloadcms/ui'
 import { useCallback } from 'react'
+import { LoadingOverlay } from '../../../../ui/src/elements/Loading'
 
-export const DefaultEditViewClient: React.FC<EditViewProps> = (props) => {
-  const id = 'id' in props ? props.id : undefined
-  const collectionSlug = 'collectionSlug' in props ? props.collectionSlug : undefined
+export const DefaultEditViewClient: React.FC = () => {
+  const { id, getVersions, getDocPermissions, collectionSlug, globalSlug } = useDocumentInfo()
+
+  const { componentMap } = useComponentMap()
+
+  const { Edit } =
+    componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug || globalSlug] ||
+    {}
+
   const isEditing = Boolean(id && collectionSlug)
-
-  const { getVersions, getDocPermissions } = useDocumentInfo()
 
   const onSave = useCallback(
     async (json: { doc }) => {
@@ -30,5 +35,9 @@ export const DefaultEditViewClient: React.FC<EditViewProps> = (props) => {
     [getVersions, isEditing, getDocPermissions, collectionSlug],
   )
 
-  return <DefaultEditView {...props} onSave={onSave} />
+  if (!Edit) {
+    return <LoadingOverlay />
+  }
+
+  return <Fragment>{Edit}</Fragment>
 }

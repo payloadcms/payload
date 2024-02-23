@@ -10,7 +10,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 import { redirect } from 'next/navigation'
-import { parseCookies } from 'payload/auth'
+import { Permissions, parseCookies } from 'payload/auth'
 import { getRequestLanguage } from './getRequestLanguage'
 import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
 import type { I18n } from '@payloadcms/translations'
@@ -35,7 +35,7 @@ export const initPage = async ({
   route?: string
 }): Promise<{
   payload: Awaited<ReturnType<typeof getPayload>>
-  permissions: Awaited<ReturnType<typeof auth>>['permissions']
+  permissions: Permissions
   user: Awaited<ReturnType<typeof auth>>['user']
   config: SanitizedConfig
   i18n: I18n

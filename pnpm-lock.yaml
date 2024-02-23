@@ -912,6 +912,9 @@ importers:
 
   packages/plugin-form-builder:
     dependencies:
+      '@payloadcms/ui':
+        specifier: workspace:^
+        version: link:../ui
       deepmerge:
         specifier: ^4.2.2
         version: 4.3.1
@@ -979,6 +982,9 @@ importers:
 
   packages/plugin-search:
     dependencies:
+      '@payloadcms/ui':
+        specifier: workspace:^
+        version: link:../ui
       ts-deepmerge:
         specifier: ^2.0.1
         version: 2.0.7
@@ -1055,6 +1061,10 @@ importers:
         version: 5.90.2(@swc/core@1.4.1)
 
   packages/plugin-seo:
+    dependencies:
+      '@payloadcms/ui':
+        specifier: workspace:^
+        version: link:../ui
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1074,6 +1084,9 @@ importers:
 
   packages/plugin-stripe:
     dependencies:
+      '@payloadcms/ui':
+        specifier: workspace:^
+        version: link:../ui
       lodash.get:
         specifier: ^4.4.2
         version: 4.4.2

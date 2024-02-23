@@ -28,9 +28,9 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const { initialData, initialParams = {} } = options
 
   const { i18n } = useTranslation()
-  const [data, setData] = useState(initialData || {})
+  const [data, setData] = useState(initialData)
   const [params, setParams] = useState(initialParams)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(!initialData)
   const [isError, setIsError] = useState(false)
   const { code: locale } = useLocale()
   const hasInitialized = useRef(false)

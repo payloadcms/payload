@@ -52,5 +52,8 @@
     "dist",
     "types.js",
     "types.d.ts"
-  ]
+  ],
+  "dependencies": {
+    "@payloadcms/ui": "workspace:^"
+  }
 }
