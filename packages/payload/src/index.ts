@@ -57,10 +57,6 @@ import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/
  * @description Payload
  */
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
-  Mutation: { fields: { [key: string]: any }; name: string } = { name: 'Mutation', fields: {} }
-
-  Query: { fields: { [key: string]: any }; name: string } = { name: 'Query', fields: {} }
-
   authStrategies: AuthStrategy[]
 
   collections: {
@@ -308,24 +304,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     this.config = await options.config
 
-    // TODO(JARROD/JAMES): can we keep this?
-    // const configPath = findConfig()
-    this.config = {
-      ...this.config,
-      // paths: {
-      //   config: configPath,
-      //   configDir: path.dirname(configPath),
-      //   rawConfig: configPath,
-      // },
-    }
-
     if (!this.config.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')
     }
 
     this.secret = crypto.createHash('sha256').update(this.config.secret).digest('hex').slice(0, 32)
-
-    this.local = options.local
 
     this.globals = {
       config: this.config.globals,
