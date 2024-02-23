@@ -1,9 +1,8 @@
 import type { Create } from 'payload/database'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { PostgresAdapter } from './types'
 
+import { getTableName } from './schema/getTableName'
 import { upsertRow } from './upsertRow'
 
 export const create: Create = async function create(
@@ -19,8 +18,11 @@ export const create: Create = async function create(
     db,
     fields: collection.fields,
     operation: 'create',
-    tableName: toSnakeCase(collectionSlug),
     req,
+    tableName: getTableName({
+      adapter: this,
+      config: collection,
+    }),
   })
 
   return result

@@ -4,11 +4,11 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { pgEnum } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
-import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
 
 import { buildTable } from './schema/build'
+import { getTableName } from './schema/getTableName'
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {
@@ -19,7 +19,10 @@ export const init: Init = async function init(this: PostgresAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const tableName = toSnakeCase(collection.slug)
+    const tableName = getTableName({
+      adapter: this,
+      config: collection,
+    })
 
     buildTable({
       adapter: this,
@@ -31,10 +34,15 @@ export const init: Init = async function init(this: PostgresAdapter) {
       fields: collection.fields,
       tableName,
       timestamps: collection.timestamps,
+      versions: false,
     })
 
     if (collection.versions) {
-      const versionsTableName = `_${tableName}_v`
+      const versionsTableName = getTableName({
+        adapter: this,
+        config: collection,
+        versions: true,
+      })
       const versionFields = buildVersionCollectionFields(collection)
 
       buildTable({
@@ -47,12 +55,13 @@ export const init: Init = async function init(this: PostgresAdapter) {
         fields: versionFields,
         tableName: versionsTableName,
         timestamps: true,
+        versions: true,
       })
     }
   })
 
   this.payload.config.globals.forEach((global) => {
-    const tableName = toSnakeCase(global.slug)
+    const tableName = getTableName({ adapter: this, config: global })
 
     buildTable({
       adapter: this,
@@ -64,10 +73,11 @@ export const init: Init = async function init(this: PostgresAdapter) {
       fields: global.fields,
       tableName,
       timestamps: false,
+      versions: false,
     })
 
     if (global.versions) {
-      const versionsTableName = `_${tableName}_v`
+      const versionsTableName = getTableName({ adapter: this, config: global, versions: true })
       const versionFields = buildVersionGlobalFields(global)
 
       buildTable({
@@ -80,6 +90,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
         fields: versionFields,
         tableName: versionsTableName,
         timestamps: true,
+        versions: true,
       })
     }
   })

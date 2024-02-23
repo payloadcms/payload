@@ -47,18 +47,22 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       name: 'postgres',
 
       // Postgres-specific
+      blockTableNames: {},
       drizzle: undefined,
       enums: {},
       fieldConstraints: {},
       idType,
+      localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
       pool: undefined,
       poolOptions: args.pool,
       push: args.push,
       relations: {},
+      relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},
       sessions: {},
       tables: {},
+      versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
       beginTransaction,
