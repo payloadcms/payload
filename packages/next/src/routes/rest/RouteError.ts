@@ -1,4 +1,4 @@
-import { Collection, PayloadRequest } from 'payload/types'
+import type { Collection, PayloadRequest } from 'payload/types'
 import { APIError } from 'payload/errors'
 import httpStatus from 'http-status'
 
