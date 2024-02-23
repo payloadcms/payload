@@ -11,5 +11,6 @@
     "lib": ["dom", "dom.iterable", "esnext"]
   },
   "include": ["src/**/*.ts", "src/**/*.json"],
+  "exclude": ["src/all"],
   "references": [{ "path": "../payload" }]
 }
