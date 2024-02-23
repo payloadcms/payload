@@ -526,7 +526,7 @@ export type RichTextField<
   ExtraProperties = {},
 > = FieldBase & {
   admin?: Admin
-  editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
+  editor: RichTextAdapter<Value, AdapterProps, AdapterProps>
   type: 'richText'
 } & ExtraProperties
 

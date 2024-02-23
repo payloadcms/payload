@@ -5,7 +5,7 @@ import type { RichTextField, RichTextAdapter, CellComponentProps } from 'payload
 
 export const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   // eslint-disable-next-line react/destructuring-assignment
-  const editor: RichTextAdapter = props.field.editor
+  const editor: RichTextAdapter = props.cellData.editor
 
   const isLazy = 'LazyCellComponent' in editor
 
