@@ -14,7 +14,7 @@ import { Permissions, parseCookies } from 'payload/auth'
 import { getRequestLanguage } from './getRequestLanguage'
 import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
 import type { I18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/all'
+import { translations } from '@payloadcms/translations/client'
 import { initI18n } from '@payloadcms/translations'
 
 export const initPage = async ({
