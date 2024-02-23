@@ -1,13 +1,13 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "composite": true, // Required for references to work
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "sourceMap": true,
     "allowImportingTsExtensions": true,
-    "composite": true // Required for references to work
+    "sourceMap": true
   },
   "exclude": ["src/**/*.spec.js", "src/**/*.spec.jsx", "src/**/*.spec.ts", "src/**/*.spec.tsx"],
   "include": ["src/**/*.ts", "src/**/*.tsx"],

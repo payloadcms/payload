@@ -3,15 +3,32 @@ import React from 'react'
 import type { Props } from './types'
 import { useTranslation } from '../../providers/Translation'
 import { RenderField } from './RenderField'
+import { useIntersect } from '../..'
 
 import './index.scss'
 
 const baseClass = 'render-fields'
 
 const RenderFields: React.FC<Props> = (props) => {
-  const { className, margins, fieldMap } = props
+  const { className, margins, forceRender, fieldMap } = props
 
   const { i18n } = useTranslation()
+  const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
+  const [intersectionRef, entry] = useIntersect(
+    {
+      rootMargin: '1000px',
+    },
+    forceRender,
+  )
+  const isIntersecting = Boolean(entry?.isIntersecting)
+  const isAboveViewport = entry?.boundingClientRect?.top < 0
+  const shouldRender = forceRender || isIntersecting || isAboveViewport
+
+  React.useEffect(() => {
+    if (shouldRender && !hasRendered) {
+      setHasRendered(true)
+    }
+  }, [shouldRender, hasRendered])
 
   if (!fieldMap || (Array.isArray(fieldMap) && fieldMap.length === 0)) {
     console.error('No fieldMap provided when calling RenderFields')
@@ -32,10 +49,12 @@ const RenderFields: React.FC<Props> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
+        ref={intersectionRef}
       >
-        {fieldMap?.map(({ Field, name }, fieldIndex) => (
-          <RenderField key={fieldIndex} name={name} Field={Field} />
-        ))}
+        {hasRendered &&
+          fieldMap?.map(({ Field, name }, fieldIndex) => (
+            <RenderField key={fieldIndex} name={name} Field={Field} />
+          ))}
       </div>
     )
   }

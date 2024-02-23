@@ -3,7 +3,7 @@ import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import type { FieldPermissions } from 'payload/auth'
 import { FieldMap, MappedField } from '@payloadcms/ui'
-import { I18n } from '@payloadcms/translations/types'
+import type { I18n } from '@payloadcms/translations'
 
 export type DiffComponents = Record<string, React.FC<Props>>
 
