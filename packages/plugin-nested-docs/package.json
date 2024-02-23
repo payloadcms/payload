@@ -20,6 +20,9 @@
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
   },
+  "peerDependencies": {
+    "payload": "^0.18.5 || ^1.0.0 || ^2.0.0"
+  },
   "exports": {
     ".": {
       "default": "./src/index.ts",
