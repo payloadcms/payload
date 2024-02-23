@@ -23,16 +23,16 @@
     "bson-objectid": "2.0.4",
     "deepmerge": "4.3.1",
     "get-port": "5.1.1",
+    "http-status": "1.6.2",
     "mongoose": "6.12.3",
     "mongoose-paginate-v2": "1.7.22",
     "prompts": "2.4.2",
-    "http-status": "1.6.2",
     "uuid": "9.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "mongodb": "^6.3.0",
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
-    "mongodb": "4.17.1",
     "mongodb-memory-server": "^9",
     "bson": "^6.3.0",
     "bson-ext": "^4.0.3",
