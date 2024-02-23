@@ -18,10 +18,6 @@
       "import": "./dist/api/index.js",
       "require": "./dist/api/index.js"
     },
-    "./all": {
-      "import": "./dist/all/index.js",
-      "require": "./dist/all/index.js"
-    },
     "./client": {
       "import": "./dist/client/index.js",
       "require": "./dist/client/index.js"

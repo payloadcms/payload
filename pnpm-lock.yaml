@@ -515,7 +515,7 @@ importers:
         specifier: workspace:*
         version: link:../graphql
       '@payloadcms/translations':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../translations
       '@payloadcms/ui':
         specifier: workspace:*

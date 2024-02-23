@@ -23,7 +23,7 @@ const formatDocumentDrawerSlug = ({
 }: {
   collectionSlug: string
   depth: number
-  id: string
+  id: string | number
   uuid: string // supply when creating a new document and no id is available
 }) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 

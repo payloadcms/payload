@@ -49,9 +49,9 @@
   "composite": true, // Required for references to work
   "references": [
     // if your tsconfig is something different
-    // {
-    //   "path": "./packages/db-mongodb"
-    // },
+    {
+      "path": "./packages/db-mongodb"
+    },
     {
       "path": "./packages/db-postgres"
     },

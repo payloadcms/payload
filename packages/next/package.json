@@ -45,7 +45,7 @@
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
     "@payloadcms/graphql": "workspace:*",
-    "@payloadcms/translations": "workspace:^",
+    "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@types/busboy": "^1.5.3",
     "busboy": "^1.6.0",

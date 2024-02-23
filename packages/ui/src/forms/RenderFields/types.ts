@@ -4,4 +4,5 @@ export type Props = {
   className?: string
   margins?: 'small' | false
   fieldMap: FieldMap
+  forceRender?: boolean
 }
