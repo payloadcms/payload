@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import swcRegister from '@swc/register'
-import dotenv from 'dotenv'
-import findUp from 'find-up'
-import fs from 'fs'
 import { getTsconfig as getTSconfig } from 'get-tsconfig'
 import minimist from 'minimist'
 import path from 'path'
 
-import { generateGraphQLSchema } from './generateGraphQLSchema'
+import type { BinScript } from '../config/types'
+
+import loadConfig from '../config/load'
 import { generateTypes } from './generateTypes'
+import { loadEnv } from './loadEnv'
 import { migrate } from './migrate'
 
 loadEnv()
@@ -51,12 +51,25 @@ if (process.env.DISABLE_SWC !== 'true') {
 
 const { build } = require('./build')
 
-const args = minimist(process.argv.slice(2))
+const executeBin = async () => {
+  const args = minimist(process.argv.slice(2))
+  const scriptIndex = args._.findIndex((x) => x === 'build')
+  const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex]
+  const config = await loadConfig()
+  const userBinScript = config.bin.find(({ key }) => key === script)
 
-const scriptIndex = args._.findIndex((x) => x === 'build')
+  if (userBinScript) {
+    try {
+      const script: BinScript = require(userBinScript.scriptPath)
+      await script(config)
+    } catch (err) {
+      console.log(`Could not find associated bin script for the ${userBinScript.key} command`)
+      console.error(err)
+    }
 
-const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex]
-if (script) {
+    return
+  }
+
   if (script.startsWith('migrate')) {
     migrate(args).then(() => process.exit(0))
   } else {
@@ -67,38 +80,15 @@ if (script) {
       }
 
       case 'generate:types': {
-        generateTypes()
+        generateTypes(config)
         break
       }
 
-      case 'generate:graphqlschema': {
-        generateGraphQLSchema()
-        break
-      }
-
-      default:
+        default:
         console.log(`Unknown script "${script}".`)
         break
     }
   }
-} else {
-  console.error('No payload script specified. Did you mean to run `payload migrate`?')
 }
 
-/**
- * Try to find user's .env and load it
- */
-function loadEnv() {
-  const envPath = findUp.sync('.env')
-
-  if (envPath) {
-    dotenv.config({ path: envPath })
-  } else {
-    const cwdPath = path.resolve(process.cwd(), '.env')
-    if (fs.existsSync(cwdPath)) {
-      dotenv.config({
-        path: cwdPath,
-      })
-    }
-  }
-}
+executeBin()

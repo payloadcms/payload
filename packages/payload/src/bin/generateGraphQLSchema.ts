@@ -1,14 +1,14 @@
-/* eslint-disable no-nested-ternary */
 import { configToSchema } from '@payloadcms/graphql'
 import fs from 'fs'
 import { printSchema } from 'graphql'
 
+import type { SanitizedConfig } from '../config/types'
+
 import loadConfig from '../config/load'
 import Logger from '../utilities/logger'
 
-export async function generateGraphQLSchema(): Promise<void> {
+export async function generateGraphQLSchema(config: SanitizedConfig): Promise<void> {
   const logger = Logger()
-  const config = await loadConfig()
 
   const { schema } = await configToSchema(config)
 
@@ -19,6 +19,11 @@ export async function generateGraphQLSchema(): Promise<void> {
 
 // when generateGraphQLSchema.js is launched directly
 if (module.id === require.main.id) {
+  const loadConfigAndGenerateSchema = async () => {
+    const config = await loadConfig()
+    await generateGraphQLSchema(config)
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  generateGraphQLSchema()
+  loadConfigAndGenerateSchema()
 }

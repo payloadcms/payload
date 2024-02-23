@@ -2,13 +2,14 @@
 import fs from 'fs'
 import { compile } from 'json-schema-to-typescript'
 
+import type { SanitizedConfig } from '../config/types'
+
 import loadConfig from '../config/load'
 import { configToJSONSchema } from '../utilities/configToJSONSchema'
 import Logger from '../utilities/logger'
 
-export async function generateTypes(): Promise<void> {
+export function generateTypes(config: SanitizedConfig): void {
   const logger = Logger()
-  const config = await loadConfig()
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
   logger.info('Compiling TS types for Collections and Globals...')
@@ -38,5 +39,10 @@ export async function generateTypes(): Promise<void> {
 
 // when generateTypes.js is launched directly
 if (module.id === require.main.id) {
-  generateTypes()
+  const loadConfigAndGenerateTypes = async () => {
+    const config = await loadConfig()
+    generateTypes(config)
+  }
+
+  loadConfigAndGenerateTypes()
 }

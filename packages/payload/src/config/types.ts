@@ -26,6 +26,13 @@ import type { PayloadRequest } from '../types'
 import type { Where } from '../types'
 import type { PayloadLogger } from '../utilities/logger'
 
+export type BinScriptConfig = {
+  key: string
+  scriptPath: string
+}
+
+export type BinScript = (config: SanitizedConfig) => Promise<void> | void
+
 type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
@@ -538,6 +545,8 @@ export type Config = {
     /** The slug of a Collection that you want be used to log in to the Admin dashboard. */
     user?: string
   }
+  /** Custom Payload bin scripts can be injected via the config. */
+  bin?: BinScriptConfig[]
   /**
    * Manage the datamodel of your application
    *
