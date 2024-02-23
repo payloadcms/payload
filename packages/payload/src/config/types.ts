@@ -170,14 +170,6 @@ export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express
 
-  /**
-   * Make Payload start in local-only mode.
-   *
-   * This will bypass setting up REST and GraphQL API routes.
-   * Express will not be required if set to `true`.
-   */
-  local?: boolean
-
   loggerDestination?: DestinationStream
 
   /**

@@ -41,7 +41,6 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
   await payload.init({
     config: loadConfig(),
     disableOnInit: true,
-    local: true,
     ...prettySyncLogger,
   })
 
