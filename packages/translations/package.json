@@ -5,9 +5,13 @@
   "main": "./dist/exports/index.ts",
   "types": "./dist/types.d.ts",
   "scripts": {
-    "build": "npx ts-node ./src/build.ts && tsc",
+    "writeFiles": "npx ts-node ./writeTranslationFiles.ts",
+    "build": "pnpm writeFiles && tsc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "exports": {
     ".": {
@@ -15,12 +19,12 @@
       "require": "./dist/exports/index.js"
     },
     "./api": {
-      "import": "./dist/api/index.js",
-      "require": "./dist/api/index.js"
+      "import": "./dist/_generatedFiles_/api/index.js",
+      "require": "./dist/_generatedFiles_/api/index.js"
     },
     "./client": {
-      "import": "./dist/client/index.js",
-      "require": "./dist/client/index.js"
+      "import": "./dist/_generatedFiles_/client/index.js",
+      "require": "./dist/_generatedFiles_/client/index.js"
     }
   },
   "devDependencies": {

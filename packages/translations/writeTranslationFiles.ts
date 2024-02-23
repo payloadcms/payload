@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { transpileAndCopy } from './utilities/transpileAndCopy'
-import { ensureDirectoryExists } from './utilities/ensureDirExists'
+import { ensureDirectoryExists } from './src/utilities/ensureDirExists'
+import { copyFile } from './src/utilities/copyFile'
 
 const serverTranslationKeys = [
   'authentication:account',
@@ -343,8 +343,8 @@ const clientTranslationKeys = [
   'version:viewingVersionsGlobal',
 ]
 
-const DESTINATION_ROOT = '../dist'
-const SOURCE_DIR = './all'
+const DESTINATION_ROOT = './src/_generatedFiles_'
+const SOURCE_DIR = './src/all'
 
 function filterKeys(obj, parentGroupKey = '', keys) {
   const result = {}
@@ -484,21 +484,21 @@ async function build() {
       },
     )
 
-    console.info(filename, ': sync complete')
+    console.info('Rebuilt:', filename)
   }
 
   // build up the client and server schema files after the translation files have been built
   buildSchemaFile('client')
   buildSchemaFile('server')
 
-  // copy barrel files
-  await transpileAndCopy(
-    path.resolve(__dirname, SOURCE_DIR, 'index.ts'),
-    path.resolve(__dirname, `${DESTINATION_ROOT}/api`, 'index.ts'),
+  // copy barrel file to both client and api folders
+  copyFile(
+    path.resolve(__dirname, `${SOURCE_DIR}/index.ts`),
+    path.resolve(__dirname, `${DESTINATION_ROOT}/api/index.ts`),
   )
-  await transpileAndCopy(
-    path.resolve(__dirname, SOURCE_DIR, 'index.ts'),
-    path.resolve(__dirname, `${DESTINATION_ROOT}/client`, 'index.ts'),
+  copyFile(
+    path.resolve(__dirname, `${SOURCE_DIR}/index.ts`),
+    path.resolve(__dirname, `${DESTINATION_ROOT}/client/index.ts`),
   )
 }
 
