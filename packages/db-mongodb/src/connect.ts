@@ -6,12 +6,12 @@ import mongoose from 'mongoose'
 
 import type { MongooseAdapter } from '.'
 
-export const connect: Connect = async function connect(this: MongooseAdapter, payload) {
+export const connect: Connect = async function connect(this: MongooseAdapter) {
   if (this.url === false) {
     return
   }
 
-  if (!payload.local && typeof this.url !== 'string') {
+  if (typeof this.url !== 'string') {
     throw new Error('Error: missing MongoDB connection URL.')
   }
 

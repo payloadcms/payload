@@ -183,8 +183,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   globals: Globals
 
-  local: boolean
-
   logger: pino.Logger
 
   login = async <T extends keyof TGeneratedTypes['collections']>(
