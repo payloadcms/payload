@@ -291,13 +291,14 @@ describe('Versions', () => {
         )
       })
 
-      it('should save to version table with correct hasMany select field value (fix #5157)', async () => {
+      // https://github.com/payloadcms/payload/issues/5157
+      it('should save to version table with correct hasMany select field value', async () => {
         // save draft
         const post = await payload.create({
           collection: versionCollectionSlug,
           draft: true,
           data: {
-            title: 'this is title',
+            title: 'title1',
             description: 'this is description',
           },
         })
@@ -305,19 +306,22 @@ describe('Versions', () => {
         await payload.update({
           collection: versionCollectionSlug,
           id: post.id,
-          data: { title: 'this is updated title', tags: ['tag1'], _status: 'published' },
+          data: { title: 'title2', tags: ['tag1'], _status: 'published' },
         })
 
         const versions = await payload.findVersions({
           collection: versionCollectionSlug,
           draft: true,
           where: { parent: { equals: post.id } },
-          sort: 'id',
         })
-        expect(versions.docs.map(({ id, version: { tags } }) => ({ id, tags }))).toStrictEqual([
-          { id: 1, tags: [] },
-          { id: 2, tags: ['tag1'] },
-        ])
+        expect(
+          versions.docs.map(({ version: { title, tags } }) => ({ title, tags })),
+        ).toStrictEqual(
+          expect.arrayContaining([
+            { title: 'title1', tags: [] },
+            { title: 'title2', tags: ['tag1'] },
+          ]),
+        )
       })
     })
 
