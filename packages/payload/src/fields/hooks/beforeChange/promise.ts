@@ -57,7 +57,7 @@ export const promise = async ({
   skipValidation,
 }: Args): Promise<void> => {
   const passesCondition = field.admin?.condition
-    ? field.admin.condition(data, siblingData, { user: req.user })
+    ? Boolean(field.admin.condition(data, siblingData, { user: req.user }))
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
 
