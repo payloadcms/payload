@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { Button, MinimalTemplate } from '@payloadcms/ui'
+import { MinimalTemplate } from '@payloadcms/ui'
 import React from 'react'
 
 import { getNextT } from '../../utilities/getNextT'
@@ -12,12 +12,14 @@ import './index.scss'
 const baseClass = 'logout'
 
 export const generateMetadata = async ({
-  config,
+  config: configPromise,
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
+  const config = await configPromise
+
   const t = await getNextT({
-    config: await config,
+    config,
   })
 
   return meta({

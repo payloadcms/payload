@@ -30,7 +30,9 @@ import { initPage } from '../../utilities/initPage'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
 export type GenerateEditViewMetadata = (args: {
-  config: Promise<SanitizedConfig>
+  collectionSlug?: string
+  config: SanitizedConfig
+  globalSlug?: string
   isEditing: boolean
   t: TFunction
 }) => Promise<Metadata>
@@ -82,7 +84,13 @@ export const generateMetadata = async ({
   })
 
   if (typeof fn === 'function') {
-    return fn({ config, isEditing, t })
+    return fn({
+      collectionSlug: params.collection,
+      config: await config,
+      globalSlug: params.global,
+      isEditing,
+      t,
+    })
   }
 }
 

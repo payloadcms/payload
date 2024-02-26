@@ -13,12 +13,14 @@ import './index.scss'
 const baseClass = 'verify'
 
 export const generateMetadata = async ({
-  config,
+  config: configPromise,
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
+  const config = await configPromise
+
   const t = await getNextT({
-    config: await config,
+    config,
   })
 
   return meta({
