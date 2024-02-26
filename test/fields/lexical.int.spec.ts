@@ -225,7 +225,7 @@ describe('Lexical', () => {
     })
   })
   describe('converters and migrations', () => {
-    it('hTMLConverter: should output correct HTML for top-level lexical field', async () => {
+    it('htmlConverter: should output correct HTML for top-level lexical field', async () => {
       const lexicalDoc: LexicalMigrateField = (
         await payload.find({
           collection: lexicalMigrateFieldsSlug,
@@ -241,7 +241,7 @@ describe('Lexical', () => {
       const htmlField: string = lexicalDoc?.lexicalSimple_html
       expect(htmlField).toStrictEqual('<p>simple</p>')
     })
-    it('hTMLConverter: should output correct HTML for lexical field nested in group', async () => {
+    it('htmlConverter: should output correct HTML for lexical field nested in group', async () => {
       const lexicalDoc: LexicalMigrateField = (
         await payload.find({
           collection: lexicalMigrateFieldsSlug,
@@ -257,7 +257,7 @@ describe('Lexical', () => {
       const htmlField: string = lexicalDoc?.groupWithLexicalField?.lexicalInGroupField_html
       expect(htmlField).toStrictEqual('<p>group</p>')
     })
-    it('hTMLConverter: should output correct HTML for lexical field nested in array', async () => {
+    it('htmlConverter: should output correct HTML for lexical field nested in array', async () => {
       const lexicalDoc: LexicalMigrateField = (
         await payload.find({
           collection: lexicalMigrateFieldsSlug,

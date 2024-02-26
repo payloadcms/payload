@@ -204,9 +204,9 @@ export const Document = async ({
     DefaultView = globalViews?.DefaultView
 
     data = await payload.findGlobal({
+      slug: globalSlug,
       depth: 0,
       locale: locale.code,
-      slug: globalSlug,
       user,
     })
 

@@ -7,7 +7,7 @@ export const TreeViewFeature = (): FeatureProvider => {
         plugins: [
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugin').then((module) => module.TreeViewPlugin),
             position: 'bottom',
           },

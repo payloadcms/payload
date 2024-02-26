@@ -1,7 +1,5 @@
 'use client'
 
-// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
-// import TextInput from 'payload/dist/admin/components/forms/field-types/Text/Input'
 import type {
   FieldType as FieldType,
   Options,
@@ -130,7 +128,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
           width: '100%',
         }}
       >
-        <LengthIndicator maxLength={maxLength} minLength={minLength} text={value as string} />
+        <LengthIndicator maxLength={maxLength} minLength={minLength} text={value} />
       </div>
     </div>
   )

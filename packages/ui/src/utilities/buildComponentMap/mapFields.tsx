@@ -80,7 +80,7 @@ export const mapFields = (args: {
         const labelProps: LabelProps = {
           htmlFor: 'TODO',
           // TODO: fix types
-          // @ts-ignore-next-line
+          // @ts-expect-error-next-line
           label: 'label' in field ? field.label : null,
           required: 'required' in field ? field.required : undefined,
         }
@@ -153,10 +153,10 @@ export const mapFields = (args: {
             })
 
             const reducedBlock: ReducedBlock = {
+              slug: block.slug,
               imageAltText: block.imageAltText,
               imageURL: block.imageURL,
               labels: block.labels,
-              slug: block.slug,
               subfields: blockFieldMap,
             }
 
@@ -245,8 +245,8 @@ export const mapFields = (args: {
           blocks:
             'blocks' in field &&
             field.blocks.map((b) => ({
-              labels: b.labels,
               slug: b.slug,
+              labels: b.labels,
             })),
           dateDisplayFormat: 'date' in field.admin ? field.admin.date.displayFormat : undefined,
           fieldType: field.type,
@@ -259,13 +259,18 @@ export const mapFields = (args: {
           options: 'options' in field ? field.options : undefined,
         }
 
+        /**
+         * Handle RichText Field Components, Cell Components, and component maps
+         */
         if (field.type === 'richText' && 'editor' in field) {
-          let RichTextComponent
+          let RichTextFieldComponent
+          let RichTextCellComponent
 
-          const isLazy = 'LazyFieldComponent' in field.editor
+          const isLazyField = 'LazyFieldComponent' in field.editor
+          const isLazyCell = 'LazyCellComponent' in field.editor
 
-          if (isLazy) {
-            RichTextComponent = React.lazy(() => {
+          if (isLazyField) {
+            RichTextFieldComponent = React.lazy(() => {
               return 'LazyFieldComponent' in field.editor
                 ? field.editor.LazyFieldComponent().then((resolvedComponent) => ({
                     default: resolvedComponent,
@@ -273,22 +278,39 @@ export const mapFields = (args: {
                 : null
             })
           } else if ('FieldComponent' in field.editor) {
-            RichTextComponent = field.editor.FieldComponent
+            RichTextFieldComponent = field.editor.FieldComponent
+          }
+
+          if (isLazyCell) {
+            RichTextCellComponent = React.lazy(() => {
+              return 'LazyCellComponent' in field.editor
+                ? field.editor.LazyCellComponent().then((resolvedComponent) => ({
+                    default: resolvedComponent,
+                  }))
+                : null
+            })
+          } else if ('CellComponent' in field.editor) {
+            RichTextCellComponent = field.editor.CellComponent
           }
 
           if (typeof field.editor.generateComponentMap === 'function') {
             const result = field.editor.generateComponentMap({ config, schemaPath: path })
-            // @ts-ignore-next-line // TODO: the `richTextComponentMap` is not found on the union type
+            // @ts-expect-error-next-line // TODO: the `richTextComponentMap` is not found on the union type
             fieldComponentProps.richTextComponentMap = result
           }
 
-          if (RichTextComponent) {
-            Field = <RichTextComponent {...fieldComponentProps} />
+          if (RichTextFieldComponent) {
+            Field = <RichTextFieldComponent {...fieldComponentProps} />
+          }
+
+          if (RichTextCellComponent) {
+            cellComponentProps.CellComponentOverride = RichTextCellComponent
           }
         }
 
         const reducedField: MappedField = {
           name: 'name' in field ? field.name : '',
+          type: field.type,
           Cell: (
             <RenderCustomComponent
               CustomComponent={field.admin?.components?.Cell}
@@ -326,7 +348,6 @@ export const mapFields = (args: {
           readOnly,
           subfields: nestedFieldMap,
           tabs,
-          type: field.type,
         }
 
         if (FieldComponent) {
@@ -344,6 +365,7 @@ export const mapFields = (args: {
   if (!hasID) {
     result.push({
       name: 'id',
+      type: 'text',
       Cell: typeof DefaultCell === 'function' ? <DefaultCell name="id" /> : null,
       Field: <HiddenInput name="id" />,
       Heading: <SortColumn label="ID" name="id" />,
@@ -355,7 +377,6 @@ export const mapFields = (args: {
       readOnly: false,
       subfields: [],
       tabs: [],
-      type: 'text',
     })
   }
 

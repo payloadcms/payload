@@ -11,7 +11,6 @@ import { translations } from '@payloadcms/translations/client'
 import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
-import { parseCookies } from 'payload/auth'
 import qs from 'qs'
 
 import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
@@ -45,11 +44,9 @@ export const initPage = async ({
   user: Awaited<ReturnType<typeof auth>>['user']
 }> => {
   const headers = getHeaders()
-  const cookies = parseCookies(headers)
 
-  const { permissions, user } = await auth({
+  const { cookies, permissions, user } = await auth({
     config: configPromise,
-    cookies,
     headers,
   })
 
@@ -71,7 +68,7 @@ export const initPage = async ({
     config,
   })
 
-  const i18n = await initI18n({
+  const i18n = initI18n({
     config: config.i18n,
     context: 'client',
     language,

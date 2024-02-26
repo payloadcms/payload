@@ -17,7 +17,7 @@ export type SerializedUnknownConvertedNode = Spread<
 >
 
 const Component = React.lazy(() =>
-  // @ts-ignore-next-line TypeScript being dumb
+  // @ts-expect-error-next-line TypeScript being dumb
   import('./Component').then((module) => ({
     default: module.UnknownConvertedNodeComponent,
   })),
@@ -68,8 +68,8 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
 
   exportJSON(): SerializedUnknownConvertedNode {
     return {
-      data: this.__data,
       type: this.getType(),
+      data: this.__data,
       version: 1,
     }
   }

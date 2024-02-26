@@ -7,6 +7,7 @@ import { convertSlateNodesToLexical } from '..'
 export const SlateUnorderedListConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
+      type: 'list',
       children: convertSlateNodesToLexical({
         canContainParagraphs: false,
         converters,
@@ -19,7 +20,6 @@ export const SlateUnorderedListConverter: SlateNodeConverter = {
       listType: 'bullet',
       start: 1,
       tag: 'ul',
-      type: 'list',
       version: 1,
     } as const as SerializedListNode
   },

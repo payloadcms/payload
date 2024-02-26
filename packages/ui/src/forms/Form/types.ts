@@ -15,6 +15,7 @@ export type FormField = {
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: Set<string>
+  fieldSchema?: FieldConfig
   initialValue: unknown
   passesCondition?: boolean
   rows?: Row[]

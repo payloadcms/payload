@@ -118,9 +118,9 @@ const Element: React.FC<Props & { enabledCollectionSlugs?: string[] }> = ({
   const swapUpload = React.useCallback(
     ({ collectionSlug, docID }) => {
       const newNode = {
+        type: uploadName,
         children: [{ text: ' ' }],
         relationTo: collectionSlug,
-        type: uploadName,
         value: { id: docID },
       }
 

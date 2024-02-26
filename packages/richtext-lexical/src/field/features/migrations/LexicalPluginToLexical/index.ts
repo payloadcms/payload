@@ -44,8 +44,8 @@ export const LexicalPluginToLexicalFeature = (props?: Props): FeatureProvider =>
         },
         nodes: [
           {
-            node: UnknownConvertedNode,
             type: UnknownConvertedNode.getType(),
+            node: UnknownConvertedNode,
           },
         ],
         props,

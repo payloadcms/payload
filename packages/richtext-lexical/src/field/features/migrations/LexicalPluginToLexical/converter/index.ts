@@ -16,6 +16,7 @@ export function convertLexicalPluginToLexical({
 }): SerializedEditorState {
   return {
     root: {
+      type: 'root',
       children: convertLexicalPluginNodesToLexical({
         converters,
         lexicalPluginNodes: lexicalPluginData?.jsonContent?.root?.children || [],
@@ -24,7 +25,6 @@ export function convertLexicalPluginToLexical({
       direction: lexicalPluginData?.jsonContent?.root?.direction || 'ltr',
       format: lexicalPluginData?.jsonContent?.root?.format || '',
       indent: lexicalPluginData?.jsonContent?.root?.indent || 0,
-      type: 'root',
       version: 1,
     },
   }
@@ -79,13 +79,13 @@ export function convertParagraphNode(
 ): SerializedParagraphNode {
   return {
     ...node,
+    type: 'paragraph',
+
     children: convertLexicalPluginNodesToLexical({
       converters,
       lexicalPluginNodes: (node as any).children || [],
       parentNodeType: 'paragraph',
     }),
-
-    type: 'paragraph',
     version: 1,
   } as SerializedParagraphNode
 }

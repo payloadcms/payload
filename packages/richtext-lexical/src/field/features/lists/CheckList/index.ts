@@ -18,7 +18,7 @@ export const CheckListFeature = (): FeatureProvider => {
             TextDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   import('../../../lexical/ui/icons/Checklist').then(
                     (module) => module.ChecklistIcon,
                   ),
@@ -39,24 +39,24 @@ export const CheckListFeature = (): FeatureProvider => {
             ? []
             : [
                 {
+                  type: ListNode.getType(),
                   converters: {
                     html: ListHTMLConverter,
                   },
                   node: ListNode,
-                  type: ListNode.getType(),
                 },
                 {
+                  type: ListItemNode.getType(),
                   converters: {
                     html: ListItemHTMLConverter,
                   },
                   node: ListItemNode,
-                  type: ListItemNode.getType(),
                 },
               ],
         plugins: [
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugin').then((module) => module.LexicalCheckListPlugin),
             position: 'normal',
           },
@@ -70,7 +70,7 @@ export const CheckListFeature = (): FeatureProvider => {
               options: [
                 new SlashMenuOption('checklist', {
                   Icon: () =>
-                    // @ts-ignore-next-line
+                    // @ts-expect-error-next-line
                     import('../../../lexical/ui/icons/Checklist').then(
                       (module) => module.ChecklistIcon,
                     ),

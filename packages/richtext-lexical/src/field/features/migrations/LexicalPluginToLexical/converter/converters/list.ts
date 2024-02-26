@@ -8,6 +8,7 @@ export const ListConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {
     return {
       ...lexicalPluginNode,
+      type: 'list',
       children: convertLexicalPluginNodesToLexical({
         converters,
         lexicalPluginNodes: (lexicalPluginNode as any).children || [],
@@ -15,7 +16,6 @@ export const ListConverter: LexicalPluginNodeConverter = {
       }),
       listType: (lexicalPluginNode as any)?.listType || 'number',
       tag: (lexicalPluginNode as any)?.tag || 'ol',
-      type: 'list',
       version: 1,
     } as const as SerializedListNode
   },

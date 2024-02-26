@@ -6,7 +6,6 @@ import { DateCell } from './Date'
 import { FileCell } from './File'
 import { JSONCell } from './JSON'
 import { RelationshipCell } from './Relationship'
-import { RichTextCell } from './Richtext'
 import { SelectCell } from './Select'
 import { TextareaCell } from './Textarea'
 
@@ -20,7 +19,6 @@ export default {
   json: JSONCell,
   radio: SelectCell,
   relationship: RelationshipCell,
-  richText: RichTextCell,
   select: SelectCell,
   textarea: TextareaCell,
   upload: RelationshipCell,

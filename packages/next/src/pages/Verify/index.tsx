@@ -5,7 +5,7 @@ import { Button, Logo, MinimalTemplate } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
-import { getNextT } from '../../utilities/getNextT'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import './index.scss'
@@ -19,7 +19,7 @@ export const generateMetadata = async ({
 }): Promise<Metadata> => {
   const config = await configPromise
 
-  const t = await getNextT({
+  const { t } = await getNextI18n({
     config,
   })
 

@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { MinimalTemplate } from '@payloadcms/ui'
-import { Logo } from '@payloadcms/ui/graphics'
+import { Logo, MinimalTemplate } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React, { Fragment } from 'react'
 
-import { getNextT } from '../../utilities/getNextT'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { LoginForm } from './LoginForm'
@@ -21,7 +20,7 @@ export const generateMetadata = async ({
 }): Promise<Metadata> => {
   const config = await configPromise
 
-  const t = await getNextT({
+  const { t } = await getNextI18n({
     config,
   })
 

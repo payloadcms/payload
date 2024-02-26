@@ -21,7 +21,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
             TextDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   import('../../lexical/ui/icons/Blockquote').then(
                     (module) => module.BlockquoteIcon,
                   ),
@@ -72,7 +72,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
               options: [
                 new SlashMenuOption(`blockquote`, {
                   Icon: () =>
-                    // @ts-ignore-next-line
+                    // @ts-expect-error-next-line
                     import('../../lexical/ui/icons/Blockquote').then(
                       (module) => module.BlockquoteIcon,
                     ),

@@ -79,8 +79,8 @@ export const BlocksDrawerComponent: React.FC = () => {
   )
 
   const drawerSlug = formatDrawerSlug({
-    depth: editDepth,
     slug: `lexical-rich-text-blocks-` + uuid,
+    depth: editDepth,
   })
 
   const blocks = (editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps)

@@ -7,6 +7,7 @@ import { convertSlateNodesToLexical } from '../index'
 export const SlateBlockquoteConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
+      type: 'quote',
       children: convertSlateNodesToLexical({
         canContainParagraphs: false,
         converters,
@@ -16,7 +17,6 @@ export const SlateBlockquoteConverter: SlateNodeConverter = {
       direction: 'ltr',
       format: '',
       indent: 0,
-      type: 'quote',
       version: 1,
     } as const as SerializedQuoteNode
   },

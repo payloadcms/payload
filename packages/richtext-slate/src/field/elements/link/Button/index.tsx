@@ -32,12 +32,12 @@ const insertLink = (editor, fields) => {
   const data = reduceFieldsToValues(fields, true)
 
   const newLink = {
+    type: 'link',
     children: [],
     doc: data.doc,
     fields: data.fields, // Any custom user-added fields are part of data.fields
     linkType: data.linkType,
     newTab: data.newTab,
-    type: 'link',
     url: data.url,
   }
 

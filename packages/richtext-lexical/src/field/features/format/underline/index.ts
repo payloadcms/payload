@@ -13,7 +13,7 @@ export const UnderlineTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   import('../../../lexical/ui/icons/Underline').then(
                     (module) => module.UnderlineIcon,
                   ),

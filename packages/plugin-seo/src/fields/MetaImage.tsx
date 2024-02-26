@@ -1,9 +1,7 @@
 'use client'
 
-import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
-// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
-// import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input'
 import type { Props as UploadInputProps } from 'payload/components/fields/Upload'
+import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 
 import { UploadInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useConfig, useDocumentInfo, useLocale } from 'payload/components/utilities'

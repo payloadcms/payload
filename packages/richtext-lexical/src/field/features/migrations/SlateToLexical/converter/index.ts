@@ -18,6 +18,7 @@ export function convertSlateToLexical({
 }): SerializedEditorState {
   return {
     root: {
+      type: 'root',
       children: convertSlateNodesToLexical({
         canContainParagraphs: true,
         converters,
@@ -27,7 +28,6 @@ export function convertSlateToLexical({
       direction: 'ltr',
       format: '',
       indent: 0,
-      type: 'root',
       version: 1,
     },
   }
@@ -85,6 +85,7 @@ export function convertParagraphNode(
   node: SlateNode,
 ): SerializedParagraphNode {
   return {
+    type: 'paragraph',
     children: convertSlateNodesToLexical({
       canContainParagraphs: false,
       converters,
@@ -94,18 +95,17 @@ export function convertParagraphNode(
     direction: 'ltr',
     format: '',
     indent: 0,
-    type: 'paragraph',
     version: 1,
   }
 }
 export function convertTextNode(node: SlateNode): SerializedTextNode {
   return {
+    type: 'text',
     detail: 0,
     format: convertNodeToFormat(node),
     mode: 'normal',
     style: '',
     text: node.text,
-    type: 'text',
     version: 1,
   }
 }
