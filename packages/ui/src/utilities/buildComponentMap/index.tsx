@@ -69,20 +69,24 @@ export const buildComponentMap = (args: {
     const afterListTable = collectionConfig?.admin?.components?.AfterListTable
 
     const BeforeList =
-      beforeList && Array.isArray(beforeList) && beforeList?.map((Component) => <Component />)
+      (beforeList && Array.isArray(beforeList) && beforeList?.map((Component) => <Component />)) ||
+      null
 
     const BeforeListTable =
-      beforeListTable &&
-      Array.isArray(beforeListTable) &&
-      beforeListTable?.map((Component) => <Component />)
+      (beforeListTable &&
+        Array.isArray(beforeListTable) &&
+        beforeListTable?.map((Component) => <Component />)) ||
+      null
 
     const AfterList =
-      afterList && Array.isArray(afterList) && afterList?.map((Component) => <Component />)
+      (afterList && Array.isArray(afterList) && afterList?.map((Component) => <Component />)) ||
+      null
 
     const AfterListTable =
-      afterListTable &&
-      Array.isArray(afterListTable) &&
-      afterListTable?.map((Component) => <Component />)
+      (afterListTable &&
+        Array.isArray(afterListTable) &&
+        afterListTable?.map((Component) => <Component />)) ||
+      null
 
     const mappedFields = mapFields({
       DefaultCell,

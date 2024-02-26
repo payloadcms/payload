@@ -17,7 +17,7 @@ import DefaultLabel from '../../forms/Label'
 import { fieldTypes } from '../../forms/fields'
 
 export const mapFields = (args: {
-  DefaultCell: React.FC<any>
+  DefaultCell?: React.FC<any>
   config: SanitizedConfig
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
@@ -344,7 +344,7 @@ export const mapFields = (args: {
   if (!hasID) {
     result.push({
       name: 'id',
-      Cell: <DefaultCell name="id" />,
+      Cell: typeof DefaultCell === 'function' ? <DefaultCell name="id" /> : null,
       Field: <HiddenInput name="id" />,
       Heading: <SortColumn label="ID" name="id" />,
       fieldIsPresentational: false,

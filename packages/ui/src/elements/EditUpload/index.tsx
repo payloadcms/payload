@@ -1,3 +1,4 @@
+'use client'
 import type { Data } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'

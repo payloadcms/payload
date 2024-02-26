@@ -10,10 +10,10 @@ export const PostsCollection: CollectionConfig = {
       name: 'text',
       type: 'text',
     },
-    {
-      name: 'richText',
-      type: 'richText',
-    },
+    // {
+    //   name: 'richText',
+    //   type: 'richText',
+    // },
     {
       name: 'associatedMedia',
       access: {
