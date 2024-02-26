@@ -1,4 +1,4 @@
-import type { GenerateEditViewMetadata } from '../Document'
+import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment'
 
 import { meta } from '../../utilities/meta'
 

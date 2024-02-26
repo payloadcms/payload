@@ -1,14 +1,10 @@
-import type { I18n, TFunction } from '@payloadcms/translations'
 import type { QueryParamTypes } from '@payloadcms/ui'
-import type { Metadata } from 'next'
 import type { AdminViewComponent } from 'payload/config'
 import type {
   DocumentPreferences,
   Document as DocumentType,
   Field,
-  SanitizedCollectionConfig,
   SanitizedConfig,
-  SanitizedGlobalConfig,
 } from 'payload/types'
 import type { DocumentPermissions } from 'payload/types'
 
@@ -27,94 +23,18 @@ import React, { Fragment } from 'react'
 
 import type { ServerSideEditViewProps } from '../Edit/types'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
-import { meta } from '../../utilities/meta.ts'
+import { getMetaBySegment } from './getMetaBySegment.tsx'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
-export type GenerateEditViewMetadata = (args: {
-  collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
-  globalConfig?: SanitizedGlobalConfig
-  i18n: I18n
-  isEditing: boolean
-}) => Promise<Metadata>
-
-export const generateMetadata = async ({
-  config: configPromise,
-  params,
-}: {
+export const generateMetadata = async (args: {
   config: Promise<SanitizedConfig>
   params: {
     collection?: string
     global?: string
     segments: string[]
   }
-}): Promise<Metadata> => {
-  const config = await configPromise
-
-  let fn: GenerateEditViewMetadata | null = null
-
-  const isEditing = Boolean(
-    params.collection && params.segments?.length > 0 && params.segments[0] !== 'create',
-  )
-
-  if (params?.segments?.length) {
-    // `/:id`
-    if (params.segments.length === 1) {
-      fn = await import('../Edit/meta.ts').then((mod) => mod.generateMetadata)
-    }
-
-    // `/:id/api`
-    if (params.segments.length === 2 && params.segments[1] === 'api') {
-      fn = await import('../API/meta.ts').then((mod) => mod.generateMetadata)
-    }
-
-    // `/:id/preview`
-    if (params.segments.length === 2 && params.segments[1] === 'preview') {
-      fn = await import('../LivePreview/meta.ts').then((mod) => mod.generateMetadata)
-    }
-
-    // `/:id/versions`
-    if (params.segments.length === 2 && params.segments[1] === 'versions') {
-      fn = await import('../Versions/meta.ts').then((mod) => mod.generateMetadata)
-    }
-
-    // `/:id/versions/:version`
-    if (params.segments.length === 3 && params.segments[1] === 'versions') {
-      fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
-    }
-  }
-
-  const i18n = await getNextI18n({
-    config,
-  })
-
-  const collectionConfig = params.collection
-    ? config?.collections?.find((collection) => collection.slug === params.collection)
-    : null
-
-  const globalConfig = params.global
-    ? config?.globals?.find((global) => global.slug === params.global)
-    : null
-
-  if (typeof fn === 'function') {
-    return fn({
-      collectionConfig,
-      config,
-      globalConfig,
-      i18n,
-      isEditing,
-    })
-  }
-
-  return meta({
-    config,
-    description: '',
-    keywords: '',
-    title: '',
-  })
-}
+}) => getMetaBySegment(args)
 
 export const Document = async ({
   config: configPromise,
