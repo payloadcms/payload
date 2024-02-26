@@ -1,13 +1,13 @@
 'use client'
-import React, { useEffect, useState } from 'react'
-import { useTranslation } from '../../../../../providers/Translation'
-
 import type { CellComponentProps, CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import React, { useEffect, useState } from 'react'
+
 import { useIntersect } from '../../../../../hooks/useIntersect'
-import { formatDocTitle } from '../../../../../utilities/formatDocTitle'
 import { useConfig } from '../../../../../providers/Config'
+import { useTranslation } from '../../../../../providers/Translation'
+import { formatDocTitle } from '../../../../../utilities/formatDocTitle'
 import { useListRelationships } from '../../../RelationshipProvider'
 import './index.scss'
 
@@ -16,14 +16,14 @@ const baseClass = 'relationship-cell'
 const totalToShow = 3
 
 export interface RelationshipCellProps extends CellComponentProps<any> {
-  relationTo: CellProps['relationTo']
   label: CellProps['label']
+  relationTo: CellProps['relationTo']
 }
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   cellData,
-  relationTo,
   label,
+  relationTo,
 }) => {
   const config = useConfig()
   const { collections, routes } = config
@@ -77,9 +77,9 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
         const relatedCollection = collections.find(({ slug }) => slug === relationTo)
 
         const label = formatDocTitle({
-          useAsTitle: relatedCollection?.admin?.useAsTitle,
           doc: document === false ? null : document,
           i18n,
+          useAsTitle: relatedCollection?.admin?.useAsTitle,
         })
 
         return (

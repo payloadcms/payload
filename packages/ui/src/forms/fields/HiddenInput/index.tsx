@@ -13,7 +13,7 @@ import { withCondition } from '../../withCondition'
 const HiddenInput: React.FC<Props> = (props) => {
   const { name, disableModifyingForm = true, path: pathFromProps, value: valueFromProps } = props
 
-  const { setValue, value, path } = useField({
+  const { path, setValue, value } = useField({
     path: pathFromProps || name,
   })
 

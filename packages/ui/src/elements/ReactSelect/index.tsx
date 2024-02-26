@@ -2,16 +2,16 @@
 import type { KeyboardEventHandler } from 'react'
 
 import { arrayMove } from '@dnd-kit/sortable'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
 import type { Option } from './types'
 import type { Props as ReactSelectAdapterProps } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
 import { Chevron } from '../../icons/Chevron'
+import { useTranslation } from '../../providers/Translation'
 import DraggableSortable from '../DraggableSortable'
 import { ClearIndicator } from './ClearIndicator'
 import { Control } from './Control'

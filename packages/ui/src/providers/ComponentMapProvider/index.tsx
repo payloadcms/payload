@@ -1,15 +1,16 @@
 'use client'
 import React, { createContext, useCallback, useContext } from 'react'
-import { ComponentMap, FieldMap, MappedField } from '../../utilities/buildComponentMap/types'
+
+import type { ComponentMap, FieldMap, MappedField } from '../../utilities/buildComponentMap/types'
 
 export type IComponentMapContext = {
   componentMap: ComponentMap
+  getFieldMap: (args: { collectionSlug?: string; globalSlug?: string }) => [] | FieldMap
   getMappedFieldByPath: (args: {
-    path: string
     collectionSlug?: string
     globalSlug?: string
+    path: string
   }) => MappedField | undefined
-  getFieldMap: (args: { collectionSlug?: string; globalSlug?: string }) => FieldMap | []
 }
 
 const ComponentMapContext = createContext<IComponentMapContext>({} as IComponentMapContext)
@@ -52,7 +53,7 @@ export const ComponentMapProvider: React.FC<{
   )
 
   return (
-    <ComponentMapContext.Provider value={{ componentMap, getMappedFieldByPath, getFieldMap }}>
+    <ComponentMapContext.Provider value={{ componentMap, getFieldMap, getMappedFieldByPath }}>
       {children}
     </ComponentMapContext.Provider>
   )

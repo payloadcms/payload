@@ -1,35 +1,36 @@
 'use client'
+import type { Validate } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
+
+import { useTranslation } from '../../../providers/Translation'
+import LabelComp from '../../Label'
+import useField from '../../useField'
 import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
-import { useTranslation } from '../../../providers/Translation'
-import { Validate } from 'payload/types'
-import useField from '../../useField'
-import { getTranslation } from '@payloadcms/translations'
-import LabelComp from '../../Label'
-
 import './index.scss'
 
 export const Email: React.FC<Props> = (props) => {
   const {
     name,
-    className,
-    path: pathFromProps,
-    autoComplete,
-    readOnly,
-    style,
-    width,
+    AfterInput,
+    BeforeInput,
+    Description,
     Error,
     Label: LabelFromProps,
+    autoComplete,
+    className,
     label,
-    BeforeInput,
-    AfterInput,
-    Description,
-    required,
-    validate,
+    path: pathFromProps,
     placeholder,
+    readOnly,
+    required,
+    style,
+    validate,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -45,9 +46,9 @@ export const Email: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { setValue, showError, value, path } = useField({
-    validate: memoizedValidate,
+  const { path, setValue, showError, value } = useField({
     path: pathFromProps || name,
+    validate: memoizedValidate,
   })
 
   return (

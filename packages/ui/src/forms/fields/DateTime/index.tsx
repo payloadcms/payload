@@ -1,15 +1,15 @@
 'use client'
+import type { Validate } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { fieldBaseClass } from '../shared'
 import DatePickerField from '../../../elements/DatePicker'
-import { getTranslation } from '@payloadcms/translations'
-import { Validate } from 'payload/types'
-import useField from '../../useField'
 import { useTranslation } from '../../../providers/Translation'
-
+import useField from '../../useField'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 const baseClass = 'date-time-field'
@@ -17,20 +17,20 @@ const baseClass = 'date-time-field'
 const DateTime: React.FC<Props> = (props) => {
   const {
     name,
-    className,
-    placeholder,
-    readOnly,
-    style,
-    width,
-    path: pathFromProps,
-    required,
+    AfterInput,
+    BeforeInput,
+    Description,
     Error,
     Label: LabelComp,
+    className,
     label,
-    BeforeInput,
-    AfterInput,
-    Description,
+    path: pathFromProps,
+    placeholder,
+    readOnly,
+    required,
+    style,
     validate,
+    width,
   } = props
 
   const Label = LabelComp || label
@@ -48,7 +48,7 @@ const DateTime: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { setValue, showError, value, path } = useField<Date>({
+  const { path, setValue, showError, value } = useField<Date>({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

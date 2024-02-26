@@ -1,17 +1,18 @@
 'use client'
+import type { Field, SanitizedCollectionConfig } from 'payload/types'
+import type { CellProps } from 'payload/types'
+
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
-import type { SanitizedCollectionConfig, Field } from 'payload/types'
-import type { CellProps } from 'payload/types'
 import type { ListPreferences } from '../../views/List/types'
 import type { Column } from '../Table/types'
 import type { Action } from './columnReducer'
 
-import { usePreferences } from '../../providers/Preferences'
-import { columnReducer } from './columnReducer'
-import { useConfig } from '../../providers/Config'
 import { useComponentMap } from '../../providers/ComponentMapProvider'
+import { useConfig } from '../../providers/Config'
+import { usePreferences } from '../../providers/Preferences'
 import { buildColumns } from './buildColumns'
+import { columnReducer } from './columnReducer'
 
 export interface ITableColumns {
   columns: Column[]
@@ -42,7 +43,7 @@ export const TableColumnsProvider: React.FC<{
   )
 
   const {
-    admin: { useAsTitle, defaultColumns },
+    admin: { defaultColumns, useAsTitle },
   } = collectionConfig
 
   const preferenceKey = `${collectionSlug}-list`
@@ -52,11 +53,11 @@ export const TableColumnsProvider: React.FC<{
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
     return buildColumns({
-      useAsTitle,
-      defaultColumns,
-      columnPreferences: listPreferences?.columns,
-      fieldMap,
       cellProps,
+      columnPreferences: listPreferences?.columns,
+      defaultColumns,
+      fieldMap,
+      useAsTitle,
     })
   })
 
@@ -76,11 +77,11 @@ export const TableColumnsProvider: React.FC<{
           dispatchTableColumns({
             payload: {
               columns: buildColumns({
-                useAsTitle,
+                cellProps,
                 columnPreferences: currentPreferences?.columns,
                 defaultColumns,
                 fieldMap,
-                cellProps,
+                useAsTitle,
               }),
             },
             type: 'set',

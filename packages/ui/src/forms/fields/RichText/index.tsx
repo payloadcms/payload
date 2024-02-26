@@ -1,6 +1,6 @@
-import React from 'react'
+import type React from 'react'
 
-import { Props } from './types'
+import type { Props } from './types'
 
 const RichText: React.FC<Props> = (props) => {
   return null

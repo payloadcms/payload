@@ -1,15 +1,16 @@
 'use client'
+import type { Validate } from 'payload/types'
+
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
-import { fieldBaseClass } from '../shared'
-import { withCondition } from '../../withCondition'
-import { Validate } from 'payload/types'
-import useField from '../../useField'
+
 import { Check } from '../../../icons/Check'
 import { Line } from '../../../icons/Line'
 import LabelComp from '../../Label'
-
+import useField from '../../useField'
+import { withCondition } from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 const baseClass = 'checkbox'
@@ -18,25 +19,25 @@ export const inputBaseClass = 'checkbox-input'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
-    className,
-    readOnly,
-    style,
-    width,
-    required,
-    validate,
-    BeforeInput,
+    id,
+    name,
     AfterInput,
-    Label: LabelFromProps,
-    label,
-    Error,
+    BeforeInput,
     Description,
+    Error,
+    Label: LabelFromProps,
+    checked: checkedFromProps,
+    className,
+    disableFormData,
+    label,
     onChange: onChangeFromProps,
     partialChecked,
-    checked: checkedFromProps,
-    disableFormData,
-    id,
     path: pathFromProps,
-    name,
+    readOnly,
+    required,
+    style,
+    validate,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -50,10 +51,10 @@ const Checkbox: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { setValue, value, showError, path } = useField({
+  const { path, setValue, showError, value } = useField({
     disableFormData,
-    validate: memoizedValidate,
     path: pathFromProps || name,
+    validate: memoizedValidate,
   })
 
   const onToggle = useCallback(() => {
@@ -103,9 +104,9 @@ const Checkbox: React.FC<Props> = (props) => {
             id={fieldID}
             name={path}
             onInput={onToggle}
+            required={required}
             // ref={inputRef}
             type="checkbox"
-            required={required}
           />
           <span
             className={[`${inputBaseClass}__icon`, !value && partialChecked ? 'check' : 'partial']

@@ -1,19 +1,21 @@
-import { SanitizedCollectionConfig } from 'payload/types'
-import { FormField } from '../forms/Form/types'
+import type { I18n } from '@payloadcms/translations'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import { getObjectDotNotation } from 'payload/utilities'
 
-import type { I18n } from '@payloadcms/translations'
+import type { FormField } from '../forms/Form/types'
+
 import { formatDate } from './formatDate'
 
 export const formatDocTitle = (args: {
-  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
+  dateFormat?: any
   doc?: Record<string, any>
   field?: FormField
-  dateFormat?: any
   i18n: I18n
   isDate?: boolean
+  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }): string => {
-  const { useAsTitle, dateFormat, doc, field: fieldFromProps, i18n, isDate } = args
+  const { dateFormat, doc, field: fieldFromProps, i18n, isDate, useAsTitle } = args
 
   if (!fieldFromProps && !doc) {
     return ''

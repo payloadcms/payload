@@ -1,4 +1,5 @@
 import type { Where } from 'payload/types'
+
 import type { Action, FieldCondition } from '../types'
 
 export type Props = {

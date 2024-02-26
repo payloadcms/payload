@@ -1,5 +1,5 @@
-import React from 'react'
-import Link from 'next/link' // TODO: abstract this out to support all routers
+import Link from 'next/link'
+import React from 'react' // TODO: abstract this out to support all routers
 
 import type { Props, RenderedTypeProps } from './types'
 
@@ -34,7 +34,7 @@ export const Banner: React.FC<Props> = ({
   if (to) RenderedType = Link
 
   return (
-    <RenderedType className={classes} onClick={onClick} href={to || ''}>
+    <RenderedType className={classes} href={to || ''} onClick={onClick}>
       {icon && alignIcon === 'left' && <React.Fragment>{icon}</React.Fragment>}
       <span className={`${baseClass}__content`}>{children}</span>
       {icon && alignIcon === 'right' && <React.Fragment>{icon}</React.Fragment>}

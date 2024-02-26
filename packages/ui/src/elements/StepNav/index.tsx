@@ -1,12 +1,12 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, createContext, useContext, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import type { Context as ContextType } from './types'
 
 import IconGraphic from '../../graphics/Icon'
-import { getTranslation } from '@payloadcms/translations'
 import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
 import './index.scss'
 
 const baseClass = 'step-nav'
@@ -31,8 +31,8 @@ const StepNavProvider: React.FC<{ children?: React.ReactNode }> = ({ children })
 const useStepNav = (): ContextType => useContext(Context)
 
 const StepNav: React.FC<{
-  className?: string
   Link?: React.ComponentType
+  className?: string
 }> = ({ Link, className }) => {
   const { i18n } = useTranslation()
 
@@ -52,9 +52,9 @@ const StepNav: React.FC<{
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
           <LinkElement
             className={`${baseClass}__home`}
-            tabIndex={0}
             // to={admin} // for `react-router-dom`
             href={admin} // for `next/link`
+            tabIndex={0}
           >
             <IconGraphic />
           </LinkElement>

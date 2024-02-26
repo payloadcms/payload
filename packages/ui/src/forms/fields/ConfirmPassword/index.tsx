@@ -1,16 +1,15 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from '../../../providers/Translation'
 
 import type { FormField } from '../../Form/types'
 import type { Props } from './types'
 
+import { useTranslation } from '../../../providers/Translation'
 import Error from '../../Error'
 import { useFormFields } from '../../Form/context'
 import Label from '../../Label'
 import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
-
 import './index.scss'
 
 const ConfirmPassword: React.FC<Props> = (props) => {

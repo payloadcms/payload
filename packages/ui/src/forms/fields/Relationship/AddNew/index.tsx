@@ -1,13 +1,13 @@
 'use client'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
-import { useTranslation } from '../../../../providers/Translation'
-
 import type { SanitizedCollectionConfig } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
+
 import type { EditViewProps } from '../../../../views/types'
 import type { Value } from '../types'
 import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
 import { Button } from '../../../../elements/Button'
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer'
 import Popup from '../../../../elements/Popup'
@@ -16,9 +16,9 @@ import { Tooltip } from '../../../../elements/Tooltip'
 import { Plus } from '../../../../icons/Plus'
 import { useAuth } from '../../../../providers/Auth'
 import { useConfig } from '../../../../providers/Config'
-import { useRelatedCollections } from './useRelatedCollections'
-
+import { useTranslation } from '../../../../providers/Translation'
 import './index.scss'
+import { useRelatedCollections } from './useRelatedCollections'
 
 const baseClass = 'relationship-add-new'
 

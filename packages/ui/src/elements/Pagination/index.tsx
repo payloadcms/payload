@@ -1,4 +1,5 @@
 'use client'
+import { usePathname, useRouter } from 'next/navigation'
 import queryString from 'qs'
 import React from 'react'
 
@@ -8,7 +9,6 @@ import { useSearchParams } from '../../providers/SearchParams'
 import ClickableArrow from './ClickableArrow'
 import Page from './Page'
 import Separator from './Separator'
-import { usePathname, useRouter } from 'next/navigation'
 import './index.scss'
 
 const nodeTypes = {

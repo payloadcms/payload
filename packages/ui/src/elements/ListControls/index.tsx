@@ -1,16 +1,17 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
+import { getTranslation } from '@payloadcms/translations'
+import { fieldAffectsData } from 'payload/types'
 import React, { useState } from 'react'
 import AnimateHeight from 'react-animate-height'
-import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
-import { fieldAffectsData } from 'payload/types'
-import { getTranslation } from '@payloadcms/translations'
 import { Chevron } from '../../icons/Chevron'
 import { useSearchParams } from '../../providers/SearchParams'
+import { useTranslation } from '../../providers/Translation'
 import { Button } from '../Button'
+import ColumnSelector from '../ColumnSelector'
 import DeleteMany from '../DeleteMany'
 import EditMany from '../EditMany'
 import Pill from '../Pill'
@@ -20,8 +21,6 @@ import SortComplex from '../SortComplex'
 import UnpublishMany from '../UnpublishMany'
 import WhereBuilder from '../WhereBuilder'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery'
-import ColumnSelector from '../ColumnSelector'
-
 import './index.scss'
 
 const baseClass = 'list-controls'
@@ -33,8 +32,8 @@ const baseClass = 'list-controls'
  */
 export const ListControls: React.FC<Props> = (props) => {
   const {
-    collectionSlug,
     collectionPluralLabel,
+    collectionSlug,
     enableColumns = true,
     enableSort = false,
     handleSearchChange,
@@ -42,8 +41,8 @@ export const ListControls: React.FC<Props> = (props) => {
     handleWhereChange,
     modifySearchQuery = true,
     resetParams,
-    titleField,
     textFieldsToBeSearched,
+    titleField,
   } = props
 
   const searchParams = useSearchParams()
@@ -137,8 +136,8 @@ export const ListControls: React.FC<Props> = (props) => {
         id={`${baseClass}-where`}
       >
         <WhereBuilder
-          collectionSlug={collectionSlug}
           collectionPluralLabel={collectionPluralLabel}
+          collectionSlug={collectionSlug}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
         />

@@ -1,11 +1,11 @@
 'use client'
+import { usePathname } from 'next/navigation'
 import React from 'react'
 
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { DefaultAccountIcon } from './Default'
 import Gravatar from './Gravatar'
-import { usePathname } from 'next/navigation'
 
 const Account = () => {
   const {

@@ -14,18 +14,21 @@ import {
   useActions,
   useTranslation,
   useLocale,
-  ServerSideEditViewProps,
+  useDocumentInfo,
 } from '@payloadcms/ui'
 import { RenderJSON } from './RenderJSON'
 import { useSearchParams } from 'next/navigation'
 import qs from 'qs'
 import { toast } from 'react-toastify'
 import './index.scss'
+import { EditViewProps } from 'payload/config'
 
 const baseClass = 'query-inspector'
 
-export const APIViewClient: React.FC<ServerSideEditViewProps> = (props) => {
-  const { data: initialData } = props
+export const APIViewClient: React.FC<EditViewProps> = (props) => {
+  const { collectionSlug, globalSlug } = props
+
+  const { initialData, id } = useDocumentInfo()
 
   const searchParams = useSearchParams()
   const { setViewActions } = useActions()
@@ -46,11 +49,6 @@ export const APIViewClient: React.FC<ServerSideEditViewProps> = (props) => {
 
   const globalConfig =
     'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
-
-  const id = 'id' in props ? props.id : undefined
-
-  const collectionSlug = collectionConfig?.slug
-  const globalSlug = globalConfig?.slug
 
   const localeOptions =
     localization &&

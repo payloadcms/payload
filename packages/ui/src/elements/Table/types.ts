@@ -1,21 +1,20 @@
-import type React from 'react'
-
 import type { CellProps, FieldBase } from 'payload/types'
+import type React from 'react'
 
 export type Column = {
   accessor: string
   active: boolean
+  cellProps?: Partial<CellProps>
   components: {
-    Heading: React.ReactNode
     Cell: React.ReactNode
+    Heading: React.ReactNode
   }
   label: FieldBase['label']
   name: FieldBase['name']
-  cellProps?: Partial<CellProps>
 }
 
 export type Props = {
   columns?: Column[]
-  data: unknown[]
   customCellContext?: Record<string, unknown>
+  data: unknown[]
 }

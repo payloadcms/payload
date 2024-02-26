@@ -1,4 +1,5 @@
 import type { TypeWithID } from 'payload/types'
+
 import type { Documents } from './index'
 
 type RequestDocuments = {

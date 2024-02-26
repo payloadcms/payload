@@ -1,15 +1,15 @@
 'use client'
+import { text } from 'payload/fields/validations'
 import React, { useEffect, useMemo, useState } from 'react'
-import { useTranslation } from '../../../providers/Translation'
 import { v4 as uuidv4 } from 'uuid'
 
-import { text } from 'payload/fields/validations'
 import CopyToClipboard from '../../../elements/CopyToClipboard'
 import GenerateConfirmation from '../../../elements/GenerateConfirmation'
 import { useFormFields } from '../../../forms/Form/context'
 import Label from '../../../forms/Label'
-import useField from '../../../forms/useField'
 import { fieldBaseClass } from '../../../forms/fields/shared'
+import useField from '../../../forms/useField'
+import { useTranslation } from '../../../providers/Translation'
 
 const path = 'apiKey'
 const baseClass = 'api-key'

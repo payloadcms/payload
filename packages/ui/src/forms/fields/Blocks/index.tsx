@@ -1,11 +1,9 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
-import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
-import { scrollToID } from '../../../utilities/scrollToID'
 import Banner from '../../../elements/Banner'
 import { Button } from '../../../elements/Button'
 import DraggableSortable from '../../../elements/DraggableSortable'
@@ -16,14 +14,15 @@ import { ErrorPill } from '../../../elements/ErrorPill'
 import { useConfig } from '../../../providers/Config'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { useLocale } from '../../../providers/Locale'
+import { useTranslation } from '../../../providers/Translation'
+import { scrollToID } from '../../../utilities/scrollToID'
 import { useForm, useFormSubmitted } from '../../Form/context'
+import LabelComp from '../../Label'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
 import { BlockRow } from './BlockRow'
 import { BlocksDrawer } from './BlocksDrawer'
-import LabelComp from '../../Label'
-
 import './index.scss'
 
 const baseClass = 'blocks-field'
@@ -33,17 +32,17 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const {
     name,
-    className,
-    readOnly,
-    forceRender = false,
-    indexPath,
-    localized,
     Description,
     Error,
     Label: LabelFromProps,
+    className,
+    forceRender = false,
+    indexPath,
     label,
+    localized,
     path: pathFromProps,
     permissions,
+    readOnly,
     required,
     validate,
   } = props
@@ -91,11 +90,12 @@ const BlocksField: React.FC<Props> = (props) => {
   )
 
   const {
+    path,
     rows = [],
+    schemaPath,
     showError,
     valid,
     value,
-    path,
   } = useField<number>({
     hasRows: true,
     path: pathFromProps || name,
@@ -193,7 +193,7 @@ const BlocksField: React.FC<Props> = (props) => {
           <div className={`${baseClass}__heading-with-error`}>
             <h3>{Label}</h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} withMessage i18n={i18n} />
+              <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
           </div>
           {rows.length > 0 && (
@@ -238,9 +238,9 @@ const BlocksField: React.FC<Props> = (props) => {
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
-                      blocks={blocks}
                       addRow={addRow}
                       block={blockToRender}
+                      blocks={blocks}
                       duplicateRow={duplicateRow}
                       forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
@@ -254,6 +254,7 @@ const BlocksField: React.FC<Props> = (props) => {
                       row={row}
                       rowCount={rows.length}
                       rowIndex={i}
+                      schemaPath={schemaPath}
                       setCollapse={setCollapse}
                     />
                   )}

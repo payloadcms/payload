@@ -1,10 +1,10 @@
 'use client'
 import queryString from 'qs'
 import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from '../providers/Translation'
 
-import { requests } from '../utilities/api'
 import { useLocale } from '../providers/Locale'
+import { useTranslation } from '../providers/Translation'
+import { requests } from '../utilities/api'
 
 type Result = [
   {

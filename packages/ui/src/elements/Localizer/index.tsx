@@ -1,11 +1,11 @@
+import { getTranslation } from '@payloadcms/translations'
 import qs from 'qs'
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
 
-import { getTranslation } from '@payloadcms/translations'
 import { useConfig } from '../../providers/Config'
 import { useLocale } from '../../providers/Locale'
 import { useSearchParams } from '../../providers/SearchParams'
+import { useTranslation } from '../../providers/Translation'
 import Popup from '../Popup'
 import * as PopupList from '../Popup/PopupButtonList'
 import { LocalizerLabel } from './LocalizerLabel'

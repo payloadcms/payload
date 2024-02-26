@@ -5,12 +5,11 @@ import type { Props } from './types'
 
 import { useTableColumns } from '../TableColumns'
 import { TableCellProvider } from './TableCellProvider'
-
 import './index.scss'
 
 const baseClass = 'table'
 
-export const Table: React.FC<Props> = ({ columns: columnsFromProps, data, customCellContext }) => {
+export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellContext, data }) => {
   const { columns: columnsFromContext } = useTableColumns()
 
   const columns = columnsFromProps || columnsFromContext
@@ -41,11 +40,11 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, data, custom
                   return (
                     <td className={`cell-${col.accessor}`} key={colIndex}>
                       <TableCellProvider
-                        rowData={row}
                         cellData={row[col.accessor]}
-                        customCellContext={customCellContext}
                         cellProps={col?.cellProps}
                         columnIndex={colIndex}
+                        customCellContext={customCellContext}
+                        rowData={row}
                       >
                         {col.components.Cell}
                       </TableCellProvider>

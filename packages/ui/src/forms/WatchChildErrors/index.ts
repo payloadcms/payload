@@ -1,21 +1,22 @@
 'use client'
-import React from 'react'
+import type React from 'react'
+
+import type { FieldMap } from '../../utilities/buildComponentMap/types'
 
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAllFormFields, useFormSubmitted } from '../Form/context'
-import { getFieldStateFromPaths } from './getFieldStateFromPaths'
 import { buildPathSegments } from './buildPathSegments'
-import { FieldMap } from '../../utilities/buildComponentMap/types'
+import { getFieldStateFromPaths } from './getFieldStateFromPaths'
 
 type TrackSubSchemaErrorCountProps = {
-  path: string
   fieldMap?: FieldMap
+  path: string
   setErrorCount: (count: number) => void
 }
 
 export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
-  path,
   fieldMap,
+  path,
   setErrorCount,
 }) => {
   const [formState] = useAllFormFields()

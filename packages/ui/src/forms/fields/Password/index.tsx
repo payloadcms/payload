@@ -1,29 +1,30 @@
 'use client'
+import type { Validate } from 'payload/types'
+
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
+
+import LabelComp from '../../Label'
+import useField from '../../useField'
 import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
-import { Validate } from 'payload/types'
-import useField from '../../useField'
-import LabelComp from '../../Label'
-
 import './index.scss'
 
 export const Password: React.FC<Props> = (props) => {
   const {
-    autoComplete,
-    className,
-    disabled,
-    required,
-    style,
-    width,
-    validate,
-    path: pathFromProps,
     name,
     Error,
     Label: LabelFromProps,
+    autoComplete,
+    className,
+    disabled,
     label,
+    path: pathFromProps,
+    required,
+    style,
+    validate,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -37,7 +38,7 @@ export const Password: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { formProcessing, setValue, showError, value, path } = useField({
+  const { formProcessing, path, setValue, showError, value } = useField({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

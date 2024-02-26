@@ -5,10 +5,10 @@ import { useNav } from '../context'
 import './index.scss'
 
 export const NavWrapper: React.FC<{
-  children: React.ReactNode
   baseClass?: string
+  children: React.ReactNode
 }> = (props) => {
-  const { children, baseClass } = props
+  const { baseClass, children } = props
 
   const { navOpen, navRef } = useNav()
 

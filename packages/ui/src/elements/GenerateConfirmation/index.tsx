@@ -1,15 +1,15 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-import { MinimalTemplate } from '../../templates/Minimal'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
+import { useTranslation } from '../../providers/Translation'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { Button } from '../Button'
-import './index.scss'
 import { Translation } from '../Translation'
+import './index.scss'
 
 const baseClass = 'generate-confirmation'
 
@@ -45,11 +45,11 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
           <h1>{t('authentication:confirmGeneration')}</h1>
           <p>
             <Translation
-              t={t}
-              i18nKey="authentication:generatingNewAPIKeyWillInvalidate"
               elements={{
                 1: ({ children }) => <strong children={children} />,
               }}
+              i18nKey="authentication:generatingNewAPIKeyWillInvalidate"
+              t={t}
             />
           </p>
 

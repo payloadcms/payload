@@ -1,12 +1,12 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
 
 import { Button } from '../../elements/Button'
 import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
 import './index.scss'
 
 const baseClass = 'stay-logged-in'

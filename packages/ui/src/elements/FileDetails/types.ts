@@ -1,13 +1,13 @@
-import type { SanitizedCollectionConfig, Data, FileSizes } from 'payload/types'
+import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload/types'
 
 export type Props = {
   canEdit?: boolean
-  uploadConfig: SanitizedCollectionConfig['upload']
+  collectionSlug: string
   doc: Data & {
     sizes?: FileSizes
   }
-  collectionSlug: string
   handleRemove?: () => void
   hasImageSizes?: boolean
   imageCacheTag?: string
+  uploadConfig: SanitizedCollectionConfig['upload']
 }

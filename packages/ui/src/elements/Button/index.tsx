@@ -49,6 +49,7 @@ export const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
 export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, ref) => {
   const {
     id,
+    Link,
     'aria-label': ariaLabel,
     buttonStyle = 'primary',
     children,
@@ -66,7 +67,6 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     tooltip,
     type = 'button',
     url,
-    Link,
   } = props
 
   const [showTooltip, setShowTooltip] = React.useState(false)
@@ -115,7 +115,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
       }
 
       return (
-        <Link {...buttonProps} to={to || url} href={to || url}>
+        <Link {...buttonProps} href={to || url} to={to || url}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

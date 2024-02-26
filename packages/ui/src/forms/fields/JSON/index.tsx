@@ -1,15 +1,15 @@
 'use client'
+import type { Validate } from 'payload/types'
+
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
-import { fieldBaseClass } from '../shared'
 import { CodeEditor } from '../../../elements/CodeEditor'
-import { Validate } from 'payload/types'
+import LabelComp from '../../Label'
 import useField from '../../useField'
 import { withCondition } from '../../withCondition'
-import LabelComp from '../../Label'
-
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 const baseClass = 'json-field'
@@ -17,19 +17,19 @@ const baseClass = 'json-field'
 const JSONField: React.FC<Props> = (props) => {
   const {
     name,
-    className,
-    readOnly,
-    style,
-    width,
-    path: pathFromProps,
+    AfterInput,
+    BeforeInput,
+    Description,
     Error,
     Label: LabelFromProps,
+    className,
     label,
-    Description,
-    BeforeInput,
-    AfterInput,
-    validate,
+    path: pathFromProps,
+    readOnly,
     required,
+    style,
+    validate,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -48,7 +48,7 @@ const JSONField: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { initialValue, setValue, value, path, showError } = useField<string>({
+  const { initialValue, path, setValue, showError, value } = useField<string>({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

@@ -1,20 +1,21 @@
 'use client'
-import React from 'react'
-import Link from 'next/link' // TODO: abstract this out to support all routers
+import Link from 'next/link'
+import React from 'react' // TODO: abstract this out to support all routers
 
 import type { CellComponentProps, CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+
+import { useTableCell } from '../../../elements/Table/TableCellProvider'
+import { useConfig } from '../../../providers/Config'
+import { useTranslation } from '../../../providers/Translation'
 import cellComponents from './fields'
 import { CodeCell } from './fields/Code'
-import { useTranslation } from '../../../providers/Translation'
-import { useConfig } from '../../../providers/Config'
-import { useTableCell } from '../../../elements/Table/TableCellProvider'
 
 export const DefaultCell: React.FC<CellProps> = (props) => {
   const {
-    className: classNameFromProps,
     name,
+    className: classNameFromProps,
     fieldType,
     isFieldAffectingData,
     label,
@@ -29,9 +30,9 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
 
   const cellContext = useTableCell()
 
-  const { cellData, rowData, customCellContext, columnIndex, cellProps } = cellContext || {}
+  const { cellData, cellProps, columnIndex, customCellContext, rowData } = cellContext || {}
 
-  const { link, onClick: onClickFromContext, className: classNameFromContext } = cellProps || {}
+  const { className: classNameFromContext, link, onClick: onClickFromContext } = cellProps || {}
 
   const className = classNameFromProps || classNameFromContext
 
@@ -41,8 +42,8 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
 
   const wrapElementProps: {
     className?: string
-    onClick?: () => void
     href?: string
+    onClick?: () => void
     type?: 'button'
   } = {
     className,
@@ -63,8 +64,8 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
     wrapElementProps.onClick = () => {
       onClick({
         cellData,
-        rowData,
         collectionSlug: customCellContext?.collectionSlug,
+        rowData,
       })
     }
   }
@@ -100,7 +101,7 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
 
   return (
     <WrapElement {...wrapElementProps}>
-      <CellComponent cellData={cellData} rowData={rowData} customCellContext={customCellContext} />
+      <CellComponent cellData={cellData} customCellContext={customCellContext} rowData={rowData} />
     </WrapElement>
   )
 }

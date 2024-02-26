@@ -1,29 +1,31 @@
 'use client'
+import type { Field } from 'payload/types'
+
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import isDeepEqual from 'deep-equal'
-import { serialize } from 'object-to-formdata'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
-import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
+import { serialize } from 'object-to-formdata'
+import { wait } from 'payload/utilities'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { toast } from 'react-toastify'
 
-import type { Field } from 'payload/types'
 import type {
-  FormState,
   Context as FormContextType,
+  FormState,
   GetDataByPath,
   Props,
   SubmitOptions,
 } from './types'
 
-import { wait } from 'payload/utilities'
-import { requests } from '../../utilities/api'
+import useDebounce from '../../hooks/useDebounce'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
 import { useOperation } from '../../providers/OperationProvider'
+import { useTranslation } from '../../providers/Translation'
+import { requests } from '../../utilities/api'
 import {
   FormContext,
   FormFieldsContext,
@@ -38,8 +40,6 @@ import getDataByPathFunc from './getDataByPath'
 import getSiblingDataFunc from './getSiblingData'
 import initContextState from './initContextState'
 import reduceFieldsToValues from './reduceFieldsToValues'
-import useDebounce from '../../hooks/useDebounce'
-import { FieldPathProvider } from '../FieldPathProvider'
 
 const baseClass = 'form'
 
@@ -53,15 +53,15 @@ const Form: React.FC<Props> = (props) => {
     disableSuccessStatus,
     disabled,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
+    beforeSubmit,
     handleResponse,
     initialState, // fully formed initial field state
+    onChange,
     onSubmit,
     onSuccess,
     redirect,
     submitted: submittedFromProps,
     waitForAutocomplete,
-    onChange,
-    beforeSubmit,
   } = props
 
   const method = 'method' in props ? props.method : undefined
@@ -98,7 +98,7 @@ const Form: React.FC<Props> = (props) => {
     let isValid = true
 
     const dataFromContext = contextRef.current.getData()
-    let data = dataFromContext
+    const data = dataFromContext
 
     const validationPromises = Object.entries(contextRef.current.fields).map(
       async ([path, field]) => {
@@ -491,8 +491,8 @@ const Form: React.FC<Props> = (props) => {
               const oldField = debouncedFormState[path]
               const newField = {
                 ...field,
-                value: oldField?.value,
                 initialValue: oldField?.initialValue,
+                value: oldField?.value,
               }
 
               newState[path] = newField
@@ -504,7 +504,7 @@ const Form: React.FC<Props> = (props) => {
 
           prevFormState.current = stateWithOldValues
 
-          dispatchFields({ state: stateWithOldValues, type: 'REPLACE_STATE', optimize: false })
+          dispatchFields({ optimize: false, state: stateWithOldValues, type: 'REPLACE_STATE' })
         }
       }
 
@@ -532,7 +532,7 @@ const Form: React.FC<Props> = (props) => {
             <ProcessingContext.Provider value={processing}>
               <ModifiedContext.Provider value={modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
-                  <FieldPathProvider path="">{children}</FieldPathProvider>
+                  {children}
                 </FormFieldsContext.Provider>
               </ModifiedContext.Provider>
             </ProcessingContext.Provider>

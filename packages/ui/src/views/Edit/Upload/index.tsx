@@ -1,10 +1,9 @@
 'use client'
+import { isImage } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
-import { isImage } from 'payload/utilities'
 import { Button } from '../../../elements/Button'
 import { Drawer, DrawerToggler } from '../../../elements/Drawer'
 import { Dropzone } from '../../../elements/Dropzone'
@@ -18,6 +17,7 @@ import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../../forms/fields/shared'
 import useField from '../../../forms/useField'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
+import { useTranslation } from '../../../providers/Translation'
 import './index.scss'
 
 const baseClass = 'file-field'
@@ -51,7 +51,7 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
-  const { onChange, updatedAt, uploadConfig, collectionSlug, initialState } = props
+  const { collectionSlug, initialState, onChange, updatedAt, uploadConfig } = props
 
   const submitted = useFormSubmitted()
   const [replacingFile, setReplacingFile] = useState(false)
@@ -131,12 +131,12 @@ export const Upload: React.FC<Props> = (props) => {
       {doc.filename && !replacingFile && (
         <FileDetails
           canEdit={showCrop || showFocalPoint}
-          uploadConfig={uploadConfig}
           collectionSlug={collectionSlug}
           doc={doc}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
           imageCacheTag={lastSubmittedTime}
+          uploadConfig={uploadConfig}
         />
       )}
       {(!doc.filename || replacingFile) && (
@@ -201,7 +201,7 @@ export const Upload: React.FC<Props> = (props) => {
           slug={sizePreviewSlug}
           title={t('upload:sizesFor', { label: doc?.filename })}
         >
-          <PreviewSizes uploadConfig={uploadConfig} doc={doc} />
+          <PreviewSizes doc={doc} uploadConfig={uploadConfig} />
         </Drawer>
       )}
     </div>

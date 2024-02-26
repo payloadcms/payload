@@ -1,11 +1,12 @@
 'use client'
-import React from 'react'
+import type React from 'react'
+
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 
 export const ShouldRenderTabs: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
-  const { collectionSlug, globalSlug, id: idFromContext } = useDocumentInfo()
+  const { id: idFromContext, collectionSlug, globalSlug } = useDocumentInfo()
 
   const id = idFromContext !== 'create' ? idFromContext : null
 

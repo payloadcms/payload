@@ -1,10 +1,10 @@
 'use client'
-import React from 'react'
-
 import type { CellComponentProps, CellProps, OptionObject } from 'payload/types'
 
-import { optionsAreObjects } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
+import { optionsAreObjects } from 'payload/types'
+import React from 'react'
+
 import { useTranslation } from '../../../../../providers/Translation'
 
 export interface SelectCellProps extends CellComponentProps<any> {

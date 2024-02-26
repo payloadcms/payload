@@ -1,48 +1,51 @@
 'use client'
-import React, { Fragment } from 'react'
-import { ClientConfig } from 'payload/types'
+import type { ClientConfig } from 'payload/types'
+
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import { WindowInfoProvider } from '@faceless-ui/window-info'
-import { ConfigProvider } from '../Config'
-import { AuthProvider } from '../Auth'
-import { PreferencesProvider } from '../Preferences'
-import { ThemeProvider } from '../Theme'
-import { LocaleProvider } from '../Locale'
-import { StepNavProvider } from '../../elements/StepNav'
+import React, { Fragment } from 'react'
+import { Slide, ToastContainer } from 'react-toastify'
+
+import type { ComponentMap } from '../../utilities/buildComponentMap/types'
+import type { LanguageOptions, LanguageTranslations } from '../Translation'
+
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay'
 import { NavProvider } from '../../elements/Nav/context'
+import { StepNavProvider } from '../../elements/StepNav'
 import { ActionsProvider } from '../ActionsProvider'
-import { TranslationProvider } from '../Translation'
-import type { LanguageOptions, LanguageTranslations } from '../Translation'
-import { Slide, ToastContainer } from 'react-toastify'
-import { DocumentEventsProvider } from '../DocumentEvents'
-import { CustomProvider } from '../CustomProvider'
-import { ComponentMap } from '../../utilities/buildComponentMap/types'
-import { ComponentMapProvider } from '../ComponentMapProvider'
-import { SearchParamsProvider } from '../SearchParams'
-import { ParamsProvider } from '../Params'
-import { DocumentInfoProvider } from '../DocumentInfo'
+import { AuthProvider } from '../Auth'
 import { ClientFunctionProvider } from '../ClientFunction'
+import { ComponentMapProvider } from '../ComponentMapProvider'
+import { ConfigProvider } from '../Config'
+import { CustomProvider } from '../CustomProvider'
+import { DocumentEventsProvider } from '../DocumentEvents'
+import { DocumentInfoProvider } from '../DocumentInfo'
+import { LocaleProvider } from '../Locale'
+import { ParamsProvider } from '../Params'
+import { PreferencesProvider } from '../Preferences'
+import { SearchParamsProvider } from '../SearchParams'
+import { ThemeProvider } from '../Theme'
+import { TranslationProvider } from '../Translation'
 
 type Props = {
-  config: ClientConfig
   children: React.ReactNode
-  translations: LanguageTranslations
-  lang: string
-  fallbackLang: ClientConfig['i18n']['fallbackLanguage']
-  languageOptions: LanguageOptions
   componentMap: ComponentMap
+  config: ClientConfig
+  fallbackLang: ClientConfig['i18n']['fallbackLanguage']
+  lang: string
+  languageOptions: LanguageOptions
+  translations: LanguageTranslations
 }
 
 export const RootProvider: React.FC<Props> = ({
-  config,
-  translations,
   children,
-  lang,
-  fallbackLang,
-  languageOptions,
   componentMap,
+  config,
+  fallbackLang,
+  lang,
+  languageOptions,
+  translations,
 }) => {
   return (
     <Fragment>
@@ -50,10 +53,10 @@ export const RootProvider: React.FC<Props> = ({
         <ComponentMapProvider componentMap={componentMap}>
           <ClientFunctionProvider>
             <TranslationProvider
-              lang={lang}
-              translations={translations}
               fallbackLang={fallbackLang}
+              lang={lang}
               languageOptions={languageOptions}
+              translations={translations}
             >
               <WindowInfoProvider
                 breakpoints={{

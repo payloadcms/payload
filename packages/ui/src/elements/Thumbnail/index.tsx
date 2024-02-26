@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
-import useThumbnail from '../../hooks/useThumbnail'
 import FileGraphic from '../../graphics/File'
+import useThumbnail from '../../hooks/useThumbnail'
 import './index.scss'
 
 const baseClass = 'thumbnail'
@@ -12,12 +12,12 @@ const baseClass = 'thumbnail'
 const Thumbnail: React.FC<Props> = (props) => {
   const {
     className = '',
-    uploadConfig,
     doc: { filename } = {},
     doc,
     fileSrc,
     imageCacheTag,
     size,
+    uploadConfig,
   } = props
 
   const thumbnailSRC = uploadConfig && doc ? useThumbnail(uploadConfig, doc) : fileSrc

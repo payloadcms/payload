@@ -1,28 +1,29 @@
-import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useReducer, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
-
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { Where } from 'payload/types'
+
+import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
+import React, { useCallback, useEffect, useReducer, useState } from 'react'
+
 import type { ListDrawerProps } from './types'
 
 import { baseClass } from '.'
-import { getTranslation } from '@payloadcms/translations'
+import { useComponentMap } from '../..'
+import Label from '../../forms/Label'
 import usePayloadAPI from '../../hooks/usePayloadAPI'
 import { useUseTitleField } from '../../hooks/useUseAsTitle'
-import Label from '../../forms/Label'
 import { X } from '../../icons/X'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
+import { ListInfoProvider } from '../../providers/ListInfo'
 import { usePreferences } from '../../providers/Preferences'
+import { useTranslation } from '../../providers/Translation'
 import { useDocumentDrawer } from '../DocumentDrawer'
+import { LoadingOverlay } from '../Loading'
 import Pill from '../Pill'
 import ReactSelect from '../ReactSelect'
 import { TableColumnsProvider } from '../TableColumns'
 import ViewDescription from '../ViewDescription'
-import { useComponentMap } from '../..'
-import { ListInfoProvider } from '../../providers/ListInfo'
-import { LoadingOverlay } from '../Loading'
 
 const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
@@ -225,20 +226,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   return (
     <ListInfoProvider
-      collectionSlug={selectedCollectionConfig.slug}
-      data={data}
-      handlePageChange={setPage}
-      handlePerPageChange={setLimit}
-      handleSearchChange={setSearch}
-      handleSortChange={setSort}
-      handleWhereChange={setWhere}
-      hasCreatePermission={hasCreatePermission}
-      limit={limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit}
-      modifySearchParams={false}
-      newDocumentURL={null}
-      setLimit={setLimit}
-      setSort={setSort}
-      titleField={titleField}
       Header={
         <header className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-wrap`}>
@@ -285,6 +272,20 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           )}
         </header>
       }
+      collectionSlug={selectedCollectionConfig.slug}
+      data={data}
+      handlePageChange={setPage}
+      handlePerPageChange={setLimit}
+      handleSearchChange={setSearch}
+      handleSortChange={setSort}
+      handleWhereChange={setWhere}
+      hasCreatePermission={hasCreatePermission}
+      limit={limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit}
+      modifySearchParams={false}
+      newDocumentURL={null}
+      setLimit={setLimit}
+      setSort={setSort}
+      titleField={titleField}
     >
       <TableColumnsProvider
         cellProps={[

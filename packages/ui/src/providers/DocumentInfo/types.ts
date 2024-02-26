@@ -1,47 +1,46 @@
-import type React from 'react'
-
+import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
 import type {
-  SanitizedCollectionConfig,
-  SanitizedGlobalConfig,
-  TypeWithTimestamps,
-  TypeWithID,
+  Data,
   DocumentPermissions,
   DocumentPreferences,
-  Data,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+  TypeWithID,
+  TypeWithTimestamps,
 } from 'payload/types'
+import type React from 'react'
 
-import { PaginatedDocs, TypeWithVersion } from 'payload/database'
-import { FormState } from '../../forms/Form/types'
+import type { FormState } from '../../forms/Form/types'
 
 export type DocumentInfoProps = {
   AfterDocument?: React.ReactNode
   AfterFields?: React.ReactNode
   BeforeDocument?: React.ReactNode
   BeforeFields?: React.ReactNode
+  action?: string
+  apiURL?: string
   collectionSlug?: SanitizedCollectionConfig['slug']
+  disableActions?: boolean
+  disableLeaveWithoutSaving?: boolean
   docPermissions: DocumentPermissions
+  docPreferences?: DocumentPreferences
   globalSlug?: SanitizedGlobalConfig['slug']
+  hasSavePermission?: boolean
   id?: number | string
   initialData?: Data
   initialState?: FormState
   onSave?: (data: Data) => Promise<void> | void
-  action?: string
-  apiURL?: string
-  docPreferences?: DocumentPreferences
-  hasSavePermission?: boolean
-  disableActions?: boolean
-  disableLeaveWithoutSaving?: boolean
 }
 
 export type DocumentInfo = DocumentInfoProps & {
   docConfig?: SanitizedCollectionConfig | SanitizedGlobalConfig
+  preferencesKey?: string
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   slug?: string
   title?: string
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
   versions?: PaginatedDocs<TypeWithVersion<any>>
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
-  preferencesKey?: string
 }
 
 export type DocumentInfoContext = DocumentInfo & {

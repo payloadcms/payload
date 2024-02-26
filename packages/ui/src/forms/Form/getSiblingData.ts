@@ -1,7 +1,8 @@
+import type { Data } from 'payload/types'
+
 import { unflatten } from 'flatley'
 
 import type { FormState } from './types'
-import type { Data } from 'payload/types'
 
 import reduceFieldsToValues from './reduceFieldsToValues'
 

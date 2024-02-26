@@ -1,11 +1,14 @@
-import React from 'react'
 import type { FieldPermissions } from 'payload/auth'
+import type { EditViewProps } from 'payload/config'
 import type { SanitizedConfig } from 'payload/types'
-import { mapFields } from './mapFields'
-import { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
+
+import React from 'react'
+
+import type { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
+
 import { DefaultEditView } from '../../views/Edit'
 import { DefaultList } from '../../views/List'
-import { EditViewProps } from 'payload/config'
+import { mapFields } from './mapFields'
 
 export const buildComponentMap = (args: {
   config: SanitizedConfig
@@ -81,10 +84,10 @@ export const buildComponentMap = (args: {
     })
 
     const componentMap: CollectionComponentMap = {
-      BeforeList,
       AfterList,
-      BeforeListTable,
       AfterListTable,
+      BeforeList,
+      BeforeListTable,
       Edit: <Edit collectionSlug={collectionConfig.slug} />,
       List: <List collectionSlug={collectionConfig.slug} />,
       fieldMap: mappedFields,
@@ -124,8 +127,8 @@ export const buildComponentMap = (args: {
     const Edit = CustomEditView || DefaultEditView
 
     const componentMap: GlobalComponentMap = {
-      fieldMap: mappedFields,
       Edit: <Edit globalSlug={globalConfig.slug} />,
+      fieldMap: mappedFields,
     }
 
     return {

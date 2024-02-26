@@ -1,11 +1,12 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useState } from 'react'
+
+import type { ReducedTab } from '../../../utilities/buildComponentMap/types'
+
+import { useTranslation } from '../../../..'
 import { ErrorPill } from '../../../../elements/ErrorPill'
 import { WatchChildErrors } from '../../../WatchChildErrors'
-import { useTranslation } from '../../../..'
-import { ReducedTab } from '../../../utilities/buildComponentMap/types'
-
 import './index.scss'
 
 const baseClass = 'tabs-field__tab-button'
@@ -18,7 +19,7 @@ type TabProps = {
 }
 
 export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
-  const { label, name } = tab
+  const { name, label } = tab
 
   const { i18n } = useTranslation()
   const [errorCount, setErrorCount] = useState(undefined)

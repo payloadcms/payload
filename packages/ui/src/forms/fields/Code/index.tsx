@@ -2,12 +2,12 @@
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
-import { CodeEditor } from '../../../elements/CodeEditor'
-import useField from '../../useField'
-import { fieldBaseClass } from '../shared'
-import { withCondition } from '../../withCondition'
-import LabelComp from '../../Label'
 
+import { CodeEditor } from '../../../elements/CodeEditor'
+import LabelComp from '../../Label'
+import useField from '../../useField'
+import { withCondition } from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 const prismToMonacoLanguageMap = {
@@ -20,19 +20,19 @@ const baseClass = 'code-field'
 const Code: React.FC<Props> = (props) => {
   const {
     name,
-    className,
-    readOnly,
-    style,
-    width,
-    path: pathFromProps,
-    required,
+    AfterInput,
+    BeforeInput,
+    Description,
     Error,
     Label: LabelFromProps,
+    className,
     label,
-    Description,
-    BeforeInput,
-    AfterInput,
+    path: pathFromProps,
+    readOnly,
+    required,
+    style,
     validate,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -49,7 +49,7 @@ const Code: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { setValue, value, path, showError } = useField({
+  const { path, setValue, showError, value } = useField({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

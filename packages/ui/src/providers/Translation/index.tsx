@@ -1,9 +1,9 @@
 'use client'
-import React, { createContext, useContext } from 'react'
+import type { I18n } from '@payloadcms/translations'
+import type { ClientConfig } from 'payload/types'
 
 import { t } from '@payloadcms/translations'
-import type { I18n } from '@payloadcms/translations'
-import { ClientConfig } from 'payload/types'
+import React, { createContext, useContext } from 'react'
 
 export type LanguageOptions = {
   label: string
@@ -11,17 +11,17 @@ export type LanguageOptions = {
 }[]
 
 const Context = createContext<{
-  t: (key: string, vars?: Record<string, any>) => string
   i18n: I18n
   languageOptions: LanguageOptions
+  t: (key: string, vars?: Record<string, any>) => string
 }>({
-  t: (key) => key,
   i18n: {
-    language: 'en',
     fallbackLanguage: 'en',
+    language: 'en',
     t: (key) => key,
   },
   languageOptions: undefined,
+  t: (key) => key,
 })
 
 export type LanguageTranslations = {
@@ -31,28 +31,28 @@ export type LanguageTranslations = {
 }
 export const TranslationProvider: React.FC<{
   children: React.ReactNode
-  translations: LanguageTranslations
-  lang: string
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
+  lang: string
   languageOptions: LanguageOptions
-}> = ({ children, translations, lang, fallbackLang, languageOptions }) => {
+  translations: LanguageTranslations
+}> = ({ children, fallbackLang, lang, languageOptions, translations }) => {
   const nextT = (key: string, vars?: Record<string, any>): string =>
     t({
       key,
-      vars,
       translations,
+      vars,
     })
 
   return (
     <Context.Provider
       value={{
-        t: nextT,
         i18n: {
-          language: lang,
           fallbackLanguage: fallbackLang,
+          language: lang,
           t: nextT,
         },
         languageOptions,
+        t: nextT,
       }}
     >
       {children}

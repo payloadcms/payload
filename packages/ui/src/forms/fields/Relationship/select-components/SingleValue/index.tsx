@@ -2,7 +2,6 @@
 import type { SingleValueProps } from 'react-select'
 
 import React, { Fragment, useEffect, useState } from 'react'
-import { useTranslation } from '../../../../../providers/Translation'
 import { components as SelectComponents } from 'react-select'
 
 import type { Option } from '../../types'
@@ -11,6 +10,7 @@ import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer'
 import { Tooltip } from '../../../../../elements/Tooltip'
 import { Edit } from '../../../../../icons/Edit'
 import { useAuth } from '../../../../../providers/Auth'
+import { useTranslation } from '../../../../../providers/Translation'
 import './index.scss'
 
 const baseClass = 'relationship--single-value'

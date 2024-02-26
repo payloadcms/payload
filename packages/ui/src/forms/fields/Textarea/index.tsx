@@ -1,39 +1,41 @@
 'use client'
-import React, { useCallback } from 'react'
-import type { Props } from './types'
-import { fieldBaseClass, isFieldRTL } from '../shared'
-import { withCondition } from '../../withCondition'
-import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '../../../providers/Translation'
-import useField from '../../useField'
-import { Validate } from 'payload/types'
-import { useConfig } from '../../../providers/Config'
-import LabelComp from '../../Label'
+import type { Validate } from 'payload/types'
 
+import { getTranslation } from '@payloadcms/translations'
+import React, { useCallback } from 'react'
+
+import type { Props } from './types'
+
+import { useConfig } from '../../../providers/Config'
+import { useTranslation } from '../../../providers/Translation'
+import LabelComp from '../../Label'
+import useField from '../../useField'
+import { withCondition } from '../../withCondition'
+import { fieldBaseClass, isFieldRTL } from '../shared'
 import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {
   const {
     name,
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
+    Label: LabelFromProps,
     className,
-    placeholder,
-    readOnly,
-    rtl,
-    style,
-    width,
+    label,
+    locale,
     localized,
     maxLength,
     minLength,
     path: pathFromProps,
+    placeholder,
+    readOnly,
     required,
-    locale,
-    Error,
-    Label: LabelFromProps,
-    BeforeInput,
-    AfterInput,
+    rtl,
+    style,
     validate,
-    Description,
-    label,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -59,7 +61,7 @@ const Textarea: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { setValue, value, path, showError } = useField<string>({
+  const { path, setValue, showError, value } = useField<string>({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

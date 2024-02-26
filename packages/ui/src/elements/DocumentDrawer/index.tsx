@@ -1,16 +1,15 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections'
 import { useEditDepth } from '../../providers/EditDepth'
+import { useTranslation } from '../../providers/Translation'
 import { Drawer, DrawerToggler } from '../Drawer'
 import { DocumentDrawerContent } from './DrawerContent'
-
 import './index.scss'
 
 export const baseClass = 'doc-drawer'
@@ -23,7 +22,7 @@ const formatDocumentDrawerSlug = ({
 }: {
   collectionSlug: string
   depth: number
-  id: string | number
+  id: number | string
   uuid: string // supply when creating a new document and no id is available
 }) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 
@@ -58,7 +57,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
+    <Drawer Header={null} className={baseClass} gutter={false} slug={drawerSlug}>
       <DocumentDrawerContent {...props} />
     </Drawer>
   )

@@ -1,9 +1,11 @@
 import type { TFunction } from '@payloadcms/translations'
-
 import type { User } from 'payload/auth'
-import type { Field as FieldSchema, Data } from 'payload/types'
-import type { FormState } from '../../Form/types'
+import type { Data, Field as FieldSchema } from 'payload/types'
+
 import { fieldIsPresentationalOnly } from 'payload/types'
+
+import type { FormState } from '../../Form/types'
+
 import { addFieldStatePromise } from './addFieldStatePromise'
 
 type Args = {
@@ -12,6 +14,7 @@ type Args = {
    */
   anyParentLocalized?: boolean
   data: Data
+  errorPaths: Set<string>
   fields: FieldSchema[]
   /**
    * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
@@ -55,7 +58,6 @@ type Args = {
   state?: FormState
   t: TFunction
   user: User
-  errorPaths: Set<string>
 }
 
 /**
@@ -65,6 +67,7 @@ export const iterateFields = async ({
   id,
   anyParentLocalized = false,
   data,
+  errorPaths,
   fields,
   forceFullValue = false,
   fullData,
@@ -80,7 +83,6 @@ export const iterateFields = async ({
   state = {},
   t,
   user,
-  errorPaths,
 }: Args): Promise<void> => {
   const promises = []
 
@@ -99,6 +101,7 @@ export const iterateFields = async ({
           id,
           anyParentLocalized,
           data,
+          errorPaths,
           field,
           forceFullValue,
           fullData,
@@ -114,7 +117,6 @@ export const iterateFields = async ({
           state,
           t,
           user,
-          errorPaths,
         }),
       )
     }

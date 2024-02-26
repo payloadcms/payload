@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect } from 'react'
+
+import type { DocumentInfo } from '../types'
+
 import { useDocumentInfo } from '..'
-import { DocumentInfo } from '../types'
 
 export const SetDocumentInfo: React.FC<DocumentInfo> = (props) => {
   const { setDocumentInfo } = useDocumentInfo()

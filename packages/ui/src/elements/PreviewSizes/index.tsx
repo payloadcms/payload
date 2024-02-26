@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import type { Data, FileSizes, SanitizedCollectionConfig, Upload } from 'payload/types'
 
-import type { SanitizedCollectionConfig, FileSizes, Upload, Data } from 'payload/types'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import Meta from '../FileDetails/Meta'
 import './index.scss'
@@ -62,12 +62,12 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
 }
 
 const PreviewSizes: React.FC<{
-  uploadConfig: SanitizedCollectionConfig['upload']
   doc: Data & {
     sizes?: FileSizes
   }
   imageCacheTag?: string
-}> = ({ uploadConfig, doc, imageCacheTag }) => {
+  uploadConfig: SanitizedCollectionConfig['upload']
+}> = ({ doc, imageCacheTag, uploadConfig }) => {
   const { imageSizes, staticURL } = uploadConfig
   const { sizes } = doc
 

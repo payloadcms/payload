@@ -1,8 +1,8 @@
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
 
-import { useConfig } from '../../providers/Config'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
+import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
 
 const css = `
   .graphic-icon {

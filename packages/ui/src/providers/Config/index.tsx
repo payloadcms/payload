@@ -1,7 +1,7 @@
 'use client'
-import React, { createContext, useContext } from 'react'
-
 import type { ClientConfig } from 'payload/types'
+
+import React, { createContext, useContext } from 'react'
 
 const Context = createContext<ClientConfig>({} as ClientConfig)
 

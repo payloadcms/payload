@@ -1,6 +1,7 @@
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { isImage } from 'payload/utilities'
+
 import { useConfig } from '../providers/Config'
 
 const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i')

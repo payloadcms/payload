@@ -1,5 +1,8 @@
 'use client'
+import type { CollectionPermission } from 'payload/auth'
+
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -8,30 +11,28 @@ import type { FormState } from '../../forms/Form/types'
 import type { DocumentDrawerProps } from './types'
 
 import { baseClass } from '.'
-import { getTranslation } from '@payloadcms/translations'
-import usePayloadAPI from '../../hooks/usePayloadAPI'
+import { FieldPathProvider, useFieldPath } from '../../forms/FieldPathProvider'
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections'
+import usePayloadAPI from '../../hooks/usePayloadAPI'
 import { X } from '../../icons/X'
+import { useComponentMap } from '../../providers/ComponentMapProvider'
 import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo'
 import { useFormQueryParams } from '../../providers/FormQueryParams'
 import { useLocale } from '../../providers/Locale'
+import { useTranslation } from '../../providers/Translation'
 import { formatFields } from '../../utilities/formatFields'
-import IDLabel from '../IDLabel'
-import { Gutter } from '../Gutter'
-import { LoadingOverlay } from '../Loading'
 import { getFormState } from '../../utilities/getFormState'
-import { FieldPathProvider, useFieldPath } from '../../forms/FieldPathProvider'
-import { useComponentMap } from '../../providers/ComponentMapProvider'
-import { CollectionPermission } from 'payload/auth'
+import { Gutter } from '../Gutter'
+import IDLabel from '../IDLabel'
+import { LoadingOverlay } from '../Loading'
 
 const Content: React.FC<DocumentDrawerProps> = ({
-  collectionSlug,
+  id,
   Header,
+  collectionSlug,
   drawerSlug,
   onSave,
-  id,
 }) => {
   const config = useConfig()
 
@@ -101,15 +102,15 @@ const Content: React.FC<DocumentDrawerProps> = ({
     if (!hasInitializedState.current && (!initialID.current || (initialID.current && data))) {
       const getInitialState = async () => {
         const result = await getFormState({
-          serverURL,
           apiRoute,
-          collectionSlug,
           body: {
             id,
-            operation: isEditing ? 'update' : 'create',
             data: data || {},
             docPreferences: null, // TODO: get this
+            operation: isEditing ? 'update' : 'create',
+            schemaPath,
           },
+          serverURL,
         })
 
         setInitialState(result)
@@ -125,9 +126,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   return (
     <DocumentInfoProvider
-      id={id}
-      action={action}
-      apiURL={apiURL}
       BeforeDocument={
         <Gutter className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-content`}>
@@ -151,18 +149,21 @@ const Content: React.FC<DocumentDrawerProps> = ({
           {id && <IDLabel id={id.toString()} />}
         </Gutter>
       }
-      initialData={data}
+      action={action}
+      apiURL={apiURL}
+      collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
+      docPermissions={{} as CollectionPermission} // TODO; get this
       // hasSavePermission={hasSavePermission}
       // isEditing={isEditing}
       // isLoading,
+      docPreferences={null} // TODO: get this
+      id={id}
+      initialData={data}
+      initialState={initialState}
       // me: true,
       onSave={onSave}
-      collectionSlug={collectionConfig.slug}
-      docPermissions={{} as CollectionPermission} // TODO; get this
-      docPreferences={null} // TODO: get this
-      initialState={initialState}
     >
       {Edit}
     </DocumentInfoProvider>
@@ -176,7 +177,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
   const { id: idFromProps, collectionSlug, onSave: onSaveFromProps } = props
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const [id, setId] = useState<null | string | number>(idFromProps)
+  const [id, setId] = useState<null | number | string>(idFromProps)
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     async (args) => {
@@ -193,7 +194,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
   )
 
   return (
-    <FieldPathProvider schemaPath={collectionSlug} path="">
+    <FieldPathProvider path="" schemaPath={collectionSlug}>
       <Content {...props} id={id} onSave={onSave} />
     </FieldPathProvider>
   )

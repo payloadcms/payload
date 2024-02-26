@@ -1,45 +1,46 @@
 'use client'
+import type { Validate } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
-import { withCondition } from '../../withCondition'
-import { fieldBaseClass, isFieldRTL } from '../shared'
-import useField from '../../useField'
-import { useTranslation } from '../../../providers/Translation'
+
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
-import { Validate } from 'payload/types'
-import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '../../../providers/Translation'
 import LabelComp from '../../Label'
-
+import useField from '../../useField'
+import { withCondition } from '../../withCondition'
+import { fieldBaseClass, isFieldRTL } from '../shared'
 import './index.scss'
 
 const Text: React.FC<Props> = (props) => {
   const {
+    name,
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
+    Label: LabelFromProps,
     className,
+    inputRef,
+    label,
     hasMany,
     localized,
+    minRows,
     maxLength,
     maxRows,
     minLength,
-    minRows,
-    required,
-    Error,
-    Label: LabelFromProps,
-    Description,
-    BeforeInput,
-    AfterInput,
-    validate,
-    inputRef,
-    readOnly,
-    width,
-    style,
     onKeyDown,
-    placeholder,
-    rtl,
-    name,
     path: pathFromProps,
-    label,
+    placeholder,
+    readOnly,
+    required,
+    rtl,
+    style,
+    validate,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -58,9 +59,9 @@ const Text: React.FC<Props> = (props) => {
     [validate, minLength, maxLength, required],
   )
 
-  const { setValue, value, path, showError, schemaPath } = useField({
-    validate: memoizedValidate,
+  const { path, schemaPath, setValue, showError, value } = useField({
     path: pathFromProps || name,
+    validate: memoizedValidate,
   })
 
   const renderRTL = isFieldRTL({

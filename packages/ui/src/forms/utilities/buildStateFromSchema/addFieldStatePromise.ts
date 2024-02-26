@@ -1,14 +1,14 @@
 /* eslint-disable no-param-reassign */
 import type { TFunction } from '@payloadcms/translations'
+import type { User } from 'payload/auth'
+import type { Data, NonPresentationalField, SanitizedConfig } from 'payload/types'
 
 import ObjectId from 'bson-objectid'
-
-import type { User } from 'payload/auth'
-import type { NonPresentationalField, Data } from 'payload/types'
-import type { FormState, FormField } from '../../Form/types'
-
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import { getDefaultValue } from 'payload/utilities'
+
+import type { FormField, FormState } from '../../Form/types'
+
 import { iterateFields } from './iterateFields'
 
 type AddFieldStatePromiseArgs = {
@@ -17,6 +17,7 @@ type AddFieldStatePromiseArgs = {
    */
   anyParentLocalized?: boolean
   data: Data
+  errorPaths: Set<string>
   field: NonPresentationalField
   /**
    * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
@@ -50,7 +51,6 @@ type AddFieldStatePromiseArgs = {
   state: FormState
   t: TFunction
   user: User
-  errorPaths: Set<string>
 }
 
 /**
@@ -62,8 +62,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     anyParentLocalized = false,
     data,
-    field,
-    forceFullValue = false,
+    errorPaths: parentErrorPaths,
+  field,
+  forceFullValue = false,
     fullData,
     includeSchema = false,
     locale,
@@ -73,21 +74,18 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     path,
     preferences,
     skipConditionChecks = false,
-    skipValidation = false,
-    state,
-    t,
-    user,
-    errorPaths: parentErrorPaths,
+    skipValidation = false,state,
+  t,
+  user,
   } = args
   if (fieldAffectsData(field)) {
     const validate = operation === 'update' ? field.validate : undefined
     const fieldState: FormField = {
-      fieldSchema: includeSchema ? field : undefined,
+      errorPaths: new Set(),
       initialValue: undefined,
       passesCondition,
       valid: true,
       value: undefined,
-      errorPaths: new Set(),
     }
 
     const valueWithDefault = await getDefaultValue({
@@ -147,6 +145,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 id,
                 anyParentLocalized: field.localized || anyParentLocalized,
                 data: row,
+                errorPaths: fieldState.errorPaths,
                 fields: field.fields,
                 forceFullValue,
                 fullData,
@@ -162,7 +161,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 state,
                 t,
                 user,
-                errorPaths: fieldState.errorPaths,
               }),
             )
 
@@ -170,11 +168,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             acc.rowMetadata.push({
               id: row.id,
-              errorPaths: fieldState.errorPaths,
               collapsed:
                 collapsedRowIDs === undefined
                   ? field.admin.initCollapsed
                   : collapsedRowIDs.includes(row.id),
+              errorPaths: fieldState.errorPaths,
             })
 
             return acc
@@ -261,6 +259,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   data: row,
                   anyParentLocalized: field.localized || anyParentLocalized,
+                  errorPaths: fieldState.errorPaths,
                   fields: block.fields,
                   forceFullValue,
                   fullData,
@@ -276,7 +275,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   state,
                   t,
                   user,
-                  errorPaths: fieldState.errorPaths,
                 }),
               )
 
@@ -285,11 +283,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.rowMetadata.push({
                 id: row.id,
                 blockType: row.blockType,
-                errorPaths: fieldState.errorPaths,
                 collapsed:
                   collapsedRowIDs === undefined
                     ? field.admin.initCollapsed
                     : collapsedRowIDs.includes(row.id),
+                errorPaths: fieldState.errorPaths,
               })
             }
 
@@ -331,6 +329,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           id,
           data: data?.[field.name] || {},
           anyParentLocalized: field.localized || anyParentLocalized,
+          errorPaths: parentErrorPaths,
           fields: field.fields,
           forceFullValue,
           fullData,
@@ -346,7 +345,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           state,
           t,
           user,
-          errorPaths: parentErrorPaths,
         })
 
         break
@@ -437,6 +435,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       id,
       data,
       anyParentLocalized: field.localized || anyParentLocalized,
+      errorPaths: parentErrorPaths,
       fields: field.fields,
       forceFullValue,
       fullData,
@@ -452,7 +451,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
       t,
       user,
-      errorPaths: parentErrorPaths,
     })
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab) =>
@@ -460,6 +458,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         id,
         anyParentLocalized: tab.localized || anyParentLocalized,
         data: tabHasName(tab) ? data?.[tab.name] : data,
+        errorPaths: parentErrorPaths,
         fields: tab.fields,
         forceFullValue,
         fullData,
@@ -475,7 +474,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         state,
         t,
         user,
-        errorPaths: parentErrorPaths,
       }),
     )
 

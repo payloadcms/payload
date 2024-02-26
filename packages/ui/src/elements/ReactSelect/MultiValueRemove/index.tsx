@@ -1,11 +1,11 @@
 import type { MultiValueRemoveProps } from 'react-select'
 
 import React from 'react'
-import { useTranslation } from '../../../providers/Translation'
 
 import type { Option as OptionType } from '../types'
 
 import { X } from '../../../icons/X'
+import { useTranslation } from '../../../providers/Translation'
 import { Tooltip } from '../../Tooltip'
 import './index.scss'
 
