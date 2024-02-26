@@ -15,9 +15,9 @@ import DefaultError from '../../forms/Error'
 import DefaultDescription from '../../forms/FieldDescription'
 import DefaultLabel from '../../forms/Label'
 import { fieldTypes } from '../../forms/fields'
-import { DefaultCell } from '../../views/List/Cell'
 
 export const mapFields = (args: {
+  DefaultCell: React.FC<any>
   config: SanitizedConfig
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
@@ -31,6 +31,7 @@ export const mapFields = (args: {
   readOnly?: boolean
 }): FieldMap => {
   const {
+    DefaultCell,
     config,
     fieldSchema,
     filter,
@@ -98,6 +99,7 @@ export const mapFields = (args: {
           field.fields &&
           Array.isArray(field.fields) &&
           mapFields({
+            DefaultCell,
             config,
             fieldSchema: field.fields,
             filter,
@@ -114,6 +116,7 @@ export const mapFields = (args: {
           Array.isArray(field.tabs) &&
           field.tabs.map((tab) => {
             const tabFieldMap = mapFields({
+              DefaultCell,
               config,
               fieldSchema: tab.fields,
               filter,
@@ -139,6 +142,7 @@ export const mapFields = (args: {
           Array.isArray(field.blocks) &&
           field.blocks.map((block) => {
             const blockFieldMap = mapFields({
+              DefaultCell,
               config,
               fieldSchema: block.fields,
               filter,

@@ -3,7 +3,7 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { UploadActions } from '../../views/Edit/Upload'
+import { UploadActions } from '../../elements/Upload'
 import { Button } from '../Button'
 import Thumbnail from '../Thumbnail'
 import Meta from './Meta'

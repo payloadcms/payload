@@ -7,6 +7,9 @@ import { cookies, headers } from 'next/headers'
 import { deepMerge } from 'payload/utilities'
 import React from 'react'
 
+import { DefaultEditView } from '../../pages/Edit/Default'
+import { DefaultListView } from '../../pages/List/Default'
+import { DefaultCell } from '../../pages/List/Default/Cell'
 import { createClientConfig } from '../../utilities/createClientConfig'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage'
 
@@ -42,7 +45,12 @@ export const RootLayout = async ({
     value: language,
   }))
 
-  const componentMap = buildComponentMap({ config })
+  const componentMap = buildComponentMap({
+    DefaultCell,
+    DefaultEditView,
+    DefaultListView,
+    config,
+  })
 
   return (
     <html dir={dir} lang={lang}>

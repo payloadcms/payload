@@ -1,6 +1,10 @@
 import type { Data, FieldAffectingData, SanitizedCollectionConfig, Where } from 'payload/types'
 import type React from 'react'
 
+import type { Column } from '../..'
+
+export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
+
 export type ListInfoProps = {
   Header?: React.ReactNode
   collectionSlug: SanitizedCollectionConfig['slug']

@@ -5,10 +5,10 @@ import React, { useRef, useState } from 'react'
 import ReactCrop, { type Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
+import { editDrawerSlug } from '../../elements/Upload'
 import { Plus } from '../../icons/Plus'
 import { useFormQueryParams } from '../../providers/FormQueryParams'
 import { useTranslation } from '../../providers/Translation'
-import { editDrawerSlug } from '../../views/Edit/Upload'
 import { Button } from '../Button'
 import './index.scss'
 

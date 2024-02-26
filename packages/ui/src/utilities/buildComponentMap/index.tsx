@@ -6,11 +6,12 @@ import React from 'react'
 
 import type { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
 
-import { DefaultEditView } from '../../views/Edit'
-import { DefaultList } from '../../views/List'
 import { mapFields } from './mapFields'
 
 export const buildComponentMap = (args: {
+  DefaultCell: React.FC<any>
+  DefaultEditView: React.FC<EditViewProps>
+  DefaultListView: React.FC<EditViewProps>
   config: SanitizedConfig
   operation?: 'create' | 'update'
   permissions?:
@@ -20,7 +21,15 @@ export const buildComponentMap = (args: {
     | FieldPermissions
   readOnly?: boolean
 }): ComponentMap => {
-  const { config, operation = 'update', permissions, readOnly: readOnlyOverride } = args
+  const {
+    DefaultCell,
+    DefaultEditView,
+    DefaultListView,
+    config,
+    operation = 'update',
+    permissions,
+    readOnly: readOnlyOverride,
+  } = args
 
   // Collections
   const collections = config.collections.reduce((acc, collectionConfig) => {
@@ -49,7 +58,7 @@ export const buildComponentMap = (args: {
           : undefined
 
     const Edit = CustomEditView || DefaultEditView
-    const List = CustomListView || DefaultList
+    const List = CustomListView || DefaultListView
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList
 
@@ -76,6 +85,7 @@ export const buildComponentMap = (args: {
       afterListTable?.map((Component) => <Component />)
 
     const mappedFields = mapFields({
+      DefaultCell,
       config,
       fieldSchema: fields,
       operation,
@@ -104,6 +114,7 @@ export const buildComponentMap = (args: {
     const { fields, slug } = globalConfig
 
     const mappedFields = mapFields({
+      DefaultCell,
       config,
       fieldSchema: fields,
       operation,
