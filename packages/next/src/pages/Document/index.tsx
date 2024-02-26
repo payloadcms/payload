@@ -25,8 +25,9 @@ import React, { Fragment } from 'react'
 
 import type { ServerSideEditViewProps } from '../Edit/types'
 
-import { getNextT } from '../../utilities/getNextT.ts'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
+import { meta } from '../../utilities/meta.ts'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
 export type GenerateEditViewMetadata = (args: {
@@ -48,7 +49,7 @@ export const generateMetadata = async ({
     segments: string[]
   }
 }): Promise<Metadata> => {
-  let fn: GenerateEditViewMetadata = null
+  let fn: GenerateEditViewMetadata | null = null
 
   const isEditing = Boolean(
     params.collection && params.segments?.length > 0 && params.segments[0] !== 'create',
@@ -79,7 +80,7 @@ export const generateMetadata = async ({
     fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
   }
 
-  const t = await getNextT({
+  const { t } = await getNextI18n({
     config: await config,
   })
 
@@ -92,6 +93,13 @@ export const generateMetadata = async ({
       t,
     })
   }
+
+  return meta({
+    config,
+    description: '',
+    keywords: '',
+    title: '',
+  })
 }
 
 export const Document = async ({

@@ -5,7 +5,7 @@ import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
-import { getNextT } from '../../utilities/getNextT'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { DefaultDashboard } from './Default'
@@ -15,7 +15,7 @@ export const generateMetadata = async ({
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
-  const t = await getNextT({
+  const { t } = await getNextI18n({
     config: await config,
   })
 

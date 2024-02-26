@@ -12,7 +12,7 @@ import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types'
 
-import { getNextT } from '../../utilities/getNextT'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { DefaultListView } from './Default'
@@ -32,7 +32,7 @@ export const generateMetadata = async ({
 
   const config = await configPromise
 
-  const t = await getNextT({
+  const { t } = await getNextI18n({
     config,
   })
 

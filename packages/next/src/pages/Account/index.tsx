@@ -13,7 +13,7 @@ import React, { Fragment } from 'react'
 
 import type { ServerSideEditViewProps } from '../Edit/types'
 
-import { getNextT } from '../../utilities/getNextT'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { EditView } from '../Edit'
@@ -26,7 +26,7 @@ export const generateMetadata = async ({
 }): Promise<Metadata> => {
   const config = await configPromise
 
-  const t = await getNextT({
+  const { t } = await getNextI18n({
     config,
   })
 
