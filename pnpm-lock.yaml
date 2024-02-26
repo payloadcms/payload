@@ -553,6 +553,9 @@ importers:
       eslint-plugin-node:
         specifier: 11.1.0
         version: 11.1.0(eslint@8.48.0)
+      eslint-plugin-only-warn:
+        specifier: ^1.1.0
+        version: 1.1.0
       eslint-plugin-perfectionist:
         specifier: 2.0.0
         version: 2.0.0(eslint@8.48.0)(typescript@5.2.2)
@@ -9896,6 +9899,11 @@ packages:
       minimatch: 3.1.2
       resolve: 1.22.6
       semver: 6.3.1
+    dev: false
+
+  /eslint-plugin-only-warn@1.1.0:
+    resolution: {integrity: sha512-2tktqUAT+Q3hCAU0iSf4xAN1k9zOpjK5WO8104mB0rT/dGhOa09582HN5HlbxNbPRZ0THV7nLGvzugcNOSjzfA==}
+    engines: {node: '>=6'}
     dev: false
 
   /eslint-plugin-perfectionist@2.0.0(eslint@8.48.0)(typescript@5.2.2):

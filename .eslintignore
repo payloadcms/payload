@@ -8,3 +8,7 @@
 **/dist/**
 **/node_modules
 **/temp
+**/*.d.ts
+**/*.spec.ts
+
+packages/payload/scripts
