@@ -42,6 +42,7 @@
       ],
       "@payloadcms/translations/api": ["./packages/translations/src/_generatedFiles_/api/index.js"],
       "@payloadcms/next/*": ["./packages/next/src/*"],
+      "@payloadcms/next": ["./packages/next/src/exports/*"],
       "@payloadcms/graphql": ["./packages/graphql/src"]
     }
   },
