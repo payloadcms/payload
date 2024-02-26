@@ -1,17 +1,18 @@
+import type { ServerSideEditViewProps } from '@payloadcms/ui'
+
+import { getTranslation } from '@payloadcms/translations'
+import { Gutter, SetDocumentStepNav as SetStepNav } from '@payloadcms/ui'
+import { notFound } from 'next/navigation'
 import React from 'react'
 
-import { Gutter, SetDocumentStepNav as SetStepNav, ServerSideEditViewProps } from '@payloadcms/ui'
 import { buildVersionColumns } from './buildColumns'
-import { notFound } from 'next/navigation'
-import { getTranslation } from '@payloadcms/translations'
 import { VersionsViewClient } from './index.client'
-
 import './index.scss'
 
 export const baseClass = 'versions'
 
 export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => {
-  const { user, payload, config, searchParams, i18n } = props
+  const { config, i18n, payload, searchParams, user } = props
 
   const id = 'id' in props ? props.id : undefined
   const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
@@ -37,10 +38,10 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
       versionsData = await payload.findVersions({
         collection: collectionSlug,
         depth: 0,
-        user,
+        limit: limit ? parseInt(limit?.toString(), 10) : undefined,
         page: page ? parseInt(page.toString(), 10) : undefined,
         sort: sort as string,
-        limit: limit ? parseInt(limit?.toString(), 10) : undefined,
+        user,
         where: {
           parent: {
             equals: id,
@@ -59,11 +60,11 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
   if (globalSlug) {
     try {
       versionsData = await payload.findGlobalVersions({
-        slug: globalSlug,
         depth: 0,
-        user,
         page: page ? parseInt(page as string, 10) : undefined,
+        slug: globalSlug,
         sort: sort as string,
+        user,
         where: {
           parent: {
             equals: id,
@@ -84,18 +85,18 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
   }
 
   const columns = buildVersionColumns({
-    config,
     collectionConfig,
-    globalConfig,
+    config,
     docID: id,
+    globalConfig,
     i18n,
   })
 
   const fetchURL = collectionSlug
     ? `${serverURL}${apiRoute}/${collectionSlug}/versions`
     : globalSlug
-    ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
-    : ''
+      ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
+      : ''
 
   return (
     <React.Fragment>
@@ -110,13 +111,13 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
       <main className={baseClass}>
         <Gutter className={`${baseClass}__wrap`}>
           <VersionsViewClient
-            initialData={versionsData}
-            columns={columns}
-            fetchURL={fetchURL}
             baseClass={baseClass}
             collectionSlug={collectionSlug}
+            columns={columns}
+            fetchURL={fetchURL}
             globalSlug={globalSlug}
             id={id}
+            initialData={versionsData}
             paginationLimits={collectionConfig?.admin?.pagination?.limits}
           />
         </Gutter>

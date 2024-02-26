@@ -1,10 +1,12 @@
-import { GraphQLError } from 'graphql'
-import httpStatus from 'http-status'
-import { configToSchema } from '@payloadcms/graphql'
-import type { Payload, CollectionAfterErrorHook, SanitizedConfig } from 'payload/types'
 import type { GraphQLFormattedError } from 'graphql'
-import { createPayloadRequest } from '../../utilities/createPayloadRequest'
+import type { GraphQLError } from 'graphql'
+import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload/types'
+
+import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
+import httpStatus from 'http-status'
+
+import { createPayloadRequest } from '../../utilities/createPayloadRequest'
 
 const handleError = async (
   payload: Payload,
@@ -75,8 +77,8 @@ export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
     const req = await createPayloadRequest({
-      request,
       config,
+      request,
     })
     const { schema, validationRules } = await getGraphql(config)
 
@@ -87,7 +89,7 @@ export const POST =
 
     const headers = {}
     const apiResponse = await createHandler({
-      context: { req, headers },
+      context: { headers, req },
       onOperation: async (request, args, result) => {
         const response =
           typeof payload.extensions === 'function'
@@ -113,12 +115,12 @@ export const POST =
     })(originalRequest)
 
     const resHeaders = new Headers(apiResponse.headers)
-    for (let key in headers) {
+    for (const key in headers) {
       resHeaders.append(key, headers[key])
     }
 
     return new Response(apiResponse.body, {
-      status: apiResponse.status,
       headers: new Headers(resHeaders),
+      status: apiResponse.status,
     })
   }

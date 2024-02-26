@@ -1,10 +1,10 @@
 import httpStatus from 'http-status'
-
-import { resetPasswordOperation } from 'payload/operations'
 import { generatePayloadCookie } from 'payload/auth'
-import { CollectionRouteHandler } from '../types'
+import { resetPasswordOperation } from 'payload/operations'
 
-export const resetPassword: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const resetPassword: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
@@ -19,9 +19,9 @@ export const resetPassword: CollectionRouteHandler = async ({ req, collection })
   })
 
   const cookie = generatePayloadCookie({
-    token: result.token,
-    payload: req.payload,
     collectionConfig: collection.config,
+    payload: req.payload,
+    token: result.token,
   })
 
   if (collection.config.auth.removeTokenFromResponses) {

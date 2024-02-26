@@ -1,7 +1,6 @@
-import { Option } from '@payloadcms/ui'
-import { CollectionPermission, GlobalPermission, Permissions, User } from 'payload/auth'
-
-import { Document, SanitizedCollectionConfig } from 'payload/types'
+import type { Option } from '@payloadcms/ui'
+import type { CollectionPermission, GlobalPermission, Permissions, User } from 'payload/auth'
+import type { Document, SanitizedCollectionConfig } from 'payload/types'
 
 export type CompareOption = {
   label: string
@@ -11,16 +10,16 @@ export type CompareOption = {
 }
 
 export type DefaultVersionsViewProps = {
+  collectionSlug?: SanitizedCollectionConfig['slug']
   doc: Document
-  mostRecentDoc: Document
-  publishedDoc: Document
+  docPermissions: CollectionPermission | GlobalPermission
+  globalSlug?: SanitizedCollectionConfig['slug']
+  id?: number | string
   initialComparisonDoc: Document
   localeOptions: Option[]
-  user: User
+  mostRecentDoc: Document
   permissions: Permissions
-  id?: string | number
+  publishedDoc: Document
+  user: User
   versionID?: string
-  docPermissions: CollectionPermission | GlobalPermission
-  collectionSlug?: SanitizedCollectionConfig['slug']
-  globalSlug?: SanitizedCollectionConfig['slug']
 }

@@ -1,12 +1,11 @@
-import React from 'react'
 import { getTranslation } from '@payloadcms/translations'
+import React from 'react'
 
 import type { Props } from '../types'
 
 import Label from '../../Label'
 import { diffStyles } from '../styles'
 import { DiffViewer } from './DiffViewer'
-
 import './index.scss'
 
 const baseClass = 'text-diff'
@@ -15,10 +14,10 @@ const Text: React.FC<Props> = ({
   comparison,
   diffMethod,
   field,
+  i18n,
   isRichText = false,
   locale,
   version,
-  i18n,
 }) => {
   let placeholder = ''
 
@@ -41,9 +40,9 @@ const Text: React.FC<Props> = ({
       <DiffViewer
         comparisonToRender={comparisonToRender}
         diffMethod={diffMethod}
+        diffStyles={diffStyles}
         placeholder={placeholder}
         versionToRender={versionToRender}
-        diffStyles={diffStyles}
       />
     </div>
   )

@@ -1,9 +1,9 @@
 import httpStatus from 'http-status'
-
 import { docAccessOperationGlobal } from 'payload/operations'
-import { GlobalRouteHandler } from '../types'
 
-export const docAccess: GlobalRouteHandler = async ({ req, globalConfig }) => {
+import type { GlobalRouteHandler } from '../types'
+
+export const docAccess: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const result = await docAccessOperationGlobal({
     globalConfig,
     req,

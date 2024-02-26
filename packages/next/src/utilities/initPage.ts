@@ -19,30 +19,30 @@ import { translations } from '@payloadcms/translations/client'
 import { initI18n } from '@payloadcms/translations'
 
 export const initPage = async ({
-  config: configPromise,
-  redirectUnauthenticatedUser = false,
   collectionSlug,
+  config: configPromise,
   globalSlug,
   localeParam,
-  searchParams,
+  redirectUnauthenticatedUser = false,
   route,
+  searchParams,
 }: {
-  config: SanitizedConfig | Promise<SanitizedConfig>
-  redirectUnauthenticatedUser?: boolean
   collectionSlug?: string
+  config: Promise<SanitizedConfig> | SanitizedConfig
   globalSlug?: string
   localeParam?: string
-  searchParams?: { [key: string]: string | string[] | undefined }
+  redirectUnauthenticatedUser?: boolean
   route?: string
+  searchParams?: { [key: string]: string | string[] | undefined }
 }): Promise<{
+  collectionConfig?: SanitizedCollectionConfig
+  config: SanitizedConfig
+  globalConfig?: SanitizedGlobalConfig
+  i18n: I18n
+  locale: ReturnType<typeof findLocaleFromCode>
   payload: Awaited<ReturnType<typeof getPayload>>
   permissions: Permissions
   user: Awaited<ReturnType<typeof auth>>['user']
-  config: SanitizedConfig
-  i18n: I18n
-  collectionConfig?: SanitizedCollectionConfig
-  globalConfig?: SanitizedGlobalConfig
-  locale: ReturnType<typeof findLocaleFromCode>
 }> => {
   const headers = getHeaders()
   const cookies = parseCookies(headers)
@@ -103,13 +103,13 @@ export const initPage = async ({
   }
 
   return {
+    collectionConfig,
+    config,
+    globalConfig,
+    i18n,
+    locale,
     payload,
     permissions,
     user,
-    config,
-    i18n,
-    collectionConfig,
-    globalConfig,
-    locale,
   }
 }

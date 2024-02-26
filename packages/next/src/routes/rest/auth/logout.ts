@@ -1,9 +1,10 @@
 import httpStatus from 'http-status'
-import { logoutOperation } from 'payload/operations'
 import { generateExpiredPayloadCookie } from 'payload/auth'
-import { CollectionRouteHandler } from '../types'
+import { logoutOperation } from 'payload/operations'
 
-export const logout: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const logout: CollectionRouteHandler = async ({ collection, req }) => {
   const result = logoutOperation({
     collection,
     req,

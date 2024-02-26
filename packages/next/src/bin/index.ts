@@ -11,7 +11,7 @@ import { install } from './install'
 main()
 
 async function main() {
-  if (debug) console.log({ pwd: process.cwd(), debug })
+  if (debug) console.log({ debug, pwd: process.cwd() })
   switch (script.toLowerCase()) {
     case 'install': {
       if (debug) console.log('Running install')

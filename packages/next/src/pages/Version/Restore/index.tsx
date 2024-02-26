@@ -1,12 +1,12 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { Button, MinimalTemplate, Pill, useConfig, useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-import { Button, MinimalTemplate, Pill, useConfig, useTranslation } from '@payloadcms/ui'
 // import { requests } from '../../../../api'
 import './index.scss'
 

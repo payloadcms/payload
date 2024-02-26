@@ -1,68 +1,70 @@
-import httpStatus from 'http-status'
-import type { Collection, GlobalConfig, PayloadRequest, SanitizedConfig } from 'payload/types'
 import type { Endpoint } from 'payload/config'
+import type { Collection, GlobalConfig, PayloadRequest, SanitizedConfig } from 'payload/types'
+
+import httpStatus from 'http-status'
 import { match } from 'path-to-regexp'
 
-import { createPayloadRequest } from '../../utilities/createPayloadRequest'
-import {
+import type {
   CollectionRouteHandler,
   CollectionRouteHandlerWithID,
   GlobalRouteHandler,
   GlobalRouteHandlerWithID,
 } from './types'
 
+import { createPayloadRequest } from '../../utilities/createPayloadRequest'
 import { RouteError } from './RouteError'
-import { endpointsAreDisabled } from './checkEndpoints'
-
-import { me } from './auth/me'
+import { access } from './auth/access'
+import { forgotPassword } from './auth/forgotPassword'
 import { init } from './auth/init'
 import { login } from './auth/login'
-import { unlock } from './auth/unlock'
-import { access } from './auth/access'
 import { logout } from './auth/logout'
+import { me } from './auth/me'
 import { refresh } from './auth/refresh'
-
-import { find } from './collections/find'
-import { create } from './collections/create'
-import { update } from './collections/update'
-import { deleteDoc } from './collections/delete'
-import { verifyEmail } from './auth/verifyEmail'
-import { findByID } from './collections/findByID'
-import { docAccess } from './collections/docAccess'
-import { resetPassword } from './auth/resetPassword'
-import { updateByID } from './collections/updateByID'
-import { deleteByID } from './collections/deleteByID'
-import { forgotPassword } from './auth/forgotPassword'
-import { findVersions } from './collections/findVersions'
 import { registerFirstUser } from './auth/registerFirstUser'
-import { restoreVersion } from './collections/restoreVersion'
+import { resetPassword } from './auth/resetPassword'
+import { unlock } from './auth/unlock'
+import { verifyEmail } from './auth/verifyEmail'
+import { buildFormState } from './buildFormState'
+import { endpointsAreDisabled } from './checkEndpoints'
+import { create } from './collections/create'
+import { deleteDoc } from './collections/delete'
+import { deleteByID } from './collections/deleteByID'
+import { docAccess } from './collections/docAccess'
+import { find } from './collections/find'
+import { findByID } from './collections/findByID'
 import { findVersionByID } from './collections/findVersionByID'
-
-import { findOne } from './globals/findOne'
-import { update as updateGlobal } from './globals/update'
+import { findVersions } from './collections/findVersions'
+import { restoreVersion } from './collections/restoreVersion'
+import { update } from './collections/update'
+import { updateByID } from './collections/updateByID'
 import { docAccess as docAccessGlobal } from './globals/docAccess'
+import { findOne } from './globals/findOne'
+import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID'
 import { findVersions as findVersionsGlobal } from './globals/findVersions'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion'
-import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID'
+import { update as updateGlobal } from './globals/update'
 import { RouteError } from './RouteError'
 import { buildFormStateGlobal } from './globals/buildFormState'
 import { buildFormStateCollection } from './collections/buildFormState'
 
 const endpoints = {
-  root: {
-    GET: {
-      access,
-    },
-  },
   collection: {
+    DELETE: {
+      delete: deleteDoc,
+      deleteByID,
+    },
     GET: {
+      'doc-access-by-id': docAccess,
+      'doc-versions-by-id': findVersionByID,
+      find,
+      findByID,
       init,
       me,
       versions: findVersions,
-      find,
-      findByID,
-      'doc-access-by-id': docAccess,
-      'doc-versions-by-id': findVersionByID,
+    },
+    PATCH: {
+      update,
+      updateByID,
     },
     POST: {
       create,
@@ -79,38 +81,38 @@ const endpoints = {
       'doc-versions-by-id': restoreVersion,
       'doc-verify-by-id': verifyEmail,
     },
-    PATCH: {
-      update,
-      updateByID,
-    },
-    DELETE: {
-      delete: deleteDoc,
-      deleteByID,
-    },
   },
   global: {
     GET: {
-      findOne,
       'doc-access': docAccessGlobal,
       'doc-versions': findVersionsGlobal,
       'doc-versions-by-id': findVersionByIdGlobal,
+      findOne,
     },
     POST: {
-      update: updateGlobal,
       'doc-access': docAccessGlobal,
       'doc-versions-by-id': restoreVersionGlobal,
+      update: updateGlobal,
       'form-state': buildFormStateGlobal,
+    },
+  },
+  root: {
+    GET: {
+      access,
+    },
+    POST: {
+      'form-state': buildFormState,
     },
   },
 }
 
 const handleCustomEndpoints = ({
-  entitySlug,
   endpoints,
+  entitySlug,
   payloadRequest,
 }: {
-  entitySlug?: string
   endpoints: Endpoint[] | GlobalConfig['endpoints']
+  entitySlug?: string
   payloadRequest: PayloadRequest
 }): Promise<Response> | Response => {
   if (endpoints && endpoints.length > 0) {
@@ -161,16 +163,16 @@ export const GET =
 
     try {
       req = await createPayloadRequest({
-        request,
         config,
         params: {
           collection: slug1,
         },
+        request,
       })
 
       const disableEndpoints = endpointsAreDisabled({
-        request,
         endpoints: req.payload.config.endpoints,
+        request,
       })
       if (disableEndpoints) return disableEndpoints
 
@@ -178,22 +180,22 @@ export const GET =
 
       if (collection) {
         const disableEndpoints = endpointsAreDisabled({
-          request,
           endpoints: collection.config.endpoints,
+          request,
         })
         if (disableEndpoints) return disableEndpoints
 
         const customEndpointResponse = await handleCustomEndpoints({
+          endpoints: collection.config.endpoints,
           entitySlug: slug1,
           payloadRequest: req,
-          endpoints: collection.config.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 
         switch (slug.length) {
           case 1:
             // /:collection
-            res = await endpoints.collection.GET.find({ req, collection })
+            res = await endpoints.collection.GET.find({ collection, req })
             break
           case 2:
             if (slug2 in endpoints.collection.GET) {
@@ -201,12 +203,12 @@ export const GET =
               // /:collection/me
               // /:collection/versions
               res = await (endpoints.collection.GET[slug2] as CollectionRouteHandler)({
-                req,
                 collection,
+                req,
               })
             } else {
               // /:collection/:id
-              res = await endpoints.collection.GET.findByID({ req, id: slug2, collection })
+              res = await endpoints.collection.GET.findByID({ id: slug2, collection, req })
             }
             break
           case 3:
@@ -215,7 +217,7 @@ export const GET =
               // /:collection/versions/:id
               res = await (
                 endpoints.collection.GET[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
-              )({ req, id: slug3, collection })
+              )({ id: slug3, collection, req })
             }
             break
         }
@@ -223,30 +225,30 @@ export const GET =
         const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
 
         const disableEndpoints = endpointsAreDisabled({
-          request,
           endpoints: globalConfig.endpoints,
+          request,
         })
         if (disableEndpoints) return disableEndpoints
 
         const customEndpointResponse = await handleCustomEndpoints({
+          endpoints: globalConfig.endpoints,
           entitySlug: `${slug1}/${slug2}`,
           payloadRequest: req,
-          endpoints: globalConfig.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 
         switch (slug.length) {
           case 2:
             // /globals/:slug
-            res = await endpoints.global.GET.findOne({ req, globalConfig })
+            res = await endpoints.global.GET.findOne({ globalConfig, req })
             break
           case 3:
             if (`doc-${slug3}` in endpoints.global.GET) {
               // /globals/:slug/access
               // /globals/:slug/versions
               res = await (endpoints.global.GET?.[`doc-${slug3}`] as GlobalRouteHandler)({
-                req,
                 globalConfig,
+                req,
               })
             }
             break
@@ -256,9 +258,9 @@ export const GET =
               res = await (
                 endpoints.global.GET?.[`doc-${slug3}-by-id`] as GlobalRouteHandlerWithID
               )({
-                req,
                 id: slug4,
                 globalConfig,
+                req,
               })
             }
             break
@@ -271,17 +273,17 @@ export const GET =
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
-        payloadRequest: req,
         endpoints: req.payload.config.endpoints,
+        payloadRequest: req,
       })
       if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse(slug)
     } catch (error) {
       return RouteError({
-        req,
         collection,
         err: error,
+        req,
       })
     }
   }
@@ -296,30 +298,30 @@ export const POST =
 
     try {
       req = await createPayloadRequest({
-        request,
         config,
         params: { collection: slug1 },
+        request,
       })
 
       collection = req.payload.collections?.[slug1]
 
       const disableEndpoints = endpointsAreDisabled({
-        request,
         endpoints: req.payload.config.endpoints,
+        request,
       })
       if (disableEndpoints) return disableEndpoints
 
       if (collection) {
         const disableEndpoints = endpointsAreDisabled({
-          request,
           endpoints: collection.config.endpoints,
+          request,
         })
         if (disableEndpoints) return disableEndpoints
 
         const customEndpointResponse = await handleCustomEndpoints({
+          endpoints: collection.config.endpoints,
           entitySlug: slug1,
           payloadRequest: req,
-          endpoints: collection.config.endpoints,
         })
 
         if (customEndpointResponse) return customEndpointResponse
@@ -327,7 +329,7 @@ export const POST =
         switch (slug.length) {
           case 1:
             // /:collection
-            res = await endpoints.collection.POST.create({ req, collection })
+            res = await endpoints.collection.POST.create({ collection, req })
             break
           case 2:
             if (slug2 in endpoints.collection.POST) {
@@ -341,8 +343,8 @@ export const POST =
               // /:collection/reset-password
               // /:collection/refresh-token
               res = await (endpoints.collection.POST?.[slug2] as CollectionRouteHandler)({
-                req,
                 collection,
+                req,
               })
             }
             break
@@ -353,36 +355,36 @@ export const POST =
               // /:collection/verify/:token ("doc-verify-by-id" uses id as token internally)
               res = await (
                 endpoints.collection.POST[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
-              )({ req, id: slug3, collection })
+              )({ id: slug3, collection, req })
             }
             break
         }
       } else if (slug1 === 'globals' && slug2) {
         const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
         const disableEndpoints = endpointsAreDisabled({
-          request,
           endpoints: globalConfig.endpoints,
+          request,
         })
         if (disableEndpoints) return disableEndpoints
 
         const customEndpointResponse = await handleCustomEndpoints({
+          endpoints: globalConfig.endpoints,
           entitySlug: `${slug1}/${slug2}`,
           payloadRequest: req,
-          endpoints: globalConfig.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 
         switch (slug.length) {
           case 2:
             // /globals/:slug
-            res = await endpoints.global.POST.update({ req, globalConfig })
+            res = await endpoints.global.POST.update({ globalConfig, req })
             break
           case 3:
             if (`doc-${slug3}` in endpoints.global.POST) {
               // /globals/:slug/access
               res = await (endpoints.global.POST?.[`doc-${slug3}`] as GlobalRouteHandler)({
-                req,
                 globalConfig,
+                req,
               })
             }
             break
@@ -392,9 +394,9 @@ export const POST =
               res = await (
                 endpoints.global.POST?.[`doc-${slug3}-by-id`] as GlobalRouteHandlerWithID
               )({
-                req,
                 id: slug4,
                 globalConfig,
+                req,
               })
             }
             break
@@ -409,17 +411,17 @@ export const POST =
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
-        payloadRequest: req,
         endpoints: req.payload.config.endpoints,
+        payloadRequest: req,
       })
       if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse(slug)
     } catch (error) {
       return RouteError({
-        req,
         collection,
         err: error,
+        req,
       })
     }
   }
@@ -434,42 +436,42 @@ export const DELETE =
 
     try {
       req = await createPayloadRequest({
-        request,
         config,
         params: {
           collection: slug1,
         },
+        request,
       })
       collection = req.payload.collections?.[slug1]
 
       const disableEndpoints = endpointsAreDisabled({
-        request,
         endpoints: req.payload.config.endpoints,
+        request,
       })
       if (disableEndpoints) return disableEndpoints
 
       if (collection) {
         const disableEndpoints = endpointsAreDisabled({
-          request,
           endpoints: collection.config.endpoints,
+          request,
         })
         if (disableEndpoints) return disableEndpoints
 
         const customEndpointResponse = await handleCustomEndpoints({
+          endpoints: collection.config.endpoints,
           entitySlug: slug1,
           payloadRequest: req,
-          endpoints: collection.config.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 
         switch (slug.length) {
           case 1:
             // /:collection
-            res = await endpoints.collection.DELETE.delete({ req, collection })
+            res = await endpoints.collection.DELETE.delete({ collection, req })
             break
           case 2:
             // /:collection/:id
-            res = await endpoints.collection.DELETE.deleteByID({ req, id: slug2, collection })
+            res = await endpoints.collection.DELETE.deleteByID({ id: slug2, collection, req })
             break
         }
       }
@@ -478,17 +480,17 @@ export const DELETE =
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
-        payloadRequest: req,
         endpoints: req.payload.config.endpoints,
+        payloadRequest: req,
       })
       if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse(slug)
     } catch (error) {
       return RouteError({
-        req,
         collection,
         err: error,
+        req,
       })
     }
   }
@@ -503,42 +505,42 @@ export const PATCH =
 
     try {
       req = await createPayloadRequest({
-        request,
         config,
         params: {
           collection: slug1,
         },
+        request,
       })
       collection = req.payload.collections?.[slug1]
 
       const disableEndpoints = endpointsAreDisabled({
-        request,
         endpoints: req.payload.config.endpoints,
+        request,
       })
       if (disableEndpoints) return disableEndpoints
 
       if (collection) {
         const disableEndpoints = endpointsAreDisabled({
-          request,
           endpoints: collection.config.endpoints,
+          request,
         })
         if (disableEndpoints) return disableEndpoints
 
         const customEndpointResponse = await handleCustomEndpoints({
+          endpoints: collection.config.endpoints,
           entitySlug: slug1,
           payloadRequest: req,
-          endpoints: collection.config.endpoints,
         })
         if (customEndpointResponse) return customEndpointResponse
 
         switch (slug.length) {
           case 1:
             // /:collection
-            res = await endpoints.collection.PATCH.update({ req, collection })
+            res = await endpoints.collection.PATCH.update({ collection, req })
             break
           case 2:
             // /:collection/:id
-            res = await endpoints.collection.PATCH.updateByID({ req, id: slug2, collection })
+            res = await endpoints.collection.PATCH.updateByID({ id: slug2, collection, req })
             break
         }
       }
@@ -547,17 +549,17 @@ export const PATCH =
 
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
-        payloadRequest: req,
         endpoints: req.payload.config.endpoints,
+        payloadRequest: req,
       })
       if (customEndpointResponse) return customEndpointResponse
 
       return RouteNotFoundResponse(slug)
     } catch (error) {
       return RouteError({
-        req,
         collection,
         err: error,
+        req,
       })
     }
   }

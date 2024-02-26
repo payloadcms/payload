@@ -3,7 +3,7 @@ import { isSafeFromPollution } from './utilities'
 export const processNested = function (data) {
   if (!data || data.length < 1) return Object.create(null)
 
-  let d = Object.create(null),
+  const d = Object.create(null),
     keys = Object.keys(data)
 
   for (let i = 0; i < keys.length; i++) {
@@ -13,7 +13,7 @@ export const processNested = function (data) {
       keyParts = key.replace(new RegExp(/\[/g), '.').replace(new RegExp(/\]/g), '').split('.')
 
     for (let index = 0; index < keyParts.length; index++) {
-      let k = keyParts[index]
+      const k = keyParts[index]
 
       // Ensure we don't allow prototype pollution
       if (!isSafeFromPollution(current, k)) {

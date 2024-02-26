@@ -3,7 +3,7 @@ import fs from 'fs'
 function iteratorToStream(iterator) {
   return new ReadableStream({
     async pull(controller) {
-      const { value, done } = await iterator.next()
+      const { done, value } = await iterator.next()
       if (done) {
         controller.close()
       } else {

@@ -1,39 +1,42 @@
+import type { QueryParamTypes } from '@payloadcms/ui'
+import type { AdminViewComponent } from 'payload/config'
 import type {
   DocumentPreferences,
   Document as DocumentType,
   Field,
   SanitizedConfig,
 } from 'payload/types'
-import React, { Fragment } from 'react'
-import { initPage } from '../../utilities/initPage'
+import type { DocumentPermissions } from 'payload/types'
+
 import {
   EditDepthProvider,
+  FormQueryParamsProvider,
+  HydrateClientUser,
   RenderCustomComponent,
+  SetDocumentInfo,
   buildStateFromSchema,
   formatFields,
-  FormQueryParamsProvider,
-  QueryParamTypes,
-  HydrateClientUser,
-  SetDocumentInfo,
 } from '@payloadcms/ui'
-import queryString from 'qs'
 import { notFound } from 'next/navigation'
-import { AdminViewComponent } from 'payload/config'
+import queryString from 'qs'
+import React, { Fragment } from 'react'
+
+import type { ServerSideEditViewProps } from '../../../../ui/src/views/types'
+
+import { initPage } from '../../utilities/initPage'
 import { getViewsFromConfig } from './getViewsFromConfig'
-import type { DocumentPermissions } from 'payload/types'
-import { ServerSideEditViewProps } from '../../../../ui/src/views/types'
 
 export const Document = async ({
-  params,
   config: configPromise,
+  params,
   searchParams,
 }: {
+  config: Promise<SanitizedConfig> | SanitizedConfig
   params: {
-    segments: string[]
     collection?: string
     global?: string
+    segments: string[]
   }
-  config: Promise<SanitizedConfig> | SanitizedConfig
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
   const collectionSlug = params.collection
@@ -45,14 +48,14 @@ export const Document = async ({
 
   const route = `/${collectionSlug || globalSlug + (params.segments?.length ? `/${params.segments.join('/')}` : '')}`
 
-  const { config, payload, permissions, user, collectionConfig, globalConfig, locale, i18n } =
+  const { collectionConfig, config, globalConfig, i18n, locale, payload, permissions, user } =
     await initPage({
-      config: configPromise,
-      redirectUnauthenticatedUser: true,
       collectionSlug,
+      config: configPromise,
       globalSlug,
-      searchParams,
+      redirectUnauthenticatedUser: true,
       route,
+      searchParams,
     })
 
   if (!collectionConfig && !globalConfig) {
@@ -88,10 +91,10 @@ export const Document = async ({
     }`
 
     const collectionViews = await getViewsFromConfig({
-      routeSegments: params.segments,
       collectionConfig,
       config,
       docPermissions,
+      routeSegments: params.segments,
     })
 
     CustomView = collectionViews?.CustomView
@@ -99,11 +102,11 @@ export const Document = async ({
 
     try {
       data = await payload.findByID({
-        collection: collectionSlug,
         id,
+        collection: collectionSlug,
         depth: 0,
-        user,
         locale: locale.code,
+        user,
       })
     } catch (error) {}
 
@@ -123,20 +126,20 @@ export const Document = async ({
     }`
 
     const globalViews = await getViewsFromConfig({
-      routeSegments: params.segments,
-      globalConfig,
       config,
       docPermissions,
+      globalConfig,
+      routeSegments: params.segments,
     })
 
     CustomView = globalViews?.CustomView
     DefaultView = globalViews?.DefaultView
 
     data = await payload.findGlobal({
-      slug: globalSlug,
       depth: 0,
-      user,
       locale: locale.code,
+      slug: globalSlug,
+      user,
     })
 
     preferencesKey = `global-${globalSlug}`
@@ -145,12 +148,12 @@ export const Document = async ({
   const { docs: [{ value: docPreferences } = { value: null }] = [] } = (await payload.find({
     collection: 'payload-preferences',
     depth: 0,
+    limit: 1,
     where: {
       key: {
         equals: preferencesKey,
       },
     },
-    limit: 1,
   })) as any as { docs: { value: DocumentPreferences }[] }
 
   const initialState = await buildStateFromSchema({
@@ -176,24 +179,24 @@ export const Document = async ({
     action: `${action}?${queryString.stringify(formQueryParams)}`,
     apiURL,
     canAccessAdmin: permissions?.canAccessAdmin,
+    collectionConfig,
     collectionSlug,
-    globalSlug,
+    config,
     data,
-    hasSavePermission,
-    isEditing,
     docPermissions,
     docPreferences,
-    updatedAt: data?.updatedAt?.toString(),
-    payload,
-    config,
-    searchParams,
-    i18n,
-    collectionConfig,
     globalConfig,
-    params,
-    permissions,
-    user,
+    globalSlug,
+    hasSavePermission,
+    i18n,
     initialState,
+    isEditing,
+    params,
+    payload,
+    permissions,
+    searchParams,
+    updatedAt: data?.updatedAt?.toString(),
+    user,
   }
 
   if (!DefaultView && !CustomView) {
@@ -202,19 +205,19 @@ export const Document = async ({
 
   return (
     <Fragment>
-      <HydrateClientUser user={user} permissions={permissions} />
+      <HydrateClientUser permissions={permissions} user={user} />
       <SetDocumentInfo
+        action={action}
+        apiURL={apiURL}
         collectionSlug={collectionConfig?.slug}
+        disableActions={false}
+        docPermissions={docPermissions}
+        docPreferences={docPreferences}
         globalSlug={globalConfig?.slug}
+        hasSavePermission={hasSavePermission}
         id={id}
         initialData={data}
         initialState={initialState}
-        docPermissions={docPermissions}
-        docPreferences={docPreferences}
-        apiURL={apiURL}
-        action={action}
-        hasSavePermission={hasSavePermission}
-        disableActions={false}
       />
       <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale}`}>
         <FormQueryParamsProvider formQueryParams={formQueryParams}>

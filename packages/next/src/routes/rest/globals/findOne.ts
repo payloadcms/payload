@@ -1,10 +1,10 @@
 import httpStatus from 'http-status'
-
 import { findOneOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
-import { GlobalRouteHandler } from '../types'
 
-export const findOne: GlobalRouteHandler = async ({ req, globalConfig }) => {
+import type { GlobalRouteHandler } from '../types'
+
+export const findOne: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 

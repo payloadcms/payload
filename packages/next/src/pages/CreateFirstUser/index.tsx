@@ -1,14 +1,14 @@
+import type { Metadata } from 'next'
+import type { Field } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
+
+import { Form, FormSubmit, MinimalTemplate, buildStateFromSchema } from '@payloadcms/ui'
 import React from 'react'
 
-import type { Field } from 'payload/types'
 import { getNextT } from '../../utilities/getNextT'
-import { Form, FormSubmit, MinimalTemplate, buildStateFromSchema } from '@payloadcms/ui'
-import { SanitizedConfig } from 'payload/types'
-import { Metadata } from 'next'
-import { meta } from '../../utilities/meta'
 import { initPage } from '../../utilities/initPage'
+import { meta } from '../../utilities/meta'
 import { CreateFirstUserFields } from './index.client'
-
 import './index.scss'
 
 const baseClass = 'create-first-user'
@@ -23,10 +23,10 @@ export const generateMetadata = async ({
   })
 
   return meta({
-    title: t('authentication:createFirstUser'),
+    config,
     description: t('authentication:createFirstUser'),
     keywords: t('general:create'),
-    config,
+    title: t('authentication:createFirstUser'),
   })
 }
 
@@ -35,17 +35,17 @@ export const CreateFirstUser: React.FC<{
 }> = async ({ config: configPromise }) => {
   const {
     config,
-    user,
-    locale,
     i18n: { t },
+    locale,
+    user,
   } = await initPage({
     config: configPromise,
     redirectUnauthenticatedUser: false,
   })
 
   const {
-    routes: { api: apiRoute, admin: adminRoute },
     admin: { user: userSlug },
+    routes: { admin: adminRoute, api: apiRoute },
     serverURL,
   } = config
 
@@ -85,11 +85,11 @@ export const CreateFirstUser: React.FC<{
       <p>{t('authentication:beginCreateFirstUser')}</p>
       <Form
         action={`${serverURL}${apiRoute}/${userSlug}/first-register`}
+        initialState={formState}
         method="POST"
         // onSuccess={onSuccess}
         redirect={adminRoute}
         validationOperation="create"
-        initialState={formState}
       >
         <CreateFirstUserFields userSlug={userSlug} />
         <FormSubmit>{t('general:create')}</FormSubmit>

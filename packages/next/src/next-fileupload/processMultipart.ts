@@ -1,12 +1,13 @@
 import Busboy from 'busboy'
-import { createUploadTimer } from './uploadTimer'
-import { fileFactory } from './fileFactory'
-import { tempFileHandler, memHandler } from './handlers'
-
-import { processNested } from './processNested'
-import { isFunc, debugLog, buildFields, parseFileName } from './utilities'
-import { NextFileUploadOptions, NextFileUploadResponse } from '.'
 import { APIError } from 'payload/errors'
+
+import type { NextFileUploadOptions, NextFileUploadResponse } from '.'
+
+import { fileFactory } from './fileFactory'
+import { memHandler, tempFileHandler } from './handlers'
+import { processNested } from './processNested'
+import { createUploadTimer } from './uploadTimer'
+import { buildFields, debugLog, isFunc, parseFileName } from './utilities'
 
 const waitFlushProperty = Symbol('wait flush property symbol')
 
@@ -14,9 +15,9 @@ type ProcessMultipart = (args: {
   options: NextFileUploadOptions
   request: Request
 }) => Promise<NextFileUploadResponse>
-export const processMultipart: ProcessMultipart = async ({ request, options }) => {
+export const processMultipart: ProcessMultipart = async ({ options, request }) => {
   let parsingRequest = true
-  let result: NextFileUploadResponse = {
+  const result: NextFileUploadResponse = {
     fields: undefined,
     files: undefined,
   }
@@ -36,11 +37,11 @@ export const processMultipart: ProcessMultipart = async ({ request, options }) =
   // Build req.files fields
   busboy.on('file', (field, file, info) => {
     // Parse file name(cutting huge names, decoding, etc..).
-    const { filename: name, encoding, mimeType: mime } = info
+    const { encoding, filename: name, mimeType: mime } = info
     const filename = parseFileName(options, name)
 
     // Define methods and handlers for upload process.
-    const { dataHandler, getFilePath, getFileSize, getHash, complete, cleanup, getWritePromise } =
+    const { cleanup, complete, dataHandler, getFilePath, getFileSize, getHash, getWritePromise } =
       options.useTempFiles
         ? tempFileHandler(options, field, filename) // Upload into temporary file.
         : memHandler(options, field, filename) // Upload into RAM.
@@ -99,14 +100,14 @@ export const processMultipart: ProcessMultipart = async ({ request, options }) =
         field,
         fileFactory(
           {
-            buffer: complete(),
             name: filename,
-            tempFilePath: getFilePath(),
-            hash: getHash(),
-            size,
+            buffer: complete(),
             encoding,
-            truncated: Boolean('truncated' in file && file.truncated),
+            hash: getHash(),
             mimetype: mime,
+            size,
+            tempFilePath: getFilePath(),
+            truncated: Boolean('truncated' in file && file.truncated),
           },
           options,
         ),

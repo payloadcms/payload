@@ -1,32 +1,34 @@
 import type {
-  SanitizedConfig,
-  PayloadRequest,
-  CustomPayloadRequest,
   Collection,
+  CustomPayloadRequest,
+  PayloadRequest,
+  SanitizedConfig,
 } from 'payload/types'
-import { getAuthenticatedUser } from 'payload/auth'
-import { getPayload } from 'payload'
-import { URL } from 'url'
-import { parseCookies } from 'payload/auth'
+
 import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/api'
+import { getPayload } from 'payload'
+import { getAuthenticatedUser } from 'payload/auth'
+import { parseCookies } from 'payload/auth'
+import { getDataLoader } from 'payload/utilities'
+import { URL } from 'url'
+
+import { getDataAndFile } from './getDataAndFile'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
-import { getDataAndFile } from './getDataAndFile'
-import { getDataLoader } from 'payload/utilities'
 
 type Args = {
-  request: Request
   config: Promise<SanitizedConfig> | SanitizedConfig
   params?: {
     collection: string
   }
+  request: Request
 }
 
 export const createPayloadRequest = async ({
-  request,
   config: configPromise,
   params,
+  request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
   const payload = await getPayload({ config: configPromise })
@@ -38,15 +40,15 @@ export const createPayloadRequest = async ({
   }
 
   const urlProperties = new URL(request.url)
-  const { searchParams, pathname } = urlProperties
+  const { pathname, searchParams } = urlProperties
 
   const isGraphQL =
     !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
 
   const { data, file } = await getDataAndFile({
-    request,
     collection,
     config,
+    request,
   })
 
   let requestFallbackLocale
@@ -54,59 +56,59 @@ export const createPayloadRequest = async ({
 
   if (config.localization) {
     const locales = getRequestLocales({
+      data,
       localization: config.localization,
       searchParams,
-      data,
     })
     requestLocale = locales.locale
     requestFallbackLocale = locales.fallbackLocale
   }
 
   const language = getRequestLanguage({
-    headers: request.headers,
     cookies,
+    headers: request.headers,
   })
 
   const i18n = await initI18n({
     config: config.i18n,
+    context: 'api',
     language,
     translations,
-    context: 'api',
   })
 
   const customRequest: CustomPayloadRequest = {
-    payload,
-    user: null,
     context: {},
-    payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
     data,
-    locale: requestLocale,
     fallbackLocale: requestFallbackLocale,
-    i18n,
-    t: i18n.t,
     file,
-    transactionID: undefined,
+    hash: urlProperties.hash,
+    host: urlProperties.host,
+    href: urlProperties.href,
+    i18n,
+    locale: requestLocale,
+    origin: urlProperties.origin,
+    pathname: urlProperties.pathname,
+    payload,
+    payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
     payloadDataLoader: undefined,
     payloadUploadSizes: {},
-    searchParams: urlProperties.searchParams,
-    pathname: urlProperties.pathname,
     port: urlProperties.port,
     protocol: urlProperties.protocol,
     search: urlProperties.search,
-    origin: urlProperties.origin,
-    href: urlProperties.href,
-    host: urlProperties.host,
-    hash: urlProperties.hash,
+    searchParams: urlProperties.searchParams,
+    t: i18n.t,
+    transactionID: undefined,
+    user: null,
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)
   req.payloadDataLoader = getDataLoader(req)
 
   req.user = await getAuthenticatedUser({
-    payload,
+    cookies,
     headers: req.headers,
     isGraphQL,
-    cookies,
+    payload,
   })
 
   return req

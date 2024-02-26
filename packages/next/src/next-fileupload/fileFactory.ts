@@ -1,10 +1,11 @@
-import { FileShape, NextFileUploadOptions } from '.'
+import type { FileShape, NextFileUploadOptions } from '.'
+
 import {
-  isFunc,
+  checkAndMakeDir,
   debugLog,
+  isFunc,
   moveFile,
   promiseCallback,
-  checkAndMakeDir,
   saveBufferToFile,
 } from './utilities'
 
@@ -34,13 +35,13 @@ const moveFromBuffer: MoveFile = (filePath, options, fileUploadOptions) => (reso
 
 type FileFactoryOptions = {
   buffer: Buffer
-  name: string
-  tempFilePath: string
-  hash: Buffer | string
-  size: number
   encoding: string
-  truncated: boolean
+  hash: Buffer | string
   mimetype: string
+  name: string
+  size: number
+  tempFilePath: string
+  truncated: boolean
 }
 type FileFactory = (
   options: FileFactoryOptions,
@@ -56,12 +57,9 @@ export const fileFactory: FileFactory = (options, fileUploadOptions) => {
   return {
     name: options.name,
     data: options.buffer,
-    size: options.size,
     encoding: options.encoding,
-    tempFilePath: options.tempFilePath,
-    truncated: options.truncated,
-    mimetype: options.mimetype,
     md5: options.hash,
+    mimetype: options.mimetype,
     mv: (filePath: string, callback) => {
       // Define a proper move function.
       const moveFunc = fileUploadOptions.useTempFiles
@@ -73,5 +71,8 @@ export const fileFactory: FileFactory = (options, fileUploadOptions) => {
       const defaultReject = () => undefined
       return isFunc(callback) ? moveFunc(callback, defaultReject) : new Promise(moveFunc)
     },
+    size: options.size,
+    tempFilePath: options.tempFilePath,
+    truncated: options.truncated,
   }
 }

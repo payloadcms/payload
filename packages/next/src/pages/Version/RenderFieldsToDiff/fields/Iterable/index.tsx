@@ -1,27 +1,27 @@
+import type { MappedField } from '@payloadcms/ui'
+import type { Field } from 'payload/types'
+
 import { getTranslation } from '@payloadcms/translations'
+import { getUniqueListBy } from 'payload/utilities'
 import React from 'react'
 
-import type { Field } from 'payload/types'
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
-import { getUniqueListBy } from 'payload/utilities'
 import Label from '../../Label'
-import { MappedField } from '@payloadcms/ui'
-
 import './index.scss'
 
 const baseClass = 'iterable-diff'
 
 const Iterable: React.FC<Props> = ({
   comparison,
+  diffComponents,
   field,
+  i18n,
   locale,
   locales,
   permissions,
   version,
-  i18n,
-  diffComponents,
 }) => {
   const versionRowCount = Array.isArray(version) ? version.length : 0
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
@@ -80,12 +80,12 @@ const Iterable: React.FC<Props> = ({
               <div className={`${baseClass}__wrap`} key={i}>
                 <RenderFieldsToDiff
                   comparison={comparisonRow}
+                  diffComponents={diffComponents}
                   fieldMap={subFields}
                   fieldPermissions={permissions}
+                  i18n={i18n}
                   locales={locales}
                   version={versionRow}
-                  i18n={i18n}
-                  diffComponents={diffComponents}
                 />
               </div>
             )

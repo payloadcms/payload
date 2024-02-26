@@ -1,15 +1,17 @@
-import { Data, DocumentPreferences, SanitizedConfig } from 'payload/types'
-import React, { Fragment } from 'react'
+import type { ServerSideEditViewProps } from '@payloadcms/ui'
+import type { Data, DocumentPreferences, SanitizedConfig } from 'payload/types'
+
 import {
-  RenderCustomComponent,
   HydrateClientUser,
+  RenderCustomComponent,
+  SetDocumentInfo,
   buildStateFromSchema,
   formatFields,
-  ServerSideEditViewProps,
-  SetDocumentInfo,
 } from '@payloadcms/ui'
-import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
+import React, { Fragment } from 'react'
+
+import { initPage } from '../../utilities/initPage'
 import { EditView } from '../Edit'
 import { Settings } from './Settings'
 
@@ -20,15 +22,15 @@ export const Account = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user, i18n, locale } = await initPage({
+  const { config, i18n, locale, payload, permissions, user } = await initPage({
     config: configPromise,
     redirectUnauthenticatedUser: true,
-    searchParams,
     route: `/account`,
+    searchParams,
   })
 
   const {
-    admin: { user: userSlug, components: { views: { Account: CustomAccountComponent } = {} } = {} },
+    admin: { components: { views: { Account: CustomAccountComponent } = {} } = {}, user: userSlug },
     routes: { api },
     serverURL,
   } = config
@@ -44,8 +46,8 @@ export const Account = async ({
 
     try {
       data = await payload.findByID({
-        collection: userSlug,
         id: user.id,
+        collection: userSlug,
         depth: 0,
         user,
       })
@@ -64,12 +66,12 @@ export const Account = async ({
     const { docs: [{ value: docPreferences } = { value: null }] = [] } = (await payload.find({
       collection: 'payload-preferences',
       depth: 0,
+      limit: 1,
       where: {
         key: {
           equals: preferencesKey,
         },
       },
-      limit: 1,
     })) as any as { docs: { value: DocumentPreferences }[] }
 
     const initialState = await buildStateFromSchema({
@@ -84,38 +86,38 @@ export const Account = async ({
     })
 
     const componentProps: ServerSideEditViewProps = {
+      id: user?.id,
       action: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
       apiURL: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
       collectionSlug: userSlug,
+      config,
       data,
-      hasSavePermission: collectionPermissions?.update?.permission,
-      initialState,
       docPermissions: collectionPermissions,
       docPreferences,
-      user,
-      updatedAt: '', // TODO
-      id: user?.id,
-      config,
+      hasSavePermission: collectionPermissions?.update?.permission,
       i18n,
+      initialState,
       payload,
       permissions,
       searchParams,
+      updatedAt: '', // TODO
+      user,
     }
 
     return (
       <Fragment>
-        <HydrateClientUser user={user} permissions={permissions} />
+        <HydrateClientUser permissions={permissions} user={user} />
         <SetDocumentInfo
+          AfterFields={<Settings />}
           action={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`}
           apiURL={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`}
           collectionSlug={userSlug}
-          initialData={data}
-          hasSavePermission={collectionPermissions?.update?.permission}
-          initialState={initialState}
           docPermissions={collectionPermissions}
           docPreferences={docPreferences}
+          hasSavePermission={collectionPermissions?.update?.permission}
           id={user?.id}
-          AfterFields={<Settings />}
+          initialData={data}
+          initialState={initialState}
         />
         <RenderCustomComponent
           CustomComponent={

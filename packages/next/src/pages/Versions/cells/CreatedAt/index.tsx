@@ -1,22 +1,22 @@
 'use client'
-import React from 'react'
-import { formatDate, useConfig, useTranslation, useTableCell } from '@payloadcms/ui'
+import { formatDate, useConfig, useTableCell, useTranslation } from '@payloadcms/ui'
 import Link from 'next/link'
+import React from 'react'
 
 type CreatedAtCellProps = {
   collectionSlug?: string
+  docID?: number | string
   globalSlug?: string
-  docID?: string | number
 }
 
 export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   collectionSlug,
-  globalSlug,
   docID,
+  globalSlug,
 }) => {
   const {
-    routes: { admin },
     admin: { dateFormat },
+    routes: { admin },
   } = useConfig()
 
   const { i18n } = useTranslation()

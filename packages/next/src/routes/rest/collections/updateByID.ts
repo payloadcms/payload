@@ -1,10 +1,10 @@
 import httpStatus from 'http-status'
-
-import { isNumber } from 'payload/utilities'
 import { updateByIDOperation } from 'payload/operations'
-import { CollectionRouteHandlerWithID } from '../types'
+import { isNumber } from 'payload/utilities'
 
-export const updateByID: CollectionRouteHandlerWithID = async ({ req, collection, id }) => {
+import type { CollectionRouteHandlerWithID } from '../types'
+
+export const updateByID: CollectionRouteHandlerWithID = async ({ id, collection, req }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
   const autosave = searchParams.get('autosave') === 'true'
@@ -27,8 +27,8 @@ export const updateByID: CollectionRouteHandlerWithID = async ({ req, collection
 
   return Response.json(
     {
-      message,
       doc,
+      message,
     },
     {
       status: httpStatus.OK,

@@ -1,9 +1,10 @@
 import httpStatus from 'http-status'
-import { registerFirstUserOperation } from 'payload/operations'
 import { generatePayloadCookie } from 'payload/auth'
-import { CollectionRouteHandler } from '../types'
+import { registerFirstUserOperation } from 'payload/operations'
 
-export const registerFirstUser: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const registerFirstUser: CollectionRouteHandler = async ({ collection, req }) => {
   const result = await registerFirstUserOperation({
     collection,
     data: {
@@ -14,9 +15,9 @@ export const registerFirstUser: CollectionRouteHandler = async ({ req, collectio
   })
 
   const cookie = generatePayloadCookie({
-    token: result.token,
-    payload: req.payload,
     collectionConfig: collection.config,
+    payload: req.payload,
+    token: result.token,
   })
 
   return Response.json(

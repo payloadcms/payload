@@ -1,10 +1,11 @@
-import { extractJWT } from 'payload/auth'
-import { refreshOperation } from 'payload/operations'
 import httpStatus from 'http-status'
+import { extractJWT } from 'payload/auth'
 import { generatePayloadCookie } from 'payload/auth'
-import { CollectionRouteHandler } from '../types'
+import { refreshOperation } from 'payload/operations'
 
-export const refresh: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
   const token = typeof req.data?.token === 'string' ? req.data.token : extractJWT(req)
 
   if (!token) {
@@ -20,15 +21,15 @@ export const refresh: CollectionRouteHandler = async ({ req, collection }) => {
   }
 
   const result = await refreshOperation({
-    token,
-    req,
     collection,
+    req,
+    token,
   })
 
   const cookie = generatePayloadCookie({
-    token: result.refreshedToken,
-    payload: req.payload,
     collectionConfig: collection.config,
+    payload: req.payload,
+    token: result.refreshedToken,
   })
 
   if (collection.config.auth.removeTokenFromResponses) {

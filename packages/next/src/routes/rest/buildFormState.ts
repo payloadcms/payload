@@ -1,13 +1,8 @@
-import httpStatus from 'http-status'
+import type { BuildFormStateArgs, FieldSchemaMap } from '@payloadcms/ui'
+import type { Field, PayloadRequest, SanitizedConfig } from 'payload/types'
 
-import {
-  BuildFormStateArgs,
-  FieldSchemaMap,
-  buildFieldSchemaMap,
-  buildStateFromSchema,
-  reduceFieldsToValues,
-} from '@payloadcms/ui'
-import { Field, PayloadRequest, SanitizedConfig } from 'payload/types'
+import { buildFieldSchemaMap, buildStateFromSchema, reduceFieldsToValues } from '@payloadcms/ui'
+import httpStatus from 'http-status'
 
 let cached = global._payload_fieldSchemaMap
 
@@ -27,7 +22,7 @@ export const getFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
 }
 
 export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
-  const { data: reqData, user, t, locale } = req
+  const { data: reqData, locale, t, user } = req
 
   // TODO: run ADMIN access control for user
 
@@ -35,10 +30,10 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
 
   const {
     id,
-    operation,
+    data: incomingData,
     docPreferences,
     formState,
-    data: incomingData,
+    operation,
     schemaPath,
   } = reqData as BuildFormStateArgs
 

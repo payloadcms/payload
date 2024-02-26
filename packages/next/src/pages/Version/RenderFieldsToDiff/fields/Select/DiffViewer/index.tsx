@@ -5,10 +5,10 @@ import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 export const DiffViewer: React.FC<{
   comparisonToRender: string
   diffMethod: string
+  diffStyles: any
   placeholder: string
   versionToRender: string
-  diffStyles: any
-}> = ({ comparisonToRender, diffMethod, placeholder, versionToRender, diffStyles }) => {
+}> = ({ comparisonToRender, diffMethod, diffStyles, placeholder, versionToRender }) => {
   return (
     <ReactDiffViewer
       compareMethod={DiffMethod[diffMethod]}

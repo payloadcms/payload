@@ -1,15 +1,16 @@
-import { Collection, CustomPayloadRequest, SanitizedConfig } from 'payload/types'
+import type { Collection, CustomPayloadRequest, SanitizedConfig } from 'payload/types'
+
 import { nextFileUpload } from '../next-fileupload'
 
 type GetDataAndFile = (args: {
-  request: Request
   collection: Collection
   config: SanitizedConfig
+  request: Request
 }) => Promise<{
   data: Record<string, any>
   file: CustomPayloadRequest['file']
 }>
-export const getDataAndFile: GetDataAndFile = async ({ request, collection, config }) => {
+export const getDataAndFile: GetDataAndFile = async ({ collection, config, request }) => {
   let data: Record<string, any> = undefined
   let file: CustomPayloadRequest['file'] = undefined
 
@@ -45,7 +46,7 @@ export const getDataAndFile: GetDataAndFile = async ({ request, collection, conf
           }
         } else {
           // store temp file on disk
-          const { fields, files, error } = await nextFileUpload({
+          const { error, fields, files } = await nextFileUpload({
             options: config.upload as any,
             request,
           })
@@ -73,7 +74,7 @@ export const getDataAndFile: GetDataAndFile = async ({ request, collection, conf
   }
 
   return {
-    file,
     data,
+    file,
   }
 }
