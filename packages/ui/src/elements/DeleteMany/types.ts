@@ -7,4 +7,3 @@ export type Props = {
   resetParams: DefaultListViewProps['resetParams']
   title?: string
 }
-3
