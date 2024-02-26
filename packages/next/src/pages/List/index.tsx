@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
+import { getTranslation } from '@payloadcms/translations'
 import {
   HydrateClientUser,
   ListInfoProvider,
@@ -18,40 +19,32 @@ import { meta } from '../../utilities/meta'
 import { DefaultListView } from './Default'
 
 export const generateMetadata = async ({
-  collectionSlug,
   config: configPromise,
-  globalSlug,
+  params,
 }: {
-  collectionSlug?: string
   config: Promise<SanitizedConfig>
-  globalSlug?: string
+  params: {
+    collection: string
+  }
 }): Promise<Metadata> => {
   let title: string = ''
-  let description: string = ''
-  let keywords: string = ''
+  const description: string = ''
+  const keywords: string = ''
+
+  const collectionSlug = params.collection
 
   const config = await configPromise
 
-  const { t } = await getNextI18n({
+  const i18n = await getNextI18n({
     config,
   })
 
   const collectionConfig = collectionSlug
-    ? config?.collections?.find((collection) => collection.slug === 'pages')
+    ? config?.collections?.find((collection) => collection.slug === collectionSlug)
     : null
 
-  const globalConfig = globalSlug ? config?.globals?.find((global) => global.slug === 'site') : null
-
   if (collectionConfig) {
-    title = ''
-    description = ''
-    keywords = ''
-  }
-
-  if (globalConfig) {
-    title = ''
-    description = ''
-    keywords = ''
+    title = getTranslation(collectionConfig.labels.plural, i18n)
   }
 
   return meta({

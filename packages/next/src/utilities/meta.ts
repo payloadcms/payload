@@ -18,6 +18,7 @@ export const meta = async (args: {
     description,
     keywords,
     openGraph: {
+      type: 'website',
       description,
       images: [
         {
@@ -28,7 +29,6 @@ export const meta = async (args: {
         },
       ],
       title: `${title} ${titleSuffix}`,
-      type: 'website',
     },
     title: `${title} ${titleSuffix}`,
   }

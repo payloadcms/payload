@@ -8,9 +8,9 @@ import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
 
 export const generateMetadata: GenerateEditViewMetadata = async ({
-  collectionSlug,
+  collectionConfig,
   config,
-  globalSlug,
+  globalConfig,
   isEditing,
   t,
 }): Promise<Metadata> => {
@@ -22,19 +22,13 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     config,
   })
 
-  const collectionConfig = collectionSlug
-    ? config?.collections?.find((collection) => collection.slug === 'pages')
-    : null
-
-  const globalConfig = globalSlug ? config?.globals?.find((global) => global.slug === 'site') : null
-
   if (collectionConfig) {
-    description = `${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+    description = `${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
       collectionConfig.labels.singular,
       i18n,
     )}`
 
-    title = `${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+    title = `${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
       collectionConfig.labels.singular,
       i18n,
     )}`

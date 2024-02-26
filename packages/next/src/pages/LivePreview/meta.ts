@@ -4,24 +4,23 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateEditViewMetadata } from '../Document'
 
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
 
 export const generateMetadata: GenerateEditViewMetadata = async ({
-  collectionSlug,
+  collectionConfig,
   config,
-  globalSlug,
+  globalConfig,
   isEditing,
   t,
 }): Promise<Metadata> => {
-  let description: string
-  let title: string
-  let keywords: string
+  let description: string = ''
+  let title: string = ''
+  let keywords: string = ''
 
-  const collectionConfig = collectionSlug
-    ? config?.collections?.find((collection) => collection.slug === 'pages')
-    : null
-
-  const globalConfig = globalSlug ? config?.globals?.find((global) => global.slug === 'site') : null
+  const i18n = await getNextI18n({
+    config,
+  })
 
   if (collectionConfig) {
     title = t('editing')

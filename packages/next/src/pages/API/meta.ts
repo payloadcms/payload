@@ -2,7 +2,7 @@ import type { GenerateEditViewMetadata } from '../Document'
 
 import { meta } from '../../utilities/meta'
 
-export const generateMetadata: GenerateEditViewMetadata = async ({ config, t }) => {
+export const generateMetadata: GenerateEditViewMetadata = async ({ config }) => {
   return meta({
     config,
     description: 'API',

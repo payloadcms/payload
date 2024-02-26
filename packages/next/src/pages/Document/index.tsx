@@ -6,7 +6,9 @@ import type {
   DocumentPreferences,
   Document as DocumentType,
   Field,
+  SanitizedCollectionConfig,
   SanitizedConfig,
+  SanitizedGlobalConfig,
 } from 'payload/types'
 import type { DocumentPermissions } from 'payload/types'
 
@@ -31,15 +33,15 @@ import { meta } from '../../utilities/meta.ts'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
 export type GenerateEditViewMetadata = (args: {
-  collectionSlug?: string
+  collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
-  globalSlug?: string
+  globalConfig?: SanitizedGlobalConfig
   isEditing: boolean
   t: TFunction
 }) => Promise<Metadata>
 
 export const generateMetadata = async ({
-  config,
+  config: configPromise,
   params,
 }: {
   config: Promise<SanitizedConfig>
@@ -49,46 +51,58 @@ export const generateMetadata = async ({
     segments: string[]
   }
 }): Promise<Metadata> => {
+  const config = await configPromise
+
   let fn: GenerateEditViewMetadata | null = null
 
   const isEditing = Boolean(
     params.collection && params.segments?.length > 0 && params.segments[0] !== 'create',
   )
 
-  // `/:id`
-  if (params.segments.length === 1) {
-    fn = await import('../Edit/meta.ts').then((mod) => mod.generateMetadata)
-  }
+  if (params?.segments?.length) {
+    // `/:id`
+    if (params.segments.length === 1) {
+      fn = await import('../Edit/meta.ts').then((mod) => mod.generateMetadata)
+    }
 
-  // `/:id/api`
-  if (params.segments.length === 2 && params.segments[1] === 'api') {
-    fn = await import('../API/meta.ts').then((mod) => mod.generateMetadata)
-  }
+    // `/:id/api`
+    if (params.segments.length === 2 && params.segments[1] === 'api') {
+      fn = await import('../API/meta.ts').then((mod) => mod.generateMetadata)
+    }
 
-  // `/:id/preview`
-  if (params.segments.length === 2 && params.segments[1] === 'preview') {
-    fn = await import('../LivePreview/meta.ts').then((mod) => mod.generateMetadata)
-  }
+    // `/:id/preview`
+    if (params.segments.length === 2 && params.segments[1] === 'preview') {
+      fn = await import('../LivePreview/meta.ts').then((mod) => mod.generateMetadata)
+    }
 
-  // `/:id/versions`
-  if (params.segments.length === 2 && params.segments[1] === 'versions') {
-    fn = await import('../Versions/meta.ts').then((mod) => mod.generateMetadata)
-  }
+    // `/:id/versions`
+    if (params.segments.length === 2 && params.segments[1] === 'versions') {
+      fn = await import('../Versions/meta.ts').then((mod) => mod.generateMetadata)
+    }
 
-  // `/:id/versions/:version`
-  if (params.segments.length === 2 && params.segments[1] === 'versions') {
-    fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
+    // `/:id/versions/:version`
+    if (params.segments.length === 2 && params.segments[1] === 'versions') {
+      fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
+    }
   }
 
   const { t } = await getNextI18n({
-    config: await config,
+    config,
   })
+
+  const collectionConfig = params.collection
+    ? config?.collections?.find((collection) => collection.slug === params.collection)
+    : null
+
+  const globalConfig = params.global
+    ? config?.globals?.find((global) => global.slug === params.global)
+    : null
 
   if (typeof fn === 'function') {
     return fn({
-      collectionSlug: params.collection,
-      config: await config,
-      globalSlug: params.global,
+      collectionConfig,
+      config,
+      globalConfig,
       isEditing,
       t,
     })

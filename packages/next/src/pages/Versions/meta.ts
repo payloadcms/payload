@@ -5,20 +5,36 @@ import type { GenerateEditViewMetadata } from '../Document'
 import { meta } from '../../utilities/meta'
 
 export const generateMetadata: GenerateEditViewMetadata = async ({
+  collectionConfig,
   config,
+  globalConfig,
   t,
 }): Promise<Metadata> => {
-  // const useAsTitle = collection?.admin?.useAsTitle || 'id'
-  // metaTitle = `${t('versions')} - ${data[useAsTitle]} - ${entityLabel}`
-  // metaDesc = t('viewingVersions', { documentTitle: data[useAsTitle], entityLabel })
+  let title: string = ''
+  let description: string = ''
+  const keywords: string = ''
 
-  // metaTitle = `${t('versions')} - ${entityLabel}`
-  // metaDesc = t('viewingVersionsGlobal', { entityLabel })
+  const data: any = {} // TODO: figure this out
+
+  if (collectionConfig) {
+    const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
+    console.log('useAsTitle', useAsTitle)
+    title = `${t('version:versions')} - ${data?.[useAsTitle]} - ${collectionConfig.slug}`
+    description = t('version:viewingVersions', {
+      documentTitle: data?.[useAsTitle],
+      entitySlug: collectionConfig.slug,
+    })
+  }
+
+  if (globalConfig) {
+    title = `${t('version:versions')} - ${globalConfig.slug}`
+    description = t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug })
+  }
 
   return meta({
     config,
-    description: '',
-    keywords: '',
-    title: '',
+    description,
+    keywords,
+    title,
   })
 }
