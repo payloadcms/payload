@@ -1,35 +1,41 @@
-import type { I18n } from '@payloadcms/translations'
-import { getAuthenticatedUser, getAccessResults } from 'payload/auth'
-import { PayloadRequest } from 'payload/types'
+import type { PayloadRequest, SanitizedConfig } from 'payload/types'
+
+import { getPayload } from 'payload'
+import { getAccessResults, getAuthenticatedUser, parseCookies } from 'payload/auth'
 import { cache } from 'react'
 
 export const auth = cache(
   async ({
+    config,
     headers,
-
-    cookies,
-    i18n,
-    partialReq,
   }: {
-    headers: any
-    cookies: Map<string, string>
-    i18n: I18n
-    partialReq: Partial<PayloadRequest>
+    config: Promise<SanitizedConfig> | SanitizedConfig
+    headers: Request['headers']
   }) => {
+    const cookies = parseCookies(headers)
+    const payload = await getPayload({ config })
     const user = await getAuthenticatedUser({
-      headers,
-      payload: partialReq.payload,
       cookies,
+      headers,
+      payload,
     })
-    partialReq.user = user
 
     const permissions = await getAccessResults({
-      req: partialReq as PayloadRequest,
+      req: {
+        context: {},
+        headers,
+        i18n: undefined,
+        payload,
+        payloadAPI: 'REST',
+        t: undefined,
+        user,
+      } as PayloadRequest,
     })
 
     return {
-      user,
+      cookies,
       permissions,
+      user,
     }
   },
 )
