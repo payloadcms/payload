@@ -494,8 +494,6 @@ export type Config = {
     disable?: boolean
     /** The route the user will be redirected to after being inactive for too long. */
     inactivityRoute?: string
-    /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
-    indexHTML?: string
     livePreview?: LivePreviewConfig & {
       collections?: string[]
       globals?: string[]

@@ -7,11 +7,9 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     avatar: 'default',
     buildPath: path.resolve(process.cwd(), './build'),
     components: {},
-    css: path.resolve(__dirname, '../admin/scss/custom.css'),
     dateFormat: 'MMMM do yyyy, h:mm a',
     disable: false,
     inactivityRoute: '/logout-inactivity',
-    indexHTML: path.resolve(__dirname, '../admin/index.html'),
     logoutRoute: '/logout',
     meta: {
       titleSuffix: '- Payload',

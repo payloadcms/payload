@@ -97,7 +97,8 @@ const getGitID = (payload: Payload) => {
 }
 
 const getPackageJSON = async (): Promise<PackageJSON> => {
-  const packageJsonPath = await findUp('package.json', { cwd: __dirname })
+  const [rootDir] = __dirname.split('/.next/')
+  const packageJsonPath = await findUp('package.json', { cwd: rootDir })
   const jsonContent: PackageJSON = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
   return jsonContent
 }
