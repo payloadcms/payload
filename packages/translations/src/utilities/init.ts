@@ -207,11 +207,11 @@ const initTFunction: InitTFunction = (args) => (key, vars) => {
 function memoize<T>(fn: Function, keys: string[]): T {
   const cacheMap = new Map()
 
-  return <T>async function (args) {
+  return <T>function (args) {
     const cacheKey = keys.reduce((acc, key) => acc + args[key], '')
 
     if (!cacheMap.has(cacheKey)) {
-      const result = await fn(args)
+      const result = fn(args)
       cacheMap.set(cacheKey, result)
     }
 
@@ -220,7 +220,7 @@ function memoize<T>(fn: Function, keys: string[]): T {
 }
 
 export const initI18n: InitI18n = memoize(
-  <InitI18n>(async ({ config, language = 'en', translations, context }) => {
+  <InitI18n>(({ config, language = 'en', translations, context }) => {
     const i18n = {
       fallbackLanguage: config.fallbackLanguage,
       language: language || config.fallbackLanguage,

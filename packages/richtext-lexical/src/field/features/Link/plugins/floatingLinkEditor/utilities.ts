@@ -1,4 +1,4 @@
-import type { i18n } from 'i18next'
+import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field, GroupField } from 'payload/types'
 
@@ -9,10 +9,10 @@ import { getBaseFields } from '../../drawer/baseFields'
  */
 export function transformExtraFields(
   customFieldSchema:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
+    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
     | Field[],
   config: SanitizedConfig,
-  i18n: i18n,
+  i18n: I18n,
   enabledCollections?: false | string[],
   disabledCollections?: false | string[],
 ): Field[] {

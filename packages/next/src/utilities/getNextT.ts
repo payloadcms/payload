@@ -14,7 +14,7 @@ export const getNextT = async ({
   config: SanitizedConfig
   language?: string
 }): Promise<TFunction> => {
-  const i18n = await initI18n({
+  const i18n = initI18n({
     config: config.i18n,
     context: 'client',
     language: language || getRequestLanguage({ cookies: cookies(), headers: headers() }),
