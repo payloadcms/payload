@@ -27,8 +27,7 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.d.ts",
-    "src/**/*.json",
-    "../next/src/pages/Edit/types.ts"
+    "src/**/*.json"
   ],
   "references": [{ "path": "../payload" }, { "path": "../translations" }]
 }
