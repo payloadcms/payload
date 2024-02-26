@@ -4,11 +4,11 @@ import type { PayloadHandler } from '../../exports/config'
 
 import update from '../operations/update'
 
-export const updateHandler: PayloadHandler = async ({ params, req }) => {
+export const updateHandler: PayloadHandler = async (req) => {
   const payloadRequest = req
 
   const doc = await update({
-    key: params?.key as string,
+    key: req.routeParams?.key as string,
     req: payloadRequest,
     user: payloadRequest?.user,
     value: payloadRequest.data.value || payloadRequest.data,

@@ -170,19 +170,19 @@ export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express
 
-  loggerDestination?: DestinationStream
+  /**
+   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
+   * This allows you to bring your own logger instance and let payload use it
+   */
+  logger?: PayloadLogger
 
+  loggerDestination?: DestinationStream
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
    *
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions
-  /**
-   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
-   * This allows you to bring your own logger instance and let payload use it
-   */
-  logger?: PayloadLogger
 
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
@@ -231,13 +231,7 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Equivalent to express middleware, but with an enhanced request object */
-export type PayloadHandler<T = PayloadRequest> = ({
-  params,
-  req,
-}: {
-  params: Record<string, unknown>
-  req: T
-}) => Promise<Response> | Response
+export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints
@@ -251,12 +245,7 @@ export type Endpoint<U = User> = {
    *
    * Compatible with Web Request/Response Model
    */
-  handler: PayloadHandler<
-    Partial<PayloadRequest<U>> & {
-    payload: PayloadRequest['payload']
-    payloadDataLoader: PayloadRequest['payloadDataLoader']
-  } & Request
-  >
+  handler: PayloadHandler
   /** HTTP method (or "all") */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
@@ -271,7 +260,7 @@ export type Endpoint<U = User> = {
    * Please add "root" routes under the /api folder in the Payload Project.
    * https://nextjs.org/docs/app/api-reference/file-conventions/route
    */
-  root?: boolean
+  root?: never
 }
 
 export type AdminViewConfig = {

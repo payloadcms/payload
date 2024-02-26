@@ -11,21 +11,23 @@ export const collectionEndpoints: CollectionConfig['endpoints'] = [
   {
     path: '/say-hello/:group/:name',
     method: 'get',
-    handler: ({ routeParams }) => {
-      return Response.json({ message: `Hello ${routeParams.name} @ ${routeParams.group}` })
+    handler: (req) => {
+      return Response.json({
+        message: `Hello ${req.routeParams.name as string} @ ${req.routeParams.group as string}`,
+      })
     },
   },
   {
     path: '/say-hello/:name',
     method: 'get',
-    handler: ({ routeParams }) => {
-      return Response.json({ message: `Hello ${routeParams.name}!` })
+    handler: (req) => {
+      return Response.json({ message: `Hello ${req.routeParams.name as string}!` })
     },
   },
   {
     path: '/whoami',
     method: 'post',
-    handler: ({ req }) => {
+    handler: (req) => {
       return Response.json({
         name: req.data.name,
         age: req.data.age,

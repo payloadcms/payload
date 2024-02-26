@@ -54,6 +54,12 @@ export type CustomPayloadRequest<U = any> = {
   payloadDataLoader?: DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
+  /** The route parameters
+   * @example
+   * /:collection/:id -> /posts/123
+   * { collection: 'posts', id: '123' }
+   */
+  routeParams?: Record<string, unknown>
   /** Translate function - duplicate of i18n.t */
   t: TFunction
   /**

@@ -6,7 +6,7 @@ export const globalEndpoints: GlobalConfig['endpoints'] = [
   {
     path: `/${globalEndpoint}`,
     method: 'post',
-    handler: ({ req }) => {
+    handler: (req) => {
       return Response.json(req.body)
     },
   },

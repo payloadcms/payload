@@ -17,7 +17,7 @@ export const getCacheUploadsAfterChangeHook =
     if (res) {
       if (operation === 'update') {
         // Unawaited promise
-        purge({ doc, endpoint, operation, req })
+        void purge({ doc, endpoint, operation, req })
       }
     }
     return doc
@@ -31,7 +31,7 @@ export const getCacheUploadsAfterDeleteHook =
     const { res } = req
     if (res) {
       // Unawaited promise
-      purge({ doc, endpoint, operation: 'delete', req })
+      void purge({ doc, endpoint, operation: 'delete', req })
     }
     return doc
   }

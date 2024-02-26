@@ -135,10 +135,8 @@ const handleCustomEndpoints = ({
     })
 
     if (customEndpoint) {
-      return customEndpoint.handler({
-        req: payloadRequest,
-        routeParams: handlerParams,
-      })
+      payloadRequest.routeParams = handlerParams
+      return customEndpoint.handler(payloadRequest)
     }
   }
 
