@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { ServerSideEditViewProps } from '../../../../ui/src/views/types'
+import type { ServerSideEditViewProps } from './types'
 
 import { DefaultEditViewClient } from './index.client'
 

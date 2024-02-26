@@ -1,3 +1,4 @@
+'use client'
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { Where } from 'payload/types'
 

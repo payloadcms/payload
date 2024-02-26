@@ -1,12 +1,12 @@
 import type { CellProps, SanitizedCollectionConfig } from 'payload/types'
 
 import type { Column } from '../../elements/Table/types'
+import type { ColumnPreferences } from '../../providers/ListInfo/types'
 import type { FieldMap } from '../../utilities/buildComponentMap/types'
-import type { ListPreferences } from '../../views/List/types'
 
 export const buildColumns = (args: {
   cellProps: Partial<CellProps>[]
-  columnPreferences: ListPreferences['columns']
+  columnPreferences: ColumnPreferences
   defaultColumns?: string[]
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']

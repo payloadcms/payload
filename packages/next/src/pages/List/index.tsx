@@ -1,19 +1,18 @@
-import type { DefaultListViewProps } from '@payloadcms/ui'
 import type { SanitizedConfig } from 'payload/types'
 
 import {
-  DefaultList,
   HydrateClientUser,
+  ListInfoProvider,
   RenderCustomComponent,
   TableColumnsProvider,
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import React, { Fragment } from 'react'
 
-import type { ListPreferences } from '../../../../ui/src/views/List/types'
+import type { DefaultListViewProps, ListPreferences } from './Default/types'
 
-import { ListInfoProvider } from '../../../../ui/src/providers/ListInfo'
 import { initPage } from '../../utilities/initPage'
+import { DefaultListView } from './Default'
 
 export const ListView = async ({
   collectionSlug,
@@ -60,12 +59,12 @@ export const ListView = async ({
       admin: { components: { views: { List: CustomList } = {} } = {} },
     } = collectionConfig
 
-    let ListToRender = null
+    let CustomListView = null
 
     if (CustomList && typeof CustomList === 'function') {
-      ListToRender = CustomList
+      CustomListView = CustomList
     } else if (typeof CustomList === 'object' && typeof CustomList.Component === 'function') {
-      ListToRender = CustomList.Component
+      CustomListView = CustomList.Component
     }
 
     const limit = Number(searchParams?.limit) || collectionConfig.admin.pagination.defaultLimit
@@ -93,8 +92,8 @@ export const ListView = async ({
         >
           <TableColumnsProvider collectionSlug={collectionSlug} listPreferences={listPreferences}>
             <RenderCustomComponent
-              CustomComponent={ListToRender}
-              DefaultComponent={DefaultList}
+              CustomComponent={CustomListView}
+              DefaultComponent={DefaultListView}
               componentProps={componentProps}
             />
           </TableColumnsProvider>
