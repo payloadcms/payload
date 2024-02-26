@@ -15,7 +15,7 @@ export type {
 
 export type { CellComponentProps } from '../admin/components/views/collections/List/Cell/types'
 
-export { FileData, ImageSize, IncomingUploadType } from '../uploads/types'
+export type { FileData, ImageSize, IncomingUploadType } from '../uploads/types'
 
 export type {
   CustomPublishButtonProps,

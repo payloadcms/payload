@@ -1,8 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 
-import type { Payload } from '../../'
-import type { Migration } from '../types'
+// import type { Payload } from '../../'
+// import type { Migration } from '../types'
 
 /**
  * Read the migration files from disk
@@ -33,10 +33,13 @@ export const readMigrationFiles = async ({
       return path.resolve(payload.db.migrationDir, file)
     })
 
-  return files.map((filePath) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const migration = require(filePath) as Migration
-    migration.name = path.basename(filePath).split('.')?.[0]
-    return migration
-  })
+  return files
+
+  // TODO: files
+  // return files.map((filePath) => {
+  //   // eslint-disable-next-line @typescript-eslint/no-var-requires
+  //   const migration = require(filePath) as Migration
+  //   migration.name = path.basename(filePath).split('.')?.[0]
+  //   return migration
+  // })
 }

@@ -11,6 +11,13 @@
     "url": "https://payloadcms.com"
   },
   "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
