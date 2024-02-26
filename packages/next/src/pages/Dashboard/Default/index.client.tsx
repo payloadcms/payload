@@ -84,7 +84,7 @@ export const DefaultDashboardClient: React.FC<{
         i18n,
       ),
     )
-  }, [collectionsConfig, globalsConfig, permissions, user])
+  }, [collectionsConfig, globalsConfig, permissions, user, i18n])
 
   return (
     <Fragment>

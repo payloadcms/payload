@@ -1,4 +1,6 @@
+import type { TFunction } from '@payloadcms/translations'
 import type { QueryParamTypes } from '@payloadcms/ui'
+import type { Metadata } from 'next'
 import type { AdminViewComponent } from 'payload/config'
 import type {
   DocumentPreferences,
@@ -23,8 +25,66 @@ import React, { Fragment } from 'react'
 
 import type { ServerSideEditViewProps } from '../Edit/types'
 
+import { getNextT } from '../../utilities/getNextT.ts'
 import { initPage } from '../../utilities/initPage'
 import { getViewsFromConfig } from './getViewsFromConfig'
+
+export type GenerateEditViewMetadata = (args: {
+  config: Promise<SanitizedConfig>
+  isEditing: boolean
+  t: TFunction
+}) => Promise<Metadata>
+
+export const generateMetadata = async ({
+  config,
+  params,
+}: {
+  config: Promise<SanitizedConfig>
+  params: {
+    collection?: string
+    global?: string
+    segments: string[]
+  }
+}): Promise<Metadata> => {
+  let fn: GenerateEditViewMetadata = null
+
+  const isEditing = Boolean(
+    params.collection && params.segments?.length > 0 && params.segments[0] !== 'create',
+  )
+
+  // `/:id`
+  if (params.segments.length === 1) {
+    fn = await import('../Edit/meta.ts').then((mod) => mod.generateMetadata)
+  }
+
+  // `/:id/api`
+  if (params.segments.length === 2 && params.segments[1] === 'api') {
+    fn = await import('../API/meta.ts').then((mod) => mod.generateMetadata)
+  }
+
+  // `/:id/preview`
+  if (params.segments.length === 2 && params.segments[1] === 'preview') {
+    fn = await import('../LivePreview/meta.ts').then((mod) => mod.generateMetadata)
+  }
+
+  // `/:id/versions`
+  if (params.segments.length === 2 && params.segments[1] === 'versions') {
+    fn = await import('../Versions/meta.ts').then((mod) => mod.generateMetadata)
+  }
+
+  // `/:id/versions/:version`
+  if (params.segments.length === 2 && params.segments[1] === 'versions') {
+    fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
+  }
+
+  const t = await getNextT({
+    config: await config,
+  })
+
+  if (typeof fn === 'function') {
+    return fn({ config, isEditing, t })
+  }
+}
 
 export const Document = async ({
   config: configPromise,

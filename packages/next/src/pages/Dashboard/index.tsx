@@ -1,11 +1,31 @@
+import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
 import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
+import { getNextT } from '../../utilities/getNextT'
 import { initPage } from '../../utilities/initPage'
+import { meta } from '../../utilities/meta'
 import { DefaultDashboard } from './Default'
+
+export const generateMetadata = async ({
+  config,
+}: {
+  config: Promise<SanitizedConfig>
+}): Promise<Metadata> => {
+  const t = await getNextT({
+    config: await config,
+  })
+
+  return meta({
+    config,
+    description: `${t('general:dashboard')} Payload`,
+    keywords: `${t('general:dashboard')}, Payload`,
+    title: t('general:dashboard'),
+  })
+}
 
 export const Dashboard = async ({
   config: configPromise,
