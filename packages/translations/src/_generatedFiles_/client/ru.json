@@ -260,6 +260,7 @@
     "type": "Тип",
     "unpublish": "Отменить публикацию",
     "unpublishing": "Отмена публикации...",
+    "version": "Версия",
     "versionCreatedOn": "{{version}} создана:",
     "versionID": "ID версии",
     "versions": "Версии",

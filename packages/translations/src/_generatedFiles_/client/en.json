@@ -262,6 +262,7 @@
     "type": "Type",
     "unpublish": "Unpublish",
     "unpublishing": "Unpublishing...",
+    "version": "Version",
     "versionCreatedOn": "{{version}} created on:",
     "versionID": "Version ID",
     "versions": "Versions",

@@ -260,6 +260,7 @@
     "type": "Tür",
     "unpublish": "Yayından Kaldır",
     "unpublishing": "Yayından kaldırılıyor...",
+    "version": "Sürüm",
     "versionCreatedOn": "{{version}} oluşturma tarihi:",
     "versionID": "Sürüm ID",
     "versions": "Sürümler",
