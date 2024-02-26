@@ -7,7 +7,10 @@
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "allowImportingTsExtensions": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "paths": {
+      "payload-config": ["./src/config.ts"]
+    }
   },
   "exclude": [
     "src/**/*.spec.js",

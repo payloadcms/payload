@@ -7,18 +7,11 @@ import { getAfterDeleteHook } from './hooks/afterDelete'
 import { getBeforeChangeHook } from './hooks/beforeChange'
 import { getCacheUploadsAfterChangeHook, getCacheUploadsAfterDeleteHook } from './hooks/uploadCache'
 import { getStaticHandler } from './staticHandler'
-import { extendWebpackConfig } from './webpack'
 
 export const payloadCloud =
   (pluginOptions?: PluginOptions) =>
   (incomingConfig: Config): Config => {
     let config = { ...incomingConfig }
-    const webpack = extendWebpackConfig(incomingConfig)
-
-    config.admin = {
-      ...(config.admin || {}),
-      webpack,
-    }
 
     if (process.env.PAYLOAD_CLOUD !== 'true') {
       return config // only modified webpack

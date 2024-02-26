@@ -6,7 +6,7 @@ export const endpoints: Config['endpoints'] = [
   {
     path: `/${applicationEndpoint}`,
     method: 'post',
-    handler: ({ req }) => {
+    handler: (req) => {
       return Response.json(req.body)
     },
   },
@@ -20,7 +20,7 @@ export const endpoints: Config['endpoints'] = [
   {
     path: `/${applicationEndpoint}/i18n`,
     method: 'get',
-    handler: ({ req }) => {
+    handler: (req) => {
       return Response.json({ message: req.t('general:updatedSuccessfully') })
     },
   },
@@ -34,7 +34,7 @@ export const endpoints: Config['endpoints'] = [
   {
     path: `/${rootEndpoint}`,
     method: 'post',
-    handler: ({ req }) => {
+    handler: (req) => {
       return Response.json(req.body)
     },
   },

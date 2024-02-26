@@ -92,6 +92,7 @@ export const createLocalReq: CreateLocalReq = async (
   req.t = i18n.t
   req.user = user || req?.user || null
   req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req)
+  req.routeParams = req?.routeParams || {}
 
   if (!req?.url) attachFakeURLProperties(req)
 

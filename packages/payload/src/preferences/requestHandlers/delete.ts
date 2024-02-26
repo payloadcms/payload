@@ -1,10 +1,12 @@
 import httpStatus from 'http-status'
 
+import type { PayloadHandler } from '../../exports/config'
+
 import deleteOperation from '../operations/delete'
 
-export const deleteHandler = async ({ req, routeParams }): Promise<Response> => {
+export const deleteHandler: PayloadHandler = async (req): Promise<Response> => {
   const result = await deleteOperation({
-    key: routeParams.key,
+    key: req.routeParams?.key as string,
     req,
     user: req.user,
   })

@@ -224,15 +224,7 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Equivalent to express middleware, but with an enhanced request object */
-export type PayloadHandler = ({
-  req,
-  routeParams,
-}: {
-  req: PayloadRequest
-  routeParams: {
-    [key: string]: string
-  }
-}) => Promise<Response> | Response
+export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints

@@ -4,9 +4,9 @@ import type { PayloadHandler } from '../../exports/config'
 
 import findOne from '../operations/findOne'
 
-export const findByIDHandler: PayloadHandler = async ({ req, routeParams }): Promise<Response> => {
+export const findByIDHandler: PayloadHandler = async (req): Promise<Response> => {
   const result = await findOne({
-    key: routeParams.key,
+    key: req.routeParams?.key as string,
     req,
     user: req.user,
   })
