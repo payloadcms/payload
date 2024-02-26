@@ -21,7 +21,7 @@ import { notFound } from 'next/navigation'
 import queryString from 'qs'
 import React, { Fragment } from 'react'
 
-import type { ServerSideEditViewProps } from '../../../../ui/src/views/types'
+import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { initPage } from '../../utilities/initPage'
 import { getViewsFromConfig } from './getViewsFromConfig'

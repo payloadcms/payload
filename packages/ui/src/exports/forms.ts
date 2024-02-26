@@ -10,8 +10,10 @@ export {
   useFormSubmitted,
   useWatchForm,
 } from '../forms/Form/context'
+export { useFormModified } from '../forms/Form/context'
 export { createNestedFieldPath } from '../forms/Form/createNestedFieldPath'
 export { default as reduceFieldsToValues } from '../forms/Form/reduceFieldsToValues'
+export type { Props as FormProps } from '../forms/Form/types'
 export type { FormState } from '../forms/Form/types'
 export { default as Label } from '../forms/Label'
 export { default as RenderFields } from '../forms/RenderFields'

@@ -9,7 +9,6 @@ import {
   MinimizeMaximize,
   Number as NumberInput,
   Select,
-  SetDocumentStepNav as SetStepNav,
   useActions,
   useConfig,
   useDocumentInfo,
@@ -21,6 +20,7 @@ import qs from 'qs'
 import * as React from 'react'
 import { toast } from 'react-toastify'
 
+import { SetStepNav } from '../Edit/Default/SetStepNav'
 import { RenderJSON } from './RenderJSON'
 import './index.scss'
 

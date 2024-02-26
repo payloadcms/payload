@@ -1,11 +1,11 @@
 import React from 'react'
 
-import type { ServerSideEditViewProps } from '../../../../ui/src/views/types'
+import type { ServerSideEditViewProps } from '../Edit/types'
 
-import { sanitizedEditViewProps } from '../Edit/sanitizedEditViewProps'
+import { sanitizeEditViewProps } from '../Edit/sanitizeEditViewProps'
 import { APIViewClient } from './index.client'
 
 export const APIView: React.FC<ServerSideEditViewProps> = async (props) => {
-  const clientSideProps = sanitizedEditViewProps(props)
+  const clientSideProps = sanitizeEditViewProps(props)
   return <APIViewClient {...clientSideProps} />
 }

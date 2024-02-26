@@ -1,9 +1,7 @@
 'use client'
-import { useComponentMap, useDocumentInfo } from '@payloadcms/ui'
+import { LoadingOverlay, useComponentMap, useDocumentInfo } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 import { useCallback } from 'react'
-
-import { LoadingOverlay } from '../../../../ui/src/elements/Loading'
 
 export const DefaultEditViewClient: React.FC = () => {
   const { id, collectionSlug, getDocPermissions, getVersions, globalSlug } = useDocumentInfo()

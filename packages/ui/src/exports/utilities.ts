@@ -3,6 +3,7 @@ export type { FieldMap, MappedField } from '../utilities/buildComponentMap/types
 export type { FieldSchemaMap } from '../utilities/buildFieldSchemaMap/types'
 export { findLocaleFromCode } from '../utilities/findLocaleFromCode'
 export { formatDate } from '../utilities/formatDate'
+export { formatDocTitle } from '../utilities/formatDocTitle'
 export { formatFields } from '../utilities/formatFields'
 export { getFormState } from '../utilities/getFormState'
 export type { EntityToGroup, Group } from '../utilities/groupNavItems'
