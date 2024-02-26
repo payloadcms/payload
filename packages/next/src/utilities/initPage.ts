@@ -1,7 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Permissions } from 'payload/auth'
 import type {
-  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -47,42 +46,18 @@ export const initPage = async ({
 }> => {
   const headers = getHeaders()
   const cookies = parseCookies(headers)
-  const language = getRequestLanguage({ cookies, headers })
-  const config = await configPromise
-  const payload = await getPayload({ config })
-
-  const { collections, globals, localization, routes } = config
-
-  const i18n = await initI18n({
-    config: config.i18n,
-    context: 'client',
-    language,
-    translations,
-  })
-
-  const defaultLocale =
-    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-  const localeCode = localeParam || defaultLocale
-  const locale = localization && findLocaleFromCode(localization, localeCode)
-
-  const partialReq: Partial<PayloadRequest> = {
-    context: {},
-    fallbackLocale: locale ? locale?.fallbackLocale : undefined,
-    headers,
-    i18n,
-    locale: locale ? locale?.code : undefined,
-    payload,
-    payloadAPI: 'REST',
-    t: i18n.t,
-    user: null,
-  }
 
   const { permissions, user } = await auth({
+    config: configPromise,
     cookies,
     headers,
-    i18n,
-    partialReq,
   })
+
+  const language = getRequestLanguage({ cookies, headers })
+
+  const config = await configPromise
+
+  const { collections, globals, localization, routes } = config
 
   if (redirectUnauthenticatedUser && !user && route !== '/login') {
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
@@ -92,6 +67,16 @@ export const initPage = async ({
     redirect(`${routes.admin}/login?redirect=${routes.admin + route + stringifiedSearchParams}`)
   }
 
+  const payload = await getPayload({
+    config,
+  })
+
+  const i18n = await initI18n({
+    config: config.i18n,
+    context: 'client',
+    language,
+    translations,
+  })
   let collectionConfig: SanitizedCollectionConfig
   let globalConfig: SanitizedGlobalConfig
 
@@ -102,6 +87,13 @@ export const initPage = async ({
   if (globalSlug) {
     globalConfig = globals.find((global) => global.slug === globalSlug)
   }
+
+  const defaultLocale =
+    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
+
+  const localeCode = localeParam || defaultLocale
+
+  const locale = localization && findLocaleFromCode(localization, localeCode)
 
   return {
     collectionConfig,
