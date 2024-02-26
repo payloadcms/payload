@@ -1,6 +1,5 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps } from '@payloadcms/ui/utilities'
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { AdapterArguments } from './types'
@@ -14,22 +13,16 @@ import { getGenerateSchemaMap } from './generateSchemaMap'
 
 export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], AdapterArguments, any> {
   return {
-    CellComponent: withMergedProps({
-      Component: RichTextCell,
-      toMergeIntoProps: args,
-    }),
-    FieldComponent: withMergedProps({
-      Component: RichTextField,
-      toMergeIntoProps: args,
-    }),
+    CellComponent: RichTextCell,
+    FieldComponent: RichTextField,
     generateComponentMap: getGenerateComponentMap(args),
     generateSchemaMap: getGenerateSchemaMap(args),
     outputSchema: ({ isRequired }) => {
       return {
+        type: withNullableJSONSchemaType('array', isRequired),
         items: {
           type: 'object',
         },
-        type: withNullableJSONSchemaType('array', isRequired),
       }
     },
     populationPromise({
