@@ -13,6 +13,7 @@ import { CodeCell } from './fields/Code'
 export const DefaultCell: React.FC<CellProps> = (props) => {
   const {
     name,
+    CellComponentOverride,
     className: classNameFromProps,
     fieldType,
     isFieldAffectingData,
@@ -76,7 +77,8 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
     )
   }
 
-  let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[fieldType]
+  let CellComponent: React.FC<CellComponentProps> =
+    cellData && (CellComponentOverride ? CellComponentOverride : cellComponents[fieldType])
 
   if (!CellComponent) {
     if (customCellContext.uploadConfig && isFieldAffectingData && name === 'filename') {

@@ -10,6 +10,13 @@ import type {
 } from '../../fields/config/types'
 
 export type CellProps = {
+  /**
+   * A custom component to override the default cell component. If this is not set, the React component will be
+   * taken from cellComponents based on the field type.
+   *
+   * This is used to provide the RichText cell component for the RichText field.
+   */
+  CellComponentOverride?: React.ComponentType<CellComponentProps>
   blocks?: {
     labels: BlockField['labels']
     slug: string
