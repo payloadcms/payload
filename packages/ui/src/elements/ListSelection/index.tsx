@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
 
+import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider'
 import { useTranslation } from '../../providers/Translation'
-import { SelectAllStatus, useSelection } from '../../views/List/SelectionProvider'
 import './index.scss'
 
 const baseClass = 'list-selection'

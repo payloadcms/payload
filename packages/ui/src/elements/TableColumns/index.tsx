@@ -1,10 +1,10 @@
 'use client'
-import type { Field, SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload/types'
 import type { CellProps } from 'payload/types'
 
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
-import type { ListPreferences } from '../../views/List/types'
+import type { ColumnPreferences } from '../../providers/ListInfo/types'
 import type { Column } from '../Table/types'
 import type { Action } from './columnReducer'
 
@@ -30,7 +30,9 @@ export const TableColumnsProvider: React.FC<{
   cellProps?: Partial<CellProps>[]
   children: React.ReactNode
   collectionSlug: string
-  listPreferences: ListPreferences
+  listPreferences: {
+    columns: ColumnPreferences
+  }
 }> = ({ cellProps, children, collectionSlug, listPreferences }) => {
   const config = useConfig()
 
@@ -70,7 +72,9 @@ export const TableColumnsProvider: React.FC<{
       const collectionHasChanged = prevCollection.current !== collectionSlug
 
       if (collectionHasChanged) {
-        const currentPreferences = await getPreference<ListPreferences>(preferenceKey)
+        const currentPreferences = await getPreference<{
+          columns: ColumnPreferences
+        }>(preferenceKey)
         prevCollection.current = collectionSlug
 
         if (currentPreferences.columns) {

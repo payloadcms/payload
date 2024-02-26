@@ -1,10 +1,11 @@
-import type { ServerSideEditViewProps } from '@payloadcms/ui'
-
 import { getTranslation } from '@payloadcms/translations'
-import { Gutter, SetDocumentStepNav as SetStepNav } from '@payloadcms/ui'
+import { Gutter } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
+import type { ServerSideEditViewProps } from '../Edit/types'
+
+import { SetStepNav } from '../Edit/Default/SetStepNav'
 import { buildVersionColumns } from './buildColumns'
 import { VersionsViewClient } from './index.client'
 import './index.scss'
