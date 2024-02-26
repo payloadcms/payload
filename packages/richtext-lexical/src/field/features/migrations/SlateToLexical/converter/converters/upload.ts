@@ -4,12 +4,12 @@ import type { SlateNodeConverter } from '../types'
 export const SlateUploadConverter: SlateNodeConverter = {
   converter({ slateNode }) {
     return {
+      type: 'upload',
       fields: {
         ...slateNode.fields,
       },
       format: '',
       relationTo: slateNode.relationTo,
-      type: 'upload',
       value: {
         id: slateNode.value?.id || '',
       },

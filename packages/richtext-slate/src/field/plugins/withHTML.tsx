@@ -3,8 +3,8 @@ import { jsx } from 'slate-hyperscript'
 
 const ELEMENT_TAGS = {
   A: (el) => ({
-    newTab: el.getAttribute('target') === '_blank',
     type: 'link',
+    newTab: el.getAttribute('target') === '_blank',
     url: el.getAttribute('href'),
   }),
   BLOCKQUOTE: () => ({ type: 'blockquote' }),

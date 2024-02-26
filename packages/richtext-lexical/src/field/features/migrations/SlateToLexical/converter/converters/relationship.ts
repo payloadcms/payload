@@ -4,9 +4,9 @@ import type { SlateNodeConverter } from '../types'
 export const SlateRelationshipConverter: SlateNodeConverter = {
   converter({ slateNode }) {
     return {
+      type: 'relationship',
       format: '',
       relationTo: slateNode.relationTo,
-      type: 'relationship',
       value: {
         id: slateNode?.value?.id || '',
       },

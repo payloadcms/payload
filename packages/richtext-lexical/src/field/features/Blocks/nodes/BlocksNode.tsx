@@ -25,7 +25,7 @@ export type BlockFields = {
 }
 
 const BlockComponent = React.lazy(() =>
-  // @ts-ignore-next-line TypeScript being dumb
+  // @ts-expect-error-next-line TypeScript being dumb
   import('../component').then((module) => ({
     default: module.BlockComponent,
   })),

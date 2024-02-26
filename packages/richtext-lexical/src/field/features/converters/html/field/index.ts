@@ -56,6 +56,7 @@ export const lexicalHTML: (
   const { name = 'lexicalHTML' } = props
   return {
     name: name,
+    type: 'text',
     admin: {
       hidden: true,
     },
@@ -167,6 +168,5 @@ export const lexicalHTML: (
         },
       ],
     },
-    type: 'text',
   }
 }

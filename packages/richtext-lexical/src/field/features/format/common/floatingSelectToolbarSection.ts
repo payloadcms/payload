@@ -7,9 +7,9 @@ export const SectionWithEntries = (
   entries: FloatingToolbarSectionEntry[],
 ): FloatingToolbarSection => {
   return {
+    type: 'buttons',
     entries,
     key: 'format',
     order: 4,
-    type: 'buttons',
   }
 }

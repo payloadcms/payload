@@ -16,9 +16,9 @@ const insertRelationship = (editor, { relationTo, value }) => {
   const text = { text: ' ' }
 
   const relationship = {
+    type: 'relationship',
     children: [text],
     relationTo,
-    type: 'relationship',
     value,
   }
 

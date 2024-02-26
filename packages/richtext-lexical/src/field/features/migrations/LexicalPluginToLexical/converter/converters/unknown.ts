@@ -6,6 +6,7 @@ import { convertLexicalPluginNodesToLexical } from '..'
 export const UnknownConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {
     return {
+      type: 'unknownConverted',
       children: convertLexicalPluginNodesToLexical({
         converters,
         lexicalPluginNodes: (lexicalPluginNode as any)?.children || [],
@@ -18,7 +19,6 @@ export const UnknownConverter: LexicalPluginNodeConverter = {
       direction: 'ltr',
       format: '',
       indent: 0,
-      type: 'unknownConverted',
       version: 1,
     } as const as SerializedUnknownConvertedNode
   },

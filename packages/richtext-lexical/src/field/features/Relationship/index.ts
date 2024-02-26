@@ -33,16 +33,16 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
       return {
         nodes: [
           {
+            type: RelationshipNode.getType(),
             node: RelationshipNode,
             populationPromises: [relationshipPopulationPromise],
-            type: RelationshipNode.getType(),
             // TODO: Add validation similar to upload
           },
         ],
         plugins: [
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugins').then((module) => {
                 const RelationshipPlugin = module.RelationshipPlugin
                 return import('@payloadcms/ui').then((module2) =>
@@ -64,7 +64,7 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
               options: [
                 new SlashMenuOption('relationship', {
                   Icon: () =>
-                    // @ts-ignore-next-line
+                    // @ts-expect-error-next-line
                     import('../../lexical/ui/icons/Relationship').then(
                       (module) => module.RelationshipIcon,
                     ),

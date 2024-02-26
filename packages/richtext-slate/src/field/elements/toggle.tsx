@@ -19,7 +19,7 @@ const toggleElement = (editor: Editor, format: string, blockType = 'type'): void
   }
 
   if (!isActive && isWithinLI && blockType !== 'textAlign') {
-    const block = { children: [], type: 'li' }
+    const block = { type: 'li', children: [] }
     Transforms.wrapNodes(editor, block, {
       at: Editor.unhangRange(editor, editor.selection),
     })

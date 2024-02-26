@@ -16,6 +16,7 @@ export const MarkdownTransformer: (enabledHeadingSizes: HeadingTagType[]) => Ele
   const regExp = new RegExp(pattern)
 
   return {
+    type: 'element',
     dependencies: [HeadingNode],
     export: (node, exportChildren) => {
       if (!$isHeadingNode(node)) {
@@ -29,6 +30,5 @@ export const MarkdownTransformer: (enabledHeadingSizes: HeadingTagType[]) => Ele
       const tag = ('h' + match[1].length) as HeadingTagType
       return $createHeadingNode(tag)
     }),
-    type: 'element',
   }
 }

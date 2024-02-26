@@ -18,12 +18,13 @@ const translations = extractTranslations([
 export const getBaseFields = (config: Config): Field[] => [
   {
     name: 'text',
+    type: 'text',
     label: translations['fields:textToDisplay'],
     required: true,
-    type: 'text',
   },
   {
     name: 'linkType',
+    type: 'radio',
     admin: {
       description: translations['fields:chooseBetweenCustomTextOrDocument'],
     },
@@ -40,16 +41,15 @@ export const getBaseFields = (config: Config): Field[] => [
       },
     ],
     required: true,
-    type: 'radio',
   },
   {
     name: 'url',
+    type: 'text',
     admin: {
       condition: ({ linkType }) => linkType !== 'internal',
     },
     label: translations['fields:enterURL'],
     required: true,
-    type: 'text',
   },
   {
     name: 'doc',
@@ -59,6 +59,7 @@ export const getBaseFields = (config: Config): Field[] => [
       },
     },
     // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
+    type: 'relationship',
     filterOptions: ({ relationTo, user }) => {
       const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
       if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
@@ -75,11 +76,10 @@ export const getBaseFields = (config: Config): Field[] => [
       })
       .map(({ slug }) => slug),
     required: true,
-    type: 'relationship',
   },
   {
     name: 'newTab',
-    label: translations['fields:openInNewTab'],
     type: 'checkbox',
+    label: translations['fields:openInNewTab'],
   },
 ]

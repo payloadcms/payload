@@ -6,6 +6,7 @@ import { convertSlateNodesToLexical } from '..'
 export const SlateLinkConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
+      type: 'link',
       children: convertSlateNodesToLexical({
         canContainParagraphs: false,
         converters,
@@ -22,7 +23,6 @@ export const SlateLinkConverter: SlateNodeConverter = {
       },
       format: '',
       indent: 0,
-      type: 'link',
       version: 2,
     } as const as SerializedLinkNode
   },

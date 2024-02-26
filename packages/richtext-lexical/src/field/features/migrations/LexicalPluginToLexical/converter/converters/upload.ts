@@ -10,10 +10,10 @@ export const UploadConverter: LexicalPluginNodeConverter = {
       }
     }
     return {
+      type: 'upload',
       fields,
       format: (lexicalPluginNode as any)?.format || '',
       relationTo: (lexicalPluginNode as any)?.rawImagePayload?.relationTo,
-      type: 'upload',
       value: {
         id: (lexicalPluginNode as any)?.rawImagePayload?.value?.id || '',
       },

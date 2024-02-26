@@ -8,13 +8,13 @@ export const ListItemConverter: LexicalPluginNodeConverter = {
   converter({ childIndex, converters, lexicalPluginNode }) {
     return {
       ...lexicalPluginNode,
+      type: 'listitem',
       checked: undefined,
       children: convertLexicalPluginNodesToLexical({
         converters,
         lexicalPluginNodes: (lexicalPluginNode as any)?.children || [],
         parentNodeType: 'listitem',
       }),
-      type: 'listitem',
       value: childIndex + 1,
       version: 1,
     } as const as SerializedListItemNode

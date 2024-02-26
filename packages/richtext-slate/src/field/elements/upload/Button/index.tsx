@@ -16,9 +16,9 @@ const insertUpload = (editor, { relationTo, value }) => {
   const text = { text: ' ' }
 
   const upload = {
+    type: 'upload',
     children: [text],
     relationTo,
-    type: 'upload',
     value,
   }
 

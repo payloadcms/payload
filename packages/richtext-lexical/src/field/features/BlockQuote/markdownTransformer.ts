@@ -3,6 +3,7 @@ import type { ElementTransformer } from '@lexical/markdown'
 import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text'
 import { $createLineBreakNode } from 'lexical'
 export const MarkdownTransformer: ElementTransformer = {
+  type: 'element',
   dependencies: [QuoteNode],
   export: (node, exportChildren) => {
     if (!$isQuoteNode(node)) {
@@ -36,5 +37,4 @@ export const MarkdownTransformer: ElementTransformer = {
     parentNode.replace(node)
     node.select(0, 0)
   },
-  type: 'element',
 }

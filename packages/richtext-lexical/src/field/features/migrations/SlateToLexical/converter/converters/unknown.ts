@@ -6,6 +6,7 @@ import { convertSlateNodesToLexical } from '..'
 export const SlateUnknownConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
+      type: 'unknownConverted',
       children: convertSlateNodesToLexical({
         canContainParagraphs: false,
         converters,
@@ -19,7 +20,6 @@ export const SlateUnknownConverter: SlateNodeConverter = {
       direction: 'ltr',
       format: '',
       indent: 0,
-      type: 'unknownConverted',
       version: 1,
     } as const as SerializedUnknownConvertedNode
   },

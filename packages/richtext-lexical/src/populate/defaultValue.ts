@@ -2,50 +2,50 @@ import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode
 
 export const defaultRichTextValue: SerializedEditorState = {
   root: {
+    type: 'root',
     children: [
       {
+        type: 'paragraph',
         children: [
           {
+            type: 'text',
             detail: 0,
             format: 0,
             mode: 'normal',
             style: '',
             text: '',
-            type: 'text',
             version: 1,
           } as SerializedTextNode,
         ],
         direction: null,
         format: '',
         indent: 0,
-        type: 'paragraph',
         version: 1,
       } as SerializedParagraphNode,
     ],
     direction: null,
     format: '',
     indent: 0,
-    type: 'root',
     version: 1,
   },
 }
 
 export const defaultRichTextValueV2: SerializedEditorState = {
   root: {
+    type: 'root',
     children: [
       {
+        type: 'paragraph',
         children: [],
         direction: null,
         format: '',
         indent: 0,
-        type: 'paragraph',
         version: 1,
       } as SerializedParagraphNode,
     ],
     direction: null,
     format: '',
     indent: 0,
-    type: 'root',
     version: 1,
   },
 }

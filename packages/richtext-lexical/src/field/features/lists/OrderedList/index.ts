@@ -16,7 +16,7 @@ export const OrderedListFeature = (): FeatureProvider => {
             TextDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   import('../../../lexical/ui/icons/OrderedList').then(
                     (module) => module.OrderedListIcon,
                   ),
@@ -36,18 +36,18 @@ export const OrderedListFeature = (): FeatureProvider => {
           ? []
           : [
               {
+                type: ListNode.getType(),
                 converters: {
                   html: ListHTMLConverter,
                 },
                 node: ListNode,
-                type: ListNode.getType(),
               },
               {
+                type: ListItemNode.getType(),
                 converters: {
                   html: ListItemHTMLConverter,
                 },
                 node: ListItemNode,
-                type: ListItemNode.getType(),
               },
             ],
         plugins: featureProviderMap.has('unorderedList')
@@ -55,7 +55,7 @@ export const OrderedListFeature = (): FeatureProvider => {
           : [
               {
                 Component: () =>
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   import('../plugin').then((module) => module.LexicalListPlugin),
                 position: 'normal',
               },
@@ -69,7 +69,7 @@ export const OrderedListFeature = (): FeatureProvider => {
               options: [
                 new SlashMenuOption('orderedlist', {
                   Icon: () =>
-                    // @ts-ignore-next-line
+                    // @ts-expect-error-next-line
                     import('../../../lexical/ui/icons/OrderedList').then(
                       (module) => module.OrderedListIcon,
                     ),

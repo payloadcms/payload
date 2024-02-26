@@ -33,6 +33,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
       return {
         nodes: [
           {
+            type: UploadNode.getType(),
             converters: {
               html: {
                 converter: async ({ node }) => {
@@ -92,14 +93,13 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
             },
             node: UploadNode,
             populationPromises: [uploadPopulationPromiseHOC(props)],
-            type: UploadNode.getType(),
             validations: [uploadValidation()],
           },
         ],
         plugins: [
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugin').then((module) => module.UploadPlugin),
             position: 'normal',
           },
@@ -113,7 +113,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
               options: [
                 new SlashMenuOption('upload', {
                   Icon: () =>
-                    // @ts-ignore-next-line
+                    // @ts-expect-error-next-line
                     import('../../lexical/ui/icons/Upload').then((module) => module.UploadIcon),
                   displayName: 'Upload',
                   keywords: ['upload', 'image', 'file', 'img', 'picture', 'photo', 'media'],

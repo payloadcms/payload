@@ -87,9 +87,9 @@ const Element: React.FC<Props> = () => {
       Transforms.setNodes(
         editor,
         {
+          type: 'relationship',
           children: [{ text: ' ' }],
           relationTo: relatedCollection.slug,
-          type: 'relationship',
           value: { id: doc.id },
         },
         { at: elementPath },
@@ -113,9 +113,9 @@ const Element: React.FC<Props> = () => {
       Transforms.setNodes(
         editor,
         {
+          type: 'relationship',
           children: [{ text: ' ' }],
           relationTo: collectionSlug,
-          type: 'relationship',
           value: { id: docID },
         },
         { at: elementPath },
