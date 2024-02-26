@@ -4,11 +4,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props, TogglerProps } from './types'
 
-import { Gutter } from '../Gutter'
-import { EditDepthContext, useEditDepth } from '../../providers/EditDepth'
-import { X } from '../../icons/X'
 import { useTranslation } from '../..'
-
+import { X } from '../../icons/X'
+import { EditDepthContext, useEditDepth } from '../../providers/EditDepth'
+import { Gutter } from '../Gutter'
 import './index.scss'
 
 const baseClass = 'drawer'
@@ -43,10 +42,10 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
 }
 
 export const Drawer: React.FC<Props> = ({
+  Header,
   children,
   className,
   gutter = true,
-  Header,
   hoverTitle,
   slug,
   title,

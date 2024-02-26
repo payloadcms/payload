@@ -1,6 +1,7 @@
+import { getTranslation } from '@payloadcms/translations'
+
 import type { Action, Option, OptionGroup } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
 import { formatDocTitle } from '../../../utilities/formatDocTitle'
 
 const reduceToIDs = (options) =>
@@ -36,9 +37,9 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       const newOptions = [...state]
 
       const docTitle = formatDocTitle({
-        useAsTitle: collection.admin.useAsTitle,
         doc,
         i18n,
+        useAsTitle: collection.admin.useAsTitle,
       })
 
       const foundOptionGroup = newOptions.find(
@@ -68,9 +69,9 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
           loadedIDs.push(doc.id)
 
           const docTitle = formatDocTitle({
-            useAsTitle: collection.admin.useAsTitle,
             doc,
             i18n,
+            useAsTitle: collection.admin.useAsTitle,
           })
 
           return [

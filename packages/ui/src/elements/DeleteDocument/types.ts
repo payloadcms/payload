@@ -2,9 +2,9 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 export type Props = {
   buttonId?: string
-  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
   collectionSlug: SanitizedCollectionConfig['slug']
-  singularLabel: SanitizedCollectionConfig['labels']['singular']
   id?: string
+  singularLabel: SanitizedCollectionConfig['labels']['singular']
   title?: string
+  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }

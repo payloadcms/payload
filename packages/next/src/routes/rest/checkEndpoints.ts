@@ -2,11 +2,11 @@ import httpStatus from 'http-status'
 import { CollectionConfig, GlobalConfig } from 'payload/types'
 
 export const endpointsAreDisabled = ({
-  request,
   endpoints,
+  request,
 }: {
+  endpoints: false | unknown[]
   request: Partial<Request>
-  endpoints: unknown[] | false
 }) => {
   if (!endpoints) {
     return Response.json(

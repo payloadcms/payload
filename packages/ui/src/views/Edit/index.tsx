@@ -1,26 +1,24 @@
 'use client'
 import React, { Fragment, useCallback } from 'react'
 
-import { FormLoadingOverlayToggle } from '../../elements/Loading'
-import Form from '../../forms/Form'
-import { OperationProvider } from '../../providers/OperationProvider'
+import type { Props as FormProps } from '../../forms/Form/types'
 
 // import { getTranslation } from '@payloadcms/translations'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentFields } from '../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
+import { FormLoadingOverlayToggle } from '../../elements/Loading'
+import { FieldPathProvider } from '../../forms/FieldPathProvider'
+import Form from '../../forms/Form'
+import { useComponentMap } from '../../providers/ComponentMapProvider'
+import { useConfig } from '../../providers/Config'
+import { useDocumentInfo } from '../../providers/DocumentInfo'
+import { OperationProvider } from '../../providers/OperationProvider'
+import { getFormState } from '../../utilities/getFormState'
 import Auth from './Auth'
+import { SetDocumentTitle } from './SetDocumentTitle'
 import { SetStepNav } from './SetStepNav'
 import { Upload } from './Upload'
-import { useConfig } from '../../providers/Config'
-import { useComponentMap } from '../../providers/ComponentMapProvider'
-import { SetDocumentTitle } from './SetDocumentTitle'
-import { Props as FormProps } from '../../forms/Form/types'
-import { getFormState } from '../../utilities/getFormState'
-import { FieldPathProvider } from '../../forms/FieldPathProvider'
-import { useDocumentInfo } from '../../providers/DocumentInfo'
-import { useAuth } from '../../providers/Auth'
-
 import './index.scss'
 
 const baseClass = 'collection-edit'
@@ -30,34 +28,32 @@ const baseClass = 'collection-edit'
 // This is solely to support custom edit views which get server-rendered
 export const DefaultEditView: React.FC = () => {
   const {
-    action,
-    BeforeDocument,
+    id,
     AfterDocument,
-    BeforeFields,
     AfterFields,
+    BeforeDocument,
+    BeforeFields,
+    action,
     apiURL,
-    initialState,
-    initialData: data,
+    collectionSlug,
+    disableActions,
+    disableLeaveWithoutSaving,
     docPermissions,
     docPreferences,
-    onSave: onSaveFromProps,
-    id,
-    hasSavePermission,
-    disableActions,
-    collectionSlug,
     globalSlug,
-    disableLeaveWithoutSaving,
+    hasSavePermission,
+    initialData: data,
+    initialState,
+    onSave: onSaveFromProps,
   } = useDocumentInfo()
-
-  const { user } = useAuth()
 
   const config = useConfig()
 
   const {
-    serverURL,
     collections,
     globals,
     routes: { api: apiRoute },
+    serverURL,
   } = config
 
   const { getFieldMap } = useComponentMap()
@@ -108,10 +104,7 @@ export const DefaultEditView: React.FC = () => {
     [
       id,
       onSaveFromProps,
-      auth,
-      user,
       // refreshCookieAsync,
-      collectionConfig,
       //  reportUpdate
     ],
   )
@@ -134,26 +127,17 @@ export const DefaultEditView: React.FC = () => {
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) =>
       getFormState({
-        serverURL,
         apiRoute,
         body: {
           id,
-          operation,
-          formState: prevFormState,
           docPreferences,
+          formState: prevFormState,
+          operation,
           schemaPath,
         },
+        serverURL,
       }),
-    [
-      serverURL,
-      apiRoute,
-      collectionConfig,
-      globalConfig,
-      id,
-      operation,
-      docPreferences,
-      schemaPath,
-    ],
+    [serverURL, apiRoute, id, operation, docPreferences, schemaPath],
   )
 
   return (
@@ -196,27 +180,28 @@ export const DefaultEditView: React.FC = () => {
             <SetStepNav
               collectionSlug={collectionConfig?.slug}
               globalSlug={globalConfig?.slug}
-              useAsTitle={collectionConfig?.admin?.useAsTitle}
               id={id}
               isEditing={Boolean(id) || false}
               pluralLabel={collectionConfig?.labels?.plural}
+              useAsTitle={collectionConfig?.admin?.useAsTitle}
             />
             <SetDocumentTitle
-              config={config}
               collectionConfig={collectionConfig}
+              config={config}
               globalConfig={globalConfig}
             />
             <DocumentControls
               apiURL={apiURL}
-              slug={collectionConfig?.slug}
               data={data}
               disableActions={disableActions}
               hasSavePermission={hasSavePermission}
               id={id}
               isEditing={Boolean(id)}
               permissions={docPermissions}
+              slug={collectionConfig?.slug}
             />
             <DocumentFields
+              AfterFields={AfterFields}
               BeforeFields={
                 BeforeFields || (
                   <Fragment>
@@ -227,23 +212,22 @@ export const DefaultEditView: React.FC = () => {
                         email={data?.email}
                         operation={operation}
                         readOnly={!hasSavePermission}
-                        requirePassword={!Boolean(id)}
+                        requirePassword={!id}
                         useAPIKey={auth.useAPIKey}
                         verify={auth.verify}
                       />
                     )}
                     {upload && (
                       <Upload
-                        uploadConfig={upload}
                         collectionSlug={collectionConfig.slug}
                         initialState={initialState}
+                        uploadConfig={upload}
                       />
                     )}
                   </Fragment>
                 )
               }
               fieldMap={fieldMap}
-              AfterFields={AfterFields}
             />
             {AfterDocument}
           </Form>

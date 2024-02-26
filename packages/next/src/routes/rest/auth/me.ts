@@ -1,15 +1,16 @@
 import httpStatus from 'http-status'
-import { meOperation } from 'payload/operations'
 import { extractJWT } from 'payload/auth'
-import { CollectionRouteHandler } from '../types'
+import { meOperation } from 'payload/operations'
 
-export const me: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const me: CollectionRouteHandler = async ({ collection, req }) => {
   const currentToken = extractJWT(req)
 
   const result = await meOperation({
     collection,
-    req,
     currentToken,
+    req,
   })
 
   if (collection.config.auth.removeTokenFromResponses) {

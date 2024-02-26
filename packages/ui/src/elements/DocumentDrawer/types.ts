@@ -1,13 +1,13 @@
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
+import type { DocumentInfoContext } from '../../providers/DocumentInfo/types'
 import type { Props as DrawerProps } from '../Drawer/types'
-import { DocumentInfoContext } from '../../providers/DocumentInfo/types'
 
 export type DocumentDrawerProps = Pick<DrawerProps, 'Header'> & {
   collectionSlug: string
   drawerSlug?: string
-  id?: string | number
+  id?: number | string
   onSave?: DocumentInfoContext['onSave']
 }
 
@@ -20,7 +20,7 @@ export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   id?: string
 }
 
-export type UseDocumentDrawer = (args: { collectionSlug: string; id?: string | number }) => [
+export type UseDocumentDrawer = (args: { collectionSlug: string; id?: number | string }) => [
   React.FC<Omit<DocumentDrawerProps, 'collectionSlug' | 'id'>>, // drawer
   React.FC<Omit<DocumentTogglerProps, 'collectionSlug' | 'id'>>, // toggler
   {

@@ -1,4 +1,9 @@
 'use client'
+import type { DocumentPreferences } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
+import { tabHasName } from 'payload/types'
+import { toKebabCase } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
@@ -6,32 +11,28 @@ import type { Props } from './types'
 import { useCollapsible } from '../../../elements/Collapsible/provider'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { usePreferences } from '../../../providers/Preferences'
+import { useTranslation } from '../../../providers/Translation'
+import { FieldPathProvider, useFieldPath } from '../../FieldPathProvider'
 import RenderFields from '../../RenderFields'
 import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
-import { TabsProvider } from './provider'
 import { TabComponent } from './Tab'
-import { getTranslation } from '@payloadcms/translations'
-import { DocumentPreferences, tabHasName } from 'payload/types'
-import { toKebabCase } from 'payload/utilities'
-import { useTranslation } from '../../../providers/Translation'
-import { FieldPathProvider, useFieldPath } from '../../FieldPathProvider'
-
 import './index.scss'
+import { TabsProvider } from './provider'
 
 const baseClass = 'tabs-field'
 
 const TabsField: React.FC<Props> = (props) => {
   const {
+    name,
+    Description,
     className,
-    readOnly,
+    fieldMap,
     forceRender = false,
     indexPath,
-    permissions,
-    Description,
-    fieldMap,
     path: pathFromProps,
-    name,
+    permissions,
+    readOnly,
   } = props
 
   const { path: pathFromContext, schemaPath } = useFieldPath()

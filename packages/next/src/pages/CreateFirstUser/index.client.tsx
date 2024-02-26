@@ -1,7 +1,6 @@
 'use client'
-import React from 'react'
-
 import { RenderFields, useComponentMap } from '@payloadcms/ui'
+import React from 'react'
 
 export const CreateFirstUserFields: React.FC<{
   userSlug: string

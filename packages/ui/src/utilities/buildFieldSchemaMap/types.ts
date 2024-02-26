@@ -1,3 +1,3 @@
-import { Field } from 'payload/types'
+import type { Field } from 'payload/types'
 
 export type FieldSchemaMap = Map<string, Field[]>

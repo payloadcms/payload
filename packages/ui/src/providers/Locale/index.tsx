@@ -1,8 +1,8 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
-
 import type { Locale } from 'payload/config'
+
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode'
 import { useAuth } from '../Auth'

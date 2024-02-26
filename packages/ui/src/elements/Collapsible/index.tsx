@@ -7,9 +7,8 @@ import type { Props } from './types'
 import { Chevron } from '../../icons/Chevron'
 import { DragHandle } from '../../icons/DragHandle'
 import { useTranslation } from '../../providers/Translation'
-import { CollapsibleProvider, useCollapsible } from './provider'
-
 import './index.scss'
+import { CollapsibleProvider, useCollapsible } from './provider'
 
 const baseClass = 'collapsible'
 

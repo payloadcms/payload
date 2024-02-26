@@ -1,10 +1,11 @@
-import React from 'react'
+import type { Metadata } from 'next'
+import type { SanitizedConfig } from 'payload/types'
 
 import { MinimalTemplate } from '@payloadcms/ui'
-import { SanitizedConfig } from 'payload/types'
-import { meta } from '../../utilities/meta'
-import { Metadata } from 'next'
+import React from 'react'
+
 import { getNextT } from '../../utilities/getNextT'
+import { meta } from '../../utilities/meta'
 import { UnauthorizedClient } from './UnauthorizedClient'
 
 export const generateMetadata = async ({
@@ -17,10 +18,10 @@ export const generateMetadata = async ({
   })
 
   return meta({
-    title: t('error:unauthorized'),
+    config,
     description: t('error:unauthorized'),
     keywords: t('error:unauthorized'),
-    config,
+    title: t('error:unauthorized'),
   })
 }
 

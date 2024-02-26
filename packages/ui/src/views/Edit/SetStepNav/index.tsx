@@ -1,27 +1,28 @@
 'use client'
-import { useEffect } from 'react'
-import { useTranslation } from '../../../providers/Translation'
-
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
-import type { StepNavItem } from '../../../elements/StepNav/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useEffect } from 'react'
+
+import type { StepNavItem } from '../../../elements/StepNav/types'
+
 import { useStepNav } from '../../../elements/StepNav'
 import { useConfig } from '../../../providers/Config'
-import { useEditDepth } from '../../../providers/EditDepth'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
+import { useEditDepth } from '../../../providers/EditDepth'
+import { useTranslation } from '../../../providers/Translation'
 
 export const SetStepNav: React.FC<{
   collectionSlug?: SanitizedCollectionConfig['slug']
-  useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
   globalLabel?: SanitizedGlobalConfig['label']
   globalSlug?: SanitizedGlobalConfig['slug']
-  pluralLabel?: SanitizedCollectionConfig['labels']['plural']
   id?: number | string
   isEditing?: boolean
+  pluralLabel?: SanitizedCollectionConfig['labels']['plural']
+  useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
   view?: string
 }> = (props) => {
-  const { collectionSlug, globalSlug, pluralLabel, useAsTitle, id, isEditing = true } = props
+  const { id, collectionSlug, globalSlug, isEditing = true, pluralLabel, useAsTitle } = props
 
   const view: string | undefined = props?.view || undefined
 

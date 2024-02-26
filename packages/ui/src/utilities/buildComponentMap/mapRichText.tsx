@@ -1,12 +1,12 @@
-import { RichTextField } from 'payload/types'
+import type { RichTextField } from 'payload/types'
 
 type elements = {
   Button: React.ReactNode
 }[]
 
 export const mapRichText = (field: RichTextField) => {
-  let cellComponent = null
-  let leafComponent = null
+  const cellComponent = null
+  const leafComponent = null
 
   let elements
 

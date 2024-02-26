@@ -1,16 +1,16 @@
 'use client'
+import type { Validate } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
-import useField from '../../useField'
-import { fieldBaseClass } from '../shared'
-import { Validate } from 'payload/types'
 import { useTranslation } from '../../../providers/Translation'
-import { withCondition } from '../../withCondition'
 import LabelComp from '../../Label'
-
+import useField from '../../useField'
+import { withCondition } from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 const baseClass = 'point'
@@ -18,20 +18,20 @@ const baseClass = 'point'
 const PointField: React.FC<Props> = (props) => {
   const {
     name,
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
+    Label: LabelFromProps,
     className,
+    label,
+    path: pathFromProps,
     placeholder,
     readOnly,
-    style,
-    width,
     required,
+    style,
     validate,
-    path: pathFromProps,
-    Error,
-    BeforeInput,
-    AfterInput,
-    Label: LabelFromProps,
-    label,
-    Description,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -50,13 +50,13 @@ const PointField: React.FC<Props> = (props) => {
   )
 
   const {
-    setValue,
-    value = [null, null],
-    showError,
     path,
+    setValue,
+    showError,
+    value = [null, null],
   } = useField<[number, number]>({
-    validate: memoizedValidate,
     path: pathFromProps || name,
+    validate: memoizedValidate,
   })
 
   const handleChange = useCallback(

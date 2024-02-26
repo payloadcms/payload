@@ -1,13 +1,13 @@
 import httpStatus from 'http-status'
-
 import { docAccessOperation } from 'payload/operations'
-import { CollectionRouteHandlerWithID } from '../types'
 
-export const docAccess: CollectionRouteHandlerWithID = async ({ req, id, collection }) => {
+import type { CollectionRouteHandlerWithID } from '../types'
+
+export const docAccess: CollectionRouteHandlerWithID = async ({ id, collection, req }) => {
   const result = await docAccessOperation({
     id,
-    req,
     collection,
+    req,
   })
 
   return Response.json(result, {

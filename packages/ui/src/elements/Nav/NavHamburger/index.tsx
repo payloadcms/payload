@@ -1,12 +1,13 @@
 'use client'
 import React from 'react'
+
 import { Hamburger } from '../../Hamburger'
 import { useNav } from '../context'
 
 export const NavHamburger: React.FC<{
   baseClass?: string
 }> = ({ baseClass }) => {
-  const { setNavOpen, navOpen } = useNav()
+  const { navOpen, setNavOpen } = useNav()
 
   return (
     <button

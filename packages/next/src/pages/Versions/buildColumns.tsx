@@ -1,30 +1,30 @@
-import React from 'react'
-
+import type { I18n } from '@payloadcms/translations'
+import type { Column } from '@payloadcms/ui'
 import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import type { Column } from '@payloadcms/ui'
 import { SortColumn } from '@payloadcms/ui'
-import { I18n } from '@payloadcms/translations'
+import React from 'react'
+
+import { AutosaveCell } from './cells/AutosaveCell'
 import { CreatedAtCell } from './cells/CreatedAt'
 import { IDCell } from './cells/ID'
-import { AutosaveCell } from './cells/AutosaveCell'
 
 export const buildVersionColumns = ({
-  config,
   collectionConfig,
-  globalConfig,
+  config,
   docID,
+  globalConfig,
   i18n: { t },
   i18n,
 }: {
-  config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
+  config: SanitizedConfig
+  docID?: number | string
   globalConfig?: SanitizedGlobalConfig
-  docID?: string | number
   i18n: I18n
 }): Column[] => [
   {
@@ -32,14 +32,14 @@ export const buildVersionColumns = ({
     accessor: 'updatedAt',
     active: true,
     components: {
-      Heading: <SortColumn label={t('general:updatedAt')} name="updatedAt" />,
       Cell: (
         <CreatedAtCell
-          docID={docID}
           collectionSlug={collectionConfig?.slug}
+          docID={docID}
           globalSlug={globalConfig?.slug}
         />
       ),
+      Heading: <SortColumn label={t('general:updatedAt')} name="updatedAt" />,
     },
     label: '',
   },
@@ -48,8 +48,8 @@ export const buildVersionColumns = ({
     accessor: 'id',
     active: true,
     components: {
-      Heading: <SortColumn disable label={t('version:versionID')} name="id" />,
       Cell: <IDCell />,
+      Heading: <SortColumn disable label={t('version:versionID')} name="id" />,
     },
     label: '',
   },
@@ -58,8 +58,8 @@ export const buildVersionColumns = ({
     accessor: 'autosave',
     active: true,
     components: {
-      Heading: <SortColumn disable label={t('version:type')} name="autosave" />,
       Cell: <AutosaveCell />,
+      Heading: <SortColumn disable label={t('version:type')} name="autosave" />,
     },
     label: '',
   },

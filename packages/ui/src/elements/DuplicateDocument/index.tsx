@@ -1,25 +1,24 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-import { useTranslation } from '../../providers/Translation'
 // import { requests } from '../../../api'
 import { useForm, useFormModified } from '../../forms/Form/context'
-import { MinimalTemplate } from '../../templates/Minimal'
 import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
-import { useRouter } from 'next/navigation'
-
 import './index.scss'
 
 const baseClass = 'duplicate'
 
-const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
+const Duplicate: React.FC<Props> = ({ id, singularLabel, slug }) => {
   const { push } = useRouter()
   const modified = useFormModified()
   const { toggleModal } = useModal()
@@ -51,7 +50,7 @@ const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
         duplicateID = '',
         locale = '',
       }): Promise<null | string> => {
-        let data = null
+        const data = null
 
         // const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
         //   headers: {

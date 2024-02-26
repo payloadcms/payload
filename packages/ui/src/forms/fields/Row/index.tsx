@@ -4,16 +4,15 @@ import React from 'react'
 import type { Props } from './types'
 
 import RenderFields from '../../RenderFields'
-import { fieldBaseClass } from '../shared'
-import { RowProvider } from './provider'
 import { withCondition } from '../../withCondition'
-
+import { fieldBaseClass } from '../shared'
 import './index.scss'
+import { RowProvider } from './provider'
 
 const baseClass = 'row'
 
 const Row: React.FC<Props> = (props) => {
-  const { className, readOnly, forceRender = false, indexPath, permissions, fieldMap } = props
+  const { className, fieldMap, forceRender = false, indexPath, permissions, readOnly } = props
 
   return (
     <RowProvider>

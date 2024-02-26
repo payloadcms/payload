@@ -8,7 +8,6 @@ import { NavToggler } from '../../elements/Nav/NavToggler'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import { NavHamburger } from './NavHamburger'
 import { Wrapper } from './Wrapper'
-
 import './index.scss'
 
 const baseClass = 'template-default'
@@ -17,9 +16,9 @@ export const DefaultTemplate: React.FC<Props> = async ({
   children,
   className,
   config: configPromise,
-  user,
-  permissions,
   i18n,
+  permissions,
+  user,
 }) => {
   const config = await configPromise
 
@@ -38,15 +37,15 @@ export const DefaultTemplate: React.FC<Props> = async ({
           <NavHamburger />
         </NavToggler>
       </div>
-      <Wrapper className={className} baseClass={baseClass}>
+      <Wrapper baseClass={baseClass} className={className}>
         <RenderCustomComponent
           CustomComponent={CustomNav}
           DefaultComponent={DefaultNav}
           componentProps={{
             config,
-            user,
-            permissions,
             i18n,
+            permissions,
+            user,
           }}
         />
         <div className={`${baseClass}__wrap`}>

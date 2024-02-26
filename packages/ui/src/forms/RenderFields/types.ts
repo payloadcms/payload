@@ -1,8 +1,8 @@
-import { FieldMap } from '../../utilities/buildComponentMap/types'
+import type { FieldMap } from '../../utilities/buildComponentMap/types'
 
 export type Props = {
   className?: string
-  margins?: 'small' | false
   fieldMap: FieldMap
   forceRender?: boolean
+  margins?: 'small' | false
 }

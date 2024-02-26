@@ -24,23 +24,24 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
     <div className={baseClass}>
       {breakpoints?.length > 0 && (
         <Popup
-          className={`${baseClass}__breakpoint`}
           button={
-            <>
+            <React.Fragment>
               <span>
                 {breakpoints.find((bp) => bp.name == breakpoint)?.label ?? customOption.label}
               </span>
               &nbsp;
               <Chevron className={`${baseClass}__chevron`} />
-            </>
+            </React.Fragment>
           }
+          className={`${baseClass}__breakpoint`}
+          horizontalAlign="right"
           render={({ close }) => (
             <PopupList.ButtonGroup>
               <React.Fragment>
                 {breakpoints.map((bp) => (
                   <PopupList.Button
-                    key={bp.name}
                     active={bp.name == breakpoint}
+                    key={bp.name}
                     onClick={() => {
                       setBreakpoint(bp.name)
                       close()
@@ -66,7 +67,6 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           )}
           showScrollbar
           verticalAlign="bottom"
-          horizontalAlign="right"
         />
       )}
       <div className={`${baseClass}__device-size`}>
@@ -77,21 +77,22 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
         <PreviewFrameSizeInput axis="y" />
       </div>
       <Popup
-        className={`${baseClass}__zoom`}
         button={
-          <>
+          <React.Fragment>
             <span>{zoom * 100}%</span>
             &nbsp;
             <Chevron className={`${baseClass}__chevron`} />
-          </>
+          </React.Fragment>
         }
+        className={`${baseClass}__zoom`}
+        horizontalAlign="right"
         render={({ close }) => (
           <PopupList.ButtonGroup>
             <React.Fragment>
               {zoomOptions.map((zoomValue) => (
                 <PopupList.Button
-                  key={zoomValue}
                   active={zoom * 100 == zoomValue}
+                  key={zoomValue}
                   onClick={() => {
                     setZoom(zoomValue / 100)
                     close()
@@ -105,7 +106,6 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
         )}
         showScrollbar
         verticalAlign="bottom"
-        horizontalAlign="right"
       />
       <a
         className={`${baseClass}__external`}

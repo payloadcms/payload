@@ -1,8 +1,9 @@
-import { forgotPasswordOperation } from 'payload/operations'
 import httpStatus from 'http-status'
-import { CollectionRouteHandler } from '../types'
+import { forgotPasswordOperation } from 'payload/operations'
 
-export const forgotPassword: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const forgotPassword: CollectionRouteHandler = async ({ collection, req }) => {
   await forgotPasswordOperation({
     collection,
     data: {

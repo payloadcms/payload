@@ -1,12 +1,12 @@
 'use client'
+import { collectionDefaults } from 'payload/config'
 import qs from 'qs'
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 
-import { collectionDefaults } from 'payload/config'
 import { Chevron } from '../../icons/Chevron'
 import { useSearchParams } from '../../providers/SearchParams'
+import { useTranslation } from '../../providers/Translation'
 import Popup from '../Popup'
 import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
@@ -41,7 +41,7 @@ export const PerPage: React.FC<Props> = ({
           <div className={`${baseClass}__base-button`}>
             <span>{t('general:perPage', { limit })}</span>
             &nbsp;
-            {<Chevron className={`${baseClass}__icon`} />}
+            <Chevron className={`${baseClass}__icon`} />
           </div>
         }
         horizontalAlign="right"

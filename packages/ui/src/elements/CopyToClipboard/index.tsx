@@ -1,10 +1,10 @@
 'use client'
 import React, { useRef, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
 import { Copy } from '../../icons/Copy'
+import { useTranslation } from '../../providers/Translation'
 import { Tooltip } from '../Tooltip'
 import './index.scss'
 

@@ -1,15 +1,16 @@
+import type { OptionObject } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
+import { sortableFieldTypes } from 'payload/fields/index'
+import { fieldAffectsData } from 'payload/types'
 import queryString from 'qs'
 import React, { useEffect, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 
-import type { OptionObject } from 'payload/types'
 import type { Props } from './types'
 
-import { fieldAffectsData } from 'payload/types'
-import { sortableFieldTypes } from 'payload/fields/index'
-import { getTranslation } from '@payloadcms/translations'
 import { useSearchParams } from '../../providers/SearchParams'
+import { useTranslation } from '../../providers/Translation'
 import ReactSelect from '../ReactSelect'
 import './index.scss'
 

@@ -1,37 +1,37 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
+import { isNumber } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import type { Option } from '../../../elements/ReactSelect/types'
 import type { Props } from './types'
-import { isNumber } from 'payload/utilities'
+
 import ReactSelect from '../../../elements/ReactSelect'
+import { useTranslation } from '../../../providers/Translation'
+import LabelComp from '../../Label'
+import useField from '../../useField'
 import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
-import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '../../../providers/Translation'
-import useField from '../../useField'
-import { Option } from '../../../elements/ReactSelect/types'
-import LabelComp from '../../Label'
-
 import './index.scss'
 
 const NumberField: React.FC<Props> = (props) => {
   const {
     name,
-    className,
-    placeholder,
-    readOnly,
-    style,
-    width,
-    path: pathFromProps,
-    required,
+    AfterInput,
+    BeforeInput,
+    Description,
     Error,
     Label: LabelFromProps,
-    Description,
-    BeforeInput,
-    AfterInput,
-    validate,
+    className,
     label,
     onChange: onChangeFromProps,
+    path: pathFromProps,
+    placeholder,
+    readOnly,
+    required,
+    style,
+    validate,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -53,7 +53,7 @@ const NumberField: React.FC<Props> = (props) => {
     [validate, min, max, required],
   )
 
-  const { setValue, showError, value, path } = useField<number | number[]>({
+  const { path, setValue, showError, value } = useField<number | number[]>({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })
@@ -168,6 +168,8 @@ const NumberField: React.FC<Props> = (props) => {
           <input
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}
+            max={max}
+            min={min}
             name={path}
             onChange={handleChange}
             onWheel={(e) => {
@@ -179,8 +181,6 @@ const NumberField: React.FC<Props> = (props) => {
             step={step}
             type="number"
             value={typeof value === 'number' ? value : ''}
-            min={min}
-            max={max}
           />
           {AfterInput}
         </div>

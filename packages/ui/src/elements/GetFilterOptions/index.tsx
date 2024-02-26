@@ -1,7 +1,8 @@
+import type { FilterOptions } from 'payload/types'
+
 import equal from 'deep-equal'
 import { useEffect } from 'react'
 
-import type { FilterOptions } from 'payload/types'
 import type { FilterOptionsResult } from '../../forms/fields/Relationship/types'
 
 import { useAllFormFields } from '../../forms/Form/context'

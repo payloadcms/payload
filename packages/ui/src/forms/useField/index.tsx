@@ -1,6 +1,5 @@
 'use client'
 import { useCallback, useMemo, useRef } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import type { FieldType, Options } from './types'
 
@@ -9,8 +8,9 @@ import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useOperation } from '../../providers/OperationProvider'
-import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context'
+import { useTranslation } from '../../providers/Translation'
 import { useFieldPath } from '../FieldPathProvider'
+import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context'
 
 /**
  * Get and set the value of a form field.
@@ -30,9 +30,9 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const { id } = useDocumentInfo()
   const operation = useOperation()
 
-  const { field, dispatchField } = useFormFields(([fields, dispatch]) => ({
-    field: (fields && fields?.[path]) || null,
+  const { dispatchField, field } = useFormFields(([fields, dispatch]) => ({
     dispatchField: dispatch,
+    field: (fields && fields?.[path]) || null,
   }))
 
   const { t } = useTranslation()
@@ -81,13 +81,13 @@ const useField = <T,>(options: Options): FieldType<T> => {
       formProcessing: processing,
       formSubmitted: submitted,
       initialValue,
+      path,
       rows: field?.rows,
+      schemaPath,
       setValue,
       showError,
       valid: field?.valid,
       value,
-      path,
-      schemaPath,
     }),
     [
       field?.errorMessage,

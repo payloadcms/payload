@@ -1,5 +1,5 @@
-import { ServerSideEditViewProps } from '@payloadcms/ui'
-import { EditViewProps } from 'payload/config'
+import type { ServerSideEditViewProps } from '@payloadcms/ui'
+import type { EditViewProps } from 'payload/config'
 
 export const sanitizedEditViewProps = (props: ServerSideEditViewProps) => {
   const clientSideProps = { ...props }

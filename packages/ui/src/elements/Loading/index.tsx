@@ -1,12 +1,12 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import type { LoadingOverlayTypes } from '../../elements/LoadingOverlay/types'
 
-import { getTranslation } from '@payloadcms/translations'
-import { useFormProcessing } from '../../forms/Form/context'
 import { useLoadingOverlay } from '../../elements/LoadingOverlay'
+import { useFormProcessing } from '../../forms/Form/context'
+import { useTranslation } from '../../providers/Translation'
 import './index.scss'
 
 const baseClass = 'loading-overlay'

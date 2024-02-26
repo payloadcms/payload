@@ -1,4 +1,4 @@
-import type { Field, ClientConfig, SanitizedConfig } from 'payload/types'
+import type { ClientConfig, Field, SanitizedConfig } from 'payload/types'
 
 export const sanitizeField = (f) => {
   const field = { ...f }
@@ -93,7 +93,7 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
 export const sanitizeFields = (fields: Field[]): Field[] => fields.map(sanitizeField)
 
 export const createClientConfig = async (
-  configPromise: SanitizedConfig | Promise<SanitizedConfig>,
+  configPromise: Promise<SanitizedConfig> | SanitizedConfig,
 ): Promise<ClientConfig> => {
   const config = await configPromise
   const clientConfig = { ...config }

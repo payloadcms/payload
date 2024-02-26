@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
+import { useTranslation } from '../../providers/Translation'
 import { SelectAllStatus, useSelection } from '../../views/List/SelectionProvider'
 import './index.scss'
 

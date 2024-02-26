@@ -1,6 +1,6 @@
-import type { SanitizedCollectionConfig, RelationshipField } from 'payload/types'
-import type { PaginatedDocs } from 'payload/database'
 import type { I18n } from '@payloadcms/translations'
+import type { PaginatedDocs } from 'payload/database'
+import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
 
 export type Props = {
   disabled?: boolean

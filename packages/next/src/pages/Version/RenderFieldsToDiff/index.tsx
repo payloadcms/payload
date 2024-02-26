@@ -3,23 +3,22 @@ import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import React from 'react'
 
-import type { Props, FieldDiffProps } from './types'
+import type { FieldDiffProps, Props } from './types'
 
 import Nested from './fields/Nested'
 import { diffMethods } from './fields/diffMethods'
-
 import './index.scss'
 
 const baseClass = 'render-field-diffs'
 
 const RenderFieldsToDiff: React.FC<Props> = ({
   comparison,
-  fieldPermissions,
+  diffComponents,
   fieldMap,
+  fieldPermissions,
+  i18n,
   locales,
   version,
-  i18n,
-  diffComponents,
 }) => {
   return (
     <div className={baseClass}>
@@ -50,15 +49,15 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             if (hasPermission === false) return null
 
             const baseCellProps: FieldDiffProps = {
+              comparison: comparisonValue,
+              diffComponents,
               diffMethod,
               field,
-              isRichText,
-              locales: locales,
+              fieldMap: 'subfields' in field ? field.subfields : fieldMap,
               fieldPermissions: subFieldPermissions,
               i18n,
-              fieldMap: 'subfields' in field ? field.subfields : fieldMap,
-              diffComponents,
-              comparison: comparisonValue,
+              isRichText,
+              locales: locales,
               version: versionValue,
             }
 
@@ -71,8 +70,8 @@ const RenderFieldsToDiff: React.FC<Props> = ({
 
                     const cellProps = {
                       ...baseCellProps,
-                      version: versionLocaleValue,
                       comparison: comparisonLocaleValue,
+                      version: versionLocaleValue,
                     }
 
                     return (
@@ -100,13 +99,13 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             return (
               <Tabs
                 comparison={comparison}
+                diffComponents={diffComponents}
+                field={field}
+                fieldMap={field.subfields}
+                i18n={i18n}
                 key={i}
                 locales={locales}
                 version={version}
-                i18n={i18n}
-                field={field}
-                fieldMap={field.subfields}
-                diffComponents={diffComponents}
               />
             )
           }
@@ -116,15 +115,15 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             return (
               <Nested
                 comparison={comparison}
+                diffComponents={diffComponents}
                 disableGutter
                 field={field}
                 fieldMap={field.subfields}
+                i18n={i18n}
                 key={i}
                 locales={locales}
                 permissions={fieldPermissions}
                 version={version}
-                i18n={i18n}
-                diffComponents={diffComponents}
               />
             )
           }

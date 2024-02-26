@@ -1,17 +1,18 @@
 'use client'
+import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
+import type { TypeWithTimestamps } from 'payload/types'
+import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from 'payload/types'
+
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
-import type { TypeWithTimestamps } from 'payload/types'
-import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
-import type { TypeWithID, DocumentPreferences, Where, DocumentPermissions } from 'payload/types'
 import type { DocumentInfo, DocumentInfoContext, DocumentInfoProps } from './types'
 
-import { useTranslation } from '../Translation'
 import { useAuth } from '../Auth'
 import { useConfig } from '../Config'
 import { useLocale } from '../Locale'
 import { usePreferences } from '../Preferences'
+import { useTranslation } from '../Translation'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -26,13 +27,13 @@ export const DocumentInfoProvider: React.FC<
     ...rest,
   })
 
-  const { globalSlug, collectionSlug, id } = documentInfo
+  const { id, collectionSlug, globalSlug } = documentInfo
 
   const {
-    routes: { api },
-    serverURL,
     collections,
     globals,
+    routes: { api },
+    serverURL,
   } = useConfig()
 
   const collectionConfig = collections.find((c) => c.slug === collectionSlug)
@@ -77,7 +78,7 @@ export const DocumentInfoProvider: React.FC<
   const getVersions = useCallback(async () => {
     let versionFetchURL
     let publishedFetchURL
-    let shouldFetchVersions = Boolean(versionsConfig)
+    const shouldFetchVersions = Boolean(versionsConfig)
     let unpublishedVersionJSON = null
     let versionJSON = null
     let shouldFetch = true
@@ -274,17 +275,17 @@ export const DocumentInfoProvider: React.FC<
 
   const value: DocumentInfoContext = {
     ...documentInfo,
+    docPermissions,
     getDocPermissions,
     getDocPreferences,
     getVersions,
+    publishedDoc,
     setDocFieldPreferences,
     setDocumentInfo,
     setDocumentTitle,
-    publishedDoc,
-    docPermissions,
-    versions,
-    unpublishedVersions,
     title,
+    unpublishedVersions,
+    versions,
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>

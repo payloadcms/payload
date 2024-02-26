@@ -1,9 +1,9 @@
-import React from 'react'
 import { useTranslation } from '@payloadcms/ui'
+import { ReactSelect, useLocale } from '@payloadcms/ui'
+import React from 'react'
 
 import type { Props } from './types'
 
-import { ReactSelect, useLocale } from '@payloadcms/ui'
 import './index.scss'
 
 const baseClass = 'select-version-locales'

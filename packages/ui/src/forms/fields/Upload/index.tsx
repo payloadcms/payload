@@ -1,42 +1,41 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types'
-
-import { useConfig } from '../../../providers/Config'
-import useField from '../../useField'
-import { useTranslation } from '../../../providers/Translation'
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types'
 import type { ListDrawerProps } from '../../../elements/ListDrawer/types'
 import type { FilterOptionsResult } from '../Relationship/types'
-import { getTranslation } from '@payloadcms/translations'
+import type { Props } from './types'
+
 import { Button } from '../../../elements/Button'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer'
 import FileDetails from '../../../elements/FileDetails'
-import { useListDrawer } from '../../../elements/ListDrawer'
 import { GetFilterOptions } from '../../../elements/GetFilterOptions'
-import { fieldBaseClass } from '../shared'
+import { useListDrawer } from '../../../elements/ListDrawer'
+import { useConfig } from '../../../providers/Config'
+import { useTranslation } from '../../../providers/Translation'
 import LabelComp from '../../Label'
-
+import useField from '../../useField'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 const baseClass = 'upload'
 
 const Upload: React.FC<Props> = (props) => {
   const {
-    className,
     Description,
-    readOnly,
-    style,
-    width,
     Error,
     Label: LabelFromProps,
-    label,
+    className,
     filterOptions,
+    label,
     path: pathFromProps,
+    readOnly,
     relationTo,
     required,
+    style,
     validate,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -58,7 +57,7 @@ const Upload: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { setValue, showError, value, path } = useField({
+  const { path, setValue, showError, value } = useField({
     path: pathFromProps,
     validate: memoizedValidate,
   })
@@ -163,7 +162,6 @@ const Upload: React.FC<Props> = (props) => {
           <React.Fragment>
             {file && !missingFile && (
               <FileDetails
-                uploadConfig={collection.upload}
                 collectionSlug={relationTo}
                 doc={file}
                 handleRemove={
@@ -173,6 +171,7 @@ const Upload: React.FC<Props> = (props) => {
                         onChange(null)
                       }
                 }
+                uploadConfig={collection.upload}
               />
             )}
             {(!file || missingFile) && (

@@ -1,6 +1,6 @@
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useEffect } from 'react'
 import { useTranslation } from '@payloadcms/ui'
+import React, { Fragment, useEffect } from 'react'
 
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import type { LivePreviewConfig } from '../../../../exports/config'
@@ -124,8 +124,8 @@ const PreviewView: React.FC<
             fields={fields}
             forceSidebarWrap
             hasSavePermission={hasSavePermission}
-            permissions={permissions}
             i18n={i18n}
+            permissions={permissions}
           />
         </div>
         <LivePreview {...props} />

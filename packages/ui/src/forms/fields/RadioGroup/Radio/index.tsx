@@ -1,23 +1,24 @@
 'use client'
-import React from 'react'
+import type { OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { OptionObject } from 'payload/types'
-import { OnChange } from '../types'
-import { useTranslation } from '../../../../providers/Translation'
+import React from 'react'
 
+import type { OnChange } from '../types'
+
+import { useTranslation } from '../../../../providers/Translation'
 import './index.scss'
 
 const baseClass = 'radio-input'
 
 export const Radio: React.FC<{
-  isSelected: boolean
-  path: string
   id: string
-  option: OptionObject
+  isSelected: boolean
   onChange: OnChange
+  option: OptionObject
+  path: string
 }> = (props) => {
-  const { isSelected, option, path, onChange } = props
+  const { isSelected, onChange, option, path } = props
   const { i18n } = useTranslation()
 
   const id = `field-${path}-${option.value}`

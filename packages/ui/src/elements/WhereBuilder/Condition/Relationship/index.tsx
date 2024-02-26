@@ -1,12 +1,13 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react'
-import { useTranslation } from '../../../../providers/Translation'
-
 import type { PaginatedDocs } from 'payload/database'
+
+import React, { useCallback, useEffect, useReducer, useState } from 'react'
+
 import type { Option } from '../../../ReactSelect/types'
 import type { GetResults, Props, ValueWithRelation } from './types'
 
 import useDebounce from '../../../../hooks/useDebounce'
 import { useConfig } from '../../../../providers/Config'
+import { useTranslation } from '../../../../providers/Translation'
 import ReactSelect from '../../../ReactSelect'
 import './index.scss'
 import optionsReducer from './optionsReducer'

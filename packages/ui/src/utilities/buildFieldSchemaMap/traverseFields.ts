@@ -1,5 +1,8 @@
-import { Field, SanitizedConfig, tabHasName } from 'payload/types'
-import { FieldSchemaMap } from './types'
+import type { Field, SanitizedConfig } from 'payload/types'
+
+import { tabHasName } from 'payload/types'
+
+import type { FieldSchemaMap } from './types'
 
 type Args = {
   config: SanitizedConfig
@@ -45,9 +48,9 @@ export const traverseFields = ({ config, fields, schemaMap, schemaPath }: Args) 
       case 'richText':
         if (typeof field.editor.generateSchemaMap === 'function') {
           field.editor.generateSchemaMap({
-            schemaPath: `${schemaPath}.${field.name}`,
             config,
             schemaMap,
+            schemaPath: `${schemaPath}.${field.name}`,
           })
         }
 

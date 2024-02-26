@@ -1,13 +1,13 @@
-import { Payload } from 'payload'
+import type { Payload } from 'payload'
 
 type GetRequestLocalesArgs = {
-  localization: Exclude<Payload['config']['localization'], false>
   data?: Record<string, any>
+  localization: Exclude<Payload['config']['localization'], false>
   searchParams?: URLSearchParams
 }
-export function getRequestLocales({ localization, searchParams, data }: GetRequestLocalesArgs): {
-  locale: string
+export function getRequestLocales({ data, localization, searchParams }: GetRequestLocalesArgs): {
   fallbackLocale: string
+  locale: string
 } {
   let locale = searchParams.get('locale')
   let fallbackLocale = searchParams.get('fallback-locale')
@@ -34,7 +34,7 @@ export function getRequestLocales({ localization, searchParams, data }: GetReque
   }
 
   return {
-    locale,
     fallbackLocale,
+    locale,
   }
 }

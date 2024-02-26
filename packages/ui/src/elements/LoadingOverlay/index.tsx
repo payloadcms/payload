@@ -1,11 +1,11 @@
 'use client'
 import React, { createContext } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types'
 
-import { useDelayedRender } from '../../hooks/useDelayedRender'
 import { LoadingOverlay } from '../../elements/Loading'
+import { useDelayedRender } from '../../hooks/useDelayedRender'
+import { useTranslation } from '../../providers/Translation'
 import { defaultLoadingOverlayState, reducer } from './reducer'
 
 const animatedDuration = 250

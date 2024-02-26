@@ -7,10 +7,10 @@ export const getFieldStateFromPaths = ({
   formState: FormState
   pathSegments: string[]
 }): {
-  fieldState: FormState
   errorCount: number
+  fieldState: FormState
 } => {
-  let fieldState: FormState = {}
+  const fieldState: FormState = {}
   let errorCount = 0
 
   Object.entries(formState).forEach(([key]) => {
@@ -31,7 +31,7 @@ export const getFieldStateFromPaths = ({
   })
 
   return {
-    fieldState,
     errorCount,
+    fieldState,
   }
 }

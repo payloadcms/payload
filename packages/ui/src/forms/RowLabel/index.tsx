@@ -1,13 +1,16 @@
-import React from 'react'
-import { Props, isComponent } from './types'
-import getSiblingData from '../Form/getSiblingData'
-import getDataByPath from '../Form/getDataByPath'
 import { getTranslation } from '@payloadcms/translations'
+import React from 'react'
+
+import type { Props } from './types'
+
+import getDataByPath from '../Form/getDataByPath'
+import getSiblingData from '../Form/getSiblingData'
+import { isComponent } from './types'
 
 const baseClass = 'row-label'
 
 export const RowLabel: React.FC<Props> = (props) => {
-  const { className, label, path, rowNumber, data: dataFromProps, i18n } = props
+  const { className, data: dataFromProps, i18n, label, path, rowNumber } = props
 
   const collapsibleData = getSiblingData(dataFromProps, path)
   const arrayData = getDataByPath(dataFromProps, path)

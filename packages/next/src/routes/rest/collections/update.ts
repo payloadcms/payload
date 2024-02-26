@@ -1,21 +1,21 @@
-import httpStatus from 'http-status'
-
 import type { Where } from 'payload/types'
 
-import { isNumber } from 'payload/utilities'
-import { updateOperation } from 'payload/operations'
 import { getTranslation } from '@payloadcms/translations'
-import { CollectionRouteHandler } from '../types'
+import httpStatus from 'http-status'
+import { updateOperation } from 'payload/operations'
+import { isNumber } from 'payload/utilities'
 import qs from 'qs'
 
-export const update: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const update: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
 
   // parse using `qs` to handle `where` queries
-  const { where, depth, draft } = qs.parse(searchParams.toString()) as {
-    where?: Where
+  const { depth, draft, where } = qs.parse(searchParams.toString()) as {
     depth?: string
     draft?: string
+    where?: Where
   }
 
   const result = await updateOperation({

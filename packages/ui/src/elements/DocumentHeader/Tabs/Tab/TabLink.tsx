@@ -1,26 +1,26 @@
 'use client'
-import React from 'react'
+import type { SanitizedConfig } from 'payload/types'
 
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
-import { SanitizedConfig } from 'payload/types'
+import React from 'react'
 
 export const DocumentTabLink: React.FC<{
   adminRoute: SanitizedConfig['routes']['admin']
-  isCollection?: boolean
-  newTab?: boolean
-  href: string
   baseClass: string
   children?: React.ReactNode
+  href: string
   isActive?: boolean
+  isCollection?: boolean
+  newTab?: boolean
 }> = ({
-  isActive: isActiveFromProps,
-  baseClass,
-  href: hrefFromProps,
-  newTab,
-  children,
   adminRoute,
+  baseClass,
+  children,
+  href: hrefFromProps,
+  isActive: isActiveFromProps,
   isCollection,
+  newTab,
 }) => {
   const pathname = usePathname()
   const params = useParams()

@@ -17,11 +17,11 @@ export const install = (args?: { debug?: boolean }): Promise<void> => {
 
   if (debug) {
     console.log({
-      useSrc,
-      basePath,
       apiTemplateDir,
-      userApiDir,
+      basePath,
       cwd: process.cwd(),
+      useSrc,
+      userApiDir,
     })
   }
 

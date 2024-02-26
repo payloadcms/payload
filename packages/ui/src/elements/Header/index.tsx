@@ -1,9 +1,11 @@
 'use client'
+import Link from 'next/link'
 import React, { useEffect, useRef, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import Account from '../../graphics/Account'
+import { useActions } from '../../providers/ActionsProvider'
 import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
 import { Hamburger } from '../Hamburger'
 import Localizer from '../Localizer'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel'
@@ -11,8 +13,6 @@ import { NavToggler } from '../Nav/NavToggler'
 import { useNav } from '../Nav/context'
 import StepNav from '../StepNav'
 import './index.scss'
-import { useActions } from '../../providers/ActionsProvider'
-import Link from 'next/link'
 
 const baseClass = 'app-header'
 
@@ -60,7 +60,7 @@ export const AppHeader: React.FC = () => {
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav className={`${baseClass}__step-nav`} Link={Link} />
+              <StepNav Link={Link} className={`${baseClass}__step-nav`} />
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
@@ -84,9 +84,9 @@ export const AppHeader: React.FC = () => {
             <LinkElement
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
-              tabIndex={0}
               // to={`${adminRoute}/account`} // for `react-router-dom` Link
               href={`${adminRoute}/account`} // for `next/link` Link
+              tabIndex={0}
             >
               <Account />
             </LinkElement>

@@ -1,21 +1,22 @@
-import httpStatus from 'http-status'
+import type { Where } from 'payload/types'
 
-import { Where } from 'payload/types'
+import httpStatus from 'http-status'
 import { findVersionsOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
-import { CollectionRouteHandler } from '../types'
 import qs from 'qs'
 
-export const findVersions: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const findVersions: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
 
   // parse using `qs` to handle `where` queries
-  const { where, page, depth, limit, sort } = qs.parse(searchParams.toString()) as {
-    where?: Where
-    page?: string
+  const { depth, limit, page, sort, where } = qs.parse(searchParams.toString()) as {
     depth?: string
     limit?: string
+    page?: string
     sort?: string
+    where?: Where
   }
 
   const result = await findVersionsOperation({

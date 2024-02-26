@@ -1,21 +1,22 @@
-import { SanitizedConfig } from 'payload/types'
-import { FormState } from '../forms/Form/types'
-import { BuildFormStateArgs } from '..'
+import type { SanitizedConfig } from 'payload/types'
+
+import type { BuildFormStateArgs } from '..'
+import type { FormState } from '../forms/Form/types'
 
 export const getFormState = async (args: {
-  serverURL: SanitizedConfig['serverURL']
   apiRoute: SanitizedConfig['routes']['api']
   body: BuildFormStateArgs
+  serverURL: SanitizedConfig['serverURL']
 }): Promise<FormState> => {
-  const { serverURL, apiRoute, body } = args
+  const { apiRoute, body, serverURL } = args
 
   const res = await fetch(`${serverURL}${apiRoute}/form-state`, {
-    method: 'POST',
+    body: JSON.stringify(body),
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include',
-    body: JSON.stringify(body),
+    method: 'POST',
   })
 
   if (res.ok) {

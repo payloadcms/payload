@@ -1,5 +1,6 @@
 'use client'
-import { Params } from 'next/dist/shared/lib/router/utils/route-matcher'
+import type { Params } from 'next/dist/shared/lib/router/utils/route-matcher'
+
 import { useParams as useNextParams } from 'next/navigation'
 import React, { createContext, useContext } from 'react'
 

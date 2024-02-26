@@ -7,8 +7,8 @@ export type AuthContext<T = User> = {
   refreshCookie: (forceRefresh?: boolean) => void
   refreshCookieAsync: () => Promise<User>
   refreshPermissions: () => Promise<void>
+  setPermissions: (permissions: Permissions) => void
   setUser: (user: T) => void
   token?: string
   user?: T | null
-  setPermissions: (permissions: Permissions) => void
 }

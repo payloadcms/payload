@@ -1,4 +1,5 @@
 import type { DocumentTabConfig } from 'payload/types'
+
 import { VersionsPill } from './VersionsPill'
 
 export const documentViewKeys = [
@@ -66,11 +67,11 @@ export const tabs: Record<
     condition: () => false,
   },
   Versions: {
+    Pill: VersionsPill,
     condition: ({ collectionConfig, globalConfig }) =>
       Boolean(collectionConfig?.versions || globalConfig?.versions),
     href: '/versions',
     label: ({ t }) => t('version:versions'),
     order: 200,
-    Pill: VersionsPill,
   },
 }

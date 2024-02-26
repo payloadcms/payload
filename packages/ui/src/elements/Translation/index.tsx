@@ -1,10 +1,11 @@
+import type { TFunction } from '@payloadcms/translations'
+
 import * as React from 'react'
-import { TFunction } from '@payloadcms/translations'
 
 const RecursiveTranslation: React.FC<{
-  translationString: string
   elements?: Record<string, React.FC<{ children: React.ReactNode }>>
-}> = ({ translationString, elements }) => {
+  translationString: string
+}> = ({ elements, translationString }) => {
   const regex = /(<[^>]+>.*?<\/[^>]+>)/g
   const sections = translationString.split(regex)
 
@@ -28,17 +29,17 @@ const RecursiveTranslation: React.FC<{
 }
 
 type TranslationProps = {
-  i18nKey: string
-  variables?: Record<string, unknown>
   elements?: Record<string, React.FC<{ children: React.ReactNode }>>
+  i18nKey: string
   t: TFunction
+  variables?: Record<string, unknown>
 }
-export const Translation: React.FC<TranslationProps> = ({ elements, variables, i18nKey, t }) => {
-  let stringWithVariables = t(i18nKey, variables || {})
+export const Translation: React.FC<TranslationProps> = ({ elements, i18nKey, t, variables }) => {
+  const stringWithVariables = t(i18nKey, variables || {})
 
   if (!elements) {
     return stringWithVariables
   }
 
-  return <RecursiveTranslation translationString={stringWithVariables} elements={elements} />
+  return <RecursiveTranslation elements={elements} translationString={stringWithVariables} />
 }

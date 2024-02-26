@@ -1,9 +1,9 @@
 'use client'
-import React from 'react'
-
 import type { CellComponentProps, CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import React from 'react'
+
 import { useTranslation } from '../../../../../providers/Translation'
 
 export interface BlocksCellProps extends CellComponentProps<any> {
@@ -11,7 +11,7 @@ export interface BlocksCellProps extends CellComponentProps<any> {
   labels: CellProps['labels']
 }
 
-export const BlocksCell: React.FC<BlocksCellProps> = ({ cellData, blocks, labels }) => {
+export const BlocksCell: React.FC<BlocksCellProps> = ({ blocks, cellData, labels }) => {
   const { i18n } = useTranslation()
 
   const selectedBlocks = cellData ? cellData.map(({ blockType }) => blockType) : []

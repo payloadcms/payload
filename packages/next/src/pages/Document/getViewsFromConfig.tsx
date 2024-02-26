@@ -1,22 +1,28 @@
-import { AdminViewComponent } from 'payload/config'
-import { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { CollectionPermission, GlobalPermission } from 'payload/auth'
+import type { AdminViewComponent } from 'payload/config'
+import type {
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+} from 'payload/types'
+
 import { lazy } from 'react'
+
 import { getCustomViewByKey } from './getCustomViewByKey'
-import { CollectionPermission, GlobalPermission } from 'payload/auth'
 import { getCustomViewByPath } from './getCustomViewByPath'
 
 export const getViewsFromConfig = async ({
-  routeSegments,
-  docPermissions,
-  config,
   collectionConfig,
+  config,
+  docPermissions,
   globalConfig,
+  routeSegments,
 }: {
-  routeSegments: string[]
-  config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
-  globalConfig?: SanitizedGlobalConfig
+  config: SanitizedConfig
   docPermissions: CollectionPermission | GlobalPermission
+  globalConfig?: SanitizedGlobalConfig
+  routeSegments: string[]
 }): Promise<{
   CustomView: AdminViewComponent
   DefaultView: AdminViewComponent

@@ -1,5 +1,6 @@
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 import type { EditViewConfig } from 'payload/config'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+
 import { documentViewKeys } from './tabs'
 
 export const getCustomViews = (args: {

@@ -1,8 +1,8 @@
 'use client'
 import type { ElementType } from 'react'
 
-import React from 'react'
-import Link from 'next/link' // TODO: abstract this out to support all routers
+import Link from 'next/link'
+import React from 'react' // TODO: abstract this out to support all routers
 
 import type { Props, RenderedTypeProps } from './types'
 
@@ -79,8 +79,8 @@ const StaticPill: React.FC<Props> = (props) => {
       aria-expanded={ariaExpanded}
       aria-label={ariaLabel}
       className={classes}
-      onClick={onClick}
       href={to || ''}
+      onClick={onClick}
       type={Element === 'button' ? 'button' : undefined}
     >
       {icon && alignIcon === 'left' && <span className={`${baseClass}__icon`}>{icon}</span>}

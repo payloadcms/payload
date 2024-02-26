@@ -1,11 +1,9 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
-import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
-import { scrollToID } from '../../../utilities/scrollToID'
 import Banner from '../../../elements/Banner'
 import { Button } from '../../../elements/Button'
 import DraggableSortable from '../../../elements/DraggableSortable'
@@ -14,13 +12,14 @@ import { ErrorPill } from '../../../elements/ErrorPill'
 import { useConfig } from '../../../providers/Config'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { useLocale } from '../../../providers/Locale'
+import { useTranslation } from '../../../providers/Translation'
+import { scrollToID } from '../../../utilities/scrollToID'
 import { useForm, useFormSubmitted } from '../../Form/context'
+import LabelComp from '../../Label'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
 import { ArrayRow } from './ArrayRow'
-import LabelComp from '../../Label'
-
 import './index.scss'
 
 const baseClass = 'array-field'
@@ -28,20 +27,20 @@ const baseClass = 'array-field'
 const ArrayFieldType: React.FC<Props> = (props) => {
   const {
     name,
+    Description,
+    Error,
+    Label: LabelFromProps,
     className,
-    readOnly,
+    fieldMap,
     forceRender = false,
     indexPath,
+    label,
     localized,
     path: pathFromProps,
     permissions,
+    readOnly,
     required,
     validate,
-    Error,
-    Label: LabelFromProps,
-    label,
-    Description,
-    fieldMap,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -88,11 +87,11 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   )
 
   const {
+    path,
     rows = [],
     showError,
     valid,
     value,
-    path,
   } = useField<number>({
     hasRows: true,
     path: pathFromProps || name,
@@ -186,7 +185,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>{Label}</h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} withMessage i18n={i18n} />
+              <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
           </div>
           {rows.length > 0 && (
@@ -226,15 +225,15 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               {(draggableSortableItemProps) => (
                 <ArrayRow
                   {...draggableSortableItemProps}
-                  // CustomRowLabel={CustomRowLabel}
-                  fieldMap={fieldMap}
                   addRow={addRow}
                   duplicateRow={duplicateRow}
+                  // CustomRowLabel={CustomRowLabel}
+                  fieldMap={fieldMap}
                   forceRender={forceRender}
                   hasMaxRows={hasMaxRows}
                   indexPath={indexPath}
-                  moveRow={moveRow}
                   labels={labels}
+                  moveRow={moveRow}
                   path={path}
                   permissions={permissions}
                   readOnly={readOnly}

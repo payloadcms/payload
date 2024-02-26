@@ -1,30 +1,30 @@
+import type { I18n } from '@payloadcms/translations'
+import type { Permissions, User } from 'payload/auth'
+import type { SanitizedConfig } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
+import Link from 'next/link'
 import React from 'react'
 
 import type { EntityToGroup } from '../../utilities/groupNavItems'
 
-import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
 import { Chevron } from '../../icons/Chevron'
+import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
 import Logout from '../Logout'
 import NavGroup from '../NavGroup'
-import Link from 'next/link'
-import { SanitizedConfig } from 'payload/types'
-import { Permissions, User } from 'payload/auth'
-import { NavWrapper } from './NavWrapper'
 import { NavHamburger } from './NavHamburger'
-import { getTranslation } from '@payloadcms/translations'
-import type { I18n } from '@payloadcms/translations'
-
+import { NavWrapper } from './NavWrapper'
 import './index.scss'
 
 const baseClass = 'nav'
 
 export const DefaultNav: React.FC<{
   config: SanitizedConfig
-  user: User
-  permissions: Permissions
   i18n: I18n
+  permissions: Permissions
+  user: User
 }> = (props) => {
-  const { config, user, permissions, i18n } = props
+  const { config, i18n, permissions, user } = props
 
   const {
     admin: {
@@ -97,11 +97,11 @@ export const DefaultNav: React.FC<{
                   <LinkElement
                     // activeClassName="active"
                     className={`${baseClass}__link`}
-                    id={id}
-                    key={i}
-                    // tabIndex={!navOpen ? -1 : undefined}
                     // to={href} // for `react-router-dom` Link
                     href={href} // for `next/link` Link
+                    id={id}
+                    // tabIndex={!navOpen ? -1 : undefined}
+                    key={i}
                   >
                     <span className={`${baseClass}__link-icon`}>
                       <Chevron direction="right" />

@@ -1,13 +1,14 @@
 'use client'
-import React, { useRef } from 'react'
-import { useTranslation } from '../../providers/Translation'
+import type { CustomSaveButtonProps, DefaultSaveButtonProps } from 'payload/types'
 
-import useHotkey from '../../hooks/useHotkey'
+import React, { useRef } from 'react'
+
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import { useForm } from '../../forms/Form/context'
 import FormSubmit from '../../forms/Submit'
+import useHotkey from '../../hooks/useHotkey'
 import { useEditDepth } from '../../providers/EditDepth'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { CustomSaveButtonProps, DefaultSaveButtonProps } from 'payload/types'
+import { useTranslation } from '../../providers/Translation'
 
 const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) => {
   const ref = useRef<HTMLButtonElement>(null)
@@ -22,7 +23,7 @@ const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) =>
   })
 
   return (
-    <FormSubmit buttonId="action-save" onClick={save} ref={ref} type="button" size="small">
+    <FormSubmit buttonId="action-save" onClick={save} ref={ref} size="small" type="button">
       {label}
     </FormSubmit>
   )

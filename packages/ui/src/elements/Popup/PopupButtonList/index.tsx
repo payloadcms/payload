@@ -1,8 +1,8 @@
 'use client'
 import type { LinkProps } from 'react-router-dom'
 
-import * as React from 'react'
-import Link from 'next/link' // TODO: abstract this out to support all routers
+import Link from 'next/link'
+import * as React from 'react' // TODO: abstract this out to support all routers
 
 import './index.scss'
 
@@ -50,13 +50,13 @@ export const Button: React.FC<MenuButtonProps> = ({
     return (
       <Link
         className={classes}
+        href={to}
         id={id}
         onClick={() => {
           if (onClick) {
             onClick()
           }
         }}
-        href={to}
       >
         {children}
       </Link>

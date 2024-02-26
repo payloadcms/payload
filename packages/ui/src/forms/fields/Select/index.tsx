@@ -1,16 +1,17 @@
 'use client'
+import type { Option, OptionObject, Validate } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
-import type { Option, OptionObject, Validate } from 'payload/types'
 import type { Props } from './types'
-import { withCondition } from '../../withCondition'
-import { getTranslation } from '@payloadcms/translations'
-import { fieldBaseClass } from '../shared'
-import useField from '../../useField'
+
 import ReactSelect from '../../../elements/ReactSelect'
 import { useTranslation } from '../../../providers/Translation'
 import LabelComp from '../../Label'
-
+import useField from '../../useField'
+import { withCondition } from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 const formatOptions = (options: Option[]): OptionObject[] =>
@@ -28,20 +29,20 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 export const Select: React.FC<Props> = (props) => {
   const {
     name,
-    className,
-    readOnly,
-    style,
-    width,
-    path: pathFromProps,
-    required,
+    AfterInput,
+    BeforeInput,
     Description,
     Error,
     Label: LabelFromProps,
+    className,
     label,
-    BeforeInput,
-    AfterInput,
-    validate,
     onChange: onChangeFromProps,
+    path: pathFromProps,
+    readOnly,
+    required,
+    style,
+    validate,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -63,7 +64,7 @@ export const Select: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { setValue, value, showError, path } = useField({
+  const { path, setValue, showError, value } = useField({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

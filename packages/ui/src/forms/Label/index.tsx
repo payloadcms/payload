@@ -1,10 +1,10 @@
 'use client'
-import React from 'react'
+import type { LabelProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { LabelProps } from 'payload/types'
-import { useTranslation } from '../..'
+import React from 'react'
 
+import { useTranslation } from '../..'
 import './index.scss'
 
 const Label: React.FC<LabelProps> = (props) => {

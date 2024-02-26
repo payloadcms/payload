@@ -1,13 +1,13 @@
+import type { Metadata } from 'next'
+import type { SanitizedConfig } from 'payload/types'
+
+import { Button, Logo, MinimalTemplate } from '@payloadcms/ui'
+import { redirect } from 'next/navigation'
 import React from 'react'
 
-import { Button, MinimalTemplate, Logo } from '@payloadcms/ui'
-import { initPage } from '../../utilities/initPage'
-import { SanitizedConfig } from 'payload/types'
-import { redirect } from 'next/navigation'
-import { Metadata } from 'next'
-import { meta } from '../../utilities/meta'
 import { getNextT } from '../../utilities/getNextT'
-
+import { initPage } from '../../utilities/initPage'
+import { meta } from '../../utilities/meta'
 import './index.scss'
 
 const baseClass = 'verify'
@@ -22,10 +22,10 @@ export const generateMetadata = async ({
   })
 
   return meta({
+    config,
     description: t('authentication:verifyUser'),
     keywords: t('authentication:verify'),
     title: t('authentication:verify'),
-    config,
   })
 }
 
@@ -36,7 +36,7 @@ export const Verify: React.FC<{
   config: configPromise,
   // token
 }) => {
-  const { config, user, i18n } = await initPage({ config: configPromise })
+  const { config, i18n, user } = await initPage({ config: configPromise })
 
   const {
     admin: { user: userSlug },
@@ -44,7 +44,7 @@ export const Verify: React.FC<{
     // serverURL,
   } = config
 
-  let verifyResult = null
+  const verifyResult = null
   // const [verifyResult, setVerifyResult] = useState<Response | null>(null)
 
   // useEffect(() => {

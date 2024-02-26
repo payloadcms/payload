@@ -11,9 +11,9 @@ const FieldPathContext = React.createContext<FieldPathContextType>({
 })
 
 export const FieldPathProvider: React.FC<{
+  children: React.ReactNode
   path: string
   schemaPath: string
-  children: React.ReactNode
 }> = (props) => {
   const { children, path, schemaPath } = props
   return (

@@ -1,52 +1,53 @@
 'use client'
-import React from 'react'
-import { useTranslation } from '../../../providers/Translation'
-
-import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'
-import type { Row } from '../../Form/types'
+import type { FieldPermissions } from 'payload/auth'
+import type { Labels } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import React from 'react'
+
+import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'
+import type { ReducedBlock } from '../../../utilities/buildComponentMap/types'
+import type { Row } from '../../Form/types'
+
 import { Collapsible } from '../../../elements/Collapsible'
 import { ErrorPill } from '../../../elements/ErrorPill'
 import Pill from '../../../elements/Pill'
+import { useTranslation } from '../../../providers/Translation'
+import { FieldPathProvider } from '../../FieldPathProvider'
 import { useFormSubmitted } from '../../Form/context'
 import RenderFields from '../../RenderFields'
 import HiddenInput from '../HiddenInput'
 import { RowActions } from './RowActions'
 import SectionTitle from './SectionTitle'
-import { FieldPathProvider } from '../../FieldPathProvider'
-import { Labels } from 'payload/types'
-import { FieldPermissions } from 'payload/auth'
-import { ReducedBlock } from '../../../utilities/buildComponentMap/types'
 
 const baseClass = 'blocks-field'
 
 type BlockFieldProps = UseDraggableSortableReturn & {
   addRow: (rowIndex: number, blockType: string) => void
-  blocks: ReducedBlock[]
   block: ReducedBlock
+  blocks: ReducedBlock[]
   duplicateRow: (rowIndex: number) => void
   forceRender?: boolean
   hasMaxRows?: boolean
+  indexPath: string
+  labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
+  path: string
+  permissions: FieldPermissions
   readOnly: boolean
   removeRow: (rowIndex: number) => void
   row: Row
   rowCount: number
   rowIndex: number
-  setCollapse: (id: string, collapsed: boolean) => void
-  indexPath: string
-  path: string
-  labels: Labels
-  permissions: FieldPermissions
   schemaPath: string
+  setCollapse: (id: string, collapsed: boolean) => void
 }
 
 export const BlockRow: React.FC<BlockFieldProps> = ({
   addRow,
   attributes,
-  blocks,
   block,
+  blocks,
   duplicateRow,
   forceRender,
   hasMaxRows,
@@ -55,13 +56,13 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   listeners,
   moveRow,
   path: parentPath,
-  schemaPath,
   permissions,
   readOnly,
   removeRow,
   row,
   rowCount,
   rowIndex,
+  schemaPath,
   setCollapse,
   setNodeRef,
   transform,
@@ -95,15 +96,15 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             <RowActions
               addRow={addRow}
               blockType={row.blockType}
+              blocks={blocks}
               duplicateRow={duplicateRow}
+              fieldMap={block.subfields}
               hasMaxRows={hasMaxRows}
               labels={labels}
               moveRow={moveRow}
               removeRow={removeRow}
               rowCount={rowCount}
               rowIndex={rowIndex}
-              blocks={blocks}
-              fieldMap={block.subfields}
             />
           ) : undefined
         }
@@ -127,7 +128,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               {getTranslation(block.labels.singular, i18n)}
             </Pill>
             <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
-            {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+            {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
         key={row.id}

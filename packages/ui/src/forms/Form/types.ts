@@ -1,27 +1,26 @@
-import type React from 'react'
-import type { Dispatch } from 'react'
-
 import type { User } from 'payload/auth'
 import type { Field, Field as FieldConfig, Validate } from 'payload/types'
 import type { Data } from 'payload/types'
+import type React from 'react'
+import type { Dispatch } from 'react'
 
 export type Row = {
   blockType?: string
-  errorPaths?: Set<string>
   collapsed?: boolean
+  errorPaths?: Set<string>
   id: string
 }
 
 export type FormField = {
   disableFormData?: boolean
   errorMessage?: string
+  errorPaths?: Set<string>
   initialValue: unknown
   passesCondition?: boolean
   rows?: Row[]
   valid: boolean
-  value: unknown
   validate?: Validate
-  errorPaths?: Set<string>
+  value: unknown
 }
 
 export type FormState = {
@@ -34,13 +33,14 @@ export type Preferences = {
 
 export type Props = (
   | {
+      action: (formData: FormData) => Promise<void>
+    }
+  | {
       action?: string
       method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
     }
-  | {
-      action: (formData: FormData) => Promise<void>
-    }
 ) & {
+  beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
   children?: React.ReactNode
   className?: string
   disableSuccessStatus?: boolean
@@ -54,14 +54,13 @@ export type Props = (
   handleResponse?: (res: Response) => void
   initialState?: FormState
   log?: boolean
+  onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: (json: unknown) => void
   redirect?: string
   submitted?: boolean
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
-  onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
-  beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
 }
 
 export type SubmitOptions = {
@@ -90,9 +89,9 @@ export type SetProcessing = (processing: boolean) => void
 export type Reset = (fieldSchema: FieldConfig[], data: unknown) => Promise<void>
 
 export type REPLACE_STATE = {
+  optimize?: boolean
   state: FormState
   type: 'REPLACE_STATE'
-  optimize?: boolean
 }
 
 export type REMOVE = {

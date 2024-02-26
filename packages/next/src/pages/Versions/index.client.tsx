@@ -1,6 +1,9 @@
 'use client'
+import type { Column } from '@payloadcms/ui'
+import type { PaginatedDocs } from 'payload/database'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import {
-  Column,
   LoadingOverlayToggle,
   Pagination,
   PerPage,
@@ -9,21 +12,19 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation'
-import { PaginatedDocs } from 'payload/database'
-import { SanitizedCollectionConfig } from 'payload/types'
 import React, { Fragment, useEffect, useRef } from 'react'
 
 export const VersionsViewClient: React.FC<{
-  initialData: PaginatedDocs
-  columns: Column[]
   baseClass: string
-  fetchURL: string
   collectionSlug?: string
+  columns: Column[]
+  fetchURL: string
   globalSlug?: string
-  id?: string | number
+  id?: number | string
+  initialData: PaginatedDocs
   paginationLimits?: SanitizedCollectionConfig['admin']['pagination']['limits']
 }> = (props) => {
-  const { initialData, columns, baseClass, collectionSlug, fetchURL, id, paginationLimits } = props
+  const { id, baseClass, collectionSlug, columns, fetchURL, initialData, paginationLimits } = props
 
   const searchParams = useSearchParams()
   const limit = searchParams.get('limit')

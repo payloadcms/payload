@@ -1,12 +1,12 @@
 'use client'
+import type { Description } from 'payload/types'
+
 import React from 'react'
 
-import type { Description } from 'payload/types'
+import type { FieldMap } from '../../utilities/buildComponentMap/types'
 
 import RenderFields from '../../forms/RenderFields'
 import { Gutter } from '../Gutter'
-import { FieldMap } from '../../utilities/buildComponentMap/types'
-
 import './index.scss'
 
 const baseClass = 'document-fields'
@@ -15,10 +15,10 @@ export const DocumentFields: React.FC<{
   AfterFields?: React.ReactNode
   BeforeFields?: React.ReactNode
   description?: Description
-  forceSidebarWrap?: boolean
   fieldMap: FieldMap
+  forceSidebarWrap?: boolean
 }> = (props) => {
-  const { AfterFields, BeforeFields, description, forceSidebarWrap, fieldMap } = props
+  const { AfterFields, BeforeFields, description, fieldMap, forceSidebarWrap } = props
 
   const mainFields = fieldMap.filter(({ isSidebar }) => !isSidebar)
 

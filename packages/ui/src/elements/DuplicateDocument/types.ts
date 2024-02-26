@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 export type Props = {
-  singularLabel: SanitizedCollectionConfig['labels']['singular']
   id: string
+  singularLabel: SanitizedCollectionConfig['labels']['singular']
   slug: string
 }

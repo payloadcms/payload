@@ -3,8 +3,8 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import IDLabel from '../IDLabel'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
+import IDLabel from '../IDLabel'
 import './index.scss'
 
 const baseClass = 'render-title'
@@ -12,7 +12,7 @@ const baseClass = 'render-title'
 const RenderTitle: React.FC<Props> = (props) => {
   const { className, element = 'h1', title: titleFromProps } = props
 
-  const { title: titleFromContext, id } = useDocumentInfo()
+  const { id, title: titleFromContext } = useDocumentInfo()
 
   const title = titleFromProps || titleFromContext
 

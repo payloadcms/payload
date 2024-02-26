@@ -1,6 +1,7 @@
 'use client'
+import type { CellComponentProps } from 'payload/types'
+
 import React from 'react'
-import { CellComponentProps } from 'payload/types'
 
 import './index.scss'
 

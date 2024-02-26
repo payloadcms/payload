@@ -1,22 +1,23 @@
+import type { Where } from 'payload/types'
+
 import httpStatus from 'http-status'
-
-import { isNumber } from 'payload/utilities'
 import { findOperation } from 'payload/operations'
-import { CollectionRouteHandler } from '../types'
+import { isNumber } from 'payload/utilities'
 import qs from 'qs'
-import { Where } from 'payload/types'
 
-export const find: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const find: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
 
   // parse using `qs` to handle `where` queries
-  const { where, page, depth, limit, sort, draft } = qs.parse(searchParams.toString()) as {
-    where?: Where
-    page?: string
+  const { depth, draft, limit, page, sort, where } = qs.parse(searchParams.toString()) as {
     depth?: string
-    limit?: string
-    sort?: string
     draft?: string
+    limit?: string
+    page?: string
+    sort?: string
+    where?: Where
   }
 
   const result = await findOperation({

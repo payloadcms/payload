@@ -1,8 +1,9 @@
-import { I18n } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
 import type { Where } from 'payload/types'
-import { FormFieldBase } from '../shared'
+
+import type { FormFieldBase } from '../shared'
 
 export type Props = FormFieldBase & {
   name: string

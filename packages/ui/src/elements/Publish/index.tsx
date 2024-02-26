@@ -1,15 +1,16 @@
 'use client'
+import type { CustomPublishButtonProps, DefaultPublishButtonProps } from 'payload/types'
+
 import qs from 'qs'
 import React, { useCallback } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import { useForm, useFormModified } from '../../forms/Form/context'
 import FormSubmit from '../../forms/Submit'
 import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { CustomPublishButtonProps, DefaultPublishButtonProps } from 'payload/types'
+import { useTranslation } from '../../providers/Translation'
 
 const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
   id,

@@ -1,28 +1,27 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
 // import { requests } from '../../../api'
 import { useForm } from '../../forms/Form/context'
-import { MinimalTemplate } from '../../templates/Minimal'
-import { useTranslation } from '../../providers/Translation'
 import { useConfig } from '../../providers/Config'
+import { useDocumentInfo } from '../../providers/DocumentInfo'
+import { useTranslation } from '../../providers/Translation'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
-import { useRouter } from 'next/navigation'
 import { Translation } from '../Translation'
-import { useDocumentInfo } from '../../providers/DocumentInfo'
-
 import './index.scss'
 
 const baseClass = 'delete-document'
 
 const DeleteDocument: React.FC<Props> = (props) => {
-  const { id, buttonId, useAsTitle, collectionSlug, singularLabel, title: titleFromProps } = props
+  const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps, useAsTitle } = props
 
   const {
     routes: { admin, api },
@@ -113,14 +112,14 @@ const DeleteDocument: React.FC<Props> = (props) => {
             <h1>{t('general:confirmDeletion')}</h1>
             <p>
               <Translation
-                t={t}
+                elements={{
+                  '1': ({ children }) => <strong children={children} />,
+                }}
                 i18nKey="general:aboutToDelete"
+                t={t}
                 variables={{
                   label: getTranslation(singularLabel, i18n),
                   title: titleToRender,
-                }}
-                elements={{
-                  '1': ({ children }) => <strong children={children} />,
                 }}
               />
             </p>

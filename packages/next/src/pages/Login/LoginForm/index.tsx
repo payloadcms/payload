@@ -1,16 +1,17 @@
 'use client'
-import React from 'react'
+import type { FormState } from '@payloadcms/ui'
+
 import {
   Email,
   Form,
   FormLoadingOverlayToggle,
-  FormState,
   FormSubmit,
   Password,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
 import Link from 'next/link'
+import React from 'react'
 
 const baseClass = 'login__form'
 
@@ -33,13 +34,13 @@ export const LoginForm: React.FC<{
   const initialState: FormState = {
     email: {
       initialValue: prefillForm ? autoLogin.email : undefined,
-      value: prefillForm ? autoLogin.email : undefined,
       valid: true,
+      value: prefillForm ? autoLogin.email : undefined,
     },
     password: {
       initialValue: prefillForm ? autoLogin.password : undefined,
-      value: prefillForm ? autoLogin.password : undefined,
       valid: true,
+      value: prefillForm ? autoLogin.password : undefined,
     },
   }
 
@@ -49,9 +50,9 @@ export const LoginForm: React.FC<{
       className={`${baseClass}__form`}
       disableSuccessStatus
       initialState={initialState}
+      method="POST"
       redirect={`${admin}${searchParams?.redirect || ''}`}
       waitForAutocomplete
-      method="POST"
     >
       <FormLoadingOverlayToggle action="loading" name="login-form" />
       <div className={`${baseClass}__inputWrap`}>

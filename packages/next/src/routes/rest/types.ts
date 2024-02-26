@@ -1,39 +1,39 @@
-import { Collection, PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
+import type { Collection, PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
 export type BaseRouteHandler = ({ req }: { req: PayloadRequest }) => Promise<Response> | Response
 
 export type CollectionRouteHandler = ({
-  req,
   collection,
+  req,
 }: {
-  req: PayloadRequest
   collection: Collection
+  req: PayloadRequest
 }) => Promise<Response> | Response
 
 export type CollectionRouteHandlerWithID = ({
-  req,
-  collection,
   id,
+  collection,
+  req,
 }: {
-  req: PayloadRequest
   collection: Collection
   id: string
+  req: PayloadRequest
 }) => Promise<Response> | Response
 
 export type GlobalRouteHandler = ({
-  req,
   globalConfig,
+  req,
 }: {
-  req: PayloadRequest
   globalConfig: SanitizedGlobalConfig
+  req: PayloadRequest
 }) => Promise<Response> | Response
 
 export type GlobalRouteHandlerWithID = ({
-  req,
-  globalConfig,
   id,
+  globalConfig,
+  req,
 }: {
-  req: PayloadRequest
   globalConfig: SanitizedGlobalConfig
   id: string
+  req: PayloadRequest
 }) => Promise<Response> | Response

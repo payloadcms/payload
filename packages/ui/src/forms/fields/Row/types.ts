@@ -1,6 +1,7 @@
-import type { FieldTypes } from 'payload/config'
 import type { FieldPermissions } from 'payload/auth'
-import { FormFieldBase } from '../shared'
+import type { FieldTypes } from 'payload/config'
+
+import type { FormFieldBase } from '../shared'
 
 export type Props = FormFieldBase & {
   fieldTypes: FieldTypes

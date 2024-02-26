@@ -1,45 +1,54 @@
-import { FieldPermissions } from 'payload/auth'
-import {
+import type { FieldPermissions } from 'payload/auth'
+import type {
   BlockField,
   FieldBase,
+  Labels,
+  Option,
+  RichTextField,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TabsField,
-  Option,
-  Labels,
-  RichTextField,
 } from 'payload/types'
-import { fieldTypes } from '../../forms/fields'
+
+import type { fieldTypes } from '../../forms/fields'
 
 export type MappedTab = {
-  name?: string
   label: TabsField['tabs'][0]['label']
+  name?: string
   subfields?: FieldMap
 }
 
 export type ReducedBlock = {
-  slug: string
-  subfields: FieldMap
-  labels: BlockField['labels']
   imageAltText?: string
   imageURL?: string
+  labels: BlockField['labels']
+  slug: string
+  subfields: FieldMap
 }
 
 export type MappedField = {
-  type: keyof typeof fieldTypes
-  Field: React.ReactNode
   Cell: React.ReactNode
+  Field: React.ReactNode
   Heading: React.ReactNode
+  /**
+   * On `richText` fields only
+   */
+  editor?: RichTextField['editor']
   fieldIsPresentational: boolean
+  fieldMap?: FieldMap
   fieldPermissions: FieldPermissions
+  hasMany?: boolean
   isFieldAffectingData: boolean
-  name: string
-  readOnly: boolean
   isSidebar: boolean
   label: FieldBase['label']
   labels: Labels
-  fieldMap?: FieldMap
   localized: boolean
+  name: string
+  /**
+   * On `select` fields only
+   */
+  options?: Option[]
+  readOnly: boolean
   /**
    * On `array`, `blocks`, `group`, `collapsible`, and `tabs` fields only
    */
@@ -48,24 +57,16 @@ export type MappedField = {
    * On `tabs` fields only
    */
   tabs?: MappedTab[]
-  /**
-   * On `select` fields only
-   */
-  options?: Option[]
-  hasMany?: boolean
-  /**
-   * On `richText` fields only
-   */
-  editor?: RichTextField['editor']
+  type: keyof typeof fieldTypes
 }
 
 export type FieldMap = MappedField[]
 
 export type CollectionComponentMap = ConfigComponentMapBase & {
-  BeforeList: React.ReactNode
   AfterList: React.ReactNode
-  BeforeListTable: React.ReactNode
   AfterListTable: React.ReactNode
+  BeforeList: React.ReactNode
+  BeforeListTable: React.ReactNode
   List: React.ReactNode
 }
 

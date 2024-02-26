@@ -1,7 +1,9 @@
-import { SanitizedConfig } from 'payload/types'
-import React, { Fragment } from 'react'
-import { RenderCustomComponent, HydrateClientUser } from '@payloadcms/ui'
+import type { SanitizedConfig } from 'payload/types'
+
+import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
 import Link from 'next/link'
+import React, { Fragment } from 'react'
+
 import { initPage } from '../../utilities/initPage'
 import { DefaultDashboard } from './Default'
 
@@ -12,7 +14,7 @@ export const Dashboard = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, user, permissions } = await initPage({
+  const { config, permissions, user } = await initPage({
     config: configPromise,
     redirectUnauthenticatedUser: true,
     route: '',
@@ -23,15 +25,15 @@ export const Dashboard = async ({
 
   return (
     <Fragment>
-      <HydrateClientUser user={user} permissions={permissions} />
+      <HydrateClientUser permissions={permissions} user={user} />
       <RenderCustomComponent
         CustomComponent={
           typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
         }
         DefaultComponent={DefaultDashboard}
         componentProps={{
-          config,
           Link,
+          config,
           user,
         }}
       />

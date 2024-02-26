@@ -1,17 +1,17 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
-import React, { useCallback, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
-import { toast } from 'react-toastify'
-
 import type { Field } from 'payload/types'
 
-import { MinimalTemplate } from '../../templates/Minimal'
+import { Modal, useModal } from '@faceless-ui/modal'
+import React, { useCallback, useState } from 'react'
+import { toast } from 'react-toastify'
+
 // import { requests } from '../../../api'
 import { useForm } from '../../forms/Form/context'
 import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
+import { useTranslation } from '../../providers/Translation'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { Button } from '../Button'
 import './index.scss'
 
@@ -20,12 +20,12 @@ const baseClass = 'status'
 const Status: React.FC = () => {
   const {
     id,
+    collectionSlug,
     docPermissions,
     getVersions,
+    globalSlug,
     publishedDoc,
     unpublishedVersions,
-    collectionSlug,
-    globalSlug,
   } = useDocumentInfo()
   const { toggleModal } = useModal()
   const {

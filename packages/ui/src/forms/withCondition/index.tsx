@@ -1,8 +1,8 @@
 'use client'
 import React from 'react'
 
-import { WatchCondition } from './WatchCondition'
 import { useFieldPath } from '../FieldPathProvider'
+import { WatchCondition } from './WatchCondition'
 
 export const withCondition = <P extends Record<string, unknown>>(
   Field: React.ComponentType<P>,

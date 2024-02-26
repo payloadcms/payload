@@ -1,18 +1,18 @@
 'use client'
-import React, { Fragment, useEffect, useState } from 'react'
-
 import type { EntityToGroup, Group } from '@payloadcms/ui'
+
+import { getTranslation } from '@payloadcms/translations'
 import {
-  EntityType,
-  groupNavItems,
   Button,
   Card,
+  EntityType,
+  groupNavItems,
+  useActions,
   useAuth,
   useConfig,
-  useActions,
   useTranslation,
 } from '@payloadcms/ui'
-import { getTranslation } from '@payloadcms/translations'
+import React, { Fragment, useEffect, useState } from 'react'
 
 import './index.scss'
 
@@ -119,9 +119,11 @@ export const DefaultDashboardClient: React.FC<{
                 return (
                   <li key={entityIndex}>
                     <Card
+                      Link={Link}
                       actions={
                         hasCreatePermission && type === EntityType.collection ? (
                           <Button
+                            Link={Link}
                             aria-label={t('general:createNewLabel', {
                               label: getTranslation(entity.labels.singular, i18n),
                             })}
@@ -131,16 +133,14 @@ export const DefaultDashboardClient: React.FC<{
                             iconStyle="with-border"
                             round
                             to={createHREF}
-                            Link={Link}
                           />
                         ) : undefined
                       }
                       buttonAriaLabel={buttonAriaLabel}
+                      href={href}
                       id={`card-${entity.slug}`}
                       title={title}
                       titleAs="h3"
-                      Link={Link}
-                      href={href}
                     />
                   </li>
                 )

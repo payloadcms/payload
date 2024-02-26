@@ -1,15 +1,15 @@
+import type { Metadata } from 'next'
+import type { SanitizedConfig } from 'payload/types'
+
+import { MinimalTemplate } from '@payloadcms/ui'
+import { Logo } from '@payloadcms/ui/graphics'
+import { redirect } from 'next/navigation'
 import React, { Fragment } from 'react'
 
-import { Logo } from '@payloadcms/ui/graphics'
-import { MinimalTemplate } from '@payloadcms/ui'
-import type { SanitizedConfig } from 'payload/types'
-import { meta } from '../../utilities/meta'
-import { Metadata } from 'next'
-import { initPage } from '../../utilities/initPage'
-import { redirect } from 'next/navigation'
 import { getNextT } from '../../utilities/getNextT'
+import { initPage } from '../../utilities/initPage'
+import { meta } from '../../utilities/meta'
 import { LoginForm } from './LoginForm'
-
 import './index.scss'
 
 const baseClass = 'login'
@@ -24,10 +24,10 @@ export const generateMetadata = async ({
   })
 
   return meta({
-    title: t('authentication:login'),
+    config,
     description: `${t('authentication:login')}`,
     keywords: `${t('authentication:login')}`,
-    config,
+    title: t('authentication:login'),
   })
 }
 
@@ -35,12 +35,12 @@ export const Login: React.FC<{
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }> = async ({ config: configPromise, searchParams }) => {
-  const { config, user } = await initPage({ config: configPromise, searchParams, route: '/login' })
+  const { config, user } = await initPage({ config: configPromise, route: '/login', searchParams })
 
   const {
     admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },
-    routes: { admin },
     collections,
+    routes: { admin },
   } = config
 
   if (user) {

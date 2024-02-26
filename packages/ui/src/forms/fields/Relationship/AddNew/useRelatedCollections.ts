@@ -1,6 +1,6 @@
-import { useState } from 'react'
-
 import type { ClientConfig, SanitizedCollectionConfig } from 'payload/types'
+
+import { useState } from 'react'
 
 import { useConfig } from '../../../../providers/Config'
 

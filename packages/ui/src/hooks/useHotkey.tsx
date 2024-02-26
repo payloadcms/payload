@@ -1,9 +1,8 @@
 'use client'
 /* eslint-disable no-shadow */
 import { useModal } from '@faceless-ui/modal'
-import { useCallback, useEffect } from 'react'
-
 import { setsAreEqual } from 'payload/utilities'
+import { useCallback, useEffect } from 'react'
 
 // Required to be outside of hook, else debounce would be necessary
 // and then one could not prevent the default behaviour.

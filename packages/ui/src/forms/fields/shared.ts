@@ -1,6 +1,6 @@
+import type { User } from 'payload/auth'
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
-import { User } from 'payload/auth'
-import {
+import type {
   ArrayField,
   BlockField,
   CodeField,
@@ -8,80 +8,53 @@ import {
   DocumentPreferences,
   JSONField,
   RelationshipField,
-  RichTextField,
   RowLabel,
   UploadField,
   Validate,
 } from 'payload/types'
-import { Option } from 'payload/types'
-import { FormState } from '../..'
+import type { Option } from 'payload/types'
+
+import { RichTextField } from 'payload/types'
+
+import type { FormState } from '../..'
 import type {
   FieldMap,
-  ReducedBlock,
-  MappedTab,
   MappedField,
+  MappedTab,
+  ReducedBlock,
 } from '../../utilities/buildComponentMap/types'
 
 export const fieldBaseClass = 'field-type'
 
 export type FormFieldBase = {
-  path?: string
-  user?: User
-  docPreferences?: DocumentPreferences
-  locale?: Locale
-  BeforeInput?: React.ReactNode
   AfterInput?: React.ReactNode
-  Label?: React.ReactNode
-  label?: string
+  BeforeInput?: React.ReactNode
   Description?: React.ReactNode
   Error?: React.ReactNode
+  Label?: React.ReactNode
+  className?: string
+  docPreferences?: DocumentPreferences
   fieldMap?: FieldMap
   initialSubfieldState?: FormState
-  style?: React.CSSProperties
-  width?: string
-  className?: string
-  readOnly?: boolean
-  rtl?: boolean
+  label?: string
+  locale?: Locale
+  localized?: boolean
   maxLength?: number
   minLength?: number
-  required?: boolean
+  path?: string
   placeholder?: string
-  localized?: boolean
+  readOnly?: boolean
+  required?: boolean
+  rtl?: boolean
+  style?: React.CSSProperties
+  user?: User
   validate?: Validate
+  width?: string
 } & (
-  | {
-      // For `number` fields
-      step?: number
-      hasMany?: boolean
-      maxRows?: number
-      min?: number
-      max?: number
-    }
-  | {
-      // For `radio` fields
-      layout?: 'horizontal' | 'vertical'
-      options?: Option[]
-    }
-  | {
-      // For `textarea` fields
-      rows?: number
-    }
-  | {
-      // For `select` fields
-      isClearable?: boolean
-      isSortable?: boolean
-    }
-  | {
-      tabs?: MappedTab[]
-    }
   | {
       // For `code` fields
       editorOptions?: CodeField['admin']['editorOptions']
       language?: CodeField['admin']['language']
-    }
-  | {
-      // For `json` fields
-      editorOptions?: JSONField['admin']['editorOptions']
     }
   | {
       // For `collapsible` fields
@@ -92,34 +65,63 @@ export type FormFieldBase = {
       date?: DateField['admin']['date']
     }
   | {
-      // For `array` fields
-      minRows?: ArrayField['minRows']
-      maxRows?: ArrayField['maxRows']
-      labels?: ArrayField['labels']
-      label?: RowLabel
+      // For `json` fields
+      editorOptions?: JSONField['admin']['editorOptions']
     }
   | {
-      // For `blocks` fields
-      slug?: string
-      minRows?: BlockField['minRows']
-      maxRows?: BlockField['maxRows']
-      labels?: BlockField['labels']
-      blocks?: ReducedBlock[]
+      // For `radio` fields
+      layout?: 'horizontal' | 'vertical'
+      options?: Option[]
+    }
+  | {
+      // For `richText` fields
+      richTextComponentMap?: Map<string, MappedField[] | React.ReactNode>
+    }
+  | {
+      // For `select` fields
+      isClearable?: boolean
+      isSortable?: boolean
+    }
+  | {
+      // For `textarea` fields
+      rows?: number
     }
   | {
       // For `upload` fields
       relationTo?: UploadField['relationTo']
     }
   | {
+      allowCreate?: RelationshipField['admin']['allowCreate']
+      filterOptions?: RelationshipField['filterOptions']
       // For `relationship` fields
       relationTo?: RelationshipField['relationTo']
-      filterOptions?: RelationshipField['filterOptions']
       sortOptions?: RelationshipField['admin']['sortOptions']
-      allowCreate?: RelationshipField['admin']['allowCreate']
     }
   | {
-      // For `richText` fields
-      richTextComponentMap?: Map<string, React.ReactNode | MappedField[]>
+      blocks?: ReducedBlock[]
+      labels?: BlockField['labels']
+      maxRows?: BlockField['maxRows']
+      minRows?: BlockField['minRows']
+      // For `blocks` fields
+      slug?: string
+    }
+  | {
+      hasMany?: boolean
+      max?: number
+      maxRows?: number
+      min?: number
+      // For `number` fields
+      step?: number
+    }
+  | {
+      label?: RowLabel
+      labels?: ArrayField['labels']
+      maxRows?: ArrayField['maxRows']
+      // For `array` fields
+      minRows?: ArrayField['minRows']
+    }
+  | {
+      tabs?: MappedTab[]
     }
 )
 
