@@ -5,22 +5,19 @@ import { formatDate } from '@payloadcms/ui'
 
 import type { GenerateEditViewMetadata } from '../Document'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
 
 export const generateMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,
   config,
   globalConfig,
-  t,
+  i18n,
 }): Promise<Metadata> => {
+  const { t } = i18n
+
   let title: string = ''
   let description: string = ''
   const keywords: string = ''
-
-  const i18n = await getNextI18n({
-    config,
-  })
 
   const doc: any = {} // TODO: figure this out
 
@@ -31,13 +28,14 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   if (collectionConfig) {
     const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
     const entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
-    title = `${t('version:version')} - ${formattedCreatedAt} - ${doc[useAsTitle]} - ${entityLabel}`
+    const titleFromData = doc?.[useAsTitle]
+    title = `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`
     description = t('version:viewingVersion', { documentTitle: doc[useAsTitle], entityLabel })
   }
 
   if (globalConfig) {
     const entityLabel = getTranslation(globalConfig.label, i18n)
-    title = `${t('version:version')} - ${formattedCreatedAt} - ${entityLabel}`
+    title = `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`
     description = t('version:viewingVersionGlobal', { entityLabel })
   }
 

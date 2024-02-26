@@ -1,4 +1,4 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { I18n, TFunction } from '@payloadcms/translations'
 import type { QueryParamTypes } from '@payloadcms/ui'
 import type { Metadata } from 'next'
 import type { AdminViewComponent } from 'payload/config'
@@ -36,8 +36,8 @@ export type GenerateEditViewMetadata = (args: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
+  i18n: I18n
   isEditing: boolean
-  t: TFunction
 }) => Promise<Metadata>
 
 export const generateMetadata = async ({
@@ -81,12 +81,12 @@ export const generateMetadata = async ({
     }
 
     // `/:id/versions/:version`
-    if (params.segments.length === 2 && params.segments[1] === 'versions') {
+    if (params.segments.length === 3 && params.segments[1] === 'versions') {
       fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
     }
   }
 
-  const { t } = await getNextI18n({
+  const i18n = await getNextI18n({
     config,
   })
 
@@ -103,8 +103,8 @@ export const generateMetadata = async ({
       collectionConfig,
       config,
       globalConfig,
+      i18n,
       isEditing,
-      t,
     })
   }
 

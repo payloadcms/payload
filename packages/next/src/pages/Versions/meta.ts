@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { getTranslation } from '@payloadcms/translations'
+
 import type { GenerateEditViewMetadata } from '../Document'
 
 import { meta } from '../../utilities/meta'
@@ -8,8 +10,10 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,
   config,
   globalConfig,
-  t,
+  i18n,
 }): Promise<Metadata> => {
+  const { t } = i18n
+
   let title: string = ''
   let description: string = ''
   const keywords: string = ''
@@ -18,8 +22,8 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
 
   if (collectionConfig) {
     const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
-    console.log('useAsTitle', useAsTitle)
-    title = `${t('version:versions')} - ${data?.[useAsTitle]} - ${collectionConfig.slug}`
+    const titleFromData = data?.[useAsTitle]
+    title = `${t('version:versions')}${titleFromData ? ` - ${titleFromData}` : ''} - ${getTranslation(collectionConfig.labels.plural, i18n)}`
     description = t('version:viewingVersions', {
       documentTitle: data?.[useAsTitle],
       entitySlug: collectionConfig.slug,
@@ -27,7 +31,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   }
 
   if (globalConfig) {
-    title = `${t('version:versions')} - ${globalConfig.slug}`
+    title = `${t('version:versions')} - ${getTranslation(globalConfig.label, i18n)}`
     description = t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug })
   }
 
