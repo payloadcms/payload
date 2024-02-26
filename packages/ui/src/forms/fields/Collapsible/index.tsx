@@ -1,36 +1,36 @@
 'use client'
+import type { DocumentPreferences } from 'payload/types'
+
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
 import { Collapsible } from '../../../elements/Collapsible'
+import { ErrorPill } from '../../../elements/ErrorPill'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { usePreferences } from '../../../providers/Preferences'
+import { useTranslation } from '../../../providers/Translation'
+import { useFieldPath } from '../../FieldPathProvider'
+import LabelComp from '../../Label'
 import RenderFields from '../../RenderFields'
+import { WatchChildErrors } from '../../WatchChildErrors'
 import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
-import { DocumentPreferences } from 'payload/types'
-import { useFieldPath } from '../../FieldPathProvider'
-import { WatchChildErrors } from '../../WatchChildErrors'
-import { ErrorPill } from '../../../elements/ErrorPill'
-import { useTranslation } from '../../../providers/Translation'
-import LabelComp from '../../Label'
-
 import './index.scss'
 
 const baseClass = 'collapsible-field'
 
 const CollapsibleField: React.FC<Props> = (props) => {
   const {
-    className,
-    readOnly,
-    path: pathFromProps,
-    permissions,
     Description,
     Error,
-    fieldMap,
     Label: LabelFromProps,
+    className,
+    fieldMap,
     label,
+    path: pathFromProps,
+    permissions,
+    readOnly,
     required,
   } = props
 
@@ -116,7 +116,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           header={
             <div className={`${baseClass}__row-label-wrap`}>
               {Label}
-              {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
           initCollapsed={collapsedOnMount}

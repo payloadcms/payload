@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
-
 import type { Field, FieldWithPath } from 'payload/types'
 
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
+import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
+import React, { useState } from 'react'
+
 import { useForm } from '../../forms/Form/context'
 import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath'
 import Label from '../../forms/Label'
+import { useTranslation } from '../../providers/Translation'
 import ReactSelect from '../ReactSelect'
 import './index.scss'
 

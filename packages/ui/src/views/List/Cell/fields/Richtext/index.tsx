@@ -1,7 +1,7 @@
 'use client'
-import React, { useMemo } from 'react'
+import type { CellComponentProps, RichTextAdapter, RichTextField } from 'payload/types'
 
-import type { RichTextField, RichTextAdapter, CellComponentProps } from 'payload/types'
+import React, { useMemo } from 'react'
 
 export const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   // eslint-disable-next-line react/destructuring-assignment

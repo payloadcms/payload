@@ -1,11 +1,11 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useEffect } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import { Button } from '../../elements/Button'
 import { useFormModified } from '../../forms/Form/context'
 import { useAuth } from '../../providers/Auth'
+import { useTranslation } from '../../providers/Translation'
 import './index.scss'
 
 const modalSlug = 'leave-without-saving'

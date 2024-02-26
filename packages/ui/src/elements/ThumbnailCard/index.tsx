@@ -1,8 +1,8 @@
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
+import { useTranslation } from '../../providers/Translation'
 import { formatDocTitle } from '../../utilities/formatDocTitle'
 import Thumbnail from '../Thumbnail'
 import './index.scss'
@@ -36,9 +36,9 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
   if (!title) {
     title =
       formatDocTitle({
-        useAsTitle: collection?.admin?.useAsTitle,
         doc,
         i18n,
+        useAsTitle: collection?.admin?.useAsTitle,
       }) ||
       (doc?.filename as string) ||
       `[${t('general:untitled')}]`

@@ -2,9 +2,8 @@
 import React from 'react'
 
 import { useTranslation } from '../../../exports'
-import { SelectAllStatus, useSelection } from '../SelectionProvider'
 import CheckboxInput from '../../../forms/fields/Checkbox'
-
+import { SelectAllStatus, useSelection } from '../SelectionProvider'
 import './index.scss'
 
 const baseClass = 'select-all'
@@ -15,7 +14,6 @@ const SelectAll: React.FC = () => {
 
   return (
     <CheckboxInput
-      path="select-all"
       aria-label={
         selectAll === SelectAllStatus.None
           ? i18n.t('general:selectAllRows')
@@ -24,10 +22,11 @@ const SelectAll: React.FC = () => {
       checked={
         selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable
       }
+      className={`${baseClass}__checkbox`}
       id="select-all"
       onChange={() => toggleAll()}
       partialChecked={selectAll === SelectAllStatus.Some}
-      className={`${baseClass}__checkbox`}
+      path="select-all"
     />
   )
 }

@@ -1,18 +1,19 @@
 /* eslint-disable no-param-reassign */
 import type { TFunction } from '@payloadcms/translations'
+import type { User } from 'payload/auth'
+import type { Data, NonPresentationalField, SanitizedConfig } from 'payload/types'
 
 import ObjectId from 'bson-objectid'
-
-import type { User } from 'payload/auth'
-import type { NonPresentationalField, Data, SanitizedConfig } from 'payload/types'
-import type { FormState, FormField } from '../../Form/types'
-
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import { getDefaultValue } from 'payload/utilities'
+
+import type { FormField, FormState } from '../../Form/types'
+
 import { iterateFields } from './iterateFields'
 
 type Args = {
   data: Data
+  errorPaths: Set<string>
   field: NonPresentationalField
   fullData: Data
   id: number | string
@@ -26,12 +27,12 @@ type Args = {
   state: FormState
   t: TFunction
   user: User
-  errorPaths: Set<string>
 }
 
 export const addFieldStatePromise = async ({
   id,
   data,
+  errorPaths: parentErrorPaths,
   field,
   fullData,
   locale,
@@ -42,16 +43,15 @@ export const addFieldStatePromise = async ({
   state,
   t,
   user,
-  errorPaths: parentErrorPaths,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
     const validate = operation === 'update' ? field.validate : undefined
     const fieldState: FormField = {
+      errorPaths: new Set(),
       initialValue: undefined,
       passesCondition,
       valid: true,
       value: undefined,
-      errorPaths: new Set(),
     }
 
     const valueWithDefault = await getDefaultValue({
@@ -108,6 +108,7 @@ export const addFieldStatePromise = async ({
               iterateFields({
                 id,
                 data: row,
+                errorPaths: fieldState.errorPaths,
                 fields: field.fields,
                 fullData,
                 locale,
@@ -118,7 +119,6 @@ export const addFieldStatePromise = async ({
                 state,
                 t,
                 user,
-                errorPaths: fieldState.errorPaths,
               }),
             )
 
@@ -126,11 +126,11 @@ export const addFieldStatePromise = async ({
 
             acc.rowMetadata.push({
               id: row.id,
-              errorPaths: fieldState.errorPaths,
               collapsed:
                 collapsedRowIDs === undefined
                   ? field.admin.initCollapsed
                   : collapsedRowIDs.includes(row.id),
+              errorPaths: fieldState.errorPaths,
             })
 
             return acc
@@ -197,6 +197,7 @@ export const addFieldStatePromise = async ({
                 iterateFields({
                   id,
                   data: row,
+                  errorPaths: fieldState.errorPaths,
                   fields: block.fields,
                   fullData,
                   locale,
@@ -207,7 +208,6 @@ export const addFieldStatePromise = async ({
                   state,
                   t,
                   user,
-                  errorPaths: fieldState.errorPaths,
                 }),
               )
 
@@ -216,11 +216,11 @@ export const addFieldStatePromise = async ({
               acc.rowMetadata.push({
                 id: row.id,
                 blockType: row.blockType,
-                errorPaths: fieldState.errorPaths,
                 collapsed:
                   collapsedRowIDs === undefined
                     ? field.admin.initCollapsed
                     : collapsedRowIDs.includes(row.id),
+                errorPaths: fieldState.errorPaths,
               })
             }
 
@@ -259,6 +259,7 @@ export const addFieldStatePromise = async ({
         await iterateFields({
           id,
           data: data?.[field.name] || {},
+          errorPaths: parentErrorPaths,
           fields: field.fields,
           fullData,
           locale,
@@ -269,7 +270,6 @@ export const addFieldStatePromise = async ({
           state,
           t,
           user,
-          errorPaths: parentErrorPaths,
         })
 
         break
@@ -359,6 +359,7 @@ export const addFieldStatePromise = async ({
     await iterateFields({
       id,
       data,
+      errorPaths: parentErrorPaths,
       fields: field.fields,
       fullData,
       locale,
@@ -369,13 +370,13 @@ export const addFieldStatePromise = async ({
       state,
       t,
       user,
-      errorPaths: parentErrorPaths,
     })
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab) =>
       iterateFields({
         id,
         data: tabHasName(tab) ? data?.[tab.name] : data,
+        errorPaths: parentErrorPaths,
         fields: tab.fields,
         fullData,
         locale,
@@ -386,7 +387,6 @@ export const addFieldStatePromise = async ({
         state,
         t,
         user,
-        errorPaths: parentErrorPaths,
       }),
     )
 

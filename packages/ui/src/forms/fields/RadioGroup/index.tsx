@@ -1,15 +1,14 @@
 'use client'
+import { optionIsObject } from 'payload/types'
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { withCondition } from '../../withCondition'
-import { Radio } from './Radio'
-import { optionIsObject } from 'payload/types'
-import useField from '../../useField'
-import { fieldBaseClass } from '../shared'
 import LabelComp from '../../Label'
-
+import useField from '../../useField'
+import { withCondition } from '../../withCondition'
+import { fieldBaseClass } from '../shared'
+import { Radio } from './Radio'
 import './index.scss'
 
 const baseClass = 'radio-group'
@@ -17,19 +16,19 @@ const baseClass = 'radio-group'
 const RadioGroup: React.FC<Props> = (props) => {
   const {
     name,
-    className,
-    readOnly,
-    style,
-    width,
-    path: pathFromProps,
+    Description,
     Error,
     Label: LabelFromProps,
+    className,
     label,
-    Description,
-    validate,
-    required,
     onChange: onChangeFromProps,
+    path: pathFromProps,
+    readOnly,
+    required,
+    style,
+    validate,
     value: valueFromProps,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -47,10 +46,10 @@ const RadioGroup: React.FC<Props> = (props) => {
   )
 
   const {
-    setValue,
-    value: valueFromContext,
     path,
+    setValue,
     showError,
+    value: valueFromContext,
   } = useField<string>({
     path: pathFromProps || name,
     validate: memoizedValidate,
@@ -80,7 +79,7 @@ const RadioGroup: React.FC<Props> = (props) => {
       <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
         {options.map((option) => {
           let optionValue = ''
-          let optionLabel: string | Record<string, string> = ''
+          let optionLabel: Record<string, string> | string = ''
 
           if (optionIsObject(option)) {
             optionValue = option.value

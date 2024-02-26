@@ -1,4 +1,5 @@
 import type { FieldTypes } from 'payload/config'
+
 import array from './Array'
 import blocks from './Blocks'
 import checkbox from './Checkbox'

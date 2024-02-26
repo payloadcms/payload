@@ -1,16 +1,17 @@
-import { CellProps, SanitizedCollectionConfig } from 'payload/types'
-import { Column } from '../../elements/Table/types'
-import { FieldMap } from '../../utilities/buildComponentMap/types'
-import { ListPreferences } from '../../views/List/types'
+import type { CellProps, SanitizedCollectionConfig } from 'payload/types'
+
+import type { Column } from '../../elements/Table/types'
+import type { FieldMap } from '../../utilities/buildComponentMap/types'
+import type { ListPreferences } from '../../views/List/types'
 
 export const buildColumns = (args: {
-  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
-  fieldMap: FieldMap
   cellProps: Partial<CellProps>[]
-  defaultColumns?: string[]
   columnPreferences: ListPreferences['columns']
+  defaultColumns?: string[]
+  fieldMap: FieldMap
+  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }): Column[] => {
-  const { fieldMap, cellProps, defaultColumns, columnPreferences, useAsTitle } = args
+  const { cellProps, columnPreferences, defaultColumns, fieldMap, useAsTitle } = args
 
   let sortedFieldMap = fieldMap
 
@@ -52,15 +53,15 @@ export const buildColumns = (args: {
 
     if (field) {
       const column: Column = {
+        name: field.name,
         accessor: field.name,
         active,
-        label: field.label,
-        name: field.name,
+        cellProps: cellProps?.[index],
         components: {
           Cell: field.Cell,
           Heading: field.Heading,
         },
-        cellProps: cellProps?.[index],
+        label: field.label,
       }
 
       acc.push(column)

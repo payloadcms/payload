@@ -7,7 +7,7 @@ type ClientFunctionsContextType = Record<string, any>
 const AddClientFunctionContext = React.createContext<AddClientFunctionContextType>(() => null)
 const ClientFunctionsContext = React.createContext<ClientFunctionsContextType>({})
 
-type AddFunctionArgs = { key: string; func: any }
+type AddFunctionArgs = { func: any; key: string }
 
 export const ClientFunctionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [clientFunctions, setClientFunctions] = React.useState({})
@@ -34,8 +34,8 @@ export const useAddClientFunction = (key: string, func: any) => {
 
   React.useEffect(() => {
     addClientFunction({
-      key,
       func,
+      key,
     })
   }, [func, key])
 }

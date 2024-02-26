@@ -1,9 +1,11 @@
+import type { Data } from 'payload/types'
+
 import type {
   Context,
   CreateFormData,
   DispatchFields,
-  FormState,
   FormField,
+  FormState,
   GetSiblingData,
   Reset,
   SetModified,
@@ -12,8 +14,6 @@ import type {
   Submit,
   ValidateForm,
 } from './types'
-
-import type { Data } from 'payload/types'
 
 const submit: Submit = () => undefined
 const getSiblingData: GetSiblingData = () => undefined

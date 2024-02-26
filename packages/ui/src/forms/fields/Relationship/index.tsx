@@ -1,32 +1,32 @@
 'use client'
-import qs from 'qs'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { useTranslation } from '../../../providers/Translation'
-
 import type { PaginatedDocs } from 'payload/database'
 import type { Where } from 'payload/types'
+
+import { wordBoundariesRegex } from 'payload/utilities'
+import qs from 'qs'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types'
 import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types'
 
-import { wordBoundariesRegex } from 'payload/utilities'
-import { useDebouncedCallback } from '../../../hooks/useDebouncedCallback'
+import { GetFilterOptions } from '../../../elements/GetFilterOptions'
 import ReactSelect from '../../../elements/ReactSelect'
+import { useDebouncedCallback } from '../../../hooks/useDebouncedCallback'
 import { useAuth } from '../../../providers/Auth'
 import { useConfig } from '../../../providers/Config'
-import { GetFilterOptions } from '../../../elements/GetFilterOptions'
 import { useLocale } from '../../../providers/Locale'
+import { useTranslation } from '../../../providers/Translation'
 import { useFormProcessing } from '../../Form/context'
 import useField from '../../useField'
+import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { AddNewRelation } from './AddNew'
 import { createRelationMap } from './createRelationMap'
 import { findOptionsByValue } from './findOptionsByValue'
+import './index.scss'
 import optionsReducer from './optionsReducer'
 import { MultiValueLabel } from './select-components/MultiValueLabel'
 import { SingleValue } from './select-components/SingleValue'
-import { withCondition } from '../../withCondition'
-
-import './index.scss'
 
 const maxResultsPerRequest = 10
 
@@ -35,16 +35,16 @@ const baseClass = 'relationship'
 const Relationship: React.FC<Props> = (props) => {
   const {
     name,
-    className,
-    style,
-    width,
-    readOnly,
     Description,
     Error,
     Label,
+    className,
     path: pathFromProps,
+    readOnly,
     required,
+    style,
     validate,
+    width,
   } = props
 
   const config = useConfig()
@@ -87,7 +87,7 @@ const Relationship: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { initialValue, setValue, showError, value, path } = useField<Value | Value[]>({
+  const { initialValue, path, setValue, showError, value } = useField<Value | Value[]>({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

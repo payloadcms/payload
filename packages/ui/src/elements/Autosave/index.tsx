@@ -5,15 +5,14 @@ import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-import useDebounce from '../../hooks/useDebounce'
-import { formatTimeToNow } from '../../utilities/formatDate'
 import { useAllFormFields, useFormModified } from '../../forms/Form/context'
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues'
+import useDebounce from '../../hooks/useDebounce'
 import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
 import { useTranslation } from '../../providers/Translation'
-
+import { formatTimeToNow } from '../../utilities/formatDate'
 import './index.scss'
 
 const baseClass = 'autosave'
@@ -23,7 +22,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
     routes: { admin, api },
     serverURL,
   } = useConfig()
-  const { getVersions, docConfig, versions } = useDocumentInfo()
+  const { docConfig, getVersions, versions } = useDocumentInfo()
   const versionsConfig = docConfig?.versions
 
   const [fields] = useAllFormFields()

@@ -2,10 +2,10 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/t
 
 export type Props = {
   className?: string
+  dateFormat?: any // TODO: type this
   element?: React.ElementType
   fallback?: string
-  title?: string
   isDate?: boolean
-  dateFormat?: any // TODO: type this
+  title?: string
   // dateFormat?: SanitizedCollectionConfig['fields'][0]['admin']['date']['displayFormat']
 }

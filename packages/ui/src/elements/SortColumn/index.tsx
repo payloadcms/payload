@@ -1,14 +1,14 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import queryString from 'qs'
 import React, { useCallback } from 'react'
-import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
 import { Chevron } from '../../icons/Chevron'
 import { useSearchParams } from '../../providers/SearchParams'
+import { useTranslation } from '../../providers/Translation'
 import './index.scss'
 
 const baseClass = 'sort-column'

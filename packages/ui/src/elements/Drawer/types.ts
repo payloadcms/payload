@@ -1,10 +1,10 @@
 import type { HTMLAttributes } from 'react'
 
 export type Props = {
+  Header?: React.ReactNode
   children: React.ReactNode
   className?: string
   gutter?: boolean
-  Header?: React.ReactNode
   hoverTitle?: boolean
   slug: string
   title?: string

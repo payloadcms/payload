@@ -1,7 +1,7 @@
-import { Theme } from './types'
+import type { Theme } from './types'
 
-export function themeIsValid(string: string | null): string is Theme {
-  return string ? ['light', 'dark'].includes(string) : false
+export function themeIsValid(string: null | string): string is Theme {
+  return string ? ['dark', 'light'].includes(string) : false
 }
 
 export const getImplicitPreference = (): Theme | null => {

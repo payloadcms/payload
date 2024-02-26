@@ -1,30 +1,31 @@
 'use client'
-import { CellComponentProps, CellProps } from 'payload/types'
+import type { CellComponentProps, CellProps } from 'payload/types'
+
 import React from 'react'
 
 export type ITableCellContext = {
-  rowData: any
   cellData: any
-  customCellContext: CellComponentProps['customCellContext']
   cellProps?: Partial<CellProps>
   columnIndex?: number
+  customCellContext: CellComponentProps['customCellContext']
+  rowData: any
 }
 
 const TableCellContext = React.createContext<ITableCellContext>({} as ITableCellContext)
 
 export const TableCellProvider: React.FC<{
   cellData: any
-  rowData: any
-  customCellContext: CellComponentProps['customCellContext']
   cellProps?: Partial<CellProps>
   children: React.ReactNode
   columnIndex?: number
+  customCellContext: CellComponentProps['customCellContext']
+  rowData: any
 }> = (props) => {
-  const { children, rowData, cellData, customCellContext, columnIndex, cellProps } = props
+  const { cellData, cellProps, children, columnIndex, customCellContext, rowData } = props
 
   return (
     <TableCellContext.Provider
-      value={{ cellData, rowData, customCellContext, columnIndex, cellProps }}
+      value={{ cellData, cellProps, columnIndex, customCellContext, rowData }}
     >
       {children}
     </TableCellContext.Provider>

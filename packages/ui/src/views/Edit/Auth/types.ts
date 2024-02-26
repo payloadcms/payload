@@ -3,8 +3,8 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 export type Props = {
   className?: string
-  disableLocalStrategy?: boolean
   collectionSlug: SanitizedCollectionConfig['slug']
+  disableLocalStrategy?: boolean
   email: string
   operation: 'create' | 'update'
   readOnly: boolean

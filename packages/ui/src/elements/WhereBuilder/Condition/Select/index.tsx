@@ -1,10 +1,11 @@
-import React from 'react'
-import { useTranslation } from '../../../../providers/Translation'
-
 import type { Option, OptionObject } from 'payload/types'
-import type { Props } from './types'
 
 import { getTranslation } from '@payloadcms/translations'
+import React from 'react'
+
+import type { Props } from './types'
+
+import { useTranslation } from '../../../../providers/Translation'
 import ReactSelect from '../../../ReactSelect'
 
 const formatOptions = (options: Option[]): OptionObject[] =>

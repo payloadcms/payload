@@ -1,8 +1,8 @@
 'use client'
 import isDeepEqual from 'deep-equal'
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
+import { useTranslation } from '../../providers/Translation'
 import { requests } from '../../utilities/api'
 import { useAuth } from '../Auth'
 import { useConfig } from '../Config'

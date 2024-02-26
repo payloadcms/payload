@@ -1,21 +1,21 @@
+import type { FieldPermissions } from 'payload/auth'
+import type { ArrayField, RowLabel as RowLabelType } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
-import { useTranslation } from '../../../providers/Translation'
 
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'
+import type { FieldMap } from '../../../utilities/buildComponentMap/types'
 import type { Row } from '../../Form/types'
-import type { ArrayField, RowLabel as RowLabelType } from 'payload/types'
 
 import { ArrayAction } from '../../../elements/ArrayAction'
 import { Collapsible } from '../../../elements/Collapsible'
 import { ErrorPill } from '../../../elements/ErrorPill'
+import { useTranslation } from '../../../providers/Translation'
+import { FieldPathProvider } from '../../FieldPathProvider'
 import { useFormSubmitted } from '../../Form/context'
 import RenderFields from '../../RenderFields'
 import HiddenInput from '../HiddenInput'
-import { FieldPathProvider } from '../../FieldPathProvider'
-import { FieldPermissions } from 'payload/auth'
-import { getTranslation } from '@payloadcms/translations'
-import { FieldMap } from '../../../utilities/buildComponentMap/types'
-
 import './index.scss'
 
 const baseClass = 'array-field'
@@ -24,20 +24,20 @@ type ArrayRowProps = UseDraggableSortableReturn & {
   CustomRowLabel?: RowLabelType
   addRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
+  fieldMap: FieldMap
   forceRender?: boolean
   hasMaxRows?: boolean
+  indexPath: string
   labels: ArrayField['labels']
   moveRow: (fromIndex: number, toIndex: number) => void
+  path: string
+  permissions: FieldPermissions
   readOnly?: boolean
   removeRow: (rowIndex: number) => void
   row: Row
   rowCount: number
   rowIndex: number
   setCollapse: (rowID: string, collapsed: boolean) => void
-  indexPath: string
-  path: string
-  permissions: FieldPermissions
-  fieldMap: FieldMap
 }
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
@@ -45,6 +45,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   addRow,
   attributes,
   duplicateRow,
+  fieldMap,
   forceRender = false,
   hasMaxRows,
   indexPath,
@@ -61,7 +62,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   setCollapse,
   setNodeRef,
   transform,
-  fieldMap,
 }) => {
   const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
@@ -120,7 +120,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               path={path}
               rowNumber={rowIndex + 1}
             /> */}
-            {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+            {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}

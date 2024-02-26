@@ -1,10 +1,10 @@
 'use client'
 import * as React from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import { Banner } from '../../elements/Banner'
 import { useConfig } from '../../providers/Config'
 import { useLocale } from '../../providers/Locale'
+import { useTranslation } from '../../providers/Translation'
 import { useForm } from '../Form/context'
 import CheckboxInput from '../fields/Checkbox'
 

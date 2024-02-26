@@ -7,10 +7,9 @@ import { Copy } from '../../icons/Copy'
 import { MoreIcon } from '../../icons/More'
 import { Plus } from '../../icons/Plus'
 import { X } from '../../icons/X'
+import { useTranslation } from '../../providers/Translation'
 import Popup from '../Popup'
 import * as PopupList from '../Popup/PopupButtonList'
-import { useTranslation } from '../../providers/Translation'
-
 import './index.scss'
 
 const baseClass = 'array-actions'

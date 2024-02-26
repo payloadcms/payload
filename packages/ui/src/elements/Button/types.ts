@@ -1,8 +1,10 @@
 import type { ElementType, MouseEvent } from 'react'
 import type React from 'react'
-import { LinkType } from '../../exports/types'
+
+import type { LinkType } from '../../exports/types'
 
 export type Props = {
+  Link?: LinkType
   'aria-label'?: string
   buttonId?: string
   buttonStyle?: 'error' | 'icon-label' | 'none' | 'primary' | 'secondary' | 'transparent'
@@ -22,5 +24,4 @@ export type Props = {
   tooltip?: string
   type?: 'button' | 'submit'
   url?: string
-  Link?: LinkType
 }

@@ -1,23 +1,22 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect } from 'react'
 
-import { SelectionProvider } from './SelectionProvider'
+import { Button } from '../../elements/Button'
 import { Gutter } from '../../elements/Gutter'
-import { getTranslation } from '@payloadcms/translations'
+import { ListControls } from '../../elements/ListControls'
+import { Pagination } from '../../elements/Pagination'
+import { PerPage } from '../../elements/PerPage'
 import Pill from '../../elements/Pill'
 import { StaggeredShimmers } from '../../elements/ShimmerEffect'
-import { RelationshipProvider } from './RelationshipProvider'
-import { Button } from '../../elements/Button'
-import { PerPage } from '../../elements/PerPage'
-import { Pagination } from '../../elements/Pagination'
-import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
-import { useComponentMap } from '../../providers/ComponentMapProvider'
-import { Table } from '../../elements/Table'
-import { ListControls } from '../../elements/ListControls'
 import { useStepNav } from '../../elements/StepNav'
+import { Table } from '../../elements/Table'
+import { useComponentMap } from '../../providers/ComponentMapProvider'
+import { useConfig } from '../../providers/Config'
 import { useListInfo } from '../../providers/ListInfo'
-
+import { useTranslation } from '../../providers/Translation'
+import { RelationshipProvider } from './RelationshipProvider'
+import { SelectionProvider } from './SelectionProvider'
 import './index.scss'
 
 const baseClass = 'collection-list'
@@ -36,8 +35,8 @@ export const DefaultList: React.FC = () => {
     modifySearchParams,
     newDocumentURL,
     // resetParams,
-    titleField,
     collectionSlug,
+    titleField,
   } = useListInfo()
 
   const config = useConfig()
@@ -46,7 +45,7 @@ export const DefaultList: React.FC = () => {
 
   const collectionComponentMap = componentMap.collections[collectionSlug]
 
-  const { BeforeList, AfterList, BeforeListTable, AfterListTable } = collectionComponentMap || {}
+  const { AfterList, AfterListTable, BeforeList, BeforeListTable } = collectionComponentMap || {}
 
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
@@ -129,11 +128,11 @@ export const DefaultList: React.FC = () => {
           {data.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <Table
-                data={docs}
                 customCellContext={{
                   collectionSlug,
                   uploadConfig: collectionConfig.upload,
                 }}
+                data={docs}
               />
             </RelationshipProvider>
           )}

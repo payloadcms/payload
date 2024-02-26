@@ -1,7 +1,9 @@
 'use client'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+
+import type { Theme, ThemeContext } from './types'
+
 import canUseDOM from '../../utilities/canUseDOM'
-import { Theme, ThemeContext } from './types'
 import { getImplicitPreference, themeIsValid } from './utilities'
 
 const initialContext: ThemeContext = {

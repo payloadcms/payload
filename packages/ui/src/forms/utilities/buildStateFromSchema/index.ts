@@ -1,11 +1,11 @@
 import type { TFunction } from '@payloadcms/translations'
-
 import type { User } from 'payload/auth'
-import type { Field as FieldSchema, Data, DocumentPreferences } from 'payload/types'
+import type { Locale } from 'payload/config'
+import type { Data, DocumentPreferences, Field as FieldSchema } from 'payload/types'
+
 import type { FormState } from '../../Form/types'
 
 import { iterateFields } from './iterateFields'
-import { Locale } from 'payload/config'
 
 type Args = {
   data?: Data
@@ -22,11 +22,11 @@ type Args = {
 }
 
 export type BuildFormStateArgs = {
-  id?: string | number
-  operation?: 'create' | 'update'
+  data?: Data
   docPreferences: DocumentPreferences
   formState?: FormState
-  data?: Data
+  id?: number | string
+  operation?: 'create' | 'update'
   schemaPath: string
 }
 
@@ -39,6 +39,7 @@ const buildStateFromSchema = async (args: Args): Promise<FormState> => {
     await iterateFields({
       id,
       data: fullData,
+      errorPaths: new Set(),
       fields: fieldSchema,
       fullData,
       locale,
@@ -49,7 +50,6 @@ const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       state,
       t,
       user,
-      errorPaths: new Set(),
     })
 
     return state

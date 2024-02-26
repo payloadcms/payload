@@ -2,35 +2,35 @@
 import React, { Fragment } from 'react'
 
 import type { Props } from './types'
-import RenderFields from '../../RenderFields'
-import { GroupProvider, useGroup } from './provider'
-import { withCondition } from '../../withCondition'
+
 import { useCollapsible } from '../../../elements/Collapsible/provider'
+import { ErrorPill } from '../../../elements/ErrorPill'
+import { useTranslation } from '../../../providers/Translation'
+import { FieldPathProvider, useFieldPath } from '../../FieldPathProvider'
+import LabelComp from '../../Label'
+import RenderFields from '../../RenderFields'
+import { WatchChildErrors } from '../../WatchChildErrors'
+import { withCondition } from '../../withCondition'
 import { useRow } from '../Row/provider'
 import { useTabs } from '../Tabs/provider'
 import { fieldBaseClass } from '../shared'
-import { FieldPathProvider, useFieldPath } from '../../FieldPathProvider'
-import { WatchChildErrors } from '../../WatchChildErrors'
-import { ErrorPill } from '../../../elements/ErrorPill'
-import { useTranslation } from '../../../providers/Translation'
-import LabelComp from '../../Label'
-
 import './index.scss'
+import { GroupProvider, useGroup } from './provider'
 
 const baseClass = 'group-field'
 
 const Group: React.FC<Props> = (props) => {
   const {
-    className,
-    style,
-    width,
-    fieldMap,
+    name,
     Description,
-    hideGutter,
     Label: LabelFromProps,
+    className,
+    fieldMap,
+    hideGutter,
     label,
     required,
-    name,
+    style,
+    width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -80,7 +80,7 @@ const Group: React.FC<Props> = (props) => {
                     {Description}
                   </header>
                 )}
-                {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+                {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
               </div>
               <RenderFields fieldMap={fieldMap} />
             </div>

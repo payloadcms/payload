@@ -3,7 +3,7 @@ import React, { createContext, useContext } from 'react'
 
 export const EditDepthContext = createContext(0)
 
-export const EditDepthProvider: React.FC<{ depth: number; children: React.ReactNode }> = ({
+export const EditDepthProvider: React.FC<{ children: React.ReactNode; depth: number }> = ({
   children,
   depth,
 }) => <EditDepthContext.Provider value={depth}>{children}</EditDepthContext.Provider>

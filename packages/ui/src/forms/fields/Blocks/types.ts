@@ -1,9 +1,10 @@
 import type { FieldPermissions } from 'payload/auth'
-import { FormFieldBase } from '../shared'
+
+import type { FormFieldBase } from '../shared'
 
 export type Props = FormFieldBase & {
-  name?: string
   forceRender?: boolean
   indexPath: string
+  name?: string
   permissions: FieldPermissions
 }

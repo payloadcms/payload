@@ -1,11 +1,10 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '../../providers/Translation'
-
 import './index.scss'
 
 const baseClass = 'field-description'

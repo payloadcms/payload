@@ -5,11 +5,10 @@ import 'react-datepicker/dist/react-datepicker.css'
 
 import type { Props } from './types'
 
-import { getSupportedDateLocale } from '../../utilities/formatDate/getSupportedDateLocale'
 import { Calendar as CalendarIcon } from '../../icons/Calendar'
 import { X as XIcon } from '../../icons/X'
 import { useTranslation } from '../../providers/Translation'
-
+import { getSupportedDateLocale } from '../../utilities/formatDate/getSupportedDateLocale'
 import './index.scss'
 
 const baseClass = 'date-time-picker'

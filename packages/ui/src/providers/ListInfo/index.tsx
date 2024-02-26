@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState } from 'react'
 
 import type { ListInfo, ListInfoContext, ListInfoProps } from './types'
+
 import { useConfig } from '../Config'
 
 const Context = createContext({} as ListInfoContext)
@@ -18,10 +19,10 @@ export const ListInfoProvider: React.FC<
   })
 
   const {
-    routes: { api },
-    serverURL,
     collections,
     globals,
+    routes: { api },
+    serverURL,
   } = useConfig()
 
   const value: ListInfoContext = {

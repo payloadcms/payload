@@ -1,41 +1,43 @@
-import React, { Fragment } from 'react'
-
 import type { FieldPermissions } from 'payload/auth'
 import type { CellProps, Field, FieldWithPath, LabelProps, SanitizedConfig } from 'payload/types'
+
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import { fieldTypes } from '../../forms/fields'
-import { FormFieldBase } from '../../forms/fields/shared'
-import { FieldMap, ReducedBlock, MappedField, MappedTab } from './types'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
+import React, { Fragment } from 'react'
+
 import type { Props as FieldDescription } from '../../forms/FieldDescription/types'
-import { DefaultCell } from '../../views/List/Cell'
+import type { FormFieldBase } from '../../forms/fields/shared'
+import type { FieldMap, MappedField, MappedTab, ReducedBlock } from './types'
+
+import { HiddenInput } from '../..'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import { SortColumn } from '../../elements/SortColumn'
-import DefaultLabel from '../../forms/Label'
 import DefaultError from '../../forms/Error'
 import DefaultDescription from '../../forms/FieldDescription'
-import { HiddenInput } from '../..'
+import DefaultLabel from '../../forms/Label'
+import { fieldTypes } from '../../forms/fields'
+import { DefaultCell } from '../../views/List/Cell'
 
 export const mapFields = (args: {
   config: SanitizedConfig
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
   operation?: 'create' | 'update'
+  parentPath?: string
   permissions?:
     | {
         [field: string]: FieldPermissions
       }
     | FieldPermissions
   readOnly?: boolean
-  parentPath?: string
 }): FieldMap => {
   const {
     config,
     fieldSchema,
     filter,
     operation = 'update',
+    parentPath,
     permissions,
     readOnly: readOnlyOverride,
-    parentPath,
   } = args
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
@@ -100,9 +102,9 @@ export const mapFields = (args: {
             fieldSchema: field.fields,
             filter,
             operation,
+            parentPath: path,
             permissions,
             readOnly: readOnlyOverride,
-            parentPath: path,
           })
 
         // `tabs` fields require a field map of each of its tab's nested fields
@@ -116,9 +118,9 @@ export const mapFields = (args: {
               fieldSchema: tab.fields,
               filter,
               operation,
+              parentPath: path,
               permissions,
               readOnly: readOnlyOverride,
-              parentPath: path,
             })
 
             const reducedTab: MappedTab = {
@@ -141,17 +143,17 @@ export const mapFields = (args: {
               fieldSchema: block.fields,
               filter,
               operation,
+              parentPath: `${path}.${block.slug}`,
               permissions,
               readOnly: readOnlyOverride,
-              parentPath: `${path}.${block.slug}`,
             })
 
             const reducedBlock: ReducedBlock = {
-              slug: block.slug,
-              subfields: blockFieldMap,
-              labels: block.labels,
               imageAltText: block.imageAltText,
               imageURL: block.imageURL,
+              labels: block.labels,
+              slug: block.slug,
+              subfields: blockFieldMap,
             }
 
             return reducedBlock
@@ -161,46 +163,20 @@ export const mapFields = (args: {
         // i.e. not all fields have `maxRows` or `min` or `max`
         // but this is labor intensive and requires consuming components to be updated
         const fieldComponentProps: FormFieldBase = {
-          fieldMap: nestedFieldMap,
-          className: 'className' in field.admin ? field?.admin?.className : undefined,
-          style: 'style' in field.admin ? field?.admin?.style : undefined,
-          width: 'width' in field.admin ? field?.admin?.width : undefined,
-          Label: (
-            <RenderCustomComponent
-              DefaultComponent={DefaultLabel}
-              CustomComponent={
-                field.admin?.components &&
-                'Label' in field.admin?.components &&
-                field.admin?.components?.Label
-              }
-              componentProps={labelProps}
-            />
-          ),
-          Error: (
-            <RenderCustomComponent
-              DefaultComponent={DefaultError}
-              CustomComponent={
-                field.admin?.components &&
-                'Error' in field.admin?.components &&
-                field.admin?.components?.Error
-              }
-              componentProps={{ path }}
-            />
-          ),
-          BeforeInput: field.admin?.components &&
-            'beforeInput' in field.admin?.components &&
-            Array.isArray(field.admin.components.beforeInput) && (
-              <Fragment>
-                {field.admin.components.beforeInput.map((Component, i) => (
-                  <Component key={i} />
-                ))}
-              </Fragment>
-            ),
           AfterInput: 'components' in field.admin &&
             'afterInput' in field.admin.components &&
             Array.isArray(field.admin.components.afterInput) && (
               <Fragment>
                 {field.admin.components.afterInput.map((Component, i) => (
+                  <Component key={i} />
+                ))}
+              </Fragment>
+            ),
+          BeforeInput: field.admin?.components &&
+            'beforeInput' in field.admin?.components &&
+            Array.isArray(field.admin.components.beforeInput) && (
+              <Fragment>
+                {field.admin.components.beforeInput.map((Component, i) => (
                   <Component key={i} />
                 ))}
               </Fragment>
@@ -218,38 +194,64 @@ export const mapFields = (args: {
               componentProps={descriptionProps}
             />
           ),
+          Error: (
+            <RenderCustomComponent
+              CustomComponent={
+                field.admin?.components &&
+                'Error' in field.admin?.components &&
+                field.admin?.components?.Error
+              }
+              DefaultComponent={DefaultError}
+              componentProps={{ path }}
+            />
+          ),
+          Label: (
+            <RenderCustomComponent
+              CustomComponent={
+                field.admin?.components &&
+                'Label' in field.admin?.components &&
+                field.admin?.components?.Label
+              }
+              DefaultComponent={DefaultLabel}
+              componentProps={labelProps}
+            />
+          ),
+          className: 'className' in field.admin ? field?.admin?.className : undefined,
+          fieldMap: nestedFieldMap,
+          style: 'style' in field.admin ? field?.admin?.style : undefined,
+          width: 'width' in field.admin ? field?.admin?.width : undefined,
           // TODO: fix types
           // label: 'label' in field ? field.label : undefined,
-          step: 'step' in field.admin ? field.admin.step : undefined,
+          blocks,
           hasMany: 'hasMany' in field ? field.hasMany : undefined,
+          max: 'max' in field ? field.max : undefined,
           maxRows: 'maxRows' in field ? field.maxRows : undefined,
           min: 'min' in field ? field.min : undefined,
-          max: 'max' in field ? field.max : undefined,
           options: 'options' in field ? field.options : undefined,
-          tabs,
-          blocks,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
           richTextComponentMap: undefined,
+          step: 'step' in field.admin ? field.admin.step : undefined,
+          tabs,
         }
 
         let Field = <FieldComponent {...fieldComponentProps} />
 
         const cellComponentProps: CellProps = {
-          fieldType: field.type,
-          isFieldAffectingData,
           name: 'name' in field ? field.name : undefined,
-          label:
-            'label' in field && field.label && typeof field.label !== 'function'
-              ? field.label
-              : undefined,
-          labels: 'labels' in field ? field.labels : undefined,
-          dateDisplayFormat: 'date' in field.admin ? field.admin.date.displayFormat : undefined,
           blocks:
             'blocks' in field &&
             field.blocks.map((b) => ({
               labels: b.labels,
               slug: b.slug,
             })),
+          dateDisplayFormat: 'date' in field.admin ? field.admin.date.displayFormat : undefined,
+          fieldType: field.type,
+          isFieldAffectingData,
+          label:
+            'label' in field && field.label && typeof field.label !== 'function'
+              ? field.label
+              : undefined,
+          labels: 'labels' in field ? field.labels : undefined,
           options: 'options' in field ? field.options : undefined,
         }
 
@@ -283,17 +285,14 @@ export const mapFields = (args: {
 
         const reducedField: MappedField = {
           name: 'name' in field ? field.name : '',
-          label: 'label' in field && typeof field.label !== 'function' ? field.label : undefined,
-          labels: 'labels' in field ? field.labels : undefined,
-          type: field.type,
-          Field,
           Cell: (
             <RenderCustomComponent
-              DefaultComponent={DefaultCell}
               CustomComponent={field.admin?.components?.Cell}
+              DefaultComponent={DefaultCell}
               componentProps={cellComponentProps}
             />
           ),
+          Field,
           Heading: (
             <SortColumn
               disable={
@@ -313,14 +312,17 @@ export const mapFields = (args: {
           ),
           fieldIsPresentational,
           fieldPermissions,
+          hasMany: 'hasMany' in field ? field.hasMany : undefined,
           isFieldAffectingData,
-          readOnly,
           isSidebar: field.admin?.position === 'sidebar',
+          label: 'label' in field && typeof field.label !== 'function' ? field.label : undefined,
+          labels: 'labels' in field ? field.labels : undefined,
+          localized: 'localized' in field ? field.localized : false,
+          options: 'options' in field ? field.options : undefined,
+          readOnly,
           subfields: nestedFieldMap,
           tabs,
-          options: 'options' in field ? field.options : undefined,
-          hasMany: 'hasMany' in field ? field.hasMany : undefined,
-          localized: 'localized' in field ? field.localized : false,
+          type: field.type,
         }
 
         if (FieldComponent) {
@@ -333,23 +335,23 @@ export const mapFields = (args: {
   }, [])
 
   const hasID =
-    result.findIndex(({ isFieldAffectingData, name }) => isFieldAffectingData && name === 'id') > -1
+    result.findIndex(({ name, isFieldAffectingData }) => isFieldAffectingData && name === 'id') > -1
 
   if (!hasID) {
     result.push({
       name: 'id',
-      type: 'text',
-      label: 'ID',
-      Field: <HiddenInput name="id" />,
       Cell: <DefaultCell name="id" />,
+      Field: <HiddenInput name="id" />,
       Heading: <SortColumn label="ID" name="id" />,
       fieldIsPresentational: false,
       fieldPermissions: {},
       isFieldAffectingData: true,
-      readOnly: false,
       isSidebar: false,
+      label: 'ID',
+      readOnly: false,
       subfields: [],
       tabs: [],
+      type: 'text',
     })
   }
 

@@ -1,11 +1,11 @@
 import type { FormFieldBase } from '../shared'
 
 export type Props = FormFieldBase & {
+  checked?: boolean
   disableFormData?: boolean
+  id?: string
+  name?: string
   onChange?: (val: boolean) => void
   partialChecked?: boolean
-  checked?: boolean
-  id?: string
   path?: string
-  name?: string
 }

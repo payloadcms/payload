@@ -7,7 +7,7 @@ import './index.scss'
 const baseClass = 'error-pill'
 
 export const ErrorPill: React.FC<Props> = (props) => {
-  const { className, count, withMessage, i18n } = props
+  const { className, count, i18n, withMessage } = props
   const lessThan3Chars = !withMessage && count < 99
 
   const classes = [baseClass, lessThan3Chars && `${baseClass}--fixed-width`, className && className]

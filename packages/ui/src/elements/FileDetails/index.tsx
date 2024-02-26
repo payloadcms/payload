@@ -1,8 +1,8 @@
+import { isImage } from 'payload/utilities'
 import React from 'react'
 
 import type { Props } from './types'
 
-import { isImage } from 'payload/utilities'
 import { UploadActions } from '../../views/Edit/Upload'
 import { Button } from '../Button'
 import Thumbnail from '../Thumbnail'
@@ -12,7 +12,7 @@ import './index.scss'
 const baseClass = 'file-details'
 
 const FileDetails: React.FC<Props> = (props) => {
-  const { canEdit, collectionSlug, uploadConfig, doc, handleRemove, hasImageSizes, imageCacheTag } =
+  const { canEdit, collectionSlug, doc, handleRemove, hasImageSizes, imageCacheTag, uploadConfig } =
     props
 
   const { staticURL } = uploadConfig
@@ -22,7 +22,7 @@ const FileDetails: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <header>
-        <Thumbnail uploadConfig={uploadConfig} doc={doc} imageCacheTag={imageCacheTag} />
+        <Thumbnail doc={doc} imageCacheTag={imageCacheTag} uploadConfig={uploadConfig} />
         <div className={`${baseClass}__main-detail`}>
           <Meta
             collection={collectionSlug}

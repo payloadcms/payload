@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 
 // Pass a component from your routing library to override the default anchor tag.
 // @example

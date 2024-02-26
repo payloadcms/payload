@@ -1,18 +1,18 @@
 'use client'
-import { useModal } from '@faceless-ui/modal'
-import React, { useEffect, useState } from 'react'
-import { useTranslation } from '../../../../providers/Translation'
+import type { I18n } from '@payloadcms/translations'
 
+import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
+import React, { useEffect, useState } from 'react'
+
+import type { ReducedBlock } from '../../../../utilities/buildComponentMap/types'
 import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
-import type { I18n } from '@payloadcms/translations'
 import { Drawer } from '../../../../elements/Drawer'
 import { ThumbnailCard } from '../../../../elements/ThumbnailCard'
 import DefaultBlockImage from '../../../../graphics/DefaultBlockImage'
+import { useTranslation } from '../../../../providers/Translation'
 import BlockSearch from './BlockSearch'
-import { ReducedBlock } from '../../../../utilities/buildComponentMap/types'
-
 import './index.scss'
 
 const baseClass = 'blocks-drawer'

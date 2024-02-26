@@ -1,4 +1,4 @@
-import { Data, FieldAffectingData, SanitizedCollectionConfig, Where } from 'payload/types'
+import type { Data, FieldAffectingData, SanitizedCollectionConfig, Where } from 'payload/types'
 import type React from 'react'
 
 export type ListInfoProps = {
@@ -11,7 +11,7 @@ export type ListInfoProps = {
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
   hasCreatePermission: boolean
-  limit: number | SanitizedCollectionConfig['admin']['pagination']['defaultLimit']
+  limit: SanitizedCollectionConfig['admin']['pagination']['defaultLimit'] | number
   modifySearchParams?: false
   newDocumentURL: string
   setLimit?: (limit: number) => void

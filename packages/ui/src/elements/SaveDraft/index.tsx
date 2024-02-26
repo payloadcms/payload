@@ -1,16 +1,17 @@
 'use client'
-import React, { useCallback, useRef } from 'react'
-import { useTranslation } from '../../providers/Translation'
+import type { CustomSaveDraftButtonProps, DefaultSaveDraftButtonProps } from 'payload/types'
 
-import useHotkey from '../../hooks/useHotkey'
+import React, { useCallback, useRef } from 'react'
+
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import { useForm, useFormModified } from '../../forms/Form/context'
 import FormSubmit from '../../forms/Submit'
+import useHotkey from '../../hooks/useHotkey'
 import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useEditDepth } from '../../providers/EditDepth'
 import { useLocale } from '../../providers/Locale'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { CustomSaveDraftButtonProps, DefaultSaveDraftButtonProps } from 'payload/types'
+import { useTranslation } from '../../providers/Translation'
 
 const baseClass = 'save-draft'
 

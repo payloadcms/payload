@@ -1,14 +1,15 @@
 // import queryString from 'qs'
+import { getTranslation } from '@payloadcms/translations'
+import { flattenTopLevelFields } from 'payload/utilities'
 import React, { useReducer, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 // import type { Where } from 'payload/types'
 import type { Props } from './types'
 
-import { flattenTopLevelFields } from 'payload/utilities'
-import { getTranslation } from '@payloadcms/translations'
+import { useConfig } from '../../providers/Config'
 // import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useSearchParams } from '../../providers/SearchParams'
+import { useTranslation } from '../../providers/Translation'
 import { Button } from '../Button'
 import Condition from './Condition'
 import fieldTypes from './field-types'
@@ -16,7 +17,6 @@ import './index.scss'
 import reducer from './reducer'
 import { transformWhereQuery } from './transformWhereQuery'
 import validateWhereQuery from './validateWhereQuery'
-import { useConfig } from '../../providers/Config'
 
 const baseClass = 'where-builder'
 
@@ -59,7 +59,7 @@ const reduceFields = (fields, i18n) =>
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 const WhereBuilder: React.FC<Props> = (props) => {
-  const { collectionSlug, collectionPluralLabel, handleChange, modifySearchQuery = true } = props
+  const { collectionPluralLabel, collectionSlug, handleChange, modifySearchQuery = true } = props
   const { i18n, t } = useTranslation()
 
   const config = useConfig()

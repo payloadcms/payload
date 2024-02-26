@@ -1,18 +1,20 @@
 'use client'
+import type { ClientConfig } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
 import { useEffect } from 'react'
+
+import { formatDate } from '../../..'
+import { useFormFields } from '../../../forms/Form/context'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { useTranslation } from '../../../providers/Translation'
-import { ClientConfig } from 'payload/types'
-import { useFormFields } from '../../../forms/Form/context'
-import { formatDate } from '../../..'
-import { getTranslation } from '@payloadcms/translations'
 
 export const SetDocumentTitle: React.FC<{
+  collectionConfig?: ClientConfig['collections'][0]
   config?: ClientConfig
   globalConfig?: ClientConfig['globals'][0]
-  collectionConfig?: ClientConfig['collections'][0]
 }> = (props) => {
-  const { config, globalConfig, collectionConfig } = props
+  const { collectionConfig, config, globalConfig } = props
 
   const dateFormatFromConfig = config?.admin?.dateFormat
 

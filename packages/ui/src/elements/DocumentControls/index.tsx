@@ -1,11 +1,13 @@
 'use client'
-import React, { Fragment } from 'react'
-
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
-import { formatDate } from '../../utilities/formatDate'
+import React, { Fragment } from 'react'
+
+import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
+import { useTranslation } from '../../providers/Translation'
+import { formatDate } from '../../utilities/formatDate'
 import Autosave from '../Autosave'
 import DeleteDocument from '../DeleteDocument'
 import DuplicateDocument from '../DuplicateDocument'
@@ -17,9 +19,6 @@ import { Publish } from '../Publish'
 import { Save } from '../Save'
 import { SaveDraft } from '../SaveDraft'
 import Status from '../Status'
-import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
-
 import './index.scss'
 
 const baseClass = 'doc-controls'
@@ -214,8 +213,8 @@ export const DocumentControls: React.FC<{
                     </PopupList.Button>
                     {!collectionConfig?.admin?.disableDuplicate && isEditing && (
                       <DuplicateDocument
-                        singularLabel={collectionConfig?.labels?.singular}
                         id={id.toString()}
+                        singularLabel={collectionConfig?.labels?.singular}
                         slug={collectionConfig?.slug}
                       />
                     )}
@@ -225,9 +224,9 @@ export const DocumentControls: React.FC<{
                   <DeleteDocument
                     buttonId="action-delete"
                     collectionSlug={collectionConfig?.slug}
-                    useAsTitle={collectionConfig?.admin?.useAsTitle}
-                    singularLabel={collectionConfig?.labels?.singular}
                     id={id.toString()}
+                    singularLabel={collectionConfig?.labels?.singular}
+                    useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />
                 )}
               </PopupList.ButtonGroup>

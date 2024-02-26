@@ -1,8 +1,9 @@
 'use client'
-import React from 'react'
+import type { CellComponentProps, CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import type { CellComponentProps, CellProps } from 'payload/types'
+import React from 'react'
+
 import { useTranslation } from '../../../../../providers/Translation'
 
 export interface ArrayCellProps extends CellComponentProps<Record<string, unknown>[]> {

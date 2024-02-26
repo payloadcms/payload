@@ -1,17 +1,18 @@
 'use client'
+import type { Permissions, User } from 'payload/auth'
+
 import { useModal } from '@faceless-ui/modal'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
 import { toast } from 'react-toastify'
 
-import type { Permissions, User } from 'payload/auth'
 import type { AuthContext } from './types'
 
-import { requests } from '../../utilities/api'
 import useDebounce from '../../hooks/useDebounce'
+import { useTranslation } from '../../providers/Translation'
+import { requests } from '../../utilities/api'
 import { useConfig } from '../Config'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 // import { useLocale } from '../Locale'
 
 const Context = createContext({} as AuthContext)
@@ -297,10 +298,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshCookie,
         refreshCookieAsync,
         refreshPermissions,
+        setPermissions,
         setUser,
         token: tokenInMemory,
         user,
-        setPermissions,
       }}
     >
       {children}
