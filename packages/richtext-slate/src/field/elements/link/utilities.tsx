@@ -1,4 +1,4 @@
-import type { i18n } from 'i18next'
+import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 import type { Editor } from 'slate'
@@ -16,9 +16,9 @@ export const wrapLink = (editor: Editor): void => {
   const isCollapsed = selection && Range.isCollapsed(selection)
 
   const link = {
+    type: 'link',
     children: isCollapsed ? [{ text: '' }] : [],
     newTab: false,
-    type: 'link',
     url: undefined,
   }
 
@@ -35,10 +35,10 @@ export const wrapLink = (editor: Editor): void => {
  */
 export function transformExtraFields(
   customFieldSchema:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
+    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
     | Field[],
   config: SanitizedConfig,
-  i18n: i18n,
+  i18n: I18n,
 ): Field[] {
   const baseFields: Field[] = getBaseFields(config)
 
@@ -68,6 +68,7 @@ export function transformExtraFields(
   if (Array.isArray(customFieldSchema) || fields.length > 0) {
     fields.push({
       name: 'fields',
+      type: 'group',
       admin: {
         style: {
           borderBottom: 0,
@@ -79,7 +80,6 @@ export function transformExtraFields(
       fields: Array.isArray(customFieldSchema)
         ? customFieldSchema.concat(extraFields)
         : extraFields,
-      type: 'group',
     })
   }
   return fields

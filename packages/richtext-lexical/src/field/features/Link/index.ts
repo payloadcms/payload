@@ -1,4 +1,4 @@
-import type { i18n } from 'i18next'
+import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 
@@ -46,7 +46,7 @@ export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
    * displayed in the link editor drawer.
    */
   fields?:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
+    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
     | Field[]
 }
 
@@ -59,7 +59,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             FeaturesSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   import('../../lexical/ui/icons/Link').then((module) => module.LinkIcon),
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
@@ -99,6 +99,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         },
         nodes: [
           {
+            type: LinkNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -125,10 +126,10 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             },
             node: LinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-            type: LinkNode.getType(),
             // TODO: Add validation similar to upload for internal links and fields
           },
           {
+            type: AutoLinkNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -158,31 +159,30 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             },
             node: AutoLinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-            type: AutoLinkNode.getType(),
           },
         ],
         plugins: [
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugins/link').then((module) => module.LinkPlugin),
             position: 'normal',
           },
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugins/autoLink').then((module) => module.AutoLinkPlugin),
             position: 'normal',
           },
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugins/clickableLink').then((module) => module.ClickableLinkPlugin),
             position: 'normal',
           },
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugins/floatingLinkEditor').then((module) => {
                 const floatingLinkEditorPlugin = module.FloatingLinkEditorPlugin
                 return import('@payloadcms/ui').then((module) =>
