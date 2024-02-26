@@ -10,7 +10,7 @@ export const auth = cache(
     headers,
   }: {
     config: Promise<SanitizedConfig> | SanitizedConfig
-    headers: any
+    headers: Request['headers']
   }) => {
     const cookies = parseCookies(headers)
     const payload = await getPayload({ config })
