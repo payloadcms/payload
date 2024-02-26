@@ -7,7 +7,7 @@ import { mediaSlug } from '../shared'
 export const Media: CollectionConfig = {
   slug: mediaSlug,
   upload: {
-    staticDir: path.resolve(__dirname, '../media'),
+    staticDir: path.resolve(process.cwd(), 'test/plugin-seo/media'),
   },
   fields: [
     {

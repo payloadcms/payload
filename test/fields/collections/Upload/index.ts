@@ -7,7 +7,7 @@ import { uploadsSlug } from '../../slugs'
 const Uploads: CollectionConfig = {
   slug: uploadsSlug,
   upload: {
-    staticDir: path.resolve(__dirname, './uploads'),
+    staticDir: path.resolve(process.cwd(), 'test/fields/collections/Upload/uploads'),
   },
   fields: [
     {
