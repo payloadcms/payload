@@ -68,7 +68,7 @@ export const initPage = async ({
     config,
   })
 
-  const i18n = await initI18n({
+  const i18n = initI18n({
     config: config.i18n,
     context: 'client',
     language,

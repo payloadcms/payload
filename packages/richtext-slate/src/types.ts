@@ -1,4 +1,4 @@
-import type { i18n as Ii18n } from 'i18next'
+import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field, RichTextFieldProps } from 'payload/types'
 import type { Editor } from 'slate'
@@ -59,7 +59,7 @@ export type AdapterArguments = {
     leaves?: RichTextLeaf[]
     link?: {
       fields?:
-        | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: Ii18n }) => Field[])
+        | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
         | Field[]
     }
     placeholder?: Record<string, string> | string
