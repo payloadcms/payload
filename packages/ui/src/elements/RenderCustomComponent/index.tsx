@@ -11,5 +11,9 @@ export const RenderCustomComponent: React.FC<{
     return <CustomComponent {...componentProps} />
   }
 
-  return <DefaultComponent {...componentProps} />
+  if (DefaultComponent) {
+    return <DefaultComponent {...componentProps} />
+  }
+
+  return null
 }

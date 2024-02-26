@@ -4,7 +4,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
-import type { EditViewProps } from '../../../../views/types'
+import type { EditViewProps } from '../../../../../../next/src/pages/Edit/types'
 import type { Value } from '../types'
 import type { Props } from './types'
 

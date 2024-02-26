@@ -6,11 +6,12 @@ import React from 'react'
 
 import type { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
 
-import { DefaultEditView } from '../../views/Edit'
-import { DefaultList } from '../../views/List'
 import { mapFields } from './mapFields'
 
 export const buildComponentMap = (args: {
+  DefaultCell: React.FC<any>
+  DefaultEditView: React.FC<EditViewProps>
+  DefaultListView: React.FC<EditViewProps>
   config: SanitizedConfig
   operation?: 'create' | 'update'
   permissions?:
@@ -20,7 +21,15 @@ export const buildComponentMap = (args: {
     | FieldPermissions
   readOnly?: boolean
 }): ComponentMap => {
-  const { config, operation = 'update', permissions, readOnly: readOnlyOverride } = args
+  const {
+    DefaultCell,
+    DefaultEditView,
+    DefaultListView,
+    config,
+    operation = 'update',
+    permissions,
+    readOnly: readOnlyOverride,
+  } = args
 
   // Collections
   const collections = config.collections.reduce((acc, collectionConfig) => {
@@ -49,7 +58,7 @@ export const buildComponentMap = (args: {
           : undefined
 
     const Edit = CustomEditView || DefaultEditView
-    const List = CustomListView || DefaultList
+    const List = CustomListView || DefaultListView
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList
 
@@ -60,22 +69,27 @@ export const buildComponentMap = (args: {
     const afterListTable = collectionConfig?.admin?.components?.AfterListTable
 
     const BeforeList =
-      beforeList && Array.isArray(beforeList) && beforeList?.map((Component) => <Component />)
+      (beforeList && Array.isArray(beforeList) && beforeList?.map((Component) => <Component />)) ||
+      null
 
     const BeforeListTable =
-      beforeListTable &&
-      Array.isArray(beforeListTable) &&
-      beforeListTable?.map((Component) => <Component />)
+      (beforeListTable &&
+        Array.isArray(beforeListTable) &&
+        beforeListTable?.map((Component) => <Component />)) ||
+      null
 
     const AfterList =
-      afterList && Array.isArray(afterList) && afterList?.map((Component) => <Component />)
+      (afterList && Array.isArray(afterList) && afterList?.map((Component) => <Component />)) ||
+      null
 
     const AfterListTable =
-      afterListTable &&
-      Array.isArray(afterListTable) &&
-      afterListTable?.map((Component) => <Component />)
+      (afterListTable &&
+        Array.isArray(afterListTable) &&
+        afterListTable?.map((Component) => <Component />)) ||
+      null
 
     const mappedFields = mapFields({
+      DefaultCell,
       config,
       fieldSchema: fields,
       operation,
@@ -104,6 +118,7 @@ export const buildComponentMap = (args: {
     const { fields, slug } = globalConfig
 
     const mappedFields = mapFields({
+      DefaultCell,
       config,
       fieldSchema: fields,
       operation,

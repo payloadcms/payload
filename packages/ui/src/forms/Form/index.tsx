@@ -146,7 +146,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid
-  }, [id, user, operation, t, dispatchFields, config, beforeSubmit])
+  }, [id, user, operation, t, dispatchFields, config])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
@@ -352,6 +352,8 @@ const Form: React.FC<Props> = (props) => {
       t,
       i18n,
       waitForAutocomplete,
+      beforeSubmit,
+      debouncedFormState,
     ],
   )
 
@@ -415,7 +417,7 @@ const Form: React.FC<Props> = (props) => {
       setModified(false)
       // dispatchFields({ state, type: 'REPLACE_STATE' })
     },
-    [id, user, operation, locale, t, dispatchFields, getDocPreferences, config],
+    [getDocPreferences],
   )
 
   const replaceState = useCallback(
@@ -508,9 +510,9 @@ const Form: React.FC<Props> = (props) => {
         }
       }
 
-      executeOnChange()
+      executeOnChange() // eslint-disable-line @typescript-eslint/no-floating-promises
     }
-  }, [debouncedFormState])
+  }, [debouncedFormState, dispatchFields, onChange])
 
   return (
     <form

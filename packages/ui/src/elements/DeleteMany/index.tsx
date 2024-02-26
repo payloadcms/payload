@@ -8,10 +8,10 @@ import type { Props } from './types'
 
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
+import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider'
 import { useTranslation } from '../../providers/Translation'
 // import { requests } from '../../../api'
 import { MinimalTemplate } from '../../templates/Minimal'
-import { SelectAllStatus, useSelection } from '../../views/List/SelectionProvider'
 import { Button } from '../Button'
 import Pill from '../Pill'
 import './index.scss'
@@ -70,20 +70,7 @@ const DeleteMany: React.FC<Props> = (props) => {
     //       return addDefaultError()
     //     }
     //   })
-  }, [
-    addDefaultError,
-    api,
-    getQueryParams,
-    i18n.language,
-    modalSlug,
-    resetParams,
-    selectAll,
-    serverURL,
-    slug,
-    t,
-    toggleAll,
-    toggleModal,
-  ])
+  }, [])
 
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
     return null

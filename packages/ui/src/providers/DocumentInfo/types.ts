@@ -22,7 +22,7 @@ export type DocumentInfoProps = {
   collectionSlug?: SanitizedCollectionConfig['slug']
   disableActions?: boolean
   disableLeaveWithoutSaving?: boolean
-  docPermissions: DocumentPermissions
+  docPermissions?: DocumentPermissions
   docPreferences?: DocumentPreferences
   globalSlug?: SanitizedGlobalConfig['slug']
   hasSavePermission?: boolean

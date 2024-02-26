@@ -1,5 +1,4 @@
 export * from './elements'
-export * from './views'
 export * from './forms'
 export * from './hooks'
 export * from './providers'

@@ -1,3 +1,4 @@
+'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React from 'react'
 import { useHistory } from 'react-router-dom'
