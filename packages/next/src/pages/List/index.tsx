@@ -1,32 +1,35 @@
-import { SanitizedConfig } from 'payload/types'
-import React, { Fragment } from 'react'
+import type { DefaultListViewProps } from '@payloadcms/ui'
+import type { SanitizedConfig } from 'payload/types'
+
 import {
-  RenderCustomComponent,
   DefaultList,
   HydrateClientUser,
-  DefaultListViewProps,
+  RenderCustomComponent,
   TableColumnsProvider,
 } from '@payloadcms/ui'
-import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
-import { ListPreferences } from '../../../../ui/src/views/List/types'
+import React, { Fragment } from 'react'
+
+import type { ListPreferences } from '../../../../ui/src/views/List/types'
+
 import { ListInfoProvider } from '../../../../ui/src/providers/ListInfo'
+import { initPage } from '../../utilities/initPage'
 
 export const ListView = async ({
   collectionSlug,
   config: configPromise,
-  searchParams,
   route,
+  searchParams,
 }: {
   collectionSlug: string
   config: Promise<SanitizedConfig>
-  searchParams: { [key: string]: string | string[] | undefined }
   route
+  searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user, collectionConfig } = await initPage({
+  const { collectionConfig, config, payload, permissions, user } = await initPage({
+    collectionSlug,
     config: configPromise,
     redirectUnauthenticatedUser: true,
-    collectionSlug,
     route,
     searchParams,
   })
@@ -37,13 +40,13 @@ export const ListView = async ({
     listPreferences = (await payload
       .find({
         collection: 'payload-preferences',
+        depth: 0,
+        limit: 1,
         where: {
           key: {
             equals: `${collectionSlug}-list`,
           },
         },
-        limit: 1,
-        depth: 0,
       })
       ?.then((res) => res?.docs?.[0]?.value)) as unknown as ListPreferences
   } catch (error) {}
@@ -80,13 +83,13 @@ export const ListView = async ({
 
     return (
       <Fragment>
-        <HydrateClientUser user={user} permissions={permissions} />
+        <HydrateClientUser permissions={permissions} user={user} />
         <ListInfoProvider
+          collectionSlug={collectionSlug}
           data={data}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
           limit={limit}
           newDocumentURL={`${admin}/collections/${collectionSlug}/create`}
-          collectionSlug={collectionSlug}
         >
           <TableColumnsProvider collectionSlug={collectionSlug} listPreferences={listPreferences}>
             <RenderCustomComponent

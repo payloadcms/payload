@@ -1,22 +1,22 @@
-import React from 'react'
+import type { Metadata } from 'next'
+import type { SanitizedConfig } from 'payload/types'
 
 import {
-  MinimalTemplate,
   Button,
+  ConfirmPassword,
   Form,
   FormSubmit,
-  ConfirmPassword,
   HiddenInput,
+  MinimalTemplate,
   Password,
   Translation,
 } from '@payloadcms/ui'
-import { SanitizedConfig } from 'payload/types'
 import Link from 'next/link'
-import { initPage } from '../../utilities/initPage'
-import { Metadata } from 'next'
-import { meta } from '../../utilities/meta'
-import { getNextT } from '../../utilities/getNextT'
+import React from 'react'
 
+import { getNextT } from '../../utilities/getNextT'
+import { initPage } from '../../utilities/initPage'
+import { meta } from '../../utilities/meta'
 import './index.scss'
 
 const baseClass = 'reset-password'
@@ -31,10 +31,10 @@ export const generateMetadata = async ({
   })
 
   return meta({
-    title: t('authentication:resetPassword'),
+    config,
     description: t('authentication:resetPassword'),
     keywords: t('authentication:resetPassword'),
-    config,
+    title: t('authentication:resetPassword'),
   })
 }
 
@@ -42,7 +42,7 @@ export const ResetPassword: React.FC<{
   config: Promise<SanitizedConfig>
   token: string
 }> = async ({ config: configPromise, token }) => {
-  const { config, user, i18n } = await initPage({ config: configPromise })
+  const { config, i18n, user } = await initPage({ config: configPromise })
 
   const {
     admin: { logoutRoute, user: userSlug },
@@ -67,11 +67,11 @@ export const ResetPassword: React.FC<{
           <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
           <p>
             <Translation
-              t={i18n.t}
-              i18nKey="authentication:loggedInChangePassword"
               elements={{
-                '0': ({ children }) => <Link href={`${admin}/account`} children={children} />,
+                '0': ({ children }) => <Link children={children} href={`${admin}/account`} />,
               }}
+              i18nKey="authentication:loggedInChangePassword"
+              t={i18n.t}
             />
           </p>
           <br />

@@ -1,12 +1,14 @@
-import { getTranslation, I18n } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
+import type { OptionObject, SelectField } from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { OptionObject, SelectField } from 'payload/types'
 import type { Props } from '../types'
+
 import Label from '../../Label'
 import { diffStyles } from '../styles'
 import { DiffViewer } from './DiffViewer'
-
 import './index.scss'
 
 const baseClass = 'select-diff'
@@ -42,7 +44,7 @@ const getTranslatedOptions = (
   return typeof options === 'string' ? options : getTranslation(options.label, i18n)
 }
 
-const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, version, i18n }) => {
+const Select: React.FC<Props> = ({ comparison, diffMethod, field, i18n, locale, version }) => {
   let placeholder = ''
 
   if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
@@ -64,11 +66,11 @@ const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, versio
         {getTranslation(field.label || '', i18n)}
       </Label>
       <DiffViewer
-        diffMethod={diffMethod}
-        versionToRender={versionToRender}
         comparisonToRender={comparisonToRender}
-        placeholder={placeholder}
+        diffMethod={diffMethod}
         diffStyles={diffStyles}
+        placeholder={placeholder}
+        versionToRender={versionToRender}
       />
     </div>
   )

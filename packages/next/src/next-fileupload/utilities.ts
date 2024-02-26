@@ -1,7 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
-import { NextFileUploadOptions } from '.'
+
+import type { NextFileUploadOptions } from '.'
 
 // Parameters for safe file name parsing.
 const SAFE_FILE_NAME_REGEX = /[^\w-]/g
@@ -132,16 +133,16 @@ type CopyFile = (src: string, dst: string, callback: (err: Error) => void) => vo
 const copyFile: CopyFile = (src, dst, callback) => {
   // cbCalled flag and runCb helps to run cb only once.
   let cbCalled = false
-  let runCb = (err?: Error) => {
+  const runCb = (err?: Error) => {
     if (cbCalled) return
     cbCalled = true
     callback(err)
   }
   // Create read stream
-  let readable = fs.createReadStream(src)
+  const readable = fs.createReadStream(src)
   readable.on('error', runCb)
   // Create write stream
-  let writable = fs.createWriteStream(dst)
+  const writable = fs.createWriteStream(dst)
   writable.on('error', (err: Error) => {
     readable.destroy()
     runCb(err)
@@ -182,13 +183,13 @@ export const saveBufferToFile = (buffer, filePath, callback) => {
   }
   // Setup readable stream from buffer.
   let streamData = buffer
-  let readStream = new Readable()
+  const readStream = new Readable()
   readStream._read = () => {
     readStream.push(streamData)
     streamData = null
   }
   // Setup file system writable stream.
-  let fstream = fs.createWriteStream(filePath)
+  const fstream = fs.createWriteStream(filePath)
   // console.log("Calling saveBuffer");
   fstream.on('error', (err) => {
     // console.log("err cb")
@@ -217,7 +218,7 @@ const uriDecodeFileName = (opts, fileName) => {
   try {
     return decodeURIComponent(fileName)
   } catch (err) {
-    const matcher = /(%[a-f0-9]{2})/gi
+    const matcher = /(%[a-f\d]{2})/gi
     return fileName
       .split(matcher)
       .map((str) => {
@@ -238,8 +239,8 @@ type ParseFileNameExtension = (
   preserveExtension: boolean | number,
   fileName: string,
 ) => {
-  name: string
   extension: string
+  name: string
 }
 export const parseFileNameExtension: ParseFileNameExtension = (preserveExtension, fileName) => {
   const defaultResult = {

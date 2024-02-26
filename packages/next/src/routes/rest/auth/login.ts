@@ -1,10 +1,11 @@
 import httpStatus from 'http-status'
+import { generatePayloadCookie } from 'payload/auth'
 import { loginOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
-import { generatePayloadCookie } from 'payload/auth'
-import { CollectionRouteHandler } from '../types'
 
-export const login: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const login: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
@@ -19,9 +20,9 @@ export const login: CollectionRouteHandler = async ({ req, collection }) => {
   })
 
   const cookie = generatePayloadCookie({
-    token: result.token,
-    payload: req.payload,
     collectionConfig: collection.config,
+    payload: req.payload,
+    token: result.token,
   })
 
   if (collection.config.auth.removeTokenFromResponses) {

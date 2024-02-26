@@ -1,41 +1,42 @@
+import type { SanitizedConfig } from 'payload/types'
+
 import { getPayload } from 'payload'
-import { getAuthenticatedUser, getAccessResults } from 'payload/auth'
-import { SanitizedConfig } from 'payload/types'
+import { getAccessResults, getAuthenticatedUser } from 'payload/auth'
 import { cache } from 'react'
 
 export const auth = cache(
   async ({
-    headers,
     config,
     cookies,
+    headers,
   }: {
-    headers: any
-    config: SanitizedConfig | Promise<SanitizedConfig>
+    config: Promise<SanitizedConfig> | SanitizedConfig
     cookies: Map<string, string>
+    headers: any
   }) => {
     const payload = await getPayload({ config })
 
     const user = await getAuthenticatedUser({
+      cookies,
       headers,
       payload,
-      cookies,
     })
 
     const permissions = await getAccessResults({
       req: {
-        user,
-        payload,
         context: {},
-        payloadAPI: 'REST',
         headers,
         i18n: undefined,
+        payload,
+        payloadAPI: 'REST',
         t: undefined,
+        user,
       },
     })
 
     return {
-      user,
       permissions,
+      user,
     }
   },
 )

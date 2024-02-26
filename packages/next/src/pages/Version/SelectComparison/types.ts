@@ -1,11 +1,12 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
 import type { PaginatedDocs } from 'payload/database'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import type { CompareOption } from '../Default/types'
 
 export type Props = {
   baseURL: string
   onChange: (val: CompareOption) => void
-  parentID?: string | number
+  parentID?: number | string
   publishedDoc: any
   value: CompareOption
   versionID: string

@@ -1,7 +1,7 @@
 'use client'
+import { Chevron } from '@payloadcms/ui'
 import * as React from 'react'
 
-import { Chevron } from '@payloadcms/ui'
 import './index.scss'
 
 const chars = {

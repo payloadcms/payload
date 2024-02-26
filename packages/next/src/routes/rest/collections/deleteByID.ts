@@ -1,10 +1,10 @@
 import httpStatus from 'http-status'
-
-import { isNumber } from 'payload/utilities'
 import { deleteByIDOperation } from 'payload/operations'
-import { CollectionRouteHandlerWithID } from '../types'
+import { isNumber } from 'payload/utilities'
 
-export const deleteByID: CollectionRouteHandlerWithID = async ({ req, collection, id }) => {
+import type { CollectionRouteHandlerWithID } from '../types'
+
+export const deleteByID: CollectionRouteHandlerWithID = async ({ id, collection, req }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
   const doc = await deleteByIDOperation({

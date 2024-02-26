@@ -1,62 +1,63 @@
-import { headers as getHeaders } from 'next/headers'
-import qs from 'qs'
-
-import { auth } from './auth'
-
-import { getPayload } from 'payload'
+import type { I18n } from '@payloadcms/translations'
+import type { Permissions } from 'payload/auth'
 import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
-import { redirect } from 'next/navigation'
-import { Permissions, parseCookies } from 'payload/auth'
-import { getRequestLanguage } from './getRequestLanguage'
-import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
-import type { I18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/client'
+
 import { initI18n } from '@payloadcms/translations'
+import { translations } from '@payloadcms/translations/client'
+import { headers as getHeaders } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
+import { parseCookies } from 'payload/auth'
+import qs from 'qs'
+
+import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
+import { auth } from './auth'
+import { getRequestLanguage } from './getRequestLanguage'
 
 export const initPage = async ({
-  config: configPromise,
-  redirectUnauthenticatedUser = false,
   collectionSlug,
+  config: configPromise,
   globalSlug,
   localeParam,
-  searchParams,
+  redirectUnauthenticatedUser = false,
   route,
+  searchParams,
 }: {
-  config: SanitizedConfig | Promise<SanitizedConfig>
-  redirectUnauthenticatedUser?: boolean
   collectionSlug?: string
+  config: Promise<SanitizedConfig> | SanitizedConfig
   globalSlug?: string
   localeParam?: string
-  searchParams?: { [key: string]: string | string[] | undefined }
+  redirectUnauthenticatedUser?: boolean
   route?: string
+  searchParams?: { [key: string]: string | string[] | undefined }
 }): Promise<{
+  collectionConfig?: SanitizedCollectionConfig
+  config: SanitizedConfig
+  globalConfig?: SanitizedGlobalConfig
+  i18n: I18n
+  locale: ReturnType<typeof findLocaleFromCode>
   payload: Awaited<ReturnType<typeof getPayload>>
   permissions: Permissions
   user: Awaited<ReturnType<typeof auth>>['user']
-  config: SanitizedConfig
-  i18n: I18n
-  collectionConfig?: SanitizedCollectionConfig
-  globalConfig?: SanitizedGlobalConfig
-  locale: ReturnType<typeof findLocaleFromCode>
 }> => {
   const headers = getHeaders()
   const cookies = parseCookies(headers)
 
   const { permissions, user } = await auth({
-    headers,
     config: configPromise,
     cookies,
+    headers,
   })
 
   const language = getRequestLanguage({ cookies, headers })
 
   const config = await configPromise
 
-  const { localization, routes, collections, globals } = config
+  const { collections, globals, localization, routes } = config
 
   if (redirectUnauthenticatedUser && !user && route !== '/login') {
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
@@ -72,9 +73,9 @@ export const initPage = async ({
 
   const i18n = await initI18n({
     config: config.i18n,
+    context: 'all',
     language,
     translations,
-    context: 'all',
   })
   let collectionConfig: SanitizedCollectionConfig
   let globalConfig: SanitizedGlobalConfig
@@ -95,13 +96,13 @@ export const initPage = async ({
   const locale = localization && findLocaleFromCode(localization, localeCode)
 
   return {
+    collectionConfig,
+    config,
+    globalConfig,
+    i18n,
+    locale,
     payload,
     permissions,
     user,
-    config,
-    i18n,
-    collectionConfig,
-    globalConfig,
-    locale,
   }
 }

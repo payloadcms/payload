@@ -1,21 +1,22 @@
-import { NextFileUploadOptions } from '.'
-
+import crypto from 'crypto'
 import fs, { WriteStream } from 'fs'
 import path from 'path'
-import crypto from 'crypto'
-import { debugLog, checkAndMakeDir, getTempFilename, deleteFile } from './utilities'
+
+import type { NextFileUploadOptions } from '.'
+
+import { checkAndMakeDir, debugLog, deleteFile, getTempFilename } from './utilities'
 
 type Handler = (
   options: NextFileUploadOptions,
   fieldname: string,
   filename: string,
 ) => {
+  cleanup: () => void
+  complete: () => Buffer
   dataHandler: (data: Buffer) => void
   getFilePath: () => string
   getFileSize: () => number
   getHash: () => string
-  complete: () => Buffer
-  cleanup: () => void
   getWritePromise: () => Promise<boolean>
 }
 
@@ -41,6 +42,23 @@ export const tempFileHandler: Handler = (options, fieldname, filename) => {
   })
 
   return {
+    cleanup: () => {
+      completed = true
+      debugLog(options, `Cleaning up temporary file ${tempFilePath}...`)
+      writeStream.end()
+      deleteFile(tempFilePath, (err) =>
+        err
+          ? debugLog(options, `Cleaning up temporary file ${tempFilePath} failed: ${err}`)
+          : debugLog(options, `Cleaning up temporary file ${tempFilePath} done.`),
+      )
+    },
+    complete: () => {
+      completed = true
+      debugLog(options, `Upload ${fieldname}->${filename} completed, bytes:${fileSize}.`)
+      if (writeStream instanceof WriteStream) writeStream.end()
+      // Return empty buff since data was uploaded into a temp file.
+      return Buffer.concat([])
+    },
     dataHandler: (data) => {
       if (completed === true) {
         debugLog(options, `Error: got ${fieldname}->${filename} data chunk for completed upload!`)
@@ -54,23 +72,6 @@ export const tempFileHandler: Handler = (options, fieldname, filename) => {
     getFilePath: () => tempFilePath,
     getFileSize: () => fileSize,
     getHash: () => hash.digest('hex'),
-    complete: () => {
-      completed = true
-      debugLog(options, `Upload ${fieldname}->${filename} completed, bytes:${fileSize}.`)
-      if (writeStream instanceof WriteStream) writeStream.end()
-      // Return empty buff since data was uploaded into a temp file.
-      return Buffer.concat([])
-    },
-    cleanup: () => {
-      completed = true
-      debugLog(options, `Cleaning up temporary file ${tempFilePath}...`)
-      writeStream.end()
-      deleteFile(tempFilePath, (err) =>
-        err
-          ? debugLog(options, `Cleaning up temporary file ${tempFilePath} failed: ${err}`)
-          : debugLog(options, `Cleaning up temporary file ${tempFilePath} done.`),
-      )
-    },
     getWritePromise: () => writePromise,
   }
 }
@@ -84,6 +85,14 @@ export const memHandler: Handler = (options, fieldname, filename) => {
   const getBuffer = () => Buffer.concat(buffers, fileSize)
 
   return {
+    cleanup: () => {
+      completed = true
+    },
+    complete: () => {
+      debugLog(options, `Upload ${fieldname}->${filename} completed, bytes:${fileSize}.`)
+      completed = true
+      return getBuffer()
+    },
     dataHandler: (data) => {
       if (completed === true) {
         debugLog(options, `Error: got ${fieldname}->${filename} data chunk for completed upload!`)
@@ -97,14 +106,6 @@ export const memHandler: Handler = (options, fieldname, filename) => {
     getFilePath: () => '',
     getFileSize: () => fileSize,
     getHash: () => hash.digest('hex'),
-    complete: () => {
-      debugLog(options, `Upload ${fieldname}->${filename} completed, bytes:${fileSize}.`)
-      completed = true
-      return getBuffer()
-    },
-    cleanup: () => {
-      completed = true
-    },
     getWritePromise: () => Promise.resolve(true),
   }
 }

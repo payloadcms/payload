@@ -1,15 +1,16 @@
 'use client'
-import React, { Fragment, useEffect } from 'react'
-import { useAuth } from '../../../../ui/src/providers/Auth'
 import { Button, useTranslation } from '@payloadcms/ui'
 import Link from 'next/link'
+import React, { Fragment, useEffect } from 'react'
+
+import { useAuth } from '../../../../ui/src/providers/Auth'
 
 export const LogoutClient: React.FC<{
-  inactivity?: boolean
   adminRoute: string
+  inactivity?: boolean
   redirect: string
 }> = (props) => {
-  const { inactivity, adminRoute, redirect } = props
+  const { adminRoute, inactivity, redirect } = props
 
   const [isLoggingOut, setIsLoggingOut] = React.useState<boolean | undefined>(undefined)
   const { logOut } = useAuth()
@@ -28,12 +29,12 @@ export const LogoutClient: React.FC<{
         {inactivity && <h2>{t('authentication:loggedOutInactivity')}</h2>}
         {!inactivity && <h2>{t('authentication:loggedOutSuccessfully')}</h2>}
         <Button
+          Link={Link}
           buttonStyle="secondary"
           el="link"
           url={`${adminRoute}/login${
             redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
           }`}
-          Link={Link}
         >
           {t('authentication:logBackIn')}
         </Button>

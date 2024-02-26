@@ -9,13 +9,13 @@ const baseClass = 'tabs-diff'
 
 const Tabs: React.FC<Props> = ({
   comparison,
+  diffComponents,
   field,
+  i18n,
+  locale,
   locales,
   permissions,
   version,
-  i18n,
-  locale,
-  diffComponents,
 }) => {
   return (
     <div className={baseClass}>
@@ -25,15 +25,15 @@ const Tabs: React.FC<Props> = ({
             return (
               <Nested
                 comparison={comparison?.[tab.name]}
+                diffComponents={diffComponents}
+                field={field}
                 fieldMap={tab.subfields}
+                i18n={i18n}
                 key={i}
+                locale={locale}
                 locales={locales}
                 permissions={permissions}
                 version={version?.[tab.name]}
-                i18n={i18n}
-                locale={locale}
-                field={field}
-                diffComponents={diffComponents}
               />
             )
           }
@@ -41,13 +41,13 @@ const Tabs: React.FC<Props> = ({
           return (
             <RenderFieldsToDiff
               comparison={comparison}
+              diffComponents={diffComponents}
               fieldMap={tab.subfields}
               fieldPermissions={permissions}
+              i18n={i18n}
               key={i}
               locales={locales}
               version={version}
-              i18n={i18n}
-              diffComponents={diffComponents}
             />
           )
         })}

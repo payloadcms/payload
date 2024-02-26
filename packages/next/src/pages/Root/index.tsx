@@ -1,5 +1,6 @@
+import type { SanitizedConfig } from 'payload/types'
+
 import { redirect } from 'next/navigation'
-import { SanitizedConfig } from 'payload/types'
 
 export const RootPage = async ({ config: configPromise }: { config: Promise<SanitizedConfig> }) => {
   const config = await configPromise

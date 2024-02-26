@@ -1,9 +1,9 @@
 import httpStatus from 'http-status'
-
 import { verifyEmailOperation } from 'payload/operations'
-import { CollectionRouteHandlerWithID } from '../types'
 
-export const verifyEmail: CollectionRouteHandlerWithID = async ({ req, id, collection }) => {
+import type { CollectionRouteHandlerWithID } from '../types'
+
+export const verifyEmail: CollectionRouteHandlerWithID = async ({ id, collection, req }) => {
   await verifyEmailOperation({
     collection,
     req,

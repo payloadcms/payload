@@ -1,11 +1,13 @@
-import { renderPlaygroundPage } from 'graphql-playground-html'
-import { createPayloadRequest } from '../../utilities/createPayloadRequest'
 import type { SanitizedConfig } from 'payload/types'
+
+import { renderPlaygroundPage } from 'graphql-playground-html'
+
+import { createPayloadRequest } from '../../utilities/createPayloadRequest'
 
 export const GET = (config: Promise<SanitizedConfig>) => async (request: Request) => {
   const req = await createPayloadRequest({
-    request,
     config,
+    request,
   })
 
   if (
@@ -16,16 +18,16 @@ export const GET = (config: Promise<SanitizedConfig>) => async (request: Request
   ) {
     return new Response(
       renderPlaygroundPage({
+        endpoint: `${req.payload.config.routes.api}${req.payload.config.routes.graphQL}`,
         settings: {
           'request.credentials': 'include',
         },
-        endpoint: `${req.payload.config.routes.api}${req.payload.config.routes.graphQL}`,
       }),
       {
-        status: 200,
         headers: {
           'Content-Type': 'text/html',
         },
+        status: 200,
       },
     )
   } else {

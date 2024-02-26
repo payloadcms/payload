@@ -1,13 +1,14 @@
+import type { Option, ServerSideEditViewProps } from '@payloadcms/ui'
+import type { CollectionPermission, GlobalPermission } from 'payload/auth'
+import type { Document } from 'payload/types'
+
+import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { DefaultVersionView } from './Default'
-import { Document } from 'payload/types'
-import type { Option, ServerSideEditViewProps } from '@payloadcms/ui'
-import { CollectionPermission, GlobalPermission } from 'payload/auth'
-import { notFound } from 'next/navigation'
 
 export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
-  const { config, permissions, payload, user, params } = props
+  const { config, params, payload, permissions, user } = props
 
   const versionID = params.segments[2]
 
@@ -33,23 +34,23 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
 
     try {
       doc = await payload.findVersionByID({
-        collection: slug,
         id: versionID,
+        collection: slug,
         depth: 1,
         locale: '*',
       })
 
       publishedDoc = await payload.findByID({
-        collection: slug,
         id,
+        collection: slug,
         depth: 1,
         draft: false,
         locale: '*',
       })
 
       mostRecentDoc = await payload.findByID({
-        collection: slug,
         id,
+        collection: slug,
         depth: 1,
         draft: true,
         locale: '*',
@@ -65,24 +66,24 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
 
     try {
       doc = payload.findGlobalVersionByID({
-        slug,
         id: versionID,
         depth: 1,
         locale: '*',
+        slug,
       })
 
       publishedDoc = payload.findGlobal({
-        slug,
         depth: 1,
         draft: false,
         locale: '*',
+        slug,
       })
 
       mostRecentDoc = payload.findGlobal({
-        slug,
         depth: 1,
         draft: true,
         locale: '*',
+        slug,
       })
     } catch (error) {
       return notFound()
@@ -104,17 +105,17 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
   return (
     <DefaultVersionView
       collectionSlug={collectionSlug}
-      globalSlug={globalSlug}
-      initialComparisonDoc={mostRecentDoc}
       doc={doc}
+      docPermissions={docPermissions}
+      globalSlug={globalSlug}
+      id={id}
+      initialComparisonDoc={mostRecentDoc}
       localeOptions={localeOptions}
       mostRecentDoc={mostRecentDoc}
-      id={id}
       permissions={permissions}
       publishedDoc={publishedDoc}
       user={user}
       versionID={versionID}
-      docPermissions={docPermissions}
     />
   )
 }

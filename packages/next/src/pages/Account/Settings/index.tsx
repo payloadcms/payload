@@ -1,8 +1,8 @@
 'use client'
-import React from 'react'
+import { Label, ReactSelect } from '@payloadcms/ui'
 import { useTranslation } from '@payloadcms/ui/providers'
+import React from 'react'
 
-import { ReactSelect, Label } from '@payloadcms/ui'
 import { ToggleTheme } from '../ToggleTheme'
 import './index.scss'
 
@@ -13,7 +13,7 @@ export const Settings: React.FC<{
 }> = (props) => {
   const { className } = props
 
-  const { i18n, t, languageOptions } = useTranslation()
+  const { i18n, languageOptions, t } = useTranslation()
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>

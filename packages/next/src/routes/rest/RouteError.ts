@@ -1,6 +1,7 @@
 import type { Collection, PayloadRequest } from 'payload/types'
-import { APIError } from 'payload/errors'
+
 import httpStatus from 'http-status'
+import { APIError } from 'payload/errors'
 
 export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
 
@@ -58,13 +59,13 @@ const formatErrors = (incoming: { [key: string]: unknown } | APIError | Error): 
 }
 
 export const RouteError = async ({
-  req,
-  err,
   collection,
+  err,
+  req,
 }: {
-  req: PayloadRequest
-  err: APIError
   collection?: Collection
+  err: APIError
+  req: PayloadRequest
 }) => {
   if (!req?.payload) {
     return Response.json(

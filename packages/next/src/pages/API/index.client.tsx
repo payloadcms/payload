@@ -1,34 +1,35 @@
 'use client'
-import * as React from 'react'
+import type { EditViewProps } from 'payload/config'
 
 import {
-  CopyToClipboard,
-  Gutter,
   Checkbox,
-  SetDocumentStepNav as SetStepNav,
+  CopyToClipboard,
   Form,
-  Select,
-  Number as NumberInput,
-  useConfig,
+  Gutter,
   MinimizeMaximize,
+  Number as NumberInput,
+  Select,
+  SetDocumentStepNav as SetStepNav,
   useActions,
-  useTranslation,
-  useLocale,
+  useConfig,
   useDocumentInfo,
+  useLocale,
+  useTranslation,
 } from '@payloadcms/ui'
-import { RenderJSON } from './RenderJSON'
 import { useSearchParams } from 'next/navigation'
 import qs from 'qs'
+import * as React from 'react'
 import { toast } from 'react-toastify'
+
+import { RenderJSON } from './RenderJSON'
 import './index.scss'
-import { EditViewProps } from 'payload/config'
 
 const baseClass = 'query-inspector'
 
 export const APIViewClient: React.FC<EditViewProps> = (props) => {
   const { collectionSlug, globalSlug } = props
 
-  const { initialData, id } = useDocumentInfo()
+  const { id, initialData } = useDocumentInfo()
 
   const searchParams = useSearchParams()
   const { setViewActions } = useActions()
@@ -36,11 +37,11 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
   const { code } = useLocale()
 
   const {
+    collections,
+    globals,
     localization,
     routes: { api: apiRoute },
     serverURL,
-    collections,
-    globals,
   } = useConfig()
 
   const collectionConfig =
@@ -78,9 +79,9 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
 
   const fetchURL = `${serverURL}${apiRoute}${docEndpoint}${qs.stringify(
     {
-      locale,
-      draft,
       depth,
+      draft,
+      locale,
     },
     { addQueryPrefix: true },
   )}`
@@ -89,11 +90,11 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
     const fetchData = async () => {
       try {
         const res = await fetch(fetchURL, {
-          method: 'GET',
           credentials: authenticated ? 'include' : 'omit',
           headers: {
             'Accept-Language': i18n.language,
           },
+          method: 'GET',
         })
 
         try {
@@ -131,12 +132,12 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
     >
       <SetStepNav
         collectionSlug={collectionSlug}
-        useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
-        pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
         globalLabel={globalConfig?.label}
         globalSlug={globalSlug}
         id={id}
         isEditing={isEditing}
+        pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
+        useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"
       />
       <div className={`${baseClass}__configuration`}>
@@ -151,24 +152,24 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
         <Form
           initialState={{
             authenticated: {
-              value: authenticated || false,
               initialValue: authenticated || false,
               valid: true,
-            },
-            draft: {
-              value: draft || false,
-              initialValue: draft || false,
-              valid: true,
+              value: authenticated || false,
             },
             depth: {
-              value: Number(depth || 0),
               initialValue: Number(depth || 0),
               valid: true,
+              value: Number(depth || 0),
+            },
+            draft: {
+              initialValue: draft || false,
+              valid: true,
+              value: draft || false,
             },
             locale: {
-              value: locale,
               initialValue: locale,
               valid: true,
+              value: locale,
             },
           }}
         >
@@ -176,36 +177,36 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
             <div className={`${baseClass}__filter-query-checkboxes`}>
               {draftsEnabled && (
                 <Checkbox
-                  name="draft"
-                  path="draft"
                   label="Draft"
+                  name="draft"
                   onChange={() => setDraft(!draft)}
+                  path="draft"
                 />
               )}
               <Checkbox
-                name="authenticated"
-                path="authenticated"
                 label="Authenticated"
+                name="authenticated"
                 onChange={() => setAuthenticated(!authenticated)}
+                path="authenticated"
               />
             </div>
             {localeOptions && (
               <Select
                 label="Locale"
                 name="locale"
+                onChange={(value) => setLocale(value)}
                 options={localeOptions}
                 path="locale"
-                onChange={(value) => setLocale(value)}
               />
             )}
             <NumberInput
               label="Depth"
-              name="depth"
-              path="depth"
-              min={0}
               max={10}
-              step={1}
+              min={0}
+              name="depth"
               onChange={(value) => setDepth(value.toString())}
+              path="depth"
+              step={1}
             />
           </div>
         </Form>

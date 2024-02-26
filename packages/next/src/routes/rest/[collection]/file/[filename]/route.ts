@@ -1,25 +1,27 @@
-import path from 'path'
-import { streamFile } from '../../../../../next-stream-file'
-import fsPromises from 'fs/promises'
 import type { Collection, PayloadRequest, SanitizedConfig, Where } from 'payload/types'
+
+import fsPromises from 'fs/promises'
+import httpStatus from 'http-status'
+import path from 'path'
 import { executeAccess } from 'payload/auth'
 import { APIError, Forbidden } from 'payload/errors'
-import { RouteError } from '../../../RouteError'
+
+import { streamFile } from '../../../../../next-stream-file'
 import { createPayloadRequest } from '../../../../../utilities/createPayloadRequest'
-import httpStatus from 'http-status'
+import { RouteError } from '../../../RouteError'
 import { endpointsAreDisabled } from '../../../checkEndpoints'
 
 async function checkFileAccess({
-  req,
-  filename,
   collection,
+  filename,
+  req,
 }: {
-  req: PayloadRequest
-  filename: string
   collection: Collection
+  filename: string
+  req: PayloadRequest
 }) {
   const { config } = collection
-  const disableEndpoints = endpointsAreDisabled({ request: req, endpoints: config.endpoints })
+  const disableEndpoints = endpointsAreDisabled({ endpoints: config.endpoints, request: req })
   if (disableEndpoints) return disableEndpoints
 
   const accessResult = await executeAccess({ isReadingStaticFile: true, req }, config.access.read)
@@ -71,9 +73,9 @@ export const GET =
 
     try {
       req = await createPayloadRequest({
-        request,
         config,
         params: { collection: collectionSlug },
+        request,
       })
       collection = req.payload.collections?.[collectionSlug]
 
@@ -96,9 +98,9 @@ export const GET =
       }
 
       await checkFileAccess({
-        req,
-        filename,
         collection,
+        filename,
+        req,
       })
 
       const fileDir = collection.config.upload?.staticDir || collection.config.slug
@@ -106,16 +108,16 @@ export const GET =
       const stats = await fsPromises.stat(filePath)
       const data = streamFile(filePath)
       return new Response(data, {
-        status: httpStatus.OK,
         headers: new Headers({
           'content-length': stats.size + '',
         }),
+        status: httpStatus.OK,
       })
     } catch (error) {
       return RouteError({
-        req,
         collection,
         err: error,
+        req,
       })
     }
   }

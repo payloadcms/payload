@@ -1,12 +1,13 @@
+import type { Metadata } from 'next'
+import type { SanitizedConfig } from 'payload/types'
+
+import { Button, Email, Form, FormSubmit, MinimalTemplate, Translation } from '@payloadcms/ui'
+import Link from 'next/link'
 import React from 'react'
 
-import { Button, Form, FormSubmit, Email, MinimalTemplate, Translation } from '@payloadcms/ui'
-import { SanitizedConfig } from 'payload/types'
-import Link from 'next/link'
+import { getNextT } from '../../utilities/getNextT'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
-import { Metadata } from 'next'
-import { getNextT } from '../../utilities/getNextT'
 
 const baseClass = 'forgot-password'
 
@@ -20,17 +21,17 @@ export const generateMetadata = async ({
   })
 
   return meta({
-    title: t('authentication:forgotPassword'),
+    config,
     description: t('authentication:forgotPassword'),
     keywords: t('authentication:forgotPassword'),
-    config,
+    title: t('authentication:forgotPassword'),
   })
 }
 
 export const ForgotPassword: React.FC<{
   config: Promise<SanitizedConfig>
 }> = async ({ config: configPromise }) => {
-  const { config, user, i18n } = await initPage({ config: configPromise })
+  const { config, i18n, user } = await initPage({ config: configPromise })
 
   const {
     admin: { user: userSlug },
@@ -55,11 +56,11 @@ export const ForgotPassword: React.FC<{
         <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
         <p>
           <Translation
-            t={i18n.t}
-            i18nKey="authentication:loggedInChangePassword"
             elements={{
-              '0': ({ children }) => <Link href={`${admin}/account`} children={children} />,
+              '0': ({ children }) => <Link children={children} href={`${admin}/account`} />,
             }}
+            i18nKey="authentication:loggedInChangePassword"
+            t={i18n.t}
           />
         </p>
         <br />

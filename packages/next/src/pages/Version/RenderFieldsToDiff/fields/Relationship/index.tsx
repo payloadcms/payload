@@ -1,14 +1,14 @@
-import React from 'react'
+import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
+
 import { getTranslation } from '@payloadcms/translations'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
+import React from 'react'
 import ReactDiffViewer from 'react-diff-viewer-continued'
 
-import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
 import type { Props } from '../types'
 
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import Label from '../../Label'
 import { diffStyles } from '../styles'
-
 import './index.scss'
 
 const baseClass = 'relationship-diff'
@@ -68,9 +68,9 @@ const generateLabelFromValue = (
 const Relationship: React.FC<Props & { field: RelationshipField }> = ({
   comparison,
   field,
-  version,
   i18n,
   locale,
+  version,
 }) => {
   let placeholder = ''
 

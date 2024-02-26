@@ -1,10 +1,10 @@
 import httpStatus from 'http-status'
-
-import { isNumber } from 'payload/utilities'
 import { createOperation } from 'payload/operations'
-import { CollectionRouteHandler } from '../types'
+import { isNumber } from 'payload/utilities'
 
-export const create: CollectionRouteHandler = async ({ req, collection }) => {
+import type { CollectionRouteHandler } from '../types'
+
+export const create: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'

@@ -1,5 +1,5 @@
-import { AdminViewComponent } from 'payload/config'
-import { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { AdminViewComponent } from 'payload/config'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 export const getCustomViewByPath = (
   views:
