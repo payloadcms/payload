@@ -260,6 +260,7 @@
     "type": "Typ",
     "unpublish": "Avpublicera",
     "unpublishing": "Avpublicerar...",
+    "version": "Version",
     "versionCreatedOn": "{{version}} skapad den:",
     "versionID": "Versions-ID",
     "versions": "Versioner",

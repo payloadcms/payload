@@ -260,6 +260,7 @@
     "type": "Type",
     "unpublish": "Avpubliser",
     "unpublishing": "Avpubliserer...",
+    "version": "Versjon",
     "versionCreatedOn": "{{version}} opprettet:",
     "versionID": "Versjons-ID",
     "versions": "Versjoner",

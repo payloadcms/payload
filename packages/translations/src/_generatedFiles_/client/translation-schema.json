@@ -1007,6 +1007,9 @@
         "versionID": {
           "type": "string"
         },
+        "version": {
+          "type": "string"
+        },
         "versions": {
           "type": "string"
         },
@@ -1055,6 +1058,7 @@
         "unpublishing",
         "versionCreatedOn",
         "versionID",
+        "version",
         "versions",
         "viewingVersion",
         "viewingVersionGlobal",
