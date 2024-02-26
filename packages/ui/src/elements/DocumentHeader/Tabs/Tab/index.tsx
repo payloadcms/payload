@@ -42,7 +42,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     })
   }
 
-  if (!condition || (condition && condition({ collectionConfig, config, globalConfig }))) {
+  if (!condition || (condition && Boolean(condition({ collectionConfig, config, globalConfig })))) {
     const labelToRender =
       typeof label === 'function'
         ? label({

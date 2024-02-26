@@ -24,7 +24,12 @@ export const IndentFeature = (): FeatureProvider => {
                   }
                   for (const node of selection.getNodes()) {
                     // If at least one node is indented, this should be active
-                    if (node.__indent > 0 || node.getParent().__indent > 0) {
+                    if (
+                      ('__indent' in node && (node.__indent as number) > 0) ||
+                      (node.getParent() &&
+                        '__indent' in node.getParent() &&
+                        node.getParent().__indent > 0)
+                    ) {
                       return true
                     }
                   }
