@@ -4,7 +4,7 @@ import type { SanitizedConfig } from 'payload/types'
 import { MinimalTemplate } from '@payloadcms/ui'
 import React from 'react'
 
-import { getNextT } from '../../utilities/getNextT'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
 import { UnauthorizedClient } from './UnauthorizedClient'
 
@@ -13,7 +13,7 @@ export const generateMetadata = async ({
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
-  const t = await getNextT({
+  const { t } = await getNextI18n({
     config: await config,
   })
 

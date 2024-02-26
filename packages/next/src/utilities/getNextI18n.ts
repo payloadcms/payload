@@ -1,4 +1,4 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
@@ -7,13 +7,13 @@ import { cookies, headers } from 'next/headers'
 
 import { getRequestLanguage } from './getRequestLanguage'
 
-export const getNextT = async ({
+export const getNextI18n = async ({
   config,
   language,
 }: {
   config: SanitizedConfig
   language?: string
-}): Promise<TFunction> => {
+}): Promise<I18n> => {
   const i18n = initI18n({
     config: config.i18n,
     context: 'client',
@@ -21,5 +21,5 @@ export const getNextT = async ({
     translations,
   })
 
-  return i18n.t
+  return i18n
 }

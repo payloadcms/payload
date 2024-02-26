@@ -14,7 +14,7 @@ import {
 import Link from 'next/link'
 import React from 'react'
 
-import { getNextT } from '../../utilities/getNextT'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import './index.scss'
@@ -26,7 +26,7 @@ export const generateMetadata = async ({
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
-  const t = await getNextT({
+  const { t } = await getNextI18n({
     config: await config,
   })
 
