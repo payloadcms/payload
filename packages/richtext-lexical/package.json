@@ -49,7 +49,9 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.4.0"
+    "payload": "^2.4.0",
+    "@payloadcms/translations": "workspace:^",
+    "@payloadcms/ui": "workspace:^"
   },
   "exports": {
     ".": {

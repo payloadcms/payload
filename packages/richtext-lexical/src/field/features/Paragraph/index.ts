@@ -5,9 +5,13 @@ import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
+import { ParagraphFeatureComponent } from './Component'
+
+export const key = 'paragraph' as const
 
 export const ParagraphFeature = (): FeatureProvider => {
   return {
+    Component: ParagraphFeatureComponent,
     feature: () => {
       return {
         floatingSelectToolbar: {
@@ -57,6 +61,6 @@ export const ParagraphFeature = (): FeatureProvider => {
         },
       }
     },
-    key: 'paragraph',
+    key: key,
   }
 }

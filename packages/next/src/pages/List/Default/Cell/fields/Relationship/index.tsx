@@ -2,7 +2,7 @@
 import type { CellComponentProps, CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatDocTitle, useConfig, useIntersect, useTranslation } from '@payloadcms/ui'
+import { canUseDOM, formatDocTitle, useConfig, useIntersect, useTranslation } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 import { useListRelationships } from '../../../RelationshipProvider'
@@ -30,7 +30,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   const [hasRequested, setHasRequested] = useState(false)
   const { i18n, t } = useTranslation()
 
-  const isAboveViewport = entry?.boundingClientRect?.top < window.innerHeight
+  const isAboveViewport = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
 
   useEffect(() => {
     if (cellData && isAboveViewport && !hasRequested) {

@@ -96,12 +96,12 @@ export function sortFeaturesForOptimalLoading(
 }
 
 export function loadFeatures({
-  unsanitizedEditorConfig,
+  unSanitizedEditorConfig,
 }: {
-  unsanitizedEditorConfig: EditorConfig
+  unSanitizedEditorConfig: EditorConfig
 }): ResolvedFeatureMap {
   // First remove all duplicate features. The LAST feature with a given key wins.
-  unsanitizedEditorConfig.features = unsanitizedEditorConfig.features
+  unSanitizedEditorConfig.features = unSanitizedEditorConfig.features
     .reverse()
     .filter((f, i, arr) => {
       const firstIndex = arr.findIndex((f2) => f2.key === f.key)
@@ -110,15 +110,15 @@ export function loadFeatures({
     .reverse()
 
   const featureProviderMap: FeatureProviderMap = new Map(
-    unsanitizedEditorConfig.features.map((f) => [f.key, f] as [string, FeatureProvider]),
+    unSanitizedEditorConfig.features.map((f) => [f.key, f] as [string, FeatureProvider]),
   )
 
-  unsanitizedEditorConfig.features = sortFeaturesForOptimalLoading(unsanitizedEditorConfig.features)
+  unSanitizedEditorConfig.features = sortFeaturesForOptimalLoading(unSanitizedEditorConfig.features)
 
   const resolvedFeatures: ResolvedFeatureMap = new Map()
 
   // Make sure all dependencies declared in the respective features exist
-  for (const featureProvider of unsanitizedEditorConfig.features) {
+  for (const featureProvider of unSanitizedEditorConfig.features) {
     if (!featureProvider.key) {
       throw new Error(
         `A Feature you've added does not have a key. Please add a key to the feature. This is used to uniquely identify the feature.`,
@@ -126,7 +126,7 @@ export function loadFeatures({
     }
     if (featureProvider.dependencies?.length) {
       for (const dependencyKey of featureProvider.dependencies) {
-        const found = unsanitizedEditorConfig.features.find((f) => f.key === dependencyKey)
+        const found = unSanitizedEditorConfig.features.find((f) => f.key === dependencyKey)
         if (!found) {
           throw new Error(
             `Feature ${featureProvider.key} has a dependency ${dependencyKey} which does not exist.`,
@@ -140,7 +140,7 @@ export function loadFeatures({
         // look in the resolved features instead of the editorConfig.features, as a dependency requires the feature to be loaded before it, contrary to a soft-dependency
         const found = resolvedFeatures.get(priorityDependencyKey)
         if (!found) {
-          const existsInEditorConfig = unsanitizedEditorConfig.features.find(
+          const existsInEditorConfig = unSanitizedEditorConfig.features.find(
             (f) => f.key === priorityDependencyKey,
           )
           if (!existsInEditorConfig) {
@@ -159,10 +159,11 @@ export function loadFeatures({
     const feature = featureProvider.feature({
       featureProviderMap,
       resolvedFeatures,
-      unsanitizedEditorConfig,
+      unSanitizedEditorConfig,
     })
     resolvedFeatures.set(featureProvider.key, {
       ...feature,
+      Component: featureProvider.Component,
       dependencies: featureProvider.dependencies,
       dependenciesPriority: featureProvider.dependenciesPriority,
       dependenciesSoft: featureProvider.dependenciesSoft,

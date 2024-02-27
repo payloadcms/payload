@@ -297,6 +297,7 @@ export const mapFields = (args: {
             const result = field.editor.generateComponentMap({ config, schemaPath: path })
             // @ts-expect-error-next-line // TODO: the `richTextComponentMap` is not found on the union type
             fieldComponentProps.richTextComponentMap = result
+            cellComponentProps.richTextComponentMap = result
           }
 
           if (RichTextFieldComponent) {
@@ -304,7 +305,7 @@ export const mapFields = (args: {
           }
 
           if (RichTextCellComponent) {
-            cellComponentProps.CellComponentOverride = RichTextCellComponent
+            cellComponentProps.CellComponentOverride = <RichTextCellComponent />
           }
         }
 
