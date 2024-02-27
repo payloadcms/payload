@@ -31,6 +31,7 @@ export const incrementLoginAttempts = async ({
           lockUntil: null,
           loginAttempts: 1,
         },
+        depth: 0,
         req,
       })
     }
@@ -52,6 +53,7 @@ export const incrementLoginAttempts = async ({
     id: doc.id,
     collection: collection.slug,
     data,
+    depth: 0,
     req,
   })
 }

@@ -14,11 +14,11 @@ type Args = {
 }
 
 export const getLatestGlobalVersion = async ({
+  slug,
   config,
   locale,
   payload,
   req,
-  slug,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
   let latestVersion
@@ -30,6 +30,7 @@ export const getLatestGlobalVersion = async ({
         global: slug,
         limit: 1,
         locale,
+        pagination: false,
         req,
         sort: '-updatedAt',
       })
@@ -37,9 +38,9 @@ export const getLatestGlobalVersion = async ({
   }
 
   const global = await payload.db.findGlobal({
+    slug,
     locale,
     req,
-    slug,
     where,
   })
   const globalExists = Boolean(global)
