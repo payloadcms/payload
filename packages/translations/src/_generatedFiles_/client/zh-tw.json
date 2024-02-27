@@ -262,6 +262,7 @@
     "type": "類型",
     "unpublish": "取消發佈",
     "unpublishing": "取消發佈中...",
+    "version": "版本",
     "versionCreatedOn": "版本 {{version}} 建立於：",
     "versionID": "版本ID",
     "versions": "版本",

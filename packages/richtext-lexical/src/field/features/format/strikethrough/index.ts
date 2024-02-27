@@ -14,7 +14,7 @@ export const StrikethroughTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   import('../../../lexical/ui/icons/Strikethrough').then(
                     (module) => module.StrikethroughIcon,
                   ),

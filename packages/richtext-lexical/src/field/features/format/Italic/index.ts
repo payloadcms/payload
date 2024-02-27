@@ -14,7 +14,7 @@ export const ItalicTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   import('../../../lexical/ui/icons/Italic').then((module) => module.ItalicIcon),
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {

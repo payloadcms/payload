@@ -44,8 +44,8 @@ export const SlateToLexicalFeature = (props?: Props): FeatureProvider => {
         },
         nodes: [
           {
-            node: UnknownConvertedNode,
             type: UnknownConvertedNode.getType(),
+            node: UnknownConvertedNode,
           },
         ],
         props,

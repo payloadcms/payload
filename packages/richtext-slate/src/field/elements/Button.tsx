@@ -14,7 +14,7 @@ import toggleElement from './toggle'
 export const baseClass = 'rich-text__button'
 
 const ElementButton: React.FC<ButtonProps> = (props) => {
-  const { children, className, el = 'button', format, onClick, tooltip, type = 'type' } = props
+  const { type = 'type', children, className, el = 'button', format, onClick, tooltip } = props
 
   const editor = useSlate()
   const [showTooltip, setShowTooltip] = useState(false)

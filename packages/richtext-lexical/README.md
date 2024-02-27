@@ -18,11 +18,9 @@ import { buildConfig } from 'payload/config'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export default buildConfig({
-  editor: lexicalEditor({})
+  editor: lexicalEditor({}),
   // ...rest of config
 })
-
 ```
 
 More detailed usage can be found in the [Payload Docs](https://payloadcms.com/docs/configuration/overview).
-

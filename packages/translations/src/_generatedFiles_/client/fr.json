@@ -260,6 +260,7 @@
     "type": "Type",
     "unpublish": "Annuler la publication",
     "unpublishing": "Annulation en cours...",
+    "version": "Version",
     "versionCreatedOn": "{{version}} créé(e) le :",
     "versionID": "Identifiant de la version",
     "versions": "Versions",

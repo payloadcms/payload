@@ -7,9 +7,9 @@ export const IndentSectionWithEntries = (
   entries: FloatingToolbarSectionEntry[],
 ): FloatingToolbarSection => {
   return {
+    type: 'buttons',
     entries,
     key: 'indent',
     order: 3,
-    type: 'buttons',
   }
 }

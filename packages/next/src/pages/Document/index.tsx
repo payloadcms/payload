@@ -24,7 +24,17 @@ import React, { Fragment } from 'react'
 import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { initPage } from '../../utilities/initPage'
+import { getMetaBySegment } from './getMetaBySegment.tsx'
 import { getViewsFromConfig } from './getViewsFromConfig'
+
+export const generateMetadata = async (args: {
+  config: Promise<SanitizedConfig>
+  params: {
+    collection?: string
+    global?: string
+    segments: string[]
+  }
+}) => getMetaBySegment(args)
 
 export const Document = async ({
   config: configPromise,
@@ -136,9 +146,9 @@ export const Document = async ({
     DefaultView = globalViews?.DefaultView
 
     data = await payload.findGlobal({
+      slug: globalSlug,
       depth: 0,
       locale: locale.code,
-      slug: globalSlug,
       user,
     })
 

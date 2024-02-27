@@ -48,4 +48,4 @@ export type InitI18n = (args: {
   language?: string
   translations: Translations
   context: 'api' | 'client'
-}) => Promise<I18n>
+}) => I18n

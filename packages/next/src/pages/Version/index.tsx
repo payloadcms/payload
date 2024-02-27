@@ -1,9 +1,11 @@
-import type { Option, ServerSideEditViewProps } from '@payloadcms/ui'
+import type { Option } from '@payloadcms/ui'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { Document } from 'payload/types'
 
 import { notFound } from 'next/navigation'
 import React from 'react'
+
+import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { DefaultVersionView } from './Default'
 

@@ -14,7 +14,7 @@ import {
 import Link from 'next/link'
 import React from 'react'
 
-import { getNextT } from '../../utilities/getNextT'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import './index.scss'
@@ -22,12 +22,14 @@ import './index.scss'
 const baseClass = 'reset-password'
 
 export const generateMetadata = async ({
-  config,
+  config: configPromise,
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
-  const t = await getNextT({
-    config: await config,
+  const config = await configPromise
+
+  const { t } = await getNextI18n({
+    config,
   })
 
   return meta({

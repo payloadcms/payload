@@ -259,6 +259,7 @@
     "type": "유형",
     "unpublish": "게시 해제",
     "unpublishing": "게시 해제 중...",
+    "version": "버전",
     "versionCreatedOn": "{{version}} 생성 날짜:",
     "versionID": "버전 ID",
     "versions": "버전",

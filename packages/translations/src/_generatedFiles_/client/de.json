@@ -260,6 +260,7 @@
     "type": "Typ",
     "unpublish": "Auf Entwurf setzen",
     "unpublishing": "Setze auf Entwurf...",
+    "version": "Version",
     "versionCreatedOn": "{{version}} erstellt am:",
     "versionID": "Version ID",
     "versions": "Versionen",

@@ -262,6 +262,7 @@
     "type": "タイプ",
     "unpublish": "非公開",
     "unpublishing": "非公開中...",
+    "version": "バージョン",
     "versionCreatedOn": "{{version}} 作成日時:",
     "versionID": "バージョンID",
     "versions": "バージョン",

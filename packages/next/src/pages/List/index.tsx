@@ -1,5 +1,7 @@
+import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
+import { getTranslation } from '@payloadcms/translations'
 import {
   HydrateClientUser,
   ListInfoProvider,
@@ -11,8 +13,47 @@ import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types'
 
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
+import { meta } from '../../utilities/meta'
 import { DefaultListView } from './Default'
+
+export const generateMetadata = async ({
+  config: configPromise,
+  params,
+}: {
+  config: Promise<SanitizedConfig>
+  params: {
+    collection: string
+  }
+}): Promise<Metadata> => {
+  let title: string = ''
+  const description: string = ''
+  const keywords: string = ''
+
+  const collectionSlug = params.collection
+
+  const config = await configPromise
+
+  const i18n = await getNextI18n({
+    config,
+  })
+
+  const collectionConfig = collectionSlug
+    ? config?.collections?.find((collection) => collection.slug === collectionSlug)
+    : null
+
+  if (collectionConfig) {
+    title = getTranslation(collectionConfig.labels.plural, i18n)
+  }
+
+  return meta({
+    config,
+    description,
+    keywords,
+    title,
+  })
+}
 
 export const ListView = async ({
   collectionSlug,

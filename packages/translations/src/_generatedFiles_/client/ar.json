@@ -260,6 +260,7 @@
     "type": "النّوع",
     "unpublish": "الغاء النّشر",
     "unpublishing": "يتمّ الغاء النّشر...",
+    "version": "النّسخة",
     "versionCreatedOn": "تمّ ﻹنشاء النّسخة في {{version}}:",
     "versionID": "مُعرّف النّسخة",
     "versions": "النُّسَخ",

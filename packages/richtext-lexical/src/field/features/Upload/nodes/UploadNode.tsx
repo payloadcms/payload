@@ -12,7 +12,7 @@ import {
 } from 'lexical'
 import * as React from 'react'
 
-// @ts-ignore-next-line TypeScript being dumb
+// @ts-expect-error-next-line TypeScript being dumb
 const RawUploadComponent = React.lazy(async () => await import('../component'))
 
 export interface RawUploadPayload {
@@ -104,7 +104,7 @@ export class UploadNode extends DecoratorBlockNode {
   }
 
   decorate(): JSX.Element {
-    // @ts-ignore-next-line
+    // @ts-expect-error-next-line
     return <RawUploadComponent data={this.__data} format={this.__format} nodeKey={this.getKey()} />
   }
 

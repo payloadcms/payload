@@ -336,6 +336,7 @@ const clientTranslationKeys = [
   'version:unpublishing',
   'version:versionCreatedOn',
   'version:versionID',
+  'version:version',
   'version:versions',
   'version:viewingVersion',
   'version:viewingVersionGlobal',

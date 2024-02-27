@@ -1,4 +1,4 @@
-import { Element } from 'slate'
+import type { Element } from 'slate'
 
 export type LinkElementType = Element & {
   doc: Record<string, unknown>

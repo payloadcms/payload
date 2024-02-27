@@ -45,11 +45,11 @@ export const SlateIndentConverter: SlateNodeConverter = {
       const children = node.children.map((child: any) => convertChildren(child, indentLevel + 1))
       console.log('slateToLexical > IndentConverter > children', JSON.stringify(children, null, 2))
       return {
+        type: 'paragraph',
         children: children,
         direction: 'ltr',
         format: '',
         indent: indentLevel,
-        type: 'paragraph',
         version: 1,
       } as const as SerializedParagraphNode
     }

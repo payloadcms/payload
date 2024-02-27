@@ -63,7 +63,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
   const validRelationships = config.collections.map((c) => c.slug) || []
   const fieldSchema = sanitizeFields({
     // TODO: fix this
-    // @ts-ignore-next-line
+    // @ts-expect-error-next-line
     config: config,
     fields: fieldSchemaUnsanitized,
     validRelationships,
@@ -93,7 +93,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
     const validRelationships = config.collections.map((c) => c.slug) || []
     const fieldSchema = sanitizeFields({
       // TODO: fix this
-      // @ts-ignore-next-line
+      // @ts-expect-error-next-line
       config: config,
       fields: fieldSchemaUnsanitized,
       validRelationships,
@@ -103,7 +103,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
         // TODO: fix this
-        // @ts-ignore-next-line
+        // @ts-expect-error-next-line
         config,
         data: deepCopyObject(fields || {}),
         fieldSchema,
