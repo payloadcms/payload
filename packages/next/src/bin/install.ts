@@ -3,36 +3,46 @@ import path from 'path'
 
 export const install = (args?: { debug?: boolean }): Promise<void> => {
   const debug = args?.debug
-  const useSrc = fs.existsSync(path.resolve(process.cwd(), './src/app'))
 
-  const basePath = useSrc ? './src' : '.'
-
-  const apiTemplateDir = path.resolve(__dirname, '../template/app/api')
-  const userApiDir = path.resolve(`${basePath}/app/(payload)/api`)
-
-  if (!fs.existsSync(apiTemplateDir)) {
-    console.log(`No api dir found at ${apiTemplateDir}`)
+  const nextConfigPath = path.resolve(process.cwd(), 'next.config.js')
+  if (!fs.existsSync(nextConfigPath)) {
+    console.log(`No next.config.js found at ${nextConfigPath}`)
     process.exit(1)
   }
 
+  const apiTemplateDir = path.resolve(__dirname, '../..', 'dist', 'template/app/(payload)')
+  const userProjectDir = process.cwd()
+
+  if (!fs.existsSync(apiTemplateDir)) {
+    console.log(`Could not find template source files from ${apiTemplateDir}`)
+    process.exit(1)
+  }
+
+  if (!fs.existsSync(path.resolve(userProjectDir, 'app'))) {
+    console.log(`Could not find user app directory at ${userProjectDir}/app`)
+    process.exit(1)
+  }
+
+  const templateFileDest = path.resolve(userProjectDir, 'app/(payload)')
+
   if (debug) {
     console.log({
-      apiTemplateDir,
-      basePath,
       cwd: process.cwd(),
-      useSrc,
-      userApiDir,
+
+      // Paths
+      apiTemplateDir,
+      templateFileDest,
+      userProjectDir,
     })
   }
 
   // Merge api dir into user's app/api, user's files take precedence
-  copyRecursiveSync(apiTemplateDir, userApiDir, debug)
-
+  copyRecursiveSync(apiTemplateDir, templateFileDest, debug)
   process.exit(0)
 }
 
 /**
- * Recursively copy files from src to dest, keep user's files
+ * Recursively copy files from src to dest
  */
 function copyRecursiveSync(src: string, dest: string, debug?: boolean) {
   const exists = fs.existsSync(src)
@@ -50,8 +60,9 @@ function copyRecursiveSync(src: string, dest: string, debug?: boolean) {
   }
 }
 
-const copyFile = (source, target) => {
-  if (!fs.existsSync(target)) {
-    fs.writeFileSync(target, fs.readFileSync(source))
-  }
+if (require.main === module) {
+  install({ debug: true }).catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
 }

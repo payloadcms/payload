@@ -13,7 +13,7 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" \"src/app/api/**\" dist/ && pnpm copyfiles:api",
-    "copyfiles:api": "copyfiles -u 1 \"src/app/api/**\" dist/template",
+    "copyfiles:api": "copyfiles -u 1 \"src/app/(payload)/**\" dist/template",
     "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "prepublishOnly": "pnpm clean && pnpm build"
