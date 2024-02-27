@@ -78,6 +78,7 @@
     "isomorphic-fetch": "3.0.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
+    "json5": "^2.2.3",
     "jwt-decode": "3.1.2",
     "lexical": "0.13.1",
     "lint-staged": "^14.0.1",
