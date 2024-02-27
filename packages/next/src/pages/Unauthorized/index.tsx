@@ -9,12 +9,14 @@ import { meta } from '../../utilities/meta'
 import { UnauthorizedClient } from './UnauthorizedClient'
 
 export const generateMetadata = async ({
-  config,
+  config: configPromise,
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
+  const config = await configPromise
+
   const { t } = await getNextI18n({
-    config: await config,
+    config,
   })
 
   return meta({

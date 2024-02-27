@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { MinimalTemplate } from '@payloadcms/ui'
-import { Logo } from '@payloadcms/ui/graphics'
+import { Logo, MinimalTemplate } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React, { Fragment } from 'react'
 
@@ -15,12 +14,14 @@ import './index.scss'
 const baseClass = 'login'
 
 export const generateMetadata = async ({
-  config,
+  config: configPromise,
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
+  const config = await configPromise
+
   const { t } = await getNextI18n({
-    config: await config,
+    config,
   })
 
   return meta({

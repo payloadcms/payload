@@ -22,12 +22,14 @@ import './index.scss'
 const baseClass = 'reset-password'
 
 export const generateMetadata = async ({
-  config,
+  config: configPromise,
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
+  const config = await configPromise
+
   const { t } = await getNextI18n({
-    config: await config,
+    config,
   })
 
   return meta({

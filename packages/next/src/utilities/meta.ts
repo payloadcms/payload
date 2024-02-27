@@ -1,30 +1,36 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import payloadOgImage from '@payloadcms/ui/assets/og-image.png'
+import { payloadFavicon, payloadOgImage } from '@payloadcms/ui'
 
 export const meta = async (args: {
-  config: Promise<SanitizedConfig>
+  config: SanitizedConfig
   description?: string
   keywords?: string
   title: string
 }): Promise<Metadata> => {
-  const {
-    config: configPromise,
-    description = '',
-    keywords = 'CMS, Admin, Dashboard',
-    title,
-  } = args
-
-  const config = await configPromise
+  const { config, description = '', keywords = 'CMS, Admin, Dashboard', title } = args
 
   const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
-  const ogImage = config.admin.meta.ogImage ?? '' // TODO: fallback to payloadOgImage once it can be imported
+  const favicon = config?.admin?.meta?.favicon ?? payloadFavicon?.src
+  const ogImage = config.admin?.meta?.ogImage ?? payloadOgImage?.src
 
   return {
     description,
+    icons: [
+      {
+        type: 'image/svg',
+        rel: 'icon',
+        url: favicon,
+      },
+    ],
     keywords,
+    metadataBase:
+      config?.serverURL ||
+      process.env.PAYLOAD_PUBLIC_SERVER_URL ||
+      `http://localhost:${process.env.PORT || 3000}`,
     openGraph: {
+      type: 'website',
       description,
       images: [
         {
@@ -35,7 +41,6 @@ export const meta = async (args: {
         },
       ],
       title: `${title} ${titleSuffix}`,
-      type: 'website',
     },
     title: `${title} ${titleSuffix}`,
   }
