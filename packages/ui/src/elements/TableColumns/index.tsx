@@ -30,10 +30,11 @@ export const TableColumnsProvider: React.FC<{
   cellProps?: Partial<CellProps>[]
   children: React.ReactNode
   collectionSlug: string
+  enableRowSelections?: boolean
   listPreferences: {
     columns: ColumnPreferences
   }
-}> = ({ cellProps, children, collectionSlug, listPreferences }) => {
+}> = ({ cellProps, children, collectionSlug, enableRowSelections = false, listPreferences }) => {
   const config = useConfig()
 
   const { componentMap } = useComponentMap()
@@ -58,6 +59,7 @@ export const TableColumnsProvider: React.FC<{
       cellProps,
       columnPreferences: listPreferences?.columns,
       defaultColumns,
+      enableRowSelections,
       fieldMap,
       useAsTitle,
     })
@@ -79,16 +81,17 @@ export const TableColumnsProvider: React.FC<{
 
         if (currentPreferences.columns) {
           dispatchTableColumns({
+            type: 'set',
             payload: {
               columns: buildColumns({
                 cellProps,
                 columnPreferences: currentPreferences?.columns,
                 defaultColumns,
+                enableRowSelections: true,
                 fieldMap,
                 useAsTitle,
               }),
             },
-            type: 'set',
           })
         }
       }
@@ -147,11 +150,11 @@ export const TableColumnsProvider: React.FC<{
       const { fromIndex, toIndex } = args
 
       dispatchTableColumns({
+        type: 'move',
         payload: {
           fromIndex,
           toIndex,
         },
-        type: 'move',
       })
     },
     [dispatchTableColumns],
@@ -160,13 +163,13 @@ export const TableColumnsProvider: React.FC<{
   const toggleColumn = useCallback(
     (column: string) => {
       dispatchTableColumns({
+        type: 'toggle',
         payload: {
           column,
         },
-        type: 'toggle',
       })
     },
-    [collectionConfig, cellProps],
+    [dispatchTableColumns],
   )
 
   return (

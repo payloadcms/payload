@@ -88,7 +88,7 @@ export const ListView = async ({
           },
         },
       })
-      ?.then((res) => res?.docs?.[0]?.value)) as unknown as ListPreferences
+      ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
   } catch (error) {}
 
   const {
@@ -131,7 +131,11 @@ export const ListView = async ({
           limit={limit}
           newDocumentURL={`${admin}/collections/${collectionSlug}/create`}
         >
-          <TableColumnsProvider collectionSlug={collectionSlug} listPreferences={listPreferences}>
+          <TableColumnsProvider
+            collectionSlug={collectionSlug}
+            enableRowSelections
+            listPreferences={listPreferences}
+          >
             <RenderCustomComponent
               CustomComponent={CustomListView}
               DefaultComponent={DefaultListView}

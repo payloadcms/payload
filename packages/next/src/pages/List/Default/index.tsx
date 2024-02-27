@@ -1,9 +1,11 @@
 'use client'
+import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   Gutter,
   ListControls,
+  ListSelection,
   Pagination,
   PerPage,
   Pill,
@@ -58,6 +60,9 @@ export const DefaultListView: React.FC = () => {
   const { i18n } = useTranslation()
 
   const { setStepNav } = useStepNav()
+  const {
+    breakpoints: { s: smallBreak },
+  } = useWindowInfo()
 
   let docs = data.docs || []
 
@@ -98,9 +103,9 @@ export const DefaultListView: React.FC = () => {
                     {i18n.t('general:createNew')}
                   </Pill>
                 )}
-                {/* {!smallBreak && (
-                  <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
-                )} */}
+                {!smallBreak && (
+                  <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+                )}
                 {/* {description && (
                   <div className={`${baseClass}__sub-header`}>
                     <ViewDescription description={description} />
@@ -110,8 +115,7 @@ export const DefaultListView: React.FC = () => {
             )}
           </header>
           <ListControls
-            collectionPluralLabel={labels?.plural}
-            collectionSlug={collectionSlug}
+            collectionConfig={collectionConfig}
             // textFieldsToBeSearched={textFieldsToBeSearched}
             // handleSearchChange={handleSearchChange}
             // handleSortChange={handleSortChange}

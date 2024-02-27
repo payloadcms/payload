@@ -1,21 +1,20 @@
 'use client'
-import { CheckboxInput, useSelection } from '@payloadcms/ui'
 import React from 'react'
 
+import { CheckboxInput, useSelection, useTableCell } from '../..'
 import './index.scss'
 
 const baseClass = 'select-row'
 
-const SelectRow: React.FC<{ id: number | string }> = ({ id }) => {
+export const SelectRow: React.FC = () => {
   const { selected, setSelection } = useSelection()
+  const { rowData } = useTableCell()
 
   return (
     <CheckboxInput
-      checked={selected[id]}
-      // onToggle={() => setSelection(id)}
+      checked={selected?.[rowData?.id]}
       className={`${baseClass}__checkbox`}
+      onToggle={() => setSelection(rowData.id)}
     />
   )
 }
-
-export default SelectRow

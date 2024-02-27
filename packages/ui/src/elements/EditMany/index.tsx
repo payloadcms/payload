@@ -82,7 +82,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   )
 }
 const EditMany: React.FC<Props> = (props) => {
-  const { collection: { fields, labels: { plural }, slug } = {}, collection, resetParams } = props
+  const { collection: { slug, fields, labels: { plural } } = {}, collection, resetParams } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()

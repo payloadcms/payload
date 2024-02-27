@@ -1,12 +1,13 @@
 'use client'
-import { CheckboxInput, SelectAllStatus, useSelection, useTranslation } from '@payloadcms/ui'
+
 import React from 'react'
 
+import { CheckboxInput, SelectAllStatus, useSelection, useTranslation } from '../..'
 import './index.scss'
 
 const baseClass = 'select-all'
 
-const SelectAll: React.FC = () => {
+export const SelectAll: React.FC = () => {
   const { selectAll, toggleAll } = useSelection()
   const { i18n } = useTranslation()
 
@@ -22,11 +23,9 @@ const SelectAll: React.FC = () => {
       }
       className={`${baseClass}__checkbox`}
       id="select-all"
-      onChange={() => toggleAll()}
+      name="select-all"
+      onToggle={() => toggleAll()}
       partialChecked={selectAll === SelectAllStatus.Some}
-      path="select-all"
     />
   )
 }
-
-export default SelectAll

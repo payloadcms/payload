@@ -3,8 +3,7 @@ import type { FieldAffectingData, SanitizedCollectionConfig, Where } from 'paylo
 import type { Column } from '../Table/types'
 
 export type Props = {
-  collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
-  collectionSlug: SanitizedCollectionConfig['slug']
+  collectionConfig: SanitizedCollectionConfig
   enableColumns?: boolean
   enableSort?: boolean
   handleSearchChange?: (search: string) => void
