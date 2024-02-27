@@ -9,6 +9,7 @@ import { RelatedProducts, type RelatedProductsProps } from '../../_blocks/Relate
 import { toKebabCase } from '../../_utilities/toKebabCase'
 import { BackgroundColor } from '../BackgroundColor/index'
 import { VerticalPadding, VerticalPaddingOptions } from '../VerticalPadding/index'
+import { FormBlock } from './Form'
 
 const blockComponents = {
   cta: CallToActionBlock,
@@ -16,6 +17,7 @@ const blockComponents = {
   mediaBlock: MediaBlock,
   archive: ArchiveBlock,
   relatedProducts: RelatedProducts,
+  formBlock: FormBlock,
 }
 
 export const Blocks: React.FC<{
@@ -30,7 +32,10 @@ export const Blocks: React.FC<{
     return (
       <Fragment>
         {blocks.map((block, index) => {
-          const { blockName, blockType } = block
+          const { blockName, blockType, form } = block as any
+
+          const isFormBlock = blockType === 'formBlock'
+          const formID: string = isFormBlock && form && form.id
 
           if (blockType && blockType in blockComponents) {
             const Block = blockComponents[blockType]
@@ -63,12 +68,12 @@ export const Blocks: React.FC<{
             if (Block) {
               return (
                 <BackgroundColor key={index} invert={blockIsInverted}>
-                  <VerticalPadding top={paddingTop} bottom={paddingBottom}>
-                    <Block
-                      // @ts-expect-error
-                      id={toKebabCase(blockName)}
-                      {...block}
-                    />
+                  <VerticalPadding
+                    top={paddingTop}
+                    bottom={paddingBottom}
+                    key={isFormBlock ? formID : index}
+                  >
+                    <Block id={toKebabCase(blockName)} {...block} />
                   </VerticalPadding>
                 </BackgroundColor>
               )
