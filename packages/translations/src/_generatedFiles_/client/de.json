@@ -79,6 +79,7 @@
     "showAll": "Alle anzeigen",
     "swapRelationship": "Beziehung Tauschen",
     "swapUpload": "Datei Austauschen",
+    "toggleBlock": "Block umschalten",
     "uploadNewLabel": "{{label}} neu hochladen"
   },
   "general": {

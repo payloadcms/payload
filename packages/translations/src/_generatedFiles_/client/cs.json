@@ -79,6 +79,7 @@
     "showAll": "Zobrazit vše",
     "swapRelationship": "Zaměnit vztah",
     "swapUpload": "Vyměnit nahrání",
+    "toggleBlock": "Přepnout blok",
     "uploadNewLabel": "Nahrát nový {{label}}"
   },
   "general": {

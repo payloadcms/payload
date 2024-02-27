@@ -79,6 +79,7 @@
     "showAll": "显示全部",
     "swapRelationship": "交换关系",
     "swapUpload": "交换上传",
+    "toggleBlock": "切换块",
     "uploadNewLabel": "上传新的{{label}}"
   },
   "general": {

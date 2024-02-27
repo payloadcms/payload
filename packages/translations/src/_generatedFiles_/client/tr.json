@@ -79,6 +79,7 @@
     "showAll": "Tümünü göster",
     "swapRelationship": "Takas Ilişkisi",
     "swapUpload": "Karşıya Yüklemeyi Değiştir",
+    "toggleBlock": "Bloğu aç/kapat",
     "uploadNewLabel": "Karşıya {{label}} yükle"
   },
   "general": {

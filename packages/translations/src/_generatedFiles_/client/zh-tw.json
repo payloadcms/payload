@@ -81,6 +81,7 @@
     "showAll": "顯示全部",
     "swapRelationship": "替換關聯",
     "swapUpload": "替換上傳",
+    "toggleBlock": "切換區塊",
     "uploadNewLabel": "上傳新的{{label}}"
   },
   "general": {

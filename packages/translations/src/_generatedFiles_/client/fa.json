@@ -79,6 +79,7 @@
     "showAll": "نمایش کل",
     "swapRelationship": "تبادل پیوستگی",
     "swapUpload": "تبادل بارگذار",
+    "toggleBlock": "کارگذاری بلوک",
     "uploadNewLabel": "بارگذاری تازه {{label}}"
   },
   "general": {

@@ -79,6 +79,7 @@
     "showAll": "Hiển thị toàn bộ",
     "swapRelationship": "Đổi quan hệ",
     "swapUpload": "Đổi bản tải lên",
+    "toggleBlock": "Bật/tắt block",
     "uploadNewLabel": "Tải lên bản mới: {{label}}"
   },
   "general": {

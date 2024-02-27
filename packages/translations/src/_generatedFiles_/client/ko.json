@@ -78,6 +78,7 @@
     "showAll": "모두 표시",
     "swapRelationship": "관계 교체",
     "swapUpload": "업로드 교체",
+    "toggleBlock": "블록 토글",
     "uploadNewLabel": "새로운 {{label}} 업로드"
   },
   "general": {

@@ -81,6 +81,7 @@
     "showAll": "すべて開く",
     "swapRelationship": "スワップ関係",
     "swapUpload": "差し替え",
+    "toggleBlock": "ブロックを切り替え",
     "uploadNewLabel": "新規 {{label}} アップロード"
   },
   "general": {

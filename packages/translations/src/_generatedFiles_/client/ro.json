@@ -79,6 +79,7 @@
     "showAll": "Afișați toate",
     "swapRelationship": "Schimbați relația",
     "swapUpload": "Schimbați Încărcarea",
+    "toggleBlock": "Toggle bloc",
     "uploadNewLabel": "Încărcați un nou {{label}}"
   },
   "general": {

@@ -79,6 +79,7 @@
     "showAll": "إظهار الكلّ",
     "swapRelationship": "تبديل العلاقة",
     "swapUpload": "تبديل المحتوى المرفوع",
+    "toggleBlock": "Toggle block",
     "uploadNewLabel": "رفع {{label}} جديد"
   },
   "general": {

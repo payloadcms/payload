@@ -79,6 +79,7 @@
     "showAll": "Afficher tout",
     "swapRelationship": "Changer de relation",
     "swapUpload": "Changer de Fichier",
+    "toggleBlock": "Bloc bascule",
     "uploadNewLabel": "Téléverser un(e) nouveau ou nouvelle {{label}}"
   },
   "general": {

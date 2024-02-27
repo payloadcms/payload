@@ -81,6 +81,7 @@
     "showAll": "Show All",
     "swapRelationship": "Swap Relationship",
     "swapUpload": "Swap Upload",
+    "toggleBlock": "Toggle block",
     "uploadNewLabel": "Upload new {{label}}"
   },
   "general": {

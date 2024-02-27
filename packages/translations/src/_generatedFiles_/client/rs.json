@@ -79,6 +79,7 @@
     "showAll": "Покажи све",
     "swapRelationship": "Замени везу",
     "swapUpload": "Замени пренос",
+    "toggleBlock": "Пребаци блок",
     "uploadNewLabel": "Учитај нови {{label}}"
   },
   "general": {

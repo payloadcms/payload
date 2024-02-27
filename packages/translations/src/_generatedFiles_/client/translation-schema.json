@@ -227,10 +227,19 @@
         "addLabel": {
           "type": "string"
         },
+        "addLink": {
+          "type": "string"
+        },
         "addNew": {
           "type": "string"
         },
         "addNewLabel": {
+          "type": "string"
+        },
+        "addRelationship": {
+          "type": "string"
+        },
+        "addUpload": {
           "type": "string"
         },
         "block": {
@@ -251,10 +260,13 @@
         "editLink": {
           "type": "string"
         },
-        "addLink": {
+        "editRelationship": {
           "type": "string"
         },
         "itemsAndMore": {
+          "type": "string"
+        },
+        "labelRelationship": {
           "type": "string"
         },
         "latitude": {
@@ -264,6 +276,15 @@
           "type": "string"
         },
         "passwordsDoNotMatch": {
+          "type": "string"
+        },
+        "removeRelationship": {
+          "type": "string"
+        },
+        "removeUpload": {
+          "type": "string"
+        },
+        "saveChanges": {
           "type": "string"
         },
         "searchForBlock": {
@@ -278,62 +299,45 @@
         "swapRelationship": {
           "type": "string"
         },
-        "uploadNewLabel": {
-          "type": "string"
-        },
         "swapUpload": {
           "type": "string"
         },
-        "addUpload": {
+        "toggleBlock": {
           "type": "string"
         },
-        "editRelationship": {
-          "type": "string"
-        },
-        "removeUpload": {
-          "type": "string"
-        },
-        "saveChanges": {
-          "type": "string"
-        },
-        "addRelationship": {
-          "type": "string"
-        },
-        "removeRelationship": {
-          "type": "string"
-        },
-        "labelRelationship": {
+        "uploadNewLabel": {
           "type": "string"
         }
       },
       "required": [
         "addLabel",
+        "addLink",
         "addNew",
         "addNewLabel",
+        "addRelationship",
+        "addUpload",
         "block",
         "blocks",
         "blockType",
         "chooseFromExisting",
         "collapseAll",
         "editLink",
-        "addLink",
+        "editRelationship",
         "itemsAndMore",
+        "labelRelationship",
         "latitude",
         "longitude",
         "passwordsDoNotMatch",
+        "removeRelationship",
+        "removeUpload",
+        "saveChanges",
         "searchForBlock",
         "selectFieldsToEdit",
         "showAll",
         "swapRelationship",
-        "uploadNewLabel",
         "swapUpload",
-        "addUpload",
-        "editRelationship",
-        "removeUpload",
-        "saveChanges",
-        "addRelationship",
-        "removeRelationship",
-        "labelRelationship"
+        "toggleBlock",
+        "uploadNewLabel"
       ],
       "type": "object"
     },

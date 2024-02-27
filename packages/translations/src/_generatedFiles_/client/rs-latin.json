@@ -79,6 +79,7 @@
     "showAll": "Pokaži sve",
     "swapRelationship": "Zameni vezu",
     "swapUpload": "Zameni prenos",
+    "toggleBlock": "Prebaci blok",
     "uploadNewLabel": "Učitaj novi {{label}}"
   },
   "general": {

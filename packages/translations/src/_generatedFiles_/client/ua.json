@@ -79,6 +79,7 @@
     "showAll": "Показати все",
     "swapRelationship": "Замінити зв'язок",
     "swapUpload": "Замінити завантаження",
+    "toggleBlock": "Перемкнути блок",
     "uploadNewLabel": "Завантажити новий {{label}}"
   },
   "general": {

@@ -79,6 +79,7 @@
     "showAll": "Alles tonen",
     "swapRelationship": "Relatie Wisselen",
     "swapUpload": "Upload Verwisselen",
+    "toggleBlock": "Blok togglen",
     "uploadNewLabel": "Upload nieuw(e) {{label}}"
   },
   "general": {

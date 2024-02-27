@@ -79,6 +79,7 @@
     "showAll": "Visa Alla",
     "swapRelationship": "Byt Förhållande",
     "swapUpload": "Byt Uppladdning",
+    "toggleBlock": "Växla block",
     "uploadNewLabel": "Ladda upp ny {{label}}"
   },
   "general": {

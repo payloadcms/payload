@@ -79,6 +79,7 @@
     "showAll": "Mostrar Todo",
     "swapRelationship": "Cambiar Relación",
     "swapUpload": "Cambiar carga",
+    "toggleBlock": "Alternar bloque",
     "uploadNewLabel": "Subir nuevo {{label}}"
   },
   "general": {

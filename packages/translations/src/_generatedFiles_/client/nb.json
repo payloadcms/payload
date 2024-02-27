@@ -79,6 +79,7 @@
     "showAll": "Vis alle",
     "swapRelationship": "Bytte Forhold",
     "swapUpload": "Bytt Opplasting",
+    "toggleBlock": "Veksle blokk",
     "uploadNewLabel": "Last opp ny {{label}}"
   },
   "general": {
