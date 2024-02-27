@@ -31,7 +31,7 @@ type RichTextAdapterBase<
     config: SanitizedConfig
     schemaPath: string
   }) => Map<string, React.ReactNode>
-  generateSchemaMap: (args: {
+  generateSchemaMap?: (args: {
     config: SanitizedConfig
     schemaMap: Map<string, Field[]>
     schemaPath: string

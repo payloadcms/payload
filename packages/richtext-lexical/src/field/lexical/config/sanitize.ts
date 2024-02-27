@@ -171,7 +171,7 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
 
 export function sanitizeEditorConfig(editorConfig: EditorConfig): SanitizedEditorConfig {
   const resolvedFeatureMap = loadFeatures({
-    unsanitizedEditorConfig: editorConfig,
+    unSanitizedEditorConfig: editorConfig,
   })
 
   return {

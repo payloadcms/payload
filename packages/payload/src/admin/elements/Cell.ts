@@ -16,7 +16,7 @@ export type CellProps = {
    *
    * This is used to provide the RichText cell component for the RichText field.
    */
-  CellComponentOverride?: React.ComponentType<CellComponentProps>
+  CellComponentOverride?: React.ReactNode
   blocks?: {
     labels: BlockField['labels']
     slug: string
@@ -36,6 +36,7 @@ export type CellProps = {
   }) => void
   options?: SelectField['options']
   relationTo?: RelationshipField['relationTo']
+  richTextComponentMap?: Map<string, React.ReactNode> // any should be MappedField
 }
 
 export type CellComponentProps<Data = unknown> = {
@@ -44,5 +45,6 @@ export type CellComponentProps<Data = unknown> = {
     collectionSlug?: SanitizedCollectionConfig['slug']
     uploadConfig?: SanitizedCollectionConfig['upload']
   }
+  richTextComponentMap?: Map<string, React.ReactNode>
   rowData?: Record<string, unknown>
 }

@@ -26,7 +26,7 @@ export const LexicalPluginToLexicalFeature = (props?: Props): FeatureProvider =>
       : (props?.converters as LexicalPluginNodeConverter[]) || defaultConverters
 
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: ({ resolvedFeatures, unSanitizedEditorConfig }) => {
       return {
         hooks: {
           load({ incomingEditorState }) {

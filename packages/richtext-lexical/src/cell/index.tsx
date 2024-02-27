@@ -1,35 +1,45 @@
 'use client'
-import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
-import type { CellComponentProps, RichTextField } from 'payload/types'
 
 import { createHeadlessEditor } from '@lexical/headless'
+import { useTableCell } from '@payloadcms/ui/elements'
 import { $getRoot } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { AdapterProps } from '../types'
+import type { SanitizedEditorConfig } from '../field/lexical/config/types'
 
+import { useFieldPath } from '../../../ui/src/forms/FieldPathProvider'
+import { useClientFunctions } from '../../../ui/src/providers/ClientFunction'
+import { defaultEditorLexicalConfig } from '../field/lexical/config/defaultClient'
+import { sanitizeEditorConfig } from '../field/lexical/config/sanitize'
 import { getEnabledNodes } from '../field/lexical/nodes'
 
-export const RichTextCell: React.FC<
-  CellComponentProps<
-    RichTextField<SerializedEditorState, AdapterProps, AdapterProps>,
-    SerializedEditorState
-  > &
-    AdapterProps
-> = ({ data, editorConfig }) => {
+export const RichTextCell: React.FC<{
+  lexicalEditorConfig: LexicalEditorConfig
+}> = ({ lexicalEditorConfig }) => {
   const [preview, setPreview] = React.useState('Loading...')
+  const { schemaPath } = useFieldPath()
+  const clientFunctions = useClientFunctions()
+
+  const { cellData, cellProps, columnIndex, richTextComponentMap, rowData } = useTableCell()
 
   useEffect(() => {
-    let dataToUse = data
+    let dataToUse = cellData
     if (dataToUse == null) {
       setPreview('')
       return
     }
 
+    const finalSanitizedEditorConfig: SanitizedEditorConfig = sanitizeEditorConfig({
+      features: [],
+      lexical: lexicalEditorConfig
+        ? () => Promise.resolve(lexicalEditorConfig)
+        : () => Promise.resolve(defaultEditorLexicalConfig),
+    })
+
     // Transform data through load hooks
-    if (editorConfig?.features?.hooks?.load?.length) {
-      editorConfig.features.hooks.load.forEach((hook) => {
+    if (finalSanitizedEditorConfig?.features?.hooks?.load?.length) {
+      finalSanitizedEditorConfig.features.hooks.load.forEach((hook) => {
         dataToUse = hook({ incomingEditorState: dataToUse })
       })
     }
@@ -51,11 +61,11 @@ export const RichTextCell: React.FC<
       return
     }
 
-    editorConfig.lexical().then((lexicalConfig: LexicalEditorConfig) => {
+    void finalSanitizedEditorConfig.lexical().then((lexicalConfig: LexicalEditorConfig) => {
       // initialize headless editor
       const headlessEditor = createHeadlessEditor({
         namespace: lexicalConfig.namespace,
-        nodes: getEnabledNodes({ editorConfig }),
+        nodes: getEnabledNodes({ editorConfig: finalSanitizedEditorConfig }),
         theme: lexicalConfig.theme,
       })
       headlessEditor.setEditorState(headlessEditor.parseEditorState(dataToUse))
@@ -68,7 +78,7 @@ export const RichTextCell: React.FC<
       // Limiting the number of characters shown is done in a CSS rule
       setPreview(textContent)
     })
-  }, [data, editorConfig])
+  }, [cellData, lexicalEditorConfig])
 
   return <span>{preview}</span>
 }
