@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { payloadOgImage } from '@payloadcms/ui'
+import { payloadFavicon, payloadOgImage } from '@payloadcms/ui'
 
 export const meta = async (args: {
   config: SanitizedConfig
@@ -12,11 +12,23 @@ export const meta = async (args: {
   const { config, description = '', keywords = 'CMS, Admin, Dashboard', title } = args
 
   const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
-  const ogImage = config.admin.meta.ogImage ?? payloadOgImage.src
+  const favicon = config?.admin?.meta?.favicon ?? payloadFavicon?.src
+  const ogImage = config.admin?.meta?.ogImage ?? payloadOgImage?.src
 
   return {
     description,
+    icons: [
+      {
+        type: 'image/svg',
+        rel: 'icon',
+        url: favicon,
+      },
+    ],
     keywords,
+    metadataBase:
+      config?.serverURL ||
+      process.env.PAYLOAD_PUBLIC_SERVER_URL ||
+      `http://localhost:${process.env.PORT || 3000}`,
     openGraph: {
       type: 'website',
       description,
