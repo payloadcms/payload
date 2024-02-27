@@ -36,7 +36,7 @@ export const getMetaBySegment = async ({
     params.collection && params.segments?.length > 0 && params.segments[0] !== 'create',
   )
 
-  if (params?.segments?.length) {
+  if (params.collection && params?.segments?.length) {
     // `/:id`
     if (params.segments.length === 1) {
       fn = await import('../Edit/meta.ts').then((mod) => mod.generateMetadata)
@@ -59,6 +59,33 @@ export const getMetaBySegment = async ({
 
     // `/:id/versions/:version`
     if (params.segments.length === 3 && params.segments[1] === 'versions') {
+      fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
+    }
+  }
+
+  if (params.global) {
+    // `/:slug`
+    if (!params.segments?.length) {
+      fn = await import('../Edit/meta.ts').then((mod) => mod.generateMetadata)
+    }
+
+    // `/:slug/api`
+    if (params.segments?.length === 1 && params.segments[0] === 'api') {
+      fn = await import('../API/meta.ts').then((mod) => mod.generateMetadata)
+    }
+
+    // `/:slug/preview`
+    if (params.segments?.length === 1 && params.segments[0] === 'preview') {
+      fn = await import('../LivePreview/meta.ts').then((mod) => mod.generateMetadata)
+    }
+
+    // `/:slug/versions`
+    if (params.segments?.length === 1 && params.segments[0] === 'versions') {
+      fn = await import('../Versions/meta.ts').then((mod) => mod.generateMetadata)
+    }
+
+    // `/:slug/versions/:version`
+    if (params.segments?.length === 2 && params.segments[0] === 'versions') {
       fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
     }
   }
