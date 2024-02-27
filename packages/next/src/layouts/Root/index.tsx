@@ -4,13 +4,13 @@ import { translations } from '@payloadcms/translations/client'
 import { RootProvider, buildComponentMap } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
 import { cookies, headers } from 'next/headers'
+import { createClientConfig } from 'payload/config'
 import { deepMerge } from 'payload/utilities'
 import React from 'react'
 
 import { DefaultEditView } from '../../pages/Edit/Default'
 import { DefaultListView } from '../../pages/List/Default'
 import { DefaultCell } from '../../pages/List/Default/Cell'
-import { createClientConfig } from '../../utilities/createClientConfig'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage'
 
 export const metadata = {
