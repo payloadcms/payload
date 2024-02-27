@@ -6,6 +6,7 @@ import type { CliArgs, PackageManager } from './types'
 
 import { createProject } from './lib/create-project'
 import { generateSecret } from './lib/generate-secret'
+import { initNext } from './lib/init-next'
 import { parseProjectName } from './lib/parse-project-name'
 import { parseTemplate } from './lib/parse-template'
 import { selectDb } from './lib/select-db'
@@ -27,6 +28,9 @@ export class Main {
         '--secret': String,
         '--template': String,
 
+        // Next.js
+        '--init-next': Boolean,
+
         // Package manager
         '--no-deps': Boolean,
         '--use-npm': Boolean,
@@ -35,6 +39,7 @@ export class Main {
 
         // Flags
         '--beta': Boolean,
+        '--debug': Boolean,
         '--dry-run': Boolean,
 
         // Aliases
@@ -53,6 +58,12 @@ export class Main {
         console.log(helpMessage())
         process.exit(0)
       }
+
+      if (this.args['--init-next']) {
+        await initNext(this.args)
+        process.exit(0)
+      }
+
       const templateArg = this.args['--template']
       if (templateArg) {
         const valid = validateTemplate(templateArg)

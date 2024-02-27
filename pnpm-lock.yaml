@@ -269,6 +269,9 @@ importers:
       fs-extra:
         specifier: ^9.0.1
         version: 9.1.0
+      globby:
+        specifier: 11.1.0
+        version: 11.1.0
       handlebars:
         specifier: ^4.7.7
         version: 4.7.8
