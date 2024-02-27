@@ -22,7 +22,8 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/withPayload.js" /* Include the withPayload.js file in the build */
+    "src/withPayload.js" /* Include the withPayload.js file in the build */,
+    "../payload/src/utilities/isEntityHidden.ts"
   ],
   "references": [
     { "path": "../payload" },
