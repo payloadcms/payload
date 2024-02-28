@@ -1,10 +1,9 @@
+'use client'
+import type { EditViewProps } from 'payload/config'
+
+import { Chevron, LinkIcon, Popup, PopupList, X } from '@payloadcms/ui'
 import React from 'react'
 
-import type { EditViewProps } from '../../../types'
-
-import { Chevron, Popup, X } from '../../../..'
-import * as PopupList from '../../../../elements/Popup/PopupButtonList'
-import { ExternalLinkIcon } from '../../../../graphics/ExternalLink'
 import { useLivePreviewContext } from '../../Context/context'
 import { PreviewFrameSizeInput } from '../SizeInput'
 import './index.scss'
@@ -116,7 +115,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
         }}
         type="button"
       >
-        <ExternalLinkIcon />
+        <LinkIcon />
       </a>
     </div>
   )

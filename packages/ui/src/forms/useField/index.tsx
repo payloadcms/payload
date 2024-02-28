@@ -1,6 +1,7 @@
 'use client'
 import { useCallback, useMemo, useRef } from 'react'
 
+import type { UPDATE } from '../Form/types'
 import type { FieldType, Options } from './types'
 
 import useThrottledEffect from '../../hooks/useThrottledEffect'
@@ -11,6 +12,7 @@ import { useOperation } from '../../providers/OperationProvider'
 import { useTranslation } from '../../providers/Translation'
 import { useFieldPath } from '../FieldPathProvider'
 import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context'
+import { FormField } from '../Form/types'
 
 /**
  * Get and set the value of a form field.
@@ -143,18 +145,22 @@ const useField = <T,>(options: Options): FieldType<T> => {
         if (valid !== prevValid.current) {
           prevValid.current = valid
 
+          const update: UPDATE = {
+            type: 'UPDATE',
+            errorMessage,
+            path,
+            rows: field?.rows,
+            valid,
+            // validate,
+            value,
+          }
+
+          if (disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false)) {
+            update.disableFormData = true
+          }
+
           if (typeof dispatchField === 'function') {
-            dispatchField({
-              type: 'UPDATE',
-              disableFormData:
-                disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
-              errorMessage,
-              path,
-              rows: field?.rows,
-              valid,
-              // validate,
-              value,
-            })
+            dispatchField(update)
           }
         }
       }

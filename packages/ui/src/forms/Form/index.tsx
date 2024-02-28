@@ -18,6 +18,7 @@ import type {
 } from './types'
 
 import useDebounce from '../../hooks/useDebounce'
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
@@ -39,6 +40,7 @@ import { fieldReducer } from './fieldReducer'
 import getDataByPathFunc from './getDataByPath'
 import getSiblingDataFunc from './getSiblingData'
 import initContextState from './initContextState'
+import { mergeServerFormState } from './mergeServerFormState'
 import reduceFieldsToValues from './reduceFieldsToValues'
 
 const baseClass = 'form'
@@ -470,7 +472,7 @@ const Form: React.FC<Props> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  useThrottledEffect(
+  useDebouncedEffect(
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
@@ -486,16 +488,17 @@ const Form: React.FC<Props> = (props) => {
             revalidatedFormState = result
           }, Promise.resolve())
 
-          if (!isDeepEqual(fields, revalidatedFormState)) {
-            console.log({ fields, revalidatedFormState })
-            dispatchFields({ type: 'MERGE_STATE_KEEP_VALUES', state: revalidatedFormState })
+          const { changed, newState } = mergeServerFormState(fields, revalidatedFormState)
+
+          if (changed) {
+            dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: newState })
           }
         }
       }
 
       executeOnChange() // eslint-disable-line @typescript-eslint/no-floating-promises
     },
-    500,
+    150,
     [fields, dispatchFields, onChange],
   )
 

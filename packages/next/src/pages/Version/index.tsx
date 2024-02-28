@@ -7,6 +7,7 @@ import React from 'react'
 
 import type { ServerSideEditViewProps } from '../Edit/types'
 
+import { sanitizeEditViewProps } from '../Edit/sanitizeEditViewProps'
 import { DefaultVersionView } from './Default'
 
 export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
@@ -69,23 +70,23 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
     try {
       doc = payload.findGlobalVersionByID({
         id: versionID,
+        slug,
         depth: 1,
         locale: '*',
-        slug,
       })
 
       publishedDoc = payload.findGlobal({
+        slug,
         depth: 1,
         draft: false,
         locale: '*',
-        slug,
       })
 
       mostRecentDoc = payload.findGlobal({
+        slug,
         depth: 1,
         draft: true,
         locale: '*',
-        slug,
       })
     } catch (error) {
       return notFound()
@@ -104,12 +105,13 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
     return notFound()
   }
 
+  const clientSideProps = sanitizeEditViewProps(props)
+
   return (
     <DefaultVersionView
-      collectionSlug={collectionSlug}
+      {...clientSideProps}
       doc={doc}
       docPermissions={docPermissions}
-      globalSlug={globalSlug}
       id={id}
       initialComparisonDoc={mostRecentDoc}
       localeOptions={localeOptions}

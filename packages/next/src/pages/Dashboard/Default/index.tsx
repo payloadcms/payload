@@ -27,6 +27,12 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     visibleGlobals,
   } = props
 
+  // const { setViewActions } = useActions()
+
+  // useEffect(() => {
+  //   setViewActions([])
+  // }, [setViewActions])
+
   return (
     <div className={baseClass}>
       <SetStepNav nav={[]} />

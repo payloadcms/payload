@@ -1,6 +1,6 @@
+'use client'
+import { useConfig } from '@payloadcms/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-import { useConfig } from '../../utilities/Config'
 
 export interface PopupMessage {
   searchParams: {
