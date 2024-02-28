@@ -20,8 +20,9 @@ let id: string
 let payload: Payload
 
 describe('SEO Plugin', () => {
+
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E({ config, dirname: __dirname })
+    const { serverURL } = await initPayloadE2E({config, dirname: __dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
@@ -37,7 +38,7 @@ describe('SEO Plugin', () => {
       file,
     })
 
-    const createdPage = (await payload.create({
+    const createdPage = await payload.create({
       collection: 'pages',
       data: {
         slug: 'test-page',
@@ -49,7 +50,7 @@ describe('SEO Plugin', () => {
         },
         title: 'Test Page',
       },
-    })) as unknown as Promise<PayloadPage>
+    }) as unknown as Promise<PayloadPage>
     id = createdPage.id
   })
 

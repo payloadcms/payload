@@ -1,10 +1,13 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { PayloadRequest } from 'payload/types'
 
-import { getMigrations, readMigrationFiles } from 'payload/database'
-import { commitTransaction } from 'payload/dist/utilities/commitTransaction'
-import { initTransaction } from 'payload/dist/utilities/initTransaction'
-import { killTransaction } from 'payload/dist/utilities/killTransaction'
+import {
+  commitTransaction,
+  getMigrations,
+  initTransaction,
+  killTransaction,
+  readMigrationFiles,
+} from 'payload/database'
 
 import type { PostgresAdapter } from './types'
 
