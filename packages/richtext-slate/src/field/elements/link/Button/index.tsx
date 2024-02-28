@@ -72,7 +72,7 @@ export const LinkButton: React.FC = () => {
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
-  const { id, getDocPreferences } = useDocumentInfo()
+  const { id, collectionSlug } = useDocumentInfo()
   const { schemaPath } = useFieldPath()
 
   const { richTextComponentMap } = fieldProps
@@ -94,13 +94,12 @@ export const LinkButton: React.FC = () => {
               const data = {
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               }
-              const docPreferences = await getDocPreferences()
               const state = await getFormState({
                 apiRoute: config.routes.api,
                 body: {
                   id,
+                  collectionSlug,
                   data,
-                  docPreferences,
                   operation: 'update',
                   schemaPath: `${schemaPath}.${linkFieldsSchemaPath}`,
                 },

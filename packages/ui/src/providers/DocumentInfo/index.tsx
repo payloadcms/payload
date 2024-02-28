@@ -18,6 +18,13 @@ const Context = createContext({} as DocumentInfoContext)
 
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
+/**
+ * To initialize documentInfo from the server
+ * use the <SetDocumentInfo /> within a RSC component
+ * to hydrate the documentInfo on the first render.
+ *
+ * Otherwise pass props to initialize the documentInfo.
+ **/
 export const DocumentInfoProvider: React.FC<
   DocumentInfoProps & {
     children: React.ReactNode
@@ -54,6 +61,13 @@ export const DocumentInfoProvider: React.FC<
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
   const [title, setTitle] = useState<string>('')
+
+  const setDocumentTitle = useCallback<DocumentInfoContext['setDocumentTitle']>(
+    (title) => {
+      setTitle(title || id?.toString() || '[untitled]')
+    },
+    [id],
+  )
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -259,19 +273,26 @@ export const DocumentInfoProvider: React.FC<
   )
 
   useEffect(() => {
-    getVersions()
+    void getVersions()
   }, [getVersions])
 
   useEffect(() => {
-    getDocPermissions()
-  }, [getDocPermissions])
+    const loadDocPermissions = async () => {
+      const docPermissions: DocumentPermissions = rest.docPermissions
+      if (!docPermissions) await getDocPermissions()
+      else setDocPermissions(docPermissions)
+    }
+    void loadDocPermissions()
+  }, [getDocPermissions, rest.docPermissions, setDocPermissions])
 
-  const setDocumentTitle = useCallback<DocumentInfoContext['setDocumentTitle']>(
-    (title) => {
-      setTitle(title || id?.toString() || '[untitled]')
-    },
-    [id],
-  )
+  useEffect(() => {
+    const loadDocPreferences = async () => {
+      let docPreferences: DocumentPreferences = rest.docPreferences
+      if (!docPreferences) docPreferences = await getDocPreferences()
+      void setPreference(preferencesKey, docPreferences)
+    }
+    void loadDocPreferences()
+  }, [getDocPreferences, preferencesKey, rest.docPreferences, setPreference])
 
   const value: DocumentInfoContext = {
     ...documentInfo,

@@ -132,14 +132,15 @@ export const DefaultEditView: React.FC = () => {
         apiRoute,
         body: {
           id,
-          docPreferences,
+          collectionSlug,
           formState: prevFormState,
+          globalSlug,
           operation,
           schemaPath,
         },
         serverURL,
       }),
-    [serverURL, apiRoute, id, operation, docPreferences, schemaPath],
+    [serverURL, apiRoute, id, operation, schemaPath, collectionSlug, globalSlug],
   )
 
   return (

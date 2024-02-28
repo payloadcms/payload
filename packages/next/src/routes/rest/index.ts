@@ -326,7 +326,6 @@ export const POST =
             break
           case 2:
             if (slug2 in endpoints.collection.POST) {
-              // /:collection/form-state
               // /:collection/login
               // /:collection/logout
               // /:collection/unlock
