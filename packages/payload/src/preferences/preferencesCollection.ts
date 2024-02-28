@@ -12,6 +12,7 @@ const preferenceAccess: Access = ({ req }) => ({
 })
 
 const getPreferencesCollection = (config: Config): CollectionConfig => ({
+  slug: 'payload-preferences',
   access: {
     delete: preferenceAccess,
     read: preferenceAccess,
@@ -39,6 +40,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
   fields: [
     {
       name: 'user',
+      type: 'relationship',
       hooks: {
         beforeValidate: [
           ({ req }) => {
@@ -52,22 +54,22 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
           },
         ],
       },
+      index: true,
       relationTo: config.collections
         .filter((collectionConfig) => collectionConfig.auth)
         .map((collectionConfig) => collectionConfig.slug),
       required: true,
-      type: 'relationship',
     },
     {
       name: 'key',
       type: 'text',
+      index: true,
     },
     {
       name: 'value',
       type: 'json',
     },
   ],
-  slug: 'payload-preferences',
 })
 
 export default getPreferencesCollection

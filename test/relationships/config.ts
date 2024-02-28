@@ -10,6 +10,7 @@ import {
   polymorphicRelationshipsSlug,
   relationSlug,
   slug,
+  treeSlug,
 } from './shared'
 
 const openAccess = {
@@ -244,6 +245,20 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: treeSlug,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: 'tree',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -335,6 +350,21 @@ export default buildConfigWithDefaults({
         customIdRelation: customIdRelation.id,
         customIdNumberRelation: customIdNumberRelation.id,
         filteredRelation: filteredRelation.id,
+      },
+    })
+
+    const root = await payload.create({
+      collection: 'tree',
+      data: {
+        text: 'root',
+      },
+    })
+
+    await payload.create({
+      collection: 'tree',
+      data: {
+        text: 'sub',
+        parent: root.id,
       },
     })
   },

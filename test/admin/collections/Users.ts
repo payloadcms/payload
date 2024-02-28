@@ -4,10 +4,10 @@ import { usersCollectionSlug } from '../slugs'
 
 export const Users: CollectionConfig = {
   slug: usersCollectionSlug,
-  auth: true,
   admin: {
     useAsTitle: 'email',
   },
+  auth: true,
   fields: [
     {
       name: 'textField',

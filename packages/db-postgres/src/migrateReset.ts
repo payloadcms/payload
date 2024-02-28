@@ -2,6 +2,9 @@
 import type { PayloadRequest } from 'payload/types'
 
 import { getMigrations, readMigrationFiles } from 'payload/database'
+import { commitTransaction } from 'payload/dist/utilities/commitTransaction'
+import { initTransaction } from 'payload/dist/utilities/initTransaction'
+import { killTransaction } from 'payload/dist/utilities/killTransaction'
 
 import type { PostgresAdapter } from './types'
 
@@ -21,10 +24,10 @@ export async function migrateReset(this: PostgresAdapter): Promise<void> {
     return
   }
 
+  const req = { payload } as PayloadRequest
+
   // Rollback all migrations in order
   for (const migration of existingMigrations) {
-    let transactionID
-
     const migrationFile = migrationFiles.find((m) => m.name === migration.name)
     try {
       if (!migrationFile) {
@@ -33,8 +36,8 @@ export async function migrateReset(this: PostgresAdapter): Promise<void> {
 
       const start = Date.now()
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
-      transactionID = await this.beginTransaction()
-      await migrationFile.down({ payload })
+      await initTransaction(req)
+      await migrationFile.down({ payload, req })
       payload.logger.info({
         msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
       })
@@ -44,19 +47,17 @@ export async function migrateReset(this: PostgresAdapter): Promise<void> {
         await payload.delete({
           id: migration.id,
           collection: 'payload-migrations',
-          req: {
-            transactionID,
-          } as PayloadRequest,
+          req,
         })
       }
 
-      await this.commitTransaction(transactionID)
+      await commitTransaction(req)
     } catch (err: unknown) {
       let msg = `Error running migration ${migrationFile.name}.`
 
       if (err instanceof Error) msg += ` ${err.message}`
 
-      await this.rollbackTransaction(transactionID)
+      await killTransaction(req)
       payload.logger.error({
         err,
         msg,

@@ -38,7 +38,9 @@ keywords: text, fields, config, configuration, documentation, Content Management
 | **`required`**     | Require this field to have a value.                                                                                                                                                                 |
 | **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                           |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
-
+| **`hasMany`**      | Makes this field an ordered array of text instead of just a single text.                                                                                                                       |
+| **`minRows`**      | Minimum number of texts in the array, if `hasMany` is set to true.                                                                                                                        |
+| **`maxRows`**      | Maximum number of texts in the array, if `hasMany` is set to true.                                                                                                                        |
 _\* An asterisk denotes that a property is required._
 
 ### Admin config

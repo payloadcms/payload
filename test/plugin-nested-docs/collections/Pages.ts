@@ -12,6 +12,9 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'fullTitle',
   },
+  versions: {
+    drafts: true,
+  },
   access: {
     read: () => true,
   },

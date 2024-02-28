@@ -16,7 +16,7 @@ async function main() {
     ...args
   } = minimist(process.argv.slice(2))
 
-  if (args.turbo) {
+  if (args.turbo !== false) {
     process.env.TURBOPACK = '1'
   }
 

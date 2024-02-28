@@ -1,7 +1,7 @@
 import { verifyEmailOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 function verifyEmailResolver(collection: Collection) {
@@ -12,7 +12,7 @@ function verifyEmailResolver(collection: Collection) {
     const options = {
       api: 'GraphQL',
       collection,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty(context.req, 'transactionID'),
       token: args.token,
     }
 

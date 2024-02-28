@@ -19,7 +19,7 @@ const Search =
         // write any config defaults here
       }
 
-      // add a beforeChange hook to every search-enabled collection
+      // add afterChange and afterDelete hooks to every search-enabled collection
       const collectionsWithSearchHooks = config?.collections
         ?.map((collection) => {
           const { hooks: existingHooks } = collection
@@ -34,7 +34,7 @@ const Search =
                 afterChange: [
                   ...(existingHooks?.afterChange || []),
                   async (args: any) => {
-                    syncWithSearch({
+                    await syncWithSearch({
                       ...args,
                       collection: collection.slug,
                       searchConfig,

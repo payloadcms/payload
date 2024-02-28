@@ -1,5 +1,5 @@
 import type { ContextType } from 'payload/dist/admin/components/utilities/DocumentInfo/types'
-import type { Field } from 'payload/dist/fields/config/types'
+import type { Field, TextareaField, TextField, UploadField } from 'payload/dist/fields/config/types'
 
 export type GenerateTitle = <T = any>(
   args: ContextType & { doc: T; locale?: string },
@@ -29,6 +29,12 @@ export interface PluginConfig {
   generateURL?: GenerateURL
   globals?: string[]
   tabbedUI?: boolean
+  fieldOverrides?: {
+    title?: Partial<TextField>
+    description?: Partial<TextareaField>
+    image?: Partial<UploadField>
+  }
+  interfaceName?: string
   uploadsCollection?: string
 }
 

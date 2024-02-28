@@ -2,7 +2,7 @@ import { resetPasswordOperation } from 'payload/operations'
 import { generatePayloadCookie } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 function resetPasswordResolver(collection: Collection) {
@@ -15,7 +15,7 @@ function resetPasswordResolver(collection: Collection) {
       collection,
       data: args,
       depth: 0,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
     const result = await resetPasswordOperation(options)

@@ -6,6 +6,7 @@ import type { FieldType, Options } from 'payload/dist/admin/components/forms/use
 import { UploadInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useConfig, useDocumentInfo, useLocale } from 'payload/components/utilities'
 import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
 
@@ -18,15 +19,17 @@ type MetaImageProps = UploadInputProps & {
 }
 
 export const MetaImage: React.FC<MetaImageProps> = (props) => {
-  const { name, fieldTypes, label, pluginConfig, relationTo } = props || {}
+  const { name, fieldTypes, label, pluginConfig, relationTo, required } = props || {}
 
   const field: FieldType<string> = useField(props as Options)
+
+  const { t } = useTranslation('plugin-seo')
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
   const docInfo = useDocumentInfo()
 
-  const { setValue, showError, value } = field
+  const { setValue, showError, value, errorMessage } = field
 
   const regenerateImage = useCallback(async () => {
     const { generateImage } = pluginConfig
@@ -65,6 +68,18 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
       >
         <div>
           {label && typeof label === 'string' && label}
+
+          {required && (
+            <span
+              style={{
+                marginLeft: '5px',
+                color: 'var(--theme-error-500)',
+              }}
+            >
+              *
+            </span>
+          )}
+
           {typeof pluginConfig.generateImage === 'function' && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -81,7 +96,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
                 }}
                 type="button"
               >
-                Auto-generate
+                {t('autoGenerate')}
               </button>
             </React.Fragment>
           )}
@@ -92,7 +107,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
               color: '#9A9A9A',
             }}
           >
-            Auto-generation will retrieve the selected hero image.
+            {t('imageAutoGenerationTip')}
           </div>
         )}
       </div>
@@ -107,6 +122,8 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
           collection={collection}
           fieldTypes={fieldTypes}
           filterOptions={{}}
+          errorMessage={errorMessage}
+          required={required}
           label={undefined}
           name={name}
           onChange={(incomingImage) => {
@@ -137,7 +154,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
         <Pill
           backgroundColor={hasImage ? 'green' : 'red'}
           color="white"
-          label={hasImage ? 'Good' : 'No Image'}
+          label={hasImage ? t('good') : t('noImage')}
         />
       </div>
     </div>

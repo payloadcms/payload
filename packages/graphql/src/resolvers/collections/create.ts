@@ -4,7 +4,7 @@ import type { GeneratedTypes } from 'payload'
 import type { PayloadRequest } from 'payload/types'
 import type { Collection } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
@@ -35,7 +35,7 @@ export default function createResolver<TSlug extends keyof GeneratedTypes['colle
       data: args.data,
       depth: 0,
       draft: args.draft,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
     const result = await createOperation(options)

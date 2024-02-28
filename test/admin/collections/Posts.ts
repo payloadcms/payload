@@ -93,6 +93,9 @@ export const Posts: CollectionConfig = {
         description:
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
       },
+      access: {
+        update: () => false,
+      },
     },
     {
       name: 'descriptionAsString',

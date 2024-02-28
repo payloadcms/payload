@@ -30,37 +30,38 @@ export const findByIDOperation = async <T extends TypeWithID>(
 ): Promise<T> => {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection.config,
-        context: args.req.context,
-        operation: 'read',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    id,
-    collection: { config: collectionConfig },
-    currentDepth,
-    depth,
-    disableErrors,
-    draft: draftEnabled = false,
-    overrideAccess = false,
-    req: { locale },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection.config,
+          context: args.req.context,
+          operation: 'read',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      id,
+      collection: { config: collectionConfig },
+      currentDepth,
+      depth,
+      disableErrors,
+      draft: draftEnabled = false,
+      overrideAccess = false,
+      req: { fallbackLocale, locale, t },
+      req,
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -86,9 +87,9 @@ export const findByIDOperation = async <T extends TypeWithID>(
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findOneArgs.where.and[0].id) throw new NotFound(req.t)
+    if (!findOneArgs.where.and[0].id) throw new NotFound(t)
 
-    let result = await req.payload.db.findOne<T>(findOneArgs)
+    let result: T = await req.payload.db.findOne(findOneArgs)
 
     if (!result) {
       if (!disableErrors) {
@@ -97,9 +98,6 @@ export const findByIDOperation = async <T extends TypeWithID>(
 
       return null
     }
-
-    // Clone the result - it may have come back memoized
-    result = JSON.parse(JSON.stringify(result))
 
     // /////////////////////////////////////
     // Replace document with draft if available
@@ -143,7 +141,9 @@ export const findByIDOperation = async <T extends TypeWithID>(
       currentDepth,
       depth,
       doc: result,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -185,7 +185,7 @@ export const findByIDOperation = async <T extends TypeWithID>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

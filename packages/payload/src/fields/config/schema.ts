@@ -83,8 +83,11 @@ export const text = baseField.keys({
     rtl: joi.boolean(),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
+  hasMany: joi.boolean().default(false),
   maxLength: joi.number(),
+  maxRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
   minLength: joi.number(),
+  minRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
   type: joi.string().valid('text').required(),
 })
 
@@ -174,6 +177,7 @@ export const json = baseField.keys({
       Error: componentSchema,
       Label: componentSchema,
     }),
+    editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
   }),
   defaultValue: joi.alternatives().try(joi.array(), joi.object()),
   type: joi.string().valid('json').required(),
@@ -412,6 +416,7 @@ export const blocks = baseField.keys({
             .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
         }),
         slug: joi.string().required(),
+        custom: joi.object().pattern(joi.string(), joi.any()),
       }),
     )
     .required(),

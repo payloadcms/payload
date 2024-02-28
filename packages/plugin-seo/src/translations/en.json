@@ -1,0 +1,22 @@
+{
+  "$schema": "./translation-schema.json",
+  "plugin-seo": {
+    "autoGenerate": "Auto-generate",
+    "imageAutoGenerationTip": "Auto-generation will retrieve the selected hero image.",
+    "bestPractices": "best practices",
+    "lengthTipTitle": "This should be between {{minLength}} and {{maxLength}} characters. For help in writing quality meta titles, see ",
+    "lengthTipDescription": "This should be between {{minLength}} and {{maxLength}} characters. For help in writing quality meta descriptions, see ",
+    "good": "Good",
+    "tooLong": "Too long",
+    "tooShort": "Too short",
+    "almostThere": "Almost there",
+    "characterCount": "{{current}}/{{minLength}}-{{maxLength}} chars, ",
+    "charactersToGo": "{{characters}} to go",
+    "charactersLeftOver": "{{characters}} left over",
+    "charactersTooMany": "{{characters}} too many",
+    "noImage": "No image",
+    "checksPassing": "{{current}}/{{max}} checks are passing",
+    "preview": "Preview",
+    "previewDescription": "Exact result listings may vary based on content and search relevancy."
+  }
+}

@@ -2,7 +2,7 @@ import { restoreVersionOperation } from 'payload/operations'
 import type { PayloadRequest } from 'payload/types'
 import type { Collection } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 export type Resolver = (
@@ -21,7 +21,7 @@ export default function restoreVersionResolver(collection: Collection): Resolver
       id: args.id,
       collection,
       depth: 0,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
     const result = await restoreVersionOperation(options)

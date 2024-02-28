@@ -11,7 +11,6 @@ import type {
   RelationWithTitle,
 } from './payload-types'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
 import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
@@ -527,10 +526,10 @@ async function clearAllDocs(): Promise<void> {
 }
 
 async function clearCollectionDocs(collectionSlug: string): Promise<void> {
-  const ids = (await payload.find({ collection: collectionSlug, limit: 100 })).docs.map(
-    (doc) => doc.id,
-  )
-  await mapAsync(ids, async (id) => {
-    await payload.delete({ id, collection: collectionSlug })
+  await payload.delete({
+    collection: collectionSlug,
+    where: {
+      id: { exists: true },
+    },
   })
 }

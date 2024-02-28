@@ -41,8 +41,9 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   originalDoc?: T
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: T
-  /** The sibling data from the previous document in `afterChange` hook. */
+  /** The sibling data of the document before changes being applied, only in `beforeChange` and `afterChange` hook. */
   previousSiblingDoc?: T
+  /** The previous value of the field, before changes, only in `beforeChange` and `afterChange` hooks. */
   previousValue?: P
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
@@ -227,7 +228,24 @@ export type TextField = FieldBase & {
   maxLength?: number
   minLength?: number
   type: 'text'
-}
+} & (
+    | {
+        /** Makes this field an ordered array of strings instead of just a single string. */
+        hasMany: true
+        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+        maxRows?: number
+        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+        minRows?: number
+      }
+    | {
+        /** Makes this field an ordered array of strings instead of just a single string. */
+        hasMany?: false | undefined
+        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+        maxRows?: undefined
+        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+        minRows?: undefined
+      }
+  )
 
 export type EmailField = FieldBase & {
   admin?: Admin & {
@@ -508,7 +526,7 @@ export type RichTextField<
   ExtraProperties = {},
 > = FieldBase & {
   admin?: Admin
-  editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
+  editor: RichTextAdapter<Value, AdapterProps, AdapterProps>
   type: 'richText'
 } & ExtraProperties
 
@@ -562,6 +580,8 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>
 }
 
 export type BlockField = FieldBase & {
@@ -674,6 +694,10 @@ export function fieldIsArrayType(field: Field): field is ArrayField {
 
 export function fieldIsBlockType(field: Field): field is BlockField {
   return field.type === 'blocks'
+}
+
+export function fieldIsGroupType(field: Field): field is GroupField {
+  return field.type === 'group'
 }
 
 export function optionIsObject(option: Option): option is OptionObject {

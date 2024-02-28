@@ -1,10 +1,20 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-import { draftCollectionSlug, postCollectionSlug, versionCollectionSlug } from '../slugs'
+import {
+  autosaveCollectionSlug,
+  draftCollectionSlug,
+  postCollectionSlug,
+  versionCollectionSlug,
+} from '../slugs'
 
 const Posts: CollectionConfig = {
   slug: postCollectionSlug,
   fields: [
+    {
+      name: 'relationToAutosaves',
+      type: 'relationship',
+      relationTo: autosaveCollectionSlug,
+    },
     {
       name: 'relationToVersions',
       type: 'relationship',
