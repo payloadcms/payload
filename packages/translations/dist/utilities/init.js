@@ -157,16 +157,16 @@ const initTFunction = (args) => (key, vars) => {
 };
 function memoize(fn, keys) {
     const cacheMap = new Map();
-    return async function (args) {
+    return function (args) {
         const cacheKey = keys.reduce((acc, key) => acc + args[key], '');
         if (!cacheMap.has(cacheKey)) {
-            const result = await fn(args);
+            const result = fn(args);
             cacheMap.set(cacheKey, result);
         }
         return cacheMap.get(cacheKey);
     };
 }
-exports.initI18n = memoize((async ({ config, language = 'en', translations, context }) => {
+exports.initI18n = memoize((({ config, language = 'en', translations, context }) => {
     const i18n = {
         fallbackLanguage: config.fallbackLanguage,
         language: language || config.fallbackLanguage,

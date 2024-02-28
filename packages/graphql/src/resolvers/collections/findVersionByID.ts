@@ -3,7 +3,7 @@ import type { PayloadRequest } from 'payload/types'
 import type { TypeWithVersion } from 'payload/versions'
 import type { Collection, TypeWithID } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 export type Resolver<T extends TypeWithID = any> = (
@@ -21,15 +21,20 @@ export type Resolver<T extends TypeWithID = any> = (
 
 export default function findVersionByIDResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context: Context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty(req, 'locale')
+    req = isolateObjectProperty(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
 
     const options = {
       id: args.id,
       collection,
       depth: 0,
       draft: args.draft,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty(req, 'transactionID'),
     }
 
     const result = await findVersionByIDOperation(options)

@@ -20,7 +20,7 @@ export type FieldType<T> = {
   path: string
   rows?: Row[]
   schemaPath: string
-  setValue: (val: unknown, modifyForm?: boolean) => void
+  setValue: (val: unknown, disableModifyingForm?: boolean) => void
   showError: boolean
   valid?: boolean
   value: T

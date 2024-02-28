@@ -30,16 +30,16 @@ The following options are configurable in the `email` property object as part of
 | **`fromName`** \*        | The name part of the From field that will be seen on the delivered email                                                                                                                     |
 | **`fromAddress`** \*     | The email address part of the From field that will be used when delivering email                                                                                                             |
 | **`transport`**          | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set                                                                                 |
-| **`transportOptions`**   | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com/smtp/) or see the examples below |
+| **`transportOptions`**   | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com) or see the examples below |
 | **`logMockCredentials`** | If set to true and no transport/transportOptions, ethereal credentials will be logged to console on startup                                                                                  |
 
 _\* An asterisk denotes that a property is required._
 
 ### Use SMTP
 
-Simple Mail Transfer Protocol, also known as SMTP can be passed in using the `transportOptions` object on the `email` options.
+Simple Mail Transfer Protocol (SMTP) options can be passed in using the `transportOptions` object on the `email` options. See the [NodeMailer SMTP documentation](https://nodemailer.com/smtp/) for more information, including details on when `secure` should and should not be set to `true`.
 
-**Example email part using SMTP:**
+**Example email options using SMTP:**
 
 ```ts
 payload.init({
@@ -50,12 +50,9 @@ payload.init({
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
-      port: 587,
-      secure: true, // use TLS
-      tls: {
-        // do not fail on invalid certs
-        rejectUnauthorized: false,
-      },
+      port: Number(process.env.SMTP_HOST),
+      secure: Number(process.env.SMTP_PORT) === 465, // true for port 465, false (the default) for 587 and others
+      requireTLS: true,
     },
     fromName: 'hello',
     fromAddress: 'hello@example.com',
@@ -71,7 +68,7 @@ payload.init({
 
 ### Use an email service
 
-Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload init could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
+Many third party mail providers are available and offer benefits beyond basic SMTP. As an example, your payload init could look like this if you wanted to use SendGrid.com, though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
 
 ```ts
 import payload from 'payload'

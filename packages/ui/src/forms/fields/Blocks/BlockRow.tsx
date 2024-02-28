@@ -56,6 +56,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   listeners,
   moveRow,
   path: parentPath,
+  schemaPath,
   permissions,
   readOnly,
   removeRow,

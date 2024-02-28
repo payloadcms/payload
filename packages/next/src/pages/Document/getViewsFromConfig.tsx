@@ -93,11 +93,11 @@ export const getViewsFromConfig = async ({
 
           case 'preview': {
             if (livePreviewEnabled) {
-              // DefaultView = lazy(() =>
-              //   import('../LivePreview/index.tsx').then((module) => ({
-              //     default: module.LivePreviewView,
-              //   })),
-              // )
+              DefaultView = lazy(() =>
+                import('../LivePreview/index.tsx').then((module) => ({
+                  default: module.LivePreviewView,
+                })),
+              )
             }
             break
           }
@@ -167,11 +167,11 @@ export const getViewsFromConfig = async ({
 
         case 'preview': {
           if (livePreviewEnabled) {
-            // DefaultView = lazy(() =>
-            //   import('../LivePreview/index.tsx').then((module) => ({
-            //     default: module.LivePreviewView,
-            //   })),
-            // )
+            DefaultView = lazy(() =>
+              import('../LivePreview/index.tsx').then((module) => ({
+                default: module.LivePreviewView,
+              })),
+            )
           }
           break
         }

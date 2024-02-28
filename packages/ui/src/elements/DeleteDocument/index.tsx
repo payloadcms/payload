@@ -61,7 +61,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
       //       if (res.status < 400) {
       //         setDeleting(false)
       //         toggleModal(modalSlug)
-      //         toast.success(t('general:titleDeleted', { label: getTranslation(singular, i18n), title }))
+      //         toast.success(json.message || t('general:titleDeleted', { label: getTranslation(singular, i18n), title }))
       //         return history.push(`${admin}/collections/${slug}`)
       //       }
       //       toggleModal(modalSlug)

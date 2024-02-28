@@ -1,9 +1,10 @@
+'use client'
+import type { EditViewProps } from 'payload/config'
+
 import { useDraggable } from '@dnd-kit/core'
+import { DragHandle } from '@payloadcms/ui'
 import React from 'react'
 
-import type { EditViewProps } from '../../types'
-
-import DragHandle from '../../../icons/Drag'
 import { useLivePreviewContext } from '../Context/context'
 import { ToolbarControls } from './Controls'
 import './index.scss'

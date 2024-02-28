@@ -1,3 +1,4 @@
+'use client'
 import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 

@@ -20,12 +20,17 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   let keywords: string = ''
 
   if (collectionConfig) {
-    title = t('editing')
-    ;(keywords = `${getTranslation(collectionConfig.labels.singular, i18n)}, Payload, CMS`),
-      (title = `${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-        collectionConfig.labels.singular,
-        i18n,
-      )}`)
+    description = `${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
+      collectionConfig.labels.singular,
+      i18n,
+    )}`
+
+    title = `${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
+      collectionConfig.labels.singular,
+      i18n,
+    )}`
+
+    keywords = `${getTranslation(collectionConfig.labels.singular, i18n)}, Payload, CMS`
   }
 
   if (globalConfig) {

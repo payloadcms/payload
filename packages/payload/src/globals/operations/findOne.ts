@@ -25,14 +25,14 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   args: Args,
 ): Promise<T> => {
   const {
+    slug,
     depth,
     draft: draftEnabled = false,
     globalConfig,
     overrideAccess = false,
-    req: { locale },
+    req: { fallbackLocale, locale },
     req,
     showHiddenFields,
-    slug,
   } = args
 
   try {
@@ -53,9 +53,9 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // /////////////////////////////////////
 
     let doc = await req.payload.db.findGlobal({
+      slug,
       locale,
       req,
-      slug,
       where: overrideAccess ? undefined : (accessResult as Where),
     })
     if (!doc) {
@@ -102,7 +102,9 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       context: req.context,
       depth,
       doc,
+      fallbackLocale,
       global: globalConfig,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,

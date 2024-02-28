@@ -54,8 +54,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         if (typeof where === 'object') {
           const paginatedRes = await payload.find({
             collection: entity.slug,
+            depth: 0,
             limit: 1,
             overrideAccess: true,
+            pagination: false,
             req,
             where: {
               ...where,
@@ -76,6 +78,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         return payload.findByID({
           id,
           collection: entity.slug,
+          depth: 0,
           overrideAccess: true,
           req,
         })
@@ -95,8 +98,13 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     const mutablePolicies = policiesObj
 
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
-      docBeingAccessed = await getEntityDoc()
+      // assign docBeingAccessed first as the promise to avoid multiple calls to getEntityDoc
+      docBeingAccessed = getEntityDoc().then((doc) => {
+        docBeingAccessed = doc
+      })
     }
+    // awaiting the promise to ensure docBeingAccessed is assigned before it is used
+    await docBeingAccessed
 
     // https://payloadcms.slack.com/archives/C048Z9C2BEX/p1702054928343769
     const accessResult = await access({ id, data, doc: docBeingAccessed, req })

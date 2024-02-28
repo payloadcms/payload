@@ -60,8 +60,8 @@ export class Main {
       }
 
       if (this.args['--init-next']) {
-        await initNext(this.args)
-        process.exit(0)
+        const result = await initNext(this.args)
+        process.exit(result.success ? 0 : 1)
       }
 
       const templateArg = this.args['--template']

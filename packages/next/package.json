@@ -53,6 +53,7 @@
     "sass": "^1.70.0"
   },
   "dependencies": {
+    "@dnd-kit/core": "6.0.8",
     "@faceless-ui/modal": "2.0.1",
     "@faceless-ui/window-info": "2.1.1",
     "@payloadcms/graphql": "workspace:*",

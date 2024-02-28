@@ -58,8 +58,6 @@ export const DocumentInfoProvider: React.FC<
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
-
   const [title, setTitle] = useState<string>('')
 
   const setDocumentTitle = useCallback<DocumentInfoContext['setDocumentTitle']>(
@@ -88,6 +86,10 @@ export const DocumentInfoProvider: React.FC<
       preferencesKey = `collection-${slug}-${id}`
     }
   }
+
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(
+    permissions[pluralType][slug],
+  )
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
@@ -296,6 +298,7 @@ export const DocumentInfoProvider: React.FC<
 
   const value: DocumentInfoContext = {
     ...documentInfo,
+    docConfig,
     docPermissions,
     getDocPermissions,
     getDocPreferences,

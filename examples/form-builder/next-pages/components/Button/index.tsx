@@ -51,9 +51,9 @@ export const Button: React.FC<Props> = ({
     <Element {...elementProps}>
       <React.Fragment>
         {el === 'link' && (
-          <a {...newTabProps} href={href} className={elementProps.className}>
+          <Link {...newTabProps} href={href} className={elementProps.className}>
             {content}
-          </a>
+          </Link>
         )}
         {el !== 'link' && <React.Fragment>{content}</React.Fragment>}
       </React.Fragment>

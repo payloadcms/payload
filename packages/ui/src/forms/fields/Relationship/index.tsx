@@ -153,6 +153,7 @@ const Relationship: React.FC<Props> = (props) => {
               where: Where
             } = {
               depth: 0,
+              draft: true,
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
@@ -204,6 +205,7 @@ const Relationship: React.FC<Props> = (props) => {
                 resultsFetched += data.docs.length
 
                 dispatchOptions({
+                  type: 'ADD',
                   collection,
                   // TODO: fix this
                   // @ts-ignore-next-line
@@ -211,12 +213,12 @@ const Relationship: React.FC<Props> = (props) => {
                   docs: data.docs,
                   i18n,
                   sort,
-                  type: 'ADD',
                 })
               }
             } else if (response.status === 403) {
               setLastFullyLoadedRelation(relations.indexOf(relation))
               dispatchOptions({
+                type: 'ADD',
                 collection,
                 // TODO: fix this
                 // @ts-ignore-next-line
@@ -225,7 +227,6 @@ const Relationship: React.FC<Props> = (props) => {
                 i18n,
                 ids: relationMap[relation],
                 sort,
-                type: 'ADD',
               })
             } else {
               setErrorLoading(t('error:unspecific'))
@@ -295,6 +296,7 @@ const Relationship: React.FC<Props> = (props) => {
       if (idsToLoad.length > 0) {
         const query = {
           depth: 0,
+          draft: true,
           limit: idsToLoad.length,
           locale,
           where: {
@@ -321,6 +323,7 @@ const Relationship: React.FC<Props> = (props) => {
           }
 
           dispatchOptions({
+            type: 'ADD',
             collection,
             // TODO: fix this
             // @ts-ignore-next-line
@@ -329,7 +332,6 @@ const Relationship: React.FC<Props> = (props) => {
             i18n,
             ids: idsToLoad,
             sort: true,
-            type: 'ADD',
           })
         }
       }
@@ -377,13 +379,13 @@ const Relationship: React.FC<Props> = (props) => {
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       dispatchOptions({
+        type: 'UPDATE',
         collection: args.collectionConfig,
         // TODO: fix this
         // @ts-ignore-next-line
         config,
         doc: args.doc,
         i18n,
-        type: 'UPDATE',
       })
     },
     [i18n, config],

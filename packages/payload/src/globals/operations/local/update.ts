@@ -36,6 +36,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   }
 
   return updateOperation<TSlug>({
+    slug: globalSlug as string,
     data,
     depth,
     draft,
@@ -43,6 +44,5 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     overrideAccess,
     req: await createLocalReq(options, payload),
     showHiddenFields,
-    slug: globalSlug as string,
   })
 }

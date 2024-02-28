@@ -25,10 +25,15 @@ export const Collapsible: React.FC<Props> = ({
 }) => {
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed))
   const [hoveringToggle, setHoveringToggle] = useState(false)
-  const isNested = useCollapsible()
+  const { withinCollapsible } = useCollapsible()
   const { t } = useTranslation()
 
   const collapsed = typeof collapsedFromProps === 'boolean' ? collapsedFromProps : collapsedLocal
+
+  const toggleCollapsible = React.useCallback(() => {
+    if (typeof onToggle === 'function') onToggle(!collapsed)
+    setCollapsedLocal(!collapsed)
+  }, [onToggle, collapsed])
 
   return (
     <div
@@ -37,14 +42,14 @@ export const Collapsible: React.FC<Props> = ({
         className,
         dragHandleProps && `${baseClass}--has-drag-handle`,
         collapsed && `${baseClass}--collapsed`,
-        isNested && `${baseClass}--nested`,
+        withinCollapsible && `${baseClass}--nested`,
         hoveringToggle && `${baseClass}--hovered`,
         `${baseClass}--style-${collapsibleStyle}`,
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <CollapsibleProvider>
+      <CollapsibleProvider collapsed={collapsed} toggle={toggleCollapsible}>
         <div
           className={`${baseClass}__toggle-wrap`}
           onMouseEnter={() => setHoveringToggle(true)}
@@ -66,10 +71,7 @@ export const Collapsible: React.FC<Props> = ({
             ]
               .filter(Boolean)
               .join(' ')}
-            onClick={() => {
-              if (typeof onToggle === 'function') onToggle(!collapsed)
-              setCollapsedLocal(!collapsed)
-            }}
+            onClick={toggleCollapsible}
             type="button"
           >
             <span>{t('fields:toggleBlock')}</span>

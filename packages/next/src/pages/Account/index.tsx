@@ -1,3 +1,4 @@
+import type { ServerSideEditViewProps } from '@payloadcms/ui'
 import type { Metadata } from 'next'
 import type { Data, DocumentPreferences, SanitizedConfig } from 'payload/types'
 
@@ -10,8 +11,6 @@ import {
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import React, { Fragment } from 'react'
-
-import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'

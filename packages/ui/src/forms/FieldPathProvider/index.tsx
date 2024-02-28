@@ -16,6 +16,7 @@ export const FieldPathProvider: React.FC<{
   schemaPath: string
 }> = (props) => {
   const { children, path, schemaPath } = props
+
   return (
     <FieldPathContext.Provider
       value={{

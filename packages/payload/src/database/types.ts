@@ -78,7 +78,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: () => Promise<void>
+  migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
   /**
    * Run all migration down functions before running up
    */
@@ -116,8 +116,8 @@ export interface BaseDatabaseAdapter {
   sessions?: {
     [id: string]: {
       db: unknown
-      reject: () => void
-      resolve: () => void
+      reject: () => Promise<void>
+      resolve: () => Promise<void>
     }
   }
 
@@ -138,6 +138,10 @@ export type Destroy = (payload: Payload) => Promise<void>
 
 export type CreateMigration = (args: {
   file?: string
+  /**
+   * Skips the prompt asking to create empty migrations
+   */
+  forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
 }) => Promise<void>
@@ -377,8 +381,8 @@ export type DeleteManyArgs = {
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
 export type Migration = MigrationData & {
-  down: ({ payload }: { payload }) => Promise<boolean>
-  up: ({ payload }: { payload }) => Promise<boolean>
+  down: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
+  up: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
 }
 
 export type MigrationData = {

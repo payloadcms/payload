@@ -36,7 +36,7 @@ export const restoreVersionOperation = async <T extends TypeWithID = any>(
     depth,
     overrideAccess = false,
     req,
-    req: { locale, payload },
+    req: { fallbackLocale, locale, payload },
     showHiddenFields,
   } = args
 
@@ -142,7 +142,9 @@ export const restoreVersionOperation = async <T extends TypeWithID = any>(
       context: req.context,
       depth,
       doc: result,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,

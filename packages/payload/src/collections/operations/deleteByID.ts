@@ -30,40 +30,43 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
 ): Promise<Document> => {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'delete',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    id,
-    collection: { config: collectionConfig },
-    depth,
-    overrideAccess,
-    req: {
-      payload: { config },
-      payload,
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
+
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'delete',
+            req: args.req,
+          })) || args
+      },
+      Promise.resolve(),
+    )
+
+    const {
+      id,
+      collection: { config: collectionConfig },
+      depth,
+      overrideAccess,
+      req: {
+        fallbackLocale,
+        locale,
+        payload: { config },
+        payload,
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -118,9 +121,9 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     if (collectionConfig.versions) {
       await deleteCollectionVersions({
         id,
+        slug: collectionConfig.slug,
         payload,
         req,
-        slug: collectionConfig.slug,
       })
     }
 
@@ -154,7 +157,9 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       context: req.context,
       depth,
       doc: result,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -212,7 +217,7 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

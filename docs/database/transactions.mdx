@@ -48,7 +48,7 @@ const afterChange: CollectionAfterChangeHook = async ({ req }) => {
   })
 
   // Should this call fail, it will not rollback other changes
-  // because the req (and its transationID) is not passed through
+  // because the req (and its transactionID) is not passed through
   const safelyIgnoredAsync = req.payload.create({
     collection: 'my-slug',
     data: {
