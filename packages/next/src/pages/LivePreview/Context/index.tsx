@@ -1,12 +1,11 @@
+'use client'
+import type { EditViewProps, LivePreviewConfig } from 'payload/config'
+
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { LivePreviewConfig } from '../../../../../exports/config'
-import type { Field } from '../../../../../fields/config/types'
-import type { EditViewProps } from '../../types'
 import type { usePopupWindow } from '../usePopupWindow'
 
-import { fieldSchemaToJSON } from '../../../../../utilities/fieldSchemaToJSON'
 import { customCollisionDetection } from './collisionDetection'
 import { LivePreviewContext } from './context'
 import { sizeReducer } from './sizeReducer'
@@ -50,21 +49,21 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
 
-  const [fieldSchemaJSON] = useState(() => {
-    let fields: Field[]
+  // const [fieldSchemaJSON] = useState(() => {
+  //   let fields: Field[]
 
-    if ('collection' in props) {
-      const { collection } = props
-      fields = collection.fields
-    }
+  //   if ('collection' in props) {
+  //     const { collection } = props
+  //     fields = collection.fields
+  //   }
 
-    if ('global' in props) {
-      const { global } = props
-      fields = global.fields
-    }
+  //   if ('global' in props) {
+  //     const { global } = props
+  //     fields = global.fields
+  //   }
 
-    return fieldSchemaToJSON(fields)
-  })
+  //   return fieldSchemaToJSON(fields)
+  // })
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
@@ -167,7 +166,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
         appIsReady,
         breakpoint,
         breakpoints,
-        fieldSchemaJSON,
+        fieldSchemaJSON: [],
         iframeHasLoaded,
         iframeRef,
         isPopupOpen,

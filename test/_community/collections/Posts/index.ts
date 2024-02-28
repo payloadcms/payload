@@ -5,6 +5,11 @@ import { mediaSlug } from '../Media'
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
+  admin: {
+    livePreview: {
+      url: 'http://localhost:3000',
+    },
+  },
   fields: [
     {
       name: 'text',

@@ -10,11 +10,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "noEmit": true,
     "outDir": "./dist",
     "resolveJsonModule": true,
@@ -22,11 +18,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": false,
-    "types": [
-      "jest",
-      "node",
-      "@types/jest"
-    ],
+    "types": ["jest", "node", "@types/jest"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -35,56 +27,25 @@
       }
     ],
     "paths": {
-      "payload": [
-        "./packages/payload/src"
-      ],
-      "payload/*": [
-        "./packages/payload/src/exports/*"
-      ],
-      "@payloadcms/db-mongodb": [
-        "./packages/db-mongodb/src"
-      ],
-      "@payloadcms/richtext-lexical": [
-        "./packages/richtext-lexical/src"
-      ],
-      "@payloadcms/ui/*": [
-        "./packages/ui/src/exports/*"
-      ],
-      "@payloadcms/ui/scss": [
-        "./packages/ui/src/scss/styles.scss"
-      ],
-      "@payloadcms/ui/scss/app.scss": [
-        "./packages/ui/src/scss/app.scss"
-      ],
-      "@payloadcms/translations": [
-        "./packages/translations/src/exports/index.ts"
-      ],
+      "payload": ["./packages/payload/src"],
+      "payload/*": ["./packages/payload/src/exports/*"],
+      "@payloadcms/db-mongodb": ["./packages/db-mongodb/src"],
+      "@payloadcms/richtext-lexical": ["./packages/richtext-lexical/src"],
+      "@payloadcms/ui/*": ["./packages/ui/src/exports/*"],
+      "@payloadcms/ui/scss": ["./packages/ui/src/scss/styles.scss"],
+      "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
+      "@payloadcms/translations": ["./packages/translations/src/exports/index.ts"],
       "@payloadcms/translations/client": [
         "./packages/translations/src/_generatedFiles_/client/index.ts"
       ],
-      "@payloadcms/translations/api": [
-        "./packages/translations/src/_generatedFiles_/api/index.ts"
-      ],
-      "@payloadcms/next/*": [
-        "./packages/next/src/*"
-      ],
-      "@payloadcms/next": [
-        "./packages/next/src/exports/*"
-      ],
-      "@payloadcms/graphql": [
-        "./packages/graphql/src"
-      ],
-      "@payload-config": [
-        "./test/_community/config.ts"
-      ]
+      "@payloadcms/translations/api": ["./packages/translations/src/_generatedFiles_/api/index.ts"],
+      "@payloadcms/next/*": ["./packages/next/src/*"],
+      "@payloadcms/next": ["./packages/next/src/exports/*"],
+      "@payloadcms/graphql": ["./packages/graphql/src"],
+      "@payload-config": ["./test/_community/config.ts"]
     }
   },
-  "exclude": [
-    "dist",
-    "build",
-    "temp",
-    "node_modules"
-  ],
+  "exclude": ["dist", "build", "temp", "node_modules"],
   "composite": true,
   "references": [
     {
@@ -145,10 +106,5 @@
       "path": "./packages/ui"
     }
   ],
-  "include": [
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    "app/**/*.ts",
-    "app/**/*.tsx"
-  ]
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "app/**/*.ts", "app/**/*.tsx"]
 }
