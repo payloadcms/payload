@@ -39,12 +39,11 @@ export const ListControls: React.FC<Props> = (props) => {
     handleSortChange,
     handleWhereChange,
     modifySearchQuery = true,
-    resetParams,
     textFieldsToBeSearched,
     titleField,
   } = props
 
-  const searchParams = useSearchParams()
+  const { searchParams } = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
 
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(

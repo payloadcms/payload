@@ -5,6 +5,7 @@ import React, { useCallback, useState } from 'react'
 
 import type { Props } from './types'
 
+import { FieldPathProvider, useComponentMap } from '../..'
 import Form from '../../forms/Form'
 import { useForm } from '../../forms/Form/context'
 import RenderFields from '../../forms/RenderFields'
@@ -13,6 +14,7 @@ import { X } from '../../icons/X'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { OperationContext } from '../../providers/OperationProvider'
+import { useSearchParams } from '../../providers/SearchParams'
 import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider'
 import { useTranslation } from '../../providers/Translation'
 import { Drawer, DrawerToggler } from '../Drawer'
@@ -82,7 +84,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   )
 }
 const EditMany: React.FC<Props> = (props) => {
-  const { collection: { slug, fields, labels: { plural } } = {}, collection, resetParams } = props
+  const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()
@@ -93,18 +95,40 @@ const EditMany: React.FC<Props> = (props) => {
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [selected, setSelected] = useState([])
+  const { dispatchSearchParams } = useSearchParams()
+  const { componentMap } = useComponentMap()
+  const [reducedFieldMap, setReducedFieldMap] = useState([])
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasUpdatePermission = collectionPermissions?.update?.permission
 
   const drawerSlug = `edit-${slug}`
 
+  React.useEffect(() => {
+    if (componentMap?.collections?.[slug]?.fieldMap) {
+      const fieldMap = componentMap.collections[slug].fieldMap
+      const reducedFieldMap = []
+      fieldMap.map((field) => {
+        selected.map((selectedField) => {
+          if (field.name === selectedField.name) {
+            reducedFieldMap.push(field)
+          }
+        })
+      })
+      setReducedFieldMap(reducedFieldMap)
+    }
+  }, [componentMap.collections, fields, slug, selected])
+
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
     return null
   }
 
   const onSuccess = () => {
-    resetParams({ page: selectAll === SelectAllStatus.AllAvailable ? 1 : undefined })
+    dispatchSearchParams({
+      type: 'set',
+      browserHistory: 'replace',
+      params: { page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined },
+    })
   }
 
   return (
@@ -121,52 +145,53 @@ const EditMany: React.FC<Props> = (props) => {
       </DrawerToggler>
       <Drawer Header={null} slug={drawerSlug}>
         <OperationContext.Provider value="update">
-          <Form className={`${baseClass}__form`} onSuccess={onSuccess}>
-            <div className={`${baseClass}__main`}>
-              <div className={`${baseClass}__header`}>
-                <h2 className={`${baseClass}__header__title`}>
-                  {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
-                </h2>
-                <button
-                  aria-label={t('general:close')}
-                  className={`${baseClass}__header__close`}
-                  id={`close-drawer__${drawerSlug}`}
-                  onClick={() => closeModal(drawerSlug)}
-                  type="button"
-                >
-                  <X />
-                </button>
-              </div>
-              <FieldSelect fields={fields} setSelected={setSelected} />
-              [RenderFields]
-              {/* <RenderFields fieldSchema={selected} fieldTypes={fieldTypes} /> */}
-              <div className={`${baseClass}__sidebar-wrap`}>
-                <div className={`${baseClass}__sidebar`}>
-                  <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                    <div className={`${baseClass}__document-actions`}>
-                      {collection.versions ? (
-                        <React.Fragment>
-                          <Publish
+          <FieldPathProvider path="" schemaPath={slug}>
+            <Form className={`${baseClass}__form`} onSuccess={onSuccess}>
+              <div className={`${baseClass}__main`}>
+                <div className={`${baseClass}__header`}>
+                  <h2 className={`${baseClass}__header__title`}>
+                    {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
+                  </h2>
+                  <button
+                    aria-label={t('general:close')}
+                    className={`${baseClass}__header__close`}
+                    id={`close-drawer__${drawerSlug}`}
+                    onClick={() => closeModal(drawerSlug)}
+                    type="button"
+                  >
+                    <X />
+                  </button>
+                </div>
+                <FieldSelect fields={fields} setSelected={setSelected} />
+                <RenderFields fieldMap={reducedFieldMap} />
+                <div className={`${baseClass}__sidebar-wrap`}>
+                  <div className={`${baseClass}__sidebar`}>
+                    <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                      <div className={`${baseClass}__document-actions`}>
+                        {collection.versions ? (
+                          <React.Fragment>
+                            <Publish
+                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                              disabled={selected.length === 0}
+                            />
+                            <SaveDraft
+                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                              disabled={selected.length === 0}
+                            />
+                          </React.Fragment>
+                        ) : (
+                          <Submit
                             action={`${serverURL}${api}/${slug}${getQueryParams()}`}
                             disabled={selected.length === 0}
                           />
-                          <SaveDraft
-                            action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-                            disabled={selected.length === 0}
-                          />
-                        </React.Fragment>
-                      ) : (
-                        <Submit
-                          action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-                          disabled={selected.length === 0}
-                        />
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Form>
+            </Form>
+          </FieldPathProvider>
         </OperationContext.Provider>
       </Drawer>
     </div>
