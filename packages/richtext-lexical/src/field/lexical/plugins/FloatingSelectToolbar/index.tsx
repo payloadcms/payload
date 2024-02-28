@@ -16,7 +16,7 @@ import { createPortal } from 'react-dom'
 
 import type { FloatingToolbarSection, FloatingToolbarSectionEntry } from './types'
 
-import { useEditorConfigContext } from '../../config/EditorConfigProvider'
+import { useEditorConfigContext } from '../../config/client/EditorConfigProvider'
 import { getDOMRangeRect } from '../../utils/getDOMRangeRect'
 import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition'
 import { ToolbarButton } from './ToolbarButton'
@@ -31,32 +31,12 @@ function ButtonSectionEntry({
   anchorElem: HTMLElement
   editor: LexicalEditor
   entry: FloatingToolbarSectionEntry
-}): JSX.Element {
-  const Component = useMemo(() => {
-    return entry?.Component
-      ? React.lazy(() =>
-          entry.Component().then((resolvedComponent) => ({
-            default: resolvedComponent,
-          })),
-        )
-      : null
-  }, [entry])
-
-  const ChildComponent = useMemo(() => {
-    return entry?.ChildComponent
-      ? React.lazy(() =>
-          entry.ChildComponent().then((resolvedChildComponent) => ({
-            default: resolvedChildComponent,
-          })),
-        )
-      : null
-  }, [entry])
-
+}): React.ReactNode {
   if (entry.Component) {
     return (
-      Component && (
+      entry?.Component && (
         <React.Suspense>
-          <Component anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />{' '}
+          <entry.Component anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />{' '}
         </React.Suspense>
       )
     )
@@ -64,9 +44,9 @@ function ButtonSectionEntry({
 
   return (
     <ToolbarButton entry={entry} key={entry.key}>
-      {ChildComponent && (
+      {entry?.ChildComponent && (
         <React.Suspense>
-          <ChildComponent />
+          <entry.ChildComponent />
         </React.Suspense>
       )}
     </ToolbarButton>
@@ -83,18 +63,13 @@ function ToolbarSection({
   editor: LexicalEditor
   index: number
   section: FloatingToolbarSection
-}): JSX.Element {
+}): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
 
-  const Icon = useMemo(() => {
-    return section?.type === 'dropdown' && section.entries.length && section.ChildComponent
-      ? React.lazy(() =>
-          section.ChildComponent().then((resolvedComponent) => ({
-            default: resolvedComponent,
-          })),
-        )
+  const Icon =
+    section?.type === 'dropdown' && section.entries.length && section.ChildComponent
+      ? section.ChildComponent
       : null
-  }, [section])
 
   return (
     <div
@@ -146,7 +121,7 @@ function FloatingSelectToolbar({
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
-}): JSX.Element {
+}): React.ReactNode {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null)
   const caretRef = useRef<HTMLDivElement | null>(null)
 

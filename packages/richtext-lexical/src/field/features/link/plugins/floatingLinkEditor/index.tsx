@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { LinkFeatureProps } from '../..'
+import type { ClientProps } from '../../feature.client'
 
 import { LinkEditor } from './LinkEditor'
 import './index.scss'
@@ -10,7 +10,7 @@ import './index.scss'
 export const FloatingLinkEditorPlugin: React.FC<
   {
     anchorElem: HTMLElement
-  } & LinkFeatureProps
+  } & ClientProps
 > = (props) => {
   const { anchorElem = document.body } = props
 

@@ -9,7 +9,7 @@ import * as ReactDOM from 'react-dom'
 
 import type { SlashMenuGroup, SlashMenuOption } from './LexicalTypeaheadMenuPlugin/types'
 
-import { useEditorConfigContext } from '../../config/EditorConfigProvider'
+import { useEditorConfigContext } from '../../config/client/EditorConfigProvider'
 import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin'
 import './index.scss'
 import { useMenuTriggerMatch } from './useMenuTriggerMatch'
@@ -45,16 +45,6 @@ function SlashMenuItem({
     title = title.substring(0, 25) + '...'
   }
 
-  const LazyIcon = useMemo(() => {
-    return option?.Icon
-      ? React.lazy(() =>
-          option.Icon().then((resolvedIcon) => ({
-            default: resolvedIcon,
-          })),
-        )
-      : null
-  }, [option])
-
   return (
     <button
       aria-selected={isSelected}
@@ -68,9 +58,9 @@ function SlashMenuItem({
       tabIndex={-1}
       type="button"
     >
-      {LazyIcon && (
+      {option?.Icon && (
         <React.Suspense>
-          <LazyIcon />
+          <option.Icon />
         </React.Suspense>
       )}
 

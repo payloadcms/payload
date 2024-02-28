@@ -1,16 +1,22 @@
-import type { FeatureProvider, FeatureProviderMap, ResolvedFeatureMap } from '../../features/types'
-import type { EditorConfig } from './types'
+import type {
+  FeatureProviderServer,
+  ResolvedServerFeatureMap,
+  ServerFeatureProviderMap,
+} from '../../../features/types'
+import type { ServerEditorConfig } from '../types'
 
 type DependencyGraph = {
   [key: string]: {
     dependencies: string[]
     dependenciesPriority: string[]
     dependenciesSoft: string[]
-    featureProvider: FeatureProvider
+    featureProvider: FeatureProviderServer<unknown, unknown>
   }
 }
 
-function createDependencyGraph(featureProviders: FeatureProvider[]): DependencyGraph {
+function createDependencyGraph(
+  featureProviders: FeatureProviderServer<unknown, unknown>[],
+): DependencyGraph {
   const graph: DependencyGraph = {}
   for (const fp of featureProviders) {
     graph[fp.key] = {
@@ -23,10 +29,12 @@ function createDependencyGraph(featureProviders: FeatureProvider[]): DependencyG
   return graph
 }
 
-function topologicallySortFeatures(featureProviders: FeatureProvider[]): FeatureProvider[] {
+function topologicallySortFeatures(
+  featureProviders: FeatureProviderServer<unknown, unknown>[],
+): FeatureProviderServer<unknown, unknown>[] {
   const graph = createDependencyGraph(featureProviders)
   const visited: { [key: string]: boolean } = {}
-  const stack: FeatureProvider[] = []
+  const stack: FeatureProviderServer<unknown, unknown>[] = []
 
   for (const key in graph) {
     if (!visited[key]) {
@@ -41,7 +49,7 @@ function visit(
   graph: DependencyGraph,
   key: string,
   visited: { [key: string]: boolean },
-  stack: FeatureProvider[],
+  stack: FeatureProviderServer<unknown, unknown>[],
   currentPath: string[] = [],
 ) {
   if (!graph[key]) {
@@ -90,16 +98,16 @@ function visit(
 }
 
 export function sortFeaturesForOptimalLoading(
-  featureProviders: FeatureProvider[],
-): FeatureProvider[] {
+  featureProviders: FeatureProviderServer<unknown, unknown>[],
+): FeatureProviderServer<unknown, unknown>[] {
   return topologicallySortFeatures(featureProviders)
 }
 
 export function loadFeatures({
   unSanitizedEditorConfig,
 }: {
-  unSanitizedEditorConfig: EditorConfig
-}): ResolvedFeatureMap {
+  unSanitizedEditorConfig: ServerEditorConfig
+}): ResolvedServerFeatureMap {
   // First remove all duplicate features. The LAST feature with a given key wins.
   unSanitizedEditorConfig.features = unSanitizedEditorConfig.features
     .reverse()
@@ -109,15 +117,18 @@ export function loadFeatures({
     })
     .reverse()
 
-  const featureProviderMap: FeatureProviderMap = new Map(
-    unSanitizedEditorConfig.features.map((f) => [f.key, f] as [string, FeatureProvider]),
-  )
-
   unSanitizedEditorConfig.features = sortFeaturesForOptimalLoading(unSanitizedEditorConfig.features)
 
-  const resolvedFeatures: ResolvedFeatureMap = new Map()
+  const featureProviderMap: ServerFeatureProviderMap = new Map(
+    unSanitizedEditorConfig.features.map(
+      (f) => [f.key, f] as [string, FeatureProviderServer<unknown, unknown>],
+    ),
+  )
+
+  const resolvedFeatures: ResolvedServerFeatureMap = new Map()
 
   // Make sure all dependencies declared in the respective features exist
+  let loaded = 0
   for (const featureProvider of unSanitizedEditorConfig.features) {
     if (!featureProvider.key) {
       throw new Error(
@@ -163,12 +174,14 @@ export function loadFeatures({
     })
     resolvedFeatures.set(featureProvider.key, {
       ...feature,
-      Component: featureProvider.Component,
       dependencies: featureProvider.dependencies,
       dependenciesPriority: featureProvider.dependenciesPriority,
       dependenciesSoft: featureProvider.dependenciesSoft,
       key: featureProvider.key,
+      order: loaded,
     })
+
+    loaded++
   }
 
   return resolvedFeatures

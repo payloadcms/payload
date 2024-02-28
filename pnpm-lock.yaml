@@ -1178,6 +1178,9 @@ importers:
       '@types/react':
         specifier: 18.2.15
         version: 18.2.15
+      '@types/react-dom':
+        specifier: 18.2.7
+        version: 18.2.7
       payload:
         specifier: workspace:*
         version: link:../payload

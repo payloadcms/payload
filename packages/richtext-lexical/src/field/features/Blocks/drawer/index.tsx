@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { BlocksFeatureProps } from '..'
 
-import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
+import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
 import { $createBlockNode } from '../nodes/BlocksNode'
 import { INSERT_BLOCK_COMMAND } from '../plugin/commands'
 const baseClass = 'lexical-blocks-drawer'

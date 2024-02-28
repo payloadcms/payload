@@ -27,11 +27,11 @@ import {
 import { sanitizeFields } from 'payload/config'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { LinkFeatureProps } from '../../..'
+import type { ClientProps } from '../../../feature.client'
 import type { LinkNode } from '../../../nodes/LinkNode'
 import type { LinkPayload } from '../types'
 
-import { useEditorConfigContext } from '../../../../../lexical/config/EditorConfigProvider'
+import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider'
 import { getSelectedNode } from '../../../../../lexical/utils/getSelectedNode'
 import { setFloatingElemPositionForLinkEditor } from '../../../../../lexical/utils/setFloatingElemPositionForLinkEditor'
 import { LinkDrawer } from '../../../drawer'
@@ -46,7 +46,7 @@ export function LinkEditor({
   disabledCollections,
   enabledCollections,
   fields: customFieldSchema,
-}: { anchorElem: HTMLElement } & LinkFeatureProps): JSX.Element {
+}: { anchorElem: HTMLElement } & ClientProps): React.ReactNode {
   const [editor] = useLexicalComposerContext()
 
   const editorRef = useRef<HTMLDivElement | null>(null)

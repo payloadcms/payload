@@ -5,45 +5,51 @@ import type { RichTextAdapter } from 'payload/types'
 
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
-import type { FeatureProvider, ResolvedFeatureMap } from './field/features/types'
-import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config/types'
+import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types'
+import type { SanitizedServerEditorConfig } from './field/lexical/config/types'
 import type { AdapterProps } from './types'
 
 import {
   defaultEditorConfig,
   defaultEditorFeatures,
-  defaultSanitizedEditorConfig,
-} from './field/lexical/config/default'
-import { loadFeatures } from './field/lexical/config/loader'
-import { sanitizeFeatures } from './field/lexical/config/sanitize'
+  defaultSanitizedServerEditorConfig,
+} from './field/lexical/config/server/default'
+import { loadFeatures } from './field/lexical/config/server/loader'
+import { sanitizeServerFeatures } from './field/lexical/config/server/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
 import { getGenerateComponentMap } from './generateComponentMap'
+import { getGenerateSchemaMap } from './generateSchemaMap'
 import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
 import { richTextValidateHOC } from './validate'
 
 export type LexicalEditorProps = {
   features?:
-    | (({ defaultFeatures }: { defaultFeatures: FeatureProvider[] }) => FeatureProvider[])
-    | FeatureProvider[]
+    | (({
+        defaultFeatures,
+      }: {
+        defaultFeatures: FeatureProviderServer<unknown, unknown>[]
+      }) => FeatureProviderServer<unknown, unknown>[])
+    | FeatureProviderServer<unknown, unknown>[]
   lexical?: LexicalEditorConfig
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps, any> & {
-  editorConfig: SanitizedEditorConfig
+  editorConfig: SanitizedServerEditorConfig
 }
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapter {
-  let resolvedFeatureMap: ResolvedFeatureMap = null // For client and sending to client. Better than serializing completely on client. That way the feature loading can be done on the server.
+  let resolvedFeatureMap: ResolvedServerFeatureMap = null
 
-  let finalSanitizedEditorConfig: SanitizedEditorConfig // For server only
+  let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
   if (!props || (!props.features && !props.lexical)) {
-    finalSanitizedEditorConfig = cloneDeep(defaultSanitizedEditorConfig)
+    finalSanitizedEditorConfig = cloneDeep(defaultSanitizedServerEditorConfig)
     resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
   } else {
-    let features: FeatureProvider[] =
+    let features: FeatureProviderServer<unknown, unknown>[] =
       props.features && typeof props.features === 'function'
         ? props.features({ defaultFeatures: cloneDeep(defaultEditorFeatures) })
-        : (props.features as FeatureProvider[])
+        : (props.features as FeatureProviderServer<unknown, unknown>[])
     if (!features) {
       features = cloneDeep(defaultEditorFeatures)
     }
@@ -53,13 +59,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     resolvedFeatureMap = loadFeatures({
       unSanitizedEditorConfig: {
         features,
-        lexical: lexical ? () => Promise.resolve(lexical) : defaultEditorConfig.lexical,
+        lexical: lexical ? lexical : defaultEditorConfig.lexical,
       },
     })
 
     finalSanitizedEditorConfig = {
-      features: sanitizeFeatures(resolvedFeatureMap),
-      lexical: lexical ? () => Promise.resolve(lexical) : defaultEditorConfig.lexical,
+      features: sanitizeServerFeatures(resolvedFeatureMap),
+      lexical: lexical ? lexical : defaultEditorConfig.lexical,
       resolvedFeatureMap: resolvedFeatureMap,
     }
   }
@@ -113,6 +119,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     },
     editorConfig: finalSanitizedEditorConfig,
     generateComponentMap: getGenerateComponentMap({
+      resolvedFeatureMap: resolvedFeatureMap,
+    }),
+    generateSchemaMap: getGenerateSchemaMap({
       resolvedFeatureMap: resolvedFeatureMap,
     }),
     outputSchema: ({ field, interfaceNameDefinitions, isRequired }) => {
@@ -234,23 +243,6 @@ export {
 } from './field/features/Blocks/nodes/BlocksNode'
 export { HeadingFeature } from './field/features/Heading'
 
-export { LinkFeature } from './field/features/Link'
-export type { LinkFeatureProps } from './field/features/Link'
-export {
-  $createAutoLinkNode,
-  $isAutoLinkNode,
-  AutoLinkNode,
-  type SerializedAutoLinkNode,
-} from './field/features/Link/nodes/AutoLinkNode'
-export {
-  $createLinkNode,
-  $isLinkNode,
-  type LinkFields,
-  LinkNode,
-  type SerializedLinkNode,
-  TOGGLE_LINK_COMMAND,
-} from './field/features/Link/nodes/LinkNode'
-
 export { ParagraphFeature } from './field/features/Paragraph'
 export { RelationshipFeature } from './field/features/Relationship'
 export {
@@ -260,6 +252,7 @@ export {
   RelationshipNode,
   type SerializedRelationshipNode,
 } from './field/features/Relationship/nodes/RelationshipNode'
+
 export { UploadFeature } from './field/features/Upload'
 export type { UploadFeatureProps } from './field/features/Upload'
 export type { RawUploadPayload } from './field/features/Upload/nodes/UploadNode'
@@ -287,19 +280,36 @@ export { defaultHTMLConverters } from './field/features/converters/html/converte
 export type { HTMLConverter } from './field/features/converters/html/converter/types'
 export { consolidateHTMLConverters } from './field/features/converters/html/field'
 export { lexicalHTML } from './field/features/converters/html/field'
-
 export { TestRecorderFeature } from './field/features/debug/TestRecorder'
 export { TreeViewFeature } from './field/features/debug/TreeView'
-
 export { BoldTextFeature } from './field/features/format/Bold'
+
 export { InlineCodeTextFeature } from './field/features/format/InlineCode'
 export { ItalicTextFeature } from './field/features/format/Italic'
+
 export { SectionWithEntries as FormatSectionWithEntries } from './field/features/format/common/floatingSelectToolbarSection'
 export { StrikethroughTextFeature } from './field/features/format/strikethrough'
 export { SubscriptTextFeature } from './field/features/format/subscript'
 export { SuperscriptTextFeature } from './field/features/format/superscript'
 export { UnderlineTextFeature } from './field/features/format/underline'
 export { IndentFeature } from './field/features/indent'
+export { LinkFeature, type LinkFeatureServerProps } from './field/features/link/feature.server'
+export {
+  $createAutoLinkNode,
+  $isAutoLinkNode,
+  AutoLinkNode,
+} from './field/features/link/nodes/AutoLinkNode'
+export {
+  $createLinkNode,
+  $isLinkNode,
+  LinkNode,
+  TOGGLE_LINK_COMMAND,
+} from './field/features/link/nodes/LinkNode'
+export type {
+  LinkFields,
+  SerializedAutoLinkNode,
+  SerializedLinkNode,
+} from './field/features/link/nodes/types'
 export { CheckListFeature } from './field/features/lists/CheckList'
 export { OrderedListFeature } from './field/features/lists/OrderedList'
 export { UnorderedListFeature } from './field/features/lists/UnorderedList'
@@ -330,26 +340,50 @@ export type {
 } from './field/features/migrations/SlateToLexical/converter/types'
 
 export type {
-  Feature,
-  FeatureProvider,
-  FeatureProviderMap,
+  ClientFeature,
+  ClientFeatureProviderMap,
+  FeatureProviderClient,
+  FeatureProviderProviderClient,
+  FeatureProviderProviderServer,
+  FeatureProviderServer,
   NodeValidation,
   PopulationPromise,
-  ResolvedFeature,
-  ResolvedFeatureMap,
-  SanitizedFeatures,
+  ResolvedClientFeature,
+  ResolvedClientFeatureMap,
+  ResolvedServerFeature,
+  ResolvedServerFeatureMap,
+  SanitizedClientFeatures,
+  SanitizedPlugin,
+  SanitizedServerFeatures,
+  ServerFeature,
+  ServerFeatureProviderMap,
 } from './field/features/types'
 export {
   EditorConfigProvider,
   useEditorConfigContext,
-} from './field/lexical/config/EditorConfigProvider'
+} from './field/lexical/config/client/EditorConfigProvider'
+export {
+  sanitizeClientEditorConfig,
+  sanitizeClientFeatures,
+} from './field/lexical/config/client/sanitize'
 export {
   defaultEditorConfig,
   defaultEditorFeatures,
-  defaultSanitizedEditorConfig,
-} from './field/lexical/config/default'
-export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
-export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
+  defaultEditorLexicalConfig,
+  defaultSanitizedServerEditorConfig,
+} from './field/lexical/config/server/default'
+export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/server/loader'
+export {
+  sanitizeServerEditorConfig,
+  sanitizeServerFeatures,
+} from './field/lexical/config/server/sanitize'
+
+export type {
+  ClientEditorConfig,
+  SanitizedClientEditorConfig,
+  SanitizedServerEditorConfig,
+  ServerEditorConfig,
+} from './field/lexical/config/types'
 export { getEnabledNodes } from './field/lexical/nodes'
 
 export {
@@ -357,8 +391,6 @@ export {
   type FloatingToolbarSectionEntry,
 } from './field/lexical/plugins/FloatingSelectToolbar/types'
 export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
-// export SanitizedEditorConfig
-export type { EditorConfig, SanitizedEditorConfig }
 export type { AdapterProps }
 
 export {

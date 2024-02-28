@@ -3,7 +3,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import * as React from 'react'
+import React from 'react'
 import { createPortal } from 'react-dom'
 
 import type { FloatingToolbarSectionEntry } from '../types'

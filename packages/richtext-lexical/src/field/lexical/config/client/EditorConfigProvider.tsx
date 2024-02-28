@@ -1,17 +1,23 @@
 'use client'
+import type { FormFieldBase } from '@payloadcms/ui'
+
 import * as React from 'react'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
-import type { FieldProps } from '../../../types'
-import type { SanitizedEditorConfig } from './types'
+import type { FieldProps } from '../../../../types'
+import type { SanitizedClientEditorConfig } from '../types'
 
 // Should always produce a 20 character pseudo-random string
 function generateQuickGuid(): string {
   return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12)
 }
 interface ContextType {
-  editorConfig: SanitizedEditorConfig
-  field: FieldProps
+  editorConfig: SanitizedClientEditorConfig
+  field: FormFieldBase & {
+    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
+    name: string
+    richTextComponentMap: Map<string, React.ReactNode>
+  }
   uuid: string
 }
 
@@ -27,9 +33,13 @@ export const EditorConfigProvider = ({
   fieldProps,
 }: {
   children: React.ReactNode
-  editorConfig: SanitizedEditorConfig
-  fieldProps: FieldProps
-}): JSX.Element => {
+  editorConfig: SanitizedClientEditorConfig
+  fieldProps: FormFieldBase & {
+    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
+    name: string
+    richTextComponentMap: Map<string, React.ReactNode>
+  }
+}): React.ReactNode => {
   // State to store the UUID
   const [uuid, setUuid] = useState(generateQuickGuid())
 

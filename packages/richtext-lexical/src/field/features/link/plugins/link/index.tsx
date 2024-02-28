@@ -10,10 +10,11 @@ import {
 } from 'lexical'
 import { useEffect } from 'react'
 
+import type { LinkFields } from '../../nodes/types'
 import type { LinkPayload } from '../floatingLinkEditor/types'
 
 import { validateUrl } from '../../../../lexical/utils/url'
-import { type LinkFields, LinkNode, TOGGLE_LINK_COMMAND, toggleLink } from '../../nodes/LinkNode'
+import { LinkNode, TOGGLE_LINK_COMMAND, toggleLink } from '../../nodes/LinkNode'
 
 export function LinkPlugin(): null {
   const [editor] = useLexicalComposerContext()

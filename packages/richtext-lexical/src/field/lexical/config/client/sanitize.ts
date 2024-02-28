@@ -1,46 +1,37 @@
-import type { ResolvedFeatureMap, SanitizedFeatures } from '../../features/types'
-import type { EditorConfig, SanitizedEditorConfig } from './types'
+'use client'
 
-import { loadFeatures } from './loader'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 
-export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeatures => {
-  const sanitized: SanitizedFeatures = {
-    converters: {
-      html: [],
-    },
+import type { ResolvedClientFeatureMap, SanitizedClientFeatures } from '../../../features/types'
+import type { SanitizedClientEditorConfig } from '../types'
+
+export const sanitizeClientFeatures = (
+  features: ResolvedClientFeatureMap,
+): SanitizedClientFeatures => {
+  const sanitized: SanitizedClientFeatures = {
     enabledFeatures: [],
     floatingSelectToolbar: {
       sections: [],
     },
-    generatedTypes: {
-      modifyOutputSchemas: [],
-    },
+
     hooks: {
-      afterReadPromises: [],
       load: [],
       save: [],
     },
-    markdownTransformers: [],
     nodes: [],
     plugins: [],
-    populationPromises: new Map(),
     slashMenu: {
       dynamicOptions: [],
       groupsWithOptions: [],
     },
-    validations: new Map(),
+  }
+
+  if (!features?.size) {
+    return sanitized
   }
 
   features.forEach((feature) => {
-    if (feature?.generatedTypes?.modifyOutputSchema) {
-      sanitized.generatedTypes.modifyOutputSchemas.push(feature.generatedTypes.modifyOutputSchema)
-    }
     if (feature.hooks) {
-      if (feature.hooks.afterReadPromise) {
-        sanitized.hooks.afterReadPromises = sanitized.hooks.afterReadPromises.concat(
-          feature.hooks.afterReadPromise,
-        )
-      }
       if (feature.hooks?.load?.length) {
         sanitized.hooks.load = sanitized.hooks.load.concat(feature.hooks.load)
       }
@@ -51,17 +42,6 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
 
     if (feature.nodes?.length) {
       sanitized.nodes = sanitized.nodes.concat(feature.nodes)
-      feature.nodes.forEach((node) => {
-        if (node?.populationPromises?.length) {
-          sanitized.populationPromises.set(node.type, node.populationPromises)
-        }
-        if (node?.validations?.length) {
-          sanitized.validations.set(node.type, node.validations)
-        }
-        if (node?.converters?.html) {
-          sanitized.converters.html.push(node.converters.html)
-        }
-      })
     }
     if (feature.plugins?.length) {
       feature.plugins.forEach((plugin, i) => {
@@ -71,11 +51,6 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
           position: plugin.position,
         })
       })
-    }
-    if (feature.markdownTransformers?.length) {
-      sanitized.markdownTransformers = sanitized.markdownTransformers.concat(
-        feature.markdownTransformers,
-      )
     }
 
     if (feature.floatingSelectToolbar?.sections?.length) {
@@ -169,14 +144,13 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
   return sanitized
 }
 
-export function sanitizeEditorConfig(editorConfig: EditorConfig): SanitizedEditorConfig {
-  const resolvedFeatureMap = loadFeatures({
-    unSanitizedEditorConfig: editorConfig,
-  })
-
+export function sanitizeClientEditorConfig(
+  lexical: LexicalEditorConfig,
+  resolvedClientFeatureMap: ResolvedClientFeatureMap,
+): SanitizedClientEditorConfig {
   return {
-    features: sanitizeFeatures(resolvedFeatureMap),
-    lexical: editorConfig.lexical,
-    resolvedFeatureMap: resolvedFeatureMap,
+    features: sanitizeClientFeatures(resolvedClientFeatureMap),
+    lexical,
+    resolvedFeatureMap: resolvedClientFeatureMap,
   }
 }

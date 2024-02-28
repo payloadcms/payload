@@ -1,23 +1,94 @@
 import type { RichTextAdapter } from 'payload/types'
 
+import { mapFields } from '@payloadcms/ui/utilities'
+import { sanitizeFields } from 'payload/dist/fields/config/sanitize'
 import React from 'react'
 
-import type { ResolvedFeatureMap } from './field/features/types'
+import type { ResolvedServerFeatureMap } from './field/features/types'
+import type { GeneratedFeatureProviderComponent } from './types'
 
 export const getGenerateComponentMap =
-  (args: { resolvedFeatureMap: ResolvedFeatureMap }): RichTextAdapter['generateComponentMap'] =>
-  ({ config }) => {
+  (args: {
+    resolvedFeatureMap: ResolvedServerFeatureMap
+  }): RichTextAdapter['generateComponentMap'] =>
+  ({ config, schemaPath }) => {
+    const validRelationships = config.collections.map((c) => c.slug) || []
+
     const componentMap = new Map()
 
-    console.log('args.resolvedFeatureMap', args.resolvedFeatureMap)
+    // turn args.resolvedFeatureMap into an array of [key, value] pairs, ordered by value.order, lowest order first:
+    const resolvedFeatureMapArray = Array.from(args.resolvedFeatureMap.entries()).sort(
+      (a, b) => a[1].order - b[1].order,
+    )
 
-    for (const key of args.resolvedFeatureMap.keys()) {
-      console.log('key', key)
-      const resolvedFeature = args.resolvedFeatureMap.get(key)
-      const Component = resolvedFeature.Component
-      componentMap.set(`feature.${key}`, <Component />)
-    }
+    componentMap.set(
+      `features`,
+      resolvedFeatureMapArray.map(([featureKey, resolvedFeature]) => {
+        const ClientComponent = resolvedFeature.ClientComponent
+        const clientComponentProps = resolvedFeature.clientFeatureProps
 
-    console.log('componentMaaap', componentMap)
+        /**
+         * Handle Feature Component Maps
+         */
+        const components = resolvedFeature.generateComponentMap({
+          config,
+          props: resolvedFeature.serverFeatureProps,
+          schemaPath,
+        })
+
+        for (const componentKey in components) {
+          const Component = components[componentKey]
+          if (Component) {
+            componentMap.set(`feature.${featureKey}.components.${componentKey}`, <Component />)
+          }
+        }
+
+        /**
+         * Handle Feature Schema Maps (rendered fields)
+         */
+        const schemas = resolvedFeature.generateSchemaMap({
+          config,
+          props: resolvedFeature.serverFeatureProps,
+          schemaMap: new Map(),
+          schemaPath,
+        })
+
+        for (const schemaKey in schemas) {
+          const fields = schemas[schemaKey]
+
+          const sanitizedFields = sanitizeFields({
+            config: config,
+            fields: fields,
+            validRelationships,
+          })
+
+          const mappedFields = mapFields({
+            config,
+            fieldSchema: sanitizedFields,
+            operation: 'update',
+            permissions: {},
+            readOnly: false,
+          })
+
+          componentMap.set(`feature.${featureKey}.fields.${schemaKey}`, mappedFields)
+        }
+
+        return {
+          ClientComponent:
+            clientComponentProps && typeof clientComponentProps === 'object' ? (
+              <ClientComponent
+                {...clientComponentProps}
+                featureKey={resolvedFeature.key}
+                order={resolvedFeature.order}
+              />
+            ) : (
+              <ClientComponent featureKey={resolvedFeature.key} order={resolvedFeature.order} />
+            ),
+          key: resolvedFeature.key,
+          order: resolvedFeature.order,
+        } as GeneratedFeatureProviderComponent
+      }),
+    )
+
     return componentMap
   }

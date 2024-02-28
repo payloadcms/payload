@@ -15,39 +15,11 @@ import {
   type LexicalNode,
   type NodeKey,
   type RangeSelection,
-  type SerializedElementNode,
-  type Spread,
   createCommand,
 } from 'lexical'
 
 import type { LinkPayload } from '../plugins/floatingLinkEditor/types'
-
-import { $isAutoLinkNode } from './AutoLinkNode'
-
-export type LinkFields = {
-  // unknown, custom fields:
-  [key: string]: unknown
-  doc: {
-    relationTo: string
-    value:
-      | {
-          // Actual doc data, populated in afterRead hook
-          [key: string]: unknown
-          id: string
-        }
-      | string
-  } | null
-  linkType: 'custom' | 'internal'
-  newTab: boolean
-  url: string
-}
-
-export type SerializedLinkNode = Spread<
-  {
-    fields: LinkFields
-  },
-  SerializedElementNode
->
+import type { LinkFields, SerializedLinkNode } from './types'
 
 const SUPPORTED_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'sms:', 'tel:'])
 

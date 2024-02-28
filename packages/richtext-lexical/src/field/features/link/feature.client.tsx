@@ -1,31 +1,37 @@
 'use client'
 
+import { $findMatchingParent } from '@lexical/utils'
+import { withMergedProps } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection } from 'lexical'
-import { $findMatchingParent } from 'lexical/LexicalUtils'
 
-import type { LinkFields } from './nodes/LinkNode'
+import type { FeatureProviderProviderClient } from '../types'
+import type { ExclusiveLinkCollectionsProps } from './feature.server'
+import type { LinkFields } from './nodes/types'
 
-import { useLexicalFeature } from '../../../useLexicalFeature'
+import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
+import { createClientComponent } from '../createClientComponent'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
+import { AutoLinkPlugin } from './plugins/autoLink'
+import { ClickableLinkPlugin } from './plugins/clickableLink'
+import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands'
-import { key } from './shared'
+import { LinkPlugin } from './plugins/link'
 
-type LinkClientProps = {}
-export const nodes = [LinkNode, AutoLinkNode]
+export type ClientProps = ExclusiveLinkCollectionsProps
 
-const getLinkFeature = (props: LinkClientProps) => {
+const LinkFeatureClient: FeatureProviderProviderClient<ClientProps> = (props) => {
   return {
+    clientFeatureProps: props,
     feature: () => ({
+      clientFeatureProps: props,
       floatingSelectToolbar: {
         sections: [
           FeaturesSectionWithEntries([
             {
-              ChildComponent: () =>
-                // @ts-expect-error-next-line
-                import('../../lexical/ui/icons/Link').then((module) => module.LinkIcon),
+              ChildComponent: LinkIcon,
               isActive: ({ selection }) => {
                 if ($isRangeSelection(selection)) {
                   const selectedNode = getSelectedNode(selection)
@@ -62,38 +68,25 @@ const getLinkFeature = (props: LinkClientProps) => {
           ]),
         ],
       },
-      nodes,
+      nodes: [LinkNode, AutoLinkNode],
       plugins: [
         {
-          Component: () =>
-            // @ts-expect-error-next-line
-            import('./plugins/link').then((module) => module.LinkPlugin),
+          Component: LinkPlugin,
           position: 'normal',
         },
         {
-          Component: () =>
-            // @ts-expect-error-next-line
-            import('./plugins/autoLink').then((module) => module.AutoLinkPlugin),
+          Component: AutoLinkPlugin,
           position: 'normal',
         },
         {
-          Component: () =>
-            // @ts-expect-error-next-line
-            import('./plugins/clickableLink').then((module) => module.ClickableLinkPlugin),
+          Component: ClickableLinkPlugin,
           position: 'normal',
         },
         {
-          Component: () =>
-            // @ts-expect-error-next-line
-            import('./plugins/floatingLinkEditor').then((module) => {
-              const floatingLinkEditorPlugin = module.FloatingLinkEditorPlugin
-              return import('@payloadcms/ui').then((module) =>
-                module.withMergedProps({
-                  Component: floatingLinkEditorPlugin,
-                  toMergeIntoProps: props,
-                }),
-              )
-            }),
+          Component: withMergedProps({
+            Component: FloatingLinkEditorPlugin,
+            toMergeIntoProps: props,
+          }),
           position: 'floatingAnchorElem',
         },
       ],
@@ -101,8 +94,4 @@ const getLinkFeature = (props: LinkClientProps) => {
   }
 }
 
-export const LinkFeatureClientComponent: React.FC<LinkClientProps> = (props) => {
-  useLexicalFeature(key, getLinkFeature(props))
-
-  return null
-}
+export const LinkFeatureClientComponent = createClientComponent(LinkFeatureClient)
