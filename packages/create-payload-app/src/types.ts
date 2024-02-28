@@ -3,8 +3,10 @@ import type arg from 'arg'
 export interface Args extends arg.Spec {
   '--beta': BooleanConstructor
   '--db': StringConstructor
+  '--debug': BooleanConstructor
   '--dry-run': BooleanConstructor
   '--help': BooleanConstructor
+  '--init-next': BooleanConstructor
   '--name': StringConstructor
   '--no-deps': BooleanConstructor
   '--secret': StringConstructor
@@ -12,6 +14,9 @@ export interface Args extends arg.Spec {
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
   '--use-yarn': BooleanConstructor
+
+  // Aliases
+
   '-h': string
   '-n': string
   '-t': string

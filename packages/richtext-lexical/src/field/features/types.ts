@@ -167,7 +167,7 @@ export type FeatureProvider = {
     featureProviderMap: FeatureProviderMap
     // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
     resolvedFeatures: ResolvedFeatureMap
-    // unsanitized EditorConfig,
+    // unSanitized EditorConfig,
     unSanitizedEditorConfig: EditorConfig
   }) => Feature
   key: string

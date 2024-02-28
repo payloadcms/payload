@@ -4,6 +4,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import Link from 'next/link'
+import { isEntityHidden } from 'payload/utilities'
 import React from 'react'
 
 import type { EntityToGroup } from '../../utilities/groupNavItems'
@@ -38,25 +39,21 @@ export const DefaultNav: React.FC<{
   const groups = groupNavItems(
     [
       ...collections
-        .filter(
-          ({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden),
-        )
+        .filter(({ admin: { hidden } }) => !isEntityHidden({ hidden, user }))
         .map((collection) => {
           const entityToGroup: EntityToGroup = {
-            entity: collection,
             type: EntityType.collection,
+            entity: collection,
           }
 
           return entityToGroup
         }),
       ...globals
-        .filter(
-          ({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden),
-        )
+        .filter(({ admin: { hidden } }) => !isEntityHidden({ hidden, user }))
         .map((global) => {
           const entityToGroup: EntityToGroup = {
-            entity: global,
             type: EntityType.global,
+            entity: global,
           }
 
           return entityToGroup
@@ -74,7 +71,7 @@ export const DefaultNav: React.FC<{
         {groups.map(({ entities, label }, key) => {
           return (
             <NavGroup key={key} label={label}>
-              {entities.map(({ entity, type }, i) => {
+              {entities.map(({ type, entity }, i) => {
                 let entityLabel: string
                 let href: string
                 let id: string

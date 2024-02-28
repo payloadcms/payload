@@ -1,26 +1,32 @@
 {
   "compilerOptions": {
-    "declaration": true /* Generates corresponding '.d.ts' file. */,
-    "declarationMap": true, // This will allow code navigation between projects.
+    "declaration": true,
+    "declarationMap": true,
     "target": "ESNext",
     "module": "Node16",
-    "moduleResolution": "Node16" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
-    /* Do not emit comments to output. */
-    "allowJs": true /* Allow javascript files to be compiled. */,
-    "checkJs": false /* Report errors in .js files. */,
-    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
-    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
-    "jsx": "preserve" /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */,
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "noEmit": true /* Do not emit outputs. */,
-    /* Concatenate and emit output to single file. */
-    "outDir": "./dist" /* Redirect output structure to the directory. */,
+    "moduleResolution": "Node16",
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "noEmit": true,
+    "outDir": "./dist",
     "resolveJsonModule": true,
-    "rootDir": "." /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
-    "skipLibCheck": true /* Skip type checking of declaration files. */,
+    "rootDir": ".",
+    "skipLibCheck": true,
     "sourceMap": true,
-    "strict": false /* Enable all strict type-checking options. */,
-    "types": ["jest", "node", "@types/jest"],
+    "strict": false,
+    "types": [
+      "jest",
+      "node",
+      "@types/jest"
+    ],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -29,28 +35,58 @@
       }
     ],
     "paths": {
-      "payload": ["./packages/payload/src"],
-      "payload/*": ["./packages/payload/src/exports/*"],
-      "@payloadcms/db-mongodb": ["./packages/db-mongodb/src"],
-      "@payloadcms/richtext-lexical": ["./packages/richtext-lexical/src"],
-      "@payloadcms/ui/*": ["./packages/ui/src/exports/*"],
-      "@payloadcms/ui/scss": ["./packages/ui/src/scss/styles.scss"],
-      "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
-      "@payloadcms/translations": ["./packages/translations/src/exports/index.ts"],
+      "payload": [
+        "./packages/payload/src"
+      ],
+      "payload/*": [
+        "./packages/payload/src/exports/*"
+      ],
+      "@payloadcms/db-mongodb": [
+        "./packages/db-mongodb/src"
+      ],
+      "@payloadcms/richtext-lexical": [
+        "./packages/richtext-lexical/src"
+      ],
+      "@payloadcms/ui/*": [
+        "./packages/ui/src/exports/*"
+      ],
+      "@payloadcms/ui/scss": [
+        "./packages/ui/src/scss/styles.scss"
+      ],
+      "@payloadcms/ui/scss/app.scss": [
+        "./packages/ui/src/scss/app.scss"
+      ],
+      "@payloadcms/translations": [
+        "./packages/translations/src/exports/index.ts"
+      ],
       "@payloadcms/translations/client": [
         "./packages/translations/src/_generatedFiles_/client/index.ts"
       ],
-      "@payloadcms/translations/api": ["./packages/translations/src/_generatedFiles_/api/index.ts"],
-      "@payloadcms/next/*": ["./packages/next/src/*"],
-      "@payloadcms/next": ["./packages/next/src/exports/*"],
-      "@payloadcms/graphql": ["./packages/graphql/src"]
+      "@payloadcms/translations/api": [
+        "./packages/translations/src/_generatedFiles_/api/index.ts"
+      ],
+      "@payloadcms/next/*": [
+        "./packages/next/src/*"
+      ],
+      "@payloadcms/next": [
+        "./packages/next/src/exports/*"
+      ],
+      "@payloadcms/graphql": [
+        "./packages/graphql/src"
+      ],
+      "@payload-config": [
+        "./test/_community/config.ts"
+      ]
     }
   },
-  "exclude": ["dist", "build", "temp", "node_modules"],
-  /* Like tsconfig.build.json, but includes test directory and doesnt emit anything */
-  "composite": true, // Required for references to work
+  "exclude": [
+    "dist",
+    "build",
+    "temp",
+    "node_modules"
+  ],
+  "composite": true,
   "references": [
-    // if your tsconfig is something different
     {
       "path": "./packages/db-mongodb"
     },
@@ -109,5 +145,10 @@
       "path": "./packages/ui"
     }
   ],
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "app/**/*.ts", "app/**/*.tsx"]
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx"
+  ]
 }

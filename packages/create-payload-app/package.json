@@ -6,7 +6,8 @@
     "create-payload-app": "bin/cli.js"
   },
   "scripts": {
-    "build": "pnpm build:swc",
+    "build": "pnpm copyfiles && pnpm build:swc",
+    "copyfiles": "copyfiles -u 4 \"../next/src/app/(payload)/**\" \"dist/app\"",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "test": "jest",
@@ -26,6 +27,7 @@
     "execa": "^5.0.0",
     "figures": "^3.2.0",
     "fs-extra": "^9.0.1",
+    "globby": "11.1.0",
     "handlebars": "^4.7.7",
     "ora": "^5.1.0",
     "prompts": "^2.4.2",

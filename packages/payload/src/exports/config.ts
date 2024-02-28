@@ -3,6 +3,7 @@ export * from '../config/types'
 
 export type { FieldTypes } from '../admin/forms/FieldTypes'
 export { defaults as collectionDefaults } from '../collections/config/defaults'
+export { createClientConfig } from '../config/createClientConfig'
 export { defaults } from '../config/defaults'
 export { sanitizeConfig } from '../config/sanitize'
 export { baseBlockFields } from '../fields/baseFields/baseBlockFields'

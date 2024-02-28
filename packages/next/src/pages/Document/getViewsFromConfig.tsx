@@ -1,4 +1,4 @@
-import type { CollectionPermission, GlobalPermission } from 'payload/auth'
+import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
 import type { AdminViewComponent } from 'payload/config'
 import type {
   SanitizedCollectionConfig,
@@ -6,6 +6,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 
+import { isEntityHidden } from 'payload/utilities'
 import { lazy } from 'react'
 
 import { getCustomViewByKey } from './getCustomViewByKey'
@@ -17,16 +18,18 @@ export const getViewsFromConfig = async ({
   docPermissions,
   globalConfig,
   routeSegments,
+  user,
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
   docPermissions: CollectionPermission | GlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
+  user: User
 }): Promise<{
   CustomView: AdminViewComponent
   DefaultView: AdminViewComponent
-}> => {
+} | null> => {
   // Conditionally import and lazy load the default view
   let DefaultView: AdminViewComponent = null
   let CustomView: AdminViewComponent = null
@@ -42,6 +45,14 @@ export const getViewsFromConfig = async ({
     config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
 
   if (collectionConfig) {
+    const {
+      admin: { hidden },
+    } = collectionConfig
+
+    if (isEntityHidden({ hidden, user })) {
+      return null
+    }
+
     // `../:id`, or `../create`
     if (routeSegments?.length === 1) {
       switch (routeSegments[0]) {
@@ -126,6 +137,14 @@ export const getViewsFromConfig = async ({
   }
 
   if (globalConfig) {
+    const {
+      admin: { hidden },
+    } = globalConfig
+
+    if (isEntityHidden({ hidden, user })) {
+      return null
+    }
+
     if (!routeSegments?.length) {
       if (docPermissions?.read?.permission) {
         CustomView = getCustomViewByKey(views, 'Default')

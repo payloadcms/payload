@@ -105,10 +105,15 @@ export const Document = async ({
       config,
       docPermissions,
       routeSegments: params.segments,
+      user,
     })
 
     CustomView = collectionViews?.CustomView
     DefaultView = collectionViews?.DefaultView
+
+    if (!CustomView && !DefaultView) {
+      return notFound()
+    }
 
     try {
       data = await payload.findByID({
@@ -140,10 +145,15 @@ export const Document = async ({
       docPermissions,
       globalConfig,
       routeSegments: params.segments,
+      user,
     })
 
     CustomView = globalViews?.CustomView
     DefaultView = globalViews?.DefaultView
+
+    if (!CustomView && !DefaultView) {
+      return notFound()
+    }
 
     data = await payload.findGlobal({
       slug: globalSlug,
@@ -207,10 +217,6 @@ export const Document = async ({
     searchParams,
     updatedAt: data?.updatedAt?.toString(),
     user,
-  }
-
-  if (!DefaultView && !CustomView) {
-    return notFound()
   }
 
   return (

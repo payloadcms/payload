@@ -1,4 +1,5 @@
 'use client'
+import type { FeatureProvider } from '@payloadcms/richtext-lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 
 import { type FormFieldBase, ShimmerEffect } from '@payloadcms/ui'
@@ -24,6 +25,9 @@ export const RichTextField: React.FC<
   const { lexicalEditorConfig, richTextComponentMap } = props
   const { schemaPath } = useFieldPath()
   const clientFunctions = useClientFunctions()
+  const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
+
+  const [featureProviders, setFeatureProviders] = useState<FeatureProvider[]>([])
 
   const finalSanitizedEditorConfig: SanitizedEditorConfig = sanitizeEditorConfig({
     features: [],
@@ -32,34 +36,30 @@ export const RichTextField: React.FC<
       : () => Promise.resolve(defaultEditorLexicalConfig),
   })
 
-  const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
-
-  const [featureComponents, setFeatureComponents] = useState<React.ReactNode>([])
-
-  const featureProviders = Array.from(richTextComponentMap.values())
+  const featureProviderComponents = Array.from(richTextComponentMap.values())
 
   useEffect(() => {
     if (!hasLoadedFeatures) {
-      const featureComponentsLocal: React.ReactNode[] = []
+      const featureProvidersLocal: FeatureProvider[] = []
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
         if (key.startsWith(`lexicalFeature.${schemaPath}.`)) {
-          featureComponentsLocal.push(plugin)
+          featureProvidersLocal.push(plugin)
         }
       })
 
-      if (featureComponentsLocal.length === featureProviders.length) {
-        setFeatureComponents(featureComponentsLocal)
+      if (featureProvidersLocal.length === featureProviderComponents.length) {
+        setFeatureProviders(featureProvidersLocal)
         setHasLoadedFeatures(true)
       }
     }
-  }, [hasLoadedFeatures, clientFunctions, schemaPath, featureProviders.length])
+  }, [hasLoadedFeatures, clientFunctions, schemaPath, featureProviderComponents.length])
 
   if (!hasLoadedFeatures) {
     return (
       <React.Fragment>
-        {Array.isArray(featureProviders) &&
-          featureProviders.map((FeatureProvider, i) => {
+        {Array.isArray(featureProviderComponents) &&
+          featureProviderComponents.map((FeatureProvider, i) => {
             return <React.Fragment key={i}>{FeatureProvider}</React.Fragment>
           })}
       </React.Fragment>
@@ -69,6 +69,8 @@ export const RichTextField: React.FC<
   const features = clientFunctions
 
   console.log('clientFunctions', features['lexicalFeature.posts.richText.paragraph'])
+
+  //features['lexicalFeature.posts.richText.paragraph']()
 
   return (
     <Suspense fallback={<ShimmerEffect height="35vh" />}>

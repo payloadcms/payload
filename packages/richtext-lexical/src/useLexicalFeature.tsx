@@ -1,3 +1,4 @@
+'use client'
 import { useAddClientFunction } from '@payloadcms/ui/providers'
 
 import type { FeatureProvider } from './field/features/types'

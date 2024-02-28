@@ -20,7 +20,9 @@ const baseClass = 'dashboard'
 
 export const DefaultDashboardClient: React.FC<{
   Link: React.ComponentType
-}> = ({ Link }) => {
+  visibleCollections: string[]
+  visibleGlobals: string[]
+}> = ({ Link, visibleCollections, visibleGlobals }) => {
   const config = useConfig()
 
   const {
@@ -43,48 +45,50 @@ export const DefaultDashboardClient: React.FC<{
 
   useEffect(() => {
     const collections = collectionsConfig.filter(
-      (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
+      (collection) =>
+        permissions?.collections?.[collection.slug]?.read?.permission &&
+        visibleCollections.includes(collection.slug),
     )
 
     const globals = globalsConfig.filter(
-      (global) => permissions?.globals?.[global.slug]?.read?.permission,
+      (global) =>
+        permissions?.globals?.[global.slug]?.read?.permission &&
+        visibleGlobals.includes(global.slug),
     )
 
     setGroups(
       groupNavItems(
         [
-          ...(collections
-            ?.filter(
-              ({ admin: { hidden } }) =>
-                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
-            )
-            .map((collection) => {
-              const entityToGroup: EntityToGroup = {
-                entity: collection,
-                type: EntityType.collection,
-              }
+          ...(collections.map((collection) => {
+            const entityToGroup: EntityToGroup = {
+              type: EntityType.collection,
+              entity: collection,
+            }
 
-              return entityToGroup
-            }) ?? []),
-          ...(globals
-            ?.filter(
-              ({ admin: { hidden } }) =>
-                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
-            )
-            .map((global) => {
-              const entityToGroup: EntityToGroup = {
-                entity: global,
-                type: EntityType.global,
-              }
+            return entityToGroup
+          }) ?? []),
+          ...(globals.map((global) => {
+            const entityToGroup: EntityToGroup = {
+              type: EntityType.global,
+              entity: global,
+            }
 
-              return entityToGroup
-            }) ?? []),
+            return entityToGroup
+          }) ?? []),
         ],
         permissions,
         i18n,
       ),
     )
-  }, [collectionsConfig, globalsConfig, permissions, user, i18n])
+  }, [
+    permissions,
+    user,
+    i18n,
+    visibleCollections,
+    visibleGlobals,
+    collectionsConfig,
+    globalsConfig,
+  ])
 
   return (
     <Fragment>
@@ -93,7 +97,7 @@ export const DefaultDashboardClient: React.FC<{
           <div className={`${baseClass}__group`} key={groupIndex}>
             <h2 className={`${baseClass}__label`}>{label}</h2>
             <ul className={`${baseClass}__card-list`}>
-              {entities.map(({ entity, type }, entityIndex) => {
+              {entities.map(({ type, entity }, entityIndex) => {
                 let title: string
                 let buttonAriaLabel: string
                 let createHREF: string
