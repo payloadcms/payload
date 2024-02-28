@@ -1,11 +1,5 @@
-const path = require('path')
-
 /** @type {import('next').NextConfig} */
 const withPayload = (nextConfig = {}) => {
-  const aliases = {
-    'payload-config': path.resolve(process.cwd(), process.env.PAYLOAD_CONFIG_PATH),
-  }
-
   return {
     ...nextConfig,
     experimental: {
@@ -24,13 +18,6 @@ const withPayload = (nextConfig = {}) => {
         'pino',
         'pino-pretty',
       ],
-      turbo: {
-        ...(nextConfig?.experimental?.turbo || {}),
-        resolveAlias: {
-          ...(nextConfig?.experimental?.turbo?.resolveAlias || {}),
-          ...aliases,
-        },
-      },
     },
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
@@ -59,7 +46,6 @@ const withPayload = (nextConfig = {}) => {
           ...(incomingWebpackConfig?.resolve || {}),
           alias: {
             ...(incomingWebpackConfig?.resolve?.alias || {}),
-            ...aliases,
           },
           fallback: {
             ...(incomingWebpackConfig?.resolve?.fallback || {}),
