@@ -66,7 +66,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
   const collection = config.collections.find((c) => c.slug === collectionSlug)
   const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
 
-  const searchParams = useSearchParams()
+  const { searchParams } = useSearchParams()
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
@@ -187,7 +187,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() => {
               if (reducedFields.length > 0)
-                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
+                dispatchConditions({ type: 'add', field: reducedFields[0].value })
             }}
           >
             {t('general:or')}
@@ -205,7 +205,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() => {
               if (reducedFields.length > 0)
-                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
+                dispatchConditions({ type: 'add', field: reducedFields[0].value })
             }}
           >
             {t('general:addFilter')}

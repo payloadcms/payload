@@ -30,21 +30,25 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
 
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
+  try {
+    const shouldCommit = await initTransaction(args.req)
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
 
-    args =
-      (await hook({
-        args,
-        collection: args.collection?.config,
-        context: args.req.context,
-        operation: 'forgotPassword',
-      })) || args
-  }, Promise.resolve())
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection?.config,
+          context: args.req.context,
+          operation: 'forgotPassword',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
 
   const {
     collection: { config: collectionConfig },
@@ -57,9 +61,6 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
     },
     req,
   } = args
-
-  try {
-    const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // Forget password
@@ -159,7 +160,7 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
 
     return token
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

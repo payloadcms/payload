@@ -1,7 +1,7 @@
 import { meOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 function meResolver(collection: Collection): any {
@@ -9,7 +9,7 @@ function meResolver(collection: Collection): any {
     const options = {
       collection,
       depth: 0,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty(context.req, 'transactionID'),
     }
     const result = await meOperation(options)
 

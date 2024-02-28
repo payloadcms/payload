@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ['localhost', process.env.NEXT_PUBLIC_CMS_URL || ''].filter(Boolean),
+    domains: ['localhost', process.env.NEXT_PUBLIC_PAYLOAD_URL || ''].filter(Boolean),
   },
 }
 

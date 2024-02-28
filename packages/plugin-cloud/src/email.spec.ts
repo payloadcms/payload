@@ -6,9 +6,6 @@ import { payloadCloudEmail } from './email'
 
 describe('email', () => {
   let defaultConfig: Config
-  beforeAll(() => {
-    jest.mock('resend')
-  })
 
   beforeEach(() => {
     // @ts-expect-error No need for db or editor
@@ -40,7 +37,7 @@ describe('email', () => {
       })
       expect(email?.fromName).toBeDefined()
       expect(email?.fromAddress).toBeDefined()
-      expect(email?.transport?.transporter.name).toEqual('payload-cloud')
+      expect(email?.transport?.transporter.name).toEqual('SMTP')
     })
 
     it('should allow setting fromName and fromAddress', () => {

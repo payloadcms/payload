@@ -20,7 +20,7 @@ export const incrementLoginAttempts = async ({
   } = collection
 
   if ('lockUntil' in doc && typeof doc.lockUntil === 'string') {
-    const lockUntil = Math.floor(new Date(doc.lockUntil).getTime() / 1000)
+    const lockUntil = new Date(doc.lockUntil).getTime()
 
     // Expired lock, restart count at 1
     if (lockUntil < Date.now()) {
@@ -52,5 +52,6 @@ export const incrementLoginAttempts = async ({
     id: doc.id,
     collection: collection.slug,
     data,
+    req,
   })
 }

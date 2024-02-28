@@ -10,6 +10,7 @@ export async function serializeLexical(data?: any, submissionData?: any): Promis
       converters,
       lexicalNodes: data?.root?.children,
       parent: data?.root,
+      submissionData,
     })
   }
   return ''
@@ -19,10 +20,12 @@ export async function convertLexicalNodesToHTML({
   converters,
   lexicalNodes,
   parent,
+  submissionData,
 }: {
   converters: HTMLConverter[]
   lexicalNodes: any[]
   parent: SerializedLexicalNodeWithParent
+  submissionData?: any
 }): Promise<string> {
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
 
@@ -33,15 +36,23 @@ export async function convertLexicalNodesToHTML({
       )
       if (!converterForNode) {
         if (unknownConverter) {
-          return unknownConverter.converter({ childIndex: i, converters, node, parent })
+          return unknownConverter.converter({
+            childIndex: i,
+            converters,
+            node,
+            parent,
+            submissionData,
+          })
         }
         return '<span>unknown node</span>'
       }
+
       return converterForNode.converter({
         childIndex: i,
         converters,
         node,
         parent,
+        submissionData,
       })
     }),
   )

@@ -7,7 +7,7 @@ import {
   GraphQLString,
 } from 'graphql'
 
-import { formatNames, toWords } from 'payload/utilities'
+import { flattenTopLevelFields, formatNames, toWords } from 'payload/utilities'
 import { fieldAffectsData } from 'payload/types'
 import { buildVersionCollectionFields } from 'payload/versions'
 import type { GraphQLInfo } from 'payload/config'
@@ -77,14 +77,17 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
 
     collection.graphQL = {} as Collection['graphQL']
 
-    const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+    const hasIDField =
+      flattenTopLevelFields(fields).findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
+      -1
+
     const idType = getCollectionIDType(config.db.defaultIDType, collectionConfig)
 
     const baseFields: ObjectTypeConfig = {}
 
     const whereInputFields = [...fields]
 
-    if (!idField) {
+    if (!hasIDField) {
       baseFields.id = { type: idType }
       whereInputFields.push({
         name: 'id',

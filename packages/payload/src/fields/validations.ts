@@ -26,23 +26,39 @@ import { isValidID } from '../utilities/isValidID'
 import { fieldAffectsData } from './config/types'
 
 export const text: Validate<unknown, unknown, TextField> = (
-  value: string,
-  { config, maxLength: fieldMaxLength, minLength, required, t },
+  value: string | string[],
+  { config, hasMany, maxLength: fieldMaxLength, maxRows, minLength, minRows, required, t },
 ) => {
   let maxLength: number
 
-  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
-  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
-  if (value && maxLength && value.length > maxLength) {
-    return t('validation:shorterThanMax', { maxLength })
+  if (!required) {
+    if (!value) return true
   }
 
-  if (value && minLength && value?.length < minLength) {
-    return t('validation:longerThanMin', { minLength })
+  if (hasMany === true) {
+    const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
+    if (typeof lengthValidationResult === 'string') return lengthValidationResult
+  }
+
+  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
+  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
+
+  const stringsToValidate: string[] = Array.isArray(value) ? value : [value]
+
+  for (const stringValue of stringsToValidate) {
+    const length = stringValue?.length || 0
+
+    if (typeof maxLength === 'number' && length > maxLength) {
+      return t('validation:shorterThanMax', { label: t('value'), maxLength, stringValue })
+    }
+
+    if (typeof minLength === 'number' && length < minLength) {
+      return t('validation:longerThanMin', { label: t('value'), minLength, stringValue })
+    }
   }
 
   if (required) {
-    if (typeof value !== 'string' || value?.length === 0) {
+    if (!(typeof value === 'string' || Array.isArray(value)) || value?.length === 0) {
       return t('validation:required')
     }
   }
@@ -258,55 +274,63 @@ const validateFilterOptions: Validate = async (
 
     await Promise.all(
       collections.map(async (collection) => {
-        let optionFilter =
-          typeof filterOptions === 'function'
-            ? await filterOptions({
-                id,
-                data,
-                relationTo: collection,
-                siblingData,
-                user,
-              })
-            : filterOptions
+        try {
+          let optionFilter =
+            typeof filterOptions === 'function'
+              ? await filterOptions({
+                  id,
+                  data,
+                  relationTo: collection,
+                  siblingData,
+                  user,
+                })
+              : filterOptions
 
-        if (optionFilter === true) {
-          optionFilter = null
-        }
-
-        const valueIDs: (number | string)[] = []
-
-        values.forEach((val) => {
-          if (typeof val === 'object' && val?.value) {
-            valueIDs.push(val.value)
+          if (optionFilter === true) {
+            optionFilter = null
           }
 
-          if (typeof val === 'string' || typeof val === 'number') {
-            valueIDs.push(val)
-          }
-        })
+          const valueIDs: (number | string)[] = []
 
-        if (valueIDs.length > 0) {
-          const findWhere = {
-            and: [{ id: { in: valueIDs } }],
-          }
+          values.forEach((val) => {
+            if (typeof val === 'object' && val?.value) {
+              valueIDs.push(val.value)
+            }
 
-          if (optionFilter) findWhere.and.push(optionFilter)
-
-          if (optionFilter === false) {
-            falseCollections.push(optionFilter)
-          }
-
-          const result = await payload.find({
-            collection,
-            depth: 0,
-            limit: 0,
-            pagination: false,
-            req,
-            where: findWhere,
+            if (typeof val === 'string' || typeof val === 'number') {
+              valueIDs.push(val)
+            }
           })
 
-          options[collection] = result.docs.map((doc) => doc.id)
-        } else {
+          if (valueIDs.length > 0) {
+            const findWhere = {
+              and: [{ id: { in: valueIDs } }],
+            }
+
+            if (optionFilter) findWhere.and.push(optionFilter)
+
+            if (optionFilter === false) {
+              falseCollections.push(optionFilter)
+            }
+
+            // `req` omitted to prevent transaction errors from aborting the entire transaction
+            const result = await payload.find({
+              collection,
+              depth: 0,
+              limit: 0,
+              pagination: false,
+              where: findWhere,
+            })
+
+            options[collection] = result.docs.map((doc) => doc.id)
+          } else {
+            options[collection] = []
+          }
+        } catch (err) {
+          req.payload.logger.error({
+            err,
+            msg: `Error validating filter options for collection ${collection}`,
+          })
           options[collection] = []
         }
       }),

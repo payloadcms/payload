@@ -87,6 +87,8 @@ export const promise = async ({
           global,
           operation,
           originalDoc: doc,
+          previousSiblingDoc: siblingDoc,
+          previousValue: siblingDoc[field.name],
           req,
           siblingData,
           value: siblingData[field.name],

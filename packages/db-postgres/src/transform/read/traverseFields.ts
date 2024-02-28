@@ -7,6 +7,7 @@ import { fieldAffectsData } from 'payload/types'
 import type { BlocksMap } from '../../utilities/createBlocksMap'
 
 import { transformHasManyNumber } from './hasManyNumber'
+import { transformHasManyText } from './hasManyText'
 import { transformRelationship } from './relationship'
 
 type TraverseFieldsArgs = {
@@ -50,6 +51,10 @@ type TraverseFieldsArgs = {
    * Data structure representing the nearest table from db
    */
   table: Record<string, unknown>
+  /**
+   * All hasMany text fields, as returned by Drizzle, keyed on an object by field path
+   */
+  texts: Record<string, Record<string, unknown>[]>
 }
 
 // Traverse fields recursively, transforming data
@@ -65,6 +70,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   path,
   relationships,
   table,
+  texts,
 }: TraverseFieldsArgs): T => {
   const sanitizedPath = path ? `${path}.` : path
 
@@ -81,6 +87,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         path,
         relationships,
         table,
+        texts,
       })
     }
 
@@ -100,12 +107,18 @@ export const traverseFields = <T extends Record<string, unknown>>({
         path,
         relationships,
         table,
+        texts,
       })
     }
 
     if (fieldAffectsData(field)) {
       const fieldName = `${fieldPrefix || ''}${field.name}`
       const fieldData = table[fieldName]
+
+      if (fieldPrefix) {
+        deletions.push(() => delete table[fieldName])
+      }
+
       if (field.type === 'array') {
         if (Array.isArray(fieldData)) {
           if (field.localized) {
@@ -131,7 +144,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                   relationships,
                   table: row,
+                  texts,
                 })
+
+                if ('_order' in rowResult) {
+                  delete rowResult._order
+                }
 
                 arrayResult[locale].push(rowResult)
               }
@@ -144,6 +162,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 row.id = row._uuid
                 delete row._uuid
               }
+
+              if ('_order' in row) {
+                delete row._order
+              }
+
               return traverseFields<T>({
                 blocks,
                 config,
@@ -155,6 +178,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 path: `${sanitizedPath}${field.name}.${i}`,
                 relationships,
                 table: row,
+                texts,
               })
             })
           }
@@ -198,6 +222,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     path: `${blockFieldPath}.${row._order - 1}`,
                     relationships,
                     table: row,
+                    texts,
                   })
 
                   delete blockResult._order
@@ -228,6 +253,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   path: `${blockFieldPath}.${i}`,
                   relationships,
                   table: row,
+                  texts,
                 })
               }
 
@@ -279,6 +305,40 @@ export const traverseFields = <T extends Record<string, unknown>>({
             field,
             ref: result,
             relations: relationPathMatch,
+          })
+        }
+
+        return result
+      }
+
+      if (field.type === 'text' && field?.hasMany) {
+        const textPathMatch = texts[`${sanitizedPath}${field.name}`]
+        if (!textPathMatch) return result
+
+        if (field.localized) {
+          result[field.name] = {}
+          const textsByLocale: Record<string, Record<string, unknown>[]> = {}
+
+          textPathMatch.forEach((row) => {
+            if (typeof row.locale === 'string') {
+              if (!textsByLocale[row.locale]) textsByLocale[row.locale] = []
+              textsByLocale[row.locale].push(row)
+            }
+          })
+
+          Object.entries(textsByLocale).forEach(([locale, texts]) => {
+            transformHasManyText({
+              field,
+              locale,
+              ref: result,
+              textRows: texts,
+            })
+          })
+        } else {
+          transformHasManyText({
+            field,
+            ref: result,
+            textRows: textPathMatch,
           })
         }
 
@@ -378,8 +438,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   path: `${sanitizedPath}${field.name}`,
                   relationships,
                   table,
+                  texts,
                 })
               })
+              if ('_order' in ref) {
+                delete ref._order
+              }
             } else {
               const groupData = {}
 
@@ -394,7 +458,26 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 path: `${sanitizedPath}${field.name}`,
                 relationships,
                 table,
+                texts,
               })
+              if ('_order' in ref) {
+                delete ref._order
+              }
+            }
+
+            break
+          }
+
+          case 'text': {
+            let val = fieldData
+            if (typeof fieldData === 'string') {
+              val = String(fieldData)
+            }
+
+            if (typeof locale === 'string') {
+              ref[locale] = val
+            } else {
+              result[field.name] = val
             }
 
             break

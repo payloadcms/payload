@@ -1,7 +1,7 @@
 import { findOneOperation } from 'payload/operations'
 import type { Document, SanitizedGlobalConfig } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {
@@ -12,11 +12,11 @@ export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Do
     const { slug } = globalConfig
 
     const options = {
+      slug,
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: isolateTransactionID(context.req),
-      slug,
+      req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
     const result = await findOneOperation(options)

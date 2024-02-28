@@ -1,7 +1,7 @@
 import { findVersionsOperationGlobal } from 'payload/operations'
 import type { Document, PayloadRequest, SanitizedGlobalConfig, Where } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 export type Resolver = (
@@ -26,7 +26,7 @@ export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig
       globalConfig,
       limit: args.limit,
       page: args.page,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty(context.req, 'transactionID'),
       sort: args.sort,
       where: args.where,
     }

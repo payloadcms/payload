@@ -11,21 +11,51 @@ import { LinkFeature } from '../packages/richtext-lexical/src/field/features/lin
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
+const [testSuiteDir] = process.argv.slice(4)
+const migrationDir = path.resolve(
+  (process.env.PAYLOAD_CONFIG_PATH
+    ? path.join(process.env.PAYLOAD_CONFIG_PATH, '..')
+    : testSuiteDir) || __dirname,
+  'migrations',
+)
+
 const databaseAdapters = {
   mongoose: mongooseAdapter({
-    migrationDir: path.resolve(__dirname, '../packages/db-mongodb/migrations'),
+    migrationDir,
     url: 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
-    migrationDir: path.resolve(__dirname, '../packages/db-postgres/migrations'),
+    migrationDir,
     pool: {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+    },
+  }),
+  'postgres-custom-schema': postgresAdapter({
+    migrationDir,
+    pool: {
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+    },
+    schemaName: 'custom',
+  }),
+  'postgres-uuid': postgresAdapter({
+    idType: 'uuid',
+    migrationDir,
+    pool: {
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+    },
+  }),
+  supabase: postgresAdapter({
+    migrationDir,
+    pool: {
+      connectionString:
+        process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
     },
   }),
 }
 
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
   const config: Config = {
+    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',
     /*editor: slateEditor({
       admin: {
@@ -52,7 +82,6 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     },
     telemetry: false,
     ...testConfig,
-    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
   }
 
   config.admin = {

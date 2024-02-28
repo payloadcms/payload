@@ -8,6 +8,7 @@ import { fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly } from '
 import formatName from '../utilities/formatName'
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap'
 import { withOperators } from './withOperators'
+import { flattenTopLevelFields } from 'payload/utilities'
 
 type Args = {
   fields: Field[]
@@ -33,11 +34,11 @@ const buildWhereInputType = ({ name, fields, parentName }: Args): GraphQLInputOb
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
-  let idField: FieldAffectingData | undefined
+  const idField = flattenTopLevelFields(fields).find(
+    (field) => fieldAffectsData(field) && field.name === 'id',
+  )
 
   const fieldTypes = fields.reduce((schema, field) => {
-    if (fieldAffectsData(field) && field.name === 'id') idField = field
-
     if (!fieldIsPresentationalOnly(field) && !field.hidden) {
       const getFieldSchema = fieldToSchemaMap({
         parentName,

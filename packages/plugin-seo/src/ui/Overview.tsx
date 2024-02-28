@@ -4,6 +4,7 @@ import type { FormField } from 'payload/types'
 
 import { useAllFormFields, useForm } from 'payload/components/forms'
 import React, { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { defaults } from '../defaults'
 
@@ -25,6 +26,7 @@ export const Overview: React.FC = () => {
       'meta.title': { value: metaTitle } = {} as FormField,
     },
   ] = useAllFormFields()
+  const { t } = useTranslation('plugin-seo')
 
   const [titleIsValid, setTitleIsValid] = useState<boolean | undefined>()
   const [descIsValid, setDescIsValid] = useState<boolean | undefined>()
@@ -58,7 +60,7 @@ export const Overview: React.FC = () => {
         marginBottom: '20px',
       }}
     >
-      <div>{`${numberOfPasses}/${testResults.length} checks are passing`}</div>
+      <div>{t('checksPassing', { current: numberOfPasses, max: testResults.length })}</div>
     </div>
   )
 }

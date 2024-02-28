@@ -26,10 +26,13 @@ export { getObjectDotNotation } from '../utilities/getObjectDotNotation'
 
 export { default as getUniqueListBy } from '../utilities/getUniqueListBy'
 
+export { isEntityHidden } from '../utilities/isEntityHidden'
 export { isNumber } from '../utilities/isNumber'
 export { isValidID } from '../utilities/isValidID'
+export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty'
 export { setsAreEqual } from '../utilities/setsAreEqual'
 export { splitPathByArrayFields } from '../utilities/splitPathByArrayFields'
+
 export { default as toKebabCase } from '../utilities/toKebabCase'
 
 export { default as wait } from '../utilities/wait'

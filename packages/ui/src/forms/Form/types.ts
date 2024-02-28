@@ -95,6 +95,11 @@ export type REPLACE_STATE = {
   type: 'REPLACE_STATE'
 }
 
+export type MERGE_STATE_KEEP_VALUES = {
+  state: FormState
+  type: 'MERGE_STATE_KEEP_VALUES'
+}
+
 export type REMOVE = {
   path: string
   type: 'REMOVE'
@@ -163,6 +168,7 @@ export type SET_ALL_ROWS_COLLAPSED = {
 export type FieldAction =
   | ADD_ROW
   | DUPLICATE_ROW
+  | MERGE_STATE_KEEP_VALUES
   | MODIFY_CONDITION
   | MOVE_ROW
   | REMOVE

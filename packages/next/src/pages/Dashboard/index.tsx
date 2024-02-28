@@ -3,7 +3,10 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
 import Link from 'next/link'
+import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
+
+import type { DashboardProps } from './Default'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
@@ -45,6 +48,27 @@ export const Dashboard = async ({
 
   const CustomDashboardComponent = config.admin.components?.views?.Dashboard
 
+  const visibleCollections: string[] = config.collections.reduce((acc, collection) => {
+    if (!isEntityHidden({ hidden: collection.admin.hidden, user })) {
+      acc.push(collection.slug)
+    }
+    return acc
+  }, [])
+
+  const visibleGlobals: string[] = config.globals.reduce((acc, global) => {
+    if (!isEntityHidden({ hidden: global.admin.hidden, user })) {
+      acc.push(global.slug)
+    }
+    return acc
+  }, [])
+
+  const componentProps: DashboardProps = {
+    Link,
+    config,
+    visibleCollections,
+    visibleGlobals,
+  }
+
   return (
     <Fragment>
       <HydrateClientUser permissions={permissions} user={user} />
@@ -53,11 +77,7 @@ export const Dashboard = async ({
           typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
         }
         DefaultComponent={DefaultDashboard}
-        componentProps={{
-          Link,
-          config,
-          user,
-        }}
+        componentProps={componentProps}
       />
     </Fragment>
   )

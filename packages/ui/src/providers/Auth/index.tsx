@@ -2,7 +2,7 @@
 import type { Permissions, User } from 'payload/auth'
 
 import { useModal } from '@faceless-ui/modal'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -13,6 +13,7 @@ import useDebounce from '../../hooks/useDebounce'
 import { useTranslation } from '../../providers/Translation'
 import { requests } from '../../utilities/api'
 import { useConfig } from '../Config'
+import { useSearchParams } from '../SearchParams'
 // import { useLocale } from '../Locale'
 
 const Context = createContext({} as AuthContext)
@@ -20,7 +21,7 @@ const Context = createContext({} as AuthContext)
 const maxTimeoutTime = 2147483647
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const searchParams = useSearchParams()
+  const { searchParams } = useSearchParams()
   const [user, setUser] = useState<User | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
@@ -211,7 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (autoLoginJson?.token) {
               setTokenAndExpiration(autoLoginJson)
             }
-            push(searchParams.get('redirect') || admin)
+            push(typeof searchParams['redirect'] === 'string' ? searchParams['redirect'] : admin)
           } else {
             setUser(null)
             revokeTokenAndExpire()
@@ -224,7 +225,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
-  }, [serverURL, api, userSlug, i18n, autoLogin, setTokenAndExpiration, revokeTokenAndExpire])
+  }, [
+    serverURL,
+    api,
+    userSlug,
+    i18n.language,
+    autoLogin,
+    setTokenAndExpiration,
+    push,
+    searchParams,
+    admin,
+    revokeTokenAndExpire,
+  ])
 
   // On mount, get user and set
   useEffect(() => {

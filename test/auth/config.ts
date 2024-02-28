@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
-import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
+import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -166,11 +166,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'api-keys',
-      labels: {
-        singular: 'API Key',
-        plural: 'API Keys',
-      },
+      slug: apiKeysSlug,
       access: {
         read: ({ req: { user } }) => {
           if (!user) return false
@@ -189,6 +185,10 @@ export default buildConfigWithDefaults({
         useAPIKey: true,
       },
       fields: [],
+      labels: {
+        plural: 'API Keys',
+        singular: 'API Key',
+      },
     },
     {
       slug: 'public-users',

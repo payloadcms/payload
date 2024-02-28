@@ -34,6 +34,7 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/consistent-type-imports': 'warn',
     '@typescript-eslint/no-explicit-any': 'warn',
+
     // Type-aware any rules:
     '@typescript-eslint/no-unsafe-assignment': 'off',
     '@typescript-eslint/no-unsafe-member-access': 'off',
@@ -56,6 +57,7 @@ module.exports = {
     'no-sparse-arrays': 'off',
     'no-underscore-dangle': 'off',
     'no-use-before-define': 'off',
+    'object-shorthand': 'warn',
     'react/no-unused-prop-types': 'off',
     'react/prop-types': 'off',
     'react/require-default-props': 'off',

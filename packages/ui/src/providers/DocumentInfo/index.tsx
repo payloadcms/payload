@@ -51,8 +51,6 @@ export const DocumentInfoProvider: React.FC<
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
-
   const [title, setTitle] = useState<string>('')
 
   const baseURL = `${serverURL}${api}`
@@ -74,6 +72,8 @@ export const DocumentInfoProvider: React.FC<
       preferencesKey = `collection-${slug}-${id}`
     }
   }
+
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
@@ -275,6 +275,7 @@ export const DocumentInfoProvider: React.FC<
 
   const value: DocumentInfoContext = {
     ...documentInfo,
+    docConfig,
     docPermissions,
     getDocPermissions,
     getDocPreferences,

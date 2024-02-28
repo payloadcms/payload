@@ -13,6 +13,9 @@ export async function getFilePrefix({
 
   const files = await req.payload.find({
     collection: collection.slug,
+    depth: 0,
+    limit: 1,
+    pagination: false,
     where: {
       or: [
         {

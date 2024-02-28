@@ -13,3 +13,5 @@ export const reduceSlug = 'reduce'
 export const adminThumbnailSlug = 'admin-thumbnail'
 
 export const unstoredMediaSlug = 'unstored-media'
+
+export const versionSlug = 'versions'

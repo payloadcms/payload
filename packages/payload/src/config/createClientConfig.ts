@@ -55,6 +55,7 @@ const sanitizeCollections = (
   collections.map((collection) => {
     const sanitized = { ...collection }
     sanitized.fields = sanitizeFields(sanitized.fields)
+
     delete sanitized.hooks
     delete sanitized.access
     delete sanitized.endpoints
@@ -66,6 +67,10 @@ const sanitizeCollections = (
 
       if ('components' in sanitized.admin) {
         delete sanitized.admin.components
+      }
+
+      if ('hidden' in sanitized.admin) {
+        delete sanitized.admin.hidden
       }
     }
 
@@ -85,6 +90,10 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
 
       if ('components' in sanitized.admin) {
         delete sanitized.admin.components
+      }
+
+      if ('hidden' in sanitized.admin) {
+        delete sanitized.admin.hidden
       }
     }
 

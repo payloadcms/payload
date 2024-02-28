@@ -38,5 +38,5 @@ export type InitI18n = (args: {
     config: I18nOptions;
     language?: string;
     translations: Translations;
-    context: 'all' | 'api' | 'client';
-}) => Promise<I18n>;
+    context: 'api' | 'client';
+}) => I18n;

@@ -1,8 +1,14 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { Payload } from 'payload'
 import type { Migration } from 'payload/database'
+import type { PayloadRequest } from 'payload/types'
 
-import { readMigrationFiles } from 'payload/database'
+import {
+  commitTransaction,
+  initTransaction,
+  killTransaction,
+  readMigrationFiles,
+} from 'payload/database'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types'
@@ -35,18 +41,18 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
       latestBatch = Number(migrationsInDB[0]?.batch)
     }
   } else {
-    await createMigrationTable(this.drizzle)
+    await createMigrationTable(this)
   }
 
   if (migrationsInDB.find((m) => m.batch === -1)) {
     const { confirm: runMigrations } = await prompts(
       {
         name: 'confirm',
+        type: 'confirm',
         initial: false,
         message:
           "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
           "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
-        type: 'confirm',
       },
       {
         onCancel: () => {
@@ -76,9 +82,10 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
-  const { generateDrizzleJson } = require('drizzle-kit/utils')
+  const { generateDrizzleJson } = require('drizzle-kit/payload')
 
   const start = Date.now()
+  const req = { payload } as PayloadRequest
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
@@ -86,7 +93,8 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
   const drizzleJSON = generateDrizzleJson(pgAdapter.schema)
 
   try {
-    await migration.up({ payload })
+    await initTransaction(req)
+    await migration.up({ payload, req })
     payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     await payload.create({
       collection: 'payload-migrations',
@@ -95,8 +103,11 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
         batch,
         schema: drizzleJSON,
       },
+      req,
     })
+    await commitTransaction(req)
   } catch (err: unknown) {
+    await killTransaction(req)
     payload.logger.error({
       err,
       msg: parseError(err, `Error running migration ${migration.name}`),
