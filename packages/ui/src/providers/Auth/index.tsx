@@ -212,7 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (autoLoginJson?.token) {
               setTokenAndExpiration(autoLoginJson)
             }
-            push(searchParams.get('redirect') || admin)
+            push(typeof searchParams['redirect'] === 'string' ? searchParams['redirect'] : admin)
           } else {
             setUser(null)
             revokeTokenAndExpire()
@@ -225,7 +225,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
-  }, [serverURL, api, userSlug, i18n, autoLogin, setTokenAndExpiration, revokeTokenAndExpire])
+  }, [
+    serverURL,
+    api,
+    userSlug,
+    i18n.language,
+    autoLogin,
+    setTokenAndExpiration,
+    push,
+    searchParams,
+    admin,
+    revokeTokenAndExpire,
+  ])
 
   // On mount, get user and set
   useEffect(() => {

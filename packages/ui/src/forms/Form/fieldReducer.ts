@@ -14,27 +14,47 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     case 'REPLACE_STATE': {
       const newState = {}
 
-      if (action.optimize !== false) {
-        // Only update fields that have changed
-        // by comparing old value / initialValue to new
-        // ..
-        // This is a performance enhancement for saving
-        // large documents with hundreds of fields
+      // Only update fields that have changed
+      // by comparing old value / initialValue to new
+      // ..
+      // This is a performance enhancement for saving
+      // large documents with hundreds of fields
 
-        Object.entries(action.state).forEach(([path, field]) => {
-          const oldField = state[path]
-          const newField = field
+      Object.entries(action.state).forEach(([path, field]) => {
+        const oldField = state[path]
+        const newField = field
 
-          if (!equal(oldField, newField)) {
-            newState[path] = newField
-          } else if (oldField) {
-            newState[path] = oldField
+        if (!equal(oldField, newField)) {
+          newState[path] = newField
+        } else if (oldField) {
+          newState[path] = oldField
+        }
+      })
+
+      return newState
+    }
+
+    case 'MERGE_STATE_KEEP_VALUES': {
+      const newState = {}
+
+      Object.entries(action.state).forEach(([path, field]) => {
+        const oldField = state[path]
+        const newField = field
+
+        if (!equal(oldField, newField)) {
+          const fieldCopy = { ...newField }
+
+          delete fieldCopy.value
+          delete fieldCopy.initialValue
+
+          newState[path] = {
+            ...oldField,
+            ...fieldCopy,
           }
-        })
-      } else {
-        // If we're not optimizing, just set the state to the new state
-        return action.state
-      }
+        } else if (oldField) {
+          newState[path] = oldField
+        }
+      })
 
       return newState
     }
