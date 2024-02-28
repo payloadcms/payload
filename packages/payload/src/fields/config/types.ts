@@ -526,7 +526,7 @@ export type RichTextField<
   ExtraProperties = {},
 > = FieldBase & {
   admin?: Admin
-  editor: RichTextAdapter<Value, AdapterProps, AdapterProps>
+  editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
   type: 'richText'
 } & ExtraProperties
 
@@ -564,6 +564,8 @@ export type RadioField = FieldBase & {
 }
 
 export type Block = {
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>
   fields: Field[]
   /** @deprecated - please migrate to the interfaceName property instead. */
   graphQL?: {
@@ -580,8 +582,6 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
-  /** Extension point to add your custom data. */
-  custom?: Record<string, any>
 }
 
 export type BlockField = FieldBase & {
