@@ -8,13 +8,13 @@ const withPayload = (nextConfig = {}) => {
         '**/*': [
           ...(nextConfig.experimental?.outputFileTracingExcludes?.['**/*'] || []),
           'drizzle-kit',
-          'drizzle-kit/utils',
+          'drizzle-kit/payload',
         ],
       },
       serverComponentsExternalPackages: [
         ...(nextConfig?.experimental?.serverComponentsExternalPackages || []),
         'drizzle-kit',
-        'drizzle-kit/utils',
+        'drizzle-kit/payload',
         'pino',
         'pino-pretty',
       ],
@@ -30,7 +30,7 @@ const withPayload = (nextConfig = {}) => {
         externals: [
           ...(incomingWebpackConfig?.externals || []),
           'drizzle-kit',
-          'drizzle-kit/utils',
+          'drizzle-kit/payload',
           'pino',
           'pino-pretty',
           'sharp',

@@ -72,7 +72,6 @@ export const DefaultEditView: React.FC = () => {
     globalSlug: globalConfig?.slug,
   })
 
-  const isEditing = 'isEditing' in props ? props.isEditing : undefined
   const operation = id ? 'update' : 'create'
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
@@ -184,7 +183,7 @@ export const DefaultEditView: React.FC = () => {
               collectionSlug={collectionConfig?.slug}
               globalSlug={globalConfig?.slug}
               id={id}
-              isEditing={isEditing || false}
+              isEditing={Boolean(id) || false}
               pluralLabel={collectionConfig?.labels?.plural}
               useAsTitle={collectionConfig?.admin?.useAsTitle}
             />
@@ -199,7 +198,7 @@ export const DefaultEditView: React.FC = () => {
               disableActions={disableActions}
               hasSavePermission={hasSavePermission}
               id={id}
-              isEditing={isEditing}
+              isEditing={Boolean(id)}
               permissions={docPermissions}
               slug={collectionConfig?.slug}
             />

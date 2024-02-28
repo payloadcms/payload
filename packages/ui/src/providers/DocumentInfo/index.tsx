@@ -51,10 +51,6 @@ export const DocumentInfoProvider: React.FC<
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
-
-
-  const [title, setTitle] = useState<string>('')
-
   const [title, setTitle] = useState<string>('')
 
   const baseURL = `${serverURL}${api}`
@@ -77,7 +73,7 @@ export const DocumentInfoProvider: React.FC<
     }
   }
 
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(permissions[pluralType][slug])
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
@@ -225,14 +221,14 @@ export const DocumentInfoProvider: React.FC<
           'Accept-Language': i18n.language,
         },
       })
-      try {
-        const json = await res.json()
-        setDocPermissions(json)
-      } catch (e) {
-        console.error('Unable to fetch document permissions', e)
-      }
+      const json = await res.json()
+      setDocPermissions(json)
+    } else {
+      // fallback to permissions from the entity type
+      // (i.e. create has no id)
+      setDocPermissions(permissions?.[pluralType]?.[slug])
     }
-  }, [serverURL, api, pluralType, slug, id, i18n.language, code])
+  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, code])
 
   const getDocPreferences = useCallback(async () => {
     return getPreference<DocumentPreferences>(preferencesKey)
@@ -279,13 +275,13 @@ export const DocumentInfoProvider: React.FC<
 
   const value: DocumentInfoContext = {
     ...documentInfo,
+    docConfig,
     docPermissions,
     getDocPermissions,
     getDocPreferences,
     getVersions,
     publishedDoc,
     setDocFieldPreferences,
-    docConfig,
     setDocumentInfo,
     setDocumentTitle,
     title,

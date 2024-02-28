@@ -1,7 +1,7 @@
 import { accessOperation } from 'payload/operations'
 import type { SanitizedConfig } from 'payload/types'
 
-import formatName from '../../../graphql/utilities/formatName'
+import formatName from '../../utilities/formatName'
 import { Context } from '../types'
 import { isolateObjectProperty } from 'payload/utilities'
 const formatConfigNames = (results, configs) => {

@@ -1,10 +1,12 @@
 import type { PayloadRequest } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
-import { readMigrationFiles } from 'payload/database'
-import { commitTransaction } from 'payload/dist/utilities/commitTransaction'
-import { initTransaction } from 'payload/dist/utilities/initTransaction'
-import { killTransaction } from 'payload/dist/utilities/killTransaction'
+import {
+  commitTransaction,
+  initTransaction,
+  killTransaction,
+  readMigrationFiles,
+} from 'payload/database'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types'
