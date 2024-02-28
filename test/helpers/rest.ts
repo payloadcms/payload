@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import fetch from 'node-fetch'
 import qs from 'qs'
 
 import type { Config } from '../../packages/payload/src/config/types'

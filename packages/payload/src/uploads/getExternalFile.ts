@@ -13,7 +13,6 @@ export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
 
   if (typeof url === 'string') {
     const fileURL = `${baseUrl}${url}`
-    const { default: fetch } = (await import('node-fetch')) as any
 
     const res = await fetch(fileURL, {
       credentials: 'include',
@@ -25,11 +24,11 @@ export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
 
     if (!res.ok) throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
 
-    const data = await res.buffer()
+    const data = await res.arrayBuffer()
 
     return {
       name: filename,
-      data,
+      data: Buffer.from(data),
       mimetype: res.headers.get('content-type') || undefined,
       size: Number(res.headers.get('content-length')) || 0,
     }
