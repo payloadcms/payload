@@ -125,7 +125,6 @@ const EditMany: React.FC<Props> = (props) => {
         {t('general:edit')}
       </DrawerToggler>
       <Drawer Header={null} slug={drawerSlug}>
-<<<<<<< HEAD
         <DocumentInfoProvider collection={collection}>
           <OperationContext.Provider value="update">
             <Form className={`${baseClass}__form`} onSuccess={onSuccess}>
@@ -163,57 +162,25 @@ const EditMany: React.FC<Props> = (props) => {
                             />
                           </React.Fragment>
                         ) : (
-                          <Submit
-=======
-        <OperationContext.Provider value="update">
-          <Form className={`${baseClass}__form`} onSuccess={onSuccess}>
-            <div className={`${baseClass}__main`}>
-              <div className={`${baseClass}__header`}>
-                <h2 className={`${baseClass}__header__title`}>
-                  {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
-                </h2>
-                <button
-                  aria-label={t('general:close')}
-                  className={`${baseClass}__header__close`}
-                  id={`close-drawer__${drawerSlug}`}
-                  onClick={() => closeModal(drawerSlug)}
-                  type="button"
-                >
-                  <X />
-                </button>
-              </div>
-              <FieldSelect fields={fields} setSelected={setSelected} />
-              [RenderFields]
-              {/* <RenderFields fieldSchema={selected} fieldTypes={fieldTypes} /> */}
-              <div className={`${baseClass}__sidebar-wrap`}>
-                <div className={`${baseClass}__sidebar`}>
-                  <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                    <div className={`${baseClass}__document-actions`}>
-                      {collection.versions ? (
-                        <React.Fragment>
-                          <Publish
->>>>>>> feat/next-poc
-                            action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-                            disabled={selected.length === 0}
-                          />
-                          <SaveDraft
-                            action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-                            disabled={selected.length === 0}
-                          />
-                        </React.Fragment>
-                      ) : (
-                        <Submit
-                          action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-                          disabled={selected.length === 0}
-                        />
-                      )}
+                          <React.Fragment>
+                            <Submit
+                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                              disabled={selected.length === 0}
+                            />
+                            <SaveDraft
+                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                              disabled={selected.length === 0}
+                            />
+                          </React.Fragment>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Form>
-        </OperationContext.Provider>
+            </Form>
+          </OperationContext.Provider>
+        </DocumentInfoProvider>
       </Drawer>
     </div>
   )
