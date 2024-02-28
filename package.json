@@ -118,7 +118,7 @@
     "react-router-dom": "5.3.4"
   },
   "engines": {
-    "node": ">=14",
+    "node": ">=18",
     "pnpm": ">=8"
   },
   "lint-staged": {

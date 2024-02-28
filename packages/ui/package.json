@@ -81,6 +81,9 @@
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "files": [
     "dist"
   ]
