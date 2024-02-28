@@ -6,7 +6,7 @@ export const isValidID = (
 ): boolean => {
   if (type === 'text' && value) {
     if (['object', 'string'].includes(typeof value)) {
-      const isObjectID = ObjectID.isValid(value as string)
+      const isObjectID = ObjectId.isValid(value as string)
       return typeof value === 'string' || isObjectID
     }
     return false
