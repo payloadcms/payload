@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react'
 import type { SanitizedConfig } from 'payload/types'
 
-import { Gutter, SetStepNav, useActions } from '@payloadcms/ui'
+import { Gutter, SetStepNav } from '@payloadcms/ui'
+import React from 'react'
+
 import { DefaultDashboardClient } from './index.client'
 import './index.scss'
 
@@ -26,11 +27,11 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     visibleGlobals,
   } = props
 
-  const { setViewActions } = useActions()
+  // const { setViewActions } = useActions()
 
-  useEffect(() => {
-    setViewActions([])
-  }, [setViewActions])
+  // useEffect(() => {
+  //   setViewActions([])
+  // }, [setViewActions])
 
   return (
     <div className={baseClass}>

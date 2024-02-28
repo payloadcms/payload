@@ -87,9 +87,7 @@ export const DocumentInfoProvider: React.FC<
     }
   }
 
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(
-    permissions[pluralType][slug],
-  )
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
