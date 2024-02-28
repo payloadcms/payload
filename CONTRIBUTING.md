@@ -98,15 +98,22 @@ We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) fo
 
 Here's a breakdown of the format. At the top-level, we use the following types to categorize our commits:
 
-- `feat`: new feature that adds functionality. These are automatically added to the changelog when creating new releases.
-- `fix`: a fix to an existing feature. These are automatically added to the changelog when creating new releases.
+- `feat`: new feature that adds functionality. **These are automatically added to the changelog when creating new releases.**
+- `fix`: a fix to an existing feature. **These are automatically added to the changelog when creating new releases.**
 - `docs`: changes to [docs](./docs) only. These do not appear in the changelog.
 - `chore`: changes to code that is neither a fix nor a feature (e.g. refactoring, adding tests, etc.). These do not appear in the changelog.
 
-If you are committing to [templates](./templates) or [examples](./examples), use the `chore` type with the proper scope, like this:
+You should also include the scope of your commit, unless committing to Payload core, which should not be scoped. Scopes are typically based on filepath within the monorepo. Here are some examples:
 
-- `chore(templates): adds feature to template`
-- `chore(examples): fixes bug in example`
+- Templates: `chore(templates/website): lints files`
+- Examples: `chore(examples/draft-preview): removes unused import`
+- Docs: `docs(authentication/operations): typo in me route`
+
+Packages should **_always_** be scoped. Here are some examples:
+
+- MongoDB Adapter: `feat(db-mongodb): update collections`
+- Live Preview SDK: `fix(live-preview): relationship depth`
+- Richtext Slate: `chore(richtext-slate): update dependencies`
 
 ## Pull Requests
 
