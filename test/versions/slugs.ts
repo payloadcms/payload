@@ -1,5 +1,7 @@
 export const autosaveCollectionSlug = 'autosave-posts' as const
 
+export const customIDSlug = 'custom-ids' as const
+
 export const draftCollectionSlug = 'draft-posts' as const
 
 export const postCollectionSlug = 'posts' as const

@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+import shelljs from 'shelljs'
 
 import wait from '../packages/payload/src/utilities/wait'
 import { devUser } from './credentials'
@@ -78,7 +79,7 @@ export async function openDocControls(page: Page): Promise<void> {
 
 export async function changeLocale(page: Page, newLocale: string) {
   await page.locator('.localizer >> button').first().click()
-  await page.locator(`.localizer >> a:has-text("${newLocale}")`).click()
+  await page.locator(`.localizer >> a[href="/?locale=${newLocale}"]`).click()
   expect(page.url()).toContain(`locale=${newLocale}`)
 }
 
@@ -132,4 +133,22 @@ export function initPageConsoleErrorCatch(page: Page) {
       throw new Error(`Browser console error: ${msg.text()}`)
     }
   })
+}
+
+export function describeIfInCIOrHasLocalstack(): jest.Describe {
+  if (process.env.CI) {
+    return describe
+  }
+
+  // Check that localstack is running
+  const { code } = shelljs.exec(`docker ps | grep localstack`)
+
+  if (code !== 0) {
+    console.warn('Localstack is not running. Skipping test suite.')
+    return describe.skip
+  }
+
+  console.log('Localstack is running. Running test suite.')
+
+  return describe
 }

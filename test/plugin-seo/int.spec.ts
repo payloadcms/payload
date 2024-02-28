@@ -37,6 +37,9 @@ describe('@payloadcms/plugin-seo', () => {
       data: {
         title: 'Test page',
         slug: 'test-page',
+        meta: {
+          title: 'Test page',
+        },
       },
       depth: 0,
     })

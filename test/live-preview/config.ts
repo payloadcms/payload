@@ -1,5 +1,3 @@
-import path from 'path'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import Categories from './collections/Categories'
 import { Media } from './collections/Media'
