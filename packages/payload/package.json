@@ -81,7 +81,6 @@
     "@types/express-serve-static-core": "4.17.35",
     "@types/hapi__joi": "17.1.9",
     "@types/ignore-styles": "5.0.0",
-    "@types/isomorphic-fetch": "0.0.36",
     "@types/joi": "14.3.4",
     "@types/json-schema": "7.0.12",
     "@types/jsonwebtoken": "8.5.9",
