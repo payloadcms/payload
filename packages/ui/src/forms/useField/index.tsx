@@ -64,9 +64,9 @@ const useField = <T,>(options: Options): FieldType<T> => {
       }
 
       dispatchField({
+        type: 'UPDATE',
         disableFormData: disableFormData || (hasRows && val > 0),
         path,
-        type: 'UPDATE',
         value: val,
       })
     },
@@ -145,12 +145,12 @@ const useField = <T,>(options: Options): FieldType<T> => {
 
           if (typeof dispatchField === 'function') {
             dispatchField({
+              type: 'UPDATE',
               disableFormData:
                 disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
               errorMessage,
               path,
               rows: field?.rows,
-              type: 'UPDATE',
               valid,
               // validate,
               value,

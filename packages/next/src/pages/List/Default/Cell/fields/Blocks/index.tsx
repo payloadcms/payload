@@ -13,11 +13,11 @@ export interface BlocksCellProps extends CellComponentProps<any> {
 export const BlocksCell: React.FC<BlocksCellProps> = ({ blocks, cellData, labels }) => {
   const { i18n } = useTranslation()
 
-  const selectedBlocks = cellData ? cellData.map(({ blockType }) => blockType) : []
+  const selectedBlocks = Array.isArray(cellData) ? cellData.map(({ blockType }) => blockType) : []
 
   const translatedBlockLabels = blocks?.map((b) => ({
-    label: getTranslation(b.labels.singular, i18n),
     slug: b.slug,
+    label: getTranslation(b.labels.singular, i18n),
   }))
 
   let label = `0 ${getTranslation(labels?.plural, i18n)}`

@@ -88,7 +88,6 @@ const Form: React.FC<Props> = (props) => {
    */
   const [fields, dispatchFields] = fieldsReducer
 
-  const debouncedFormState = useDebounce(fields, 150)
   const prevFormState = useRef<FormState>(null)
 
   contextRef.current.fields = fields
@@ -142,7 +141,7 @@ const Form: React.FC<Props> = (props) => {
     await Promise.all(validationPromises)
 
     if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
-      dispatchFields({ state: validatedFieldState, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 
     return isValid
@@ -182,7 +181,7 @@ const Form: React.FC<Props> = (props) => {
           await priorOnChange
 
           const result = await beforeSubmitFn({
-            formState: debouncedFormState,
+            formState: fields,
           })
 
           revalidatedFormState = result
@@ -192,7 +191,7 @@ const Form: React.FC<Props> = (props) => {
 
         if (!isValid) {
           setProcessing(false)
-          return dispatchFields({ state: revalidatedFormState, type: 'REPLACE_STATE' })
+          return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
         }
       }
 
@@ -353,7 +352,6 @@ const Form: React.FC<Props> = (props) => {
       i18n,
       waitForAutocomplete,
       beforeSubmit,
-      debouncedFormState,
     ],
   )
 
@@ -424,7 +422,7 @@ const Form: React.FC<Props> = (props) => {
     (state: FormState) => {
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      dispatchFields({ state, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state })
     },
     [dispatchFields],
   )
@@ -453,7 +451,7 @@ const Form: React.FC<Props> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({ state: initialState, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state: initialState })
     }
   }, [initialState, dispatchFields])
 
@@ -472,8 +470,8 @@ const Form: React.FC<Props> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  useEffect(() => {
-    if (!isDeepEqual(debouncedFormState, prevFormState.current)) {
+  useThrottledEffect(
+    () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
           let revalidatedFormState: FormState
@@ -482,37 +480,24 @@ const Form: React.FC<Props> = (props) => {
             await priorOnChange
 
             const result = await onChangeFn({
-              formState: debouncedFormState,
+              formState: fields,
             })
 
             revalidatedFormState = result
           }, Promise.resolve())
 
-          const stateWithOldValues: FormState = Object.entries(revalidatedFormState).reduce(
-            (newState, [path, field]) => {
-              const oldField = debouncedFormState[path]
-              const newField = {
-                ...field,
-                initialValue: oldField?.initialValue,
-                value: oldField?.value,
-              }
-
-              newState[path] = newField
-
-              return newState
-            },
-            {},
-          )
-
-          prevFormState.current = stateWithOldValues
-
-          dispatchFields({ optimize: false, state: stateWithOldValues, type: 'REPLACE_STATE' })
+          if (!isDeepEqual(fields, revalidatedFormState)) {
+            console.log({ fields, revalidatedFormState })
+            dispatchFields({ type: 'MERGE_STATE_KEEP_VALUES', state: revalidatedFormState })
+          }
         }
       }
 
       executeOnChange() // eslint-disable-line @typescript-eslint/no-floating-promises
-    }
-  }, [debouncedFormState, dispatchFields, onChange])
+    },
+    500,
+    [fields, dispatchFields, onChange],
+  )
 
   return (
     <form
