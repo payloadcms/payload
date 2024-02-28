@@ -19,9 +19,9 @@ export type Action = (
     }
 ) & {
   /**
-   * If true, a new entry will be added to the history stack.
-   * If false, current history entry will be overwritten.
-   * @default true
+   * `push` will add a new entry to the browser history stack.
+   * `replace` will overwrite the browser history entry.
+   * @default 'push'
    * */
   browserHistory?: 'push' | 'replace'
 }
