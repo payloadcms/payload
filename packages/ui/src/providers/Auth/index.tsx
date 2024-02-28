@@ -2,7 +2,7 @@
 import type { Permissions, User } from 'payload/auth'
 
 import { useModal } from '@faceless-ui/modal'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -13,6 +13,7 @@ import useDebounce from '../../hooks/useDebounce'
 import { useTranslation } from '../../providers/Translation'
 import { requests } from '../../utilities/api'
 import { useConfig } from '../Config'
+import { useSearchParams } from '../SearchParams'
 // import { useLocale } from '../Locale'
 
 const Context = createContext({} as AuthContext)
@@ -20,7 +21,7 @@ const Context = createContext({} as AuthContext)
 const maxTimeoutTime = 2147483647
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const searchParams = useSearchParams()
+  const { searchParams } = useSearchParams()
   const [user, setUser] = useState<User | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
