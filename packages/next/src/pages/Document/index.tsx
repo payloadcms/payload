@@ -211,6 +211,7 @@ export const Document = async ({
     i18n,
     initialState,
     isEditing,
+    locale,
     params,
     payload,
     permissions,

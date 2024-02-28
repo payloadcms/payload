@@ -1,9 +1,11 @@
 'use client'
+import type { EditViewProps } from 'payload/config'
+
 import { LoadingOverlay, useComponentMap, useDocumentInfo } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 import { useCallback } from 'react'
 
-export const DefaultEditViewClient: React.FC = () => {
+export const EditViewClient: React.FC<EditViewProps> = () => {
   const { id, collectionSlug, getDocPermissions, getVersions, globalSlug } = useDocumentInfo()
 
   const { componentMap } = useComponentMap()
@@ -34,7 +36,8 @@ export const DefaultEditViewClient: React.FC = () => {
     [getVersions, isEditing, getDocPermissions, collectionSlug],
   )
 
-  if (!Edit) {
+  // Allow the `DocumentInfoProvider` to hydrate
+  if (!Edit || (!collectionSlug && !globalSlug)) {
     return <LoadingOverlay />
   }
 

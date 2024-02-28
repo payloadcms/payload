@@ -183,7 +183,7 @@ export const DefaultEditView: React.FC = () => {
               collectionSlug={collectionConfig?.slug}
               globalSlug={globalConfig?.slug}
               id={id}
-              isEditing={Boolean(id) || false}
+              isEditing={Boolean(id)}
               pluralLabel={collectionConfig?.labels?.plural}
               useAsTitle={collectionConfig?.admin?.useAsTitle}
             />

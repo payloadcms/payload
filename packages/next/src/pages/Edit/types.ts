@@ -1,7 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
 import type { FormState } from '@payloadcms/ui'
 import type { Permissions, User } from 'payload/auth'
-import type { EditViewProps } from 'payload/config'
+import type { EditViewProps, Locale } from 'payload/config'
 import type {
   Data,
   DocumentPermissions,
@@ -27,6 +27,7 @@ export type ServerSideEditViewProps = EditViewProps & {
   id?: string
   initialState?: FormState
   isEditing?: boolean
+  locale: Locale
   params?: {
     collection?: string
     global?: string
