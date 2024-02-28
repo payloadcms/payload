@@ -5,6 +5,7 @@ import queryString from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useLocale } from '../Locale'
+import { useSearchParams } from '../SearchParams'
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
@@ -37,6 +38,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const [selected, setSelected] = useState<SelectionContext['selected']>({})
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
   const [count, setCount] = useState(0)
+  const { searchParams } = useSearchParams()
 
   const toggleAll = useCallback(
     (allAvailable = false) => {
@@ -83,11 +85,10 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     (additionalParams?: Where): string => {
       let where: Where
       if (selectAll === SelectAllStatus.AllAvailable) {
-        // const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true })
-        //   .where as Where
-        // where = params || {
-        //   id: { not_equals: '' },
-        // }
+        const params = searchParams?.where as Where
+        where = params || {
+          id: { not_equals: '' },
+        }
       } else {
         where = {
           id: {
@@ -110,7 +111,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
         { addQueryPrefix: true },
       )
     },
-    [selectAll, selected, locale],
+    [selectAll, selected, locale, searchParams],
   )
 
   useEffect(() => {
