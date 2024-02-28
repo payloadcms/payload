@@ -63,7 +63,7 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
 }) => Promise<string | true> | string | true
 
 export type FeatureProviderProviderServer<ServerFeatureProps, ClientFeatureProps> = (
-  props: ServerFeatureProps,
+  props?: ServerFeatureProps,
 ) => FeatureProviderServer<ServerFeatureProps, ClientFeatureProps>
 
 export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
@@ -88,7 +88,7 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
 }
 
 export type FeatureProviderProviderClient<ClientFeatureProps> = (
-  props: ClientComponentProps<ClientFeatureProps>,
+  props?: ClientComponentProps<ClientFeatureProps>,
 ) => FeatureProviderClient<ClientFeatureProps>
 
 /**

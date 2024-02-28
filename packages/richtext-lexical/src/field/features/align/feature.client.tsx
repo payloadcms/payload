@@ -11,7 +11,7 @@ import { AlignRightIcon } from '../../lexical/ui/icons/AlignRight'
 import { createClientComponent } from '../createClientComponent'
 import { AlignDropdownSectionWithEntries } from './floatingSelectToolbarAlignDropdownSection'
 
-const AlignFeatureClient: FeatureProviderProviderClient<null> = (props) => {
+const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
     clientFeatureProps: props,
     feature: () => ({
