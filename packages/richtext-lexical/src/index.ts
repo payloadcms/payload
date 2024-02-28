@@ -66,7 +66,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     finalSanitizedEditorConfig = {
       features: sanitizeServerFeatures(resolvedFeatureMap),
       lexical: lexical ? lexical : defaultEditorConfig.lexical,
-      resolvedFeatureMap: resolvedFeatureMap,
+      resolvedFeatureMap,
     }
   }
 
@@ -119,10 +119,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     },
     editorConfig: finalSanitizedEditorConfig,
     generateComponentMap: getGenerateComponentMap({
-      resolvedFeatureMap: resolvedFeatureMap,
+      resolvedFeatureMap,
     }),
     generateSchemaMap: getGenerateSchemaMap({
-      resolvedFeatureMap: resolvedFeatureMap,
+      resolvedFeatureMap,
     }),
     outputSchema: ({ field, interfaceNameDefinitions, isRequired }) => {
       let outputSchema: JSONSchema4 = {
@@ -263,7 +263,7 @@ export {
   type UploadData,
   UploadNode,
 } from './field/features/Upload/nodes/UploadNode'
-export { AlignFeature } from './field/features/align'
+export { AlignFeature } from './field/features/align/feature.server'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export {
   HTMLConverterFeature,

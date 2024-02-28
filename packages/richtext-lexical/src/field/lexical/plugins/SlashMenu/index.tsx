@@ -58,11 +58,7 @@ function SlashMenuItem({
       tabIndex={-1}
       type="button"
     >
-      {option?.Icon && (
-        <React.Suspense>
-          <option.Icon />
-        </React.Suspense>
-      )}
+      {option?.Icon && <option.Icon />}
 
       <span className={`${baseClass}__item-text`}>{title}</span>
     </button>

@@ -174,7 +174,7 @@ export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps & {
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
   ClientComponent: React.FC<ClientComponentProps<ClientFeatureProps>>
   /**
-   * This determines what props will be available on the Client
+   * This determines what props will be available on the Client.
    */
   clientFeatureProps: ClientFeatureProps
   generateComponentMap?: (args: {

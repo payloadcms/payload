@@ -7,20 +7,8 @@ export const EditorPlugin: React.FC<{
   plugin: SanitizedPlugin
 }> = ({ anchorElem, plugin }) => {
   if (plugin.position === 'floatingAnchorElem') {
-    return (
-      plugin.Component && (
-        <React.Suspense>
-          <plugin.Component anchorElem={anchorElem} />
-        </React.Suspense>
-      )
-    )
+    return plugin.Component && <plugin.Component anchorElem={anchorElem} />
   }
 
-  return (
-    plugin.Component && (
-      <React.Suspense>
-        <plugin.Component />
-      </React.Suspense>
-    )
-  )
+  return plugin.Component && <plugin.Component />
 }

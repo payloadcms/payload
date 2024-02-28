@@ -16,6 +16,18 @@ export function loadClientFeatures({
 }: {
   unSanitizedEditorConfig: ClientEditorConfig
 }): ResolvedClientFeatureMap {
+  for (const featureProvider of unSanitizedEditorConfig.features) {
+    if (
+      !featureProvider?.clientFeatureProps?.featureKey ||
+      featureProvider?.clientFeatureProps?.order === undefined ||
+      featureProvider?.clientFeatureProps?.order === null
+    ) {
+      throw new Error(
+        'A Feature you have installed does not return the client props as clientFeatureProps. Please make sure to always return those props, even if they are null, as other important props like order and featureKey are later on injected.',
+      )
+    }
+  }
+
   // sort unSanitizedEditorConfig.features by order
   unSanitizedEditorConfig.features = unSanitizedEditorConfig.features.sort(
     (a, b) => a.clientFeatureProps.order - b.clientFeatureProps.order,

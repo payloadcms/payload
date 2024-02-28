@@ -22,20 +22,14 @@ export const ToolbarEntry = ({
   if (entry.Component) {
     return (
       entry?.Component && (
-        <React.Suspense>
-          <entry.Component anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />
-        </React.Suspense>
+        <entry.Component anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />
       )
     )
   }
 
   return (
     <DropDownItem entry={entry} key={entry.key}>
-      {entry?.ChildComponent && (
-        <React.Suspense>
-          <entry.ChildComponent />
-        </React.Suspense>
-      )}
+      {entry?.ChildComponent && <entry.ChildComponent />}
       <span className="text">{entry.label}</span>
     </DropDownItem>
   )

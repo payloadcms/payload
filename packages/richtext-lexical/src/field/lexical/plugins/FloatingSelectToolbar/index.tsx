@@ -10,7 +10,7 @@ import {
   COMMAND_PRIORITY_LOW,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
@@ -35,20 +35,14 @@ function ButtonSectionEntry({
   if (entry.Component) {
     return (
       entry?.Component && (
-        <React.Suspense>
-          <entry.Component anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />{' '}
-        </React.Suspense>
+        <entry.Component anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />
       )
     )
   }
 
   return (
     <ToolbarButton entry={entry} key={entry.key}>
-      {entry?.ChildComponent && (
-        <React.Suspense>
-          <entry.ChildComponent />
-        </React.Suspense>
-      )}
+      {entry?.ChildComponent && <entry.ChildComponent />}
     </ToolbarButton>
   )
 }
@@ -79,15 +73,13 @@ function ToolbarSection({
       {section.type === 'dropdown' &&
         section.entries.length &&
         (Icon ? (
-          <React.Suspense>
-            <ToolbarDropdown
-              Icon={Icon}
-              anchorElem={anchorElem}
-              editor={editor}
-              entries={section.entries}
-              sectionKey={section.key}
-            />
-          </React.Suspense>
+          <ToolbarDropdown
+            Icon={Icon}
+            anchorElem={anchorElem}
+            editor={editor}
+            entries={section.entries}
+            sectionKey={section.key}
+          />
         ) : (
           <ToolbarDropdown
             anchorElem={anchorElem}
