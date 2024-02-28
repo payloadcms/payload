@@ -1,7 +1,7 @@
 import type { RichTextAdapter } from 'payload/types'
 
 import { mapFields } from '@payloadcms/ui/utilities'
-import { sanitizeFields } from 'payload/dist/fields/config/sanitize'
+import { sanitizeFields } from 'payload/config'
 import React from 'react'
 
 import type { ResolvedServerFeatureMap } from './field/features/types'
@@ -57,8 +57,8 @@ export const getGenerateComponentMap =
           const fields = schemas[schemaKey]
 
           const sanitizedFields = sanitizeFields({
-            config: config,
-            fields: fields,
+            config,
+            fields,
             validRelationships,
           })
 
