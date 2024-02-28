@@ -1,7 +1,6 @@
 'use client'
 
 import { $findMatchingParent } from '@lexical/utils'
-import { withMergedProps } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types'
@@ -83,10 +82,7 @@ const LinkFeatureClient: FeatureProviderProviderClient<ClientProps> = (props) =>
           position: 'normal',
         },
         {
-          Component: withMergedProps({
-            Component: FloatingLinkEditorPlugin,
-            toMergeIntoProps: props,
-          }),
+          Component: FloatingLinkEditorPlugin,
           position: 'floatingAnchorElem',
         },
       ],

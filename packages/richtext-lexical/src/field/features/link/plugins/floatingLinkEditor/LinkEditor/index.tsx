@@ -6,16 +6,7 @@ import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import {
-  buildStateFromSchema,
-  formatDrawerSlug,
-  useAuth,
-  useConfig,
-  useDocumentInfo,
-  useEditDepth,
-  useLocale,
-  useTranslation,
-} from '@payloadcms/ui'
+import { formatDrawerSlug, useConfig, useEditDepth, useTranslation } from '@payloadcms/ui'
 import {
   $getSelection,
   $isRangeSelection,
@@ -24,10 +15,8 @@ import {
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { sanitizeFields } from 'payload/config'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { ClientProps } from '../../../feature.client'
 import type { LinkNode } from '../../../nodes/LinkNode'
 import type { LinkPayload } from '../types'
 
@@ -38,15 +27,9 @@ import { LinkDrawer } from '../../../drawer'
 import { $isAutoLinkNode } from '../../../nodes/AutoLinkNode'
 import { $createLinkNode } from '../../../nodes/LinkNode'
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode'
-import { transformExtraFields } from '../utilities'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands'
 
-export function LinkEditor({
-  anchorElem,
-  disabledCollections,
-  enabledCollections,
-  fields: customFieldSchema,
-}: { anchorElem: HTMLElement } & ClientProps): React.ReactNode {
+export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
@@ -57,36 +40,9 @@ export function LinkEditor({
 
   const config = useConfig()
 
-  const { user } = useAuth()
-  const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
 
-  const { getDocPreferences } = useDocumentInfo()
-
-  const [initialState, setInitialState] = useState<FormState>({})
-
-  const [fieldSchema] = useState(() => {
-    const fieldsUnsanitized = transformExtraFields(
-      customFieldSchema,
-      // TODO: fix this
-      // @ts-expect-error-next-line
-      config,
-      i18n,
-      enabledCollections,
-      disabledCollections,
-    )
-    // Sanitize custom fields here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    const fields = sanitizeFields({
-      // TODO: fix this
-      // @ts-expect-error-next-line
-      config,
-      fields: fieldsUnsanitized,
-      validRelationships,
-    })
-
-    return fields
-  })
+  const [stateData, setStateData] = useState<LinkPayload>(null)
 
   const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
@@ -98,7 +54,7 @@ export function LinkEditor({
     depth: editDepth,
   })
 
-  const updateLinkEditor = useCallback(async () => {
+  const updateLinkEditor = useCallback(() => {
     const selection = $getSelection()
     let selectedNodeDomRect: DOMRect | undefined = null
 
@@ -147,22 +103,7 @@ export function LinkEditor({
         setLinkLabel(label)
       }
 
-      // Set initial state of the drawer. This will basically pre-fill the drawer fields with the
-      // values saved in the link node you clicked on.
-      const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        // TODO: fix this
-        // @ts-expect-error-next-line
-        config,
-        data,
-        fieldSchema,
-        locale,
-        operation: 'create',
-        preferences,
-        t,
-        user: user ?? undefined,
-      })
-      setInitialState(state)
+      setStateData(data)
       setIsLink(true)
       if ($isAutoLinkNode(linkParent)) {
         setIsAutoLink(true)
@@ -206,7 +147,7 @@ export function LinkEditor({
     }
 
     return true
-  }, [anchorElem, editor, fieldSchema, config, getDocPreferences, locale, t, user, i18n])
+  }, [anchorElem, editor, config, t, i18n])
 
   useEffect(() => {
     return mergeRegister(
@@ -217,12 +158,8 @@ export function LinkEditor({
 
           // Now, open the modal
           updateLinkEditor()
-            .then(() => {
-              toggleModal(drawerSlug)
-            })
-            .catch((error) => {
-              throw error
-            })
+          toggleModal(drawerSlug)
+
           return true
         },
         COMMAND_PRIORITY_LOW,
@@ -339,7 +276,6 @@ export function LinkEditor({
       </div>
       <LinkDrawer
         drawerSlug={drawerSlug}
-        fieldSchema={fieldSchema}
         handleModalSubmit={(fields: FormState, data: Data) => {
           closeModal(drawerSlug)
 
@@ -363,7 +299,7 @@ export function LinkEditor({
           // it being applied to the auto link node instead of the link node.
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, newLinkPayload)
         }}
-        initialState={initialState}
+        stateData={stateData}
       />
     </React.Fragment>
   )

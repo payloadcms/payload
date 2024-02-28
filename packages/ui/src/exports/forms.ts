@@ -1,6 +1,7 @@
 export { default as Error } from '../forms/Error'
 export { default as FieldDescription } from '../forms/FieldDescription'
 export { FieldPathProvider } from '../forms/FieldPathProvider'
+export { useFieldPath } from '../forms/FieldPathProvider'
 export { default as Form } from '../forms/Form'
 export { default as buildInitialState } from '../forms/Form'
 export {

@@ -7,7 +7,7 @@ import { mongooseAdapter } from '../packages/db-mongodb/src'
 import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
 import { LinkFeature } from '../packages/richtext-lexical/src/field/features/link/feature.server'
-import { slateEditor } from '../packages/richtext-slate/src'
+//import { slateEditor } from '../packages/richtext-slate/src'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 

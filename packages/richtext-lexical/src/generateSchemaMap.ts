@@ -10,8 +10,6 @@ export const getGenerateSchemaMap =
     const validRelationships = config.collections.map((c) => c.slug) || []
 
     for (const [featureKey, resolvedFeature] of args.resolvedFeatureMap.entries()) {
-      console.log('schemamap-key', featureKey)
-
       const schemas = resolvedFeature.generateSchemaMap({
         config,
         props: resolvedFeature.serverFeatureProps,
@@ -28,7 +26,7 @@ export const getGenerateSchemaMap =
           validRelationships,
         })
 
-        schemaMap.set(`${schemaPath}.${featureKey}.${schemaKey}`, sanitizedFields)
+        schemaMap.set(`${schemaPath}.feature.${featureKey}.${schemaKey}`, sanitizedFields)
       }
     }
 
