@@ -13,7 +13,7 @@ import { Pagination } from '../Pagination'
 import classes from './index.module.scss'
 
 type Result = {
-  docs: (Post | Project | string)[]
+  docs: (Post | Project)[]
   hasNextPage: boolean
   hasPrevPage: boolean
   nextPage: number
@@ -75,9 +75,7 @@ export const CollectionArchive: React.FC<Props> = props => {
   const isRequesting = useRef(false)
   const [page, setPage] = useState(1)
 
-  const categories = (catsFromProps || [])
-    .map(cat => (typeof cat === 'object' ? cat.id : cat))
-    .join(',')
+  const categories = (catsFromProps || []).map(cat => cat.id).join(',')
 
   const scrollToRef = useCallback(() => {
     const { current } = scrollRef
@@ -184,15 +182,11 @@ export const CollectionArchive: React.FC<Props> = props => {
         <Gutter>
           <div className={classes.grid}>
             {results.docs?.map((result, index) => {
-              if (typeof result === 'object' && result !== null) {
-                return (
-                  <div className={classes.column} key={index}>
-                    <Card doc={result} relationTo={relationTo} showCategories />
-                  </div>
-                )
-              }
-
-              return null
+              return (
+                <div className={classes.column} key={index}>
+                  <Card doc={result} relationTo={relationTo} showCategories />
+                </div>
+              )
             })}
           </div>
           {results.totalPages > 1 && populateBy !== 'selection' && (

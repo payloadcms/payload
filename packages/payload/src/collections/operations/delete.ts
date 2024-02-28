@@ -66,15 +66,14 @@ export const deleteOperation = async <TSlug extends keyof GeneratedTypes['collec
       depth,
       overrideAccess,
       req: {
-        fallbackLocale,
-        locale,
-        payload: { config },
-        payload,
-      },
-      req,
-      showHiddenFields,
-      where,
-    } = args
+        fallbackLocale,locale,
+      payload: { config },
+      payload,
+    },
+    req,
+    showHiddenFields,
+    where,
+  } = args
 
     if (!where) {
       throw new APIError("Missing 'where' query of documents to delete.", httpStatus.BAD_REQUEST)

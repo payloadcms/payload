@@ -78,9 +78,8 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
     collection.graphQL = {} as Collection['graphQL']
 
     const hasIDField =
-      flattenTopLevelFields(fields).findIndex(
-        (field) => fieldAffectsData(field) && field.name === 'id',
-      ) > -1
+      flattenTopLevelFields(fields).findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
+      -1
 
     const idType = getCollectionIDType(config.db.defaultIDType, collectionConfig)
 

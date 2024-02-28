@@ -50,17 +50,17 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
         })) || args
     }, Promise.resolve())
 
-    const {
-      collection: { config: collectionConfig },
-      data,
-      disableEmail,
-      expiration,
-      req: {
-        payload: { config, emailOptions, sendEmail: email },
-        payload,
-      },
-      req,
-    } = args
+  const {
+    collection: { config: collectionConfig },
+    data,
+    disableEmail,
+    expiration,
+    req: {
+      payload: { config, emailOptions, sendEmail: email },
+      payload,
+    },
+    req,
+  } = args
 
     // /////////////////////////////////////
     // Forget password
