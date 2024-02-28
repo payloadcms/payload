@@ -13,10 +13,13 @@ import type { LinkFields, SerializedLinkNode } from './nodes/LinkNode'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
+import { LinkFeatureClientComponent, nodes } from './ClientComponent'
+import { AutoLink, Link } from './nodes'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands'
 import { linkPopulationPromiseHOC } from './populationPromise'
+import { key } from './shared'
 
 type ExclusiveLinkCollectionsProps =
   | {
@@ -50,154 +53,20 @@ export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
     | Field[]
 }
 
-export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
-  return {
-    feature: () => {
-      return {
-        floatingSelectToolbar: {
-          sections: [
-            FeaturesSectionWithEntries([
-              {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../lexical/ui/icons/Link').then((module) => module.LinkIcon),
-                isActive: ({ selection }) => {
-                  if ($isRangeSelection(selection)) {
-                    const selectedNode = getSelectedNode(selection)
-                    const linkParent = $findMatchingParent(selectedNode, $isLinkNode)
-                    return linkParent != null
-                  }
-                  return false
-                },
-                key: 'link',
-                label: `Link`,
-                onClick: ({ editor, isActive }) => {
-                  if (!isActive) {
-                    let selectedText = null
-                    editor.getEditorState().read(() => {
-                      selectedText = $getSelection().getTextContent()
-                    })
-                    const linkFields: LinkFields = {
-                      doc: null,
-                      linkType: 'custom',
-                      newTab: false,
-                      url: 'https://',
-                    }
-                    editor.dispatchCommand(TOGGLE_LINK_WITH_MODAL_COMMAND, {
-                      fields: linkFields,
-                      text: selectedText,
-                    })
-                  } else {
-                    // remove link
-                    editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
-                  }
-                },
-                order: 1,
-              },
-            ]),
-          ],
-        },
-        nodes: [
-          {
-            type: LinkNode.getType(),
-            converters: {
-              html: {
-                converter: async ({ converters, node, parent }) => {
-                  const childrenText = await convertLexicalNodesToHTML({
-                    converters,
-                    lexicalNodes: node.children,
-                    parent: {
-                      ...node,
-                      parent,
-                    },
-                  })
-
-                  const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
-
-                  const href: string =
-                    node.fields.linkType === 'custom'
-                      ? node.fields.url
-                      : (node.fields.doc?.value as string)
-
-                  return `<a href="${href}"${rel}>${childrenText}</a>`
-                },
-                nodeTypes: [LinkNode.getType()],
-              } as HTMLConverter<SerializedLinkNode>,
-            },
-            node: LinkNode,
-            populationPromises: [linkPopulationPromiseHOC(props)],
-            // TODO: Add validation similar to upload for internal links and fields
-          },
-          {
-            type: AutoLinkNode.getType(),
-            converters: {
-              html: {
-                converter: async ({ converters, node, parent }) => {
-                  const childrenText = await convertLexicalNodesToHTML({
-                    converters,
-                    lexicalNodes: node.children,
-                    parent: {
-                      ...node,
-                      parent,
-                    },
-                  })
-
-                  const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
-
-                  let href: string = node.fields.url
-                  if (node.fields.linkType === 'internal') {
-                    href =
-                      typeof node.fields.doc?.value === 'string'
-                        ? node.fields.doc?.value
-                        : node.fields.doc?.value?.id
-                  }
-
-                  return `<a href="${href}"${rel}>${childrenText}</a>`
-                },
-                nodeTypes: [AutoLinkNode.getType()],
-              } as HTMLConverter<SerializedAutoLinkNode>,
-            },
-            node: AutoLinkNode,
-            populationPromises: [linkPopulationPromiseHOC(props)],
-          },
-        ],
-        plugins: [
-          {
-            Component: () =>
-              // @ts-expect-error-next-line
-              import('./plugins/link').then((module) => module.LinkPlugin),
-            position: 'normal',
-          },
-          {
-            Component: () =>
-              // @ts-expect-error-next-line
-              import('./plugins/autoLink').then((module) => module.AutoLinkPlugin),
-            position: 'normal',
-          },
-          {
-            Component: () =>
-              // @ts-expect-error-next-line
-              import('./plugins/clickableLink').then((module) => module.ClickableLinkPlugin),
-            position: 'normal',
-          },
-          {
-            Component: () =>
-              // @ts-expect-error-next-line
-              import('./plugins/floatingLinkEditor').then((module) => {
-                const floatingLinkEditorPlugin = module.FloatingLinkEditorPlugin
-                return import('@payloadcms/ui').then((module) =>
-                  module.withMergedProps({
-                    Component: floatingLinkEditorPlugin,
-                    toMergeIntoProps: props,
-                  }),
-                )
-              }),
-            position: 'floatingAnchorElem',
-          },
-        ],
-        props,
-      }
-    },
-    key: 'link',
-  }
-}
+// export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
+//   return {
+//     feature: () => {
+//       return {
+//         ClientComponent: LinkFeatureClientComponent,
+//         createClientProps: (props) => props // safe,
+//         nodes: [
+//           {
+//             node: LinkNode,
+//             populationPromises: []
+//           }
+//         ],
+//         key: key,
+//       }
+//     }
+//   }
+// }
