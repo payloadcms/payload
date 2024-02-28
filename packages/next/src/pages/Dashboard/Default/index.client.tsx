@@ -29,6 +29,12 @@ export const DefaultDashboardClient: React.FC<{
     routes: { admin },
   } = config
 
+  const { setViewActions } = useActions()
+
+  useEffect(() => {
+    setViewActions([])
+  }, [setViewActions])
+
   const { permissions, user } = useAuth()
 
   const { i18n, t } = useTranslation()
@@ -78,7 +84,7 @@ export const DefaultDashboardClient: React.FC<{
         i18n,
       ),
     )
-  }, [collectionsConfig, globalsConfig, permissions, user])
+  }, [collectionsConfig, globalsConfig, permissions, user, i18n])
 
   return (
     <Fragment>

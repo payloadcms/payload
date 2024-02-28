@@ -33,6 +33,13 @@ export type BinScriptConfig = {
 
 export type BinScript = (config: SanitizedConfig) => Promise<void> | void
 
+export type BinScriptConfig = {
+  key: string
+  scriptPath: string
+}
+
+export type BinScript = (config: SanitizedConfig) => Promise<void> | void
+
 type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
@@ -177,13 +184,13 @@ export type InitOptions = {
   logger?: PayloadLogger
 
   loggerDestination?: DestinationStream
+
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
    *
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions
-
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */

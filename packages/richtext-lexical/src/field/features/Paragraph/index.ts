@@ -5,9 +5,13 @@ import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
+import { ParagraphFeatureComponent } from './Component'
+
+export const key = 'paragraph' as const
 
 export const ParagraphFeature = (): FeatureProvider => {
   return {
+    Component: ParagraphFeatureComponent,
     feature: () => {
       return {
         floatingSelectToolbar: {
@@ -15,7 +19,7 @@ export const ParagraphFeature = (): FeatureProvider => {
             TextDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   import('../../lexical/ui/icons/Text').then((module) => module.TextIcon),
                 isActive: () => false,
                 key: 'normal-text',
@@ -40,7 +44,7 @@ export const ParagraphFeature = (): FeatureProvider => {
               options: [
                 new SlashMenuOption('paragraph', {
                   Icon: () =>
-                    // @ts-ignore-next-line
+                    // @ts-expect-error-next-line
                     import('../../lexical/ui/icons/Text').then((module) => module.TextIcon),
                   displayName: 'Paragraph',
                   keywords: ['normal', 'paragraph', 'p', 'text'],
@@ -57,6 +61,6 @@ export const ParagraphFeature = (): FeatureProvider => {
         },
       }
     },
-    key: 'paragraph',
+    key: key,
   }
 }

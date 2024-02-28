@@ -1,11 +1,11 @@
 'use client'
 import type { SerializedEditorState } from 'lexical'
 
-import { Error, FieldDescription, Label, useField } from '@payloadcms/ui'
+import { type FormFieldBase, useField } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
-import type { FieldProps } from '../types'
+import type { SanitizedEditorConfig } from './lexical/config/types'
 
 import { richTextValidateHOC } from '../validate'
 import './index.scss'
@@ -13,25 +13,41 @@ import { LexicalProvider } from './lexical/LexicalProvider'
 
 const baseClass = 'rich-text-lexical'
 
-const RichText: React.FC<FieldProps> = (props) => {
+const RichText: React.FC<
+  FormFieldBase & {
+    editorConfig: SanitizedEditorConfig // With rendered features n stuff
+    name: string
+    richTextComponentMap: Map<string, React.ReactNode>
+  }
+> = (props) => {
   const {
     name,
-    admin: { className, condition, description, readOnly, style, width } = {
-      className,
-      condition,
-      description,
-      readOnly,
-      style,
-      width,
-    },
+    AfterInput,
+    BeforeInput,
+    Description,
+    Error,
+    Label,
+    className,
+    docPreferences,
     editorConfig,
+    fieldMap,
+    initialSubfieldState,
     label,
+    locale,
+    localized,
+    maxLength,
+    minLength,
     path: pathFromProps,
+    placeholder,
+    readOnly,
     required,
+    richTextComponentMap,
+    rtl,
+    style,
+    user,
     validate = richTextValidateHOC({ editorConfig }),
+    width,
   } = props
-
-  const path = pathFromProps || name
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
@@ -44,12 +60,11 @@ const RichText: React.FC<FieldProps> = (props) => {
   )
 
   const fieldType = useField<SerializedEditorState>({
-    // condition,
-    path,
+    path: pathFromProps || name,
     validate: memoizedValidate,
   })
 
-  const { errorMessage, initialValue, setValue, showError, value } = fieldType
+  const { errorMessage, initialValue, path, schemaPath, setValue, showError, value } = fieldType
 
   const classes = [
     baseClass,
@@ -71,8 +86,8 @@ const RichText: React.FC<FieldProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__wrap`}>
-        <Error message={errorMessage} showError={showError} />
-        <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+        {Error}
+        {Label}
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}
@@ -95,13 +110,13 @@ const RichText: React.FC<FieldProps> = (props) => {
             value={value}
           />
         </ErrorBoundary>
-        <FieldDescription description={description} path={path} value={value} />
+        {Description}
       </div>
     </div>
   )
 }
 
-function fallbackRender({ error }): JSX.Element {
+function fallbackRender({ error }): React.ReactElement {
   // Call resetErrorBoundary() to reset the error boundary and retry the render.
 
   return (

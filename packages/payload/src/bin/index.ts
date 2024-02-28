@@ -45,11 +45,9 @@ if (tsConfig?.config?.compilerOptions?.paths) {
 // Allow disabling SWC for debugging
 if (process.env.DISABLE_SWC !== 'true') {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error - bad @swc/register types
+  // @ts-ignore - bad @swc/register types
   swcRegister(swcOptions)
 }
-
-const { build } = require('./build')
 
 const executeBin = async () => {
   const args = minimist(process.argv.slice(2))
@@ -74,17 +72,12 @@ const executeBin = async () => {
     migrate(args).then(() => process.exit(0))
   } else {
     switch (script.toLowerCase()) {
-      case 'build': {
-        build()
-        break
-      }
-
       case 'generate:types': {
         generateTypes(config)
         break
       }
 
-        default:
+      default:
         console.log(`Unknown script "${script}".`)
         break
     }

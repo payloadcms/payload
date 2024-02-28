@@ -1,10 +1,11 @@
 'use client'
 
+import type { Element } from 'slate'
+
 import React, { isValidElement } from 'react'
 
 import { useElement } from '../../providers/ElementProvider'
 import listTypes from '../listTypes'
-import { Element } from 'slate'
 
 export const ListItemElement: React.FC = () => {
   const { attributes, children, element } = useElement<Element>()

@@ -20,6 +20,10 @@ export type AddFieldStatePromiseArgs = {
   errorPaths: Set<string>
   field: NonPresentationalField
   /**
+   * You can use this to filter down to only `localized` fields that require transalation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
+   */
+  filter?: (args: AddFieldStatePromiseArgs) => boolean
+  /**
    * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
    */
   forceFullValue?: boolean
@@ -63,8 +67,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     anyParentLocalized = false,
     data,
     errorPaths: parentErrorPaths,
-  field,
-  forceFullValue = false,
+    field,
+    filter,
+    forceFullValue = false,
     fullData,
     includeSchema = false,
     locale,
@@ -74,10 +79,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     path,
     preferences,
     skipConditionChecks = false,
-    skipValidation = false,state,
-  t,
-  user,
+    skipValidation = false,
+    state,
+    t,
+    user,
   } = args
+
   if (fieldAffectsData(field)) {
     const validate = operation === 'update' ? field.validate : undefined
     const fieldState: FormField = {
@@ -133,8 +140,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const rowPath = `${path}${field.name}.${i}.`
             row.id = row?.id || new ObjectId().toHexString()
 
-            if (!omitParents) {
+            if (!omitParents && (!filter || filter(args))) {
               state[`${rowPath}id`] = {
+                fieldSchema: includeSchema
+                  ? field.fields.find((field) => 'name' in field && field.name === 'id')
+                  : undefined,
                 initialValue: row.id,
                 valid: true,
                 value: row.id,
@@ -148,6 +158,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 data: row,
                 errorPaths: fieldState.errorPaths,
                 fields: field.fields,
+                filter,
                 forceFullValue,
                 fullData,
                 includeSchema,
@@ -202,7 +213,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.rows = rowMetadata
 
         // Add field to state
-        if (!omitParents) {
+        if (!omitParents && (!filter || filter(args))) {
           state[`${path}${field.name}`] = fieldState
         }
 
@@ -220,7 +231,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
 
-              if (!omitParents) {
+              if (!omitParents && (!filter || filter(args))) {
                 state[`${rowPath}id`] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
@@ -258,10 +269,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.promises.push(
                 iterateFields({
                   id,
-                  data: row,
                   anyParentLocalized: field.localized || anyParentLocalized,
+                  data: row,
                   errorPaths: fieldState.errorPaths,
                   fields: block.fields,
+                  filter,
                   forceFullValue,
                   fullData,
                   includeSchema,
@@ -318,7 +330,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.rows = rowMetadata
 
         // Add field to state
-        if (!omitParents) {
+        if (!omitParents && (!filter || filter(args))) {
           state[`${path}${field.name}`] = fieldState
         }
 
@@ -328,10 +340,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'group': {
         await iterateFields({
           id,
-          data: data?.[field.name] || {},
           anyParentLocalized: field.localized || anyParentLocalized,
+          data: data?.[field.name] || {},
           errorPaths: parentErrorPaths,
           fields: field.fields,
+          filter,
           forceFullValue,
           fullData,
           includeSchema,
@@ -402,7 +415,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.initialValue = relationshipValue
         }
 
-        state[`${path}${field.name}`] = fieldState
+        if (!filter || filter(args)) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -415,7 +430,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.value = relationshipValue
         fieldState.initialValue = relationshipValue
 
-        state[`${path}${field.name}`] = fieldState
+        if (!filter || filter(args)) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -425,7 +442,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.initialValue = valueWithDefault
 
         // Add field to state
-        state[`${path}${field.name}`] = fieldState
+        if (!filter || filter(args)) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -434,10 +453,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Handle field types that do not use names (row, etc)
     await iterateFields({
       id,
-      data,
       anyParentLocalized: field.localized || anyParentLocalized,
+      data,
       errorPaths: parentErrorPaths,
       fields: field.fields,
+      filter,
       forceFullValue,
       fullData,
       includeSchema,
@@ -461,6 +481,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         data: tabHasName(tab) ? data?.[tab.name] : data,
         errorPaths: parentErrorPaths,
         fields: tab.fields,
+        filter,
         forceFullValue,
         fullData,
         includeSchema,

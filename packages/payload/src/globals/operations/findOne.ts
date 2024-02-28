@@ -30,7 +30,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     draft: draftEnabled = false,
     globalConfig,
     overrideAccess = false,
-    req: { fallbackLocale, locale, payload },
+    req: { fallbackLocale, locale },
     req,
     showHiddenFields,
   } = args

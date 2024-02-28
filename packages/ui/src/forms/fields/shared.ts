@@ -14,8 +14,6 @@ import type {
 } from 'payload/types'
 import type { Option } from 'payload/types'
 
-import { RichTextField } from 'payload/types'
-
 import type { FormState } from '../..'
 import type {
   FieldMap,

@@ -2,10 +2,11 @@
 import Link from 'next/link'
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type { CellComponentProps, CellProps } from 'payload/types'
+import type { CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig, useTableCell, useTranslation } from '@payloadcms/ui'
+import { TableCellProvider } from '@payloadcms/ui'
 
 import cellComponents from './fields'
 import { CodeCell } from './fields/Code'
@@ -13,11 +14,13 @@ import { CodeCell } from './fields/Code'
 export const DefaultCell: React.FC<CellProps> = (props) => {
   const {
     name,
+    CellComponentOverride,
     className: classNameFromProps,
     fieldType,
     isFieldAffectingData,
     label,
     onClick: onClickFromProps,
+    richTextComponentMap,
   } = props
 
   const { i18n } = useTranslation()
@@ -76,11 +79,35 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
     )
   }
 
-  let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[fieldType]
+  const DefaultCellComponent = cellComponents[fieldType]
 
-  if (!CellComponent) {
+  let CellComponent: React.ReactNode =
+    cellData &&
+    (CellComponentOverride ? ( // CellComponentOverride is used for richText
+      <TableCellProvider richTextComponentMap={richTextComponentMap}>
+        {CellComponentOverride}
+      </TableCellProvider>
+    ) : null)
+
+  if (!CellComponent && DefaultCellComponent) {
+    CellComponent = (
+      <DefaultCellComponent
+        cellData={cellData}
+        customCellContext={customCellContext}
+        rowData={rowData}
+      />
+    )
+  } else if (!CellComponent && !DefaultCellComponent) {
+    // DefaultCellComponent does not exist for certain field types like `text`
     if (customCellContext.uploadConfig && isFieldAffectingData && name === 'filename') {
-      CellComponent = cellComponents.File
+      const FileCellComponent = cellComponents.File
+      CellComponent = (
+        <FileCellComponent
+          cellData={cellData}
+          customCellContext={customCellContext}
+          rowData={rowData}
+        />
+      )
     } else {
       return (
         <WrapElement {...wrapElementProps}>
@@ -97,9 +124,5 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
     }
   }
 
-  return (
-    <WrapElement {...wrapElementProps}>
-      <CellComponent cellData={cellData} customCellContext={customCellContext} rowData={rowData} />
-    </WrapElement>
-  )
+  return <WrapElement {...wrapElementProps}>{CellComponent}</WrapElement>
 }

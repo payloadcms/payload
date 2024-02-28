@@ -154,27 +154,31 @@ export type Feature = {
 }
 
 export type FeatureProvider = {
+  Component: React.FC
   /** Keys of dependencies needed for this feature. These dependencies do not have to be loaded first */
   dependencies?: string[]
   /** Keys of priority dependencies needed for this feature. These dependencies have to be loaded first and are available in the `feature` property*/
   dependenciesPriority?: string[]
+
   /** Keys of soft-dependencies needed for this feature. These dependencies are optional, but are considered as last-priority in the loading process */
   dependenciesSoft?: string[]
-
   feature: (props: {
-    /** unsanitizedEditorConfig.features, but mapped */
+    /** unSanitizedEditorConfig.features, but mapped */
     featureProviderMap: FeatureProviderMap
     // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
     resolvedFeatures: ResolvedFeatureMap
-    // unsanitized EditorConfig,
-    unsanitizedEditorConfig: EditorConfig
+    // unSanitized EditorConfig,
+    unSanitizedEditorConfig: EditorConfig
   }) => Feature
   key: string
 }
 
 export type ResolvedFeature = Feature &
   Required<
-    Pick<FeatureProvider, 'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'>
+    Pick<
+      FeatureProvider,
+      'Component' | 'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
+    >
   >
 
 export type ResolvedFeatureMap = Map<string, ResolvedFeature>

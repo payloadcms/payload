@@ -7,7 +7,7 @@ export const TestRecorderFeature = (): FeatureProvider => {
         plugins: [
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugin').then((module) => module.TestRecorderPlugin),
             position: 'bottom',
           },

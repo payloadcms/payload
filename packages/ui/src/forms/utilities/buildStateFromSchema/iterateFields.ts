@@ -17,6 +17,7 @@ type Args = {
   data: Data
   errorPaths: Set<string>
   fields: FieldSchema[]
+  filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
    * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
    */
@@ -27,7 +28,6 @@ type Args = {
    * Whether the field schema should be included in the state. @default false
    */
   includeSchema?: boolean
-
   /**
    * locale is only needed for checking field conditions
    */
@@ -70,6 +70,7 @@ export const iterateFields = async ({
   data,
   errorPaths,
   fields,
+  filter,
   forceFullValue = false,
   fullData,
   includeSchema = false,
@@ -105,6 +106,7 @@ export const iterateFields = async ({
           data,
           errorPaths,
           field,
+          filter,
           forceFullValue,
           fullData,
           includeSchema,

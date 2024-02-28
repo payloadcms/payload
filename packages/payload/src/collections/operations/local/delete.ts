@@ -71,8 +71,6 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  const req = createLocalReq(options, payload)
-
   const args = {
     id,
     collection,

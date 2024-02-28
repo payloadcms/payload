@@ -69,7 +69,7 @@ export function LinkEditor({
     const fieldsUnsanitized = transformExtraFields(
       customFieldSchema,
       // TODO: fix this
-      // @ts-ignore-next-line
+      // @ts-expect-error-next-line
       config,
       i18n,
       enabledCollections,
@@ -79,7 +79,7 @@ export function LinkEditor({
     const validRelationships = config.collections.map((c) => c.slug) || []
     const fields = sanitizeFields({
       // TODO: fix this
-      // @ts-ignore-next-line
+      // @ts-expect-error-next-line
       config,
       fields: fieldsUnsanitized,
       validRelationships,
@@ -152,7 +152,7 @@ export function LinkEditor({
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
         // TODO: fix this
-        // @ts-ignore-next-line
+        // @ts-expect-error-next-line
         config,
         data,
         fieldSchema,

@@ -36,8 +36,8 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
           modifyOutputSchema: ({ currentSchema, field, interfaceNameDefinitions }) => {
             const blocksField: BlockField = {
               name: field?.name + '_lexical_blocks',
-              blocks: props.blocks,
               type: 'blocks',
+              blocks: props.blocks,
             }
             // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
             // we don't actually use the JSON Schema itself in the generated types yet.
@@ -48,16 +48,16 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
         },
         nodes: [
           {
+            type: BlockNode.getType(),
             node: BlockNode,
             populationPromises: [blockPopulationPromiseHOC(props)],
-            type: BlockNode.getType(),
             validations: [blockValidationHOC(props)],
           },
         ],
         plugins: [
           {
             Component: () =>
-              // @ts-ignore-next-line
+              // @ts-expect-error-next-line
               import('./plugin').then((module) => module.BlocksPlugin),
             position: 'normal',
           },
@@ -72,11 +72,11 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
                 ...props.blocks.map((block) => {
                   return new SlashMenuOption('block-' + block.slug, {
                     Icon: () =>
-                      // @ts-ignore-next-line
+                      // @ts-expect-error-next-line
                       import('../../lexical/ui/icons/Block').then((module) => module.BlockIcon),
                     displayName: ({ i18n }) => {
                       // TODO: fix this
-                      // @ts-ignore-next-line
+                      // @ts-expect-error-next-line
                       return getTranslation(block.labels.singular, i18n)
                     },
                     keywords: ['block', 'blocks', block.slug],

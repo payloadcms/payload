@@ -79,6 +79,7 @@
     "showAll": "Hiển thị toàn bộ",
     "swapRelationship": "Đổi quan hệ",
     "swapUpload": "Đổi bản tải lên",
+    "toggleBlock": "Bật/tắt block",
     "uploadNewLabel": "Tải lên bản mới: {{label}}"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "Loại",
     "unpublish": "Ẩn tài liệu",
     "unpublishing": "Đang ẩn tài liệu...",
+    "version": "Phiên bản",
     "versionCreatedOn": "Phiên bản {{version}} được tạo vào lúc:",
     "versionID": "ID của phiên bản",
     "versions": "Danh sách phiên bản",

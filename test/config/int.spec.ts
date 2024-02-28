@@ -1,6 +1,5 @@
-import type { BlockField } from 'payload/types'
-
 import type { Payload } from '../../packages/payload/src'
+import type { BlockField } from 'payload/types'
 
 import { getPayload } from '../../packages/payload/src'
 import { startMemoryDB } from '../startMemoryDB'

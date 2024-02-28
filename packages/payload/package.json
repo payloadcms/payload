@@ -22,8 +22,6 @@
   },
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && ts-node -T ../../scripts/exportPointerFiles.ts ../packages/payload dist/exports",
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components && ts-node -T ./scripts/exportPointerFiles.ts",
-    "build:components": "webpack --config dist/admin/components.config.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
@@ -61,7 +59,6 @@
     "mkdirp": "1.0.4",
     "monaco-editor": "0.38.0",
     "nodemailer": "6.9.10",
-    "object-to-formdata": "4.5.1",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
     "pluralize": "8.0.0",

@@ -164,8 +164,8 @@ export const IndentButton: React.FC = () => {
             Transforms.wrapNodes(
               editor,
               {
-                children: [],
                 type: isCurrentlyOL ? 'ol' : 'ul',
+                children: [],
               },
               {
                 match: (node) => Element.isElement(node) && node.type === 'li',
@@ -177,8 +177,8 @@ export const IndentButton: React.FC = () => {
             Transforms.wrapNodes(
               editor,
               {
-                children: [{ children: [], type: 'li' }],
                 type: isCurrentlyOL ? 'ol' : 'ul',
+                children: [{ type: 'li', children: [] }],
               },
               {
                 match: (node) => Element.isElement(node) && node.type === 'li',
@@ -187,7 +187,7 @@ export const IndentButton: React.FC = () => {
             )
           }
         } else {
-          Transforms.wrapNodes(editor, { children: [], type: indentType })
+          Transforms.wrapNodes(editor, { type: indentType, children: [] })
         }
       }
 

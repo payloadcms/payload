@@ -44,6 +44,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
     const idType = args.idType || 'serial'
+
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
 

@@ -5,7 +5,7 @@ import type { SanitizedConfig } from 'payload/types'
 import { Form, FormSubmit, MinimalTemplate, buildStateFromSchema } from '@payloadcms/ui'
 import React from 'react'
 
-import { getNextT } from '../../utilities/getNextT'
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { CreateFirstUserFields } from './index.client'
@@ -18,7 +18,7 @@ export const generateMetadata = async ({
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
-  const t = await getNextT({
+  const { t } = await getNextI18n({
     config: await config,
   })
 
@@ -52,21 +52,21 @@ export const CreateFirstUser: React.FC<{
   const fields = [
     {
       name: 'email',
+      type: 'email',
       label: t('general:emailAddress'),
       required: true,
-      type: 'email',
     },
     {
       name: 'password',
+      type: 'password',
       label: t('general:password'),
       required: true,
-      type: 'password',
     },
     {
       name: 'confirm-password',
+      type: 'confirmPassword',
       label: t('authentication:confirmPassword'),
       required: true,
-      type: 'confirmPassword',
     },
   ] as Field[]
 

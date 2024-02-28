@@ -15,8 +15,8 @@ export const connect: Connect = async function connect(this: MongooseAdapter) {
     throw new Error('Error: missing MongoDB connection URL.')
   }
 
-  let urlToConnect = this.url
-  let successfulConnectionMessage = 'Connected to MongoDB server successfully!'
+  const urlToConnect = this.url
+  const successfulConnectionMessage = 'Connected to MongoDB server successfully!'
 
   const connectionOptions: ConnectOptions & { useFacet: undefined } = {
     autoIndex: true,

@@ -43,9 +43,6 @@ import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionB
 import { findVersions as findVersionsGlobal } from './globals/findVersions'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion'
 import { update as updateGlobal } from './globals/update'
-import { RouteError } from './RouteError'
-import { buildFormStateGlobal } from './globals/buildFormState'
-import { buildFormStateCollection } from './collections/buildFormState'
 
 const endpoints = {
   collection: {
@@ -67,19 +64,18 @@ const endpoints = {
       updateByID,
     },
     POST: {
-      create,
-      login,
-      logout,
-      unlock,
       access: docAccess,
+      create,
+      'doc-access-by-id': docAccess,
+      'doc-verify-by-id': verifyEmail,
+      'doc-versions-by-id': restoreVersion,
       'first-register': registerFirstUser,
       'forgot-password': forgotPassword,
-      'form-state': buildFormStateCollection,
-      'reset-password': resetPassword,
+      login,
+      logout,
       'refresh-token': refresh,
-      'doc-access-by-id': docAccess,
-      'doc-versions-by-id': restoreVersion,
-      'doc-verify-by-id': verifyEmail,
+      'reset-password': resetPassword,
+      unlock,
     },
   },
   global: {
@@ -93,7 +89,6 @@ const endpoints = {
       'doc-access': docAccessGlobal,
       'doc-versions-by-id': restoreVersionGlobal,
       update: updateGlobal,
-      'form-state': buildFormStateGlobal,
     },
   },
   root: {

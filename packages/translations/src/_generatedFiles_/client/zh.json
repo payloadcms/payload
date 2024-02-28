@@ -79,6 +79,7 @@
     "showAll": "显示全部",
     "swapRelationship": "交换关系",
     "swapUpload": "交换上传",
+    "toggleBlock": "切换块",
     "uploadNewLabel": "上传新的{{label}}"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "类型",
     "unpublish": "取消发布",
     "unpublishing": "取消发布中...",
+    "version": "版本",
     "versionCreatedOn": "{{version}}创建于：",
     "versionID": "版本ID",
     "versions": "版本",

@@ -79,6 +79,7 @@
     "showAll": "Показати все",
     "swapRelationship": "Замінити зв'язок",
     "swapUpload": "Замінити завантаження",
+    "toggleBlock": "Перемкнути блок",
     "uploadNewLabel": "Завантажити новий {{label}}"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "Тип",
     "unpublish": "Відмінити публікацію",
     "unpublishing": "Відміна публікації...",
+    "version": "Версія",
     "versionCreatedOn": "{{version}} створена:",
     "versionID": "ID версії",
     "versions": "Версії",

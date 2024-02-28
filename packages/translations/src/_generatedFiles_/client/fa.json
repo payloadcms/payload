@@ -79,6 +79,7 @@
     "showAll": "نمایش کل",
     "swapRelationship": "تبادل پیوستگی",
     "swapUpload": "تبادل بارگذار",
+    "toggleBlock": "کارگذاری بلوک",
     "uploadNewLabel": "بارگذاری تازه {{label}}"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "تایپ کنید",
     "unpublish": "لغو انتشار",
     "unpublishing": "در حال لغو انتشار...",
+    "version": "نگارش",
     "versionCreatedOn": "{{version}} ساخته شده در:",
     "versionID": "شناسه نگارش",
     "versions": "نگارش‌ها",

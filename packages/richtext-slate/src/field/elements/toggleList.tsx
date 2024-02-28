@@ -49,7 +49,7 @@ const toggleList = (editor: Editor, format: string): void => {
     )
     // Otherwise we can assume that we should just activate the list
   } else {
-    Transforms.wrapNodes(editor, { children: [], type: format })
+    Transforms.wrapNodes(editor, { type: format, children: [] })
 
     const [, parentNodePath] = getCommonBlock(
       editor,
@@ -90,7 +90,7 @@ const toggleList = (editor: Editor, format: string): void => {
     )
 
     nodesToWrap.forEach(([, path]) => {
-      Transforms.wrapNodes(editor, { children: [], type: 'li' }, { at: path })
+      Transforms.wrapNodes(editor, { type: 'li', children: [] }, { at: path })
     })
   }
 

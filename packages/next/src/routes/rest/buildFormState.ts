@@ -44,7 +44,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
   if (schemaPathSegments.length === 1) {
     if (req.payload.collections[schemaPath]) {
       fieldSchema = req.payload.collections[schemaPath].config.fields
-    } else if (req.payload.globals[schemaPath]) {
+    } else {
       fieldSchema = req.payload.config.globals.find((global) => global.slug === schemaPath)?.fields
     }
   } else if (fieldSchemaMap.has(schemaPath)) {

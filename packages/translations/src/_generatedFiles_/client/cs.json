@@ -79,6 +79,7 @@
     "showAll": "Zobrazit vše",
     "swapRelationship": "Zaměnit vztah",
     "swapUpload": "Vyměnit nahrání",
+    "toggleBlock": "Přepnout blok",
     "uploadNewLabel": "Nahrát nový {{label}}"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "Typ",
     "unpublish": "Zrušit publikování",
     "unpublishing": "Zrušuji publikování...",
+    "version": "Verze",
     "versionCreatedOn": "{{version}} vytvořena:",
     "versionID": "ID verze",
     "versions": "Verze",

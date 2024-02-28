@@ -79,6 +79,7 @@
     "showAll": "အကုန် ကြည့်မည်။",
     "swapRelationship": "လဲလှယ်ဆက်ဆံရေး",
     "swapUpload": "အပ်လုဒ်ဖလှယ်ပါ။",
+    "toggleBlock": "ဘလောက်ကို ပြောင်းပါ။",
     "uploadNewLabel": "{{label}} အသစ်တင်မည်။"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "အမျိုးအစား",
     "unpublish": "ပြန်ဖြုတ်မည်။",
     "unpublishing": "ပြန်ဖြုတ်နေဆဲ ...",
+    "version": "ဗားရှင်း",
     "versionCreatedOn": "{{version}} အား ဖန်တီးခဲ့သည်။",
     "versionID": "ဗားရှင်း ID",
     "versions": "ဗားရှင်းများ",

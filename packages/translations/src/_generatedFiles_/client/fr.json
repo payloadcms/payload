@@ -79,6 +79,7 @@
     "showAll": "Afficher tout",
     "swapRelationship": "Changer de relation",
     "swapUpload": "Changer de Fichier",
+    "toggleBlock": "Bloc bascule",
     "uploadNewLabel": "Téléverser un(e) nouveau ou nouvelle {{label}}"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "Type",
     "unpublish": "Annuler la publication",
     "unpublishing": "Annulation en cours...",
+    "version": "Version",
     "versionCreatedOn": "{{version}} créé(e) le :",
     "versionID": "Identifiant de la version",
     "versions": "Versions",

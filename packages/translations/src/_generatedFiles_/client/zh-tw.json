@@ -81,6 +81,7 @@
     "showAll": "顯示全部",
     "swapRelationship": "替換關聯",
     "swapUpload": "替換上傳",
+    "toggleBlock": "切換區塊",
     "uploadNewLabel": "上傳新的{{label}}"
   },
   "general": {
@@ -262,6 +263,7 @@
     "type": "類型",
     "unpublish": "取消發佈",
     "unpublishing": "取消發佈中...",
+    "version": "版本",
     "versionCreatedOn": "版本 {{version}} 建立於：",
     "versionID": "版本ID",
     "versions": "版本",

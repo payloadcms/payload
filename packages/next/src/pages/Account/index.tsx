@@ -1,4 +1,5 @@
 import type { ServerSideEditViewProps } from '@payloadcms/ui'
+import type { Metadata } from 'next'
 import type { Data, DocumentPreferences, SanitizedConfig } from 'payload/types'
 
 import {
@@ -11,9 +12,30 @@ import {
 import { notFound } from 'next/navigation'
 import React, { Fragment } from 'react'
 
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
+import { meta } from '../../utilities/meta'
 import { EditView } from '../Edit'
 import { Settings } from './Settings'
+
+export const generateMetadata = async ({
+  config: configPromise,
+}: {
+  config: Promise<SanitizedConfig>
+}): Promise<Metadata> => {
+  const config = await configPromise
+
+  const { t } = await getNextI18n({
+    config,
+  })
+
+  return meta({
+    config,
+    description: `${t('authentication:accountOfCurrentUser')}`,
+    keywords: `${t('authentication:account')}`,
+    title: t('authentication:account'),
+  })
+}
 
 export const Account = async ({
   config: configPromise,

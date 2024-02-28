@@ -1,3 +1,4 @@
+import type { Payload } from '../../packages/payload/src'
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'

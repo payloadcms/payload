@@ -79,6 +79,7 @@
     "showAll": "Tümünü göster",
     "swapRelationship": "Takas Ilişkisi",
     "swapUpload": "Karşıya Yüklemeyi Değiştir",
+    "toggleBlock": "Bloğu aç/kapat",
     "uploadNewLabel": "Karşıya {{label}} yükle"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "Tür",
     "unpublish": "Yayından Kaldır",
     "unpublishing": "Yayından kaldırılıyor...",
+    "version": "Sürüm",
     "versionCreatedOn": "{{version}} oluşturma tarihi:",
     "versionID": "Sürüm ID",
     "versions": "Sürümler",

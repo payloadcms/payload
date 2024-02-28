@@ -79,6 +79,7 @@
     "showAll": "Vis alle",
     "swapRelationship": "Bytte Forhold",
     "swapUpload": "Bytt Opplasting",
+    "toggleBlock": "Veksle blokk",
     "uploadNewLabel": "Last opp ny {{label}}"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "Type",
     "unpublish": "Avpubliser",
     "unpublishing": "Avpubliserer...",
+    "version": "Versjon",
     "versionCreatedOn": "{{version}} opprettet:",
     "versionID": "Versjons-ID",
     "versions": "Versjoner",

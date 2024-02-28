@@ -79,6 +79,7 @@
     "showAll": "Mostrar Tudo",
     "swapRelationship": "Relação de Troca",
     "swapUpload": "Substituir Upload",
+    "toggleBlock": "Alternar bloco",
     "uploadNewLabel": "Carregar novo(a) {{label}}"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "Tipo",
     "unpublish": "Despublicar",
     "unpublishing": "Despublicando...",
+    "version": "Versão",
     "versionCreatedOn": "{{version}} criada em:",
     "versionID": "ID da versão",
     "versions": "Versões",

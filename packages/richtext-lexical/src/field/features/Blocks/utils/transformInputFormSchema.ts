@@ -18,6 +18,7 @@ export function transformInputFormSchema(formSchema: any, blockFieldWrapperName:
     ),
     {
       name: blockFieldWrapperName,
+      type: 'group',
       admin: {
         hideGutter: true,
       },
@@ -25,7 +26,6 @@ export function transformInputFormSchema(formSchema: any, blockFieldWrapperName:
         (field) => !('name' in field) || !['blockName', 'blockType', 'id'].includes(field.name),
       ),
       label: '',
-      type: 'group',
     },
   ]
 }

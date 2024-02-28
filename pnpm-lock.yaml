@@ -272,6 +272,9 @@ importers:
       fs-extra:
         specifier: ^9.0.1
         version: 9.1.0
+      globby:
+        specifier: 11.1.0
+        version: 11.1.0
       handlebars:
         specifier: ^4.7.7
         version: 4.7.8
@@ -529,6 +532,12 @@ importers:
       deep-equal:
         specifier: 2.2.2
         version: 2.2.2
+      graphql:
+        specifier: ^16.8.1
+        version: 16.8.1
+      graphql-http:
+        specifier: ^1.22.0
+        version: 1.22.0(graphql@16.8.1)
       graphql-playground-html:
         specifier: 1.6.30
         version: 1.6.30
@@ -623,9 +632,6 @@ importers:
       nodemailer:
         specifier: 6.9.10
         version: 6.9.10
-      object-to-formdata:
-        specifier: 4.5.1
-        version: 4.5.1
       pino:
         specifier: 8.15.0
         version: 8.15.0
@@ -1153,9 +1159,6 @@ importers:
       deep-equal:
         specifier: 2.2.3
         version: 2.2.3
-      i18next:
-        specifier: 22.5.1
-        version: 22.5.1
       json-schema:
         specifier: ^0.4.0
         version: 0.4.0
@@ -10728,12 +10731,6 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
     dev: true
-
-  /i18next@22.5.1:
-    resolution: {integrity: sha512-8TGPgM3pAD+VRsMtUMNknRz3kzqwp/gPALrWMsDnmC1mKqJwpWyooQRLMcbTwq8z8YwSmuj+ZYvc+xCuEpkssA==}
-    dependencies:
-      '@babel/runtime': 7.22.15
-    dev: false
 
   /iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}

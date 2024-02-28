@@ -80,7 +80,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
         locale,
         payload: { config },
         payload,
-        t,
+
       },
       req,
       showHiddenFields,

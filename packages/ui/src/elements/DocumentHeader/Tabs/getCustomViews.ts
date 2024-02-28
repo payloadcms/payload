@@ -2,8 +2,6 @@ import type { EditViewConfig } from 'payload/config'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 import { documentViewKeys } from './tabs'
-import { defaultGlobalViews } from '../../../views/Global/RenderCustomView'
-import { defaultCollectionViews } from '../../../views/Edit/RenderCustomView'
 
 export const getCustomViews = (args: {
   collectionConfig: SanitizedCollectionConfig
@@ -20,10 +18,8 @@ export const getCustomViews = (args: {
         ? collectionConfig?.admin?.components?.views?.Edit
         : undefined
 
-    const defaultViewKeys = Object.keys(defaultCollectionViews())
-
     customViews = Object.entries(collectionViewsConfig || {}).reduce((prev, [key, view]) => {
-      if (defaultViewKeys.includes(key)) {
+      if (documentViewKeys.includes(key)) {
         return prev
       }
 
@@ -38,10 +34,8 @@ export const getCustomViews = (args: {
         ? globalConfig?.admin?.components?.views?.Edit
         : undefined
 
-    const defaultViewKeys = Object.keys(defaultGlobalViews())
-
     customViews = Object.entries(globalViewsConfig || {}).reduce((prev, [key, view]) => {
-      if (defaultViewKeys.includes(key)) {
+      if (documentViewKeys.includes(key)) {
         return prev
       }
 

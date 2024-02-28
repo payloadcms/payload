@@ -87,7 +87,13 @@ export const findByIDOperation = async <T extends TypeWithID>(
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findOneArgs.where.and[0].id) throw new NotFound(req.t)
+    if (!findOneArgs.where.and[0].id) throw new NotFound(t)
+
+    if (!req.findByID) {
+      req.findByID = { [transactionID]: {} }
+    } else if (!req.findByID[transactionID]) {
+      req.findByID[transactionID] = {}
+    }
 
     let result: T = await req.payload.db.findOne(findOneArgs)
 

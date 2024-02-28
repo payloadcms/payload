@@ -7,6 +7,7 @@ import { convertLexicalPluginNodesToLexical } from '..'
 export const LinkConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {
     return {
+      type: 'link',
       children: convertLexicalPluginNodesToLexical({
         converters,
         lexicalPluginNodes: (lexicalPluginNode as any).children || [],
@@ -26,7 +27,6 @@ export const LinkConverter: LexicalPluginNodeConverter = {
       },
       format: (lexicalPluginNode as any).format || '',
       indent: (lexicalPluginNode as any).indent || 0,
-      type: 'link',
       version: 2,
     } as const as SerializedLinkNode
   },

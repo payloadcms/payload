@@ -15,11 +15,12 @@ export type Resolver = (
   },
 ) => Promise<CollectionPermission | GlobalPermission>
 
-export function docAccessResolver(): Resolver {
+export function docAccessResolver(collection: Collection): Resolver {
   async function resolver(_, args, context: Context) {
     return docAccessOperation({
       id: args.id,
       req: isolateObjectProperty(context.req, 'transactionID'),
+      collection,
     })
   }
 

@@ -79,6 +79,7 @@
     "showAll": "Alle anzeigen",
     "swapRelationship": "Beziehung Tauschen",
     "swapUpload": "Datei Austauschen",
+    "toggleBlock": "Block umschalten",
     "uploadNewLabel": "{{label}} neu hochladen"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "Typ",
     "unpublish": "Auf Entwurf setzen",
     "unpublishing": "Setze auf Entwurf...",
+    "version": "Version",
     "versionCreatedOn": "{{version}} erstellt am:",
     "versionID": "Version ID",
     "versions": "Versionen",

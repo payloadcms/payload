@@ -81,6 +81,7 @@
     "showAll": "Show All",
     "swapRelationship": "Swap Relationship",
     "swapUpload": "Swap Upload",
+    "toggleBlock": "Toggle block",
     "uploadNewLabel": "Upload new {{label}}"
   },
   "general": {
@@ -262,6 +263,7 @@
     "type": "Type",
     "unpublish": "Unpublish",
     "unpublishing": "Unpublishing...",
+    "version": "Version",
     "versionCreatedOn": "{{version}} created on:",
     "versionID": "Version ID",
     "versions": "Versions",

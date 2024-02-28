@@ -79,6 +79,7 @@
     "showAll": "Az összes megjelenítése",
     "swapRelationship": "Kapcsolat csere",
     "swapUpload": "Feltöltés csere",
+    "toggleBlock": "Blokk kinyitása",
     "uploadNewLabel": "Új {{label}} feltöltése"
   },
   "general": {
@@ -260,6 +261,7 @@
     "type": "Típus",
     "unpublish": "Közzététel visszavonása",
     "unpublishing": "Közzététel visszavonása...",
+    "version": "Verzió",
     "versionCreatedOn": "{{version}} létrehozva:",
     "versionID": "Verzióazonosító",
     "versions": "Verziók",

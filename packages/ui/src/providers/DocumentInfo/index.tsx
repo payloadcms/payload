@@ -52,6 +52,9 @@ export const DocumentInfoProvider: React.FC<
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
 
+
+  const [title, setTitle] = useState<string>('')
+
   const [title, setTitle] = useState<string>('')
 
   const baseURL = `${serverURL}${api}`
