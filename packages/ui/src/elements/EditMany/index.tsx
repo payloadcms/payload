@@ -197,7 +197,7 @@ const EditMany: React.FC<Props> = (props) => {
                   <div className={`${baseClass}__sidebar`}>
                     <div className={`${baseClass}__sidebar-sticky-wrap`}>
                       <div className={`${baseClass}__document-actions`}>
-                        {collection.versions ? (
+                        {collection?.versions?.drafts ? (
                           <React.Fragment>
                             <Publish
                               action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}

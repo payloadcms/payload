@@ -71,8 +71,8 @@ export const ListControls: React.FC<Props> = (props) => {
             {!smallBreak && (
               <React.Fragment>
                 <EditMany collection={collectionConfig} />
+                <PublishMany collection={collectionConfig} />
                 {/*
-                <PublishMany  />
                 <UnpublishMany  />
                 <DeleteMany />
                 */}
