@@ -70,10 +70,12 @@ export const ListControls: React.FC<Props> = (props) => {
           <div className={`${baseClass}__buttons-wrap`}>
             {!smallBreak && (
               <React.Fragment>
-                <EditMany collection={collectionConfig} resetParams={resetParams} />
-                {/* <PublishMany resetParams={resetParams} />
-                <UnpublishMany resetParams={resetParams} />
-                <DeleteMany resetParams={resetParams} /> */}
+                <EditMany collection={collectionConfig} />
+                {/*
+                <PublishMany  />
+                <UnpublishMany  />
+                <DeleteMany />
+                */}
               </React.Fragment>
             )}
             {enableColumns && (

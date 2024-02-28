@@ -19,7 +19,7 @@ import './index.scss'
 const baseClass = 'delete-documents'
 
 const DeleteMany: React.FC<Props> = (props) => {
-  const { collection: { labels: { plural }, slug } = {}, resetParams } = props
+  const { collection: { slug, labels: { plural } } = {} } = props
 
   const { permissions } = useAuth()
   const {

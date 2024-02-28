@@ -3,9 +3,10 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
+import type { FormState } from '../..'
 import type { Props } from './types'
 
-import { FieldPathProvider, useComponentMap } from '../..'
+import { FieldPathProvider, getFormState, useComponentMap } from '../..'
 import Form from '../../forms/Form'
 import { useForm } from '../../forms/Form/context'
 import RenderFields from '../../forms/RenderFields'
@@ -89,7 +90,7 @@ const EditMany: React.FC<Props> = (props) => {
   const { permissions } = useAuth()
   const { closeModal } = useModal()
   const {
-    routes: { api },
+    routes: { api: apiRoute },
     serverURL,
   } = useConfig()
   const { count, getQueryParams, selectAll } = useSelection()
@@ -98,6 +99,8 @@ const EditMany: React.FC<Props> = (props) => {
   const { dispatchSearchParams } = useSearchParams()
   const { componentMap } = useComponentMap()
   const [reducedFieldMap, setReducedFieldMap] = useState([])
+  const [initialState, setInitialState] = useState<FormState>()
+  const hasInitializedState = React.useRef(false)
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasUpdatePermission = collectionPermissions?.update?.permission
@@ -118,6 +121,28 @@ const EditMany: React.FC<Props> = (props) => {
       setReducedFieldMap(reducedFieldMap)
     }
   }, [componentMap.collections, fields, slug, selected])
+
+  React.useEffect(() => {
+    if (!hasInitializedState.current) {
+      const getInitialState = async () => {
+        const result = await getFormState({
+          apiRoute,
+          body: {
+            collectionSlug: slug,
+            data: {},
+            operation: 'update',
+            schemaPath: slug,
+          },
+          serverURL,
+        })
+
+        setInitialState(result)
+        hasInitializedState.current = true
+      }
+
+      void getInitialState()
+    }
+  }, [apiRoute, hasInitializedState, serverURL, slug])
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
     return null
@@ -145,25 +170,29 @@ const EditMany: React.FC<Props> = (props) => {
       </DrawerToggler>
       <Drawer Header={null} slug={drawerSlug}>
         <OperationContext.Provider value="update">
-          <FieldPathProvider path="" schemaPath={slug}>
-            <Form className={`${baseClass}__form`} onSuccess={onSuccess}>
-              <div className={`${baseClass}__main`}>
-                <div className={`${baseClass}__header`}>
-                  <h2 className={`${baseClass}__header__title`}>
-                    {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
-                  </h2>
-                  <button
-                    aria-label={t('general:close')}
-                    className={`${baseClass}__header__close`}
-                    id={`close-drawer__${drawerSlug}`}
-                    onClick={() => closeModal(drawerSlug)}
-                    type="button"
-                  >
-                    <X />
-                  </button>
-                </div>
+          <div className={`${baseClass}__main`}>
+            <div className={`${baseClass}__header`}>
+              <h2 className={`${baseClass}__header__title`}>
+                {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
+              </h2>
+              <button
+                aria-label={t('general:close')}
+                className={`${baseClass}__header__close`}
+                id={`close-drawer__${drawerSlug}`}
+                onClick={() => closeModal(drawerSlug)}
+                type="button"
+              >
+                <X />
+              </button>
+            </div>
+            <FieldPathProvider path="" schemaPath={slug}>
+              <Form
+                className={`${baseClass}__form`}
+                initialState={initialState}
+                onSuccess={onSuccess}
+              >
                 <FieldSelect fields={fields} setSelected={setSelected} />
-                <RenderFields fieldMap={reducedFieldMap} />
+                {reducedFieldMap.length === 0 ? null : <RenderFields fieldMap={reducedFieldMap} />}
                 <div className={`${baseClass}__sidebar-wrap`}>
                   <div className={`${baseClass}__sidebar`}>
                     <div className={`${baseClass}__sidebar-sticky-wrap`}>
@@ -171,17 +200,17 @@ const EditMany: React.FC<Props> = (props) => {
                         {collection.versions ? (
                           <React.Fragment>
                             <Publish
-                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
                               disabled={selected.length === 0}
                             />
                             <SaveDraft
-                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
                               disabled={selected.length === 0}
                             />
                           </React.Fragment>
                         ) : (
                           <Submit
-                            action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                            action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
                             disabled={selected.length === 0}
                           />
                         )}
@@ -189,9 +218,9 @@ const EditMany: React.FC<Props> = (props) => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </Form>
-          </FieldPathProvider>
+              </Form>
+            </FieldPathProvider>
+          </div>
         </OperationContext.Provider>
       </Drawer>
     </div>

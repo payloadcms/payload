@@ -19,7 +19,7 @@ import './index.scss'
 const baseClass = 'unpublish-many'
 
 const UnpublishMany: React.FC<Props> = (props) => {
-  const { collection: { labels: { plural }, slug, versions } = {}, resetParams } = props
+  const { collection: { slug, labels: { plural }, versions } = {} } = props
 
   const {
     routes: { api },
@@ -78,7 +78,6 @@ const UnpublishMany: React.FC<Props> = (props) => {
     getQueryParams,
     i18n.language,
     modalSlug,
-    resetParams,
     selectAll,
     serverURL,
     slug,

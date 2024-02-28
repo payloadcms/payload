@@ -41,7 +41,6 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
-    docPreferences,
     globalSlug,
     hasSavePermission,
     initialData: data,

@@ -111,6 +111,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
         })
 
         setInitialState(result)
+        hasInitializedState.current = true
       }
 
       void getInitialState()

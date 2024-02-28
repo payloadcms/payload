@@ -28,6 +28,7 @@ const baseClass = 'collection-list'
 export const DefaultListView: React.FC = () => {
   const {
     Header,
+    collectionSlug,
     data,
     handlePageChange,
     handlePerPageChange,
@@ -38,8 +39,6 @@ export const DefaultListView: React.FC = () => {
     limit,
     modifySearchParams,
     newDocumentURL,
-    // resetParams,
-    collectionSlug,
     titleField,
   } = useListInfo()
 
@@ -121,7 +120,6 @@ export const DefaultListView: React.FC = () => {
             // handleSortChange={handleSortChange}
             // handleWhereChange={handleWhereChange}
             // modifySearchQuery={modifySearchParams}
-            // resetParams={resetParams}
             titleField={titleField}
           />
           {BeforeListTable}
@@ -190,10 +188,10 @@ export const DefaultListView: React.FC = () => {
                       <Fragment>
                         <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
                         <div className={`${baseClass}__list-selection-actions`}>
-                          <EditMany resetParams={resetParams} />
-                          <PublishMany resetParams={resetParams} />
-                          <UnpublishMany resetParams={resetParams} />
-                          <DeleteMany resetParams={resetParams} />
+                          <EditMany />
+                          <PublishMany />
+                          <UnpublishMany />
+                          <DeleteMany />
                         </div>
                       </Fragment>
                     </div>
