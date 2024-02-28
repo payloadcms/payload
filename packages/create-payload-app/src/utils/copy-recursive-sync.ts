@@ -11,11 +11,9 @@ export function copyRecursiveSync(src: string, dest: string, debug?: boolean) {
   if (isDirectory) {
     fs.mkdirSync(dest, { recursive: true })
     fs.readdirSync(src).forEach((childItemName) => {
-      if (debug) console.log(`Copying: ${src}/${childItemName} -> ${dest}/${childItemName}`)
       copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName))
     })
   } else {
-    if (debug) console.log(`Copying: ${src} -> ${dest}`)
     fs.copyFileSync(src, dest)
   }
 }
