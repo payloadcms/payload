@@ -63,7 +63,6 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
         locale,
         payload: { config },
         payload,
-        
       },
       req,
       showHiddenFields,
