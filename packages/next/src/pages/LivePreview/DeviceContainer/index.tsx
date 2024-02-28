@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 
 import { useLivePreviewContext } from '../Context/context'
@@ -36,16 +37,16 @@ export const DeviceContainer: React.FC<{
           foundBreakpoint && foundBreakpoint?.name !== 'responsive'
             ? `${size?.height / (typeof zoom === 'number' ? zoom : 1)}px`
             : typeof zoom === 'number'
-            ? `${100 / zoom}%`
-            : '100%',
+              ? `${100 / zoom}%`
+              : '100%',
         margin,
         transform: `translate3d(${x}, 0, 0)`,
         width:
           foundBreakpoint && foundBreakpoint?.name !== 'responsive'
             ? `${size?.width / (typeof zoom === 'number' ? zoom : 1)}px`
             : typeof zoom === 'number'
-            ? `${100 / zoom}%`
-            : '100%',
+              ? `${100 / zoom}%`
+              : '100%',
       }}
     >
       {children}

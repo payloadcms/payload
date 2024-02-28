@@ -6,6 +6,7 @@ import React from 'react'
 import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { SetStepNav } from '../Edit/Default/SetStepNav'
+import { sanitizeEditViewProps } from '../Edit/sanitizeEditViewProps'
 import { buildVersionColumns } from './buildColumns'
 import { VersionsViewClient } from './index.client'
 import './index.scss'
@@ -61,9 +62,9 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
   if (globalSlug) {
     try {
       versionsData = await payload.findGlobalVersions({
+        slug: globalSlug,
         depth: 0,
         page: page ? parseInt(page as string, 10) : undefined,
-        slug: globalSlug,
         sort: sort as string,
         user,
         where: {
@@ -99,6 +100,8 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
       ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
       : ''
 
+  const clientSideProps = sanitizeEditViewProps(props)
+
   return (
     <React.Fragment>
       <SetStepNav
@@ -112,11 +115,10 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
       <main className={baseClass}>
         <Gutter className={`${baseClass}__wrap`}>
           <VersionsViewClient
+            {...clientSideProps}
             baseClass={baseClass}
-            collectionSlug={collectionSlug}
             columns={columns}
             fetchURL={fetchURL}
-            globalSlug={globalSlug}
             id={id}
             initialData={versionsData}
             paginationLimits={collectionConfig?.admin?.pagination?.limits}

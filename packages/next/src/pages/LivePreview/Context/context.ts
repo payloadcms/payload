@@ -1,9 +1,9 @@
+import type { LivePreviewConfig } from 'payload/config'
+import type { fieldSchemaToJSON } from 'payload/utilities'
 import type { Dispatch } from 'react'
 
 import { createContext, useContext } from 'react'
 
-import type { LivePreviewConfig } from '../../../../../exports/config'
-import type { fieldSchemaToJSON } from '../../../../../utilities/fieldSchemaToJSON'
 import type { usePopupWindow } from '../usePopupWindow'
 import type { SizeReducerAction } from './sizeReducer'
 

@@ -1,11 +1,14 @@
+'use client'
+import type { EditViewProps } from 'payload/config'
+
+import {
+  ShimmerEffect,
+  reduceFieldsToValues,
+  useAllFormFields,
+  useDocumentEvents,
+} from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
-import type { EditViewProps } from '../../types'
-
-import { ShimmerEffect } from '../../../elements/ShimmerEffect'
-import { useAllFormFields } from '../../../forms/Form/context'
-import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
-import { useDocumentEvents } from '../../../utilities/DocumentEvents'
 import { useLivePreviewContext } from '../Context/context'
 import { DeviceContainer } from '../Device'
 import { IFrame } from '../IFrame'
@@ -52,10 +55,10 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
       prevWindowType.current = previewWindowType
 
       const message = {
+        type: 'payload-live-preview',
         data: values,
         externallyUpdatedRelationship: mostRecentUpdate,
         fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
-        type: 'payload-live-preview',
       }
 
       // Post message to external popup window
