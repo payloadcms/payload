@@ -8,17 +8,18 @@ import type { Props } from './types'
 
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
+import { useSearchParams } from '../../providers/SearchParams'
 import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider'
 import { useTranslation } from '../../providers/Translation'
-// import { requests } from '../../../api'
 import { MinimalTemplate } from '../../templates/Minimal'
+import { requests } from '../../utilities/api'
 import { Button } from '../Button'
 import Pill from '../Pill'
 import './index.scss'
 
 const baseClass = 'unpublish-many'
 
-const UnpublishMany: React.FC<Props> = (props) => {
+export const UnpublishMany: React.FC<Props> = (props) => {
   const { collection: { slug, labels: { plural }, versions } = {} } = props
 
   const {
@@ -28,8 +29,9 @@ const UnpublishMany: React.FC<Props> = (props) => {
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
   const { i18n, t } = useTranslation()
-  const { count, getQueryParams, selectAll } = useSelection()
+  const { getQueryParams, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
+  const { dispatchSearchParams } = useSearchParams()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasPermission = collectionPermissions?.update?.permission
@@ -40,41 +42,46 @@ const UnpublishMany: React.FC<Props> = (props) => {
     toast.error(t('error:unknown'))
   }, [t])
 
-  const handleUnpublish = useCallback(() => {
+  const handleUnpublish = useCallback(async () => {
     setSubmitted(true)
-    // requests
-    //   .patch(`${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'draft' } })}`, {
-    //     body: JSON.stringify({
-    //       _status: 'draft',
-    //     }),
-    //     headers: {
-    //       'Accept-Language': i18n.language,
-    //       'Content-Type': 'application/json',
-    //     },
-    //   })
-    //   .then(async (res) => {
-    //     try {
-    //       const json = await res.json()
-    //       toggleModal(modalSlug)
-    //       if (res.status < 400) {
-    //         toast.success(t('general:updatedSuccessfully'))
-    //         resetParams({ page: selectAll ? 1 : undefined })
-    //         return null
-    //       }
+    await requests
+      .patch(`${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'draft' } })}`, {
+        body: JSON.stringify({
+          _status: 'draft',
+        }),
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(async (res) => {
+        try {
+          const json = await res.json()
+          toggleModal(modalSlug)
+          if (res.status < 400) {
+            toast.success(t('general:updatedSuccessfully'))
+            dispatchSearchParams({
+              type: 'set',
+              browserHistory: 'replace',
+              params: { page: selectAll ? '1' : undefined },
+            })
+            return null
+          }
 
-    //       if (json.errors) {
-    //         json.errors.forEach((error) => toast.error(error.message))
-    //       } else {
-    //         addDefaultError()
-    //       }
-    //       return false
-    //     } catch (e) {
-    //       return addDefaultError()
-    //     }
-    //   })
+          if (json.errors) {
+            json.errors.forEach((error) => toast.error(error.message))
+          } else {
+            addDefaultError()
+          }
+          return false
+        } catch (e) {
+          return addDefaultError()
+        }
+      })
   }, [
     addDefaultError,
     api,
+    dispatchSearchParams,
     getQueryParams,
     i18n.language,
     modalSlug,
@@ -120,5 +127,3 @@ const UnpublishMany: React.FC<Props> = (props) => {
     </React.Fragment>
   )
 }
-
-export default UnpublishMany

@@ -84,7 +84,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
     </FormSubmit>
   )
 }
-const EditMany: React.FC<Props> = (props) => {
+export const EditMany: React.FC<Props> = (props) => {
   const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
   const { permissions } = useAuth()
@@ -226,5 +226,3 @@ const EditMany: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default EditMany

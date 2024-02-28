@@ -12,13 +12,13 @@ import { useSearchParams } from '../../providers/SearchParams'
 import { useTranslation } from '../../providers/Translation'
 import { Button } from '../Button'
 import ColumnSelector from '../ColumnSelector'
-import DeleteMany from '../DeleteMany'
-import EditMany from '../EditMany'
+import { DeleteMany } from '../DeleteMany'
+import { EditMany } from '../EditMany'
 import Pill from '../Pill'
-import PublishMany from '../PublishMany'
+import { PublishMany } from '../PublishMany'
 import SearchFilter from '../SearchFilter'
 import SortComplex from '../SortComplex'
-import UnpublishMany from '../UnpublishMany'
+import { UnpublishMany } from '../UnpublishMany'
 import WhereBuilder from '../WhereBuilder'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery'
 import './index.scss'
@@ -72,10 +72,8 @@ export const ListControls: React.FC<Props> = (props) => {
               <React.Fragment>
                 <EditMany collection={collectionConfig} />
                 <PublishMany collection={collectionConfig} />
-                {/*
-                <UnpublishMany  />
-                <DeleteMany />
-                */}
+                <UnpublishMany collection={collectionConfig} />
+                <DeleteMany collection={collectionConfig} />
               </React.Fragment>
             )}
             {enableColumns && (

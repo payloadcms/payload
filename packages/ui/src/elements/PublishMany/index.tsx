@@ -19,7 +19,7 @@ import './index.scss'
 
 const baseClass = 'publish-many'
 
-const PublishMany: React.FC<Props> = (props) => {
+export const PublishMany: React.FC<Props> = (props) => {
   const { collection: { slug, labels: { plural }, versions } = {} } = props
 
   const {
@@ -130,5 +130,3 @@ const PublishMany: React.FC<Props> = (props) => {
     </React.Fragment>
   )
 }
-
-export default PublishMany
