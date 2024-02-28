@@ -37,7 +37,7 @@ export const useAddClientFunction = (key: string, func: any) => {
       func,
       key,
     })
-  }, [func, key])
+  }, [func, key, addClientFunction])
 }
 
 export const useClientFunctions = () => {

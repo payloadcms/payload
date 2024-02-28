@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { SerializedLinkNode } from '../../../../Link/nodes/LinkNode'
+import type { SerializedLinkNode } from '../../../../link/nodes/LinkNode'
 import type { LexicalPluginNodeConverter } from '../types'
 
 import { convertLexicalPluginNodesToLexical } from '..'

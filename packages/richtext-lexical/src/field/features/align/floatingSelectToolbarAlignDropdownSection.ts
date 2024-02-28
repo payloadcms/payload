@@ -3,14 +3,14 @@ import type {
   FloatingToolbarSectionEntry,
 } from '../../lexical/plugins/FloatingSelectToolbar/types'
 
+import { AlignLeftIcon } from '../../lexical/ui/icons/AlignLeft'
+
 export const AlignDropdownSectionWithEntries = (
   entries: FloatingToolbarSectionEntry[],
 ): FloatingToolbarSection => {
   return {
     type: 'dropdown',
-    ChildComponent: () =>
-      // @ts-expect-error-next-line
-      import('../../lexical/ui/icons/AlignLeft').then((module) => module.AlignLeftIcon),
+    ChildComponent: AlignLeftIcon,
     entries,
     key: 'dropdown-align',
     order: 2,
