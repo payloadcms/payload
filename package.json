@@ -101,7 +101,7 @@
     "read-stream": "^2.1.1",
     "rimraf": "3.0.2",
     "semver": "^7.5.4",
-    "sharp": "0.32.6",
+    "sharp": "0.33.2",
     "shelljs": "0.8.5",
     "simple-git": "^3.20.0",
     "slash": "3.0.0",
@@ -118,7 +118,7 @@
     "react-router-dom": "5.3.4"
   },
   "engines": {
-    "node": ">=18",
+    "node": ">=18.17.0",
     "pnpm": ">=8"
   },
   "lint-staged": {

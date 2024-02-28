@@ -106,7 +106,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18.17.0"
   },
   "files": [
     "dist"
