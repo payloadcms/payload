@@ -3,7 +3,7 @@ import type { PaginatedDocs } from 'payload/database'
 import type { PayloadRequest, Where } from 'payload/types'
 import type { Collection } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 export type Resolver = (
@@ -26,8 +26,13 @@ export type Resolver = (
 
 export default function findResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context: Context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty(req, 'locale')
+    req = isolateObjectProperty(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
 
     const options = {
       collection,
@@ -35,7 +40,7 @@ export default function findResolver(collection: Collection): Resolver {
       draft: args.draft,
       limit: args.limit,
       page: args.page,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty(req, 'transactionID'),
       sort: args.sort,
       where: args.where,
     }

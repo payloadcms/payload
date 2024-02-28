@@ -1,3 +1,4 @@
+import type { UploadedFile } from 'express-fileupload'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes, Payload } from '../../../'

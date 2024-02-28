@@ -1,5 +1,5 @@
-import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
+import type { Metadata } from 'next'
 
 import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
 import Link from 'next/link'
@@ -10,7 +10,6 @@ import type { DashboardProps } from './Default'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
-import { meta } from '../../utilities/meta'
 import { DefaultDashboard } from './Default'
 
 export const generateMetadata = async ({

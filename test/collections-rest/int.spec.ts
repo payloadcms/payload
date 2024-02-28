@@ -1287,7 +1287,8 @@ describe('collections-rest', () => {
           const result = await response.json()
 
           expect(response.status).toEqual(200)
-          expect(result.totalDocs).toEqual(50)
+          expect(result.docs).toHaveLength(50)
+          expect(result.totalPages).toEqual(1)
         })
       })
 

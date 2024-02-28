@@ -3,7 +3,7 @@ import type { DeepPartial } from 'ts-essentials'
 import type { GeneratedTypes } from 'payload'
 import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
@@ -29,12 +29,12 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
     const { slug } = globalConfig
 
     const options = {
+      slug,
       data: args.data,
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: isolateTransactionID(context.req),
-      slug,
+      req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
     const result = await updateOperationGlobal<TSlug>(options)

@@ -1,12 +1,50 @@
+import type { Payload } from 'payload'
 import type { Connect } from 'payload/database'
 
 import { eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { numeric, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core'
+import { numeric, timestamp, varchar } from 'drizzle-orm/pg-core'
 import { Pool } from 'pg'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types'
+
+const connectWithReconnect = async function ({
+  adapter,
+  payload,
+  reconnect = false,
+}: {
+  adapter: PostgresAdapter
+  payload: Payload
+  reconnect?: boolean
+}) {
+  let result
+
+  if (!reconnect) {
+    result = await adapter.pool.connect()
+  } else {
+    try {
+      result = await adapter.pool.connect()
+    } catch (err) {
+      setTimeout(() => {
+        payload.logger.info('Reconnecting to postgres')
+        void connectWithReconnect({ adapter, payload, reconnect: true })
+      }, 1000)
+    }
+  }
+  if (!result) {
+    return
+  }
+  result.prependListener('error', (err) => {
+    try {
+      if (err.code === 'ECONNRESET') {
+        void connectWithReconnect({ adapter, payload, reconnect: true })
+      }
+    } catch (err) {
+      // swallow error
+    }
+  })
+}
 
 export const connect: Connect = async function connect(this: PostgresAdapter, payload) {
   this.schema = {
@@ -17,13 +55,19 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
 
   try {
     this.pool = new Pool(this.poolOptions)
-    await this.pool.connect()
+    await connectWithReconnect({ adapter: this, payload })
 
-    this.drizzle = drizzle(this.pool, { schema: this.schema })
+    const logger = this.logger || false
+
+    this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.payload.logger.info('---- DROPPING TABLES ----')
-      await this.drizzle.execute(sql`drop schema public cascade;
-      create schema public;`)
+      this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
+      await this.drizzle.execute(
+        sql.raw(`
+        drop schema if exists ${this.schemaName || 'public'} cascade;
+        create schema ${this.schemaName || 'public'};
+      `),
+      )
       this.payload.logger.info('---- DROPPED TABLES ----')
     }
   } catch (err) {
@@ -39,7 +83,7 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   )
     return
 
-  const { pushSchema } = require('drizzle-kit/utils')
+  const { pushSchema } = require('drizzle-kit/payload')
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
@@ -59,9 +103,9 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     const { confirm: acceptWarnings } = await prompts(
       {
         name: 'confirm',
+        type: 'confirm',
         initial: false,
         message,
-        type: 'confirm',
       },
       {
         onCancel: () => {
@@ -80,7 +124,7 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   await apply()
 
   // Migration table def in order to use query using drizzle
-  const migrationsSchema = pgTable('payload_migrations', {
+  const migrationsSchema = this.pgSchema.table('payload_migrations', {
     name: varchar('name'),
     batch: numeric('batch'),
     created_at: timestamp('created_at'),

@@ -16,7 +16,7 @@ import { getFieldsToSign } from '../getFieldsToSign'
 import isLocked from '../isLocked'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts'
-import { unlockOperation } from './unlock'
+import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts'
 
 export type Result = {
   exp?: number
@@ -41,37 +41,40 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> => {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection?.config,
-        context: args.req.context,
-        operation: 'login',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    collection: { config: collectionConfig },
-    data,
-    depth,
-    overrideAccess,
-    req,
-    req: {
-      payload,
-      payload: { secret },
-    },
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection?.config,
+          context: args.req.context,
+          operation: 'login',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      collection: { config: collectionConfig },
+      data,
+      depth,
+      overrideAccess,
+      req,
+      req: {
+        fallbackLocale,
+        locale,
+        payload,
+        payload: { secret },
+      },
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Login
@@ -111,16 +114,16 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
         })
       }
 
+      if (shouldCommit) await commitTransaction(req)
+
       throw new AuthenticationError(req.t)
     }
 
     if (maxLoginAttemptsEnabled) {
-      await unlockOperation({
-        collection: {
-          config: collectionConfig,
-        },
-        data,
-        overrideAccess: true,
+      await resetLoginAttempts({
+        collection: collectionConfig,
+        doc: user,
+        payload: req.payload,
         req,
       })
     }
@@ -175,7 +178,9 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
       context: req.context,
       depth,
       doc: user,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -230,6 +235,10 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
       result,
     })
 
+    if (collectionConfig.auth.removeTokenFromResponses) {
+      delete result.token
+    }
+
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
@@ -238,7 +247,7 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

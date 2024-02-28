@@ -159,6 +159,39 @@ A function called by the search preview component to display the actual URL of y
 }
 ```
 
+#### `interfaceName`
+
+Rename the meta group interface name that is generated for TypeScript and GraphQL.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  seoPlugin({
+    interfaceName: 'customInterfaceNameSEO'
+  })
+}
+```
+
+#### `fieldOverrides`
+
+Pass any valid field props to the base fields: Title, Description or Image.
+
+```ts
+// payload.config.ts
+seoPlugin({
+  // ...
+  fieldOverrides: {
+    title: {
+      required: true,
+    },
+    description: {
+      localized: true,
+    },
+  },
+})
+```
+
 ## TypeScript
 
 All types can be directly imported:

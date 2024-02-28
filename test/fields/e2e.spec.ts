@@ -4,7 +4,8 @@ import type { Payload } from 'payload'
 import { expect, test } from '@playwright/test'
 import path from 'path'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
+import type { RelationshipField, TextField } from './payload-types'
+
 import wait from '../../packages/payload/src/utilities/wait'
 import {
   exactText,
@@ -121,6 +122,25 @@ describe('fields', () => {
       const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
       expect(nextSiblingText).toEqual('#after-input')
     })
+
+    test('should create hasMany with multiple texts', async () => {
+      const input = 'five'
+      const furtherInput = 'six'
+
+      await page.goto(url.create)
+      const requiredField = page.locator('#field-text')
+      const field = page.locator('.field-hasMany')
+
+      await requiredField.fill(String(input))
+      await field.click()
+      await page.keyboard.type(input)
+      await page.keyboard.press('Enter')
+      await page.keyboard.type(furtherInput)
+      await page.keyboard.press('Enter')
+      await saveDocAndAssert(page)
+      await expect(field.locator('.rs__value-container')).toContainText(input)
+      await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
+    })
   })
 
   describe('number', () => {
@@ -231,6 +251,7 @@ describe('fields', () => {
             unique: uniqueText,
           },
           text: 'text',
+          uniqueRequiredText: 'text',
           uniqueText,
         },
       })
@@ -796,6 +817,95 @@ describe('fields', () => {
         ).toHaveValue(`${assertGroupText3} duplicate`)
       })
     })
+    test('should bulk update', async () => {
+      await Promise.all([
+        payload.create({
+          collection: 'array-fields',
+          data: {
+            title: 'for test 1',
+            items: [
+              {
+                text: 'test 1',
+              },
+              {
+                text: 'test 2',
+              },
+            ],
+          },
+        }),
+        payload.create({
+          collection: 'array-fields',
+          data: {
+            title: 'for test 2',
+            items: [
+              {
+                text: 'test 3',
+              },
+            ],
+          },
+        }),
+        payload.create({
+          collection: 'array-fields',
+          data: {
+            title: 'for test 3',
+            items: [
+              {
+                text: 'test 4',
+              },
+              {
+                text: 'test 5',
+              },
+              {
+                text: 'test 6',
+              },
+            ],
+          },
+        }),
+      ])
+
+      const bulkText = 'Bulk update text'
+      await page.goto(url.list)
+      await page.waitForSelector('.table > table > tbody > tr td.cell-title')
+      const rows = page.locator('.table > table > tbody > tr', {
+        has: page.locator('td.cell-title span', {
+          hasText: 'for test',
+        }),
+      })
+      const count = await rows.count()
+
+      for (let i = 0; i < count; i++) {
+        await rows
+          .nth(i)
+          .locator('td.cell-_select .checkbox-input__input > input[type="checkbox"]')
+          .check()
+      }
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const arrayOption = page.locator('.rs__option', {
+        hasText: exactText('Items'),
+      })
+
+      await expect(arrayOption).toBeVisible()
+
+      await arrayOption.click()
+      const addRowButton = page.locator('#field-items > .btn.array-field__add-row')
+
+      await expect(addRowButton).toBeVisible()
+
+      await addRowButton.click()
+
+      const targetInput = page.locator('#field-items__0__text')
+
+      await expect(targetInput).toBeVisible()
+
+      await targetInput.fill(bulkText)
+
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+      await expect(page.locator('.Toastify__toast--success')).toContainText(
+        'Updated 3 Array Fields successfully.',
+      )
+    })
   })
 
   describe('tabs', () => {
@@ -881,6 +991,7 @@ describe('fields', () => {
       await page.goto(url.list)
       await page.locator('.row-1 .cell-title a').click()
     }
+
     describe('cell', () => {
       test('ensure cells are smaller than 300px in height', async () => {
         const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
@@ -1360,6 +1471,7 @@ describe('fields', () => {
 
   describe('relationship', () => {
     let url: AdminUrlUtil
+    const tableRowLocator = 'table > tbody > tr'
 
     beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields')
@@ -1367,13 +1479,9 @@ describe('fields', () => {
 
     afterEach(async () => {
       // delete all existing relationship documents
-      const allRelationshipDocs = await payload.find({
+      await payload.delete({
         collection: relationshipFieldsSlug,
-        limit: 100,
-      })
-      const relationshipIDs = allRelationshipDocs.docs.map((doc) => doc.id)
-      await mapAsync(relationshipIDs, async (id) => {
-        await payload.delete({ id, collection: relationshipFieldsSlug })
+        where: { id: { exists: true } },
       })
     })
 
@@ -1692,6 +1800,37 @@ describe('fields', () => {
       const firstOptionText = await firstOption.textContent()
       expect(firstOptionText.trim()).toBe('Seeded text document')
     })
+
+    test('should allow filtering by relationship field / equals', async () => {
+      const textDoc = await createTextFieldDoc()
+      await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
+
+      await page.goto(url.list)
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = page.locator('.condition__field')
+      await conditionField.click()
+
+      const dropdownFieldOptions = conditionField.locator('.rs__option')
+      await dropdownFieldOptions.locator('text=Relationship').nth(0).click()
+
+      const operatorField = page.locator('.condition__operator')
+      await operatorField.click()
+
+      const dropdownOperatorOptions = operatorField.locator('.rs__option')
+      await dropdownOperatorOptions.locator('text=equals').click()
+
+      const valueField = page.locator('.condition__value')
+      await valueField.click()
+      const dropdownValueOptions = valueField.locator('.rs__option')
+      await dropdownValueOptions.locator('text=some text').click()
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    })
   })
 
   describe('upload', () => {
@@ -1933,3 +2072,27 @@ describe('fields', () => {
     })
   })
 })
+
+async function createTextFieldDoc(overrides?: Partial<TextField>): Promise<TextField> {
+  return payload.create({
+    collection: 'text-fields',
+    data: {
+      text: 'some text',
+      localizedText: 'some localized text',
+      ...overrides,
+    },
+  }) as unknown as Promise<TextField>
+}
+
+async function createRelationshipFieldDoc(
+  relationship: RelationshipField['relationship'],
+  overrides?: Partial<RelationshipField>,
+): Promise<RelationshipField> {
+  return payload.create({
+    collection: 'relationship-fields',
+    data: {
+      relationship,
+      ...overrides,
+    },
+  }) as unknown as Promise<RelationshipField>
+}

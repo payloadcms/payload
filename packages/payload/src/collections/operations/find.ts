@@ -37,42 +37,43 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
 ): Promise<PaginatedDocs<T>> => {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection.config,
-        context: args.req.context,
-        operation: 'read',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    collection: { config: collectionConfig },
-    collection,
-    currentDepth,
-    depth,
-    disableErrors,
-    draft: draftsEnabled,
-    limit,
-    overrideAccess,
-    page,
-    pagination = true,
-    req: { locale, payload },
-    req,
-    showHiddenFields,
-    sort,
-    where,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection.config,
+          context: args.req.context,
+          operation: 'read',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      collection: { config: collectionConfig },
+      collection,
+      currentDepth,
+      depth,
+      disableErrors,
+      draft: draftsEnabled,
+      limit,
+      overrideAccess,
+      page,
+      pagination = true,
+      req: { fallbackLocale, locale, payload },
+      req,
+      showHiddenFields,
+      sort,
+      where,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -195,8 +196,10 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
             currentDepth,
             depth,
             doc,
+            fallbackLocale,
             findMany: true,
             global: null,
+            locale,
             overrideAccess,
             req,
             showHiddenFields,
@@ -253,7 +256,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

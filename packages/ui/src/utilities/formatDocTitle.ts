@@ -23,7 +23,14 @@ export const formatDocTitle = (args: {
 
   const field = fieldFromProps || getObjectDotNotation<FormField>(doc, useAsTitle)
 
-  let title = typeof field === 'string' ? field : (field?.value as string)
+  let title: string
+  if (typeof field === 'string') {
+    title = field
+  } else if (typeof field === 'number') {
+    title = String(field)
+  } else {
+    title = field?.value as string
+  }
 
   if (title && isDate) {
     title = formatDate(title, dateFormat, i18n.language)

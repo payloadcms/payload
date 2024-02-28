@@ -1,4 +1,5 @@
 import type { Payload } from '../../packages/payload/src'
+import type { BlockField } from 'payload/types'
 
 import { getPayload } from '../../packages/payload/src'
 import { startMemoryDB } from '../startMemoryDB'
@@ -45,6 +46,15 @@ describe('Config', () => {
       const [field] = collection.fields
 
       expect(field.custom).toEqual({ description: 'The title of this page' })
+    })
+
+    it('allows a custom field in blocks in collection fields', () => {
+      const [collection] = payload.config.collections
+      const [, blocksField] = collection.fields
+
+      expect((blocksField as BlockField).blocks[0].custom).toEqual({
+        description: 'The blockOne of this page',
+      })
     })
   })
 

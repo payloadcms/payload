@@ -18,11 +18,6 @@
       "import": "./src/exports/*.ts",
       "require": "./src/exports/*.ts",
       "types": "./src/exports/*.ts"
-    },
-    "./dist/*": {
-      "import": "./src/*.ts",
-      "require": "./src/*.ts",
-      "types": "./src/*.ts"
     }
   },
   "scripts": {

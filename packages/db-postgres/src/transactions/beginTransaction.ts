@@ -11,11 +11,11 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
   try {
     id = uuid()
 
-    let reject: (value?: unknown) => void
-    let resolve: (value?: unknown) => void
+    let reject: () => Promise<void>
+    let resolve: () => Promise<void>
     let transaction: DrizzleTransaction
 
-    let transactionReady: (value?: unknown) => void
+    let transactionReady: () => void
 
     // Drizzle only exposes a transactions API that is sufficient if you
     // can directly pass around the `tx` argument. But our operations are spread
@@ -24,13 +24,19 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
     // and will call them in our respective transaction methods
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.drizzle
+    const done = this.drizzle
       .transaction(async (tx) => {
         transaction = tx
-        await new Promise((res, rej) => {
+        await new Promise<void>((res, rej) => {
+          resolve = () => {
+            res()
+            return done
+          }
+          reject = () => {
+            rej()
+            return done
+          }
           transactionReady()
-          resolve = res
-          reject = rej
         })
       })
       .catch(() => {
@@ -39,7 +45,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
 
     // Need to wait until the transaction is ready
     // before binding its `resolve` and `reject` methods below
-    await new Promise((resolve) => (transactionReady = resolve))
+    await new Promise<void>((resolve) => (transactionReady = resolve))
 
     this.sessions[id] = {
       db: transaction,

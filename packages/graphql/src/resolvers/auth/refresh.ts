@@ -2,7 +2,7 @@ import { refreshOperation } from 'payload/operations'
 import { generatePayloadCookie, extractJWT } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { isolateObjectProperty } from 'payload/utilities'
 import { Context } from '../types'
 
 function refreshResolver(collection: Collection) {
@@ -18,7 +18,7 @@ function refreshResolver(collection: Collection) {
     const options = {
       collection,
       depth: 0,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty(context.req, 'transactionID'),
       token,
     }
 

@@ -7,7 +7,6 @@ import type SMTPConnection from 'nodemailer/lib/smtp-connection'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
-// @ts-ignore-next-line
 
 import type { Payload } from '..'
 import type { DocumentTab, RichTextAdapter } from '../admin/types'
@@ -22,8 +21,8 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types'
 import type { ClientConfigField } from '../fields/config/types'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types'
-import type { PayloadRequest } from '../types'
-import type { Where } from '../types'
+import type { PayloadRequest, Where } from '../types'
+import type { PayloadLogger } from '../utilities/logger'
 
 export type BinScriptConfig = {
   key: string
@@ -169,6 +168,12 @@ export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express
 
+  /**
+   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
+   * This allows you to bring your own logger instance and let payload use it
+   */
+  logger?: PayloadLogger
+
   loggerDestination?: DestinationStream
 
   /**
@@ -232,6 +237,7 @@ export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Respon
 export type Endpoint<U = User> = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+
   /**
    * Middleware that will be called when the path/method matches
    *

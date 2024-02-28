@@ -7,13 +7,14 @@ import { extractTranslations } from '../../translations/extractTranslations'
 const labels = extractTranslations(['authentication:enableAPIKey', 'authentication:apiKey'])
 
 const encryptKey: FieldHook = ({ req, value }) =>
-  value ? req.payload.encrypt(value as string) : undefined
+  value ? req.payload.encrypt(value as string) : null
 const decryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.decrypt(value as string) : undefined
 
 export default [
   {
     name: 'enableAPIKey',
+    type: 'checkbox',
     admin: {
       components: {
         Field: () => null,
@@ -21,10 +22,10 @@ export default [
     },
     defaultValue: false,
     label: labels['authentication:enableAPIKey'],
-    type: 'checkbox',
   },
   {
     name: 'apiKey',
+    type: 'text',
     admin: {
       components: {
         Field: () => null,
@@ -35,10 +36,10 @@ export default [
       beforeChange: [encryptKey],
     },
     label: labels['authentication:apiKey'],
-    type: 'text',
   },
   {
     name: 'apiKeyIndex',
+    type: 'text',
     admin: {
       disabled: true,
     },
@@ -59,6 +60,5 @@ export default [
         },
       ],
     },
-    type: 'text',
   },
 ] as Field[]

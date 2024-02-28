@@ -27,7 +27,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     depth,
     globalConfig,
     overrideAccess,
-    req: { payload },
+    req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
   } = args
@@ -68,9 +68,9 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // /////////////////////////////////////
 
     const previousDoc = await payload.findGlobal({
+      slug: globalConfig.slug,
       depth,
       req,
-      slug: globalConfig.slug,
     })
 
     // /////////////////////////////////////
@@ -78,23 +78,23 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // /////////////////////////////////////
 
     const global = await payload.db.findGlobal({
-      req,
       slug: globalConfig.slug,
+      req,
     })
 
     let result = rawVersion.version
 
     if (global) {
       result = await payload.db.updateGlobal({
+        slug: globalConfig.slug,
         data: result,
         req,
-        slug: globalConfig.slug,
       })
     } else {
       result = await payload.db.createGlobal({
+        slug: globalConfig.slug,
         data: result,
         req,
-        slug: globalConfig.slug,
       })
     }
 
@@ -107,7 +107,9 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       context: req.context,
       depth,
       doc: result,
+      fallbackLocale,
       global: globalConfig,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,

@@ -1,6 +1,12 @@
 @import '../../scss/styles.scss';
 
 .template-default {
+  [dir='rtl']
+  &__nav-toggler-wrapper {
+    left: unset;
+    right: 0;
+  }
+
   &__nav-toggler-wrapper {
     position: fixed;
     z-index: var(--z-modal);

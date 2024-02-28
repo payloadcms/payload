@@ -153,7 +153,7 @@ const NumberField: React.FC<Props> = (props) => {
           //   if (isOverHasMany) {
           //     return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
           //   }
-          //   return t('general:noOptions')
+          //   return null
           // }}
           // numberOnly
           // onChange={handleHasManyChange}

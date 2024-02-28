@@ -33,7 +33,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     disableErrors,
     globalConfig,
     overrideAccess,
-    req: { locale, payload },
+    req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
   } = args
@@ -110,7 +110,9 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       currentDepth,
       depth,
       doc: result.version,
+      fallbackLocale,
       global: globalConfig,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
