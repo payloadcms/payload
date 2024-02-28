@@ -7,13 +7,13 @@ import type { Props } from './types'
 
 import Form from '../../forms/Form'
 import { useForm } from '../../forms/Form/context'
-import RenderFields from '../../forms/RenderFields'
 import FormSubmit from '../../forms/Submit'
 import { X } from '../../icons/X'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo'
 import { OperationContext } from '../../providers/OperationProvider'
+import { useSearchParams } from '../../providers/SearchParams'
 import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider'
 import { useTranslation } from '../../providers/Translation'
 import { Drawer, DrawerToggler } from '../Drawer'
@@ -83,7 +83,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   )
 }
 const EditMany: React.FC<Props> = (props) => {
-  const { collection: { fields, labels: { plural }, slug } = {}, collection, resetParams } = props
+  const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()
@@ -94,6 +94,7 @@ const EditMany: React.FC<Props> = (props) => {
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [selected, setSelected] = useState([])
+  const { dispatchSearchParams } = useSearchParams()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasUpdatePermission = collectionPermissions?.update?.permission
@@ -105,7 +106,11 @@ const EditMany: React.FC<Props> = (props) => {
   }
 
   const onSuccess = () => {
-    resetParams({ page: selectAll === SelectAllStatus.AllAvailable ? 1 : undefined })
+    dispatchSearchParams({
+      type: 'set',
+      browserHistory: 'replace',
+      params: { page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined },
+    })
   }
 
   return (

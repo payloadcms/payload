@@ -7,10 +7,14 @@ import './index.scss'
 
 const baseClass = 'dashboard'
 
-export const DefaultDashboard: React.FC<{
+export type DashboardProps = {
   Link: React.ComponentType<any>
   config: SanitizedConfig
-}> = (props) => {
+  visibleCollections: string[]
+  visibleGlobals: string[]
+}
+
+export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
   const {
     Link,
     config: {
@@ -18,6 +22,8 @@ export const DefaultDashboard: React.FC<{
         components: { afterDashboard, beforeDashboard },
       },
     },
+    visibleCollections,
+    visibleGlobals,
   } = props
 
   const { setViewActions } = useActions()
@@ -32,7 +38,11 @@ export const DefaultDashboard: React.FC<{
       <Gutter className={`${baseClass}__wrap`}>
         {Array.isArray(beforeDashboard) &&
           beforeDashboard.map((Component, i) => <Component key={i} />)}
-        <DefaultDashboardClient Link={Link} />
+        <DefaultDashboardClient
+          Link={Link}
+          visibleCollections={visibleCollections}
+          visibleGlobals={visibleGlobals}
+        />
         {Array.isArray(afterDashboard) &&
           afterDashboard.map((Component, i) => <Component key={i} />)}
       </Gutter>

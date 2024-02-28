@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { payloadFavicon, payloadOgImage } from '@payloadcms/ui'
+import { payloadFavicon, payloadOgImage } from '@payloadcms/ui/assets'
 
 export const meta = async (args: {
   config: SanitizedConfig

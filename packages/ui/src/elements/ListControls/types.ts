@@ -11,7 +11,6 @@ export type Props = {
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
   modifySearchQuery?: boolean
-  resetParams?: () => void
   textFieldsToBeSearched?: FieldAffectingData[]
   titleField: FieldAffectingData
 }

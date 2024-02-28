@@ -33,7 +33,7 @@ export const buildComponentMap = (args: {
 
   // Collections
   const collections = config.collections.reduce((acc, collectionConfig) => {
-    const { fields, slug } = collectionConfig
+    const { slug, fields } = collectionConfig
 
     const editViewFromConfig = collectionConfig?.admin?.components?.views?.Edit
     const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
@@ -115,7 +115,7 @@ export const buildComponentMap = (args: {
 
   // Globals
   const globals = config.globals.reduce((acc, globalConfig) => {
-    const { fields, slug } = globalConfig
+    const { slug, fields } = globalConfig
 
     const mappedFields = mapFields({
       DefaultCell,

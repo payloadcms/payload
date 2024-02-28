@@ -9,6 +9,7 @@ import {
   TableColumnsProvider,
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
+import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types'
@@ -97,8 +98,12 @@ export const ListView = async ({
 
   if (collectionConfig) {
     const {
-      admin: { components: { views: { List: CustomList } = {} } = {} },
+      admin: { components: { views: { List: CustomList } = {} } = {}, hidden },
     } = collectionConfig
+
+    if (isEntityHidden({ hidden, user })) {
+      return notFound()
+    }
 
     let CustomListView = null
 

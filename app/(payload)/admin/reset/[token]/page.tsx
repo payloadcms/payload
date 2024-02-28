@@ -6,7 +6,7 @@ import {
   generateMetadata as generateMeta,
 } from '@payloadcms/next/pages/ResetPassword'
 import { Metadata } from 'next'
-import config from 'payload-config'
+import config from '@payload-config'
 
 export const generateMetadata = async (): Promise<Metadata> => generateMeta({ config })
 
