@@ -93,10 +93,6 @@
     "nodemon": "3.0.3",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
-    "pino": "8.15.0",
-    "pino-pretty": "10.2.0",
-    "pino": "8.15.0",
-    "pino-pretty": "10.2.0",
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
@@ -121,16 +117,6 @@
     "react": "18.2.0",
     "react-router-dom": "5.3.4"
   },
-  "pnpm": {
-    "overrides": {
-      "copyfiles": "$copyfiles",
-      "cross-env": "$cross-env",
-      "dotenv": "$dotenv",
-      "drizzle-orm": "$drizzle-orm",
-      "ts-node": "$ts-node",
-      "typescript": "$typescript"
-    }
-  },
   "engines": {
     "node": ">=14",
     "pnpm": ">=8"
@@ -146,9 +132,15 @@
   },
   "pnpm": {
     "overrides": {
+      "copyfiles": "$copyfiles",
+      "cross-env": "$cross-env",
+      "dotenv": "$dotenv",
+      "drizzle-orm": "$drizzle-orm",
       "graphql": "^16.8.1",
-      "react": "^18.2.0",
-      "react-dom": "^18.2.0"
+      "react": "$react",
+      "react-dom": "$react-dom",
+      "ts-node": "$ts-node",
+      "typescript": "$typescript"
     },
     "allowedDeprecatedVersions": {
       "uuid": "3.4.0",
