@@ -89,11 +89,9 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
     id,
     data,
     fieldSchema,
-    locale,
     operation,
     preferences: docPreferences,
-    t,
-    user,
+    req,
   })
 
   return Response.json(result, {
