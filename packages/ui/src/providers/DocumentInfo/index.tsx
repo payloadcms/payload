@@ -282,17 +282,27 @@ export const DocumentInfoProvider: React.FC<
       if (!docPermissions) await getDocPermissions()
       else setDocPermissions(docPermissions)
     }
-    void loadDocPermissions()
-  }, [getDocPermissions, rest.docPermissions, setDocPermissions])
+
+    if (collectionSlug || globalSlug) {
+      void loadDocPermissions()
+    }
+  }, [getDocPermissions, rest.docPermissions, setDocPermissions, collectionSlug, globalSlug])
 
   useEffect(() => {
     const loadDocPreferences = async () => {
       let docPreferences: DocumentPreferences = rest.docPreferences
       if (!docPreferences) docPreferences = await getDocPreferences()
-      void setPreference(preferencesKey, docPreferences)
+
+      setDocumentInfo((existingInfo) => ({
+        ...existingInfo,
+        docPreferences,
+      }))
     }
-    void loadDocPreferences()
-  }, [getDocPreferences, preferencesKey, rest.docPreferences, setPreference])
+
+    if (id) {
+      void loadDocPreferences()
+    }
+  }, [getDocPreferences, preferencesKey, rest.docPreferences, id])
 
   const value: DocumentInfoContext = {
     ...documentInfo,
