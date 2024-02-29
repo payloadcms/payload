@@ -46,7 +46,6 @@ import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequire
 import combineParentName from '../utilities/combineParentName'
 import formatName from '../utilities/formatName'
 import withNullableType from './withNullableType'
-import { Result } from './configToSchema'
 import { flattenTopLevelFields } from 'payload/utilities'
 
 const idFieldTypes = {
