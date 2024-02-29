@@ -7,6 +7,8 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 
+import { initI18n } from '@payloadcms/translations'
+import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui'
 import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -65,12 +67,21 @@ export const initPage = async ({
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
   const localeCode = localeParam || defaultLocale
   const locale = localization && findLocaleFromCode(localization, localeCode)
+  const language = getRequestLanguage({ cookies, headers })
+  const i18n = initI18n({
+    config: config.i18n,
+    context: 'client',
+    language,
+    translations,
+  })
 
   const req = await createLocalReq(
     {
       fallbackLocale: null,
-      language: getRequestLanguage({ cookies, headers }),
       locale: locale.code,
+      req: {
+        i18n,
+      } as PayloadRequest,
       user,
     },
     payload,
