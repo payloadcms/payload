@@ -33,18 +33,15 @@ export const LinkDrawer: React.FC<Props> = ({
   const { t } = useTranslation()
   const { schemaPath } = useFieldPath()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
-  const { id, getDocPreferences } = useDocumentInfo()
+  const { id } = useDocumentInfo()
   const config = useConfig()
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const docPreferences = await getDocPreferences()
-
       return getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
-          docPreferences,
           formState: prevFormState,
           operation: 'update',
           schemaPath: fieldMapPath,
@@ -53,14 +50,14 @@ export const LinkDrawer: React.FC<Props> = ({
       })
     },
 
-    [config.routes.api, config.serverURL, fieldMapPath, getDocPreferences, id],
+    [config.routes.api, config.serverURL, fieldMapPath, id],
   )
 
   return (
     <FieldPathProvider path="" schemaPath="">
       <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
         <Form initialState={initialState} onChange={[onChange]} onSubmit={handleModalSubmit}>
-          <RenderFields fieldMap={fieldMap} forceRender readOnly={false} />
+          <RenderFields fieldMap={fieldMap} forceRender />
           <LinkSubmit />
         </Form>
       </Drawer>
