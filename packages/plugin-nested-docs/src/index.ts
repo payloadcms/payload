@@ -1,5 +1,5 @@
 import type { Plugin } from 'payload/config'
-import type { SingleRelationshipField } from 'payload/dist/fields/config/types'
+import type { SingleRelationshipField } from 'payload/types'
 
 import type { PluginConfig } from './types'
 

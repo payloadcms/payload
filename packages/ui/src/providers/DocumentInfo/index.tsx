@@ -16,6 +16,8 @@ import { useTranslation } from '../Translation'
 
 const Context = createContext({} as DocumentInfoContext)
 
+export type { DocumentInfo, DocumentInfoContext, DocumentInfoProps }
+
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
 export const DocumentInfoProvider: React.FC<
