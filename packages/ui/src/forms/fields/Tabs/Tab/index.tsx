@@ -2,7 +2,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { useState } from 'react'
 
-import type { ReducedTab } from '../../../utilities/buildComponentMap/types'
+import type { MappedTab } from '../../../../utilities/buildComponentMap/types'
 
 import { useTranslation } from '../../../..'
 import { ErrorPill } from '../../../../elements/ErrorPill'
@@ -15,7 +15,7 @@ type TabProps = {
   isActive?: boolean
   parentPath: string
   setIsActive: () => void
-  tab: ReducedTab
+  tab: MappedTab
 }
 
 export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {

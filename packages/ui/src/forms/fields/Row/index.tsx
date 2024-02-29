@@ -21,10 +21,10 @@ const Row: React.FC<Props> = (props) => {
           className={`${baseClass}__fields`}
           fieldMap={fieldMap}
           forceRender={forceRender}
-          indexPath={indexPath}
+          // indexPath={indexPath}
           margins={false}
-          permissions={permissions}
-          readOnly={readOnly}
+          // permissions={permissions}
+          // readOnly={readOnly}
         />
       </div>
     </RowProvider>

@@ -125,6 +125,7 @@ const EditMany: React.FC<Props> = (props) => {
         {t('general:edit')}
       </DrawerToggler>
       <Drawer Header={null} slug={drawerSlug}>
+        {/* @ts-expect-error */}
         <DocumentInfoProvider collection={collection}>
           <OperationContext.Provider value="update">
             <Form className={`${baseClass}__form`} onSuccess={onSuccess}>
@@ -180,6 +181,7 @@ const EditMany: React.FC<Props> = (props) => {
               </div>
             </Form>
           </OperationContext.Provider>
+          {/* @ts-expect-error */}
         </DocumentInfoProvider>
       </Drawer>
     </div>

@@ -48,9 +48,7 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     <button className={classes} onClick={onClick} title={title} type="button">
       <div className={`${baseClass}__thumbnail`}>
         {thumbnail && thumbnail}
-        {!thumbnail && collection && doc && (
-          <Thumbnail collection={collection} doc={doc} size="expand" />
-        )}
+        {!thumbnail && collection && doc && <Thumbnail doc={doc} size="expand" />}
       </div>
       <div className={`${baseClass}__label`}>{title}</div>
     </button>

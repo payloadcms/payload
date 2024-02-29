@@ -140,19 +140,19 @@ const TabsField: React.FC<Props> = (props) => {
                   <RenderFields
                     fieldMap={activeTabConfig.subfields}
                     forceRender={forceRender}
-                    indexPath={indexPath}
+                    // indexPath={indexPath}
                     key={
                       activeTabConfig.label
                         ? getTranslation(activeTabConfig.label, i18n)
                         : activeTabConfig['name']
                     }
                     margins="small"
-                    permissions={
-                      'name' in activeTabConfig && permissions?.[activeTabConfig.name]
-                        ? permissions[activeTabConfig.name].fields
-                        : permissions
-                    }
-                    readOnly={readOnly}
+                    // permissions={
+                    //   'name' in activeTabConfig && permissions?.[activeTabConfig.name]
+                    //     ? permissions[activeTabConfig.name].fields
+                    //     : permissions
+                    // }
+                    // readOnly={readOnly}
                   />
                 </FieldPathProvider>
               </div>
