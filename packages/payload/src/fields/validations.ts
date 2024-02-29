@@ -1,4 +1,4 @@
-import type { RichTextAdapter } from '../exports/types'
+import type { RichTextAdapter, Where } from '../exports/types'
 import type {
   ArrayField,
   BlockField,
@@ -344,14 +344,14 @@ const validateFilterOptions: Validate<
           })
 
           if (valueIDs.length > 0) {
-            const findWhere = {
+            const findWhere: Where = {
               and: [{ id: { in: valueIDs } }],
             }
 
-            if (optionFilter) findWhere.and.push(optionFilter)
+            if (optionFilter && optionFilter !== true) findWhere.and.push(optionFilter)
 
             if (optionFilter === false) {
-              falseCollections.push(optionFilter)
+              falseCollections.push(collection)
             }
 
             // `req` omitted to prevent transaction errors from aborting the entire transaction
