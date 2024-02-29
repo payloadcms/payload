@@ -7,11 +7,14 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "echo \"Build temporarily disabled.\" && exit 0",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "prepublishOnly": "pnpm clean && pnpm build"
   },
   "keywords": [
     "payload",
@@ -51,8 +54,5 @@
     "dist",
     "types.js",
     "types.d.ts"
-  ],
-  "dependencies": {
-    "@payloadcms/ui": "workspace:^"
-  }
+  ]
 }
