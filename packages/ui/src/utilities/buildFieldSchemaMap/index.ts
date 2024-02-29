@@ -7,12 +7,15 @@ import { traverseFields } from './traverseFields'
 export const buildFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
   const result: FieldSchemaMap = new Map()
 
+  const validRelationships = config.collections.map((c) => c.slug) || []
+
   config.collections.forEach((collection) => {
     traverseFields({
       config,
       fields: collection.fields,
       schemaMap: result,
       schemaPath: collection.slug,
+      validRelationships,
     })
   })
 
@@ -22,6 +25,7 @@ export const buildFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => 
       fields: global.fields,
       schemaMap: result,
       schemaPath: global.slug,
+      validRelationships,
     })
   })
 

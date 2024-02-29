@@ -62,7 +62,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
     )
   }
 
-  const data = incomingData || reduceFieldsToValues(formState, true)
+  const data = incomingData || reduceFieldsToValues(formState || {}, true)
 
   const result = await buildStateFromSchema({
     id,

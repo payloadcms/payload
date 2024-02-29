@@ -122,6 +122,7 @@ export type ADD_ROW = {
   blockType?: string
   path: string
   rowIndex?: number
+  subFieldState?: FormState
   type: 'ADD_ROW'
 }
 
@@ -129,6 +130,7 @@ export type REPLACE_ROW = {
   blockType?: string
   path: string
   rowIndex: number
+  subFieldState?: FormState
   type: 'REPLACE_ROW'
 }
 
@@ -176,6 +178,18 @@ export type FieldAction =
 export type FormFieldsContext = [FormState, Dispatch<FieldAction>]
 
 export type Context = {
+  addFieldRow: ({
+    data,
+    path,
+    rowIndex,
+  }: {
+    data?: Data
+    path: string
+    /*
+     * by default the new row will be added to the end of the list
+     */
+    rowIndex?: number
+  }) => Promise<void>
   buildRowErrors: () => void
   createFormData: CreateFormData
   disabled: boolean
@@ -190,6 +204,16 @@ export type Context = {
   getField: GetField
   getFields: GetFields
   getSiblingData: GetSiblingData
+  removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
+  replaceFieldRow: ({
+    data,
+    path,
+    rowIndex,
+  }: {
+    data?: Data
+    path: string
+    rowIndex: number
+  }) => Promise<void>
   replaceState: (state: FormState) => void
   reset: Reset
   setModified: SetModified
