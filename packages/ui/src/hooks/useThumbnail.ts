@@ -51,7 +51,7 @@ const useThumbnail = (
       }
 
       if (sizes?.[adminThumbnail]?.filename) {
-        return `${serverURL}/${sizes[adminThumbnail].filename}`
+        return `${serverURL}${apiRoute}/${collectionSlug}/file/${sizes[adminThumbnail].filename}`
       }
     }
 
