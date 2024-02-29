@@ -131,10 +131,10 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             className={`${baseClass}__fields`}
             fieldMap={fieldMap}
             forceRender={forceRender}
-            indexPath={indexPath}
+            // indexPath={indexPath}
             margins="small"
-            permissions={permissions?.fields}
-            readOnly={readOnly}
+            // permissions={permissions?.fields}
+            // readOnly={readOnly}
           />
         </FieldPathProvider>
       </Collapsible>

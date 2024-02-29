@@ -56,7 +56,7 @@ export const recurseRichText = ({
               field,
               findMany,
               flattenLocales,
-              node: node,
+              node,
               overrideAccess,
               populationPromises,
               req,

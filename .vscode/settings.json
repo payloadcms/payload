@@ -36,26 +36,6 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   // Load .git-blame-ignore-revs file
   "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
-  "workbench.colorCustomizations": {
-    "activityBar.activeBackground": "#7fafca",
-    "activityBar.background": "#7fafca",
-    "activityBar.foreground": "#15202b",
-    "activityBar.inactiveForeground": "#15202b99",
-    "activityBarBadge.background": "#b44b8e",
-    "activityBarBadge.foreground": "#e7e7e7",
-    "commandCenter.border": "#15202b99",
-    "sash.hoverBorder": "#7fafca",
-    "statusBar.background": "#5b98bb",
-    "statusBar.foreground": "#15202b",
-    "statusBarItem.hoverBackground": "#437ea0",
-    "statusBarItem.remoteBackground": "#5b98bb",
-    "statusBarItem.remoteForeground": "#15202b",
-    "titleBar.activeBackground": "#5b98bb",
-    "titleBar.activeForeground": "#15202b",
-    "titleBar.inactiveBackground": "#5b98bb99",
-    "titleBar.inactiveForeground": "#15202b99"
-  },
-  "peacock.color": "#5b98bb",
   "[javascript][typescript][typescriptreact]": {
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"

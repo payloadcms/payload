@@ -3,17 +3,23 @@
 import {
   Drawer,
   Form,
+  type FormProps,
   FormSubmit,
   RenderFields,
+  getFormState,
+  useConfig,
+  useDocumentInfo,
   useEditDepth,
+  useFieldPath,
   useTranslation,
 } from '@payloadcms/ui'
 import { FieldPathProvider } from '@payloadcms/ui/forms'
 import { useHotkey } from '@payloadcms/ui/hooks'
-import React, { useRef } from 'react'
+import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types'
 
+import { linkFieldsSchemaPath } from '../shared'
 import './index.scss'
 
 const baseClass = 'rich-text-link-edit-modal'
@@ -25,11 +31,35 @@ export const LinkDrawer: React.FC<Props> = ({
   initialState,
 }) => {
   const { t } = useTranslation()
+  const { schemaPath } = useFieldPath()
+  const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
+  const { id, getDocPreferences } = useDocumentInfo()
+  const config = useConfig()
+
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      const docPreferences = await getDocPreferences()
+
+      return getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          docPreferences,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: fieldMapPath,
+        },
+        serverURL: config.serverURL,
+      })
+    },
+
+    [config.routes.api, config.serverURL, fieldMapPath, getDocPreferences, id],
+  )
 
   return (
     <FieldPathProvider path="" schemaPath="">
       <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
-        <Form initialState={initialState} onSubmit={handleModalSubmit}>
+        <Form initialState={initialState} onChange={[onChange]} onSubmit={handleModalSubmit}>
           <RenderFields fieldMap={fieldMap} forceRender readOnly={false} />
           <LinkSubmit />
         </Form>

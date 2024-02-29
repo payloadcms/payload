@@ -26,7 +26,7 @@ import type { ElementProps } from '..'
 import type { UploadFeatureProps } from '../..'
 import type { UploadData, UploadNode } from '../../nodes/UploadNode'
 
-import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigProvider'
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider'
 
 /**
  * This handles the extra fields, e.g. captions or alt text, which are

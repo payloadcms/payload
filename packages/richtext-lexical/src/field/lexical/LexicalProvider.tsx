@@ -1,21 +1,25 @@
 'use client'
 import type { InitialConfigType } from '@lexical/react/LexicalComposer'
+import type { FormFieldBase } from '@payloadcms/ui'
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { LexicalEditor } from 'lexical'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import * as React from 'react'
 
-import type { FieldProps } from '../../types'
-import type { SanitizedEditorConfig } from './config/types'
+import type { SanitizedClientEditorConfig } from './config/types'
 
 import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor'
-import { EditorConfigProvider } from './config/EditorConfigProvider'
+import { EditorConfigProvider } from './config/client/EditorConfigProvider'
 import { getEnabledNodes } from './nodes'
+
 export type LexicalProviderProps = {
-  editorConfig: SanitizedEditorConfig
-  fieldProps: FieldProps
+  editorConfig: SanitizedClientEditorConfig
+  fieldProps: FormFieldBase & {
+    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
+    name: string
+    richTextComponentMap: Map<string, React.ReactNode>
+  }
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   path: string
   readOnly: boolean
@@ -27,21 +31,19 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
   const [initialConfig, setInitialConfig] = React.useState<InitialConfigType | null>(null)
 
-  // set lexical config in useffect async:
+  // set lexical config in useEffect: // TODO: Is this the most performant way to do this? Prob not
   React.useEffect(() => {
-    void editorConfig.lexical().then((lexicalConfig: LexicalEditorConfig) => {
-      const newInitialConfig: InitialConfigType = {
-        editable: readOnly !== true,
-        editorState: value != null ? JSON.stringify(value) : undefined,
-        namespace: lexicalConfig.namespace,
-        nodes: [...getEnabledNodes({ editorConfig })],
-        onError: (error: Error) => {
-          throw error
-        },
-        theme: lexicalConfig.theme,
-      }
-      setInitialConfig(newInitialConfig)
-    })
+    const newInitialConfig: InitialConfigType = {
+      editable: readOnly !== true,
+      editorState: value != null ? JSON.stringify(value) : undefined,
+      namespace: editorConfig.lexical.namespace,
+      nodes: [...getEnabledNodes({ editorConfig })],
+      onError: (error: Error) => {
+        throw error
+      },
+      theme: editorConfig.lexical.theme,
+    }
+    setInitialConfig(newInitialConfig)
   }, [editorConfig, readOnly, value])
 
   if (editorConfig?.features?.hooks?.load?.length) {

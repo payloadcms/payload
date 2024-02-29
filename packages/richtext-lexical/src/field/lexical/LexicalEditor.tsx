@@ -111,7 +111,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
       {editor.isEditable() && (
         <React.Fragment>
           <HistoryPlugin />
-          <MarkdownShortcutPlugin />
+          {editorConfig?.features?.markdownTransformers?.length > 0 && <MarkdownShortcutPlugin />}
         </React.Fragment>
       )}
 

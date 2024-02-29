@@ -46,12 +46,13 @@
     "@types/json-schema": "7.0.15",
     "@types/node": "20.6.2",
     "@types/react": "18.2.15",
+    "@types/react-dom": "18.2.7",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.4.0",
     "@payloadcms/translations": "workspace:^",
-    "@payloadcms/ui": "workspace:^"
+    "@payloadcms/ui": "workspace:^",
+    "payload": "^2.4.0"
   },
   "exports": {
     ".": {
@@ -70,6 +71,9 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
+  },
+  "engines": {
+    "node": ">=18.17.0"
   },
   "files": [
     "dist",

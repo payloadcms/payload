@@ -6,8 +6,6 @@ import { startMemoryDB } from '../../startMemoryDB'
 import configPromise from './config'
 import { usersSlug } from './shared'
 
-require('isomorphic-fetch')
-
 let payload: Payload
 let restClient: NextRESTClient
 

@@ -6,6 +6,7 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
+import type { ListPreferences } from '../TableColumns'
 import type { ListDrawerProps } from './types'
 
 import { baseClass } from '.'
@@ -304,6 +305,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           },
         ]}
         collectionSlug={selectedCollectionConfig.slug}
+        listPreferences={{} as ListPreferences} // TODO: get list preferences
       >
         {List}
         <DocumentDrawer onSave={onCreateNew} />

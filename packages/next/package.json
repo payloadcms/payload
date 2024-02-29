@@ -1,7 +1,6 @@
 {
   "name": "@payloadcms/next",
   "version": "0.0.1",
-  "private": true,
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "bin": {
@@ -105,6 +104,9 @@
       }
     },
     "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=18.17.0"
   },
   "files": [
     "dist"
