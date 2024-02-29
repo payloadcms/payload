@@ -11,12 +11,13 @@ const baseClass = 'file'
 export interface FileCellProps extends CellComponentProps<any> {}
 
 export const FileCell: React.FC<FileCellProps> = ({ cellData, customCellContext, rowData }) => {
-  const { uploadConfig } = customCellContext
+  const { collectionSlug, uploadConfig } = customCellContext
 
   return (
     <div className={baseClass}>
       <Thumbnail
         className={`${baseClass}__thumbnail`}
+        collectionSlug={collectionSlug}
         doc={{
           ...rowData,
           filename: cellData,

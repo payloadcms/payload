@@ -63,6 +63,7 @@ export type MappedField = {
 export type FieldMap = MappedField[]
 
 export type CollectionComponentMap = ConfigComponentMapBase & {
+  AdminThumbnail: React.ReactNode
   AfterList: React.ReactNode
   AfterListTable: React.ReactNode
   BeforeList: React.ReactNode

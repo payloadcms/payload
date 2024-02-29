@@ -2,28 +2,34 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { isImage } from 'payload/utilities'
 
+import { useComponentMap } from '..'
 import { useConfig } from '../providers/Config'
 
 const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i')
 const base64Pattern = new RegExp(/^data:image\/[a-z]+;base64,/)
 
+// /api/[collectionSlug]/file/[filename]
+
 const useThumbnail = (
+  collectionSlug: string,
   uploadConfig: SanitizedCollectionConfig['upload'],
   doc: Record<string, unknown>,
 ): false | string => {
-  const { adminThumbnail, staticURL } = uploadConfig
+  const {
+    routes: { api: apiRoute },
+    serverURL,
+  } = useConfig()
+  const { componentMap } = useComponentMap()
+
+  if (!collectionSlug || !uploadConfig || !doc) return null
+
+  const { adminThumbnail } = uploadConfig
 
   const { filename, mimeType, sizes, url } = doc
+  const thumbnailSrcFunction = componentMap?.[`${collectionSlug}.adminThumbnail`]
 
-  const { serverURL } = useConfig()
-  let pathURL = `${serverURL}${staticURL || ''}`
-
-  if (absoluteURLPattern.test(staticURL)) {
-    pathURL = staticURL
-  }
-
-  if (typeof adminThumbnail === 'function') {
-    const thumbnailURL = adminThumbnail({ doc })
+  if (typeof thumbnailSrcFunction === 'function') {
+    const thumbnailURL = thumbnailSrcFunction({ doc })
 
     if (!thumbnailURL) return false
 
@@ -31,7 +37,7 @@ const useThumbnail = (
       return thumbnailURL
     }
 
-    return `${pathURL}/${thumbnailURL}`
+    return `${serverURL}/${thumbnailURL}`
   }
 
   if (isImage(mimeType as string)) {
@@ -39,19 +45,23 @@ const useThumbnail = (
       return url as string
     }
 
-    if (sizes?.[adminThumbnail]?.url) {
-      return sizes[adminThumbnail].url
-    }
+    if (typeof adminThumbnail === 'string') {
+      if (sizes?.[adminThumbnail]?.url) {
+        return sizes[adminThumbnail].url
+      }
 
-    if (sizes?.[adminThumbnail]?.filename) {
-      return `${pathURL}/${sizes[adminThumbnail].filename}`
+      if (sizes?.[adminThumbnail]?.filename) {
+        return `${serverURL}/${sizes[adminThumbnail].filename}`
+      }
     }
 
     if (url) {
       return url as string
     }
 
-    return `${pathURL}/${filename}`
+    if (typeof filename === 'string') {
+      return `${serverURL}${apiRoute}/${collectionSlug}/file/${filename}`
+    }
   }
 
   return false

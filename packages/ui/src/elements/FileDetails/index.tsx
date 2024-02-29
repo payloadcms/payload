@@ -22,7 +22,12 @@ const FileDetails: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <header>
-        <Thumbnail doc={doc} imageCacheTag={imageCacheTag} uploadConfig={uploadConfig} />
+        <Thumbnail
+          collectionSlug={collectionSlug}
+          doc={doc}
+          imageCacheTag={imageCacheTag}
+          uploadConfig={uploadConfig}
+        />
         <div className={`${baseClass}__main-detail`}>
           <Meta
             collection={collectionSlug}

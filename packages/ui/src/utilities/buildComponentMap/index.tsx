@@ -97,7 +97,15 @@ export const buildComponentMap = (args: {
       readOnly: readOnlyOverride,
     })
 
+    let AdminThumbnail = null
+    if (typeof collectionConfig?.upload?.adminThumbnail === 'function') {
+      AdminThumbnail = collectionConfig?.upload?.adminThumbnail
+    } else if (typeof collectionConfig?.upload?.adminThumbnail === 'string') {
+      AdminThumbnail = () => collectionConfig?.upload?.adminThumbnail
+    }
+
     const componentMap: CollectionComponentMap = {
+      AdminThumbnail,
       AfterList,
       AfterListTable,
       BeforeList,

@@ -60,7 +60,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
       <div className={`${baseClass}__blocks-wrapper`}>
         <ul className={`${baseClass}__blocks`}>
           {filteredBlocks?.map((block, index) => {
-            const { imageAltText, imageURL, labels: blockLabels, slug } = block
+            const { slug, imageAltText, imageURL, labels: blockLabels } = block
 
             return (
               <li className={`${baseClass}__block`} key={index}>

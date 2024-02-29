@@ -84,7 +84,7 @@ const Element: React.FC<Props & { enabledCollectionSlugs?: string[] }> = ({
     { initialParams },
   )
 
-  const thumbnailSRC = useThumbnail(relatedCollection.upload, data)
+  const thumbnailSRC = useThumbnail(relatedCollection.slug, relatedCollection.upload, data)
 
   const removeUpload = useCallback(() => {
     const elementPath = ReactEditor.findPath(editor, element)
