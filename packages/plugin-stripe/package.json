@@ -7,12 +7,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "_build": "pnpm build:swc && pnpm build:types",
+    "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "test": "echo 'No tests available.'",
-    "prepublishOnly": "yarn clean && yarn build"
+    "prepublishOnly": "pnpm clean && pnpm turbo run build && pnpm test"
   },
   "keywords": [
     "payload",
