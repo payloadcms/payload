@@ -330,6 +330,9 @@ importers:
       mongoose:
         specifier: 6.12.3
         version: 6.12.3
+      mongoose-aggregate-paginate-v2:
+        specifier: 1.0.6
+        version: 1.0.6
       mongoose-paginate-v2:
         specifier: 1.7.22
         version: 1.7.22
@@ -346,9 +349,6 @@ importers:
       '@types/mongoose-aggregate-paginate-v2':
         specifier: 1.0.9
         version: 1.0.9
-      bson:
-        specifier: ^6.3.0
-        version: 6.3.0
       mongodb:
         specifier: 4.17.1
         version: 4.17.1
@@ -6996,11 +6996,6 @@ packages:
     engines: {node: '>=14.20.1'}
     dev: true
 
-  /bson@6.3.0:
-    resolution: {integrity: sha512-balJfqwwTBddxfnidJZagCBPP/f48zj9Sdp3OJswREOgsJzHiQSaOIAtApSgDQFYgHqAvFkp53AFSqjMDZoTFw==}
-    engines: {node: '>=16.20.1'}
-    dev: true
-
   /buffer-crc32@0.2.13:
     resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
     dev: true
@@ -12313,6 +12308,11 @@ packages:
     optionalDependencies:
       '@mongodb-js/saslprep': 1.1.4
     dev: true
+
+  /mongoose-aggregate-paginate-v2@1.0.6:
+    resolution: {integrity: sha512-UuALu+mjhQa1K9lMQvjLL3vm3iALvNw8PQNIh2gp1b+tO5hUa0NC0Wf6/8QrT9PSJVTihXaD8hQVy3J4e0jO0Q==}
+    engines: {node: '>=4.0.0'}
+    dev: false
 
   /mongoose-paginate-v2@1.7.22:
     resolution: {integrity: sha512-xW5GugkE21DJiu9e13EOxKt4ejEKQkRP/S1PkkXRjnk2rRZVKBcld1nPV+VJ/YCPfm8hb3sz9OvI7O38RmixkA==}

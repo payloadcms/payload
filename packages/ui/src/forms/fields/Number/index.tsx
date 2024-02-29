@@ -42,7 +42,7 @@ const NumberField: React.FC<Props> = (props) => {
   const hasMany = 'hasMany' in props ? props.hasMany : false
   const maxRows = 'maxRows' in props ? props.maxRows : Infinity
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -73,7 +73,7 @@ const NumberField: React.FC<Props> = (props) => {
 
       setValue(newVal)
     },
-    [setValue],
+    [onChangeFromProps, setValue],
   )
 
   const [valueToRender, setValueToRender] = useState<
@@ -148,17 +148,17 @@ const NumberField: React.FC<Props> = (props) => {
           isCreatable
           isMulti
           isSortable
-          // noOptionsMessage={({ inputValue }) => {
-          //   const isOverHasMany = Array.isArray(value) && value.length >= maxRows
-          //   if (isOverHasMany) {
-          //     return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
-          //   }
-          //   return null
-          // }}
+          noOptionsMessage={({ inputValue }) => {
+            const isOverHasMany = Array.isArray(value) && value.length >= maxRows
+            if (isOverHasMany) {
+              return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
+            }
+            return null
+          }}
           // numberOnly
-          // onChange={handleHasManyChange}
+          onChange={handleHasManyChange}
           options={[]}
-          // placeholder={t('general:enterAValue')}
+          placeholder={t('general:enterAValue')}
           showError={showError}
           value={valueToRender as Option[]}
         />
@@ -174,7 +174,7 @@ const NumberField: React.FC<Props> = (props) => {
             onChange={handleChange}
             onWheel={(e) => {
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
+              // @ts-expect-error
               e.target.blur()
             }}
             placeholder={getTranslation(placeholder, i18n)}
