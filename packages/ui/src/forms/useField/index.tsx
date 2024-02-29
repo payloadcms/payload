@@ -12,7 +12,6 @@ import { useOperation } from '../../providers/OperationProvider'
 import { useTranslation } from '../../providers/Translation'
 import { useFieldPath } from '../FieldPathProvider'
 import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context'
-import { FormField } from '../Form/types'
 
 /**
  * Get and set the value of a form field.

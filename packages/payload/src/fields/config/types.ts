@@ -143,6 +143,8 @@ export type Validate<
   options: ValidateOptions<TData, TSiblingData, TFieldConfig>,
 ) => Promise<string | true> | string | true
 
+export type ClientValidate = Omit<Validate, 'req'>
+
 export type OptionObject = {
   label: Record<string, string> | string
   value: string

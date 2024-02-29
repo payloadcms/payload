@@ -1,5 +1,5 @@
 import type { User } from 'payload/auth'
-import type { Field, Field as FieldConfig, Validate } from 'payload/types'
+import type { ClientValidate, Field, Field as FieldConfig } from 'payload/types'
 import type { Data } from 'payload/types'
 import type React from 'react'
 import type { Dispatch } from 'react'
@@ -20,7 +20,7 @@ export type FormField = {
   passesCondition?: boolean
   rows?: Row[]
   valid: boolean
-  validate?: Validate
+  validate?: ClientValidate
   value: unknown
 }
 

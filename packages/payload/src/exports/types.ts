@@ -33,6 +33,7 @@ export type {
   Block,
   BlockField,
   CheckboxField,
+  ClientValidate,
   CodeField,
   CollapsibleField,
   Condition,

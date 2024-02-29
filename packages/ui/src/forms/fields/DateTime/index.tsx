@@ -1,5 +1,5 @@
 'use client'
-import type { Validate } from 'payload/types'
+import type { ClientValidate } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -39,7 +39,7 @@ const DateTime: React.FC<Props> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const memoizedValidate: Validate = useCallback(
+  const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
