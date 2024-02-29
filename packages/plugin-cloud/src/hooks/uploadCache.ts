@@ -13,8 +13,10 @@ export const getCacheUploadsAfterChangeHook =
   async ({ doc, operation, req }) => {
     if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
 
-    const { res } = req
-    if (res) {
+    // WARNING:
+    // TODO: Test this for 3.0
+    const { payloadAPI } = req
+    if (payloadAPI !== 'local') {
       if (operation === 'update') {
         // Unawaited promise
         void purge({ doc, endpoint, operation, req })
@@ -28,8 +30,11 @@ export const getCacheUploadsAfterDeleteHook =
   async ({ doc, req }) => {
     if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
 
-    const { res } = req
-    if (res) {
+    const { payloadAPI } = req
+
+    // WARNING:
+    // TODO: Test this for 3.0
+    if (payloadAPI !== 'local') {
       // Unawaited promise
       void purge({ doc, endpoint, operation: 'delete', req })
     }
