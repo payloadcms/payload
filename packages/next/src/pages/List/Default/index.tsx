@@ -20,6 +20,10 @@ import {
 } from '@payloadcms/ui'
 import React, { Fragment, useEffect } from 'react'
 
+import DeleteMany from '../../../../../ui/src/elements/DeleteMany'
+import { EditMany } from '../../../../../ui/src/elements/EditMany'
+import { PublishMany } from '../../../../../ui/src/elements/PublishMany'
+import { UnpublishMany } from '../../../../../ui/src/elements/UnpublishMany'
 import { RelationshipProvider } from './RelationshipProvider'
 import './index.scss'
 
@@ -183,19 +187,21 @@ export const DefaultListView: React.FC = () => {
                     modifySearchParams={modifySearchParams}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />
-                  {/* {smallBreak && (
+                  {smallBreak && (
                     <div className={`${baseClass}__list-selection`}>
                       <Fragment>
-                        <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
+                        <ListSelection
+                          label={getTranslation(collectionConfig.labels.plural, i18n)}
+                        />
                         <div className={`${baseClass}__list-selection-actions`}>
-                          <EditMany />
-                          <PublishMany />
-                          <UnpublishMany />
-                          <DeleteMany />
+                          <EditMany collection={collectionConfig} />
+                          <PublishMany collection={collectionConfig} />
+                          <UnpublishMany collection={collectionConfig} />
+                          <DeleteMany collection={collectionConfig} />
                         </div>
                       </Fragment>
                     </div>
-                  )} */}
+                  )}
                 </Fragment>
               )}
             </div>
