@@ -116,15 +116,12 @@ export const promise = async ({
       const validationResult = await field.validate(valueToValidate, {
         ...field,
         id,
-        config: req.payload.config,
         data: merge(doc, data, { arrayMerge: (_, source) => source }),
+        // @ts-expect-error-next-line
         jsonError,
         operation,
-        payload: req.payload,
         req,
         siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
-        t: req.t,
-        user: req.user,
       })
 
       if (typeof validationResult === 'string') {
@@ -175,11 +172,11 @@ export const promise = async ({
         siblingData[field.name][1] !== null
       ) {
         siblingData[field.name] = {
+          type: 'Point',
           coordinates: [
             parseFloat(siblingData[field.name][0]),
             parseFloat(siblingData[field.name][1]),
           ],
-          type: 'Point',
         }
       }
 
