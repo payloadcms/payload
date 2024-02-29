@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/ui",
   "version": "0.0.1",
-  "main": "./dist/index.ts",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
@@ -14,11 +14,11 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "exports": {
-    ".": "./dist/exports/index.ts",
+    ".": "./dist/exports/index.js",
     "./*": {
-      "import": "./dist/exports/*.ts",
-      "require": "./dist/exports/*.ts",
-      "types": "./dist/exports/*.ts"
+      "import": "./dist/exports/*.js",
+      "require": "./dist/exports/*.js",
+      "types": "./dist/exports/*.d.ts"
     },
     "./scss": {
       "import": "./dist/scss.scss",
