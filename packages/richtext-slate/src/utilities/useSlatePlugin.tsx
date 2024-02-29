@@ -1,8 +1,7 @@
 import type { Editor } from 'slate'
 
+import { useFieldPath } from '@payloadcms/ui/forms'
 import { useAddClientFunction } from '@payloadcms/ui/providers'
-
-import { useFieldPath } from '../../../ui/src/forms/FieldPathProvider'
 
 type Plugin = (editor: Editor) => Editor
 
