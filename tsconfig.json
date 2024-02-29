@@ -47,6 +47,9 @@
       "@payloadcms/richtext-lexical": [
         "./packages/richtext-lexical/src"
       ],
+      "@payloadcms/ui": [
+        "./packages/ui/src/exports/index.ts"
+      ],
       "@payloadcms/ui/*": [
         "./packages/ui/src/exports/*"
       ],
