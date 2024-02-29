@@ -1,6 +1,6 @@
 import type { Response } from 'express'
 import type { Config as PayloadConfig } from 'payload/config'
-import type { PayloadRequest } from 'payload/dist/types'
+import type { PayloadRequest } from 'payload/types'
 
 import Stripe from 'stripe'
 

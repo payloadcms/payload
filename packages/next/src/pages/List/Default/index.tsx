@@ -1,5 +1,4 @@
 'use client'
-import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -17,6 +16,7 @@ import {
   useListInfo,
   useStepNav,
   useTranslation,
+  useWindowInfo,
 } from '@payloadcms/ui'
 import React, { Fragment, useEffect } from 'react'
 

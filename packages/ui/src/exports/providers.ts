@@ -7,7 +7,12 @@ export { ConfigProvider, useConfig } from '../providers/Config'
 export { CustomProvider } from '../providers/CustomProvider'
 export { useDocumentEvents } from '../providers/DocumentEvents'
 export { useDocumentInfo } from '../providers/DocumentInfo'
-export { DocumentInfoProvider } from '../providers/DocumentInfo'
+export {
+  type DocumentInfo,
+  type DocumentInfoContext,
+  type DocumentInfoProps,
+  DocumentInfoProvider,
+} from '../providers/DocumentInfo'
 export { SetDocumentInfo } from '../providers/DocumentInfo/SetDocumentInfo'
 export { EditDepthContext, EditDepthProvider } from '../providers/EditDepth'
 export { useEditDepth } from '../providers/EditDepth'

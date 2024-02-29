@@ -19,7 +19,9 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       const prefix = await getFilePrefix({ collection, req })
       const file = getStorageClient()
         .bucket(bucket)
-        .file(path.posix.join(prefix, req.params.filename))
+        // WARNING:
+        // TODO: Untested for 3.0
+        .file(path.posix.join(prefix, req.routeParams.filename as string))
 
       const [metadata] = await file.getMetadata()
 

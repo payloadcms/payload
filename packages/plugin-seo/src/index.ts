@@ -1,5 +1,5 @@
 import type { Config } from 'payload/config'
-import type { Field, GroupField, TabsField } from 'payload/dist/fields/config/types'
+import type { Field, GroupField, TabsField } from 'payload/types'
 
 import { deepMerge } from 'payload/utilities'
 
@@ -30,7 +30,6 @@ const seo =
             },
             label: 'Overview',
           },
-          // @ts-expect-error
           {
             name: 'title',
             type: 'text',

@@ -1,40 +1,41 @@
-import type { ContextType } from 'payload/dist/admin/components/utilities/DocumentInfo/types'
-import type { Field, TextareaField, TextField, UploadField } from 'payload/dist/fields/config/types'
+import type { Field, TextField, TextareaField, UploadField } from 'payload/types'
+
+import type { DocumentInfoContext } from '../../ui/src/providers/DocumentInfo/types'
 
 export type GenerateTitle = <T = any>(
-  args: ContextType & { doc: T; locale?: string },
+  args: DocumentInfoContext & { doc: T; locale?: string },
 ) => Promise<string> | string
 
 export type GenerateDescription = <T = any>(
-  args: ContextType & {
+  args: DocumentInfoContext & {
     doc: T
     locale?: string
   },
 ) => Promise<string> | string
 
 export type GenerateImage = <T = any>(
-  args: ContextType & { doc: T; locale?: string },
+  args: DocumentInfoContext & { doc: T; locale?: string },
 ) => Promise<string> | string
 
 export type GenerateURL = <T = any>(
-  args: ContextType & { doc: T; locale?: string },
+  args: DocumentInfoContext & { doc: T; locale?: string },
 ) => Promise<string> | string
 
 export interface PluginConfig {
   collections?: string[]
+  fieldOverrides?: {
+    description?: Partial<TextareaField>
+    image?: Partial<UploadField>
+    title?: Partial<TextField>
+  }
   fields?: Field[]
   generateDescription?: GenerateDescription
   generateImage?: GenerateImage
   generateTitle?: GenerateTitle
   generateURL?: GenerateURL
   globals?: string[]
-  tabbedUI?: boolean
-  fieldOverrides?: {
-    title?: Partial<TextField>
-    description?: Partial<TextareaField>
-    image?: Partial<UploadField>
-  }
   interfaceName?: string
+  tabbedUI?: boolean
   uploadsCollection?: string
 }
 

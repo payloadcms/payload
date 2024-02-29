@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [ opened, reopened, synchronize ]
   push:
-    branches: [ 'main' ]
+    branches: ['main']
 
 jobs:
   changes:
@@ -71,7 +71,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm install
-      - run: pnpm run build
+      - run: pnpm run build:all
 
       - name: Cache build
         uses: actions/cache@v3

@@ -10,7 +10,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo} && rimraf dev/yarn.lock",
-    "prepublishOnly": "pnpm clean && pnpm build && pnpm test",
+    "prepublishOnly": "pnpm clean && pnpm turbo build && pnpm test",
     "test": "jest"
   },
   "peerDependencies": {

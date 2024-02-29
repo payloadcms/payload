@@ -61,7 +61,6 @@ type CreateLocalReq = (
   options: {
     context?: RequestContext
     fallbackLocale?: string
-    language?: string
     locale?: string
     req?: PayloadRequest
     user?: User
@@ -69,10 +68,10 @@ type CreateLocalReq = (
   payload: Payload,
 ) => Promise<PayloadRequest>
 export const createLocalReq: CreateLocalReq = async (
-  { context, fallbackLocale, language, locale, req = {} as PayloadRequest, user },
+  { context, fallbackLocale, locale, req = {} as PayloadRequest, user },
   payload,
 ) => {
-  const i18n = req?.i18n || (await getLocalI18n({ config: payload.config, language }))
+  const i18n = req?.i18n || (await getLocalI18n({ config: payload.config }))
 
   if (payload.config?.localization) {
     const defaultLocale = payload.config.localization.defaultLocale

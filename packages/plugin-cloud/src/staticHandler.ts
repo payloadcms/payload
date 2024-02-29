@@ -34,7 +34,9 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
 
       const Key = createKey({
         collection: collection.slug,
-        filename: req.params.filename,
+        // WARNING:
+        // TODO: Untested for 3.0
+        filename: req.routeParams.filename as string,
         identityID,
       })
 
