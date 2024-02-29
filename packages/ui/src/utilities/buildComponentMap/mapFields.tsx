@@ -337,6 +337,7 @@ export const mapFields = (args: {
               name={'name' in field ? field.name : undefined}
             />
           ),
+          blocks,
           fieldIsPresentational,
           fieldPermissions,
           hasMany: 'hasMany' in field ? field.hasMany : undefined,
@@ -347,6 +348,7 @@ export const mapFields = (args: {
           localized: 'localized' in field ? field.localized : false,
           options: 'options' in field ? field.options : undefined,
           readOnly,
+          relationTo: 'relationTo' in field ? field.relationTo : undefined,
           subfields: nestedFieldMap,
           tabs,
         }

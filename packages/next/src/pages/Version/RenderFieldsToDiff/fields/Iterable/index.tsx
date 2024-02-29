@@ -1,5 +1,4 @@
 import type { MappedField } from '@payloadcms/ui'
-import type { Field } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getUniqueListBy } from 'payload/utilities'
@@ -57,20 +56,24 @@ const Iterable: React.FC<Props> = ({
               if (versionRow?.blockType === comparisonRow?.blockType) {
                 const matchedBlock = field.blocks.find(
                   (block) => block.slug === versionRow?.blockType,
-                ) || { fields: [] }
+                ) || { subfields: [] }
 
-                subFields = [...subFields, ...matchedBlock.fields]
+                subFields = [...subFields, ...matchedBlock.subfields]
               } else {
                 const matchedVersionBlock = field.blocks.find(
                   (block) => block.slug === versionRow?.blockType,
-                ) || { fields: [] }
+                ) || { subfields: [] }
 
                 const matchedComparisonBlock = field.blocks.find(
                   (block) => block.slug === comparisonRow?.blockType,
-                ) || { fields: [] }
+                ) || { subfields: [] }
 
-                subFields = getUniqueListBy<Field>(
-                  [...subFields, ...matchedVersionBlock.fields, ...matchedComparisonBlock.fields],
+                subFields = getUniqueListBy<MappedField>(
+                  [
+                    ...subFields,
+                    ...matchedVersionBlock.subfields,
+                    ...matchedComparisonBlock.subfields,
+                  ],
                   'name',
                 )
               }

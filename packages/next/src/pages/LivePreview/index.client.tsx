@@ -42,7 +42,6 @@ const PreviewView: React.FC = (props) => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
-    docPreferences,
     globalSlug,
     hasSavePermission,
     initialData: data,
@@ -111,14 +110,13 @@ const PreviewView: React.FC = (props) => {
         apiRoute,
         body: {
           id,
-          docPreferences,
           formState: prevFormState,
           operation,
           schemaPath,
         },
         serverURL,
       }),
-    [serverURL, apiRoute, id, operation, docPreferences, schemaPath],
+    [serverURL, apiRoute, id, operation, schemaPath],
   )
 
   // Allow the `DocumentInfoProvider` to hydrate
