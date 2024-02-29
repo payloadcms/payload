@@ -18,7 +18,7 @@ export type AddFieldStatePromiseArgs = {
   errorPaths: Set<string>
   field: NonPresentationalField
   /**
-   * You can use this to filter down to only `localized` fields that require transalation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
+   * You can use this to filter down to only `localized` fields that require translation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
    */
   filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
@@ -41,6 +41,10 @@ export type AddFieldStatePromiseArgs = {
   preferences: {
     [key: string]: unknown
   }
+  /**
+   * Req is used for validation and defaultValue calculation. If you don't need validation,
+   * just create your own req and pass in the locale and the user
+   */
   req: PayloadRequest
   /**
    * Whether to skip checking the field's condition. @default false

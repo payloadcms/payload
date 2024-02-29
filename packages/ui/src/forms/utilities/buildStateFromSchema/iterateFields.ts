@@ -85,7 +85,7 @@ export const iterateFields = async ({
       if (!skipConditionChecks) {
         passesCondition = Boolean(
           (field?.admin?.condition
-            ? Boolean(field.admin.condition(fullData || {}, data || {}, { user }))
+            ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
             : true) && parentPassesCondition,
         )
       }
