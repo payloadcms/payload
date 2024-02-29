@@ -25,7 +25,7 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
   const { id, getDocPreferences } = useDocumentInfo()
   const { schemaPath } = useFieldPath()
   const config = useConfig()
-  const [initialState, setInitialState] = useState<FormState>({})
+  const [initialState, setInitialState] = useState<FormState | false>(false)
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
@@ -51,9 +51,7 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
         serverURL: config.serverURL,
       }) // Form State
 
-      if (state) {
-        setInitialState(state)
-      }
+      setInitialState(state)
     }
 
     if (stateData) {
@@ -82,23 +80,25 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
   )
 
   return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
-      <FieldPathProvider path="" schemaPath="">
-        <Form
-          fields={Array.isArray(fieldMap) ? fieldMap : []}
-          initialState={initialState}
-          onChange={[onChange]}
-          onSubmit={handleModalSubmit}
-        >
-          <RenderFields
-            fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
-            forceRender
-            readOnly={false}
-          />
+    initialState !== false && (
+      <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
+        <FieldPathProvider path="" schemaPath="">
+          <Form
+            fields={Array.isArray(fieldMap) ? fieldMap : []}
+            initialState={initialState}
+            onChange={[onChange]}
+            onSubmit={handleModalSubmit}
+          >
+            <RenderFields
+              fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+              forceRender
+              readOnly={false}
+            />
 
-          <FormSubmit>{t('general:submit')}</FormSubmit>
-        </Form>
-      </FieldPathProvider>
-    </Drawer>
+            <FormSubmit>{t('general:submit')}</FormSubmit>
+          </Form>
+        </FieldPathProvider>
+      </Drawer>
+    )
   )
 }
