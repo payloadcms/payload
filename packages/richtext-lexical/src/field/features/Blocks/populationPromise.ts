@@ -2,8 +2,8 @@ import type { Block } from 'payload/types'
 
 import { sanitizeFields } from 'payload/config'
 
-import type { BlocksFeatureProps } from '.'
 import type { PopulationPromise } from '../types'
+import type { BlocksFeatureProps } from './feature.server'
 import type { SerializedBlockNode } from './nodes/BlocksNode'
 
 import { recurseNestedFields } from '../../../populate/recurseNestedFields'
@@ -61,7 +61,7 @@ export const blockPopulationPromiseHOC = (
       promises,
       req,
       showHiddenFields,
-      // The afterReadPromise gets its data from looking for field.name inside of the siblingDoc. Thus, here we cannot pass the whole document's siblingDoc, but only the siblingDoc (sibling fields) of the current field.
+      // The afterReadPromise gets its data from looking for field.name inside the siblingDoc. Thus, here we cannot pass the whole document's siblingDoc, but only the siblingDoc (sibling fields) of the current field.
       siblingDoc: blockFieldData,
     })
 

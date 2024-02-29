@@ -38,7 +38,7 @@ export const LinkDrawer: React.FC<Props> = ({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      return getFormState({
+      return await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,

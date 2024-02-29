@@ -96,8 +96,9 @@ export class BlockNode extends DecoratorBlockNode {
     return (
       <BlockComponent
         blockFieldWrapperName={blockFieldWrapperName}
-        formData={transformedFormData}
+        formData={this.getFields()}
         nodeKey={this.getKey()}
+        transformedFormData={transformedFormData}
       />
     )
   }

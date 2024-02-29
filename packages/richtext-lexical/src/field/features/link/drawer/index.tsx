@@ -22,7 +22,7 @@ const baseClass = 'lexical-link-edit-drawer'
 
 export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, stateData }) => {
   const { t } = useTranslation()
-  const { id, getDocPreferences } = useDocumentInfo()
+  const { id } = useDocumentInfo()
   const { schemaPath } = useFieldPath()
   const config = useConfig()
   const [initialState, setInitialState] = useState<FormState | false>(false)
@@ -37,14 +37,11 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const docPreferences = await getDocPreferences()
-
       const state = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
           data: stateData,
-          docPreferences,
           operation: 'update',
           schemaPath: schemaFieldsPath,
         },
@@ -57,17 +54,14 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
     if (stateData) {
       void awaitInitialState()
     }
-  }, [config.routes.api, config.serverURL, schemaFieldsPath, getDocPreferences, id, stateData])
+  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, stateData])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
-      const docPreferences = await getDocPreferences()
-
-      return getFormState({
+      return await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
-          docPreferences,
           formState: prevFormState,
           operation: 'update',
           schemaPath: schemaFieldsPath,
@@ -76,7 +70,7 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
       })
     },
 
-    [config.routes.api, config.serverURL, schemaFieldsPath, getDocPreferences, id],
+    [config.routes.api, config.serverURL, schemaFieldsPath, id],
   )
 
   return (
@@ -89,11 +83,7 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
             onChange={[onChange]}
             onSubmit={handleModalSubmit}
           >
-            <RenderFields
-              fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
-              forceRender
-              readOnly={false}
-            />
+            <RenderFields fieldMap={Array.isArray(fieldMap) ? fieldMap : []} forceRender />
 
             <FormSubmit>{t('general:submit')}</FormSubmit>
           </Form>

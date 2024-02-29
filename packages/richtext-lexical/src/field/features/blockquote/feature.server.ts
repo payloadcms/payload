@@ -16,7 +16,6 @@ export const BlockQuoteFeature: FeatureProviderProviderServer<undefined, undefin
         markdownTransformers: [MarkdownTransformer],
         nodes: [
           {
-            type: QuoteNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {

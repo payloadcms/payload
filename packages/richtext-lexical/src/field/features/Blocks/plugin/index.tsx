@@ -18,7 +18,7 @@ import { INSERT_BLOCK_COMMAND } from './commands'
 
 export type InsertBlockPayload = Exclude<BlockFields, 'id'>
 
-export function BlocksPlugin(): JSX.Element | null {
+export function BlocksPlugin(): React.ReactNode {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
