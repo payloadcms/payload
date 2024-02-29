@@ -18,7 +18,9 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
     try {
       const prefix = await getFilePrefix({ collection, req })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
-        path.posix.join(prefix, req.params.filename),
+        // WARNING:
+        // TODO: Untested for 3.0
+        path.posix.join(prefix, req.routeParams.filename as string),
       )
 
       const { end, start } = await getRangeFromHeader(blockBlobClient, req.headers.range)

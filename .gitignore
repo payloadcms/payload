@@ -10,6 +10,7 @@ test-results
 /migrations
 /media
 .localstack
+.turbo
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,macos,windows,webstorm,sublimetext,visualstudiocode

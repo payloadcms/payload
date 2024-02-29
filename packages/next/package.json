@@ -15,7 +15,7 @@
     "copyfiles:api": "copyfiles -u 1 \"src/app/(payload)/**\" dist/template",
     "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "prepublishOnly": "pnpm clean && pnpm build"
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "exports": {
     "./*": {

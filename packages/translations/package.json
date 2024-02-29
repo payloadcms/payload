@@ -7,7 +7,7 @@
     "writeFiles": "npx ts-node ./writeTranslationFiles.ts",
     "build": "pnpm writeFiles && tsc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm build"
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "publishConfig": {
     "access": "public"
