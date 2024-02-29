@@ -25,10 +25,11 @@ export const meta = async (args: {
       },
     ],
     keywords,
-    metadataBase:
+    metadataBase: new URL(
       config?.serverURL ||
-      process.env.PAYLOAD_PUBLIC_SERVER_URL ||
-      `http://localhost:${process.env.PORT || 3000}`,
+        process.env.PAYLOAD_PUBLIC_SERVER_URL ||
+        `http://localhost:${process.env.PORT || 3000}`,
+    ),
     openGraph: {
       type: 'website',
       description,
