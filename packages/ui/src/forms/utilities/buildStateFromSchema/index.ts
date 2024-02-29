@@ -1,7 +1,4 @@
-import type { TFunction } from '@payloadcms/translations'
-import type { User } from 'payload/auth'
-import type { Locale } from 'payload/config'
-import type { Data, Field as FieldSchema } from 'payload/types'
+import type { Data, Field as FieldSchema, PayloadRequest } from 'payload/types'
 
 import type { FormState } from '../../Form/types'
 
@@ -11,14 +8,12 @@ type Args = {
   data?: Data
   fieldSchema: FieldSchema[] | undefined
   id?: number | string
-  locale: Locale['code']
   operation?: 'create' | 'update'
   preferences: {
     [key: string]: unknown
   }
+  req: PayloadRequest
   siblingData?: Data
-  t: TFunction
-  user?: User | null
 }
 
 export type BuildFormStateArgs = {
@@ -32,7 +27,7 @@ export type BuildFormStateArgs = {
 }
 
 const buildStateFromSchema = async (args: Args): Promise<FormState> => {
-  const { id, data: fullData = {}, fieldSchema, locale, operation, preferences, t, user } = args
+  const { id, data: fullData = {}, fieldSchema, operation, preferences, req } = args
 
   if (fieldSchema) {
     const state: FormState = {}
@@ -43,14 +38,12 @@ const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       errorPaths: new Set(),
       fields: fieldSchema,
       fullData,
-      locale,
       operation,
       parentPassesCondition: true,
       path: '',
       preferences,
+      req,
       state,
-      t,
-      user,
     })
 
     return state

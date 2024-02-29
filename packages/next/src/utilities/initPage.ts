@@ -1,19 +1,19 @@
-import type { I18n } from '@payloadcms/translations'
 import type { Permissions } from 'payload/auth'
+import type { Locale } from 'payload/config'
 import type {
+  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/client'
+import { findLocaleFromCode } from '@payloadcms/ui'
 import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
+import { createLocalReq } from 'payload/utilities'
 import qs from 'qs'
 
-import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
 import { auth } from './auth'
 import { getRequestLanguage } from './getRequestLanguage'
 
@@ -35,13 +35,10 @@ export const initPage = async ({
   searchParams?: { [key: string]: string | string[] | undefined }
 }): Promise<{
   collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
   globalConfig?: SanitizedGlobalConfig
-  i18n: I18n
-  locale: ReturnType<typeof findLocaleFromCode>
-  payload: Awaited<ReturnType<typeof getPayload>>
+  locale: Locale
   permissions: Permissions
-  user: Awaited<ReturnType<typeof auth>>['user']
+  req: PayloadRequest
 }> => {
   const headers = getHeaders()
 
@@ -49,8 +46,6 @@ export const initPage = async ({
     config: configPromise,
     headers,
   })
-
-  const language = getRequestLanguage({ cookies, headers })
 
   const config = await configPromise
 
@@ -64,16 +59,23 @@ export const initPage = async ({
     redirect(`${routes.admin}/login?redirect=${routes.admin + route + stringifiedSearchParams}`)
   }
 
-  const payload = await getPayload({
-    config,
-  })
+  const payload = await getPayload({ config })
 
-  const i18n = initI18n({
-    config: config.i18n,
-    context: 'client',
-    language,
-    translations,
-  })
+  const defaultLocale =
+    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
+  const localeCode = localeParam || defaultLocale
+  const locale = localization && findLocaleFromCode(localization, localeCode)
+
+  const req = await createLocalReq(
+    {
+      fallbackLocale: null,
+      language: getRequestLanguage({ cookies, headers }),
+      locale: locale.code,
+      user,
+    },
+    payload,
+  )
+
   let collectionConfig: SanitizedCollectionConfig
   let globalConfig: SanitizedGlobalConfig
 
@@ -85,21 +87,11 @@ export const initPage = async ({
     globalConfig = globals.find((global) => global.slug === globalSlug)
   }
 
-  const defaultLocale =
-    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-
-  const localeCode = localeParam || defaultLocale
-
-  const locale = localization && findLocaleFromCode(localization, localeCode)
-
   return {
     collectionConfig,
-    config,
     globalConfig,
-    i18n,
     locale,
-    payload,
     permissions,
-    user,
+    req,
   }
 }

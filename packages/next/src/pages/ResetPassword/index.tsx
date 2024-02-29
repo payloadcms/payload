@@ -44,10 +44,16 @@ export const ResetPassword: React.FC<{
   config: Promise<SanitizedConfig>
   token: string
 }> = async ({ config: configPromise, token }) => {
-  const { config, i18n, user } = await initPage({ config: configPromise })
+  const { req } = await initPage({ config: configPromise })
 
   const {
-    admin: { logoutRoute, user: userSlug },
+    i18n,
+    payload: { config },
+    user,
+  } = req
+
+  const {
+    admin: { user: userSlug },
     routes: { admin, api },
     serverURL,
   } = config

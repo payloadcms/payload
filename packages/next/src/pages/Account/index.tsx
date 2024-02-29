@@ -1,4 +1,3 @@
-import type { ServerSideEditViewProps } from '@payloadcms/ui'
 import type { Metadata } from 'next'
 import type { Data, DocumentPreferences, SanitizedConfig } from 'payload/types'
 
@@ -11,6 +10,8 @@ import {
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import React, { Fragment } from 'react'
+
+import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
@@ -44,12 +45,18 @@ export const Account = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, i18n, locale, payload, permissions, user } = await initPage({
+  const { locale, permissions, req } = await initPage({
     config: configPromise,
     redirectUnauthenticatedUser: true,
     route: `/account`,
     searchParams,
   })
+
+  const {
+    payload,
+    payload: { config },
+    user,
+  } = req
 
   const {
     admin: { components: { views: { Account: CustomAccountComponent } = {} } = {}, user: userSlug },
@@ -100,25 +107,24 @@ export const Account = async ({
       id: user?.id,
       data: data || {},
       fieldSchema,
-      locale: locale.code,
       operation: 'update',
       preferences: docPreferences,
-      t: i18n.t,
-      user,
+      req,
     })
 
     const componentProps: ServerSideEditViewProps = {
       id: user?.id,
-      action: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
-      apiURL: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
+      action: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`,
+      apiURL: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`,
       collectionSlug: userSlug,
       config,
       data,
       docPermissions: collectionPermissions,
       docPreferences,
       hasSavePermission: collectionPermissions?.update?.permission,
-      i18n,
+      i18n: req.i18n,
       initialState,
+      locale,
       payload,
       permissions,
       searchParams,
@@ -131,8 +137,8 @@ export const Account = async ({
         <HydrateClientUser permissions={permissions} user={user} />
         <SetDocumentInfo
           AfterFields={<Settings />}
-          action={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`}
-          apiURL={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`}
+          action={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`}
+          apiURL={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`}
           collectionSlug={userSlug}
           docPermissions={collectionPermissions}
           docPreferences={docPreferences}

@@ -1,4 +1,5 @@
 import type { Payload, RequestContext } from '..'
+import type { User } from '../auth'
 import type { PayloadRequest } from '../exports/types'
 
 import { getDataLoader } from '../collections/dataloader'
@@ -33,11 +34,11 @@ const attachFakeURLProperties = (req: PayloadRequest) => {
     req.host = urlProperties.host
     req.protocol = urlProperties.protocol
     req.pathname = urlProperties.pathname
-    // @ts-ignore
+    // @ts-expect-error
     req.searchParams = urlProperties.searchParams
-    // @ts-ignore
+    // @ts-expect-error
     req.origin = urlProperties.origin
-    // @ts-ignore
+    // @ts-expect-error
     req.url = urlProperties.href
     return
   } catch (error) {
@@ -47,11 +48,11 @@ const attachFakeURLProperties = (req: PayloadRequest) => {
   req.host = 'localhost'
   req.protocol = 'https:'
   req.pathname = '/'
-  // @ts-ignore
+  // @ts-expect-error
   req.searchParams = new URLSearchParams()
-  // @ts-ignore
+  // @ts-expect-error
   req.origin = 'http://localhost'
-  // @ts-ignore
+  // @ts-expect-error
   req.url = 'http://localhost'
   return
 }
@@ -60,17 +61,18 @@ type CreateLocalReq = (
   options: {
     context?: RequestContext
     fallbackLocale?: string
+    language?: string
     locale?: string
     req?: PayloadRequest
-    user?: Document
+    user?: User
   },
   payload: Payload,
 ) => Promise<PayloadRequest>
 export const createLocalReq: CreateLocalReq = async (
-  { context, fallbackLocale, locale, req = {} as PayloadRequest, user },
+  { context, fallbackLocale, language, locale, req = {} as PayloadRequest, user },
   payload,
 ) => {
-  const i18n = req?.i18n || (await getLocalI18n({ config: payload.config }))
+  const i18n = req?.i18n || (await getLocalI18n({ config: payload.config, language }))
 
   if (payload.config?.localization) {
     const defaultLocale = payload.config.localization.defaultLocale

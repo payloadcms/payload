@@ -14,12 +14,14 @@ import './index.scss'
 const baseClass = 'create-first-user'
 
 export const generateMetadata = async ({
-  config,
+  config: configPromise,
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
+  const config = await configPromise
+
   const { t } = await getNextI18n({
-    config: await config,
+    config,
   })
 
   return meta({
@@ -33,15 +35,12 @@ export const generateMetadata = async ({
 export const CreateFirstUser: React.FC<{
   config: Promise<SanitizedConfig>
 }> = async ({ config: configPromise }) => {
-  const {
-    config,
-    i18n: { t },
-    locale,
-    user,
-  } = await initPage({
+  const { req } = await initPage({
     config: configPromise,
     redirectUnauthenticatedUser: false,
   })
+
+  const { config } = req.payload
 
   const {
     admin: { user: userSlug },
@@ -53,36 +52,34 @@ export const CreateFirstUser: React.FC<{
     {
       name: 'email',
       type: 'email',
-      label: t('general:emailAddress'),
+      label: req.t('general:emailAddress'),
       required: true,
     },
     {
       name: 'password',
       type: 'password',
-      label: t('general:password'),
+      label: req.t('general:password'),
       required: true,
     },
     {
       name: 'confirm-password',
       type: 'confirmPassword',
-      label: t('authentication:confirmPassword'),
+      label: req.t('authentication:confirmPassword'),
       required: true,
     },
   ] as Field[]
 
   const formState = await buildStateFromSchema({
     fieldSchema: fields,
-    locale: locale.code,
     operation: 'create',
     preferences: {},
-    t,
-    user,
+    req,
   })
 
   return (
     <MinimalTemplate className={baseClass}>
-      <h1>{t('general:welcome')}</h1>
-      <p>{t('authentication:beginCreateFirstUser')}</p>
+      <h1>{req.t('general:welcome')}</h1>
+      <p>{req.t('authentication:beginCreateFirstUser')}</p>
       <Form
         action={`${serverURL}${apiRoute}/${userSlug}/first-register`}
         initialState={formState}
@@ -92,7 +89,7 @@ export const CreateFirstUser: React.FC<{
         validationOperation="create"
       >
         <CreateFirstUserFields userSlug={userSlug} />
-        <FormSubmit>{t('general:create')}</FormSubmit>
+        <FormSubmit>{req.t('general:create')}</FormSubmit>
       </Form>
     </MinimalTemplate>
   )

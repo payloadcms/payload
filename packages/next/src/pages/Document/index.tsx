@@ -58,19 +58,25 @@ export const Document = async ({
 
   const route = `/${collectionSlug || globalSlug + (params.segments?.length ? `/${params.segments.join('/')}` : '')}`
 
-  const { collectionConfig, config, globalConfig, i18n, locale, payload, permissions, user } =
-    await initPage({
-      collectionSlug,
-      config: configPromise,
-      globalSlug,
-      redirectUnauthenticatedUser: true,
-      route,
-      searchParams,
-    })
+  const { collectionConfig, globalConfig, locale, permissions, req } = await initPage({
+    collectionSlug,
+    config: configPromise,
+    globalSlug,
+    redirectUnauthenticatedUser: true,
+    route,
+    searchParams,
+  })
 
   if (!collectionConfig && !globalConfig) {
     return notFound()
   }
+
+  const {
+    i18n,
+    payload,
+    payload: { config },
+    user,
+  } = req
 
   const {
     routes: { api },
@@ -180,11 +186,9 @@ export const Document = async ({
     id,
     data: data || {},
     fieldSchema: formatFields(fields, isEditing),
-    locale: locale.code,
     operation: isEditing ? 'update' : 'create',
     preferences: docPreferences,
-    t: i18n.t,
-    user,
+    req,
   })
 
   const formQueryParams: QueryParamTypes = {

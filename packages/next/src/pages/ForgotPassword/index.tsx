@@ -12,12 +12,14 @@ import { meta } from '../../utilities/meta'
 const baseClass = 'forgot-password'
 
 export const generateMetadata = async ({
-  config,
+  config: configPromise,
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
+  const config = await configPromise
+
   const { t } = await getNextI18n({
-    config: await config,
+    config,
   })
 
   return meta({
@@ -31,7 +33,13 @@ export const generateMetadata = async ({
 export const ForgotPassword: React.FC<{
   config: Promise<SanitizedConfig>
 }> = async ({ config: configPromise }) => {
-  const { config, i18n, user } = await initPage({ config: configPromise })
+  const { req } = await initPage({ config: configPromise })
+
+  const {
+    i18n,
+    payload: { config },
+    user,
+  } = req
 
   const {
     admin: { user: userSlug },

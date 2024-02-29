@@ -4,10 +4,8 @@ import type { CSSProperties } from 'react'
 
 //eslint-disable-next-line @typescript-eslint/no-unused-vars
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
-import type { TFunction } from '@payloadcms/translations'
 import type React from 'react'
 
-import type { Payload } from '../../'
 import type {
   ConditionalDateProps,
   Description,
@@ -18,7 +16,6 @@ import type {
 } from '../../admin/types'
 import type { User } from '../../auth'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
-import type { SanitizedConfig } from '../../config/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { PayloadRequest, RequestContext } from '../../types'
 import type { Operation, Where } from '../../types'
@@ -123,15 +120,11 @@ export type Labels = {
 }
 
 export type BaseValidateOptions<TData, TSiblingData> = {
-  config: SanitizedConfig
   data: Partial<TData>
   id?: number | string
   operation?: Operation
-  payload?: Payload
-  req?: PayloadRequest
+  req: PayloadRequest
   siblingData: Partial<TSiblingData>
-  t: TFunction
-  user?: Partial<User>
 }
 
 export type ValidateOptions<TData, TSiblingData, TFieldConfig extends object> = BaseValidateOptions<

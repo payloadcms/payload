@@ -22,7 +22,7 @@ export const DocumentLayout = async ({
   config: Promise<SanitizedConfig>
   globalSlug?: string
 }) => {
-  const { collectionConfig, config, globalConfig, i18n } = await initPage({
+  const { collectionConfig, globalConfig, req } = await initPage({
     collectionSlug,
     config: configPromise,
     globalSlug,
@@ -32,9 +32,9 @@ export const DocumentLayout = async ({
     <Fragment>
       <DocumentHeader
         collectionConfig={collectionConfig}
-        config={config}
+        config={req.payload.config}
         globalConfig={globalConfig}
-        i18n={i18n}
+        i18n={req.i18n}
       />
       {children}
     </Fragment>

@@ -1,6 +1,4 @@
-import type { TFunction } from '@payloadcms/translations'
-import type { User } from 'payload/auth'
-import type { Data, Field as FieldSchema } from 'payload/types'
+import type { Data, Field as FieldSchema, PayloadRequest } from 'payload/types'
 
 import { fieldIsPresentationalOnly } from 'payload/types'
 
@@ -29,10 +27,6 @@ type Args = {
    */
   includeSchema?: boolean
   /**
-   * locale is only needed for checking field conditions
-   */
-  locale: string
-  /**
    * Whether to omit parent fields in the state. @default false
    */
   omitParents?: boolean
@@ -48,6 +42,7 @@ type Args = {
   preferences?: {
     [key: string]: unknown
   }
+  req: PayloadRequest
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -57,8 +52,6 @@ type Args = {
    */
   skipValidation?: boolean
   state?: FormState
-  t: TFunction
-  user: User
 }
 
 /**
@@ -74,17 +67,15 @@ export const iterateFields = async ({
   forceFullValue = false,
   fullData,
   includeSchema = false,
-  locale,
   omitParents = false,
   operation,
   parentPassesCondition = true,
   path = '',
   preferences,
+  req,
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
-  t,
-  user,
 }: Args): Promise<void> => {
   const promises = []
 
@@ -110,17 +101,15 @@ export const iterateFields = async ({
           forceFullValue,
           fullData,
           includeSchema,
-          locale,
           omitParents,
           operation,
           passesCondition,
           path,
           preferences,
+          req,
           skipConditionChecks,
           skipValidation,
           state,
-          t,
-          user,
         }),
       )
     }

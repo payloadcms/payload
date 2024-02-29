@@ -38,7 +38,13 @@ export const Verify: React.FC<{
   config: configPromise,
   // token
 }) => {
-  const { config, i18n, user } = await initPage({ config: configPromise })
+  const { req } = await initPage({ config: configPromise })
+
+  const {
+    i18n,
+    payload: { config },
+    user,
+  } = req
 
   const {
     admin: { user: userSlug },

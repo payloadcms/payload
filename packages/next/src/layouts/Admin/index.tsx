@@ -18,10 +18,10 @@ export const AdminLayout = async ({
   children: React.ReactNode
   config: Promise<SanitizedConfig> | SanitizedConfig
 }) => {
-  const { i18n, permissions, user } = await initPage({ config })
+  const { permissions, req } = await initPage({ config })
 
   return (
-    <DefaultTemplate config={config} i18n={i18n} permissions={permissions} user={user}>
+    <DefaultTemplate config={config} i18n={req.i18n} permissions={permissions} user={req.user}>
       {children}
     </DefaultTemplate>
   )

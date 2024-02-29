@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { TFunction } from '@payloadcms/translations'
-import type { User } from 'payload/auth'
-import type { Data, NonPresentationalField, SanitizedConfig } from 'payload/types'
+import type { Data, NonPresentationalField, PayloadRequest } from 'payload/types'
 
 import ObjectId from 'bson-objectid'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
@@ -33,7 +31,6 @@ export type AddFieldStatePromiseArgs = {
    * Whether the field schema should be included in the state
    */
   includeSchema?: boolean
-  locale: string
   /**
    * Whether to omit parent fields in the state. @default false
    */
@@ -44,6 +41,7 @@ export type AddFieldStatePromiseArgs = {
   preferences: {
     [key: string]: unknown
   }
+  req: PayloadRequest
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -53,8 +51,6 @@ export type AddFieldStatePromiseArgs = {
    */
   skipValidation?: boolean
   state: FormState
-  t: TFunction
-  user: User
 }
 
 /**
@@ -72,17 +68,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     forceFullValue = false,
     fullData,
     includeSchema = false,
-    locale,
     omitParents = false,
     operation,
     passesCondition,
     path,
     preferences,
+    req,
     skipConditionChecks = false,
     skipValidation = false,
     state,
-    t,
-    user,
   } = args
 
   if (fieldAffectsData(field)) {
@@ -98,8 +92,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const valueWithDefault = await getDefaultValue({
       defaultValue: field.defaultValue,
-      locale,
-      user,
+      locale: req.locale,
+      user: req.user,
       value: data?.[field.name],
     })
 
@@ -115,9 +109,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         id,
         data: fullData,
         operation,
+        req,
         siblingData: data,
-        t,
-        user,
       })
     }
 
@@ -162,17 +155,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 forceFullValue,
                 fullData,
                 includeSchema,
-                locale,
                 omitParents,
                 operation,
                 parentPassesCondition: passesCondition,
                 path: rowPath,
                 preferences,
+                req,
                 skipConditionChecks,
                 skipValidation,
                 state,
-                t,
-                user,
               }),
             )
 
@@ -277,17 +268,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   forceFullValue,
                   fullData,
                   includeSchema,
-                  locale,
                   omitParents,
                   operation,
                   parentPassesCondition: passesCondition,
                   path: rowPath,
                   preferences,
+                  req,
                   skipConditionChecks,
                   skipValidation,
                   state,
-                  t,
-                  user,
                 }),
               )
 
@@ -348,17 +337,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           forceFullValue,
           fullData,
           includeSchema,
-          locale,
           omitParents,
           operation,
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,
           preferences,
+          req,
           skipConditionChecks,
           skipValidation,
           state,
-          t,
-          user,
         })
 
         break
@@ -461,17 +448,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       forceFullValue,
       fullData,
       includeSchema,
-      locale,
       omitParents,
       operation,
       parentPassesCondition: passesCondition,
       path,
       preferences,
+      req,
       skipConditionChecks,
       skipValidation,
       state,
-      t,
-      user,
     })
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab) =>
@@ -485,17 +470,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         forceFullValue,
         fullData,
         includeSchema,
-        locale,
         omitParents,
         operation,
         parentPassesCondition: passesCondition,
         path: tabHasName(tab) ? `${path}${tab.name}.` : path,
         preferences,
+        req,
         skipConditionChecks,
         skipValidation,
         state,
-        t,
-        user,
       }),
     )
 

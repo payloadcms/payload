@@ -67,13 +67,19 @@ export const ListView = async ({
   route
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { collectionConfig, config, payload, permissions, user } = await initPage({
+  const { collectionConfig, permissions, req } = await initPage({
     collectionSlug,
     config: configPromise,
     redirectUnauthenticatedUser: true,
     route,
     searchParams,
   })
+
+  const {
+    payload,
+    payload: { config },
+    user,
+  } = req
 
   let listPreferences: ListPreferences
 
