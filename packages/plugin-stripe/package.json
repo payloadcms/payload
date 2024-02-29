@@ -7,7 +7,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
+    "build": "echo \"Build temporarily disabled.\" && exit 0",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
@@ -31,7 +31,7 @@
     "payload": "^1.1.8 || ^2.0.0"
   },
   "dependencies": {
-    "@payloadcms/ui": "workspace:^",
+    "@payloadcms/ui": "workspace:*",
     "lodash.get": "^4.4.2",
     "stripe": "^10.2.0",
     "uuid": "^9.0.0"

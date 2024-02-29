@@ -29,7 +29,6 @@
     "@lexical/selection": "0.13.1",
     "@lexical/utils": "0.13.1",
     "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
     "bson-objectid": "2.0.4",
     "classnames": "^2.3.2",
     "deep-equal": "2.2.3",
@@ -43,6 +42,7 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/node": "20.6.2",
     "@types/react": "18.2.15",
@@ -50,8 +50,8 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@payloadcms/translations": "workspace:^",
-    "@payloadcms/ui": "workspace:^",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "payload": "^2.4.0"
   },
   "exports": {
