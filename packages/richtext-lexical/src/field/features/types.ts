@@ -50,14 +50,12 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
 export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   node,
   nodeValidations,
-  payloadConfig,
   validation,
 }: {
   node: T
   nodeValidations: Map<string, Array<NodeValidation>>
-  payloadConfig: SanitizedConfig
   validation: {
-    options: ValidateOptions<SerializedEditorState, unknown, RichTextField>
+    options: ValidateOptions<unknown, unknown, RichTextField>
     value: SerializedEditorState
   }
 }) => Promise<string | true> | string | true

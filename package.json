@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "0.0.1",
+  "version": "2.11.2",
   "private": true,
   "workspaces:": [
     "packages/*"
@@ -60,6 +60,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.142.0",
     "@next/bundle-analyzer": "^14.1.0",
+    "@octokit/core": "^5.1.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@playwright/test": "1.40.1",
     "@swc/cli": "^0.1.62",
@@ -71,6 +72,7 @@
     "@types/conventional-changelog": "^3.1.4",
     "@types/conventional-changelog-core": "^4.2.5",
     "@types/conventional-changelog-preset-loader": "^2.3.4",
+    "@types/conventional-changelog-writer": "^4.0.10",
     "@types/fs-extra": "^11.0.2",
     "@types/jest": "29.5.7",
     "@types/minimist": "1.2.2",
@@ -86,12 +88,15 @@
     "chalk-template": "1.1.0",
     "concat-stream": "^2.0.0",
     "conventional-changelog": "^5.1.0",
+    "conventional-changelog-conventionalcommits": "^7.0.2",
     "conventional-changelog-core": "^7.0.0",
     "conventional-changelog-preset-loader": "^4.1.0",
+    "conventional-changelog-writer": "^7.0.1",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "dotenv": "8.6.0",
     "drizzle-orm": "0.29.4",
+    "execa": "5.1.1",
     "express": "4.18.2",
     "form-data": "3.0.1",
     "fs-extra": "10.1.0",
@@ -127,7 +132,7 @@
     "slate": "0.91.4",
     "tempfile": "^3.0.0",
     "ts-node": "10.9.2",
-    "turbo": "^1.11.1",
+    "turbo": "^1.12.4",
     "typescript": "5.2.2",
     "uuid": "^9.0.1",
     "yocto-queue": "^1.0.0"

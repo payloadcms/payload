@@ -64,7 +64,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
   const fieldSchema = sanitizeFields({
     // TODO: fix this
     // @ts-expect-error-next-line
-    config: config,
+    config,
     fields: fieldSchemaUnsanitized,
     validRelationships,
   })
@@ -94,7 +94,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
     const fieldSchema = sanitizeFields({
       // TODO: fix this
       // @ts-expect-error-next-line
-      config: config,
+      config,
       fields: fieldSchemaUnsanitized,
       validRelationships,
     })
@@ -102,16 +102,12 @@ export const ExtraFieldsUploadDrawer: React.FC<
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
-        // TODO: fix this
-        // @ts-expect-error-next-line
-        config,
         data: deepCopyObject(fields || {}),
         fieldSchema,
         locale,
         operation: 'update',
         preferences,
-        t,
-        user,
+        req,
       })
       setInitialState(state)
     }

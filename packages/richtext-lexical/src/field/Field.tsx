@@ -7,7 +7,6 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from './lexical/config/types'
 
-import { richTextValidateHOC } from '../validate'
 import './index.scss'
 import { LexicalProvider } from './lexical/LexicalProvider'
 
@@ -22,36 +21,24 @@ const RichText: React.FC<
 > = (props) => {
   const {
     name,
-    AfterInput,
-    BeforeInput,
     Description,
     Error,
     Label,
     className,
-    docPreferences,
     editorConfig,
-    fieldMap,
-    initialSubfieldState,
-    label,
-    locale,
-    localized,
-    maxLength,
-    minLength,
     path: pathFromProps,
-    placeholder,
     readOnly,
     required,
-    richTextComponentMap,
-    rtl,
     style,
-    user,
-    validate = richTextValidateHOC({ editorConfig }),
+    validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
     width,
   } = props
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      return validate(value, { ...validationOptions, props, required })
+      if (typeof validate === 'function') {
+        return validate(value, { ...validationOptions, props, required })
+      }
     },
     // Important: do not add props to the dependencies array.
     // This would cause an infinite loop and endless re-rendering.

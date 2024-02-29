@@ -11,7 +11,8 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { BlocksFeatureProps } from '..'
+import type { ClientComponentProps } from '../../types'
+import type { BlocksFeatureClientProps } from '../feature.client'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
 import { $createBlockNode } from '../nodes/BlocksNode'
@@ -35,7 +36,7 @@ const insertBlock = ({
     editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
       id: null,
       blockName: '',
-      blockType: blockType,
+      blockType,
     })
   } else {
     editor.update(() => {
@@ -45,7 +46,7 @@ const insertBlock = ({
           $createBlockNode({
             id: null,
             blockName: '',
-            blockType: blockType,
+            blockType,
           }),
         )
       }
@@ -68,9 +69,9 @@ export const BlocksDrawerComponent: React.FC = () => {
   }
 
   const addRow = useCallback(
-    async (rowIndex: number, blockType: string) => {
+    (rowIndex: number, blockType: string) => {
       insertBlock({
-        blockType: blockType,
+        blockType,
         editor,
         replaceNodeKey,
       })
@@ -83,8 +84,10 @@ export const BlocksDrawerComponent: React.FC = () => {
     depth: editDepth,
   })
 
-  const blocks = (editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps)
-    ?.blocks
+  const reducedBlocks = (
+    editorConfig?.resolvedFeatureMap?.get('blocks')
+      ?.clientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
+  )?.reducedBlocks
 
   useEffect(() => {
     return editor.registerCommand<{
@@ -104,7 +107,7 @@ export const BlocksDrawerComponent: React.FC = () => {
     <BlocksDrawer
       addRow={addRow}
       addRowIndex={0}
-      blocks={blocks}
+      blocks={reducedBlocks}
       drawerSlug={drawerSlug}
       labels={labels}
     />
