@@ -1,8 +1,8 @@
 {
   "name": "@payloadcms/ui",
   "version": "0.0.1",
-  "main": "./src/index.ts",
-  "types": "./src/index.d.ts",
+  "main": "./dist/index.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -14,19 +14,19 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "exports": {
-    ".": "./src/exports/index.ts",
+    ".": "./dist/exports/index.ts",
     "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
+      "import": "./dist/exports/*.ts",
+      "require": "./dist/exports/*.ts",
+      "types": "./dist/exports/*.ts"
     },
     "./scss": {
-      "import": "./src/scss.scss",
-      "require": "./src/scss.scss",
-      "default": "./src/scss.scss"
+      "import": "./dist/scss.scss",
+      "require": "./dist/scss.scss",
+      "default": "./dist/scss.scss"
     },
-    "./scss/app.scss": "./src/scss/app.scss",
-    "./assets/*": "./src/assets/*"
+    "./scss/app.scss": "./dist/scss/app.scss",
+    "./assets/*": "./dist/assets/*"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -65,20 +65,6 @@
     "next": "^14.0.0",
     "payload": "^2.0.0",
     "react": "^18.0.0"
-  },
-  "publishConfig": {
-    "exports": {
-      "./*": {
-        "import": "./dist/exports/*.ts",
-        "require": "./dist/exports/*.ts",
-        "types": "./dist/exports/*.d.ts"
-      },
-      "./scss/app.scss": "./dist/scss/app.scss",
-      "./assets/*": "./dist/assets/*"
-    },
-    "main": "./dist/index.js",
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
   },
   "engines": {
     "node": ">=18.17.0"

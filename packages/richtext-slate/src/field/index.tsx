@@ -2,13 +2,13 @@
 import type { FormFieldBase } from '@payloadcms/ui/types'
 
 import { ShimmerEffect } from '@payloadcms/ui'
+import { useFieldPath } from '@payloadcms/ui/forms'
+import { useClientFunctions } from '@payloadcms/ui/providers'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
 import type { RichTextPlugin } from '../types'
 import type { EnabledFeatures } from './types'
 
-import { useFieldPath } from '../../../ui/src/forms/FieldPathProvider'
-import { useClientFunctions } from '../../../ui/src/providers/ClientFunction'
 import { createFeatureMap } from './createFeatureMap'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue

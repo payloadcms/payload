@@ -1,6 +1,7 @@
 export { useActions } from '../providers/ActionsProvider'
 export { useAuth } from '../providers/Auth'
 export { ClientFunctionProvider, useAddClientFunction } from '../providers/ClientFunction'
+export { useClientFunctions } from '../providers/ClientFunction'
 export { useComponentMap } from '../providers/ComponentMapProvider'
 export type { IComponentMapContext } from '../providers/ComponentMapProvider'
 export { ConfigProvider, useConfig } from '../providers/Config'
