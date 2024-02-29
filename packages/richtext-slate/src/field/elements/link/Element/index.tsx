@@ -75,7 +75,7 @@ export const LinkElement = () => {
   const [renderModal, setRenderModal] = useState(false)
   const [renderPopup, setRenderPopup] = useState(false)
   const [initialState, setInitialState] = useState<FormState>({})
-  const { id, getDocPreferences } = useDocumentInfo()
+  const { id, collectionSlug } = useDocumentInfo()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -96,14 +96,12 @@ export const LinkElement = () => {
         url: element.url,
       }
 
-      const docPreferences = await getDocPreferences()
-
       const state = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
+          collectionSlug,
           data,
-          docPreferences,
           operation: 'update',
           schemaPath: fieldMapPath,
         },
@@ -114,7 +112,7 @@ export const LinkElement = () => {
     }
 
     void awaitInitialState()
-  }, [renderModal, element, user, locale, t, getDocPreferences, config, id, fieldMapPath])
+  }, [renderModal, element, user, locale, t, collectionSlug, config, id, fieldMapPath])
 
   return (
     <span className={baseClass} {...attributes}>

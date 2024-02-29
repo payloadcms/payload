@@ -520,6 +520,9 @@ importers:
       '@faceless-ui/modal':
         specifier: 2.0.1
         version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
+      '@faceless-ui/window-info':
+        specifier: 2.1.1
+        version: 2.1.1(react-dom@18.2.0)(react@18.2.0)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../graphql

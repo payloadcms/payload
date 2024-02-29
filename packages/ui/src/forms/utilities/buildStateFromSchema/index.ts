@@ -1,7 +1,7 @@
 import type { TFunction } from '@payloadcms/translations'
 import type { User } from 'payload/auth'
 import type { Locale } from 'payload/config'
-import type { Data, DocumentPreferences, Field as FieldSchema } from 'payload/types'
+import type { Data, Field as FieldSchema } from 'payload/types'
 
 import type { FormState } from '../../Form/types'
 
@@ -22,9 +22,10 @@ type Args = {
 }
 
 export type BuildFormStateArgs = {
+  collectionSlug?: string
   data?: Data
-  docPreferences: DocumentPreferences
   formState?: FormState
+  globalSlug?: string
   id?: number | string
   operation?: 'create' | 'update'
   schemaPath: string

@@ -87,7 +87,7 @@ export const FieldSelect: React.FC<Props> = ({ fields, setSelected }) => {
       setSelected(selected.map(({ value }) => value))
     }
     // remove deselected values from form state
-    if (selected === null || Object.keys(activeFields).length > selected.length) {
+    if (selected === null || Object.keys(activeFields || []).length > selected.length) {
       Object.keys(activeFields).forEach((path) => {
         if (
           selected === null ||
@@ -96,8 +96,8 @@ export const FieldSelect: React.FC<Props> = ({ fields, setSelected }) => {
           })
         ) {
           dispatchFields({
-            path,
             type: 'REMOVE',
+            path,
           })
         }
       })

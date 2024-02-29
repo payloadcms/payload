@@ -3,10 +3,13 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
+import type { FormState } from '../..'
 import type { Props } from './types'
 
+import { DocumentInfoProvider, FieldPathProvider, getFormState, useComponentMap } from '../..'
 import Form from '../../forms/Form'
 import { useForm } from '../../forms/Form/context'
+import RenderFields from '../../forms/RenderFields'
 import FormSubmit from '../../forms/Submit'
 import { X } from '../../icons/X'
 import { useAuth } from '../../providers/Auth'
@@ -81,24 +84,65 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
     </FormSubmit>
   )
 }
-const EditMany: React.FC<Props> = (props) => {
+export const EditMany: React.FC<Props> = (props) => {
   const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()
   const {
-    routes: { api },
+    routes: { api: apiRoute },
     serverURL,
   } = useConfig()
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [selected, setSelected] = useState([])
   const { dispatchSearchParams } = useSearchParams()
+  const { componentMap } = useComponentMap()
+  const [reducedFieldMap, setReducedFieldMap] = useState([])
+  const [initialState, setInitialState] = useState<FormState>()
+  const hasInitializedState = React.useRef(false)
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasUpdatePermission = collectionPermissions?.update?.permission
 
   const drawerSlug = `edit-${slug}`
+
+  React.useEffect(() => {
+    if (componentMap?.collections?.[slug]?.fieldMap) {
+      const fieldMap = componentMap.collections[slug].fieldMap
+      const reducedFieldMap = []
+      fieldMap.map((field) => {
+        selected.map((selectedField) => {
+          if (field.name === selectedField.name) {
+            reducedFieldMap.push(field)
+          }
+        })
+      })
+      setReducedFieldMap(reducedFieldMap)
+    }
+  }, [componentMap.collections, fields, slug, selected])
+
+  React.useEffect(() => {
+    if (!hasInitializedState.current) {
+      const getInitialState = async () => {
+        const result = await getFormState({
+          apiRoute,
+          body: {
+            collectionSlug: slug,
+            data: {},
+            operation: 'update',
+            schemaPath: slug,
+          },
+          serverURL,
+        })
+
+        setInitialState(result)
+        hasInitializedState.current = true
+      }
+
+      void getInitialState()
+    }
+  }, [apiRoute, hasInitializedState, serverURL, slug])
 
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
     return null
@@ -128,64 +172,62 @@ const EditMany: React.FC<Props> = (props) => {
         {/* @ts-expect-error */}
         <DocumentInfoProvider collection={collection}>
           <OperationContext.Provider value="update">
-            <Form className={`${baseClass}__form`} onSuccess={onSuccess}>
-              <div className={`${baseClass}__main`}>
-                <div className={`${baseClass}__header`}>
-                  <h2 className={`${baseClass}__header__title`}>
-                    {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
-                  </h2>
-                  <button
-                    aria-label={t('general:close')}
-                    className={`${baseClass}__header__close`}
-                    id={`close-drawer__${drawerSlug}`}
-                    onClick={() => closeModal(drawerSlug)}
-                    type="button"
-                  >
-                    <X />
-                  </button>
-                </div>
-                <FieldSelect fields={fields} setSelected={setSelected} />
-                [RenderFields]
-                {/* <RenderFields fieldSchema={selected} fieldTypes={fieldTypes} /> */}
-                <div className={`${baseClass}__sidebar-wrap`}>
-                  <div className={`${baseClass}__sidebar`}>
-                    <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                      <div className={`${baseClass}__document-actions`}>
-                        {collection.versions ? (
-                          <React.Fragment>
-                            <Publish
-                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-                              disabled={selected.length === 0}
-                            />
-                            <SaveDraft
-                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-                              disabled={selected.length === 0}
-                            />
-                          </React.Fragment>
-                        ) : (
-                          <React.Fragment>
+            <div className={`${baseClass}__main`}>
+              <div className={`${baseClass}__header`}>
+                <h2 className={`${baseClass}__header__title`}>
+                  {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
+                </h2>
+                <button
+                  aria-label={t('general:close')}
+                  className={`${baseClass}__header__close`}
+                  id={`close-drawer__${drawerSlug}`}
+                  onClick={() => closeModal(drawerSlug)}
+                  type="button"
+                >
+                  <X />
+                </button>
+              </div>
+              <FieldPathProvider path="" schemaPath={slug}>
+                <Form
+                  className={`${baseClass}__form`}
+                  initialState={initialState}
+                  onSuccess={onSuccess}
+                >
+                  <FieldSelect fields={fields} setSelected={setSelected} />
+                  {reducedFieldMap.length === 0 ? null : (
+                    <RenderFields fieldMap={reducedFieldMap} />
+                  )}
+                  <div className={`${baseClass}__sidebar-wrap`}>
+                    <div className={`${baseClass}__sidebar`}>
+                      <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                        <div className={`${baseClass}__document-actions`}>
+                          {collection?.versions?.drafts ? (
+                            <React.Fragment>
+                              <Publish
+                                action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
+                                disabled={selected.length === 0}
+                              />
+                              <SaveDraft
+                                action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
+                                disabled={selected.length === 0}
+                              />
+                            </React.Fragment>
+                          ) : (
                             <Submit
-                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
                               disabled={selected.length === 0}
                             />
-                            <SaveDraft
-                              action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-                              disabled={selected.length === 0}
-                            />
-                          </React.Fragment>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </Form>
+                </Form>
+              </FieldPathProvider>
+            </div>
           </OperationContext.Provider>
-          {/* @ts-expect-error */}
         </DocumentInfoProvider>
       </Drawer>
     </div>
   )
 }
-
-export default EditMany

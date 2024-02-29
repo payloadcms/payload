@@ -43,7 +43,7 @@ export type DocumentInfo = DocumentInfoProps & {
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
 }
 
-export type DocumentInfoContext = DocumentInfo & {
+export type DocumentInfoContext = Omit<DocumentInfo, 'docPreferences'> & {
   getDocPermissions: () => Promise<void>
   getDocPreferences: () => Promise<{ [key: string]: unknown }>
   getVersions: () => Promise<void>

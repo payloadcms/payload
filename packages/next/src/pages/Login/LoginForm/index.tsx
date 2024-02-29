@@ -51,7 +51,7 @@ export const LoginForm: React.FC<{
       disableSuccessStatus
       initialState={initialState}
       method="POST"
-      redirect={`${admin}${searchParams?.redirect || ''}`}
+      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : ''}
       waitForAutocomplete
     >
       <FormLoadingOverlayToggle action="loading" name="login-form" />

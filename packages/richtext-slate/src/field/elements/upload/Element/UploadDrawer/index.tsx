@@ -45,7 +45,7 @@ export const UploadDrawer: React.FC<{
   const { code: locale } = useLocale()
   const { user } = useAuth()
   const { closeModal } = useModal()
-  const { id, getDocPreferences } = useDocumentInfo()
+  const { id, collectionSlug } = useDocumentInfo()
   const [initialState, setInitialState] = useState({})
   const { richTextComponentMap } = fieldProps
 
@@ -72,14 +72,12 @@ export const UploadDrawer: React.FC<{
     const data = deepCopyObject(element?.fields || {})
 
     const awaitInitialState = async () => {
-      const docPreferences = await getDocPreferences()
-
       const state = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
+          collectionSlug,
           data,
-          docPreferences,
           operation: 'update',
           schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
         },
@@ -89,14 +87,14 @@ export const UploadDrawer: React.FC<{
       setInitialState(state)
     }
 
-    awaitInitialState()
+    void awaitInitialState()
   }, [
     config,
     element?.fields,
     user,
     locale,
     t,
-    getDocPreferences,
+    collectionSlug,
     id,
     schemaPath,
     relatedCollection.slug,

@@ -1,17 +1,28 @@
 import type { CellProps, SanitizedCollectionConfig } from 'payload/types'
 
-import type { Column } from '../../elements/Table/types'
 import type { ColumnPreferences } from '../../providers/ListInfo/types'
 import type { FieldMap } from '../../utilities/buildComponentMap/types'
+import type { Column } from '../Table/types'
+
+import { SelectAll } from '../SelectAll'
+import { SelectRow } from '../SelectRow'
 
 export const buildColumns = (args: {
   cellProps: Partial<CellProps>[]
   columnPreferences: ColumnPreferences
   defaultColumns?: string[]
+  enableRowSelections: boolean
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }): Column[] => {
-  const { cellProps, columnPreferences, defaultColumns, fieldMap, useAsTitle } = args
+  const {
+    cellProps,
+    columnPreferences,
+    defaultColumns,
+    enableRowSelections,
+    fieldMap,
+    useAsTitle,
+  } = args
 
   let sortedFieldMap = fieldMap
 
@@ -32,7 +43,7 @@ export const buildColumns = (args: {
 
   let numberOfActiveColumns = 0
 
-  return sortedFieldMap.reduce((acc, field, index) => {
+  const sorted = sortedFieldMap.reduce((acc, field, index) => {
     const columnPreference = columnPreferences?.find(
       (preference) => preference.accessor === field.name,
     )
@@ -56,7 +67,10 @@ export const buildColumns = (args: {
         name: field.name,
         accessor: field.name,
         active,
-        cellProps: cellProps?.[index],
+        cellProps: {
+          ...cellProps?.[index],
+          link: (numberOfActiveColumns === 1 && active && enableRowSelections) || undefined,
+        },
         components: {
           Cell: field.Cell,
           Heading: field.Heading,
@@ -69,4 +83,19 @@ export const buildColumns = (args: {
 
     return acc
   }, [])
+
+  if (enableRowSelections) {
+    sorted.unshift({
+      name: '',
+      accessor: '_select',
+      active: true,
+      components: {
+        Cell: <SelectRow />,
+        Heading: <SelectAll />,
+      },
+      label: null,
+    })
+  }
+
+  return sorted
 }

@@ -41,7 +41,6 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
-    docPreferences,
     globalSlug,
     hasSavePermission,
     initialData: data,
@@ -132,14 +131,15 @@ export const DefaultEditView: React.FC = () => {
         apiRoute,
         body: {
           id,
-          docPreferences,
+          collectionSlug,
           formState: prevFormState,
+          globalSlug,
           operation,
           schemaPath,
         },
         serverURL,
       }),
-    [serverURL, apiRoute, id, operation, docPreferences, schemaPath],
+    [serverURL, apiRoute, id, operation, schemaPath, collectionSlug, globalSlug],
   )
 
   return (

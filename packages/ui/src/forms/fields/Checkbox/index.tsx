@@ -5,17 +5,14 @@ import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { Check } from '../../../icons/Check'
-import { Line } from '../../../icons/Line'
 import LabelComp from '../../Label'
 import useField from '../../useField'
 import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
+import { CheckboxInput } from './Input'
 import './index.scss'
 
 const baseClass = 'checkbox'
-
-export const inputBaseClass = 'checkbox-input'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
@@ -86,40 +83,19 @@ const Checkbox: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>{Error}</div>
-      <div
-        className={[
-          inputBaseClass,
-          checked && `${inputBaseClass}--checked`,
-          readOnly && `${inputBaseClass}--read-only`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <div className={`${inputBaseClass}__input`}>
-          {BeforeInput}
-          <input
-            aria-label=""
-            defaultChecked={Boolean(checked)}
-            disabled={readOnly}
-            id={fieldID}
-            name={path}
-            onInput={onToggle}
-            required={required}
-            // ref={inputRef}
-            type="checkbox"
-          />
-          <span
-            className={[`${inputBaseClass}__icon`, !value && partialChecked ? 'check' : 'partial']
-              .filter(Boolean)
-              .join(' ')}
-          >
-            {value && <Check />}
-            {!value && partialChecked && <Line />}
-          </span>
-          {AfterInput}
-        </div>
-        {Label}
-      </div>
+      <CheckboxInput
+        AfterInput={AfterInput}
+        BeforeInput={BeforeInput}
+        Label={Label}
+        checked={checked}
+        id={fieldID}
+        inputRef={null}
+        name={path}
+        onToggle={onToggle}
+        partialChecked={partialChecked}
+        readOnly={readOnly}
+        required={required}
+      />
       {Description}
     </div>
   )
