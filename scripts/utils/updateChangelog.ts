@@ -111,12 +111,13 @@ if (require.main === module) {
 
 async function createContributorSection(lastTag: string): Promise<string> {
   const commits = await git.log({ from: lastTag, to: 'HEAD' })
+  console.log(`Fetching contributors from ${commits.total} commits`)
   const usernames = await Promise.all(
     commits.all.map((c) =>
       octokit
         .request('GET /repos/{owner}/{repo}/commits/{ref}', {
-          owner: 'denolfe', // TODO: Set this safely
-          repo: 'payload-fork', // TODO: Set this safely
+          owner: 'payloadcms',
+          repo: 'payload',
           ref: c.hash,
         })
         .then(({ data }) => data.author?.login as string),

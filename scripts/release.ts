@@ -11,12 +11,14 @@ import simpleGit from 'simple-git'
 import { getPackageDetails } from './lib/getPackageDetails'
 import { updateChangelog } from './utils/updateChangelog'
 
-const git = simpleGit(path.resolve(__dirname, '..'))
+const rootPath = path.resolve(__dirname, '..')
+
+const git = simpleGit(rootPath)
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
 
-const { tag = 'latest', bump = 'patch', 'dry-run': dryRun = true } = args
+const { tag = 'latest', bump = 'patch', 'dry-run': dryRun = true, changelog = false } = args
 
 const logPrefix = dryRun ? chalk.bold.magenta('[dry-run] >') : ''
 
@@ -39,6 +41,10 @@ const cmdRunnerAsync =
   }
 
 async function main() {
+  if (dryRun) {
+    console.log(chalk.bold.yellow(chalk.bold.magenta('\n  👀 Dry run mode enabled')))
+  }
+
   const runCmd = cmdRunner(dryRun)
   const runCmdAsync = cmdRunnerAsync(dryRun)
 
@@ -90,12 +96,25 @@ ${packageDetails
 
   // Prebuild all packages
   header(`\n🔨 Prebuilding all packages...`)
-  runCmd('pnpm build:all --output-logs=errors-only', execOpts)
+  const buildResult = await execa('pnpm', ['build:all'], {
+    cwd: rootPath,
+    // stdio: ['ignore', 'ignore', 'pipe'],
+    stdio: 'inherit',
+  })
+  // const buildResult = execSync('pnpm build:all', execOpts)
+  if (buildResult.exitCode !== 0) {
+    console.error(chalk.bold.red('Build failed'))
+    console.log(buildResult.stderr)
+    abort('Build failed')
+  }
 
   // Update changelog
-
-  header(`${logPrefix}📝 Updating changelog...`)
-  await updateChangelog({ newVersion: nextReleaseVersion, dryRun })
+  if (changelog) {
+    header(`${logPrefix}📝 Updating changelog...`)
+    await updateChangelog({ newVersion: nextReleaseVersion, dryRun })
+  } else {
+    console.log(chalk.bold.yellow('📝 Skipping changelog update'))
+  }
 
   // Increment all package versions
   header(`${logPrefix}📦 Updating package.json versions...`)
@@ -141,14 +160,14 @@ ${packageDetails
           '--no-git-checks',
           '--tag',
           tag,
-          '--dry-run',
-        ] // TODO: remove this
-        // if (dryRun) cmdArgs.push('--dry-run')
+          '--dry-run', // TODO: Use dryRun var
+        ]
         const { exitCode } = await execa('pnpm', cmdArgs, {
-          cwd: path.resolve(__dirname, '..'),
-          stdio: ['ignore', 'ignore', 'pipe'],
-          // stdio: 'inherit',
+          cwd: rootPath,
+          // stdio: ['ignore', 'ignore', 'pipe'],
+          stdio: 'inherit',
         })
+
         if (exitCode !== 0) {
           console.log(chalk.bold.red(`\n\np❌ ${pkg.name} ERROR: pnpm publish failed\n\n`))
           return { name: pkg.name, success: false }
