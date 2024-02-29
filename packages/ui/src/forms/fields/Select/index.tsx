@@ -1,5 +1,5 @@
 'use client'
-import type { Option, OptionObject, Validate } from 'payload/types'
+import type { ClientValidate, Option, OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
@@ -56,12 +56,12 @@ export const Select: React.FC<Props> = (props) => {
 
   const [options] = useState(formatOptions(optionsFromProps))
 
-  const memoizedValidate: Validate = useCallback(
+  const memoizedValidate: ClientValidate = useCallback(
     (value, validationOptions) => {
       if (typeof validate === 'function')
         return validate(value, { ...validationOptions, hasMany, options, required })
     },
-    [validate, required],
+    [validate, required, hasMany, options],
   )
 
   const { path, setValue, showError, value } = useField({

@@ -5,7 +5,7 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 export const Uploads2: CollectionConfig = {
   slug: 'uploads-2',
   upload: {
-    staticDir: path.resolve(__dirname, './uploads'),
+    staticDir: path.resolve(process.cwd(), 'test/uploads/collections/Upload2/uploads'),
   },
   admin: {
     enableRichTextRelationship: false,

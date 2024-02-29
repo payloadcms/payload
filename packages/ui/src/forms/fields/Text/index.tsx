@@ -1,5 +1,5 @@
 'use client'
-import type { Validate } from 'payload/types'
+import type { ClientValidate } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -24,14 +24,14 @@ const Text: React.FC<Props> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
+    hasMany,
     inputRef,
     label,
-    hasMany,
     localized,
-    minRows,
     maxLength,
     maxRows,
     minLength,
+    minRows,
     onKeyDown,
     path: pathFromProps,
     placeholder,
@@ -51,7 +51,7 @@ const Text: React.FC<Props> = (props) => {
 
   const { localization: localizationConfig } = useConfig()
 
-  const memoizedValidate: Validate = useCallback(
+  const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function')
         return validate(value, { ...options, maxLength, minLength, required })

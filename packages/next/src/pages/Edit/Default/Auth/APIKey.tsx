@@ -1,4 +1,6 @@
 'use client'
+import type { PayloadRequest } from 'payload/types'
+
 import {
   CopyToClipboard,
   GenerateConfirmation,
@@ -21,8 +23,17 @@ const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
   const { t } = useTranslation()
 
   const apiKey = useFormFields(([fields]) => fields[path])
+
   const validate = (val) =>
-    text(val, { data: {}, maxLength: 48, minLength: 24, siblingData: {}, t })
+    text(val, {
+      name: 'apiKey',
+      type: 'text',
+      data: {},
+      maxLength: 48,
+      minLength: 24,
+      req: { t } as PayloadRequest,
+      siblingData: {},
+    })
 
   const apiKeyValue = apiKey?.value
 

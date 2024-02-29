@@ -55,7 +55,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         staticURL: '/media-gif',
-        staticDir: path.resolve(__dirname, './media-gif'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/media-gif'),
         mimeTypes: ['image/gif'],
         resizeOptions: {
           position: 'center',
@@ -79,14 +79,6 @@ export default buildConfigWithDefaults({
             width: 1000,
           },
         ],
-        mimeTypes: ['image/gif'],
-        resizeOptions: {
-          height: 200,
-          position: 'center',
-          width: 200,
-        },
-        staticDir: './media-gif',
-        staticURL: '/media-gif',
       },
     },
     {
@@ -94,15 +86,13 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         staticURL: '/no-image-sizes',
-        staticDir: path.resolve(__dirname, './no-image-sizes'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/no-image-sizes'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         resizeOptions: {
           height: 200,
           position: 'center',
           width: 200,
         },
-        staticDir: './no-image-sizes',
-        staticURL: '/no-image-sizes',
       },
     },
     {
@@ -110,7 +100,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         staticURL: '/object-fit',
-        staticDir: path.resolve(__dirname, './object-fit'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/object-fit'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
@@ -138,9 +128,6 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        staticDir: './object-fit',
-        staticURL: '/object-fit',
       },
     },
     {
@@ -149,7 +136,7 @@ export default buildConfigWithDefaults({
       upload: {
         focalPoint: false,
         staticURL: '/crop-only',
-        staticDir: path.resolve(__dirname, './crop-only'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/crop-only'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
@@ -168,9 +155,6 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        staticDir: './crop-only',
-        staticURL: '/crop-only',
       },
     },
     {
@@ -179,7 +163,7 @@ export default buildConfigWithDefaults({
       upload: {
         crop: false,
         staticURL: '/focal-only',
-        staticDir: path.resolve(__dirname, './focal-only'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/focal-only'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
@@ -198,17 +182,14 @@ export default buildConfigWithDefaults({
             width: 900,
           },
         ],
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        staticDir: './focal-only',
-        staticURL: '/focal-only',
       },
     },
     {
       slug: mediaSlug,
       fields: [],
       upload: {
-        staticDir: './media',
-        staticURL: path.resolve(__dirname, '/media'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/media'),
+        staticURL: '/test/uploads/media',
         // crop: false,
         // focalPoint: false,
         formatOptions: {
@@ -300,13 +281,13 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-      fields: [],
     },
     {
       slug: enlargeSlug,
+      fields: [],
       upload: {
         staticURL: '/enlarge',
-        staticDir: path.resolve(__dirname, './media/enlarge'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/media/enlarge'),
         mimeTypes: [
           'image/png',
           'image/jpg',
@@ -315,12 +296,6 @@ export default buildConfigWithDefaults({
           'image/svg+xml',
           'audio/mpeg',
         ],
-      },
-    },
-    {
-      slug: enlargeSlug,
-      fields: [],
-      upload: {
         imageSizes: [
           {
             name: 'accidentalSameSize',
@@ -354,29 +329,13 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-      fields: [],
     },
     {
       slug: reduceSlug,
+      fields: [],
       upload: {
         staticURL: '/reduce',
-        staticDir: path.resolve(__dirname, './media/reduce'),
-        mimeTypes: [
-          'image/png',
-          'image/jpg',
-          'image/jpeg',
-          'image/gif',
-          'image/svg+xml',
-          'audio/mpeg',
-        ],
-        staticDir: './media/enlarge',
-        staticURL: '/enlarge',
-      },
-    },
-    {
-      slug: reduceSlug,
-      fields: [],
-      upload: {
+        staticDir: path.resolve(process.cwd(), 'test/uploads/media/reduce'),
         imageSizes: [
           {
             name: 'accidentalSameSize',
@@ -411,8 +370,6 @@ export default buildConfigWithDefaults({
           'image/svg+xml',
           'audio/mpeg',
         ],
-        staticDir: './media/reduce',
-        staticURL: '/reduce',
       },
     },
     {
@@ -420,20 +377,26 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         staticURL: '/media-trim',
-        staticDir: path.resolve(__dirname, './media-trim'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/media-trim'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        trimOptions: 0,
+        trimOptions: {
+          threshold: 0,
+        },
         imageSizes: [
           {
             name: 'trimNumber',
             height: undefined,
-            trimOptions: 0,
+            trimOptions: {
+              threshold: 0,
+            },
             width: 1024,
           },
           {
             name: 'trimString',
             height: undefined,
-            trimOptions: 0,
+            trimOptions: {
+              threshold: 0,
+            },
             width: 1024,
           },
           {
@@ -446,10 +409,6 @@ export default buildConfigWithDefaults({
             width: 1024,
           },
         ],
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        staticDir: './media-trim',
-        staticURL: '/media-trim',
-        trimOptions: 0,
       },
     },
     {
@@ -465,9 +424,8 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://localhost:3000/media)
-        staticDir: './media',
         staticURL: 'http://localhost:3000/media',
-        staticDir: path.resolve(__dirname, './media'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/media'),
       },
     },
     Uploads1,
@@ -478,7 +436,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         filesRequiredOnCreate: false,
-        staticDir: path.resolve(__dirname, './optional'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/optional'),
         staticURL: '/optional',
       },
     },
@@ -487,10 +445,8 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         staticURL: '/required',
-        staticDir: path.resolve(__dirname, './required'),
+        staticDir: path.resolve(process.cwd(), 'test/uploads/required'),
         filesRequiredOnCreate: true,
-        staticDir: './required',
-        staticURL: '/required',
       },
     },
     {
@@ -508,7 +464,7 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    const uploadsDir = path.resolve(__dirname, './media')
+    const uploadsDir = path.resolve(process.cwd(), 'test/uploads/media')
     removeFiles(path.normalize(uploadsDir))
 
     await payload.create({
@@ -520,7 +476,7 @@ export default buildConfigWithDefaults({
     })
 
     // Create image
-    const imageFilePath = path.resolve(__dirname, './image.png')
+    const imageFilePath = path.resolve(process.cwd(), 'test/uploads/image.png')
     const imageFile = await getFileByPath(imageFilePath)
 
     const { id: uploadedImage } = await payload.create({
@@ -547,7 +503,7 @@ export default buildConfigWithDefaults({
     })
 
     // Create audio
-    const audioFilePath = path.resolve(__dirname, './audio.mp3')
+    const audioFilePath = path.resolve(process.cwd(), 'test/uploads/audio.mp3')
     const audioFile = await getFileByPath(audioFilePath)
 
     const file = await payload.create({

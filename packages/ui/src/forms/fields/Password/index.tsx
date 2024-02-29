@@ -1,5 +1,5 @@
 'use client'
-import type { Validate } from 'payload/types'
+import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
@@ -29,7 +29,7 @@ export const Password: React.FC<Props> = (props) => {
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
-  const memoizedValidate: Validate = useCallback(
+  const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })

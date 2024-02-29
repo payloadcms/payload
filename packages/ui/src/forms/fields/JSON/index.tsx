@@ -1,5 +1,5 @@
 'use client'
-import type { Validate } from 'payload/types'
+import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -40,15 +40,21 @@ const JSONField: React.FC<Props> = (props) => {
   const [jsonError, setJsonError] = useState<string>()
   const [hasLoadedValue, setHasLoadedValue] = useState(false)
 
-  const memoizedValidate: Validate = useCallback(
+  const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
       if (typeof validate === 'function')
         return validate(value, { ...options, jsonError, required })
     },
-    [validate, required],
+    [validate, required, jsonError],
   )
 
-  const { initialValue, path, setValue, showError, value } = useField<string>({
+  const {
+    initialValue,
+    // path,
+    setValue,
+    showError,
+    value,
+  } = useField<string>({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })
@@ -72,7 +78,7 @@ const JSONField: React.FC<Props> = (props) => {
     if (hasLoadedValue) return
     setStringValue(JSON.stringify(value ? value : initialValue, null, 2))
     setHasLoadedValue(true)
-  }, [initialValue, value])
+  }, [initialValue, value, hasLoadedValue])
 
   return (
     <div

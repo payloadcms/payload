@@ -1,4 +1,4 @@
-import type { Validate } from 'payload/types'
+import type { ClientValidate } from 'payload/types'
 
 import type { Row } from '../Form/types'
 
@@ -9,7 +9,7 @@ export type Options = {
    * If you do not provide a `path` or a `name`, this hook will look for one using the `useFieldPath` hook.
    **/
   path?: string
-  validate?: Validate
+  validate?: ClientValidate
 }
 
 export type FieldType<T> = {

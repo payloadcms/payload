@@ -20,16 +20,16 @@ export const adminThumbnailSrc = '/media/image-640x480.png'
 export const AdminThumbnailCol: CollectionConfig = {
   slug: 'admin-thumbnail',
   upload: {
-    staticDir: path.resolve(__dirname, '../../media'),
-    adminThumbnail: ({ doc }) => {
-      if (docHasFilename(doc)) {
-        if (doc.mimeType.startsWith('image/')) {
-          return null // Fallback to default admin thumbnail if image
-        }
-        return adminThumbnailSrc // Use custom thumbnail if not image
-      }
-      return null
-    },
+    staticDir: path.resolve(process.cwd(), 'test/uploads/media'),
+    // adminThumbnail: ({ doc }) => {
+    //   if (docHasFilename(doc)) {
+    //     if (doc.mimeType.startsWith('image/')) {
+    //       return null // Fallback to default admin thumbnail if image
+    //     }
+    //     return adminThumbnailSrc // Use custom thumbnail if not image
+    //   }
+    //   return null
+    // },
   },
   fields: [],
 }
