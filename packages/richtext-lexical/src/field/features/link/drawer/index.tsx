@@ -2,6 +2,7 @@ import {
   Drawer,
   FieldPathProvider,
   Form,
+  type FormProps,
   type FormState,
   FormSubmit,
   RenderFields,
@@ -11,7 +12,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { useFieldPath } from '@payloadcms/ui'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
 import './index.scss'
@@ -50,7 +51,9 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
         serverURL: config.serverURL,
       }) // Form State
 
-      setInitialState(state)
+      if (state) {
+        setInitialState(state)
+      }
     }
 
     if (stateData) {
@@ -58,11 +61,40 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
     }
   }, [config.routes.api, config.serverURL, schemaFieldsPath, getDocPreferences, id, stateData])
 
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      const docPreferences = await getDocPreferences()
+
+      return getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          docPreferences,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL: config.serverURL,
+      })
+    },
+
+    [config.routes.api, config.serverURL, schemaFieldsPath, getDocPreferences, id],
+  )
+
   return (
     <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
       <FieldPathProvider path="" schemaPath="">
-        <Form fields={fieldMap} initialState={initialState} onSubmit={handleModalSubmit}>
-          <RenderFields fieldMap={fieldMap} forceRender readOnly={false} />
+        <Form
+          fields={Array.isArray(fieldMap) ? fieldMap : []}
+          initialState={initialState}
+          onChange={[onChange]}
+          onSubmit={handleModalSubmit}
+        >
+          <RenderFields
+            fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+            forceRender
+            readOnly={false}
+          />
 
           <FormSubmit>{t('general:submit')}</FormSubmit>
         </Form>
