@@ -6,12 +6,12 @@ import { useTableCell } from '@payloadcms/ui/elements'
 import { $getRoot } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { SanitizedEditorConfig } from '../field/lexical/config/types'
+import type { SanitizedClientEditorConfig } from '../field/lexical/config/types'
 
 import { useFieldPath } from '../../../ui/src/forms/FieldPathProvider'
 import { useClientFunctions } from '../../../ui/src/providers/ClientFunction'
-import { defaultEditorLexicalConfig } from '../field/lexical/config/defaultClient'
-import { sanitizeEditorConfig } from '../field/lexical/config/sanitize'
+import { defaultEditorLexicalConfig } from '../field/lexical/config/client/default'
+import { sanitizeClientEditorConfig } from '../field/lexical/config/client/sanitize'
 import { getEnabledNodes } from '../field/lexical/nodes'
 
 export const RichTextCell: React.FC<{
@@ -30,12 +30,10 @@ export const RichTextCell: React.FC<{
       return
     }
 
-    const finalSanitizedEditorConfig: SanitizedEditorConfig = sanitizeEditorConfig({
-      features: [],
-      lexical: lexicalEditorConfig
-        ? () => Promise.resolve(lexicalEditorConfig)
-        : () => Promise.resolve(defaultEditorLexicalConfig),
-    })
+    const finalSanitizedEditorConfig: SanitizedClientEditorConfig = sanitizeClientEditorConfig(
+      lexicalEditorConfig ? lexicalEditorConfig : defaultEditorLexicalConfig,
+      null,
+    )
 
     // Transform data through load hooks
     if (finalSanitizedEditorConfig?.features?.hooks?.load?.length) {
@@ -61,23 +59,21 @@ export const RichTextCell: React.FC<{
       return
     }
 
-    void finalSanitizedEditorConfig.lexical().then((lexicalConfig: LexicalEditorConfig) => {
-      // initialize headless editor
-      const headlessEditor = createHeadlessEditor({
-        namespace: lexicalConfig.namespace,
-        nodes: getEnabledNodes({ editorConfig: finalSanitizedEditorConfig }),
-        theme: lexicalConfig.theme,
-      })
-      headlessEditor.setEditorState(headlessEditor.parseEditorState(dataToUse))
-
-      const textContent =
-        headlessEditor.getEditorState().read(() => {
-          return $getRoot().getTextContent()
-        }) || ''
-
-      // Limiting the number of characters shown is done in a CSS rule
-      setPreview(textContent)
+    // initialize headless editor
+    const headlessEditor = createHeadlessEditor({
+      namespace: finalSanitizedEditorConfig.lexical.namespace,
+      nodes: getEnabledNodes({ editorConfig: finalSanitizedEditorConfig }),
+      theme: finalSanitizedEditorConfig.lexical.theme,
     })
+    headlessEditor.setEditorState(headlessEditor.parseEditorState(dataToUse))
+
+    const textContent =
+      headlessEditor.getEditorState().read(() => {
+        return $getRoot().getTextContent()
+      }) || ''
+
+    // Limiting the number of characters shown is done in a CSS rule
+    setPreview(textContent)
   }, [cellData, lexicalEditorConfig])
 
   return <span>{preview}</span>

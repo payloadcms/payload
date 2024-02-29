@@ -96,7 +96,7 @@ export const Document = async ({
       (isEditing && permissions?.collections?.[collectionSlug]?.update?.permission) ||
       (!isEditing && permissions?.collections?.[collectionSlug]?.create?.permission)
 
-    apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${
+    apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale.code}${
       collectionConfig.versions?.drafts ? '&draft=true' : ''
     }`
 
@@ -136,7 +136,7 @@ export const Document = async ({
     hasSavePermission = isEditing && docPermissions?.update?.permission
     action = `${serverURL}${api}/${globalSlug}`
 
-    apiURL = `${serverURL}${api}/${globalSlug}?locale=${locale}${
+    apiURL = `${serverURL}${api}/${globalSlug}?locale=${locale.code}${
       globalConfig.versions?.drafts ? '&draft=true' : ''
     }`
 
@@ -236,7 +236,7 @@ export const Document = async ({
         initialData={data}
         initialState={initialState}
       />
-      <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale}`}>
+      <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale.code}`}>
         <FormQueryParamsProvider formQueryParams={formQueryParams}>
           <RenderCustomComponent
             CustomComponent={typeof CustomView === 'function' ? CustomView : undefined}

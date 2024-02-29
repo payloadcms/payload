@@ -4,7 +4,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
-import type { EditViewProps } from '../../../../../../next/src/pages/Edit/types'
+import type { DocumentInfoContext } from '../../../../providers/DocumentInfo/types'
 import type { Value } from '../types'
 import type { Props } from './types'
 
@@ -49,7 +49,7 @@ export const AddNewRelation: React.FC<Props> = ({
     },
   )
 
-  const onSave: EditViewProps['onSave'] = useCallback(
+  const onSave: DocumentInfoContext['onSave'] = useCallback(
     ({ doc, operation }) => {
       if (operation === 'create') {
         const newValue: Value = Array.isArray(relationTo)
@@ -66,16 +66,16 @@ export const AddNewRelation: React.FC<Props> = ({
             : value !== doc.id
 
         if (isNewValue) {
-          dispatchOptions({
-            collection: collectionConfig,
-            // TODO: fix this
-            // @ts-ignore-next-line
-            config,
-            docs: [doc],
-            i18n,
-            sort: true,
-            type: 'ADD',
-          })
+          // dispatchOptions({
+          //   collection: collectionConfig,
+          //   // TODO: fix this
+          //   // @ts-expect-error-next-line
+          //   type: 'ADD',
+          //   config,
+          //   docs: [doc],
+          //   i18n,
+          //   sort: true,
+          // })
 
           if (hasMany) {
             setValue([...(Array.isArray(value) ? value : []), newValue])

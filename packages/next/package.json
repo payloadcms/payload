@@ -1,7 +1,6 @@
 {
   "name": "@payloadcms/next",
   "version": "0.0.1",
-  "private": true,
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "bin": {
@@ -55,6 +54,7 @@
   "dependencies": {
     "@dnd-kit/core": "6.0.8",
     "@faceless-ui/modal": "2.0.1",
+    "@faceless-ui/window-info": "2.1.1",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
@@ -104,6 +104,9 @@
       }
     },
     "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=18.17.0"
   },
   "files": [
     "dist"

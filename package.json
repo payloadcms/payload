@@ -70,7 +70,7 @@
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "dotenv": "8.6.0",
-    "drizzle-orm": "0.29.3",
+    "drizzle-orm": "0.29.4",
     "express": "4.18.2",
     "form-data": "3.0.1",
     "fs-extra": "10.1.0",
@@ -78,7 +78,6 @@
     "get-stream": "6.0.1",
     "glob": "8.1.0",
     "husky": "^8.0.3",
-    "isomorphic-fetch": "3.0.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "json5": "^2.2.3",
@@ -88,7 +87,6 @@
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9",
     "next": "14.1.1-canary.26",
-    "node-fetch": "2.6.12",
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
     "pino": "8.15.0",
@@ -101,7 +99,7 @@
     "read-stream": "^2.1.1",
     "rimraf": "3.0.2",
     "semver": "^7.5.4",
-    "sharp": "0.32.6",
+    "sharp": "0.33.2",
     "shelljs": "0.8.5",
     "simple-git": "^3.20.0",
     "slash": "3.0.0",
@@ -118,7 +116,7 @@
     "react-router-dom": "5.3.4"
   },
   "engines": {
-    "node": ">=14",
+    "node": ">=18.17.0",
     "pnpm": ">=8"
   },
   "lint-staged": {

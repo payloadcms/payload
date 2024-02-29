@@ -371,10 +371,12 @@ export const mapFields = (args: {
       Field: <HiddenInput name="id" />,
       Heading: <SortColumn label="ID" name="id" />,
       fieldIsPresentational: false,
-      fieldPermissions: {},
+      fieldPermissions: {} as FieldPermissions, // TODO: wire this up
       isFieldAffectingData: true,
       isSidebar: false,
       label: 'ID',
+      labels: undefined,
+      localized: undefined,
       readOnly: false,
       subfields: [],
       tabs: [],

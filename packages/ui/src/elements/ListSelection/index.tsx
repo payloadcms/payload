@@ -1,3 +1,4 @@
+'use client'
 import React, { Fragment } from 'react'
 
 import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider'
@@ -9,7 +10,7 @@ const baseClass = 'list-selection'
 type Props = {
   label: string
 }
-const ListSelection: React.FC<Props> = ({ label }) => {
+export const ListSelection: React.FC<Props> = ({ label }) => {
   const { count, selectAll, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
 
@@ -37,5 +38,3 @@ const ListSelection: React.FC<Props> = ({ label }) => {
     </div>
   )
 }
-
-export default ListSelection

@@ -1,9 +1,11 @@
 'use client'
+import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   Gutter,
   ListControls,
+  ListSelection,
   Pagination,
   PerPage,
   Pill,
@@ -18,6 +20,10 @@ import {
 } from '@payloadcms/ui'
 import React, { Fragment, useEffect } from 'react'
 
+import DeleteMany from '../../../../../ui/src/elements/DeleteMany'
+import { EditMany } from '../../../../../ui/src/elements/EditMany'
+import { PublishMany } from '../../../../../ui/src/elements/PublishMany'
+import { UnpublishMany } from '../../../../../ui/src/elements/UnpublishMany'
 import { RelationshipProvider } from './RelationshipProvider'
 import './index.scss'
 
@@ -26,6 +32,7 @@ const baseClass = 'collection-list'
 export const DefaultListView: React.FC = () => {
   const {
     Header,
+    collectionSlug,
     data,
     handlePageChange,
     handlePerPageChange,
@@ -36,8 +43,6 @@ export const DefaultListView: React.FC = () => {
     limit,
     modifySearchParams,
     newDocumentURL,
-    // resetParams,
-    collectionSlug,
     titleField,
   } = useListInfo()
 
@@ -58,6 +63,9 @@ export const DefaultListView: React.FC = () => {
   const { i18n } = useTranslation()
 
   const { setStepNav } = useStepNav()
+  const {
+    breakpoints: { s: smallBreak },
+  } = useWindowInfo()
 
   let docs = data.docs || []
 
@@ -98,9 +106,9 @@ export const DefaultListView: React.FC = () => {
                     {i18n.t('general:createNew')}
                   </Pill>
                 )}
-                {/* {!smallBreak && (
-                  <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
-                )} */}
+                {!smallBreak && (
+                  <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+                )}
                 {/* {description && (
                   <div className={`${baseClass}__sub-header`}>
                     <ViewDescription description={description} />
@@ -110,14 +118,12 @@ export const DefaultListView: React.FC = () => {
             )}
           </header>
           <ListControls
-            collectionPluralLabel={labels?.plural}
-            collectionSlug={collectionSlug}
+            collectionConfig={collectionConfig}
             // textFieldsToBeSearched={textFieldsToBeSearched}
             // handleSearchChange={handleSearchChange}
             // handleSortChange={handleSortChange}
             // handleWhereChange={handleWhereChange}
             // modifySearchQuery={modifySearchParams}
-            // resetParams={resetParams}
             titleField={titleField}
           />
           {BeforeListTable}
@@ -181,19 +187,21 @@ export const DefaultListView: React.FC = () => {
                     modifySearchParams={modifySearchParams}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />
-                  {/* {smallBreak && (
+                  {smallBreak && (
                     <div className={`${baseClass}__list-selection`}>
                       <Fragment>
-                        <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
+                        <ListSelection
+                          label={getTranslation(collectionConfig.labels.plural, i18n)}
+                        />
                         <div className={`${baseClass}__list-selection-actions`}>
-                          <EditMany resetParams={resetParams} />
-                          <PublishMany resetParams={resetParams} />
-                          <UnpublishMany resetParams={resetParams} />
-                          <DeleteMany resetParams={resetParams} />
+                          <EditMany collection={collectionConfig} />
+                          <PublishMany collection={collectionConfig} />
+                          <UnpublishMany collection={collectionConfig} />
+                          <DeleteMany collection={collectionConfig} />
                         </div>
                       </Fragment>
                     </div>
-                  )} */}
+                  )}
                 </Fragment>
               )}
             </div>

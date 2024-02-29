@@ -26,14 +26,17 @@ export const TableColumnContext = createContext<ITableColumns>({} as ITableColum
 
 export const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
 
+export type ListPreferences = {
+  columns: ColumnPreferences
+}
+
 export const TableColumnsProvider: React.FC<{
   cellProps?: Partial<CellProps>[]
   children: React.ReactNode
   collectionSlug: string
-  listPreferences: {
-    columns: ColumnPreferences
-  }
-}> = ({ cellProps, children, collectionSlug, listPreferences }) => {
+  enableRowSelections?: boolean
+  listPreferences: ListPreferences
+}> = ({ cellProps, children, collectionSlug, enableRowSelections = false, listPreferences }) => {
   const config = useConfig()
 
   const { componentMap } = useComponentMap()
@@ -58,6 +61,7 @@ export const TableColumnsProvider: React.FC<{
       cellProps,
       columnPreferences: listPreferences?.columns,
       defaultColumns,
+      enableRowSelections,
       fieldMap,
       useAsTitle,
     })
@@ -79,16 +83,17 @@ export const TableColumnsProvider: React.FC<{
 
         if (currentPreferences.columns) {
           dispatchTableColumns({
+            type: 'set',
             payload: {
               columns: buildColumns({
                 cellProps,
                 columnPreferences: currentPreferences?.columns,
                 defaultColumns,
+                enableRowSelections: true,
                 fieldMap,
                 useAsTitle,
               }),
             },
-            type: 'set',
           })
         }
       }
@@ -123,35 +128,35 @@ export const TableColumnsProvider: React.FC<{
     void setPreference(preferenceKey, { columns }, true)
   }, [tableColumns, preferenceKey, setPreference])
 
-  // const setActiveColumns = useCallback(
-  //   (columns: string[]) => {
-  //     dispatchTableColumns({
-  //       payload: {
-  //         // onSelect,
-  //         i18n,
-  //         cellProps,
-  //         collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
-  //         columns: columns.map((column) => ({
-  //           accessor: column,
-  //           active: true,
-  //         })),
-  //       },
-  //       type: 'set',
-  //     })
-  //   },
-  //   [collectionConfig, cellProps],
-  // )
+  const setActiveColumns = useCallback(
+    (columns: string[]) => {
+      // dispatchTableColumns({
+      //   type: 'set',
+      //   payload: {
+      //     // onSelect,
+      //     cellProps,
+      //     collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
+      //     columns: columns.map((column) => ({
+      //       accessor: column,
+      //       active: true,
+      //     })),
+      //     i18n,
+      //   },
+      // })
+    },
+    [collectionConfig, cellProps],
+  )
 
   const moveColumn = useCallback(
     (args: { fromIndex: number; toIndex: number }) => {
       const { fromIndex, toIndex } = args
 
       dispatchTableColumns({
+        type: 'move',
         payload: {
           fromIndex,
           toIndex,
         },
-        type: 'move',
       })
     },
     [dispatchTableColumns],
@@ -160,13 +165,13 @@ export const TableColumnsProvider: React.FC<{
   const toggleColumn = useCallback(
     (column: string) => {
       dispatchTableColumns({
+        type: 'toggle',
         payload: {
           column,
         },
-        type: 'toggle',
       })
     },
-    [collectionConfig, cellProps],
+    [dispatchTableColumns],
   )
 
   return (
@@ -175,7 +180,7 @@ export const TableColumnsProvider: React.FC<{
         columns: tableColumns,
         dispatchTableColumns,
         moveColumn,
-        // setActiveColumns,
+        setActiveColumns,
         toggleColumn,
       }}
     >

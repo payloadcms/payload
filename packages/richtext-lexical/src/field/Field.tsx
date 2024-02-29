@@ -5,7 +5,7 @@ import { type FormFieldBase, useField } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
-import type { SanitizedEditorConfig } from './lexical/config/types'
+import type { SanitizedClientEditorConfig } from './lexical/config/types'
 
 import { richTextValidateHOC } from '../validate'
 import './index.scss'
@@ -15,7 +15,7 @@ const baseClass = 'rich-text-lexical'
 
 const RichText: React.FC<
   FormFieldBase & {
-    editorConfig: SanitizedEditorConfig // With rendered features n stuff
+    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
   }

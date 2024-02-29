@@ -48,6 +48,9 @@
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
+  "engines": {
+    "node": ">=18.17.0"
+  },
   "files": [
     "dist"
   ]

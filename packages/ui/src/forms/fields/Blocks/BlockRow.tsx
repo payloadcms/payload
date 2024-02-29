@@ -140,10 +140,10 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             className={`${baseClass}__fields`}
             fieldMap={block.subfields}
             forceRender={forceRender}
-            indexPath={indexPath}
+            // indexPath={indexPath}
             margins="small"
-            permissions={permissions?.blocks?.[row.blockType]?.fields}
-            readOnly={readOnly}
+            // permissions={permissions?.blocks?.[row.blockType]?.fields}
+            // readOnly={readOnly}
           />
         </FieldPathProvider>
       </Collapsible>

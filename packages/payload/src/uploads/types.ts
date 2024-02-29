@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import type express from 'express'
 import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'

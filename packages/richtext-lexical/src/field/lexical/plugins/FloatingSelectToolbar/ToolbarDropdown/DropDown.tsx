@@ -3,7 +3,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import * as React from 'react'
+import React from 'react'
 import { createPortal } from 'react-dom'
 
 import type { FloatingToolbarSectionEntry } from '../types'
@@ -24,7 +24,7 @@ export function DropDownItem({
   children: React.ReactNode
   entry: FloatingToolbarSectionEntry
   title?: string
-}): JSX.Element {
+}): React.ReactNode {
   const [editor] = useLexicalComposerContext()
   const [enabled, setEnabled] = useState<boolean>(true)
   const [active, setActive] = useState<boolean>(false)
@@ -209,7 +209,7 @@ export function DropDown({
   children: ReactNode
   disabled?: boolean
   stopCloseOnClickSelf?: boolean
-}): JSX.Element {
+}): React.ReactNode {
   const dropDownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [showDropDown, setShowDropDown] = useState(false)

@@ -1,14 +1,32 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 
-import type { FeatureProvider, ResolvedFeatureMap, SanitizedFeatures } from '../../features/types'
+import type {
+  FeatureProviderClient,
+  FeatureProviderServer,
+  ResolvedClientFeatureMap,
+  ResolvedServerFeatureMap,
+  SanitizedClientFeatures,
+  SanitizedServerFeatures,
+} from '../../features/types'
 
-export type EditorConfig = {
-  features: FeatureProvider[]
-  lexical?: () => Promise<LexicalEditorConfig>
+export type ServerEditorConfig = {
+  features: FeatureProviderServer<unknown, unknown>[]
+  lexical?: LexicalEditorConfig
 }
 
-export type SanitizedEditorConfig = {
-  features: SanitizedFeatures
-  lexical: () => Promise<LexicalEditorConfig>
-  resolvedFeatureMap: ResolvedFeatureMap
+export type SanitizedServerEditorConfig = {
+  features: SanitizedServerFeatures
+  lexical: LexicalEditorConfig
+  resolvedFeatureMap: ResolvedServerFeatureMap
+}
+
+export type ClientEditorConfig = {
+  features: FeatureProviderClient<unknown>[]
+  lexical?: LexicalEditorConfig
+}
+
+export type SanitizedClientEditorConfig = {
+  features: SanitizedClientFeatures
+  lexical: LexicalEditorConfig
+  resolvedFeatureMap: ResolvedClientFeatureMap
 }

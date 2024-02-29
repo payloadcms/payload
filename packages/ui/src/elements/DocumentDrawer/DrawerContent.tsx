@@ -1,5 +1,4 @@
 'use client'
-import type { CollectionPermission } from 'payload/auth'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -71,7 +70,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   useEffect(() => {
     setFields(formatFields(fields, true))
-  }, [collectionSlug, collectionConfig])
+  }, [collectionSlug, collectionConfig, fields])
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
@@ -84,11 +83,9 @@ const Content: React.FC<DocumentDrawerProps> = ({
     }
   }, [isError, t, isOpen, data, drawerSlug, closeModal, isLoadingDocument])
 
-  if (isError) return null
-
   const isEditing = Boolean(id)
 
-  const apiURL = id ? `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale}` : null
+  const apiURL = id ? `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}` : null
 
   const action = `${serverURL}${apiRoute}/${collectionSlug}${
     isEditing ? `/${id}` : ''
@@ -105,8 +102,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
           apiRoute,
           body: {
             id,
+            collectionSlug,
             data: data || {},
-            docPreferences: null, // TODO: get this
             operation: isEditing ? 'update' : 'create',
             schemaPath,
           },
@@ -114,11 +111,14 @@ const Content: React.FC<DocumentDrawerProps> = ({
         })
 
         setInitialState(result)
+        hasInitializedState.current = true
       }
 
-      getInitialState()
+      void getInitialState()
     }
-  }, [apiRoute, data, id, isEditing, schemaPath, serverURL])
+  }, [apiRoute, data, id, isEditing, schemaPath, serverURL, collectionSlug])
+
+  if (isError) return null
 
   if (!initialState || isLoadingDocument) {
     return <LoadingOverlay />
@@ -142,6 +142,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
               aria-label={t('general:close')}
               className={`${baseClass}__header-close`}
               onClick={() => toggleModal(drawerSlug)}
+              type="button"
             >
               <X />
             </button>
@@ -154,11 +155,9 @@ const Content: React.FC<DocumentDrawerProps> = ({
       collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
-      docPermissions={{} as CollectionPermission} // TODO; get this
       // hasSavePermission={hasSavePermission}
       // isEditing={isEditing}
       // isLoading,
-      docPreferences={null} // TODO: get this
       id={id}
       initialData={data}
       initialState={initialState}

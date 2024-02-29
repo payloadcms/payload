@@ -1,5 +1,5 @@
 import type { BuildFormStateArgs, FieldSchemaMap } from '@payloadcms/ui'
-import type { Field, PayloadRequest, SanitizedConfig } from 'payload/types'
+import type { DocumentPreferences, Field, PayloadRequest, SanitizedConfig } from 'payload/types'
 
 import { buildFieldSchemaMap, buildStateFromSchema, reduceFieldsToValues } from '@payloadcms/ui'
 import httpStatus from 'http-status'
@@ -22,20 +22,21 @@ export const getFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
 }
 
 export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
-  const { data: reqData, locale, t, user } = req
+  const { locale, t, user } = req
+  const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
 
   // TODO: run ADMIN access control for user
 
   const fieldSchemaMap = getFieldSchemaMap(req.payload.config)
 
   const {
-    id,
+    collectionSlug,
     data: incomingData,
-    docPreferences,
     formState,
+    globalSlug,
     operation,
     schemaPath,
-  } = reqData as BuildFormStateArgs
+  } = reqData
 
   const schemaPathSegments = schemaPath.split('.')
 
@@ -63,6 +64,26 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
   }
 
   const data = incomingData || reduceFieldsToValues(formState || {}, true)
+
+  let id: number | string | undefined
+  let docPreferencesKey: string
+  if (collectionSlug) {
+    id = reqData.id
+    docPreferencesKey = `collection-${collectionSlug}${id ? `-${id}` : ''}`
+  } else {
+    docPreferencesKey = `global-${globalSlug}`
+  }
+
+  const { docs: [{ value: docPreferences } = { value: null }] = [] } = (await req.payload.find({
+    collection: 'payload-preferences',
+    depth: 0,
+    limit: 1,
+    where: {
+      key: {
+        equals: docPreferencesKey,
+      },
+    },
+  })) as any as { docs: { value: DocumentPreferences }[] }
 
   const result = await buildStateFromSchema({
     id,

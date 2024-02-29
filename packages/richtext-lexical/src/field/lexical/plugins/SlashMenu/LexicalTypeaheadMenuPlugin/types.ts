@@ -5,7 +5,7 @@ import type React from 'react'
 
 export class SlashMenuOption {
   // Icon for display
-  Icon: () => Promise<React.FC>
+  Icon: React.FC
 
   displayName?: (({ i18n }: { i18n: I18n }) => string) | string
   // Used for class names and, if displayName is not provided, for display.
@@ -22,7 +22,7 @@ export class SlashMenuOption {
   constructor(
     key: string,
     options: {
-      Icon: () => Promise<React.FC>
+      Icon: React.FC
       displayName?: (({ i18n }: { i18n: I18n }) => string) | string
       keyboardShortcut?: string
       keywords?: Array<string>

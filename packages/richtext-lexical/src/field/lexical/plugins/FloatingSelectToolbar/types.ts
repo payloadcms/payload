@@ -3,7 +3,7 @@ import type React from 'react'
 
 export type FloatingToolbarSection =
   | {
-      ChildComponent?: () => Promise<React.FC>
+      ChildComponent?: React.FC
       entries: Array<FloatingToolbarSectionEntry>
       key: string
       order?: number
@@ -17,15 +17,13 @@ export type FloatingToolbarSection =
     }
 
 export type FloatingToolbarSectionEntry = {
-  ChildComponent?: () => Promise<React.FC>
+  ChildComponent?: React.FC
   /** Use component to ignore the children and onClick properties. It does not use the default, pre-defined format Button component */
-  Component?: () => Promise<
-    React.FC<{
-      anchorElem: HTMLElement
-      editor: LexicalEditor
-      entry: FloatingToolbarSectionEntry
-    }>
-  >
+  Component?: React.FC<{
+    anchorElem: HTMLElement
+    editor: LexicalEditor
+    entry: FloatingToolbarSectionEntry
+  }>
   isActive?: ({ editor, selection }: { editor: LexicalEditor; selection: BaseSelection }) => boolean
   isEnabled?: ({
     editor,

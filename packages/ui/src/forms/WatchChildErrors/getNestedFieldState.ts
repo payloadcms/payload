@@ -2,13 +2,13 @@ import type { Field } from 'payload/types'
 
 import type { FormState } from '../Form/types'
 
-import { buildPathSegments } from './buildPathSegments'
+// import { buildPathSegments } from './buildPathSegments'
 import { getFieldStateFromPaths } from './getFieldStateFromPaths'
 
 export const getNestedFieldState = ({
   fieldSchema,
   formState,
-  path,
+  // path,
   pathSegments: pathSegmentsFromProps,
 }: {
   fieldSchema?: Field[]
@@ -20,10 +20,10 @@ export const getNestedFieldState = ({
   fieldState: FormState
   pathSegments: string[]
 } => {
-  let pathSegments = pathSegmentsFromProps
+  const pathSegments = pathSegmentsFromProps
 
   if (!pathSegments && fieldSchema) {
-    pathSegments = buildPathSegments(path, fieldSchema)
+    // pathSegments = buildPathSegments(path, fieldSchema)
   }
 
   const result = getFieldStateFromPaths({ formState, pathSegments })

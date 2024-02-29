@@ -20,7 +20,7 @@ import { sanitizeFields } from 'payload/config'
 
 import type { BlocksFeatureProps } from '..'
 
-import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
+import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
 import { transformInputFormSchema } from '../utils/transformInputFormSchema'
 import { BlockContent } from './BlockContent'
 import './index.scss'

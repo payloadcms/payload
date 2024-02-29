@@ -12,13 +12,13 @@ import { useSearchParams } from '../../providers/SearchParams'
 import { useTranslation } from '../../providers/Translation'
 import { Button } from '../Button'
 import ColumnSelector from '../ColumnSelector'
-import DeleteMany from '../DeleteMany'
-import EditMany from '../EditMany'
+import { DeleteMany } from '../DeleteMany'
+import { EditMany } from '../EditMany'
 import Pill from '../Pill'
-import PublishMany from '../PublishMany'
+import { PublishMany } from '../PublishMany'
 import SearchFilter from '../SearchFilter'
 import SortComplex from '../SortComplex'
-import UnpublishMany from '../UnpublishMany'
+import { UnpublishMany } from '../UnpublishMany'
 import WhereBuilder from '../WhereBuilder'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery'
 import './index.scss'
@@ -32,8 +32,7 @@ const baseClass = 'list-controls'
  */
 export const ListControls: React.FC<Props> = (props) => {
   const {
-    collectionPluralLabel,
-    collectionSlug,
+    collectionConfig,
     enableColumns = true,
     enableSort = false,
     handleSearchChange,
@@ -71,10 +70,10 @@ export const ListControls: React.FC<Props> = (props) => {
           <div className={`${baseClass}__buttons-wrap`}>
             {!smallBreak && (
               <React.Fragment>
-                {/* <EditMany resetParams={resetParams} />
-                <PublishMany resetParams={resetParams} />
-                <UnpublishMany resetParams={resetParams} />
-                <DeleteMany resetParams={resetParams} /> */}
+                <EditMany collection={collectionConfig} />
+                <PublishMany collection={collectionConfig} />
+                <UnpublishMany collection={collectionConfig} />
+                <DeleteMany collection={collectionConfig} />
               </React.Fragment>
             )}
             {enableColumns && (
@@ -126,7 +125,7 @@ export const ListControls: React.FC<Props> = (props) => {
           height={visibleDrawer === 'columns' ? 'auto' : 0}
           id={`${baseClass}-columns`}
         >
-          <ColumnSelector collectionSlug={collectionSlug} />
+          <ColumnSelector collectionSlug={collectionConfig.slug} />
         </AnimateHeight>
       )}
       <AnimateHeight
@@ -135,8 +134,8 @@ export const ListControls: React.FC<Props> = (props) => {
         id={`${baseClass}-where`}
       >
         <WhereBuilder
-          collectionPluralLabel={collectionPluralLabel}
-          collectionSlug={collectionSlug}
+          collectionPluralLabel={collectionConfig?.labels?.plural}
+          collectionSlug={collectionConfig.slug}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
         />

@@ -528,17 +528,17 @@ function buildObjectType({
             })
 
             if (Object.keys(objectType.getFields()).length) {
-              payload.types.groupTypes[interfaceName] = objectType
+              graphqlResult.types.groupTypes[interfaceName] = objectType
             }
           }
 
-          if (!payload.types.groupTypes[interfaceName]) {
+          if (!graphqlResult.types.groupTypes[interfaceName]) {
             return tabSchema
           }
 
           return {
             ...tabSchema,
-            [tab.name]: { type: payload.types.groupTypes[interfaceName] },
+            [tab.name]: { type: graphqlResult.types.groupTypes[interfaceName] },
           }
         }
 

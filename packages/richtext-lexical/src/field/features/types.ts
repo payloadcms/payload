@@ -5,11 +5,11 @@ import type { SerializedLexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
 import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
-import type { PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
+import type { Field, PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
 import type React from 'react'
 
 import type { AdapterProps } from '../../types'
-import type { EditorConfig } from '../lexical/config/types'
+import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types'
 import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import type { HTMLConverter } from './converters/html/converter/types'
@@ -62,9 +62,135 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
   }
 }) => Promise<string | true> | string | true
 
-export type Feature = {
+export type FeatureProviderProviderServer<ServerFeatureProps, ClientFeatureProps> = (
+  props?: ServerFeatureProps,
+) => FeatureProviderServer<ServerFeatureProps, ClientFeatureProps>
+
+export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
+  /** Keys of dependencies needed for this feature. These dependencies do not have to be loaded first */
+  dependencies?: string[]
+  /** Keys of priority dependencies needed for this feature. These dependencies have to be loaded first and are available in the `feature` property*/
+  dependenciesPriority?: string[]
+  /** Keys of soft-dependencies needed for this feature. The FeatureProviders dependencies are optional, but are considered as last-priority in the loading process */
+  dependenciesSoft?: string[]
+
+  feature: (props: {
+    /** unSanitizedEditorConfig.features, but mapped */
+    featureProviderMap: ServerFeatureProviderMap
+    // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
+    resolvedFeatures: ResolvedServerFeatureMap
+    // unSanitized EditorConfig,
+    unSanitizedEditorConfig: ServerEditorConfig
+  }) => ServerFeature<ServerFeatureProps, ClientFeatureProps>
+  key: string
+  /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
+  serverFeatureProps: ServerFeatureProps
+}
+
+export type FeatureProviderProviderClient<ClientFeatureProps> = (
+  props?: ClientComponentProps<ClientFeatureProps>,
+) => FeatureProviderClient<ClientFeatureProps>
+
+/**
+ * No dependencies => Features need to be sorted on the server first, then sent to client in right order
+ */
+export type FeatureProviderClient<ClientFeatureProps> = {
+  /**
+   * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
+   */
+  clientFeatureProps: ClientComponentProps<ClientFeatureProps>
+  feature: (props: {
+    /** unSanitizedEditorConfig.features, but mapped */
+    featureProviderMap: ClientFeatureProviderMap
+    // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
+    resolvedFeatures: ResolvedClientFeatureMap
+    // unSanitized EditorConfig,
+    unSanitizedEditorConfig: ClientEditorConfig
+  }) => ClientFeature<ClientFeatureProps>
+}
+
+export type ClientFeature<ClientFeatureProps> = {
+  /**
+   * Return props, to make it easy to retrieve passed in props to this Feature for the client if anyone wants to
+   */
+  clientFeatureProps: ClientComponentProps<ClientFeatureProps>
+
   floatingSelectToolbar?: {
     sections: FloatingToolbarSection[]
+  }
+  hooks?: {
+    load?: ({
+      incomingEditorState,
+    }: {
+      incomingEditorState: SerializedEditorState
+    }) => SerializedEditorState
+    save?: ({
+      incomingEditorState,
+    }: {
+      incomingEditorState: SerializedEditorState
+    }) => SerializedEditorState
+  }
+  markdownTransformers?: Transformer[]
+  nodes?: Array<Klass<LexicalNode> | LexicalNodeReplacement>
+  plugins?: Array<
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        position: 'bottom' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        position: 'normal' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        position: 'top' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC<{ anchorElem: HTMLElement }>
+        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+      }
+  >
+  slashMenu?: {
+    dynamicOptions?: ({
+      editor,
+      queryString,
+    }: {
+      editor: LexicalEditor
+      queryString: string
+    }) => SlashMenuGroup[]
+    options?: SlashMenuGroup[]
+  }
+}
+
+export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps & {
+  featureKey: string
+  order: number
+}
+
+export type ServerFeature<ServerProps, ClientFeatureProps> = {
+  ClientComponent: React.FC<ClientComponentProps<ClientFeatureProps>>
+  /**
+   * This determines what props will be available on the Client.
+   */
+  clientFeatureProps: ClientFeatureProps
+  generateComponentMap?: (args: {
+    config: SanitizedConfig
+    props: ServerProps
+    schemaPath: string
+  }) => {
+    [key: string]: React.FC
+  }
+  generateSchemaMap?: (args: {
+    config: SanitizedConfig
+    props: ServerProps
+    schemaMap: Map<string, Field[]>
+    schemaPath: string
+  }) => {
+    [key: string]: Field[]
   }
   generatedTypes?: {
     modifyOutputSchema: ({
@@ -95,16 +221,6 @@ export type Feature = {
       incomingEditorState: SerializedEditorState
       siblingDoc: Record<string, unknown>
     }) => Promise<void> | null
-    load?: ({
-      incomingEditorState,
-    }: {
-      incomingEditorState: SerializedEditorState
-    }) => SerializedEditorState
-    save?: ({
-      incomingEditorState,
-    }: {
-      incomingEditorState: SerializedEditorState
-    }) => SerializedEditorState
   }
   markdownTransformers?: Transformer[]
   nodes?: Array<{
@@ -113,107 +229,66 @@ export type Feature = {
     }
     node: Klass<LexicalNode> | LexicalNodeReplacement
     populationPromises?: Array<PopulationPromise>
-    type: string
     validations?: Array<NodeValidation>
   }>
-  plugins?: Array<
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: () => Promise<React.FC<{ anchorElem: HTMLElement }>>
-        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: () => Promise<React.FC>
-        position: 'bottom' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: () => Promise<React.FC>
-        position: 'normal' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: () => Promise<React.FC>
-        position: 'top' // Determines at which position the Component will be added.
-      }
-  >
 
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
-  props: unknown
-  slashMenu?: {
-    dynamicOptions?: ({
-      editor,
-      queryString,
-    }: {
-      editor: LexicalEditor
-      queryString: string
-    }) => SlashMenuGroup[]
-    options?: SlashMenuGroup[]
-  }
+  serverFeatureProps: ServerProps
 }
 
-export type FeatureProvider = {
-  Component: React.FC
-  /** Keys of dependencies needed for this feature. These dependencies do not have to be loaded first */
-  dependencies?: string[]
-  /** Keys of priority dependencies needed for this feature. These dependencies have to be loaded first and are available in the `feature` property*/
-  dependenciesPriority?: string[]
-
-  /** Keys of soft-dependencies needed for this feature. These dependencies are optional, but are considered as last-priority in the loading process */
-  dependenciesSoft?: string[]
-  feature: (props: {
-    /** unSanitizedEditorConfig.features, but mapped */
-    featureProviderMap: FeatureProviderMap
-    // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
-    resolvedFeatures: ResolvedFeatureMap
-    // unSanitized EditorConfig,
-    unSanitizedEditorConfig: EditorConfig
-  }) => Feature
-  key: string
-}
-
-export type ResolvedFeature = Feature &
+export type ResolvedServerFeature<ServerProps, ClientFeatureProps> = ServerFeature<
+  ServerProps,
+  ClientFeatureProps
+> &
   Required<
     Pick<
-      FeatureProvider,
-      'Component' | 'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
+      FeatureProviderServer<ServerProps, ClientFeatureProps>,
+      'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
     >
-  >
+  > & {
+    order: number
+  }
 
-export type ResolvedFeatureMap = Map<string, ResolvedFeature>
+export type ResolvedClientFeature<ClientFeatureProps> = ClientFeature<ClientFeatureProps> & {
+  key: string
+  order: number
+}
 
-export type FeatureProviderMap = Map<string, FeatureProvider>
+export type ResolvedServerFeatureMap = Map<string, ResolvedServerFeature<unknown, unknown>>
+export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<unknown>>
+
+export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<unknown, unknown>>
+export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<unknown>>
 
 export type SanitizedPlugin =
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: () => Promise<React.FC<{ anchorElem: HTMLElement }>>
-      desktopOnly?: boolean
-      key: string
-      position: 'floatingAnchorElem' // Determines at which position the Component will be added.
-    }
-  | {
-      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: () => Promise<React.FC>
+      Component: React.FC
       key: string
       position: 'bottom' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: () => Promise<React.FC>
+      Component: React.FC
       key: string
       position: 'normal' // Determines at which position the Component will be added.
     }
   | {
       // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-      Component: () => Promise<React.FC>
+      Component: React.FC
       key: string
       position: 'top' // Determines at which position the Component will be added.
     }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: React.FC<{ anchorElem: HTMLElement }>
+      desktopOnly?: boolean
+      key: string
+      position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+    }
 
-export type SanitizedFeatures = Required<
-  Pick<ResolvedFeature, 'markdownTransformers' | 'nodes'>
+export type SanitizedServerFeatures = Required<
+  Pick<ResolvedServerFeature<unknown, unknown>, 'markdownTransformers' | 'nodes'>
 > & {
   /**  The node types mapped to their converters */
   converters: {
@@ -221,9 +296,6 @@ export type SanitizedFeatures = Required<
   }
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  floatingSelectToolbar: {
-    sections: FloatingToolbarSection[]
-  }
   generatedTypes: {
     modifyOutputSchemas: Array<
       ({
@@ -257,6 +329,22 @@ export type SanitizedFeatures = Required<
         siblingDoc: Record<string, unknown>
       }) => Promise<void> | null
     >
+  }
+  /**  The node types mapped to their populationPromises */
+  populationPromises: Map<string, Array<PopulationPromise>>
+  /**  The node types mapped to their validations */
+  validations: Map<string, Array<NodeValidation>>
+}
+
+export type SanitizedClientFeatures = Required<
+  Pick<ResolvedClientFeature<unknown>, 'markdownTransformers' | 'nodes'>
+> & {
+  /** The keys of all enabled features */
+  enabledFeatures: string[]
+  floatingSelectToolbar: {
+    sections: FloatingToolbarSection[]
+  }
+  hooks: {
     load: Array<
       ({
         incomingEditorState,
@@ -273,14 +361,10 @@ export type SanitizedFeatures = Required<
     >
   }
   plugins?: Array<SanitizedPlugin>
-  /**  The node types mapped to their populationPromises */
-  populationPromises: Map<string, Array<PopulationPromise>>
   slashMenu: {
     dynamicOptions: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]
     >
     groupsWithOptions: SlashMenuGroup[]
   }
-  /**  The node types mapped to their validations */
-  validations: Map<string, Array<NodeValidation>>
 }

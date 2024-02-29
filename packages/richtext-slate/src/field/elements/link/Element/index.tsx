@@ -64,7 +64,7 @@ export const LinkElement = () => {
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
 
   const { richTextComponentMap } = fieldProps
-  const fieldMap = richTextComponentMap.get(fieldMapPath)
+  const fieldMap = richTextComponentMap.get(linkFieldsSchemaPath)
 
   const editor = useSlate()
   const config = useConfig()
@@ -75,7 +75,7 @@ export const LinkElement = () => {
   const [renderModal, setRenderModal] = useState(false)
   const [renderPopup, setRenderPopup] = useState(false)
   const [initialState, setInitialState] = useState<FormState>({})
-  const { id, getDocPreferences } = useDocumentInfo()
+  const { id, collectionSlug } = useDocumentInfo()
 
   const drawerSlug = useDrawerSlug('rich-text-link')
 
@@ -96,14 +96,12 @@ export const LinkElement = () => {
         url: element.url,
       }
 
-      const docPreferences = await getDocPreferences()
-
       const state = await getFormState({
         apiRoute: config.routes.api,
         body: {
           id,
+          collectionSlug,
           data,
-          docPreferences,
           operation: 'update',
           schemaPath: fieldMapPath,
         },
@@ -113,8 +111,8 @@ export const LinkElement = () => {
       setInitialState(state)
     }
 
-    awaitInitialState()
-  }, [renderModal, element, user, locale, t, getDocPreferences, config, id, fieldMapPath])
+    void awaitInitialState()
+  }, [renderModal, element, user, locale, t, collectionSlug, config, id, fieldMapPath])
 
   return (
     <span className={baseClass} {...attributes}>

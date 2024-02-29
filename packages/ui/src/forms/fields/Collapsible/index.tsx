@@ -125,10 +125,10 @@ const CollapsibleField: React.FC<Props> = (props) => {
           <RenderFields
             fieldMap={fieldMap}
             forceRender
-            indexPath={path}
+            // indexPath={path}
             margins="small"
-            permissions={permissions}
-            readOnly={readOnly}
+            // permissions={permissions}
+            // readOnly={readOnly}
           />
         </Collapsible>
         {Description}
