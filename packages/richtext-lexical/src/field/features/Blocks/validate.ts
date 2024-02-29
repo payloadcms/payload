@@ -1,31 +1,32 @@
+import type { BlocksFeatureProps } from '@payloadcms/richtext-lexical'
 import type { Block } from 'payload/types'
 
 import { sanitizeFields } from 'payload/config'
 
-import type { BlocksFeatureProps } from '.'
 import type { NodeValidation } from '../types'
 import type { SerializedBlockNode } from './nodes/BlocksNode'
 
 export const blockValidationHOC = (
   props: BlocksFeatureProps,
 ): NodeValidation<SerializedBlockNode> => {
-  const blockValidation: NodeValidation<SerializedBlockNode> = async ({
-    node,
-    payloadConfig,
-    validation,
-  }) => {
+  const blockValidation: NodeValidation<SerializedBlockNode> = async ({ node, validation }) => {
     const blockFieldData = node.fields
     const blocks: Block[] = props.blocks
 
     const {
-      options: { req },
+      options: {
+        req,
+        req: {
+          payload: { config },
+        },
+      },
     } = validation
 
     // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
-    const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
+    const validRelationships = config.collections.map((c) => c.slug) || []
     blocks.forEach((block) => {
       block.fields = sanitizeFields({
-        config: payloadConfig,
+        config,
         fields: block.fields,
         validRelationships,
       })
@@ -57,13 +58,10 @@ export const blockValidationHOC = (
         const validationResult = await field.validate(fieldValue, {
           ...field,
           id: validation.options.id,
-          config: payloadConfig,
           data: fieldValue,
           operation: validation.options.operation,
-          payload: validation.options.payload,
+          req,
           siblingData: validation.options.siblingData,
-          t: validation.options.t,
-          user: validation.options.user,
         })
 
         if (validationResult !== true) {

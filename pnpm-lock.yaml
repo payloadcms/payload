@@ -35,6 +35,9 @@ importers:
       '@next/bundle-analyzer':
         specifier: ^14.1.0
         version: 14.1.0
+      '@octokit/core':
+        specifier: ^5.1.0
+        version: 5.1.0
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:packages/eslint-config-payload
@@ -68,6 +71,9 @@ importers:
       '@types/conventional-changelog-preset-loader':
         specifier: ^2.3.4
         version: 2.3.5
+      '@types/conventional-changelog-writer':
+        specifier: ^4.0.10
+        version: 4.0.10
       '@types/fs-extra':
         specifier: ^11.0.2
         version: 11.0.4
@@ -113,12 +119,18 @@ importers:
       conventional-changelog:
         specifier: ^5.1.0
         version: 5.1.0
+      conventional-changelog-conventionalcommits:
+        specifier: ^7.0.2
+        version: 7.0.2
       conventional-changelog-core:
         specifier: ^7.0.0
         version: 7.0.0
       conventional-changelog-preset-loader:
         specifier: ^4.1.0
         version: 4.1.0
+      conventional-changelog-writer:
+        specifier: ^7.0.1
+        version: 7.0.1
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -131,6 +143,9 @@ importers:
       drizzle-orm:
         specifier: 0.29.4
         version: 0.29.4(@libsql/client@0.5.2)(@types/pg@8.10.2)(@types/react@18.2.15)(pg@8.11.3)(react@18.2.0)
+      execa:
+        specifier: 5.1.1
+        version: 5.1.1
       express:
         specifier: 4.18.2
         version: 4.18.2
@@ -237,7 +252,7 @@ importers:
         specifier: 10.9.2
         version: 10.9.2(@swc/core@1.4.2)(@types/node@20.5.7)(typescript@5.2.2)
       turbo:
-        specifier: ^1.11.1
+        specifier: ^1.12.4
         version: 1.12.4
       typescript:
         specifier: 5.2.2
@@ -1039,10 +1054,6 @@ importers:
         version: 5.90.3(@swc/core@1.4.2)
 
   packages/plugin-seo:
-    dependencies:
-      '@payloadcms/ui':
-        specifier: workspace:^
-        version: link:../ui
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -5447,7 +5458,7 @@ packages:
     resolution: {integrity: sha512-EK654IW1SBqTZSzN9+PlB6SKSYlDhsrCv1olfeEXvt/FHcmd7kvFWW0cFvMtnWalR/D7baYzY3FJ2TSt7UUySg==}
     dependencies:
       '@types/conventional-commits-parser': 5.0.0
-      '@types/node': 20.6.2
+      '@types/node': 16.18.85
     dev: true
 
   /@types/conventional-changelog@3.1.5:
@@ -5462,7 +5473,7 @@ packages:
   /@types/conventional-commits-parser@5.0.0:
     resolution: {integrity: sha512-loB369iXNmAZglwWATL+WRe+CRMmmBPtpolYzIebFaX4YA3x+BEfLqhUAV9WanycKI3TG1IMr5bMJDajDKLlUQ==}
     dependencies:
-      '@types/node': 20.6.2
+      '@types/node': 16.18.85
     dev: true
 
   /@types/conventional-recommended-bump@9.0.3:
@@ -5557,7 +5568,7 @@ packages:
   /@types/git-raw-commits@2.0.4:
     resolution: {integrity: sha512-PYmTK156j6TilbwtnO2JErH4TCC1izpgP3kRE3KUX35bjBOD2A+syCGeercqHXBcM6wL+DU0WbJB2Gz8fPR+8A==}
     dependencies:
-      '@types/node': 20.6.2
+      '@types/node': 16.18.85
     dev: true
 
   /@types/glob@7.2.0:
@@ -5935,7 +5946,7 @@ packages:
   /@types/tunnel@0.0.3:
     resolution: {integrity: sha512-sOUTGn6h1SfQ+gbgqC364jLFBw2lnFqkgF3q0WovEHRLMrVD1sd5aufqi/aJObLekJO+Aq5z646U4Oxy6shXMA==}
     dependencies:
-      '@types/node': 20.6.2
+      '@types/node': 16.18.85
     dev: true
 
   /@types/uuid@8.3.4:
@@ -11366,7 +11377,7 @@ packages:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 20.6.2
+      '@types/node': 16.18.85
       merge-stream: 2.0.0
       supports-color: 8.1.1
     dev: true

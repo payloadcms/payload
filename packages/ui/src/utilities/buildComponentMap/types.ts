@@ -4,6 +4,7 @@ import type {
   FieldBase,
   Labels,
   Option,
+  RelationshipField,
   RichTextField,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
@@ -31,6 +32,10 @@ export type MappedField = {
   Field: React.ReactNode
   Heading: React.ReactNode
   /**
+   * On `block` fields only
+   */
+  blocks?: ReducedBlock[]
+  /**
    * On `richText` fields only
    */
   editor?: RichTextField['editor']
@@ -50,7 +55,11 @@ export type MappedField = {
   options?: Option[]
   readOnly: boolean
   /**
-   * On `array`, `blocks`, `group`, `collapsible`, and `tabs` fields only
+   * On `relationship` fields only
+   */
+  relationTo?: RelationshipField['relationTo']
+  /**
+   * On `array`, `group`, `collapsible`, and `tabs` fields only
    */
   subfields?: FieldMap
   /**

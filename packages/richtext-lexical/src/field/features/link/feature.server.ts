@@ -48,9 +48,6 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
   fields?:
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
     | Field[]
-
-  //someFunction: (something: number) => string
-  someFunction?: React.FC
 }
 
 export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, ClientProps> = (
@@ -64,11 +61,6 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           disabledCollections: props.disabledCollections,
           enabledCollections: props.enabledCollections,
         } as ExclusiveLinkCollectionsProps,
-        generateComponentMap: () => {
-          return {
-            someFunction: props.someFunction,
-          }
-        },
         generateSchemaMap: ({ config, props, schemaMap, schemaPath }) => {
           const i18n = initI18n({ config: config.i18n, context: 'client', translations })
 

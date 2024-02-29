@@ -1,19 +1,23 @@
+import type { SanitizedServerEditorConfig } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from 'lexical'
 import type { RichTextField, Validate } from 'payload/types'
-
-import type { SanitizedEditorConfig } from '../field/lexical/config/types'
 
 import { defaultRichTextValue, defaultRichTextValueV2 } from '../populate/defaultValue'
 import { validateNodes } from './validateNodes'
 
-export const richTextValidateHOC = ({ editorConfig }: { editorConfig: SanitizedEditorConfig }) => {
-  const richTextValidate: Validate<
-    SerializedEditorState,
-    SerializedEditorState,
-    unknown,
-    RichTextField
-  > = async (value, options) => {
-    const { required, t } = options
+export const richTextValidateHOC = ({
+  editorConfig,
+}: {
+  editorConfig: SanitizedServerEditorConfig
+}) => {
+  const richTextValidate: Validate<SerializedEditorState, unknown, unknown, RichTextField> = async (
+    value,
+    options,
+  ) => {
+    const {
+      req: { t },
+      required,
+    } = options
 
     if (required) {
       if (
@@ -35,7 +39,6 @@ export const richTextValidateHOC = ({ editorConfig }: { editorConfig: SanitizedE
       return await validateNodes({
         nodeValidations: editorConfig.features.validations,
         nodes: rootNodes,
-        payloadConfig: options.config,
         validation: {
           options,
           value,

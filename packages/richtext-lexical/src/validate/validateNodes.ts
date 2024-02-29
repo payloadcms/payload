@@ -1,5 +1,4 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
-import type { SanitizedConfig } from 'payload/config'
 import type { RichTextField, ValidateOptions } from 'payload/types'
 
 import type { NodeValidation } from '../field/features/types'
@@ -7,14 +6,12 @@ import type { NodeValidation } from '../field/features/types'
 export async function validateNodes({
   nodeValidations,
   nodes,
-  payloadConfig,
   validation: validationFromProps,
 }: {
   nodeValidations: Map<string, Array<NodeValidation>>
   nodes: SerializedLexicalNode[]
-  payloadConfig: SanitizedConfig
   validation: {
-    options: ValidateOptions<SerializedEditorState, unknown, RichTextField>
+    options: ValidateOptions<unknown, unknown, RichTextField>
     value: SerializedEditorState
   }
 }): Promise<string | true> {
@@ -30,7 +27,6 @@ export async function validateNodes({
         const validationResult = await validation({
           node,
           nodeValidations,
-          payloadConfig,
           validation: validationFromProps,
         })
         if (validationResult !== true) {
@@ -44,7 +40,6 @@ export async function validateNodes({
       const childrenValidationResult = await validateNodes({
         nodeValidations,
         nodes: node.children as SerializedLexicalNode[],
-        payloadConfig,
         validation: validationFromProps,
       })
       if (childrenValidationResult !== true) {

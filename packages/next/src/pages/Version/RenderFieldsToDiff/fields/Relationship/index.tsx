@@ -1,6 +1,8 @@
-import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
+'use client'
+import type { ClientConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { type MappedField, useConfig } from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import React from 'react'
 import ReactDiffViewer from 'react-diff-viewer-continued'
@@ -16,8 +18,8 @@ const baseClass = 'relationship-diff'
 type RelationshipValue = Record<string, any>
 
 const generateLabelFromValue = (
-  collections: SanitizedCollectionConfig[],
-  field: RelationshipField,
+  collections: ClientConfig['collections'],
+  field: MappedField,
   locale: string,
   value: { relationTo: string; value: RelationshipValue } | RelationshipValue,
 ): string => {
@@ -25,17 +27,19 @@ const generateLabelFromValue = (
   let relatedDoc: RelationshipValue
   let valueToReturn = '' as any
 
+  const relationTo = 'relationTo' in field ? field.relationTo : undefined
+
   if (value === null || typeof value === 'undefined') {
     return String(value)
   }
 
-  if (Array.isArray(field.relationTo)) {
+  if (Array.isArray(relationTo)) {
     if (typeof value === 'object') {
       relation = value.relationTo
       relatedDoc = value.value
     }
   } else {
-    relation = field.relationTo
+    relation = relationTo
     relatedDoc = value
   }
 
@@ -65,14 +69,10 @@ const generateLabelFromValue = (
   return valueToReturn
 }
 
-const Relationship: React.FC<Props & { field: RelationshipField }> = ({
-  comparison,
-  field,
-  i18n,
-  locale,
-  version,
-}) => {
+const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, version }) => {
   let placeholder = ''
+
+  const { collections } = useConfig()
 
   if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
 
@@ -93,11 +93,13 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({
     comparisonToRender = generateLabelFromValue(collections, field, locale, comparison)
   }
 
+  const label = 'label' in field && typeof field.label !== 'boolean' ? field?.label : ''
+
   return (
     <div className={baseClass}>
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {getTranslation(field.label, i18n)}
+        {getTranslation(label, i18n)}
       </Label>
       <ReactDiffViewer
         hideLineNumbers

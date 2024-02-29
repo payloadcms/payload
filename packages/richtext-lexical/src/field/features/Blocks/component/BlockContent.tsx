@@ -1,14 +1,15 @@
-import type { FormState } from '@payloadcms/ui'
-import type { Block, Data, Field } from 'payload/types'
+import type { SanitizedClientEditorConfig } from '@payloadcms/richtext-lexical'
+import type { FormFieldBase, FormState } from '@payloadcms/ui'
+import type { Data, Field } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { getTranslation } from '@payloadcms/translations'
+import { RenderFields } from '@payloadcms/ui'
 import {
   Button,
   Collapsible,
   ErrorPill,
   Pill,
-  RenderFields,
   SectionTitle,
   createNestedFieldPath,
   useDocumentInfo,
@@ -19,6 +20,7 @@ import isDeepEqual from 'deep-equal'
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
+import type { ReducedBlock } from '../../../../../../ui/src/utilities/buildComponentMap/types'
 import type { FieldProps } from '../../../../types'
 import type { BlockFields, BlockNode } from '../nodes/BlocksNode'
 
@@ -26,11 +28,15 @@ import { FormSavePlugin } from './FormSavePlugin'
 
 type Props = {
   baseClass: string
-  block: Block
-  field: FieldProps
+  field: FormFieldBase & {
+    editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
+    name: string
+    richTextComponentMap: Map<string, React.ReactNode>
+  }
   formData: BlockFields
   formSchema: Field[]
   nodeKey: string
+  reducedBlock: ReducedBlock
 }
 
 /**
@@ -41,12 +47,13 @@ type Props = {
 export const BlockContent: React.FC<Props> = (props) => {
   const {
     baseClass,
-    block: { labels },
     field,
     formData,
     formSchema,
     nodeKey,
+    reducedBlock: { labels },
   } = props
+
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
   // Used for saving collapsed to preferences (and gettin' it from there again)
@@ -92,10 +99,17 @@ export const BlockContent: React.FC<Props> = (props) => {
       fullFieldsWithValues: FormState
       newFormData: Data
     }) => {
+      newFormData = {
+        ...newFormData,
+        id: formData.id, // TODO: Why does form updatee not include theeeeem
+        blockName: formData.blockName, // TODO: Why does form updatee not include theeeeem
+        blockType: formData.blockType, // TODO: Why does form updatee not include theeeeem
+      }
+
       // Recursively remove all undefined values from even being present in formData, as they will
       // cause isDeepEqual to return false if, for example, formData has a key that fields.data
       // does not have, even if it's undefined.
-      // Currently, this happens if a block has another sub-blocks field. Inside of formData, that sub-blocks field has an undefined blockName property.
+      // Currently, this happens if a block has another sub-blocks field. Inside formData, that sub-blocks field has an undefined blockName property.
       // Inside of fields.data however, that sub-blocks blockName property does not exist at all.
       function removeUndefinedAndNullRecursively(obj: object) {
         Object.keys(obj).forEach((key) => {
@@ -109,6 +123,8 @@ export const BlockContent: React.FC<Props> = (props) => {
       removeUndefinedAndNullRecursively(newFormData)
       removeUndefinedAndNullRecursively(formData)
 
+      console.log('before saving node data...', newFormData, 'old', formData)
+
       // Only update if the data has actually changed. Otherwise, we may be triggering an unnecessary value change,
       // which would trigger the "Leave without saving" dialog unnecessarily
       if (!isDeepEqual(formData, newFormData)) {
@@ -120,6 +136,7 @@ export const BlockContent: React.FC<Props> = (props) => {
           editor.update(() => {
             const node: BlockNode = $getNodeByKey(nodeKey)
             if (node) {
+              console.log('saving node data...', newFormData)
               node.setFields(newFormData as BlockFields)
             }
           })
@@ -163,11 +180,6 @@ export const BlockContent: React.FC<Props> = (props) => {
     })
   }, [editor, nodeKey])
 
-  const fieldSchemaWithPath = formSchema.map((field) => ({
-    ...field,
-    path: createNestedFieldPath(null, field),
-  }))
-
   return (
     <React.Fragment>
       <Collapsible
@@ -186,7 +198,7 @@ export const BlockContent: React.FC<Props> = (props) => {
                   : '[Singular Label]'}
               </Pill>
               <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
-              {fieldHasErrors && <ErrorPill count={errorCount} withMessage />}
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
             {editor.isEditable() && (
               <Button
@@ -210,16 +222,12 @@ export const BlockContent: React.FC<Props> = (props) => {
           onCollapsedChange()
         }}
       >
-        [RenderFields]
-        {/* <RenderFields
+        <RenderFields
           className={`${baseClass}__fields`}
-          fieldSchema={fieldSchemaWithPath}
-          fieldTypes={field.fieldTypes}
+          fieldMap={Array.isArray(formSchema) ? formSchema : []}
           forceRender
           margins="small"
-          permissions={field.permissions?.blocks?.[formData?.blockType]?.fields}
-          readOnly={field.admin.readOnly}
-        /> */}
+        />
       </Collapsible>
 
       <FormSavePlugin onChange={onFormChange} />

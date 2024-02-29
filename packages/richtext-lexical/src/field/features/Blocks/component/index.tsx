@@ -1,133 +1,142 @@
 'use client'
 import {
+  FieldPathProvider,
   Form,
+  type FormProps,
+  type FormState,
   buildInitialState,
   buildStateFromSchema,
+  getFormState,
   useConfig,
   useDocumentInfo,
+  useFieldPath,
   useFormSubmitted,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { type BlockFields } from '../nodes/BlocksNode'
 const baseClass = 'lexical-block'
 
 import type { Data } from 'payload/types'
 
-import { sanitizeFields } from 'payload/config'
-
-import type { BlocksFeatureProps } from '..'
+import type { ReducedBlock } from '../../../../../../ui/src/utilities/buildComponentMap/types'
+import type { ClientComponentProps } from '../../types'
+import type { BlocksFeatureClientProps } from '../feature.client'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
-import { transformInputFormSchema } from '../utils/transformInputFormSchema'
 import { BlockContent } from './BlockContent'
 import './index.scss'
 
 type Props = {
   blockFieldWrapperName: string
   children?: React.ReactNode
-  /**
-   * This formData already comes wrapped in blockFieldWrapperName
-   */
+
   formData: BlockFields
   nodeKey?: string
+  /**
+   * This transformedFormData already comes wrapped in blockFieldWrapperName
+   */
+  transformedFormData: BlockFields
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
   const { blockFieldWrapperName, formData, nodeKey } = props
-  const payloadConfig = useConfig()
+  const config = useConfig()
   const submitted = useFormSubmitted()
-
+  const { id } = useDocumentInfo()
+  const { schemaPath } = useFieldPath()
   const { editorConfig, field: parentLexicalRichTextField } = useEditorConfigContext()
 
-  const block = (
-    editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps
-  )?.blocks?.find((block) => block.slug === formData?.blockType)
+  const [initialState, setInitialState] = useState<FormState | false>(false)
+  const {
+    field: { richTextComponentMap },
+  } = useEditorConfigContext()
 
-  const unsanitizedFormSchema = block?.fields || []
+  console.log('1. Loading node data', formData)
+
+  const componentMapRenderedFieldsPath = `feature.blocks.fields.${formData?.blockType}`
+  const schemaFieldsPath = `${schemaPath}.feature.blocks.${formData?.blockType}`
+
+  const reducedBlock: ReducedBlock = (
+    editorConfig?.resolvedFeatureMap?.get('blocks')
+      ?.clientFeatureProps as ClientComponentProps<BlocksFeatureClientProps>
+  )?.reducedBlocks?.find((block) => block.slug === formData?.blockType)
+
+  const fieldMap = richTextComponentMap.get(componentMapRenderedFieldsPath) // Field Schema
+  useEffect(() => {
+    const awaitInitialState = async () => {
+      const state = await getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          data: JSON.parse(JSON.stringify(formData)),
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL: config.serverURL,
+      }) // Form State
+
+      if (state) {
+        setInitialState(state)
+      }
+    }
+
+    if (formData) {
+      void awaitInitialState()
+    }
+  }, [config.routes.api, config.serverURL, schemaFieldsPath, id])
+
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      return await getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL: config.serverURL,
+      })
+    },
+
+    [config.routes.api, config.serverURL, schemaFieldsPath, id],
+  )
 
   // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
-  const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
-  const formSchema = transformInputFormSchema(
-    sanitizeFields({
-      // @ts-expect-error-next-line TODO: Fix this
-      config: payloadConfig,
-      fields: unsanitizedFormSchema,
-      validRelationships,
-    }),
-    blockFieldWrapperName,
-  )
+  //const formSchema = transformInputFormSchema(fieldMap, blockFieldWrapperName)
 
   const initialStateRef = React.useRef<Data>(null) // Store initial value in a ref, so it doesn't change on re-render and only gets initialized once
 
-  const config = useConfig()
-  const { t } = useTranslation()
-  const { code: locale } = useLocale()
-  const { getDocPreferences } = useDocumentInfo()
-
-  // initialState State
-  const [initialState, setInitialState] = React.useState<Data>(null)
-
-  useEffect(() => {
-    async function createInitialState() {
-      const preferences = await getDocPreferences()
-
-      const stateFromSchema = await buildStateFromSchema({
-        // @ts-expect-error-next-line TODO: Fix this
-        config,
-        data: JSON.parse(JSON.stringify(formData)),
-        fieldSchema: formSchema as any,
-        locale,
-        operation: 'create',
-        preferences,
-        t,
-      })
-
-      if (!initialStateRef.current) {
-        // @ts-expect-error-next-line TODO: Fix this
-        initialStateRef.current = buildInitialState(JSON.parse(JSON.stringify(formData)))
-      }
-
-      // We have to merge the output of buildInitialState (above this useEffect) with the output of buildStateFromSchema.
-      // That's because the output of buildInitialState provides important properties necessary for THIS block,
-      // like blockName, blockType and id, while buildStateFromSchema provides the correct output of this block's data,
-      // e.g. if this block has a sub-block (like the `rows` property)
-      const consolidatedInitialState = {
-        ...initialStateRef.current,
-        ...stateFromSchema,
-      }
-
-      // We need to delete consolidatedInitialState[blockFieldWrapperName] - it's an unnecessary property.
-      // It causes issues when we later use reduceFieldsToValues in the FormSavePlugin, because that may
-      // cause some sub-fields to "use" the wrong value from the blockFieldWrapperName property (which shouldn't be there)
-      // This fixes the 'should respect row removal in nested array field' fields lexical e2e test
-      delete consolidatedInitialState[blockFieldWrapperName]
-
-      setInitialState(consolidatedInitialState)
-    }
-    void createInitialState()
-  }, [setInitialState, config, locale, getDocPreferences, t]) // do not add formData or formSchema here, it causes an endless loop
+  console.log('Bloocks initialState', initialState)
 
   // Memoized Form JSX
   const formContent = useMemo(() => {
     return (
-      block &&
+      reducedBlock &&
       initialState && (
-        <Form fields={formSchema} initialState={initialState} submitted={submitted}>
-          <BlockContent
-            baseClass={baseClass}
-            block={block}
-            field={parentLexicalRichTextField}
-            formData={formData}
-            formSchema={formSchema}
-            nodeKey={nodeKey}
-          />
-        </Form>
+        <FieldPathProvider path="" schemaPath="">
+          <Form
+            fields={fieldMap}
+            initialState={initialState}
+            onChange={[onChange]}
+            submitted={submitted}
+          >
+            <BlockContent
+              baseClass={baseClass}
+              field={parentLexicalRichTextField}
+              formData={formData}
+              formSchema={fieldMap}
+              nodeKey={nodeKey}
+              reducedBlock={reducedBlock}
+            />
+          </Form>
+        </FieldPathProvider>
       )
     )
-  }, [block, parentLexicalRichTextField, nodeKey, submitted, initialState])
+  }, [fieldMap, parentLexicalRichTextField, nodeKey, submitted, initialState, reducedBlock])
 
   return <div className={baseClass}>{formContent}</div>
 }
