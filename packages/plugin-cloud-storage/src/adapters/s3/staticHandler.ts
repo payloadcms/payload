@@ -21,7 +21,9 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
 
       const object = await getStorageClient().getObject({
         Bucket: bucket,
-        Key: path.posix.join(prefix, req.params.filename),
+        // WARNING:
+        // TODO: Untested for 3.0
+        Key: path.posix.join(prefix, req.routeParams.filename as string),
       })
 
       res.set({

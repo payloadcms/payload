@@ -36,7 +36,7 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         collection: collection.slug,
         // WARNING:
         // TODO: Untested for 3.0
-        filename: req.file.name,
+        filename: req.routeParams.filename as string,
         identityID,
       })
 
