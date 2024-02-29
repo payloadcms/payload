@@ -1,6 +1,6 @@
 'use client'
 
-import type { TextField } from 'payload/dist/fields/config/types'
+import type { TextField } from 'payload/types'
 
 import { Select, useForm } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
@@ -13,7 +13,6 @@ export const DynamicFieldSelector: React.FC<TextField> = (props) => {
   const [options, setOptions] = useState<SelectFieldOption[]>([])
 
   useEffect(() => {
-    // @ts-ignore
     const fields: any[] = getDataByPath('fields')
 
     if (fields) {
