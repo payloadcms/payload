@@ -2,6 +2,7 @@ import {
   Drawer,
   FieldPathProvider,
   Form,
+  type FormProps,
   type FormState,
   FormSubmit,
   RenderFields,
@@ -11,7 +12,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { useFieldPath } from '@payloadcms/ui'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
 import './index.scss'
@@ -24,7 +25,7 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
   const { id, getDocPreferences } = useDocumentInfo()
   const { schemaPath } = useFieldPath()
   const config = useConfig()
-  const [initialState, setInitialState] = useState<FormState>({})
+  const [initialState, setInitialState] = useState<FormState | false>(false)
   const {
     field: { richTextComponentMap },
   } = useEditorConfigContext()
@@ -58,15 +59,46 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
     }
   }, [config.routes.api, config.serverURL, schemaFieldsPath, getDocPreferences, id, stateData])
 
-  return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
-      <FieldPathProvider path="" schemaPath="">
-        <Form fields={fieldMap} initialState={initialState} onSubmit={handleModalSubmit}>
-          <RenderFields fieldMap={fieldMap} forceRender readOnly={false} />
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      const docPreferences = await getDocPreferences()
 
-          <FormSubmit>{t('general:submit')}</FormSubmit>
-        </Form>
-      </FieldPathProvider>
-    </Drawer>
+      return getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          docPreferences,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL: config.serverURL,
+      })
+    },
+
+    [config.routes.api, config.serverURL, schemaFieldsPath, getDocPreferences, id],
+  )
+
+  return (
+    initialState !== false && (
+      <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
+        <FieldPathProvider path="" schemaPath="">
+          <Form
+            fields={Array.isArray(fieldMap) ? fieldMap : []}
+            initialState={initialState}
+            onChange={[onChange]}
+            onSubmit={handleModalSubmit}
+          >
+            <RenderFields
+              fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+              forceRender
+              readOnly={false}
+            />
+
+            <FormSubmit>{t('general:submit')}</FormSubmit>
+          </Form>
+        </FieldPathProvider>
+      </Drawer>
+    )
   )
 }

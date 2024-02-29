@@ -232,7 +232,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   }
 }
 
-export { BlockQuoteFeature } from './field/features/BlockQuote'
 export { BlocksFeature } from './field/features/Blocks'
 export {
   $createBlockNode,
@@ -242,8 +241,8 @@ export {
   type SerializedBlockNode,
 } from './field/features/Blocks/nodes/BlocksNode'
 export { HeadingFeature } from './field/features/Heading'
-
 export { ParagraphFeature } from './field/features/Paragraph'
+
 export { RelationshipFeature } from './field/features/Relationship'
 export {
   $createRelationshipNode,
@@ -252,8 +251,8 @@ export {
   RelationshipNode,
   type SerializedRelationshipNode,
 } from './field/features/Relationship/nodes/RelationshipNode'
-
 export { UploadFeature } from './field/features/Upload'
+
 export type { UploadFeatureProps } from './field/features/Upload'
 export type { RawUploadPayload } from './field/features/Upload/nodes/UploadNode'
 export {
@@ -264,6 +263,7 @@ export {
   UploadNode,
 } from './field/features/Upload/nodes/UploadNode'
 export { AlignFeature } from './field/features/align/feature.server'
+export { BlockQuoteFeature } from './field/features/blockquote/feature.server'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export {
   HTMLConverterFeature,
