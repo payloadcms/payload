@@ -101,8 +101,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'ADD_ROW': {
-      const { blockType, path, rowIndex: rowIndexFromArgs } = action
-      const subFieldState: FormState = {}
+      const { blockType, path, rowIndex: rowIndexFromArgs, subFieldState = {} } = action
 
       const rowIndex =
         typeof rowIndexFromArgs === 'number' ? rowIndexFromArgs : state[path]?.rows?.length || 0

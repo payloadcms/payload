@@ -63,7 +63,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
     )
   }
 
-  const data = incomingData || reduceFieldsToValues(formState, true)
+  const data = incomingData || reduceFieldsToValues(formState || {}, true)
 
   let id: number | string | undefined
   let docPreferencesKey: string

@@ -17,7 +17,7 @@ import type {
   SubmitOptions,
 } from './types'
 
-import useDebounce from '../../hooks/useDebounce'
+import { getFormState } from '../..'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAuth } from '../../providers/Auth'
@@ -68,7 +68,7 @@ const Form: React.FC<Props> = (props) => {
 
   const method = 'method' in props ? props.method : undefined
 
-  const { push } = useRouter()
+  const router = useRouter()
 
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -76,12 +76,17 @@ const Form: React.FC<Props> = (props) => {
   const operation = useOperation()
 
   const config = useConfig()
+  const {
+    routes: { api: apiRoute },
+    serverURL,
+  } = config
 
   const [modified, setModified] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
+  const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
   /**
@@ -89,8 +94,6 @@ const Form: React.FC<Props> = (props) => {
    * which calls the fieldReducer, which then updates the state.
    */
   const [fields, dispatchFields] = fieldsReducer
-
-  const prevFormState = useRef<FormState>(null)
 
   contextRef.current.fields = fields
 
@@ -271,7 +274,7 @@ const Form: React.FC<Props> = (props) => {
             //   }
             // }
 
-            push(redirect)
+            router.push(redirect)
           } else if (!disableSuccessStatus) {
             toast.success(json.message || t('general:submissionSuccessful'), { autoClose: 3000 })
           }
@@ -349,7 +352,7 @@ const Form: React.FC<Props> = (props) => {
       onSubmit,
       onSuccess,
       redirect,
-      push,
+      router,
       t,
       i18n,
       waitForAutocomplete,
@@ -429,6 +432,64 @@ const Form: React.FC<Props> = (props) => {
     [dispatchFields],
   )
 
+  const getFieldStateByPath = useCallback(
+    async ({ data, path }) => {
+      const fieldSchema = await getFormState({
+        apiRoute,
+        body: {
+          collectionSlug,
+          data,
+          globalSlug,
+          /**
+            Turns: 'arrayField.0.group123field.arrayField.0.textField'
+            Into: 'arrayField.group123field.arrayField.textField'
+          */
+          schemaPath: `${collectionSlug || globalSlug}.${path}`.replace(/\.\d+\./g, '.'),
+        },
+        serverURL,
+      })
+      return fieldSchema
+    },
+    [apiRoute, collectionSlug, globalSlug, serverURL],
+  )
+
+  const addFieldRow: FormContextType['addFieldRow'] = useCallback(
+    async ({ data, path, rowIndex }) => {
+      const subFieldState = await getFieldStateByPath({ data, path })
+
+      dispatchFields({
+        type: 'ADD_ROW',
+        blockType: data?.blockType,
+        path,
+        rowIndex,
+        subFieldState,
+      })
+    },
+    [getFieldStateByPath, dispatchFields],
+  )
+
+  const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
+    ({ path, rowIndex }) => {
+      dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
+    },
+    [dispatchFields],
+  )
+
+  const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
+    async ({ data, path, rowIndex }) => {
+      const subFieldState = await getFieldStateByPath({ data, path })
+
+      dispatchFields({
+        type: 'REPLACE_ROW',
+        blockType: data?.blockType,
+        path,
+        rowIndex,
+        subFieldState,
+      })
+    },
+    [getFieldStateByPath, dispatchFields],
+  )
+
   contextRef.current.submit = submit
   contextRef.current.getFields = getFields
   contextRef.current.getField = getField
@@ -445,6 +506,9 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.reset = reset
   contextRef.current.replaceState = replaceState
   contextRef.current.dispatchFields = dispatchFields
+  contextRef.current.addFieldRow = addFieldRow
+  contextRef.current.removeFieldRow = removeFieldRow
+  contextRef.current.replaceFieldRow = replaceFieldRow
 
   useEffect(() => {
     if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)

@@ -21,7 +21,11 @@ export const mergeServerFormState = (
       oldState[path].errorPaths.forEach((path) => oldErrorPaths.push(path))
     }
 
-    if (!Array.isArray(newFieldState.errorPaths) && typeof newFieldState.errorPaths) {
+    if (
+      newFieldState.errorPaths &&
+      !Array.isArray(newFieldState.errorPaths) &&
+      typeof newFieldState.errorPaths
+    ) {
       Object.values(newFieldState.errorPaths).forEach((path) => newErrorPaths.push(path))
     }
 
