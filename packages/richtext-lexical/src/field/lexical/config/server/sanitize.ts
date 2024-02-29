@@ -79,6 +79,6 @@ export function sanitizeServerEditorConfig(
   return {
     features: sanitizeServerFeatures(resolvedFeatureMap),
     lexical: editorConfig.lexical,
-    resolvedFeatureMap: resolvedFeatureMap,
+    resolvedFeatureMap,
   }
 }
