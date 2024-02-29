@@ -8,6 +8,7 @@
   "scripts": {
     "build": "pnpm run build:payload",
     "build:all": "turbo build",
+    "build:app": "next build",
     "build:create-payload-app": "turbo build --filter create-payload-app",
     "build:db-mongodb": "turbo build --filter db-mongodb",
     "build:db-postgres": "turbo build --filter db-postgres",
