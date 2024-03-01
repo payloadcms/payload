@@ -1,5 +1,6 @@
 'use client'
-import type { LinkProps } from 'react-router-dom'
+// TODO: abstract the `next/link` dependency out from this component
+import type { LinkProps } from 'next/link'
 
 import Link from 'next/link'
 import * as React from 'react' // TODO: abstract this out to support all routers
@@ -29,9 +30,9 @@ type MenuButtonProps = {
   active?: boolean
   children: React.ReactNode
   className?: string
+  href?: LinkProps['href']
   id?: string
   onClick?: () => void
-  to?: LinkProps['to']
 }
 
 export const Button: React.FC<MenuButtonProps> = ({
@@ -39,18 +40,18 @@ export const Button: React.FC<MenuButtonProps> = ({
   active,
   children,
   className,
+  href,
   onClick,
-  to,
 }) => {
   const classes = [`${baseClass}__button`, active && `${baseClass}__button--selected`, className]
     .filter(Boolean)
     .join(' ')
 
-  if (to) {
+  if (href) {
     return (
       <Link
         className={classes}
-        href={to}
+        href={href}
         id={id}
         onClick={() => {
           if (onClick) {

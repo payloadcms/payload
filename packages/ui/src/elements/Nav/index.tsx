@@ -94,8 +94,7 @@ export const DefaultNav: React.FC<{
                   <LinkElement
                     // activeClassName="active"
                     className={`${baseClass}__link`}
-                    // to={href} // for `react-router-dom` Link
-                    href={href} // for `next/link` Link
+                    href={href}
                     id={id}
                     // tabIndex={!navOpen ? -1 : undefined}
                     key={i}

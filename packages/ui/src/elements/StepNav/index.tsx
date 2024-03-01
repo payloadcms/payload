@@ -50,12 +50,7 @@ const StepNav: React.FC<{
     <Fragment>
       {stepNav.length > 0 ? (
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
-          <LinkElement
-            className={`${baseClass}__home`}
-            // to={admin} // for `react-router-dom`
-            href={admin} // for `next/link`
-            tabIndex={0}
-          >
+          <LinkElement className={`${baseClass}__home`} href={admin} tabIndex={0}>
             <IconGraphic />
           </LinkElement>
           <span>/</span>
@@ -70,10 +65,7 @@ const StepNav: React.FC<{
             ) : (
               <Fragment key={i}>
                 {item.url ? (
-                  <LinkElement
-                    // to={item.url} // for `react-router-dom`
-                    href={item.url} // for `next/link`
-                  >
+                  <LinkElement href={item.url}>
                     <span key={i}>{StepLabel}</span>
                   </LinkElement>
                 ) : (

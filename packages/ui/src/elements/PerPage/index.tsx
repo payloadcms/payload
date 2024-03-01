@@ -1,8 +1,9 @@
 'use client'
+// TODO: abstract the `next/navigation` dependency out from this component
+import { usePathname, useRouter } from 'next/navigation'
 import { collectionDefaults } from 'payload/config'
 import qs from 'qs'
 import React from 'react'
-import { useHistory } from 'react-router-dom'
 
 import { Chevron } from '../../icons/Chevron'
 import { useSearchParams } from '../../providers/SearchParams'
@@ -31,7 +32,8 @@ export const PerPage: React.FC<Props> = ({
   resetPage = false,
 }) => {
   const { searchParams } = useSearchParams()
-  const history = useHistory()
+  const router = useRouter()
+  const pathname = usePathname()
   const { t } = useTranslation()
 
   return (
@@ -60,16 +62,16 @@ export const PerPage: React.FC<Props> = ({
                   close()
                   if (handleChange) handleChange(limitNumber)
                   if (modifySearchParams) {
-                    history.replace({
-                      search: qs.stringify(
-                        {
-                          ...searchParams,
-                          limit: limitNumber,
-                          page: resetPage ? 1 : searchParams.page,
-                        },
-                        { addQueryPrefix: true },
-                      ),
-                    })
+                    const search = qs.stringify(
+                      {
+                        ...searchParams,
+                        limit: limitNumber,
+                        page: resetPage ? 1 : searchParams.page,
+                      },
+                      { addQueryPrefix: true },
+                    )
+
+                    router.replace(`${pathname}${search}`)
                   }
                 }}
               >

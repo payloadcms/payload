@@ -26,8 +26,7 @@ const DefaultLogout: React.FC<{
     <LinkElement
       aria-label={t('authentication:logOut')}
       className={`${baseClass}__log-out`}
-      // to={`${admin}${logoutRoute}`} // for `react-router-dom`
-      href={`${admin}${logoutRoute}`} // for `next/link`
+      href={`${admin}${logoutRoute}`}
       tabIndex={tabIndex}
     >
       <LogOut />

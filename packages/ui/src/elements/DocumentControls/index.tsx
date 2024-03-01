@@ -32,17 +32,17 @@ export const DocumentControls: React.FC<{
   isAccountView?: boolean
   isEditing?: boolean
   permissions: CollectionPermission | GlobalPermission | null
-  slug: SanitizedCollectionConfig['slug'] | SanitizedGlobalConfig['slug']
+  slug: SanitizedCollectionConfig['slug']
 }> = (props) => {
   const {
     id,
+    slug,
     data,
     disableActions,
     hasSavePermission,
     isAccountView,
     isEditing,
     permissions,
-    slug,
   } = props
 
   const { i18n } = useTranslation()
@@ -206,8 +206,8 @@ export const DocumentControls: React.FC<{
                 {hasCreatePermission && (
                   <React.Fragment>
                     <PopupList.Button
+                      href={`${adminRoute}/collections/${collectionConfig?.slug}/create`}
                       id="action-create"
-                      to={`${adminRoute}/collections/${collectionConfig?.slug}/create`}
                     >
                       {i18n.t('general:createNew')}
                     </PopupList.Button>

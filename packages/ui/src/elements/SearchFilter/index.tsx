@@ -1,7 +1,8 @@
 import { getTranslation } from '@payloadcms/translations'
+// TODO: abstract the `next/navigation` dependency out from this component
+import { usePathname, useRouter } from 'next/navigation'
 import queryString from 'qs'
 import React, { useEffect, useRef, useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
 
@@ -23,7 +24,8 @@ const SearchFilter: React.FC<Props> = (props) => {
   } = props
 
   const { searchParams } = useSearchParams()
-  const history = useHistory()
+  const router = useRouter()
+  const pathname = usePathname()
   const { i18n, t } = useTranslation()
 
   const [search, setSearch] = useState(
@@ -40,13 +42,13 @@ const SearchFilter: React.FC<Props> = (props) => {
       if (handleChange) handleChange(debouncedSearch)
 
       if (modifySearchQuery) {
-        history.replace({
-          search: queryString.stringify({
-            ...searchParams,
-            page: 1,
-            search: debouncedSearch || undefined,
-          }),
+        const search = queryString.stringify({
+          ...searchParams,
+          page: 1,
+          search: debouncedSearch || undefined,
         })
+
+        router.replace(`${pathname}?${search}`)
       }
 
       setPreviousSearch(debouncedSearch)
@@ -54,12 +56,13 @@ const SearchFilter: React.FC<Props> = (props) => {
   }, [
     debouncedSearch,
     previousSearch,
-    history,
+    router,
     fieldName,
     searchParams,
     handleChange,
     modifySearchQuery,
     listSearchableFields,
+    pathname,
   ])
 
   useEffect(() => {
