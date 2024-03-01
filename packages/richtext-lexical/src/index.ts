@@ -78,7 +78,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         return import('@payloadcms/ui').then((module2) =>
           module2.withMergedProps({
             Component: RichTextCell,
-            toMergeIntoProps: { lexicalEditorConfig: props.lexical }, // lexicalEditorConfig is serializable
+            toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical }, // lexicalEditorConfig is serializable
           }),
         )
       }),
@@ -90,7 +90,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         return import('@payloadcms/ui').then((module2) =>
           module2.withMergedProps({
             Component: RichTextField,
-            toMergeIntoProps: { lexicalEditorConfig: props.lexical }, // lexicalEditorConfig is serializable
+            toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical }, // lexicalEditorConfig is serializable
           }),
         )
       }),
