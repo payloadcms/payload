@@ -25,6 +25,7 @@ import type { Config, SanitizedConfig } from '../packages/payload/src/config/typ
 import { mongooseAdapter } from '../packages/db-mongodb/src'
 import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
+import { ParagraphFeature } from '../packages/richtext-lexical/src/field/features/paragraph/feature.server'
 // import { slateEditor } from '../packages/richtext-slate/src'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
@@ -93,6 +94,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     // }),
     editor: lexicalEditor({
       features: [
+        ParagraphFeature(),
         LinkFeature(),
         CheckListFeature(),
         UnorderedListFeature(),
