@@ -1,11 +1,13 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
+import type { ActionMap } from '../../utilities/buildComponentMap/types'
+
 import { useConfig } from '../Config'
 
 type ActionsContextType = {
-  actions: React.ComponentType<any>[]
-  setViewActions: (actions: React.ComponentType<any>[]) => void
+  actions: ActionMap['Edit'][string]
+  setViewActions: (actions: ActionMap['Edit'][string]) => void
 }
 
 const ActionsContext = createContext<ActionsContextType>({
@@ -29,7 +31,7 @@ export const ActionsProvider = ({ children }) => {
     setAdminActions(configAdminActions || [])
   }, [configAdminActions])
 
-  const combinedActions = [...viewActions, ...adminActions]
+  const combinedActions = [...(viewActions || []), ...(adminActions || [])]
 
   return (
     <ActionsContext.Provider value={{ actions: combinedActions, setViewActions }}>

@@ -3,6 +3,7 @@ import type { Option } from '@payloadcms/ui'
 
 import {
   Gutter,
+  SetViewActions,
   formatDate,
   useComponentMap,
   useConfig,
@@ -40,7 +41,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const { i18n } = useTranslation()
 
-  const { getFieldMap } = useComponentMap()
+  const { getComponentMap, getFieldMap } = useComponentMap()
+
+  const componentMap = getComponentMap({ collectionSlug, globalSlug })
 
   const [fieldMap] = useState(() => getFieldMap({ collectionSlug, globalSlug }))
 
@@ -59,16 +62,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     routes: { api: apiRoute },
     serverURL,
   } = config
-
-  // useEffect(() => {
-  //   const editConfig = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit
-  //   const versionActions =
-  //     editConfig && 'Version' in editConfig && 'actions' in editConfig.Version
-  //       ? editConfig.Version.actions
-  //       : []
-
-  //   setViewActions(versionActions)
-  // }, [collectionConfig, globalConfig, setViewActions])
 
   const formattedCreatedAt = doc?.createdAt
     ? formatDate(doc.createdAt, dateFormat, i18n.language)
@@ -103,6 +96,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   return (
     <main className={baseClass}>
+      <SetViewActions actions={componentMap?.actionsMap?.Edit?.Version} />
       <SetStepNav
         collectionConfig={collectionConfig}
         collectionSlug={collectionSlug}

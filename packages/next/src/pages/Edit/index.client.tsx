@@ -1,7 +1,13 @@
 'use client'
 import type { EditViewProps } from 'payload/config'
 
-import { LoadingOverlay, useComponentMap, useConfig, useDocumentInfo } from '@payloadcms/ui'
+import {
+  LoadingOverlay,
+  SetViewActions,
+  useComponentMap,
+  useConfig,
+  useDocumentInfo,
+} from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React, { Fragment, useEffect } from 'react'
 import { useCallback } from 'react'
@@ -13,11 +19,12 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
     routes: { api: adminRoute },
   } = useConfig()
 
-  const { componentMap } = useComponentMap()
+  const { getComponentMap } = useComponentMap()
 
-  const { Edit } =
-    componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug || globalSlug] ||
-    {}
+  const { Edit, actionsMap } = getComponentMap({
+    collectionSlug,
+    globalSlug,
+  })
 
   const isEditing = Boolean(id && collectionSlug)
 
@@ -53,5 +60,10 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
     return <LoadingOverlay />
   }
 
-  return <Fragment>{Edit}</Fragment>
+  return (
+    <Fragment>
+      <SetViewActions actions={actionsMap?.Edit?.Default} />
+      {Edit}
+    </Fragment>
+  )
 }

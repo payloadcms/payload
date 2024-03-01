@@ -5,6 +5,10 @@ import type { ComponentMap, FieldMap, MappedField } from '../../utilities/buildC
 
 export type IComponentMapContext = {
   componentMap: ComponentMap
+  getComponentMap: (args: {
+    collectionSlug?: string
+    globalSlug?: string
+  }) => ComponentMap['collections'][0] | ComponentMap['globals'][0]
   getFieldMap: (args: { collectionSlug?: string; globalSlug?: string }) => [] | FieldMap
   getMappedFieldByPath: (args: {
     collectionSlug?: string
@@ -52,8 +56,25 @@ export const ComponentMapProvider: React.FC<{
     [componentMap],
   )
 
+  const getComponentMap: IComponentMapContext['getComponentMap'] = useCallback(
+    ({ collectionSlug, globalSlug }) => {
+      if (collectionSlug) {
+        return componentMap.collections[collectionSlug]
+      }
+
+      if (globalSlug) {
+        return componentMap.globals[globalSlug]
+      }
+
+      return {} as ComponentMap['collections'][0] | ComponentMap['globals'][0]
+    },
+    [componentMap],
+  )
+
   return (
-    <ComponentMapContext.Provider value={{ componentMap, getFieldMap, getMappedFieldByPath }}>
+    <ComponentMapContext.Provider
+      value={{ componentMap, getComponentMap, getFieldMap, getMappedFieldByPath }}
+    >
       {children}
     </ComponentMapContext.Provider>
   )

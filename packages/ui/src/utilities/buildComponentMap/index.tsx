@@ -6,6 +6,7 @@ import React from 'react'
 
 import type { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
 
+import { mapActions } from './mapActions'
 import { mapFields } from './mapFields'
 
 export const buildComponentMap = (args: {
@@ -88,15 +89,6 @@ export const buildComponentMap = (args: {
         afterListTable?.map((Component) => <Component />)) ||
       null
 
-    const mappedFields = mapFields({
-      DefaultCell,
-      config,
-      fieldSchema: fields,
-      operation,
-      permissions,
-      readOnly: readOnlyOverride,
-    })
-
     let AdminThumbnail = null
     if (typeof collectionConfig?.upload?.adminThumbnail === 'function') {
       AdminThumbnail = collectionConfig?.upload?.adminThumbnail
@@ -112,7 +104,17 @@ export const buildComponentMap = (args: {
       BeforeListTable,
       Edit: <Edit collectionSlug={collectionConfig.slug} />,
       List: <List collectionSlug={collectionConfig.slug} />,
-      fieldMap: mappedFields,
+      actionsMap: mapActions({
+        collectionConfig,
+      }),
+      fieldMap: mapFields({
+        DefaultCell,
+        config,
+        fieldSchema: fields,
+        operation,
+        permissions,
+        readOnly: readOnlyOverride,
+      }),
     }
 
     return {
@@ -124,15 +126,6 @@ export const buildComponentMap = (args: {
   // Globals
   const globals = config.globals.reduce((acc, globalConfig) => {
     const { slug, fields } = globalConfig
-
-    const mappedFields = mapFields({
-      DefaultCell,
-      config,
-      fieldSchema: fields,
-      operation,
-      permissions,
-      readOnly: readOnlyOverride,
-    })
 
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
@@ -151,7 +144,17 @@ export const buildComponentMap = (args: {
 
     const componentMap: GlobalComponentMap = {
       Edit: <Edit globalSlug={globalConfig.slug} />,
-      fieldMap: mappedFields,
+      actionsMap: mapActions({
+        globalConfig,
+      }),
+      fieldMap: mapFields({
+        DefaultCell,
+        config,
+        fieldSchema: fields,
+        operation,
+        permissions,
+        readOnly: readOnlyOverride,
+      }),
     }
 
     return {

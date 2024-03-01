@@ -26,6 +26,8 @@ export const AppHeader: React.FC = () => {
 
   const { actions } = useActions()
 
+  console.log('actions', actions)
+
   const { navOpen } = useNav()
 
   const customControlsRef = useRef<HTMLDivElement>(null)
@@ -65,14 +67,14 @@ export const AppHeader: React.FC = () => {
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
                 {Array.isArray(actions) &&
-                  actions.map((Component, i) => (
+                  actions.map((Action, i) => (
                     <div
                       className={
                         isScrollable && i === actions.length - 1 ? `${baseClass}__last-action` : ''
                       }
                       key={i}
                     >
-                      <Component />
+                      {Action}
                     </div>
                   ))}
               </div>

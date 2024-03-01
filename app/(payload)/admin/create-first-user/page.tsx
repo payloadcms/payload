@@ -4,10 +4,12 @@ import React from 'react'
 import {
   CreateFirstUser,
   generateMetadata as generateMeta,
-} from '@payloadcms/next/pages/CreateFirstUser'
+} from '@payloadcms/next/pages/CreateFirstUser/index'
 import { Metadata } from 'next'
 import config from '@payload-config'
 
 export const generateMetadata = async (): Promise<Metadata> => generateMeta({ config })
 
-export default async () => <CreateFirstUser config={config} />
+const Page = async () => <CreateFirstUser config={config} />
+
+export default Page
