@@ -1,30 +1,10 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 import { mediaSlug } from '../Media'
-import { MyAPIAction } from './APIAction'
-import { MyAction } from './Action'
-import { MyListAction } from './ListAction'
 
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
-  admin: {
-    components: {
-      views: {
-        Edit: {
-          Default: {
-            actions: [MyAction],
-          },
-          API: {
-            actions: [MyAPIAction],
-          },
-        },
-        List: {
-          actions: [MyListAction],
-        },
-      },
-    },
-  },
   fields: [
     {
       name: 'text',
