@@ -291,9 +291,9 @@ export type {
   SerializedAutoLinkNode,
   SerializedLinkNode,
 } from './field/features/link/nodes/types'
-export { CheckListFeature } from './field/features/lists/checklist'
-export { OrderedListFeature } from './field/features/lists/orderedlist'
-export { UnorderedListFeature } from './field/features/lists/unorderedlist'
+export { CheckListFeature } from './field/features/lists/checklist/feature.server'
+export { OrderedListFeature } from './field/features/lists/orderedlist/feature.server'
+export { UnorderedListFeature } from './field/features/lists/unorderedlist/feature.server'
 export { LexicalPluginToLexicalFeature } from './field/features/migrations/lexicalPluginToLexical'
 export { SlateToLexicalFeature } from './field/features/migrations/slateToLexical'
 export { SlateBlockquoteConverter } from './field/features/migrations/slateToLexical/converter/converters/blockquote'

@@ -1,25 +1,27 @@
+'use client'
+
 import { INSERT_ORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
 
-import type { FeatureProvider } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList'
 import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
-import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
+import { createClientComponent } from '../../createClientComponent'
+import { LexicalListPlugin } from '../plugin'
 import { ORDERED_LIST } from './markdownTransformer'
 
-export const OrderedListFeature = (): FeatureProvider => {
+const OrderedListFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
+    clientFeatureProps: props,
     feature: ({ featureProviderMap }) => {
       return {
+        clientFeatureProps: props,
         floatingSelectToolbar: {
           sections: [
             TextDropdownSectionWithEntries([
               {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../../lexical/ui/icons/OrderedList').then(
-                    (module) => module.OrderedListIcon,
-                  ),
+                ChildComponent: OrderedListIcon,
                 isActive: () => false,
                 key: 'orderedList',
                 label: `Ordered List`,
@@ -32,35 +34,15 @@ export const OrderedListFeature = (): FeatureProvider => {
           ],
         },
         markdownTransformers: [ORDERED_LIST],
-        nodes: featureProviderMap.has('unorderedList')
+        nodes: featureProviderMap.has('unorderedlist') ? [] : [ListNode, ListItemNode],
+        plugins: featureProviderMap.has('unorderedlist')
           ? []
           : [
               {
-                type: ListNode.getType(),
-                converters: {
-                  html: ListHTMLConverter,
-                },
-                node: ListNode,
-              },
-              {
-                type: ListItemNode.getType(),
-                converters: {
-                  html: ListItemHTMLConverter,
-                },
-                node: ListItemNode,
-              },
-            ],
-        plugins: featureProviderMap.has('unorderedList')
-          ? []
-          : [
-              {
-                Component: () =>
-                  // @ts-expect-error-next-line
-                  import('../plugin').then((module) => module.LexicalListPlugin),
+                Component: LexicalListPlugin,
                 position: 'normal',
               },
             ],
-        props: null,
         slashMenu: {
           options: [
             {
@@ -68,11 +50,7 @@ export const OrderedListFeature = (): FeatureProvider => {
               key: 'lists',
               options: [
                 new SlashMenuOption('orderedlist', {
-                  Icon: () =>
-                    // @ts-expect-error-next-line
-                    import('../../../lexical/ui/icons/OrderedList').then(
-                      (module) => module.OrderedListIcon,
-                    ),
+                  Icon: OrderedListIcon,
                   displayName: 'Ordered List',
                   keywords: ['ordered list', 'ol'],
                   onSelect: ({ editor }) => {
@@ -85,6 +63,7 @@ export const OrderedListFeature = (): FeatureProvider => {
         },
       }
     },
-    key: 'orderedlist',
   }
 }
+
+export const OrderedListFeatureClientComponent = createClientComponent(OrderedListFeatureClient)

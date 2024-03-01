@@ -3,16 +3,19 @@ import {
   BlockQuoteFeature,
   BlocksFeature,
   BoldFeature,
+  CheckListFeature,
   HeadingFeature,
   IndentFeature,
   InlineCodeFeature,
   ItalicFeature,
   LinkFeature,
+  OrderedListFeature,
   StrikethroughFeature,
   SubscriptFeature,
   SuperscriptFeature,
   TreeViewFeature,
   UnderlineFeature,
+  UnorderedListFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
@@ -91,6 +94,9 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     editor: lexicalEditor({
       features: [
         LinkFeature(),
+        CheckListFeature(),
+        UnorderedListFeature(),
+        OrderedListFeature(),
         AlignFeature(),
         BlockQuoteFeature(),
         BoldFeature(),
