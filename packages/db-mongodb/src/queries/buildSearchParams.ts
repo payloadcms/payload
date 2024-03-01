@@ -102,6 +102,7 @@ export async function buildSearchParam({
       hasCustomID,
       operator,
       path,
+      payload,
       val,
     })
 
