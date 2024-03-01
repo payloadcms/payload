@@ -18,7 +18,7 @@ import { LinkFeature } from '../../../features/link/feature.server'
 import { CheckListFeature } from '../../../features/lists/checklist/feature.server'
 import { OrderedListFeature } from '../../../features/lists/orderedlist/feature.server'
 import { UnorderedListFeature } from '../../../features/lists/unorderedlist/feature.server'
-import { ParagraphFeature } from '../../../features/paragraph'
+import { ParagraphFeature } from '../../../features/paragraph/feature.server'
 import { RelationshipFeature } from '../../../features/relationship'
 import { UploadFeature } from '../../../features/upload'
 import { LexicalEditorTheme } from '../../theme/EditorTheme'
@@ -44,7 +44,7 @@ export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown>[] = 
   UnorderedListFeature(),
   OrderedListFeature(),
   CheckListFeature(),
-  LinkFeature({}),
+  LinkFeature(),
   RelationshipFeature(),
   BlockQuoteFeature(),
   UploadFeature(),

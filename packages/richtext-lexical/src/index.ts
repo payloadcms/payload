@@ -318,7 +318,7 @@ export type {
   SlateNodeConverter,
 } from './field/features/migrations/slateToLexical/converter/types'
 export { SlateToLexicalFeature } from './field/features/migrations/slateToLexical/feature.server'
-export { ParagraphFeature } from './field/features/paragraph'
+export { ParagraphFeature } from './field/features/paragraph/feature.server'
 export { RelationshipFeature } from './field/features/relationship'
 export {
   $createRelationshipNode,
