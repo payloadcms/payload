@@ -5,8 +5,9 @@ import { Logo, MinimalTemplate } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React, { Fragment } from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
+
 import { getNextI18n } from '../../utilities/getNextI18n'
-import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { LoginForm } from './LoginForm'
 import './index.scss'
@@ -33,10 +34,10 @@ export const generateMetadata = async ({
 }
 
 export const Login: React.FC<{
-  config: Promise<SanitizedConfig>
+  page: InitPageResult
   searchParams: { [key: string]: string | string[] | undefined }
-}> = async ({ config: configPromise, searchParams }) => {
-  const { req } = await initPage({ config: configPromise, route: '/login', searchParams })
+}> = ({ page, searchParams }) => {
+  const { req } = page
 
   const {
     payload: { config },

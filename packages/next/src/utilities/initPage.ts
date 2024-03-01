@@ -19,6 +19,24 @@ import qs from 'qs'
 import { auth } from './auth'
 import { getRequestLanguage } from './getRequestLanguage'
 
+type Args = {
+  collectionSlug?: string
+  config: Promise<SanitizedConfig> | SanitizedConfig
+  globalSlug?: string
+  localeParam?: string
+  redirectUnauthenticatedUser?: boolean
+  route?: string
+  searchParams?: { [key: string]: string | string[] | undefined }
+}
+
+export type InitPageResult = {
+  collectionConfig?: SanitizedCollectionConfig
+  globalConfig?: SanitizedGlobalConfig
+  locale: Locale
+  permissions: Permissions
+  req: PayloadRequest
+}
+
 export const initPage = async ({
   collectionSlug,
   config: configPromise,
@@ -27,21 +45,7 @@ export const initPage = async ({
   redirectUnauthenticatedUser = false,
   route,
   searchParams,
-}: {
-  collectionSlug?: string
-  config: Promise<SanitizedConfig> | SanitizedConfig
-  globalSlug?: string
-  localeParam?: string
-  redirectUnauthenticatedUser?: boolean
-  route?: string
-  searchParams?: { [key: string]: string | string[] | undefined }
-}): Promise<{
-  collectionConfig?: SanitizedCollectionConfig
-  globalConfig?: SanitizedGlobalConfig
-  locale: Locale
-  permissions: Permissions
-  req: PayloadRequest
-}> => {
+}: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
 
   const { cookies, permissions, user } = await auth({
