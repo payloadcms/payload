@@ -4,11 +4,17 @@ import { number, password, point, relationship, select, text, textarea } from '.
 
 const t = jest.fn((string) => string)
 
-let options: ValidateOptions<any, any, any> = {
+let options: ValidateOptions<any, any> = {
   data: undefined,
   operation: 'create',
   siblingData: undefined,
-  t,
+  req: {
+    t,
+    context: {},
+    payload: {
+      config: {},
+    },
+  },
 }
 
 describe('Field Validations', () => {
