@@ -1090,6 +1090,13 @@ importers:
         version: 5.90.3(@swc/core@1.4.2)(webpack-cli@5.1.4)
 
   packages/plugin-seo:
+    dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
