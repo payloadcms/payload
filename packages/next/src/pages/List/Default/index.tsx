@@ -18,9 +18,17 @@ import {
   useTranslation,
   useWindowInfo,
 } from '@payloadcms/ui'
-import { DeleteMany, EditMany, PublishMany, UnpublishMany } from '@payloadcms/ui/elements'
+import {
+  DeleteMany,
+  EditMany,
+  PublishMany,
+  SetViewActions,
+  UnpublishMany,
+} from '@payloadcms/ui/elements'
 import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
+
+import type { CollectionComponentMap } from '../../../../../ui/src/utilities/buildComponentMap/types'
 
 import { RelationshipProvider } from './RelationshipProvider'
 import './index.scss'
@@ -46,11 +54,11 @@ export const DefaultListView: React.FC = () => {
 
   const config = useConfig()
 
-  const { componentMap } = useComponentMap()
+  const { getComponentMap } = useComponentMap()
 
-  const collectionComponentMap = componentMap.collections[collectionSlug]
+  const componentMap = getComponentMap({ collectionSlug }) as CollectionComponentMap
 
-  const { AfterList, AfterListTable, BeforeList, BeforeListTable } = collectionComponentMap || {}
+  const { AfterList, AfterListTable, BeforeList, BeforeListTable, actionsMap } = componentMap || {}
 
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
@@ -61,6 +69,7 @@ export const DefaultListView: React.FC = () => {
   const { i18n } = useTranslation()
 
   const { setStepNav } = useStepNav()
+
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
@@ -86,6 +95,7 @@ export const DefaultListView: React.FC = () => {
 
   return (
     <div className={baseClass}>
+      <SetViewActions actions={actionsMap?.List} />
       {BeforeList}
       {/* <Meta title={getTranslation(collection.labels.plural, i18n)} /> */}
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>

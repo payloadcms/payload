@@ -1,6 +1,6 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui'
-import type { LivePreviewConfig } from 'payload/config'
+import type { EditViewProps, LivePreviewConfig } from 'payload/config'
 import type { Data } from 'payload/types'
 
 import {
@@ -10,6 +10,7 @@ import {
   Form,
   LoadingOverlay,
   OperationProvider,
+  SetViewActions,
   getFormState,
   useComponentMap,
   useConfig,
@@ -197,41 +198,38 @@ const PreviewView: React.FC = (props) => {
   )
 }
 
-export const LivePreviewClient: React.FC<{
-  breakpoints: LivePreviewConfig['breakpoints']
-  initialData: Data
-  livePreviewConfig: LivePreviewConfig
-  url: string
-}> = (props) => {
-  const { breakpoints, url } = props
+export const LivePreviewClient: React.FC<
+  EditViewProps & {
+    breakpoints: LivePreviewConfig['breakpoints']
+    initialData: Data
+    livePreviewConfig: LivePreviewConfig
+    url: string
+  }
+> = (props) => {
+  const { breakpoints, collectionSlug, globalSlug, url } = props
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
     url,
   })
 
-  // const { setViewActions }  = useActions()
+  const { getComponentMap } = useComponentMap()
 
-  // useEffect(() => {
-  //   const editConfig = (collectionSlug || globalSlug)?.admin?.components?.views?.Edit
-  //   const livePreviewActions =
-  //     editConfig && 'LivePreview' in editConfig && 'actions' in editConfig.LivePreview
-  //       ? editConfig.LivePreview.actions
-  //       : []
-
-  //   setViewActions(livePreviewActions)
-  // }, [global, setViewActions])
+  const componentMap = getComponentMap({ collectionSlug, globalSlug })
 
   return (
-    <LivePreviewProvider
-      {...props}
-      breakpoints={breakpoints}
-      isPopupOpen={isPopupOpen}
-      openPopupWindow={openPopupWindow}
-      popupRef={popupRef}
-      url={url}
-    >
-      <PreviewView />
-    </LivePreviewProvider>
+    <Fragment>
+      <SetViewActions actions={componentMap?.actionsMap?.Edit?.LivePreview} />
+      <LivePreviewProvider
+        {...props}
+        breakpoints={breakpoints}
+        isPopupOpen={isPopupOpen}
+        openPopupWindow={openPopupWindow}
+        popupRef={popupRef}
+        url={url}
+      >
+        <PreviewView />
+      </LivePreviewProvider>
+    </Fragment>
   )
 }

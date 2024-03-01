@@ -79,6 +79,7 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
       {initialState !== false && (
         <FieldPathProvider path="" schemaPath="">
           <Form
+            // @ts-expect-error // TODO: Fix this type. Is this correct?
             fields={Array.isArray(fieldMap) ? fieldMap : []}
             initialState={initialState}
             onChange={[onChange]}

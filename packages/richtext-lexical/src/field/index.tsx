@@ -34,8 +34,9 @@ export const RichTextField: React.FC<
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<SanitizedClientEditorConfig>(null)
 
-  let featureProviderComponents: GeneratedFeatureProviderComponent[] =
-    richTextComponentMap.get('features')
+  let featureProviderComponents: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
+    'features',
+  ) as GeneratedFeatureProviderComponent[] // TODO: Type better
   // order by order
   featureProviderComponents = featureProviderComponents.sort((a, b) => a.order - b.order)
 
@@ -105,7 +106,7 @@ export const RichTextField: React.FC<
             )
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
               return richTextComponentMap.get(key)
-            })
+            }) as React.ReactNode[] // TODO: Type better
 
             return (
               <React.Fragment key={featureProvider.key}>

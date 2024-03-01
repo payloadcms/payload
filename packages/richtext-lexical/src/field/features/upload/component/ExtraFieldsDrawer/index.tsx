@@ -128,13 +128,14 @@ export const ExtraFieldsUploadDrawer: React.FC<
       {initialState !== false && (
         <FieldPathProvider path="" schemaPath="">
           <Form
+            // @ts-expect-error // TODO: Fix this type. Is this correct?
             fields={fieldMap}
             initialState={initialState}
             onChange={[onChange]}
             onSubmit={handleUpdateEditData}
             uuid={uuid()}
           >
-            <RenderFields fieldMap={fieldMap} forceRender readOnly={false} />
+            <RenderFields fieldMap={Array.isArray(fieldMap) ? fieldMap : []} forceRender />
             <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
           </Form>
         </FieldPathProvider>

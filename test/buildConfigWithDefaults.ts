@@ -174,10 +174,6 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
         }),
       ],
     }),
-    rateLimit: {
-      max: 9999999999,
-      window: 15 * 60 * 1000, // 15min default,
-    },
     telemetry: false,
     ...testConfig,
   }

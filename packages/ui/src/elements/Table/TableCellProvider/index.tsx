@@ -42,9 +42,9 @@ export const TableCellProvider: React.FC<{
         cellProps,
         columnIndex,
         customCellContext,
-        richTextComponentMap,
         rowData,
         ...contextToInherit,
+        richTextComponentMap,
       }}
     >
       {children}
