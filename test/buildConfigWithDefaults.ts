@@ -2,7 +2,15 @@ import {
   AlignFeature,
   BlockQuoteFeature,
   BlocksFeature,
+  BoldFeature,
+  InlineCodeFeature,
+  ItalicFeature,
   LinkFeature,
+  StrikethroughFeature,
+  SubscriptFeature,
+  SuperscriptFeature,
+  TreeViewFeature,
+  UnderlineFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
@@ -83,18 +91,48 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
         LinkFeature({}),
         AlignFeature(),
         BlockQuoteFeature(),
+        BoldFeature(),
+        ItalicFeature(),
+        UnderlineFeature(),
+        StrikethroughFeature(),
+        SubscriptFeature(),
+        SuperscriptFeature(),
+        InlineCodeFeature(),
+        TreeViewFeature(),
         BlocksFeature({
           blocks: [
             {
               slug: 'myBlock',
               fields: [
                 {
-                  name: 'title',
+                  name: 'someText',
                   type: 'text',
                 },
                 {
-                  name: 'content',
-                  type: 'textarea',
+                  name: 'someTextRequired',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'radios',
+                  type: 'radio',
+                  options: [
+                    {
+                      label: 'Option 1',
+                      value: 'option1',
+                    },
+                    {
+                      label: 'Option 2',
+                      value: 'option2',
+                    },
+                    {
+                      label: 'Option 3',
+                      value: 'option3',
+                    },
+                  ],
+                  validate: (value) => {
+                    return value !== 'option2' ? true : 'Cannot be option2'
+                  },
                 },
               ],
             },

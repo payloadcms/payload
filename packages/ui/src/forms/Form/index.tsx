@@ -63,6 +63,7 @@ const Form: React.FC<Props> = (props) => {
     onSuccess,
     redirect,
     submitted: submittedFromProps,
+    uuid,
     waitForAutocomplete,
   } = props
 
@@ -509,6 +510,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.addFieldRow = addFieldRow
   contextRef.current.removeFieldRow = removeFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
+  contextRef.current.uuid = uuid
 
   useEffect(() => {
     if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)

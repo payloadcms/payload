@@ -23,81 +23,87 @@ export const getGenerateComponentMap =
 
     componentMap.set(
       `features`,
-      resolvedFeatureMapArray.map(([featureKey, resolvedFeature]) => {
-        const ClientComponent = resolvedFeature.ClientComponent
-        const clientComponentProps = resolvedFeature.clientFeatureProps
+      resolvedFeatureMapArray
+        .map(([featureKey, resolvedFeature]) => {
+          const ClientComponent = resolvedFeature.ClientComponent
+          const clientComponentProps = resolvedFeature.clientFeatureProps
 
-        /**
-         * Handle Feature Component Maps
-         */
-        if (
-          'generateComponentMap' in resolvedFeature &&
-          typeof resolvedFeature.generateComponentMap === 'function'
-        ) {
-          const components = resolvedFeature.generateComponentMap({
-            config,
-            props: resolvedFeature.serverFeatureProps,
-            schemaPath,
-          })
+          /**
+           * Handle Feature Component Maps
+           */
+          if (
+            'generateComponentMap' in resolvedFeature &&
+            typeof resolvedFeature.generateComponentMap === 'function'
+          ) {
+            const components = resolvedFeature.generateComponentMap({
+              config,
+              props: resolvedFeature.serverFeatureProps,
+              schemaPath,
+            })
 
-          for (const componentKey in components) {
-            const Component = components[componentKey]
-            if (Component) {
-              componentMap.set(`feature.${featureKey}.components.${componentKey}`, <Component />)
+            for (const componentKey in components) {
+              const Component = components[componentKey]
+              if (Component) {
+                componentMap.set(`feature.${featureKey}.components.${componentKey}`, <Component />)
+              }
             }
           }
-        }
 
-        /**
-         * Handle Feature Schema Maps (rendered fields)
-         */
-        if (
-          'generateSchemaMap' in resolvedFeature &&
-          typeof resolvedFeature.generateSchemaMap === 'function'
-        ) {
-          const schemas = resolvedFeature.generateSchemaMap({
-            config,
-            props: resolvedFeature.serverFeatureProps,
-            schemaMap: new Map(),
-            schemaPath,
-          })
-
-          for (const schemaKey in schemas) {
-            const fields = schemas[schemaKey]
-
-            const sanitizedFields = sanitizeFields({
+          /**
+           * Handle Feature Schema Maps (rendered fields)
+           */
+          if (
+            'generateSchemaMap' in resolvedFeature &&
+            typeof resolvedFeature.generateSchemaMap === 'function'
+          ) {
+            const schemas = resolvedFeature.generateSchemaMap({
               config,
-              fields,
-              validRelationships,
+              props: resolvedFeature.serverFeatureProps,
+              schemaMap: new Map(),
+              schemaPath,
             })
 
-            const mappedFields = mapFields({
-              config,
-              fieldSchema: sanitizedFields,
-              operation: 'update',
-              permissions: {},
-              readOnly: false,
-            })
+            for (const schemaKey in schemas) {
+              const fields = schemas[schemaKey]
 
-            componentMap.set(`feature.${featureKey}.fields.${schemaKey}`, mappedFields)
+              const sanitizedFields = sanitizeFields({
+                config,
+                fields,
+                validRelationships,
+              })
+
+              const mappedFields = mapFields({
+                config,
+                fieldSchema: sanitizedFields,
+                operation: 'update',
+                permissions: {},
+                readOnly: false,
+              })
+
+              componentMap.set(`feature.${featureKey}.fields.${schemaKey}`, mappedFields)
+            }
           }
-        }
 
-        return {
-          ClientComponent:
-            clientComponentProps && typeof clientComponentProps === 'object' ? (
-              <ClientComponent
-                {...clientComponentProps}
-                featureKey={resolvedFeature.key}
-                order={resolvedFeature.order}
-              />
-            ) : (
-              <ClientComponent featureKey={resolvedFeature.key} order={resolvedFeature.order} />
-            ),
-          key: resolvedFeature.key,
-          order: resolvedFeature.order,
-        } as GeneratedFeatureProviderComponent
-      }),
+          if (!ClientComponent) {
+            return null
+          }
+
+          return {
+            ClientComponent:
+              clientComponentProps && typeof clientComponentProps === 'object' ? (
+                <ClientComponent
+                  {...clientComponentProps}
+                  featureKey={resolvedFeature.key}
+                  order={resolvedFeature.order}
+                />
+              ) : (
+                <ClientComponent featureKey={resolvedFeature.key} order={resolvedFeature.order} />
+              ),
+            key: resolvedFeature.key,
+            order: resolvedFeature.order,
+          } as GeneratedFeatureProviderComponent
+        })
+        .filter((feature) => feature !== null),
     )
 
     return componentMap

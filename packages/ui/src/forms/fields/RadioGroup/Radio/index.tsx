@@ -17,11 +17,12 @@ export const Radio: React.FC<{
   onChange: OnChange
   option: OptionObject
   path: string
+  uuid?: string
 }> = (props) => {
-  const { isSelected, onChange, option, path } = props
+  const { isSelected, onChange, option, path, uuid } = props
   const { i18n } = useTranslation()
 
-  const id = `field-${path}-${option.value}`
+  const id = `field-${path}-${option.value}${uuid ? `-${uuid}` : ''}`
 
   return (
     <label htmlFor={id}>

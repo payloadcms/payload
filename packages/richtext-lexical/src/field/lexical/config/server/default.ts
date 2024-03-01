@@ -3,24 +3,24 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { FeatureProviderServer } from '../../../features/types'
 import type { SanitizedServerEditorConfig, ServerEditorConfig } from '../types'
 
-import { HeadingFeature } from '../../../features/Heading'
-import { ParagraphFeature } from '../../../features/Paragraph'
-import { RelationshipFeature } from '../../../features/Relationship'
-import { UploadFeature } from '../../../features/Upload'
 import { AlignFeature } from '../../../features/align/feature.server'
 import { BlockQuoteFeature } from '../../../features/blockquote/feature.server'
-import { BoldTextFeature } from '../../../features/format/Bold'
-import { InlineCodeTextFeature } from '../../../features/format/InlineCode'
-import { ItalicTextFeature } from '../../../features/format/Italic'
-import { StrikethroughTextFeature } from '../../../features/format/strikethrough'
-import { SubscriptTextFeature } from '../../../features/format/subscript'
-import { SuperscriptTextFeature } from '../../../features/format/superscript'
-import { UnderlineTextFeature } from '../../../features/format/underline'
+import { BoldFeature } from '../../../features/format/bold/feature.server'
+import { InlineCodeFeature } from '../../../features/format/inlinecode/feature.server'
+import { ItalicFeature } from '../../../features/format/italic/feature.server'
+import { StrikethroughFeature } from '../../../features/format/strikethrough/feature.server'
+import { SubscriptFeature } from '../../../features/format/subscript/feature.server'
+import { SuperscriptFeature } from '../../../features/format/superscript/feature.server'
+import { UnderlineFeature } from '../../../features/format/underline/feature.server'
+import { HeadingFeature } from '../../../features/heading'
 import { IndentFeature } from '../../../features/indent'
 import { LinkFeature } from '../../../features/link/feature.server'
-import { CheckListFeature } from '../../../features/lists/CheckList'
-import { OrderedListFeature } from '../../../features/lists/OrderedList'
-import { UnorderedListFeature } from '../../../features/lists/UnorderedList'
+import { CheckListFeature } from '../../../features/lists/checklist'
+import { OrderedListFeature } from '../../../features/lists/orderedlist'
+import { UnorderedListFeature } from '../../../features/lists/unorderedlist'
+import { ParagraphFeature } from '../../../features/paragraph'
+import { RelationshipFeature } from '../../../features/relationship'
+import { UploadFeature } from '../../../features/upload'
 import { LexicalEditorTheme } from '../../theme/EditorTheme'
 import { sanitizeServerEditorConfig } from './sanitize'
 
@@ -30,13 +30,13 @@ export const defaultEditorLexicalConfig: LexicalEditorConfig = {
 }
 
 export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown>[] = [
-  BoldTextFeature(),
-  ItalicTextFeature(),
-  UnderlineTextFeature(),
-  StrikethroughTextFeature(),
-  SubscriptTextFeature(),
-  SuperscriptTextFeature(),
-  InlineCodeTextFeature(),
+  BoldFeature(),
+  ItalicFeature(),
+  UnderlineFeature(),
+  StrikethroughFeature(),
+  SubscriptFeature(),
+  SuperscriptFeature(),
+  InlineCodeFeature(),
   ParagraphFeature(),
   HeadingFeature({}),
   AlignFeature(),
