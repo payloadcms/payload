@@ -1,7 +1,6 @@
-import { email } from 'payload/fields/validations'
-
 import type { Field } from '../../fields/config/types'
 
+import { email } from '../../fields/validations'
 import { extractTranslations } from '../../translations/extractTranslations'
 
 const labels = extractTranslations(['general:email'])
@@ -9,6 +8,7 @@ const labels = extractTranslations(['general:email'])
 const baseAuthFields: Field[] = [
   {
     name: 'email',
+    type: 'email',
     admin: {
       components: {
         Field: () => null,
@@ -16,29 +16,28 @@ const baseAuthFields: Field[] = [
     },
     label: labels['general:email'],
     required: true,
-    type: 'email',
     unique: true,
     validate: email,
   },
   {
     name: 'resetPasswordToken',
-    hidden: true,
     type: 'text',
+    hidden: true,
   },
   {
     name: 'resetPasswordExpiration',
-    hidden: true,
     type: 'date',
+    hidden: true,
   },
   {
     name: 'salt',
-    hidden: true,
     type: 'text',
+    hidden: true,
   },
   {
     name: 'hash',
-    hidden: true,
     type: 'text',
+    hidden: true,
   },
 ]
 
