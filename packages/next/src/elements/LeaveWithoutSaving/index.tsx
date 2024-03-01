@@ -57,13 +57,13 @@ export const LeaveWithoutSaving: React.FC = () => {
   const [show, setShow] = React.useState(false)
   const [hasAccepted, setHasAccepted] = React.useState(false)
 
-  const preventLeave = Boolean(modified && user)
+  const prevent = Boolean(modified && user)
 
   const onPrevent = useCallback(() => {
     setShow(true)
   }, [])
 
-  usePreventLeave({ hasAccepted, onPrevent, preventLeave })
+  usePreventLeave({ hasAccepted, onPrevent, prevent })
 
   return (
     <Component

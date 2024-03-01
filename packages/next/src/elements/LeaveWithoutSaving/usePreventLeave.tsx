@@ -58,17 +58,17 @@ export const usePreventLeave = ({
   hasAccepted = false,
   message = 'Are you sure want to leave this page?',
   onPrevent,
-  preventLeave = true,
+  prevent = true,
 }: {
   hasAccepted: boolean
   // if no `onPrevent` is provided, the message will be displayed in a confirm dialog
   message?: string
   // to use a custom confirmation dialog, provide a function that returns a boolean
   onPrevent?: () => void
-  preventLeave: boolean
+  prevent: boolean
 }) => {
   // check when page is about to be reloaded
-  useBeforeUnload(preventLeave, message)
+  useBeforeUnload(prevent, message)
 
   const router = useRouter()
   const cancelledURL = useRef<string>('')
@@ -113,7 +113,7 @@ export const usePreventLeave = ({
 
           const isPageLeaving = !(newUrl === currentUrl || isAnchor || isDownloadLink)
 
-          if (isPageLeaving && preventLeave && !onPrevent ? !window.confirm(message) : true) {
+          if (isPageLeaving && prevent && (!onPrevent ? !window.confirm(message) : true)) {
             // Keep a reference of the href
             cancelledURL.current = newUrl
 
@@ -138,7 +138,7 @@ export const usePreventLeave = ({
     return () => {
       document.removeEventListener('click', handleClick, true)
     }
-  }, [onPrevent, preventLeave, message])
+  }, [onPrevent, prevent, message])
 
   useEffect(() => {
     if (hasAccepted && cancelledURL.current) {

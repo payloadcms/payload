@@ -45,7 +45,7 @@ export const DefaultEditView: React.FC = () => {
     hasSavePermission,
     initialData: data,
     initialState,
-    onSave: onSaveFromProps,
+    onSave: onSaveFromContext,
   } = useDocumentInfo()
 
   const config = useConfig()
@@ -95,8 +95,8 @@ export const DefaultEditView: React.FC = () => {
       //   await refreshCookieAsync()
       // }
 
-      if (typeof onSaveFromProps === 'function') {
-        onSaveFromProps({
+      if (typeof onSaveFromContext === 'function') {
+        onSaveFromContext({
           ...json,
           operation: id ? 'update' : 'create',
         })
@@ -104,7 +104,7 @@ export const DefaultEditView: React.FC = () => {
     },
     [
       id,
-      onSaveFromProps,
+      onSaveFromContext,
       // refreshCookieAsync,
       //  reportUpdate
     ],
