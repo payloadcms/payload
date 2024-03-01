@@ -9,7 +9,8 @@ import {
   MinimizeMaximize,
   Number as NumberInput,
   Select,
-  useActions,
+  SetViewActions,
+  useComponentMap,
   useConfig,
   useDocumentInfo,
   useLocale,
@@ -32,9 +33,12 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
   const { id, initialData } = useDocumentInfo()
 
   const searchParams = useSearchParams()
-  const { setViewActions } = useActions()
   const { i18n } = useTranslation()
   const { code } = useLocale()
+
+  const { getComponentMap } = useComponentMap()
+
+  const componentMap = getComponentMap({ collectionSlug, globalSlug })
 
   const {
     collections,
@@ -45,11 +49,9 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
   } = useConfig()
 
   const collectionConfig =
-    'collectionSlug' in props &&
-    collections.find((collection) => collection.slug === props.collectionSlug)
+    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
 
-  const globalConfig =
-    'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
+  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
 
   const localeOptions =
     localization &&
@@ -110,20 +112,8 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
       }
     }
 
-    fetchData()
+    void fetchData()
   }, [i18n.language, fetchURL, authenticated])
-
-  React.useEffect(() => {
-    const editConfig = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit
-    const apiActions =
-      editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
-
-    setViewActions(apiActions)
-
-    return () => {
-      setViewActions([])
-    }
-  }, [collectionConfig, globalConfig, setViewActions])
 
   return (
     <Gutter
@@ -140,6 +130,7 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
         useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"
       />
+      <SetViewActions actions={componentMap?.actionMap?.API} />
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>

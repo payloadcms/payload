@@ -1,11 +1,13 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
+import type { ActionMap } from '../../utilities/buildComponentMap/types'
+
 import { useConfig } from '../Config'
 
 type ActionsContextType = {
-  actions: React.ComponentType<any>[]
-  setViewActions: (actions: React.ComponentType<any>[]) => void
+  actions: ActionMap[string]
+  setViewActions: (actions: ActionMap[string]) => void
 }
 
 const ActionsContext = createContext<ActionsContextType>({
