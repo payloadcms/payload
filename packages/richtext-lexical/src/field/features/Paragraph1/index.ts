@@ -4,7 +4,7 @@ import { $createParagraphNode, $getSelection } from 'lexical'
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
+import { TextDropdownSectionWithEntries } from '../common4/floatingSelectToolbarTextDropdownSection'
 import { ParagraphFeatureComponent } from './Component'
 
 export const key = 'paragraph' as const
@@ -61,6 +61,6 @@ export const ParagraphFeature = (): FeatureProvider => {
         },
       }
     },
-    key: key,
+    key,
   }
 }

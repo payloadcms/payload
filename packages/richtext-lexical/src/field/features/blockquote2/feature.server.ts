@@ -1,9 +1,9 @@
 import { QuoteNode, type SerializedQuoteNode } from '@lexical/rich-text'
 
-import type { HTMLConverter } from '../converters/html/converter/types'
+import type { HTMLConverter } from '../converters5/html/converter/types'
 import type { FeatureProviderProviderServer } from '../types'
 
-import { convertLexicalNodesToHTML } from '../converters/html/converter'
+import { convertLexicalNodesToHTML } from '../converters5/html/converter'
 import { BlockQuoteFeatureClientComponent } from './feature.client'
 import { MarkdownTransformer } from './markdownTransformer'
 

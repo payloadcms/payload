@@ -4,12 +4,12 @@ import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection } from 'lexical'
 
-import type { HTMLConverter } from '../converters/html/converter/types'
+import type { HTMLConverter } from '../converters5/html/converter/types'
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
-import { convertLexicalNodesToHTML } from '../converters/html/converter'
+import { TextDropdownSectionWithEntries } from '../common4/floatingSelectToolbarTextDropdownSection'
+import { convertLexicalNodesToHTML } from '../converters5/html/converter'
 import { MarkdownTransformer } from './markdownTransformer'
 
 const setHeading = (headingSize: HeadingTagType) => {

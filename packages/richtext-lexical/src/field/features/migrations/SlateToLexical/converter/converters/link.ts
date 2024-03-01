@@ -1,4 +1,4 @@
-import type { SerializedLinkNode } from '../../../../link/nodes/LinkNode'
+import type { SerializedLinkNode } from '../../../../link1/nodes/LinkNode'
 import type { SlateNodeConverter } from '../types'
 
 import { convertSlateNodesToLexical } from '..'

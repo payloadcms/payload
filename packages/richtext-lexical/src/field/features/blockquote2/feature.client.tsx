@@ -8,7 +8,7 @@ import type { FeatureProviderProviderClient } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote'
-import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
+import { TextDropdownSectionWithEntries } from '../common4/floatingSelectToolbarTextDropdownSection'
 import { createClientComponent } from '../createClientComponent'
 import { MarkdownTransformer } from './markdownTransformer'
 

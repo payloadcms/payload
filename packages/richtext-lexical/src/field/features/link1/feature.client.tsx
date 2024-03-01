@@ -9,7 +9,7 @@ import type { LinkFields } from './nodes/types'
 
 import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
-import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
+import { FeaturesSectionWithEntries } from '../common4/floatingSelectToolbarFeaturesButtonsSection'
 import { createClientComponent } from '../createClientComponent'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'

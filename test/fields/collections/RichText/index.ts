@@ -8,7 +8,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
-import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters/html/field'
+import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters5/html/field'
 import { slateEditor } from '../../../../packages/richtext-slate/src'
 import { richTextFieldsSlug } from '../../slugs'
 import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks'

@@ -12,7 +12,7 @@ import type { AdapterProps } from '../../types'
 import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types'
 import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import type { HTMLConverter } from './converters/html/converter/types'
+import type { HTMLConverter } from './converters5/html/converter/types'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,

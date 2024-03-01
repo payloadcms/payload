@@ -2,7 +2,7 @@ import type { Field } from 'payload/types'
 
 import payload from 'payload'
 
-import type { HTMLConverter } from '../converters/html/converter/types'
+import type { HTMLConverter } from '../converters5/html/converter/types'
 import type { FeatureProvider } from '../types'
 import type { SerializedUploadNode } from './nodes/UploadNode'
 
@@ -104,7 +104,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
             position: 'normal',
           },
         ],
-        props: props,
+        props,
         slashMenu: {
           options: [
             {

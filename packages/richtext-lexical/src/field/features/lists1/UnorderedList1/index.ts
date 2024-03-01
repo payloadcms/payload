@@ -3,7 +3,7 @@ import { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/
 import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
+import { TextDropdownSectionWithEntries } from '../../common4/floatingSelectToolbarTextDropdownSection'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { UNORDERED_LIST } from './markdownTransformer'
 

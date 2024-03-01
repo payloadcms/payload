@@ -22,7 +22,7 @@ import type { UploadFeatureProps } from '..'
 import type { UploadData } from '../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
-import { EnabledRelationshipsCondition } from '../../Relationship/utils/EnabledRelationshipsCondition'
+import { EnabledRelationshipsCondition } from '../../Relationship1/utils/EnabledRelationshipsCondition'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands'
 import { ExtraFieldsUploadDrawer } from './ExtraFieldsDrawer'
 import './index.scss'
