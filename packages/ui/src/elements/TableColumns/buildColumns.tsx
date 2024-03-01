@@ -1,5 +1,7 @@
 import type { CellProps, SanitizedCollectionConfig } from 'payload/types'
 
+import React from 'react'
+
 import type { ColumnPreferences } from '../../providers/ListInfo/types'
 import type { FieldMap } from '../../utilities/buildComponentMap/types'
 import type { Column } from '../Table/types'
