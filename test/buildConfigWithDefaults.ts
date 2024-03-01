@@ -3,6 +3,7 @@ import {
   BlockQuoteFeature,
   BlocksFeature,
   BoldFeature,
+  HeadingFeature,
   InlineCodeFeature,
   ItalicFeature,
   LinkFeature,
@@ -99,6 +100,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
         SuperscriptFeature(),
         InlineCodeFeature(),
         TreeViewFeature(),
+        HeadingFeature(),
         BlocksFeature({
           blocks: [
             {

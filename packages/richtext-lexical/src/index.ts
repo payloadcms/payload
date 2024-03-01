@@ -270,7 +270,7 @@ export { StrikethroughFeature } from './field/features/format/strikethrough/feat
 export { SubscriptFeature } from './field/features/format/subscript/feature.server'
 export { SuperscriptFeature } from './field/features/format/superscript/feature.server'
 export { UnderlineFeature } from './field/features/format/underline/feature.server'
-export { HeadingFeature } from './field/features/heading'
+export { HeadingFeature } from './field/features/heading/feature.server'
 
 export { IndentFeature } from './field/features/indent'
 export { LinkFeature, type LinkFeatureServerProps } from './field/features/link/feature.server'

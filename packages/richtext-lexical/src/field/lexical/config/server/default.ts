@@ -12,7 +12,7 @@ import { StrikethroughFeature } from '../../../features/format/strikethrough/fea
 import { SubscriptFeature } from '../../../features/format/subscript/feature.server'
 import { SuperscriptFeature } from '../../../features/format/superscript/feature.server'
 import { UnderlineFeature } from '../../../features/format/underline/feature.server'
-import { HeadingFeature } from '../../../features/heading'
+import { HeadingFeature } from '../../../features/heading/feature.server'
 import { IndentFeature } from '../../../features/indent'
 import { LinkFeature } from '../../../features/link/feature.server'
 import { CheckListFeature } from '../../../features/lists/checklist'

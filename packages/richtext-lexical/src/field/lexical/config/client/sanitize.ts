@@ -13,11 +13,11 @@ export const sanitizeClientFeatures = (
     floatingSelectToolbar: {
       sections: [],
     },
-
     hooks: {
       load: [],
       save: [],
     },
+    markdownTransformers: [],
     nodes: [],
     plugins: [],
     slashMenu: {
@@ -110,6 +110,11 @@ export const sanitizeClientFeatures = (
       }
     }
 
+    if (feature.markdownTransformers?.length) {
+      sanitized.markdownTransformers = sanitized.markdownTransformers.concat(
+        feature.markdownTransformers,
+      )
+    }
     sanitized.enabledFeatures.push(feature.key)
   })
 
