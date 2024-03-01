@@ -1,4 +1,4 @@
-import type { CollectionConfig, IncomingUploadType, PayloadRequest } from 'payload/types'
+import type { CollectionConfig, PayloadRequest, UploadConfig } from 'payload/types'
 
 export async function getFilePrefix({
   collection,
@@ -7,9 +7,9 @@ export async function getFilePrefix({
   collection: CollectionConfig
   req: PayloadRequest
 }): Promise<string> {
-  const imageSizes = (collection?.upload as IncomingUploadType)?.imageSizes || []
-  const { searchParams } = req
-  const filename = searchParams.get('filename')
+  const imageSizes = (collection?.upload as UploadConfig)?.imageSizes || []
+  const { routeParams } = req
+  const filename = routeParams['filename']
 
   const files = await req.payload.find({
     collection: collection.slug,

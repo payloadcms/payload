@@ -13,6 +13,7 @@ const strategyBaseSchema = joi.object().keys({
 })
 
 const collectionSchema = joi.object().keys({
+  slug: joi.string().required(),
   access: joi.object({
     admin: joi.func(),
     create: joi.func(),
@@ -158,14 +159,13 @@ const collectionSchema = joi.object().keys({
       .alternatives()
       .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
   }),
-  slug: joi.string().required(),
   timestamps: joi.boolean(),
   typescript: joi.object().keys({
     interface: joi.string(),
   }),
   upload: joi.alternatives().try(
     joi.object({
-      adminThumbnail: joi.alternatives().try(joi.string(), joi.func()),
+      adminThumbnail: joi.alternatives().try(joi.string(), componentSchema),
       crop: joi.bool(),
       disableLocalStorage: joi.bool(),
       filesRequiredOnCreate: joi.bool(),
@@ -202,7 +202,6 @@ const collectionSchema = joi.object().keys({
         .allow(null),
       staticDir: joi.string(),
       staticOptions: joi.object(),
-      staticURL: joi.string(),
       tempFileDir: joi.string(),
       trimOptions: joi.alternatives().try(
         joi.object().keys({
