@@ -2,7 +2,15 @@ import {
   AlignFeature,
   BlockQuoteFeature,
   BlocksFeature,
+  BoldFeature,
+  InlineCodeFeature,
+  ItalicFeature,
   LinkFeature,
+  StrikethroughFeature,
+  SubscriptFeature,
+  SuperscriptFeature,
+  TreeViewFeature,
+  UnderlineFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
@@ -83,6 +91,14 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
         LinkFeature({}),
         AlignFeature(),
         BlockQuoteFeature(),
+        BoldFeature(),
+        ItalicFeature(),
+        UnderlineFeature(),
+        StrikethroughFeature(),
+        SubscriptFeature(),
+        SuperscriptFeature(),
+        InlineCodeFeature(),
+        TreeViewFeature(),
         BlocksFeature({
           blocks: [
             {

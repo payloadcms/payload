@@ -1,7 +1,10 @@
+'use client'
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types'
 
+import { BoldIcon } from '../../../lexical/ui/icons/Bold'
+import { createClientComponent } from '../../createClientComponent'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import {
   BOLD_ITALIC_STAR,
@@ -10,9 +13,9 @@ import {
   BOLD_UNDERSCORE,
 } from './markdownTransformers'
 
-export const BoldTextFeature = (): FeatureProvider => {
+const BoldFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
-    dependenciesSoft: ['italic'],
+    clientFeatureProps: props,
     feature: ({ featureProviderMap }) => {
       const markdownTransformers = [BOLD_STAR, BOLD_UNDERSCORE]
       if (featureProviderMap.get('italic')) {
@@ -20,13 +23,12 @@ export const BoldTextFeature = (): FeatureProvider => {
       }
 
       return {
+        clientFeatureProps: props,
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../../lexical/ui/icons/Bold').then((module) => module.BoldIcon),
+                ChildComponent: BoldIcon,
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('bold')
@@ -42,10 +44,10 @@ export const BoldTextFeature = (): FeatureProvider => {
             ]),
           ],
         },
-        markdownTransformers: markdownTransformers,
-        props: null,
+        markdownTransformers,
       }
     },
-    key: 'bold',
   }
 }
+
+export const BoldFeatureClientComponent = createClientComponent(BoldFeatureClient)

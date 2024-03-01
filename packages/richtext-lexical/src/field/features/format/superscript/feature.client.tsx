@@ -1,22 +1,24 @@
+'use client'
+
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types'
 
+import { SuperscriptIcon } from '../../../lexical/ui/icons/Superscript'
+import { createClientComponent } from '../../createClientComponent'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 
-export const SuperscriptTextFeature = (): FeatureProvider => {
+const SuperscriptFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
+    clientFeatureProps: props,
     feature: () => {
       return {
+        clientFeatureProps: props,
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../../lexical/ui/icons/Superscript').then(
-                    (module) => module.SuperscriptIcon,
-                  ),
+                ChildComponent: SuperscriptIcon,
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('superscript')
@@ -32,9 +34,9 @@ export const SuperscriptTextFeature = (): FeatureProvider => {
             ]),
           ],
         },
-        props: null,
       }
     },
-    key: 'superscript',
   }
 }
+
+export const SuperscriptFeatureClientComponent = createClientComponent(SuperscriptFeatureClient)

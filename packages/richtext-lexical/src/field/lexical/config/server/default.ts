@@ -5,13 +5,13 @@ import type { SanitizedServerEditorConfig, ServerEditorConfig } from '../types'
 
 import { AlignFeature } from '../../../features/align/feature.server'
 import { BlockQuoteFeature } from '../../../features/blockquote/feature.server'
-import { BoldTextFeature } from '../../../features/format/bold'
-import { InlineCodeTextFeature } from '../../../features/format/inlinecode'
-import { ItalicTextFeature } from '../../../features/format/italic'
-import { StrikethroughTextFeature } from '../../../features/format/strikethrough'
-import { SubscriptTextFeature } from '../../../features/format/subscript'
-import { SuperscriptTextFeature } from '../../../features/format/superscript'
-import { UnderlineTextFeature } from '../../../features/format/underline'
+import { BoldFeature } from '../../../features/format/bold/feature.server'
+import { InlineCodeFeature } from '../../../features/format/inlinecode/feature.server'
+import { ItalicFeature } from '../../../features/format/italic/feature.server'
+import { StrikethroughFeature } from '../../../features/format/strikethrough/feature.server'
+import { SubscriptFeature } from '../../../features/format/subscript/feature.server'
+import { SuperscriptFeature } from '../../../features/format/superscript/feature.server'
+import { UnderlineFeature } from '../../../features/format/underline/feature.server'
 import { HeadingFeature } from '../../../features/heading'
 import { IndentFeature } from '../../../features/indent'
 import { LinkFeature } from '../../../features/link/feature.server'
@@ -30,13 +30,13 @@ export const defaultEditorLexicalConfig: LexicalEditorConfig = {
 }
 
 export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown>[] = [
-  BoldTextFeature(),
-  ItalicTextFeature(),
-  UnderlineTextFeature(),
-  StrikethroughTextFeature(),
-  SubscriptTextFeature(),
-  SuperscriptTextFeature(),
-  InlineCodeTextFeature(),
+  BoldFeature(),
+  ItalicFeature(),
+  UnderlineFeature(),
+  StrikethroughFeature(),
+  SubscriptFeature(),
+  SuperscriptFeature(),
+  InlineCodeFeature(),
   ParagraphFeature(),
   HeadingFeature({}),
   AlignFeature(),

@@ -1,23 +1,26 @@
+'use client'
+
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types'
 
+import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough'
+import { createClientComponent } from '../../createClientComponent'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import { STRIKETHROUGH } from './markdownTransformers'
 
-export const StrikethroughTextFeature = (): FeatureProvider => {
+const StrikethroughFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
+    clientFeatureProps: props,
     feature: () => {
       return {
+        clientFeatureProps: props,
+
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../../lexical/ui/icons/Strikethrough').then(
-                    (module) => module.StrikethroughIcon,
-                  ),
+                ChildComponent: StrikethroughIcon,
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('strikethrough')
@@ -34,9 +37,9 @@ export const StrikethroughTextFeature = (): FeatureProvider => {
           ],
         },
         markdownTransformers: [STRIKETHROUGH],
-        props: null,
       }
     },
-    key: 'strikethrough',
   }
 }
+
+export const StrikethroughFeatureClientComponent = createClientComponent(StrikethroughFeatureClient)

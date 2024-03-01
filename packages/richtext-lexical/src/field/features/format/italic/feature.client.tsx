@@ -1,21 +1,26 @@
+'use client'
+
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types'
 
+import { ItalicIcon } from '../../../lexical/ui/icons/Italic'
+import { createClientComponent } from '../../createClientComponent'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers'
 
-export const ItalicTextFeature = (): FeatureProvider => {
+const ItalicFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
+    clientFeatureProps: props,
     feature: () => {
       return {
+        clientFeatureProps: props,
+
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../../lexical/ui/icons/Italic').then((module) => module.ItalicIcon),
+                ChildComponent: ItalicIcon,
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('italic')
@@ -32,9 +37,9 @@ export const ItalicTextFeature = (): FeatureProvider => {
           ],
         },
         markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
-        props: null,
       }
     },
-    key: 'italic',
   }
 }
+
+export const ItalicFeatureClientComponent = createClientComponent(ItalicFeatureClient)

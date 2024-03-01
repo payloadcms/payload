@@ -1,22 +1,24 @@
+'use client'
+
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types'
 
+import { SubscriptIcon } from '../../../lexical/ui/icons/Subscript'
+import { createClientComponent } from '../../createClientComponent'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 
-export const SubscriptTextFeature = (): FeatureProvider => {
+const SubscriptFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
+    clientFeatureProps: props,
     feature: () => {
       return {
+        clientFeatureProps: props,
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../../lexical/ui/icons/Subscript').then(
-                    (module) => module.SubscriptIcon,
-                  ),
+                ChildComponent: SubscriptIcon,
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('subscript')
@@ -32,9 +34,9 @@ export const SubscriptTextFeature = (): FeatureProvider => {
             ]),
           ],
         },
-        props: null,
       }
     },
-    key: 'subscript',
   }
 }
+
+export const SubscriptFeatureClientComponent = createClientComponent(SubscriptFeatureClient)

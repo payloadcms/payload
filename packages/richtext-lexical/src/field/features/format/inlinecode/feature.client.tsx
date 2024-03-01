@@ -1,21 +1,25 @@
+'use client'
+
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types'
 
+import { CodeIcon } from '../../../lexical/ui/icons/Code'
+import { createClientComponent } from '../../createClientComponent'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import { INLINE_CODE } from './markdownTransformers'
 
-export const InlineCodeTextFeature = (): FeatureProvider => {
+const InlineCodeFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
+    clientFeatureProps: props,
     feature: () => {
       return {
+        clientFeatureProps: props,
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../../lexical/ui/icons/Code').then((module) => module.CodeIcon),
+                ChildComponent: CodeIcon,
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('code')
@@ -31,10 +35,11 @@ export const InlineCodeTextFeature = (): FeatureProvider => {
             ]),
           ],
         },
+
         markdownTransformers: [INLINE_CODE],
-        props: null,
       }
     },
-    key: 'inlinecode',
   }
 }
+
+export const InlineCodeFeatureClientComponent = createClientComponent(InlineCodeFeatureClient)

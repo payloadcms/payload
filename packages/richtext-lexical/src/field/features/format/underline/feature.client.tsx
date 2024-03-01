@@ -1,22 +1,24 @@
+'use client'
+
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types'
 
+import { UnderlineIcon } from '../../../lexical/ui/icons/Underline'
+import { createClientComponent } from '../../createClientComponent'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 
-export const UnderlineTextFeature = (): FeatureProvider => {
+const UnderlineFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
+    clientFeatureProps: props,
     feature: () => {
       return {
+        clientFeatureProps: props,
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../../lexical/ui/icons/Underline').then(
-                    (module) => module.UnderlineIcon,
-                  ),
+                ChildComponent: UnderlineIcon,
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('underline')
@@ -32,9 +34,9 @@ export const UnderlineTextFeature = (): FeatureProvider => {
             ]),
           ],
         },
-        props: null,
       }
     },
-    key: 'underline',
   }
 }
+
+export const UnderlineFeatureClientComponent = createClientComponent(UnderlineFeatureClient)
