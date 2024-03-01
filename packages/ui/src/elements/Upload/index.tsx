@@ -4,12 +4,12 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
-import { useClientFunctions } from '../..'
 import Error from '../../forms/Error'
 import { useFormSubmitted } from '../../forms/Form/context'
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../forms/fields/shared'
 import useField from '../../forms/useField'
+import { useClientFunctions } from '../../providers/ClientFunction'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useTranslation } from '../../providers/Translation'
 import { Button } from '../Button'

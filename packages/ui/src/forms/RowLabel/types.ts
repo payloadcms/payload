@@ -3,7 +3,7 @@ import type { RowLabel, RowLabelComponent } from 'payload/types'
 
 import React from 'react'
 
-import type { FormState } from '../..'
+import type { FormState } from '../../forms/Form/types'
 
 export type Props = {
   className?: string

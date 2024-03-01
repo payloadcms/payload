@@ -3,7 +3,7 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { useIntersect } from '../..'
+import { useIntersect } from '../../hooks/useIntersect'
 import { useTranslation } from '../../providers/Translation'
 import { RenderField } from './RenderField'
 import './index.scss'

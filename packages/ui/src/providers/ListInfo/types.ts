@@ -1,7 +1,7 @@
 import type { Data, FieldAffectingData, SanitizedCollectionConfig, Where } from 'payload/types'
 import type React from 'react'
 
-import type { Column } from '../..'
+import type { Column } from '../../elements/Table/types'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 
@@ -15,7 +15,7 @@ export type ListInfoProps = {
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
   hasCreatePermission: boolean
-  limit: SanitizedCollectionConfig['admin']['pagination']['defaultLimit'] | number
+  limit: SanitizedCollectionConfig['admin']['pagination']['defaultLimit']
   modifySearchParams?: false
   newDocumentURL: string
   setLimit?: (limit: number) => void

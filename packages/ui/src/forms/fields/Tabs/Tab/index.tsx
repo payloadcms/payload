@@ -4,8 +4,8 @@ import React, { useState } from 'react'
 
 import type { MappedTab } from '../../../../utilities/buildComponentMap/types'
 
-import { useTranslation } from '../../../..'
 import { ErrorPill } from '../../../../elements/ErrorPill'
+import { useTranslation } from '../../../../providers/Translation'
 import { WatchChildErrors } from '../../../WatchChildErrors'
 import './index.scss'
 

@@ -4,24 +4,24 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props, TogglerProps } from './types'
 
-import { useTranslation } from '../..'
 import { X } from '../../icons/X'
 import { EditDepthContext, useEditDepth } from '../../providers/EditDepth'
+import { useTranslation } from '../../providers/Translation'
 import { Gutter } from '../Gutter'
 import './index.scss'
 
 const baseClass = 'drawer'
 const zBase = 100
 
-export const formatDrawerSlug = ({ depth, slug }: { depth: number; slug: string }): string =>
+export const formatDrawerSlug = ({ slug, depth }: { depth: number; slug: string }): string =>
   `drawer_${depth}_${slug}`
 
 export const DrawerToggler: React.FC<TogglerProps> = ({
+  slug,
   children,
   className,
   disabled,
   onClick,
-  slug,
   ...rest
 }) => {
   const { openModal } = useModal()
@@ -42,12 +42,12 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
 }
 
 export const Drawer: React.FC<Props> = ({
+  slug,
   Header,
   children,
   className,
   gutter = true,
   hoverTitle,
-  slug,
   title,
 }) => {
   const { t } = useTranslation()

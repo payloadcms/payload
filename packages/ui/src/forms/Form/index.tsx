@@ -17,7 +17,6 @@ import type {
   SubmitOptions,
 } from './types'
 
-import { getFormState } from '../..'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAuth } from '../../providers/Auth'
@@ -27,6 +26,7 @@ import { useLocale } from '../../providers/Locale'
 import { useOperation } from '../../providers/OperationProvider'
 import { useTranslation } from '../../providers/Translation'
 import { requests } from '../../utilities/api'
+import { getFormState } from '../../utilities/getFormState'
 import {
   FormContext,
   FormFieldsContext,

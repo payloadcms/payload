@@ -1,7 +1,8 @@
 'use client'
 import React from 'react'
 
-import { Check, Line } from '../../..'
+import { Check } from '../../../icons/Check'
+import { Line } from '../../../icons/Line'
 
 type Props = {
   AfterInput?: React.ReactNode

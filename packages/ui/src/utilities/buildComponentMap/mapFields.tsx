@@ -8,13 +8,13 @@ import type { Props as FieldDescription } from '../../forms/FieldDescription/typ
 import type { FormFieldBase } from '../../forms/fields/shared'
 import type { FieldMap, MappedField, MappedTab, ReducedBlock } from './types'
 
-import { HiddenInput } from '../..'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import { SortColumn } from '../../elements/SortColumn'
 import DefaultError from '../../forms/Error'
 import DefaultDescription from '../../forms/FieldDescription'
 import DefaultLabel from '../../forms/Label'
 import { fieldTypes } from '../../forms/fields'
+import { HiddenInput } from '../../forms/fields/HiddenInput'
 
 export const mapFields = (args: {
   DefaultCell?: React.FC<any>
