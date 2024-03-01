@@ -10,6 +10,7 @@ import {
   ItalicFeature,
   LinkFeature,
   OrderedListFeature,
+  RelationshipFeature,
   StrikethroughFeature,
   SubscriptFeature,
   SuperscriptFeature,
@@ -95,6 +96,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),
+        RelationshipFeature(),
         LinkFeature(),
         CheckListFeature(),
         UnorderedListFeature(),

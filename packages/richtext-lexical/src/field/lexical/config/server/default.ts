@@ -19,7 +19,7 @@ import { CheckListFeature } from '../../../features/lists/checklist/feature.serv
 import { OrderedListFeature } from '../../../features/lists/orderedlist/feature.server'
 import { UnorderedListFeature } from '../../../features/lists/unorderedlist/feature.server'
 import { ParagraphFeature } from '../../../features/paragraph/feature.server'
-import { RelationshipFeature } from '../../../features/relationship'
+import { RelationshipFeature } from '../../../features/relationship/feature.server'
 import { UploadFeature } from '../../../features/upload'
 import { LexicalEditorTheme } from '../../theme/EditorTheme'
 import { sanitizeServerEditorConfig } from './sanitize'

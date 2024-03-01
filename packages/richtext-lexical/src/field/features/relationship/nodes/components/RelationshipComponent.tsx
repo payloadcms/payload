@@ -57,7 +57,7 @@ const Component: React.FC<Props> = (props) => {
   )
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
-    id: id,
+    id,
     collectionSlug: relatedCollection.slug,
   })
 
@@ -93,7 +93,7 @@ const Component: React.FC<Props> = (props) => {
         </p>
         <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
           <p className={`${baseClass}__title`}>
-            {data[relatedCollection?.admin?.useAsTitle || 'id']}
+            {data ? data[relatedCollection?.admin?.useAsTitle || 'id'] : id}
           </p>
         </DocumentDrawerToggler>
       </div>
@@ -102,7 +102,7 @@ const Component: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__swapButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={field?.readOnly}
             el="div"
             icon="swap"
             onClick={() => {
@@ -116,7 +116,7 @@ const Component: React.FC<Props> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__removeButton`}
-            disabled={field?.admin?.readOnly}
+            disabled={field?.readOnly}
             icon="x"
             onClick={(e) => {
               e.preventDefault()
