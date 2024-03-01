@@ -14,7 +14,7 @@ import DefaultError from '../../forms/Error'
 import DefaultDescription from '../../forms/FieldDescription'
 import DefaultLabel from '../../forms/Label'
 import { fieldTypes } from '../../forms/fields'
-import { HiddenInput } from '../../forms/fields/HiddenInput'
+import HiddenInput from '../../forms/fields/HiddenInput'
 
 export const mapFields = (args: {
   DefaultCell?: React.FC<any>
