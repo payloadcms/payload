@@ -1,10 +1,10 @@
-import {
-  AlignFeature,
-  BlockQuoteFeature,
-  BlocksFeature,
-  LinkFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
+// import {
+//   AlignFeature,
+//   BlockQuoteFeature,
+//   BlocksFeature,
+//   LinkFeature,
+//   lexicalEditor,
+// } from '@payloadcms/richtext-lexical'
 import path from 'path'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
@@ -12,7 +12,7 @@ import type { Config, SanitizedConfig } from '../packages/payload/src/config/typ
 import { mongooseAdapter } from '../packages/db-mongodb/src'
 import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
-//import { slateEditor } from '../packages/richtext-slate/src'
+import { slateEditor } from '../packages/richtext-slate/src'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
@@ -62,7 +62,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',
-    /*editor: slateEditor({
+    editor: slateEditor({
       admin: {
         upload: {
           collections: {
@@ -77,31 +77,31 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
           },
         },
       },
-    }),*/
-    editor: lexicalEditor({
-      features: [
-        LinkFeature({}),
-        AlignFeature(),
-        BlockQuoteFeature(),
-        BlocksFeature({
-          blocks: [
-            {
-              slug: 'myBlock',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                },
-                {
-                  name: 'content',
-                  type: 'textarea',
-                },
-              ],
-            },
-          ],
-        }),
-      ],
     }),
+    // editor: lexicalEditor({
+    //   features: [
+    //     LinkFeature({}),
+    //     AlignFeature(),
+    //     BlockQuoteFeature(),
+    //     BlocksFeature({
+    //       blocks: [
+    //         {
+    //           slug: 'myBlock',
+    //           fields: [
+    //             {
+    //               name: 'title',
+    //               type: 'text',
+    //             },
+    //             {
+    //               name: 'content',
+    //               type: 'textarea',
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     }),
+    //   ],
+    // }),
     rateLimit: {
       max: 9999999999,
       window: 15 * 60 * 1000, // 15min default,
