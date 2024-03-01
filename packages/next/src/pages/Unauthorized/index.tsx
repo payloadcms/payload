@@ -1,23 +1,20 @@
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
 
 import { MinimalTemplate } from '@payloadcms/ui'
 import React from 'react'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
+import type { InitPageResult } from '../../utilities/initPage'
+
 import { meta } from '../../utilities/meta'
 import { UnauthorizedClient } from './UnauthorizedClient'
 
-export const generateMetadata = async ({
-  config: configPromise,
-}: {
-  config: Promise<SanitizedConfig>
-}): Promise<Metadata> => {
-  const config = await configPromise
-
-  const { t } = await getNextI18n({
-    config,
-  })
+export const generateMetadata = async ({ page }: { page: InitPageResult }): Promise<Metadata> => {
+  const {
+    req: {
+      payload: { config },
+      t,
+    },
+  } = page
 
   return meta({
     config,
@@ -28,9 +25,13 @@ export const generateMetadata = async ({
 }
 
 export const Unauthorized: React.FC<{
-  config: Promise<SanitizedConfig>
-}> = async ({ config: configPromise }) => {
-  const config = await configPromise
+  page: InitPageResult
+}> = ({ page }) => {
+  const {
+    req: {
+      payload: { config },
+    },
+  } = page
 
   const {
     admin: { logoutRoute },

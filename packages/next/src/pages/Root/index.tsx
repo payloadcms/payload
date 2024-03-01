@@ -2,8 +2,14 @@ import type { SanitizedConfig } from 'payload/types'
 
 import React from 'react'
 
+import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
+import { meta } from '../../utilities/meta'
+import { CreateFirstUser } from '../CreateFirstUser'
+import { ForgotPassword } from '../ForgotPassword'
 import { Login } from '../Login'
+import { Logout, LogoutInactivity } from '../Logout'
+import { Unauthorized } from '../Unauthorized'
 
 type Args = {
   config: Promise<SanitizedConfig>
@@ -16,7 +22,12 @@ type Args = {
 }
 
 const views = {
+  'create-first-user': CreateFirstUser,
+  forgot: ForgotPassword,
   login: Login,
+  logout: Logout,
+  'logout-inactivity': LogoutInactivity,
+  unauthorized: Unauthorized,
 }
 
 export const RootPage = async ({ config: configPromise, params, searchParams }: Args) => {
@@ -42,4 +53,22 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
   }
 
   return null
+}
+
+export const generateMeta = async ({ config: configPromise, params, searchParams }: Args) => {
+  const config = await configPromise
+
+  const { t } = await getNextI18n({
+    config,
+  })
+
+  return meta({
+    config,
+    description: 'Payload',
+    keywords: 'Payload',
+    title: 'Payload',
+    // description: `${t('authentication:logoutUser')}`,
+    // keywords: `${t('authentication:logout')}`,
+    // title: t('authentication:logout'),
+  })
 }

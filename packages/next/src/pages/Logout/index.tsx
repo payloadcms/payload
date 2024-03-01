@@ -4,6 +4,8 @@ import type { SanitizedConfig } from 'payload/types'
 import { MinimalTemplate } from '@payloadcms/ui'
 import React from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
+
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
 import { LogoutClient } from './LogoutClient'
@@ -30,12 +32,18 @@ export const generateMetadata = async ({
   })
 }
 
-export const Logout: React.FC<{
-  config: Promise<SanitizedConfig>
+type Props = {
   inactivity?: boolean
+  page: InitPageResult
   searchParams: { [key: string]: string | string[] }
-}> = async ({ config: configPromise, inactivity, searchParams }) => {
-  const config = await configPromise
+}
+
+export const Logout: React.FC<Props> = ({ inactivity, page, searchParams }) => {
+  const {
+    req: {
+      payload: { config },
+    },
+  } = page
 
   const {
     routes: { admin },
@@ -54,4 +62,6 @@ export const Logout: React.FC<{
   )
 }
 
-export default Logout
+export const LogoutInactivity: React.FC<Props> = (props) => {
+  return <Logout inactivity {...props} />
+}

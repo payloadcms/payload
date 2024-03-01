@@ -5,8 +5,9 @@ import type { SanitizedConfig } from 'payload/types'
 import { Form, FormSubmit, MinimalTemplate, buildStateFromSchema } from '@payloadcms/ui'
 import React from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
+
 import { getNextI18n } from '../../utilities/getNextI18n'
-import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { CreateFirstUserFields } from './index.client'
 import './index.scss'
@@ -33,12 +34,9 @@ export const generateMetadata = async ({
 }
 
 export const CreateFirstUser: React.FC<{
-  config: Promise<SanitizedConfig>
-}> = async ({ config: configPromise }) => {
-  const { req } = await initPage({
-    config: configPromise,
-    redirectUnauthenticatedUser: false,
-  })
+  page: InitPageResult
+}> = async ({ page }) => {
+  const { req } = page
 
   const { config } = req.payload
 

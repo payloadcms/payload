@@ -5,8 +5,9 @@ import { Button, Email, Form, FormSubmit, MinimalTemplate, Translation } from '@
 import Link from 'next/link'
 import React from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
+
 import { getNextI18n } from '../../utilities/getNextI18n'
-import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 
 const baseClass = 'forgot-password'
@@ -31,9 +32,9 @@ export const generateMetadata = async ({
 }
 
 export const ForgotPassword: React.FC<{
-  config: Promise<SanitizedConfig>
-}> = async ({ config: configPromise }) => {
-  const { req } = await initPage({ config: configPromise })
+  page: InitPageResult
+}> = async ({ page }) => {
+  const { req } = page
 
   const {
     i18n,
