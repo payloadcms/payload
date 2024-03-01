@@ -162,6 +162,7 @@ ol {
 
 a {
   color: currentColor;
+  transition: all var(--all-trans-timing);
 
   &:focus {
     &:not(:focus-visible) {
