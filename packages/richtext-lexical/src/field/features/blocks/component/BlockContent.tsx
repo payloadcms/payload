@@ -1,6 +1,6 @@
 import type { SanitizedClientEditorConfig } from '@payloadcms/richtext-lexical'
-import type { FormFieldBase, FormState } from '@payloadcms/ui'
-import type { Data, Field } from 'payload/types'
+import type { FieldMap, FormFieldBase, FormState } from '@payloadcms/ui'
+import type { Data } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { getTranslation } from '@payloadcms/translations'
@@ -32,7 +32,7 @@ type Props = {
     richTextComponentMap: Map<string, React.ReactNode>
   }
   formData: BlockFields
-  formSchema: Field[]
+  formSchema: FieldMap
   nodeKey: string
   reducedBlock: ReducedBlock
 }

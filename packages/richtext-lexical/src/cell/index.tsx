@@ -35,8 +35,9 @@ export const RichTextCell: React.FC<{
   const [finalSanitizedEditorConfig, setFinalSanitizedEditorConfig] =
     useState<SanitizedClientEditorConfig>(null)
 
-  let featureProviderComponents: GeneratedFeatureProviderComponent[] =
-    richTextComponentMap.get('features')
+  let featureProviderComponents: GeneratedFeatureProviderComponent[] = richTextComponentMap.get(
+    'features',
+  ) as GeneratedFeatureProviderComponent[] // TODO: Type better
   // order by order
   featureProviderComponents = featureProviderComponents.sort((a, b) => a.order - b.order)
 
