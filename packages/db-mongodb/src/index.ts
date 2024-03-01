@@ -49,6 +49,8 @@ export interface Args {
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
   migrationDir?: string
+  /** Set to true to evaluate null field values as existing */
+  nullFieldValuesNotExist?: boolean
   transactionOptions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
@@ -93,6 +95,7 @@ export function mongooseAdapter({
   connectOptions,
   disableIndexHints = false,
   migrationDir: migrationDirArg,
+  nullFieldValuesNotExist = true,
   transactionOptions = {},
   url,
 }: Args): MongooseAdapterResult {
@@ -102,6 +105,8 @@ export function mongooseAdapter({
 
     return createDatabaseAdapter<MongooseAdapter>({
       name: 'mongoose',
+
+      nullFieldValuesNotExist,
 
       // Mongoose-specific
       autoPluralization,
