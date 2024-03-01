@@ -1094,6 +1094,12 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@types/express':
         specifier: 4.17.17
         version: 4.17.17
@@ -1182,9 +1188,6 @@ importers:
       '@lexical/utils':
         specifier: 0.13.1
         version: 0.13.1(lexical@0.13.1)
-      '@payloadcms/translations':
-        specifier: workspace:*
-        version: link:../translations
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
@@ -1219,6 +1222,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui

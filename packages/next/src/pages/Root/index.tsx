@@ -52,6 +52,21 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
     return <View page={page} searchParams={searchParams} />
   }
 
+  // * Catch any two-segment routes:
+  // /reset-password/:token
+  // /verify/:token
+  // /collections/:collectionSlug
+  // /globals/:globalSlug
+
+  // * Catch any three-segment routes:
+  // /collections/:collectionSlug/:id
+
+  // * Catch any four-segment routes:
+  // /collections/:collectionSlug/:id/versions
+
+  // * Catch any five-segment routes:
+  // /collections/:collectionSlug/:id/versions/:versionId
+
   return null
 }
 
