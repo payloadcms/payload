@@ -1,10 +1,10 @@
 import type { SerializedEditorState } from 'lexical'
 import type { Field, RichTextField, TextField } from 'payload/types'
 
-import type { LexicalRichTextAdapter, SanitizedEditorConfig } from '../../../../../index'
+import type { LexicalRichTextAdapter, SanitizedServerEditorConfig } from '../../../../../index'
 import type { AdapterProps } from '../../../../../types'
 import type { HTMLConverter } from '../converter/types'
-import type { HTMLConverterFeatureProps } from '../index'
+import type { HTMLConverterFeatureProps } from '../feature.server'
 
 import { convertLexicalToHTML } from '../converter'
 import { defaultHTMLConverters } from '../converter/defaultConverters'
@@ -21,10 +21,11 @@ type Props = {
 export const consolidateHTMLConverters = ({
   editorConfig,
 }: {
-  editorConfig: SanitizedEditorConfig
+  editorConfig: SanitizedServerEditorConfig
 }) => {
   const htmlConverterFeature = editorConfig.resolvedFeatureMap.get('htmlConverter')
-  const htmlConverterFeatureProps: HTMLConverterFeatureProps = htmlConverterFeature?.props
+  const htmlConverterFeatureProps: HTMLConverterFeatureProps =
+    htmlConverterFeature?.serverFeatureProps
 
   const defaultConvertersWithConvertersFromFeatures = defaultHTMLConverters
 
@@ -55,7 +56,7 @@ export const lexicalHTML: (
 ) => TextField = (lexicalFieldName, props) => {
   const { name = 'lexicalHTML' } = props
   return {
-    name: name,
+    name,
     type: 'text',
     admin: {
       hidden: true,

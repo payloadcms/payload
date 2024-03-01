@@ -170,11 +170,11 @@ export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps & {
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
-  ClientComponent: React.FC<ClientComponentProps<ClientFeatureProps>>
+  ClientComponent?: React.FC<ClientComponentProps<ClientFeatureProps>>
   /**
    * This determines what props will be available on the Client.
    */
-  clientFeatureProps: ClientFeatureProps
+  clientFeatureProps?: ClientFeatureProps
   generateComponentMap?: (args: {
     config: SanitizedConfig
     props: ServerProps

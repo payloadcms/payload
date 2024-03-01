@@ -245,19 +245,19 @@ export {
 
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export {
-  HTMLConverterFeature,
-  type HTMLConverterFeatureProps,
-} from './field/features/converters/html'
-export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
 } from './field/features/converters/html/converter'
-
 export { LinebreakHTMLConverter } from './field/features/converters/html/converter/converters/linebreak'
+
 export { ParagraphHTMLConverter } from './field/features/converters/html/converter/converters/paragraph'
 export { TextHTMLConverter } from './field/features/converters/html/converter/converters/text'
 export { defaultHTMLConverters } from './field/features/converters/html/converter/defaultConverters'
 export type { HTMLConverter } from './field/features/converters/html/converter/types'
+export {
+  HTMLConverterFeature,
+  type HTMLConverterFeatureProps,
+} from './field/features/converters/html/feature.server'
 export { consolidateHTMLConverters } from './field/features/converters/html/field'
 export { lexicalHTML } from './field/features/converters/html/field'
 export { TestRecorderFeature } from './field/features/debug/testrecorder'
