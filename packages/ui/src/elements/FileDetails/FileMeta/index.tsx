@@ -1,10 +1,9 @@
+import { formatFilesize } from 'payload/utilities'
 import React, { useState } from 'react'
 
 import type { Props } from './types'
 
-// import formatFilesize from '../../../../../uploads/formatFilesize'
 import { Edit } from '../../../icons/Edit'
-import { useConfig } from '../../../providers/Config'
 import CopyToClipboard from '../../CopyToClipboard'
 import { useDocumentDrawer } from '../../DocumentDrawer'
 import { Tooltip } from '../../Tooltip'
@@ -12,8 +11,8 @@ import './index.scss'
 
 const baseClass = 'file-meta'
 
-const Meta: React.FC<Props> = (props) => {
-  const { id, collection, filename, filesize, height, mimeType, staticURL, url, width } = props
+const FileMeta: React.FC<Props> = (props) => {
+  const { id, collection, filename, filesize, height, mimeType, url: fileURL, width } = props
 
   const [hovered, setHovered] = useState(false)
   const openInDrawer = Boolean(id && collection)
@@ -22,10 +21,6 @@ const Meta: React.FC<Props> = (props) => {
     id,
     collectionSlug: collection,
   })
-
-  const { serverURL } = useConfig()
-
-  const fileURL = url || `${serverURL}${staticURL}/${filename}`
 
   return (
     <div className={baseClass}>
@@ -47,7 +42,7 @@ const Meta: React.FC<Props> = (props) => {
         )}
       </div>
       <div className={`${baseClass}__size-type`}>
-        {/* {formatFilesize(filesize)} */}
+        {formatFilesize(filesize)}
         {width && height && (
           <React.Fragment>
             &nbsp;-&nbsp;
@@ -65,4 +60,4 @@ const Meta: React.FC<Props> = (props) => {
   )
 }
 
-export default Meta
+export default FileMeta

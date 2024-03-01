@@ -46,12 +46,12 @@ const sanitizeCollection = (
     if (!hasUpdatedAt) {
       sanitized.fields.push({
         name: 'updatedAt',
+        type: 'date',
         admin: {
           disableBulkEdit: true,
           hidden: true,
         },
         label: translations['general:updatedAt'],
-        type: 'date',
       })
     }
     if (!hasCreatedAt) {
@@ -62,9 +62,9 @@ const sanitizeCollection = (
           hidden: true,
         },
         // The default sort for list view is createdAt. Thus, enabling indexing by default, is a major performance improvement, especially for large or a large amount of collections.
+        type: 'date',
         index: true,
         label: translations['general:createdAt'],
-        type: 'date',
       })
     }
   }
@@ -99,7 +99,6 @@ const sanitizeCollection = (
     if (sanitized.upload === true) sanitized.upload = {}
 
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
-    sanitized.upload.staticURL = sanitized.upload.staticURL || `/${sanitized.slug}`
     sanitized.admin.useAsTitle =
       sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id'
         ? sanitized.admin.useAsTitle

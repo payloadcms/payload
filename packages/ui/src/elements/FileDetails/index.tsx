@@ -6,7 +6,7 @@ import type { Props } from './types'
 import { UploadActions } from '../../elements/Upload'
 import { Button } from '../Button'
 import Thumbnail from '../Thumbnail'
-import Meta from './Meta'
+import FileMeta from './FileMeta'
 import './index.scss'
 
 const baseClass = 'file-details'
@@ -14,8 +14,6 @@ const baseClass = 'file-details'
 const FileDetails: React.FC<Props> = (props) => {
   const { canEdit, collectionSlug, doc, handleRemove, hasImageSizes, imageCacheTag, uploadConfig } =
     props
-
-  const { staticURL } = uploadConfig
 
   const { id, filename, filesize, height, mimeType, url, width } = doc
 
@@ -29,14 +27,13 @@ const FileDetails: React.FC<Props> = (props) => {
           uploadConfig={uploadConfig}
         />
         <div className={`${baseClass}__main-detail`}>
-          <Meta
+          <FileMeta
             collection={collectionSlug}
             filename={filename as string}
             filesize={filesize as number}
             height={height as number}
             id={id as string}
             mimeType={mimeType as string}
-            staticURL={staticURL}
             url={url as string}
             width={width as number}
           />

@@ -69,7 +69,12 @@ export type ImageSize = Omit<ResizeOptions, 'withoutEnlargement'> & {
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 
-export type IncomingUploadType = {
+export type UploadConfig = {
+  /**
+   * Represents an admin thumbnail, which can be either a React component or a string.
+   * - If a string, it should be one of the image size names.
+   * - If a React component, register a function that generates the thumbnail URL using the `useAdminThumbnail` hook.
+   **/
   adminThumbnail?: React.ComponentType | string
   crop?: boolean
   disableLocalStorage?: boolean
@@ -83,30 +88,11 @@ export type IncomingUploadType = {
   resizeOptions?: ResizeOptions
   staticDir?: string
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
-  staticURL?: string
   trimOptions?: ImageUploadTrimOptions
 }
 
-export type Upload = {
-  /**
-   * Represents an admin thumbnail, which can be either a React component or a string.
-   * - If a string, it should be one of the image size names.
-   * - If a React component, register a function that generates the thumbnail URL using the `useAdminThumbnail` hook.
-   **/
-  adminThumbnail?: React.ComponentType | string
-  crop?: boolean
-  disableLocalStorage?: boolean
-  filesRequiredOnCreate?: boolean
-  focalPoint?: boolean
-  formatOptions?: ImageUploadFormatOptions
-  handlers?: any[]
-  imageSizes?: ImageSize[]
-  mimeTypes?: string[]
-  resizeOptions?: ResizeOptions
-  staticDir: string
-  staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
-  staticURL: string
-  trimOptions?: ImageUploadTrimOptions
+export type SanitizedUploadConfig = UploadConfig & {
+  staticDir: UploadConfig['staticDir']
 }
 
 export type File = {

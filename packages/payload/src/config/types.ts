@@ -1,5 +1,4 @@
 import type { I18nOptions } from '@payloadcms/translations'
-import type { Express } from 'express'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
 import type { Transporter } from 'nodemailer'
@@ -11,7 +10,6 @@ import type { DeepRequired } from 'ts-essentials'
 import type { Payload } from '..'
 import type { DocumentTab, RichTextAdapter } from '../admin/types'
 import type { User } from '../auth/types'
-import type { PayloadBundler } from '../bundlers/types'
 import type {
   AfterErrorHook,
   Collection,
@@ -165,9 +163,6 @@ export type InitOptions = {
    */
   email?: EmailOptions
 
-  /** Express app for Payload to use */
-  express?: Express
-
   /**
    * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
    * This allows you to bring your own logger instance and let payload use it
@@ -228,7 +223,7 @@ export type Access<T = any, U = any> = (
   args: AccessArgs<T, U>,
 ) => AccessResult | Promise<AccessResult>
 
-/** Equivalent to express middleware, but with an enhanced request object */
+/** Web Request/Response model, but the the req has more payload specific properties added to it. */
 export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
 
 /**
@@ -421,8 +416,6 @@ export type Config = {
      * @default "/build"
      * */
     buildPath?: string
-    /** Customize the bundler used to run your admin panel. */
-    bundler?: PayloadBundler
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -492,16 +485,12 @@ export type Config = {
         Dashboard?: AdminView
       }
     }
-    /** Absolute path to a stylesheet that you can use to override / customize the Admin panel styling. */
-    css?: string
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean
     /** The route the user will be redirected to after being inactive for too long. */
     inactivityRoute?: string
-    /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
-    indexHTML?: string
     livePreview?: LivePreviewConfig & {
       collections?: string[]
       globals?: string[]
@@ -586,28 +575,6 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
-   * Express-specific middleware options such as compression and JSON parsing.
-   *
-   * @see https://payloadcms.com/docs/configuration/express
-   */
-  express?: {
-    /** Control the way responses are compressed */
-    compression?: {
-      [key: string]: unknown
-    }
-    /** Control the way JSON is parsed */
-    json?: {
-      /** Defaults to 2MB  */
-      limit?: number
-    }
-    /**
-     * @deprecated express.middleware will be removed in a future version. Please migrate to express.postMiddleware.
-     */
-    middleware?: any[]
-    postMiddleware?: any[]
-    preMiddleware?: any[]
-  }
-  /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
   globals?: GlobalConfig[]
@@ -670,21 +637,6 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
-  /**
-   * Limit heavy usage
-   *
-   * @default
-   * {
-   *   window: 15 * 60 * 1000, // 15 minutes,
-   *   max: 500,
-   * }
-   */
-  rateLimit?: {
-    max?: number
-    skip?: (req: PayloadRequest) => boolean
-    trustProxy?: boolean
-    window?: number
-  }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** @default "/admin" */
