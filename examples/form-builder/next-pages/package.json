@@ -11,7 +11,7 @@
   "dependencies": {
     "@apollo/client": "^3.7.0",
     "@faceless-ui/css-grid": "^1.2.0",
-    "@faceless-ui/modal": "^2.0.1",
+    "@faceless-ui/modal": "^2.0.2",
     "escape-html": "^1.0.3",
     "graphql": "^16.8.1",
     "next": "^13.5.6",

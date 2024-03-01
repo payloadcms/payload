@@ -18,7 +18,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@faceless-ui/modal": "2.0.1",
+    "@faceless-ui/modal": "2.0.2",
     "@lexical/headless": "0.13.1",
     "@lexical/link": "0.13.1",
     "@lexical/list": "0.13.1",
