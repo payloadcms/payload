@@ -14,7 +14,7 @@ import {
 import { useEffect } from 'react'
 import React from 'react'
 
-import type { RelationshipFeatureProps } from '../index'
+import type { RelationshipFeatureProps } from '../feature.server'
 import type { RelationshipData } from '../nodes/RelationshipNode'
 
 import { RelationshipDrawer } from '../drawer'
@@ -24,7 +24,7 @@ export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = cre
   'INSERT_RELATIONSHIP_COMMAND',
 )
 
-export function RelationshipPlugin(props?: RelationshipFeatureProps): JSX.Element | null {
+export function RelationshipPlugin(props?: RelationshipFeatureProps): React.ReactNode {
   const [editor] = useLexicalComposerContext()
   const { collections } = useConfig()
 

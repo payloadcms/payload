@@ -63,7 +63,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           disabledCollections: props.disabledCollections,
           enabledCollections: props.enabledCollections,
         } as ExclusiveLinkCollectionsProps,
-        generateSchemaMap: ({ config, props, schemaMap, schemaPath }) => {
+        generateSchemaMap: ({ config, props }) => {
           const i18n = initI18n({ config: config.i18n, context: 'client', translations })
 
           return {

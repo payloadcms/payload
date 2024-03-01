@@ -5,6 +5,9 @@ import { mediaSlug } from '../Media'
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
+  admin: {
+    useAsTitle: 'text',
+  },
   fields: [
     {
       name: 'text',

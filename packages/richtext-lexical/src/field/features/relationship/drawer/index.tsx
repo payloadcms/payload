@@ -68,11 +68,11 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
   }, [editor, openDrawer])
 
   const onSelect = useCallback(
-    ({ collectionConfig, docID }) => {
+    ({ collectionSlug, docID }) => {
       insertRelationship({
         id: docID,
         editor,
-        relationTo: collectionConfig.slug,
+        relationTo: collectionSlug,
         replaceNodeKey,
       })
       closeDrawer()

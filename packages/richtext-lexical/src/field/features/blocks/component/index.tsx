@@ -124,7 +124,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const formContent = useMemo(() => {
     return (
       reducedBlock &&
-      initialState && (
+      initialState !== false && (
         <FieldPathProvider path="" schemaPath="">
           <Form
             fields={fieldMap}

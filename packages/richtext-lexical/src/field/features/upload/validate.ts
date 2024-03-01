@@ -7,20 +7,26 @@ import type { SerializedUploadNode } from './nodes/UploadNode'
 import { CAN_USE_DOM } from '../../lexical/utils/canUseDOM'
 
 export const uploadValidation = (): NodeValidation<SerializedUploadNode> => {
-  const uploadValidation: NodeValidation<SerializedUploadNode> = async ({
+  const uploadValidation: NodeValidation<SerializedUploadNode> = ({
     node,
-    payloadConfig,
-    validation,
+    validation: {
+      options: {
+        req: {
+          payload: { config, db },
+          t,
+        },
+      },
+    },
   }) => {
     if (!CAN_USE_DOM) {
-      const idField = payloadConfig.collections
+      const idField = config.collections
         .find(({ slug }) => slug === node.relationTo)
         .fields.find((field) => fieldAffectsData(field) && field.name === 'id')
 
-      const type = getIDType(idField, validation?.options?.payload?.db?.defaultIDType)
+      const type = getIDType(idField, db?.defaultIDType)
 
       if (!isValidID(node.value?.id, type)) {
-        return validation.options.t('validation:validUploadID')
+        return t('validation:validUploadID')
       }
     }
 

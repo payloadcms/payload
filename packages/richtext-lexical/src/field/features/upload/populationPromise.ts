@@ -1,4 +1,5 @@
-import type { UploadFeatureProps } from '.'
+import type { UploadFeatureProps } from '@payloadcms/richtext-lexical'
+
 import type { PopulationPromise } from '../types'
 import type { SerializedUploadNode } from './nodes/UploadNode'
 

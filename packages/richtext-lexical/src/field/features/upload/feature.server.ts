@@ -3,12 +3,11 @@ import type { Field } from 'payload/types'
 import payload from 'payload'
 
 import type { HTMLConverter } from '../converters/html/converter/types'
-import type { FeatureProvider } from '../types'
-import type { SerializedUploadNode } from './nodes/UploadNode'
+import type { FeatureProviderProviderServer } from '../types'
+import type { UploadFeaturePropsClient } from './feature.client'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands'
-import { UploadNode } from './nodes/UploadNode'
+import { UploadFeatureClientComponent } from './feature.client'
+import { type SerializedUploadNode, UploadNode } from './nodes/UploadNode'
 import { uploadPopulationPromiseHOC } from './populationPromise'
 import { uploadValidation } from './validate'
 
@@ -27,13 +26,43 @@ function getAbsoluteURL(url: string): string {
   return url?.startsWith('http') ? url : (payload?.config?.serverURL || '') + url
 }
 
-export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
+export const UploadFeature: FeatureProviderProviderServer<
+  UploadFeatureProps,
+  UploadFeaturePropsClient
+> = (props) => {
+  if (!props) {
+    props = { collections: {} }
+  }
+
+  const clientProps: UploadFeaturePropsClient = { collections: {} }
+  if (props.collections) {
+    for (const collection in props.collections) {
+      clientProps.collections[collection] = {
+        hasExtraFields: props.collections[collection].fields.length >= 1,
+      }
+    }
+  }
+
   return {
     feature: () => {
       return {
+        ClientComponent: UploadFeatureClientComponent,
+        clientFeatureProps: clientProps,
+        generateSchemaMap: ({ props }) => {
+          if (!props?.collections) return {}
+
+          const map: {
+            [key: string]: Field[]
+          } = {}
+
+          for (const collection in props.collections) {
+            map[collection] = props.collections[collection].fields
+          }
+
+          return map
+        },
         nodes: [
           {
-            type: UploadNode.getType(),
             converters: {
               html: {
                 converter: async ({ node }) => {
@@ -96,39 +125,10 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
             validations: [uploadValidation()],
           },
         ],
-        plugins: [
-          {
-            Component: () =>
-              // @ts-expect-error-next-line
-              import('./plugin').then((module) => module.UploadPlugin),
-            position: 'normal',
-          },
-        ],
-        props,
-        slashMenu: {
-          options: [
-            {
-              displayName: 'Basic',
-              key: 'basic',
-              options: [
-                new SlashMenuOption('upload', {
-                  Icon: () =>
-                    // @ts-expect-error-next-line
-                    import('../../lexical/ui/icons/Upload').then((module) => module.UploadIcon),
-                  displayName: 'Upload',
-                  keywords: ['upload', 'image', 'file', 'img', 'picture', 'photo', 'media'],
-                  onSelect: ({ editor }) => {
-                    editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
-                      replace: false,
-                    })
-                  },
-                }),
-              ],
-            },
-          ],
-        },
+        serverFeatureProps: props,
       }
     },
     key: 'upload',
+    serverFeatureProps: props,
   }
 }

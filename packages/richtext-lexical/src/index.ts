@@ -319,7 +319,7 @@ export type {
 } from './field/features/migrations/slateToLexical/converter/types'
 export { SlateToLexicalFeature } from './field/features/migrations/slateToLexical/feature.server'
 export { ParagraphFeature } from './field/features/paragraph/feature.server'
-export { RelationshipFeature } from './field/features/relationship'
+export { RelationshipFeature } from './field/features/relationship/feature.server'
 export {
   $createRelationshipNode,
   $isRelationshipNode,
@@ -346,9 +346,9 @@ export type {
   ServerFeature,
   ServerFeatureProviderMap,
 } from './field/features/types'
-export { UploadFeature } from './field/features/upload'
+export { UploadFeature } from './field/features/upload/feature.server'
 
-export type { UploadFeatureProps } from './field/features/upload'
+export type { UploadFeatureProps } from './field/features/upload/feature.server'
 
 export type { RawUploadPayload } from './field/features/upload/nodes/UploadNode'
 
