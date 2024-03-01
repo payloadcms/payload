@@ -6,24 +6,24 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { getTranslation } from '@payloadcms/translations'
 import {
   Drawer,
+  FieldPathProvider,
   Form,
+  type FormProps,
+  type FormState,
   FormSubmit,
   RenderFields,
-  buildStateFromSchema,
-  fieldTypes,
-  useAuth,
+  getFormState,
   useConfig,
   useDocumentInfo,
-  useLocale,
+  useFieldPath,
   useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
-import { sanitizeFields } from 'payload/config'
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
+import { v4 as uuid } from 'uuid'
 
 import type { ElementProps } from '..'
-import type { UploadFeatureProps } from '../..'
 import type { UploadData, UploadNode } from '../../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider'
@@ -46,28 +46,58 @@ export const ExtraFieldsUploadDrawer: React.FC<
   } = props
 
   const [editor] = useLexicalComposerContext()
-  const { editorConfig, field } = useEditorConfigContext()
+
+  const { closeModal } = useModal()
 
   const { i18n, t } = useTranslation()
-  const { code: locale } = useLocale()
-  const { user } = useAuth()
-  const { closeModal } = useModal()
-  const { getDocPreferences } = useDocumentInfo()
-  const [initialState, setInitialState] = useState({})
-  const fieldSchemaUnsanitized = (
-    editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps
-  )?.collections?.[relatedCollection.slug]?.fields
+  const { id } = useDocumentInfo()
+  const { schemaPath } = useFieldPath()
   const config = useConfig()
+  const [initialState, setInitialState] = useState<FormState | false>(false)
+  const {
+    field: { richTextComponentMap },
+  } = useEditorConfigContext()
 
-  // Sanitize custom fields here
-  const validRelationships = config.collections.map((c) => c.slug) || []
-  const fieldSchema = sanitizeFields({
-    // TODO: fix this
-    // @ts-expect-error-next-line
-    config,
-    fields: fieldSchemaUnsanitized,
-    validRelationships,
-  })
+  const componentMapRenderedFieldsPath = `feature.upload.fields.${relatedCollection.slug}`
+  const schemaFieldsPath = `${schemaPath}.feature.upload.${relatedCollection.slug}`
+
+  const fieldMap = richTextComponentMap.get(componentMapRenderedFieldsPath) // Field Schema
+
+  useEffect(() => {
+    const awaitInitialState = async () => {
+      const state = await getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          data: deepCopyObject(fields || {}),
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL: config.serverURL,
+      }) // Form State
+
+      setInitialState(state)
+    }
+
+    void awaitInitialState()
+  }, [config.routes.api, config.serverURL, schemaFieldsPath, id, fields])
+
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      return await getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: schemaFieldsPath,
+        },
+        serverURL: config.serverURL,
+      })
+    },
+
+    [config.routes.api, config.serverURL, schemaFieldsPath, id],
+  )
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -88,33 +118,6 @@ export const ExtraFieldsUploadDrawer: React.FC<
     [closeModal, editor, drawerSlug, nodeKey],
   )
 
-  useEffect(() => {
-    // Sanitize custom fields here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    const fieldSchema = sanitizeFields({
-      // TODO: fix this
-      // @ts-expect-error-next-line
-      config,
-      fields: fieldSchemaUnsanitized,
-      validRelationships,
-    })
-
-    const awaitInitialState = async () => {
-      const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        data: deepCopyObject(fields || {}),
-        fieldSchema,
-        locale,
-        operation: 'update',
-        preferences,
-        req,
-      })
-      setInitialState(state)
-    }
-
-    void awaitInitialState()
-  }, [user, locale, t, getDocPreferences, fields, fieldSchemaUnsanitized, config])
-
   return (
     <Drawer
       slug={drawerSlug}
@@ -122,11 +125,20 @@ export const ExtraFieldsUploadDrawer: React.FC<
         label: getTranslation(relatedCollection.labels.singular, i18n),
       })}
     >
-      <Form initialState={initialState} onSubmit={handleUpdateEditData}>
-        [RenderFields]
-        {/* <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} /> */}
-        <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-      </Form>
+      {initialState !== false && (
+        <FieldPathProvider path="" schemaPath="">
+          <Form
+            fields={fieldMap}
+            initialState={initialState}
+            onChange={[onChange]}
+            onSubmit={handleUpdateEditData}
+            uuid={uuid()}
+          >
+            <RenderFields fieldMap={fieldMap} forceRender readOnly={false} />
+            <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+          </Form>
+        </FieldPathProvider>
+      )}
     </Drawer>
   )
 }

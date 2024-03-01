@@ -13,6 +13,7 @@ import {
 } from '@payloadcms/ui'
 import { useFieldPath } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
+import { v4 as uuid } from 'uuid'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
 import './index.scss'
@@ -74,21 +75,22 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
   )
 
   return (
-    initialState !== false && (
-      <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
+    <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
+      {initialState !== false && (
         <FieldPathProvider path="" schemaPath="">
           <Form
             fields={Array.isArray(fieldMap) ? fieldMap : []}
             initialState={initialState}
             onChange={[onChange]}
             onSubmit={handleModalSubmit}
+            uuid={uuid()}
           >
             <RenderFields fieldMap={Array.isArray(fieldMap) ? fieldMap : []} forceRender />
 
             <FormSubmit>{t('general:submit')}</FormSubmit>
           </Form>
         </FieldPathProvider>
-      </Drawer>
-    )
+      )}
+    </Drawer>
   )
 }

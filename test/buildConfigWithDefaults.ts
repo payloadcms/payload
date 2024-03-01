@@ -17,6 +17,7 @@ import {
   TreeViewFeature,
   UnderlineFeature,
   UnorderedListFeature,
+  UploadFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
@@ -97,7 +98,14 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
       features: [
         ParagraphFeature(),
         RelationshipFeature(),
-        LinkFeature(),
+        LinkFeature({
+          fields: [
+            {
+              name: 'description',
+              type: 'text',
+            },
+          ],
+        }),
         CheckListFeature(),
         UnorderedListFeature(),
         OrderedListFeature(),
@@ -105,6 +113,18 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
         BlockQuoteFeature(),
         BoldFeature(),
         ItalicFeature(),
+        UploadFeature({
+          collections: {
+            media: {
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'text',
+                },
+              ],
+            },
+          },
+        }),
         UnderlineFeature(),
         StrikethroughFeature(),
         SubscriptFeature(),

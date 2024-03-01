@@ -346,9 +346,9 @@ export type {
   ServerFeature,
   ServerFeatureProviderMap,
 } from './field/features/types'
-export { UploadFeature } from './field/features/upload'
+export { UploadFeature } from './field/features/upload/feature.server'
 
-export type { UploadFeatureProps } from './field/features/upload'
+export type { UploadFeatureProps } from './field/features/upload/feature.server'
 
 export type { RawUploadPayload } from './field/features/upload/nodes/UploadNode'
 

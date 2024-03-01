@@ -18,7 +18,8 @@ import {
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback, useReducer, useState } from 'react'
 
-import type { UploadFeatureProps } from '..'
+import type { ClientComponentProps } from '../../types'
+import type { UploadFeaturePropsClient } from '../feature.client'
 import type { UploadData } from '../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
@@ -95,9 +96,10 @@ const Component: React.FC<ElementProps> = (props) => {
     [setParams, cacheBust, closeDrawer],
   )
 
-  const customFields = (
-    editorConfig?.resolvedFeatureMap?.get('upload')?.props as UploadFeatureProps
-  )?.collections?.[relatedCollection.slug]?.fields
+  const hasExtraFields = (
+    editorConfig?.resolvedFeatureMap?.get('upload')
+      ?.clientFeatureProps as ClientComponentProps<UploadFeaturePropsClient>
+  ).collections?.[relatedCollection.slug]?.hasExtraFields
 
   return (
     <div
@@ -111,16 +113,14 @@ const Component: React.FC<ElementProps> = (props) => {
           </div>
           <div className={`${baseClass}__topRowRightPanel`}>
             <div className={`${baseClass}__collectionLabel`}>
-              {/* TODO: fix this */}
-              {/* @ts-expect-error-next-line */}
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             {editor.isEditable() && (
               <div className={`${baseClass}__actions`}>
-                {customFields?.length > 0 && (
+                {hasExtraFields ? (
                   <DrawerToggler
                     className={`${baseClass}__upload-drawer-toggler`}
-                    disabled={field?.admin?.readOnly}
+                    disabled={field?.readOnly}
                     slug={drawerSlug}
                   >
                     <Button
@@ -134,11 +134,11 @@ const Component: React.FC<ElementProps> = (props) => {
                       tooltip={t('fields:editRelationship')}
                     />
                   </DrawerToggler>
-                )}
+                ) : null}
 
                 <Button
                   buttonStyle="icon-label"
-                  disabled={field?.admin?.readOnly}
+                  disabled={field?.readOnly}
                   el="div"
                   icon="swap"
                   onClick={() => {
@@ -152,7 +152,7 @@ const Component: React.FC<ElementProps> = (props) => {
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__removeButton`}
-                  disabled={field?.admin?.readOnly}
+                  disabled={field?.readOnly}
                   icon="x"
                   onClick={(e) => {
                     e.preventDefault()
