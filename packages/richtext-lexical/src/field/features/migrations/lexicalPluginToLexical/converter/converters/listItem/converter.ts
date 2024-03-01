@@ -1,10 +1,10 @@
 import type { SerializedListItemNode } from '@lexical/list'
 
-import type { LexicalPluginNodeConverter } from '../types'
+import type { LexicalPluginNodeConverter } from '../../types'
 
-import { convertLexicalPluginNodesToLexical } from '..'
+import { convertLexicalPluginNodesToLexical } from '../../index'
 
-export const ListItemConverter: LexicalPluginNodeConverter = {
+export const _ListItemConverter: LexicalPluginNodeConverter = {
   converter({ childIndex, converters, lexicalPluginNode }) {
     return {
       ...lexicalPluginNode,
@@ -12,7 +12,7 @@ export const ListItemConverter: LexicalPluginNodeConverter = {
       checked: undefined,
       children: convertLexicalPluginNodesToLexical({
         converters,
-        lexicalPluginNodes: (lexicalPluginNode as any)?.children || [],
+        lexicalPluginNodes: lexicalPluginNode.children,
         parentNodeType: 'listitem',
       }),
       value: childIndex + 1,

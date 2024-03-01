@@ -1,0 +1,21 @@
+import type { SerializedQuoteNode } from '@lexical/rich-text'
+
+import type { LexicalPluginNodeConverter } from '../../types'
+
+import { convertLexicalPluginNodesToLexical } from '../../index'
+
+export const _QuoteConverter: LexicalPluginNodeConverter = {
+  converter({ converters, lexicalPluginNode }) {
+    return {
+      ...lexicalPluginNode,
+      type: 'quote',
+      children: convertLexicalPluginNodesToLexical({
+        converters,
+        lexicalPluginNodes: lexicalPluginNode.children,
+        parentNodeType: 'quote',
+      }),
+      version: 1,
+    } as const as SerializedQuoteNode
+  },
+  nodeTypes: ['quote'],
+}

@@ -1,17 +1,17 @@
 import type { SerializedHeadingNode } from '@lexical/rich-text'
 
-import type { LexicalPluginNodeConverter } from '../types'
+import type { LexicalPluginNodeConverter } from '../../types'
 
-import { convertLexicalPluginNodesToLexical } from '..'
+import { convertLexicalPluginNodesToLexical } from '../../index'
 
-export const HeadingConverter: LexicalPluginNodeConverter = {
+export const _HeadingConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {
     return {
       ...lexicalPluginNode,
       type: 'heading',
       children: convertLexicalPluginNodesToLexical({
         converters,
-        lexicalPluginNodes: (lexicalPluginNode as any).children || [],
+        lexicalPluginNodes: lexicalPluginNode.children,
         parentNodeType: 'heading',
       }),
       version: 1,

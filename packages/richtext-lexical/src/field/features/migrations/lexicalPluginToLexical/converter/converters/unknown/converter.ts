@@ -1,15 +1,15 @@
-import type { SerializedUnknownConvertedNode } from '../../nodes/unknownConvertedNode'
-import type { LexicalPluginNodeConverter } from '../types'
+import type { SerializedUnknownConvertedNode } from '../../../nodes/unknownConvertedNode'
+import type { LexicalPluginNodeConverter } from '../../types'
 
-import { convertLexicalPluginNodesToLexical } from '..'
+import { convertLexicalPluginNodesToLexical } from '../../index'
 
-export const UnknownConverter: LexicalPluginNodeConverter = {
+export const _UnknownConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {
     return {
       type: 'unknownConverted',
       children: convertLexicalPluginNodesToLexical({
         converters,
-        lexicalPluginNodes: (lexicalPluginNode as any)?.children || [],
+        lexicalPluginNodes: lexicalPluginNode.children,
         parentNodeType: 'unknownConverted',
       }),
       data: {

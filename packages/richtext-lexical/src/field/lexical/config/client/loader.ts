@@ -12,8 +12,12 @@ import type {
  * @param unSanitizedEditorConfig
  */
 export function loadClientFeatures({
+  clientFunctions,
+  schemaPath,
   unSanitizedEditorConfig,
 }: {
+  clientFunctions?: Record<string, any>
+  schemaPath: string
   unSanitizedEditorConfig: ClientEditorConfig
 }): ResolvedClientFeatureMap {
   for (const featureProvider of unSanitizedEditorConfig.features) {
@@ -44,7 +48,25 @@ export function loadClientFeatures({
   // Make sure all dependencies declared in the respective features exist
   let loaded = 0
   for (const featureProvider of unSanitizedEditorConfig.features) {
+    /**
+     * Load relevant clientFunctions scoped to this feature and then pass them to the client feature
+     */
+    const relevantClientFunctions: Record<string, any> = {}
+    Object.entries(clientFunctions).forEach(([key, plugin]) => {
+      if (
+        key.startsWith(
+          `lexicalFeature.${schemaPath}.${featureProvider.clientFeatureProps.featureKey}.components.`,
+        )
+      ) {
+        const featureComponentKey = key.split(
+          `${schemaPath}.${featureProvider.clientFeatureProps.featureKey}.components.`,
+        )[1]
+        relevantClientFunctions[featureComponentKey] = plugin
+      }
+    })
+
     const feature = featureProvider.feature({
+      clientFunctions: relevantClientFunctions,
       featureProviderMap,
       resolvedFeatures,
       unSanitizedEditorConfig,

@@ -98,6 +98,7 @@ export type FeatureProviderClient<ClientFeatureProps> = {
    */
   clientFeatureProps: ClientComponentProps<ClientFeatureProps>
   feature: (props: {
+    clientFunctions: Record<string, any>
     /** unSanitizedEditorConfig.features, but mapped */
     featureProviderMap: ClientFeatureProviderMap
     // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
@@ -180,7 +181,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     props: ServerProps
     schemaPath: string
   }) => {
-    [key: string]: React.FC
+    [key: string]: React.FC<{ componentKey: string; featureKey: string }>
   }
   generateSchemaMap?: (args: {
     config: SanitizedConfig

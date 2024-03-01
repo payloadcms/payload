@@ -44,7 +44,14 @@ export const getGenerateComponentMap =
             for (const componentKey in components) {
               const Component = components[componentKey]
               if (Component) {
-                componentMap.set(`feature.${featureKey}.components.${componentKey}`, <Component />)
+                componentMap.set(
+                  `feature.${featureKey}.components.${componentKey}`,
+                  <Component
+                    componentKey={componentKey}
+                    featureKey={resolvedFeature.key}
+                    key={`${resolvedFeature.key}-${componentKey}`}
+                  />,
+                )
               }
             }
           }
@@ -94,10 +101,15 @@ export const getGenerateComponentMap =
                 <ClientComponent
                   {...clientComponentProps}
                   featureKey={resolvedFeature.key}
+                  key={resolvedFeature.key}
                   order={resolvedFeature.order}
                 />
               ) : (
-                <ClientComponent featureKey={resolvedFeature.key} order={resolvedFeature.order} />
+                <ClientComponent
+                  featureKey={resolvedFeature.key}
+                  key={resolvedFeature.key}
+                  order={resolvedFeature.order}
+                />
               ),
             key: resolvedFeature.key,
             order: resolvedFeature.order,

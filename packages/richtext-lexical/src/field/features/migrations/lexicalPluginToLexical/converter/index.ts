@@ -36,12 +36,15 @@ export function convertLexicalPluginNodesToLexical({
   parentNodeType,
 }: {
   converters: LexicalPluginNodeConverter[]
-  lexicalPluginNodes: SerializedLexicalNode[]
+  lexicalPluginNodes: SerializedLexicalNode[] | undefined
   /**
    * Type of the parent lexical node (not the type of the original, parent payload-plugin-lexical type)
    */
   parentNodeType: string
 }): SerializedLexicalNode[] {
+  if (!lexicalPluginNodes?.length) {
+    return []
+  }
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
   return (
     lexicalPluginNodes.map((lexicalPluginNode, i) => {
@@ -91,8 +94,4 @@ export function convertParagraphNode(
 }
 export function convertTextNode(node: SerializedLexicalNode): SerializedTextNode {
   return node as SerializedTextNode
-}
-
-export function convertNodeToFormat(node: SerializedLexicalNode): number {
-  return (node as any).format
 }

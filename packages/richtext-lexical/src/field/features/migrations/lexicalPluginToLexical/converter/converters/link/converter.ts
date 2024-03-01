@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { SerializedLinkNode } from '../../../../link/nodes/LinkNode'
-import type { LexicalPluginNodeConverter } from '../types'
 
-import { convertLexicalPluginNodesToLexical } from '..'
+import type { SerializedLinkNode } from '@payloadcms/richtext-lexical'
 
-export const LinkConverter: LexicalPluginNodeConverter = {
+import type { LexicalPluginNodeConverter } from '../../types'
+
+import { convertLexicalPluginNodesToLexical } from '../../index'
+
+export const _LinkConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {
     return {
       type: 'link',
       children: convertLexicalPluginNodesToLexical({
         converters,
-        lexicalPluginNodes: (lexicalPluginNode as any).children || [],
+        lexicalPluginNodes: lexicalPluginNode.children,
         parentNodeType: 'link',
       }),
       direction: (lexicalPluginNode as any).direction || 'ltr',

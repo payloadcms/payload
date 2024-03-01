@@ -295,7 +295,7 @@ export type {
 export { CheckListFeature } from './field/features/lists/checklist/feature.server'
 export { OrderedListFeature } from './field/features/lists/orderedlist/feature.server'
 export { UnorderedListFeature } from './field/features/lists/unorderedlist/feature.server'
-export { LexicalPluginToLexicalFeature } from './field/features/migrations/lexicalPluginToLexical'
+export { LexicalPluginToLexicalFeature } from './field/features/migrations/lexicalPluginToLexical/feature.server'
 export { SlateBlockquoteConverter } from './field/features/migrations/slateToLexical/converter/converters/blockquote'
 export { SlateHeadingConverter } from './field/features/migrations/slateToLexical/converter/converters/heading'
 export { SlateIndentConverter } from './field/features/migrations/slateToLexical/converter/converters/indent'

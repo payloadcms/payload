@@ -39,17 +39,26 @@ export const RichTextField: React.FC<
   // order by order
   featureProviderComponents = featureProviderComponents.sort((a, b) => a.order - b.order)
 
+  const featureComponentsWithFeaturesLength =
+    Array.from(richTextComponentMap.keys()).filter(
+      (key) => key.startsWith(`feature.`) && !key.includes('.fields.'),
+    ).length + featureProviderComponents.length
+
   useEffect(() => {
     if (!hasLoadedFeatures) {
       const featureProvidersLocal: FeatureProviderClient<unknown>[] = []
+      let featureProvidersAndComponentsLoaded = 0
 
       Object.entries(clientFunctions).forEach(([key, plugin]) => {
         if (key.startsWith(`lexicalFeature.${schemaPath}.`)) {
-          featureProvidersLocal.push(plugin)
+          if (!key.includes('.components.')) {
+            featureProvidersLocal.push(plugin)
+          }
+          featureProvidersAndComponentsLoaded++
         }
       })
 
-      if (featureProvidersLocal.length === featureProviderComponents.length) {
+      if (featureProvidersAndComponentsLoaded === featureComponentsWithFeaturesLength) {
         setFeatureProviders(featureProvidersLocal)
         setHasLoadedFeatures(true)
 
@@ -58,6 +67,8 @@ export const RichTextField: React.FC<
          */
 
         const resolvedClientFeatures = loadClientFeatures({
+          clientFunctions,
+          schemaPath,
           unSanitizedEditorConfig: {
             features: featureProvidersLocal,
             lexical: lexicalEditorConfig,
@@ -80,16 +91,30 @@ export const RichTextField: React.FC<
     featureProviders,
     finalSanitizedEditorConfig,
     lexicalEditorConfig,
+    featureComponentsWithFeaturesLength,
   ])
 
   if (!hasLoadedFeatures) {
     return (
       <React.Fragment>
         {Array.isArray(featureProviderComponents) &&
-          featureProviderComponents.map((FeatureProvider) => {
+          featureProviderComponents.map((featureProvider) => {
+            // get all components starting with key feature.${FeatureProvider.key}.components.{featureComponentKey}
+            const featureComponentKeys = Array.from(richTextComponentMap.keys()).filter((key) =>
+              key.startsWith(`feature.${featureProvider.key}.components.`),
+            )
+            const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
+              return richTextComponentMap.get(key)
+            })
+
             return (
-              <React.Fragment key={FeatureProvider.key}>
-                {FeatureProvider.ClientComponent}
+              <React.Fragment key={featureProvider.key}>
+                {featureComponents?.length
+                  ? featureComponents.map((FeatureComponent) => {
+                      return FeatureComponent
+                    })
+                  : null}
+                {featureProvider.ClientComponent}
               </React.Fragment>
             )
           })}

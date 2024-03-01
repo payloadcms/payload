@@ -1,7 +1,10 @@
-import type { SerializedUploadNode } from '../../../../../..'
-import type { LexicalPluginNodeConverter } from '../types'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export const UploadConverter: LexicalPluginNodeConverter = {
+import type { SerializedUploadNode } from '@payloadcms/richtext-lexical'
+
+import type { LexicalPluginNodeConverter } from '../../types'
+
+export const _UploadConverter: LexicalPluginNodeConverter = {
   converter({ lexicalPluginNode }) {
     let fields = {}
     if ((lexicalPluginNode as any)?.caption?.editorState) {
