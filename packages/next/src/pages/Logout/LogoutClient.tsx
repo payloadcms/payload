@@ -1,9 +1,8 @@
 'use client'
 import { Button, useTranslation } from '@payloadcms/ui'
+import { useAuth } from '@payloadcms/ui/providers'
 import Link from 'next/link'
 import React, { Fragment, useEffect } from 'react'
-
-import { useAuth } from '../../../../ui/src/providers/Auth'
 
 export const LogoutClient: React.FC<{
   adminRoute: string

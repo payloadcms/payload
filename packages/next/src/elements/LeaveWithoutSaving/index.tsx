@@ -1,11 +1,11 @@
 'use client'
 import { Modal, useModal } from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements'
+import { useFormModified } from '@payloadcms/ui/forms'
+import { useAuth } from '@payloadcms/ui/providers'
+import { useTranslation } from '@payloadcms/ui/providers'
 import React, { useCallback, useEffect } from 'react'
 
-import { Button } from '../../../../ui/src/elements/Button'
-import { useFormModified } from '../../../../ui/src/forms/Form/context'
-import { useAuth } from '../../../../ui/src/providers/Auth'
-import { useTranslation } from '../../../../ui/src/providers/Translation'
 import './index.scss'
 import { usePreventLeave } from './usePreventLeave'
 

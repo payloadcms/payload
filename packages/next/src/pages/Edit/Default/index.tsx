@@ -13,9 +13,9 @@ import {
   useConfig,
   useDocumentInfo,
 } from '@payloadcms/ui'
+import { Upload } from '@payloadcms/ui/elements'
 import React, { Fragment, useCallback } from 'react'
 
-import { Upload } from '../../../../../ui/src/elements/Upload'
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving'
 // import { getTranslation } from '@payloadcms/translations'
 import Auth from './Auth'

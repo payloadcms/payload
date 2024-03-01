@@ -18,13 +18,10 @@ import {
   useTranslation,
   useWindowInfo,
 } from '@payloadcms/ui'
+import { DeleteMany, EditMany, PublishMany, UnpublishMany } from '@payloadcms/ui/elements'
 import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
-import DeleteMany from '../../../../../ui/src/elements/DeleteMany'
-import { EditMany } from '../../../../../ui/src/elements/EditMany'
-import { PublishMany } from '../../../../../ui/src/elements/PublishMany'
-import { UnpublishMany } from '../../../../../ui/src/elements/UnpublishMany'
 import { RelationshipProvider } from './RelationshipProvider'
 import './index.scss'
 
