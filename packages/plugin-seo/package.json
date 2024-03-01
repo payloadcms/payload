@@ -29,7 +29,9 @@
   "license": "MIT",
   "peerDependencies": {
     "payload": "^2.7.0",
-    "react": "^18.0.0"
+    "react": "^18.0.0",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
