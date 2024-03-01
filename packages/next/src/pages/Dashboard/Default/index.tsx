@@ -1,6 +1,6 @@
 import type { SanitizedConfig } from 'payload/types'
 
-import { Gutter, SetStepNav } from '@payloadcms/ui'
+import { Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
 import React from 'react'
 
 import { DefaultDashboardClient } from './index.client'
@@ -27,15 +27,10 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     visibleGlobals,
   } = props
 
-  // const { setViewActions } = useActions()
-
-  // useEffect(() => {
-  //   setViewActions([])
-  // }, [setViewActions])
-
   return (
     <div className={baseClass}>
       <SetStepNav nav={[]} />
+      <SetViewActions actions={[]} />
       <Gutter className={`${baseClass}__wrap`}>
         {Array.isArray(beforeDashboard) &&
           beforeDashboard.map((Component, i) => <Component key={i} />)}

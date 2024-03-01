@@ -6,8 +6,8 @@ import {
   Button,
   Card,
   EntityType,
+  SetViewActions,
   groupNavItems,
-  useActions,
   useAuth,
   useConfig,
   useTranslation,
@@ -30,12 +30,6 @@ export const DefaultDashboardClient: React.FC<{
     globals: globalsConfig,
     routes: { admin },
   } = config
-
-  const { setViewActions } = useActions()
-
-  useEffect(() => {
-    setViewActions([])
-  }, [setViewActions])
 
   const { permissions, user } = useAuth()
 
@@ -92,6 +86,7 @@ export const DefaultDashboardClient: React.FC<{
 
   return (
     <Fragment>
+      <SetViewActions actions={[]} />
       {groups.map(({ entities, label }, groupIndex) => {
         return (
           <div className={`${baseClass}__group`} key={groupIndex}>

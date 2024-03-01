@@ -71,6 +71,13 @@ export type MappedField = {
 
 export type FieldMap = MappedField[]
 
+export type ActionMap = {
+  Edit: {
+    [view: string]: React.ReactNode[]
+  }
+  List: React.ReactNode[]
+}
+
 export type CollectionComponentMap = ConfigComponentMapBase & {
   AdminThumbnail: React.ReactNode
   AfterList: React.ReactNode
@@ -84,6 +91,7 @@ export type GlobalComponentMap = ConfigComponentMapBase
 
 export type ConfigComponentMapBase = {
   Edit: React.ReactNode
+  actionsMap: ActionMap
   fieldMap: FieldMap
 }
 
