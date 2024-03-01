@@ -7,7 +7,9 @@ import {
   LoadingOverlayToggle,
   Pagination,
   PerPage,
+  SetViewActions,
   Table,
+  useComponentMap,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
@@ -24,7 +26,23 @@ export const VersionsViewClient: React.FC<{
   initialData: PaginatedDocs
   paginationLimits?: SanitizedCollectionConfig['admin']['pagination']['limits']
 }> = (props) => {
-  const { id, baseClass, collectionSlug, columns, fetchURL, initialData, paginationLimits } = props
+  const {
+    id,
+    baseClass,
+    collectionSlug,
+    columns,
+    fetchURL,
+    globalSlug,
+    initialData,
+    paginationLimits,
+  } = props
+
+  const { getComponentMap } = useComponentMap()
+
+  const componentMap = getComponentMap({
+    collectionSlug,
+    globalSlug,
+  })
 
   const searchParams = useSearchParams()
   const limit = searchParams.get('limit')
@@ -77,22 +95,13 @@ export const VersionsViewClient: React.FC<{
     }
 
     setParams(params)
-  }, [id, collectionSlug, searchParams, limit])
-
-  // useEffect(() => {
-  //   const editConfig = (collection || global)?.admin?.components?.views?.Edit
-  //   const versionsActions =
-  //     editConfig && 'Versions' in editConfig && 'actions' in editConfig.Versions
-  //       ? editConfig.Versions.actions
-  //       : []
-
-  //   setViewActions(versionsActions)
-  // }, [collection, global, setViewActions])
+  }, [id, collectionSlug, searchParams, limit, initialData, setParams])
 
   const versionCount = data?.totalDocs || 0
 
   return (
     <Fragment>
+      <SetViewActions actions={componentMap?.actionMap?.Edit?.Versions} />
       <LoadingOverlayToggle name="versions" show={isLoading} />
       {versionCount === 0 && (
         <div className={`${baseClass}__no-versions`}>

@@ -6,8 +6,8 @@ import type { ActionMap } from '../../utilities/buildComponentMap/types'
 import { useConfig } from '../Config'
 
 type ActionsContextType = {
-  actions: ActionMap[string]
-  setViewActions: (actions: ActionMap[string]) => void
+  actions: ActionMap['Edit'][string]
+  setViewActions: (actions: ActionMap['Edit'][string]) => void
 }
 
 const ActionsContext = createContext<ActionsContextType>({
