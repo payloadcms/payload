@@ -20,7 +20,6 @@ import { DocumentInfoProvider } from '../../providers/DocumentInfo'
 import { useFormQueryParams } from '../../providers/FormQueryParams'
 import { useLocale } from '../../providers/Locale'
 import { useTranslation } from '../../providers/Translation'
-import { formatFields } from '../../utilities/formatFields'
 import { getFormState } from '../../utilities/getFormState'
 import { Gutter } from '../Gutter'
 import IDLabel from '../IDLabel'
@@ -58,8 +57,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
 
-  const [fields, setFields] = useState(() => formatFields(fieldsFromConfig, true))
-
   // no need to an additional requests when creating new documents
   const initialID = useRef(id)
 
@@ -67,10 +64,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
     initialID.current ? `${serverURL}${apiRoute}/${collectionSlug}/${initialID.current}` : null,
     { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   )
-
-  useEffect(() => {
-    setFields(formatFields(fields, true))
-  }, [collectionSlug, collectionConfig, fields])
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
