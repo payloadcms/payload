@@ -1,9 +1,9 @@
-import type { SerializedUnknownConvertedNode } from '../../nodes/unknownConvertedNode'
-import type { SlateNodeConverter } from '../types'
+import type { SerializedUnknownConvertedNode } from '../../../nodes/unknownConvertedNode'
+import type { SlateNodeConverter } from '../../types'
 
-import { convertSlateNodesToLexical } from '..'
+import { convertSlateNodesToLexical } from '../..'
 
-export const SlateUnknownConverter: SlateNodeConverter = {
+export const _SlateUnknownConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       type: 'unknownConverted',
@@ -11,7 +11,7 @@ export const SlateUnknownConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'unknownConverted',
-        slateNodes: slateNode.children || [],
+        slateNodes: slateNode.children,
       }),
       data: {
         nodeData: slateNode,

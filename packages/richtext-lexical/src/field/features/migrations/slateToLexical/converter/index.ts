@@ -40,13 +40,16 @@ export function convertSlateNodesToLexical({
   slateNodes,
 }: {
   canContainParagraphs: boolean
-  converters: SlateNodeConverter[]
+  converters: SlateNodeConverter[] | undefined
   /**
    * Type of the parent lexical node (not the type of the original, parent slate type)
    */
   parentNodeType: string
   slateNodes: SlateNode[]
 }): SerializedLexicalNode[] {
+  if (!converters?.length) {
+    return []
+  }
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
   return (
     slateNodes.map((slateNode, i) => {

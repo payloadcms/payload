@@ -29,7 +29,9 @@ export const LexicalPluginToLexicalFeature: FeatureProviderProviderServer<
 
   if (props?.converters && typeof props?.converters === 'function') {
     converters = props.converters({ defaultConverters })
-  } else if (!props?.converters) {
+  } else if (props.converters && typeof props?.converters !== 'function') {
+    converters = props.converters
+  } else {
     converters = defaultConverters
   }
 

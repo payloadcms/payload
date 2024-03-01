@@ -1,7 +1,7 @@
-import type { SerializedRelationshipNode } from '../../../../../..'
-import type { SlateNodeConverter } from '../types'
+import type { SerializedRelationshipNode } from '../../../../../relationship/nodes/RelationshipNode'
+import type { SlateNodeConverter } from '../../types'
 
-export const SlateRelationshipConverter: SlateNodeConverter = {
+export const _SlateRelationshipConverter: SlateNodeConverter = {
   converter({ slateNode }) {
     return {
       type: 'relationship',

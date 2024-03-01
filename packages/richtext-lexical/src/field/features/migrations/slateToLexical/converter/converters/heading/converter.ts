@@ -1,10 +1,10 @@
 import type { SerializedHeadingNode } from '@lexical/rich-text'
 
-import type { SlateNodeConverter } from '../types'
+import type { SlateNodeConverter } from '../../types'
 
-import { convertSlateNodesToLexical } from '..'
+import { convertSlateNodesToLexical } from '../..'
 
-export const SlateHeadingConverter: SlateNodeConverter = {
+export const _SlateHeadingConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       type: 'heading',
@@ -12,7 +12,7 @@ export const SlateHeadingConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'heading',
-        slateNodes: slateNode.children || [],
+        slateNodes: slateNode.children,
       }),
       direction: 'ltr',
       format: '',

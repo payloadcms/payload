@@ -1,6 +1,7 @@
+import type React from 'react'
+
 import type { FeatureProviderProviderServer } from '../../types'
-import type { SlateNodeConverter } from './converter/types'
-import type { SlateToLexicalFeatureClientProps } from './feature.client'
+import type { SlateNodeConverterProvider } from './converter/types'
 
 import { defaultSlateConverters } from './converter/defaultConverters'
 import { SlateToLexicalFeatureClientComponent } from './feature.client'
@@ -8,32 +9,52 @@ import { UnknownConvertedNode } from './nodes/unknownConvertedNode'
 
 export type SlateToLexicalFeatureProps = {
   converters?:
-    | (({ defaultConverters }: { defaultConverters: SlateNodeConverter[] }) => SlateNodeConverter[])
-    | SlateNodeConverter[]
+    | (({
+        defaultConverters,
+      }: {
+        defaultConverters: SlateNodeConverterProvider[]
+      }) => SlateNodeConverterProvider[])
+    | SlateNodeConverterProvider[]
 }
 
 export const SlateToLexicalFeature: FeatureProviderProviderServer<
   SlateToLexicalFeatureProps,
-  SlateToLexicalFeatureClientProps
+  undefined
 > = (props) => {
   if (!props) {
     props = {}
   }
 
-  props.converters =
-    props?.converters && typeof props?.converters === 'function'
-      ? props.converters({ defaultConverters: defaultSlateConverters })
-      : (props?.converters as SlateNodeConverter[]) || defaultSlateConverters
-
-  const clientProps: SlateToLexicalFeatureClientProps = {
-    converters: props.converters,
+  let converters: SlateNodeConverterProvider[] = []
+  if (props?.converters && typeof props?.converters === 'function') {
+    converters = props.converters({ defaultConverters: defaultSlateConverters })
+  } else if (props.converters && typeof props?.converters !== 'function') {
+    converters = props.converters
+  } else {
+    converters = defaultSlateConverters
   }
+
+  props.converters = converters
 
   return {
     feature: () => {
       return {
         ClientComponent: SlateToLexicalFeatureClientComponent,
-        clientFeatureProps: clientProps,
+        clientFeatureProps: null,
+        generateComponentMap: () => {
+          const map: {
+            [key: string]: React.FC
+          } = {}
+
+          for (const converter of converters) {
+            if (converter.ClientComponent) {
+              const key = converter.converter.nodeTypes.join('-')
+              map[key] = converter.ClientComponent
+            }
+          }
+
+          return map
+        },
         nodes: [
           {
             node: UnknownConvertedNode,

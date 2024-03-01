@@ -1,9 +1,9 @@
-import type { SerializedLinkNode } from '../../../../link/nodes/LinkNode'
-import type { SlateNodeConverter } from '../types'
+import type { SerializedLinkNode } from '../../../../../link/nodes/types'
+import type { SlateNodeConverter } from '../../types'
 
-import { convertSlateNodesToLexical } from '..'
+import { convertSlateNodesToLexical } from '../..'
 
-export const SlateLinkConverter: SlateNodeConverter = {
+export const _SlateLinkConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       type: 'link',
@@ -11,7 +11,7 @@ export const SlateLinkConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'link',
-        slateNodes: slateNode.children || [],
+        slateNodes: slateNode.children,
       }),
       direction: 'ltr',
       fields: {

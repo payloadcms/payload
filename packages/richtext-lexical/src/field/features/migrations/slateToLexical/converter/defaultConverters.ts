@@ -1,4 +1,4 @@
-import type { SlateNodeConverter } from './types'
+import type { SlateNodeConverterProvider } from './types'
 
 import { SlateBlockquoteConverter } from './converters/blockquote'
 import { SlateHeadingConverter } from './converters/heading'
@@ -11,15 +11,15 @@ import { SlateUnknownConverter } from './converters/unknown'
 import { SlateUnorderedListConverter } from './converters/unorderedList'
 import { SlateUploadConverter } from './converters/upload'
 
-export const defaultSlateConverters: SlateNodeConverter[] = [
-  SlateUnknownConverter,
-  SlateUploadConverter,
-  SlateUnorderedListConverter,
-  SlateOrderedListConverter,
-  SlateRelationshipConverter,
-  SlateListItemConverter,
-  SlateLinkConverter,
+export const defaultSlateConverters: SlateNodeConverterProvider[] = [
   SlateBlockquoteConverter,
   SlateHeadingConverter,
   SlateIndentConverter,
+  SlateLinkConverter,
+  SlateListItemConverter,
+  SlateOrderedListConverter,
+  SlateRelationshipConverter,
+  SlateUnorderedListConverter,
+  SlateUploadConverter,
+  SlateUnknownConverter,
 ]

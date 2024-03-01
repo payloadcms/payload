@@ -1,10 +1,10 @@
 import type { SerializedListItemNode } from '@lexical/list'
 
-import type { SlateNodeConverter } from '../types'
+import type { SlateNodeConverter } from '../../types'
 
-import { convertSlateNodesToLexical } from '..'
+import { convertSlateNodesToLexical } from '../..'
 
-export const SlateListItemConverter: SlateNodeConverter = {
+export const _SlateListItemConverter: SlateNodeConverter = {
   converter({ childIndex, converters, slateNode }) {
     return {
       type: 'listitem',
@@ -13,7 +13,7 @@ export const SlateListItemConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'listitem',
-        slateNodes: slateNode.children || [],
+        slateNodes: slateNode.children,
       }),
       direction: 'ltr',
       format: '',

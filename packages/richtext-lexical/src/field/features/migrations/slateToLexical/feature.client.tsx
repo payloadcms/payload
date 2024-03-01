@@ -7,37 +7,35 @@ import { createClientComponent } from '../../createClientComponent'
 import { convertSlateToLexical } from './converter'
 import { UnknownConvertedNode } from './nodes/unknownConvertedNode'
 
-export type SlateToLexicalFeatureClientProps = {
-  converters: SlateNodeConverter[]
-}
-
-const SlateToLexicalFeatureClient: FeatureProviderProviderClient<
-  SlateToLexicalFeatureClientProps
-> = (props) => {
+const SlateToLexicalFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
     clientFeatureProps: props,
-    feature: () => ({
-      clientFeatureProps: props,
-      hooks: {
-        load({ incomingEditorState }) {
-          if (
-            !incomingEditorState ||
-            !Array.isArray(incomingEditorState) ||
-            'root' in incomingEditorState
-          ) {
-            // incomingEditorState null or not from Slate
-            return incomingEditorState
-          }
-          // Slate => convert to lexical
+    feature: ({ clientFunctions }) => {
+      const converters: SlateNodeConverter[] = Object.values(clientFunctions)
 
-          return convertSlateToLexical({
-            converters: props.converters,
-            slateData: incomingEditorState,
-          })
+      return {
+        clientFeatureProps: props,
+        hooks: {
+          load({ incomingEditorState }) {
+            if (
+              !incomingEditorState ||
+              !Array.isArray(incomingEditorState) ||
+              'root' in incomingEditorState
+            ) {
+              // incomingEditorState null or not from Slate
+              return incomingEditorState
+            }
+            // Slate => convert to lexical
+
+            return convertSlateToLexical({
+              converters,
+              slateData: incomingEditorState,
+            })
+          },
         },
-      },
-      nodes: [UnknownConvertedNode],
-    }),
+        nodes: [UnknownConvertedNode],
+      }
+    },
   }
 }
 

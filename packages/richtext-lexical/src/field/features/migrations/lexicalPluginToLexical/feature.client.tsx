@@ -1,7 +1,7 @@
 'use client'
 
 import type { FeatureProviderProviderClient } from '../../types'
-import type { PayloadPluginLexicalData } from './converter/types'
+import type { LexicalPluginNodeConverter, PayloadPluginLexicalData } from './converter/types'
 
 import { createClientComponent } from '../../createClientComponent'
 import { convertLexicalPluginToLexical } from './converter'
@@ -11,7 +11,7 @@ const LexicalPluginToLexicalFeatureClient: FeatureProviderProviderClient<null> =
   return {
     clientFeatureProps: props,
     feature: ({ clientFunctions, resolvedFeatures }) => {
-      const converters = Object.values(clientFunctions)
+      const converters: LexicalPluginNodeConverter[] = Object.values(clientFunctions)
 
       return {
         clientFeatureProps: props,

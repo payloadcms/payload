@@ -1,10 +1,10 @@
 import type { SerializedQuoteNode } from '@lexical/rich-text'
 
-import type { SlateNodeConverter } from '../types'
+import type { SlateNodeConverter } from '../../types'
 
-import { convertSlateNodesToLexical } from '../index'
+import { convertSlateNodesToLexical } from '../..'
 
-export const SlateBlockquoteConverter: SlateNodeConverter = {
+export const _SlateBlockquoteConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       type: 'quote',
@@ -12,7 +12,7 @@ export const SlateBlockquoteConverter: SlateNodeConverter = {
         canContainParagraphs: false,
         converters,
         parentNodeType: 'quote',
-        slateNodes: slateNode.children || [],
+        slateNodes: slateNode.children,
       }),
       direction: 'ltr',
       format: '',

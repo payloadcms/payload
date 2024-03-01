@@ -8,7 +8,6 @@ import {
   IndentFeature,
   InlineCodeFeature,
   ItalicFeature,
-  LexicalPluginToLexicalFeature,
   LinkFeature,
   OrderedListFeature,
   StrikethroughFeature,
@@ -108,7 +107,6 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
         SuperscriptFeature(),
         InlineCodeFeature(),
         TreeViewFeature(),
-        LexicalPluginToLexicalFeature(),
         HeadingFeature(),
         IndentFeature(),
         BlocksFeature({
