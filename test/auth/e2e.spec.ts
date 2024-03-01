@@ -7,7 +7,6 @@ import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import config from './config'
-import config from './config'
 import { apiKeysSlug, slug } from './shared'
 
 /**
