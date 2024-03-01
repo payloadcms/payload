@@ -9,7 +9,10 @@
     "allowImportingTsExtensions": true,
     "sourceMap": true,
     "paths": {
-      "payload-config": ["./src/config.ts"]
+      "@payloadcms/ui": ["../ui/src/exports/index.ts"],
+      "@payloadcms/ui/*": ["../ui/src/exports/*"],
+      "@payloadcms/ui/scss": ["../ui/src/scss/styles.scss"],
+      "@payloadcms/ui/scss/app.scss": ["../ui/src/scss/app.scss"]
     }
   },
   "exclude": [
@@ -22,8 +25,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/withPayload.js" /* Include the withPayload.js file in the build */,
-    "../payload/src/utilities/isEntityHidden.ts"
+    "src/withPayload.js" /* Include the withPayload.js file in the build */
   ],
   "references": [
     { "path": "../payload" },
