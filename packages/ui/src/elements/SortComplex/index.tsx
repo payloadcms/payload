@@ -1,11 +1,12 @@
 import type { OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+// TODO: abstract the `next/navigation` dependency out from this component
+import { usePathname, useRouter } from 'next/navigation'
 import { sortableFieldTypes } from 'payload/fields/index'
 import { fieldAffectsData } from 'payload/types'
 import queryString from 'qs'
 import React, { useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
 
@@ -19,7 +20,8 @@ const baseClass = 'sort-complex'
 const SortComplex: React.FC<Props> = (props) => {
   const { collection, handleChange, modifySearchQuery = true } = props
 
-  const history = useHistory()
+  const router = useRouter()
+  const pathname = usePathname()
   const { searchParams } = useSearchParams()
   const { i18n, t } = useTranslation()
   const [sortOptions, setSortOptions] = useState<OptionObject[]>()
@@ -47,18 +49,18 @@ const SortComplex: React.FC<Props> = (props) => {
       if (handleChange) handleChange(newSortValue)
 
       if (searchParams.sort !== newSortValue && modifySearchQuery) {
-        history.replace({
-          search: queryString.stringify(
-            {
-              ...searchParams,
-              sort: newSortValue,
-            },
-            { addQueryPrefix: true },
-          ),
-        })
+        const search = queryString.stringify(
+          {
+            ...searchParams,
+            sort: newSortValue,
+          },
+          { addQueryPrefix: true },
+        )
+
+        router.replace(`${pathname}${search}`)
       }
     }
-  }, [history, searchParams, sortField, sortOrder, modifySearchQuery, handleChange])
+  }, [pathname, router, searchParams, sortField, sortOrder, modifySearchQuery, handleChange])
 
   useEffect(() => {
     setSortOptions([

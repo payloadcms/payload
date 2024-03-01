@@ -8,6 +8,7 @@ import { headers as getHeaders } from 'next/headers'
 import { createClientConfig } from 'payload/config'
 import { deepMerge } from 'payload/utilities'
 import React from 'react'
+import 'react-toastify/dist/ReactToastify.css'
 
 import { DefaultEditView } from '../../pages/Edit/Default'
 import { DefaultListView } from '../../pages/List/Default'

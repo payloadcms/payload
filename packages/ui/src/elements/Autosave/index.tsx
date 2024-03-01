@@ -1,6 +1,7 @@
 'use client'
+// TODO: abstract the `next/navigation` dependency out from this component
+import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useHistory } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
@@ -28,7 +29,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
   const [fields] = useAllFormFields()
   const modified = useFormModified()
   const { code: locale } = useLocale()
-  const { replace } = useHistory()
+  const router = useRouter()
   const { i18n, t } = useTranslation()
 
   let interval = 800
@@ -68,21 +69,21 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
 
     if (res.status === 201) {
       const json = await res.json()
-      replace(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
-        state: {
-          data: json.doc,
-        },
+      router.replace(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
+        // state: {
+        //   data: json.doc,
+        // },
       })
     } else {
       toast.error(t('error:autosaving'))
     }
-  }, [i18n, serverURL, api, collection, locale, replace, admin, t])
+  }, [i18n, serverURL, api, collection, locale, router, admin, t])
 
   useEffect(() => {
     // If no ID, but this is used for a collection doc,
     // Immediately save it and set lastSaved
     if (!id && collection) {
-      createCollectionDoc()
+      void createCollectionDoc()
     }
   }, [id, collection, createCollectionDoc])
 
@@ -126,7 +127,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
 
               if (res.status === 200) {
                 setLastSaved(new Date().getTime())
-                getVersions()
+                void getVersions()
               }
             }
 
@@ -136,7 +137,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
       }
     }
 
-    autosave()
+    void autosave()
   }, [
     i18n,
     debouncedFields,

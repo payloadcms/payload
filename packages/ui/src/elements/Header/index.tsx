@@ -84,8 +84,7 @@ export const AppHeader: React.FC = () => {
             <LinkElement
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
-              // to={`${adminRoute}/account`} // for `react-router-dom` Link
-              href={`${adminRoute}/account`} // for `next/link` Link
+              href={`${adminRoute}/account`}
               tabIndex={0}
             >
               <Account />

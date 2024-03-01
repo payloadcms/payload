@@ -48,7 +48,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
             typeof relationTo === 'string'
           ) {
             formattedValues.push({
-              relationTo: relationTo,
+              relationTo,
               value: cell,
             })
           }

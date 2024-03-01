@@ -1,15 +1,24 @@
-import type { HeadingTagType, SerializedHeadingNode } from '@lexical/rich-text'
+'use client'
 
-import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
+import type { HeadingTagType } from '@lexical/rich-text'
+
+import { HeadingNode } from '@lexical/rich-text'
+import { $createHeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection } from 'lexical'
 
-import type { HTMLConverter } from '../converters/html/converter/types'
-import type { FeatureProvider } from '../types'
+import type { FeatureProviderProviderClient } from '../types'
+import type { HeadingFeatureProps } from './feature.server'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import { H1Icon } from '../../lexical/ui/icons/H1'
+import { H2Icon } from '../../lexical/ui/icons/H2'
+import { H3Icon } from '../../lexical/ui/icons/H3'
+import { H4Icon } from '../../lexical/ui/icons/H4'
+import { H5Icon } from '../../lexical/ui/icons/H5'
+import { H6Icon } from '../../lexical/ui/icons/H6'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
-import { convertLexicalNodesToHTML } from '../converters/html/converter'
+import { createClientComponent } from '../createClientComponent'
 import { MarkdownTransformer } from './markdownTransformer'
 
 const setHeading = (headingSize: HeadingTagType) => {
@@ -17,31 +26,23 @@ const setHeading = (headingSize: HeadingTagType) => {
   $setBlocksType(selection, () => $createHeadingNode(headingSize))
 }
 
-type Props = {
-  enabledHeadingSizes?: HeadingTagType[]
-}
-
 const iconImports = {
-  // @ts-expect-error-next-line
-  h1: () => import('../../lexical/ui/icons/H1').then((module) => module.H1Icon),
-  // @ts-expect-error-next-line
-  h2: () => import('../../lexical/ui/icons/H2').then((module) => module.H2Icon),
-  // @ts-expect-error-next-line
-  h3: () => import('../../lexical/ui/icons/H3').then((module) => module.H3Icon),
-  // @ts-expect-error-next-line
-  h4: () => import('../../lexical/ui/icons/H4').then((module) => module.H4Icon),
-  // @ts-expect-error-next-line
-  h5: () => import('../../lexical/ui/icons/H5').then((module) => module.H5Icon),
-  // @ts-expect-error-next-line
-  h6: () => import('../../lexical/ui/icons/H6').then((module) => module.H6Icon),
+  h1: H1Icon,
+  h2: H2Icon,
+  h3: H3Icon,
+  h4: H4Icon,
+  h5: H5Icon,
+  h6: H6Icon,
 }
 
-export const HeadingFeature = (props: Props): FeatureProvider => {
+const HeadingFeatureClient: FeatureProviderProviderClient<HeadingFeatureProps> = (props) => {
   const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
 
   return {
+    clientFeatureProps: props,
     feature: () => {
       return {
+        clientFeatureProps: props,
         floatingSelectToolbar: {
           sections: [
             ...enabledHeadingSizes.map((headingSize, i) =>
@@ -63,30 +64,7 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
           ],
         },
         markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
-        nodes: [
-          {
-            type: HeadingNode.getType(),
-            converters: {
-              html: {
-                converter: async ({ converters, node, parent }) => {
-                  const childrenText = await convertLexicalNodesToHTML({
-                    converters,
-                    lexicalNodes: node.children,
-                    parent: {
-                      ...node,
-                      parent,
-                    },
-                  })
-
-                  return '<' + node?.tag + '>' + childrenText + '</' + node?.tag + '>'
-                },
-                nodeTypes: [HeadingNode.getType()],
-              } as HTMLConverter<SerializedHeadingNode>,
-            },
-            node: HeadingNode,
-          },
-        ],
-        props,
+        nodes: [HeadingNode],
         slashMenu: {
           options: [
             ...enabledHeadingSizes.map((headingSize) => {
@@ -109,6 +87,7 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
         },
       }
     },
-    key: 'heading',
   }
 }
+
+export const HeadingFeatureClientComponent = createClientComponent(HeadingFeatureClient)

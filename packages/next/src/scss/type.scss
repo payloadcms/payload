@@ -1,0 +1,117 @@
+@import 'vars';
+@import 'queries';
+
+/////////////////////////////
+// HEADINGS
+/////////////////////////////
+
+%h1,
+%h2,
+%h3,
+%h4,
+%h5,
+%h6 {
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+%jumbo {
+  font-size: base(2.5);
+  line-height: 1;
+  margin: 0 0 base(2);
+}
+
+%h1 {
+  margin: 0 0 base(1);
+  font-size: base(2);
+  line-height: 1.15;
+  letter-spacing: -1px;
+
+  @include small-break {
+    letter-spacing: -0.5px;
+    font-size: base(1.25);
+  }
+}
+
+%h2 {
+  margin: 0 0 base(1);
+  font-size: base(1.25);
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+
+  @include small-break {
+    font-size: base(0.85);
+  }
+}
+
+%h3 {
+  margin: 0 0 base(1);
+  font-size: base(0.925);
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+
+  @include small-break {
+    font-size: base(0.65);
+    line-height: 1.25;
+  }
+}
+
+%h4 {
+  margin: 0 0 $baseline;
+  font-size: base(0.75);
+  line-height: 1.5;
+  letter-spacing: -0.375px;
+}
+
+%h5 {
+  margin: 0;
+  font-size: base(0.5625);
+  line-height: 1.5;
+}
+
+%h6 {
+  margin: 0;
+  font-size: base(0.5);
+  line-height: 1.5;
+}
+
+%small {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/////////////////////////////
+// TYPE STYLES
+/////////////////////////////
+
+%large-body {
+  font-size: base(0.6);
+  line-height: base(1);
+  letter-spacing: base(0.02);
+
+  @include mid-break {
+    font-size: base(0.7);
+    line-height: base(1);
+  }
+
+  @include small-break {
+    font-size: base(0.55);
+    line-height: base(0.75);
+  }
+}
+
+%body {
+  font-size: $baseline-body-size;
+  line-height: $baseline-px;
+  font-weight: normal;
+}
+
+%code {
+  font-size: base(0.4);
+  color: var(--theme-elevation-400);
+
+  span {
+    color: var(--theme-elevation-800);
+  }
+}

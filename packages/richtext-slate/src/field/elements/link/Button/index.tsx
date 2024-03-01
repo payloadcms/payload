@@ -11,11 +11,11 @@ import {
   useDrawerSlug,
   useTranslation,
 } from '@payloadcms/ui'
+import { useFieldPath } from '@payloadcms/ui/forms'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import { useFieldPath } from '../../../../../../ui/src/forms/FieldPathProvider'
 import LinkIcon from '../../../icons/Link'
 import { useElementButton } from '../../../providers/ElementButtonProvider'
 import ElementButton from '../../Button'

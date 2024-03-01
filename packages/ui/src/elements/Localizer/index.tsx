@@ -40,14 +40,14 @@ const Localizer: React.FC<{
                 {locale ? (
                   <PopupList.Button
                     active
-                    key={locale.code}
-                    onClick={close}
-                    to={{
+                    href={{
                       search: qs.stringify({
                         ...searchParams,
                         locale: locale.code,
                       }),
                     }}
+                    key={locale.code}
+                    onClick={close}
                   >
                     {localeLabel}
                     {localeLabel !== locale.code && ` (${locale.code})`}
@@ -65,7 +65,7 @@ const Localizer: React.FC<{
                   const localeOptionLabel = getTranslation(localeOption.label, i18n)
 
                   return (
-                    <PopupList.Button key={localeOption.code} onClick={close} to={{ search }}>
+                    <PopupList.Button href={{ search }} key={localeOption.code} onClick={close}>
                       {localeOptionLabel}
                       {localeOptionLabel !== localeOption.code && ` (${localeOption.code})`}
                     </PopupList.Button>

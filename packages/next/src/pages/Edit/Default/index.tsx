@@ -7,16 +7,16 @@ import {
   FieldPathProvider,
   Form,
   FormLoadingOverlayToggle,
-  LeaveWithoutSaving,
   OperationProvider,
   getFormState,
   useComponentMap,
   useConfig,
   useDocumentInfo,
 } from '@payloadcms/ui'
+import { Upload } from '@payloadcms/ui/elements'
 import React, { Fragment, useCallback } from 'react'
 
-import { Upload } from '../../../../../ui/src/elements/Upload'
+import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving'
 // import { getTranslation } from '@payloadcms/translations'
 import Auth from './Auth'
 import { SetDocumentTitle } from './SetDocumentTitle'
@@ -45,7 +45,7 @@ export const DefaultEditView: React.FC = () => {
     hasSavePermission,
     initialData: data,
     initialState,
-    onSave: onSaveFromProps,
+    onSave: onSaveFromContext,
   } = useDocumentInfo()
 
   const config = useConfig()
@@ -95,8 +95,8 @@ export const DefaultEditView: React.FC = () => {
       //   await refreshCookieAsync()
       // }
 
-      if (typeof onSaveFromProps === 'function') {
-        onSaveFromProps({
+      if (typeof onSaveFromContext === 'function') {
+        onSaveFromContext({
           ...json,
           operation: id ? 'update' : 'create',
         })
@@ -104,7 +104,7 @@ export const DefaultEditView: React.FC = () => {
     },
     [
       id,
-      onSaveFromProps,
+      onSaveFromContext,
       // refreshCookieAsync,
       //  reportUpdate
     ],

@@ -12,12 +12,12 @@ import { StrikethroughFeature } from '../../../features/format/strikethrough/fea
 import { SubscriptFeature } from '../../../features/format/subscript/feature.server'
 import { SuperscriptFeature } from '../../../features/format/superscript/feature.server'
 import { UnderlineFeature } from '../../../features/format/underline/feature.server'
-import { HeadingFeature } from '../../../features/heading'
-import { IndentFeature } from '../../../features/indent'
+import { HeadingFeature } from '../../../features/heading/feature.server'
+import { IndentFeature } from '../../../features/indent/feature.server'
 import { LinkFeature } from '../../../features/link/feature.server'
-import { CheckListFeature } from '../../../features/lists/checklist'
-import { OrderedListFeature } from '../../../features/lists/orderedlist'
-import { UnorderedListFeature } from '../../../features/lists/unorderedlist'
+import { CheckListFeature } from '../../../features/lists/checklist/feature.server'
+import { OrderedListFeature } from '../../../features/lists/orderedlist/feature.server'
+import { UnorderedListFeature } from '../../../features/lists/unorderedlist/feature.server'
 import { ParagraphFeature } from '../../../features/paragraph'
 import { RelationshipFeature } from '../../../features/relationship'
 import { UploadFeature } from '../../../features/upload'
@@ -38,7 +38,7 @@ export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown>[] = 
   SuperscriptFeature(),
   InlineCodeFeature(),
   ParagraphFeature(),
-  HeadingFeature({}),
+  HeadingFeature(),
   AlignFeature(),
   IndentFeature(),
   UnorderedListFeature(),

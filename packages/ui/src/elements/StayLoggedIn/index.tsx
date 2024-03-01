@@ -1,7 +1,8 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
+// TODO: abstract the `next/navigation` dependency out from this component
+import { useRouter } from 'next/navigation'
 import React from 'react'
-import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
 
@@ -16,7 +17,7 @@ const modalSlug = 'stay-logged-in'
 
 const StayLoggedInModal: React.FC<Props> = (props) => {
   const { refreshCookie } = props
-  const history = useHistory()
+  const router = useRouter()
   const config = useConfig()
   const {
     admin: { logoutRoute },
@@ -37,7 +38,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
             buttonStyle="secondary"
             onClick={() => {
               toggleModal(modalSlug)
-              history.push(`${admin}${logoutRoute}`)
+              router.push(`${admin}${logoutRoute}`)
             }}
           >
             {t('authentication:logOut')}

@@ -1,0 +1,75 @@
+@font-face {
+  font-family: 'Suisse Intl';
+  src:
+    url('../assets/fonts/SuisseIntl.woff2') format('woff2'),
+    url('../assets/fonts/SuisseIntl.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Suisse Intl';
+  src:
+    url('../assets/fonts/SuisseIntl-Medium.woff2') format('woff2'),
+    url('../assets/fonts/SuisseIntl-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Suisse Intl';
+  src:
+    url('../assets/fonts/SuisseIntl-SemiBold.woff2') format('woff2'),
+    url('../assets/fonts/SuisseIntl-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Suisse Intl';
+  src:
+    url('../assets/fonts/SuisseIntl-Bold.woff2') format('woff2'),
+    url('../assets/fonts/SuisseIntl-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local(''),
+    url('../assets/fonts/merriweather-v30-latin-regular.woff2') format('woff2'),
+    url('../assets/fonts/merriweather-v30-latin-regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  font-style: italic;
+  font-weight: 400;
+  src:
+    local(''),
+    url('../assets/fonts/merriweather-v30-latin-italic.woff2') format('woff2'),
+    url('../assets/fonts/merriweather-v30-latin-italic.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  font-style: normal;
+  font-weight: 900;
+  src:
+    local(''),
+    url('../assets/fonts/merriweather-v30-latin-900.woff2') format('woff2'),
+    url('../assets/fonts/merriweather-v30-latin-900.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  font-style: italic;
+  font-weight: 900;
+  src:
+    local(''),
+    url('../assets/fonts/merriweather-v30-latin-900italic.woff2') format('woff2'),
+    url('../assets/fonts/merriweather-v30-latin-900italic.woff') format('woff');
+}

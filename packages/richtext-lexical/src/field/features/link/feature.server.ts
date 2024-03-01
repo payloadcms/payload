@@ -1,7 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
-import type React from 'react'
 
 import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/client'
@@ -53,6 +52,9 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
 export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, ClientProps> = (
   props,
 ) => {
+  if (!props) {
+    props = {}
+  }
   return {
     feature: () => {
       return {

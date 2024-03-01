@@ -1,25 +1,27 @@
+'use client'
+
 import { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
 
-import type { FeatureProvider } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import { UnorderedListIcon } from '../../../lexical/ui/icons/UnorderedList'
 import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
-import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
+import { createClientComponent } from '../../createClientComponent'
+import { LexicalListPlugin } from '../plugin'
 import { UNORDERED_LIST } from './markdownTransformer'
 
-export const UnorderedListFeature = (): FeatureProvider => {
+const UnorderedListFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {
+    clientFeatureProps: props,
     feature: () => {
       return {
+        clientFeatureProps: props,
         floatingSelectToolbar: {
           sections: [
             TextDropdownSectionWithEntries([
               {
-                ChildComponent: () =>
-                  // @ts-expect-error-next-line
-                  import('../../../lexical/ui/icons/UnorderedList').then(
-                    (module) => module.UnorderedListIcon,
-                  ),
+                ChildComponent: UnorderedListIcon,
                 isActive: () => false,
                 key: 'unorderedList',
                 label: `Unordered List`,
@@ -32,31 +34,13 @@ export const UnorderedListFeature = (): FeatureProvider => {
           ],
         },
         markdownTransformers: [UNORDERED_LIST],
-        nodes: [
-          {
-            type: ListNode.getType(),
-            converters: {
-              html: ListHTMLConverter,
-            },
-            node: ListNode,
-          },
-          {
-            type: ListItemNode.getType(),
-            converters: {
-              html: ListItemHTMLConverter,
-            },
-            node: ListItemNode,
-          },
-        ],
+        nodes: [ListNode, ListItemNode],
         plugins: [
           {
-            Component: () =>
-              // @ts-expect-error-next-line
-              import('../plugin').then((module) => module.LexicalListPlugin),
+            Component: LexicalListPlugin,
             position: 'normal',
           },
         ],
-        props: null,
         slashMenu: {
           options: [
             {
@@ -64,11 +48,7 @@ export const UnorderedListFeature = (): FeatureProvider => {
               key: 'lists',
               options: [
                 new SlashMenuOption('unorderedlist', {
-                  Icon: () =>
-                    // @ts-expect-error-next-line
-                    import('../../../lexical/ui/icons/UnorderedList').then(
-                      (module) => module.UnorderedListIcon,
-                    ),
+                  Icon: UnorderedListIcon,
                   displayName: 'Unordered List',
                   keywords: ['unordered list', 'ul'],
                   onSelect: ({ editor }) => {
@@ -81,6 +61,7 @@ export const UnorderedListFeature = (): FeatureProvider => {
         },
       }
     },
-    key: 'unorderedlist',
   }
 }
+
+export const UnorderedListFeatureClientComponent = createClientComponent(UnorderedListFeatureClient)
