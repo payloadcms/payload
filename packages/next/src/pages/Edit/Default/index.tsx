@@ -8,6 +8,7 @@ import {
   Form,
   FormLoadingOverlayToggle,
   OperationProvider,
+  SetViewActions,
   getFormState,
   useComponentMap,
   useConfig,
@@ -57,7 +58,9 @@ export const DefaultEditView: React.FC = () => {
     serverURL,
   } = config
 
-  const { componentMap, getFieldMap } = useComponentMap()
+  const { getComponentMap, getFieldMap } = useComponentMap()
+
+  const componentMap = getComponentMap({ collectionSlug, globalSlug })
 
   const collectionConfig =
     collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
@@ -110,21 +113,6 @@ export const DefaultEditView: React.FC = () => {
     ],
   )
 
-  // useEffect(() => {
-  //   const path = location.pathname
-
-  //   if (!(path.endsWith(id) || path.endsWith('/create'))) {
-  //     return
-  //   }
-  //   const editConfig = collectionConfig?.admin?.components?.views?.Edit
-  //   const defaultActions =
-  //     editConfig && 'Default' in editConfig && 'actions' in editConfig.Default
-  //       ? editConfig.Default.actions
-  //       : []
-
-  //   setViewActions(defaultActions)
-  // }, [id, location.pathname, collectionConfig?.admin?.components?.views?.Edit, setViewActions])
-
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) =>
       getFormState({
@@ -146,6 +134,7 @@ export const DefaultEditView: React.FC = () => {
 
   return (
     <main className={classes}>
+      <SetViewActions actions={componentMap?.actionMap?.Default} />
       <FieldPathProvider path="" schemaPath={schemaPath}>
         <OperationProvider operation={operation}>
           <Form

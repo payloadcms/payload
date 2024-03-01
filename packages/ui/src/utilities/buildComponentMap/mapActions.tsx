@@ -18,8 +18,10 @@ export const mapActions = (args: {
     Object.entries(views).forEach(([key, view]) => {
       if (typeof view === 'object' && 'actions' in view) {
         view.actions.forEach((action) => {
-          const Action = action.Component
-          result[key] = [...(result[key] || []), <Action />]
+          const Action = action
+          if (typeof Action === 'function') {
+            result[key] = [...(result[key] || []), <Action />]
+          }
         })
       }
     })
