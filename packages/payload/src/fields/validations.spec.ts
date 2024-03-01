@@ -221,13 +221,17 @@ describe('Field Validations', () => {
 
     const relationshipOptions = {
       ...options,
-      config: {
-        collections: [relationCollection],
-      },
-      payload: {
-        collections: {
-          relation: {
-            config: relationCollection,
+      req: {
+        ...options.req,
+        payload: {
+          ...options.req.payload,
+          config: {
+            collections: [relationCollection],
+          },
+          collections: {
+            relation: {
+              config: relationCollection,
+            },
           },
         },
       },
