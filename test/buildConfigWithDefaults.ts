@@ -4,6 +4,7 @@ import {
   BlocksFeature,
   BoldFeature,
   HeadingFeature,
+  IndentFeature,
   InlineCodeFeature,
   ItalicFeature,
   LinkFeature,
@@ -89,7 +90,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     }),*/
     editor: lexicalEditor({
       features: [
-        LinkFeature({}),
+        LinkFeature(),
         AlignFeature(),
         BlockQuoteFeature(),
         BoldFeature(),
@@ -101,6 +102,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
         InlineCodeFeature(),
         TreeViewFeature(),
         HeadingFeature(),
+        IndentFeature(),
         BlocksFeature({
           blocks: [
             {

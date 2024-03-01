@@ -272,7 +272,7 @@ export { SuperscriptFeature } from './field/features/format/superscript/feature.
 export { UnderlineFeature } from './field/features/format/underline/feature.server'
 export { HeadingFeature } from './field/features/heading/feature.server'
 
-export { IndentFeature } from './field/features/indent'
+export { IndentFeature } from './field/features/indent/feature.server'
 export { LinkFeature, type LinkFeatureServerProps } from './field/features/link/feature.server'
 
 export {

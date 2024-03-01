@@ -13,7 +13,7 @@ import { SubscriptFeature } from '../../../features/format/subscript/feature.ser
 import { SuperscriptFeature } from '../../../features/format/superscript/feature.server'
 import { UnderlineFeature } from '../../../features/format/underline/feature.server'
 import { HeadingFeature } from '../../../features/heading/feature.server'
-import { IndentFeature } from '../../../features/indent'
+import { IndentFeature } from '../../../features/indent/feature.server'
 import { LinkFeature } from '../../../features/link/feature.server'
 import { CheckListFeature } from '../../../features/lists/checklist'
 import { OrderedListFeature } from '../../../features/lists/orderedlist'
@@ -38,7 +38,7 @@ export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown>[] = 
   SuperscriptFeature(),
   InlineCodeFeature(),
   ParagraphFeature(),
-  HeadingFeature({}),
+  HeadingFeature(),
   AlignFeature(),
   IndentFeature(),
   UnorderedListFeature(),
