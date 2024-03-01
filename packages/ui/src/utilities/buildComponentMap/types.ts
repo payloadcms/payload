@@ -72,7 +72,10 @@ export type MappedField = {
 export type FieldMap = MappedField[]
 
 export type ActionMap = {
-  [view: string]: React.ReactNode[]
+  Edit: {
+    [view: string]: React.ReactNode[]
+  }
+  List: React.ReactNode[]
 }
 
 export type CollectionComponentMap = ConfigComponentMapBase & {

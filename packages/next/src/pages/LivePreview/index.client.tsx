@@ -219,7 +219,7 @@ export const LivePreviewClient: React.FC<
 
   return (
     <Fragment>
-      <SetViewActions actions={componentMap?.actionMap?.LivePreview} />
+      <SetViewActions actions={componentMap?.actionMap?.Edit?.LivePreview} />
       <LivePreviewProvider
         {...props}
         breakpoints={breakpoints}

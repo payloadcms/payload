@@ -134,7 +134,7 @@ export const DefaultEditView: React.FC = () => {
 
   return (
     <main className={classes}>
-      <SetViewActions actions={componentMap?.actionMap?.Default} />
+      <SetViewActions actions={componentMap?.actionMap?.Edit?.Default} />
       <FieldPathProvider path="" schemaPath={schemaPath}>
         <OperationProvider operation={operation}>
           <Form

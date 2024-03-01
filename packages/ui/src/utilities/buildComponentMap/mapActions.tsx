@@ -10,19 +10,36 @@ export const mapActions = (args: {
 }): ActionMap => {
   const { collectionConfig, globalConfig } = args
 
-  const views = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit
+  const editViews = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit
 
-  const result: ActionMap = {}
+  const listActions =
+    typeof collectionConfig?.admin?.components?.views?.List === 'object'
+      ? collectionConfig?.admin?.components?.views?.List?.actions
+      : undefined
 
-  if (views) {
-    Object.entries(views).forEach(([key, view]) => {
+  const result: ActionMap = {
+    Edit: {},
+    List: [],
+  }
+
+  if (editViews) {
+    Object.entries(editViews).forEach(([key, view]) => {
       if (typeof view === 'object' && 'actions' in view) {
         view.actions.forEach((action) => {
           const Action = action
           if (typeof Action === 'function') {
-            result[key] = [...(result[key] || []), <Action />]
+            result.Edit[key] = [...(result[key] || []), <Action />]
           }
         })
+      }
+    })
+  }
+
+  if (listActions) {
+    listActions.forEach((action) => {
+      const Action = action
+      if (typeof Action === 'function') {
+        result.List = [...result.List, <Action />]
       }
     })
   }
