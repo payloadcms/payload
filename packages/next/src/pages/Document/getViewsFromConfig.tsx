@@ -7,8 +7,12 @@ import type {
 } from 'payload/types'
 
 import { isEntityHidden } from 'payload/utilities'
-import { lazy } from 'react'
 
+import { APIView as DefaultAPIView } from '../API'
+import { EditView as DefaultEditView } from '../Edit'
+import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview'
+import { VersionView as DefaultVersionView } from '../Version'
+import { VersionsView as DefaultVersionsView } from '../Versions'
 import { getCustomViewByKey } from './getCustomViewByKey'
 import { getCustomViewByPath } from './getCustomViewByPath'
 
@@ -59,9 +63,7 @@ export const getViewsFromConfig = async ({
         case 'create': {
           if ('create' in docPermissions && docPermissions?.create?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
-            DefaultView = lazy(() =>
-              import('../Edit/index.tsx').then((module) => ({ default: module.EditView })),
-            )
+            DefaultView = DefaultEditView
           }
           break
         }
@@ -69,9 +71,7 @@ export const getViewsFromConfig = async ({
         default: {
           if (docPermissions?.read?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
-            DefaultView = lazy(() =>
-              import('../Edit/index.tsx').then((module) => ({ default: module.EditView })),
-            )
+            DefaultView = DefaultEditView
           }
         }
       }
@@ -84,20 +84,14 @@ export const getViewsFromConfig = async ({
           case 'api': {
             if (collectionConfig?.admin?.hideAPIURL !== true) {
               CustomView = getCustomViewByKey(views, 'API')
-              DefaultView = lazy(() =>
-                import('../API/index.tsx').then((module) => ({ default: module.APIView })),
-              )
+              DefaultView = DefaultAPIView
             }
             break
           }
 
           case 'preview': {
             if (livePreviewEnabled) {
-              DefaultView = lazy(() =>
-                import('../LivePreview/index.tsx').then((module) => ({
-                  default: module.LivePreviewView,
-                })),
-              )
+              DefaultView = DefaultLivePreviewView
             }
             break
           }
@@ -105,11 +99,7 @@ export const getViewsFromConfig = async ({
           case 'versions': {
             if (docPermissions?.readVersions?.permission) {
               CustomView = getCustomViewByKey(views, 'Versions')
-              DefaultView = lazy(() =>
-                import('../Versions/index.tsx').then((module) => ({
-                  default: module.VersionsView,
-                })),
-              )
+              DefaultView = DefaultVersionsView
             }
             break
           }
@@ -127,9 +117,7 @@ export const getViewsFromConfig = async ({
         if (routeSegments[1] === 'versions') {
           if (docPermissions?.readVersions?.permission) {
             CustomView = getCustomViewByKey(views, 'Version')
-            DefaultView = lazy(() =>
-              import('../Version/index.tsx').then((module) => ({ default: module.VersionView })),
-            )
+            DefaultView = DefaultVersionView
           }
         }
       }
@@ -148,9 +136,7 @@ export const getViewsFromConfig = async ({
     if (!routeSegments?.length) {
       if (docPermissions?.read?.permission) {
         CustomView = getCustomViewByKey(views, 'Default')
-        DefaultView = lazy(() =>
-          import('../Edit/index.tsx').then((module) => ({ default: module.EditView })),
-        )
+        DefaultView = DefaultEditView
       }
     } else if (routeSegments?.length === 1) {
       // `../:slug/api`, `../:slug/preview`, `../:slug/versions`, etc
@@ -158,20 +144,14 @@ export const getViewsFromConfig = async ({
         case 'api': {
           if (globalConfig?.admin?.hideAPIURL !== true) {
             CustomView = getCustomViewByKey(views, 'API')
-            DefaultView = lazy(() =>
-              import('../API/index.tsx').then((module) => ({ default: module.APIView })),
-            )
+            DefaultView = DefaultAPIView
           }
           break
         }
 
         case 'preview': {
           if (livePreviewEnabled) {
-            DefaultView = lazy(() =>
-              import('../LivePreview/index.tsx').then((module) => ({
-                default: module.LivePreviewView,
-              })),
-            )
+            DefaultView = DefaultLivePreviewView
           }
           break
         }
@@ -179,9 +159,7 @@ export const getViewsFromConfig = async ({
         case 'versions': {
           if (docPermissions?.readVersions?.permission) {
             CustomView = getCustomViewByKey(views, 'Versions')
-            DefaultView = lazy(() =>
-              import('../Versions/index.tsx').then((module) => ({ default: module.VersionsView })),
-            )
+            DefaultView = DefaultVersionsView
           }
           break
         }
@@ -189,9 +167,7 @@ export const getViewsFromConfig = async ({
         default: {
           if (docPermissions?.read?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
-            DefaultView = lazy(() =>
-              import('../Edit/index.tsx').then((module) => ({ default: module.EditView })),
-            )
+            DefaultView = DefaultEditView
           }
           break
         }
@@ -201,9 +177,7 @@ export const getViewsFromConfig = async ({
       if (routeSegments[1] === 'versions') {
         if (docPermissions?.readVersions?.permission) {
           CustomView = getCustomViewByKey(views, 'Version')
-          DefaultView = lazy(() =>
-            import('../Version/index.tsx').then((module) => ({ default: module.VersionView })),
-          )
+          DefaultView = DefaultVersionView
         }
       }
     }
