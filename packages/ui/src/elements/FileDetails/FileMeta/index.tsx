@@ -1,8 +1,8 @@
+import { formatFilesize } from 'payload/utilities'
 import React, { useState } from 'react'
 
 import type { Props } from './types'
 
-// import formatFilesize from '../../../../../uploads/formatFilesize'
 import { Edit } from '../../../icons/Edit'
 import CopyToClipboard from '../../CopyToClipboard'
 import { useDocumentDrawer } from '../../DocumentDrawer'
@@ -42,7 +42,7 @@ const FileMeta: React.FC<Props> = (props) => {
         )}
       </div>
       <div className={`${baseClass}__size-type`}>
-        {/* {formatFilesize(filesize)} */}
+        {formatFilesize(filesize)}
         {width && height && (
           <React.Fragment>
             &nbsp;-&nbsp;

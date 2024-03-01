@@ -18,6 +18,7 @@ import {
   useTranslation,
   useWindowInfo,
 } from '@payloadcms/ui'
+import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
 import DeleteMany from '../../../../../ui/src/elements/DeleteMany'
@@ -73,7 +74,7 @@ export const DefaultListView: React.FC = () => {
     docs = docs?.map((doc) => {
       return {
         ...doc,
-        // filesize: formatFilesize(doc.filesize),
+        filesize: formatFilesize(doc.filesize),
       }
     })
   }
