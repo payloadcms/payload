@@ -2,6 +2,13 @@ module.exports = {
   extends: ['@payloadcms'],
   overrides: [
     {
+      files: ['scripts/**'],
+      rules: {
+        '@typescript-eslint/no-unused-vars': 'off',
+        'no-console': 'off',
+      },
+    },
+    {
       extends: ['plugin:@typescript-eslint/disable-type-checked'],
       files: ['*.js', '*.cjs', '*.json', '*.md', '*.yml', '*.yaml'],
     },
@@ -34,5 +41,9 @@ module.exports = {
       },
     },
   ],
+  parserOptions: {
+    project: ['./tsconfig.json'],
+    tsconfigRootDir: __dirname,
+  },
   root: true,
 }
