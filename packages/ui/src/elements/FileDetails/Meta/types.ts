@@ -6,7 +6,6 @@ export type Props = {
   id?: string
   mimeType: string
   sizes?: unknown
-  staticURL: string
-  url?: string
+  url: string
   width?: number
 }

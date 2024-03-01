@@ -21,7 +21,7 @@ import type {
 } from '../../config/types'
 import type { Field } from '../../fields/config/types'
 import type { PayloadRequest, RequestContext } from '../../types'
-import type { IncomingUploadType, Upload } from '../../uploads/types'
+import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types'
 import type { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types'
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils'
 
@@ -422,7 +422,7 @@ export type CollectionConfig = {
    *
    * @default false // disable uploads
    */
-  upload?: IncomingUploadType | boolean
+  upload?: UploadConfig | boolean
   /**
    * Customize the handling of incoming file uploads
    *
@@ -439,7 +439,7 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-  upload: Upload
+  upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
 }
 

@@ -15,8 +15,6 @@ const FileDetails: React.FC<Props> = (props) => {
   const { canEdit, collectionSlug, doc, handleRemove, hasImageSizes, imageCacheTag, uploadConfig } =
     props
 
-  const { staticURL } = uploadConfig
-
   const { id, filename, filesize, height, mimeType, url, width } = doc
 
   return (
@@ -36,7 +34,6 @@ const FileDetails: React.FC<Props> = (props) => {
             height={height as number}
             id={id as string}
             mimeType={mimeType as string}
-            staticURL={staticURL}
             url={url as string}
             width={width as number}
           />

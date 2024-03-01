@@ -1,4 +1,9 @@
-import type { Data, FileSizes, SanitizedCollectionConfig, Upload } from 'payload/types'
+import type {
+  Data,
+  FileSizes,
+  SanitizedCollectionConfig,
+  SanitizedUploadConfig,
+} from 'payload/types'
 
 import React, { useEffect, useMemo, useState } from 'react'
 
@@ -7,7 +12,7 @@ import './index.scss'
 
 const baseClass = 'preview-sizes'
 
-const sortSizes = (sizes: FileSizes, imageSizes: Upload['imageSizes']) => {
+const sortSizes = (sizes: FileSizes, imageSizes: SanitizedUploadConfig['imageSizes']) => {
   if (!imageSizes || imageSizes.length === 0) return sizes
 
   const orderedSizes: FileSizes = {}
@@ -23,7 +28,6 @@ const sortSizes = (sizes: FileSizes, imageSizes: Upload['imageSizes']) => {
 
 type PreviewSizeCardProps = {
   active: boolean
-  baseURL: string
   meta: FileSizes[0]
   name: string
   onClick?: () => void
@@ -32,7 +36,6 @@ type PreviewSizeCardProps = {
 const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
   name,
   active,
-  baseURL,
   meta,
   onClick,
   previewSrc,
@@ -55,7 +58,7 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
       </div>
       <div className={`${baseClass}__sizeMeta`}>
         <div className={`${baseClass}__sizeName`}>{name}</div>
-        <Meta {...meta} staticURL={baseURL} />
+        <Meta {...meta} />
       </div>
     </div>
   )
@@ -68,7 +71,7 @@ const PreviewSizes: React.FC<{
   imageCacheTag?: string
   uploadConfig: SanitizedCollectionConfig['upload']
 }> = ({ doc, imageCacheTag, uploadConfig }) => {
-  const { imageSizes, staticURL } = uploadConfig
+  const { imageSizes } = uploadConfig
   const { sizes } = doc
 
   const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes))
@@ -103,10 +106,7 @@ const PreviewSizes: React.FC<{
       <div className={`${baseClass}__imageWrap`}>
         <div className={`${baseClass}__meta`}>
           <div className={`${baseClass}__sizeName`}>{selectedSize || originalFilename}</div>
-          <Meta
-            {...(selectedSize ? orderedSizes[selectedSize] : originalImage)}
-            staticURL={staticURL}
-          />
+          <Meta {...(selectedSize ? orderedSizes[selectedSize] : originalImage)} />
         </div>
         <img alt={doc.filename} className={`${baseClass}__preview`} src={mainPreviewSrc} />
       </div>
@@ -114,7 +114,6 @@ const PreviewSizes: React.FC<{
         <div className={`${baseClass}__list`}>
           <PreviewSizeCard
             active={!selectedSize}
-            baseURL={staticURL}
             meta={originalImage}
             name={originalFilename}
             onClick={() => setSelectedSize(null)}
@@ -129,7 +128,6 @@ const PreviewSizes: React.FC<{
               return (
                 <PreviewSizeCard
                   active={selected}
-                  baseURL={staticURL}
                   key={key}
                   meta={val}
                   name={key}

@@ -23,7 +23,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
         path.posix.join(prefix, req.routeParams.filename as string),
       )
 
-      const { end, start } = await getRangeFromHeader(blockBlobClient, req.headers.range)
+      const { end, start } = await getRangeFromHeader(blockBlobClient, req.headers.get('range'))
 
       const blob = await blockBlobClient.download(start, end)
       // eslint-disable-next-line no-underscore-dangle
