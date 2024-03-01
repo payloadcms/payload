@@ -1,12 +1,13 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
-import React, { useEffect } from 'react'
+import { Modal, useModal } from '@payloadcms/ui'
+import React, { useCallback, useEffect } from 'react'
 
-import { Button } from '../../elements/Button'
-import { useFormModified } from '../../forms/Form/context'
-import { useAuth } from '../../providers/Auth'
-import { useTranslation } from '../../providers/Translation'
+import { Button } from '../../../../ui/src/elements/Button'
+import { useFormModified } from '../../../../ui/src/forms/Form/context'
+import { useAuth } from '../../../../ui/src/providers/Auth'
+import { useTranslation } from '../../../../ui/src/providers/Translation'
 import './index.scss'
+import { usePreventLeave } from './usePreventLeave'
 
 const modalSlug = 'leave-without-saving'
 
@@ -17,15 +18,15 @@ const Component: React.FC<{
   onCancel: () => void
   onConfirm: () => void
 }> = ({ isActive, onCancel, onConfirm }) => {
-  const { closeModal, openModal, modalState } = useModal()
+  const { closeModal, modalState, openModal } = useModal()
   const { t } = useTranslation()
 
   // Manually check for modal state as 'esc' key will not trigger the nav inactivity
-  useEffect(() => {
-    if (!modalState?.[modalSlug]?.isOpen && isActive) {
-      onCancel()
-    }
-  }, [modalState])
+  // useEffect(() => {
+  //   if (!modalState?.[modalSlug]?.isOpen && isActive) {
+  //     onCancel()
+  //   }
+  // }, [modalState, isActive, onCancel])
 
   useEffect(() => {
     if (isActive) openModal(modalSlug)
@@ -53,11 +54,26 @@ const Component: React.FC<{
 export const LeaveWithoutSaving: React.FC = () => {
   const modified = useFormModified()
   const { user } = useAuth()
+  const [show, setShow] = React.useState(false)
+  const [hasAccepted, setHasAccepted] = React.useState(false)
 
-  return null
-  // <NavigationPrompt renderIfNotActive when={Boolean(modified && user)}>
-  //   {({ isActive, onCancel, onConfirm }) => (
-  //     <Component isActive={isActive} onCancel={onCancel} onConfirm={onConfirm} />
-  //   )}
-  // </NavigationPrompt>
+  const prevent = Boolean(modified && user)
+
+  const onPrevent = useCallback(() => {
+    setShow(true)
+  }, [])
+
+  usePreventLeave({ hasAccepted, onPrevent, prevent })
+
+  return (
+    <Component
+      isActive={show}
+      onCancel={() => {
+        setShow(false)
+      }}
+      onConfirm={() => {
+        setHasAccepted(true)
+      }}
+    />
+  )
 }

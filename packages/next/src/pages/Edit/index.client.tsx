@@ -1,12 +1,17 @@
 'use client'
 import type { EditViewProps } from 'payload/config'
 
-import { LoadingOverlay, useComponentMap, useDocumentInfo } from '@payloadcms/ui'
-import React, { Fragment } from 'react'
+import { LoadingOverlay, useComponentMap, useConfig, useDocumentInfo } from '@payloadcms/ui'
+import { redirect } from 'next/navigation'
+import React, { Fragment, useEffect } from 'react'
 import { useCallback } from 'react'
 
 export const EditViewClient: React.FC<EditViewProps> = () => {
-  const { id, collectionSlug, getDocPermissions, getVersions, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, getDocPermissions, getVersions, globalSlug, setDocumentInfo } =
+    useDocumentInfo()
+  const {
+    routes: { api: adminRoute },
+  } = useConfig()
 
   const { componentMap } = useComponentMap()
 
@@ -22,7 +27,7 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
       getDocPermissions()
 
       if (!isEditing) {
-        // setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`)
+        redirect(`${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}`)
       } else {
         // buildState(json.doc, {
         //   fieldSchema: collection.fields,
@@ -33,8 +38,15 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
         // }))
       }
     },
-    [getVersions, isEditing, getDocPermissions, collectionSlug],
+    [getVersions, isEditing, getDocPermissions, collectionSlug, adminRoute],
   )
+
+  useEffect(() => {
+    setDocumentInfo((current) => ({
+      ...current,
+      onSave,
+    }))
+  }, [setDocumentInfo, onSave])
 
   // Allow the `DocumentInfoProvider` to hydrate
   if (!Edit || (!collectionSlug && !globalSlug)) {
