@@ -4,7 +4,7 @@ import type { LabelProps } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import { useTranslation } from '../..'
+import { useTranslation } from '../../providers/Translation'
 import './index.scss'
 
 const Label: React.FC<LabelProps> = (props) => {
