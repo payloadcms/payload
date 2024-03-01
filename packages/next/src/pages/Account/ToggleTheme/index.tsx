@@ -6,11 +6,7 @@ import { RadioGroupInput, useTheme } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
 export const ToggleTheme: React.FC = () => {
-  const {
-    //  autoMode,
-    setTheme,
-    theme,
-  } = useTheme()
+  const { autoMode, setTheme, theme } = useTheme()
   const { t } = useTranslation()
 
   const onChange = useCallback<OnChange<Theme>>(
@@ -39,8 +35,7 @@ export const ToggleTheme: React.FC = () => {
           value: 'dark',
         },
       ]}
-      // value={autoMode ? 'auto' : theme}
-      value={theme}
+      value={autoMode ? 'auto' : theme}
     />
   )
 }
