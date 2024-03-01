@@ -11,8 +11,8 @@ import './index.scss'
 
 const baseClass = 'file-meta'
 
-const Meta: React.FC<Props> = (props) => {
-  const { id, collection, filename, filesize, height, mimeType, url, width } = props
+const FileMeta: React.FC<Props> = (props) => {
+  const { id, collection, filename, filesize, height, mimeType, url: fileURL, width } = props
 
   const [hovered, setHovered] = useState(false)
   const openInDrawer = Boolean(id && collection)
@@ -21,8 +21,6 @@ const Meta: React.FC<Props> = (props) => {
     id,
     collectionSlug: collection,
   })
-
-  const fileURL = url
 
   return (
     <div className={baseClass}>
@@ -62,4 +60,4 @@ const Meta: React.FC<Props> = (props) => {
   )
 }
 
-export default Meta
+export default FileMeta
