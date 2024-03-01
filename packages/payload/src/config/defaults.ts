@@ -7,11 +7,9 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     avatar: 'default',
     buildPath: path.resolve(process.cwd(), './build'),
     components: {},
-    css: path.resolve(__dirname, '../admin/scss/custom.css'),
     dateFormat: 'MMMM do yyyy, h:mm a',
     disable: false,
     inactivityRoute: '/logout-inactivity',
-    indexHTML: path.resolve(__dirname, '../admin/index.html'),
     logoutRoute: '/logout',
     meta: {
       titleSuffix: '- Payload',
@@ -26,13 +24,6 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   defaultDepth: 2,
   defaultMaxTextLength: 40000,
   endpoints: [],
-  express: {
-    compression: {},
-    json: {},
-    middleware: [],
-    postMiddleware: [],
-    preMiddleware: [],
-  },
   globals: [],
   graphQL: {
     disablePlaygroundInProduction: true,
@@ -42,10 +33,6 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   hooks: {},
   localization: false,
   maxDepth: 10,
-  rateLimit: {
-    max: 500,
-    window: 15 * 60 * 1000, // 15min default,
-  },
   routes: {
     admin: '/admin',
     api: '/api',

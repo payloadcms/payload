@@ -32,11 +32,6 @@ export default joi.object({
     ),
     avatar: joi.alternatives().try(joi.string(), component),
     buildPath: joi.string(),
-    bundler: {
-      build: joi.func(),
-      dev: joi.func(),
-      serve: joi.func(),
-    },
     components: joi.object().keys({
       Nav: component,
       actions: joi.array().items(component),
@@ -62,11 +57,9 @@ export default joi.object({
         joi.object().pattern(joi.string(), component),
       ),
     }),
-    css: joi.string(),
     dateFormat: joi.string(),
     disable: joi.bool(),
     inactivityRoute: joi.string(),
-    indexHTML: joi.string(),
     livePreview: joi.object({
       ...livePreviewSchema,
       collections: joi.array().items(joi.string()),
@@ -105,13 +98,6 @@ export default joi.object({
     .unknown(),
   email: joi.object(),
   endpoints: endpointsSchema,
-  express: joi.object().keys({
-    compression: joi.object(),
-    json: joi.object(),
-    middleware: joi.array().items(joi.func()),
-    postMiddleware: joi.array().items(joi.func()),
-    preMiddleware: joi.array().items(joi.func()),
-  }),
   globals: joi.array(),
   graphQL: joi.object().keys({
     disable: joi.boolean(),
@@ -156,12 +142,6 @@ export default joi.object({
   maxDepth: joi.number().min(0).max(100),
   onInit: joi.func(),
   plugins: joi.array().items(joi.func()),
-  rateLimit: joi.object().keys({
-    max: joi.number(),
-    skip: joi.func(),
-    trustProxy: joi.boolean(),
-    window: joi.number(),
-  }),
   routes: joi.object({
     admin: joi.string(),
     api: joi.string(),

@@ -4,7 +4,6 @@ import type { Props } from './types'
 
 // import formatFilesize from '../../../../../uploads/formatFilesize'
 import { Edit } from '../../../icons/Edit'
-import { useConfig } from '../../../providers/Config'
 import CopyToClipboard from '../../CopyToClipboard'
 import { useDocumentDrawer } from '../../DocumentDrawer'
 import { Tooltip } from '../../Tooltip'
@@ -13,7 +12,7 @@ import './index.scss'
 const baseClass = 'file-meta'
 
 const Meta: React.FC<Props> = (props) => {
-  const { id, collection, filename, filesize, height, mimeType, staticURL, url, width } = props
+  const { id, collection, filename, filesize, height, mimeType, url, width } = props
 
   const [hovered, setHovered] = useState(false)
   const openInDrawer = Boolean(id && collection)
@@ -23,9 +22,7 @@ const Meta: React.FC<Props> = (props) => {
     collectionSlug: collection,
   })
 
-  const { serverURL } = useConfig()
-
-  const fileURL = url || `${serverURL}${staticURL}/${filename}`
+  const fileURL = url
 
   return (
     <div className={baseClass}>

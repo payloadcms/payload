@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types'
 import type { Config } from '../config/types'
 import type { Field } from '../fields/config/types'
-import type { IncomingUploadType } from './types'
+import type { UploadConfig } from './types'
 
 import { extractTranslations } from '../translations/extractTranslations'
 import { mimeTypeValidator } from './mimeTypeValidator'
@@ -20,8 +20,7 @@ type Options = {
 }
 
 const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
-  const uploadOptions: IncomingUploadType =
-    typeof collection.upload === 'object' ? collection.upload : {}
+  const uploadOptions: UploadConfig = typeof collection.upload === 'object' ? collection.upload : {}
 
   const mimeType: Field = {
     name: 'mimeType',
