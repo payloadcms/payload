@@ -14,8 +14,9 @@ import {
 import Link from 'next/link'
 import React from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
+
 import { getNextI18n } from '../../utilities/getNextI18n'
-import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import './index.scss'
 
@@ -41,10 +42,11 @@ export const generateMetadata = async ({
 }
 
 export const ResetPassword: React.FC<{
-  config: Promise<SanitizedConfig>
-  token: string
-}> = async ({ config: configPromise, token }) => {
-  const { req } = await initPage({ config: configPromise })
+  page: InitPageResult
+  params: { [key: string]: string }
+}> = ({ page, params }) => {
+  const { req } = page
+  const { token } = params
 
   const {
     i18n,

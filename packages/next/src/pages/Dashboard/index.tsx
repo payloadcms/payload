@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
 import type { DashboardProps } from './Default'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
@@ -32,19 +33,13 @@ export const generateMetadata = async ({
   })
 }
 
-export const Dashboard = async ({
-  config: configPromise,
-  searchParams,
-}: {
-  config: Promise<SanitizedConfig>
+type Args = {
+  page: InitPageResult
   searchParams: { [key: string]: string | string[] | undefined }
-}) => {
-  const { permissions, req } = await initPage({
-    config: configPromise,
-    redirectUnauthenticatedUser: true,
-    route: '',
-    searchParams,
-  })
+}
+
+export const Dashboard = async ({ page, searchParams }: Args) => {
+  const { permissions, req } = page
 
   const {
     payload: { config },

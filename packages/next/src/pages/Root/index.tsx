@@ -1,27 +1,33 @@
 import type { SanitizedConfig } from 'payload/types'
 
+import { DefaultTemplate } from '@payloadcms/ui'
 import React from 'react'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
+import { Account } from '../Account'
 import { CreateFirstUser } from '../CreateFirstUser'
+import { Dashboard } from '../Dashboard'
 import { ForgotPassword } from '../ForgotPassword'
 import { Login } from '../Login'
 import { Logout, LogoutInactivity } from '../Logout'
+import { ResetPassword } from '../ResetPassword'
 import { Unauthorized } from '../Unauthorized'
+import Verify from '../Verify'
 
 type Args = {
   config: Promise<SanitizedConfig>
   params: {
-    [key: string]: string[]
+    [key: string]: string | string[]
   }
   searchParams: {
     [key: string]: string | string[]
   }
 }
 
-const views = {
+const oneSegmentViews = {
+  account: Account,
   'create-first-user': CreateFirstUser,
   forgot: ForgotPassword,
   login: Login,
@@ -30,12 +36,23 @@ const views = {
   unauthorized: Unauthorized,
 }
 
+const twoSegmentViews = {
+  reset: ResetPassword,
+  verify: Verify,
+}
+
 export const RootPage = async ({ config: configPromise, params, searchParams }: Args) => {
   const config = await configPromise
-  const route = `${config.routes.admin}/${params.segments.join('/')}`
-  const page = await initPage({ config, route })
 
-  const [segmentOne, segmentTwo] = params.segments
+  let route = config.routes.admin
+
+  if (Array.isArray(params.segments)) {
+    route = route + '/' + params.segments.join('/')
+  }
+
+  const segments = Array.isArray(params.segments) ? params.segments : []
+
+  const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive] = segments
 
   // Catch any single-segment routes:
   // /create-first-user
@@ -45,12 +62,36 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
   // /logout-inactivity
   // /unauthorized
   // /verify
-
-  if (params.segments.length === 1 && views[segmentOne]) {
-    const View = views[segmentOne]
+  // /account
+  if (segments.length === 1 && oneSegmentViews[segmentOne]) {
+    const redirectUnauthenticatedUser = segmentOne === 'account'
+    const page = await initPage({ config, redirectUnauthenticatedUser, route })
+    const View = oneSegmentViews[segmentOne]
 
     return <View page={page} searchParams={searchParams} />
   }
+
+  // Catch any two-segment routes:
+  // /reset
+  // /verify
+  if (segments.length === 2 && twoSegmentViews[segmentOne]) {
+    const page = await initPage({ config, route })
+    const View = twoSegmentViews[segmentOne]
+    return <View page={page} params={params} searchParams={searchParams} />
+  }
+
+  const page = await initPage({ config, redirectUnauthenticatedUser: true, route })
+
+  return (
+    <DefaultTemplate
+      config={config}
+      i18n={page.req.i18n}
+      permissions={page.permissions}
+      user={page.req.user}
+    >
+      {segments.length === 0 && <Dashboard page={page} searchParams={searchParams} />}
+    </DefaultTemplate>
+  )
 
   // * Catch any two-segment routes:
   // /reset-password/:token

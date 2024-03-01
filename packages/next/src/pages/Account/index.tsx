@@ -11,10 +11,10 @@ import {
 import { notFound } from 'next/navigation'
 import React, { Fragment } from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
 import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
-import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { EditView } from '../Edit'
 import { Settings } from './Settings'
@@ -39,18 +39,13 @@ export const generateMetadata = async ({
 }
 
 export const Account = async ({
-  config: configPromise,
+  page,
   searchParams,
 }: {
-  config: Promise<SanitizedConfig>
+  page: InitPageResult
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { locale, permissions, req } = await initPage({
-    config: configPromise,
-    redirectUnauthenticatedUser: true,
-    route: `/account`,
-    searchParams,
-  })
+  const { locale, permissions, req } = page
 
   const {
     payload,

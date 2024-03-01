@@ -5,8 +5,9 @@ import { Button, Logo, MinimalTemplate } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
+
 import { getNextI18n } from '../../utilities/getNextI18n'
-import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import './index.scss'
 
@@ -32,13 +33,10 @@ export const generateMetadata = async ({
 }
 
 export const Verify: React.FC<{
-  config: Promise<SanitizedConfig>
-  token: string
-}> = async ({
-  config: configPromise,
-  // token
-}) => {
-  const { req } = await initPage({ config: configPromise })
+  page: InitPageResult
+  params: { [key: string]: string }
+}> = async ({ page, params }) => {
+  const { req } = page
 
   const {
     i18n,

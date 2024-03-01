@@ -38,9 +38,7 @@ export type InitPageResult = {
 }
 
 export const initPage = async ({
-  collectionSlug,
   config: configPromise,
-  globalSlug,
   localeParam,
   redirectUnauthenticatedUser = false,
   route,
@@ -54,6 +52,9 @@ export const initPage = async ({
   })
 
   const config = await configPromise
+  const routeSegments = route.replace(config.routes.admin, '').split('/')
+  const collectionSlug = routeSegments[0] === 'collections' ? routeSegments[1] : undefined
+  const globalSlug = routeSegments[0] === 'globals' ? routeSegments[1] : undefined
 
   const { collections, globals, localization, routes } = config
 
