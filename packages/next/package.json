@@ -72,9 +72,14 @@
     "payload": "^2.0.0"
   },
   "publishConfig": {
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./dist/exports/index.js",
+    "types": "./dist/exports/index.d.ts",
     "exports": {
+      ".": {
+        "import": "./dist/exports/index.js",
+        "require": "./dist/exports/index.js",
+        "types": "./dist/exports/index.d.ts"
+      },
       "./utilities/*": {
         "import": "./dist/utilities/*.js",
         "require": "./dist/utilities/*.js",
