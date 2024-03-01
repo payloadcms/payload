@@ -27,7 +27,6 @@ type Args = {
 }
 
 const oneSegmentViews = {
-  account: Account,
   'create-first-user': CreateFirstUser,
   forgot: ForgotPassword,
   login: Login,
@@ -63,9 +62,8 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
   // /unauthorized
   // /verify
   // /account
-  if (segments.length === 1 && oneSegmentViews[segmentOne]) {
-    const redirectUnauthenticatedUser = segmentOne === 'account'
-    const page = await initPage({ config, redirectUnauthenticatedUser, route })
+  if (segments.length === 1 && oneSegmentViews[segmentOne] && segmentOne !== 'account') {
+    const page = await initPage({ config, route })
     const View = oneSegmentViews[segmentOne]
 
     return <View page={page} searchParams={searchParams} />
@@ -89,6 +87,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       permissions={page.permissions}
       user={page.req.user}
     >
+      {segmentOne === 'account' && <Account page={page} searchParams={searchParams} />}
       {segments.length === 0 && <Dashboard page={page} searchParams={searchParams} />}
     </DefaultTemplate>
   )
