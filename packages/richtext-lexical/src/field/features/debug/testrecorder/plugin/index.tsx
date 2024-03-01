@@ -389,6 +389,7 @@ ${steps.map(formatStep).join(`\n`)}
         e.preventDefault()
       }}
       title={isRecording ? 'Disable test recorder' : 'Enable test recorder'}
+      type="button"
     >
       {isRecording ? 'Disable test recorder' : 'Enable test recorder'}
     </button>
@@ -404,6 +405,7 @@ ${steps.map(formatStep).join(`\n`)}
             e.preventDefault()
           }}
           title="Insert snapshot"
+          type="button"
         >
           Insert Snapshot
         </button>
@@ -415,6 +417,7 @@ ${steps.map(formatStep).join(`\n`)}
             e.preventDefault()
           }}
           title="Copy to clipboard"
+          type="button"
         >
           Copy
         </button>
@@ -426,6 +429,7 @@ ${steps.map(formatStep).join(`\n`)}
             e.preventDefault()
           }}
           title="Download as a file"
+          type="button"
         >
           Download
         </button>
