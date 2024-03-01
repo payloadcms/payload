@@ -4,6 +4,7 @@ import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
+import { useForm } from '../../Form/context'
 import LabelComp from '../../Label'
 import useField from '../../useField'
 import { withCondition } from '../../withCondition'
@@ -30,6 +31,8 @@ const RadioGroup: React.FC<Props> = (props) => {
     value: valueFromProps,
     width,
   } = props
+
+  const { uuid } = useForm()
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
@@ -91,7 +94,7 @@ const RadioGroup: React.FC<Props> = (props) => {
 
           const isSelected = String(optionValue) === String(value)
 
-          const id = `field-${path}-${optionValue}`
+          const id = `field-${path}-${optionValue}${uuid ? `-${uuid}` : ''}`
 
           return (
             <li key={`${path} - ${optionValue}`}>
@@ -109,6 +112,7 @@ const RadioGroup: React.FC<Props> = (props) => {
                 }}
                 option={optionIsObject(option) ? option : { label: option, value: option }}
                 path={path}
+                uuid={uuid}
               />
             </li>
           )

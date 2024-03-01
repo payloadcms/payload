@@ -594,7 +594,7 @@ importers:
   packages/payload:
     dependencies:
       '@payloadcms/translations':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../translations
       bson-objectid:
         specifier: 2.0.4
@@ -906,7 +906,7 @@ importers:
   packages/plugin-form-builder:
     dependencies:
       '@payloadcms/ui':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui
       deepmerge:
         specifier: ^4.2.2
@@ -976,7 +976,7 @@ importers:
   packages/plugin-search:
     dependencies:
       '@payloadcms/ui':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui
       ts-deepmerge:
         specifier: ^2.0.1
@@ -1074,7 +1074,7 @@ importers:
   packages/plugin-stripe:
     dependencies:
       '@payloadcms/ui':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui
       lodash.get:
         specifier: ^4.4.2
@@ -1117,8 +1117,8 @@ importers:
   packages/richtext-lexical:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 2.0.1
-        version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
+        specifier: 2.0.2
+        version: 2.0.2(react-dom@18.2.0)(react@18.2.0)
       '@lexical/headless':
         specifier: 0.13.1
         version: 0.13.1(lexical@0.13.1)
@@ -1149,9 +1149,6 @@ importers:
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../ui
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
@@ -1186,6 +1183,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@types/json-schema':
         specifier: 7.0.15
         version: 7.0.15
@@ -1205,14 +1205,11 @@ importers:
   packages/richtext-slate:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 2.0.1
-        version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
+        specifier: 2.0.2
+        version: 2.0.2(react-dom@18.2.0)(react@18.2.0)
       '@payloadcms/translations':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../translations
-      '@payloadcms/ui':
-        specifier: workspace:^
-        version: link:../ui
       is-hotkey:
         specifier: 0.2.0
         version: 0.2.0
@@ -1235,6 +1232,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@types/node':
         specifier: 20.5.7
         version: 20.5.7
@@ -1281,7 +1281,7 @@ importers:
         specifier: 4.5.1
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
       '@payloadcms/translations':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../translations
       body-scroll-lock:
         specifier: 4.0.0-beta.0
@@ -3136,20 +3136,6 @@ packages:
   /@eslint/js@8.48.0:
     resolution: {integrity: sha512-ZSjtmelB7IJfWD2Fvb7+Z+ChTIKWq6kjda95fLcQKNS5aheVHn4IkfgRQE3sIIzTcSLwLcLZUD9UBt+V7+h+Pw==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-    dev: false
-
-  /@faceless-ui/modal@2.0.1(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-z1PaaLxwuX+1In4vhUxODZndGKdCY+WIqzvtnas3CaYGGCVJBSJ4jfv9UEEGZzcahmSy+71bEL89cUT6d36j1Q==}
-    peerDependencies:
-      react: ^18.2.0
-      react-dom: ^18.2.0
-    dependencies:
-      body-scroll-lock: 3.1.5
-      focus-trap: 6.9.4
-      qs: 6.11.2
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-transition-group: 4.4.5(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
   /@faceless-ui/modal@2.0.2(react-dom@18.2.0)(react@18.2.0):

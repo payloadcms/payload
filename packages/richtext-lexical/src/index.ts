@@ -232,28 +232,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   }
 }
 
-export { HeadingFeature } from './field/features/Heading'
-export { ParagraphFeature } from './field/features/Paragraph'
-export { RelationshipFeature } from './field/features/Relationship'
-export {
-  $createRelationshipNode,
-  $isRelationshipNode,
-  type RelationshipData,
-  RelationshipNode,
-  type SerializedRelationshipNode,
-} from './field/features/Relationship/nodes/RelationshipNode'
-
-export { UploadFeature } from './field/features/Upload'
-export type { UploadFeatureProps } from './field/features/Upload'
-export type { RawUploadPayload } from './field/features/Upload/nodes/UploadNode'
-
-export {
-  $createUploadNode,
-  $isUploadNode,
-  type SerializedUploadNode,
-  type UploadData,
-  UploadNode,
-} from './field/features/Upload/nodes/UploadNode'
 export { AlignFeature } from './field/features/align/feature.server'
 export { BlockQuoteFeature } from './field/features/blockquote/feature.server'
 export { BlocksFeature, type BlocksFeatureProps } from './field/features/blocks/feature.server'
@@ -264,36 +242,39 @@ export {
   BlockNode,
   type SerializedBlockNode,
 } from './field/features/blocks/nodes/BlocksNode'
+
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
-export {
-  HTMLConverterFeature,
-  type HTMLConverterFeatureProps,
-} from './field/features/converters/html'
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
 } from './field/features/converters/html/converter'
 export { LinebreakHTMLConverter } from './field/features/converters/html/converter/converters/linebreak'
+
 export { ParagraphHTMLConverter } from './field/features/converters/html/converter/converters/paragraph'
 export { TextHTMLConverter } from './field/features/converters/html/converter/converters/text'
 export { defaultHTMLConverters } from './field/features/converters/html/converter/defaultConverters'
 export type { HTMLConverter } from './field/features/converters/html/converter/types'
+export {
+  HTMLConverterFeature,
+  type HTMLConverterFeatureProps,
+} from './field/features/converters/html/feature.server'
 export { consolidateHTMLConverters } from './field/features/converters/html/field'
 export { lexicalHTML } from './field/features/converters/html/field'
-export { TestRecorderFeature } from './field/features/debug/TestRecorder'
-export { TreeViewFeature } from './field/features/debug/TreeView'
-export { BoldTextFeature } from './field/features/format/Bold'
-
-export { InlineCodeTextFeature } from './field/features/format/InlineCode'
-export { ItalicTextFeature } from './field/features/format/Italic'
-
+export { TestRecorderFeature } from './field/features/debug/testrecorder/feature.server'
+export { TreeViewFeature } from './field/features/debug/treeview/feature.server'
+export { BoldFeature } from './field/features/format/bold/feature.server'
 export { SectionWithEntries as FormatSectionWithEntries } from './field/features/format/common/floatingSelectToolbarSection'
-export { StrikethroughTextFeature } from './field/features/format/strikethrough'
-export { SubscriptTextFeature } from './field/features/format/subscript'
-export { SuperscriptTextFeature } from './field/features/format/superscript'
-export { UnderlineTextFeature } from './field/features/format/underline'
+export { InlineCodeFeature } from './field/features/format/inlinecode/feature.server'
+export { ItalicFeature } from './field/features/format/italic/feature.server'
+export { StrikethroughFeature } from './field/features/format/strikethrough/feature.server'
+export { SubscriptFeature } from './field/features/format/subscript/feature.server'
+export { SuperscriptFeature } from './field/features/format/superscript/feature.server'
+export { UnderlineFeature } from './field/features/format/underline/feature.server'
+export { HeadingFeature } from './field/features/heading/feature.server'
+
 export { IndentFeature } from './field/features/indent'
 export { LinkFeature, type LinkFeatureServerProps } from './field/features/link/feature.server'
+
 export {
   $createAutoLinkNode,
   $isAutoLinkNode,
@@ -310,35 +291,41 @@ export type {
   SerializedAutoLinkNode,
   SerializedLinkNode,
 } from './field/features/link/nodes/types'
-export { CheckListFeature } from './field/features/lists/CheckList'
-export { OrderedListFeature } from './field/features/lists/OrderedList'
-export { UnorderedListFeature } from './field/features/lists/UnorderedList'
-export { LexicalPluginToLexicalFeature } from './field/features/migrations/LexicalPluginToLexical'
-export { SlateToLexicalFeature } from './field/features/migrations/SlateToLexical'
-export { SlateBlockquoteConverter } from './field/features/migrations/SlateToLexical/converter/converters/blockquote'
+export { CheckListFeature } from './field/features/lists/checklist'
+export { OrderedListFeature } from './field/features/lists/orderedlist'
+export { UnorderedListFeature } from './field/features/lists/unorderedlist'
+export { LexicalPluginToLexicalFeature } from './field/features/migrations/lexicalPluginToLexical'
+export { SlateToLexicalFeature } from './field/features/migrations/slateToLexical'
+export { SlateBlockquoteConverter } from './field/features/migrations/slateToLexical/converter/converters/blockquote'
+export { SlateHeadingConverter } from './field/features/migrations/slateToLexical/converter/converters/heading'
+export { SlateIndentConverter } from './field/features/migrations/slateToLexical/converter/converters/indent'
+export { SlateLinkConverter } from './field/features/migrations/slateToLexical/converter/converters/link'
+export { SlateListItemConverter } from './field/features/migrations/slateToLexical/converter/converters/listItem'
+export { SlateOrderedListConverter } from './field/features/migrations/slateToLexical/converter/converters/orderedList'
+export { SlateRelationshipConverter } from './field/features/migrations/slateToLexical/converter/converters/relationship'
+export { SlateUnknownConverter } from './field/features/migrations/slateToLexical/converter/converters/unknown'
 
-export { SlateHeadingConverter } from './field/features/migrations/SlateToLexical/converter/converters/heading'
-export { SlateIndentConverter } from './field/features/migrations/SlateToLexical/converter/converters/indent'
-export { SlateLinkConverter } from './field/features/migrations/SlateToLexical/converter/converters/link'
-
-export { SlateListItemConverter } from './field/features/migrations/SlateToLexical/converter/converters/listItem'
-export { SlateOrderedListConverter } from './field/features/migrations/SlateToLexical/converter/converters/orderedList'
-export { SlateRelationshipConverter } from './field/features/migrations/SlateToLexical/converter/converters/relationship'
-export { SlateUnknownConverter } from './field/features/migrations/SlateToLexical/converter/converters/unknown'
-export { SlateUnorderedListConverter } from './field/features/migrations/SlateToLexical/converter/converters/unorderedList'
-export { SlateUploadConverter } from './field/features/migrations/SlateToLexical/converter/converters/upload'
-export { defaultSlateConverters } from './field/features/migrations/SlateToLexical/converter/defaultConverters'
+export { SlateUnorderedListConverter } from './field/features/migrations/slateToLexical/converter/converters/unorderedList'
+export { SlateUploadConverter } from './field/features/migrations/slateToLexical/converter/converters/upload'
+export { defaultSlateConverters } from './field/features/migrations/slateToLexical/converter/defaultConverters'
 
 export {
   convertSlateNodesToLexical,
   convertSlateToLexical,
-} from './field/features/migrations/SlateToLexical/converter/index'
-
+} from './field/features/migrations/slateToLexical/converter/index'
 export type {
   SlateNode,
   SlateNodeConverter,
-} from './field/features/migrations/SlateToLexical/converter/types'
-
+} from './field/features/migrations/slateToLexical/converter/types'
+export { ParagraphFeature } from './field/features/paragraph'
+export { RelationshipFeature } from './field/features/relationship'
+export {
+  $createRelationshipNode,
+  $isRelationshipNode,
+  type RelationshipData,
+  RelationshipNode,
+  type SerializedRelationshipNode,
+} from './field/features/relationship/nodes/RelationshipNode'
 export type {
   ClientFeature,
   ClientFeatureProviderMap,
@@ -358,6 +345,19 @@ export type {
   ServerFeature,
   ServerFeatureProviderMap,
 } from './field/features/types'
+export { UploadFeature } from './field/features/upload'
+
+export type { UploadFeatureProps } from './field/features/upload'
+
+export type { RawUploadPayload } from './field/features/upload/nodes/UploadNode'
+
+export {
+  $createUploadNode,
+  $isUploadNode,
+  type SerializedUploadNode,
+  type UploadData,
+  UploadNode,
+} from './field/features/upload/nodes/UploadNode'
 export {
   EditorConfigProvider,
   useEditorConfigContext,

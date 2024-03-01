@@ -1,3 +1,4 @@
+export { useAdminThumbnail } from '../hooks/useAdminThumbnail'
 export { default as useDebounce } from '../hooks/useDebounce'
 export { default as useHotkey } from '../hooks/useHotkey'
 export { useIntersect } from '../hooks/useIntersect'

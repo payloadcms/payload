@@ -72,6 +72,10 @@ const sanitizeCollections = (
       if ('hidden' in sanitized.admin) {
         delete sanitized.admin.hidden
       }
+
+      if ('preview' in sanitized.admin) {
+        delete sanitized.admin.preview
+      }
     }
 
     return sanitized
@@ -94,6 +98,10 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
 
       if ('hidden' in sanitized.admin) {
         delete sanitized.admin.hidden
+      }
+
+      if ('preview' in sanitized.admin) {
+        delete sanitized.admin.preview
       }
     }
 

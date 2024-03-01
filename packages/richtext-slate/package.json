@@ -6,7 +6,7 @@
   "license": "MIT",
   "homepage": "https://payloadcms.com",
   "author": "Payload CMS, Inc.",
-  "main": "./dist/index.js",
+  "main": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
@@ -17,7 +17,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@faceless-ui/modal": "2.0.1",
+    "@faceless-ui/modal": "2.0.2",
     "is-hotkey": "0.2.0",
     "react": "18.2.0",
     "slate": "0.91.4",
@@ -26,6 +26,7 @@
     "slate-react": "0.92.0"
   },
   "devDependencies": {
+    "@payloadcms/ui": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/node": "20.5.7",
     "@types/react": "18.2.15",
@@ -33,8 +34,8 @@
   },
   "peerDependencies": {
     "payload": "^2.3.0",
-    "@payloadcms/translations": "workspace:^",
-    "@payloadcms/ui": "workspace:^"
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*"
   },
   "exports": {
     ".": {

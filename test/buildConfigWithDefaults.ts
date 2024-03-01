@@ -1,10 +1,19 @@
-// import {
-//   AlignFeature,
-//   BlockQuoteFeature,
-//   BlocksFeature,
-//   LinkFeature,
-//   lexicalEditor,
-// } from '@payloadcms/richtext-lexical'
+import {
+  AlignFeature,
+  BlockQuoteFeature,
+  BlocksFeature,
+  BoldFeature,
+  HeadingFeature,
+  InlineCodeFeature,
+  ItalicFeature,
+  LinkFeature,
+  StrikethroughFeature,
+  SubscriptFeature,
+  SuperscriptFeature,
+  TreeViewFeature,
+  UnderlineFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 import path from 'path'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
@@ -12,7 +21,7 @@ import type { Config, SanitizedConfig } from '../packages/payload/src/config/typ
 import { mongooseAdapter } from '../packages/db-mongodb/src'
 import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
-import { slateEditor } from '../packages/richtext-slate/src'
+// import { slateEditor } from '../packages/richtext-slate/src'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
@@ -62,46 +71,77 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',
-    editor: slateEditor({
-      admin: {
-        upload: {
-          collections: {
-            media: {
-              fields: [
-                {
-                  name: 'alt',
-                  type: 'text',
-                },
-              ],
-            },
-          },
-        },
-      },
-    }),
-    // editor: lexicalEditor({
-    //   features: [
-    //     LinkFeature({}),
-    //     AlignFeature(),
-    //     BlockQuoteFeature(),
-    //     BlocksFeature({
-    //       blocks: [
-    //         {
-    //           slug: 'myBlock',
+    // editor: slateEditor({
+    //   admin: {
+    //     upload: {
+    //       collections: {
+    //         media: {
     //           fields: [
     //             {
-    //               name: 'title',
+    //               name: 'alt',
     //               type: 'text',
-    //             },
-    //             {
-    //               name: 'content',
-    //               type: 'textarea',
     //             },
     //           ],
     //         },
-    //       ],
-    //     }),
-    //   ],
+    //       },
+    //     },
+    //   },
     // }),
+    editor: lexicalEditor({
+      features: [
+        LinkFeature({}),
+        AlignFeature(),
+        BlockQuoteFeature(),
+        BoldFeature(),
+        ItalicFeature(),
+        UnderlineFeature(),
+        StrikethroughFeature(),
+        SubscriptFeature(),
+        SuperscriptFeature(),
+        InlineCodeFeature(),
+        TreeViewFeature(),
+        HeadingFeature(),
+        BlocksFeature({
+          blocks: [
+            {
+              slug: 'myBlock',
+              fields: [
+                {
+                  name: 'someText',
+                  type: 'text',
+                },
+                {
+                  name: 'someTextRequired',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'radios',
+                  type: 'radio',
+                  options: [
+                    {
+                      label: 'Option 1',
+                      value: 'option1',
+                    },
+                    {
+                      label: 'Option 2',
+                      value: 'option2',
+                    },
+                    {
+                      label: 'Option 3',
+                      value: 'option3',
+                    },
+                  ],
+                  validate: (value) => {
+                    return value !== 'option2' ? true : 'Cannot be option2'
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+      ],
+    }),
     rateLimit: {
       max: 9999999999,
       window: 15 * 60 * 1000, // 15min default,

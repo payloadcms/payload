@@ -8,7 +8,6 @@ import {
   DocumentFields,
   FieldPathProvider,
   Form,
-  LeaveWithoutSaving,
   LoadingOverlay,
   OperationProvider,
   getFormState,
@@ -19,6 +18,7 @@ import {
 } from '@payloadcms/ui'
 import React, { Fragment, useCallback } from 'react'
 
+import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
 import { SetDocumentTitle } from '../Edit/Default/SetDocumentTitle'
 import { SetStepNav } from '../Edit/Default/SetStepNav'
 import { LivePreviewProvider } from './Context'

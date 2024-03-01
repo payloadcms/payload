@@ -60,6 +60,7 @@ export type Props = (
   onSuccess?: (json: unknown) => void
   redirect?: string
   submitted?: boolean
+  uuid?: string
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
 }
@@ -220,5 +221,6 @@ export type Context = {
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted
   submit: Submit
+  uuid?: string
   validateForm: ValidateForm
 }
