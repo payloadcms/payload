@@ -1,3 +1,4 @@
+import type { Payload } from 'payload'
 import type { Field, TabAsField } from 'payload/types'
 
 import mongoose from 'mongoose'
@@ -8,6 +9,7 @@ type SanitizeQueryValueArgs = {
   hasCustomID: boolean
   operator: string
   path: string
+  payload: Payload
   val: any
 }
 
@@ -16,6 +18,7 @@ export const sanitizeQueryValue = ({
   hasCustomID,
   operator,
   path,
+  payload,
   val,
 }: SanitizeQueryValueArgs): {
   operator?: string
@@ -172,6 +175,14 @@ export const sanitizeQueryValue = ({
             $or: [{ [path]: { $exists: false } }, { [path]: { $eq: null } }],
           },
         }
+      }
+    }
+
+    if (!payload.db.nullFieldValuesNotExist) {
+      return {
+        rawQuery: {
+          $or: [{ [path]: { $exists: true } }, { [path]: { $eq: null } }],
+        },
       }
     }
   }
