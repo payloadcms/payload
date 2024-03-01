@@ -4,10 +4,12 @@ import React from 'react'
 import {
   ForgotPassword,
   generateMetadata as generateMeta,
-} from '@payloadcms/next/pages/ForgotPassword'
+} from '@payloadcms/next/pages/ForgotPassword/index'
 import { Metadata } from 'next'
 import config from '@payload-config'
 
 export const generateMetadata = async (): Promise<Metadata> => generateMeta({ config })
 
-export default async () => <ForgotPassword config={config} />
+const Page = async () => <ForgotPassword config={config} />
+
+export default Page
