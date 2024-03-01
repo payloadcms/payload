@@ -95,6 +95,7 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
         cellData={cellData}
         customCellContext={customCellContext}
         rowData={rowData}
+        {...props}
       />
     )
   } else if (!CellComponent && !DefaultCellComponent) {
@@ -106,6 +107,7 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
           cellData={cellData}
           customCellContext={customCellContext}
           rowData={rowData}
+          {...props}
         />
       )
     } else {

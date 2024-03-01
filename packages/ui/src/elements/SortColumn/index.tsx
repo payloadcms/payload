@@ -1,8 +1,9 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
+// TODO: abstract the `next/navigation` dependency out from this component
+import { usePathname, useRouter } from 'next/navigation'
 import queryString from 'qs'
 import React, { useCallback } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
 
@@ -16,7 +17,8 @@ const baseClass = 'sort-column'
 export const SortColumn: React.FC<Props> = (props) => {
   const { name, disable = false, label } = props
   const { searchParams } = useSearchParams()
-  const history = useHistory()
+  const router = useRouter()
+  const pathname = usePathname()
   const { i18n, t } = useTranslation()
 
   const { sort } = searchParams
@@ -32,17 +34,17 @@ export const SortColumn: React.FC<Props> = (props) => {
 
   const setSort = useCallback(
     (newSort) => {
-      history.push({
-        search: queryString.stringify(
-          {
-            ...searchParams,
-            sort: newSort,
-          },
-          { addQueryPrefix: true },
-        ),
-      })
+      const search = queryString.stringify(
+        {
+          ...searchParams,
+          sort: newSort,
+        },
+        { addQueryPrefix: true },
+      )
+
+      router.replace(`${pathname}?${search}`)
     },
-    [searchParams, history],
+    [searchParams, pathname, router],
   )
 
   return (
