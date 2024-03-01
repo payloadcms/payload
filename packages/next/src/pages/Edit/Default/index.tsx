@@ -7,7 +7,6 @@ import {
   FieldPathProvider,
   Form,
   FormLoadingOverlayToggle,
-  LeaveWithoutSaving,
   OperationProvider,
   getFormState,
   useComponentMap,
@@ -17,6 +16,7 @@ import {
 import React, { Fragment, useCallback } from 'react'
 
 import { Upload } from '../../../../../ui/src/elements/Upload'
+import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving'
 // import { getTranslation } from '@payloadcms/translations'
 import Auth from './Auth'
 import { SetDocumentTitle } from './SetDocumentTitle'

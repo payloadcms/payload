@@ -2,7 +2,8 @@
 //    - Source: https://github.com/vercel/next.js/discussions/32231#discussioncomment-7284386
 // Credit: `react-use` maintainers
 //    -  Source: https://github.com/streamich/react-use/blob/ade8d3905f544305515d010737b4ae604cc51024/src/useBeforeUnload.ts#L2
-import { useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useRef } from 'react'
 
 function on<T extends Document | EventTarget | HTMLElement | Window>(
   obj: T | null,
@@ -22,7 +23,7 @@ function off<T extends Document | EventTarget | HTMLElement | Window>(
   }
 }
 
-export const _useBeforeUnload = (enabled: (() => boolean) | boolean = true, message?: string) => {
+export const useBeforeUnload = (enabled: (() => boolean) | boolean = true, message?: string) => {
   const handler = useCallback(
     (event: BeforeUnloadEvent) => {
       const finalEnabled = typeof enabled === 'function' ? enabled() : true
@@ -53,12 +54,24 @@ export const _useBeforeUnload = (enabled: (() => boolean) | boolean = true, mess
   }, [enabled, handler])
 }
 
-export const useBeforeUnload = (
-  isConfirm = true,
+export const usePreventLeave = ({
+  hasAccepted = false,
   message = 'Are you sure want to leave this page?',
-) => {
+  onPrevent,
+  preventLeave = true,
+}: {
+  hasAccepted: boolean
+  // if no `onPrevent` is provided, the message will be displayed in a confirm dialog
+  message?: string
+  // to use a custom confirmation dialog, provide a function that returns a boolean
+  onPrevent?: () => void
+  preventLeave: boolean
+}) => {
   // check when page is about to be reloaded
-  _useBeforeUnload(isConfirm, message)
+  useBeforeUnload(preventLeave, message)
+
+  const router = useRouter()
+  const cancelledURL = useRef<string>('')
 
   // check when page is about to be changed
   useEffect(() => {
@@ -100,10 +113,17 @@ export const useBeforeUnload = (
 
           const isPageLeaving = !(newUrl === currentUrl || isAnchor || isDownloadLink)
 
-          if (isPageLeaving && isConfirm && !window.confirm(message)) {
+          if (isPageLeaving && preventLeave && !onPrevent ? !window.confirm(message) : true) {
+            // Keep a reference of the href
+            cancelledURL.current = newUrl
+
             // Cancel the route change
             event.preventDefault()
             event.stopPropagation()
+
+            if (typeof onPrevent === 'function') {
+              onPrevent()
+            }
           }
         }
       } catch (err) {
@@ -118,5 +138,11 @@ export const useBeforeUnload = (
     return () => {
       document.removeEventListener('click', handleClick, true)
     }
-  }, [isConfirm, message])
+  }, [onPrevent, preventLeave, message])
+
+  useEffect(() => {
+    if (hasAccepted && cancelledURL.current) {
+      router.push(cancelledURL.current)
+    }
+  }, [hasAccepted, router])
 }
