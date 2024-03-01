@@ -25,7 +25,6 @@ export const FormSavePlugin: React.FC<Props> = (props) => {
   const newFormData = reduceFieldsToValues(fields, true)
 
   useEffect(() => {
-    console.log('FormSavePlugin', newFormData)
     if (onChange) {
       onChange({ fullFieldsWithValues: fields, newFormData })
     }

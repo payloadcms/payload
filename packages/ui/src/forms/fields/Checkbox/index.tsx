@@ -5,6 +5,7 @@ import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
+import { useForm } from '../../Form/context'
 import LabelComp from '../../Label'
 import useField from '../../useField'
 import { withCondition } from '../../withCondition'
@@ -37,6 +38,8 @@ const Checkbox: React.FC<Props> = (props) => {
     width,
   } = props
 
+  const { uuid } = useForm()
+
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const memoizedValidate: ClientValidate = useCallback(
@@ -63,7 +66,7 @@ const Checkbox: React.FC<Props> = (props) => {
 
   const checked = checkedFromProps || Boolean(value)
 
-  const fieldID = id || `field-${path?.replace(/\./g, '__')}`
+  const fieldID = id || `field-${path?.replace(/\./g, '__')}${uuid ? `-${uuid}` : ''}`
 
   return (
     <div

@@ -11,7 +11,6 @@ import {
   ErrorPill,
   Pill,
   SectionTitle,
-  createNestedFieldPath,
   useDocumentInfo,
   useFormSubmitted,
   useTranslation,
@@ -21,7 +20,6 @@ import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
 import type { ReducedBlock } from '../../../../../../ui/src/utilities/buildComponentMap/types'
-import type { FieldProps } from '../../../../types'
 import type { BlockFields, BlockNode } from '../nodes/BlocksNode'
 
 import { FormSavePlugin } from './FormSavePlugin'
@@ -89,8 +87,6 @@ export const BlockContent: React.FC<Props> = (props) => {
     .filter(Boolean)
     .join(' ')
 
-  const path = '' as const
-
   const onFormChange = useCallback(
     ({
       fullFieldsWithValues,
@@ -101,9 +97,9 @@ export const BlockContent: React.FC<Props> = (props) => {
     }) => {
       newFormData = {
         ...newFormData,
-        id: formData.id, // TODO: Why does form updatee not include theeeeem
-        blockName: formData.blockName, // TODO: Why does form updatee not include theeeeem
-        blockType: formData.blockType, // TODO: Why does form updatee not include theeeeem
+        id: formData.id,
+        blockName: newFormData.blockName2, // TODO: Find a better solution for this. We have to wrap it in blockName2 when using it here, as blockName does not accept or provide any updated values for some reason.
+        blockType: formData.blockType,
       }
 
       // Recursively remove all undefined values from even being present in formData, as they will
@@ -123,8 +119,6 @@ export const BlockContent: React.FC<Props> = (props) => {
       removeUndefinedAndNullRecursively(newFormData)
       removeUndefinedAndNullRecursively(formData)
 
-      console.log('before saving node data...', newFormData, 'old', formData)
-
       // Only update if the data has actually changed. Otherwise, we may be triggering an unnecessary value change,
       // which would trigger the "Leave without saving" dialog unnecessarily
       if (!isDeepEqual(formData, newFormData)) {
@@ -136,7 +130,6 @@ export const BlockContent: React.FC<Props> = (props) => {
           editor.update(() => {
             const node: BlockNode = $getNodeByKey(nodeKey)
             if (node) {
-              console.log('saving node data...', newFormData)
               node.setFields(newFormData as BlockFields)
             }
           })
@@ -197,14 +190,14 @@ export const BlockContent: React.FC<Props> = (props) => {
                   ? getTranslation(labels.singular, i18n)
                   : '[Singular Label]'}
               </Pill>
-              <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
+              <SectionTitle path="blockName2" readOnly={field?.readOnly} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
             {editor.isEditable() && (
               <Button
                 buttonStyle="icon-label"
                 className={`${baseClass}__removeButton`}
-                disabled={field?.admin?.readOnly}
+                disabled={field?.readOnly}
                 icon="x"
                 onClick={(e) => {
                   e.preventDefault()

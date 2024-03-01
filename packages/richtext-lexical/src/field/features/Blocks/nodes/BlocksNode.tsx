@@ -14,8 +14,6 @@ import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
 import ObjectID from 'bson-objectid'
 import React from 'react'
 
-import { transformInputFormData } from '../utils/transformInputFormData'
-
 export type BlockFields = {
   /** Block form data */
   [key: string]: any
@@ -90,17 +88,7 @@ export class BlockNode extends DecoratorBlockNode {
     return false
   }
   decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
-    const blockFieldWrapperName = this.getFields().blockType + '-' + this.getFields().id
-    const transformedFormData = transformInputFormData(this.getFields(), blockFieldWrapperName)
-
-    return (
-      <BlockComponent
-        blockFieldWrapperName={blockFieldWrapperName}
-        formData={this.getFields()}
-        nodeKey={this.getKey()}
-        transformedFormData={transformedFormData}
-      />
-    )
+    return <BlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
   }
 
   exportDOM(): DOMExportOutput {
@@ -129,18 +117,7 @@ export class BlockNode extends DecoratorBlockNode {
   }
 
   setFields(fields: BlockFields): void {
-    let fieldsCopy = JSON.parse(JSON.stringify(fields)) as BlockFields
-    // Possibly transform fields
-    const blockFieldWrapperName = fieldsCopy.blockType + '-' + fieldsCopy.id
-    if (fieldsCopy[blockFieldWrapperName]) {
-      fieldsCopy = {
-        id: fieldsCopy.id,
-        blockName: fieldsCopy.blockName,
-        blockType: fieldsCopy.blockType,
-        ...fieldsCopy[blockFieldWrapperName],
-      }
-      delete fieldsCopy[blockFieldWrapperName]
-    }
+    const fieldsCopy = JSON.parse(JSON.stringify(fields)) as BlockFields
 
     const writable = this.getWritable()
     writable.__fields = fieldsCopy

@@ -89,12 +89,34 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
               slug: 'myBlock',
               fields: [
                 {
-                  name: 'title',
+                  name: 'someText',
                   type: 'text',
                 },
                 {
-                  name: 'content',
-                  type: 'textarea',
+                  name: 'someTextRequired',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'radios',
+                  type: 'radio',
+                  options: [
+                    {
+                      label: 'Option 1',
+                      value: 'option1',
+                    },
+                    {
+                      label: 'Option 2',
+                      value: 'option2',
+                    },
+                    {
+                      label: 'Option 3',
+                      value: 'option3',
+                    },
+                  ],
+                  validate: (value) => {
+                    return value !== 'option2' ? true : 'Cannot be option2'
+                  },
                 },
               ],
             },
