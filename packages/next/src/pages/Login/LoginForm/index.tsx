@@ -15,6 +15,8 @@ import React from 'react'
 
 const baseClass = 'login__form'
 
+import { useRouter } from 'next/navigation'
+
 import './index.scss'
 
 export const LoginForm: React.FC<{
@@ -27,6 +29,7 @@ export const LoginForm: React.FC<{
     routes: { admin, api },
   } = config
 
+  const router = useRouter()
   const { t } = useTranslation()
 
   const prefillForm = autoLogin && autoLogin.prefillOnly
@@ -51,6 +54,9 @@ export const LoginForm: React.FC<{
       disableSuccessStatus
       initialState={initialState}
       method="POST"
+      onSuccess={() => {
+        router.push(admin)
+      }}
       redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : ''}
       waitForAutocomplete
     >
