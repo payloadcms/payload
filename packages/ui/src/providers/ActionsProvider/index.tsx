@@ -31,7 +31,7 @@ export const ActionsProvider = ({ children }) => {
     setAdminActions(configAdminActions || [])
   }, [configAdminActions])
 
-  const combinedActions = [...viewActions, ...adminActions]
+  const combinedActions = [...(viewActions || []), ...(adminActions || [])]
 
   return (
     <ActionsContext.Provider value={{ actions: combinedActions, setViewActions }}>
