@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import './index.scss'
 
-export function TreeViewPlugin(): JSX.Element {
+export function TreeViewPlugin(): React.ReactNode {
   const [editor] = useLexicalComposerContext()
   return (
     <TreeView
