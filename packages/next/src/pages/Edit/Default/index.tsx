@@ -57,7 +57,7 @@ export const DefaultEditView: React.FC = () => {
     serverURL,
   } = config
 
-  const { getFieldMap } = useComponentMap()
+  const { componentMap, getFieldMap } = useComponentMap()
 
   const collectionConfig =
     collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
@@ -142,6 +142,8 @@ export const DefaultEditView: React.FC = () => {
     [serverURL, apiRoute, id, operation, schemaPath, collectionSlug, globalSlug],
   )
 
+  const RegisterGetThumbnailFunction = componentMap?.[`${collectionSlug}.adminThumbnail`]
+
   return (
     <main className={classes}>
       <FieldPathProvider path="" schemaPath={schemaPath}>
@@ -220,11 +222,14 @@ export const DefaultEditView: React.FC = () => {
                       />
                     )}
                     {upload && (
-                      <Upload
-                        collectionSlug={collectionConfig.slug}
-                        initialState={initialState}
-                        uploadConfig={upload}
-                      />
+                      <React.Fragment>
+                        {RegisterGetThumbnailFunction && <RegisterGetThumbnailFunction />}
+                        <Upload
+                          collectionSlug={collectionConfig.slug}
+                          initialState={initialState}
+                          uploadConfig={upload}
+                        />
+                      </React.Fragment>
                     )}
                   </Fragment>
                 )

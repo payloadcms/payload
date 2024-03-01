@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
+import { useClientFunctions } from '../..'
 import Error from '../../forms/Error'
 import { useFormSubmitted } from '../../forms/Form/context'
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues'
@@ -52,6 +53,7 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
 
 export const Upload: React.FC<Props> = (props) => {
   const { collectionSlug, initialState, onChange, updatedAt, uploadConfig } = props
+  const clientFunctions = useClientFunctions()
 
   const submitted = useFormSubmitted()
   const [replacingFile, setReplacingFile] = useState(false)
@@ -152,7 +154,10 @@ export const Upload: React.FC<Props> = (props) => {
           {value && (
             <React.Fragment>
               <div className={`${baseClass}__thumbnail-wrap`}>
-                <Thumbnail fileSrc={isImage(value.type) ? fileSrc : null} />
+                <Thumbnail
+                  collectionSlug={collectionSlug}
+                  fileSrc={isImage(value.type) ? fileSrc : null}
+                />
               </div>
               <div className={`${baseClass}__file-adjustments`}>
                 <input

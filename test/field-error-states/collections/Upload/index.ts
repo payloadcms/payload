@@ -5,7 +5,7 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 const Uploads: CollectionConfig = {
   slug: 'uploads',
   upload: {
-    staticDir: path.resolve(__dirname, './uploads'),
+    staticDir: path.resolve(process.cwd(), 'test/field-error-states/collections/Upload/uploads'),
   },
   fields: [
     {

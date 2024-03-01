@@ -70,7 +70,7 @@ export type ImageSize = Omit<ResizeOptions, 'withoutEnlargement'> & {
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 
 export type IncomingUploadType = {
-  adminThumbnail?: GetAdminThumbnail | string
+  adminThumbnail?: React.ComponentType | string
   crop?: boolean
   disableLocalStorage?: boolean
   filesRequiredOnCreate?: boolean
@@ -88,7 +88,12 @@ export type IncomingUploadType = {
 }
 
 export type Upload = {
-  adminThumbnail?: GetAdminThumbnail | string
+  /**
+   * Represents an admin thumbnail, which can be either a React component or a string.
+   * - If a string, it should be one of the image size names.
+   * - If a React component, register a function that generates the thumbnail URL using the `useAdminThumbnail` hook.
+   **/
+  adminThumbnail?: React.ComponentType | string
   crop?: boolean
   disableLocalStorage?: boolean
   filesRequiredOnCreate?: boolean

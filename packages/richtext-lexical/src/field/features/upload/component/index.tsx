@@ -74,7 +74,7 @@ const Component: React.FC<ElementProps> = (props) => {
     { initialParams },
   )
 
-  const thumbnailSRC = useThumbnail(relatedCollection, data)
+  const thumbnailSRC = useThumbnail(relatedCollection.slug, relatedCollection.upload, data)
 
   const removeUpload = useCallback(() => {
     editor.update(() => {
