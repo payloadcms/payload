@@ -9,6 +9,7 @@ import { createClientConfig } from 'payload/config'
 import { deepMerge } from 'payload/utilities'
 import React from 'react'
 
+import '../../../node_modules/react-toastify/dist/ReactToastify.css'
 import { DefaultEditView } from '../../pages/Edit/Default'
 import { DefaultListView } from '../../pages/List/Default'
 import { DefaultCell } from '../../pages/List/Default/Cell'
