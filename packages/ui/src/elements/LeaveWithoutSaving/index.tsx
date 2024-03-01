@@ -7,6 +7,7 @@ import { useFormModified } from '../../forms/Form/context'
 import { useAuth } from '../../providers/Auth'
 import { useTranslation } from '../../providers/Translation'
 import './index.scss'
+import { useBeforeUnload } from './useBeforeUnload'
 
 const modalSlug = 'leave-without-saving'
 
@@ -17,7 +18,7 @@ const Component: React.FC<{
   onCancel: () => void
   onConfirm: () => void
 }> = ({ isActive, onCancel, onConfirm }) => {
-  const { closeModal, openModal, modalState } = useModal()
+  const { closeModal, modalState, openModal } = useModal()
   const { t } = useTranslation()
 
   // Manually check for modal state as 'esc' key will not trigger the nav inactivity
@@ -53,6 +54,10 @@ const Component: React.FC<{
 export const LeaveWithoutSaving: React.FC = () => {
   const modified = useFormModified()
   const { user } = useAuth()
+
+  const preventLeave = Boolean(modified && user)
+
+  useBeforeUnload(preventLeave, 'Leave without saving?')
 
   return null
   // <NavigationPrompt renderIfNotActive when={Boolean(modified && user)}>
