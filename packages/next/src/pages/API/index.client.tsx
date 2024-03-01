@@ -130,7 +130,7 @@ export const APIViewClient: React.FC<EditViewProps> = (props) => {
         useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"
       />
-      <SetViewActions actions={componentMap?.actionMap?.Edit?.API} />
+      <SetViewActions actions={componentMap?.actionsMap?.Edit?.API} />
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>

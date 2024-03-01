@@ -21,7 +21,7 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
 
   const { getComponentMap } = useComponentMap()
 
-  const { Edit, actionMap } = getComponentMap({
+  const { Edit, actionsMap } = getComponentMap({
     collectionSlug,
     globalSlug,
   })
@@ -62,7 +62,7 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
 
   return (
     <Fragment>
-      <SetViewActions actions={actionMap?.Edit?.Default} />
+      <SetViewActions actions={actionsMap?.Edit?.Default} />
       {Edit}
     </Fragment>
   )

@@ -58,7 +58,7 @@ export const DefaultListView: React.FC = () => {
 
   const componentMap = getComponentMap({ collectionSlug }) as CollectionComponentMap
 
-  const { AfterList, AfterListTable, BeforeList, BeforeListTable, actionMap } = componentMap || {}
+  const { AfterList, AfterListTable, BeforeList, BeforeListTable, actionsMap } = componentMap || {}
 
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
@@ -95,7 +95,7 @@ export const DefaultListView: React.FC = () => {
 
   return (
     <div className={baseClass}>
-      <SetViewActions actions={actionMap?.List} />
+      <SetViewActions actions={actionsMap?.List} />
       {BeforeList}
       {/* <Meta title={getTranslation(collection.labels.plural, i18n)} /> */}
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>

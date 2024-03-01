@@ -96,7 +96,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   return (
     <main className={baseClass}>
-      <SetViewActions actions={componentMap?.actionMap?.Edit?.Version} />
+      <SetViewActions actions={componentMap?.actionsMap?.Edit?.Version} />
       <SetStepNav
         collectionConfig={collectionConfig}
         collectionSlug={collectionSlug}

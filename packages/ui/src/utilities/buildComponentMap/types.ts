@@ -91,7 +91,7 @@ export type GlobalComponentMap = ConfigComponentMapBase
 
 export type ConfigComponentMapBase = {
   Edit: React.ReactNode
-  actionMap: ActionMap
+  actionsMap: ActionMap
   fieldMap: FieldMap
 }
 

@@ -104,7 +104,7 @@ export const buildComponentMap = (args: {
       BeforeListTable,
       Edit: <Edit collectionSlug={collectionConfig.slug} />,
       List: <List collectionSlug={collectionConfig.slug} />,
-      actionMap: mapActions({
+      actionsMap: mapActions({
         collectionConfig,
       }),
       fieldMap: mapFields({
@@ -144,7 +144,7 @@ export const buildComponentMap = (args: {
 
     const componentMap: GlobalComponentMap = {
       Edit: <Edit globalSlug={globalConfig.slug} />,
-      actionMap: mapActions({
+      actionsMap: mapActions({
         globalConfig,
       }),
       fieldMap: mapFields({

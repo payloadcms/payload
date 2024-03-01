@@ -101,7 +101,7 @@ export const VersionsViewClient: React.FC<{
 
   return (
     <Fragment>
-      <SetViewActions actions={componentMap?.actionMap?.Edit?.Versions} />
+      <SetViewActions actions={componentMap?.actionsMap?.Edit?.Versions} />
       <LoadingOverlayToggle name="versions" show={isLoading} />
       {versionCount === 0 && (
         <div className={`${baseClass}__no-versions`}>
