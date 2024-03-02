@@ -73,18 +73,6 @@ export const collectionSlugs: CollectionConfig[] = [
 ]
 
 export default buildConfigWithDefaults({
-  admin: {
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
-        },
-      },
-    }),
-  },
   collections: collectionSlugs,
   globals: [TabsWithRichText],
   localization: {
