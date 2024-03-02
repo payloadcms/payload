@@ -93,8 +93,6 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
   )
 
   // * Catch any two-segment routes:
-  // /reset-password/:token
-  // /verify/:token
   // /collections/:collectionSlug
   // /globals/:globalSlug
 

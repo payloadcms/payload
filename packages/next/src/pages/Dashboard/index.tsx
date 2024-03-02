@@ -10,7 +10,6 @@ import type { InitPageResult } from '../../utilities/initPage'
 import type { DashboardProps } from './Default'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
-import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { DefaultDashboard } from './Default'
 

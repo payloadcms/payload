@@ -7,8 +7,11 @@ type Args = {
   params: {
     segments: string[]
   }
+  searchParams: {
+    [key: string]: string | string[]
+  }
 }
 
-const Page = ({ params }: Args) => RootPage({ config, params })
+const Page = ({ params, searchParams }: Args) => RootPage({ config, params, searchParams })
 
 export default Page
