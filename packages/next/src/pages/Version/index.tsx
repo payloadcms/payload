@@ -5,19 +5,26 @@ import type { Document } from 'payload/types'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
-import type { ServerSideEditViewProps } from '../Edit/types'
+import type { InitPageResult } from '../../utilities/initPage'
 
-import { sanitizeEditViewProps } from '../Edit/sanitizeEditViewProps'
 import { DefaultVersionView } from './Default'
 
-export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
-  const { config, params, payload, permissions, user } = props
+type Props = {
+  page: InitPageResult
+  params: { [key: string]: string | string[] }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+export const VersionView: React.FC = async (props: Props) => {
+  const { page, params } = props
+  const {
+    collectionConfig,
+    globalConfig,
+    permissions,
+    req: { payload, payload: { config } = {}, user } = {},
+  } = page
 
-  const versionID = params.segments[2]
-
-  const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
-  const globalConfig = 'globalConfig' in props && props?.globalConfig
-  const id = 'id' in props ? props.id : undefined
+  // /entityType/:entitySlug/:id/versions/:versionID
+  const [entityType, entitySlug, id, versions, versionID] = params.segments
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
@@ -105,13 +112,12 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
     return notFound()
   }
 
-  const clientSideProps = sanitizeEditViewProps(props)
-
   return (
     <DefaultVersionView
-      {...clientSideProps}
+      collectionSlug={collectionSlug}
       doc={doc}
       docPermissions={docPermissions}
+      globalSlug={globalSlug}
       id={id}
       initialComparisonDoc={mostRecentDoc}
       localeOptions={localeOptions}

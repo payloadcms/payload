@@ -2,22 +2,33 @@ import type { LivePreviewConfig } from 'payload/config'
 
 import React from 'react'
 
-import type { ServerSideEditViewProps } from '../Edit/types'
+import type { InitPageResult } from '../../utilities/initPage'
 
-import { sanitizeEditViewProps } from '../Edit/sanitizeEditViewProps'
 import { LivePreviewClient } from './index.client'
 import './index.scss'
 
-export const LivePreviewView: React.FC<ServerSideEditViewProps> = async (props) => {
+type Props = {
+  page: InitPageResult
+  params: { [key: string]: string | string[] }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+export const LivePreviewView: React.FC = async (props: Props) => {
+  const { page } = props
   const {
     collectionConfig,
-    config: {
-      admin: { livePreview: topLevelLivePreviewConfig },
-    },
-    data,
     globalConfig,
     locale,
-  } = props
+    req: {
+      payload: {
+        config: {
+          admin: { livePreview: topLevelLivePreviewConfig },
+        },
+      } = {},
+    } = {},
+  } = page
+
+  // TODO(JAKE): not sure what `data` is or what it should be
+  const { data = {} } = props
 
   let livePreviewConfig: LivePreviewConfig = topLevelLivePreviewConfig
 
@@ -54,15 +65,16 @@ export const LivePreviewView: React.FC<ServerSideEditViewProps> = async (props) 
         })
       : livePreviewConfig?.url
 
-  const clientSideProps = sanitizeEditViewProps(props)
-
   return (
-    <LivePreviewClient
-      {...clientSideProps}
-      breakpoints={breakpoints}
-      initialData={data}
-      livePreviewConfig={livePreviewConfig}
-      url={url}
-    />
+    <React.Fragment>
+      <LivePreviewClient
+        breakpoints={breakpoints}
+        collectionSlug={collectionConfig?.slug}
+        globalSlug={globalConfig?.slug}
+        initialData={data}
+        livePreviewConfig={livePreviewConfig}
+        url={url}
+      />
+    </React.Fragment>
   )
 }

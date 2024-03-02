@@ -9,6 +9,7 @@ import type {
 import type { DocumentPermissions } from 'payload/types'
 
 import {
+  DocumentHeader,
   EditDepthProvider,
   FormQueryParamsProvider,
   HydrateClientUser,
@@ -21,9 +22,9 @@ import { notFound } from 'next/navigation'
 import queryString from 'qs'
 import React, { Fragment } from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
 import type { ServerSideEditViewProps } from '../Edit/types'
 
-import { initPage } from '../../utilities/initPage'
 import { getMetaBySegment } from './getMetaBySegment.tsx'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
@@ -36,52 +37,33 @@ export const generateMetadata = async (args: {
   }
 }) => getMetaBySegment(args)
 
-export const Document = async ({
-  config: configPromise,
-  params,
-  searchParams,
-}: {
-  config: Promise<SanitizedConfig> | SanitizedConfig
-  params: {
-    collection?: string
-    global?: string
-    segments: string[]
-  }
+type Props = {
+  page: InitPageResult
+  params: { [key: string]: string | string[] }
   searchParams: { [key: string]: string | string[] | undefined }
-}) => {
-  const collectionSlug = params.collection
-  const globalSlug = params.global
-  const isCreating = params.segments?.length === 1 && params.segments?.[0] === 'create'
-  const id = (collectionSlug && !isCreating && params.segments[0]) || undefined
+}
+export const Document = async ({ page, params, searchParams }: Props) => {
+  const segments = Array.isArray(params?.segments) ? params.segments : []
+  const [entityType, entitySlug, createOrID] = segments
+  const collectionSlug = entityType === 'collections' ? entitySlug : undefined
+  const globalSlug = entitySlug === 'globals' ? entitySlug : undefined
+  const isCreating = createOrID === 'create'
+  const id = (collectionSlug && !isCreating && createOrID) || undefined
 
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
-
-  const route = `/${collectionSlug || globalSlug + (params.segments?.length ? `/${params.segments.join('/')}` : '')}`
-
-  const { collectionConfig, globalConfig, locale, permissions, req } = await initPage({
-    collectionSlug,
-    config: configPromise,
-    globalSlug,
-    redirectUnauthenticatedUser: true,
-    route,
-    searchParams,
-  })
-
-  if (!collectionConfig && !globalConfig) {
-    return notFound()
-  }
 
   const {
     i18n,
     payload,
     payload: { config },
     user,
-  } = req
+  } = page.req
 
   const {
     routes: { api },
     serverURL,
   } = config
+  const { collectionConfig, globalConfig, locale, permissions, req } = page
 
   let CustomView: SanitizedConfig['admin']['components']['views'][0]
   let DefaultView: AdminViewComponent
@@ -110,7 +92,7 @@ export const Document = async ({
       collectionConfig,
       config,
       docPermissions,
-      routeSegments: params.segments,
+      routeSegments: segments,
       user,
     })
 
@@ -150,7 +132,7 @@ export const Document = async ({
       config,
       docPermissions,
       globalConfig,
-      routeSegments: params.segments,
+      routeSegments: segments,
       user,
     })
 
@@ -216,7 +198,6 @@ export const Document = async ({
     initialState,
     isEditing,
     locale,
-    params,
     payload,
     permissions,
     searchParams,
@@ -226,6 +207,12 @@ export const Document = async ({
 
   return (
     <Fragment>
+      <DocumentHeader
+        collectionConfig={collectionConfig}
+        config={req.payload.config}
+        globalConfig={globalConfig}
+        i18n={req.i18n}
+      />
       <HydrateClientUser permissions={permissions} user={user} />
       <SetDocumentInfo
         action={action}

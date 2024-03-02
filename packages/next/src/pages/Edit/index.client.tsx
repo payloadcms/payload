@@ -8,7 +8,7 @@ import {
   useConfig,
   useDocumentInfo,
 } from '@payloadcms/ui'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import React, { Fragment, useEffect } from 'react'
 import { useCallback } from 'react'
 
@@ -16,8 +16,9 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
   const { id, collectionSlug, getDocPermissions, getVersions, globalSlug, setDocumentInfo } =
     useDocumentInfo()
   const {
-    routes: { api: adminRoute },
+    routes: { admin: adminRoute },
   } = useConfig()
+  const router = useRouter()
 
   const { getComponentMap } = useComponentMap()
 
@@ -34,7 +35,7 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
       getDocPermissions()
 
       if (!isEditing) {
-        redirect(`${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}`)
+        router.push(`${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}`)
       } else {
         // buildState(json.doc, {
         //   fieldSchema: collection.fields,
@@ -45,7 +46,7 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
         // }))
       }
     },
-    [getVersions, isEditing, getDocPermissions, collectionSlug, adminRoute],
+    [getVersions, isEditing, getDocPermissions, collectionSlug, adminRoute, router],
   )
 
   useEffect(() => {

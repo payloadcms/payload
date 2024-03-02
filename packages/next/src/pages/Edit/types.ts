@@ -28,11 +28,6 @@ export type ServerSideEditViewProps = EditViewProps & {
   initialState?: FormState
   isEditing?: boolean
   locale: Locale
-  params?: {
-    collection?: string
-    global?: string
-    segments: string[]
-  }
   payload: Payload
   permissions: Permissions
   searchParams: { [key: string]: string | string[] | undefined }

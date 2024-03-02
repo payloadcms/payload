@@ -52,7 +52,7 @@ export const initPage = async ({
   })
 
   const config = await configPromise
-  const routeSegments = route.replace(config.routes.admin, '').split('/')
+  const routeSegments = route.replace(config.routes.admin, '').split('/').filter(Boolean)
   const collectionSlug = routeSegments[0] === 'collections' ? routeSegments[1] : undefined
   const globalSlug = routeSegments[0] === 'globals' ? routeSegments[1] : undefined
 

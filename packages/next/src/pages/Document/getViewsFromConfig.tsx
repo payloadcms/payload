@@ -37,7 +37,7 @@ export const getViewsFromConfig = async ({
   // Conditionally import and lazy load the default view
   let DefaultView: AdminViewComponent = null
   let CustomView: AdminViewComponent = null
-
+  const [entityType, entitySlug, createOrID, tabViewName, segmentFive] = routeSegments
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
     (globalConfig && globalConfig?.admin?.components?.views)
@@ -58,8 +58,8 @@ export const getViewsFromConfig = async ({
     }
 
     // `../:id`, or `../create`
-    if (routeSegments?.length === 1) {
-      switch (routeSegments[0]) {
+    if (!tabViewName) {
+      switch (createOrID) {
         case 'create': {
           if ('create' in docPermissions && docPermissions?.create?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
@@ -77,10 +77,20 @@ export const getViewsFromConfig = async ({
       }
     }
 
-    if (routeSegments[0] !== 'create') {
+    if (tabViewName) {
+      // `../:id/versions/:version`, etc
+      if (segmentFive) {
+        if (tabViewName === 'versions') {
+          if (docPermissions?.readVersions?.permission) {
+            CustomView = getCustomViewByKey(views, 'Version')
+            DefaultView = DefaultVersionView
+          }
+        }
+      }
+
       // `../:id/api`, `../:id/preview`, `../:id/versions`, etc
-      if (routeSegments?.length === 2) {
-        switch (routeSegments[1]) {
+      if (routeSegments?.length === 4) {
+        switch (tabViewName) {
           case 'api': {
             if (collectionConfig?.admin?.hideAPIURL !== true) {
               CustomView = getCustomViewByKey(views, 'API')
@@ -105,19 +115,9 @@ export const getViewsFromConfig = async ({
           }
 
           default: {
-            const path = `/${routeSegments[1]}`
+            const path = `/${tabViewName}`
             CustomView = getCustomViewByPath(views, path)
             break
-          }
-        }
-      }
-
-      // `../:id/versions/:version`, etc
-      if (routeSegments?.length === 3) {
-        if (routeSegments[1] === 'versions') {
-          if (docPermissions?.readVersions?.permission) {
-            CustomView = getCustomViewByKey(views, 'Version')
-            DefaultView = DefaultVersionView
           }
         }
       }
@@ -140,7 +140,7 @@ export const getViewsFromConfig = async ({
       }
     } else if (routeSegments?.length === 1) {
       // `../:slug/api`, `../:slug/preview`, `../:slug/versions`, etc
-      switch (routeSegments[0]) {
+      switch (tabViewName) {
         case 'api': {
           if (globalConfig?.admin?.hideAPIURL !== true) {
             CustomView = getCustomViewByKey(views, 'API')
@@ -174,7 +174,7 @@ export const getViewsFromConfig = async ({
       }
     } else if (routeSegments?.length === 2) {
       // `../:slug/versions/:version`, etc
-      if (routeSegments[1] === 'versions') {
+      if (tabViewName === 'versions') {
         if (docPermissions?.readVersions?.permission) {
           CustomView = getCustomViewByKey(views, 'Version')
           DefaultView = DefaultVersionView

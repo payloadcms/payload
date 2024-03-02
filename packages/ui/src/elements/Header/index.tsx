@@ -26,8 +26,6 @@ export const AppHeader: React.FC = () => {
 
   const { actions } = useActions()
 
-  console.log('actions', actions)
-
   const { navOpen } = useNav()
 
   const customControlsRef = useRef<HTMLDivElement>(null)

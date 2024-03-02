@@ -12,10 +12,10 @@ import { notFound } from 'next/navigation'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
+import type { InitPageResult } from '../../utilities/initPage'
 import type { DefaultListViewProps, ListPreferences } from './Default/types'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
-import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
 import { DefaultListView } from './Default'
 
@@ -56,30 +56,19 @@ export const generateMetadata = async ({
   })
 }
 
-export const ListView = async ({
-  collectionSlug,
-  config: configPromise,
-  route,
-  searchParams,
-}: {
-  collectionSlug: string
-  config: Promise<SanitizedConfig>
-  route
+type Props = {
+  page: InitPageResult
+  params: { [key: string]: string | string[] }
   searchParams: { [key: string]: string | string[] | undefined }
-}) => {
-  const { collectionConfig, permissions, req } = await initPage({
-    collectionSlug,
-    config: configPromise,
-    redirectUnauthenticatedUser: true,
-    route,
-    searchParams,
-  })
-
+}
+export const ListView = async ({ page, searchParams }: Props) => {
+  const { collectionConfig, permissions } = page
   const {
     payload,
     payload: { config },
     user,
-  } = req
+  } = page.req
+  const collectionSlug = collectionConfig?.slug
 
   let listPreferences: ListPreferences
 

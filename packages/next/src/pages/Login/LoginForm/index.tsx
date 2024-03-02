@@ -50,7 +50,7 @@ export const LoginForm: React.FC<{
   return (
     <Form
       action={`${api}/${userSlug}/login`}
-      className={`${baseClass}__form`}
+      className={baseClass}
       disableSuccessStatus
       initialState={initialState}
       method="POST"

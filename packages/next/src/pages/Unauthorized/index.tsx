@@ -24,9 +24,10 @@ export const generateMetadata = async ({ page }: { page: InitPageResult }): Prom
   })
 }
 
-export const Unauthorized: React.FC<{
+type Props = {
   page: InitPageResult
-}> = ({ page }) => {
+}
+export const Unauthorized: React.FC<Props> = ({ page }) => {
   const {
     req: {
       payload: { config },
@@ -38,9 +39,5 @@ export const Unauthorized: React.FC<{
     routes: { admin },
   } = config
 
-  return (
-    <MinimalTemplate className="unauthorized">
-      <UnauthorizedClient logoutRoute={`${admin}${logoutRoute}`} />
-    </MinimalTemplate>
-  )
+  return <UnauthorizedClient logoutRoute={`${admin}${logoutRoute}`} />
 }

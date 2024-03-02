@@ -33,9 +33,11 @@ export const generateMetadata = async ({
 }
 
 type Props = {
-  inactivity?: boolean
+  baseClass: string
   page: InitPageResult
   searchParams: { [key: string]: string | string[] }
+} & {
+  inactivity?: boolean
 }
 
 export const Logout: React.FC<Props> = ({ inactivity, page, searchParams }) => {

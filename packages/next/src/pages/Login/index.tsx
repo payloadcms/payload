@@ -12,8 +12,6 @@ import { meta } from '../../utilities/meta'
 import { LoginForm } from './LoginForm'
 import './index.scss'
 
-const baseClass = 'login'
-
 export const generateMetadata = async ({
   config: configPromise,
 }: {
@@ -33,10 +31,12 @@ export const generateMetadata = async ({
   })
 }
 
-export const Login: React.FC<{
+type Props = {
+  baseClass: string
   page: InitPageResult
   searchParams: { [key: string]: string | string[] | undefined }
-}> = ({ page, searchParams }) => {
+}
+export const Login: React.FC<Props> = ({ baseClass, page, searchParams }) => {
   const { req } = page
 
   const {
@@ -57,15 +57,13 @@ export const Login: React.FC<{
   const collectionConfig = collections.find(({ slug }) => slug === userSlug)
 
   return (
-    <MinimalTemplate className={baseClass}>
-      <Fragment>
-        <div className={`${baseClass}__brand`}>
-          <Logo config={config} />
-        </div>
-        {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
-        {!collectionConfig?.auth?.disableLocalStrategy && <LoginForm searchParams={searchParams} />}
-        {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
-      </Fragment>
-    </MinimalTemplate>
+    <Fragment>
+      <div className={`${baseClass}__brand`}>
+        <Logo config={config} />
+      </div>
+      {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
+      {!collectionConfig?.auth?.disableLocalStrategy && <LoginForm searchParams={searchParams} />}
+      {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
+    </Fragment>
   )
 }

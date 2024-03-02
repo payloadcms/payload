@@ -3,14 +3,12 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { Button, Email, Form, FormSubmit, MinimalTemplate, Translation } from '@payloadcms/ui'
 import Link from 'next/link'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import type { InitPageResult } from '../../utilities/initPage'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
-
-const baseClass = 'forgot-password'
 
 export const generateMetadata = async ({
   config: configPromise,
@@ -31,9 +29,11 @@ export const generateMetadata = async ({
   })
 }
 
-export const ForgotPassword: React.FC<{
+type Props = {
+  baseClass: string
   page: InitPageResult
-}> = async ({ page }) => {
+}
+export const ForgotPassword: React.FC<Props> = async ({ page }) => {
   const { req } = page
 
   const {
@@ -61,12 +61,12 @@ export const ForgotPassword: React.FC<{
 
   if (user) {
     return (
-      <MinimalTemplate className={baseClass}>
+      <Fragment>
         <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
         <p>
           <Translation
             elements={{
-              '0': ({ children }) => <Link children={children} href={`${admin}/account`} />,
+              '0': ({ children }) => <Link href={`${admin}/account`}>{children}</Link>,
             }}
             i18nKey="authentication:loggedInChangePassword"
             t={i18n.t}
@@ -76,21 +76,21 @@ export const ForgotPassword: React.FC<{
         <Button buttonStyle="secondary" el="link" to={admin}>
           {i18n.t('general:backToDashboard')}
         </Button>
-      </MinimalTemplate>
+      </Fragment>
     )
   }
 
   // if (hasSubmitted) {
   //   return (
-  //     <MinimalTemplate className={baseClass}>
+  //     <Fragment>
   //       <h1>{i18n.t('authentication:emailSent')}</h1>
   //       <p>{i18n.t('authentication:checkYourEmailForPasswordReset')}</p>
-  //     </MinimalTemplate>
+  //     </Fragment>
   //   )
   // }
 
   return (
-    <MinimalTemplate className={baseClass}>
+    <Fragment>
       <Form
         action={`${serverURL}${api}/${userSlug}/forgot-password`}
         // handleResponse={handleResponse}
@@ -102,6 +102,6 @@ export const ForgotPassword: React.FC<{
         <FormSubmit>{i18n.t('general:submit')}</FormSubmit>
       </Form>
       <Link href={`${admin}/login`}>{i18n.t('authentication:backToLogin')}</Link>
-    </MinimalTemplate>
+    </Fragment>
   )
 }

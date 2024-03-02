@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { Button, Logo, MinimalTemplate } from '@payloadcms/ui'
+import { Logo } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
@@ -32,63 +32,47 @@ export const generateMetadata = async ({
   })
 }
 
-export const Verify: React.FC<{
+type Props = {
   page: InitPageResult
-  params: { [key: string]: string }
-}> = async ({ page, params }) => {
+  params: { [key: string]: string | string[] }
+  searchParams: { [key: string]: string | string[] }
+}
+export const Verify: React.FC<Props> = async ({ page, params }) => {
+  // /:collectionSlug/verify/:token
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [collectionSlug, verify, token] = params.segments
   const { req } = page
 
   const {
-    i18n,
     payload: { config },
-    user,
   } = req
 
   const {
-    admin: { user: userSlug },
     routes: { admin: adminRoute },
-    // serverURL,
   } = config
 
-  const verifyResult = null
-  // const [verifyResult, setVerifyResult] = useState<Response | null>(null)
+  let textToRender
 
-  // useEffect(() => {
-  //   async function verifyToken() {
-  //     const result = await fetch(`${serverURL}/api/${collectionSlug}/verify/${token}`, {
-  //       credentials: 'include',
-  //       headers: {
-  //         'Accept-Language': i18n.language,
-  //       },
-  //       method: 'POST',
-  //     })
-  //     setVerifyResult(result)
-  //   }
-  //   verifyToken()
-  // }, [setVerifyResult, collectionSlug, serverURL, token, i18n])
+  try {
+    await req.payload.verifyEmail({
+      collection: collectionSlug,
+      token,
+    })
 
-  if (user) {
     return redirect(`${adminRoute}/login`)
-  }
-
-  const getText = () => {
-    if (verifyResult?.status === 200) return i18n.t('authentication:verifiedSuccessfully')
-    if (verifyResult?.status === 202) return i18n.t('authentication:alreadyActivated')
-    return i18n.t('authentication:unableToVerify')
+  } catch (e) {
+    // already verified
+    if (e?.status === 202) redirect(`${adminRoute}/login`)
+    textToRender = req.t('authentication:unableToVerify')
   }
 
   return (
-    <MinimalTemplate className={baseClass}>
+    <React.Fragment>
       <div className={`${baseClass}__brand`}>
         <Logo config={config} />
       </div>
-      <h2>{getText()}</h2>
-      {verifyResult?.status === 200 && (
-        <Button buttonStyle="secondary" el="link" to={`${adminRoute}/login`}>
-          {i18n.t('authentication:login')}
-        </Button>
-      )}
-    </MinimalTemplate>
+      <h2>{textToRender}</h2>
+    </React.Fragment>
   )
 }
 export default Verify

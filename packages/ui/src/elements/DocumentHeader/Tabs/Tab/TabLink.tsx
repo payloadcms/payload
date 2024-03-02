@@ -19,21 +19,23 @@ export const DocumentTabLink: React.FC<{
   children,
   href: hrefFromProps,
   isActive: isActiveFromProps,
-  isCollection,
   newTab,
 }) => {
   const pathname = usePathname()
   const params = useParams()
+  const [entityType, entitySlug, segmentThree, segmentFour, ...rest] = params.segments || []
+  const isCollection = entityType === 'collections'
+  let docPath = `${adminRoute}/${isCollection ? 'collections' : 'globals'}/${entitySlug}`
+  if (isCollection && segmentThree) {
+    // doc ID
+    docPath += `/${segmentThree}`
+  }
 
-  const docHref = `${adminRoute}/${isCollection ? 'collections' : 'globals'}${
-    isCollection ? `/${params.collection}` : `/${params.global}`
-  }${isCollection ? `/${params.segments?.[0]}` : ''}`
-
-  const href = `${docHref}${hrefFromProps}`
+  const href = `${docPath}${hrefFromProps}`
 
   const isActive =
-    (href === docHref && pathname === docHref) ||
-    (href !== docHref && pathname.startsWith(href)) ||
+    (href === docPath && pathname === docPath) ||
+    (href !== docPath && pathname.startsWith(href)) ||
     isActiveFromProps
 
   return (

@@ -41,10 +41,12 @@ export const generateMetadata = async ({
   })
 }
 
-export const ResetPassword: React.FC<{
+type Props = {
   page: InitPageResult
-  params: { [key: string]: string }
-}> = ({ page, params }) => {
+  params: { [key: string]: string | string[] }
+  searchParams: { [key: string]: string | string[] }
+}
+export const ResetPassword: React.FC<Props> = ({ page, params }) => {
   const { req } = page
   const { token } = params
 
