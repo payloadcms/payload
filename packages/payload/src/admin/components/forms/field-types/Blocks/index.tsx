@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
@@ -166,6 +166,53 @@ const BlocksField: React.FC<Props> = (props) => {
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
   const showRequired = readOnly && rows.length === 0
 
+  const addMore = useMemo(() => {
+    if (readOnly && hasMaxRows) return null
+
+    const hasOneBlock = blocks.length === 1
+    const addMessage = t('addLabel', { label: getTranslation(labels.singular, i18n) })
+    const rowIndex = rows?.length || 0
+
+    if (hasOneBlock) {
+      return (
+        <Button
+          buttonStyle="icon-label"
+          icon="plus"
+          iconPosition="left"
+          iconStyle="with-border"
+          onClick={() => {
+            addRow(rowIndex, blocks[0].slug)
+          }}
+        >
+          {addMessage}
+        </Button>
+      )
+    }
+
+    return (
+      <Fragment>
+        <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
+          <Button
+            buttonStyle="icon-label"
+            el="span"
+            icon="plus"
+            iconPosition="left"
+            iconStyle="with-border"
+          >
+            {addMessage}
+          </Button>
+        </DrawerToggler>
+        <BlocksDrawer
+          addRow={addRow}
+          addRowIndex={rowIndex}
+          blocks={blocks}
+          drawerSlug={drawerSlug}
+          labels={labels}
+        />
+      </Fragment>
+    )
+  }, [addRow, blocks, drawerSlug, hasMaxRows, i18n, labels, readOnly, rows, t])
+
   return (
     <div
       className={[
@@ -284,28 +331,7 @@ const BlocksField: React.FC<Props> = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!readOnly && !hasMaxRows && (
-        <Fragment>
-          <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
-            <Button
-              buttonStyle="icon-label"
-              el="span"
-              icon="plus"
-              iconPosition="left"
-              iconStyle="with-border"
-            >
-              {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
-            </Button>
-          </DrawerToggler>
-          <BlocksDrawer
-            addRow={addRow}
-            addRowIndex={rows?.length || 0}
-            blocks={blocks}
-            drawerSlug={drawerSlug}
-            labels={labels}
-          />
-        </Fragment>
-      )}
+      {addMore}
     </div>
   )
 }
