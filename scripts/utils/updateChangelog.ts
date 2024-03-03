@@ -1,15 +1,18 @@
+import type {
+  GitRawCommitsOptions,
+  ParserOptions,
+  WriterOptions,
+} from 'conventional-changelog-core'
+
+import { Octokit } from '@octokit/core'
 import addStream from 'add-stream'
 import conventionalChangelog from 'conventional-changelog'
 import { default as getConventionalPreset } from 'conventional-changelog-conventionalcommits'
-import { GitRawCommitsOptions, ParserOptions, WriterOptions } from 'conventional-changelog-core'
+import { once } from 'events'
 import fse, { createReadStream, createWriteStream } from 'fs-extra'
 import minimist from 'minimist'
-import semver, { ReleaseType } from 'semver'
-import tempfile from 'tempfile'
-
-import { Octokit } from '@octokit/core'
 import simpleGit from 'simple-git'
-import { once } from 'events'
+import tempfile from 'tempfile'
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 const git = simpleGit()
@@ -36,11 +39,10 @@ export const updateChangelog = async ({ newVersion, dryRun }: Args) => {
 
   // Load conventional commits preset and modify it
   const conventionalPreset = (await getConventionalPreset()) as {
+    conventionalChangelog: unknown
     gitRawCommitsOpts: GitRawCommitsOptions
     parserOpts: ParserOptions
     writerOpts: WriterOptions
-    recommmendBumpOpts: unknown
-    conventionalChangelog: unknown
   }
 
   // Unbold scope
@@ -106,7 +108,13 @@ export const updateChangelog = async ({ newVersion, dryRun }: Args) => {
 // If file is executed directly, run the function
 if (require.main === module) {
   const { newVersion } = minimist(process.argv.slice(2))
-  updateChangelog({ newVersion, dryRun: true })
+  updateChangelog({ dryRun: true, newVersion })
+    .then(() => {
+      console.log('Done')
+    })
+    .catch((err) => {
+      console.error(err)
+    })
 }
 
 async function createContributorSection(lastTag: string): Promise<string> {
@@ -120,7 +128,7 @@ async function createContributorSection(lastTag: string): Promise<string> {
           repo: 'payload',
           ref: c.hash,
         })
-        .then(({ data }) => data.author?.login as string),
+        .then(({ data }) => data.author?.login),
     ),
   )
 

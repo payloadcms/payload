@@ -6,6 +6,8 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
         'no-console': 'off',
+        'perfectionist/sort-object-types': 'off',
+        'perfectionist/sort-objects': 'off',
       },
     },
     {

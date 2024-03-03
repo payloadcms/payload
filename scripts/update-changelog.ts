@@ -1,24 +1,29 @@
-import fse, { createWriteStream, createReadStream } from 'fs-extra'
-import { ExecSyncOptions, execSync } from 'child_process'
-import chalk from 'chalk'
-import path from 'path'
-import prompts from 'prompts'
-import minimist from 'minimist'
-import chalkTemplate from 'chalk-template'
-import { PackageDetails, getPackageDetails, showPackageDetails } from './lib/getPackageDetails'
-import semver from 'semver'
+import type { ExecSyncOptions } from 'child_process'
+
 import addStream from 'add-stream'
-import tempfile from 'tempfile'
+import chalk from 'chalk'
+import chalkTemplate from 'chalk-template'
+import { execSync } from 'child_process'
 import concatSream from 'concat-stream'
-import getStream from 'get-stream'
+import conventionalChangelog, { Options as ChangelogOptions } from 'conventional-changelog'
 import conventionalChangelogCore, {
-  Options,
   Context,
   GitRawCommitsOptions,
+  Options,
   ParserOptions,
   WriterOptions,
 } from 'conventional-changelog-core'
-import conventionalChangelog, { Options as ChangelogOptions } from 'conventional-changelog'
+import fse, { createReadStream, createWriteStream } from 'fs-extra'
+import getStream from 'get-stream'
+import minimist from 'minimist'
+import path from 'path'
+import prompts from 'prompts'
+import semver from 'semver'
+import tempfile from 'tempfile'
+
+import type { PackageDetails } from './lib/getPackageDetails'
+
+import { getPackageDetails, showPackageDetails } from './lib/getPackageDetails'
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
@@ -65,7 +70,7 @@ async function main() {
     abort()
   }
 
-  const nextReleaseVersion = semver.inc(pkg.version, bump) as string
+  const nextReleaseVersion = semver.inc(pkg.version, bump)
   const changelogStream = conventionalChangelog(
     {
       preset: 'conventionalcommits',

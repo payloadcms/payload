@@ -5,13 +5,24 @@ const packagesDir = path.resolve(__dirname, '../../packages')
 
 export type PackageDetails = {
   name: string
-  shortName: string
   packagePath: string
+  shortName: string
   version: string
 }
 
+const whitelist3_0 = [
+  'payload',
+  'translations',
+  'ui',
+  'next',
+  'graphql',
+
+  'db-mongodb',
+  'richtext-slate',
+]
+
 export const getPackageDetails = async (): Promise<PackageDetails[]> => {
-  const packageDirs = fse.readdirSync(packagesDir).filter((d) => d !== 'eslint-config-payload')
+  const packageDirs = fse.readdirSync(packagesDir).filter((d) => whitelist3_0.includes(d))
 
   const packageDetails = await Promise.all(
     packageDirs.map(async (dirName) => {
@@ -21,8 +32,8 @@ export const getPackageDetails = async (): Promise<PackageDetails[]> => {
 
       return {
         name: packageJson.name as string,
-        shortName: dirName,
         packagePath: path.resolve(packagesDir, dirName),
+        shortName: dirName,
         version: packageJson.version,
       }
     }),
