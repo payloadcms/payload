@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "2.11.2",
+  "version": "3.0.0-alpha.7",
   "private": true,
   "workspaces:": [
     "packages/*"

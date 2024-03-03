@@ -1,18 +1,8 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-alpha.7",
+  "version": "3.0.0-alpha.1",
   "main": "./src/index.ts",
   "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
-  },
   "exports": {
     ".": "./dist/exports/index.js",
     "./*": {
@@ -29,13 +19,13 @@
     "./assets/*": "./dist/assets/*"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
     "@types/body-scroll-lock": "^3.1.0",
     "@types/qs": "6.9.7",
     "@types/react": "18.2.15",
     "@types/react-dom": "18.2.7",
     "@types/uuid": "8.3.4",
-    "payload": "workspace:*"
+    "payload": "3.0.0-alpha.0",
+    "@payloadcms/eslint-config": "1.1.1"
   },
   "dependencies": {
     "@dnd-kit/core": "6.0.8",
@@ -44,7 +34,6 @@
     "@faceless-ui/scroll-info": "1.3.0",
     "@faceless-ui/window-info": "2.1.2",
     "@monaco-editor/react": "4.5.1",
-    "@payloadcms/translations": "workspace:*",
     "body-scroll-lock": "4.0.0-beta.0",
     "bson-objectid": "2.0.4",
     "date-fns": "2.30.0",
@@ -59,7 +48,8 @@
     "react-select": "5.7.4",
     "react-toastify": "10.0.4",
     "use-context-selector": "1.4.1",
-    "uuid": "9.0.1"
+    "uuid": "9.0.1",
+    "@payloadcms/translations": "3.0.0-alpha.0"
   },
   "peerDependencies": {
     "next": "^14.0.0",
@@ -71,5 +61,14 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./dist -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "lint": "eslint \"src/**/*.{ts,tsx}\""
+  }
 }

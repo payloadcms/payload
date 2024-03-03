@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/translations",
-  "version": "0.0.1",
+  "version": "3.0.0-alpha.7",
   "main": "./dist/exports/index.ts",
   "types": "./dist/types.d.ts",
   "scripts": {
