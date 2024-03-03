@@ -25,7 +25,7 @@ import React, { Fragment } from 'react'
 import type { InitPageResult } from '../../utilities/initPage'
 import type { ServerSideEditViewProps } from '../Edit/types'
 
-import { getMetaBySegment } from './getMetaBySegment.tsx'
+import { getMetaBySegment } from './getMetaBySegment'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
 export const generateMetadata = async (args: {

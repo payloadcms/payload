@@ -1,4 +1,5 @@
 import type { LivePreviewConfig } from 'payload/config'
+import type { Data } from 'payload/types'
 
 import React from 'react'
 
@@ -8,6 +9,7 @@ import { LivePreviewClient } from './index.client'
 import './index.scss'
 
 type Props = {
+  data: Data
   page: InitPageResult
   params: { [key: string]: string | string[] }
   searchParams: { [key: string]: string | string[] | undefined }
