@@ -1,11 +1,9 @@
-import type { Data } from 'payload/types'
+import type { Data, FormField, FormState } from 'payload/types'
 
 import type {
   Context,
   CreateFormData,
   DispatchFields,
-  FormField,
-  FormState,
   GetSiblingData,
   Reset,
   SetModified,

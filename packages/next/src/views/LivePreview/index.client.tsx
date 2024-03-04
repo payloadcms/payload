@@ -1,7 +1,7 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui'
-import type { EditViewProps, LivePreviewConfig } from 'payload/config'
-import type { Data } from 'payload/types'
+import type { LivePreviewConfig } from 'payload/config'
+import type { Data, EditViewProps } from 'payload/types'
 
 import {
   DocumentControls,

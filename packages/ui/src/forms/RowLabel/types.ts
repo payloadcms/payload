@@ -1,9 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
-import type { RowLabel, RowLabelComponent } from 'payload/types'
+import type { FormState, RowLabel, RowLabelComponent } from 'payload/types'
 
 import React from 'react'
-
-import type { FormState } from '../../forms/Form/types'
 
 export type Props = {
   className?: string

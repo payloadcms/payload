@@ -1,8 +1,7 @@
 import type { LivePreviewConfig } from 'payload/config'
+import type { ServerSideEditViewProps } from 'payload/types'
 
 import React from 'react'
-
-import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { LivePreviewClient } from './index.client'
 import './index.scss'
@@ -57,6 +56,7 @@ export const LivePreviewView: React.FC = async (props: ServerSideEditViewProps) 
       ? await livePreviewConfig.url({
           data,
           documentInfo: {}, // TODO: recreate this object server-side, see `useDocumentInfo`
+          // @ts-expect-error
           locale,
         })
       : livePreviewConfig?.url

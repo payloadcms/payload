@@ -1,5 +1,11 @@
 import type { Metadata } from 'next'
-import type { Data, DocumentPreferences, SanitizedConfig } from 'payload/types'
+import type {
+  Data,
+  DocumentPreferences,
+  InitPageResult,
+  SanitizedConfig,
+  ServerSideEditViewProps,
+} from 'payload/types'
 
 import {
   HydrateClientUser,
@@ -10,9 +16,6 @@ import {
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import React, { Fragment } from 'react'
-
-import type { InitPageResult } from '../../utilities/initPage'
-import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -39,19 +42,22 @@ export const generateMetadata = async ({
 }
 
 export const Account = async ({
-  page,
+  initPageResult,
   searchParams,
 }: {
-  page: InitPageResult
+  initPageResult: InitPageResult
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { locale, permissions, req } = page
-
   const {
-    payload,
-    payload: { config },
-    user,
-  } = req
+    locale,
+    permissions,
+    req: {
+      payload,
+      payload: { config },
+      user,
+    },
+    req,
+  } = initPageResult
 
   const {
     admin: { components: { views: { Account: CustomAccountComponent } = {} } = {}, user: userSlug },
@@ -116,7 +122,7 @@ export const Account = async ({
       docPermissions: collectionPermissions,
       docPreferences,
       hasSavePermission: collectionPermissions?.update?.permission,
-      initPageResult: page,
+      initPageResult,
       initialState,
       searchParams,
       updatedAt: '', // TODO

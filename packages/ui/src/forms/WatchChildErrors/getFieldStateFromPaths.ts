@@ -1,4 +1,4 @@
-import type { FormState } from '../Form/types'
+import type { FormState } from 'payload/types'
 
 export const getFieldStateFromPaths = ({
   formState,

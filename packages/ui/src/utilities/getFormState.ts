@@ -1,7 +1,6 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { FormState, SanitizedConfig } from 'payload/types'
 
 import type { BuildFormStateArgs } from '..'
-import type { FormState } from '../forms/Form/types'
 
 export const getFormState = async (args: {
   apiRoute: SanitizedConfig['routes']['api']

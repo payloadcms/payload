@@ -3,14 +3,13 @@ import type {
   Data,
   DocumentPermissions,
   DocumentPreferences,
+  FormState,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TypeWithID,
   TypeWithTimestamps,
 } from 'payload/types'
 import type React from 'react'
-
-import type { FormState } from '../../forms/Form/types'
 
 export type DocumentInfoProps = {
   AfterDocument?: React.ReactNode

@@ -1,11 +1,15 @@
 /* eslint-disable no-param-reassign */
-import type { Data, NonPresentationalField, PayloadRequest } from 'payload/types'
+import type {
+  Data,
+  FormField,
+  FormState,
+  NonPresentationalField,
+  PayloadRequest,
+} from 'payload/types'
 
 import ObjectId from 'bson-objectid'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import { getDefaultValue } from 'payload/utilities'
-
-import type { FormField, FormState } from '../../Form/types'
 
 import { iterateFields } from './iterateFields'
 

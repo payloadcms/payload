@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
-import { Button, Email, Form, FormSubmit, MinimalTemplate, Translation } from '@payloadcms/ui'
+import { Button, Email, Form, FormSubmit, Translation } from '@payloadcms/ui'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
-
-import type { InitPageResult } from '../../utilities/initPage'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'

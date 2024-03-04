@@ -1,6 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
-
-import type { FormState } from '../../forms/Form/types'
+import type { FormState, SanitizedCollectionConfig } from 'payload/types'
 
 export type Props = {
   collectionSlug: string

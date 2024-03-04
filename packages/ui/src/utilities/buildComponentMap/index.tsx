@@ -1,6 +1,5 @@
 import type { FieldPermissions } from 'payload/auth'
-import type { EditViewProps } from 'payload/config'
-import type { SanitizedConfig } from 'payload/types'
+import type { EditViewProps, SanitizedConfig } from 'payload/types'
 
 import React from 'react'
 
@@ -58,7 +57,7 @@ export const buildComponentMap = (args: {
           ? listViewFromConfig.Component
           : undefined
 
-    const Edit = CustomEditView || DefaultEditView
+    const Edit = (CustomEditView as React.FC<EditViewProps>) || DefaultEditView
     const List = CustomListView || DefaultListView
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList
@@ -137,10 +136,10 @@ export const buildComponentMap = (args: {
           : typeof editViewFromConfig?.Default === 'object' &&
               'Component' in editViewFromConfig.Default &&
               typeof editViewFromConfig.Default.Component === 'function'
-            ? (editViewFromConfig.Default.Component as React.FC<EditViewProps>)
+            ? editViewFromConfig.Default.Component
             : undefined
 
-    const Edit = CustomEditView || DefaultEditView
+    const Edit = (CustomEditView as React.FC<EditViewProps>) || DefaultEditView
 
     const componentMap: GlobalComponentMap = {
       Edit: <Edit globalSlug={globalConfig.slug} />,

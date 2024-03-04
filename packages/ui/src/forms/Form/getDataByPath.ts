@@ -1,6 +1,6 @@
-import { unflatten } from 'flatley'
+import type { FormState } from 'payload/types'
 
-import type { FormState } from './types'
+import { unflatten } from 'flatley'
 
 const getDataByPath = <T = unknown>(fields: FormState, path: string): T => {
   const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1)

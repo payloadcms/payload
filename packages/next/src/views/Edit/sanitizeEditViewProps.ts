@@ -1,6 +1,4 @@
-import type { EditViewProps } from 'payload/config'
-
-import type { ServerSideEditViewProps } from './types'
+import type { EditViewProps, ServerSideEditViewProps } from 'payload/types'
 
 export const sanitizeEditViewProps = (props: ServerSideEditViewProps) => {
   const clientSideProps = { ...props }

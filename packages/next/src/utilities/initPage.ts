@@ -1,6 +1,5 @@
-import type { Permissions } from 'payload/auth'
-import type { Locale } from 'payload/config'
 import type {
+  InitPageResult,
   PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedConfig,
@@ -27,14 +26,6 @@ type Args = {
   redirectUnauthenticatedUser?: boolean
   route?: string
   searchParams?: { [key: string]: string | string[] | undefined }
-}
-
-export type InitPageResult = {
-  collectionConfig?: SanitizedCollectionConfig
-  globalConfig?: SanitizedGlobalConfig
-  locale: Locale
-  permissions: Permissions
-  req: PayloadRequest
 }
 
 export const initPage = async ({

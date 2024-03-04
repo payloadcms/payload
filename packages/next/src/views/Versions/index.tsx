@@ -1,8 +1,8 @@
+import type { ServerSideEditViewProps } from 'payload/types'
+
 import { Gutter } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import React from 'react'
-
-import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { SetStepNav } from '../Edit/Default/SetStepNav'
 import { sanitizeEditViewProps } from '../Edit/sanitizeEditViewProps'

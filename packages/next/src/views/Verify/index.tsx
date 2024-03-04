@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
 import { Logo } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React from 'react'
-
-import type { InitPageResult } from '../../utilities/initPage'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -37,6 +35,7 @@ type Props = {
   params: { [key: string]: string | string[] }
   searchParams: { [key: string]: string | string[] }
 }
+
 export const Verify: React.FC<Props> = async ({ page, params }) => {
   // /:collectionSlug/verify/:token
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

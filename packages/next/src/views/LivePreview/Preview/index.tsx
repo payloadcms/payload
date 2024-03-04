@@ -1,5 +1,6 @@
 'use client'
-import type { EditViewProps } from 'payload/config'
+
+import type { EditViewProps } from 'payload/types'
 
 import {
   ShimmerEffect,

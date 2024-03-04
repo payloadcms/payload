@@ -6,6 +6,7 @@ import type {
   CodeField,
   DateField,
   DocumentPreferences,
+  FormState,
   JSONField,
   RelationshipField,
   RowLabel,
@@ -14,7 +15,6 @@ import type {
 } from 'payload/types'
 import type { Option } from 'payload/types'
 
-import type { FormState } from '../../forms/Form/types'
 import type {
   FieldMap,
   MappedField,
