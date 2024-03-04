@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect } from 'react'
 
-import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 import { type AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav'
 import { customNestedTabViewTitle } from '../../../shared'
 
 const CustomNestedTabView: AdminViewComponent = () => {

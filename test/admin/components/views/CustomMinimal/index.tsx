@@ -1,9 +1,9 @@
 import React from 'react'
 
-import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
+import { Button } from '../../../../../packages/ui/src/elements/Button'
+import { useConfig } from '../../../../../packages/ui/src/providers/Config'
 // As this is the demo project, we import our dependencies from the `src` directory.
-import MinimalTemplate from '../../../../../packages/payload/src/admin/components/templates/Minimal'
-import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
+import { MinimalTemplate } from '../../../../../packages/ui/src/templates/Minimal'
 
 // In your projects, you can import as follows:
 // import { MinimalTemplate } from 'payload/components/templates';

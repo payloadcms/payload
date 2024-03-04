@@ -3,12 +3,13 @@ import { Redirect } from 'react-router-dom'
 
 import type { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
 
-import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
-import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
+import { Button } from '../../../../../packages/ui/src/elements/Button'
+// TODO(3.0): Meta?
+// import Meta from '../../../../../packages/payload/src/admin/components/utilities/Meta'
+import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav'
+import { useConfig } from '../../../../../packages/ui/src/providers/Config'
 // As this is the demo project, we import our dependencies from the `src` directory.
-import DefaultTemplate from '../../../../../packages/payload/src/admin/components/templates/Default'
-import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
-import Meta from '../../../../../packages/payload/src/admin/components/utilities/Meta'
+import { DefaultTemplate } from '../../../../../packages/ui/src/templates/Default'
 
 // In your projects, you can import as follows:
 // import { DefaultTemplate } from 'payload/components/templates';
@@ -47,11 +48,11 @@ const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
 
   return (
     <DefaultTemplate>
-      <Meta
+      {/* <Meta
         description="Building custom views into Payload is easy."
         keywords="Custom React Components, Payload, CMS"
         title="Custom Admin View with Default Template"
-      />
+      /> */}
       <div
         className={`${baseClass}__content`}
         style={{

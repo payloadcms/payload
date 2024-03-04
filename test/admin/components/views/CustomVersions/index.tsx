@@ -3,8 +3,8 @@ import { Redirect } from 'react-router-dom'
 
 import type { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
 
-import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
-import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
+import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav'
+import { useConfig } from '../../../../../packages/ui/src/providers/Config'
 
 const CustomVersionsView: AdminViewComponent = ({
   canAccessAdmin,

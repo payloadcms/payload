@@ -1,7 +1,7 @@
 import React from 'react'
 
-import LogOut from '../../../../packages/payload/src/admin/components/icons/LogOut'
-import { useConfig } from '../../../../packages/payload/src/admin/components/utilities/Config'
+import { LogOut } from '../../../../packages/ui/src/icons/LogOut'
+import { useConfig } from '../../../../packages/ui/src/providers/Config'
 
 const Logout: React.FC = () => {
   const config = useConfig()

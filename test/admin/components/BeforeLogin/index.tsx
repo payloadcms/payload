@@ -1,5 +1,6 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+
+import { useTranslation } from '../../../../packages/ui/src/providers/Translation'
 
 const BeforeLogin: React.FC<{ i18n }> = () => {
   const { t } = useTranslation()

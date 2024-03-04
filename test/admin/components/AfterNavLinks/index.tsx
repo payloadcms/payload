@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 
 // As this is the demo project, we import our dependencies from the `src` directory.
-import { useConfig } from '../../../../packages/payload/src/admin/components/utilities/Config'
+import { useConfig } from '../../../../packages/ui/src/providers/Config'
 
 // In your projects, you can import as follows:
 // import { useConfig } from 'payload/components/utilities';
