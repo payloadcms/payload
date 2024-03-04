@@ -67,12 +67,12 @@ export const RootProvider: React.FC<Props> = ({
                 }}
               >
                 <ScrollInfoProvider>
-                  <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                    <AuthProvider>
-                      <PreferencesProvider>
-                        <ThemeProvider>
-                          <ParamsProvider>
-                            <SearchParamsProvider>
+                  <SearchParamsProvider>
+                    <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                      <AuthProvider>
+                        <PreferencesProvider>
+                          <ThemeProvider>
+                            <ParamsProvider>
                               <LocaleProvider>
                                 <StepNavProvider>
                                   <LoadingOverlayProvider>
@@ -88,13 +88,13 @@ export const RootProvider: React.FC<Props> = ({
                                   </LoadingOverlayProvider>
                                 </StepNavProvider>
                               </LocaleProvider>
-                            </SearchParamsProvider>
-                          </ParamsProvider>
-                        </ThemeProvider>
-                      </PreferencesProvider>
-                      <ModalContainer />
-                    </AuthProvider>
-                  </ModalProvider>
+                            </ParamsProvider>
+                          </ThemeProvider>
+                        </PreferencesProvider>
+                        <ModalContainer />
+                      </AuthProvider>
+                    </ModalProvider>
+                  </SearchParamsProvider>
                 </ScrollInfoProvider>
               </WindowInfoProvider>
             </TranslationProvider>

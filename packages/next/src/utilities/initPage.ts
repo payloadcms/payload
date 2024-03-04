@@ -54,7 +54,7 @@ export const initPage = async ({
       ? `?${qs.stringify(searchParams)}`
       : ''
 
-    redirect(`${routes.admin}/login?redirect=${routes.admin + route + stringifiedSearchParams}`)
+    redirect(`${routes.admin}/login?redirect=${route + stringifiedSearchParams}`)
   }
 
   const payload = await getPayload({ config })
