@@ -204,10 +204,10 @@ const initTFunction: InitTFunction = (args) => (key, vars) => {
   })
 }
 
-function memoize<T>(fn: Function, keys: string[]): T {
+function memoize(fn: Function, keys: string[]) {
   const cacheMap = new Map()
 
-  return <T>function (args) {
+  const memoized = (args) => {
     const cacheKey = keys.reduce((acc, key) => acc + args[key], '')
 
     if (!cacheMap.has(cacheKey)) {
@@ -217,11 +217,13 @@ function memoize<T>(fn: Function, keys: string[]): T {
 
     return cacheMap.get(cacheKey)!
   }
+
+  return memoized
 }
 
 export const initI18n: InitI18n = memoize(
-  <InitI18n>(({ config, language = 'en', translations, context }) => {
-    const i18n = {
+  ({ config, language = 'en', translations, context }: Parameters<InitI18n>[0]) => {
+    const i18n: I18n = {
       fallbackLanguage: config.fallbackLanguage,
       language: language || config.fallbackLanguage,
       t: initTFunction({
@@ -232,6 +234,6 @@ export const initI18n: InitI18n = memoize(
     }
 
     return i18n
-  }),
+  },
   ['language', 'context'] satisfies Array<keyof Parameters<InitI18n>[0]>,
 )
