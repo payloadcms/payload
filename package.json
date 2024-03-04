@@ -36,7 +36,7 @@
     "clean": "turbo clean",
     "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache && rimraf .next",
     "clean:all": "find . \\( -type d \\( -name node_modules -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} +",
-    "dev": "cross-env node ./test/dev.js",
+    "dev": "cross-env node --no-deprecation ./test/dev.js",
     "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
     "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
     "dev:postgres": "pnpm --filter payload run dev:postgres",
