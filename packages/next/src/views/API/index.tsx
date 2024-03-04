@@ -1,6 +1,6 @@
-import React from 'react'
+import type { ServerSideEditViewProps } from 'payload/types'
 
-import type { ServerSideEditViewProps } from '../Edit/types'
+import React from 'react'
 
 import { sanitizeEditViewProps } from '../Edit/sanitizeEditViewProps'
 import { APIViewClient } from './index.client'

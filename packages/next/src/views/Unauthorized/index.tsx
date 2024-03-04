@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
+import type { InitPageResult } from 'payload/types'
 
-import { MinimalTemplate } from '@payloadcms/ui'
 import React from 'react'
-
-import type { InitPageResult } from '../../utilities/initPage'
 
 import { meta } from '../../utilities/meta'
 import { UnauthorizedClient } from './UnauthorizedClient'

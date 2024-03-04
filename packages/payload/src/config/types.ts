@@ -9,6 +9,7 @@ import type { DeepRequired } from 'ts-essentials'
 
 import type { Payload } from '..'
 import type { DocumentTab, RichTextAdapter } from '../admin/types'
+import type { AdminView, ServerSideEditViewProps } from '../admin/views/types'
 import type { User } from '../auth/types'
 import type {
   AfterErrorHook,
@@ -256,30 +257,7 @@ export type Endpoint<U = User> = {
   root?: never
 }
 
-export type AdminViewConfig = {
-  Component: AdminViewComponent
-  /** Whether the path should be matched exactly or as a prefix */
-  exact?: boolean
-  path: string
-  sensitive?: boolean
-  strict?: boolean
-}
-
-export type AdminViewProps = {
-  canAccessAdmin?: boolean
-  user: User | null | undefined
-}
-
-export type AdminViewComponent = React.ComponentType<AdminViewProps>
-
-export type AdminView = AdminViewComponent | AdminViewConfig
-
-export type EditViewProps = {
-  collectionSlug?: string
-  globalSlug?: string
-}
-
-export type EditViewComponent = React.ComponentType<EditViewProps>
+export type EditViewComponent = React.ComponentType<ServerSideEditViewProps>
 
 export type EditViewConfig =
   | {
@@ -293,7 +271,7 @@ export type EditViewConfig =
       path?: string
     }
   | {
-      Component: AdminViewComponent // TODO: The `Edit` view Component is of type `React.FC<EditViewProps>`
+      Component: EditViewComponent
       path: string
     }
   | {
@@ -307,7 +285,7 @@ export type EditViewConfig =
  * All Tab properties become optional
  * i.e. you can change just the label, if desired
  */
-export type EditView = AdminViewComponent | EditViewConfig
+export type EditView = EditViewComponent | EditViewConfig
 
 export type Locale = {
   /**

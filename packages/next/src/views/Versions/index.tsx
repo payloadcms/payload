@@ -1,9 +1,8 @@
-import { getTranslation } from '@payloadcms/translations'
+import type { ServerSideEditViewProps } from 'payload/types'
+
 import { Gutter } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import React from 'react'
-
-import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { SetStepNav } from '../Edit/Default/SetStepNav'
 import { sanitizeEditViewProps } from '../Edit/sanitizeEditViewProps'
@@ -14,25 +13,28 @@ import './index.scss'
 export const baseClass = 'versions'
 
 export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => {
-  const { config, i18n, payload, searchParams, user } = props
+  const { id, initPageResult, searchParams } = props
 
-  const id = 'id' in props ? props.id : undefined
-  const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
-  const globalConfig = 'globalConfig' in props && props?.globalConfig
+  const {
+    collectionConfig,
+    globalConfig,
+    req: {
+      i18n,
+      payload,
+      payload: { config },
+      user,
+    },
+  } = initPageResult
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
   const { limit, page, sort } = searchParams
 
   const {
-    routes: { admin: adminRoute, api: apiRoute },
+    routes: { api: apiRoute },
     serverURL,
   } = config
 
-  let docURL: string
-  let entityLabel: string
-  let slug: string
-  let editURL: string
   let versionsData
 
   if (collectionSlug) {
@@ -51,12 +53,8 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
         },
       })
     } catch (error) {
-      console.error(error)
+      console.error(error) // eslint-disable-line no-console
     }
-
-    docURL = `${serverURL}${apiRoute}/${slug}/${id}`
-    entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
-    editURL = `${adminRoute}/collections/${collectionSlug}/${id}`
   }
 
   if (globalSlug) {
@@ -74,16 +72,12 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
         },
       })
     } catch (error) {
-      console.error(error)
+      console.error(error) // eslint-disable-line no-console
     }
 
     if (!versionsData) {
       return notFound()
     }
-
-    docURL = `${serverURL}${apiRoute}/globals/${globalSlug}`
-    entityLabel = getTranslation(globalConfig.label, i18n)
-    editURL = `${adminRoute}/globals/${globalSlug}`
   }
 
   const columns = buildVersionColumns({

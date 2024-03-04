@@ -1,5 +1,5 @@
 'use client'
-import type { Field } from 'payload/types'
+import type { Field, FormState } from 'payload/types'
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import isDeepEqual from 'deep-equal'
@@ -9,13 +9,7 @@ import { wait } from 'payload/utilities'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type {
-  Context as FormContextType,
-  FormState,
-  GetDataByPath,
-  Props,
-  SubmitOptions,
-} from './types'
+import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
@@ -249,7 +243,7 @@ const Form: React.FC<Props> = (props) => {
         const contentType = res.headers.get('content-type')
         const isJSON = contentType && contentType.indexOf('application/json') !== -1
 
-        let json: any = {}
+        let json: Record<string, any> = {}
 
         if (isJSON) json = await res.json()
 

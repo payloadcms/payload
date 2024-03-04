@@ -1,8 +1,6 @@
-import type { Data } from 'payload/types'
+import type { Data, FormState } from 'payload/types'
 
 import { unflatten as flatleyUnflatten } from 'flatley'
-
-import type { FormState } from './types'
 
 /**
  * Reduce flattened form fields (Fields) to just map to the respective values instead of the full FormField object

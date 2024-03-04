@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -12,7 +12,6 @@ import { notFound } from 'next/navigation'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
-import type { InitPageResult } from '../../utilities/initPage'
 import type { DefaultListViewProps, ListPreferences } from './Default/types'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
@@ -56,18 +55,24 @@ export const generateMetadata = async ({
   })
 }
 
-type Props = {
-  page: InitPageResult
+export const ListView = async ({
+  initPageResult,
+  searchParams,
+}: {
+  initPageResult: InitPageResult
   params: { [key: string]: string | string[] }
   searchParams: { [key: string]: string | string[] | undefined }
-}
-export const ListView = async ({ page, searchParams }: Props) => {
-  const { collectionConfig, permissions } = page
+}) => {
   const {
-    payload,
-    payload: { config },
-    user,
-  } = page.req
+    collectionConfig,
+    permissions,
+    req: {
+      payload,
+      payload: { config },
+      user,
+    },
+  } = initPageResult
+
   const collectionSlug = collectionConfig?.slug
 
   let listPreferences: ListPreferences
@@ -85,7 +90,7 @@ export const ListView = async ({ page, searchParams }: Props) => {
         },
       })
       ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
-  } catch (error) {}
+  } catch (error) {} // eslint-disable-line no-empty
 
   const {
     routes: { admin },

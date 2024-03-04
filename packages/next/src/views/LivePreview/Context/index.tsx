@@ -1,5 +1,6 @@
 'use client'
-import type { EditViewProps, LivePreviewConfig } from 'payload/config'
+import type { LivePreviewConfig } from 'payload/config'
+import type { EditViewProps } from 'payload/types'
 
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect, useState } from 'react'

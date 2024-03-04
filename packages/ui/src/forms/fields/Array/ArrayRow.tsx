@@ -1,12 +1,11 @@
 import type { FieldPermissions } from 'payload/auth'
-import type { ArrayField, RowLabel as RowLabelType } from 'payload/types'
+import type { ArrayField, Row, RowLabel as RowLabelType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'
 import type { FieldMap } from '../../../utilities/buildComponentMap/types'
-import type { Row } from '../../Form/types'
 
 import { ArrayAction } from '../../../elements/ArrayAction'
 import { Collapsible } from '../../../elements/Collapsible'
@@ -41,19 +40,16 @@ type ArrayRowProps = UseDraggableSortableReturn & {
 }
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
-  CustomRowLabel,
   addRow,
   attributes,
   duplicateRow,
   fieldMap,
   forceRender = false,
   hasMaxRows,
-  indexPath,
   labels,
   listeners,
   moveRow,
   path: parentPath,
-  permissions,
   readOnly,
   removeRow,
   row,

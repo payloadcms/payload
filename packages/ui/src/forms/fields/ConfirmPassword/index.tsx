@@ -1,7 +1,8 @@
 'use client'
+import type { FormField } from 'payload/types'
+
 import React, { useCallback } from 'react'
 
-import type { FormField } from '../../Form/types'
 import type { Props } from './types'
 
 import { useTranslation } from '../../../providers/Translation'

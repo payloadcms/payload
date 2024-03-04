@@ -23,6 +23,12 @@ export type {
   DescriptionComponent,
   DescriptionFunction,
 } from './forms/FieldDescription'
-export type { Data } from './forms/Form'
+export type { Data, FormField, FormState, Row } from './forms/Form'
 export type { LabelProps } from './forms/Label'
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel'
+export type {
+  AdminViewComponent,
+  EditViewProps,
+  InitPageResult,
+  ServerSideEditViewProps,
+} from './views/types'

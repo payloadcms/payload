@@ -1,27 +1,21 @@
 import type { Option } from '@payloadcms/ui'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { Document } from 'payload/types'
+import type { Document, ServerSideEditViewProps } from 'payload/types'
 
 import { notFound } from 'next/navigation'
 import React from 'react'
 
-import type { InitPageResult } from '../../utilities/initPage'
-
 import { DefaultVersionView } from './Default'
 
-type Props = {
-  page: InitPageResult
-  params: { [key: string]: string | string[] }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-export const VersionView: React.FC = async (props: Props) => {
-  const { page, params } = props
+export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
+  const { initPageResult, params } = props
+
   const {
     collectionConfig,
     globalConfig,
     permissions,
     req: { payload, payload: { config } = {}, user } = {},
-  } = page
+  } = initPageResult
 
   // /entityType/:entitySlug/:id/versions/:versionID
   const [entityType, entitySlug, id, versions, versionID] = params.segments

@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
-import { Logo, MinimalTemplate } from '@payloadcms/ui'
+import { Logo } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React, { Fragment } from 'react'
-
-import type { InitPageResult } from '../../utilities/initPage'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'

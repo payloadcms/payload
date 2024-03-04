@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
 import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
 import Link from 'next/link'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
-import type { InitPageResult } from '../../utilities/initPage'
 import type { DashboardProps } from './Default'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
@@ -32,18 +31,20 @@ export const generateMetadata = async ({
   })
 }
 
-type Args = {
-  page: InitPageResult
+export const Dashboard = ({
+  initPageResult,
+  // searchParams,
+}: {
+  initPageResult: InitPageResult
   searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export const Dashboard = async ({ page, searchParams }: Args) => {
-  const { permissions, req } = page
-
+}) => {
   const {
-    payload: { config },
-    user,
-  } = req
+    permissions,
+    req: {
+      payload: { config },
+      user,
+    },
+  } = initPageResult
 
   const CustomDashboardComponent = config.admin.components?.views?.Dashboard
 

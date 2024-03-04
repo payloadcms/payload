@@ -1,12 +1,13 @@
 'use client'
 
+import type { FormState } from 'payload/types'
+
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { FormState } from '../../forms/Form/types'
 import type { DocumentDrawerProps } from './types'
 
 import { baseClass } from '.'

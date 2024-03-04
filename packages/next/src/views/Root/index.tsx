@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
 import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
 import React from 'react'
@@ -48,7 +48,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
   const config = await configPromise
   let ViewToRender
   let templateClassName
-  let pageData
+  let initPageResult: InitPageResult
   let templateType: 'default' | 'minimal' = 'default'
 
   let route = config.routes.admin
@@ -70,7 +70,12 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       ViewToRender = Dashboard
       templateClassName = 'dashboard'
       templateType = 'default'
-      pageData = await initPage({ config, redirectUnauthenticatedUser: true, route, searchParams })
+      initPageResult = await initPage({
+        config,
+        redirectUnauthenticatedUser: true,
+        route,
+        searchParams,
+      })
       break
     }
     case 1: {
@@ -81,13 +86,13 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         // --> /logout
         // --> /logout-inactivity
         // --> /unauthorized
-        pageData = await initPage({ config, route, searchParams })
+        initPageResult = await initPage({ config, route, searchParams })
         ViewToRender = oneSegmentViews[segmentOne]
         templateClassName = baseClasses[segmentOne]
         templateType = 'minimal'
       } else if (segmentOne === 'account') {
         // --> /account
-        pageData = await initPage({
+        initPageResult = await initPage({
           config,
           redirectUnauthenticatedUser: true,
           route,
@@ -102,14 +107,14 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
     case 2: {
       if (segmentOne === 'reset') {
         // --> /reset/:token
-        pageData = await initPage({ config, route, searchParams })
+        initPageResult = await initPage({ config, route, searchParams })
         ViewToRender = ResetPassword
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
       }
       if (isCollection) {
         // --> /collections/:collectionSlug
-        pageData = await initPage({
+        initPageResult = await initPage({
           config,
           redirectUnauthenticatedUser: true,
           route,
@@ -120,7 +125,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         templateType = 'default'
       } else if (isGlobal) {
         // --> /globals/:globalSlug
-        pageData = await initPage({
+        initPageResult = await initPage({
           config,
           redirectUnauthenticatedUser: true,
           route,
@@ -135,7 +140,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
     default:
       if (segmentTwo === 'verify') {
         // --> /:collectionSlug/verify/:token
-        pageData = await initPage({ config, route, searchParams })
+        initPageResult = await initPage({ config, route, searchParams })
         ViewToRender = Verify
         templateClassName = 'verify'
         templateType = 'minimal'
@@ -146,7 +151,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         // --> /collections/:collectionSlug/:id/versions
         // --> /collections/:collectionSlug/:id/versions/:versionId
         // --> /collections/:collectionSlug/:id/api
-        pageData = await initPage({
+        initPageResult = await initPage({
           config,
           redirectUnauthenticatedUser: true,
           route,
@@ -161,7 +166,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/versions/:versionId
         // --> /globals/:globalSlug/api
-        pageData = await initPage({
+        initPageResult = await initPage({
           config,
           redirectUnauthenticatedUser: true,
           route,
@@ -174,22 +179,30 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       break
   }
 
-  if (pageData) {
+  if (initPageResult) {
     if (templateType === 'minimal') {
       return (
         <MinimalTemplate className={templateClassName}>
-          <ViewToRender page={pageData} params={params} searchParams={searchParams} />
+          <ViewToRender
+            initPageResult={initPageResult}
+            params={params}
+            searchParams={searchParams}
+          />
         </MinimalTemplate>
       )
     } else {
       return (
         <DefaultTemplate
           config={config}
-          i18n={pageData.req.i18n}
-          permissions={pageData.permissions}
-          user={pageData.req.user}
+          i18n={initPageResult.req.i18n}
+          permissions={initPageResult.permissions}
+          user={initPageResult.req.user}
         >
-          <ViewToRender page={pageData} params={params} searchParams={searchParams} />
+          <ViewToRender
+            initPageResult={initPageResult}
+            params={params}
+            searchParams={searchParams}
+          />
         </DefaultTemplate>
       )
     }

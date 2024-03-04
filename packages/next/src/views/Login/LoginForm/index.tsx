@@ -1,5 +1,4 @@
 'use client'
-import type { FormState } from '@payloadcms/ui'
 
 import {
   Email,
@@ -14,6 +13,8 @@ import Link from 'next/link'
 import React from 'react'
 
 const baseClass = 'login__form'
+
+import type { FormState } from 'payload/types'
 
 import { useRouter } from 'next/navigation'
 

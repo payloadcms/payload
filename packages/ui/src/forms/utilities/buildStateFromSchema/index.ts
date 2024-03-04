@@ -1,6 +1,4 @@
-import type { Data, Field as FieldSchema, PayloadRequest } from 'payload/types'
-
-import type { FormState } from '../../Form/types'
+import type { Data, Field as FieldSchema, FormState, PayloadRequest } from 'payload/types'
 
 import { iterateFields } from './iterateFields'
 
