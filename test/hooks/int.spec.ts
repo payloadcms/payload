@@ -1,7 +1,6 @@
 import type { Payload } from '../../packages/payload/src'
-import type { NestedAfterReadHook } from './payload-types'
-
 import { getPayload } from '../../packages/payload/src'
+import type { NestedAfterReadHook } from './payload-types'
 import { AuthenticationError } from '../../packages/payload/src/errors'
 import { devUser, regularUser } from '../credentials'
 import { NextRESTClient } from '../helpers/NextRESTClient'
@@ -464,7 +463,7 @@ describe('Hooks', () => {
 
   describe('config level after error hook', () => {
     it('should handle error', async () => {
-      const response = await fetch(`${apiUrl}/throw-to-after-error`)
+      const response = await restClient.GET(`/throw-to-after-error`, {})
       const body = await response.json()
       expect(response.status).toEqual(418)
       expect(body).toEqual({ errors: [{ message: "I'm a teapot" }] })
