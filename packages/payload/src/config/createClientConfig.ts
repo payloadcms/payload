@@ -62,6 +62,11 @@ const sanitizeCollections = (
 
     if ('editor' in sanitized) delete sanitized.editor
 
+    if ('upload' in sanitized && typeof sanitized.upload === 'object') {
+      sanitized.upload = { ...sanitized.upload }
+      delete sanitized.upload.handlers
+    }
+
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
 
@@ -119,6 +124,7 @@ export const createClientConfig = async (
   delete clientConfig.endpoints
   delete clientConfig.db
   delete clientConfig.editor
+  delete clientConfig.plugins
 
   'localization' in clientConfig &&
     clientConfig.localization &&

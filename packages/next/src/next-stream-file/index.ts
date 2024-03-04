@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-function iteratorToStream(iterator) {
+export function iteratorToStream(iterator) {
   return new ReadableStream({
     async pull(controller) {
       const { done, value } = await iterator.next()
@@ -13,7 +13,7 @@ function iteratorToStream(iterator) {
   })
 }
 
-async function* nodeStreamToIterator(stream: fs.ReadStream) {
+export async function* nodeStreamToIterator(stream: fs.ReadStream) {
   for await (const chunk of stream) {
     yield new Uint8Array(chunk)
   }

@@ -1,4 +1,5 @@
 import type express from 'express'
+import type { PayloadRequest } from 'payload/types'
 import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'
 
@@ -82,7 +83,10 @@ export type UploadConfig = {
   focalPoint?: boolean
   /** Options for original upload file only. For sizes, set each formatOptions individually. */
   formatOptions?: ImageUploadFormatOptions
-  handlers?: any[]
+  handlers?: ((
+    req: PayloadRequest,
+    args2: { params: { collection: string; filename: string } },
+  ) => Promise<Response> | Response)[]
   imageSizes?: ImageSize[]
   mimeTypes?: string[]
   resizeOptions?: ResizeOptions

@@ -1,6 +1,5 @@
 import type * as AWS from '@aws-sdk/client-s3'
 import type { CollectionConfig } from 'payload/types'
-import type { Readable } from 'stream'
 
 import path from 'path'
 
@@ -14,33 +13,43 @@ interface Args {
   getStorageClient: () => AWS.S3
 }
 
+// Convert a stream into a promise that resolves with a Buffer
+const streamToBuffer = async (readableStream) => {
+  const chunks = []
+  for await (const chunk of readableStream) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+  }
+  return Buffer.concat(chunks)
+}
+
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, res, next) => {
+  return async (req, { params }) => {
     try {
       const prefix = await getFilePrefix({ collection, req })
 
       const object = await getStorageClient().getObject({
         Bucket: bucket,
-        // WARNING:
-        // TODO: Untested for 3.0
-        Key: path.posix.join(prefix, req.routeParams.filename as string),
+        Key: path.posix.join(prefix, params.filename),
       })
 
-      res.set({
-        'Accept-Ranges': object.AcceptRanges,
-        'Content-Length': object.ContentLength,
-        'Content-Type': object.ContentType,
-        ETag: object.ETag,
-      })
-
-      if (object?.Body) {
-        return (object.Body as Readable).pipe(res)
+      if (!object.Body) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
-      return next()
-    } catch (err: unknown) {
+      const bodyBuffer = await streamToBuffer(object.Body)
+
+      return new Response(bodyBuffer, {
+        headers: new Headers({
+          'Accept-Ranges': object.AcceptRanges,
+          'Content-Length': String(object.ContentLength),
+          'Content-Type': object.ContentType,
+          ETag: object.ETag,
+        }),
+        status: 200,
+      })
+    } catch (err) {
       req.payload.logger.error(err)
-      return next()
+      return new Response('Internal Server Error', { status: 500 })
     }
   }
 }

@@ -8,7 +8,6 @@ import { getGenerateURL } from './generateURL'
 import { getHandleDelete } from './handleDelete'
 import { getHandleUpload } from './handleUpload'
 import { getHandler } from './staticHandler'
-import { extendWebpackConfig } from './webpack'
 
 export interface Args {
   acl?: 'Private' | 'Public'
@@ -38,6 +37,5 @@ export const gcsAdapter =
         prefix,
       }),
       staticHandler: getHandler({ bucket, collection, getStorageClient }),
-      webpack: extendWebpackConfig,
     }
   }

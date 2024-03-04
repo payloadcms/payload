@@ -14,26 +14,40 @@ interface Args {
 }
 
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, res, next) => {
+  return async (req, { params }) => {
     try {
       const prefix = await getFilePrefix({ collection, req })
-      const file = getStorageClient()
-        .bucket(bucket)
-        // WARNING:
-        // TODO: Untested for 3.0
-        .file(path.posix.join(prefix, req.routeParams.filename as string))
+      const file = getStorageClient().bucket(bucket).file(path.posix.join(prefix, params.filename))
 
       const [metadata] = await file.getMetadata()
 
-      res.set({
-        'Content-Length': metadata.size,
-        'Content-Type': metadata.contentType,
-        ETag: metadata.etag,
+      // Manually create a ReadableStream for the web from a Node.js stream.
+      const readableStream = new ReadableStream({
+        start(controller) {
+          const nodeStream = file.createReadStream()
+          nodeStream.on('data', (chunk) => {
+            controller.enqueue(new Uint8Array(chunk))
+          })
+          nodeStream.on('end', () => {
+            controller.close()
+          })
+          nodeStream.on('error', (err) => {
+            controller.error(err)
+          })
+        },
       })
 
-      return file.createReadStream().pipe(res)
+      return new Response(readableStream, {
+        headers: new Headers({
+          'Content-Length': String(metadata.size),
+          'Content-Type': metadata.contentType,
+          ETag: metadata.etag,
+        }),
+        status: 200,
+      })
     } catch (err: unknown) {
-      return next()
+      req.payload.logger.error(err)
+      return new Response('Internal Server Error', { status: 500 })
     }
   }
 }

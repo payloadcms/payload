@@ -8,7 +8,6 @@ import { getGenerateURL } from './generateURL'
 import { getHandleDelete } from './handleDelete'
 import { getHandleUpload } from './handleUpload'
 import { getHandler } from './staticHandler'
-import { extendWebpackConfig } from './webpack'
 
 export interface Args {
   allowContainerCreate: boolean
@@ -44,7 +43,6 @@ export const azureBlobStorageAdapter = ({
         prefix,
       }),
       staticHandler: getHandler({ collection, getStorageClient }),
-      webpack: extendWebpackConfig,
       ...(allowContainerCreate && { onInit: createContainerIfNotExists }),
     }
   }

@@ -5,7 +5,6 @@ import type { PluginOptions } from './types'
 import { getFields } from './fields/getFields'
 import { getAfterDeleteHook } from './hooks/afterDelete'
 import { getBeforeChangeHook } from './hooks/beforeChange'
-import { extendWebpackConfig } from './webpack'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -21,13 +20,6 @@ export const cloudStorage =
   (incomingConfig: Config): Config => {
     const { collections: allCollectionOptions, enabled } = pluginOptions
     const config = { ...incomingConfig }
-
-    const webpack = extendWebpackConfig({ config: incomingConfig, options: pluginOptions })
-
-    config.admin = {
-      ...(config.admin || {}),
-      webpack,
-    }
 
     // Return early if disabled. Only webpack config mods are applied.
     if (enabled === false) {

@@ -1,3 +1,4 @@
+import * as AWS from '@aws-sdk/client-s3'
 import dotenv from 'dotenv'
 import path from 'path'
 
@@ -16,8 +17,12 @@ let adapter: Adapter
 let uploadOptions
 
 dotenv.config({
-  path: path.resolve(__dirname, '.env.emulated'),
+  path: path.resolve(process.cwd(), './test/plugin-cloud-storage/.env.emulated'),
 })
+
+console.log(
+  `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
+)
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'azure') {
   adapter = azureBlobStorageAdapter({
@@ -79,37 +84,9 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'r2') {
   })
 }
 
-console.log(
-  `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
-)
-
 export default buildConfigWithDefaults({
   collections: [Media, Users],
   upload: uploadOptions,
-  admin: {
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          [path.resolve(__dirname, '../../packages/plugin-cloud-storage/src/index')]: path.resolve(
-            __dirname,
-            '../../packages/plugin-cloud-storage/src/admin/mock.js',
-          ),
-          [path.resolve(__dirname, '../../packages/plugin-cloud-storage/src/adapters/s3/index')]:
-            path.resolve(__dirname, '../../packages/plugin-cloud-storage/src/adapters/s3/mock.js'),
-          [path.resolve(__dirname, '../../packages/plugin-cloud-storage/src/adapters/gcs/index')]:
-            path.resolve(__dirname, '../../packages/plugin-cloud-storage/src/adapters/gcs/mock.js'),
-          [path.resolve(__dirname, '../../packages/plugin-cloud-storage/src/adapters/azure/index')]:
-            path.resolve(
-              __dirname,
-              '../../packages/plugin-cloud-storage/src/adapters/azure/mock.js',
-            ),
-        },
-      },
-    }),
-  },
   plugins: [
     cloudStorage({
       collections: {
@@ -120,6 +97,24 @@ export default buildConfigWithDefaults({
     }),
   ],
   onInit: async (payload) => {
+    /*const client = new AWS.S3({
+      endpoint: process.env.S3_ENDPOINT,
+      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+      region: process.env.S3_REGION,
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY_ID,
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+      },
+    })
+
+    const makeBucketRes = await client.send(
+      new AWS.CreateBucketCommand({ Bucket: 'payload-bucket' }),
+    )
+
+    if (makeBucketRes.$metadata.httpStatusCode !== 200) {
+      throw new Error(`Failed to create bucket. ${makeBucketRes.$metadata.httpStatusCode}`)
+    }*/
+
     await payload.create({
       collection: 'users',
       data: {

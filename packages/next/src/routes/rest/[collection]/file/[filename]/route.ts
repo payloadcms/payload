@@ -77,6 +77,7 @@ export const GET =
         params: { collection: collectionSlug },
         request,
       })
+
       collection = req.payload.collections?.[collectionSlug]
 
       if (!collection) {
@@ -90,7 +91,7 @@ export const GET =
         )
       }
 
-      if (collection.config.upload.disableLocalStorage) {
+      if (collection.config.upload.disableLocalStorage && !collection.config.upload.handlers) {
         throw new APIError(
           `This collection has local storage disabled: ${collectionSlug}`,
           httpStatus.BAD_REQUEST,
@@ -103,10 +104,21 @@ export const GET =
         req,
       })
 
+      let response: Response = null
+      if (collection.config.upload.handlers?.length) {
+        for (const handler of collection.config.upload.handlers) {
+          response = await handler(req, { params })
+        }
+
+        return response
+      }
+
       const fileDir = collection.config.upload?.staticDir || collection.config.slug
       const filePath = path.resolve(`${fileDir}/${filename}`)
+
       const stats = await fsPromises.stat(filePath)
       const data = streamFile(filePath)
+
       return new Response(data, {
         headers: new Headers({
           'content-length': stats.size + '',

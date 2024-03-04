@@ -6,7 +6,6 @@ import { getGenerateURL } from './generateURL'
 import { getHandleDelete } from './handleDelete'
 import { getHandleUpload } from './handleUpload'
 import { getHandler } from './staticHandler'
-import { extendWebpackConfig } from './webpack'
 
 export interface Args {
   acl?: 'private' | 'public-read'
@@ -45,6 +44,5 @@ export const s3Adapter =
         prefix,
       }),
       staticHandler: getHandler({ bucket, collection, getStorageClient }),
-      webpack: extendWebpackConfig,
     }
   }
