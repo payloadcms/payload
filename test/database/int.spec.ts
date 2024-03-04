@@ -1,4 +1,3 @@
-import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
 
@@ -8,7 +7,6 @@ import type { TypeWithID } from '../../packages/payload/src/collections/config/t
 import type { PayloadRequest } from '../../packages/payload/src/types'
 
 import { getPayload } from '../../packages/payload/src'
-import { migrate } from '../../packages/payload/src/bin/migrate'
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction'
 import { initTransaction } from '../../packages/payload/src/utilities/initTransaction'
 import { devUser } from '../credentials'
@@ -26,6 +24,7 @@ describe('database', () => {
   beforeAll(async () => {
     const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
+    payload.db.migrationDir = path.join(__dirname, './migrations')
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -37,7 +36,6 @@ describe('database', () => {
 
     user = loginResult.user
   })
-
   describe('migrations', () => {
     beforeAll(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
@@ -53,15 +51,15 @@ describe('database', () => {
     })
 
     afterAll(() => {
-      removeFiles(path.normalize(payload.db.migrationDir))
+      removeFiles(path.join(__dirname, './migrations'))
     })
 
     it('should run migrate:create', async () => {
-      const args = {
-        _: ['migrate:create', 'test'],
+      await payload.db.createMigration({
         forceAcceptWarning: true,
-      }
-      await migrate(args)
+        migrationName: 'test',
+        payload,
+      })
 
       // read files names in migrationsDir
       const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
@@ -69,25 +67,23 @@ describe('database', () => {
     })
 
     it('should run migrate', async () => {
-      const args = {
-        _: ['migrate'],
+      try {
+        await payload.db.migrate()
+      } catch (e) {
+        console.error(e)
       }
-      await migrate(args)
       const { docs } = await payload.find({
         collection: 'payload-migrations',
       })
       const migration = docs[0]
-      expect(migration.name).toContain('_test')
-      expect(migration.batch).toStrictEqual(1)
+      expect(migration?.name).toContain('_test')
+      expect(migration?.batch).toStrictEqual(1)
     })
 
     it('should run migrate:status', async () => {
       let error
-      const args = {
-        _: ['migrate:status'],
-      }
       try {
-        await migrate(args)
+        await payload.db.migrateStatus()
       } catch (e) {
         error = e
       }
@@ -95,11 +91,7 @@ describe('database', () => {
     })
 
     it('should run migrate:fresh', async () => {
-      const args = {
-        _: ['migrate:fresh'],
-        forceAcceptWarning: true,
-      }
-      await migrate(args)
+      await payload.db.migrateFresh({ forceAcceptWarning: true })
       const { docs } = await payload.find({
         collection: 'payload-migrations',
       })
@@ -111,11 +103,8 @@ describe('database', () => {
     // known issue: https://github.com/payloadcms/payload/issues/4597
     it.skip('should run migrate:down', async () => {
       let error
-      const args = {
-        _: ['migrate:down'],
-      }
       try {
-        await migrate(args)
+        await payload.db.migrateDown()
       } catch (e) {
         error = e
       }
@@ -125,11 +114,8 @@ describe('database', () => {
     // known issue: https://github.com/payloadcms/payload/issues/4597
     it.skip('should run migrate:refresh', async () => {
       let error
-      const args = {
-        _: ['migrate:refresh'],
-      }
       try {
-        await migrate(args)
+        await payload.db.migrateRefresh()
       } catch (e) {
         error = e
       }
@@ -161,7 +147,7 @@ describe('database', () => {
             collection,
             // omitting req for isolation
           }),
-        ).rejects.toThrow('The requested resource was not found.')
+        ).rejects.toThrow('Not Found')
 
         const second = await payload.create({
           collection,
@@ -282,7 +268,7 @@ describe('database', () => {
             collection,
             req,
           }),
-        ).rejects.toThrow('The requested resource was not found.')
+        ).rejects.toThrow('Not Found')
       })
     })
   })

@@ -35,7 +35,8 @@ export const readMigrationFiles = async ({
 
   return Promise.all(
     files.map(async (filePath) => {
-      const migration = eval(`(await import(${filePath}))`) as Migration
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const migration = require(filePath) as Migration
       migration.name = path.basename(filePath).split('.')?.[0]
       return migration
     }),
