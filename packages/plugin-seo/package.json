@@ -28,7 +28,7 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^2.7.0",
+    "payload": "workspace:*",
     "react": "^18.0.0",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*"
