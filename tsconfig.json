@@ -84,7 +84,7 @@
         "./packages/graphql/src"
       ],
       "@payload-config": [
-        "./test/plugin-cloud/config.ts"
+        "./test/_community/config.ts"
       ]
     }
   },
