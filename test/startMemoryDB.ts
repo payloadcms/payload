@@ -1,5 +1,5 @@
 import getPort from 'get-port'
-import { MongoMemoryServer } from 'mongodb-memory-server'
+import { MongoMemoryReplSet } from 'mongodb-memory-server'
 
 import type { SanitizedConfig } from '../packages/payload/src/config/types'
 
@@ -21,10 +21,13 @@ export const startMemoryDB = async (
 
     default: {
       const port = await getPort()
-      const db = await MongoMemoryServer.create({
+      const db = await MongoMemoryReplSet.create({
         instance: {
           dbName: 'payloadmemory',
           port,
+        },
+        replSet: {
+          count: 3,
         },
       })
 
