@@ -13,6 +13,18 @@ import simpleGit from 'simple-git'
 import { getPackageDetails } from './lib/getPackageDetails'
 import { updateChangelog } from './utils/updateChangelog'
 
+// Update this list with any packages to publish
+const packageWhitelist = [
+  'payload',
+  'translations',
+  'ui',
+  'next',
+  'graphql',
+
+  'db-mongodb',
+  'richtext-slate',
+]
+
 const rootPath = path.resolve(__dirname, '..')
 
 const git = simpleGit(rootPath)
@@ -21,10 +33,10 @@ const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
 
 const {
-  bump = 'patch',
-  changelog = false,
+  bump = 'patch', // Semver release type
+  changelog = false, // Whether to update the changelog. WARNING: This gets throttled on too many commits
   'dry-run': dryRun,
-  'git-tag': gitTag = false,
+  'git-tag': gitTag = false, // Whether to run git tag and commit operations
   tag = 'latest',
 } = args
 
@@ -90,7 +102,7 @@ async function main() {
     return // For TS type checking
   }
 
-  const packageDetails = await getPackageDetails()
+  const packageDetails = await getPackageDetails(packageWhitelist)
 
   console.log(chalk.bold(`\n  Version: ${monorepoVersion} => ${chalk.green(nextReleaseVersion)}\n`))
   console.log(chalk.bold.yellow(`  Bump: ${bump}`))
