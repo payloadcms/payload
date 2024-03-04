@@ -206,17 +206,16 @@ describe('Lexical', () => {
           }
         }
       }`
-      const response: {
-        RichTextFields: PaginatedDocs<RichTextField>
-      } = await graphQLClient.request(
-        query,
-        {},
-        {
-          Authorization: `JWT ${token}`,
-        },
-      )
 
-      const { docs } = response.RichTextFields
+      const response: {
+        data: { RichTextFields: PaginatedDocs<RichTextField> }
+      } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+
+      const { docs } = response.data.RichTextFields
 
       const uploadNode: SerializedUploadNode = docs[0].lexicalCustomFields.root.children.find(
         (node) => node.type === 'upload',
