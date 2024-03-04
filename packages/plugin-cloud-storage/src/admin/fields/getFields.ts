@@ -11,21 +11,21 @@ interface Args {
 export const getFields = ({ collection, prefix }: Args): Field[] => {
   const baseURLField: Field = {
     name: 'url',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: 'URL',
-    type: 'text',
   }
 
   const basePrefixField: Field = {
     name: 'prefix',
+    type: 'text',
     admin: {
       hidden: true,
       readOnly: true,
     },
-    type: 'text',
   }
 
   const fields = [...collection.fields]
@@ -70,6 +70,7 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
     const sizesField: Field = {
       ...(existingSizesField || {}),
       name: 'sizes',
+      type: 'group',
       admin: {
         hidden: true,
       },
@@ -85,16 +86,15 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
         return {
           ...existingSizeField,
           name: size.name,
+          type: 'group',
           fields: [
             {
               ...(existingSizeURLField || {}),
               ...baseURLField,
             },
           ],
-          type: 'group',
         }
       }),
-      type: 'group',
     }
 
     fields.push(sizesField)

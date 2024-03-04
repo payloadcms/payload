@@ -55,7 +55,6 @@
     "nodemon": "3.0.3",
     "payload": "workspace:*",
     "rimraf": "^4.1.2",
-    "ts-node": "^9.1.1",
     "webpack": "^5.78.0"
   },
   "dependencies": {
