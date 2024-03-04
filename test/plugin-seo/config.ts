@@ -1,5 +1,3 @@
-import path from 'path'
-
 import seoPlugin from '../../packages/plugin-seo/src'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
@@ -8,26 +6,12 @@ import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { seed } from './seed'
 
-const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
-
 export default buildConfigWithDefaults({
   collections: [Users, Pages, Media],
   localization: {
     defaultLocale: 'en',
     fallback: true,
     locales: ['en', 'es', 'de'],
-  },
-  admin: {
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          fs: mockModulePath,
-        },
-      },
-    }),
   },
   i18n: {
     resources: {

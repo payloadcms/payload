@@ -1,4 +1,5 @@
 {
+  "type": "object",
   "$schema": "http://json-schema.org/draft-04/schema#",
   "additionalProperties": false,
   "properties": {
@@ -6,57 +7,58 @@
       "type": "string"
     },
     "plugin-seo": {
+      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "autoGenerate": {
+        "almostThere": {
           "type": "string"
         },
-        "imageAutoGenerationTip": {
+        "autoGenerate": {
           "type": "string"
         },
         "bestPractices": {
           "type": "string"
         },
-        "lengthTipTitle": {
-          "type": "string"
-        },
-        "lengthTipDescription": {
-          "type": "string"
-        },
-        "good": {
-          "type": "string"
-        },
-        "tooLong": {
-          "type": "string"
-        },
-        "tooShort": {
-          "type": "string"
-        },
-        "almostThere": {
-          "type": "string"
-        },
         "characterCount": {
-          "type": "string"
-        },
-        "charactersToGo": {
           "type": "string"
         },
         "charactersLeftOver": {
           "type": "string"
         },
+        "charactersToGo": {
+          "type": "string"
+        },
         "charactersTooMany": {
           "type": "string"
         },
-        "noImage": {
+        "checksPassing": {
           "type": "string"
         },
-        "checksPassing": {
+        "good": {
+          "type": "string"
+        },
+        "imageAutoGenerationTip": {
+          "type": "string"
+        },
+        "lengthTipDescription": {
+          "type": "string"
+        },
+        "lengthTipTitle": {
+          "type": "string"
+        },
+        "noImage": {
           "type": "string"
         },
         "preview": {
           "type": "string"
         },
         "previewDescription": {
+          "type": "string"
+        },
+        "tooLong": {
+          "type": "string"
+        },
+        "tooShort": {
           "type": "string"
         }
       },
@@ -78,10 +80,8 @@
         "checksPassing",
         "preview",
         "previewDescription"
-      ],
-      "type": "object"
+      ]
     }
   },
-  "required": ["plugin-seo"],
-  "type": "object"
+  "required": ["plugin-seo"]
 }

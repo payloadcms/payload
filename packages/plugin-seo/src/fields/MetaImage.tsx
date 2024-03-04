@@ -29,7 +29,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
   const [fields] = useAllFormFields()
   const docInfo = useDocumentInfo()
 
-  const { setValue, showError, value, errorMessage } = field
+  const { errorMessage, setValue, showError, value } = field
 
   const regenerateImage = useCallback(async () => {
     const { generateImage } = pluginConfig
@@ -72,8 +72,8 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
           {required && (
             <span
               style={{
-                marginLeft: '5px',
                 color: 'var(--theme-error-500)',
+                marginLeft: '5px',
               }}
             >
               *
@@ -120,10 +120,9 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
         <UploadInput
           api={api}
           collection={collection}
+          errorMessage={errorMessage}
           fieldTypes={fieldTypes}
           filterOptions={{}}
-          errorMessage={errorMessage}
-          required={required}
           label={undefined}
           name={name}
           onChange={(incomingImage) => {
@@ -136,6 +135,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
           }}
           path={name}
           relationTo={relationTo}
+          required={required}
           serverURL={serverURL}
           showError={showError}
           style={{

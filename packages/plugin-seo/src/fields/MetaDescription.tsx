@@ -35,7 +35,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
     path,
   } as Options)
 
-  const { setValue, showError, value, errorMessage } = field
+  const { errorMessage, setValue, showError, value } = field
 
   const regenerateDescription = useCallback(async () => {
     const { generateDescription } = pluginConfig
@@ -70,8 +70,8 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
           {required && (
             <span
               style={{
-                marginLeft: '5px',
                 color: 'var(--theme-error-500)',
+                marginLeft: '5px',
               }}
             >
               *
@@ -121,15 +121,15 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
         }}
       >
         <Textarea
+          errorMessage={errorMessage}
           name={name}
           onChange={setValue}
           path={name}
+          required={required}
           showError={showError}
           style={{
             marginBottom: 0,
           }}
-          required={required}
-          errorMessage={errorMessage}
           value={value}
         />
       </div>
