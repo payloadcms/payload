@@ -24,8 +24,8 @@ export const getStorageClient: GetStorageClient = async () => {
   }
 
   session = await authAsCognitoUser(
-    process.env.PAYLOAD_CLOUD_PROJECT_ID as string,
-    process.env.PAYLOAD_CLOUD_COGNITO_PASSWORD as string,
+    process.env.PAYLOAD_CLOUD_PROJECT_ID,
+    process.env.PAYLOAD_CLOUD_COGNITO_PASSWORD,
   )
 
   const cognitoIdentity = new CognitoIdentityClient({
@@ -33,7 +33,7 @@ export const getStorageClient: GetStorageClient = async () => {
       clientConfig: {
         region: 'us-east-1',
       },
-      identityPoolId: process.env.PAYLOAD_CLOUD_COGNITO_IDENTITY_POOL_ID as string,
+      identityPoolId: process.env.PAYLOAD_CLOUD_COGNITO_IDENTITY_POOL_ID,
       logins: {
         [`cognito-idp.us-east-1.amazonaws.com/${process.env.PAYLOAD_CLOUD_COGNITO_USER_POOL_ID}`]:
           session.getIdToken().getJwtToken(),

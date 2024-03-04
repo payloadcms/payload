@@ -84,7 +84,7 @@
         "./packages/graphql/src"
       ],
       "@payload-config": [
-        "./test/plugin-cloud-storage/config.ts"
+        "./test/plugin-cloud/config.ts"
       ]
     }
   },

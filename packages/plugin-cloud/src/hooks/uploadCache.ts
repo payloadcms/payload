@@ -10,7 +10,7 @@ interface Args {
 
 export const getCacheUploadsAfterChangeHook =
   ({ endpoint }: Args): CollectionAfterChangeHook =>
-  async ({ doc, operation, req }) => {
+  ({ doc, operation, req }) => {
     if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
 
     // WARNING:
@@ -27,7 +27,7 @@ export const getCacheUploadsAfterChangeHook =
 
 export const getCacheUploadsAfterDeleteHook =
   ({ endpoint }: Args): CollectionAfterDeleteHook =>
-  async ({ doc, req }) => {
+  ({ doc, req }) => {
     if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
 
     const { payloadAPI } = req

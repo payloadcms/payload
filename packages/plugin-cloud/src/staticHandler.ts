@@ -1,5 +1,4 @@
 import type { CollectionConfig } from 'payload/types'
-import type { Readable } from 'stream'
 
 import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types'
 
@@ -9,6 +8,15 @@ import { getStorageClient } from './utilities/getStorageClient'
 interface Args {
   cachingOptions?: PluginOptions['uploadCaching']
   collection: CollectionConfig
+}
+
+// Convert a stream into a promise that resolves with a Buffer
+const streamToBuffer = async (readableStream) => {
+  const chunks = []
+  for await (const chunk of readableStream) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+  }
+  return Buffer.concat(chunks)
 }
 
 export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHandler => {
@@ -28,15 +36,13 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
     !!process.env.PAYLOAD_CLOUD_CACHE_KEY &&
     collCacheConfig?.enabled !== false
 
-  return async (req, res, next) => {
+  return async (req, { params }) => {
     try {
       const { identityID, storageClient } = await getStorageClient()
 
       const Key = createKey({
         collection: collection.slug,
-        // WARNING:
-        // TODO: Untested for 3.0
-        filename: req.routeParams.filename as string,
+        filename: params.filename,
         identityID,
       })
 
@@ -45,21 +51,24 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         Key,
       })
 
-      res.set({
-        'Content-Length': object.ContentLength,
-        'Content-Type': object.ContentType,
-        ...(cachingEnabled && { 'Cache-Control': `public, max-age=${maxAge}` }),
-        ETag: object.ETag,
-      })
-
-      if (object?.Body) {
-        return (object.Body as Readable).pipe(res)
+      if (!object.Body) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
-      return next()
+      const bodyBuffer = await streamToBuffer(object.Body)
+
+      return new Response(bodyBuffer, {
+        headers: new Headers({
+          'Content-Length': String(object.ContentLength),
+          'Content-Type': object.ContentType,
+          ...(cachingEnabled && { 'Cache-Control': `public, max-age=${maxAge}` }),
+          ETag: object.ETag,
+        }),
+        status: 200,
+      })
     } catch (err: unknown) {
       req.payload.logger.error({ err, msg: 'Error getting file from cloud storage' })
-      return next()
+      return new Response('Internal Server Error', { status: 500 })
     }
   }
 }

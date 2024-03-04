@@ -7,7 +7,6 @@ export const Media: CollectionConfig = {
     create: () => true,
   },
   upload: {
-    staticURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
     imageSizes: [
       {
         height: 400,

@@ -15,21 +15,6 @@ dotenv.config({
 export default buildConfigWithDefaults({
   collections: [Media, Users],
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
-  admin: {
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          [path.resolve(__dirname, '../../packages/plugin-cloud/src')]: path.resolve(
-            __dirname,
-            '../../packages/plugin-cloud/src/admin.js',
-          ),
-        },
-      },
-    }),
-  },
   plugins: [payloadCloud()],
   onInit: async (payload) => {
     await payload.create({

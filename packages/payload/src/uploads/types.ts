@@ -85,7 +85,7 @@ export type UploadConfig = {
   formatOptions?: ImageUploadFormatOptions
   handlers?: ((
     req: PayloadRequest,
-    args2: { params: { collection: string; filename: string } },
+    args: { params: { collection: string; filename: string } },
   ) => Promise<Response> | Response)[]
   imageSizes?: ImageSize[]
   mimeTypes?: string[]

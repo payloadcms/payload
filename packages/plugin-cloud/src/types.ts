@@ -38,9 +38,8 @@ export type GenerateURL = (args: {
 
 export type StaticHandler = (
   req: PayloadRequest,
-  res: Response,
-  next: NextFunction,
-) => Promise<unknown> | unknown
+  args: { params: { collection: string; filename: string } },
+) => Promise<Response> | Response
 
 export interface PayloadCloudEmailOptions {
   apiKey: string

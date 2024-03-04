@@ -14,7 +14,7 @@ export const payloadCloud =
     let config = { ...incomingConfig }
 
     if (process.env.PAYLOAD_CLOUD !== 'true') {
-      return config // only modified webpack
+      return config
     }
 
     const cachingEnabled =

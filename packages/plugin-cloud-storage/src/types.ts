@@ -36,7 +36,7 @@ export type GenerateURL = (args: {
 
 export type StaticHandler = (
   req: PayloadRequest,
-  args2: { params: { collection: string; filename: string } },
+  args: { params: { collection: string; filename: string } },
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
