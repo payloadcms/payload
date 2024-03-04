@@ -36,7 +36,7 @@ const {
   bump = 'patch', // Semver release type
   changelog = false, // Whether to update the changelog. WARNING: This gets throttled on too many commits
   'dry-run': dryRun,
-  'git-tag': gitTag = false, // Whether to run git tag and commit operations
+  'git-tag': gitTag = true, // Whether to run git tag and commit operations
   tag = 'latest',
 } = args
 
@@ -170,7 +170,7 @@ async function main() {
   header(`🧑‍💻 Committing changes...`)
 
   // Commit all staged changes
-  runCmd(`git add CHANGELOG.md packages package.json`, execOpts)
+  runCmd(`git add CHANGELOG.md packages/**/package.json package.json`, execOpts)
   runCmd(`git commit -m "chore(release): v${nextReleaseVersion} [skip ci]"`, execOpts)
 
   // Tag
