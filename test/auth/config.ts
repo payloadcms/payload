@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
+import { AuthDebug } from './AuthDebug'
 import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
 export default buildConfigWithDefaults({
@@ -153,16 +154,16 @@ export default buildConfigWithDefaults({
           label: 'Custom',
           type: 'text',
         },
-        // {
-        //   name: 'authDebug',
-        //   label: 'Auth Debug',
-        //   type: 'ui',
-        //   admin: {
-        //     components: {
-        //       Field: AuthDebug,
-        //     },
-        //   },
-        // },
+        {
+          name: 'authDebug',
+          label: 'Auth Debug',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: AuthDebug,
+            },
+          },
+        },
       ],
     },
     {

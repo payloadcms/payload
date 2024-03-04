@@ -29,7 +29,7 @@ describe('auth', () => {
   let apiURL: string
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E({ config, dirname: __dirname })
+    ;({ serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
     url = new AdminUrlUtil(serverURL, slug)
 
     const context = await browser.newContext()

@@ -1,6 +1,6 @@
 import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
 
-import CustomEditView from '../components/views/CustomEdit'
+import { CustomEditView } from '../components/views/CustomEdit'
 import { customGlobalViews1GlobalSlug } from '../slugs'
 
 export const CustomGlobalViews1: GlobalConfig = {

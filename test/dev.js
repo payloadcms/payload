@@ -39,5 +39,5 @@ async function main() {
   const PAYLOAD_CONFIG_PATH = path.resolve(testSuite, 'config')
   process.env.PAYLOAD_CONFIG_PATH = PAYLOAD_CONFIG_PATH
 
-  nextDev({ _: [path.resolve(__dirname, '..')] })
+  nextDev({ _: [path.resolve(__dirname, '..')], port: process.env.PORT || 3000 })
 }

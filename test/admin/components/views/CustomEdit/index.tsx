@@ -8,7 +8,7 @@ import type { AdminViewComponent } from '../../../../../packages/payload/src/adm
 import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav'
 import { useConfig } from '../../../../../packages/ui/src/providers/Config'
 
-const CustomEditView: AdminViewComponent = ({
+export const CustomEditView: AdminViewComponent = ({
   canAccessAdmin,
   //  collection,
   //  global,
@@ -58,5 +58,3 @@ const CustomEditView: AdminViewComponent = ({
     </Fragment>
   )
 }
-
-export default CustomEditView
