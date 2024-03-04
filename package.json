@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.7",
+  "version": "3.0.0-alpha.8",
   "private": true,
   "workspaces:": [
     "packages/*"
@@ -51,6 +51,7 @@
     "reinstall": "pnpm clean:all && pnpm install",
     "script:list-packages": "tsx ./scripts/list-packages.ts",
     "release:alpha": "tsx ./scripts/release.ts --bump prerelease --tag alpha",
+    "release:beta": "tsx ./scripts/release.ts --bump prerelease --tag beta",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env jest --config=jest.components.config.js",
     "test:e2e": "npx playwright install --with-deps chromium && ts-node -T ./test/runE2E.ts",
