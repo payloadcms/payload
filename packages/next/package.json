@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-alpha.11",
+  "version": "3.0.0-alpha.12",
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "bin": {
