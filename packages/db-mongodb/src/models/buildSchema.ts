@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-use-before-define */
 import type { IndexOptions, SchemaOptions, SchemaTypeOptions } from 'mongoose'
+import type { Schema } from 'mongoose'
 import type { SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config'
 import type {
   ArrayField,
@@ -32,7 +32,7 @@ import type {
   UploadField,
 } from 'payload/types'
 
-import { Schema } from 'mongoose'
+import mongoose from 'mongoose'
 import {
   fieldAffectsData,
   fieldIsLocalized,
@@ -126,7 +126,7 @@ const buildSchema = (
     }
   }
 
-  const schema = new Schema(fields, options)
+  const schema = new mongoose.Schema(fields, options)
 
   schemaFields.forEach((field) => {
     if (!fieldIsPresentationalOnly(field)) {
@@ -176,7 +176,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
     const fieldSchema = {
-      type: [new Schema({}, { _id: false, discriminatorKey: 'blockType' })],
+      type: [new mongoose.Schema({}, { _id: false, discriminatorKey: 'blockType' })],
       default: undefined,
     }
 
@@ -185,7 +185,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     })
 
     field.blocks.forEach((blockItem: Block) => {
-      const blockSchema = new Schema({}, { _id: false, id: false })
+      const blockSchema = new mongoose.Schema({}, { _id: false, id: false })
 
       blockItem.fields.forEach((blockField) => {
         const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type]
@@ -307,7 +307,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     config: SanitizedConfig,
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
-    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed }
+    const baseSchema = {
+      ...formatBaseSchema(field, buildSchemaOptions),
+      type: mongoose.Schema.Types.Mixed,
+    }
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
@@ -405,17 +408,17 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
             localeSchema = {
               ...formatBaseSchema(field, buildSchemaOptions),
               _id: false,
-              type: Schema.Types.Mixed,
+              type: mongoose.Schema.Types.Mixed,
               relationTo: { type: String, enum: field.relationTo },
               value: {
-                type: Schema.Types.Mixed,
+                type: mongoose.Schema.Types.Mixed,
                 refPath: `${field.name}.${locale}.relationTo`,
               },
             }
           } else {
             localeSchema = {
               ...formatBaseSchema(field, buildSchemaOptions),
-              type: Schema.Types.Mixed,
+              type: mongoose.Schema.Types.Mixed,
               ref: field.relationTo,
             }
           }
@@ -431,10 +434,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
         _id: false,
-        type: Schema.Types.Mixed,
+        type: mongoose.Schema.Types.Mixed,
         relationTo: { type: String, enum: field.relationTo },
         value: {
-          type: Schema.Types.Mixed,
+          type: mongoose.Schema.Types.Mixed,
           refPath: `${field.name}.relationTo`,
         },
       }
@@ -448,7 +451,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
-        type: Schema.Types.Mixed,
+        type: mongoose.Schema.Types.Mixed,
         ref: field.relationTo,
       }
 
@@ -470,7 +473,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     config: SanitizedConfig,
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
-    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed }
+    const baseSchema = {
+      ...formatBaseSchema(field, buildSchemaOptions),
+      type: mongoose.Schema.Types.Mixed,
+    }
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
@@ -586,7 +592,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   ): void => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
-      type: Schema.Types.Mixed,
+      type: mongoose.Schema.Types.Mixed,
       ref: field.relationTo,
     }
 
