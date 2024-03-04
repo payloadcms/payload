@@ -1,48 +1,85 @@
+import type { CompilerOptions } from 'typescript'
+
+import * as CommentJson from 'comment-json'
 import fs from 'fs'
 import path from 'path'
 import shelljs from 'shelljs'
+import { promisify } from 'util'
 
 import { initNext } from '../../packages/create-payload-app/src/lib/init-next'
+const readFile = promisify(fs.readFile)
+
+const nextCreateCommands: Partial<Record<'noSrcDir' | 'srcDir', string>> = {
+  srcDir:
+    'pnpm create next-app@latest . --typescript --eslint --no-tailwind --app --import-alias="@/*" --src-dir',
+  noSrcDir:
+    'pnpm create next-app@latest . --typescript --eslint --no-tailwind --app --import-alias="@/*" --no-src-dir',
+}
 
 describe('create-payload-app', () => {
-  describe('--init-next', () => {
-    const nextDir = path.resolve(__dirname, 'test-app')
+  beforeAll(() => {
+    // Runs copyfiles copy app/(payload) -> dist/app/(payload)
+    shelljs.exec('pnpm build:create-payload-app')
+  })
 
-    beforeAll(() => {
-      if (fs.existsSync(nextDir)) {
-        fs.rmdirSync(nextDir, { recursive: true })
+  describe('Next.js app template files', () => {
+    it('should exist in dist', () => {
+      const distPath = path.resolve(
+        __dirname,
+        '../../packages/create-payload-app/dist/app/(payload)',
+      )
+      expect(fs.existsSync(distPath)).toBe(true)
+    })
+  })
+
+  describe.each(Object.keys(nextCreateCommands))(`--init-next with %s`, (nextCmdKey) => {
+    const projectDir = path.resolve(__dirname, 'test-app')
+
+    beforeEach(() => {
+      if (fs.existsSync(projectDir)) {
+        fs.rmdirSync(projectDir, { recursive: true })
       }
 
       // Create dir for Next.js project
-      if (!fs.existsSync(nextDir)) {
-        fs.mkdirSync(nextDir)
+      if (!fs.existsSync(projectDir)) {
+        fs.mkdirSync(projectDir)
       }
 
       // Create a new Next.js project with default options
-      shelljs.exec(
-        'pnpm create next-app@latest . --typescript --eslint --no-tailwind --app --import-alias="@/*" --src-dir',
-        { cwd: nextDir },
-      )
+      shelljs.exec(nextCreateCommands[nextCmdKey], { cwd: projectDir })
     })
 
-    afterAll(() => {
-      if (fs.existsSync(nextDir)) {
-        fs.rmdirSync(nextDir, { recursive: true })
+    afterEach(() => {
+      if (fs.existsSync(projectDir)) {
+        fs.rmdirSync(projectDir, { recursive: true })
       }
     })
 
     it('should install payload app in Next.js project', async () => {
-      expect(fs.existsSync(nextDir)).toBe(true)
+      expect(fs.existsSync(projectDir)).toBe(true)
 
       const result = await initNext({
         '--debug': true,
-        nextDir,
-        useDistFiles: true, // create-payload-app must be built
+        projectDir,
+        useDistFiles: true, // create-payload-app/dist/app/(payload)
       })
 
       expect(result.success).toBe(true)
-      const payloadFilesPath = path.resolve(nextDir, 'src/app/(payload)')
+
+      const payloadFilesPath = path.resolve(result.userAppDir, '(payload)')
       expect(fs.existsSync(payloadFilesPath)).toBe(true)
+
+      const payloadConfig = path.resolve(projectDir, 'payload.config.ts')
+      expect(fs.existsSync(payloadConfig)).toBe(true)
+
+      const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
+      const userTsConfigContent = await readFile(tsConfigPath, { encoding: 'utf8' })
+      const userTsConfig = CommentJson.parse(userTsConfigContent) as {
+        compilerOptions?: CompilerOptions
+      }
+      expect(userTsConfig.compilerOptions.paths?.['@payload-config']).toEqual([
+        './payload.config.ts',
+      ])
     })
   })
 })

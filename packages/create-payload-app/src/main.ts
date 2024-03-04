@@ -12,7 +12,7 @@ import { parseTemplate } from './lib/parse-template'
 import { selectDb } from './lib/select-db'
 import { getValidTemplates, validateTemplate } from './lib/templates'
 import { writeEnvFile } from './lib/write-env-file'
-import { success } from './utils/log'
+import { error, success } from './utils/log'
 import { helpMessage, successMessage, welcomeMessage } from './utils/messages'
 
 export class Main {
@@ -61,6 +61,11 @@ export class Main {
 
       if (this.args['--init-next']) {
         const result = await initNext(this.args)
+        if (!result.success) {
+          error(result.reason || 'Failed to initialize Payload app in Next.js project')
+        } else {
+          success('Payload app successfully initialized in Next.js project')
+        }
         process.exit(result.success ? 0 : 1)
       }
 
