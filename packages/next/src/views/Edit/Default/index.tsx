@@ -11,6 +11,7 @@ import {
   getFormState,
   useComponentMap,
   useConfig,
+  useDocumentEvents,
   useDocumentInfo,
 } from '@payloadcms/ui'
 import { Upload } from '@payloadcms/ui/elements'
@@ -73,6 +74,8 @@ export const DefaultEditView: React.FC = () => {
     globalSlug: globalConfig?.slug,
   })
 
+  const { reportUpdate } = useDocumentEvents()
+
   const operation = id ? 'update' : 'create'
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
@@ -87,11 +90,11 @@ export const DefaultEditView: React.FC = () => {
 
   const onSave = useCallback(
     async (json) => {
-      // reportUpdate({
-      //   id,
-      //   entitySlug: collectionConfig.slug,
-      //   updatedAt: json?.result?.updatedAt || new Date().toISOString(),
-      // })
+      reportUpdate({
+        id,
+        entitySlug: collectionConfig.slug,
+        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      })
 
       // if (auth && id === user.id) {
       //   await refreshCookieAsync()
@@ -108,7 +111,7 @@ export const DefaultEditView: React.FC = () => {
       id,
       onSaveFromContext,
       // refreshCookieAsync,
-      //  reportUpdate
+      reportUpdate,
     ],
   )
 

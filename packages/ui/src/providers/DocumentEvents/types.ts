@@ -1,6 +1,6 @@
 export type UpdatedDocument = {
   entitySlug: string
-  id?: string
+  id?: number | string
   updatedAt: string
 }
 
