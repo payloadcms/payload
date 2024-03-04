@@ -65,8 +65,6 @@ const Text: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
-  console.log('text props', props, pathFromProps || name, 'V', value)
-
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
     fieldRTL: rtl,
