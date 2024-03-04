@@ -1,4 +1,3 @@
-import type { Payload } from '../../packages/payload/src'
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
@@ -13,14 +12,15 @@ import { migrate } from '../../packages/payload/src/bin/migrate'
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction'
 import { initTransaction } from '../../packages/payload/src/utilities/initTransaction'
 import { devUser } from '../credentials'
+import removeFiles from '../helpers/removeFiles'
 import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
-import removeFiles from '../helpers/removeFiles'
 
 let payload: Payload
 let user: TypeWithID & Record<string, unknown>
 const collection = 'posts'
 const title = 'title'
+process.env.PAYLOAD_CONFIG_PATH = path.join(__dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {

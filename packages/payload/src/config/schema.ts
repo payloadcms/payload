@@ -73,6 +73,12 @@ export default joi.object({
     }),
     user: joi.string(),
   }),
+  bin: joi.array().items(
+    joi.object().keys({
+      key: joi.string(),
+      scriptPath: joi.string(),
+    }),
+  ),
   collections: joi.array(),
   cookiePrefix: joi.string(),
   cors: [joi.string().valid('*'), joi.array().items(joi.string())],
@@ -148,6 +154,7 @@ export default joi.object({
     graphQL: joi.string(),
     graphQLPlayground: joi.string(),
   }),
+  secret: joi.string(),
   serverURL: joi
     .string()
     .uri()
