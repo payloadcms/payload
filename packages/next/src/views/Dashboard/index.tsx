@@ -1,6 +1,3 @@
-import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
-
 import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
 import Link from 'next/link'
 import { isEntityHidden } from 'payload/utilities'
@@ -9,28 +6,9 @@ import React, { Fragment } from 'react'
 import type { AdminViewProps } from '../Root'
 import type { DashboardProps } from './Default'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
-import { meta } from '../../utilities/meta'
 import { DefaultDashboard } from './Default'
 
-export const generateMetadata = async ({
-  config: configPromise,
-}: {
-  config: Promise<SanitizedConfig>
-}): Promise<Metadata> => {
-  const config = await configPromise
-
-  const { t } = await getNextI18n({
-    config,
-  })
-
-  return meta({
-    config,
-    description: `${t('general:dashboard')} Payload`,
-    keywords: `${t('general:dashboard')}, Payload`,
-    title: t('general:dashboard'),
-  })
-}
+export { generateDashboardMetadata } from './meta'
 
 export const Dashboard: React.FC<AdminViewProps> = ({
   initPageResult,

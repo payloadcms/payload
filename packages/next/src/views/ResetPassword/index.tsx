@@ -1,6 +1,3 @@
-import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
-
 import {
   Button,
   ConfirmPassword,
@@ -16,30 +13,11 @@ import React from 'react'
 
 import type { AdminViewProps } from '../Root'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
-import { meta } from '../../utilities/meta'
 import './index.scss'
 
 const baseClass = 'reset-password'
 
-export const generateMetadata = async ({
-  config: configPromise,
-}: {
-  config: Promise<SanitizedConfig>
-}): Promise<Metadata> => {
-  const config = await configPromise
-
-  const { t } = await getNextI18n({
-    config,
-  })
-
-  return meta({
-    config,
-    description: t('authentication:resetPassword'),
-    keywords: t('authentication:resetPassword'),
-    title: t('authentication:resetPassword'),
-  })
-}
+export { generateResetPasswordMetadata } from './meta'
 
 export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params }) => {
   const { req } = initPageResult
