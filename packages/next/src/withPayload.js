@@ -67,4 +67,4 @@ const withPayload = (nextConfig = {}) => {
   }
 }
 
-module.exports = { withPayload }
+module.exports = withPayload

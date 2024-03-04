@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build:webpack": "webpack --config webpack.config.js",
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:webpack && pnpm build:types",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
