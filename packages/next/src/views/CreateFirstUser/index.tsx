@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
-import type { Field, InitPageResult } from 'payload/types'
+import type { Field } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
 
 import { Form, FormSubmit, buildStateFromSchema } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React from 'react'
+
+import type { AdminViewProps } from '../Root'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -30,19 +32,19 @@ export const generateMetadata = async ({
   })
 }
 
-type Props = {
-  page: InitPageResult
-  params: { [key: string]: string | string[] }
-  searchParams: { [key: string]: string | string[] }
-}
-export const CreateFirstUser: React.FC<Props> = async ({ page }) => {
-  const { req } = page
-  const { config } = req.payload
+export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult }) => {
   const {
-    admin: { user: userSlug },
-    routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
-  } = config
+    req,
+    req: {
+      payload: {
+        config: {
+          admin: { user: userSlug },
+          routes: { admin: adminRoute, api: apiRoute },
+          serverURL,
+        },
+      },
+    },
+  } = initPageResult
 
   if (req.user) {
     redirect(adminRoute)

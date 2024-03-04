@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { InitPageResult, SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -12,6 +12,7 @@ import { notFound } from 'next/navigation'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
+import type { AdminViewProps } from '../Root'
 import type { DefaultListViewProps, ListPreferences } from './Default/types'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
@@ -55,14 +56,7 @@ export const generateMetadata = async ({
   })
 }
 
-export const ListView = async ({
-  initPageResult,
-  searchParams,
-}: {
-  initPageResult: InitPageResult
-  params: { [key: string]: string | string[] }
-  searchParams: { [key: string]: string | string[] | undefined }
-}) => {
+export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
   const {
     collectionConfig,
     permissions,

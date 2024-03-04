@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import type {
   Data,
   DocumentPreferences,
-  InitPageResult,
   SanitizedConfig,
   ServerSideEditViewProps,
 } from 'payload/types'
@@ -16,6 +15,8 @@ import {
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import React, { Fragment } from 'react'
+
+import type { AdminViewProps } from '../Root'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -41,13 +42,7 @@ export const generateMetadata = async ({
   })
 }
 
-export const Account = async ({
-  initPageResult,
-  searchParams,
-}: {
-  initPageResult: InitPageResult
-  searchParams: { [key: string]: string | string[] | undefined }
-}) => {
+export const Account: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
   const {
     locale,
     permissions,

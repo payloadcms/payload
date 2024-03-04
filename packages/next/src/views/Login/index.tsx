@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
-import type { InitPageResult, SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import { Logo } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React, { Fragment } from 'react'
+
+import type { AdminViewProps } from '../Root'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -29,13 +31,8 @@ export const generateMetadata = async ({
   })
 }
 
-type Props = {
-  baseClass: string
-  page: InitPageResult
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-export const Login: React.FC<Props> = ({ baseClass, page, searchParams }) => {
-  const { req } = page
+export const Login: React.FC<AdminViewProps> = ({ baseClass, initPageResult, searchParams }) => {
+  const { req } = initPageResult
 
   const {
     payload: { config },

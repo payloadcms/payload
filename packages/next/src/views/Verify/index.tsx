@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
-import type { InitPageResult, SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import { Logo } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React from 'react'
+
+import type { AdminViewProps } from '../Root'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -30,17 +32,11 @@ export const generateMetadata = async ({
   })
 }
 
-type Props = {
-  page: InitPageResult
-  params: { [key: string]: string | string[] }
-  searchParams: { [key: string]: string | string[] }
-}
-
-export const Verify: React.FC<Props> = async ({ page, params }) => {
+export const Verify: React.FC<AdminViewProps> = async ({ initPageResult, params }) => {
   // /:collectionSlug/verify/:token
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [collectionSlug, verify, token] = params.segments
-  const { req } = page
+  const { req } = initPageResult
 
   const {
     payload: { config },

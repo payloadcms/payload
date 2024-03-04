@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
-import type { InitPageResult, SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import { Button, Email, Form, FormSubmit, Translation } from '@payloadcms/ui'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
+
+import type { AdminViewProps } from '../Root'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -27,18 +29,14 @@ export const generateMetadata = async ({
   })
 }
 
-type Props = {
-  baseClass: string
-  page: InitPageResult
-}
-export const ForgotPassword: React.FC<Props> = async ({ page }) => {
-  const { req } = page
-
+export const ForgotPassword: React.FC<AdminViewProps> = ({ initPageResult }) => {
   const {
-    i18n,
-    payload: { config },
-    user,
-  } = req
+    req: {
+      i18n,
+      payload: { config },
+      user,
+    },
+  } = initPageResult
 
   const {
     admin: { user: userSlug },

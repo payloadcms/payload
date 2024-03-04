@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
-import type { InitPageResult, SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import { MinimalTemplate } from '@payloadcms/ui'
 import React from 'react'
+
+import type { AdminViewProps } from '../Root'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -30,24 +32,20 @@ export const generateMetadata = async ({
   })
 }
 
-type Props = {
-  baseClass: string
-  page: InitPageResult
-  searchParams: { [key: string]: string | string[] }
-} & {
-  inactivity?: boolean
-}
-
-export const Logout: React.FC<Props> = ({ inactivity, page, searchParams }) => {
+export const Logout: React.FC<
+  AdminViewProps & {
+    inactivity?: boolean
+  }
+> = ({ inactivity, initPageResult, searchParams }) => {
   const {
     req: {
-      payload: { config },
+      payload: {
+        config: {
+          routes: { admin },
+        },
+      },
     },
-  } = page
-
-  const {
-    routes: { admin },
-  } = config
+  } = initPageResult
 
   return (
     <MinimalTemplate className={baseClass}>
@@ -62,6 +60,6 @@ export const Logout: React.FC<Props> = ({ inactivity, page, searchParams }) => {
   )
 }
 
-export const LogoutInactivity: React.FC<Props> = (props) => {
+export const LogoutInactivity: React.FC<AdminViewProps> = (props) => {
   return <Logout inactivity {...props} />
 }

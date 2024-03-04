@@ -3,6 +3,8 @@ import type { InitPageResult } from 'payload/types'
 
 import React from 'react'
 
+import type { AdminViewProps } from '../Root'
+
 import { meta } from '../../utilities/meta'
 import { UnauthorizedClient } from './UnauthorizedClient'
 
@@ -22,20 +24,17 @@ export const generateMetadata = async ({ page }: { page: InitPageResult }): Prom
   })
 }
 
-type Props = {
-  page: InitPageResult
-}
-export const Unauthorized: React.FC<Props> = ({ page }) => {
+export const Unauthorized: React.FC<AdminViewProps> = ({ initPageResult }) => {
   const {
     req: {
-      payload: { config },
+      payload: {
+        config: {
+          admin: { logoutRoute },
+          routes: { admin },
+        },
+      },
     },
-  } = page
-
-  const {
-    admin: { logoutRoute },
-    routes: { admin },
-  } = config
+  } = initPageResult
 
   return <UnauthorizedClient logoutRoute={`${admin}${logoutRoute}`} />
 }

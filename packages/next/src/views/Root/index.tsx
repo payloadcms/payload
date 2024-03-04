@@ -28,6 +28,13 @@ type Args = {
   }
 }
 
+export type AdminViewProps = {
+  baseClass?: string
+  initPageResult: InitPageResult
+  params?: { [key: string]: string | string[] | undefined }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
 const baseClasses = {
   forgot: 'forgot-password',
   login: 'login',
@@ -46,7 +53,7 @@ const oneSegmentViews = {
 
 export const RootPage = async ({ config: configPromise, params, searchParams }: Args) => {
   const config = await configPromise
-  let ViewToRender
+  let ViewToRender: React.FC<AdminViewProps>
   let templateClassName
   let initPageResult: InitPageResult
   let templateType: 'default' | 'minimal' = 'default'

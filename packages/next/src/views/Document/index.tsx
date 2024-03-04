@@ -4,7 +4,6 @@ import type {
   DocumentPreferences,
   Document as DocumentType,
   Field,
-  InitPageResult,
   SanitizedConfig,
   ServerSideEditViewProps,
 } from 'payload/types'
@@ -24,6 +23,8 @@ import { notFound } from 'next/navigation'
 import queryString from 'qs'
 import React, { Fragment } from 'react'
 
+import type { AdminViewProps } from '../Root'
+
 import { getMetaBySegment } from './getMetaBySegment'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
@@ -36,14 +37,10 @@ export const generateMetadata = async (args: {
   }
 }) => getMetaBySegment(args)
 
-export const Document = async ({
+export const Document: React.FC<AdminViewProps> = async ({
   initPageResult,
   params,
   searchParams,
-}: {
-  initPageResult: InitPageResult
-  params: { [key: string]: string | string[] }
-  searchParams: { [key: string]: string | string[] | undefined }
 }) => {
   const {
     collectionConfig,

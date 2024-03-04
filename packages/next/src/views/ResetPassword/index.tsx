@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { InitPageResult, SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import {
   Button,
@@ -13,6 +13,8 @@ import {
 } from '@payloadcms/ui'
 import Link from 'next/link'
 import React from 'react'
+
+import type { AdminViewProps } from '../Root'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -39,14 +41,9 @@ export const generateMetadata = async ({
   })
 }
 
-type Props = {
-  page: InitPageResult
-  params: { [key: string]: string | string[] }
-  searchParams: { [key: string]: string | string[] }
-}
+export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params }) => {
+  const { req } = initPageResult
 
-export const ResetPassword: React.FC<Props> = ({ page, params }) => {
-  const { req } = page
   const { token } = params
 
   const {
