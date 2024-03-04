@@ -47,6 +47,9 @@
       "@payloadcms/richtext-lexical": [
         "./packages/richtext-lexical/src"
       ],
+      "@payloadcms/plugin-cloud": [
+        "./packages/plugin-cloud/src"
+      ],
       "@payloadcms/plugin-cloud-storage": [
         "./packages/plugin-cloud-storage/src"
       ],
