@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc",
-    "copyfiles": "copyfiles -u 4 \"../next/src/app/(payload)/**\" \"dist/app\"",
+    "copyfiles": "copyfiles -u 2 \"../../app/(payload)/**\" \"dist\"",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "test": "jest",
@@ -23,7 +23,9 @@
     "arg": "^5.0.0",
     "chalk": "^4.1.0",
     "command-exists": "^1.2.9",
+    "comment-json": "^4.2.3",
     "degit": "^2.8.4",
+    "detect-package-manager": "^3.0.1",
     "execa": "^5.0.0",
     "figures": "^3.2.0",
     "fs-extra": "^9.0.1",
