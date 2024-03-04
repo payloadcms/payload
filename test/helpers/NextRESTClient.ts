@@ -37,6 +37,8 @@ function generateQueryString(query: RequestOptions['query'], params: ParsedQs): 
     },
     {
       addQueryPrefix: true,
+      strictNullHandling: true,
+      // skipNulls: false,
     },
   )
 }
@@ -119,7 +121,11 @@ export class NextRESTClient {
     const { url, slug, params } = this.generateRequestParts(path)
     const { query, ...rest } = options || {}
     const queryParams = generateQueryString(query, params)
-
+    console.log(
+      'parsed',
+      JSON.stringify(QueryString.parse(queryParams, { strictNullHandling: false }), null, 2),
+    )
+    // TODO: determine why the queryParams are not returning the expected values
     const request = new Request(`${url}${queryParams}`, {
       ...rest,
       method: 'GET',
