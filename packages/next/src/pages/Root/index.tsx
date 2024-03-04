@@ -75,18 +75,18 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
     }
     case 1: {
       if (oneSegmentViews[segmentOne] && segmentOne !== 'account') {
-        // /create-first-user
-        // /forgot
-        // /login
-        // /logout
-        // /logout-inactivity
-        // /unauthorized
+        // --> /create-first-user
+        // --> /forgot
+        // --> /login
+        // --> /logout
+        // --> /logout-inactivity
+        // --> /unauthorized
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = oneSegmentViews[segmentOne]
         templateClassName = baseClasses[segmentOne]
         templateType = 'minimal'
       } else if (segmentOne === 'account') {
-        // /account
+        // --> /account
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = Account
         templateClassName = 'account'
@@ -95,21 +95,21 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       break
     }
     case 2: {
-      if (segmentTwo === 'reset') {
-        // /reset/:token
+      if (segmentOne === 'reset') {
+        // --> /reset/:token
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = ResetPassword
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
       }
       if (isCollection) {
-        // /collections/:collectionSlug
+        // --> /collections/:collectionSlug
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = ListView
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
       } else if (isGlobal) {
-        // /globals/:globalSlug
+        // --> /globals/:globalSlug
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = DocumentView
         templateClassName = 'global-edit'
@@ -119,30 +119,31 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
     }
     default:
       if (segmentTwo === 'verify') {
-        // /:collectionSlug/verify/:token
+        // --> /:collectionSlug/verify/:token
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = Verify
-        templateClassName = 'global-edit'
+        templateClassName = 'verify'
         templateType = 'minimal'
       } else if (isCollection) {
-        // /collections/:collectionSlug/:id
-        // /collections/:collectionSlug/:id/preview
-        // /collections/:collectionSlug/:id/versions
-        // /collections/:collectionSlug/:id/versions/:versionId
-        // /collections/:collectionSlug/:id/api
+        // Custom Views
+        // --> /collections/:collectionSlug/:id
+        // --> /collections/:collectionSlug/:id/preview
+        // --> /collections/:collectionSlug/:id/versions
+        // --> /collections/:collectionSlug/:id/versions/:versionId
+        // --> /collections/:collectionSlug/:id/api
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = DocumentView
-        templateClassName = `collection-versions`
+        templateClassName = `collection-default-edit`
         templateType = 'default'
       } else if (isGlobal) {
-        // /globals/:globalSlug
-        // /globals/:globalSlug/preview
-        // /globals/:globalSlug/versions
-        // /globals/:globalSlug/versions/:versionId
-        // /globals/:globalSlug/api
+        // Custom Views
+        // --> /globals/:globalSlug/versions
+        // --> /globals/:globalSlug/preview
+        // --> /globals/:globalSlug/versions/:versionId
+        // --> /globals/:globalSlug/api
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = DocumentView
-        templateClassName = `global-versions`
+        templateClassName = `global-edit`
         templateType = 'default'
       }
       break
