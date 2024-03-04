@@ -571,6 +571,9 @@ importers:
       react-toastify:
         specifier: 8.2.0
         version: 8.2.0(react-dom@18.2.0)(react@18.2.0)
+      sass:
+        specifier: ^1.71.1
+        version: 1.71.1
     devDependencies:
       '@next/eslint-plugin-next':
         specifier: ^14.1.0
@@ -605,9 +608,6 @@ importers:
       postcss-preset-env:
         specifier: ^9.4.0
         version: 9.4.0(postcss@8.4.35)
-      sass:
-        specifier: ^1.70.0
-        version: 1.71.1
       sass-loader:
         specifier: ^14.1.1
         version: 14.1.1(sass@1.71.1)(webpack@5.90.3)
