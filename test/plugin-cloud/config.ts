@@ -9,7 +9,7 @@ import { Users } from './collections/Users'
 
 // NOTE: may need to create .env file for testing
 dotenv.config({
-  path: path.resolve(__dirname, '.env'),
+  path: path.resolve(process.cwd(), './test/plugin-cloud/.env'),
 })
 
 export default buildConfigWithDefaults({
