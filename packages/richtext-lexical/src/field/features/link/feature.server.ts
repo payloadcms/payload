@@ -80,7 +80,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           {
             converters: {
               html: {
-                converter: async ({ converters, node, parent }) => {
+                converter: async ({ converters, node, parent, payload }) => {
                   const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
@@ -88,6 +88,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                       ...node,
                       parent,
                     },
+                    payload,
                   })
 
                   const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
@@ -111,7 +112,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           {
             converters: {
               html: {
-                converter: async ({ converters, node, parent }) => {
+                converter: async ({ converters, node, parent, payload }) => {
                   const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
@@ -119,6 +120,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                       ...node,
                       parent,
                     },
+                    payload,
                   })
 
                   const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''

@@ -63,7 +63,7 @@ export const lexicalHTML: (
     },
     hooks: {
       afterRead: [
-        async ({ collection, field, global, siblingData }) => {
+        async ({ collection, field, global, req, siblingData }) => {
           const fields = collection ? collection.fields : global.fields
 
           // find the path of this field, as well as its sibling fields, by looking for this `field` in fields and traversing it recursively
@@ -165,6 +165,7 @@ export const lexicalHTML: (
           return await convertLexicalToHTML({
             converters: finalConverters,
             data: lexicalFieldData,
+            payload: req.payload,
           })
         },
       ],

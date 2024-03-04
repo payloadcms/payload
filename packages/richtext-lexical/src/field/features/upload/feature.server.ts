@@ -1,6 +1,4 @@
-import type { Field } from 'payload/types'
-
-import payload from 'payload'
+import type { Field, Payload } from 'payload/types'
 
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProviderProviderServer } from '../types'
@@ -22,7 +20,7 @@ export type UploadFeatureProps = {
 /**
  * Get the absolute URL for an upload URL by potentially prepending the serverURL
  */
-function getAbsoluteURL(url: string): string {
+function getAbsoluteURL(url: string, payload: Payload): string {
   return url?.startsWith('http') ? url : (payload?.config?.serverURL || '') + url
 }
 
@@ -65,57 +63,61 @@ export const UploadFeature: FeatureProviderProviderServer<
           {
             converters: {
               html: {
-                converter: async ({ node }) => {
-                  const uploadDocument: any = await payload.findByID({
-                    id: node.value.id,
-                    collection: node.relationTo,
-                  })
-                  const url: string = getAbsoluteURL(uploadDocument?.url as string)
+                converter: async ({ node, payload }) => {
+                  if (payload) {
+                    const uploadDocument: any = await payload.findByID({
+                      id: node.value.id,
+                      collection: node.relationTo,
+                    })
 
-                  /**
-                   * If the upload is not an image, return a link to the upload
-                   */
-                  if (!(uploadDocument?.mimeType as string)?.startsWith('image')) {
-                    return `<a href="${url}" rel="noopener noreferrer">${uploadDocument.filename}</a>`
-                  }
+                    const url: string = getAbsoluteURL(uploadDocument?.url as string, payload)
 
-                  /**
-                   * If the upload is a simple image with no different sizes, return a simple img tag
-                   */
-                  if (!uploadDocument?.sizes || !Object.keys(uploadDocument?.sizes).length) {
-                    return `<img src="${url}" alt="${uploadDocument?.filename}" width="${uploadDocument?.width}"  height="${uploadDocument?.height}"/>`
-                  }
-
-                  /**
-                   * If the upload is an image with different sizes, return a picture element
-                   */
-                  let pictureHTML = '<picture>'
-
-                  // Iterate through each size in the data.sizes object
-                  for (const size in uploadDocument.sizes) {
-                    const imageSize = uploadDocument.sizes[size]
-
-                    // Skip if any property of the size object is null
-                    if (
-                      !imageSize.width ||
-                      !imageSize.height ||
-                      !imageSize.mimeType ||
-                      !imageSize.filesize ||
-                      !imageSize.filename ||
-                      !imageSize.url
-                    ) {
-                      continue
+                    /**
+                     * If the upload is not an image, return a link to the upload
+                     */
+                    if (!(uploadDocument?.mimeType as string)?.startsWith('image')) {
+                      return `<a href="${url}" rel="noopener noreferrer">${uploadDocument.filename}</a>`
                     }
-                    const imageSizeURL: string = getAbsoluteURL(imageSize?.url as string)
 
-                    pictureHTML += `<source srcset="${imageSizeURL}" media="(max-width: ${imageSize.width}px)" type="${imageSize.mimeType}">`
+                    /**
+                     * If the upload is a simple image with no different sizes, return a simple img tag
+                     */
+                    if (!uploadDocument?.sizes || !Object.keys(uploadDocument?.sizes).length) {
+                      return `<img src="${url}" alt="${uploadDocument?.filename}" width="${uploadDocument?.width}"  height="${uploadDocument?.height}"/>`
+                    }
+
+                    /**
+                     * If the upload is an image with different sizes, return a picture element
+                     */
+                    let pictureHTML = '<picture>'
+
+                    // Iterate through each size in the data.sizes object
+                    for (const size in uploadDocument.sizes) {
+                      const imageSize = uploadDocument.sizes[size]
+
+                      // Skip if any property of the size object is null
+                      if (
+                        !imageSize.width ||
+                        !imageSize.height ||
+                        !imageSize.mimeType ||
+                        !imageSize.filesize ||
+                        !imageSize.filename ||
+                        !imageSize.url
+                      ) {
+                        continue
+                      }
+                      const imageSizeURL: string = getAbsoluteURL(imageSize?.url as string, payload)
+
+                      pictureHTML += `<source srcset="${imageSizeURL}" media="(max-width: ${imageSize.width}px)" type="${imageSize.mimeType}">`
+                    }
+
+                    // Add the default img tag
+                    pictureHTML += `<img src="${url}" alt="Image" width="${uploadDocument.width}" height="${uploadDocument.height}">`
+                    pictureHTML += '</picture>'
+                    return pictureHTML
+                  } else {
+                    return `<img src="${node.value.id}" />`
                   }
-
-                  // Add the default img tag
-                  pictureHTML += `<img src="${url}" alt="Image" width="${uploadDocument.width}" height="${uploadDocument.height}">`
-                  pictureHTML += '</picture>'
-
-                  return pictureHTML
                 },
                 nodeTypes: [UploadNode.getType()],
               } as HTMLConverter<SerializedUploadNode>,

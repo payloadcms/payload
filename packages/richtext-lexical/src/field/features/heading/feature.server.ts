@@ -33,7 +33,7 @@ export const HeadingFeature: FeatureProviderProviderServer<
             type: HeadingNode.getType(),
             converters: {
               html: {
-                converter: async ({ converters, node, parent }) => {
+                converter: async ({ converters, node, parent, payload }) => {
                   const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
@@ -41,6 +41,7 @@ export const HeadingFeature: FeatureProviderProviderServer<
                       ...node,
                       parent,
                     },
+                    payload,
                   })
 
                   return '<' + node?.tag + '>' + childrenText + '</' + node?.tag + '>'
