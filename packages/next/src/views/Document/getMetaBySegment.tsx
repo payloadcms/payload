@@ -1,10 +1,5 @@
-import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type {
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-} from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
@@ -13,84 +8,82 @@ import { generateMetadata as editMeta } from '../Edit/meta'
 import { generateMetadata as livePreviewMeta } from '../LivePreview/meta'
 import { generateMetadata as versionMeta } from '../Version/meta'
 import { generateMetadata as versionsMeta } from '../Versions/meta'
+import { GenerateViewMetadata } from '../Root'
 
-export type GenerateEditViewMetadata = (args: {
-  collectionConfig?: SanitizedCollectionConfig
-  config: SanitizedConfig
-  globalConfig?: SanitizedGlobalConfig
-  i18n: I18n
-  isEditing: boolean
-}) => Promise<Metadata>
+export type GenerateEditViewMetadata = (
+  args: Parameters<GenerateViewMetadata>[0] & {
+    collectionConfig?: SanitizedCollectionConfig | null
+    globalConfig?: SanitizedGlobalConfig | null
+    isEditing: boolean
+  },
+) => Promise<Metadata>
 
-export const getMetaBySegment = async ({
-  config: configPromise,
+export const getMetaBySegment: GenerateEditViewMetadata = async ({
+  config,
   params,
-}: {
-  config: Promise<SanitizedConfig>
-  params: {
-    collection?: string
-    global?: string
-    segments: string[]
-  }
-}): Promise<Metadata> => {
-  const config = await configPromise
+  collectionConfig,
+  globalConfig,
+}) => {
+  const { segments } = params
 
   let fn: GenerateEditViewMetadata | null = null
 
-  const isEditing = Boolean(
-    params.collection && params.segments?.length > 0 && params.segments[0] !== 'create',
-  )
+  const [segmentOne] = segments
+  const isCollection = segmentOne === 'collections'
+  const isGlobal = segmentOne === 'globals'
 
-  if (params.collection && params?.segments?.length) {
+  const isEditing = Boolean(isCollection && segments?.length > 2 && segments[2] !== 'create')
+
+  if (isCollection) {
     // `/:id`
-    if (params.segments.length === 1) {
+    if (params.segments.length === 3) {
       fn = editMeta
     }
 
     // `/:id/api`
-    if (params.segments.length === 2 && params.segments[1] === 'api') {
+    if (params.segments.length === 4 && params.segments[3] === 'api') {
       fn = apiMeta
     }
 
     // `/:id/preview`
-    if (params.segments.length === 2 && params.segments[1] === 'preview') {
+    if (params.segments.length === 4 && params.segments[3] === 'preview') {
       fn = livePreviewMeta
     }
 
     // `/:id/versions`
-    if (params.segments.length === 2 && params.segments[1] === 'versions') {
+    if (params.segments.length === 4 && params.segments[3] === 'versions') {
       fn = versionsMeta
     }
 
     // `/:id/versions/:version`
-    if (params.segments.length === 3 && params.segments[1] === 'versions') {
+    if (params.segments.length === 5 && params.segments[3] === 'versions') {
       fn = versionMeta
     }
   }
 
-  if (params.global) {
+  if (isGlobal) {
     // `/:slug`
-    if (!params.segments?.length) {
+    if (params.segments?.length === 2) {
       fn = editMeta
     }
 
     // `/:slug/api`
-    if (params.segments?.length === 1 && params.segments[0] === 'api') {
+    if (params.segments?.length === 3 && params.segments[2] === 'api') {
       fn = apiMeta
     }
 
     // `/:slug/preview`
-    if (params.segments?.length === 1 && params.segments[0] === 'preview') {
+    if (params.segments?.length === 3 && params.segments[2] === 'preview') {
       fn = livePreviewMeta
     }
 
     // `/:slug/versions`
-    if (params.segments?.length === 1 && params.segments[0] === 'versions') {
+    if (params.segments?.length === 3 && params.segments[2] === 'versions') {
       fn = versionsMeta
     }
 
     // `/:slug/versions/:version`
-    if (params.segments?.length === 2 && params.segments[0] === 'versions') {
+    if (params.segments?.length === 4 && params.segments[2] === 'versions') {
       fn = versionMeta
     }
   }
@@ -98,14 +91,6 @@ export const getMetaBySegment = async ({
   const i18n = await getNextI18n({
     config,
   })
-
-  const collectionConfig = params.collection
-    ? config?.collections?.find((collection) => collection.slug === params.collection)
-    : null
-
-  const globalConfig = params.global
-    ? config?.globals?.find((global) => global.slug === params.global)
-    : null
 
   if (typeof fn === 'function') {
     return fn({

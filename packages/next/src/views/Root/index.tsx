@@ -3,9 +3,7 @@ import type { InitPageResult, SanitizedConfig } from 'payload/types'
 import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
 import React from 'react'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
 import { initPage } from '../../utilities/initPage'
-import { meta } from '../../utilities/meta'
 import { Account } from '../Account'
 import { CreateFirstUser } from '../CreateFirstUser'
 import { Dashboard } from '../Dashboard'
@@ -16,7 +14,11 @@ import { Login } from '../Login'
 import { Logout, LogoutInactivity } from '../Logout'
 import { ResetPassword } from '../ResetPassword'
 import { Unauthorized } from '../Unauthorized'
-import Verify from '../Verify'
+import { Verify } from '../Verify'
+import { Metadata } from 'next'
+import { I18n } from '@payloadcms/translations'
+
+export { generatePageMetadata } from './meta'
 
 type Args = {
   config: Promise<SanitizedConfig>
@@ -27,6 +29,12 @@ type Args = {
     [key: string]: string | string[]
   }
 }
+
+export type GenerateViewMetadata = (args: {
+  config: SanitizedConfig
+  i18n: I18n
+  params?: { [key: string]: string | string[] }
+}) => Promise<Metadata>
 
 export type AdminViewProps = {
   baseClass?: string
@@ -59,6 +67,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
   let templateType: 'default' | 'minimal' = 'default'
 
   let route = config.routes.admin
+
   if (Array.isArray(params.segments)) {
     route = route + '/' + params.segments.join('/')
   }
@@ -216,22 +225,4 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
   }
 
   return null
-}
-
-export const generateMeta = async ({ config: configPromise, params, searchParams }: Args) => {
-  const config = await configPromise
-
-  const { t } = await getNextI18n({
-    config,
-  })
-
-  return meta({
-    config,
-    description: 'Payload',
-    keywords: 'Payload',
-    title: 'Payload',
-    // description: `${t('authentication:logoutUser')}`,
-    // keywords: `${t('authentication:logout')}`,
-    // title: t('authentication:logout'),
-  })
 }

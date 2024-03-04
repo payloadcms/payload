@@ -1,10 +1,4 @@
-import type { Metadata } from 'next'
-import type {
-  Data,
-  DocumentPreferences,
-  SanitizedConfig,
-  ServerSideEditViewProps,
-} from 'payload/types'
+import type { Data, DocumentPreferences, ServerSideEditViewProps } from 'payload/types'
 
 import {
   HydrateClientUser,
@@ -18,29 +12,10 @@ import React, { Fragment } from 'react'
 
 import type { AdminViewProps } from '../Root'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
-import { meta } from '../../utilities/meta'
 import { EditView } from '../Edit'
 import { Settings } from './Settings'
 
-export const generateMetadata = async ({
-  config: configPromise,
-}: {
-  config: Promise<SanitizedConfig>
-}): Promise<Metadata> => {
-  const config = await configPromise
-
-  const { t } = await getNextI18n({
-    config,
-  })
-
-  return meta({
-    config,
-    description: `${t('authentication:accountOfCurrentUser')}`,
-    keywords: `${t('authentication:account')}`,
-    title: t('authentication:account'),
-  })
-}
+export { generateAccountMetadata } from './meta'
 
 export const Account: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
   const {

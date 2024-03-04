@@ -1,33 +1,10 @@
-import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
-
 import { Button, Email, Form, FormSubmit, Translation } from '@payloadcms/ui'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
 import type { AdminViewProps } from '../Root'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
-import { meta } from '../../utilities/meta'
-
-export const generateMetadata = async ({
-  config: configPromise,
-}: {
-  config: Promise<SanitizedConfig>
-}): Promise<Metadata> => {
-  const config = await configPromise
-
-  const { t } = await getNextI18n({
-    config,
-  })
-
-  return meta({
-    config,
-    description: t('authentication:forgotPassword'),
-    keywords: t('authentication:forgotPassword'),
-    title: t('authentication:forgotPassword'),
-  })
-}
+export { generateForgotPasswordMetadata } from './meta'
 
 export const ForgotPassword: React.FC<AdminViewProps> = ({ initPageResult }) => {
   const {

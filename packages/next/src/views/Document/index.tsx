@@ -25,17 +25,10 @@ import React, { Fragment } from 'react'
 
 import type { AdminViewProps } from '../Root'
 
-import { getMetaBySegment } from './getMetaBySegment'
+import { GenerateEditViewMetadata, getMetaBySegment } from './getMetaBySegment'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
-export const generateMetadata = async (args: {
-  config: Promise<SanitizedConfig>
-  params: {
-    collection?: string
-    global?: string
-    segments: string[]
-  }
-}) => getMetaBySegment(args)
+export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
 export const Document: React.FC<AdminViewProps> = async ({
   initPageResult,

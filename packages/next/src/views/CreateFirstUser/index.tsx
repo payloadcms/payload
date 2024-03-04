@@ -1,6 +1,4 @@
-import type { Metadata } from 'next'
 import type { Field } from 'payload/types'
-import type { SanitizedConfig } from 'payload/types'
 
 import { Form, FormSubmit, buildStateFromSchema } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
@@ -8,29 +6,10 @@ import React from 'react'
 
 import type { AdminViewProps } from '../Root'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
-import { meta } from '../../utilities/meta'
 import { CreateFirstUserFields } from './index.client'
 import './index.scss'
 
-export const generateMetadata = async ({
-  config: configPromise,
-}: {
-  config: Promise<SanitizedConfig>
-}): Promise<Metadata> => {
-  const config = await configPromise
-
-  const { t } = await getNextI18n({
-    config,
-  })
-
-  return meta({
-    config,
-    description: t('authentication:createFirstUser'),
-    keywords: t('general:create'),
-    title: t('authentication:createFirstUser'),
-  })
-}
+export { generateCreateFirstUserMetadata } from './meta'
 
 export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult }) => {
   const {
