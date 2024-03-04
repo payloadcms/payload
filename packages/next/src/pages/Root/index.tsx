@@ -118,24 +118,22 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       break
     }
     default:
-      if (isCollection) {
-        if (segmentTwo === 'verify') {
-          // /:collectionSlug/verify/:token
-          pageData = await initPage({ config, route, searchParams })
-          ViewToRender = Verify
-          templateClassName = 'global-edit'
-          templateType = 'minimal'
-        } else {
-          // /collections/:collectionSlug/:id
-          // /collections/:collectionSlug/:id/preview
-          // /collections/:collectionSlug/:id/versions
-          // /collections/:collectionSlug/:id/versions/:versionId
-          // /collections/:collectionSlug/:id/api
-          pageData = await initPage({ config, route, searchParams })
-          ViewToRender = DocumentView
-          templateClassName = `collection-versions`
-          templateType = 'default'
-        }
+      if (segmentTwo === 'verify') {
+        // /:collectionSlug/verify/:token
+        pageData = await initPage({ config, route, searchParams })
+        ViewToRender = Verify
+        templateClassName = 'global-edit'
+        templateType = 'minimal'
+      } else if (isCollection) {
+        // /collections/:collectionSlug/:id
+        // /collections/:collectionSlug/:id/preview
+        // /collections/:collectionSlug/:id/versions
+        // /collections/:collectionSlug/:id/versions/:versionId
+        // /collections/:collectionSlug/:id/api
+        pageData = await initPage({ config, route, searchParams })
+        ViewToRender = DocumentView
+        templateClassName = `collection-versions`
+        templateType = 'default'
       } else if (isGlobal) {
         // /globals/:globalSlug
         // /globals/:globalSlug/preview
