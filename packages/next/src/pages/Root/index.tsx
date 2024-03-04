@@ -17,7 +17,6 @@ import { Logout, LogoutInactivity } from '../Logout'
 import { ResetPassword } from '../ResetPassword'
 import { Unauthorized } from '../Unauthorized'
 import Verify from '../Verify'
-import { VersionsView } from '../Versions'
 
 type Args = {
   config: Promise<SanitizedConfig>
@@ -59,7 +58,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
-  const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive] = segments
+  const [segmentOne, segmentTwo] = segments
 
   const isGlobal = segmentOne === 'globals'
   const isCollection = segmentOne === 'collections'
@@ -76,18 +75,18 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
     }
     case 1: {
       if (oneSegmentViews[segmentOne] && segmentOne !== 'account') {
-        // /create-first-user
-        // /forgot
-        // /login
-        // /logout
-        // /logout-inactivity
-        // /unauthorized
+        // --> /create-first-user
+        // --> /forgot
+        // --> /login
+        // --> /logout
+        // --> /logout-inactivity
+        // --> /unauthorized
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = oneSegmentViews[segmentOne]
         templateClassName = baseClasses[segmentOne]
         templateType = 'minimal'
       } else if (segmentOne === 'account') {
-        // /account
+        // --> /account
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = Account
         templateClassName = 'account'
@@ -96,21 +95,21 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       break
     }
     case 2: {
-      if (segmentTwo === 'reset') {
-        // /reset/:token
+      if (segmentOne === 'reset') {
+        // --> /reset/:token
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = ResetPassword
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
       }
       if (isCollection) {
-        // /collections/:collectionSlug
+        // --> /collections/:collectionSlug
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = ListView
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
       } else if (isGlobal) {
-        // /globals/:globalSlug
+        // --> /globals/:globalSlug
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = DocumentView
         templateClassName = 'global-edit'
@@ -118,34 +117,33 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       }
       break
     }
-    case 3: {
-      if (isCollection) {
-        // /collections/:collectionSlug/:id
-        pageData = await initPage({ config, route, searchParams })
-        ViewToRender = DocumentView
-        templateClassName = `collection-edit`
-        templateType = 'default'
-      } else if (segmentTwo === 'verify') {
-        // /:collectionSlug/verify/:token
+    default:
+      if (segmentTwo === 'verify') {
+        // --> /:collectionSlug/verify/:token
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = Verify
-        templateClassName = baseClasses[segmentTwo]
+        templateClassName = 'verify'
         templateType = 'minimal'
-      }
-      break
-    }
-    default:
-      if (isCollection) {
-        // /collections/:collectionSlug/:id/versions
+      } else if (isCollection) {
+        // Custom Views
+        // --> /collections/:collectionSlug/:id
+        // --> /collections/:collectionSlug/:id/preview
+        // --> /collections/:collectionSlug/:id/versions
+        // --> /collections/:collectionSlug/:id/versions/:versionId
+        // --> /collections/:collectionSlug/:id/api
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = DocumentView
-        templateClassName = `collection-versions`
+        templateClassName = `collection-default-edit`
         templateType = 'default'
       } else if (isGlobal) {
-        // /globals/:globalSlug/:id/versions
+        // Custom Views
+        // --> /globals/:globalSlug/versions
+        // --> /globals/:globalSlug/preview
+        // --> /globals/:globalSlug/versions/:versionId
+        // --> /globals/:globalSlug/api
         pageData = await initPage({ config, route, searchParams })
         ViewToRender = DocumentView
-        templateClassName = `global-versions`
+        templateClassName = `global-edit`
         templateType = 'default'
       }
       break
