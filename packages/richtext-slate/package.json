@@ -33,7 +33,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.3.0",
+    "payload": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*"
   },

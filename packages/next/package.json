@@ -82,7 +82,7 @@
   "peerDependencies": {
     "http-status": "1.6.2",
     "next": "14.1.1-canary.26",
-    "payload": "^2.0.0"
+    "payload": "workspace:*"
   },
   "publishConfig": {
     "main": "./dist/exports/index.js",
