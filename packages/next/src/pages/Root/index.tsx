@@ -70,7 +70,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       ViewToRender = Dashboard
       templateClassName = 'dashboard'
       templateType = 'default'
-      pageData = await initPage({ config, route, searchParams })
+      pageData = await initPage({ config, redirectUnauthenticatedUser: true, route, searchParams })
       break
     }
     case 1: {
@@ -87,7 +87,12 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         templateType = 'minimal'
       } else if (segmentOne === 'account') {
         // --> /account
-        pageData = await initPage({ config, route, searchParams })
+        pageData = await initPage({
+          config,
+          redirectUnauthenticatedUser: true,
+          route,
+          searchParams,
+        })
         ViewToRender = Account
         templateClassName = 'account'
         templateType = 'default'
@@ -104,13 +109,23 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       }
       if (isCollection) {
         // --> /collections/:collectionSlug
-        pageData = await initPage({ config, route, searchParams })
+        pageData = await initPage({
+          config,
+          redirectUnauthenticatedUser: true,
+          route,
+          searchParams,
+        })
         ViewToRender = ListView
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
       } else if (isGlobal) {
         // --> /globals/:globalSlug
-        pageData = await initPage({ config, route, searchParams })
+        pageData = await initPage({
+          config,
+          redirectUnauthenticatedUser: true,
+          route,
+          searchParams,
+        })
         ViewToRender = DocumentView
         templateClassName = 'global-edit'
         templateType = 'default'
@@ -131,7 +146,12 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         // --> /collections/:collectionSlug/:id/versions
         // --> /collections/:collectionSlug/:id/versions/:versionId
         // --> /collections/:collectionSlug/:id/api
-        pageData = await initPage({ config, route, searchParams })
+        pageData = await initPage({
+          config,
+          redirectUnauthenticatedUser: true,
+          route,
+          searchParams,
+        })
         ViewToRender = DocumentView
         templateClassName = `collection-default-edit`
         templateType = 'default'
@@ -141,7 +161,12 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/versions/:versionId
         // --> /globals/:globalSlug/api
-        pageData = await initPage({ config, route, searchParams })
+        pageData = await initPage({
+          config,
+          redirectUnauthenticatedUser: true,
+          route,
+          searchParams,
+        })
         ViewToRender = DocumentView
         templateClassName = `global-edit`
         templateType = 'default'
