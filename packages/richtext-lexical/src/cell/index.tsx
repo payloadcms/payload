@@ -3,6 +3,8 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { useTableCell } from '@payloadcms/ui/elements'
+import { useFieldPath } from '@payloadcms/ui/forms'
+import { useClientFunctions } from '@payloadcms/ui/providers'
 import { $getRoot } from 'lexical'
 import React, { useEffect, useState } from 'react'
 
@@ -10,8 +12,6 @@ import type { FeatureProviderClient } from '../field/features/types'
 import type { SanitizedClientEditorConfig } from '../field/lexical/config/types'
 import type { GeneratedFeatureProviderComponent } from '../types'
 
-import { useFieldPath } from '../../../ui/src/forms/FieldPathProvider'
-import { useClientFunctions } from '../../../ui/src/providers/ClientFunction'
 import { defaultEditorLexicalConfig } from '../field/lexical/config/client/default'
 import { loadClientFeatures } from '../field/lexical/config/client/loader'
 import { sanitizeClientEditorConfig } from '../field/lexical/config/client/sanitize'
