@@ -37,7 +37,7 @@ export { TextInput, type TextInputProps } from '../forms/fields/Text/Input'
 export type { Props as TextFieldProps } from '../forms/fields/Text/types'
 export { default as Textarea } from '../forms/fields/Textarea'
 export { type TextAreaInputProps, TextareaInput } from '../forms/fields/Textarea/Input'
-export { default as Upload } from '../forms/fields/Upload'
+export { default as UploadField } from '../forms/fields/Upload'
 
 export { UploadInput, type UploadInputProps } from '../forms/fields/Upload/Input'
 
