@@ -53,7 +53,6 @@ export const Document = async ({ page, params, searchParams }: Props) => {
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
   const {
-    i18n,
     payload,
     payload: { config },
     user,
@@ -185,24 +184,18 @@ export const Document = async ({ page, params, searchParams }: Props) => {
     action: `${action}?${queryString.stringify(formQueryParams)}`,
     apiURL,
     canAccessAdmin: permissions?.canAccessAdmin,
-    collectionConfig,
     collectionSlug,
-    config,
     data,
     docPermissions,
     docPreferences,
-    globalConfig,
     globalSlug,
     hasSavePermission,
-    i18n,
+    initPageResult: page,
     initialState,
     isEditing,
-    locale,
-    payload,
-    permissions,
+    params,
     searchParams,
     updatedAt: data?.updatedAt?.toString(),
-    user,
   }
 
   return (

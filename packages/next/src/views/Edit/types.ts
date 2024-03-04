@@ -1,37 +1,25 @@
-import type { I18n } from '@payloadcms/translations'
 import type { FormState } from '@payloadcms/ui'
-import type { Permissions, User } from 'payload/auth'
-import type { EditViewProps, Locale } from 'payload/config'
-import type {
-  Data,
-  DocumentPermissions,
-  DocumentPreferences,
-  Payload,
-  SanitizedConfig,
-} from 'payload/types'
+import type { EditViewProps } from 'payload/config'
+import type { Data, DocumentPermissions, DocumentPreferences } from 'payload/types'
+
+import type { InitPageResult } from '../../utilities/initPage'
 
 export type ServerSideEditViewProps = EditViewProps & {
   action?: string
   apiURL: string
   canAccessAdmin?: boolean
-  collectionConfig?: SanitizedConfig['collections'][0]
-  config: SanitizedConfig
   data: Data
   disableActions?: boolean
   disableLeaveWithoutSaving?: boolean
   docPermissions: DocumentPermissions
   docPreferences: DocumentPreferences
-  globalConfig?: SanitizedConfig['globals'][0]
   hasSavePermission?: boolean
-  i18n: I18n
   id?: string
+  initPageResult: InitPageResult
   initialState?: FormState
   isEditing?: boolean
-  locale: Locale
-  payload: Payload
-  permissions: Permissions
+  params?: { [key: string]: string | string[] }
   searchParams: { [key: string]: string | string[] | undefined }
   // isLoading: boolean
   updatedAt: string
-  user: User
 }

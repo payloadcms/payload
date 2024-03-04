@@ -112,19 +112,14 @@ export const Account = async ({
       action: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`,
       apiURL: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`,
       collectionSlug: userSlug,
-      config,
       data,
       docPermissions: collectionPermissions,
       docPreferences,
       hasSavePermission: collectionPermissions?.update?.permission,
-      i18n: req.i18n,
+      initPageResult: page,
       initialState,
-      locale,
-      payload,
-      permissions,
       searchParams,
       updatedAt: '', // TODO
-      user,
     }
 
     return (

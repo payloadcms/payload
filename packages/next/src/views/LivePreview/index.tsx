@@ -1,21 +1,15 @@
 import type { LivePreviewConfig } from 'payload/config'
-import type { Data } from 'payload/types'
 
 import React from 'react'
 
-import type { InitPageResult } from '../../utilities/initPage'
+import type { ServerSideEditViewProps } from '../Edit/types'
 
 import { LivePreviewClient } from './index.client'
 import './index.scss'
 
-type Props = {
-  data: Data
-  page: InitPageResult
-  params: { [key: string]: string | string[] }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-export const LivePreviewView: React.FC = async (props: Props) => {
-  const { page } = props
+export const LivePreviewView: React.FC = async (props: ServerSideEditViewProps) => {
+  const { initPageResult } = props
+
   const {
     collectionConfig,
     globalConfig,
@@ -27,7 +21,7 @@ export const LivePreviewView: React.FC = async (props: Props) => {
         },
       } = {},
     } = {},
-  } = page
+  } = initPageResult
 
   // TODO(JAKE): not sure what `data` is or what it should be
   const { data = {} } = props
