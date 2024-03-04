@@ -1,12 +1,17 @@
 'use client'
 
-import type { Props as UploadInputProps } from 'payload/components/fields/Upload'
-import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
+import type { FieldType, Options, UploadInputProps } from '@payloadcms/ui'
 
-import { UploadInput, useAllFormFields, useField } from 'payload/components/forms'
-import { useConfig, useDocumentInfo, useLocale } from 'payload/components/utilities'
+import {
+  UploadInput,
+  useAllFormFields,
+  useConfig,
+  useDocumentInfo,
+  useField,
+  useLocale,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
 
@@ -19,11 +24,11 @@ type MetaImageProps = UploadInputProps & {
 }
 
 export const MetaImage: React.FC<MetaImageProps> = (props) => {
-  const { name, fieldTypes, label, pluginConfig, relationTo, required } = props || {}
+  const { label, pluginConfig, relationTo, required } = props || {}
 
   const field: FieldType<string> = useField(props as Options)
 
-  const { t } = useTranslation('plugin-seo')
+  const { t } = useTranslation()
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
@@ -32,7 +37,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateImage = useCallback(async () => {
-    const { generateImage } = pluginConfig
+    /*const { generateImage } = pluginConfig
     let generatedImage
 
     if (typeof generateImage === 'function') {
@@ -43,7 +48,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
       })
     }
 
-    setValue(generatedImage)
+    setValue(generatedImage)*/
   }, [fields, setValue, pluginConfig, locale, docInfo])
 
   const hasImage = Boolean(value)
@@ -80,7 +85,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
             </span>
           )}
 
-          {typeof pluginConfig.generateImage === 'function' && (
+          {typeof pluginConfig?.generateImage === 'function' && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
@@ -96,18 +101,18 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
                 }}
                 type="button"
               >
-                {t('autoGenerate')}
+                {t('plugin-seo:autoGenerate')}
               </button>
             </React.Fragment>
           )}
         </div>
-        {typeof pluginConfig.generateImage === 'function' && (
+        {typeof pluginConfig?.generateImage === 'function' && (
           <div
             style={{
               color: '#9A9A9A',
             }}
           >
-            {t('imageAutoGenerationTip')}
+            {t('plugin-seo:imageAutoGenerationTip')}
           </div>
         )}
       </div>
@@ -118,13 +123,11 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <UploadInput
+          Error={errorMessage} // TODO: Fix
           api={api}
           collection={collection}
-          errorMessage={errorMessage}
-          fieldTypes={fieldTypes}
           filterOptions={{}}
           label={undefined}
-          name={name}
           onChange={(incomingImage) => {
             if (incomingImage !== null) {
               const { id: incomingID } = incomingImage
@@ -133,7 +136,6 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
               setValue(null)
             }
           }}
-          path={name}
           relationTo={relationTo}
           required={required}
           serverURL={serverURL}
@@ -154,7 +156,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
         <Pill
           backgroundColor={hasImage ? 'green' : 'red'}
           color="white"
-          label={hasImage ? t('good') : t('noImage')}
+          label={hasImage ? t('plugin-seo:good') : t('plugin-seo:noImage')}
         />
       </div>
     </div>

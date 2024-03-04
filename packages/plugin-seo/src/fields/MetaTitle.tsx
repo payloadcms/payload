@@ -1,15 +1,18 @@
 'use client'
 
-import type {
-  FieldType as FieldType,
-  Options,
-} from 'payload/dist/admin/components/forms/useField/types'
+import type { FieldType, Options } from '@payloadcms/ui'
 import type { TextField as TextFieldType } from 'payload/types'
 
-import { TextInput, useAllFormFields, useField } from 'payload/components/forms'
-import { useDocumentInfo, useLocale } from 'payload/components/utilities'
+import { useFieldPath } from '@payloadcms/ui'
+import {
+  TextInput,
+  useAllFormFields,
+  useDocumentInfo,
+  useField,
+  useLocale,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
 
@@ -26,8 +29,10 @@ type MetaTitleProps = TextFieldType & {
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
   const { name, label, path, pluginConfig, required } = props || {}
+  console.log('props tit', props)
+  const { path: pathFromContext, schemaPath } = useFieldPath()
 
-  const { t } = useTranslation('plugin-seo')
+  const { t } = useTranslation()
 
   const field: FieldType<string> = useField({
     name,
@@ -42,7 +47,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateTitle = useCallback(async () => {
-    const { generateTitle } = pluginConfig
+    /* const { generateTitle } = pluginConfig
     let generatedTitle
 
     if (typeof generateTitle === 'function') {
@@ -53,7 +58,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
       })
     }
 
-    setValue(generatedTitle)
+    setValue(generatedTitle)*/
   }, [fields, setValue, pluginConfig, locale, docInfo])
 
   return (
@@ -82,7 +87,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
             </span>
           )}
 
-          {typeof pluginConfig.generateTitle === 'function' && (
+          {typeof pluginConfig?.generateTitle === 'function' && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
@@ -98,7 +103,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
                 }}
                 type="button"
               >
-                {t('autoGenerate')}
+                {t('plugin-seo:autoGenerate')}
               </button>
             </React.Fragment>
           )}
@@ -108,13 +113,13 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
             color: '#9A9A9A',
           }}
         >
-          {t('lengthTipTitle', { maxLength, minLength })}
+          {t('plugin-seo:lengthTipTitle', { maxLength, minLength })}
           <a
             href="https://developers.google.com/search/docs/advanced/appearance/title-link#page-titles"
             rel="noopener noreferrer"
             target="_blank"
           >
-            {t('bestPractices')}
+            {t('plugin-seo:bestPractices')}
           </a>
           .
         </div>
@@ -126,10 +131,9 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <TextInput
-          errorMessage={errorMessage}
-          name={name}
+          Error={errorMessage} // TODO: fix errormessage
           onChange={setValue}
-          path={name}
+          path={name || pathFromContext}
           required={required}
           showError={showError}
           style={{

@@ -1,16 +1,17 @@
 import type { Config } from 'payload/config'
-import type { Field, GroupField, TabsField } from 'payload/types'
+import type { Field, GroupField, TabsField, TextField } from 'payload/types'
 
 import { deepMerge } from 'payload/utilities'
+import React from 'react'
 
 import type { PluginConfig } from './types'
 
-import { getMetaDescriptionField } from './fields/MetaDescription'
-import { getMetaImageField } from './fields/MetaImage'
-import { getMetaTitleField } from './fields/MetaTitle'
+import { MetaDescription, getMetaDescriptionField } from './fields/MetaDescription'
+import { MetaImage, getMetaImageField } from './fields/MetaImage'
+import { MetaTitle, getMetaTitleField } from './fields/MetaTitle'
 import translations from './translations'
 import { Overview } from './ui/Overview'
-import { getPreviewField } from './ui/Preview'
+import { Preview, getPreviewField } from './ui/Preview'
 
 const seo =
   (pluginConfig: PluginConfig) =>
@@ -35,18 +36,22 @@ const seo =
             type: 'text',
             admin: {
               components: {
-                Field: (props) => getMetaTitleField({ ...props, pluginConfig }),
+                Field: (props) => {
+                  return <MetaTitle {...props} />
+                },
               },
             },
             localized: true,
-            ...(pluginConfig?.fieldOverrides?.title ?? {}),
+            ...((pluginConfig?.fieldOverrides?.title as TextField) ?? {}),
           },
           {
             name: 'description',
             type: 'textarea',
             admin: {
               components: {
-                Field: (props) => getMetaDescriptionField({ ...props, pluginConfig }),
+                Field: (props) => {
+                  return <MetaDescription {...props} />
+                },
               },
             },
             localized: true,
@@ -60,7 +65,9 @@ const seo =
                   type: 'upload',
                   admin: {
                     components: {
-                      Field: (props) => getMetaImageField({ ...props, pluginConfig }),
+                      Field: (props) => {
+                        return <MetaImage {...props} />
+                      },
                     },
                     description:
                       'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',
@@ -78,7 +85,9 @@ const seo =
             type: 'ui',
             admin: {
               components: {
-                Field: (props) => getPreviewField({ ...props, pluginConfig }),
+                Field: (props) => {
+                  return <Preview {...props} />
+                },
               },
             },
             label: 'Preview',
@@ -198,8 +207,8 @@ const seo =
         }) || [],
       i18n: {
         ...config.i18n,
-        resources: {
-          ...deepMerge(translations, config.i18n?.resources),
+        translations: {
+          ...deepMerge(translations, config.i18n?.translations),
         },
       },
     }

@@ -1,7 +1,7 @@
 'use client'
 
+import { useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import { Pill } from './Pill'
 
@@ -19,7 +19,7 @@ export const LengthIndicator: React.FC<{
 
   const [label, setLabel] = useState('')
   const [barWidth, setBarWidth] = useState<number>(0)
-  const { t } = useTranslation('plugin-seo')
+  const { t } = useTranslation()
 
   useEffect(() => {
     const textLength = text?.length || 0
@@ -38,13 +38,13 @@ export const LengthIndicator: React.FC<{
         const ratioUntilMin = textLength / minLength
 
         if (ratioUntilMin > 0.9) {
-          setLabel(t('almostThere'))
+          setLabel(t('plugin-seo:almostThere'))
           setLabelStyle({
             backgroundColor: 'orange',
             color: 'white',
           })
         } else {
-          setLabel(t('tooShort'))
+          setLabel(t('plugin-seo:tooShort'))
           setLabelStyle({
             backgroundColor: 'orangered',
             color: 'white',
@@ -55,7 +55,7 @@ export const LengthIndicator: React.FC<{
       }
 
       if (progress >= 0 && progress <= 1) {
-        setLabel(t('good'))
+        setLabel(t('plugin-seo:good'))
         setLabelStyle({
           backgroundColor: 'green',
           color: 'white',
@@ -64,7 +64,7 @@ export const LengthIndicator: React.FC<{
       }
 
       if (progress > 1) {
-        setLabel(t('tooLong'))
+        setLabel(t('plugin-seo:tooLong'))
         setLabelStyle({
           backgroundColor: 'red',
           color: 'white',
@@ -97,15 +97,17 @@ export const LengthIndicator: React.FC<{
         }}
       >
         <small>
-          {t('characterCount', { current: text?.length || 0, maxLength, minLength })}
+          {t('plugin-seo:characterCount', { current: text?.length || 0, maxLength, minLength })}
           {(textLength === 0 || charsUntilMin > 0) && (
-            <Fragment>{t('charactersToGo', { characters: charsUntilMin })}</Fragment>
+            <Fragment>{t('plugin-seo:charactersToGo', { characters: charsUntilMin })}</Fragment>
           )}
           {charsUntilMin <= 0 && charsUntilMax >= 0 && (
-            <Fragment>{t('charactersLeftOver', { characters: charsUntilMax })}</Fragment>
+            <Fragment>{t('plugin-seo:charactersLeftOver', { characters: charsUntilMax })}</Fragment>
           )}
           {charsUntilMax < 0 && (
-            <Fragment>{t('charactersTooMany', { characters: charsUntilMax * -1 })}</Fragment>
+            <Fragment>
+              {t('plugin-seo:charactersTooMany', { characters: charsUntilMax * -1 })}
+            </Fragment>
           )}
         </small>
       </div>

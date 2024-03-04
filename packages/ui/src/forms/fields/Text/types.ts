@@ -1,11 +1,11 @@
 import type { FormFieldBase } from '../shared'
 
 export type Props = FormFieldBase & {
-  inputRef?: React.MutableRefObject<HTMLInputElement>
-  name?: string
   hasMany?: boolean
+  inputRef?: React.MutableRefObject<HTMLInputElement>
   maxRows?: number
   minRows?: number
+  name?: string
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
   path?: string
 }

@@ -3,9 +3,11 @@
 import type { FieldType, Options } from '@payloadcms/ui'
 import type { TextareaField } from 'payload/types'
 
-import { Textarea, useAllFormFields, useDocumentInfo, useField, useLocale } from '@payloadcms/ui'
+import { useFieldPath } from '@payloadcms/ui'
+import { useTranslation } from '@payloadcms/ui'
+import { TextareaInput } from '@payloadcms/ui'
+import { useAllFormFields, useDocumentInfo, useField, useLocale } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
 
@@ -22,8 +24,9 @@ type MetaDescriptionProps = TextareaField & {
 
 export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
   const { name, label, path, pluginConfig, required } = props
+  const { path: pathFromContext, schemaPath } = useFieldPath()
 
-  const { t } = useTranslation('plugin-seo')
+  const { t } = useTranslation()
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
@@ -38,7 +41,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateDescription = useCallback(async () => {
-    const { generateDescription } = pluginConfig
+    /*const { generateDescription } = pluginConfig
     let generatedDescription
 
     if (typeof generateDescription === 'function') {
@@ -49,7 +52,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
       })
     }
 
-    setValue(generatedDescription)
+    setValue(generatedDescription)*/
   }, [fields, setValue, pluginConfig, locale, docInfo])
 
   return (
@@ -78,7 +81,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
             </span>
           )}
 
-          {typeof pluginConfig.generateDescription === 'function' && (
+          {typeof pluginConfig?.generateDescription === 'function' && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
@@ -94,7 +97,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
                 }}
                 type="button"
               >
-                {t('autoGenerate')}
+                {t('plugin-seo:autoGenerate')}
               </button>
             </React.Fragment>
           )}
@@ -104,13 +107,13 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
             color: '#9A9A9A',
           }}
         >
-          {t('lengthTipDescription', { maxLength, minLength })}
+          {t('plugin-seo:lengthTipDescription', { maxLength, minLength })}
           <a
             href="https://developers.google.com/search/docs/advanced/appearance/snippet#meta-descriptions"
             rel="noopener noreferrer"
             target="_blank"
           >
-            {t('bestPractices')}
+            {t('plugin-seo:bestPractices')}
           </a>
         </div>
       </div>
@@ -120,11 +123,10 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
           position: 'relative',
         }}
       >
-        <Textarea
-          errorMessage={errorMessage}
-          name={name}
+        <TextareaInput
+          Error={errorMessage} // TODO: Fix
           onChange={setValue}
-          path={name}
+          path={name || pathFromContext}
           required={required}
           showError={showError}
           style={{

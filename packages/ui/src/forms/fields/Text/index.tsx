@@ -1,20 +1,19 @@
 'use client'
 import type { ClientValidate } from 'payload/types'
 
-import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../../elements/ReactSelect/types'
 import type { Props } from './types'
 
-import ReactSelect from '../../../elements/ReactSelect'
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
 import { useTranslation } from '../../../providers/Translation'
 import LabelComp from '../../Label'
 import useField from '../../useField'
 import { withCondition } from '../../withCondition'
-import { fieldBaseClass, isFieldRTL } from '../shared'
+import { isFieldRTL } from '../shared'
+import { TextInput } from './Input'
 import './index.scss'
 
 const Text: React.FC<Props> = (props) => {
@@ -66,6 +65,8 @@ const Text: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
+  console.log('text props', props, pathFromProps || name, 'V', value)
+
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
     fieldRTL: rtl,
@@ -115,71 +116,35 @@ const Text: React.FC<Props> = (props) => {
   }, [value, hasMany])
 
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        'number',
-        className,
-        showError && 'error',
-        readOnly && 'read-only',
-        hasMany && 'has-many',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
-    >
-      {Error}
-      {Label}
-      {hasMany ? (
-        <ReactSelect
-          className={`field-${path.replace(/\./g, '__')}`}
-          disabled={readOnly}
-          // prevent adding additional options if maxRows is reached
-          filterOption={() =>
-            !maxRows ? true : !(Array.isArray(value) && maxRows && value.length >= maxRows)
-          }
-          isClearable
-          isCreatable
-          isMulti
-          isSortable
-          noOptionsMessage={() => {
-            const isOverHasMany = Array.isArray(value) && value.length >= maxRows
-            if (isOverHasMany) {
-              return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
-            }
-            return null
-          }}
-          onChange={handleHasManyChange}
-          options={[]}
-          placeholder={t('general:enterAValue')}
-          showError={showError}
-          value={valueToRender as Option[]}
-        />
-      ) : (
-        <div>
-          {BeforeInput}
-          <input
-            data-rtl={renderRTL}
-            disabled={readOnly}
-            id={`field-${path?.replace(/\./g, '__')}`}
-            name={path}
-            onChange={(e) => {
+    <TextInput
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
+      Description={Description}
+      Error={Error}
+      Label={Label}
+      className={className}
+      hasMany={hasMany}
+      inputRef={inputRef}
+      maxRows={maxRows}
+      minRows={minRows}
+      onChange={
+        hasMany
+          ? handleHasManyChange
+          : (e) => {
               setValue(e.target.value)
-            }}
-            onKeyDown={onKeyDown}
-            placeholder={getTranslation(placeholder, i18n)}
-            ref={inputRef}
-            type="text"
-            value={(value as string) || ''}
-          />
-          {AfterInput}
-        </div>
-      )}
-      {Description}
-    </div>
+            }
+      }
+      path={path}
+      placeholder={placeholder}
+      readOnly={readOnly}
+      required={required}
+      rtl={renderRTL}
+      showError={showError}
+      style={style}
+      value={(value as string) || ''}
+      valueToRender={valueToRender as Option[]}
+      width={width}
+    />
   )
 }
 

@@ -2,10 +2,8 @@
 
 import type { FormField, UIField } from 'payload/types'
 
-import { useAllFormFields } from 'payload/components/forms'
-import { useDocumentInfo, useLocale } from 'payload/components/utilities'
+import { useAllFormFields, useDocumentInfo, useLocale, useTranslation } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
 
@@ -15,11 +13,9 @@ type PreviewProps = UIField & {
 }
 
 export const Preview: React.FC<PreviewProps> = (props) => {
-  const {
-    pluginConfig: { generateURL },
-  } = props || {}
+  const { pluginConfig: { generateURL } = {} } = props || {}
 
-  const { t } = useTranslation('plugin-seo')
+  const { t } = useTranslation()
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
@@ -33,7 +29,7 @@ export const Preview: React.FC<PreviewProps> = (props) => {
   const [href, setHref] = useState<string>()
 
   useEffect(() => {
-    const getHref = async () => {
+    /* const getHref = async () => {
       if (typeof generateURL === 'function' && !href) {
         const newHref = await generateURL({
           ...docInfo,
@@ -45,19 +41,19 @@ export const Preview: React.FC<PreviewProps> = (props) => {
       }
     }
 
-    getHref() // eslint-disable-line @typescript-eslint/no-floating-promises
+    getHref() // eslint-disable-line @typescript-eslint/no-floating-promises*/
   }, [generateURL, fields, href, locale, docInfo])
 
   return (
     <div>
-      <div>{t('preview')}</div>
+      <div>{t('plugin-seo:preview')}</div>
       <div
         style={{
           color: '#9A9A9A',
           marginBottom: '5px',
         }}
       >
-        {t('previewDescription')}
+        {t('plugin-seo:previewDescription')}
       </div>
       <div
         style={{

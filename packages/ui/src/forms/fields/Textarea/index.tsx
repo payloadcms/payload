@@ -11,7 +11,8 @@ import { useTranslation } from '../../../providers/Translation'
 import LabelComp from '../../Label'
 import useField from '../../useField'
 import { withCondition } from '../../withCondition'
-import { fieldBaseClass, isFieldRTL } from '../shared'
+import { isFieldRTL } from '../shared'
+import { TextareaInput } from './Input'
 import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {
@@ -67,43 +68,27 @@ const Textarea: React.FC<Props> = (props) => {
   })
 
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        'textarea',
-        className,
-        showError && 'error',
-        readOnly && 'read-only',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
+    <TextareaInput
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
+      Description={Description}
+      Error={Error}
+      Label={Label}
+      className={className}
+      onChange={(e) => {
+        setValue(e.target.value)
       }}
-    >
-      {Error}
-      {Label}
-      {BeforeInput}
-      <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
-        <div className="textarea-inner">
-          <div className="textarea-clone" data-value={value || placeholder || ''} />
-          <textarea
-            className="textarea-element"
-            data-rtl={isRTL}
-            disabled={readOnly}
-            id={`field-${path.replace(/\./g, '__')}`}
-            name={path}
-            onChange={setValue}
-            placeholder={getTranslation(placeholder, i18n)}
-            rows={rows}
-            value={value || ''}
-          />
-        </div>
-      </label>
-      {AfterInput}
-      {Description}
-    </div>
+      path={path}
+      placeholder={getTranslation(placeholder, i18n)}
+      readOnly={readOnly}
+      required={required}
+      rows={rows}
+      rtl={isRTL}
+      showError={showError}
+      style={style}
+      value={value}
+      width={width}
+    />
   )
 }
 
