@@ -220,6 +220,7 @@
     "*.scss",
     "*.js",
     "*.d.ts",
+    "!.*.js",
     "!jest.config.js",
     "!jest.components.config.js"
   ],
