@@ -20,7 +20,7 @@ To prevent DDoS, brute-force, and similar attacks, you can set IP-based rate lim
 
 | Option           | Description                                                                                                             |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **`window`**     | Time in milliseconds to track requests per IP. Defaults to `90000` (15 minutes).                                        |
+| **`window`**     | Time in milliseconds to track requests per IP. Defaults to `900,000` (15 minutes).                                        |
 | **`max`**        | Number of requests served from a single IP before limiting. Defaults to `500`.                                          |
 | **`skip`**       | Express middleware function that can return true (or promise resulting in true) that will bypass limit.                 |
 | **`trustProxy`** | True or false, to enable to allow requests to pass through a proxy such as a load balancer or an `nginx` reverse proxy. |
