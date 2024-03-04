@@ -8,6 +8,11 @@ import type {
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'
+import { generateMetadata as apiMeta } from '../API/meta'
+import { generateMetadata as editMeta } from '../Edit/meta'
+import { generateMetadata as livePreviewMeta } from '../LivePreview/meta'
+import { generateMetadata as versionMeta } from '../Version/meta'
+import { generateMetadata as versionsMeta } from '../Versions/meta'
 
 export type GenerateEditViewMetadata = (args: {
   collectionConfig?: SanitizedCollectionConfig
@@ -39,54 +44,54 @@ export const getMetaBySegment = async ({
   if (params.collection && params?.segments?.length) {
     // `/:id`
     if (params.segments.length === 1) {
-      fn = await import('../Edit/meta.ts').then((mod) => mod.generateMetadata)
+      fn = editMeta
     }
 
     // `/:id/api`
     if (params.segments.length === 2 && params.segments[1] === 'api') {
-      fn = await import('../API/meta.ts').then((mod) => mod.generateMetadata)
+      fn = apiMeta
     }
 
     // `/:id/preview`
     if (params.segments.length === 2 && params.segments[1] === 'preview') {
-      fn = await import('../LivePreview/meta.ts').then((mod) => mod.generateMetadata)
+      fn = livePreviewMeta
     }
 
     // `/:id/versions`
     if (params.segments.length === 2 && params.segments[1] === 'versions') {
-      fn = await import('../Versions/meta.ts').then((mod) => mod.generateMetadata)
+      fn = versionsMeta
     }
 
     // `/:id/versions/:version`
     if (params.segments.length === 3 && params.segments[1] === 'versions') {
-      fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
+      fn = versionMeta
     }
   }
 
   if (params.global) {
     // `/:slug`
     if (!params.segments?.length) {
-      fn = await import('../Edit/meta.ts').then((mod) => mod.generateMetadata)
+      fn = editMeta
     }
 
     // `/:slug/api`
     if (params.segments?.length === 1 && params.segments[0] === 'api') {
-      fn = await import('../API/meta.ts').then((mod) => mod.generateMetadata)
+      fn = apiMeta
     }
 
     // `/:slug/preview`
     if (params.segments?.length === 1 && params.segments[0] === 'preview') {
-      fn = await import('../LivePreview/meta.ts').then((mod) => mod.generateMetadata)
+      fn = livePreviewMeta
     }
 
     // `/:slug/versions`
     if (params.segments?.length === 1 && params.segments[0] === 'versions') {
-      fn = await import('../Versions/meta.ts').then((mod) => mod.generateMetadata)
+      fn = versionsMeta
     }
 
     // `/:slug/versions/:version`
     if (params.segments?.length === 2 && params.segments[0] === 'versions') {
-      fn = await import('../Version/meta.ts').then((mod) => mod.generateMetadata)
+      fn = versionMeta
     }
   }
 
