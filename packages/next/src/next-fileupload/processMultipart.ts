@@ -158,7 +158,9 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       parsingRequest = false
     }
 
-    busboy.write(value)
+    if (value) {
+      busboy.write(value)
+    }
   }
 
   return result
