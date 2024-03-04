@@ -1,9 +1,4 @@
-export const GET = async () => {
-  console.log('1')
-  console.log('1')
-  console.log('1')
-  console.log('1')
-  console.log('1')
+export const GET = () => {
   return Response.json({
     hello: 'elliot',
   })

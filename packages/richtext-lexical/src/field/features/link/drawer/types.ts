@@ -1,4 +1,4 @@
-import type { FormState } from '@payloadcms/ui'
+import type { FormState } from 'payload/types'
 
 import type { LinkPayload } from '../plugins/floatingLinkEditor/types'
 

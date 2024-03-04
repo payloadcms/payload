@@ -1,6 +1,7 @@
 import type { SanitizedClientEditorConfig } from '@payloadcms/richtext-lexical'
-import type { FieldMap, FormFieldBase, FormState } from '@payloadcms/ui'
+import type { FieldMap, FormFieldBase } from '@payloadcms/ui'
 import type { ReducedBlock } from '@payloadcms/ui/types'
+import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
