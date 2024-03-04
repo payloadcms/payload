@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { FormState, SanitizedCollectionConfig } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -9,7 +9,6 @@ import {
   FieldPathProvider,
   Form,
   type FormProps,
-  type FormState,
   FormSubmit,
   RenderFields,
   getFormState,

@@ -3,7 +3,6 @@ import {
   FieldPathProvider,
   Form,
   type FormProps,
-  type FormState,
   getFormState,
   useConfig,
   useDocumentInfo,
@@ -16,7 +15,7 @@ import { type BlockFields } from '../nodes/BlocksNode'
 const baseClass = 'lexical-block'
 
 import type { ReducedBlock } from '@payloadcms/ui/types'
-import type { Data } from 'payload/types'
+import type { FormState } from 'payload/types'
 
 import { v4 as uuid } from 'uuid'
 
