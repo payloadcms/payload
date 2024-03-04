@@ -1,6 +1,8 @@
+'use client'
+
 import React, { Fragment, useEffect } from 'react'
 
-import { type AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import { type AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
 import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav'
 import { customTabViewTitle } from '../../../shared'
 

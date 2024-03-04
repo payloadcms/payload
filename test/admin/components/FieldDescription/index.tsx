@@ -3,7 +3,7 @@ import React from 'react'
 import type {
   DescriptionComponent,
   DescriptionFunction,
-} from '../../../../packages/payload/src/admin/components/forms/FieldDescription/types'
+} from '../../../../packages/payload/src/admin/types'
 
 export const FieldDescriptionComponent: DescriptionComponent<string> = ({ path, value }) => {
   return (

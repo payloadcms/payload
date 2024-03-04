@@ -1,7 +1,9 @@
+'use client'
+
 import React from 'react'
 import { Link, useRouteMatch } from 'react-router-dom'
 
-import type { DocumentTabComponent } from '../../../../packages/payload/src/admin/components/elements/DocumentHeader/Tabs/types'
+import type { DocumentTabComponent } from '../../../../packages/payload/src/admin/types'
 
 import './index.scss'
 

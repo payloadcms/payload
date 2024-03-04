@@ -1,6 +1,6 @@
-import type { PlaywrightTestConfig } from '@playwright/test'
+import { defineConfig } from '@playwright/test'
 
-const config: PlaywrightTestConfig = {
+export default defineConfig({
   // Look for test files in the "test" directory, relative to this configuration file
   testDir: 'test',
   testMatch: '*e2e.spec.ts',
@@ -14,5 +14,5 @@ const config: PlaywrightTestConfig = {
     timeout: 45000,
   },
   workers: 16,
-}
-export default config
+  globalSetup: require.resolve('./playwright-global-setup'),
+})

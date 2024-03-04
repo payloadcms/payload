@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import { AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
 
 const CustomDashboardView: AdminViewComponent = () => {
   return (

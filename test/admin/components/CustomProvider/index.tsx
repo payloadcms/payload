@@ -1,3 +1,5 @@
+'use client'
+
 import React, { createContext, useContext, useState } from 'react'
 
 type CustomContext = {
@@ -7,7 +9,7 @@ type CustomContext = {
 
 const Context = createContext({} as CustomContext)
 
-const CustomProvider: React.FC = ({ children }) => {
+const CustomProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [getCustom, setCustom] = useState({})
 
   const value = {

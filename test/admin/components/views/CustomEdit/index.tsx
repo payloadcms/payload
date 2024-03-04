@@ -1,7 +1,9 @@
+'use client'
+
 import React, { Fragment, useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 
-import type { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import type { AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
 
 import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav'
 import { useConfig } from '../../../../../packages/ui/src/providers/Config'

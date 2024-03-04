@@ -1,7 +1,9 @@
+'use client'
+
 import React, { useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 
-import type { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import type { AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
 
 import { Button } from '../../../../../packages/ui/src/elements/Button'
 // TODO(3.0): Meta?

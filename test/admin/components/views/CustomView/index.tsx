@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { type AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import { type AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
 import { customViewTitle } from '../../../shared'
 
 const CustomView: AdminViewComponent = () => {

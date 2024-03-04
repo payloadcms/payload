@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 
 import { Button } from '../../../../../packages/ui/src/elements/Button'
