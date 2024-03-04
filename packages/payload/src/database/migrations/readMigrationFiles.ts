@@ -35,8 +35,8 @@ export const readMigrationFiles = async ({
 
   return Promise.all(
     files.map(async (filePath) => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const migration = require(filePath) as Migration
+      // eval used to circumvent errors bundling
+      const migration = eval(`require('${filePath.replaceAll('\\', '/')}')`)
       migration.name = path.basename(filePath).split('.')?.[0]
       return migration
     }),
