@@ -23,9 +23,13 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     describe('S3', () => {
       beforeAll(async () => {
         client = new AWS.S3({
-          endpoint: 'http://localhost:4566',
-          region: 'us-east-1',
-          forcePathStyle: true, // required for localstack
+          endpoint: process.env.S3_ENDPOINT,
+          forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+          region: process.env.S3_REGION,
+          credentials: {
+            accessKeyId: process.env.S3_ACCESS_KEY_ID,
+            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+          },
         })
 
         await createTestBucket()
