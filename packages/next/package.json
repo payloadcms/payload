@@ -77,7 +77,8 @@
     "graphql-playground-html": "1.6.30",
     "path-to-regexp": "^6.2.1",
     "react-diff-viewer-continued": "3.2.6",
-    "react-toastify": "8.2.0"
+    "react-toastify": "8.2.0",
+    "sass": "^1.71.1"
   },
   "peerDependencies": {
     "http-status": "1.6.2",
