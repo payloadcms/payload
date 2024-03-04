@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 
-import type { EditViewProps as Props } from '../../packages/payload/src/config/types'
+import type { EditViewProps as Props } from '../../packages/payload/src/admin/views/types'
 
 import { EditView as DefaultEditView } from '../../packages/next/src/views/Edit'
 import { useAuth } from '../../packages/ui/src/providers/Auth'
