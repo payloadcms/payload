@@ -1,6 +1,4 @@
-import type { ClientValidate } from 'payload/types'
-
-import type { Row } from '../Form/types'
+import type { ClientValidate, Row } from 'payload/types'
 
 export type Options = {
   disableFormData?: boolean

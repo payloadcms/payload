@@ -1,15 +1,10 @@
-import type { EditViewProps } from 'payload/config'
-
-import type { ServerSideEditViewProps } from './types'
+import type { EditViewProps, ServerSideEditViewProps } from 'payload/types'
 
 export const sanitizeEditViewProps = (props: ServerSideEditViewProps) => {
   const clientSideProps = { ...props }
-  delete clientSideProps.payload
-  delete clientSideProps.config
+  delete clientSideProps.initPageResult.req
+  delete clientSideProps.initPageResult.collectionConfig
+  delete clientSideProps.initPageResult.globalConfig
   delete clientSideProps.searchParams
-  delete clientSideProps.i18n
-  delete clientSideProps.collectionConfig
-  delete clientSideProps.globalConfig
-
   return clientSideProps as EditViewProps
 }

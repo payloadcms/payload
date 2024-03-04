@@ -15,11 +15,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { type BlockFields } from '../nodes/BlocksNode'
 const baseClass = 'lexical-block'
 
+import type { ReducedBlock } from '@payloadcms/ui/types'
 import type { Data } from 'payload/types'
 
 import { v4 as uuid } from 'uuid'
 
-import type { ReducedBlock } from '../../../../../../ui/src/utilities/buildComponentMap/types'
 import type { ClientComponentProps } from '../../types'
 import type { BlocksFeatureClientProps } from '../feature.client'
 

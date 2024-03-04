@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-alpha.8",
+  "version": "3.0.0-alpha.11",
   "main": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -14,19 +14,36 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "exports": {
-    ".": "./dist/exports/index.js",
+    ".": "./src/exports/index.ts",
     "./*": {
-      "import": "./dist/exports/*.js",
-      "require": "./dist/exports/*.js",
-      "types": "./dist/exports/*.d.ts"
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.dts"
     },
     "./scss": {
-      "import": "./dist/scss.scss",
-      "require": "./dist/scss.scss",
-      "default": "./dist/scss.scss"
+      "import": "./src/scss.scss",
+      "require": "./src/scss.scss",
+      "default": "./src/scss.scss"
     },
-    "./scss/app.scss": "./dist/scss/app.scss",
-    "./assets/*": "./dist/assets/*"
+    "./scss/app.scss": "./src/scss/app.scss",
+    "./assets/*": "./src/assets/*"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/exports/index.js",
+      "./*": {
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
+      },
+      "./scss": {
+        "import": "./dist/scss.scss",
+        "require": "./dist/scss.scss",
+        "default": "./dist/scss.scss"
+      },
+      "./scss/app.scss": "./dist/scss/app.scss",
+      "./assets/*": "./dist/assets/*"
+    }
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

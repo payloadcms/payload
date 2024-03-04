@@ -1,8 +1,10 @@
+import type { FormField, FormState, Row } from 'payload/types'
+
 import ObjectId from 'bson-objectid'
 import equal from 'deep-equal'
 import { deepCopyObject } from 'payload/utilities'
 
-import type { FieldAction, FormField, FormState, Row } from './types'
+import type { FieldAction } from './types'
 
 import { flattenRows, separateRows } from './rows'
 

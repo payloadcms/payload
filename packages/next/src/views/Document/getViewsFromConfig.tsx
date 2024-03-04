@@ -1,5 +1,5 @@
 import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
-import type { AdminViewComponent } from 'payload/config'
+import type { EditViewComponent } from 'payload/config'
 import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
@@ -31,13 +31,15 @@ export const getViewsFromConfig = async ({
   routeSegments: string[]
   user: User
 }): Promise<{
-  CustomView: AdminViewComponent
-  DefaultView: AdminViewComponent
+  CustomView: EditViewComponent
+  DefaultView: EditViewComponent
 } | null> => {
   // Conditionally import and lazy load the default view
-  let DefaultView: AdminViewComponent = null
-  let CustomView: AdminViewComponent = null
+  let DefaultView: EditViewComponent = null
+  let CustomView: EditViewComponent = null
+
   const [entityType, entitySlug, createOrID, tabViewName, segmentFive] = routeSegments
+
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
     (globalConfig && globalConfig?.admin?.components?.views)

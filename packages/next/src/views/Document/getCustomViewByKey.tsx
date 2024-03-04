@@ -1,4 +1,4 @@
-import type { AdminViewComponent } from 'payload/config'
+import type { EditViewComponent } from 'payload/config'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 export const getCustomViewByKey = (
@@ -6,7 +6,7 @@ export const getCustomViewByKey = (
     | SanitizedCollectionConfig['admin']['components']['views']
     | SanitizedGlobalConfig['admin']['components']['views'],
   customViewKey: string,
-): AdminViewComponent => {
+): EditViewComponent => {
   return typeof views?.Edit === 'function'
     ? views?.Edit
     : typeof views?.Edit === 'object' &&

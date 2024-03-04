@@ -1,9 +1,8 @@
 'use client'
+import { useFieldPath } from '@payloadcms/ui/forms'
 import { useAddClientFunction } from '@payloadcms/ui/providers'
 
 import type { FeatureProviderClient } from './field/features/types'
-
-import { useFieldPath } from '../../ui/src/forms/FieldPathProvider'
 
 export const useLexicalFeature = <ClientFeatureProps,>(
   featureKey: string,

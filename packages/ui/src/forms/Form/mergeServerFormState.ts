@@ -1,4 +1,4 @@
-import type { FormState } from './types'
+import type { FormState } from 'payload/types'
 
 import { arraysHaveSameStrings } from '../../utilities/arraysHaveSameStrings'
 

@@ -6,5 +6,14 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 module.exports = withBundleAnalyzer(
   withPayload({
     reactStrictMode: false,
+    async redirects() {
+      return [
+        {
+          destination: '/admin',
+          permanent: true,
+          source: '/',
+        },
+      ]
+    },
   }),
 )

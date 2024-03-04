@@ -1,12 +1,10 @@
 import type { Metadata } from 'next'
-import type { Field } from 'payload/types'
+import type { Field, InitPageResult } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
 
 import { Form, FormSubmit, buildStateFromSchema } from '@payloadcms/ui'
 import { redirect } from 'next/navigation'
 import React from 'react'
-
-import type { InitPageResult } from '../../utilities/initPage'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { meta } from '../../utilities/meta'

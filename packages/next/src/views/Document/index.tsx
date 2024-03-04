@@ -1,10 +1,12 @@
 import type { QueryParamTypes } from '@payloadcms/ui'
-import type { AdminViewComponent } from 'payload/config'
+import type { EditViewComponent } from 'payload/config'
 import type {
   DocumentPreferences,
   Document as DocumentType,
   Field,
+  InitPageResult,
   SanitizedConfig,
+  ServerSideEditViewProps,
 } from 'payload/types'
 import type { DocumentPermissions } from 'payload/types'
 
@@ -22,9 +24,6 @@ import { notFound } from 'next/navigation'
 import queryString from 'qs'
 import React, { Fragment } from 'react'
 
-import type { InitPageResult } from '../../utilities/initPage'
-import type { ServerSideEditViewProps } from '../Edit/types'
-
 import { getMetaBySegment } from './getMetaBySegment'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
@@ -37,12 +36,35 @@ export const generateMetadata = async (args: {
   }
 }) => getMetaBySegment(args)
 
-type Props = {
-  page: InitPageResult
+export const Document = async ({
+  initPageResult,
+  params,
+  searchParams,
+}: {
+  initPageResult: InitPageResult
   params: { [key: string]: string | string[] }
   searchParams: { [key: string]: string | string[] | undefined }
-}
-export const Document = async ({ page, params, searchParams }: Props) => {
+}) => {
+  const {
+    collectionConfig,
+    globalConfig,
+    locale,
+    permissions,
+    req,
+    req: {
+      i18n,
+      payload,
+      payload: {
+        config,
+        config: {
+          routes: { api: apiRoute },
+          serverURL,
+        },
+      },
+      user,
+    },
+  } = initPageResult
+
   const segments = Array.isArray(params?.segments) ? params.segments : []
   const [entityType, entitySlug, createOrID] = segments
   const collectionSlug = entityType === 'collections' ? entitySlug : undefined
@@ -52,21 +74,8 @@ export const Document = async ({ page, params, searchParams }: Props) => {
 
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
-  const {
-    i18n,
-    payload,
-    payload: { config },
-    user,
-  } = page.req
-
-  const {
-    routes: { api },
-    serverURL,
-  } = config
-  const { collectionConfig, globalConfig, locale, permissions, req } = page
-
-  let CustomView: SanitizedConfig['admin']['components']['views'][0]
-  let DefaultView: AdminViewComponent
+  let CustomView: EditViewComponent
+  let DefaultView: EditViewComponent
   let data: DocumentType
   let docPermissions: DocumentPermissions
   let preferencesKey: string
@@ -78,13 +87,13 @@ export const Document = async ({ page, params, searchParams }: Props) => {
   if (collectionConfig) {
     docPermissions = permissions?.collections?.[collectionSlug]
     fields = collectionConfig.fields
-    action = `${serverURL}${api}/${collectionSlug}${isEditing ? `/${id}` : ''}`
+    action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
 
     hasSavePermission =
       (isEditing && permissions?.collections?.[collectionSlug]?.update?.permission) ||
       (!isEditing && permissions?.collections?.[collectionSlug]?.create?.permission)
 
-    apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale.code}${
+    apiURL = `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}${
       collectionConfig.versions?.drafts ? '&draft=true' : ''
     }`
 
@@ -111,7 +120,7 @@ export const Document = async ({ page, params, searchParams }: Props) => {
         locale: locale.code,
         user,
       })
-    } catch (error) {}
+    } catch (error) {} // eslint-disable-line no-empty
 
     if (id) {
       preferencesKey = `collection-${collectionSlug}-${id}`
@@ -122,9 +131,9 @@ export const Document = async ({ page, params, searchParams }: Props) => {
     docPermissions = permissions?.globals?.[globalSlug]
     fields = globalConfig.fields
     hasSavePermission = isEditing && docPermissions?.update?.permission
-    action = `${serverURL}${api}/${globalSlug}`
+    action = `${serverURL}${apiRoute}/${globalSlug}`
 
-    apiURL = `${serverURL}${api}/${globalSlug}?locale=${locale.code}${
+    apiURL = `${serverURL}${apiRoute}/${globalSlug}?locale=${locale.code}${
       globalConfig.versions?.drafts ? '&draft=true' : ''
     }`
 
@@ -162,7 +171,7 @@ export const Document = async ({ page, params, searchParams }: Props) => {
         equals: preferencesKey,
       },
     },
-  })) as any as { docs: { value: DocumentPreferences }[] }
+  })) as any as { docs: { value: DocumentPreferences }[] } // eslint-disable-line @typescript-eslint/no-explicit-any
 
   const initialState = await buildStateFromSchema({
     id,
@@ -185,33 +194,27 @@ export const Document = async ({ page, params, searchParams }: Props) => {
     action: `${action}?${queryString.stringify(formQueryParams)}`,
     apiURL,
     canAccessAdmin: permissions?.canAccessAdmin,
-    collectionConfig,
     collectionSlug,
-    config,
     data,
     docPermissions,
     docPreferences,
-    globalConfig,
     globalSlug,
     hasSavePermission,
-    i18n,
+    initPageResult,
     initialState,
     isEditing,
-    locale,
-    payload,
-    permissions,
+    params,
     searchParams,
     updatedAt: data?.updatedAt?.toString(),
-    user,
   }
 
   return (
     <Fragment>
       <DocumentHeader
         collectionConfig={collectionConfig}
-        config={req.payload.config}
+        config={payload.config}
         globalConfig={globalConfig}
-        i18n={req.i18n}
+        i18n={i18n}
       />
       <HydrateClientUser permissions={permissions} user={user} />
       <SetDocumentInfo

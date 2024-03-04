@@ -1,8 +1,7 @@
-import type { Data, Field as FieldSchema, PayloadRequest } from 'payload/types'
+import type { Data, Field as FieldSchema, FormState, PayloadRequest } from 'payload/types'
 
 import { fieldIsPresentationalOnly } from 'payload/types'
 
-import type { FormState } from '../../Form/types'
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise'
 
 import { addFieldStatePromise } from './addFieldStatePromise'

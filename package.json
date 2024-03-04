@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.8",
+  "version": "3.0.0-alpha.11",
   "private": true,
   "workspaces:": [
     "packages/*"
@@ -37,8 +37,8 @@
     "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache && rimraf .next",
     "clean:all": "find . \\( -type d \\( -name node_modules -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} +",
     "dev": "cross-env node --no-deprecation ./test/dev.js",
-    "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
-    "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
+    "dev:generate-graphql-schema": "NODE_OPTIONS=--no-deprecation ts-node -T ./test/generateGraphQLSchema.ts",
+    "dev:generate-types": "NODE_OPTIONS=--no-deprecation ts-node -T ./test/generateTypes.ts",
     "dev:postgres": "pnpm --filter payload run dev:postgres",
     "docker:restart": "pnpm docker:stop --remove-orphans && pnpm docker:start",
     "docker:start": "docker-compose -f packages/plugin-cloud-storage/docker-compose.yml up -d",
@@ -53,12 +53,12 @@
     "release:alpha": "tsx ./scripts/release.ts --bump prerelease --tag alpha",
     "release:beta": "tsx ./scripts/release.ts --bump prerelease --tag beta",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
-    "test:components": "cross-env jest --config=jest.components.config.js",
-    "test:e2e": "npx playwright install --with-deps chromium && ts-node -T ./test/runE2E.ts",
-    "test:e2e:debug": "cross-env PWDEBUG=1 DISABLE_LOGGING=true playwright test",
-    "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
-    "test:int:postgres": "cross-env PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
-    "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
+    "test:components": "cross-env NODE_OPTIONS=--no-deprecation jest --config=jest.components.config.js",
+    "test:e2e": "NODE_OPTIONS=--no-deprecation npx playwright install --with-deps chromium && NODE_OPTIONS=--no-deprecation ts-node -T ./test/runE2E.ts",
+    "test:e2e:debug": "cross-env NODE_OPTIONS=--no-deprecation PWDEBUG=1 DISABLE_LOGGING=true playwright test",
+    "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation DISABLE_LOGGING=true playwright test --headed",
+    "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "devDependencies": {

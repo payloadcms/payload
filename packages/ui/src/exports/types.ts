@@ -7,3 +7,4 @@ import type React from 'react'
 // import { Link } from 'next/link'
 export type LinkType = React.ElementType
 export type { FormFieldBase } from '../forms/fields/shared'
+export type { ReducedBlock } from '../utilities/buildComponentMap/types'

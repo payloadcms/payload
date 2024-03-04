@@ -2,14 +2,14 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 
 import { type FormFieldBase, ShimmerEffect } from '@payloadcms/ui'
+import { useFieldPath } from '@payloadcms/ui/forms'
+import { useClientFunctions } from '@payloadcms/ui/providers'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
 import type { GeneratedFeatureProviderComponent } from '../types'
 import type { FeatureProviderClient } from './features/types'
 import type { SanitizedClientEditorConfig } from './lexical/config/types'
 
-import { useFieldPath } from '../../../ui/src/forms/FieldPathProvider'
-import { useClientFunctions } from '../../../ui/src/providers/ClientFunction'
 import { defaultEditorLexicalConfig } from './lexical/config/client/default'
 import { loadClientFeatures } from './lexical/config/client/loader'
 import { sanitizeClientEditorConfig } from './lexical/config/client/sanitize'

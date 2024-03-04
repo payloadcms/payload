@@ -1,32 +1,8 @@
 import type { User } from 'payload/auth'
-import type { ClientValidate, Field, Field as FieldConfig } from 'payload/types'
+import type { Field, FormField, FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 import type React from 'react'
 import type { Dispatch } from 'react'
-
-export type Row = {
-  blockType?: string
-  collapsed?: boolean
-  errorPaths?: Set<string>
-  id: string
-}
-
-export type FormField = {
-  disableFormData?: boolean
-  errorMessage?: string
-  errorPaths?: Set<string>
-  fieldSchema?: FieldConfig
-  initialValue: unknown
-  passesCondition?: boolean
-  rows?: Row[]
-  valid: boolean
-  validate?: ClientValidate
-  value: unknown
-}
-
-export type FormState = {
-  [path: string]: FormField
-}
 
 export type Preferences = {
   [key: string]: unknown
@@ -88,7 +64,7 @@ export type SetModified = (modified: boolean) => void
 export type SetSubmitted = (submitted: boolean) => void
 export type SetProcessing = (processing: boolean) => void
 
-export type Reset = (fieldSchema: FieldConfig[], data: unknown) => Promise<void>
+export type Reset = (fieldSchema: Field[], data: unknown) => Promise<void>
 
 export type REPLACE_STATE = {
   optimize?: boolean

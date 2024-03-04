@@ -1,8 +1,9 @@
 'use client'
 
+import type { ReducedBlock } from '@payloadcms/ui/types'
+
 import { getTranslation } from '@payloadcms/translations'
 
-import type { ReducedBlock } from '../../../../../ui/src/utilities/buildComponentMap/types'
 import type { FeatureProviderProviderClient } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'

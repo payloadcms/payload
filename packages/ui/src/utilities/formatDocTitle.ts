@@ -1,9 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { FormField, SanitizedCollectionConfig } from 'payload/types'
 
 import { getObjectDotNotation } from 'payload/utilities'
-
-import type { FormField } from '../forms/Form/types'
 
 import { formatDate } from './formatDate'
 

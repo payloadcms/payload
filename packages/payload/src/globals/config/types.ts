@@ -10,7 +10,6 @@ import type {
 import type { User } from '../../auth/types'
 import type {
   Access,
-  AdminViewComponent,
   EditViewComponent,
   EditViewConfig,
   Endpoint,
@@ -118,11 +117,11 @@ export type GlobalAdminOptions = {
                  * + `Version` - `/admin/globals/:id/versions/:version`
                  * + `CustomView` - `/admin/globals/:id/:path`
                  */
-                API?: AdminViewComponent | Partial<EditViewConfig>
+                API?: EditViewComponent | Partial<EditViewConfig>
                 Default?: EditViewComponent | Partial<EditViewConfig>
-                LivePreview?: AdminViewComponent | Partial<EditViewConfig>
-                Version?: AdminViewComponent | Partial<EditViewConfig>
-                Versions?: AdminViewComponent | Partial<EditViewConfig>
+                LivePreview?: EditViewComponent | Partial<EditViewConfig>
+                Version?: EditViewComponent | Partial<EditViewConfig>
+                Versions?: EditViewComponent | Partial<EditViewConfig>
                 // TODO: uncomment these as they are built
                 // References?: EditView
                 // Relationships?: EditView
