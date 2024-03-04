@@ -8,13 +8,13 @@ import { Account } from '../Account'
 import { CreateFirstUser } from '../CreateFirstUser'
 import { Dashboard } from '../Dashboard'
 import { Document as DocumentView } from '../Document'
-import { ForgotPassword } from '../ForgotPassword'
+import { ForgotPassword, forgotPasswordBaseClass } from '../ForgotPassword'
 import { ListView } from '../List'
-import { Login } from '../Login'
+import { Login, loginBaseClass } from '../Login'
 import { Logout, LogoutInactivity } from '../Logout'
-import { ResetPassword } from '../ResetPassword'
+import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword'
 import { Unauthorized } from '../Unauthorized'
-import { Verify } from '../Verify'
+import { Verify, verifyBaseClass } from '../Verify'
 import { Metadata } from 'next'
 import { I18n } from '@payloadcms/translations'
 
@@ -37,17 +37,16 @@ export type GenerateViewMetadata = (args: {
 }) => Promise<Metadata>
 
 export type AdminViewProps = {
-  baseClass?: string
   initPageResult: InitPageResult
   params?: { [key: string]: string | string[] | undefined }
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
 const baseClasses = {
-  forgot: 'forgot-password',
-  login: 'login',
-  reset: 'reset-password',
-  verify: 'verify',
+  forgot: forgotPasswordBaseClass,
+  login: loginBaseClass,
+  reset: resetPasswordBaseClass,
+  verify: verifyBaseClass,
 }
 
 const oneSegmentViews = {

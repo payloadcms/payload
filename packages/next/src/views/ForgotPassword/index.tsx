@@ -6,6 +6,8 @@ import type { AdminViewProps } from '../Root'
 
 export { generateForgotPasswordMetadata } from './meta'
 
+export const forgotPasswordBaseClass = 'forgot-password'
+
 export const ForgotPassword: React.FC<AdminViewProps> = ({ initPageResult }) => {
   const {
     req: {

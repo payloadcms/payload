@@ -9,7 +9,9 @@ import './index.scss'
 
 export { generateLoginMetadata } from './meta'
 
-export const Login: React.FC<AdminViewProps> = ({ baseClass, initPageResult, searchParams }) => {
+export const loginBaseClass = 'login'
+
+export const Login: React.FC<AdminViewProps> = ({ initPageResult, searchParams }) => {
   const { req } = initPageResult
 
   const {
@@ -31,7 +33,7 @@ export const Login: React.FC<AdminViewProps> = ({ baseClass, initPageResult, sea
 
   return (
     <Fragment>
-      <div className={`${baseClass}__brand`}>
+      <div className={`${loginBaseClass}__brand`}>
         <Logo config={config} />
       </div>
       {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}

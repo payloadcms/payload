@@ -15,7 +15,7 @@ import type { AdminViewProps } from '../Root'
 
 import './index.scss'
 
-const baseClass = 'reset-password'
+export const resetPasswordBaseClass = 'reset-password'
 
 export { generateResetPasswordMetadata } from './meta'
 
@@ -48,8 +48,8 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
 
   if (user) {
     return (
-      <MinimalTemplate className={baseClass}>
-        <div className={`${baseClass}__wrap`}>
+      <MinimalTemplate className={resetPasswordBaseClass}>
+        <div className={`${resetPasswordBaseClass}__wrap`}>
           <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
           <p>
             <Translation
@@ -70,8 +70,8 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
   }
 
   return (
-    <MinimalTemplate className={baseClass}>
-      <div className={`${baseClass}__wrap`}>
+    <MinimalTemplate className={resetPasswordBaseClass}>
+      <div className={`${resetPasswordBaseClass}__wrap`}>
         <h1>{i18n.t('authentication:resetPassword')}</h1>
         <Form
           action={`${serverURL}${api}/${userSlug}/reset-password`}

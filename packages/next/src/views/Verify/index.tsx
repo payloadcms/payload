@@ -6,7 +6,7 @@ import type { AdminViewProps } from '../Root'
 
 import './index.scss'
 
-const baseClass = 'verify'
+export const verifyBaseClass = 'verify'
 
 export { generateVerifyMetadata } from './meta'
 
@@ -41,7 +41,7 @@ export const Verify: React.FC<AdminViewProps> = async ({ initPageResult, params 
 
   return (
     <React.Fragment>
-      <div className={`${baseClass}__brand`}>
+      <div className={`${verifyBaseClass}__brand`}>
         <Logo config={config} />
       </div>
       <h2>{textToRender}</h2>
