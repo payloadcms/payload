@@ -31,7 +31,6 @@
       "payload/*": ["./packages/payload/src/exports/*"],
       "@payloadcms/db-mongodb": ["./packages/db-mongodb/src"],
       "@payloadcms/richtext-lexical": ["./packages/richtext-lexical/src"],
-      "@payloadcms/plugin-cloud-storage": ["./packages/plugin-cloud-storage/src"],
       "@payloadcms/ui": ["./packages/ui/src/exports/index.ts"],
       "@payloadcms/ui/*": ["./packages/ui/src/exports/*"],
       "@payloadcms/ui/scss": ["./packages/ui/src/scss/styles.scss"],

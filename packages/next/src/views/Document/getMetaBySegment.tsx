@@ -6,8 +6,8 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import { getNextI18n } from '../../utilities/getNextI18n'
-import { meta } from '../../utilities/meta'
+import { getNextI18n } from '../../utilities/getNextI18n.ts'
+import { meta } from '../../utilities/meta.ts'
 
 export type GenerateEditViewMetadata = (args: {
   collectionConfig?: SanitizedCollectionConfig

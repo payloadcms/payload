@@ -10,9 +10,9 @@ import { deepMerge } from 'payload/utilities'
 import React from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
-import { DefaultEditView } from '../../pages/Edit/Default'
-import { DefaultListView } from '../../pages/List/Default'
-import { DefaultCell } from '../../pages/List/Default/Cell'
+import { DefaultEditView } from '../../views/Edit/Default'
+import { DefaultListView } from '../../views/List/Default'
+import { DefaultCell } from '../../views/List/Default/Cell'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage'
 
 export const metadata = {

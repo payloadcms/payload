@@ -34,10 +34,10 @@
       "require": "./dist/layouts/*.js",
       "types": "./src/layouts/*.ts"
     },
-    "./pages/*": {
-      "import": "./dist/pages/*.js",
-      "require": "./dist/pages/*.js",
-      "types": "./src/pages/*.ts"
+    "./views/*": {
+      "import": "./dist/views/*.js",
+      "require": "./dist/views/*.js",
+      "types": "./src/views/*.ts"
     },
     "./routes": {
       "import": "./dist/routes/index.js",
@@ -108,10 +108,10 @@
         "require": "./dist/layouts/*.js",
         "types": "./dist/layouts/*.d.ts"
       },
-      "./pages/*": {
-        "import": "./dist/pages/*.js",
-        "require": "./dist/pages/*.js",
-        "types": "./dist/pages/*.d.ts"
+      "./views/*": {
+        "import": "./dist/views/*.js",
+        "require": "./dist/views/*.js",
+        "types": "./dist/views/*.d.ts"
       },
       "./app/*": {
         "import": "./dist/app/*.js",
