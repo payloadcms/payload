@@ -70,7 +70,7 @@ export const getGenerateComponentMap =
         switch (element.name) {
           case 'link': {
             const linkFields = sanitizeFields({
-              config: config,
+              config,
               fields: transformExtraFields(args.admin?.link?.fields, config, i18n),
               validRelationships,
             })
@@ -78,7 +78,6 @@ export const getGenerateComponentMap =
             const mappedFields = mapFields({
               config,
               fieldSchema: linkFields,
-              operation: 'update',
               permissions: {},
               readOnly: false,
             })
@@ -110,7 +109,6 @@ export const getGenerateComponentMap =
                 const mappedFields = mapFields({
                   config,
                   fieldSchema: uploadFields,
-                  operation: 'update',
                   permissions: {},
                   readOnly: false,
                 })

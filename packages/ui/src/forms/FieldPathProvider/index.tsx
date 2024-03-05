@@ -5,6 +5,7 @@ type FieldPathContextType = {
   path: string
   schemaPath: string
 }
+
 const FieldPathContext = React.createContext<FieldPathContextType>({
   path: '',
   schemaPath: '',

@@ -1,5 +1,5 @@
 'use client'
-import type { Description } from 'payload/types'
+import type { Description, Operation } from 'payload/types'
 
 import React from 'react'
 

@@ -31,7 +31,6 @@ const Textarea: React.FC<Props> = (props) => {
     minLength,
     path: pathFromProps,
     placeholder,
-    readOnly,
     required,
     rtl,
     style,
@@ -62,7 +61,7 @@ const Textarea: React.FC<Props> = (props) => {
     [validate, required, maxLength, minLength],
   )
 
-  const { path, setValue, showError, value } = useField<string>({
+  const { path, readOnly, setValue, showError, value } = useField<string>({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

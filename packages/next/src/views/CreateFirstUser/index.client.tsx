@@ -10,5 +10,10 @@ export const CreateFirstUserFields: React.FC<{
 
   const fieldMap = getFieldMap({ collectionSlug: userSlug })
 
-  return <RenderFields fieldMap={[...(fieldMap || []), ...(createFirstUserFieldMap || [])]} />
+  return (
+    <RenderFields
+      fieldMap={[...(fieldMap || []), ...(createFirstUserFieldMap || [])]}
+      operation="create"
+    />
+  )
 }

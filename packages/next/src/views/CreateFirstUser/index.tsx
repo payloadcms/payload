@@ -48,10 +48,8 @@ export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult
 
   const createFirstUserFieldMap = mapFields({
     fieldSchema: fields,
-    operation: 'create',
     config,
     parentPath: userSlug,
-    permissions: {},
   })
 
   const formState = await buildStateFromSchema({

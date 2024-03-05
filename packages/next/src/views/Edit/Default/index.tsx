@@ -158,17 +158,6 @@ export const DefaultEditView: React.FC = () => {
               }`}
               type="withoutNav"
             />
-            {/* <Meta
-        description={`${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
-          collection.labels.singular,
-          i18n,
-        )}`}
-        keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
-        title={`${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
-          collection.labels.singular,
-          i18n,
-        )}`}
-      /> */}
             {BeforeDocument}
             {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
             <SetStepNav

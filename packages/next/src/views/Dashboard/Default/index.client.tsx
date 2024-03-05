@@ -15,6 +15,7 @@ import {
 import React, { Fragment, useEffect, useState } from 'react'
 
 import './index.scss'
+import { Permissions } from 'payload/auth'
 
 const baseClass = 'dashboard'
 
@@ -22,7 +23,8 @@ export const DefaultDashboardClient: React.FC<{
   Link: React.ComponentType
   visibleCollections: string[]
   visibleGlobals: string[]
-}> = ({ Link, visibleCollections, visibleGlobals }) => {
+  permissions: Permissions
+}> = ({ Link, visibleCollections, visibleGlobals, permissions }) => {
   const config = useConfig()
 
   const {
@@ -31,7 +33,7 @@ export const DefaultDashboardClient: React.FC<{
     routes: { admin },
   } = config
 
-  const { permissions, user } = useAuth()
+  const { user } = useAuth()
 
   const { i18n, t } = useTranslation()
 

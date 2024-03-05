@@ -1,4 +1,4 @@
-import type { User } from 'payload/auth'
+import type { FieldPermissions, User } from 'payload/auth'
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import type {
   ArrayField,
@@ -33,6 +33,7 @@ export type FormFieldBase = {
   className?: string
   docPreferences?: DocumentPreferences
   fieldMap?: FieldMap
+  fieldPermissions?: FieldPermissions
   initialSubfieldState?: FormState
   label?: string
   locale?: Locale

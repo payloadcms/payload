@@ -1,4 +1,5 @@
 'use client'
+
 import * as React from 'react'
 
 import { Banner } from '../../elements/Banner'
@@ -13,6 +14,7 @@ type NullifyLocaleFieldProps = {
   localized: boolean
   path: string
 }
+
 export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   fieldValue,
   localized,
@@ -30,8 +32,8 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
     const useFallback = !checked
 
     dispatchFields({
-      path,
       type: 'UPDATE',
+      path,
       value: useFallback ? null : fieldValue || 0,
     })
     setModified(true)

@@ -53,8 +53,14 @@ const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {hasRendered &&
-          fieldMap?.map(({ name, Field }, fieldIndex) => (
-            <RenderField Field={Field} key={fieldIndex} name={name} />
+          fieldMap?.map(({ name, Field, fieldPermissions, readOnly }, fieldIndex) => (
+            <RenderField
+              Field={Field}
+              fieldPermissions={fieldPermissions}
+              key={fieldIndex}
+              name={name}
+              readOnly={readOnly}
+            />
           ))}
       </div>
     )

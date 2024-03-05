@@ -5,6 +5,7 @@ import React from 'react'
 
 import { DefaultDashboardClient } from './index.client'
 import './index.scss'
+import { Permissions } from 'payload/auth'
 
 const baseClass = 'dashboard'
 
@@ -13,6 +14,7 @@ export type DashboardProps = {
   config: SanitizedConfig
   visibleCollections: string[]
   visibleGlobals: string[]
+  permissions: Permissions
 }
 
 export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
@@ -25,6 +27,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     },
     visibleCollections,
     visibleGlobals,
+    permissions,
   } = props
 
   return (
@@ -38,6 +41,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
           Link={Link}
           visibleCollections={visibleCollections}
           visibleGlobals={visibleGlobals}
+          permissions={permissions}
         />
         {Array.isArray(afterDashboard) &&
           afterDashboard.map((Component, i) => <Component key={i} />)}

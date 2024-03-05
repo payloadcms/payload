@@ -1,4 +1,4 @@
-import type { FieldPermissions } from 'payload/auth'
+import type { CollectionPermission, FieldPermissions, GlobalPermission } from 'payload/auth'
 import type { CellProps, Field, FieldWithPath, LabelProps, SanitizedConfig } from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
@@ -21,13 +21,8 @@ export const mapFields = (args: {
   config: SanitizedConfig
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
-  operation?: 'create' | 'update'
   parentPath?: string
-  permissions?:
-    | {
-        [field: string]: FieldPermissions
-      }
-    | FieldPermissions
+  permissions?: CollectionPermission['fields'] | GlobalPermission['fields']
   readOnly?: boolean
 }): FieldMap => {
   const {
@@ -35,7 +30,6 @@ export const mapFields = (args: {
     config,
     fieldSchema,
     filter,
-    operation = 'update',
     parentPath,
     permissions,
     readOnly: readOnlyOverride,
@@ -57,24 +51,12 @@ export const mapFields = (args: {
           field.path || (isFieldAffectingData && 'name' in field ? field.name : '')
         }`
 
-        const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : permissions
+        const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : undefined
 
         // if the user cannot read the field, then filter it out
+        // this is different from `admin.readOnly` which is executed on the client based on `operation`
         if (fieldPermissions?.read?.permission === false) {
           return acc
-        }
-
-        // readOnly from field config
-        let readOnly = field.admin && 'readOnly' in field.admin ? field.admin.readOnly : undefined
-
-        // if parent field is readOnly
-        // but this field is `readOnly: false`
-        // the field should be editable
-        if (readOnlyOverride && readOnly !== false) readOnly = true
-
-        // unless the user does not pass access control
-        if (fieldPermissions?.[operation]?.permission === false) {
-          readOnly = true
         }
 
         const labelProps: LabelProps = {
@@ -103,7 +85,6 @@ export const mapFields = (args: {
             config,
             fieldSchema: field.fields,
             filter,
-            operation,
             parentPath: path,
             permissions,
             readOnly: readOnlyOverride,
@@ -120,7 +101,6 @@ export const mapFields = (args: {
               config,
               fieldSchema: tab.fields,
               filter,
-              operation,
               parentPath: path,
               permissions,
               readOnly: readOnlyOverride,
@@ -146,7 +126,6 @@ export const mapFields = (args: {
               config,
               fieldSchema: block.fields,
               filter,
-              operation,
               parentPath: `${path}.${block.slug}`,
               permissions,
               readOnly: readOnlyOverride,
@@ -232,11 +211,14 @@ export const mapFields = (args: {
           // TODO: fix types
           // label: 'label' in field ? field.label : undefined,
           blocks,
+          fieldPermissions,
           hasMany: 'hasMany' in field ? field.hasMany : undefined,
           max: 'max' in field ? field.max : undefined,
           maxRows: 'maxRows' in field ? field.maxRows : undefined,
           min: 'min' in field ? field.min : undefined,
           options: 'options' in field ? field.options : undefined,
+          readOnly:
+            'admin' in field && 'readOnly' in field.admin ? field.admin.readOnly : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
           richTextComponentMap: undefined,
           step: 'admin' in field && 'step' in field.admin ? field.admin.step : undefined,
@@ -353,7 +335,8 @@ export const mapFields = (args: {
           labels: 'labels' in field ? field.labels : undefined,
           localized: 'localized' in field ? field.localized : false,
           options: 'options' in field ? field.options : undefined,
-          readOnly,
+          readOnly:
+            'admin' in field && 'readOnly' in field.admin ? field.admin.readOnly : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
           subfields: nestedFieldMap,
           tabs,
@@ -379,7 +362,7 @@ export const mapFields = (args: {
       Field: <HiddenInput name="id" />,
       Heading: <SortColumn label="ID" name="id" />,
       fieldIsPresentational: false,
-      fieldPermissions: {} as FieldPermissions, // TODO: wire this up
+      fieldPermissions: {} as FieldPermissions,
       isFieldAffectingData: true,
       isSidebar: false,
       label: 'ID',

@@ -53,6 +53,9 @@ export type MappedField = {
    * On `select` fields only
    */
   options?: Option[]
+  /**
+   * This is the `admin.readOnly` value from the field's config
+   */
   readOnly: boolean
   /**
    * On `relationship` fields only

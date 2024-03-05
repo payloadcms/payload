@@ -43,6 +43,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({
     config,
     visibleCollections,
     visibleGlobals,
+    permissions,
   }
 
   return (

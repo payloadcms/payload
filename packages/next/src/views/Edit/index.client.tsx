@@ -16,9 +16,11 @@ import { useCallback } from 'react'
 export const EditViewClient: React.FC<EditViewProps> = () => {
   const { id, collectionSlug, getDocPermissions, getVersions, globalSlug, setDocumentInfo } =
     useDocumentInfo()
+
   const {
     routes: { admin: adminRoute },
   } = useConfig()
+
   const router = useRouter()
 
   const { getComponentMap } = useComponentMap()

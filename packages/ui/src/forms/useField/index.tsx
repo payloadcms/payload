@@ -12,6 +12,7 @@ import { useOperation } from '../../providers/OperationProvider'
 import { useTranslation } from '../../providers/Translation'
 import { useFieldPath } from '../FieldPathProvider'
 import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context'
+import { useReadOnly } from '../ReadOnlyProvider'
 
 /**
  * Get and set the value of a form field.
@@ -22,6 +23,8 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const { disableFormData = false, hasRows, validate } = options
 
   const { path: pathFromContext, schemaPath } = useFieldPath()
+
+  const readOnly = useReadOnly()
 
   const path = options.path || pathFromContext
 
@@ -83,6 +86,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
       formSubmitted: submitted,
       initialValue,
       path,
+      readOnly: readOnly || false,
       rows: field?.rows,
       schemaPath,
       setValue,
@@ -102,6 +106,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
       initialValue,
       path,
       schemaPath,
+      readOnly,
     ],
   )
 

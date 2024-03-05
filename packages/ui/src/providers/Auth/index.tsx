@@ -159,6 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const params = {
       locale: code,
     }
+
     try {
       const request = await requests.get(`${serverURL}${api}/access?${qs.stringify(params)}`, {
         headers: {
@@ -255,13 +256,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     setLastLocationChange(Date.now())
   }, [pathname])
-
-  // When user changes, get new access
-  useEffect(() => {
-    if (id) {
-      refreshPermissions()
-    }
-  }, [i18n, id, api, serverURL, refreshPermissions])
 
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>

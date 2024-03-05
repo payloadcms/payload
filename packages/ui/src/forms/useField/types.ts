@@ -16,6 +16,7 @@ export type FieldType<T> = {
   formSubmitted: boolean
   initialValue?: T
   path: string
+  readOnly?: boolean
   rows?: Row[]
   schemaPath: string
   setValue: (val: unknown, disableModifyingForm?: boolean) => void

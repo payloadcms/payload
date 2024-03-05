@@ -8,7 +8,6 @@ import type { Props } from './types'
 
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
-import { useTranslation } from '../../../providers/Translation'
 import LabelComp from '../../Label'
 import useField from '../../useField'
 import { withCondition } from '../../withCondition'
@@ -33,10 +32,8 @@ const Text: React.FC<Props> = (props) => {
     maxRows,
     minLength,
     minRows,
-    onKeyDown,
     path: pathFromProps,
     placeholder,
-    readOnly,
     required,
     rtl,
     style,
@@ -45,8 +42,6 @@ const Text: React.FC<Props> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const { i18n, t } = useTranslation()
 
   const locale = useLocale()
 
@@ -60,7 +55,7 @@ const Text: React.FC<Props> = (props) => {
     [validate, minLength, maxLength, required],
   )
 
-  const { path, schemaPath, setValue, showError, value } = useField({
+  const { path, readOnly, setValue, showError, value } = useField({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

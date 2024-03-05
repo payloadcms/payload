@@ -2,7 +2,6 @@
 import type { DocumentPreferences } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { tabHasName } from 'payload/types'
 import { toKebabCase } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 

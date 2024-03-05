@@ -1,5 +1,5 @@
 import type { FieldPermissions } from 'payload/auth'
-import type { ArrayField, Row, RowLabel as RowLabelType } from 'payload/types'
+import type { ArrayField, Operation, Row, RowLabel as RowLabelType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
