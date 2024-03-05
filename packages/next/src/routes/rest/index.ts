@@ -208,6 +208,7 @@ export const GET =
             if (`doc-${slug2}-by-id` in endpoints.collection.GET) {
               // /:collection/access/:id
               // /:collection/versions/:id
+
               res = await (
                 endpoints.collection.GET[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
               )({ id: slug3, collection, req })
@@ -334,6 +335,7 @@ export const POST =
               // /:collection/forgot-password
               // /:collection/reset-password
               // /:collection/refresh-token
+
               res = await (endpoints.collection.POST?.[slug2] as CollectionRouteHandler)({
                 collection,
                 req,

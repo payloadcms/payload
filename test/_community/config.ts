@@ -12,7 +12,19 @@ export default buildConfigWithDefaults({
   collections: [
     PostsCollection,
     MediaCollection,
-    // ...add more collections here
+    {
+      slug: 'posty',
+      fields: [
+        {
+          name: 'test',
+          type: 'text',
+        },
+        // {
+        //   name: 'anotherField',
+        //   type: 'text',
+        // },
+      ],
+    },
   ],
   globals: [
     MenuGlobal,

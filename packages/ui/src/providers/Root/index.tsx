@@ -1,4 +1,5 @@
 'use client'
+import type { LanguageTranslations } from '@payloadcms/translations'
 import type { ClientConfig } from 'payload/types'
 
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
@@ -8,7 +9,7 @@ import React, { Fragment } from 'react'
 import { Slide, ToastContainer } from 'react-toastify'
 
 import type { ComponentMap } from '../../utilities/buildComponentMap/types'
-import type { LanguageOptions, LanguageTranslations } from '../Translation'
+import type { LanguageOptions } from '../Translation'
 
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay'
 import { NavProvider } from '../../elements/Nav/context'

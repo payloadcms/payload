@@ -1,5 +1,5 @@
 'use client'
-import type { I18n } from '@payloadcms/translations'
+import type { I18n, LanguageTranslations } from '@payloadcms/translations'
 import type { ClientConfig } from 'payload/types'
 
 import { t } from '@payloadcms/translations'
@@ -19,16 +19,12 @@ const Context = createContext<{
     fallbackLanguage: 'en',
     language: 'en',
     t: (key) => key,
+    translations: {},
   },
   languageOptions: undefined,
   t: (key) => key,
 })
 
-export type LanguageTranslations = {
-  [namespace: string]: {
-    [key: string]: string
-  }
-}
 export const TranslationProvider: React.FC<{
   children: React.ReactNode
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
@@ -50,6 +46,7 @@ export const TranslationProvider: React.FC<{
           fallbackLanguage: fallbackLang,
           language: lang,
           t: nextT,
+          translations,
         },
         languageOptions,
         t: nextT,
