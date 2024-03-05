@@ -130,9 +130,13 @@ export interface BaseDatabaseAdapter {
   updateVersion: UpdateVersion
 }
 
-export type Init = (payload: Payload) => Promise<void>
+export type Init = (payload: Payload) => Promise<void> | void
 
-export type Connect = (payload: Payload) => Promise<void>
+type ConnectArgs = {
+  hotReload: boolean
+}
+
+export type Connect = (args?: ConnectArgs) => Promise<void>
 
 export type Destroy = (payload: Payload) => Promise<void>
 

@@ -6,7 +6,14 @@ import mongoose from 'mongoose'
 
 import type { MongooseAdapter } from '.'
 
-export const connect: Connect = async function connect(this: MongooseAdapter) {
+export const connect: Connect = async function connect(
+  this: MongooseAdapter,
+  options = {
+    hotReload: false,
+  },
+) {
+  const { hotReload } = options
+
   if (this.url === false) {
     return
   }
@@ -24,6 +31,8 @@ export const connect: Connect = async function connect(this: MongooseAdapter) {
     useFacet: undefined,
   }
 
+  if (hotReload) connectionOptions.autoIndex = false
+
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
 
@@ -34,12 +43,15 @@ export const connect: Connect = async function connect(this: MongooseAdapter) {
       this.beginTransaction = undefined
     }
 
-    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.payload.logger.info('---- DROPPING DATABASE ----')
-      await mongoose.connection.dropDatabase()
-      this.payload.logger.info('---- DROPPED DATABASE ----')
+    if (!hotReload) {
+      if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+        this.payload.logger.info('---- DROPPING DATABASE ----')
+        await mongoose.connection.dropDatabase()
+        this.payload.logger.info('---- DROPPED DATABASE ----')
+      }
+
+      this.payload.logger.info(successfulConnectionMessage)
     }
-    this.payload.logger.info(successfulConnectionMessage)
   } catch (err) {
     this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)
     process.exit(1)

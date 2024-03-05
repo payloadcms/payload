@@ -1,3 +1,5 @@
+import type { Translations } from '@payloadcms/translations'
+
 import type { DocumentPermissions, Permissions, User } from '../../auth'
 import type { SanitizedCollectionConfig } from '../../collections/config/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
@@ -30,10 +32,12 @@ export type EditViewProps = {
 
 export type InitPageResult = {
   collectionConfig?: SanitizedCollectionConfig
+  cookies: Map<string, string>
   globalConfig?: SanitizedGlobalConfig
   locale: Locale
   permissions: Permissions
   req: PayloadRequest
+  translations: Translations
 }
 
 export type ServerSideEditViewProps = EditViewProps & {
