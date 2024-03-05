@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import type { IndexOptions, SchemaOptions, SchemaTypeOptions } from 'mongoose'
-import type { Schema } from 'mongoose'
+import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose'
 import type { SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config'
 import type {
   ArrayField,
