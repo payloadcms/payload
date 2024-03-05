@@ -46,7 +46,14 @@ const connectWithReconnect = async function ({
   })
 }
 
-export const connect: Connect = async function connect(this: PostgresAdapter, payload) {
+export const connect: Connect = async function connect(
+  this: PostgresAdapter,
+  options = {
+    hotReload: false,
+  },
+) {
+  const { hotReload } = options
+
   this.schema = {
     ...this.tables,
     ...this.relations,
@@ -55,23 +62,26 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
 
   try {
     this.pool = new Pool(this.poolOptions)
-    await connectWithReconnect({ adapter: this, payload })
+    await connectWithReconnect({ adapter: this, payload: this.payload })
 
     const logger = this.logger || false
 
     this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
-    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
-      await this.drizzle.execute(
-        sql.raw(`
-        drop schema if exists ${this.schemaName || 'public'} cascade;
-        create schema ${this.schemaName || 'public'};
-      `),
-      )
-      this.payload.logger.info('---- DROPPED TABLES ----')
+
+    if (!hotReload) {
+      if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+        this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
+        await this.drizzle.execute(
+          sql.raw(`
+          drop schema if exists ${this.schemaName || 'public'} cascade;
+          create schema ${this.schemaName || 'public'};
+        `),
+        )
+        this.payload.logger.info('---- DROPPED TABLES ----')
+      }
     }
   } catch (err) {
-    payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
+    this.payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
     process.exit(1)
   }
 

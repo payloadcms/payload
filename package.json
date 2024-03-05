@@ -165,8 +165,6 @@
       "dotenv": "$dotenv",
       "drizzle-orm": "$drizzle-orm",
       "graphql": "^16.8.1",
-      "pino": "8.15.0",
-      "pino-pretty": "10.2.0",
       "react": "$react",
       "react-dom": "$react-dom",
       "ts-node": "$ts-node",
