@@ -14,6 +14,14 @@ export const connect: Connect = async function connect(
 ) {
   const { hotReload } = options
 
+export const connect: Connect = async function connect(
+  this: MongooseAdapter,
+  options = {
+    hotReload: false,
+  },
+) {
+  const { hotReload } = options
+
   if (this.url === false) {
     return
   }

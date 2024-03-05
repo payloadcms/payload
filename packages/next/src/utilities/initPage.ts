@@ -9,8 +9,10 @@ import type {
 import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui'
-import { headers as getHeaders } from 'next/headers.js'
-import { notFound, redirect } from 'next/navigation.js'
+import { headers as getHeaders } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
+import { parseCookies } from 'payload/auth'
 import { createLocalReq } from 'payload/utilities'
 import qs from 'qs'
 
@@ -26,23 +28,25 @@ type Args = {
 }
 
 export const initPage = async ({
-  config: configPromise,
+  config,
+  localeParam,
   redirectUnauthenticatedUser = false,
   route,
   searchParams,
 }: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
-  const localeParam = searchParams?.locale as string
-  const { cookies, permissions, user } = await auth({
+  const cookies = parseCookies(headers)
+
+  const payload = await getPayload({ config })
+
+  const { permissions, user } = await auth({
     headers,
     payload,
   })
 
   const routeSegments = route.replace(payload.config.routes.admin, '').split('/').filter(Boolean)
-  const [entityType, entitySlug, createOrID] = routeSegments
-  const collectionSlug = entityType === 'collections' ? entitySlug : undefined
-  const globalSlug = entityType === 'globals' ? entitySlug : undefined
-  const docID = collectionSlug && createOrID !== 'create' ? createOrID : undefined
+  const collectionSlug = routeSegments[0] === 'collections' ? routeSegments[1] : undefined
+  const globalSlug = routeSegments[0] === 'globals' ? routeSegments[1] : undefined
 
   const { collections, globals, localization, routes } = payload.config
 
@@ -103,7 +107,6 @@ export const initPage = async ({
   return {
     collectionConfig,
     cookies,
-    docID,
     globalConfig,
     locale,
     permissions,

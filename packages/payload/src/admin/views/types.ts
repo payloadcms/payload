@@ -1,9 +1,11 @@
 import type { Translations } from '@payloadcms/translations'
 
-import type { Permissions, User } from '../../auth/index.js'
-import type { SanitizedCollectionConfig } from '../../collections/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
+import type { DocumentPermissions, Permissions, User } from '../../auth'
+import type { SanitizedCollectionConfig } from '../../collections/config/types'
+import type { SanitizedGlobalConfig } from '../../globals/config/types'
+import type { DocumentPreferences } from '../../preferences/types'
+import type { PayloadRequest } from '../../types'
+import type { Data, FormState } from '../types'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -31,7 +33,6 @@ export type EditViewProps = {
 export type InitPageResult = {
   collectionConfig?: SanitizedCollectionConfig
   cookies: Map<string, string>
-  docID?: string
   globalConfig?: SanitizedGlobalConfig
   locale: Locale
   permissions: Permissions
