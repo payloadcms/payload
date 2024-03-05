@@ -8,8 +8,8 @@ import { WindowInfoProvider } from '@faceless-ui/window-info'
 import React, { Fragment } from 'react'
 import { Slide, ToastContainer } from 'react-toastify'
 
-import type { ComponentMap } from '../../utilities/buildComponentMap/types.js'
-import type { LanguageOptions } from '../Translation/index.js'
+import type { ComponentMap } from '../../utilities/buildComponentMap/types'
+import type { LanguageOptions } from '../Translation'
 
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'

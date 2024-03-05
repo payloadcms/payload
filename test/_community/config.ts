@@ -12,15 +12,17 @@ export default buildConfigWithDefaults({
   collections: [
     PostsCollection,
     MediaCollection,
-    // ...add more collections here
     {
-      slug: 'localized',
+      slug: 'posty',
       fields: [
         {
-          name: 'text',
+          name: 'test',
           type: 'text',
-          localized: true,
         },
+        // {
+        //   name: 'anotherField',
+        //   type: 'text',
+        // },
       ],
     },
   ],

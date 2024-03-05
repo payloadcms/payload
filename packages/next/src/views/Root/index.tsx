@@ -1,23 +1,27 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18n, LanguageTranslations } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
-import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
-import { notFound, redirect } from 'next/navigation.js'
+import { DefaultTemplate, MinimalTemplate, RootProvider, buildComponentMap } from '@payloadcms/ui'
+import { createClientConfig } from 'payload/config'
 import React from 'react'
 
-import { initPage } from '../../utilities/initPage.js'
-import { Account } from '../Account/index.js'
-import { CreateFirstUser } from '../CreateFirstUser/index.js'
-import { Dashboard } from '../Dashboard/index.js'
-import { Document as DocumentView } from '../Document/index.js'
-import { ForgotPassword, forgotPasswordBaseClass } from '../ForgotPassword/index.js'
-import { ListView } from '../List/index.js'
-import { Login, loginBaseClass } from '../Login/index.js'
-import { Logout, LogoutInactivity } from '../Logout/index.js'
-import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
-import { Unauthorized } from '../Unauthorized/index.js'
-import { Verify, verifyBaseClass } from '../Verify/index.js'
+import type { initPage } from '../../utilities/initPage'
+
+import { DefaultCell } from '../../views/List/Default/Cell'
+import { Account } from '../Account'
+import { CreateFirstUser } from '../CreateFirstUser'
+import { Dashboard } from '../Dashboard'
+import { Document as DocumentView } from '../Document'
+import { DefaultEditView } from '../Edit/Default'
+import { ForgotPassword, forgotPasswordBaseClass } from '../ForgotPassword'
+import { ListView } from '../List'
+import { DefaultListView } from '../List/Default'
+import { Login, loginBaseClass } from '../Login'
+import { Logout, LogoutInactivity } from '../Logout'
+import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword'
+import { Unauthorized } from '../Unauthorized'
+import { Verify, verifyBaseClass } from '../Verify'
 
 export { generatePageMetadata } from './meta.js'
 
@@ -175,31 +179,61 @@ export const RootPage = async ({
       break
   }
 
-  let dbHasUser = false
+  const languageOptions = Object.entries(initPageResult.req.i18n.translations || {}).map(
+    ([language, translations]) => ({
+      label: 'general' in translations ? translations.general.thisLanguage : 'English',
+      value: language,
+    }),
+  )
 
-  if (!ViewToRender) {
-    notFound()
-  }
+  const componentMap = buildComponentMap({
+    DefaultCell,
+    DefaultEditView,
+    DefaultListView,
+    config,
+  })
 
-  const initPageResult = await initPage(initPageOptions)
+  const clientConfig = await createClientConfig(config)
 
   if (initPageResult) {
-    dbHasUser = await initPageResult?.req.payload.db
-      .findOne({
-        collection: userSlug,
-        req: initPageResult?.req,
-      })
-      ?.then((doc) => !!doc)
-
-    const createFirstUserRoute = `${adminRoute}/create-first-user`
-
-    if (!dbHasUser && route !== createFirstUserRoute) {
-      redirect(createFirstUserRoute)
-    }
-
-    if (dbHasUser && route === createFirstUserRoute) {
-      redirect(adminRoute)
-    }
+    return (
+      <RootProvider
+        componentMap={componentMap}
+        config={clientConfig}
+        fallbackLang={clientConfig.i18n.fallbackLanguage}
+        lang={initPageResult.req.i18n.language}
+        languageOptions={languageOptions}
+        translations={
+          initPageResult.req.i18n.translations[
+            initPageResult.req.i18n.language
+          ] as LanguageTranslations
+        }
+      >
+        {templateType === 'minimal' && (
+          <MinimalTemplate className={templateClassName}>
+            <ViewToRender
+              initPageResult={initPageResult}
+              params={params}
+              searchParams={searchParams}
+            />
+          </MinimalTemplate>
+        )}
+        {templateType === 'default' && (
+          <DefaultTemplate
+            config={config}
+            i18n={initPageResult.req.i18n}
+            permissions={initPageResult.permissions}
+            user={initPageResult.req.user}
+          >
+            <ViewToRender
+              initPageResult={initPageResult}
+              params={params}
+              searchParams={searchParams}
+            />
+          </DefaultTemplate>
+        )}
+      </RootProvider>
+    )
   }
 
   if (templateType === 'minimal') {
