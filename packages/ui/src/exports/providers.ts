@@ -7,30 +7,27 @@ export type { IComponentMapContext } from '../providers/ComponentMapProvider/ind
 export { ConfigProvider, useConfig } from '../providers/Config/index.js'
 export { CustomProvider } from '../providers/CustomProvider/index.js'
 export { useDocumentEvents } from '../providers/DocumentEvents/index.js'
-export { SetDocumentInfo } from '../providers/DocumentInfo/SetDocumentInfo/index.js'
-export { useDocumentInfo } from '../providers/DocumentInfo/index.js'
 export {
   type DocumentInfo,
   type DocumentInfoContext,
   type DocumentInfoProps,
   DocumentInfoProvider,
-} from '../providers/DocumentInfo/index.js'
-export { EditDepthContext, EditDepthProvider } from '../providers/EditDepth/index.js'
-export { useEditDepth } from '../providers/EditDepth/index.js'
-export { FormQueryParams, FormQueryParamsProvider } from '../providers/FormQueryParams/index.js'
-export type { QueryParamTypes } from '../providers/FormQueryParams/index.js'
-export { useFormQueryParams } from '../providers/FormQueryParams/index.js'
-export { useListInfo } from '../providers/ListInfo/index.js'
-export { ListInfoProvider } from '../providers/ListInfo/index.js'
-export type { ColumnPreferences } from '../providers/ListInfo/types.d.ts'
-export { useLocale } from '../providers/Locale/index.js'
-export { OperationProvider } from '../providers/OperationProvider/index.js'
-export { RootProvider } from '../providers/Root/index.js'
-export {
-  SelectAllStatus,
-  SelectionProvider,
-  useSelection,
-} from '../providers/SelectionProvider/index.js'
-export { useTheme } from '../providers/Theme/index.js'
-export type { Theme } from '../providers/Theme/types.d.ts'
-export { useTranslation } from '../providers/Translation/index.js'
+} from '../providers/DocumentInfo'
+export { SetDocumentInfo } from '../providers/DocumentInfo/SetDocumentInfo'
+export { SetDocumentInfo } from '../providers/DocumentInfo/SetDocumentInfo/index.js'
+export { useDocumentInfo } from '../providers/DocumentInfo/index.js'
+export { EditDepthContext, EditDepthProvider } from '../providers/EditDepth'
+export { useEditDepth } from '../providers/EditDepth'
+export { FormQueryParams, FormQueryParamsProvider } from '../providers/FormQueryParams'
+export type { QueryParamTypes } from '../providers/FormQueryParams'
+export { useFormQueryParams } from '../providers/FormQueryParams'
+export { useListInfo } from '../providers/ListInfo'
+export { ListInfoProvider } from '../providers/ListInfo'
+export type { ColumnPreferences } from '../providers/ListInfo/types'
+export { useLocale } from '../providers/Locale'
+export { OperationProvider } from '../providers/OperationProvider'
+export { RootProvider } from '../providers/Root'
+export { SelectAllStatus, SelectionProvider, useSelection } from '../providers/SelectionProvider'
+export { useTheme } from '../providers/Theme'
+export type { Theme } from '../providers/Theme/types'
+export { useTranslation } from '../providers/Translation'

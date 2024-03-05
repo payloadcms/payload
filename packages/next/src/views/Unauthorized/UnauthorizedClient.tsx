@@ -1,6 +1,6 @@
 'use client'
 import { Button, useTranslation } from '@payloadcms/ui'
-import LinkDefault from 'next/link.js'
+import Link from 'next/link'
 import React from 'react'
 
 const Link = LinkDefault.default

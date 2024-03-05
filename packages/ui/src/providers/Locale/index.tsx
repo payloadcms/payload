@@ -3,7 +3,7 @@
 import type { Locale } from 'payload/config'
 
 // TODO: abstract the `next/navigation` dependency out from this component
-import { useRouter } from 'next/navigation.js'
+import { useRouter } from 'next/navigation'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
@@ -75,7 +75,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
   useEffect(() => {
     if (searchParams?.locale) {
       dispatchSearchParams({
-        type: 'SET',
+        type: 'set',
         params: {
           locale: searchParams.locale,
         },

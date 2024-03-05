@@ -25,7 +25,7 @@ import {
   SetViewActions,
   UnpublishMany,
 } from '@payloadcms/ui/elements'
-import LinkDefault from 'next/link.js'
+import Link from 'next/link'
 import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 

@@ -1,6 +1,6 @@
-import type { SanitizedConfig } from 'payload/types'
-
-import { DefaultTemplate } from '@payloadcms/ui'
+'use client'
+import { Button, Gutter, useConfig, useStepNav, useTranslation } from '@payloadcms/ui'
+import Link from 'next/link'
 import React from 'react'
 
 import { initPage } from '../../utilities/initPage.js'
@@ -34,7 +34,18 @@ export const NotFoundView = async ({
       permissions={initPageResult.permissions}
       user={initPageResult.req.user}
     >
-      <NotFoundClient />
-    </DefaultTemplate>
+      {/* <Meta
+        description={t('general:pageNotFound')}
+        keywords={`404 ${t('general:notFound')}`}
+        title={t('general:notFound')}
+      /> */}
+      <Gutter className={`${baseClass}__wrap`}>
+        <h1>{t('general:nothingFound')}</h1>
+        <p>{t('general:sorryNotFound')}</p>
+        <Button Link={Link} className={`${baseClass}__button`} el="link" to={`${admin}`}>
+          {t('general:backToDashboard')}
+        </Button>
+      </Gutter>
+    </div>
   )
 }

@@ -19,13 +19,11 @@ import {
 } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
-import type { AdminViewProps } from '../Root/index.d.ts'
-import type { GenerateEditViewMetadata } from './getMetaBySegment.d.ts'
+import type { AdminViewProps } from '../Root'
+import type { GenerateEditViewMetadata } from './getMetaBySegment'
 
-import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle.js'
-import { NotFoundClient } from '../NotFound/index.client.js'
-import { getMetaBySegment } from './getMetaBySegment.js'
-import { getViewsFromConfig } from './getViewsFromConfig.js'
+import { getMetaBySegment } from './getMetaBySegment'
+import { getViewsFromConfig } from './getViewsFromConfig'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
@@ -179,7 +177,25 @@ export const Document: React.FC<AdminViewProps> = async ({
     req,
   })
 
-  const serverSideProps: ServerSideEditViewProps = {
+  const formQueryParams: QueryParamTypes = {
+    depth: 0,
+    'fallback-locale': 'null',
+    locale: locale.code,
+    uploadEdits: undefined,
+  }
+  console.log('server code', `${action}?${queryString.stringify(formQueryParams)}`)
+
+  const componentProps: ServerSideEditViewProps = {
+    id,
+    action: `${action}?${queryString.stringify(formQueryParams)}`,
+    apiURL,
+    canAccessAdmin: permissions?.canAccessAdmin,
+    collectionSlug,
+    data,
+    docPermissions,
+    docPreferences,
+    globalSlug,
+    hasSavePermission,
     initPageResult,
     routeSegments: segments,
     searchParams,
@@ -195,7 +211,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       />
       <HydrateClientUser permissions={permissions} user={user} />
       <SetDocumentInfo
-        action={action}
+        action={`${action}?${queryString.stringify(formQueryParams)}`}
         apiURL={apiURL}
         collectionSlug={collectionConfig?.slug}
         disableActions={false}
