@@ -1,22 +1,19 @@
-import type { I18n, LanguageTranslations } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
-import { DefaultTemplate, MinimalTemplate, RootProvider, buildComponentMap } from '@payloadcms/ui'
-import { createClientConfig } from 'payload/config'
+import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
+import { redirect } from 'next/navigation'
 import React from 'react'
 
 import type { initPage } from '../../utilities/initPage'
 
-import { DefaultCell } from '../../views/List/Default/Cell'
 import { Account } from '../Account'
 import { CreateFirstUser } from '../CreateFirstUser'
 import { Dashboard } from '../Dashboard'
 import { Document as DocumentView } from '../Document'
-import { DefaultEditView } from '../Edit/Default'
 import { ForgotPassword, forgotPasswordBaseClass } from '../ForgotPassword'
 import { ListView } from '../List'
-import { DefaultListView } from '../List/Default'
 import { Login, loginBaseClass } from '../Login'
 import { Logout, LogoutInactivity } from '../Logout'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword'
@@ -179,61 +176,50 @@ export const RootPage = async ({
       break
   }
 
-  const languageOptions = Object.entries(initPageResult.req.i18n.translations || {}).map(
-    ([language, translations]) => ({
-      label: 'general' in translations ? translations.general.thisLanguage : 'English',
-      value: language,
-    }),
-  )
+  const dbHasUser = await initPageResult.req.payload.db
+    .findOne({
+      collection: userSlug,
+      req: initPageResult.req,
+    })
+    ?.then((doc) => !!doc)
 
-  const componentMap = buildComponentMap({
-    DefaultCell,
-    DefaultEditView,
-    DefaultListView,
-    config,
-  })
+  const createFirstUserRoute = `${adminRoute}/create-first-user`
 
-  const clientConfig = await createClientConfig(config)
+  if (!dbHasUser && route !== createFirstUserRoute) {
+    redirect(createFirstUserRoute)
+  }
+
+  if (dbHasUser && route === createFirstUserRoute) {
+    redirect(adminRoute)
+  }
 
   if (initPageResult) {
-    return (
-      <RootProvider
-        componentMap={componentMap}
-        config={clientConfig}
-        fallbackLang={clientConfig.i18n.fallbackLanguage}
-        lang={initPageResult.req.i18n.language}
-        languageOptions={languageOptions}
-        translations={
-          initPageResult.req.i18n.translations[
-            initPageResult.req.i18n.language
-          ] as LanguageTranslations
-        }
-      >
-        {templateType === 'minimal' && (
-          <MinimalTemplate className={templateClassName}>
-            <ViewToRender
-              initPageResult={initPageResult}
-              params={params}
-              searchParams={searchParams}
-            />
-          </MinimalTemplate>
-        )}
-        {templateType === 'default' && (
-          <DefaultTemplate
-            config={config}
-            i18n={initPageResult.req.i18n}
-            permissions={initPageResult.permissions}
-            user={initPageResult.req.user}
-          >
-            <ViewToRender
-              initPageResult={initPageResult}
-              params={params}
-              searchParams={searchParams}
-            />
-          </DefaultTemplate>
-        )}
-      </RootProvider>
-    )
+    if (templateType === 'minimal') {
+      return (
+        <MinimalTemplate className={templateClassName}>
+          <ViewToRender
+            initPageResult={initPageResult}
+            params={params}
+            searchParams={searchParams}
+          />
+        </MinimalTemplate>
+      )
+    } else {
+      return (
+        <DefaultTemplate
+          config={config}
+          i18n={initPageResult.req.i18n}
+          permissions={initPageResult.permissions}
+          user={initPageResult.req.user}
+        >
+          <ViewToRender
+            initPageResult={initPageResult}
+            params={params}
+            searchParams={searchParams}
+          />
+        </DefaultTemplate>
+      )
+    }
   }
 
   if (templateType === 'minimal') {
