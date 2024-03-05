@@ -125,6 +125,7 @@ export const createClientConfig = async (
   delete clientConfig.db
   delete clientConfig.editor
   delete clientConfig.plugins
+  delete clientConfig.sharp
 
   'localization' in clientConfig &&
     clientConfig.localization &&
