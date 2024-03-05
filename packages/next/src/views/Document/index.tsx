@@ -179,7 +179,6 @@ export const Document: React.FC<AdminViewProps> = async ({
     locale: locale.code,
     uploadEdits: undefined,
   }
-  console.log('server code', `${action}?${queryString.stringify(formQueryParams)}`)
 
   const componentProps: ServerSideEditViewProps = {
     id,

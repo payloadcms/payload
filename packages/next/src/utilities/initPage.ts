@@ -47,6 +47,8 @@ export const initPage = async ({
   const { collections, globals, localization, routes } = payload.config
 
   if (redirectUnauthenticatedUser && !user && route !== '/login') {
+    if ('redirect' in searchParams) delete searchParams.redirect
+
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
       ? `?${qs.stringify(searchParams)}`
       : ''

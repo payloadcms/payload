@@ -22,7 +22,7 @@ const Localizer: React.FC<{
 
   const { i18n } = useTranslation()
   const locale = useLocale()
-  const { searchParams } = useSearchParams()
+  const { dispatchSearchParams, searchParams } = useSearchParams()
   const router = useRouter()
   if (localization) {
     const { locales } = localization
@@ -48,6 +48,12 @@ const Localizer: React.FC<{
                     key={localeOption.code}
                     onClick={() => {
                       close()
+                      dispatchSearchParams({
+                        type: 'set',
+                        params: {
+                          locale: searchParams.locale,
+                        },
+                      })
                       router.refresh()
                     }}
                   >
