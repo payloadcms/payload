@@ -34,8 +34,8 @@ export const EditViewClient: React.FC<EditViewProps> = () => {
 
   const onSave = useCallback(
     async (json: { doc }) => {
-      getVersions()
-      getDocPermissions()
+      void getVersions()
+      void getDocPermissions()
 
       if (!isEditing) {
         router.push(`${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}`)

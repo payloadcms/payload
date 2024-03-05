@@ -67,7 +67,7 @@ export const DefaultEditView: React.FC = () => {
 
   const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
 
-  const [schemaPath] = React.useState(collectionConfig?.slug || globalConfig?.slug)
+  const schemaPath = collectionConfig?.slug || globalConfig?.slug
 
   const fieldMap = getFieldMap({
     collectionSlug: collectionConfig?.slug,
