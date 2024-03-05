@@ -16,6 +16,7 @@ export const getPayload = async (options: InitOptions): Promise<Payload> => {
     const config = await options.config
 
     if (cached.reload) {
+      cached.reload = false
       if (typeof cached.payload.db.destroy === 'function') {
         await cached.payload.db.destroy()
       }
@@ -32,7 +33,6 @@ export const getPayload = async (options: InitOptions): Promise<Payload> => {
 
       await cached.payload.db.init()
       await cached.payload.db.connect({ hotReload: true })
-      cached.reload = false
     }
 
     return cached.payload
@@ -49,7 +49,7 @@ export const getPayload = async (options: InitOptions): Promise<Payload> => {
       try {
         const ws = new WebSocket('ws://localhost:3000/_next/webpack-hmr')
 
-        ws.onmessage = async (event) => {
+        ws.onmessage = (event) => {
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
 
