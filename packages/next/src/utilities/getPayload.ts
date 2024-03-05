@@ -54,7 +54,6 @@ export const getPayload = async (options: InitOptions): Promise<Payload> => {
             const data = JSON.parse(event.data)
 
             if ('action' in data && data.action === 'serverComponentChanges') {
-              console.log(data)
               cached.reload = true
             }
           }
