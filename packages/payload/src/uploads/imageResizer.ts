@@ -1,11 +1,12 @@
-import type { OutputInfo } from 'sharp'
+import type { OutputInfo, default as Sharp } from 'sharp'
+import type sharp from 'sharp'
 
 import { fromBuffer } from 'file-type'
 import fs from 'fs'
 import sanitize from 'sanitize-filename'
-import sharp from 'sharp'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types'
+import type { SharpDependency } from '../exports/config'
 import type { UploadEdits } from '../exports/types'
 import type { CustomPayloadRequest, PayloadRequest } from '../types'
 import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types'
@@ -24,6 +25,7 @@ type ResizeArgs = {
     }
   }
   savedFilename: string
+  sharp: SharpDependency
   staticPath: string
 }
 
@@ -213,6 +215,7 @@ export default async function resizeAndTransformImageSizes({
   mimeType,
   req,
   savedFilename,
+  sharp,
   staticPath,
 }: ResizeArgs): Promise<ImageSizesResult> {
   const { imageSizes } = config.upload

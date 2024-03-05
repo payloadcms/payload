@@ -1,4 +1,5 @@
 import path from 'path'
+import sharp from 'sharp'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
 
@@ -161,6 +162,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
         }),
       ],
     }),
+    sharp,
     telemetry: false,
     ...testConfig,
   }

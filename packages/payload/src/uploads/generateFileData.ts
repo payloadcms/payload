@@ -4,7 +4,6 @@ import { fromBuffer } from 'file-type'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import sanitize from 'sanitize-filename'
-import sharp from 'sharp'
 
 import type { Collection } from '../collections/config/types'
 import type { SanitizedConfig } from '../config/types'
@@ -48,6 +47,8 @@ export const generateFileData = async <T>({
       files: [],
     }
   }
+
+  const { sharp } = req.payload.config
 
   let file = req.file
 
@@ -113,7 +114,7 @@ export const generateFileData = async <T>({
 
     if (fileIsAnimated) sharpOptions.animated = true
 
-    if (fileHasAdjustments) {
+    if (fileHasAdjustments && sharp) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
@@ -180,8 +181,8 @@ export const generateFileData = async <T>({
     fileData.filename = fsSafeName
     let fileForResize = file
 
-    if (cropData) {
-      const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file })
+    if (cropData && sharp) {
+      const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file, sharp })
 
       filesToSave.push({
         buffer: croppedImage,
@@ -223,7 +224,7 @@ export const generateFileData = async <T>({
       }
     }
 
-    if (Array.isArray(imageSizes) && fileSupportsResize) {
+    if (Array.isArray(imageSizes) && fileSupportsResize && sharp) {
       req.payloadUploadSizes = {}
       const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
@@ -238,6 +239,7 @@ export const generateFileData = async <T>({
         mimeType: fileData.mimeType,
         req,
         savedFilename: fsSafeName || file.name,
+        sharp,
         staticPath,
       })
 

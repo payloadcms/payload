@@ -177,6 +177,7 @@ export default joi.object({
 
       return value
     }),
+  sharp: joi.any(),
   telemetry: joi.boolean(),
   typescript: joi.object({
     declare: joi.boolean(),

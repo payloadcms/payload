@@ -5,6 +5,7 @@ import type { Transporter } from 'nodemailer'
 import type SMTPConnection from 'nodemailer/lib/smtp-connection'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
+import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { Payload } from '..'
@@ -359,6 +360,23 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
+export type SharpDependency = (
+  input?:
+    | ArrayBuffer
+    | Buffer
+    | Float32Array
+    | Float64Array
+    | Int8Array
+    | Int16Array
+    | Int32Array
+    | Uint8Array
+    | Uint8ClampedArray
+    | Uint16Array
+    | Uint32Array
+    | string,
+  options?: sharp.SharpOptions,
+) => sharp.Sharp
+
 /**
  * This is the central configuration
  *
@@ -635,6 +653,11 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/overview#options
    */
   serverURL?: string
+  /**
+   * Pass in a local copy of Sharp if you'd like to use it.
+   *
+   */
+  sharp?: SharpDependency
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */

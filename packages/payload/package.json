@@ -65,8 +65,7 @@
     "probe-image-size": "6.0.0",
     "sanitize-filename": "1.6.3",
     "scheduler": "0.23.0",
-    "scmp": "2.1.0",
-    "sharp": "0.32.6"
+    "scmp": "2.1.0"
   },
   "devDependencies": {
     "@monaco-editor/react": "4.5.1",
@@ -113,7 +112,8 @@
     "release-it": "17.1.1",
     "rimraf": "3.0.2",
     "serve-static": "1.15.0",
-    "ts-essentials": "7.0.3"
+    "ts-essentials": "7.0.3",
+    "sharp": "0.32.6"
   },
   "engines": {
     "node": ">=18.17.0"
