@@ -51,6 +51,10 @@ if (!cached) {
 }
 
 export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedConfig) => {
+  if (process.env.NODE_ENV === 'development') {
+    cached = global._payload_graphql = { graphql: null, promise: null }
+  }
+
   if (cached.graphql) {
     return cached.graphql
   }
@@ -110,7 +114,7 @@ export const POST =
         }
         return response
       },
-      schema: schema,
+      schema,
       validationRules: (request, args, defaultRules) => defaultRules.concat(validationRules(args)),
     })(originalRequest)
 

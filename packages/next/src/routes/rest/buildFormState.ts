@@ -12,7 +12,7 @@ if (!cached) {
 }
 
 export const getFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
-  if (cached) {
+  if (cached && process.env.NODE_ENV !== 'development') {
     return cached
   }
 
