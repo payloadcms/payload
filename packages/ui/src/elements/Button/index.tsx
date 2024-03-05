@@ -49,6 +49,7 @@ export const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
 export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, ref) => {
   const {
     id,
+    type = 'button',
     Link,
     'aria-label': ariaLabel,
     buttonStyle = 'primary',
@@ -65,7 +66,6 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     size = 'medium',
     to,
     tooltip,
-    type = 'button',
     url,
   } = props
 
@@ -95,6 +95,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
 
   const buttonProps = {
     id,
+    type,
     'aria-disabled': disabled,
     'aria-label': ariaLabel,
     className: classes,
@@ -104,13 +105,12 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     onMouseLeave: tooltip ? () => setShowTooltip(false) : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
-    type,
   }
 
   switch (el) {
     case 'link':
       if (!Link) {
-        console.error('Link is required when using el="link"')
+        console.error('Link is required when using el="link"', children)
         return null
       }
 

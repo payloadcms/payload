@@ -19,10 +19,7 @@ import { auth } from './auth'
 import { getRequestLanguage } from './getRequestLanguage'
 
 type Args = {
-  collectionSlug?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
-  globalSlug?: string
-  localeParam?: string
   redirectUnauthenticatedUser?: boolean
   route?: string
   searchParams?: { [key: string]: string | string[] | undefined }
@@ -30,13 +27,12 @@ type Args = {
 
 export const initPage = async ({
   config: configPromise,
-  localeParam,
   redirectUnauthenticatedUser = false,
   route,
   searchParams,
 }: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
-
+  const localeParam = searchParams?.locale as string
   const { cookies, permissions, user } = await auth({
     config: configPromise,
     headers,

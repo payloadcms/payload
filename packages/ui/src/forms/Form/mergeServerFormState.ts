@@ -11,7 +11,7 @@ export const mergeServerFormState = (
   let changed = false
 
   Object.entries(newState).forEach(([path, newFieldState]) => {
-    newFieldState.initialValue = oldState[path].initialValue
+    newFieldState.initialValue = oldState[path]?.initialValue
     newFieldState.value = oldState[path].value
 
     const oldErrorPaths: string[] = []

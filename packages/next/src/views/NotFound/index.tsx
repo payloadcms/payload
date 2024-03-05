@@ -1,5 +1,6 @@
 'use client'
 import { Button, Gutter, useConfig, useStepNav, useTranslation } from '@payloadcms/ui'
+import Link from 'next/link'
 import React from 'react'
 
 // import Meta from '../../utilities/Meta'
@@ -41,7 +42,7 @@ const NotFound: React.FC<{
       <Gutter className={`${baseClass}__wrap`}>
         <h1>{t('general:nothingFound')}</h1>
         <p>{t('general:sorryNotFound')}</p>
-        <Button className={`${baseClass}__button`} el="link" to={`${admin}`}>
+        <Button Link={Link} className={`${baseClass}__button`} el="link" to={`${admin}`}>
           {t('general:backToDashboard')}
         </Button>
       </Gutter>

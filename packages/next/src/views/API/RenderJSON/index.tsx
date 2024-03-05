@@ -14,9 +14,9 @@ const chars = {
 const baseClass = 'query-inspector'
 
 const Bracket = ({
+  type,
   comma = false,
   position,
-  type,
 }: {
   comma?: boolean
   position: 'end' | 'start'
@@ -49,7 +49,7 @@ export const RenderJSON = ({
   parentType = 'object',
   trailingComma = false,
 }: Args) => {
-  const objectKeys = Object.keys(object)
+  const objectKeys = object ? Object.keys(object) : []
   const objectLength = objectKeys.length
   const [isOpen, setIsOpen] = React.useState<boolean>(true)
 

@@ -25,6 +25,7 @@ import {
   SetViewActions,
   UnpublishMany,
 } from '@payloadcms/ui/elements'
+import Link from 'next/link'
 import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
@@ -156,7 +157,7 @@ export const DefaultListView: React.FC = () => {
             <div className={`${baseClass}__no-results`}>
               <p>{i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}</p>
               {hasCreatePermission && newDocumentURL && (
-                <Button el="link" to={newDocumentURL}>
+                <Button Link={Link} el="link" to={newDocumentURL}>
                   {i18n.t('general:createNewLabel', {
                     label: getTranslation(labels?.singular, i18n),
                   })}

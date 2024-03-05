@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
   const pathname = usePathname()
-  const { push } = useRouter()
+  const router = useRouter()
   // const { code } = useLocale()
   const code = 'en' // TODO: re-enable i18n asap
 
@@ -52,12 +52,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const redirectParam = `?redirect=${encodeURIComponent(
         window.location.pathname.replace(admin, ''),
       )}`
-      push(`${admin}${logoutInactivityRoute}${redirectParam}`)
+      router.replace(`${admin}${logoutInactivityRoute}${redirectParam}`)
     } else {
-      push(`${admin}${logoutInactivityRoute}`)
+      router.replace(`${admin}${logoutInactivityRoute}`)
     }
     closeAllModals()
-  }, [push, admin, logoutInactivityRoute, closeAllModals])
+  }, [router, admin, logoutInactivityRoute, closeAllModals])
 
   const revokeTokenAndExpire = useCallback(() => {
     setTokenInMemory(undefined)
@@ -212,7 +212,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (autoLoginJson?.token) {
               setTokenAndExpiration(autoLoginJson)
             }
-            push(typeof searchParams['redirect'] === 'string' ? searchParams['redirect'] : admin)
+            router.push(
+              typeof searchParams['redirect'] === 'string' ? searchParams['redirect'] : admin,
+            )
           } else {
             setUser(null)
             revokeTokenAndExpire()
@@ -232,7 +234,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     i18n.language,
     autoLogin,
     setTokenAndExpiration,
-    push,
+    router,
     searchParams,
     admin,
     revokeTokenAndExpire,

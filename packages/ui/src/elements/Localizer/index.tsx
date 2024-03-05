@@ -1,5 +1,5 @@
 import { getTranslation } from '@payloadcms/translations'
-import qs from 'qs'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 
 import { useConfig } from '../../providers/Config'
@@ -23,9 +23,7 @@ const Localizer: React.FC<{
   const { i18n } = useTranslation()
   const locale = useLocale()
   const { searchParams } = useSearchParams()
-
-  const localeLabel = getTranslation(locale.label, i18n)
-
+  const router = useRouter()
   if (localization) {
     const { locales } = localization
 
@@ -36,42 +34,28 @@ const Localizer: React.FC<{
           horizontalAlign="right"
           render={({ close }) => (
             <PopupList.ButtonGroup>
-              <React.Fragment>
-                {locale ? (
+              {locales.map((localeOption) => {
+                const newParams = {
+                  ...searchParams,
+                  locale: localeOption.code,
+                }
+                const localeOptionLabel = getTranslation(localeOption.label, i18n)
+
+                return (
                   <PopupList.Button
-                    active
-                    href={{
-                      search: qs.stringify({
-                        ...searchParams,
-                        locale: locale.code,
-                      }),
+                    active={locale.code === localeOption.code}
+                    href={{ query: newParams }}
+                    key={localeOption.code}
+                    onClick={() => {
+                      close()
+                      router.refresh()
                     }}
-                    key={locale.code}
-                    onClick={close}
                   >
-                    {localeLabel}
-                    {localeLabel !== locale.code && ` (${locale.code})`}
+                    {localeOptionLabel}
+                    {localeOptionLabel !== localeOption.code && ` (${localeOption.code})`}
                   </PopupList.Button>
-                ) : null}
-
-                {locales.map((localeOption) => {
-                  if (locale.code === localeOption.code) return null
-
-                  const newParams = {
-                    ...searchParams,
-                    locale: localeOption.code,
-                  }
-                  const search = qs.stringify(newParams)
-                  const localeOptionLabel = getTranslation(localeOption.label, i18n)
-
-                  return (
-                    <PopupList.Button href={{ search }} key={localeOption.code} onClick={close}>
-                      {localeOptionLabel}
-                      {localeOptionLabel !== localeOption.code && ` (${localeOption.code})`}
-                    </PopupList.Button>
-                  )
-                })}
-              </React.Fragment>
+                )
+              })}
             </PopupList.ButtonGroup>
           )}
           showScrollbar

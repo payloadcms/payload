@@ -24,6 +24,7 @@ export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({
   const [searchParams, dispatchSearchParams] = React.useReducer((state: State, action: Action) => {
     const stackAction = action.browserHistory || 'push'
     let paramsToSet
+
     switch (action.type) {
       case 'set':
         paramsToSet = {

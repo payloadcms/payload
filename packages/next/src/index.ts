@@ -1,5 +1,4 @@
 export { AdminLayout } from './layouts/Admin'
-export { DocumentLayout } from './layouts/Document'
 export { RootLayout } from './layouts/Root'
 export { Dashboard as DashboardPage } from './views/Dashboard'
 export { Login } from './views/Login'

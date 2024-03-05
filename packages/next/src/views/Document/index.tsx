@@ -24,8 +24,9 @@ import queryString from 'qs'
 import React, { Fragment } from 'react'
 
 import type { AdminViewProps } from '../Root'
+import type { GenerateEditViewMetadata } from './getMetaBySegment'
 
-import { GenerateEditViewMetadata, getMetaBySegment } from './getMetaBySegment'
+import { getMetaBySegment } from './getMetaBySegment'
 import { getViewsFromConfig } from './getViewsFromConfig'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
@@ -178,6 +179,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     locale: locale.code,
     uploadEdits: undefined,
   }
+  console.log('server code', `${action}?${queryString.stringify(formQueryParams)}`)
 
   const componentProps: ServerSideEditViewProps = {
     id,
@@ -208,7 +210,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       />
       <HydrateClientUser permissions={permissions} user={user} />
       <SetDocumentInfo
-        action={action}
+        action={`${action}?${queryString.stringify(formQueryParams)}`}
         apiURL={apiURL}
         collectionSlug={collectionConfig?.slug}
         disableActions={false}

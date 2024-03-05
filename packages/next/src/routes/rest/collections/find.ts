@@ -9,7 +9,6 @@ import type { CollectionRouteHandler } from '../types'
 
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
-
   // parse using `qs` to handle `where` queries
   const { depth, draft, limit, page, sort, where } = qs.parse(searchParams.toString()) as {
     depth?: string
