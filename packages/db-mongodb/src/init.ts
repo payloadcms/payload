@@ -19,7 +19,7 @@ import { buildGlobalModel } from './models/buildGlobalModel'
 import buildSchema from './models/buildSchema'
 import getBuildQueryPlugin from './queries/buildQuery'
 
-export const init: Init = async function init(this: MongooseAdapter) {
+export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schema = buildCollectionSchema(collection, this.payload.config)
 

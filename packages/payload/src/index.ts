@@ -316,6 +316,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.globals = {
       config: this.config.globals,
     }
+
     this.config.collections.forEach((collection) => {
       this.collections[collection.slug] = {
         config: collection,
@@ -330,7 +331,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     if (!options.disableDBConnect && this.db.connect) {
-      await this.db.connect(this)
+      await this.db.connect()
     }
 
     this.logger.info('Starting Payload...')

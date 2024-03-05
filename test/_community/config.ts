@@ -9,34 +9,7 @@ import { MenuGlobal } from './globals/Menu'
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [
-    PostsCollection,
-    MediaCollection,
-    // ...add more collections here
-    {
-      slug: 'localized',
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-          localized: true,
-        },
-      ],
-    },
-  ],
-  localization: {
-    defaultLocale: 'en',
-    locales: [
-      {
-        code: 'en',
-        label: 'English',
-      },
-      {
-        code: 'es',
-        label: 'Spanish',
-      },
-    ],
-  },
+  collections: [PostsCollection, MediaCollection],
   globals: [
     MenuGlobal,
     // ...add more globals here

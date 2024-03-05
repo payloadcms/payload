@@ -1,13 +1,15 @@
+export type LanguageTranslations = {
+  [namespace: string]: {
+    [key: string]: string
+  }
+}
+
 export type Translations = {
   [language: string]:
     | {
         $schema: string
       }
-    | {
-        [namespace: string]: {
-          [key: string]: string
-        }
-      }
+    | LanguageTranslations
 }
 
 export type TFunction = (key: string, options?: Record<string, any>) => string
@@ -19,6 +21,7 @@ export type I18n = {
   language: string
   /** Translate function */
   t: (key: string, options?: Record<string, unknown>) => string
+  translations: Translations
 }
 
 export type I18nOptions = {
@@ -29,11 +32,7 @@ export type I18nOptions = {
       | {
           $schema: string
         }
-      | {
-          [namespace: string]: {
-            [key: string]: string
-          }
-        }
+      | LanguageTranslations
   }
 }
 
@@ -41,7 +40,10 @@ export type InitTFunction = (args: {
   config: I18nOptions
   language?: string
   translations?: Translations
-}) => TFunction
+}) => {
+  t: TFunction
+  translations: Translations
+}
 
 export type InitI18n = (args: {
   config: I18nOptions

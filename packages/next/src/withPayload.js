@@ -20,6 +20,7 @@ const withPayload = (nextConfig = {}) => {
         'libsql',
         'pino',
         'pino-pretty',
+        'payload',
       ],
     },
     webpack: (webpackConfig, webpackOptions) => {

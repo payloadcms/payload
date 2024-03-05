@@ -1,19 +1,12 @@
-import type { PayloadRequest, SanitizedConfig } from 'payload/types'
+import type { Payload, PayloadRequest } from 'payload/types'
 
-import { getPayload } from 'payload'
 import { getAccessResults, getAuthenticatedUser, parseCookies } from 'payload/auth'
 import { cache } from 'react'
 
 export const auth = cache(
-  async ({
-    config,
-    headers,
-  }: {
-    config: Promise<SanitizedConfig> | SanitizedConfig
-    headers: Request['headers']
-  }) => {
+  async ({ headers, payload }: { headers: Request['headers']; payload: Payload }) => {
     const cookies = parseCookies(headers)
-    const payload = await getPayload({ config })
+
     const user = await getAuthenticatedUser({
       cookies,
       headers,

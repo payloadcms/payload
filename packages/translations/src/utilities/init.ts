@@ -191,17 +191,21 @@ export function matchLanguage(header: string): string | undefined {
   return undefined
 }
 
-const initTFunction: InitTFunction = (args) => (key, vars) => {
+const initTFunction: InitTFunction = (args) => {
   const { config, language, translations } = args
-
-  const mergedLanguages = deepMerge(config?.translations ?? {}, translations)
+  const mergedTranslations = deepMerge(config?.translations ?? {}, translations)
   const languagePreference = matchLanguage(language)
 
-  return t({
-    key,
-    translations: mergedLanguages[languagePreference],
-    vars,
-  })
+  return {
+    translations: mergedTranslations,
+    t: (key, vars) => {
+      return t({
+        key,
+        translations: mergedTranslations[languagePreference],
+        vars,
+      })
+    },
+  }
 }
 
 function memoize(fn: Function, keys: string[]) {
@@ -222,15 +226,23 @@ function memoize(fn: Function, keys: string[]) {
 }
 
 export const initI18n: InitI18n = memoize(
-  ({ config, language = 'en', translations, context }: Parameters<InitI18n>[0]) => {
+  ({
+    config,
+    language = 'en',
+    translations: incomingTranslations,
+    context,
+  }: Parameters<InitI18n>[0]) => {
+    const { t, translations } = initTFunction({
+      config,
+      language: language || config.fallbackLanguage,
+      translations: incomingTranslations,
+    })
+
     const i18n: I18n = {
       fallbackLanguage: config.fallbackLanguage,
       language: language || config.fallbackLanguage,
-      t: initTFunction({
-        config,
-        language: language || config.fallbackLanguage,
-        translations,
-      }),
+      t,
+      translations,
     }
 
     return i18n

@@ -10,6 +10,7 @@ export const destroy: Destroy = async function destroy(this: MongooseAdapter) {
     await mongoose.connection.close()
     await this.mongoMemoryServer.stop()
   } else {
-    await mongoose.connection.close()
+    await mongoose.disconnect()
   }
+  Object.keys(mongoose.models).map((model) => mongoose.deleteModel(model))
 }

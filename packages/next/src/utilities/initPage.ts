@@ -11,10 +11,10 @@ import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui'
 import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getPayload } from 'payload'
 import { createLocalReq } from 'payload/utilities'
 import qs from 'qs'
 
+import { getPayload } from '../utilities/getPayload'
 import { auth } from './auth'
 import { getRequestLanguage } from './getRequestLanguage'
 
@@ -33,17 +33,18 @@ export const initPage = async ({
 }: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
   const localeParam = searchParams?.locale as string
+  const payload = await getPayload({ config: configPromise })
+
   const { cookies, permissions, user } = await auth({
-    config: configPromise,
     headers,
+    payload,
   })
 
-  const config = await configPromise
-  const routeSegments = route.replace(config.routes.admin, '').split('/').filter(Boolean)
+  const routeSegments = route.replace(payload.config.routes.admin, '').split('/').filter(Boolean)
   const collectionSlug = routeSegments[0] === 'collections' ? routeSegments[1] : undefined
   const globalSlug = routeSegments[0] === 'globals' ? routeSegments[1] : undefined
 
-  const { collections, globals, localization, routes } = config
+  const { collections, globals, localization, routes } = payload.config
 
   if (redirectUnauthenticatedUser && !user && route !== '/login') {
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
@@ -53,15 +54,14 @@ export const initPage = async ({
     redirect(`${routes.admin}/login?redirect=${route + stringifiedSearchParams}`)
   }
 
-  const payload = await getPayload({ config })
-
   const defaultLocale =
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
   const localeCode = localeParam || defaultLocale
   const locale = localization && findLocaleFromCode(localization, localeCode)
   const language = getRequestLanguage({ cookies, headers })
+
   const i18n = initI18n({
-    config: config.i18n,
+    config: payload.config.i18n,
     context: 'client',
     language,
     translations,
@@ -92,9 +92,11 @@ export const initPage = async ({
 
   return {
     collectionConfig,
+    cookies,
     globalConfig,
     locale,
     permissions,
     req,
+    translations: i18n.translations,
   }
 }

@@ -49,6 +49,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "18.2.15",
     "@types/react-dom": "18.2.7",
+    "@types/ws": "^8.5.10",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
     "file-loader": "6.2.0",
@@ -78,7 +79,8 @@
     "path-to-regexp": "^6.2.1",
     "react-diff-viewer-continued": "3.2.6",
     "react-toastify": "8.2.0",
-    "sass": "^1.71.1"
+    "sass": "^1.71.1",
+    "ws": "^8.16.0"
   },
   "peerDependencies": {
     "http-status": "1.6.2",

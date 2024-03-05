@@ -1,18 +1,12 @@
 import type { SanitizedConfig } from 'payload/types'
 
-import { auth } from '@payloadcms/next/utilities/auth'
-import { translations } from '@payloadcms/translations/client'
-import { RootProvider, buildComponentMap } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
 import { headers as getHeaders } from 'next/headers'
+import { parseCookies } from 'payload/auth'
 import { createClientConfig } from 'payload/config'
-import { deepMerge } from 'payload/utilities'
 import React from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
-import { DefaultEditView } from '../../views/Edit/Default'
-import { DefaultListView } from '../../views/List/Default'
-import { DefaultCell } from '../../views/List/Default/Cell'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage'
 
 export const metadata = {
@@ -33,11 +27,8 @@ export const RootLayout = async ({
   const clientConfig = await createClientConfig(config)
 
   const headers = getHeaders()
+  const cookies = parseCookies(headers)
 
-  const { cookies, user } = await auth({
-    config: configPromise,
-    headers,
-  })
   const lang =
     getRequestLanguage({
       cookies,
@@ -46,33 +37,10 @@ export const RootLayout = async ({
 
   const dir = rtlLanguages.includes(lang) ? 'RTL' : 'LTR'
 
-  const mergedTranslations = deepMerge(translations, clientConfig.i18n.translations)
-
-  const languageOptions = Object.entries(translations || {}).map(([language, translations]) => ({
-    label: translations.general.thisLanguage,
-    value: language,
-  }))
-
-  const componentMap = buildComponentMap({
-    DefaultCell,
-    DefaultEditView,
-    DefaultListView,
-    config,
-  })
-
   return (
     <html dir={dir} lang={lang}>
       <body>
-        <RootProvider
-          componentMap={componentMap}
-          config={clientConfig}
-          fallbackLang={clientConfig.i18n.fallbackLanguage}
-          lang={lang}
-          languageOptions={languageOptions}
-          translations={mergedTranslations[lang]}
-        >
-          {children}
-        </RootProvider>
+        {children}
         <div id="portal" />
       </body>
     </html>

@@ -7,13 +7,13 @@ import type {
 
 import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/api'
-import { getPayload } from 'payload'
 import { getAuthenticatedUser } from 'payload/auth'
 import { parseCookies } from 'payload/auth'
 import { getDataLoader } from 'payload/utilities'
 import { URL } from 'url'
 
 import { getDataAndFile } from './getDataAndFile'
+import { getPayload } from './getPayload'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 
@@ -32,6 +32,7 @@ export const createPayloadRequest = async ({
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
   const payload = await getPayload({ config: configPromise })
+
   const { collections, config } = payload
 
   let collection: Collection = undefined
