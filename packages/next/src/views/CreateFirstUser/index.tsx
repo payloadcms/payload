@@ -1,7 +1,6 @@
 import type { Field } from 'payload/types'
 
-import { Form, FormSubmit, buildStateFromSchema } from '@payloadcms/ui'
-import { redirect } from 'next/navigation'
+import { Form, FormSubmit, buildStateFromSchema, mapFields } from '@payloadcms/ui'
 import React from 'react'
 
 import type { AdminViewProps } from '../Root'
@@ -16,6 +15,7 @@ export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult
     req,
     req: {
       payload: {
+        config,
         config: {
           admin: { user: userSlug },
           routes: { admin: adminRoute, api: apiRoute },
@@ -25,21 +25,7 @@ export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult
     },
   } = initPageResult
 
-  if (req.user) {
-    redirect(adminRoute)
-  }
-
-  const { docs } = await req.payload.find({
-    collection: userSlug,
-    depth: 0,
-    limit: 1,
-  })
-
-  if (docs.length > 0) {
-    redirect(adminRoute)
-  }
-
-  const fields = [
+  const fields: Field[] = [
     {
       name: 'email',
       type: 'email',
@@ -48,17 +34,25 @@ export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult
     },
     {
       name: 'password',
-      type: 'password',
+      type: 'text',
       label: req.t('general:password'),
       required: true,
     },
     {
       name: 'confirm-password',
-      type: 'confirmPassword',
+      type: 'text',
       label: req.t('authentication:confirmPassword'),
       required: true,
     },
-  ] as Field[]
+  ]
+
+  const createFirstUserFieldMap = mapFields({
+    fieldSchema: fields,
+    operation: 'create',
+    config,
+    parentPath: userSlug,
+    permissions: {},
+  })
 
   const formState = await buildStateFromSchema({
     fieldSchema: fields,
@@ -78,7 +72,10 @@ export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult
         redirect={adminRoute}
         validationOperation="create"
       >
-        <CreateFirstUserFields userSlug={userSlug} />
+        <CreateFirstUserFields
+          userSlug={userSlug}
+          createFirstUserFieldMap={createFirstUserFieldMap}
+        />
         <FormSubmit>{req.t('general:create')}</FormSubmit>
       </Form>
     </React.Fragment>

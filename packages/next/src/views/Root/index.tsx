@@ -17,6 +17,7 @@ import { Unauthorized } from '../Unauthorized'
 import { Verify, verifyBaseClass } from '../Verify'
 import { Metadata } from 'next'
 import { I18n } from '@payloadcms/translations'
+import { redirect } from 'next/navigation'
 
 export { generatePageMetadata } from './meta'
 
@@ -60,12 +61,18 @@ const oneSegmentViews = {
 
 export const RootPage = async ({ config: configPromise, params, searchParams }: Args) => {
   const config = await configPromise
+
+  const {
+    routes: { admin: adminRoute },
+    admin: { user: userSlug },
+  } = config
+
   let ViewToRender: React.FC<AdminViewProps>
   let templateClassName
   let initPageResult: InitPageResult
   let templateType: 'default' | 'minimal' = 'default'
 
-  let route = config.routes.admin
+  let route = adminRoute
 
   if (Array.isArray(params.segments)) {
     route = route + '/' + params.segments.join('/')
@@ -192,6 +199,23 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         templateType = 'default'
       }
       break
+  }
+
+  const dbHasUser = await initPageResult.req.payload.db
+    .findOne({
+      collection: userSlug,
+      req: initPageResult.req,
+    })
+    ?.then((doc) => !!doc)
+
+  const createFirstUserRoute = `${adminRoute}/create-first-user`
+
+  if (!dbHasUser && route !== createFirstUserRoute) {
+    redirect(createFirstUserRoute)
+  }
+
+  if (dbHasUser && route === createFirstUserRoute) {
+    redirect(adminRoute)
   }
 
   if (initPageResult) {

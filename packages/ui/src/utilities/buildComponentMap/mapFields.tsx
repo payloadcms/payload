@@ -167,17 +167,19 @@ export const mapFields = (args: {
         // i.e. not all fields have `maxRows` or `min` or `max`
         // but this is labor intensive and requires consuming components to be updated
         const fieldComponentProps: FormFieldBase = {
-          AfterInput: 'components' in field.admin &&
+          AfterInput: 'admin' in field &&
+            'components' in field.admin &&
             'afterInput' in field.admin.components &&
-            Array.isArray(field.admin.components.afterInput) && (
+            Array.isArray(field.admin?.components?.afterInput) && (
               <Fragment>
                 {field.admin.components.afterInput.map((Component, i) => (
                   <Component key={i} />
                 ))}
               </Fragment>
             ),
-          BeforeInput: field.admin?.components &&
-            'beforeInput' in field.admin?.components &&
+          BeforeInput: 'admin' in field &&
+            field.admin?.components &&
+            'beforeInput' in field.admin.components &&
             Array.isArray(field.admin.components.beforeInput) && (
               <Fragment>
                 {field.admin.components.beforeInput.map((Component, i) => (
@@ -201,8 +203,9 @@ export const mapFields = (args: {
           Error: (
             <RenderCustomComponent
               CustomComponent={
-                field.admin?.components &&
-                'Error' in field.admin?.components &&
+                'admin' in field &&
+                field.admin.components &&
+                'Error' in field.admin.components &&
                 field.admin?.components?.Error
               }
               DefaultComponent={DefaultError}
@@ -212,18 +215,20 @@ export const mapFields = (args: {
           Label: (
             <RenderCustomComponent
               CustomComponent={
+                'admin' in field &&
                 field.admin?.components &&
-                'Label' in field.admin?.components &&
+                'Label' in field.admin.components &&
                 field.admin?.components?.Label
               }
               DefaultComponent={DefaultLabel}
               componentProps={labelProps}
             />
           ),
-          className: 'className' in field.admin ? field?.admin?.className : undefined,
+          className:
+            'admin' in field && 'className' in field.admin ? field?.admin?.className : undefined,
           fieldMap: nestedFieldMap,
-          style: 'style' in field.admin ? field?.admin?.style : undefined,
-          width: 'width' in field.admin ? field?.admin?.width : undefined,
+          style: 'admin' in field && 'style' in field.admin ? field?.admin?.style : undefined,
+          width: 'admin' in field && 'width' in field.admin ? field?.admin?.width : undefined,
           // TODO: fix types
           // label: 'label' in field ? field.label : undefined,
           blocks,
@@ -234,7 +239,7 @@ export const mapFields = (args: {
           options: 'options' in field ? field.options : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
           richTextComponentMap: undefined,
-          step: 'step' in field.admin ? field.admin.step : undefined,
+          step: 'admin' in field && 'step' in field.admin ? field.admin.step : undefined,
           tabs,
         }
 
@@ -248,7 +253,8 @@ export const mapFields = (args: {
               slug: b.slug,
               labels: b.labels,
             })),
-          dateDisplayFormat: 'date' in field.admin ? field.admin.date.displayFormat : undefined,
+          dateDisplayFormat:
+            'admin' in field && 'date' in field.admin ? field.admin.date.displayFormat : undefined,
           fieldType: field.type,
           isFieldAffectingData,
           label:
@@ -342,7 +348,7 @@ export const mapFields = (args: {
           fieldPermissions,
           hasMany: 'hasMany' in field ? field.hasMany : undefined,
           isFieldAffectingData,
-          isSidebar: field.admin?.position === 'sidebar',
+          isSidebar: 'admin' in field && field.admin?.position === 'sidebar',
           label: 'label' in field && typeof field.label !== 'function' ? field.label : undefined,
           labels: 'labels' in field ? field.labels : undefined,
           localized: 'localized' in field ? field.localized : false,
