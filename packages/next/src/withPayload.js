@@ -14,6 +14,7 @@ const withPayload = (nextConfig = {}) => {
       },
       serverComponentsExternalPackages: [
         ...(nextConfig?.experimental?.serverComponentsExternalPackages || []),
+        '@payloadcms/db-mongodb',
         'drizzle-kit',
         'drizzle-kit/payload',
         'libsql',

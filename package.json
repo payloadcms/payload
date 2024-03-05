@@ -129,7 +129,6 @@
     "read-stream": "^2.1.1",
     "rimraf": "3.0.2",
     "semver": "^7.5.4",
-    "sharp": "0.33.2",
     "shelljs": "0.8.5",
     "simple-git": "^3.20.0",
     "slash": "3.0.0",
