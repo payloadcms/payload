@@ -1,9 +1,11 @@
-const withPayload = require('./packages/next/src/withPayload')
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
+import withPayload from './packages/next/src/withPayload.js'
+import bundleAnalyzer from '@next/bundle-analyzer'
+
+const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
-module.exports = withBundleAnalyzer(
+export default withBundleAnalyzer(
   withPayload({
     reactStrictMode: false,
     async redirects() {

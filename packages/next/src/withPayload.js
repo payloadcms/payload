@@ -70,4 +70,4 @@ const withPayload = (nextConfig = {}) => {
   }
 }
 
-module.exports = withPayload
+export default withPayload

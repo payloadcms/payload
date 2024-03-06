@@ -2,6 +2,7 @@
   "name": "payload-monorepo",
   "version": "3.0.0-alpha.19",
   "private": true,
+  "type": "module",
   "workspaces:": [
     "packages/*"
   ],
