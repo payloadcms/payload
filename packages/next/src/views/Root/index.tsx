@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
 import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import React from 'react'
 
 import { initPage } from '../../utilities/initPage'
@@ -20,16 +20,6 @@ import { Unauthorized } from '../Unauthorized'
 import { Verify, verifyBaseClass } from '../Verify'
 
 export { generatePageMetadata } from './meta'
-
-type Args = {
-  config: Promise<SanitizedConfig>
-  params: {
-    [key: string]: string | string[]
-  }
-  searchParams: {
-    [key: string]: string | string[]
-  }
-}
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -59,7 +49,19 @@ const oneSegmentViews = {
   unauthorized: Unauthorized,
 }
 
-export const RootPage = async ({ config: configPromise, params, searchParams }: Args) => {
+export const RootPage = async ({
+  config: configPromise,
+  params,
+  searchParams,
+}: {
+  config: Promise<SanitizedConfig>
+  params: {
+    [key: string]: string | string[]
+  }
+  searchParams: {
+    [key: string]: string | string[]
+  }
+}) => {
   const config = await configPromise
 
   const {
@@ -69,7 +71,6 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
 
   let ViewToRender: React.FC<AdminViewProps>
   let templateClassName
-  let initPageResult: InitPageResult
   let templateType: 'default' | 'minimal' = 'default'
 
   let route = adminRoute
@@ -85,6 +86,12 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
   const isGlobal = segmentOne === 'globals'
   const isCollection = segmentOne === 'collections'
 
+  let initPageOptions: Parameters<typeof initPage>[0] = {
+    config,
+    searchParams,
+    route,
+  }
+
   // TODO: handle custom routes
 
   switch (segments.length) {
@@ -92,12 +99,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       ViewToRender = Dashboard
       templateClassName = 'dashboard'
       templateType = 'default'
-      initPageResult = await initPage({
-        config,
-        redirectUnauthenticatedUser: true,
-        route,
-        searchParams,
-      })
+      initPageOptions.redirectUnauthenticatedUser = true
       break
     }
     case 1: {
@@ -108,18 +110,12 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         // --> /logout
         // --> /logout-inactivity
         // --> /unauthorized
-        initPageResult = await initPage({ config, route, searchParams })
         ViewToRender = oneSegmentViews[segmentOne]
         templateClassName = baseClasses[segmentOne]
         templateType = 'minimal'
       } else if (segmentOne === 'account') {
         // --> /account
-        initPageResult = await initPage({
-          config,
-          redirectUnauthenticatedUser: true,
-          route,
-          searchParams,
-        })
+        initPageOptions.redirectUnauthenticatedUser = true
         ViewToRender = Account
         templateClassName = 'account'
         templateType = 'default'
@@ -129,30 +125,19 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
     case 2: {
       if (segmentOne === 'reset') {
         // --> /reset/:token
-        initPageResult = await initPage({ config, route, searchParams })
         ViewToRender = ResetPassword
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
       }
       if (isCollection) {
         // --> /collections/:collectionSlug
-        initPageResult = await initPage({
-          config,
-          redirectUnauthenticatedUser: true,
-          route,
-          searchParams,
-        })
+        initPageOptions.redirectUnauthenticatedUser = true
         ViewToRender = ListView
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
       } else if (isGlobal) {
         // --> /globals/:globalSlug
-        initPageResult = await initPage({
-          config,
-          redirectUnauthenticatedUser: true,
-          route,
-          searchParams,
-        })
+        initPageOptions.redirectUnauthenticatedUser = true
         ViewToRender = DocumentView
         templateClassName = 'global-edit'
         templateType = 'default'
@@ -162,7 +147,6 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
     default:
       if (segmentTwo === 'verify') {
         // --> /:collectionSlug/verify/:token
-        initPageResult = await initPage({ config, route, searchParams })
         ViewToRender = Verify
         templateClassName = 'verify'
         templateType = 'minimal'
@@ -173,12 +157,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         // --> /collections/:collectionSlug/:id/versions
         // --> /collections/:collectionSlug/:id/versions/:versionId
         // --> /collections/:collectionSlug/:id/api
-        initPageResult = await initPage({
-          config,
-          redirectUnauthenticatedUser: true,
-          route,
-          searchParams,
-        })
+        initPageOptions.redirectUnauthenticatedUser = true
         ViewToRender = DocumentView
         templateClassName = `collection-default-edit`
         templateType = 'default'
@@ -188,12 +167,7 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
         // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/versions/:versionId
         // --> /globals/:globalSlug/api
-        initPageResult = await initPage({
-          config,
-          redirectUnauthenticatedUser: true,
-          route,
-          searchParams,
-        })
+        initPageOptions.redirectUnauthenticatedUser = true
         ViewToRender = DocumentView
         templateClassName = `global-edit`
         templateType = 'default'
@@ -201,51 +175,49 @@ export const RootPage = async ({ config: configPromise, params, searchParams }: 
       break
   }
 
-  const dbHasUser = await initPageResult.req.payload.db
-    .findOne({
-      collection: userSlug,
-      req: initPageResult.req,
-    })
-    ?.then((doc) => !!doc)
+  let dbHasUser = false
 
-  const createFirstUserRoute = `${adminRoute}/create-first-user`
-
-  if (!dbHasUser && route !== createFirstUserRoute) {
-    redirect(createFirstUserRoute)
+  if (!ViewToRender) {
+    notFound()
   }
 
-  if (dbHasUser && route === createFirstUserRoute) {
-    redirect(adminRoute)
-  }
+  const initPageResult = await initPage(initPageOptions)
 
   if (initPageResult) {
-    if (templateType === 'minimal') {
-      return (
-        <MinimalTemplate className={templateClassName}>
-          <ViewToRender
-            initPageResult={initPageResult}
-            params={params}
-            searchParams={searchParams}
-          />
-        </MinimalTemplate>
-      )
-    } else {
-      return (
-        <DefaultTemplate
-          config={config}
-          i18n={initPageResult.req.i18n}
-          permissions={initPageResult.permissions}
-          user={initPageResult.req.user}
-        >
-          <ViewToRender
-            initPageResult={initPageResult}
-            params={params}
-            searchParams={searchParams}
-          />
-        </DefaultTemplate>
-      )
+    dbHasUser = await initPageResult?.req.payload.db
+      .findOne({
+        collection: userSlug,
+        req: initPageResult?.req,
+      })
+      ?.then((doc) => !!doc)
+
+    const createFirstUserRoute = `${adminRoute}/create-first-user`
+
+    if (!dbHasUser && route !== createFirstUserRoute) {
+      redirect(createFirstUserRoute)
+    }
+
+    if (dbHasUser && route === createFirstUserRoute) {
+      redirect(adminRoute)
     }
   }
 
-  return null
+  if (templateType === 'minimal') {
+    return (
+      <MinimalTemplate className={templateClassName}>
+        <ViewToRender initPageResult={initPageResult} params={params} searchParams={searchParams} />
+      </MinimalTemplate>
+    )
+  } else {
+    return (
+      <DefaultTemplate
+        config={config}
+        i18n={initPageResult.req.i18n}
+        permissions={initPageResult.permissions}
+        user={initPageResult.req.user}
+      >
+        <ViewToRender initPageResult={initPageResult} params={params} searchParams={searchParams} />
+      </DefaultTemplate>
+    )
+  }
 }

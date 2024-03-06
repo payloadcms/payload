@@ -11,6 +11,7 @@ import { Metadata } from 'next'
 import { generateDocumentMetadata } from '../Document/meta'
 import { getNextI18n } from '../../utilities/getNextI18n'
 import { SanitizedConfig } from 'payload/types'
+import { generateNotFoundMeta } from '../NotFound/meta'
 
 const oneSegmentMeta = {
   'create-first-user': generateCreateFirstUserMetadata,
@@ -129,6 +130,10 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
       }
       break
     }
+  }
+
+  if (!meta) {
+    meta = generateNotFoundMeta({ i18n })
   }
 
   return meta
