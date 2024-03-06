@@ -133,7 +133,7 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
   }
 
   if (!meta) {
-    meta = generateNotFoundMeta({ i18n })
+    meta = await generateNotFoundMeta({ config, i18n })
   }
 
   return meta

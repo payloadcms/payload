@@ -102,5 +102,5 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     })
   }
 
-  return generateNotFoundMeta({ i18n })
+  return generateNotFoundMeta({ config, i18n })
 }
