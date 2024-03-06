@@ -1,11 +1,11 @@
 'use client'
 
 import type {
-  ClientEditorConfig,
   ClientFeatureProviderMap,
   FeatureProviderClient,
   ResolvedClientFeatureMap,
-} from '@payloadcms/richtext-lexical'
+} from '../../../features/types.js'
+import type { ClientEditorConfig } from '../types.js'
 
 /**
  * This function expects client functions to ALREADY be ordered & dependencies checked on the server

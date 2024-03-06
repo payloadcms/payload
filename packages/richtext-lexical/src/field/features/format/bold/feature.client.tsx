@@ -1,17 +1,17 @@
 'use client'
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProviderProviderClient } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { BoldIcon } from '../../../lexical/ui/icons/Bold'
-import { createClientComponent } from '../../createClientComponent'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
+import { BoldIcon } from '../../../lexical/ui/icons/Bold/index.js'
+import { createClientComponent } from '../../createClientComponent.js'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
 import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,
   BOLD_STAR,
   BOLD_UNDERSCORE,
-} from './markdownTransformers'
+} from './markdownTransformers.js'
 
 const BoldFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

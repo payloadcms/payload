@@ -1,7 +1,7 @@
-import type { SlateNodeConverterProvider } from '../../types'
+import type { SlateNodeConverterProvider } from '../../types.js'
 
-import { UploadConverterClient } from './client'
-import { _SlateUploadConverter } from './converter'
+import { UploadConverterClient } from './client.js'
+import { _SlateUploadConverter } from './converter.js'
 
 export const SlateUploadConverter: SlateNodeConverterProvider = {
   ClientComponent: UploadConverterClient,

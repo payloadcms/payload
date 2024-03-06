@@ -1,13 +1,13 @@
 import type { Field, Payload } from 'payload/types'
 
-import type { HTMLConverter } from '../converters/html/converter/types'
-import type { FeatureProviderProviderServer } from '../types'
-import type { UploadFeaturePropsClient } from './feature.client'
+import type { HTMLConverter } from '../converters/html/converter/types.js'
+import type { FeatureProviderProviderServer } from '../types.js'
+import type { UploadFeaturePropsClient } from './feature.client.js'
 
-import { UploadFeatureClientComponent } from './feature.client'
-import { type SerializedUploadNode, UploadNode } from './nodes/UploadNode'
-import { uploadPopulationPromiseHOC } from './populationPromise'
-import { uploadValidation } from './validate'
+import { UploadFeatureClientComponent } from './feature.client.js'
+import { type SerializedUploadNode, UploadNode } from './nodes/UploadNode.js'
+import { uploadPopulationPromiseHOC } from './populationPromise.js'
+import { uploadValidation } from './validate.js'
 
 export type UploadFeatureProps = {
   collections: {

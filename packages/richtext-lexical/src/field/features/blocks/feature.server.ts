@@ -3,13 +3,13 @@ import type { Block, BlockField, Field } from 'payload/types'
 import { baseBlockFields, sanitizeFields } from 'payload/config'
 import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
 
-import type { FeatureProviderProviderServer } from '../types'
-import type { BlocksFeatureClientProps } from './feature.client'
+import type { FeatureProviderProviderServer } from '../types.js'
+import type { BlocksFeatureClientProps } from './feature.client.js'
 
-import { BlocksFeatureClientComponent } from './feature.client'
-import { BlockNode } from './nodes/BlocksNode'
-import { blockPopulationPromiseHOC } from './populationPromise'
-import { blockValidationHOC } from './validate'
+import { BlocksFeatureClientComponent } from './feature.client.js'
+import { BlockNode } from './nodes/BlocksNode.js'
+import { blockPopulationPromiseHOC } from './populationPromise.js'
+import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
   blocks: Block[]

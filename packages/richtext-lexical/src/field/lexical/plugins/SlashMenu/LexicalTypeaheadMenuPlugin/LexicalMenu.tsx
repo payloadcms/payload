@@ -17,9 +17,8 @@ import {
 } from 'lexical'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-import type { MenuTextMatch } from '../useMenuTriggerMatch'
-import type { SlashMenuOption } from './types'
-import type { SlashMenuGroup } from './types'
+import type { MenuTextMatch } from '../useMenuTriggerMatch.js'
+import type { SlashMenuGroup, SlashMenuOption } from './types.js'
 
 export type MenuResolution = {
   getRect: () => DOMRect

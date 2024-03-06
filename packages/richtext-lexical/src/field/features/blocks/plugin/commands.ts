@@ -2,7 +2,7 @@ import type { LexicalCommand } from 'lexical'
 
 import { createCommand } from 'lexical'
 
-import type { InsertBlockPayload } from './index'
+import type { InsertBlockPayload } from './index.js'
 
 export const INSERT_BLOCK_COMMAND: LexicalCommand<InsertBlockPayload> =
   createCommand('INSERT_BLOCK_COMMAND')

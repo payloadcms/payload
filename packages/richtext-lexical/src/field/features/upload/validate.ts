@@ -1,10 +1,10 @@
 import { fieldAffectsData } from 'payload/types'
 import { getIDType, isValidID } from 'payload/utilities'
 
-import type { NodeValidation } from '../types'
-import type { SerializedUploadNode } from './nodes/UploadNode'
+import type { NodeValidation } from '../types.js'
+import type { SerializedUploadNode } from './nodes/UploadNode.js'
 
-import { CAN_USE_DOM } from '../../lexical/utils/canUseDOM'
+import { CAN_USE_DOM } from '../../lexical/utils/canUseDOM.js'
 
 export const uploadValidation = (): NodeValidation<SerializedUploadNode> => {
   const uploadValidation: NodeValidation<SerializedUploadNode> = ({

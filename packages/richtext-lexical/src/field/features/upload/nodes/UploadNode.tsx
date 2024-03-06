@@ -12,7 +12,7 @@ import {
 } from 'lexical'
 import * as React from 'react'
 
-const RawUploadComponent = React.lazy(async () => await import('../component'))
+const RawUploadComponent = React.lazy(async () => await import('../component/index.js'))
 
 export type RawUploadPayload = {
   fields: {

@@ -1,6 +1,6 @@
-import type { FeatureProviderProviderServer } from '../types'
+import type { FeatureProviderProviderServer } from '../types.js'
 
-import { ParagraphFeatureClientComponent } from './feature.client'
+import { ParagraphFeatureClientComponent } from './feature.client.js'
 
 export const ParagraphFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

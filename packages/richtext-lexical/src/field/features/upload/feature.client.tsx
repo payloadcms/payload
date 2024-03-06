@@ -1,13 +1,13 @@
 'use client'
 
-import type { FeatureProviderProviderClient } from '../types'
+import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { UploadIcon } from '../../lexical/ui/icons/Upload'
-import { createClientComponent } from '../createClientComponent'
-import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands'
-import { UploadNode } from './nodes/UploadNode'
-import { UploadPlugin } from './plugin'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { UploadIcon } from '../../lexical/ui/icons/Upload/index.js'
+import { createClientComponent } from '../createClientComponent.js'
+import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands.js'
+import { UploadNode } from './nodes/UploadNode.js'
+import { UploadPlugin } from './plugin/index.js'
 
 export type UploadFeaturePropsClient = {
   collections: {

@@ -23,7 +23,7 @@ export type BlockFields = {
 }
 
 const BlockComponent = React.lazy(() =>
-  import('../component').then((module) => ({
+  import('../component/index.js').then((module) => ({
     default: module.BlockComponent,
   })),
 )

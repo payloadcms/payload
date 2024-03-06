@@ -11,12 +11,12 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { ClientComponentProps } from '../../types'
-import type { BlocksFeatureClientProps } from '../feature.client'
+import type { ClientComponentProps } from '../../types.js'
+import type { BlocksFeatureClientProps } from '../feature.client.js'
 
-import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
-import { $createBlockNode } from '../nodes/BlocksNode'
-import { INSERT_BLOCK_COMMAND } from '../plugin/commands'
+import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
+import { $createBlockNode } from '../nodes/BlocksNode.js'
+import { INSERT_BLOCK_COMMAND } from '../plugin/commands.js'
 const baseClass = 'lexical-blocks-drawer'
 
 export const INSERT_BLOCK_WITH_DRAWER_COMMAND: LexicalCommand<{

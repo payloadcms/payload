@@ -17,17 +17,17 @@ import {
 } from 'lexical'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { LinkNode } from '../../../nodes/LinkNode'
-import type { LinkPayload } from '../types'
+import type { LinkNode } from '../../../nodes/LinkNode.js'
+import type { LinkPayload } from '../types.js'
 
-import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider'
-import { getSelectedNode } from '../../../../../lexical/utils/getSelectedNode'
-import { setFloatingElemPositionForLinkEditor } from '../../../../../lexical/utils/setFloatingElemPositionForLinkEditor'
-import { LinkDrawer } from '../../../drawer'
-import { $isAutoLinkNode } from '../../../nodes/AutoLinkNode'
-import { $createLinkNode } from '../../../nodes/LinkNode'
-import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode'
-import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands'
+import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
+import { getSelectedNode } from '../../../../../lexical/utils/getSelectedNode.js'
+import { setFloatingElemPositionForLinkEditor } from '../../../../../lexical/utils/setFloatingElemPositionForLinkEditor.js'
+import { LinkDrawer } from '../../../drawer/index.js'
+import { $isAutoLinkNode } from '../../../nodes/AutoLinkNode.js'
+import { $createLinkNode } from '../../../nodes/LinkNode.js'
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode.js'
+import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
   const [editor] = useLexicalComposerContext()

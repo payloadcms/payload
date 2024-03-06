@@ -1,9 +1,9 @@
 import type {
   FloatingToolbarSection,
   FloatingToolbarSectionEntry,
-} from '../../lexical/plugins/FloatingSelectToolbar/types'
+} from '../../lexical/plugins/FloatingSelectToolbar/types.js'
 
-import { AlignLeftIcon } from '../../lexical/ui/icons/AlignLeft'
+import { AlignLeftIcon } from '../../lexical/ui/icons/AlignLeft/index.js'
 
 export const AlignDropdownSectionWithEntries = (
   entries: FloatingToolbarSectionEntry[],

@@ -1,8 +1,8 @@
 import type { SerializedHeadingNode } from '@lexical/rich-text'
 
-import type { SlateNodeConverter } from '../../types'
+import type { SlateNodeConverter } from '../../types.js'
 
-import { convertSlateNodesToLexical } from '../..'
+import { convertSlateNodesToLexical } from '../../index.js'
 
 export const _SlateHeadingConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {

@@ -6,10 +6,10 @@ import { Button, useConfig, useDocumentDrawer, usePayloadAPI, useTranslation } f
 import { $getNodeByKey, type ElementFormatType } from 'lexical'
 import React, { useCallback, useReducer, useState } from 'react'
 
-import type { RelationshipData } from '../RelationshipNode'
+import type { RelationshipData } from '../RelationshipNode.js'
 
-import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider'
-import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../../drawer/commands'
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../../drawer/commands.js'
 import './index.scss'
 
 const baseClass = 'lexical-relationship'

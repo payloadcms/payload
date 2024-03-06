@@ -1,6 +1,6 @@
 'use client'
 
-import { createFeaturePropComponent } from '../../../../../createFeaturePropComponent'
-import { _UploadConverter } from './converter'
+import { createFeaturePropComponent } from '../../../../../createFeaturePropComponent.js'
+import { _UploadConverter } from './converter.js'
 
 export const UploadConverterClient = createFeaturePropComponent(_UploadConverter)

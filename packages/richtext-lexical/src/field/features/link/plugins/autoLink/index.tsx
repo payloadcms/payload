@@ -15,11 +15,11 @@ import {
 } from 'lexical'
 import { useEffect } from 'react'
 
-import type { LinkFields } from '../../nodes/types'
+import type { LinkFields } from '../../nodes/types.js'
 
-import { invariant } from '../../../../lexical/utils/invariant'
-import { $createAutoLinkNode, $isAutoLinkNode, AutoLinkNode } from '../../nodes/AutoLinkNode'
-import { $isLinkNode } from '../../nodes/LinkNode'
+import { invariant } from '../../../../lexical/utils/invariant.js'
+import { $createAutoLinkNode, $isAutoLinkNode, AutoLinkNode } from '../../nodes/AutoLinkNode.js'
+import { $isLinkNode } from '../../nodes/LinkNode.js'
 
 type ChangeHandler = (url: null | string, prevUrl: null | string) => void
 

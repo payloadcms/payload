@@ -7,11 +7,11 @@ import type { LexicalEditor } from 'lexical'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import * as React from 'react'
 
-import type { SanitizedClientEditorConfig } from './config/types'
+import type { SanitizedClientEditorConfig } from './config/types.js'
 
-import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor'
-import { EditorConfigProvider } from './config/client/EditorConfigProvider'
-import { getEnabledNodes } from './nodes'
+import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor.js'
+import { EditorConfigProvider } from './config/client/EditorConfigProvider.js'
+import { getEnabledNodes } from './nodes/index.js'
 
 export type LexicalProviderProps = {
   editorConfig: SanitizedClientEditorConfig

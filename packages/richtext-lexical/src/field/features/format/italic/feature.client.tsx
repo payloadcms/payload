@@ -2,12 +2,12 @@
 
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProviderProviderClient } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { ItalicIcon } from '../../../lexical/ui/icons/Italic'
-import { createClientComponent } from '../../createClientComponent'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
-import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers'
+import { ItalicIcon } from '../../../lexical/ui/icons/Italic/index.js'
+import { createClientComponent } from '../../createClientComponent.js'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers.js'
 
 const ItalicFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

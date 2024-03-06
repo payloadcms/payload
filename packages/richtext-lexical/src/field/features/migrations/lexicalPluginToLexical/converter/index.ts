@@ -5,7 +5,7 @@ import type {
   SerializedTextNode,
 } from 'lexical'
 
-import type { LexicalPluginNodeConverter, PayloadPluginLexicalData } from './types'
+import type { LexicalPluginNodeConverter, PayloadPluginLexicalData } from './types.js'
 
 export function convertLexicalPluginToLexical({
   converters,

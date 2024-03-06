@@ -19,11 +19,11 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import * as React from 'react'
 
-import type { MenuTextMatch, TriggerFn } from '../useMenuTriggerMatch'
-import type { MenuRenderFn, MenuResolution } from './LexicalMenu'
-import type { SlashMenuGroup, SlashMenuOption } from './types'
+import type { MenuTextMatch, TriggerFn } from '../useMenuTriggerMatch.js'
+import type { MenuRenderFn, MenuResolution } from './LexicalMenu.js'
+import type { SlashMenuGroup, SlashMenuOption } from './types.js'
 
-import { LexicalMenu, useMenuAnchorRef } from './LexicalMenu'
+import { LexicalMenu, useMenuAnchorRef } from './LexicalMenu.js'
 
 export const PUNCTUATION = '\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%\'"~=<>_:;'
 

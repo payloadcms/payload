@@ -1,13 +1,13 @@
 import type { SerializedEditorState } from 'lexical'
 import type { Field, RichTextField, TextField } from 'payload/types'
 
-import type { LexicalRichTextAdapter, SanitizedServerEditorConfig } from '../../../../../index'
-import type { AdapterProps } from '../../../../../types'
-import type { HTMLConverter } from '../converter/types'
-import type { HTMLConverterFeatureProps } from '../feature.server'
+import type { LexicalRichTextAdapter, SanitizedServerEditorConfig } from '../../../../../index.js'
+import type { AdapterProps } from '../../../../../types.js'
+import type { HTMLConverter } from '../converter/types.js'
+import type { HTMLConverterFeatureProps } from '../feature.server.js'
 
-import { convertLexicalToHTML } from '../converter'
-import { defaultHTMLConverters } from '../converter/defaultConverters'
+import { defaultHTMLConverters } from '../converter/defaultConverters.js'
+import { convertLexicalToHTML } from '../converter/index.js'
 
 type Props = {
   name: string

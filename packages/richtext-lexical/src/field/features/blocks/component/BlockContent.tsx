@@ -1,4 +1,3 @@
-import type { SanitizedClientEditorConfig } from '@payloadcms/richtext-lexical'
 import type { FieldMap, FormFieldBase } from '@payloadcms/ui'
 import type { ReducedBlock } from '@payloadcms/ui/types'
 import type { FormState } from 'payload/types'
@@ -21,9 +20,10 @@ import isDeepEqual from 'deep-equal'
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
-import type { BlockFields, BlockNode } from '../nodes/BlocksNode'
+import type { SanitizedClientEditorConfig } from '../../../lexical/config/types.js'
+import type { BlockFields, BlockNode } from '../nodes/BlocksNode.js'
 
-import { FormSavePlugin } from './FormSavePlugin'
+import { FormSavePlugin } from './FormSavePlugin.js'
 
 type Props = {
   baseClass: string

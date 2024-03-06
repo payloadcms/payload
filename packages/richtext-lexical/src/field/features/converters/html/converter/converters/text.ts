@@ -1,8 +1,8 @@
 import type { SerializedTextNode } from 'lexical'
 
-import type { HTMLConverter } from '../types'
+import type { HTMLConverter } from '../types.js'
 
-import { NodeFormat } from '../../../../../lexical/utils/nodeFormat'
+import { NodeFormat } from '../../../../../lexical/utils/nodeFormat.js'
 
 export const TextHTMLConverter: HTMLConverter<SerializedTextNode> = {
   converter({ node }) {

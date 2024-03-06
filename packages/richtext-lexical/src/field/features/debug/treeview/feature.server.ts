@@ -1,6 +1,6 @@
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { TreeViewFeatureClientComponent } from './feature.client'
+import { TreeViewFeatureClientComponent } from './feature.client.js'
 
 export const TreeViewFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

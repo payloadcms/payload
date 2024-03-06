@@ -1,10 +1,10 @@
 import { ListItemNode, ListNode } from '@lexical/list'
 
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
-import { CheckListFeatureClientComponent } from './feature.client'
-import { CHECK_LIST } from './markdownTransformers'
+import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter.js'
+import { CheckListFeatureClientComponent } from './feature.client.js'
+import { CHECK_LIST } from './markdownTransformers.js'
 
 export const CheckListFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

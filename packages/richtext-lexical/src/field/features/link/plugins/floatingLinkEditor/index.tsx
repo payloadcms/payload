@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-import { LinkEditor } from './LinkEditor'
+import { LinkEditor } from './LinkEditor/index.js'
 import './index.scss'
 
 export const FloatingLinkEditorPlugin: React.FC<{

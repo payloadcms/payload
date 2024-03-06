@@ -5,9 +5,9 @@ const baseClass = 'floating-select-toolbar-popup__dropdown'
 
 import type { LexicalEditor } from 'lexical'
 
-import type { FloatingToolbarSectionEntry } from '../types'
+import type { FloatingToolbarSectionEntry } from '../types.js'
 
-import { DropDown, DropDownItem } from './DropDown'
+import { DropDown, DropDownItem } from './DropDown.js'
 import './index.scss'
 
 export const ToolbarEntry = ({

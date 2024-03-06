@@ -1,4 +1,4 @@
-import { type Point, isPoint } from './point'
+import { type Point, isPoint } from './point.js'
 
 interface ContainsPointReturn {
   reason: {

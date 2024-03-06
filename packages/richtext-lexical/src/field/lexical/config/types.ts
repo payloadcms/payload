@@ -7,7 +7,7 @@ import type {
   ResolvedServerFeatureMap,
   SanitizedClientFeatures,
   SanitizedServerFeatures,
-} from '../../features/types'
+} from '../../features/types.js'
 
 export type ServerEditorConfig = {
   features: FeatureProviderServer<unknown, unknown>[]

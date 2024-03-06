@@ -2,7 +2,7 @@ import type { LexicalEditor } from 'lexical'
 
 import { useCallback } from 'react'
 
-import { PUNCTUATION } from './LexicalTypeaheadMenuPlugin'
+import { PUNCTUATION } from './LexicalTypeaheadMenuPlugin/index.js'
 
 export type TriggerFn = ({
   editor,

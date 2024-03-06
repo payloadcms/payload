@@ -1,7 +1,7 @@
-import type { SerializedLinkNode } from '../../../../../link/nodes/types'
-import type { SlateNodeConverter } from '../../types'
+import type { SerializedLinkNode } from '../../../../../link/nodes/types.js'
+import type { SlateNodeConverter } from '../../types.js'
 
-import { convertSlateNodesToLexical } from '../..'
+import { convertSlateNodesToLexical } from '../../index.js'
 
 export const _SlateLinkConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {

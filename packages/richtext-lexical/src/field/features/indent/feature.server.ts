@@ -1,6 +1,6 @@
-import type { FeatureProviderProviderServer } from '../types'
+import type { FeatureProviderProviderServer } from '../types.js'
 
-import { IndentFeatureClientComponent } from './feature.client'
+import { IndentFeatureClientComponent } from './feature.client.js'
 
 export const IndentFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

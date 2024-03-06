@@ -18,14 +18,14 @@ import {
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback, useReducer, useState } from 'react'
 
-import type { ClientComponentProps } from '../../types'
-import type { UploadFeaturePropsClient } from '../feature.client'
-import type { UploadData } from '../nodes/UploadNode'
+import type { ClientComponentProps } from '../../types.js'
+import type { UploadFeaturePropsClient } from '../feature.client.js'
+import type { UploadData } from '../nodes/UploadNode.js'
 
-import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
-import { EnabledRelationshipsCondition } from '../../relationship/utils/EnabledRelationshipsCondition'
-import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands'
-import { ExtraFieldsUploadDrawer } from './ExtraFieldsDrawer'
+import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
+import { EnabledRelationshipsCondition } from '../../relationship/utils/EnabledRelationshipsCondition.js'
+import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
+import { ExtraFieldsUploadDrawer } from './ExtraFieldsDrawer/index.js'
 import './index.scss'
 
 const baseClass = 'lexical-upload'

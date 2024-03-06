@@ -1,8 +1,8 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import type { PayloadRequest, RichTextAdapter, RichTextField } from 'payload/types'
 
-import type { PopulationPromise } from '../field/features/types'
-import type { AdapterProps } from '../types'
+import type { PopulationPromise } from '../field/features/types.js'
+import type { AdapterProps } from '../types.js'
 
 export type Args = Parameters<
   RichTextAdapter<SerializedEditorState, AdapterProps>['populationPromise']

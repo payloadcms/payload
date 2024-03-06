@@ -1,9 +1,9 @@
-import type { PopulationPromise } from '../types'
-import type { LinkFeatureServerProps } from './feature.server'
-import type { SerializedLinkNode } from './nodes/types'
+import type { PopulationPromise } from '../types.js'
+import type { LinkFeatureServerProps } from './feature.server.js'
+import type { SerializedLinkNode } from './nodes/types.js'
 
-import { populate } from '../../../populate/populate'
-import { recurseNestedFields } from '../../../populate/recurseNestedFields'
+import { populate } from '../../../populate/populate.js'
+import { recurseNestedFields } from '../../../populate/recurseNestedFields.js'
 
 export const linkPopulationPromiseHOC = (
   props: LinkFeatureServerProps,

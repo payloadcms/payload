@@ -1,6 +1,6 @@
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { SubscriptFeatureClientComponent } from './feature.client'
+import { SubscriptFeatureClientComponent } from './feature.client.js'
 
 export const SubscriptFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

@@ -2,8 +2,8 @@
 
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 
-import type { ResolvedClientFeatureMap, SanitizedClientFeatures } from '../../../features/types'
-import type { SanitizedClientEditorConfig } from '../types'
+import type { ResolvedClientFeatureMap, SanitizedClientFeatures } from '../../../features/types.js'
+import type { SanitizedClientEditorConfig } from '../types.js'
 
 export const sanitizeClientFeatures = (
   features: ResolvedClientFeatureMap,

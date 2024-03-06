@@ -1,11 +1,11 @@
 import type React from 'react'
 
-import type { FeatureProviderProviderServer } from '../../types'
-import type { LexicalPluginNodeConverterProvider } from './converter/types'
+import type { FeatureProviderProviderServer } from '../../types.js'
+import type { LexicalPluginNodeConverterProvider } from './converter/types.js'
 
-import { defaultConverters } from './converter/defaultConverters'
-import { LexicalPluginToLexicalFeatureClientComponent } from './feature.client'
-import { UnknownConvertedNode } from './nodes/unknownConvertedNode'
+import { defaultConverters } from './converter/defaultConverters.js'
+import { LexicalPluginToLexicalFeatureClientComponent } from './feature.client.js'
+import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
 
 export type LexicalPluginToLexicalFeatureProps = {
   converters?:

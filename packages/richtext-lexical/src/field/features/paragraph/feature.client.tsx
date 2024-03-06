@@ -3,12 +3,12 @@
 import { $setBlocksType } from '@lexical/selection'
 import { $createParagraphNode, $getSelection } from 'lexical'
 
-import type { FeatureProviderProviderClient } from '../types'
+import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { TextIcon } from '../../lexical/ui/icons/Text'
-import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
-import { createClientComponent } from '../createClientComponent'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { TextIcon } from '../../lexical/ui/icons/Text/index.js'
+import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection/index.js'
+import { createClientComponent } from '../createClientComponent.js'
 
 const ParagraphFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

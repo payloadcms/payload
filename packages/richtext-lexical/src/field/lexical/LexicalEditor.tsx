@@ -8,16 +8,16 @@ import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
-import type { LexicalProviderProps } from './LexicalProvider'
+import type { LexicalProviderProps } from './LexicalProvider.js'
 
-import { EditorPlugin } from './EditorPlugin'
+import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
-import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
-import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut'
-import { SlashMenuPlugin } from './plugins/SlashMenu'
-import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin'
-import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin'
-import { LexicalContentEditable } from './ui/ContentEditable'
+import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar/index.js'
+import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
+import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
+import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
+import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>> = (
   props,

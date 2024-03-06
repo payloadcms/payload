@@ -6,15 +6,15 @@ import { useFieldPath } from '@payloadcms/ui/forms'
 import { useClientFunctions } from '@payloadcms/ui/providers'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
-import type { GeneratedFeatureProviderComponent } from '../types'
-import type { FeatureProviderClient } from './features/types'
-import type { SanitizedClientEditorConfig } from './lexical/config/types'
+import type { GeneratedFeatureProviderComponent } from '../types.js'
+import type { FeatureProviderClient } from './features/types.js'
+import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
 
-import { defaultEditorLexicalConfig } from './lexical/config/client/default'
-import { loadClientFeatures } from './lexical/config/client/loader'
-import { sanitizeClientEditorConfig } from './lexical/config/client/sanitize'
+import { defaultEditorLexicalConfig } from './lexical/config/client/default.js'
+import { loadClientFeatures } from './lexical/config/client/loader.js'
+import { sanitizeClientEditorConfig } from './lexical/config/client/sanitize.js'
 
-const RichTextEditor = lazy(() => import('./Field'))
+const RichTextEditor = lazy(() => import('./Field.js'))
 
 export const RichTextField: React.FC<
   FormFieldBase & {
