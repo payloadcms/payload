@@ -75,7 +75,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
   useEffect(() => {
     if (searchParams?.locale) {
       dispatchSearchParams({
-        type: 'set',
+        type: 'SET',
         params: {
           locale: searchParams.locale,
         },

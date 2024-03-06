@@ -12,17 +12,17 @@ import { toast } from 'react-toastify'
 
 import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types.d.ts'
 
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
-import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
-import useThrottledEffect from '../../hooks/useThrottledEffect.js'
-import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig } from '../../providers/Config/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useLocale } from '../../providers/Locale/index.js'
-import { useOperation } from '../../providers/OperationProvider/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { requests } from '../../utilities/api.js'
-import { getFormState } from '../../utilities/getFormState.js'
+import { useFormQueryParams } from '../..'
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect'
+import useThrottledEffect from '../../hooks/useThrottledEffect'
+import { useAuth } from '../../providers/Auth'
+import { useConfig } from '../../providers/Config'
+import { useDocumentInfo } from '../../providers/DocumentInfo'
+import { useLocale } from '../../providers/Locale'
+import { useOperation } from '../../providers/OperationProvider'
+import { useTranslation } from '../../providers/Translation'
+import { requests } from '../../utilities/api'
+import { getFormState } from '../../utilities/getFormState'
 import {
   FormContext,
   FormFieldsContext,

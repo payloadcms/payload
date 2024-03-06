@@ -2,11 +2,9 @@
 
 import React, { createContext, useContext } from 'react'
 
-import type { Action, FormQueryParamsContext, State } from './types.js'
+import type { Action, FormQueryParamsContext, State } from './types'
 
-import { useLocale } from '../Locale/index.js'
-
-export type QueryParamTypes = State
+import { useLocale } from '../Locale'
 
 export const FormQueryParams = createContext({} as FormQueryParamsContext)
 

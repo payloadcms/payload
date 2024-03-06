@@ -96,9 +96,7 @@ export const createPayloadRequest = async ({
     payloadUploadSizes: {},
     port: urlProperties.port,
     protocol: urlProperties.protocol,
-    query: urlProperties.search
-      ? QueryString.parse(urlProperties.search, { strictNullHandling: true })
-      : {},
+    query: urlProperties.search ? QueryString.parse(urlProperties.search) : {},
     routeParams: params || {},
     search: urlProperties.search,
     searchParams: urlProperties.searchParams,

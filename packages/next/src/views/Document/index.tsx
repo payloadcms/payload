@@ -179,25 +179,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     req,
   })
 
-  const formQueryParams: QueryParamTypes = {
-    depth: 0,
-    'fallback-locale': 'null',
-    locale: locale.code,
-    uploadEdits: undefined,
-  }
-  console.log('server code', `${action}?${queryString.stringify(formQueryParams)}`)
-
-  const componentProps: ServerSideEditViewProps = {
-    id,
-    action: `${action}?${queryString.stringify(formQueryParams)}`,
-    apiURL,
-    canAccessAdmin: permissions?.canAccessAdmin,
-    collectionSlug,
-    data,
-    docPermissions,
-    docPreferences,
-    globalSlug,
-    hasSavePermission,
+  const serverSideProps: ServerSideEditViewProps = {
     initPageResult,
     routeSegments: segments,
     searchParams,
@@ -213,7 +195,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       />
       <HydrateClientUser permissions={permissions} user={user} />
       <SetDocumentInfo
-        action={`${action}?${queryString.stringify(formQueryParams)}`}
+        action={action}
         apiURL={apiURL}
         collectionSlug={collectionConfig?.slug}
         disableActions={false}

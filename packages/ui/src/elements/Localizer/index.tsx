@@ -48,6 +48,12 @@ const Localizer: React.FC<{
                     key={localeOption.code}
                     onClick={() => {
                       close()
+                      dispatchSearchParams({
+                        type: 'SET',
+                        params: {
+                          locale: searchParams.locale,
+                        },
+                      })
                       router.refresh()
                     }}
                   >
