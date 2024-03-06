@@ -4,14 +4,20 @@ import type { Field, GroupField, TabsField, TextField } from 'payload/types'
 import { deepMerge } from 'payload/utilities'
 import React from 'react'
 
-import type { PluginConfig } from './types'
+import type {
+  GenerateDescription,
+  GenerateImage,
+  GenerateTitle,
+  GenerateURL,
+  PluginConfig,
+} from './types'
 
-import { MetaDescription, getMetaDescriptionField } from './fields/MetaDescription'
-import { MetaImage, getMetaImageField } from './fields/MetaImage'
-import { MetaTitle, getMetaTitleField } from './fields/MetaTitle'
+import { MetaDescription } from './fields/MetaDescription'
+import { MetaImage } from './fields/MetaImage'
+import { MetaTitle } from './fields/MetaTitle'
 import translations from './translations'
 import { Overview } from './ui/Overview'
-import { Preview, getPreviewField } from './ui/Preview'
+import { Preview } from './ui/Preview'
 
 const seo =
   (pluginConfig: PluginConfig) =>
@@ -36,22 +42,30 @@ const seo =
             type: 'text',
             admin: {
               components: {
-                Field: (props) => {
-                  return <MetaTitle {...props} />
-                },
+                Field: (props) => (
+                  <MetaTitle
+                    {...props}
+                    hasGenerateTitleFn={typeof pluginConfig.generateTitle === 'function'}
+                  />
+                ),
               },
             },
             localized: true,
-            ...((pluginConfig?.fieldOverrides?.title as TextField) ?? {}),
+            ...((pluginConfig?.fieldOverrides?.title as unknown as TextField) ?? {}),
           },
           {
             name: 'description',
             type: 'textarea',
             admin: {
               components: {
-                Field: (props) => {
-                  return <MetaDescription {...props} />
-                },
+                Field: (props) => (
+                  <MetaDescription
+                    {...props}
+                    hasGenerateDescriptionFn={
+                      typeof pluginConfig.generateDescription === 'function'
+                    }
+                  />
+                ),
               },
             },
             localized: true,
@@ -65,9 +79,12 @@ const seo =
                   type: 'upload',
                   admin: {
                     components: {
-                      Field: (props) => {
-                        return <MetaImage {...props} />
-                      },
+                      Field: (props) => (
+                        <MetaImage
+                          {...props}
+                          hasGenerateImageFn={typeof pluginConfig.generateImage === 'function'}
+                        />
+                      ),
                     },
                     description:
                       'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',
@@ -85,9 +102,12 @@ const seo =
             type: 'ui',
             admin: {
               components: {
-                Field: (props) => {
-                  return <Preview {...props} />
-                },
+                Field: (props) => (
+                  <Preview
+                    {...props}
+                    hasGenerateURLFn={typeof pluginConfig.generateURL === 'function'}
+                  />
+                ),
               },
             },
             label: 'Preview',
@@ -159,6 +179,48 @@ const seo =
 
           return collection
         }) || [],
+      endpoints: [
+        {
+          handler: async (req) => {
+            const args: Parameters<GenerateTitle>[0] =
+              req.data as unknown as Parameters<GenerateTitle>[0]
+            const result = await pluginConfig.generateTitle(args)
+            return new Response(JSON.stringify({ result }), { status: 200 })
+          },
+          method: 'post',
+          path: '/plugin-seo/generate-title',
+        },
+        {
+          handler: async (req) => {
+            const args: Parameters<GenerateDescription>[0] =
+              req.data as unknown as Parameters<GenerateDescription>[0]
+            const result = await pluginConfig.generateDescription(args)
+            return new Response(JSON.stringify({ result }), { status: 200 })
+          },
+          method: 'post',
+          path: '/plugin-seo/generate-description',
+        },
+        {
+          handler: async (req) => {
+            const args: Parameters<GenerateURL>[0] =
+              req.data as unknown as Parameters<GenerateURL>[0]
+            const result = await pluginConfig.generateURL(args)
+            return new Response(JSON.stringify({ result }), { status: 200 })
+          },
+          method: 'post',
+          path: '/plugin-seo/generate-url',
+        },
+        {
+          handler: async (req) => {
+            const args: Parameters<GenerateImage>[0] =
+              req.data as unknown as Parameters<GenerateImage>[0]
+            const result = await pluginConfig.generateImage(args)
+            return new Response(result, { status: 200 })
+          },
+          method: 'post',
+          path: '/plugin-seo/generate-image',
+        },
+      ],
       globals:
         config.globals?.map((global) => {
           const { slug } = global

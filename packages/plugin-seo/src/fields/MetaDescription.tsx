@@ -1,7 +1,6 @@
 'use client'
 
-import type { FieldType, Options } from '@payloadcms/ui'
-import type { TextareaField } from 'payload/types'
+import type { FieldType, FormFieldBase, Options } from '@payloadcms/ui'
 
 import { useFieldPath } from '@payloadcms/ui'
 import { useTranslation } from '@payloadcms/ui'
@@ -9,7 +8,7 @@ import { TextareaInput } from '@payloadcms/ui'
 import { useAllFormFields, useDocumentInfo, useField, useLocale } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { PluginConfig } from '../types'
+import type { GenerateDescription } from '../types'
 
 import { defaults } from '../defaults'
 import { LengthIndicator } from '../ui/LengthIndicator'
@@ -17,13 +16,13 @@ import { LengthIndicator } from '../ui/LengthIndicator'
 const { maxLength, minLength } = defaults.description
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-type MetaDescriptionProps = TextareaField & {
+type MetaDescriptionProps = FormFieldBase & {
+  hasGenerateDescriptionFn: boolean
   path: string
-  pluginConfig: PluginConfig
 }
 
 export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
-  const { name, label, path, pluginConfig, required } = props
+  const { Label, hasGenerateDescriptionFn, path, required } = props
   const { path: pathFromContext, schemaPath } = useFieldPath()
 
   const { t } = useTranslation()
@@ -33,27 +32,31 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
   const docInfo = useDocumentInfo()
 
   const field: FieldType<string> = useField({
-    name,
-    label,
     path,
   } as Options)
 
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateDescription = useCallback(async () => {
-    /*const { generateDescription } = pluginConfig
-    let generatedDescription
+    if (!hasGenerateDescriptionFn) return
 
-    if (typeof generateDescription === 'function') {
-      generatedDescription = await generateDescription({
+    const genDescriptionResponse = await fetch('/api/plugin-seo/generate-description', {
+      body: JSON.stringify({
         ...docInfo,
         doc: { ...fields },
         locale: typeof locale === 'object' ? locale?.code : locale,
-      })
-    }
+      } satisfies Parameters<GenerateDescription>[0]),
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    })
 
-    setValue(generatedDescription)*/
-  }, [fields, setValue, pluginConfig, locale, docInfo])
+    const { result: generatedDescription } = await genDescriptionResponse.json()
+
+    setValue(generatedDescription || '')
+  }, [fields, setValue, hasGenerateDescriptionFn, locale, docInfo])
 
   return (
     <div
@@ -67,8 +70,8 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
           position: 'relative',
         }}
       >
-        <div>
-          {label && typeof label === 'string' && label}
+        <div className="plugin-seo__field">
+          {Label}
 
           {required && (
             <span
@@ -81,7 +84,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
             </span>
           )}
 
-          {typeof pluginConfig?.generateDescription === 'function' && (
+          {hasGenerateDescriptionFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
@@ -126,7 +129,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
         <TextareaInput
           Error={errorMessage} // TODO: Fix
           onChange={setValue}
-          path={name || pathFromContext}
+          path={pathFromContext}
           required={required}
           showError={showError}
           style={{
@@ -147,7 +150,3 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
     </div>
   )
 }
-
-export const getMetaDescriptionField = (props: MetaDescriptionProps) => (
-  <MetaDescription {...props} />
-)

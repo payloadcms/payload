@@ -13,7 +13,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
   try {
     // Create image
-    const filePath = path.resolve(__dirname, '../image-1.jpg')
+    const filePath = path.resolve(process.cwd(), './test/plugin-seo/image-1.jpg')
     const file = await getFileByPath(filePath)
 
     const mediaDoc = await payload.create({

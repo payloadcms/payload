@@ -5,16 +5,14 @@ import type { FormField, UIField } from 'payload/types'
 import { useAllFormFields, useDocumentInfo, useLocale, useTranslation } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
-import type { PluginConfig } from '../types'
+import type { GenerateURL } from '../types'
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type PreviewProps = UIField & {
-  pluginConfig: PluginConfig
+  hasGenerateURLFn: boolean
 }
 
-export const Preview: React.FC<PreviewProps> = (props) => {
-  const { pluginConfig: { generateURL } = {} } = props || {}
-
+export const Preview: React.FC<PreviewProps> = ({ hasGenerateURLFn }) => {
   const { t } = useTranslation()
 
   const locale = useLocale()
@@ -29,20 +27,29 @@ export const Preview: React.FC<PreviewProps> = (props) => {
   const [href, setHref] = useState<string>()
 
   useEffect(() => {
-    /* const getHref = async () => {
-      if (typeof generateURL === 'function' && !href) {
-        const newHref = await generateURL({
+    const getHref = async () => {
+      const genURLResponse = await fetch('/api/plugin-seo/generate-url', {
+        body: JSON.stringify({
           ...docInfo,
           doc: { ...fields },
           locale: typeof locale === 'object' ? locale?.code : locale,
-        })
+        } satisfies Parameters<GenerateURL>[0]),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
 
-        setHref(newHref)
-      }
+      const { result: newHref } = await genURLResponse.json()
+
+      setHref(newHref)
     }
 
-    getHref() // eslint-disable-line @typescript-eslint/no-floating-promises*/
-  }, [generateURL, fields, href, locale, docInfo])
+    if (hasGenerateURLFn && !href) {
+      void getHref()
+    }
+  }, [fields, href, locale, docInfo, hasGenerateURLFn])
 
   return (
     <div>
@@ -101,5 +108,3 @@ export const Preview: React.FC<PreviewProps> = (props) => {
     </div>
   )
 }
-
-export const getPreviewField = (props: PreviewProps) => <Preview {...props} />

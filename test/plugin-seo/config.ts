@@ -14,7 +14,7 @@ export default buildConfigWithDefaults({
     locales: ['en', 'es', 'de'],
   },
   i18n: {
-    resources: {
+    translations: {
       es: {
         'plugin-seo': {
           autoGenerate: 'Auto-génerar',
@@ -46,7 +46,7 @@ export default buildConfigWithDefaults({
         },
       },
       generateTitle: (data: any) => `Website.com — ${data?.doc?.title?.value}`,
-      generateDescription: ({ doc }: any) => doc?.excerpt?.value,
+      generateDescription: ({ doc }: any) => doc?.excerpt?.value || 'generated description',
       generateURL: ({ doc, locale }: any) =>
         `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug?.value || ''}`,
     }),

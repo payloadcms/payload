@@ -13,18 +13,17 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { PluginConfig } from '../types'
+import type { GenerateImage } from '../types'
 
 import { Pill } from '../ui/Pill'
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type MetaImageProps = UploadInputProps & {
-  path: string
-  pluginConfig: PluginConfig
+  hasGenerateImageFn: boolean
 }
 
 export const MetaImage: React.FC<MetaImageProps> = (props) => {
-  const { label, pluginConfig, relationTo, required } = props || {}
+  const { Label, hasGenerateImageFn, path, relationTo, required } = props || {}
 
   const field: FieldType<string> = useField(props as Options)
 
@@ -37,19 +36,25 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateImage = useCallback(async () => {
-    /*const { generateImage } = pluginConfig
-    let generatedImage
+    if (!hasGenerateImageFn) return
 
-    if (typeof generateImage === 'function') {
-      generatedImage = await generateImage({
+    const genImageResponse = await fetch('/api/plugin-seo/generate-image', {
+      body: JSON.stringify({
         ...docInfo,
         doc: { ...fields },
         locale: typeof locale === 'object' ? locale?.code : locale,
-      })
-    }
+      } satisfies Parameters<GenerateImage>[0]),
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    })
 
-    setValue(generatedImage)*/
-  }, [fields, setValue, pluginConfig, locale, docInfo])
+    const { result: generatedImage } = await genImageResponse.json()
+
+    setValue(generatedImage || '')
+  }, [fields, setValue, hasGenerateImageFn, locale, docInfo])
 
   const hasImage = Boolean(value)
 
@@ -71,8 +76,8 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
           position: 'relative',
         }}
       >
-        <div>
-          {label && typeof label === 'string' && label}
+        <div className="plugin-seo__field">
+          {Label}
 
           {required && (
             <span
@@ -85,7 +90,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
             </span>
           )}
 
-          {typeof pluginConfig?.generateImage === 'function' && (
+          {hasGenerateImageFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
@@ -106,7 +111,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
             </React.Fragment>
           )}
         </div>
-        {typeof pluginConfig?.generateImage === 'function' && (
+        {hasGenerateImageFn && (
           <div
             style={{
               color: '#9A9A9A',
@@ -162,5 +167,3 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
     </div>
   )
 }
-
-export const getMetaImageField = (props: MetaImageProps) => <MetaImage {...props} />

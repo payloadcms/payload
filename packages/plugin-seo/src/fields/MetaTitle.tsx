@@ -1,7 +1,6 @@
 'use client'
 
-import type { FieldType, Options } from '@payloadcms/ui'
-import type { TextField as TextFieldType } from 'payload/types'
+import type { FieldType, FormFieldBase, Options } from '@payloadcms/ui'
 
 import { useFieldPath } from '@payloadcms/ui'
 import {
@@ -14,29 +13,26 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { PluginConfig } from '../types'
+import type { GenerateTitle } from '../types'
 
 import { defaults } from '../defaults'
 import { LengthIndicator } from '../ui/LengthIndicator'
+import './index.scss'
 
 const { maxLength, minLength } = defaults.title
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-type MetaTitleProps = TextFieldType & {
-  path: string
-  pluginConfig: PluginConfig
+type MetaTitleProps = FormFieldBase & {
+  hasGenerateTitleFn: boolean
 }
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
-  const { name, label, path, pluginConfig, required } = props || {}
-  console.log('props tit', props)
+  const { Label, hasGenerateTitleFn, path, required } = props || {}
   const { path: pathFromContext, schemaPath } = useFieldPath()
 
   const { t } = useTranslation()
 
   const field: FieldType<string> = useField({
-    name,
-    label,
     path,
   } as Options)
 
@@ -47,19 +43,25 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
   const { errorMessage, setValue, showError, value } = field
 
   const regenerateTitle = useCallback(async () => {
-    /* const { generateTitle } = pluginConfig
-    let generatedTitle
+    if (!hasGenerateTitleFn) return
 
-    if (typeof generateTitle === 'function') {
-      generatedTitle = await generateTitle({
+    const genTitleResponse = await fetch('/api/plugin-seo/generate-title', {
+      body: JSON.stringify({
         ...docInfo,
         doc: { ...fields },
         locale: typeof locale === 'object' ? locale?.code : locale,
-      })
-    }
+      } satisfies Parameters<GenerateTitle>[0]),
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    })
 
-    setValue(generatedTitle)*/
-  }, [fields, setValue, pluginConfig, locale, docInfo])
+    const { result: generatedTitle } = await genTitleResponse.json()
+
+    setValue(generatedTitle || '')
+  }, [fields, setValue, hasGenerateTitleFn, locale, docInfo])
 
   return (
     <div
@@ -73,8 +75,8 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
           position: 'relative',
         }}
       >
-        <div>
-          {label && typeof label === 'string' && label}
+        <div className="plugin-seo__field">
+          {Label}
 
           {required && (
             <span
@@ -87,7 +89,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
             </span>
           )}
 
-          {typeof pluginConfig?.generateTitle === 'function' && (
+          {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
@@ -133,7 +135,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
         <TextInput
           Error={errorMessage} // TODO: fix errormessage
           onChange={setValue}
-          path={name || pathFromContext}
+          path={pathFromContext}
           required={required}
           showError={showError}
           style={{
@@ -154,5 +156,3 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
     </div>
   )
 }
-
-export const getMetaTitleField = (props: MetaTitleProps) => <MetaTitle {...props} />
