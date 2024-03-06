@@ -6,13 +6,13 @@ import { mapFields } from '@payloadcms/ui/utilities'
 import { sanitizeFields } from 'payload/config'
 import React from 'react'
 
-import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from '.'
+import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from './types.d.ts'
 
-import elementTypes from './field/elements'
-import { linkFieldsSchemaPath } from './field/elements/link/shared'
-import { transformExtraFields } from './field/elements/link/utilities'
-import { uploadFieldsSchemaPath } from './field/elements/upload/shared'
-import leafTypes from './field/leaves'
+import elementTypes from './field/elements/index.js'
+import { linkFieldsSchemaPath } from './field/elements/link/shared.js'
+import { transformExtraFields } from './field/elements/link/utilities.js'
+import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
+import leafTypes from './field/leaves/index.js'
 
 export const getGenerateComponentMap =
   (args: AdapterArguments): RichTextAdapter['generateComponentMap'] =>

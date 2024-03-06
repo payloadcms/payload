@@ -1,9 +1,9 @@
-import type { RichTextCustomElement } from '../../..'
+import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import Button from './Button'
-import Element from './Element'
-import { WithUpload } from './plugin'
-import { uploadName } from './shared'
+import Button from './Button/index.js'
+import Element from './Element/index.js'
+import { WithUpload } from './plugin.js'
+import { uploadName } from './shared.js'
 
 const upload: RichTextCustomElement = {
   name: uploadName,

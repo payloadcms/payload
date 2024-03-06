@@ -1,9 +1,9 @@
-import type { RichTextCustomElement } from '../../..'
+import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import Button from './Button'
-import Element from './Element'
-import { WithRelationship } from './plugin'
-import { relationshipName } from './shared'
+import Button from './Button/index.js'
+import Element from './Element/index.js'
+import { WithRelationship } from './plugin.js'
+import { relationshipName } from './shared.js'
 
 const relationship: RichTextCustomElement = {
   name: relationshipName,

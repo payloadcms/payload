@@ -3,8 +3,8 @@ import React from 'react'
 import { useSlate } from 'slate-react'
 
 import '../buttons.scss'
-import isMarkActive from './isActive'
-import toggleLeaf from './toggle'
+import isMarkActive from './isActive.js'
+import toggleLeaf from './toggle.js'
 
 const baseClass = 'rich-text__button'
 

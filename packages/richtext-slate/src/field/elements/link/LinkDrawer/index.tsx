@@ -17,9 +17,9 @@ import { FieldPathProvider } from '@payloadcms/ui/forms'
 import { useHotkey } from '@payloadcms/ui/hooks'
 import React, { useCallback, useRef } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { linkFieldsSchemaPath } from '../shared'
+import { linkFieldsSchemaPath } from '../shared.js'
 import './index.scss'
 
 const baseClass = 'rich-text-link-edit-modal'

@@ -3,11 +3,11 @@
 import React, { useCallback } from 'react'
 import { useSlate } from 'slate-react'
 
-import type { ButtonProps } from './types'
+import type { ButtonProps } from './types.d.ts'
 
 import '../buttons.scss'
-import isListActive from './isListActive'
-import toggleList from './toggleList'
+import isListActive from './isListActive.js'
+import toggleList from './toggleList.js'
 
 export const baseClass = 'rich-text__button'
 

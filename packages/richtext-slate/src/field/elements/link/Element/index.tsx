@@ -22,12 +22,12 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { LinkElementType } from '../types'
+import type { LinkElementType } from '../types.d.ts'
 
-import { useElement } from '../../../providers/ElementProvider'
-import { LinkDrawer } from '../LinkDrawer'
-import { linkFieldsSchemaPath } from '../shared'
-import { unwrapLink } from '../utilities'
+import { useElement } from '../../../providers/ElementProvider.js'
+import { LinkDrawer } from '../LinkDrawer/index.js'
+import { linkFieldsSchemaPath } from '../shared.js'
+import { unwrapLink } from '../utilities.js'
 import './index.scss'
 
 const baseClass = 'rich-text-link'

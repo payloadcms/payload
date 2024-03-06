@@ -3,7 +3,7 @@
 import type React from 'react'
 import type { Editor } from 'slate'
 
-import { useSlatePlugin } from '../../../utilities/useSlatePlugin'
+import { useSlatePlugin } from '../../../utilities/useSlatePlugin.js'
 
 const plugin = (incomingEditor: Editor): Editor => {
   const editor = incomingEditor

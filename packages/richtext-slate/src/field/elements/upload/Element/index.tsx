@@ -20,12 +20,12 @@ import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { UploadElementType } from '../types'
+import type { UploadElementType } from '../types.d.ts'
 
-import { useElement } from '../../../providers/ElementProvider'
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
-import { uploadFieldsSchemaPath, uploadName } from '../shared'
-import { UploadDrawer } from './UploadDrawer'
+import { useElement } from '../../../providers/ElementProvider.js'
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
+import { uploadFieldsSchemaPath, uploadName } from '../shared.js'
+import { UploadDrawer } from './UploadDrawer/index.js'
 import './index.scss'
 
 const baseClass = 'rich-text-upload'

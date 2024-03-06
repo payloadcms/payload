@@ -1,9 +1,9 @@
 import type { PayloadRequest, RichTextAdapter, RichTextField } from 'payload/types'
 
-import type { AdapterArguments } from '../types'
+import type { AdapterArguments } from '../types.d.ts'
 
-import { populate } from './populate'
-import { recurseNestedFields } from './recurseNestedFields'
+import { populate } from './populate.js'
+import { recurseNestedFields } from './recurseNestedFields.js'
 
 export type Args = Parameters<RichTextAdapter<any[], AdapterArguments>['populationPromise']>[0]
 

@@ -2,8 +2,8 @@
 
 import type React from 'react'
 
-import { useSlatePlugin } from '../../../utilities/useSlatePlugin'
-import { uploadName } from './shared'
+import { useSlatePlugin } from '../../../utilities/useSlatePlugin.js'
+import { uploadName } from './shared.js'
 
 export const WithUpload: React.FC = () => {
   useSlatePlugin('withUpload', (incomingEditor) => {

@@ -6,12 +6,12 @@ import { useFieldPath } from '@payloadcms/ui/forms'
 import { useClientFunctions } from '@payloadcms/ui/providers'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
-import type { RichTextPlugin } from '../types'
-import type { EnabledFeatures } from './types'
+import type { RichTextPlugin } from '../types.d.ts'
+import type { EnabledFeatures } from './types.d.ts'
 
-import { createFeatureMap } from './createFeatureMap'
+import { createFeatureMap } from './createFeatureMap.js'
 
-const RichTextEditor = lazy(() => import('./RichText'))
+const RichTextEditor = lazy(() => import('./RichText.js'))
 
 const RichTextField: React.FC<
   FormFieldBase & {

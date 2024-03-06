@@ -16,13 +16,13 @@ import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import LinkIcon from '../../../icons/Link'
-import { useElementButton } from '../../../providers/ElementButtonProvider'
-import ElementButton from '../../Button'
-import isElementActive from '../../isActive'
-import { LinkDrawer } from '../LinkDrawer'
-import { linkFieldsSchemaPath } from '../shared'
-import { unwrapLink } from '../utilities'
+import LinkIcon from '../../../icons/Link/index.js'
+import { useElementButton } from '../../../providers/ElementButtonProvider.js'
+import ElementButton from '../../Button.js'
+import isElementActive from '../../isActive.js'
+import { LinkDrawer } from '../LinkDrawer/index.js'
+import { linkFieldsSchemaPath } from '../shared.js'
+import { unwrapLink } from '../utilities.js'
 
 /**
  * This function is called when an new link is created - not when an existing link is edited.

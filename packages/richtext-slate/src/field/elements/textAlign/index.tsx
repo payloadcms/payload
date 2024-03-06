@@ -1,11 +1,11 @@
 import React from 'react'
 
-import type { RichTextCustomElement } from '../../..'
+import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import AlignCenterIcon from '../../icons/AlignCenter'
-import AlignLeftIcon from '../../icons/AlignLeft'
-import AlignRightIcon from '../../icons/AlignRight'
-import ElementButton from '../Button'
+import AlignCenterIcon from '../../icons/AlignCenter/index.js'
+import AlignLeftIcon from '../../icons/AlignLeft/index.js'
+import AlignRightIcon from '../../icons/AlignRight/index.js'
+import ElementButton from '../Button.js'
 
 const alignment: RichTextCustomElement = {
   name: 'alignment',

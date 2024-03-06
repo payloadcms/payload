@@ -2,8 +2,8 @@ import type { Field, PayloadRequest } from 'payload/types'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
 
-import { populate } from './populate'
-import { recurseRichText } from './richTextRelationshipPromise'
+import { populate } from './populate.js'
+import { recurseRichText } from './richTextRelationshipPromise.js'
 
 type NestedRichTextFieldsArgs = {
   currentDepth?: number

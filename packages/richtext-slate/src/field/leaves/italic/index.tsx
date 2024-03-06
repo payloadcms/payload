@@ -1,10 +1,10 @@
 import React from 'react'
 
-import type { RichTextCustomLeaf } from '../../..'
+import type { RichTextCustomLeaf } from '../../../types.d.ts'
 
-import ItalicIcon from '../../icons/Italic'
-import LeafButton from '../Button'
-import { Italic } from './Italic'
+import ItalicIcon from '../../icons/Italic/index.js'
+import LeafButton from '../Button.js'
+import { Italic } from './Italic/index.js'
 
 const italic: RichTextCustomLeaf = {
   name: 'italic',

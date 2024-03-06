@@ -1,10 +1,10 @@
 import React from 'react'
 
-import type { RichTextCustomElement } from '../../..'
+import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import H1Icon from '../../icons/headings/H1'
-import ElementButton from '../Button'
-import { Heading1 } from './Heading1'
+import H1Icon from '../../icons/headings/H1/index.js'
+import ElementButton from '../Button.js'
+import { Heading1 } from './Heading1.js'
 
 const name = 'h1'
 
