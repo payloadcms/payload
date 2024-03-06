@@ -1,7 +1,7 @@
-export * from '../auth'
-export { default as executeAccess } from '../auth/executeAccess'
-export { getAccessResults } from '../auth/getAccessResults'
-export { getAuthenticatedUser } from '../auth/getAuthenticatedUser'
+export * from '../auth/index.js'
+export { default as executeAccess } from '../auth/executeAccess.js'
+export { getAccessResults } from '../auth/getAccessResults.js'
+export { getAuthenticatedUser } from '../auth/getAuthenticatedUser.js'
 
 export type {
   AuthStrategyFunction,
@@ -14,4 +14,4 @@ export type {
   Permissions,
   User,
   VerifyConfig,
-} from '../auth/types'
+} from '../auth/types.d.ts'

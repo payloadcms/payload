@@ -1,3 +1,3 @@
-export { initI18n, t, matchLanguage } from '../utilities/init'
-export { getTranslation } from '../utilities/getTranslation'
-export type * from '../types'
+export { getTranslation } from '../utilities/getTranslation.js'
+export { initI18n, matchLanguage, t } from '../utilities/init.js'
+export type * from '../types.d.ts'

@@ -1,8 +1,8 @@
 import crypto from 'crypto'
 
-import type { Field, FieldHook } from '../../fields/config/types'
+import type { Field, FieldHook } from '../../fields/config/types.d.ts'
 
-import { extractTranslations } from '../../translations/extractTranslations'
+import { extractTranslations } from '../../translations/extractTranslations.js'
 
 const labels = extractTranslations(['authentication:enableAPIKey', 'authentication:apiKey'])
 

@@ -1,6 +1,6 @@
-import type { RelationshipField, UploadField } from '../fields/config/types'
+import type { RelationshipField, UploadField } from '../fields/config/types.d.ts'
 
-import APIError from './APIError'
+import APIError from './APIError.js'
 
 class InvalidFieldRelationship extends APIError {
   constructor(field: RelationshipField | UploadField, relationship: string) {

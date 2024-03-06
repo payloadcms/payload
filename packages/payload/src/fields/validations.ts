@@ -1,4 +1,4 @@
-import type { RichTextAdapter, Where } from '../exports/types'
+import type { RichTextAdapter, Where } from '../exports/types.d.ts'
 import type {
   ArrayField,
   BlockField,
@@ -18,12 +18,12 @@ import type {
   TextareaField,
   UploadField,
   Validate,
-} from './config/types'
+} from './config/types.d.ts'
 
-import { getIDType } from '../utilities/getIDType'
-import { isNumber } from '../utilities/isNumber'
-import { isValidID } from '../utilities/isValidID'
-import { fieldAffectsData } from './config/types'
+import { getIDType } from '../utilities/getIDType.js'
+import { isNumber } from '../utilities/isNumber.js'
+import { isValidID } from '../utilities/isValidID.js'
+import { fieldAffectsData } from './config/types.js'
 
 export const text: Validate<string | string[], unknown, unknown, TextField> = (
   value,

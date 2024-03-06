@@ -1,5 +1,5 @@
 'use client'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 
 import { type FormFieldBase, ShimmerEffect } from '@payloadcms/ui'
 import { useFieldPath } from '@payloadcms/ui/forms'

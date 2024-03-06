@@ -1,17 +1,17 @@
-import type { Config } from '../../config/types'
-import type { Field } from './types'
+import type { Config } from '../../config/types.d.ts'
+import type { Field } from './types.d.ts'
 
 import {
   DuplicateFieldName,
   InvalidFieldName,
   InvalidFieldRelationship,
   MissingFieldType,
-} from '../../errors'
-import { formatLabels, toWords } from '../../utilities/formatLabels'
-import { baseBlockFields } from '../baseFields/baseBlockFields'
-import { baseIDField } from '../baseFields/baseIDField'
-import validations from '../validations'
-import { fieldAffectsData, tabHasName } from './types'
+} from '../../errors/index.js'
+import { formatLabels, toWords } from '../../utilities/formatLabels.js'
+import { baseBlockFields } from '../baseFields/baseBlockFields.js'
+import { baseIDField } from '../baseFields/baseIDField.js'
+import validations from '../validations.js'
+import { fieldAffectsData, tabHasName } from './types.js'
 
 type Args = {
   config: Config
@@ -112,7 +112,7 @@ export const sanitizeFields = ({
     if (fieldAffectsData(field)) {
       if (existingFieldNames.has(field.name)) {
         throw new DuplicateFieldName(field.name)
-      } else if (!['id', 'blockName'].includes(field.name)) {
+      } else if (!['blockName', 'id'].includes(field.name)) {
         existingFieldNames.add(field.name)
       }
 
@@ -171,9 +171,9 @@ export const sanitizeFields = ({
 
         unsanitizedBlock.fields = sanitizeFields({
           config,
+          existingFieldNames: new Set(),
           fields: block.fields,
           validRelationships,
-          existingFieldNames: new Set(),
         })
 
         return unsanitizedBlock

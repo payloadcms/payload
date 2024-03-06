@@ -7,16 +7,16 @@ import type {
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
-} from './types'
+} from './types.d.ts'
 
-import { defaultUserCollection } from '../auth/defaultUser'
-import sanitizeCollection from '../collections/config/sanitize'
-import { migrationsCollection } from '../database/migrations/migrationsCollection'
-import { InvalidConfiguration } from '../errors'
-import sanitizeGlobals from '../globals/config/sanitize'
-import getPreferencesCollection from '../preferences/preferencesCollection'
-import checkDuplicateCollections from '../utilities/checkDuplicateCollections'
-import { defaults } from './defaults'
+import { defaultUserCollection } from '../auth/defaultUser.js'
+import sanitizeCollection from '../collections/config/sanitize.js'
+import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
+import { InvalidConfiguration } from '../errors/index.js'
+import sanitizeGlobals from '../globals/config/sanitize.js'
+import getPreferencesCollection from '../preferences/preferencesCollection.js'
+import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
+import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }

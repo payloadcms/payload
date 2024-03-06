@@ -1,10 +1,10 @@
-import type { Payload, RequestContext } from '../../..'
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../types'
+import type { Payload, RequestContext } from '../../../index.d.ts'
+import type { GeneratedTypes } from '../../../index.d.ts'
+import type { PayloadRequest } from '../../../types/index.d.ts'
 
-import { APIError } from '../../../errors'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { verifyEmailOperation } from '../verifyEmail'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { verifyEmailOperation } from '../verifyEmail.js'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T

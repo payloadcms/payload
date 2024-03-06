@@ -3,7 +3,7 @@ import type { ReducedBlock } from '@payloadcms/ui/types'
 import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
 import { RenderFields } from '@payloadcms/ui'
 import {

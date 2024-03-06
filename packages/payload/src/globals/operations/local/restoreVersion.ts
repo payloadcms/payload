@@ -1,11 +1,9 @@
-import type { Payload, RequestContext } from '../../..'
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../types'
-import type { Document } from '../../../types'
+import type { GeneratedTypes, Payload, RequestContext } from '../../../index.d.ts'
+import type { Document, PayloadRequest } from '../../../types/index.d.ts'
 
-import { APIError } from '../../../errors'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { restoreVersionOperation } from '../restoreVersion'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { restoreVersionOperation } from '../restoreVersion.js'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
@@ -24,7 +22,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   payload: Payload,
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
-  const { id, depth, overrideAccess = true, showHiddenFields, slug: globalSlug } = options
+  const { id, slug: globalSlug, depth, overrideAccess = true, showHiddenFields } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 

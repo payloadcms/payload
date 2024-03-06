@@ -1,11 +1,11 @@
-import type { Payload, RequestContext } from '../../..'
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../types'
-import type { Result } from '../resetPassword'
+import type { Payload, RequestContext } from '../../../index.d.ts'
+import type { GeneratedTypes } from '../../../index.d.ts'
+import type { PayloadRequest } from '../../../types/index.d.ts'
+import type { Result } from '../resetPassword.d.ts'
 
-import { APIError } from '../../../errors'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { resetPasswordOperation } from '../resetPassword'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { resetPasswordOperation } from '../resetPassword.js'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T

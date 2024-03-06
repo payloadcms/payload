@@ -3,7 +3,7 @@ import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import { formatDrawerSlug, useConfig, useEditDepth, useTranslation } from '@payloadcms/ui'

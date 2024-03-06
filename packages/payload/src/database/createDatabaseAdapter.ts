@@ -6,14 +6,14 @@ import type {
   BeginTransaction,
   CommitTransaction,
   RollbackTransaction,
-} from './types'
+} from './types.d.ts'
 
-import { createMigration } from './migrations/createMigration'
-import { migrate } from './migrations/migrate'
-import { migrateDown } from './migrations/migrateDown'
-import { migrateRefresh } from './migrations/migrateRefresh'
-import { migrateReset } from './migrations/migrateReset'
-import { migrateStatus } from './migrations/migrateStatus'
+import { createMigration } from './migrations/createMigration.js'
+import { migrate } from './migrations/migrate.js'
+import { migrateDown } from './migrations/migrateDown.js'
+import { migrateRefresh } from './migrations/migrateRefresh.js'
+import { migrateReset } from './migrations/migrateReset.js'
+import { migrateStatus } from './migrations/migrateStatus.js'
 
 const beginTransaction: BeginTransaction = async () => null
 const rollbackTransaction: RollbackTransaction = async () => null

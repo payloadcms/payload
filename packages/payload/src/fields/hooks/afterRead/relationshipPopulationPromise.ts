@@ -1,7 +1,7 @@
-import type { PayloadRequest } from '../../../types'
-import type { RelationshipField, UploadField } from '../../config/types'
+import type { PayloadRequest } from '../../../types/index.d.ts'
+import type { RelationshipField, UploadField } from '../../config/types.d.ts'
 
-import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types'
+import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types.js'
 
 type PopulateArgs = {
   currentDepth: number

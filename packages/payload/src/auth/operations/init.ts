@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../types'
+import type { PayloadRequest } from '../../types/index.d.ts'
 
 export const initOperation = async (args: {
   collection: string

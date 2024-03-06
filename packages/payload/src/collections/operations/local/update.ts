@@ -1,16 +1,15 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes, Payload } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../types'
-import type { Document, Where } from '../../../types'
-import type { File } from '../../../uploads/types'
-import type { BulkOperationResult } from '../../config/types'
+import type { GeneratedTypes, Payload } from '../../../index.d.ts'
+import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.d.ts'
+import type { File } from '../../../uploads/types.d.ts'
+import type { BulkOperationResult } from '../../config/types.d.ts'
 
-import { APIError } from '../../../errors'
-import getFileByPath from '../../../uploads/getFileByPath'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { updateOperation } from '../update'
-import { updateByIDOperation } from '../updateByID'
+import { APIError } from '../../../errors/index.js'
+import getFileByPath from '../../../uploads/getFileByPath.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { updateOperation } from '../update.js'
+import { updateByIDOperation } from '../updateByID.js'
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   autosave?: boolean

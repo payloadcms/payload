@@ -47,44 +47,44 @@ export type {
   UpdateOneArgs,
   UpdateVersion,
   UpdateVersionArgs,
-} from '../database/types'
+} from '../database/types.d.ts'
 
-export * from '../database/queryValidation/types'
+export * from '../database/queryValidation/types.js'
 
-export { combineQueries } from '../database/combineQueries'
+export { combineQueries } from '../database/combineQueries.js'
 
-export { createDatabaseAdapter } from '../database/createDatabaseAdapter'
+export { createDatabaseAdapter } from '../database/createDatabaseAdapter.js'
 
-export { default as flattenWhereToOperators } from '../database/flattenWhereToOperators'
+export { default as flattenWhereToOperators } from '../database/flattenWhereToOperators.js'
 
-export { getLocalizedPaths } from '../database/getLocalizedPaths'
+export { getLocalizedPaths } from '../database/getLocalizedPaths.js'
 
-export { createMigration } from '../database/migrations/createMigration'
+export { createMigration } from '../database/migrations/createMigration.js'
 
-export { getMigrations } from '../database/migrations/getMigrations'
+export { getMigrations } from '../database/migrations/getMigrations.js'
 
-export { migrate } from '../database/migrations/migrate'
+export { migrate } from '../database/migrations/migrate.js'
 
-export { migrateDown } from '../database/migrations/migrateDown'
+export { migrateDown } from '../database/migrations/migrateDown.js'
 
-export { migrateRefresh } from '../database/migrations/migrateRefresh'
+export { migrateRefresh } from '../database/migrations/migrateRefresh.js'
 
-export { migrateReset } from '../database/migrations/migrateReset'
+export { migrateReset } from '../database/migrations/migrateReset.js'
 
-export { migrateStatus } from '../database/migrations/migrateStatus'
+export { migrateStatus } from '../database/migrations/migrateStatus.js'
 
-export { migrationTemplate } from '../database/migrations/migrationTemplate'
+export { migrationTemplate } from '../database/migrations/migrationTemplate.js'
 
-export { migrationsCollection } from '../database/migrations/migrationsCollection'
+export { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 
-export { readMigrationFiles } from '../database/migrations/readMigrationFiles'
+export { readMigrationFiles } from '../database/migrations/readMigrationFiles.js'
 
-export type { EntityPolicies, PathToQuery } from '../database/queryValidation/types'
+export type { EntityPolicies, PathToQuery } from '../database/queryValidation/types.d.ts'
 
-export { validateQueryPaths } from '../database/queryValidation/validateQueryPaths'
+export { validateQueryPaths } from '../database/queryValidation/validateQueryPaths.js'
 
-export { validateSearchParam } from '../database/queryValidation/validateSearchParams'
+export { validateSearchParam } from '../database/queryValidation/validateSearchParams.js'
 
-export { commitTransaction } from '../utilities/commitTransaction'
-export { initTransaction } from '../utilities/initTransaction'
-export { killTransaction } from '../utilities/killTransaction'
+export { commitTransaction } from '../utilities/commitTransaction.js'
+export { initTransaction } from '../utilities/initTransaction.js'
+export { killTransaction } from '../utilities/killTransaction.js'

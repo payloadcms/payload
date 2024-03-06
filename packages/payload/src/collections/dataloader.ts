@@ -2,12 +2,12 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { PayloadRequest } from '../types'
-import type { TypeWithID } from './config/types'
+import type { PayloadRequest } from '../types/index.d.ts'
+import type { TypeWithID } from './config/types.d.ts'
 
-import { fieldAffectsData } from '../fields/config/types'
-import { getIDType } from '../utilities/getIDType'
-import { isValidID } from '../utilities/isValidID'
+import { fieldAffectsData } from '../fields/config/types.js'
+import { getIDType } from '../utilities/getIDType.js'
+import { isValidID } from '../utilities/isValidID.js'
 
 // Payload uses `dataloader` to solve the classic GraphQL N+1 problem.
 

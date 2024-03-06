@@ -3,7 +3,7 @@ import type { TFunction } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/api'
 import httpStatus from 'http-status'
 
-import APIError from './APIError'
+import APIError from './APIError.js'
 
 class UnauthorizedError extends APIError {
   constructor(t?: TFunction) {

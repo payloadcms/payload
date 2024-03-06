@@ -1,10 +1,10 @@
 import { URL } from 'url'
 
-import type { Payload } from '..'
-import type { Collection } from '../collections/config/types'
-import type { EmailOptions, SanitizedConfig } from '../config/types'
-import type { PayloadRequest } from '../types'
-import type { User, VerifyConfig } from './types'
+import type { Collection } from '../collections/config/types.d.ts'
+import type { EmailOptions, SanitizedConfig } from '../config/types.d.ts'
+import type { Payload } from '../index.d.ts'
+import type { PayloadRequest } from '../types/index.d.ts'
+import type { User, VerifyConfig } from './types.d.ts'
 
 type Args = {
   collection: Collection

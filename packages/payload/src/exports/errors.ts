@@ -17,4 +17,4 @@ export {
   NotFound,
   QueryError,
   ValidationError,
-} from '../errors'
+} from '../errors/index.js'

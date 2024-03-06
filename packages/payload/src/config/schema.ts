@@ -1,7 +1,7 @@
 import joi from 'joi'
 
-import { adminViewSchema } from './shared/adminViewSchema'
-import { componentSchema, livePreviewSchema } from './shared/componentSchema'
+import { adminViewSchema } from './shared/adminViewSchema.js'
+import { componentSchema, livePreviewSchema } from './shared/componentSchema.js'
 
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 

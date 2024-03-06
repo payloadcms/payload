@@ -2,9 +2,9 @@ import type { ParsedArgs } from 'minimist'
 
 import minimist from 'minimist'
 
-import payload from '..'
-import loadConfig from '../config/load'
-import { prettySyncLoggerDestination } from '../utilities/logger'
+import loadConfig from '../config/load.js'
+import payload from '../index.js'
+import { prettySyncLoggerDestination } from '../utilities/logger.js'
 
 /**
  * The default logger's options did not allow for forcing sync logging

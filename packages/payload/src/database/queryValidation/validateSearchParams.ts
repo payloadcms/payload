@@ -1,13 +1,13 @@
-import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { Field } from '../../fields/config/types'
-import type { SanitizedGlobalConfig } from '../../globals/config/types'
-import type { PayloadRequest } from '../../types'
-import type { EntityPolicies, PathToQuery } from './types'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.d.ts'
+import type { Field } from '../../fields/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
+import type { PayloadRequest } from '../../types/index.d.ts'
+import type { EntityPolicies, PathToQuery } from './types.d.ts'
 
-import { fieldAffectsData } from '../../fields/config/types'
-import { getEntityPolicies } from '../../utilities/getEntityPolicies'
-import { getLocalizedPaths } from '../getLocalizedPaths'
-import { validateQueryPaths } from './validateQueryPaths'
+import { fieldAffectsData } from '../../fields/config/types.js'
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import { getLocalizedPaths } from '../getLocalizedPaths.js'
+import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
@@ -55,10 +55,10 @@ export async function validateSearchParam({
 
     // eslint-disable-next-line no-param-reassign
     policies.globals[slug] = await getEntityPolicies({
+      type: 'global',
       entity: globalConfig,
       operations: ['read'],
       req,
-      type: 'global',
     })
   }
 
@@ -86,10 +86,10 @@ export async function validateSearchParam({
           if (!policies.collections[collectionSlug]) {
             // eslint-disable-next-line no-param-reassign
             policies.collections[collectionSlug] = await getEntityPolicies({
+              type: 'collection',
               entity: req.payload.collections[collectionSlug].config,
               operations: ['read'],
               req,
-              type: 'collection',
             })
           }
 

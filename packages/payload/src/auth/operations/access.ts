@@ -1,11 +1,11 @@
-import type { PayloadRequest } from '../../types'
-import type { Permissions } from '../types'
+import type { PayloadRequest } from '../../types/index.d.ts'
+import type { Permissions } from '../types.d.ts'
 
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit'
-import { getAccessResults } from '../getAccessResults'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit.js'
+import { getAccessResults } from '../getAccessResults.js'
 
 type Arguments = {
   req: PayloadRequest

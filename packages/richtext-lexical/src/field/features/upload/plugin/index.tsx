@@ -1,5 +1,5 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
 import { useConfig } from '@payloadcms/ui'
 import {

@@ -1,9 +1,9 @@
 import httpStatus from 'http-status'
 
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../types'
+import type { Collection } from '../../collections/config/types.d.ts'
+import type { PayloadRequest } from '../../types/index.d.ts'
 
-import { APIError } from '../../errors'
+import { APIError } from '../../errors/index.js'
 
 export type Arguments = {
   collection: Collection

@@ -13,7 +13,7 @@ import type {
 import {
   DecoratorBlockNode,
   type SerializedDecoratorBlockNode,
-} from '@lexical/react/LexicalDecoratorBlockNode'
+} from '@lexical/react/LexicalDecoratorBlockNode.js'
 import * as React from 'react'
 
 const RelationshipComponent = React.lazy(() =>

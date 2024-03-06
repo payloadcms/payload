@@ -1,11 +1,11 @@
-import type { Payload } from '..'
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
-import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { PayloadRequest } from '../types'
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { Payload } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 
-import { deepCopyObject } from '../utilities/deepCopyObject'
-import sanitizeInternalFields from '../utilities/sanitizeInternalFields'
-import { enforceMaxVersions } from './enforceMaxVersions'
+import { deepCopyObject } from '../utilities/deepCopyObject.js'
+import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
+import { enforceMaxVersions } from './enforceMaxVersions.js'
 
 type Args = {
   autosave?: boolean

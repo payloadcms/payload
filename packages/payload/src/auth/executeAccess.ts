@@ -1,7 +1,7 @@
-import type { Access, AccessResult } from '../config/types'
-import type { PayloadRequest } from '../exports/types'
+import type { Access, AccessResult } from '../config/types.d.ts'
+import type { PayloadRequest } from '../exports/types.d.ts'
 
-import { Forbidden } from '../errors'
+import { Forbidden } from '../errors/index.js'
 
 type OperationArgs = {
   data?: any

@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import { ValidationError } from '../../../errors'
+import { ValidationError } from '../../../errors/index.js'
 
 const defaultPasswordValidator = (password: string): string | true => {
   if (!password) return 'No password was given'

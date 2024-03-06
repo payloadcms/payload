@@ -1,10 +1,10 @@
 'use client'
-import type { InitialConfigType } from '@lexical/react/LexicalComposer'
+import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
 import type { FormFieldBase } from '@payloadcms/ui'
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { LexicalEditor } from 'lexical'
 
-import { LexicalComposer } from '@lexical/react/LexicalComposer'
+import { LexicalComposer } from '@lexical/react/LexicalComposerContext.js'
 import * as React from 'react'
 
 import type { SanitizedClientEditorConfig } from './config/types.js'
