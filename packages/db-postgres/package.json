@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "3.0.0-alpha.22",
+  "version": "3.0.0-alpha.23",
   "description": "The officially supported Postgres database adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",

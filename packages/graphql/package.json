@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/graphql",
-  "version": "3.0.0-alpha.22",
+  "version": "3.0.0-alpha.23",
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "type": "module",

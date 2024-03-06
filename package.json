@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.22",
+  "version": "3.0.0-alpha.23",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -10,7 +10,7 @@
     "build": "pnpm run build:core",
     "build:all": "turbo build",
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
-    "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\" --filter \"!@payloadcms/plugin-search\"",
+    "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\" --filter \"!@payloadcms/plugin-search\" --filter \"!@payloadcms/plugin-redirects\" --filter \"!@payloadcms/plugin-nested-docs\"",
     "build:app": "next build",
     "build:create-payload-app": "turbo build --filter create-payload-app",
     "build:db-mongodb": "turbo build --filter db-mongodb",
