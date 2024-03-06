@@ -1,7 +1,7 @@
 'use client'
 import type { TextNode } from 'lexical'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'

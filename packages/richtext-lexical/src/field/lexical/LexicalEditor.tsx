@@ -50,6 +50,8 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
     }
   }, [isSmallWidthViewport])
 
+  const ErrorBoundaryComponent = LexicalErrorBoundary.default
+
   return (
     <React.Fragment>
       {editorConfig.features.plugins.map((plugin) => {
@@ -58,7 +60,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
         }
       })}
       <RichTextPlugin
-        ErrorBoundary={LexicalErrorBoundary}
+        ErrorBoundary={ErrorBoundaryComponent}
         contentEditable={
           <div className="editor-scroller">
             <div className="editor" ref={onRef}>

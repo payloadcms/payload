@@ -1,7 +1,7 @@
 'use client'
 import type { ParagraphNode } from 'lexical'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $createParagraphNode } from 'lexical'
 import { $getNodeByKey, type LexicalEditor, type LexicalNode } from 'lexical'
 import * as React from 'react'

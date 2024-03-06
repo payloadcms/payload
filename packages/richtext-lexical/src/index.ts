@@ -73,7 +73,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   return {
     LazyCellComponent: () =>
       // @ts-expect-error
-      import('./cell').then((module) => {
+      import('./cell/index.js').then((module) => {
         const RichTextCell = module.RichTextCell
         return import('@payloadcms/ui').then((module2) =>
           module2.withMergedProps({
@@ -84,7 +84,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }),
 
     LazyFieldComponent: () =>
-      import('./field').then((module) => {
+      import('./field/index.js').then((module) => {
         const RichTextField = module.RichTextField
         return import('@payloadcms/ui').then((module2) =>
           module2.withMergedProps({

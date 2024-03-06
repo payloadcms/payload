@@ -128,7 +128,7 @@ export function $createBlockNode(fields: Exclude<BlockFields, 'id'>): BlockNode 
   return new BlockNode({
     fields: {
       ...fields,
-      id: fields?.id || new ObjectID().toHexString(),
+      id: fields?.id || new ObjectID.default().toHexString(),
     },
   })
 }
