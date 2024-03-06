@@ -1,8 +1,8 @@
 'use client'
-import type { FeatureProviderProviderClient } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { createClientComponent } from '../../createClientComponent'
-import { TreeViewPlugin } from './plugin'
+import { createClientComponent } from '../../createClientComponent.js'
+import { TreeViewPlugin } from './plugin/index.js'
 
 const TreeViewFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

@@ -1,14 +1,14 @@
-import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
-import type { AccessResult } from '../../config/types'
-import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types'
-import type { SanitizedGlobalConfig } from '../../globals/config/types'
-import type { PayloadRequest, Where } from '../../types'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.d.ts'
+import type { AccessResult } from '../../config/types.d.ts'
+import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.d.ts'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
+import type { PayloadRequest, Where } from '../../types/index.d.ts'
 
-import { hasWhereAccessResult } from '../../auth'
-import { combineQueries } from '../../database/combineQueries'
-import { docHasTimestamps } from '../../types'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
-import { appendVersionToQueryKey } from './appendVersionToQueryKey'
+import { hasWhereAccessResult } from '../../auth/index.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { docHasTimestamps } from '../../types/index.js'
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 
 type Arguments<T> = {
   accessResult: AccessResult

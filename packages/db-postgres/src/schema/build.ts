@@ -13,11 +13,11 @@ import { index, integer, numeric, serial, timestamp, unique, varchar } from 'dri
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types'
+import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types.d.ts'
 
-import { parentIDColumnMap } from './parentIDColumnMap'
-import { setColumnID } from './setColumnID'
-import { traverseFields } from './traverseFields'
+import { parentIDColumnMap } from './parentIDColumnMap.js'
+import { setColumnID } from './setColumnID.js'
+import { traverseFields } from './traverseFields.js'
 
 type Args = {
   adapter: PostgresAdapter

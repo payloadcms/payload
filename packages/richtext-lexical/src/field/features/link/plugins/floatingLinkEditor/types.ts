@@ -1,4 +1,4 @@
-import type { LinkFields } from '../../nodes/types'
+import type { LinkFields } from '../../nodes/types.js'
 
 /**
  * The payload of a link node

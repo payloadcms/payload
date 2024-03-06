@@ -3,7 +3,7 @@ import type { Field, Where } from 'payload/types'
 
 import { QueryError } from 'payload/errors'
 
-import { parseParams } from './parseParams'
+import { parseParams } from './parseParams.js'
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string

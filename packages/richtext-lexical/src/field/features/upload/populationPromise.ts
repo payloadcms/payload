@@ -1,10 +1,9 @@
-import type { UploadFeatureProps } from '@payloadcms/richtext-lexical'
+import type { PopulationPromise } from '../types.js'
+import type { UploadFeatureProps } from './feature.server.js'
+import type { SerializedUploadNode } from './nodes/UploadNode.js'
 
-import type { PopulationPromise } from '../types'
-import type { SerializedUploadNode } from './nodes/UploadNode'
-
-import { populate } from '../../../populate/populate'
-import { recurseNestedFields } from '../../../populate/recurseNestedFields'
+import { populate } from '../../../populate/populate.js'
+import { recurseNestedFields } from '../../../populate/recurseNestedFields.js'
 
 export const uploadPopulationPromiseHOC = (
   props?: UploadFeatureProps,

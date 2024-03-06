@@ -1,5 +1,5 @@
-import pino from 'pino'
-import prettifier from 'pino-pretty'
+import { pino } from 'pino'
+import { PinoPretty } from 'pino-pretty'
 
 export type PayloadLogger = pino.Logger
 
@@ -16,7 +16,7 @@ export const defaultLoggerOptions: pino.LoggerOptions = {
   },
 }
 
-export const prettySyncLoggerDestination = prettifier({
+export const prettySyncLoggerDestination = PinoPretty({
   ...prettyOptions,
   destination: 1, // stdout
   sync: true,

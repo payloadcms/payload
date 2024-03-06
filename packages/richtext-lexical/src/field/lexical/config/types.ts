@@ -1,4 +1,4 @@
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 
 import type {
   FeatureProviderClient,
@@ -7,7 +7,7 @@ import type {
   ResolvedServerFeatureMap,
   SanitizedClientFeatures,
   SanitizedServerFeatures,
-} from '../../features/types'
+} from '../../features/types.js'
 
 export type ServerEditorConfig = {
   features: FeatureProviderServer<unknown, unknown>[]

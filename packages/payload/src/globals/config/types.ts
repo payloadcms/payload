@@ -6,8 +6,8 @@ import type {
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
-} from '../../admin/types'
-import type { User } from '../../auth/types'
+} from '../../admin/types.d.ts'
+import type { User } from '../../auth/types.d.ts'
 import type {
   Access,
   EditViewComponent,
@@ -16,11 +16,11 @@ import type {
   EntityDescription,
   GeneratePreviewURL,
   LivePreviewConfig,
-} from '../../config/types'
-import type { Field } from '../../fields/config/types'
-import type { PayloadRequest, RequestContext } from '../../types'
-import type { Where } from '../../types'
-import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
+} from '../../config/types.d.ts'
+import type { Field } from '../../fields/config/types.d.ts'
+import type { PayloadRequest, RequestContext } from '../../types/index.d.ts'
+import type { Where } from '../../types/index.d.ts'
+import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.d.ts'
 
 export type TypeWithID = {
   id: number | string

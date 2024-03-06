@@ -11,8 +11,8 @@ import { flattenTopLevelFields } from 'payload/utilities'
 import toSnakeCase from 'to-snake-case'
 import { v4 as uuid } from 'uuid'
 
-import type { GenericColumn, GenericTable, PostgresAdapter } from '../types'
-import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
+import type { GenericColumn, GenericTable, PostgresAdapter } from '../types.d.ts'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.d.ts'
 
 type Constraint = {
   columnName: string

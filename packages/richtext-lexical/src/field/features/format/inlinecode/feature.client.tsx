@@ -2,12 +2,12 @@
 
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProviderProviderClient } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { CodeIcon } from '../../../lexical/ui/icons/Code'
-import { createClientComponent } from '../../createClientComponent'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
-import { INLINE_CODE } from './markdownTransformers'
+import { CodeIcon } from '../../../lexical/ui/icons/Code/index.js'
+import { createClientComponent } from '../../createClientComponent.js'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { INLINE_CODE } from './markdownTransformers.js'
 
 const InlineCodeFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

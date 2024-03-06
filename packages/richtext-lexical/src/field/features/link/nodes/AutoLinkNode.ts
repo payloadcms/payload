@@ -6,9 +6,9 @@ import {
   type RangeSelection,
 } from 'lexical'
 
-import type { LinkFields, SerializedAutoLinkNode } from './types'
+import type { LinkFields, SerializedAutoLinkNode } from './types.js'
 
-import { LinkNode } from './LinkNode'
+import { LinkNode } from './LinkNode.js'
 
 // Custom node type to override `canInsertTextAfter` that will
 // allow typing within the link

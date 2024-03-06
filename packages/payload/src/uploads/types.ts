@@ -1,7 +1,7 @@
 import type express from 'express'
-import type { PayloadRequest } from 'payload/types'
 import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'
+import type { PayloadRequest } from '../types/index.d.ts'
 
 export type FileSize = {
   filename: null | string

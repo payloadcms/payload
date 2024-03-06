@@ -1,8 +1,8 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
-import { ensureDirectoryExists } from './src/utilities/ensureDirExists'
-import { copyFile } from './src/utilities/copyFile'
+import { ensureDirectoryExists } from './src/utilities/ensureDirExists.js'
+import { copyFile } from './src/utilities/copyFile.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

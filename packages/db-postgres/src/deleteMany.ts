@@ -4,9 +4,9 @@ import type { PayloadRequest } from 'payload/types'
 import { inArray } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { findMany } from './find/findMany'
+import { findMany } from './find/findMany.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: PostgresAdapter,

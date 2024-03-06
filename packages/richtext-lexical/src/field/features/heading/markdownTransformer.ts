@@ -3,7 +3,7 @@ import type { HeadingTagType } from '@lexical/rich-text'
 
 import { $createHeadingNode, $isHeadingNode, HeadingNode } from '@lexical/rich-text'
 
-import { createBlockNode } from '../../lexical/utils/markdown/createBlockNode'
+import { createBlockNode } from '../../lexical/utils/markdown/createBlockNode.js'
 
 export const MarkdownTransformer: (enabledHeadingSizes: HeadingTagType[]) => ElementTransformer = (
   enabledHeadingSizes,

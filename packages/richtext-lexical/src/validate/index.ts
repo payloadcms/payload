@@ -1,9 +1,10 @@
-import type { SanitizedServerEditorConfig } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from 'lexical'
 import type { RichTextField, Validate } from 'payload/types'
 
-import { defaultRichTextValue, defaultRichTextValueV2 } from '../populate/defaultValue'
-import { validateNodes } from './validateNodes'
+import type { SanitizedServerEditorConfig } from '../field/lexical/config/types.js'
+
+import { defaultRichTextValue, defaultRichTextValueV2 } from '../populate/defaultValue.js'
+import { validateNodes } from './validateNodes.js'
 
 export const richTextValidateHOC = ({
   editorConfig,

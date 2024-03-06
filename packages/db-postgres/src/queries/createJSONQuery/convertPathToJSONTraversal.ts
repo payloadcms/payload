@@ -1,4 +1,4 @@
-import { formatJSONPathSegment } from './formatJSONPathSegment'
+import { formatJSONPathSegment } from './formatJSONPathSegment.js'
 
 export const convertPathToJSONTraversal = (incomingSegments: string[]) => {
   const segments = [...incomingSegments]

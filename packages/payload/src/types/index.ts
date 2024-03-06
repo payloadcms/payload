@@ -1,11 +1,11 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 
-import type payload from '../'
-import type { User } from '../auth/types'
-import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types'
-import type { validOperators } from './constants'
-export type { Payload as Payload } from '../'
+import type { User } from '../auth/types.d.ts'
+import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types.d.ts'
+import type payload from '../index.d.ts'
+import type { validOperators } from './constants.d.ts'
+export type { Payload as Payload } from '../index.d.ts'
 
 export type UploadEdits = {
   crop?: {

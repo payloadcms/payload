@@ -1,6 +1,6 @@
-import type { Field, FieldHook } from '../../fields/config/types'
+import type { Field, FieldHook } from '../../fields/config/types.d.ts'
 
-import { extractTranslations } from '../../translations/extractTranslations'
+import { extractTranslations } from '../../translations/extractTranslations.js'
 
 const labels = extractTranslations(['authentication:verified'])
 
@@ -22,6 +22,7 @@ const autoRemoveVerificationToken: FieldHook = ({ data, operation, originalDoc, 
 export default [
   {
     name: '_verified',
+    type: 'checkbox',
     access: {
       create: ({ req: { user } }) => Boolean(user),
       read: ({ req: { user } }) => Boolean(user),
@@ -33,14 +34,13 @@ export default [
       },
     },
     label: labels['authentication:verified'],
-    type: 'checkbox',
   },
   {
     name: '_verificationToken',
+    type: 'text',
     hidden: true,
     hooks: {
       beforeChange: [autoRemoveVerificationToken],
     },
-    type: 'text',
   },
 ] as Field[]

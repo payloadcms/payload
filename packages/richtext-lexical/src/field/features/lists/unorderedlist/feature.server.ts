@@ -1,10 +1,10 @@
 import { ListItemNode, ListNode } from '@lexical/list'
 
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
-import { UnorderedListFeatureClientComponent } from './feature.client'
-import { UNORDERED_LIST } from './markdownTransformer'
+import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter.js'
+import { UnorderedListFeatureClientComponent } from './feature.client.js'
+import { UNORDERED_LIST } from './markdownTransformer.js'
 
 export const UnorderedListFeature: FeatureProviderProviderServer<undefined, undefined> = (
   props,

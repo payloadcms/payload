@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 
-import APIError from './APIError'
+import APIError from './APIError.js'
 
 class InvalidConfiguration extends APIError {
   constructor(message: string) {

@@ -1,4 +1,3 @@
-/** @type {import('prettier').Config} */
 module.exports = {
   extends: ['@payloadcms'],
   overrides: [

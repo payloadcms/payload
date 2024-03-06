@@ -1,4 +1,4 @@
-import type { Validate } from '../fields/config/types'
+import type { Validate } from '../fields/config/types.d.ts'
 
 export const mimeTypeValidator =
   (mimeTypes: string[]): Validate =>

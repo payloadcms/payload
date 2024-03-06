@@ -5,10 +5,10 @@ import { type FormFieldBase, useField } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
-import type { SanitizedClientEditorConfig } from './lexical/config/types'
+import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
 
 import './index.scss'
-import { LexicalProvider } from './lexical/LexicalProvider'
+import { LexicalProvider } from './lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'
 

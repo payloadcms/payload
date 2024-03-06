@@ -1,10 +1,10 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 
-import type { SanitizedConfig } from './types'
+import type { SanitizedConfig } from './types.d.ts'
 
-import { clientFiles } from './clientFiles'
-import findConfig from './find'
+import { clientFiles } from './clientFiles.js'
+import findConfig from './find.js'
 
 const loadConfig = async (): Promise<SanitizedConfig> => {
   const configPath = findConfig()

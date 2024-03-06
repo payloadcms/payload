@@ -1,9 +1,9 @@
-import type { Payload, RequestContext } from '..'
-import type { User } from '../auth'
-import type { PayloadRequest } from '../exports/types'
+import type { Payload, RequestContext } from '../index.d.ts'
+import type { User } from '../auth/types.d.ts'
+import type { PayloadRequest } from '../types/index.d.ts'
 
-import { getDataLoader } from '../collections/dataloader'
-import { getLocalI18n } from '../translations/getLocalI18n'
+import { getDataLoader } from '../collections/dataloader.js'
+import { getLocalI18n } from '../translations/getLocalI18n.js'
 
 function getRequestContext(
   req: PayloadRequest = { context: null } as PayloadRequest,

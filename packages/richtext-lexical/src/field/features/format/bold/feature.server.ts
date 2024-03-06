@@ -1,12 +1,12 @@
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { BoldFeatureClientComponent } from './feature.client'
+import { BoldFeatureClientComponent } from './feature.client.js'
 import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,
   BOLD_STAR,
   BOLD_UNDERSCORE,
-} from './markdownTransformers'
+} from './markdownTransformers.js'
 
 export const BoldFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

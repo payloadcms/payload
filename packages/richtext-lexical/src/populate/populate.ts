@@ -2,7 +2,7 @@ import type { SerializedEditorState } from 'lexical'
 import type { PayloadRequest } from 'payload/types'
 import type { Collection, Field, RichTextField } from 'payload/types'
 
-import type { AdapterProps } from '../types'
+import type { AdapterProps } from '../types.js'
 
 type Arguments = {
   currentDepth?: number

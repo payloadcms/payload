@@ -1,9 +1,9 @@
 import { Table } from 'console-table-printer'
 import { getMigrations, readMigrationFiles } from 'payload/database'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { migrationTableExists } from './utilities/migrationTableExists'
+import { migrationTableExists } from './utilities/migrationTableExists.js'
 
 export async function migrateStatus(this: PostgresAdapter): Promise<void> {
   const { payload } = this

@@ -1,7 +1,7 @@
-import type { LexicalPluginNodeConverterProvider } from '../../types'
+import type { LexicalPluginNodeConverterProvider } from '../../types.js'
 
-import { ListItemConverterClient } from './client'
-import { _ListItemConverter } from './converter'
+import { ListItemConverterClient } from './client.js'
+import { _ListItemConverter } from './converter.js'
 
 export const ListItemConverter: LexicalPluginNodeConverterProvider = {
   ClientComponent: ListItemConverterClient,

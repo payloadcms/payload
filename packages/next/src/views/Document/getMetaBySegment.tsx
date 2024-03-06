@@ -2,13 +2,13 @@ import type { Metadata } from 'next'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 import { getNextI18n } from '../../utilities/getNextI18n'
-import { meta } from '../../utilities/meta'
 import { generateMetadata as apiMeta } from '../API/meta'
 import { generateMetadata as editMeta } from '../Edit/meta'
 import { generateMetadata as livePreviewMeta } from '../LivePreview/meta'
 import { generateMetadata as versionMeta } from '../Version/meta'
 import { generateMetadata as versionsMeta } from '../Versions/meta'
 import { GenerateViewMetadata } from '../Root'
+import { generateNotFoundMeta } from '../NotFound/meta'
 
 export type GenerateEditViewMetadata = (
   args: Parameters<GenerateViewMetadata>[0] & {
@@ -102,10 +102,5 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     })
   }
 
-  return meta({
-    config,
-    description: '',
-    keywords: '',
-    title: '',
-  })
+  return generateNotFoundMeta({ config, i18n })
 }

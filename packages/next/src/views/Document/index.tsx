@@ -18,7 +18,6 @@ import {
   buildStateFromSchema,
   formatFields,
 } from '@payloadcms/ui'
-import { notFound } from 'next/navigation'
 import queryString from 'qs'
 import React, { Fragment } from 'react'
 
@@ -27,6 +26,7 @@ import type { GenerateEditViewMetadata } from './getMetaBySegment'
 
 import { getMetaBySegment } from './getMetaBySegment'
 import { getViewsFromConfig } from './getViewsFromConfig'
+import { NotFoundClient } from '../NotFound/index.client'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
@@ -97,20 +97,24 @@ export const Document: React.FC<AdminViewProps> = async ({
     DefaultView = collectionViews?.DefaultView
 
     if (!CustomView && !DefaultView) {
-      return notFound()
+      return <NotFoundClient />
     }
 
-    try {
-      data = await payload.findByID({
-        id,
-        collection: collectionSlug,
-        depth: 0,
-        locale: locale.code,
-        user,
-      })
-    } catch (error) {} // eslint-disable-line no-empty
-
     if (id) {
+      try {
+        data = await payload.findByID({
+          id,
+          collection: collectionSlug,
+          depth: 0,
+          locale: locale.code,
+          user,
+        })
+      } catch (error) {} // eslint-disable-line no-empty
+
+      if (!data) {
+        return <NotFoundClient />
+      }
+
       preferencesKey = `collection-${collectionSlug}-${id}`
     }
   }
@@ -137,15 +141,21 @@ export const Document: React.FC<AdminViewProps> = async ({
     DefaultView = globalViews?.DefaultView
 
     if (!CustomView && !DefaultView) {
-      return notFound()
+      return <NotFoundClient />
     }
 
-    data = await payload.findGlobal({
-      slug: globalSlug,
-      depth: 0,
-      locale: locale.code,
-      user,
-    })
+    try {
+      data = await payload.findGlobal({
+        slug: globalSlug,
+        depth: 0,
+        locale: locale.code,
+        user,
+      })
+    } catch (error) {} // eslint-disable-line no-empty
+
+    if (!data) {
+      return <NotFoundClient />
+    }
 
     preferencesKey = `global-${globalSlug}`
   }

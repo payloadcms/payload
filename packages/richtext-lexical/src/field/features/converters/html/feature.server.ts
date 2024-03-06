@@ -1,6 +1,5 @@
-import type { HTMLConverter } from '@payloadcms/richtext-lexical'
-
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
+import type { HTMLConverter } from './converter/types.js'
 
 export type HTMLConverterFeatureProps = {
   converters?:

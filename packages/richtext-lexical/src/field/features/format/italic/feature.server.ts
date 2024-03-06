@@ -1,7 +1,7 @@
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { ItalicFeatureClientComponent } from './feature.client'
-import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers'
+import { ItalicFeatureClientComponent } from './feature.client.js'
+import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers.js'
 
 export const ItalicFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

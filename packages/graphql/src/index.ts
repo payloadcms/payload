@@ -10,13 +10,13 @@ import {
 
 import type { GraphQLInfo } from 'payload/config'
 import type { SanitizedConfig } from 'payload/types'
-import accessResolver from './resolvers/auth/access'
-import initCollections from './schema/initCollections'
-import initGlobals from './schema/initGlobals'
-import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType'
-import buildLocaleInputType from './schema/buildLocaleInputType'
-import buildPoliciesType from './schema/buildPoliciesType'
-import { wrapCustomFields } from './utilities/wrapCustomResolver'
+import accessResolver from './resolvers/auth/access.js'
+import initCollections from './schema/initCollections.js'
+import initGlobals from './schema/initGlobals.js'
+import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType.js'
+import buildLocaleInputType from './schema/buildLocaleInputType.js'
+import buildPoliciesType from './schema/buildPoliciesType.js'
+import { wrapCustomFields } from './utilities/wrapCustomResolver.js'
 
 export async function configToSchema(config: SanitizedConfig): Promise<{
   schema: GraphQL.GraphQLSchema

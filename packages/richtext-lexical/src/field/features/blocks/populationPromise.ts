@@ -2,11 +2,11 @@ import type { Block } from 'payload/types'
 
 import { sanitizeFields } from 'payload/config'
 
-import type { PopulationPromise } from '../types'
-import type { BlocksFeatureProps } from './feature.server'
-import type { SerializedBlockNode } from './nodes/BlocksNode'
+import type { PopulationPromise } from '../types.js'
+import type { BlocksFeatureProps } from './feature.server.js'
+import type { SerializedBlockNode } from './nodes/BlocksNode.js'
 
-import { recurseNestedFields } from '../../../populate/recurseNestedFields'
+import { recurseNestedFields } from '../../../populate/recurseNestedFields.js'
 
 export const blockPopulationPromiseHOC = (
   props: BlocksFeatureProps,

@@ -2,14 +2,14 @@
 
 import { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
 
-import type { FeatureProviderProviderClient } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { UnorderedListIcon } from '../../../lexical/ui/icons/UnorderedList'
-import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
-import { createClientComponent } from '../../createClientComponent'
-import { LexicalListPlugin } from '../plugin'
-import { UNORDERED_LIST } from './markdownTransformer'
+import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { UnorderedListIcon } from '../../../lexical/ui/icons/UnorderedList/index.js'
+import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection/index.js'
+import { createClientComponent } from '../../createClientComponent.js'
+import { LexicalListPlugin } from '../plugin/index.js'
+import { UNORDERED_LIST } from './markdownTransformer.js'
 
 const UnorderedListFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

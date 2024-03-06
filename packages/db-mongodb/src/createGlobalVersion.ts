@@ -2,9 +2,9 @@ import type { CreateGlobalVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 import type { Document } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.d.ts'
 
-import { withSession } from './withSession'
+import { withSession } from './withSession.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,

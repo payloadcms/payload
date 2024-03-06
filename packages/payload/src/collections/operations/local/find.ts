@@ -1,11 +1,10 @@
-import type { GeneratedTypes, Payload } from '../../../'
-import type { PaginatedDocs } from '../../../database/types'
-import type { PayloadRequest, RequestContext } from '../../../types'
-import type { Document, Where } from '../../../types'
+import type { PaginatedDocs } from '../../../database/types.d.ts'
+import type { GeneratedTypes, Payload } from '../../../index.d.ts'
+import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.d.ts'
 
-import { APIError } from '../../../errors'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { findOperation } from '../find'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findOperation } from '../find.js'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T

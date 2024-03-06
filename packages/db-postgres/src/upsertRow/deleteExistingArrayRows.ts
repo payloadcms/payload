@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm'
 
-import type { DrizzleDB, PostgresAdapter } from '../types'
+import type { DrizzleDB, PostgresAdapter } from '../types.d.ts'
 
 type Args = {
   adapter: PostgresAdapter

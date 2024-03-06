@@ -1,6 +1,6 @@
 import type React from 'react'
 
-import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform'
+import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'
 
 export function highlightElemOriginalPosition(
   debugHighlightRef: React.RefObject<HTMLDivElement>,

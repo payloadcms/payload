@@ -2,15 +2,15 @@
 
 import { withMergedProps } from '@payloadcms/ui'
 
-import type { FeatureProviderProviderClient } from '../types'
-import type { RelationshipFeatureProps } from './feature.server'
+import type { FeatureProviderProviderClient } from '../types.js'
+import type { RelationshipFeatureProps } from './feature.server.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { RelationshipIcon } from '../../lexical/ui/icons/Relationship'
-import { createClientComponent } from '../createClientComponent'
-import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands'
-import { RelationshipNode } from './nodes/RelationshipNode'
-import { RelationshipPlugin } from './plugins'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { RelationshipIcon } from '../../lexical/ui/icons/Relationship/index.js'
+import { createClientComponent } from '../createClientComponent.js'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands.js'
+import { RelationshipNode } from './nodes/RelationshipNode.js'
+import { RelationshipPlugin } from './plugins/index.js'
 
 const RelationshipFeatureClient: FeatureProviderProviderClient<RelationshipFeatureProps> = (
   props,

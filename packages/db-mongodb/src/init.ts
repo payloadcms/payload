@@ -11,13 +11,13 @@ import {
   getVersionsModelName,
 } from 'payload/versions'
 
-import type { MongooseAdapter } from '.'
-import type { CollectionModel } from './types'
+import type { MongooseAdapter } from './index.d.ts'
+import type { CollectionModel } from './types.d.ts'
 
-import buildCollectionSchema from './models/buildCollectionSchema'
-import { buildGlobalModel } from './models/buildGlobalModel'
-import buildSchema from './models/buildSchema'
-import getBuildQueryPlugin from './queries/buildQuery'
+import buildCollectionSchema from './models/buildCollectionSchema.js'
+import { buildGlobalModel } from './models/buildGlobalModel.js'
+import buildSchema from './models/buildSchema.js'
+import getBuildQueryPlugin from './queries/buildQuery.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {

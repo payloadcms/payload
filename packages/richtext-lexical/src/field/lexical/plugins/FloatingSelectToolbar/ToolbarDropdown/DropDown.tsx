@@ -6,7 +6,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { FloatingToolbarSectionEntry } from '../types'
+import type { FloatingToolbarSectionEntry } from '../types.js'
 
 const baseClass = 'floating-select-toolbar-popup__dropdown-item'
 

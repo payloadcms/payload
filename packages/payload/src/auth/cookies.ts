@@ -1,5 +1,5 @@
-import type { Payload } from '..'
-import type { SanitizedCollectionConfig } from './../collections/config/types'
+import type { Payload } from '../index.d.ts'
+import type { SanitizedCollectionConfig } from './../collections/config/types.d.ts'
 type CookieOptions = {
   domain?: string
   expires?: Date
@@ -84,8 +84,8 @@ export const generatePayloadCookie = ({
     typeof collectionConfig.auth.cookies.sameSite === 'string'
       ? collectionConfig.auth.cookies.sameSite
       : collectionConfig.auth.cookies.sameSite
-      ? 'Strict'
-      : undefined
+        ? 'Strict'
+        : undefined
 
   return generateCookie({
     name: `${payload.config.cookiePrefix}-token`,
@@ -107,8 +107,8 @@ export const generateExpiredPayloadCookie = ({
     typeof collectionConfig.auth.cookies.sameSite === 'string'
       ? collectionConfig.auth.cookies.sameSite
       : collectionConfig.auth.cookies.sameSite
-      ? 'Strict'
-      : undefined
+        ? 'Strict'
+        : undefined
 
   const expires = new Date(Date.now() - 1000)
 

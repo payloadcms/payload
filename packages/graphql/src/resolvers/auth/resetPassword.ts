@@ -3,9 +3,9 @@ import { generatePayloadCookie } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import { Context } from '../types'
+import type { Context } from '../types.d.ts'
 
-function resetPasswordResolver(collection: Collection) {
+function resetPasswordResolver(collection: Collection): any {
   async function resolver(_, args, context: Context) {
     if (args.locale) context.req.locale = args.locale
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale

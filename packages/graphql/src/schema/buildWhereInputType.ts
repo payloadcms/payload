@@ -5,9 +5,9 @@ import { GraphQLInputObjectType, GraphQLList } from 'graphql'
 import type { Field, FieldAffectingData } from 'payload/types'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly } from 'payload/types'
-import formatName from '../utilities/formatName'
-import fieldToSchemaMap from './fieldToWhereInputSchemaMap'
-import { withOperators } from './withOperators'
+import formatName from '../utilities/formatName.js'
+import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js'
+import { withOperators } from './withOperators.js'
 import { flattenTopLevelFields } from 'payload/utilities'
 
 type Args = {

@@ -1,10 +1,10 @@
-import type { BlocksFeatureProps } from '@payloadcms/richtext-lexical'
 import type { Block } from 'payload/types'
 
 import { sanitizeFields } from 'payload/config'
 
-import type { NodeValidation } from '../types'
-import type { SerializedBlockNode } from './nodes/BlocksNode'
+import type { NodeValidation } from '../types.js'
+import type { BlocksFeatureProps } from './feature.server.js'
+import type { SerializedBlockNode } from './nodes/BlocksNode.js'
 
 export const blockValidationHOC = (
   props: BlocksFeatureProps,

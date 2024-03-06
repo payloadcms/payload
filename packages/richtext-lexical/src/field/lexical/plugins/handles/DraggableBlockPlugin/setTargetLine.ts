@@ -1,6 +1,6 @@
-import { getCollapsedMargins } from '../utils/getCollapsedMargins'
-import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform'
-import { highlightElemOriginalPosition } from './highlightElemOriginalPosition'
+import { getCollapsedMargins } from '../utils/getCollapsedMargins.js'
+import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'
+import { highlightElemOriginalPosition } from './highlightElemOriginalPosition.js'
 const TARGET_LINE_HALF_HEIGHT = 25
 const TEXT_BOX_HORIZONTAL_PADDING = -24
 const DEBUG = false

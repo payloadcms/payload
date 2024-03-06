@@ -2,7 +2,7 @@ import { fromFile } from 'file-type'
 import fs from 'fs'
 import path from 'path'
 
-import type { CustomPayloadRequest } from '../exports/types'
+import type { CustomPayloadRequest } from '../types/index.d.ts'
 
 const mimeTypeEstimate = {
   svg: 'image/svg+xml',

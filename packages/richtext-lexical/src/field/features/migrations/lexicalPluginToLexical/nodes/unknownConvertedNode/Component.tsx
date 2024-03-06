@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { UnknownConvertedNodeData } from './index'
+import type { UnknownConvertedNodeData } from './index.js'
 
 import './index.scss'
 

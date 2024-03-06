@@ -3,12 +3,12 @@ import type { Logger } from 'pino'
 
 import nodemailer from 'nodemailer'
 
-import type { EmailOptions, EmailTransport } from '../config/types'
-import type { BuildEmailResult, MockEmailHandler } from './types'
+import type { EmailOptions, EmailTransport } from '../config/types.d.ts'
+import type { BuildEmailResult, MockEmailHandler } from './types.d.ts'
 
-import { hasTransport, hasTransportOptions } from '../config/types'
-import { InvalidConfiguration } from '../errors'
-import mockHandler from './mockHandler'
+import { hasTransport, hasTransportOptions } from '../config/types.js'
+import { InvalidConfiguration } from '../errors/index.js'
+import mockHandler from './mockHandler.js'
 
 async function handleTransport(
   transport: Transporter,

@@ -1,7 +1,7 @@
 import type {
   FloatingToolbarSection,
   FloatingToolbarSectionEntry,
-} from '../../../lexical/plugins/FloatingSelectToolbar/types'
+} from '../../../lexical/plugins/FloatingSelectToolbar/types.js'
 
 export const FeaturesSectionWithEntries = (
   entries: FloatingToolbarSectionEntry[],

@@ -1,6 +1,6 @@
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { TestRecorderFeatureClientComponent } from './feature.client'
+import { TestRecorderFeatureClientComponent } from './feature.client.js'
 
 export const TestRecorderFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

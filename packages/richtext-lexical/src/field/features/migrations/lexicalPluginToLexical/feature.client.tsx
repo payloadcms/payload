@@ -1,11 +1,11 @@
 'use client'
 
-import type { FeatureProviderProviderClient } from '../../types'
-import type { LexicalPluginNodeConverter, PayloadPluginLexicalData } from './converter/types'
+import type { FeatureProviderProviderClient } from '../../types.js'
+import type { LexicalPluginNodeConverter, PayloadPluginLexicalData } from './converter/types.js'
 
-import { createClientComponent } from '../../createClientComponent'
-import { convertLexicalPluginToLexical } from './converter'
-import { UnknownConvertedNode } from './nodes/unknownConvertedNode'
+import { createClientComponent } from '../../createClientComponent.js'
+import { convertLexicalPluginToLexical } from './converter/index.js'
+import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
 
 const LexicalPluginToLexicalFeatureClient: FeatureProviderProviderClient<null> = (props) => {
   return {

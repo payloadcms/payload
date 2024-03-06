@@ -1,5 +1,5 @@
 'use client'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 
 import { createHeadlessEditor } from '@lexical/headless'
 import { useTableCell } from '@payloadcms/ui/elements'
@@ -8,14 +8,14 @@ import { useClientFunctions } from '@payloadcms/ui/providers'
 import { $getRoot } from 'lexical'
 import React, { useEffect, useState } from 'react'
 
-import type { FeatureProviderClient } from '../field/features/types'
-import type { SanitizedClientEditorConfig } from '../field/lexical/config/types'
-import type { GeneratedFeatureProviderComponent } from '../types'
+import type { FeatureProviderClient } from '../field/features/types.js'
+import type { SanitizedClientEditorConfig } from '../field/lexical/config/types.js'
+import type { GeneratedFeatureProviderComponent } from '../types.js'
 
-import { defaultEditorLexicalConfig } from '../field/lexical/config/client/default'
-import { loadClientFeatures } from '../field/lexical/config/client/loader'
-import { sanitizeClientEditorConfig } from '../field/lexical/config/client/sanitize'
-import { getEnabledNodes } from '../field/lexical/nodes'
+import { defaultEditorLexicalConfig } from '../field/lexical/config/client/default.js'
+import { loadClientFeatures } from '../field/lexical/config/client/loader.js'
+import { sanitizeClientEditorConfig } from '../field/lexical/config/client/sanitize.js'
+import { getEnabledNodes } from '../field/lexical/nodes/index.js'
 
 export const RichTextCell: React.FC<{
   lexicalEditorConfig: LexicalEditorConfig

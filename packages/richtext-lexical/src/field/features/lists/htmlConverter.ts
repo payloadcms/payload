@@ -2,9 +2,9 @@ import type { SerializedListItemNode, SerializedListNode } from '@lexical/list'
 
 import { ListItemNode, ListNode } from '@lexical/list'
 
-import type { HTMLConverter } from '../converters/html/converter/types'
+import type { HTMLConverter } from '../converters/html/converter/types.js'
 
-import { convertLexicalNodesToHTML } from '../converters/html/converter'
+import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
 
 export const ListHTMLConverter: HTMLConverter<SerializedListNode> = {
   converter: async ({ converters, node, parent, payload }) => {

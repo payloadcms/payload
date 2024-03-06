@@ -1,6 +1,6 @@
 'use client'
 
-import { createFeaturePropComponent } from '../../../../../createFeaturePropComponent'
-import { _SlateBlockquoteConverter } from './converter'
+import { createFeaturePropComponent } from '../../../../../createFeaturePropComponent.js'
+import { _SlateBlockquoteConverter } from './converter.js'
 
 export const BlockQuoteConverterClient = createFeaturePropComponent(_SlateBlockquoteConverter)

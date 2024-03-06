@@ -1,6 +1,6 @@
 import joi from 'joi'
 
-import { componentSchema } from './componentSchema'
+import { componentSchema } from './componentSchema.js'
 
 export const adminViewSchema = joi.array().items(
   joi.object().keys({

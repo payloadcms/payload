@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { SerializedUploadNode } from '@payloadcms/richtext-lexical'
-
-import type { LexicalPluginNodeConverter } from '../../types'
+import type { SerializedUploadNode } from '../../../../../upload/nodes/UploadNode.js'
+import type { LexicalPluginNodeConverter } from '../../types.js'
 
 export const _UploadConverter: LexicalPluginNodeConverter = {
   converter({ lexicalPluginNode }) {

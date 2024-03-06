@@ -4,10 +4,10 @@ import { useListDrawer } from '@payloadcms/ui'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR, type LexicalEditor } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { $createRelationshipNode } from '../nodes/RelationshipNode'
-import { INSERT_RELATIONSHIP_COMMAND } from '../plugins'
-import { EnabledRelationshipsCondition } from '../utils/EnabledRelationshipsCondition'
-import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './commands'
+import { $createRelationshipNode } from '../nodes/RelationshipNode.js'
+import { INSERT_RELATIONSHIP_COMMAND } from '../plugins/index.js'
+import { EnabledRelationshipsCondition } from '../utils/EnabledRelationshipsCondition.js'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './commands.js'
 
 const insertRelationship = ({
   id,

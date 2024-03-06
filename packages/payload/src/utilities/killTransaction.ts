@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../types'
+import type { PayloadRequest } from '../types/index.d.ts'
 
 /**
  * Rollback the transaction from the req using the db adapter and removes it from the req

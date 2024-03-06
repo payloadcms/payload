@@ -1,7 +1,7 @@
-import type { SlateNodeConverterProvider } from '../../types'
+import type { SlateNodeConverterProvider } from '../../types.js'
 
-import { RelationshipConverterClient } from './client'
-import { _SlateRelationshipConverter } from './converter'
+import { RelationshipConverterClient } from './client.js'
+import { _SlateRelationshipConverter } from './converter.js'
 
 export const SlateRelationshipConverter: SlateNodeConverterProvider = {
   ClientComponent: RelationshipConverterClient,

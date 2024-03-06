@@ -1,4 +1,4 @@
-import type { User } from '../auth'
+import type { User } from '../auth/index.js'
 
 type Args = {
   defaultValue: unknown

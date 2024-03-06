@@ -9,9 +9,9 @@ import {
 } from 'payload/database'
 import prompts from 'prompts'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { parseError } from './utilities/parseError'
+import { parseError } from './utilities/parseError.js'
 
 /**
  * Drop the current database and run all migrate up functions

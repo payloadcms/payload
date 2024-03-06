@@ -2,11 +2,11 @@ import type { UpdateOne } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { ChainedMethods } from './find/chainMethods'
-import { chainMethods } from './find/chainMethods'
-import type { PostgresAdapter } from './types'
-import buildQuery from './queries/buildQuery'
-import { upsertRow } from './upsertRow'
+import type { ChainedMethods } from './find/chainMethods.d.ts'
+import type { PostgresAdapter } from './types.d.ts'
+import { chainMethods } from './find/chainMethods.js'
+import buildQuery from './queries/buildQuery.js'
+import { upsertRow } from './upsertRow/index.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: PostgresAdapter,

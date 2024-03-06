@@ -1,4 +1,4 @@
-import { CAN_USE_DOM } from './canUseDOM'
+import { CAN_USE_DOM } from './canUseDOM.js'
 
 declare global {
   interface Document {

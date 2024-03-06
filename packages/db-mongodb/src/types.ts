@@ -25,7 +25,7 @@ import type {
   UploadField,
 } from 'payload/types'
 
-import type { BuildQueryArgs } from './queries/buildQuery'
+import type { BuildQueryArgs } from './queries/buildQuery.d.ts'
 
 export interface CollectionModel extends Model<any>, PaginateModel<any> {
   /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */

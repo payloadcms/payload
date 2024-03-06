@@ -1,5 +1,5 @@
-import type { User } from '../auth'
-import type { PayloadRequest } from '../types'
+import type { User } from '../auth/index.d.ts'
+import type { PayloadRequest } from '../types/index.d.ts'
 
 export type PreferenceRequest = {
   key: string

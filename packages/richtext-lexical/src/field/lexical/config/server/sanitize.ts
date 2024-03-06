@@ -1,7 +1,7 @@
-import type { ResolvedServerFeatureMap, SanitizedServerFeatures } from '../../../features/types'
-import type { SanitizedServerEditorConfig, ServerEditorConfig } from '../types'
+import type { ResolvedServerFeatureMap, SanitizedServerFeatures } from '../../../features/types.js'
+import type { SanitizedServerEditorConfig, ServerEditorConfig } from '../types.js'
 
-import { loadFeatures } from './loader'
+import { loadFeatures } from './loader.js'
 
 export const sanitizeServerFeatures = (
   features: ResolvedServerFeatureMap,

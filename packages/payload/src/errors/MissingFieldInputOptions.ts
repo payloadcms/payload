@@ -1,6 +1,6 @@
-import type { RadioField, SelectField } from '../fields/config/types'
+import type { RadioField, SelectField } from '../fields/config/types.d.ts'
 
-import APIError from './APIError'
+import APIError from './APIError.js'
 
 class MissingFieldInputOptions extends APIError {
   constructor(field: RadioField | SelectField) {

@@ -10,7 +10,7 @@ import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui'
 import { headers as getHeaders } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { createLocalReq } from 'payload/utilities'
 import qs from 'qs'
 
@@ -88,10 +88,18 @@ export const initPage = async ({
 
   if (collectionSlug) {
     collectionConfig = collections.find((collection) => collection.slug === collectionSlug)
+
+    if (!collectionConfig) {
+      notFound()
+    }
   }
 
   if (globalSlug) {
     globalConfig = globals.find((global) => global.slug === globalSlug)
+
+    if (!globalConfig) {
+      notFound()
+    }
   }
 
   return {

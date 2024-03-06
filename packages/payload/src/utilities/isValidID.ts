@@ -6,7 +6,7 @@ export const isValidID = (
 ): boolean => {
   if (type === 'text' && value) {
     if (['object', 'string'].includes(typeof value)) {
-      const isObjectID = ObjectId.isValid(value as string)
+      const isObjectID = ObjectId.default.isValid(value as string)
       return typeof value === 'string' || isObjectID
     }
     return false
@@ -15,6 +15,6 @@ export const isValidID = (
   if (typeof value === 'number' && !Number.isNaN(value)) return true
 
   if (type === 'ObjectID') {
-    return ObjectId.isValid(String(value))
+    return ObjectId.default.isValid(String(value))
   }
 }

@@ -1,7 +1,7 @@
-import type { SlateNodeConverterProvider } from '../../types'
+import type { SlateNodeConverterProvider } from '../../types.js'
 
-import { BlockQuoteConverterClient } from './client'
-import { _SlateBlockquoteConverter } from './converter'
+import { BlockQuoteConverterClient } from './client.js'
+import { _SlateBlockquoteConverter } from './converter.js'
 
 export const SlateBlockquoteConverter: SlateNodeConverterProvider = {
   ClientComponent: BlockQuoteConverterClient,

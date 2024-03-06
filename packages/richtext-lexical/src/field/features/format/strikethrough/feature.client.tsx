@@ -2,12 +2,12 @@
 
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProviderProviderClient } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough'
-import { createClientComponent } from '../../createClientComponent'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
-import { STRIKETHROUGH } from './markdownTransformers'
+import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough/index.js'
+import { createClientComponent } from '../../createClientComponent.js'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
+import { STRIKETHROUGH } from './markdownTransformers.js'
 
 const StrikethroughFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

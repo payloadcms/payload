@@ -1,14 +1,14 @@
 import { translations } from '@payloadcms/translations/api'
 
-import type { Config } from '../../config/types'
-import type { SanitizedGlobalConfig } from './types'
+import type { Config } from '../../config/types.d.ts'
+import type { SanitizedGlobalConfig } from './types.d.ts'
 
-import defaultAccess from '../../auth/defaultAccess'
-import { sanitizeFields } from '../../fields/config/sanitize'
-import { fieldAffectsData } from '../../fields/config/types'
-import mergeBaseFields from '../../fields/mergeBaseFields'
-import { toWords } from '../../utilities/formatLabels'
-import baseVersionFields from '../../versions/baseFields'
+import defaultAccess from '../../auth/defaultAccess.js'
+import { sanitizeFields } from '../../fields/config/sanitize.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
+import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { toWords } from '../../utilities/formatLabels.js'
+import baseVersionFields from '../../versions/baseFields.js'
 
 const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
   const { collections, globals } = config
@@ -73,23 +73,23 @@ const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
     if (!hasUpdatedAt) {
       sanitizedGlobal.fields.push({
         name: 'updatedAt',
+        type: 'date',
         admin: {
           disableBulkEdit: true,
           hidden: true,
         },
         label: translations['general:updatedAt'],
-        type: 'date',
       })
     }
     if (!hasCreatedAt) {
       sanitizedGlobal.fields.push({
         name: 'createdAt',
+        type: 'date',
         admin: {
           disableBulkEdit: true,
           hidden: true,
         },
         label: translations['general:createdAt'],
-        type: 'date',
       })
     }
 

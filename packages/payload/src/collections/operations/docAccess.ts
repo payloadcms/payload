@@ -1,12 +1,11 @@
-import type { CollectionPermission } from '../../auth'
-import type { PayloadRequest } from '../../types'
-import type { AllOperations } from '../../types'
-import type { Collection } from '../config/types'
+import type { CollectionPermission } from '../../auth/index.d.ts'
+import type { AllOperations, PayloadRequest } from '../../types/index.d.ts'
+import type { Collection } from '../config/types.d.ts'
 
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { getEntityPolicies } from '../../utilities/getEntityPolicies'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
 
@@ -42,10 +41,10 @@ export async function docAccessOperation(args: Arguments): Promise<CollectionPer
 
     const result = await getEntityPolicies({
       id,
+      type: 'collection',
       entity: config,
       operations: collectionOperations,
       req,
-      type: 'collection',
     })
 
     if (shouldCommit) await commitTransaction(req)

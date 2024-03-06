@@ -1,7 +1,7 @@
-import type { SlateNodeConverterProvider } from '../../types'
+import type { SlateNodeConverterProvider } from '../../types.js'
 
-import { OrderedListConverterClient } from './client'
-import { _SlateOrderedListConverter } from './converter'
+import { OrderedListConverterClient } from './client.js'
+import { _SlateOrderedListConverter } from './converter.js'
 
 export const SlateOrderedListConverter: SlateNodeConverterProvider = {
   ClientComponent: OrderedListConverterClient,

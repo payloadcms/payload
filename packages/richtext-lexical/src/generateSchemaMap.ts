@@ -2,7 +2,7 @@ import type { RichTextAdapter } from 'payload/types'
 
 import { sanitizeFields } from 'payload/config'
 
-import type { ResolvedServerFeatureMap } from './field/features/types'
+import type { ResolvedServerFeatureMap } from './field/features/types.js'
 
 export const getGenerateSchemaMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateSchemaMap'] =>

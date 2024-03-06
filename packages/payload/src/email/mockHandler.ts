@@ -1,9 +1,9 @@
 import nodemailer from 'nodemailer'
 
-import type { EmailOptions } from '../config/types'
-import type { MockEmailHandler } from './types'
+import type { EmailOptions } from '../config/types.d.ts'
+import type { MockEmailHandler } from './types.d.ts'
 
-import { defaults as emailDefaults } from './defaults'
+import { defaults as emailDefaults } from './defaults.js'
 
 const mockEmailHandler = async (emailConfig: EmailOptions): Promise<MockEmailHandler> => {
   const testAccount = await nodemailer.createTestAccount()

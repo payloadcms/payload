@@ -16,9 +16,9 @@ import { useFieldPath } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
-import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
+import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
 import './index.scss'
-import { type Props } from './types'
+import { type Props } from './types.js'
 
 const baseClass = 'lexical-link-edit-drawer'
 

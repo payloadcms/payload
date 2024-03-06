@@ -42,10 +42,10 @@ import type {
 import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/types'
 import { toWords } from 'payload/utilities'
 
-import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield'
-import combineParentName from '../utilities/combineParentName'
-import formatName from '../utilities/formatName'
-import withNullableType from './withNullableType'
+import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
+import combineParentName from '../utilities/combineParentName.js'
+import formatName from '../utilities/formatName.js'
+import withNullableType from './withNullableType.js'
 import { flattenTopLevelFields } from 'payload/utilities'
 
 const idFieldTypes = {

@@ -2,14 +2,14 @@ import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
 import { singular } from 'pluralize'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { SanitizedConfig } from '../exports/config'
-import type { Field, FieldAffectingData, Option } from '../fields/config/types'
-import type { SanitizedGlobalConfig } from '../globals/config/types'
+import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
+import type { SanitizedConfig } from '../config/types.d.ts'
+import type { Field, FieldAffectingData, Option } from '../fields/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
 
-import { fieldAffectsData, tabHasName } from '../fields/config/types'
-import { deepCopyObject } from './deepCopyObject'
-import { toWords } from './formatLabels'
+import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
+import { deepCopyObject } from './deepCopyObject.js'
+import { toWords } from './formatLabels.js'
 
 const fieldIsRequired = (field: Field) => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)

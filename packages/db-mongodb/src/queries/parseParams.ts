@@ -9,8 +9,8 @@ import deepmerge from 'deepmerge'
 import { validOperators } from 'payload/types'
 import { combineMerge } from 'payload/utilities'
 
-import { buildAndOrConditions } from './buildAndOrConditions'
-import { buildSearchParam } from './buildSearchParams'
+import { buildAndOrConditions } from './buildAndOrConditions.js'
+import { buildSearchParam } from './buildSearchParams.js'
 
 export async function parseParams({
   collectionSlug,

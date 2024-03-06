@@ -1,26 +1,26 @@
 import type { JSONSchema4 } from 'json-schema'
 import type { SerializedEditorState } from 'lexical'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 import type { RichTextAdapter } from 'payload/types'
 
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
-import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types'
-import type { SanitizedServerEditorConfig } from './field/lexical/config/types'
-import type { AdapterProps } from './types'
+import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'
+import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
+import type { AdapterProps } from './types.js'
 
 import {
   defaultEditorConfig,
   defaultEditorFeatures,
   defaultSanitizedServerEditorConfig,
-} from './field/lexical/config/server/default'
-import { loadFeatures } from './field/lexical/config/server/loader'
-import { sanitizeServerFeatures } from './field/lexical/config/server/sanitize'
-import { cloneDeep } from './field/lexical/utils/cloneDeep'
-import { getGenerateComponentMap } from './generateComponentMap'
-import { getGenerateSchemaMap } from './generateSchemaMap'
-import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
-import { richTextValidateHOC } from './validate'
+} from './field/lexical/config/server/default.js'
+import { loadFeatures } from './field/lexical/config/server/loader.js'
+import { sanitizeServerFeatures } from './field/lexical/config/server/sanitize.js'
+import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
+import { getGenerateComponentMap } from './generateComponentMap.js'
+import { getGenerateSchemaMap } from './generateSchemaMap.js'
+import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise.js'
+import { richTextValidateHOC } from './validate/index.js'
 
 export type LexicalEditorProps = {
   features?:
@@ -231,101 +231,101 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   }
 }
 
-export { AlignFeature } from './field/features/align/feature.server'
-export { BlockQuoteFeature } from './field/features/blockquote/feature.server'
-export { BlocksFeature, type BlocksFeatureProps } from './field/features/blocks/feature.server'
+export { AlignFeature } from './field/features/align/feature.server.js'
+export { BlockQuoteFeature } from './field/features/blockquote/feature.server.js'
+export { BlocksFeature, type BlocksFeatureProps } from './field/features/blocks/feature.server.js'
 export {
   $createBlockNode,
   $isBlockNode,
   type BlockFields,
   BlockNode,
   type SerializedBlockNode,
-} from './field/features/blocks/nodes/BlocksNode'
+} from './field/features/blocks/nodes/BlocksNode.js'
 
-export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
+export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection/index.js'
+export { LinebreakHTMLConverter } from './field/features/converters/html/converter/converters/linebreak.js'
+export { ParagraphHTMLConverter } from './field/features/converters/html/converter/converters/paragraph.js'
+
+export { TextHTMLConverter } from './field/features/converters/html/converter/converters/text.js'
+export { defaultHTMLConverters } from './field/features/converters/html/converter/defaultConverters.js'
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
-} from './field/features/converters/html/converter'
-export { LinebreakHTMLConverter } from './field/features/converters/html/converter/converters/linebreak'
-
-export { ParagraphHTMLConverter } from './field/features/converters/html/converter/converters/paragraph'
-export { TextHTMLConverter } from './field/features/converters/html/converter/converters/text'
-export { defaultHTMLConverters } from './field/features/converters/html/converter/defaultConverters'
-export type { HTMLConverter } from './field/features/converters/html/converter/types'
+} from './field/features/converters/html/converter/index.js'
+export type { HTMLConverter } from './field/features/converters/html/converter/types.js'
 export {
   HTMLConverterFeature,
   type HTMLConverterFeatureProps,
-} from './field/features/converters/html/feature.server'
-export { consolidateHTMLConverters } from './field/features/converters/html/field'
-export { lexicalHTML } from './field/features/converters/html/field'
-export { createClientComponent } from './field/features/createClientComponent'
-export { TestRecorderFeature } from './field/features/debug/testrecorder/feature.server'
-export { TreeViewFeature } from './field/features/debug/treeview/feature.server'
-export { BoldFeature } from './field/features/format/bold/feature.server'
-export { SectionWithEntries as FormatSectionWithEntries } from './field/features/format/common/floatingSelectToolbarSection'
-export { InlineCodeFeature } from './field/features/format/inlinecode/feature.server'
-export { ItalicFeature } from './field/features/format/italic/feature.server'
-export { StrikethroughFeature } from './field/features/format/strikethrough/feature.server'
-export { SubscriptFeature } from './field/features/format/subscript/feature.server'
-export { SuperscriptFeature } from './field/features/format/superscript/feature.server'
-export { UnderlineFeature } from './field/features/format/underline/feature.server'
+} from './field/features/converters/html/feature.server.js'
+export { consolidateHTMLConverters } from './field/features/converters/html/field/index.js'
+export { lexicalHTML } from './field/features/converters/html/field/index.js'
+export { createClientComponent } from './field/features/createClientComponent.js'
+export { TestRecorderFeature } from './field/features/debug/testrecorder/feature.server.js'
+export { TreeViewFeature } from './field/features/debug/treeview/feature.server.js'
+export { BoldFeature } from './field/features/format/bold/feature.server.js'
+export { SectionWithEntries as FormatSectionWithEntries } from './field/features/format/common/floatingSelectToolbarSection.js'
+export { InlineCodeFeature } from './field/features/format/inlinecode/feature.server.js'
+export { ItalicFeature } from './field/features/format/italic/feature.server.js'
+export { StrikethroughFeature } from './field/features/format/strikethrough/feature.server.js'
+export { SubscriptFeature } from './field/features/format/subscript/feature.server.js'
+export { SuperscriptFeature } from './field/features/format/superscript/feature.server.js'
+export { UnderlineFeature } from './field/features/format/underline/feature.server.js'
 
-export { HeadingFeature } from './field/features/heading/feature.server'
-export { IndentFeature } from './field/features/indent/feature.server'
+export { HeadingFeature } from './field/features/heading/feature.server.js'
+export { IndentFeature } from './field/features/indent/feature.server.js'
 
-export { LinkFeature, type LinkFeatureServerProps } from './field/features/link/feature.server'
+export { LinkFeature, type LinkFeatureServerProps } from './field/features/link/feature.server.js'
 export {
   $createAutoLinkNode,
   $isAutoLinkNode,
   AutoLinkNode,
-} from './field/features/link/nodes/AutoLinkNode'
+} from './field/features/link/nodes/AutoLinkNode.js'
 export {
   $createLinkNode,
   $isLinkNode,
   LinkNode,
   TOGGLE_LINK_COMMAND,
-} from './field/features/link/nodes/LinkNode'
+} from './field/features/link/nodes/LinkNode.js'
 export type {
   LinkFields,
   SerializedAutoLinkNode,
   SerializedLinkNode,
-} from './field/features/link/nodes/types'
-export { CheckListFeature } from './field/features/lists/checklist/feature.server'
-export { OrderedListFeature } from './field/features/lists/orderedlist/feature.server'
-export { UnorderedListFeature } from './field/features/lists/unorderedlist/feature.server'
-export { LexicalPluginToLexicalFeature } from './field/features/migrations/lexicalPluginToLexical/feature.server'
-export { SlateBlockquoteConverter } from './field/features/migrations/slateToLexical/converter/converters/blockquote'
-export { SlateHeadingConverter } from './field/features/migrations/slateToLexical/converter/converters/heading'
-export { SlateIndentConverter } from './field/features/migrations/slateToLexical/converter/converters/indent'
-export { SlateLinkConverter } from './field/features/migrations/slateToLexical/converter/converters/link'
-export { SlateListItemConverter } from './field/features/migrations/slateToLexical/converter/converters/listItem'
-export { SlateOrderedListConverter } from './field/features/migrations/slateToLexical/converter/converters/orderedList'
-export { SlateRelationshipConverter } from './field/features/migrations/slateToLexical/converter/converters/relationship'
-export { SlateUnknownConverter } from './field/features/migrations/slateToLexical/converter/converters/unknown'
-export { SlateUnorderedListConverter } from './field/features/migrations/slateToLexical/converter/converters/unorderedList'
+} from './field/features/link/nodes/types.js'
+export { CheckListFeature } from './field/features/lists/checklist/feature.server.js'
+export { OrderedListFeature } from './field/features/lists/orderedlist/feature.server.js'
+export { UnorderedListFeature } from './field/features/lists/unorderedlist/feature.server.js'
+export { LexicalPluginToLexicalFeature } from './field/features/migrations/lexicalPluginToLexical/feature.server.js'
+export { SlateBlockquoteConverter } from './field/features/migrations/slateToLexical/converter/converters/blockquote/index.js'
+export { SlateHeadingConverter } from './field/features/migrations/slateToLexical/converter/converters/heading/index.js'
+export { SlateIndentConverter } from './field/features/migrations/slateToLexical/converter/converters/indent/index.js'
+export { SlateLinkConverter } from './field/features/migrations/slateToLexical/converter/converters/link/index.js'
+export { SlateListItemConverter } from './field/features/migrations/slateToLexical/converter/converters/listItem/index.js'
+export { SlateOrderedListConverter } from './field/features/migrations/slateToLexical/converter/converters/orderedList/index.js'
+export { SlateRelationshipConverter } from './field/features/migrations/slateToLexical/converter/converters/relationship/index.js'
+export { SlateUnknownConverter } from './field/features/migrations/slateToLexical/converter/converters/unknown/index.js'
+export { SlateUnorderedListConverter } from './field/features/migrations/slateToLexical/converter/converters/unorderedList/index.js'
 
-export { SlateUploadConverter } from './field/features/migrations/slateToLexical/converter/converters/upload'
-export { defaultSlateConverters } from './field/features/migrations/slateToLexical/converter/defaultConverters'
+export { SlateUploadConverter } from './field/features/migrations/slateToLexical/converter/converters/upload/index.js'
+export { defaultSlateConverters } from './field/features/migrations/slateToLexical/converter/defaultConverters.js'
 export {
   convertSlateNodesToLexical,
   convertSlateToLexical,
-} from './field/features/migrations/slateToLexical/converter/index'
+} from './field/features/migrations/slateToLexical/converter/index.js'
 
 export type {
   SlateNode,
   SlateNodeConverter,
-} from './field/features/migrations/slateToLexical/converter/types'
-export { SlateToLexicalFeature } from './field/features/migrations/slateToLexical/feature.server'
-export { ParagraphFeature } from './field/features/paragraph/feature.server'
-export { RelationshipFeature } from './field/features/relationship/feature.server'
+} from './field/features/migrations/slateToLexical/converter/types.js'
+export { SlateToLexicalFeature } from './field/features/migrations/slateToLexical/feature.server.js'
+export { ParagraphFeature } from './field/features/paragraph/feature.server.js'
+export { RelationshipFeature } from './field/features/relationship/feature.server.js'
 export {
   $createRelationshipNode,
   $isRelationshipNode,
   type RelationshipData,
   RelationshipNode,
   type SerializedRelationshipNode,
-} from './field/features/relationship/nodes/RelationshipNode'
+} from './field/features/relationship/nodes/RelationshipNode.js'
 export type {
   ClientFeature,
   ClientFeatureProviderMap,
@@ -344,12 +344,12 @@ export type {
   SanitizedServerFeatures,
   ServerFeature,
   ServerFeatureProviderMap,
-} from './field/features/types'
-export { UploadFeature } from './field/features/upload/feature.server'
+} from './field/features/types.js'
+export { UploadFeature } from './field/features/upload/feature.server.js'
 
-export type { UploadFeatureProps } from './field/features/upload/feature.server'
+export type { UploadFeatureProps } from './field/features/upload/feature.server.js'
 
-export type { RawUploadPayload } from './field/features/upload/nodes/UploadNode'
+export type { RawUploadPayload } from './field/features/upload/nodes/UploadNode.js'
 
 export {
   $createUploadNode,
@@ -357,54 +357,57 @@ export {
   type SerializedUploadNode,
   type UploadData,
   UploadNode,
-} from './field/features/upload/nodes/UploadNode'
+} from './field/features/upload/nodes/UploadNode.js'
 export {
   EditorConfigProvider,
   useEditorConfigContext,
-} from './field/lexical/config/client/EditorConfigProvider'
+} from './field/lexical/config/client/EditorConfigProvider.js'
 export {
   sanitizeClientEditorConfig,
   sanitizeClientFeatures,
-} from './field/lexical/config/client/sanitize'
+} from './field/lexical/config/client/sanitize.js'
 export {
   defaultEditorConfig,
   defaultEditorFeatures,
   defaultEditorLexicalConfig,
   defaultSanitizedServerEditorConfig,
-} from './field/lexical/config/server/default'
-export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/server/loader'
+} from './field/lexical/config/server/default.js'
+export {
+  loadFeatures,
+  sortFeaturesForOptimalLoading,
+} from './field/lexical/config/server/loader.js'
 export {
   sanitizeServerEditorConfig,
   sanitizeServerFeatures,
-} from './field/lexical/config/server/sanitize'
+} from './field/lexical/config/server/sanitize.js'
 
 export type {
   ClientEditorConfig,
   SanitizedClientEditorConfig,
   SanitizedServerEditorConfig,
   ServerEditorConfig,
-} from './field/lexical/config/types'
-export { getEnabledNodes } from './field/lexical/nodes'
+} from './field/lexical/config/types.js'
+export { getEnabledNodes } from './field/lexical/nodes/index.js'
 
 export {
   type FloatingToolbarSection,
   type FloatingToolbarSectionEntry,
-} from './field/lexical/plugins/FloatingSelectToolbar/types'
-export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
+} from './field/lexical/plugins/FloatingSelectToolbar/types.js'
+export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index.js'
 export type { AdapterProps }
 
 export {
   SlashMenuGroup,
   SlashMenuOption,
-} from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM'
-export { cloneDeep } from './field/lexical/utils/cloneDeep'
-export { getDOMRangeRect } from './field/lexical/utils/getDOMRangeRect'
-export { getSelectedNode } from './field/lexical/utils/getSelectedNode'
-export { isHTMLElement } from './field/lexical/utils/guard'
-export { invariant } from './field/lexical/utils/invariant'
-export { joinClasses } from './field/lexical/utils/joinClasses'
-export { createBlockNode } from './field/lexical/utils/markdown/createBlockNode'
+} from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM.js'
+export { cloneDeep } from './field/lexical/utils/cloneDeep.js'
+export { getDOMRangeRect } from './field/lexical/utils/getDOMRangeRect.js'
+export { getSelectedNode } from './field/lexical/utils/getSelectedNode.js'
+export { isHTMLElement } from './field/lexical/utils/guard.js'
+export { invariant } from './field/lexical/utils/invariant.js'
+export { joinClasses } from './field/lexical/utils/joinClasses.js'
+export { createBlockNode } from './field/lexical/utils/markdown/createBlockNode.js'
 export {
   DETAIL_TYPE_TO_DETAIL,
   DOUBLE_LINE_BREAK,
@@ -418,16 +421,16 @@ export {
   TEXT_MODE_TO_TYPE,
   TEXT_TYPE_TO_FORMAT,
   TEXT_TYPE_TO_MODE,
-} from './field/lexical/utils/nodeFormat'
-export { Point, isPoint } from './field/lexical/utils/point'
-export { Rect } from './field/lexical/utils/rect'
-export { setFloatingElemPosition } from './field/lexical/utils/setFloatingElemPosition'
-export { setFloatingElemPositionForLinkEditor } from './field/lexical/utils/setFloatingElemPositionForLinkEditor'
+} from './field/lexical/utils/nodeFormat.js'
+export { Point, isPoint } from './field/lexical/utils/point.js'
+export { Rect } from './field/lexical/utils/rect.js'
+export { setFloatingElemPosition } from './field/lexical/utils/setFloatingElemPosition.js'
+export { setFloatingElemPositionForLinkEditor } from './field/lexical/utils/setFloatingElemPositionForLinkEditor.js'
 export {
   addSwipeDownListener,
   addSwipeLeftListener,
   addSwipeRightListener,
   addSwipeUpListener,
-} from './field/lexical/utils/swipe'
-export { sanitizeUrl, validateUrl } from './field/lexical/utils/url'
-export { defaultRichTextValue } from './populate/defaultValue'
+} from './field/lexical/utils/swipe.js'
+export { sanitizeUrl, validateUrl } from './field/lexical/utils/url.js'
+export { defaultRichTextValue } from './populate/defaultValue.js'

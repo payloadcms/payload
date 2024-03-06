@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { SerializedLinkNode } from '@payloadcms/richtext-lexical'
+import type { SerializedLinkNode } from '../../../../../link/nodes/types.js'
+import type { LexicalPluginNodeConverter } from '../../types.js'
 
-import type { LexicalPluginNodeConverter } from '../../types'
-
-import { convertLexicalPluginNodesToLexical } from '../../index'
+import { convertLexicalPluginNodesToLexical } from '../../index.js'
 
 export const _LinkConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {

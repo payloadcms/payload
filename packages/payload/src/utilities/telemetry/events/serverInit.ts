@@ -1,6 +1,6 @@
-import type { Payload } from '../../../types'
+import type { Payload } from '../../../index.d.ts'
 
-import { sendEvent } from '..'
+import { sendEvent } from '../index.js'
 
 export type ServerInitEvent = {
   type: 'server-init'

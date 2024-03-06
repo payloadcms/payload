@@ -1,8 +1,8 @@
-export * from './../types'
-export type * from '../admin/types'
-export type * from '../uploads/types'
+export * from './../types/index.js'
+export type * from '../admin/types.d.ts'
+export type * from '../uploads/types.d.ts'
 
-export type { DocumentPermissions } from '../auth'
+export type { DocumentPermissions } from '../auth/index.d.ts'
 
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
@@ -24,9 +24,9 @@ export type {
   SanitizedCollectionConfig,
   TypeWithID,
   TypeWithTimestamps,
-} from './../collections/config/types'
+} from './../collections/config/types.d.ts'
 
-export type { Access, AccessArgs, ClientConfig, SanitizedConfig } from './../config/types'
+export type { Access, AccessArgs, ClientConfig, SanitizedConfig } from './../config/types.d.ts'
 
 export type {
   ArrayField,
@@ -83,7 +83,7 @@ export type {
   Validate,
   ValidateOptions,
   ValueWithRelation,
-} from './../fields/config/types'
+} from './../fields/config/types.d.ts'
 
 export {
   fieldAffectsData,
@@ -100,7 +100,7 @@ export {
   optionsAreObjects,
   tabHasName,
   valueIsValueWithRelation,
-} from './../fields/config/types'
+} from './../fields/config/types.js'
 
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
@@ -110,8 +110,8 @@ export type {
   BeforeValidateHook as GlobalBeforeValidateHook,
   GlobalConfig,
   SanitizedGlobalConfig,
-} from './../globals/config/types'
+} from './../globals/config/types.d.ts'
 
-export type { DocumentPreferences } from './../preferences/types'
+export type { DocumentPreferences } from './../preferences/types.d.ts'
 
-export { validOperators } from './../types/constants'
+export { validOperators } from './../types/constants.js'

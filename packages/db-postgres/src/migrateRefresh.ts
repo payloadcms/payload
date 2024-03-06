@@ -9,10 +9,10 @@ import {
   readMigrationFiles,
 } from 'payload/database'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { migrationTableExists } from './utilities/migrationTableExists'
-import { parseError } from './utilities/parseError'
+import { migrationTableExists } from './utilities/migrationTableExists.js'
+import { parseError } from './utilities/parseError.js'
 
 /**
  * Run all migration down functions before running up

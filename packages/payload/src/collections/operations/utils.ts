@@ -1,15 +1,19 @@
-import type { forgotPasswordOperation } from '../../auth/operations/forgotPassword'
-import type { loginOperation } from '../../auth/operations/login'
-import type { refreshOperation } from '../../auth/operations/refresh'
-import type { PayloadRequest } from '../../exports/types'
-import type { AfterOperationHook, SanitizedCollectionConfig, TypeWithID } from '../config/types'
-import type { createOperation } from './create'
-import type { deleteOperation } from './delete'
-import type { deleteByIDOperation } from './deleteByID'
-import type { findOperation } from './find'
-import type { findByIDOperation } from './findByID'
-import type { updateOperation } from './update'
-import type { updateByIDOperation } from './updateByID'
+import type { forgotPasswordOperation } from '../../auth/operations/forgotPassword.d.ts'
+import type { loginOperation } from '../../auth/operations/login.d.ts'
+import type { refreshOperation } from '../../auth/operations/refresh.d.ts'
+import type { PayloadRequest } from '../../exports/types.d.ts'
+import type {
+  AfterOperationHook,
+  SanitizedCollectionConfig,
+  TypeWithID,
+} from '../config/types.d.ts'
+import type { createOperation } from './create.d.ts'
+import type { deleteOperation } from './delete.d.ts'
+import type { deleteByIDOperation } from './deleteByID.d.ts'
+import type { findOperation } from './find.d.ts'
+import type { findByIDOperation } from './findByID.d.ts'
+import type { updateOperation } from './update.d.ts'
+import type { updateByIDOperation } from './updateByID.d.ts'
 
 export type AfterOperationMap<T extends TypeWithID> = {
   create: typeof createOperation // todo: pass correct generic
