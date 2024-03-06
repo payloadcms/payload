@@ -19,7 +19,6 @@ export { generateAccountMetadata } from './meta'
 
 export const Account: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
   const {
-    locale,
     permissions,
     req: {
       payload,
@@ -94,8 +93,8 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
         <HydrateClientUser permissions={permissions} user={user} />
         <SetDocumentInfo
           AfterFields={<Settings />}
-          action={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`}
-          apiURL={`${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`}
+          action={`${serverURL}${api}/${userSlug}${data?.id ? `/${data.id}` : ''}`}
+          apiURL={`${serverURL}${api}/${userSlug}${data?.id ? `/${data.id}` : ''}`}
           collectionSlug={userSlug}
           docPermissions={collectionPermissions}
           docPreferences={docPreferences}

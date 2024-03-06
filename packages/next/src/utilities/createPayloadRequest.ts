@@ -10,6 +10,7 @@ import { translations } from '@payloadcms/translations/api'
 import { getAuthenticatedUser } from 'payload/auth'
 import { parseCookies } from 'payload/auth'
 import { getDataLoader } from 'payload/utilities'
+import QueryString from 'qs'
 import { URL } from 'url'
 
 import { getDataAndFile } from './getDataAndFile'
@@ -95,6 +96,7 @@ export const createPayloadRequest = async ({
     payloadUploadSizes: {},
     port: urlProperties.port,
     protocol: urlProperties.protocol,
+    query: urlProperties.search ? QueryString.parse(urlProperties.search) : {},
     routeParams: params || {},
     search: urlProperties.search,
     searchParams: urlProperties.searchParams,

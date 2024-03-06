@@ -26,16 +26,16 @@ export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({
     let paramsToSet
 
     switch (action.type) {
-      case 'set':
+      case 'SET':
         paramsToSet = {
           ...state,
           ...action.params,
         }
         break
-      case 'replace':
+      case 'REPLACE':
         paramsToSet = action.params
         break
-      case 'clear':
+      case 'CLEAR':
         paramsToSet = {}
         break
       default:

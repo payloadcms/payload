@@ -1,38 +1,65 @@
 'use client'
-import type { UploadEdits } from 'payload/types'
 
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext } from 'react'
 
-export type QueryParamTypes = {
-  depth: number
-  'fallback-locale': string
-  locale: string
-  uploadEdits?: UploadEdits
-}
-export const FormQueryParams = createContext(
-  {} as {
-    formQueryParams: QueryParamTypes
-    setFormQueryParams: (params: QueryParamTypes) => void
-  },
-)
+import type { Action, FormQueryParamsContext, State } from './types'
+
+import { useLocale } from '../Locale'
+
+export const FormQueryParams = createContext({} as FormQueryParamsContext)
 
 export const FormQueryParamsProvider: React.FC<{
   children: React.ReactNode
-  formQueryParams?: QueryParamTypes
-  setFormQueryParams?: (params: QueryParamTypes) => void
-}> = ({ children, formQueryParams: formQueryParamsFromProps }) => {
-  const [formQueryParams, setFormQueryParams] = useState(
-    formQueryParamsFromProps || ({} as QueryParamTypes),
+  initialParams?: State
+}> = ({ children, initialParams: formQueryParamsFromProps }) => {
+  const [formQueryParams, dispatchFormQueryParams] = React.useReducer(
+    (state: State, action: Action) => {
+      const newState = { ...state }
+
+      switch (action.type) {
+        case 'SET':
+          if (action.params?.uploadEdits === null && newState?.uploadEdits) {
+            delete newState.uploadEdits
+          }
+          if (action.params?.uploadEdits?.crop === null && newState?.uploadEdits?.crop) {
+            delete newState.uploadEdits.crop
+          }
+          if (
+            action.params?.uploadEdits?.focalPoint === null &&
+            newState?.uploadEdits?.focalPoint
+          ) {
+            delete newState.uploadEdits.focalPoint
+          }
+          return {
+            ...newState,
+            ...action.params,
+          }
+        default:
+          return state
+      }
+    },
+    formQueryParamsFromProps || ({} as State),
   )
 
+  const locale = useLocale()
+
+  React.useEffect(() => {
+    dispatchFormQueryParams({
+      type: 'SET',
+      params: {
+        locale: locale.code,
+      },
+    })
+  }, [locale.code])
+
   return (
-    <FormQueryParams.Provider value={{ formQueryParams, setFormQueryParams }}>
+    <FormQueryParams.Provider value={{ dispatchFormQueryParams, formQueryParams }}>
       {children}
     </FormQueryParams.Provider>
   )
 }
 
 export const useFormQueryParams = (): {
-  formQueryParams: QueryParamTypes
-  setFormQueryParams: (params: QueryParamTypes) => void
+  dispatchFormQueryParams: React.Dispatch<Action>
+  formQueryParams: State
 } => useContext(FormQueryParams)

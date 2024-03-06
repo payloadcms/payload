@@ -170,13 +170,6 @@ export const Document: React.FC<AdminViewProps> = async ({
     req,
   })
 
-  const formQueryParams: QueryParamTypes = {
-    depth: 0,
-    'fallback-locale': 'null',
-    locale: locale.code,
-    uploadEdits: undefined,
-  }
-
   const serverSideProps: ServerSideEditViewProps = {
     initPageResult,
     routeSegments: segments,
@@ -193,7 +186,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       />
       <HydrateClientUser permissions={permissions} user={user} />
       <SetDocumentInfo
-        action={`${action}?${queryString.stringify(formQueryParams)}`}
+        action={action}
         apiURL={apiURL}
         collectionSlug={collectionConfig?.slug}
         disableActions={false}
@@ -206,7 +199,14 @@ export const Document: React.FC<AdminViewProps> = async ({
         initialState={initialState}
       />
       <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale.code}`}>
-        <FormQueryParamsProvider formQueryParams={formQueryParams}>
+        <FormQueryParamsProvider
+          initialParams={{
+            depth: 0,
+            'fallback-locale': 'null',
+            locale: locale.code,
+            uploadEdits: undefined,
+          }}
+        >
           <RenderCustomComponent
             CustomComponent={typeof CustomView === 'function' ? CustomView : undefined}
             DefaultComponent={DefaultView}

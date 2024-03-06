@@ -1,6 +1,8 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 
+import { QuerySelector } from 'mongoose'
+
 import type payload from '../'
 import type { User } from '../auth/types'
 import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types'
@@ -54,6 +56,8 @@ export type CustomPayloadRequest<U = any> = {
   payloadDataLoader?: DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
+  /** Query params on the request */
+  query: Record<string, unknown>
   /** The route parameters
    * @example
    * /:collection/:id -> /posts/123

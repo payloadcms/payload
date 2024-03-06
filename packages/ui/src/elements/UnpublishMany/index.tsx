@@ -61,7 +61,7 @@ export const UnpublishMany: React.FC<Props> = (props) => {
           if (res.status < 400) {
             toast.success(t('general:updatedSuccessfully'))
             dispatchSearchParams({
-              type: 'set',
+              type: 'SET',
               browserHistory: 'replace',
               params: { page: selectAll ? '1' : undefined },
             })

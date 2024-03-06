@@ -154,7 +154,7 @@ export const EditMany: React.FC<Props> = (props) => {
 
   const onSuccess = () => {
     dispatchSearchParams({
-      type: 'set',
+      type: 'SET',
       browserHistory: 'replace',
       params: { page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined },
     })

@@ -6,6 +6,7 @@ import {
   useComponentMap,
   useConfig,
   useDocumentInfo,
+  useFormQueryParams,
 } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import React, { Fragment, useEffect } from 'react'
@@ -20,6 +21,7 @@ export const EditViewClient: React.FC = () => {
   } = useConfig()
 
   const router = useRouter()
+  const { dispatchFormQueryParams } = useFormQueryParams()
 
   const { getComponentMap } = useComponentMap()
 
@@ -38,16 +40,23 @@ export const EditViewClient: React.FC = () => {
       if (!isEditing) {
         router.push(`${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}`)
       } else {
-        // buildState(json.doc, {
-        //   fieldSchema: collection.fields,
-        // })
-        // setFormQueryParams((params) => ({
-        //   ...params,
-        //   uploadEdits: undefined,
-        // }))
+        dispatchFormQueryParams({
+          type: 'SET',
+          params: {
+            uploadEdits: null,
+          },
+        })
       }
     },
-    [getVersions, isEditing, getDocPermissions, collectionSlug, adminRoute, router],
+    [
+      adminRoute,
+      collectionSlug,
+      dispatchFormQueryParams,
+      getDocPermissions,
+      getVersions,
+      isEditing,
+      router,
+    ],
   )
 
   useEffect(() => {

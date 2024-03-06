@@ -3,13 +3,7 @@
   // Hover to view descriptions of existing attributes.
   "configurations": [
     {
-      "command": "pnpm dev",
-      "name": "Run Dev 3.0",
-      "request": "launch",
-      "type": "node-terminal"
-    },
-    {
-      "command": "pnpm run dev _community",
+      "command": "pnpm run dev _community -- --no-turbo",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Community",
       "request": "launch",

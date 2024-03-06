@@ -59,7 +59,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
             toast.success(json.message || t('general:deletedSuccessfully'), { autoClose: 3000 })
             toggleAll()
             dispatchSearchParams({
-              type: 'set',
+              type: 'SET',
               browserHistory: 'replace',
               params: { page: selectAll ? '1' : undefined },
             })

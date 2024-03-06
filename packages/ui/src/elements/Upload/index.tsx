@@ -9,7 +9,6 @@ import { useFormSubmitted } from '../../forms/Form/context'
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../forms/fields/shared'
 import useField from '../../forms/useField'
-import { useClientFunctions } from '../../providers/ClientFunction'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useTranslation } from '../../providers/Translation'
 import { Button } from '../Button'
@@ -53,7 +52,6 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
 
 export const Upload: React.FC<Props> = (props) => {
   const { collectionSlug, initialState, onChange, updatedAt, uploadConfig } = props
-  const clientFunctions = useClientFunctions()
 
   const submitted = useFormSubmitted()
   const [replacingFile, setReplacingFile] = useState(false)
