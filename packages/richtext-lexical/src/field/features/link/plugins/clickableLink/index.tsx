@@ -3,6 +3,7 @@ import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugi
 import React from 'react'
 
 export function ClickableLinkPlugin() {
-  const Component = LexicalClickableLinkPlugin.default
+  const Component = LexicalClickableLinkPlugin.default || LexicalClickableLinkPlugin
+  //@ts-expect-error ts being dumb
   return <Component />
 }

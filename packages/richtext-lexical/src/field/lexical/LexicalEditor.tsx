@@ -50,7 +50,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
     }
   }, [isSmallWidthViewport])
 
-  const ErrorBoundaryComponent = LexicalErrorBoundary.default
+  const ErrorBoundaryComponent = LexicalErrorBoundary.default || LexicalErrorBoundary
 
   return (
     <React.Fragment>
@@ -60,6 +60,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
         }
       })}
       <RichTextPlugin
+        //@ts-expect-error ts being dumb
         ErrorBoundary={ErrorBoundaryComponent}
         contentEditable={
           <div className="editor-scroller">
