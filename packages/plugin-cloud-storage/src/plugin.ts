@@ -1,10 +1,10 @@
 import type { Config } from 'payload/config'
 
-import type { PluginOptions } from './types'
+import type { PluginOptions } from './types.d.ts'
 
-import { getFields } from './fields/getFields'
-import { getAfterDeleteHook } from './hooks/afterDelete'
-import { getBeforeChangeHook } from './hooks/beforeChange'
+import { getFields } from './fields/getFields.js'
+import { getAfterDeleteHook } from './hooks/afterDelete.js'
+import { getBeforeChangeHook } from './hooks/beforeChange.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.

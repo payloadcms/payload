@@ -1,7 +1,7 @@
 import type { FileData, TypeWithID } from 'payload/types'
 import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload/types'
 
-import type { GeneratedAdapter, TypeWithPrefix } from '../types'
+import type { GeneratedAdapter, TypeWithPrefix } from '../types.d.ts'
 
 interface Args {
   adapter: GeneratedAdapter
