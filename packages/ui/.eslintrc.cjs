@@ -1,4 +1,3 @@
-/** @type {import('prettier').Config} */
 module.exports = {
   extends: ['@payloadcms'],
   overrides: [
@@ -26,13 +25,6 @@ module.exports = {
         'perfectionist/sort-svelte-attributes': 'off',
         'perfectionist/sort-union-types': 'off',
         'perfectionist/sort-vue-attributes': 'off',
-      },
-    },
-    {
-      files: ['**/*.spec.ts'],
-      rules: {
-        'jest/prefer-strict-equal': 'off',
-        'no-console': 'off',
       },
     },
   ],
