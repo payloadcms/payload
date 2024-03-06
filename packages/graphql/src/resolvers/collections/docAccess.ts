@@ -3,7 +3,7 @@ import type { Collection, PayloadRequest } from 'payload/types'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import { Context } from '../types'
+import type { Context } from '../types.d.ts'
 
 export type Resolver = (
   _: unknown,

@@ -3,7 +3,7 @@ import type { Field, PayloadRequest } from 'payload/types'
 
 import { afterReadTraverseFields } from 'payload/utilities'
 
-import type { PopulationPromise } from '../field/features/types'
+import type { PopulationPromise } from '../field/features/types.js'
 
 type NestedRichTextFieldsArgs = {
   context: RequestContext

@@ -1,9 +1,9 @@
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
-import type { FindOneArgs } from '../database/types'
-import type { Payload, PayloadRequest } from '../types'
-import type { TypeWithVersion } from './types'
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.d.ts'
+import type { FindOneArgs } from '../database/types.d.ts'
+import type { Payload, PayloadRequest } from '../types/index.d.ts'
+import type { TypeWithVersion } from './types.d.ts'
 
-import { docHasTimestamps } from '../types'
+import { docHasTimestamps } from '../types/index.js'
 
 type Args = {
   config: SanitizedCollectionConfig

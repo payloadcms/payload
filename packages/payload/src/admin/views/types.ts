@@ -1,9 +1,9 @@
 import type { Translations } from '@payloadcms/translations'
 
-import type { Permissions, User } from '../../auth'
-import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { SanitizedGlobalConfig } from '../../globals/config/types'
-import type { PayloadRequest } from '../../types'
+import type { Permissions, User } from '../../auth/index.js'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
+import type { PayloadRequest } from '../../types/index.d.ts'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent

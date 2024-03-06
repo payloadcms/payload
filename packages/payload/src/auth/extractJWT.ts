@@ -1,6 +1,6 @@
-import type { AuthStrategyFunctionArgs } from '.'
+import type { AuthStrategyFunctionArgs } from './index.d.ts'
 
-import { parseCookies } from '../utilities/parseCookies'
+import { parseCookies } from '../utilities/parseCookies.js'
 
 export const extractJWT = (
   args: Pick<AuthStrategyFunctionArgs, 'cookies' | 'headers' | 'payload'>,

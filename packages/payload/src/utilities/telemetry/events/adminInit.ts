@@ -1,8 +1,8 @@
-import type { Payload } from '../../..'
-import type { User } from '../../../auth'
+import type { Payload } from '../../../index.d.ts'
+import type { User } from '../../../auth/types.d.ts'
 
-import { sendEvent } from '..'
-import { oneWayHash } from '../oneWayHash'
+import { sendEvent } from '../index.js'
+import { oneWayHash } from '../oneWayHash.js'
 
 export type AdminInitEvent = {
   domainID?: string

@@ -1,7 +1,7 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import type { Payload } from 'payload'
 
-import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types'
+import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types.js'
 
 export async function convertLexicalToHTML({
   converters,

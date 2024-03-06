@@ -4,13 +4,13 @@ import { $createQuoteNode, QuoteNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection } from 'lexical'
 
-import type { FeatureProviderProviderClient } from '../types'
+import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote'
-import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
-import { createClientComponent } from '../createClientComponent'
-import { MarkdownTransformer } from './markdownTransformer'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote/index.js'
+import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection/index.js'
+import { createClientComponent } from '../createClientComponent.js'
+import { MarkdownTransformer } from './markdownTransformer.js'
 
 const BlockQuoteFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

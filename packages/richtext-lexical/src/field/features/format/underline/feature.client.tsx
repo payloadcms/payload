@@ -2,11 +2,11 @@
 
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProviderProviderClient } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { UnderlineIcon } from '../../../lexical/ui/icons/Underline'
-import { createClientComponent } from '../../createClientComponent'
-import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
+import { UnderlineIcon } from '../../../lexical/ui/icons/Underline/index.js'
+import { createClientComponent } from '../../createClientComponent.js'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection.js'
 
 const UnderlineFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

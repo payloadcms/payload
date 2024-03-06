@@ -1,11 +1,11 @@
 'use client'
 
-import type { FeatureProviderProviderClient } from '../../types'
-import type { SlateNodeConverter } from './converter/types'
+import type { FeatureProviderProviderClient } from '../../types.js'
+import type { SlateNodeConverter } from './converter/types.js'
 
-import { createClientComponent } from '../../createClientComponent'
-import { convertSlateToLexical } from './converter'
-import { UnknownConvertedNode } from './nodes/unknownConvertedNode'
+import { createClientComponent } from '../../createClientComponent.js'
+import { convertSlateToLexical } from './converter/index.js'
+import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
 
 const SlateToLexicalFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

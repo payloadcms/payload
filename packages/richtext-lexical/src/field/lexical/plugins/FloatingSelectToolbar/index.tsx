@@ -1,7 +1,7 @@
 'use client'
 import type { LexicalEditor } from 'lexical'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { mergeRegister } from '@lexical/utils'
 import {
   $getSelection,
@@ -14,13 +14,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { FloatingToolbarSection, FloatingToolbarSectionEntry } from './types'
+import type { FloatingToolbarSection, FloatingToolbarSectionEntry } from './types.js'
 
-import { useEditorConfigContext } from '../../config/client/EditorConfigProvider'
-import { getDOMRangeRect } from '../../utils/getDOMRangeRect'
-import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition'
-import { ToolbarButton } from './ToolbarButton'
-import { ToolbarDropdown } from './ToolbarDropdown'
+import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
+import { getDOMRangeRect } from '../../utils/getDOMRangeRect.js'
+import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition.js'
+import { ToolbarButton } from './ToolbarButton/index.js'
+import { ToolbarDropdown } from './ToolbarDropdown/index.js'
 import './index.scss'
 
 function ButtonSectionEntry({

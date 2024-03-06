@@ -4,8 +4,7 @@ import type { FormFieldBase } from '@payloadcms/ui'
 import * as React from 'react'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
-import type { FieldProps } from '../../../../types'
-import type { SanitizedClientEditorConfig } from '../types'
+import type { SanitizedClientEditorConfig } from '../types.js'
 
 // Should always produce a 20 character pseudo-random string
 function generateQuickGuid(): string {

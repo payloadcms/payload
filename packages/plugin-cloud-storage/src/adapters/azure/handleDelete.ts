@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import path from 'path'
 
-import type { HandleDelete } from '../../types'
+import type { HandleDelete } from '../../types.d.ts'
 
 interface Args {
   collection: CollectionConfig

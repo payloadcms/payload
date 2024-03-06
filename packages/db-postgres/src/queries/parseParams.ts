@@ -6,15 +6,15 @@ import { and, ilike, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
-import type { GenericColumn, PostgresAdapter } from '../types'
-import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
+import type { GenericColumn, PostgresAdapter } from '../types.d.ts'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.d.ts'
 
-import { buildAndOrConditions } from './buildAndOrConditions'
-import { createJSONQuery } from './createJSONQuery'
-import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal'
-import { getTableColumnFromPath } from './getTableColumnFromPath'
-import { operatorMap } from './operatorMap'
-import { sanitizeQueryValue } from './sanitizeQueryValue'
+import { buildAndOrConditions } from './buildAndOrConditions.js'
+import { createJSONQuery } from './createJSONQuery/index.js'
+import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal.js'
+import { getTableColumnFromPath } from './getTableColumnFromPath.js'
+import { operatorMap } from './operatorMap.js'
+import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type Args = {
   adapter: PostgresAdapter

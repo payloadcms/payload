@@ -1,15 +1,15 @@
 import jwt from 'jsonwebtoken'
 
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../types'
+import type { Collection } from '../../collections/config/types.d.ts'
+import type { PayloadRequest } from '../../types/index.d.ts'
 
-import { APIError } from '../../errors'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-import { getFieldsToSign } from '../getFieldsToSign'
-import { authenticateLocalStrategy } from '../strategies/local/authenticate'
-import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash'
+import { APIError } from '../../errors/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { getFieldsToSign } from '../getFieldsToSign.js'
+import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
+import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 
 export type Result = {
   token?: string

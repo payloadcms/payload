@@ -1,14 +1,13 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../'
 import type {
   CustomPreviewButtonProps,
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
-} from '../../admin/types'
-import type { Auth, IncomingAuthType, User } from '../../auth/types'
+} from '../../admin/types.d.ts'
+import type { Auth, IncomingAuthType, User } from '../../auth/types.d.ts'
 import type {
   Access,
   EditViewComponent,
@@ -17,12 +16,16 @@ import type {
   EntityDescription,
   GeneratePreviewURL,
   LivePreviewConfig,
-} from '../../config/types'
-import type { Field } from '../../fields/config/types'
-import type { PayloadRequest, RequestContext } from '../../types'
-import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types'
-import type { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types'
-import type { AfterOperationArg, AfterOperationMap } from '../operations/utils'
+} from '../../config/types.d.ts'
+import type { Field } from '../../fields/config/types.d.ts'
+import type { GeneratedTypes } from '../../index.d.ts'
+import type { PayloadRequest, RequestContext } from '../../types/index.d.ts'
+import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.d.ts'
+import type {
+  IncomingCollectionVersions,
+  SanitizedCollectionVersions,
+} from '../../versions/types.d.ts'
+import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.d.ts'
 
 export type HookOperationType =
   | 'autosave'

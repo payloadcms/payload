@@ -1,7 +1,7 @@
 import type { Klass, LexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
 
-import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types'
+import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types.js'
 
 export function getEnabledNodes({
   editorConfig,

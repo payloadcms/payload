@@ -1,7 +1,7 @@
-import type { Field } from '../../fields/config/types'
+import type { Field } from '../../fields/config/types.d.ts'
 
-import { email } from '../../fields/validations'
-import { extractTranslations } from '../../translations/extractTranslations'
+import { email } from '../../fields/validations.js'
+import { extractTranslations } from '../../translations/extractTranslations.js'
 
 const labels = extractTranslations(['general:email'])
 

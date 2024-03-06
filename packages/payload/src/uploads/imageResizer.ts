@@ -1,18 +1,16 @@
-import type { OutputInfo, default as Sharp } from 'sharp'
-import type sharp from 'sharp'
+import type { OutputInfo } from 'sharp'
 
 import { fromBuffer } from 'file-type'
 import fs from 'fs'
 import sanitize from 'sanitize-filename'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { SharpDependency } from '../exports/config'
-import type { UploadEdits } from '../exports/types'
-import type { CustomPayloadRequest, PayloadRequest } from '../types'
-import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types'
+import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
+import type { SharpDependency } from '../config/types.d.ts'
+import type { CustomPayloadRequest, PayloadRequest, UploadEdits } from '../types/index.d.ts'
+import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types.d.ts'
 
-import { isNumber } from '../utilities/isNumber'
-import fileExists from './fileExists'
+import { isNumber } from '../utilities/isNumber.js'
+import fileExists from './fileExists.js'
 
 type ResizeArgs = {
   config: SanitizedCollectionConfig

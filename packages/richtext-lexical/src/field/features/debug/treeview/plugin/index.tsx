@@ -1,6 +1,6 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { TreeView } from '@lexical/react/LexicalTreeView'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { TreeView } from '@lexical/react/LexicalTreeView.js'
 import * as React from 'react'
 
 import './index.scss'

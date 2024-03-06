@@ -1,10 +1,10 @@
-import type { Document, Where } from '../../types'
-import type { PreferenceRequest } from '../types'
+import type { Document, Where } from '../../types/index.d.ts'
+import type { PreferenceRequest } from '../types.d.ts'
 
-import defaultAccess from '../../auth/defaultAccess'
-import executeAccess from '../../auth/executeAccess'
-import NotFound from '../../errors/NotFound'
-import UnauthorizedError from '../../errors/UnathorizedError'
+import defaultAccess from '../../auth/defaultAccess.js'
+import executeAccess from '../../auth/executeAccess.js'
+import NotFound from '../../errors/NotFound.js'
+import UnauthorizedError from '../../errors/UnathorizedError.js'
 
 async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {

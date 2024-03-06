@@ -1,5 +1,5 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
 import { useConfig } from '@payloadcms/ui'
 import {
@@ -13,10 +13,10 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { RawUploadPayload } from '../nodes/UploadNode'
+import type { RawUploadPayload } from '../nodes/UploadNode.js'
 
-import { UploadDrawer } from '../drawer'
-import { $createUploadNode, UploadNode } from '../nodes/UploadNode'
+import { UploadDrawer } from '../drawer/index.js'
+import { $createUploadNode, UploadNode } from '../nodes/UploadNode.js'
 
 export type InsertUploadPayload = Readonly<RawUploadPayload>
 

@@ -1,13 +1,13 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useListDrawer } from '@payloadcms/ui'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR, type LexicalEditor } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { EnabledRelationshipsCondition } from '../../relationship/utils/EnabledRelationshipsCondition'
-import { $createUploadNode } from '../nodes/UploadNode'
-import { INSERT_UPLOAD_COMMAND } from '../plugin'
-import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './commands'
+import { EnabledRelationshipsCondition } from '../../relationship/utils/EnabledRelationshipsCondition.js'
+import { $createUploadNode } from '../nodes/UploadNode.js'
+import { INSERT_UPLOAD_COMMAND } from '../plugin/index.js'
+import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './commands.js'
 
 const baseClass = 'lexical-upload-drawer'
 

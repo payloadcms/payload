@@ -1,10 +1,10 @@
 import React from 'react'
 
-import type { RichTextCustomLeaf } from '../../..'
+import type { RichTextCustomLeaf } from '../../../types.d.ts'
 
-import CodeIcon from '../../icons/Code'
-import LeafButton from '../Button'
-import { Code } from './Code'
+import CodeIcon from '../../icons/Code/index.js'
+import LeafButton from '../Button.js'
+import { Code } from './Code/index.js'
 
 const code: RichTextCustomLeaf = {
   name: 'code',

@@ -3,9 +3,9 @@ import type { CollectionConfig, Field } from 'payload/types'
 
 import path from 'path'
 
-import type { GenerateFileURL, GeneratedAdapter } from '../types'
+import type { GenerateFileURL, GeneratedAdapter } from '../types.d.ts'
 
-import { getAfterReadHook } from '../hooks/afterRead'
+import { getAfterReadHook } from '../hooks/afterRead.js'
 
 interface Args {
   adapter: GeneratedAdapter

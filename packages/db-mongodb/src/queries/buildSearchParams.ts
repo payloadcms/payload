@@ -9,10 +9,10 @@ import { getLocalizedPaths } from 'payload/database'
 import { fieldAffectsData } from 'payload/types'
 import { validOperators } from 'payload/types'
 
-import type { MongooseAdapter } from '..'
+import type { MongooseAdapter } from '../index.d.ts'
 
-import { operatorMap } from './operatorMap'
-import { sanitizeQueryValue } from './sanitizeQueryValue'
+import { operatorMap } from './operatorMap.js'
+import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type SearchParam = {
   path?: string
@@ -204,7 +204,9 @@ export async function buildSearchParam({
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value.$or.push({ [path]: { [operatorKey]: new ObjectId(formattedValue) } })
+            result.value.$or.push({
+              [path]: { [operatorKey]: new ObjectId.default(formattedValue) },
+            })
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
               (relationTo) => {

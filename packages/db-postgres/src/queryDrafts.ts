@@ -4,7 +4,7 @@ import { type QueryDrafts, combineQueries } from 'payload/database'
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import { findMany } from './find/findMany'
+import { findMany } from './find/findMany.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts({
   collection,

@@ -1,11 +1,10 @@
-import type { GeneratedTypes, Payload } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../types'
-import type { Document } from '../../../types'
-import type { TypeWithVersion } from '../../../versions/types'
+import type { GeneratedTypes, Payload } from '../../../index.d.ts'
+import type { Document, PayloadRequest, RequestContext } from '../../../types/index.d.ts'
+import type { TypeWithVersion } from '../../../versions/types.d.ts'
 
-import { APIError } from '../../../errors'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { findVersionByIDOperation } from '../findVersionByID'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findVersionByIDOperation } from '../findVersionByID.js'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T

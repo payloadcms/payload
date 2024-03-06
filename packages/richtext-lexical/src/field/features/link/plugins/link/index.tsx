@@ -1,5 +1,5 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { mergeRegister } from '@lexical/utils'
 import {
   $getSelection,
@@ -10,11 +10,11 @@ import {
 } from 'lexical'
 import { useEffect } from 'react'
 
-import type { LinkFields } from '../../nodes/types'
-import type { LinkPayload } from '../floatingLinkEditor/types'
+import type { LinkFields } from '../../nodes/types.js'
+import type { LinkPayload } from '../floatingLinkEditor/types.js'
 
-import { validateUrl } from '../../../../lexical/utils/url'
-import { LinkNode, TOGGLE_LINK_COMMAND, toggleLink } from '../../nodes/LinkNode'
+import { validateUrl } from '../../../../lexical/utils/url.js'
+import { LinkNode, TOGGLE_LINK_COMMAND, toggleLink } from '../../nodes/LinkNode.js'
 
 export function LinkPlugin(): null {
   const [editor] = useLexicalComposerContext()

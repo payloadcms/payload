@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import path from 'path'
 
-import type { HandleUpload } from '../../types'
+import type { HandleUpload } from '../../types.d.ts'
 
 interface Args {
   acl?: 'Private' | 'Public'

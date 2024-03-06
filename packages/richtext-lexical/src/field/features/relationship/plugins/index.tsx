@@ -1,5 +1,5 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot } from '@lexical/utils'
 import { useConfig } from '@payloadcms/ui'
 import {
@@ -14,11 +14,11 @@ import {
 import { useEffect } from 'react'
 import React from 'react'
 
-import type { RelationshipFeatureProps } from '../feature.server'
-import type { RelationshipData } from '../nodes/RelationshipNode'
+import type { RelationshipFeatureProps } from '../feature.server.js'
+import type { RelationshipData } from '../nodes/RelationshipNode.js'
 
-import { RelationshipDrawer } from '../drawer'
-import { $createRelationshipNode, RelationshipNode } from '../nodes/RelationshipNode'
+import { RelationshipDrawer } from '../drawer/index.js'
+import { $createRelationshipNode, RelationshipNode } from '../nodes/RelationshipNode.js'
 
 export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = createCommand(
   'INSERT_RELATIONSHIP_COMMAND',

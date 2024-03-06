@@ -1,7 +1,7 @@
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { InlineCodeFeatureClientComponent } from './feature.client'
-import { INLINE_CODE } from './markdownTransformers'
+import { InlineCodeFeatureClientComponent } from './feature.client.js'
+import { INLINE_CODE } from './markdownTransformers.js'
 
 export const InlineCodeFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

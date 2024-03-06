@@ -5,9 +5,9 @@ import type {
   SerializedTextNode,
 } from 'lexical'
 
-import type { SlateNode, SlateNodeConverter } from './types'
+import type { SlateNode, SlateNodeConverter } from './types.js'
 
-import { NodeFormat } from '../../../../lexical/utils/nodeFormat'
+import { NodeFormat } from '../../../../lexical/utils/nodeFormat.js'
 
 export function convertSlateToLexical({
   converters,

@@ -1,23 +1,23 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary.js'
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
+import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
-import type { LexicalProviderProps } from './LexicalProvider'
+import type { LexicalProviderProps } from './LexicalProvider.js'
 
-import { EditorPlugin } from './EditorPlugin'
+import { EditorPlugin } from './EditorPlugin.js'
 import './LexicalEditor.scss'
-import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
-import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut'
-import { SlashMenuPlugin } from './plugins/SlashMenu'
-import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin'
-import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin'
-import { LexicalContentEditable } from './ui/ContentEditable'
+import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar/index.js'
+import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
+import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
+import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
+import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>> = (
   props,
@@ -50,6 +50,8 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
     }
   }, [isSmallWidthViewport])
 
+  const ErrorBoundaryComponent = LexicalErrorBoundary.default
+
   return (
     <React.Fragment>
       {editorConfig.features.plugins.map((plugin) => {
@@ -58,7 +60,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
         }
       })}
       <RichTextPlugin
-        ErrorBoundary={LexicalErrorBoundary}
+        ErrorBoundary={ErrorBoundaryComponent}
         contentEditable={
           <div className="editor-scroller">
             <div className="editor" ref={onRef}>

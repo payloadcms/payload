@@ -1,4 +1,4 @@
-import type { PopulationsByCollection, UpdatedDocument } from './types'
+import type { PopulationsByCollection, UpdatedDocument } from './types.d.ts'
 
 export const traverseRichText = ({
   externallyUpdatedRelationship,

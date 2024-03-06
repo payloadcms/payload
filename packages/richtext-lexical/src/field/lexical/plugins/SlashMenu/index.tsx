@@ -1,18 +1,18 @@
 'use client'
 import type { TextNode } from 'lexical'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useTranslation } from '@payloadcms/ui'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
-import type { SlashMenuGroup, SlashMenuOption } from './LexicalTypeaheadMenuPlugin/types'
+import type { SlashMenuGroup, SlashMenuOption } from './LexicalTypeaheadMenuPlugin/types.js'
 
-import { useEditorConfigContext } from '../../config/client/EditorConfigProvider'
-import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin'
+import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
+import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
 import './index.scss'
-import { useMenuTriggerMatch } from './useMenuTriggerMatch'
+import { useMenuTriggerMatch } from './useMenuTriggerMatch.js'
 
 const baseClass = 'slash-menu-popup'
 

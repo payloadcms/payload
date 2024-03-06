@@ -2,7 +2,7 @@ import type { EmailTransport } from 'payload/config'
 
 import nodemailer from 'nodemailer'
 
-import type { PayloadCloudEmailOptions } from './types'
+import type { PayloadCloudEmailOptions } from './types.d.ts'
 
 export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTransport | undefined => {
   if (process.env.PAYLOAD_CLOUD !== 'true' || !args) {

@@ -1,3 +1,3 @@
-export { payloadCloud } from './plugin'
-export { createKey } from './utilities/createKey'
-export { getStorageClient } from './utilities/getStorageClient'
+export { payloadCloud } from './plugin.js'
+export { createKey } from './utilities/createKey.js'
+export { getStorageClient } from './utilities/getStorageClient.js'

@@ -10,14 +10,14 @@ import type {
   GenerateTitle,
   GenerateURL,
   PluginConfig,
-} from './types'
+} from './types.d.ts'
 
-import { MetaDescription } from './fields/MetaDescription'
-import { MetaImage } from './fields/MetaImage'
-import { MetaTitle } from './fields/MetaTitle'
-import translations from './translations'
-import { Overview } from './ui/Overview'
-import { Preview } from './ui/Preview'
+import { MetaDescription } from './fields/MetaDescription.js'
+import { MetaImage } from './fields/MetaImage.js'
+import { MetaTitle } from './fields/MetaTitle.js'
+import translations from './translations/index.js'
+import { Overview } from './ui/Overview.js'
+import { Preview } from './ui/Preview.js'
 
 const seo =
   (pluginConfig: PluginConfig) =>

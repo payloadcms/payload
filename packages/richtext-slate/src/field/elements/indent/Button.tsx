@@ -5,17 +5,17 @@ import { useCallback } from 'react'
 import { Editor, Element, Text, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { ElementNode } from '../../../types'
+import type { ElementNode } from '../../../types.d.ts'
 
-import IndentLeft from '../../icons/IndentLeft'
-import IndentRight from '../../icons/IndentRight'
-import { baseClass } from '../Button'
-import { getCommonBlock } from '../getCommonBlock'
-import isElementActive from '../isActive'
-import { isBlockElement } from '../isBlockElement'
-import listTypes from '../listTypes'
-import { unwrapList } from '../unwrapList'
-import { indentType } from './shared'
+import IndentLeft from '../../icons/IndentLeft/index.js'
+import IndentRight from '../../icons/IndentRight/index.js'
+import { baseClass } from '../Button.js'
+import { getCommonBlock } from '../getCommonBlock.js'
+import isElementActive from '../isActive.js'
+import { isBlockElement } from '../isBlockElement.js'
+import listTypes from '../listTypes.js'
+import { unwrapList } from '../unwrapList.js'
+import { indentType } from './shared.js'
 
 export const IndentButton: React.FC = () => {
   const editor = useSlate()

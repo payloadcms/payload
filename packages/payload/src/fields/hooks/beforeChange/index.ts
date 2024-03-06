@@ -1,11 +1,10 @@
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
-import type { PayloadRequest, RequestContext } from '../../../types'
-import type { Operation } from '../../../types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.d.ts'
+import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.d.ts'
 
-import { ValidationError } from '../../../errors'
-import { deepCopyObject } from '../../../utilities/deepCopyObject'
-import { traverseFields } from './traverseFields'
+import { ValidationError } from '../../../errors/index.js'
+import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
+import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
   collection: SanitizedCollectionConfig | null

@@ -1,7 +1,7 @@
-import type { SerializedUnknownConvertedNode } from '../../../nodes/unknownConvertedNode'
-import type { LexicalPluginNodeConverter } from '../../types'
+import type { SerializedUnknownConvertedNode } from '../../../nodes/unknownConvertedNode/index.js'
+import type { LexicalPluginNodeConverter } from '../../types.js'
 
-import { convertLexicalPluginNodesToLexical } from '../../index'
+import { convertLexicalPluginNodesToLexical } from '../../index.js'
 
 export const _UnknownConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {

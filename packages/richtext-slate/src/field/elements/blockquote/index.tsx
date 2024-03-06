@@ -1,10 +1,10 @@
 import React from 'react'
 
-import type { RichTextCustomElement } from '../../..'
+import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import BlockquoteIcon from '../../icons/Blockquote'
-import ElementButton from '../Button'
-import { Blockquote } from './Blockquote'
+import BlockquoteIcon from '../../icons/Blockquote/index.js'
+import ElementButton from '../Button.js'
+import { Blockquote } from './Blockquote.js'
 
 const name = 'blockquote'
 

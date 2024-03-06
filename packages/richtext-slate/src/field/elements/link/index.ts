@@ -1,8 +1,8 @@
-import type { RichTextCustomElement } from '../../..'
+import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import { LinkButton } from './Button'
-import { LinkElement } from './Element'
-import { WithLinks } from './WithLinks'
+import { LinkButton } from './Button/index.js'
+import { LinkElement } from './Element/index.js'
+import { WithLinks } from './WithLinks.js'
 
 const link: RichTextCustomElement = {
   name: 'link',

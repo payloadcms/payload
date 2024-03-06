@@ -1,8 +1,8 @@
 import type { SerializedQuoteNode } from '@lexical/rich-text'
 
-import type { SlateNodeConverter } from '../../types'
+import type { SlateNodeConverter } from '../../types.js'
 
-import { convertSlateNodesToLexical } from '../..'
+import { convertSlateNodesToLexical } from '../../index.js'
 
 export const _SlateBlockquoteConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {

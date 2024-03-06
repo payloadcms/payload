@@ -1,10 +1,10 @@
 import React from 'react'
 
-import type { RichTextCustomElement } from '../../..'
+import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import OLIcon from '../../icons/OrderedList'
-import ListButton from '../ListButton'
-import { OrderedList } from './OrderedList'
+import OLIcon from '../../icons/OrderedList/index.js'
+import ListButton from '../ListButton.js'
+import { OrderedList } from './OrderedList.js'
 
 const name = 'ol'
 

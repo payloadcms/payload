@@ -2,14 +2,14 @@
 
 import { FORMAT_ELEMENT_COMMAND } from 'lexical'
 
-import type { FeatureProviderProviderClient } from '../types'
+import type { FeatureProviderProviderClient } from '../types.js'
 
-import { AlignCenterIcon } from '../../lexical/ui/icons/AlignCenter'
-import { AlignJustifyIcon } from '../../lexical/ui/icons/AlignJustify'
-import { AlignLeftIcon } from '../../lexical/ui/icons/AlignLeft'
-import { AlignRightIcon } from '../../lexical/ui/icons/AlignRight'
-import { createClientComponent } from '../createClientComponent'
-import { AlignDropdownSectionWithEntries } from './floatingSelectToolbarAlignDropdownSection'
+import { AlignCenterIcon } from '../../lexical/ui/icons/AlignCenter/index.js'
+import { AlignJustifyIcon } from '../../lexical/ui/icons/AlignJustify/index.js'
+import { AlignLeftIcon } from '../../lexical/ui/icons/AlignLeft/index.js'
+import { AlignRightIcon } from '../../lexical/ui/icons/AlignRight/index.js'
+import { createClientComponent } from '../createClientComponent.js'
+import { AlignDropdownSectionWithEntries } from './floatingSelectToolbarAlignDropdownSection.js'
 
 const AlignFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

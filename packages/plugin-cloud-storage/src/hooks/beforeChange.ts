@@ -1,9 +1,9 @@
 import type { FileData, TypeWithID } from 'payload/types'
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
 
-import type { GeneratedAdapter } from '../types'
+import type { GeneratedAdapter } from '../types.d.ts'
 
-import { getIncomingFiles } from '../utilities/getIncomingFiles'
+import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
 
 interface Args {
   adapter: GeneratedAdapter

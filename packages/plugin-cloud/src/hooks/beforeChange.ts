@@ -9,9 +9,9 @@ import type stream from 'stream'
 import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs'
 
-import { createKey } from '../utilities/createKey'
-import { getIncomingFiles } from '../utilities/getIncomingFiles'
-import { getStorageClient } from '../utilities/getStorageClient'
+import { createKey } from '../utilities/createKey.js'
+import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
+import { getStorageClient } from '../utilities/getStorageClient.js'
 
 interface Args {
   collection: CollectionConfig

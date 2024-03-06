@@ -4,7 +4,7 @@ import type { FieldTypes } from 'payload/config'
 import type { RichTextFieldProps } from 'payload/types'
 import type React from 'react'
 
-import type { SanitizedServerEditorConfig } from './field/lexical/config/types'
+import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
 
 export type FieldProps = RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps> & {
   fieldTypes: FieldTypes

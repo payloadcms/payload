@@ -23,10 +23,10 @@ import type {
   UploadField,
 } from 'payload/types'
 
-import combineParentName from '../utilities/combineParentName'
-import formatName from '../utilities/formatName'
-import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths'
-import { withOperators } from './withOperators'
+import combineParentName from '../utilities/combineParentName.js'
+import formatName from '../utilities/formatName.js'
+import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths.js'
+import { withOperators } from './withOperators.js'
 
 type Args = {
   nestedFieldName?: string
@@ -96,7 +96,7 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
                 ),
               }),
             },
-            value: { type: GraphQLJSON },
+            value: { type: GraphQLJSON.default },
           },
         }),
       }

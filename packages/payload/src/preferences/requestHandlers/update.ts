@@ -1,8 +1,8 @@
 import httpStatus from 'http-status'
 
-import type { PayloadHandler } from '../../exports/config'
+import type { PayloadHandler } from '../../exports/config.d.ts'
 
-import update from '../operations/update'
+import update from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (req) => {
   const payloadRequest = req

@@ -1,7 +1,7 @@
-import type { PopulationPromise } from '../types'
-import type { SerializedRelationshipNode } from './nodes/RelationshipNode'
+import type { PopulationPromise } from '../types.js'
+import type { SerializedRelationshipNode } from './nodes/RelationshipNode.js'
 
-import { populate } from '../../../populate/populate'
+import { populate } from '../../../populate/populate.js'
 
 export const relationshipPopulationPromise: PopulationPromise<SerializedRelationshipNode> = ({
   currentDepth,

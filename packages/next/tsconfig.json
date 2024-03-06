@@ -8,6 +8,9 @@
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "allowImportingTsExtensions": true,
     "sourceMap": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "paths": {
       "@payloadcms/ui": ["../ui/src/exports/index.ts"],
       "@payloadcms/ui/*": ["../ui/src/exports/*"],

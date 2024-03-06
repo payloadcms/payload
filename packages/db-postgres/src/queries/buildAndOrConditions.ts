@@ -1,10 +1,10 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Where } from 'payload/types'
 
-import type { GenericColumn, PostgresAdapter } from '../types'
-import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
+import type { GenericColumn, PostgresAdapter } from '../types.d.ts'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.d.ts'
 
-import { parseParams } from './parseParams'
+import { parseParams } from './parseParams.js'
 
 export async function buildAndOrConditions({
   adapter,

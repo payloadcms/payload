@@ -3,9 +3,9 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { upsertRow } from './upsertRow'
+import { upsertRow } from './upsertRow/index.js'
 
 export async function updateGlobal<T extends TypeWithID>(
   this: PostgresAdapter,

@@ -4,14 +4,14 @@ import type { ReducedBlock } from '@payloadcms/ui/types'
 
 import { getTranslation } from '@payloadcms/translations'
 
-import type { FeatureProviderProviderClient } from '../types'
+import type { FeatureProviderProviderClient } from '../types.js'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { BlockIcon } from '../../lexical/ui/icons/Block'
-import { createClientComponent } from '../createClientComponent'
-import { BlockNode } from './nodes/BlocksNode'
-import { BlocksPlugin } from './plugin'
-import { INSERT_BLOCK_COMMAND } from './plugin/commands'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { BlockIcon } from '../../lexical/ui/icons/Block/index.js'
+import { createClientComponent } from '../createClientComponent.js'
+import { BlockNode } from './nodes/BlocksNode.js'
+import { INSERT_BLOCK_COMMAND } from './plugin/commands.js'
+import { BlocksPlugin } from './plugin/index.js'
 
 export type BlocksFeatureClientProps = {
   reducedBlocks: ReducedBlock[]

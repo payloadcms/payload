@@ -11,7 +11,7 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { type BlockFields } from '../nodes/BlocksNode'
+import { type BlockFields } from '../nodes/BlocksNode.js'
 const baseClass = 'lexical-block'
 
 import type { ReducedBlock } from '@payloadcms/ui/types'
@@ -19,11 +19,11 @@ import type { FormState } from 'payload/types'
 
 import { v4 as uuid } from 'uuid'
 
-import type { ClientComponentProps } from '../../types'
-import type { BlocksFeatureClientProps } from '../feature.client'
+import type { ClientComponentProps } from '../../types.js'
+import type { BlocksFeatureClientProps } from '../feature.client.js'
 
-import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider'
-import { BlockContent } from './BlockContent'
+import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
+import { BlockContent } from './BlockContent.js'
 import './index.scss'
 
 type Props = {

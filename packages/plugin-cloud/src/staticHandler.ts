@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload/types'
 
-import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types'
+import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types.d.ts'
 
-import { createKey } from './utilities/createKey'
-import { getStorageClient } from './utilities/getStorageClient'
+import { createKey } from './utilities/createKey.js'
+import { getStorageClient } from './utilities/getStorageClient.js'
 
 interface Args {
   cachingOptions?: PluginOptions['uploadCaching']

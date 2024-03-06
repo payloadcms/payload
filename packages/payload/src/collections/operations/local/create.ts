@@ -1,15 +1,14 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { Payload } from '../../..'
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../types'
-import type { Document } from '../../../types'
-import type { File } from '../../../uploads/types'
+import type { GeneratedTypes } from '../../..//index.d.ts'
+import type { Payload } from '../../../index.d.ts'
+import type { Document, PayloadRequest, RequestContext } from '../../../types/index.d.ts'
+import type { File } from '../../../uploads/types.d.ts'
 
-import { APIError } from '../../../errors'
-import getFileByPath from '../../../uploads/getFileByPath'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { createOperation } from '../create'
+import { APIError } from '../../../errors/index.js'
+import getFileByPath from '../../../uploads/getFileByPath.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createOperation } from '../create.js'
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug

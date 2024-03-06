@@ -3,9 +3,9 @@ import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payl
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { findMany } from './find/findMany'
+import { findMany } from './find/findMany.js'
 
 export async function findOne<T extends TypeWithID>(
   this: PostgresAdapter,

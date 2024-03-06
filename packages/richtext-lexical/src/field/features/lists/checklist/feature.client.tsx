@@ -1,15 +1,15 @@
 'use client'
 import { INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
 
-import type { ClientFeature, FeatureProviderProviderClient } from '../../types'
+import type { ClientFeature, FeatureProviderProviderClient } from '../../types.js'
 
-import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist'
-import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
-import { createClientComponent } from '../../createClientComponent'
-import { LexicalListPlugin } from '../plugin'
-import { CHECK_LIST } from './markdownTransformers'
-import { LexicalCheckListPlugin } from './plugin'
+import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist/index.js'
+import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection/index.js'
+import { createClientComponent } from '../../createClientComponent.js'
+import { LexicalListPlugin } from '../plugin/index.js'
+import { CHECK_LIST } from './markdownTransformers.js'
+import { LexicalCheckListPlugin } from './plugin/index.js'
 
 const CheckListFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

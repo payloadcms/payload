@@ -22,14 +22,14 @@ import { InvalidConfiguration } from 'payload/errors'
 import { fieldAffectsData, optionIsObject } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { GenericColumns, IDType, PostgresAdapter } from '../types'
+import type { GenericColumns, IDType, PostgresAdapter } from '../types.d.ts'
 
-import { hasLocalesTable } from '../utilities/hasLocalesTable'
-import { buildTable } from './build'
-import { createIndex } from './createIndex'
-import { idToUUID } from './idToUUID'
-import { parentIDColumnMap } from './parentIDColumnMap'
-import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical'
+import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
+import { buildTable } from './build.js'
+import { createIndex } from './createIndex.js'
+import { idToUUID } from './idToUUID.js'
+import { parentIDColumnMap } from './parentIDColumnMap.js'
+import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical.js'
 
 type Args = {
   adapter: PostgresAdapter

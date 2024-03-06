@@ -6,9 +6,9 @@ import { sql } from 'drizzle-orm'
 import { buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { upsertRow } from './upsertRow'
+import { upsertRow } from './upsertRow/index.js'
 
 export async function createGlobalVersion<T extends TypeWithID>(
   this: PostgresAdapter,

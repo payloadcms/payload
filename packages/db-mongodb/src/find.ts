@@ -4,11 +4,11 @@ import type { PayloadRequest } from 'payload/types'
 
 import { flattenWhereToOperators } from 'payload/database'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.d.ts'
 
-import { buildSortParam } from './queries/buildSortParam'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
+import { buildSortParam } from './queries/buildSortParam.js'
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { withSession } from './withSession.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,

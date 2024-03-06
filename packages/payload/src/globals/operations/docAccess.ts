@@ -1,12 +1,11 @@
-import type { GlobalPermission } from '../../auth'
-import type { PayloadRequest } from '../../types'
-import type { AllOperations } from '../../types'
-import type { SanitizedGlobalConfig } from '../config/types'
+import type { GlobalPermission } from '../../auth/index.d.ts'
+import type { AllOperations, PayloadRequest } from '../../types/index.d.ts'
+import type { SanitizedGlobalConfig } from '../config/types.d.ts'
 
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { getEntityPolicies } from '../../utilities/getEntityPolicies'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -25,10 +24,10 @@ export const docAccessOperation = async (args: Arguments): Promise<GlobalPermiss
   try {
     const shouldCommit = await initTransaction(req)
     const result = await getEntityPolicies({
+      type: 'global',
       entity: globalConfig,
       operations: globalOperations,
       req,
-      type: 'global',
     })
     if (shouldCommit) await commitTransaction(req)
     return result

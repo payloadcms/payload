@@ -1,4 +1,4 @@
-export * from './types'
+export * from './types.js'
 
-export { extractJWT } from './extractJWT'
-export * from './cookies'
+export { extractJWT } from './extractJWT.js'
+export * from './cookies.js'

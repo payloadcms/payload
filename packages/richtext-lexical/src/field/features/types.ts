@@ -8,11 +8,11 @@ import type { SanitizedConfig } from 'payload/config'
 import type { Field, PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
 import type React from 'react'
 
-import type { AdapterProps } from '../../types'
-import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types'
-import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
-import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import type { HTMLConverter } from './converters/html/converter/types'
+import type { AdapterProps } from '../../types.js'
+import type { ClientEditorConfig, ServerEditorConfig } from '../lexical/config/types.js'
+import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types.js'
+import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import type { HTMLConverter } from './converters/html/converter/types.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   context,

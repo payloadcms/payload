@@ -1,11 +1,11 @@
 import minimist from 'minimist'
 
-import type { BinScript } from '../config/types'
+import type { BinScript } from '../config/types.d.ts'
 
-import loadConfig from '../config/load'
-import { generateTypes } from './generateTypes'
-import { loadEnv } from './loadEnv'
-import { migrate } from './migrate'
+import loadConfig from '../config/load.js'
+import { generateTypes } from './generateTypes.js'
+import { loadEnv } from './loadEnv.js'
+import { migrate } from './migrate.js'
 
 loadEnv()
 

@@ -1,9 +1,9 @@
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
-import type { PayloadRequest, RequestContext } from '../../../types'
-import type { Field, TabAsField } from '../../config/types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.d.ts'
+import type { PayloadRequest, RequestContext } from '../../../types/index.d.ts'
+import type { Field, TabAsField } from '../../config/types.d.ts'
 
-import { promise } from './promise'
+import { promise } from './promise.js'
 
 type Args = {
   collection: SanitizedCollectionConfig | null

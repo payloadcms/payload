@@ -2,7 +2,7 @@ import type { Config } from 'payload/config'
 
 import { defaults } from 'payload/config'
 
-import { payloadCloudEmail } from './email'
+import { payloadCloudEmail } from './email.js'
 
 describe('email', () => {
   let defaultConfig: Config

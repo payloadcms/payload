@@ -1,11 +1,15 @@
-import type { Field, FieldAffectingData, FieldPresentationalOnly } from '../fields/config/types'
+import type {
+  Field,
+  FieldAffectingData,
+  FieldPresentationalOnly,
+} from '../fields/config/types.d.ts'
 
 import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsPresentationalOnly,
   tabHasName,
-} from '../fields/config/types'
+} from '../fields/config/types.js'
 
 /**
  * Flattens a collection's fields into a single array of fields, as long

@@ -1,10 +1,10 @@
-import type { CollectionConfig } from '../collections/config/types'
-import type { Config } from '../config/types'
-import type { Field } from '../fields/config/types'
-import type { UploadConfig } from './types'
+import type { CollectionConfig } from '../collections/config/types.d.ts'
+import type { Config } from '../config/types.d.ts'
+import type { Field } from '../fields/config/types.d.ts'
+import type { UploadConfig } from './types.d.ts'
 
-import { extractTranslations } from '../translations/extractTranslations'
-import { mimeTypeValidator } from './mimeTypeValidator'
+import { extractTranslations } from '../translations/extractTranslations.js'
+import { mimeTypeValidator } from './mimeTypeValidator.js'
 
 const labels = extractTranslations([
   'upload:width',

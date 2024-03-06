@@ -1,8 +1,8 @@
 import type { SerializedLexicalNode, SerializedParagraphNode } from 'lexical'
 
-import type { SlateNodeConverter } from '../../types'
+import type { SlateNodeConverter } from '../../types.js'
 
-import { convertSlateNodesToLexical } from '../..'
+import { convertSlateNodesToLexical } from '../../index.js'
 
 export const _SlateIndentConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {

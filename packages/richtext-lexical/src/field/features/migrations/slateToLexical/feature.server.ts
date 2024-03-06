@@ -1,11 +1,11 @@
 import type React from 'react'
 
-import type { FeatureProviderProviderServer } from '../../types'
-import type { SlateNodeConverterProvider } from './converter/types'
+import type { FeatureProviderProviderServer } from '../../types.js'
+import type { SlateNodeConverterProvider } from './converter/types.js'
 
-import { defaultSlateConverters } from './converter/defaultConverters'
-import { SlateToLexicalFeatureClientComponent } from './feature.client'
-import { UnknownConvertedNode } from './nodes/unknownConvertedNode'
+import { defaultSlateConverters } from './converter/defaultConverters.js'
+import { SlateToLexicalFeatureClientComponent } from './feature.client.js'
+import { UnknownConvertedNode } from './nodes/unknownConvertedNode/index.js'
 
 export type SlateToLexicalFeatureProps = {
   converters?:

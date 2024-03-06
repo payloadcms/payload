@@ -2,9 +2,9 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "module": "NodeNext",
+    "target": "esnext",
+    "moduleResolution": "NodeNext",
     "allowJs": true,
     "checkJs": false,
     "esModuleInterop": true,

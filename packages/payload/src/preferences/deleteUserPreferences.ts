@@ -1,6 +1,6 @@
-import type { Payload } from '..'
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { PayloadRequest } from '../types'
+import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
+import type { Payload } from '../index.d.ts'
+import type { PayloadRequest } from '../types/index.d.ts'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig

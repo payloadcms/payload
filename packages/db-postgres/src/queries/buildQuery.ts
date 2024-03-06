@@ -4,10 +4,10 @@ import type { Field, Where } from 'payload/types'
 
 import { asc, desc } from 'drizzle-orm'
 
-import type { GenericColumn, GenericTable, PostgresAdapter } from '../types'
+import type { GenericColumn, GenericTable, PostgresAdapter } from '../types.d.ts'
 
-import { getTableColumnFromPath } from './getTableColumnFromPath'
-import { parseParams } from './parseParams'
+import { getTableColumnFromPath } from './getTableColumnFromPath.js'
+import { parseParams } from './parseParams.js'
 
 export type BuildQueryJoins = Record<string, SQL>
 

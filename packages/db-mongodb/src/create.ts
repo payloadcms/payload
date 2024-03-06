@@ -1,10 +1,10 @@
 import type { Create } from 'payload/database'
 import type { Document, PayloadRequest } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.d.ts'
 
-import handleError from './utilities/handleError'
-import { withSession } from './withSession'
+import handleError from './utilities/handleError.js'
+import { withSession } from './withSession.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,

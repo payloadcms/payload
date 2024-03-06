@@ -1,16 +1,16 @@
 /* eslint-disable no-underscore-dangle */
-import type { FindGlobalVersionsArgs } from '../../database/types'
-import type { PayloadRequest } from '../../types'
-import type { TypeWithVersion } from '../../versions/types'
-import type { SanitizedGlobalConfig } from '../config/types'
+import type { FindGlobalVersionsArgs } from '../../database/types.d.ts'
+import type { PayloadRequest } from '../../types/index.d.ts'
+import type { TypeWithVersion } from '../../versions/types.d.ts'
+import type { SanitizedGlobalConfig } from '../config/types.d.ts'
 
-import executeAccess from '../../auth/executeAccess'
-import { combineQueries } from '../../database/combineQueries'
-import { Forbidden, NotFound } from '../../errors'
-import { afterRead } from '../../fields/hooks/afterRead'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import executeAccess from '../../auth/executeAccess.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { Forbidden, NotFound } from '../../errors/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
   currentDepth?: number

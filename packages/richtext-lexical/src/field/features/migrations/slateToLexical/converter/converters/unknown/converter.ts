@@ -1,7 +1,7 @@
-import type { SerializedUnknownConvertedNode } from '../../../nodes/unknownConvertedNode'
-import type { SlateNodeConverter } from '../../types'
+import type { SerializedUnknownConvertedNode } from '../../../nodes/unknownConvertedNode/index.js'
+import type { SlateNodeConverter } from '../../types.js'
 
-import { convertSlateNodesToLexical } from '../..'
+import { convertSlateNodesToLexical } from '../../index.js'
 
 export const _SlateUnknownConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {

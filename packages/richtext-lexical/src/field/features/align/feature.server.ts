@@ -1,6 +1,6 @@
-import type { FeatureProviderProviderServer } from '../types'
+import type { FeatureProviderProviderServer } from '../types.js'
 
-import { AlignFeatureClientComponent } from './feature.client'
+import { AlignFeatureClientComponent } from './feature.client.js'
 
 export const AlignFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

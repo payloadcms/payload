@@ -5,11 +5,11 @@ import { Tooltip } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 import { useSlate } from 'slate-react'
 
-import type { ButtonProps } from './types'
+import type { ButtonProps } from './types.d.ts'
 
 import '../buttons.scss'
-import isElementActive from './isActive'
-import toggleElement from './toggle'
+import isElementActive from './isActive.js'
+import toggleElement from './toggle.js'
 
 export const baseClass = 'rich-text__button'
 

@@ -2,8 +2,8 @@ import type {
   FeatureProviderServer,
   ResolvedServerFeatureMap,
   ServerFeatureProviderMap,
-} from '../../../features/types'
-import type { ServerEditorConfig } from '../types'
+} from '../../../features/types.js'
+import type { ServerEditorConfig } from '../types.js'
 
 type DependencyGraph = {
   [key: string]: {

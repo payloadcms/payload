@@ -1,8 +1,8 @@
 'use client'
 
-import type { FeatureProviderProviderClient, ServerFeature } from './types'
+import type { FeatureProviderProviderClient, ServerFeature } from './types.js'
 
-import { useLexicalFeature } from '../../useLexicalFeature'
+import { useLexicalFeature } from '../../useLexicalFeature.js'
 
 /**
  * Utility function to create a client component for the client feature

@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../collections/config/types'
+import type { CollectionConfig } from '../collections/config/types.d.ts'
 
-import APIError from './APIError'
+import APIError from './APIError.js'
 
 class TimestampsRequired extends APIError {
   constructor(collection: CollectionConfig) {

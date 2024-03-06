@@ -1,10 +1,10 @@
 import React from 'react'
 
-import type { RichTextCustomElement } from '../../..'
+import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import ULIcon from '../../icons/UnorderedList'
-import ListButton from '../ListButton'
-import { UnorderedList } from './UnorderedList'
+import ULIcon from '../../icons/UnorderedList/index.js'
+import ListButton from '../ListButton.js'
+import { UnorderedList } from './UnorderedList.js'
 
 const name = 'ul'
 

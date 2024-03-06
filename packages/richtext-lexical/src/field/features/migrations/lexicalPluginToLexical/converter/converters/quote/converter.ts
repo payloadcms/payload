@@ -1,8 +1,8 @@
 import type { SerializedQuoteNode } from '@lexical/rich-text'
 
-import type { LexicalPluginNodeConverter } from '../../types'
+import type { LexicalPluginNodeConverter } from '../../types.js'
 
-import { convertLexicalPluginNodesToLexical } from '../../index'
+import { convertLexicalPluginNodesToLexical } from '../../index.js'
 
 export const _QuoteConverter: LexicalPluginNodeConverter = {
   converter({ converters, lexicalPluginNode }) {

@@ -1,12 +1,15 @@
 import type { Config } from 'payload/config'
 
-import type { PluginOptions } from './types'
+import type { PluginOptions } from './types.d.ts'
 
-import { payloadCloudEmail } from './email'
-import { getAfterDeleteHook } from './hooks/afterDelete'
-import { getBeforeChangeHook } from './hooks/beforeChange'
-import { getCacheUploadsAfterChangeHook, getCacheUploadsAfterDeleteHook } from './hooks/uploadCache'
-import { getStaticHandler } from './staticHandler'
+import { payloadCloudEmail } from './email.js'
+import { getAfterDeleteHook } from './hooks/afterDelete.js'
+import { getBeforeChangeHook } from './hooks/beforeChange.js'
+import {
+  getCacheUploadsAfterChangeHook,
+  getCacheUploadsAfterDeleteHook,
+} from './hooks/uploadCache.js'
+import { getStaticHandler } from './staticHandler.js'
 
 export const payloadCloud =
   (pluginOptions?: PluginOptions) =>

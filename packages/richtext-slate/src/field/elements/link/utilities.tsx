@@ -5,7 +5,7 @@ import type { Editor } from 'slate'
 
 import { Element, Range, Transforms } from 'slate'
 
-import { getBaseFields } from './LinkDrawer/baseFields'
+import { getBaseFields } from './LinkDrawer/baseFields.js'
 
 export const unwrapLink = (editor: Editor): void => {
   Transforms.unwrapNodes(editor, { match: (n) => Element.isElement(n) && n.type === 'link' })

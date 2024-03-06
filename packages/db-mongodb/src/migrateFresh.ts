@@ -8,7 +8,7 @@ import {
 } from 'payload/database'
 import prompts from 'prompts'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.d.ts'
 
 /**
  * Drop the current database and run all migrate up functions

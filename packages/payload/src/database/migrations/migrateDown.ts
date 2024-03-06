@@ -1,12 +1,12 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from '../../types'
-import type { BaseDatabaseAdapter } from '../types'
+import type { PayloadRequest } from '../../types/index.d.ts'
+import type { BaseDatabaseAdapter } from '../types.d.ts'
 
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-import { getMigrations } from './getMigrations'
-import { readMigrationFiles } from './readMigrationFiles'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { getMigrations } from './getMigrations.js'
+import { readMigrationFiles } from './readMigrationFiles.js'
 
 export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
   const { payload } = this

@@ -1,5 +1,5 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
 import {
   $getPreviousSelection,
@@ -10,11 +10,11 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { BlockFields } from '../nodes/BlocksNode'
+import type { BlockFields } from '../nodes/BlocksNode.js'
 
-import { BlocksDrawerComponent } from '../drawer'
-import { $createBlockNode, BlockNode } from '../nodes/BlocksNode'
-import { INSERT_BLOCK_COMMAND } from './commands'
+import { BlocksDrawerComponent } from '../drawer/index.js'
+import { $createBlockNode, BlockNode } from '../nodes/BlocksNode.js'
+import { INSERT_BLOCK_COMMAND } from './commands.js'
 
 export type InsertBlockPayload = Exclude<BlockFields, 'id'>
 

@@ -1,8 +1,8 @@
-import type { FeatureProviderProviderServer } from '../types'
+import type { FeatureProviderProviderServer } from '../types.js'
 
-import { RelationshipFeatureClientComponent } from './feature.client'
-import { RelationshipNode } from './nodes/RelationshipNode'
-import { relationshipPopulationPromise } from './populationPromise'
+import { RelationshipFeatureClientComponent } from './feature.client.js'
+import { RelationshipNode } from './nodes/RelationshipNode.js'
+import { relationshipPopulationPromise } from './populationPromise.js'
 
 export type RelationshipFeatureProps =
   | {

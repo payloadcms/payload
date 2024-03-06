@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { index, uniqueIndex } from 'drizzle-orm/pg-core'
 
-import type { GenericColumn } from '../types'
+import type { GenericColumn } from '../types.d.ts'
 
 type CreateIndexArgs = {
   columnName: string

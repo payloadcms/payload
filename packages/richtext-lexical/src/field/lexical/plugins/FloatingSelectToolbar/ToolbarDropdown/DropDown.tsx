@@ -1,12 +1,12 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import React from 'react'
 import { createPortal } from 'react-dom'
 
-import type { FloatingToolbarSectionEntry } from '../types'
+import type { FloatingToolbarSectionEntry } from '../types.js'
 
 const baseClass = 'floating-select-toolbar-popup__dropdown-item'
 

@@ -1,5 +1,5 @@
-import type { FieldTypes } from '../exports/config'
-import type { Field } from '../fields/config/types'
+import type { FieldTypes } from '../exports/config.d.ts'
+import type { Field } from '../fields/config/types.d.ts'
 
 export type FieldSchemaJSON = {
   blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`

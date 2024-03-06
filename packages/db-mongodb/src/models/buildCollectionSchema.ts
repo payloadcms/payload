@@ -4,8 +4,8 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import paginate from 'mongoose-paginate-v2'
 
-import getBuildQueryPlugin from '../queries/buildQuery'
-import buildSchema from './buildSchema'
+import getBuildQueryPlugin from '../queries/buildQuery.js'
+import buildSchema from './buildSchema.js'
 
 const buildCollectionSchema = (
   collection: SanitizedCollectionConfig,

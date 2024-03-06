@@ -1,8 +1,8 @@
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import type { PopulationsByCollection, UpdatedDocument } from './types'
+import type { PopulationsByCollection, UpdatedDocument } from './types.d.ts'
 
-import { traverseRichText } from './traverseRichText'
+import { traverseRichText } from './traverseRichText.js'
 
 export const traverseFields = <T>(args: {
   externallyUpdatedRelationship?: UpdatedDocument

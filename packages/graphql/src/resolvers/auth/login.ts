@@ -3,9 +3,9 @@ import { generatePayloadCookie } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import { Context } from '../types'
+import type { Context } from '../types.d.ts'
 
-function loginResolver(collection: Collection) {
+function loginResolver(collection: Collection): any {
   async function resolver(_, args, context: Context) {
     const options = {
       collection,

@@ -2,8 +2,8 @@
 
 import type React from 'react'
 
-import { useSlatePlugin } from '../../../utilities/useSlatePlugin'
-import { relationshipName } from './shared'
+import { useSlatePlugin } from '../../../utilities/useSlatePlugin.js'
+import { relationshipName } from './shared.js'
 
 export const WithRelationship: React.FC = () => {
   useSlatePlugin('withRelationship', (incomingEditor) => {

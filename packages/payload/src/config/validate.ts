@@ -1,15 +1,15 @@
 import type { ValidationResult } from 'joi'
 import type { Logger } from 'pino'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { SanitizedConfig } from './types'
+import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
+import type { SanitizedConfig } from './types.d.ts'
 
-import collectionSchema from '../collections/config/schema'
-import fieldSchema, { idField } from '../fields/config/schema'
-import { fieldAffectsData } from '../fields/config/types'
-import globalSchema from '../globals/config/schema'
-import schema from './schema'
+import collectionSchema from '../collections/config/schema.js'
+import fieldSchema, { idField } from '../fields/config/schema.js'
+import { fieldAffectsData } from '../fields/config/types.js'
+import globalSchema from '../globals/config/schema.js'
+import schema from './schema.js'
 
 const validateFields = (
   context: string,

@@ -13,9 +13,9 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { GenerateImage } from '../types'
+import type { GenerateImage } from '../types.d.ts'
 
-import { Pill } from '../ui/Pill'
+import { Pill } from '../ui/Pill.js'
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type MetaImageProps = UploadInputProps & {

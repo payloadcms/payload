@@ -1,7 +1,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, PayloadRequest } from 'payload/types'
 
-import type { DrizzleDB, GenericColumn, PostgresAdapter } from '../types'
+import type { DrizzleDB, GenericColumn, PostgresAdapter } from '../types.d.ts'
 
 type BaseArgs = {
   adapter: PostgresAdapter

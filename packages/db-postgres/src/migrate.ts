@@ -11,11 +11,11 @@ import {
 } from 'payload/database'
 import prompts from 'prompts'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { createMigrationTable } from './utilities/createMigrationTable'
-import { migrationTableExists } from './utilities/migrationTableExists'
-import { parseError } from './utilities/parseError'
+import { createMigrationTable } from './utilities/createMigrationTable.js'
+import { migrationTableExists } from './utilities/migrationTableExists.js'
+import { parseError } from './utilities/parseError.js'
 
 export async function migrate(this: PostgresAdapter): Promise<void> {
   const { payload } = this

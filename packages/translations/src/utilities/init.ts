@@ -1,5 +1,5 @@
-import { Translations, InitTFunction, InitI18n, I18n } from '../types'
-import { deepMerge } from './deepMerge'
+import { Translations, InitTFunction, InitI18n, I18n } from '../types.js'
+import { deepMerge } from './deepMerge.js'
 
 /**
  * @function getTranslationString

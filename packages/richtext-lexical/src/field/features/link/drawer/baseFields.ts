@@ -4,7 +4,7 @@ import type { Field, RadioField, TextField } from 'payload/types'
 
 import { extractTranslations } from 'payload/utilities'
 
-import { validateUrl } from '../../../lexical/utils/url'
+import { validateUrl } from '../../../lexical/utils/url.js'
 
 const translations = extractTranslations([
   'fields:textToDisplay',

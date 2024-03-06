@@ -2,14 +2,14 @@ import type { RichTextAdapter } from 'payload/types'
 
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
-import type { AdapterArguments } from './types'
+import type { AdapterArguments } from './types.d.ts'
 
-import RichTextCell from './cell'
-import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
-import { richTextValidate } from './data/validation'
-import RichTextField from './field'
-import { getGenerateComponentMap } from './generateComponentMap'
-import { getGenerateSchemaMap } from './generateSchemaMap'
+import RichTextCell from './cell/index.js'
+import { richTextRelationshipPromise } from './data/richTextRelationshipPromise.js'
+import { richTextValidate } from './data/validation.js'
+import RichTextField from './field/index.js'
+import { getGenerateComponentMap } from './generateComponentMap.js'
+import { getGenerateSchemaMap } from './generateSchemaMap.js'
 
 export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], AdapterArguments, any> {
   return {
@@ -64,10 +64,10 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
   }
 }
 
-export { default as ElementButton } from './field/elements/Button'
+export { default as ElementButton } from './field/elements/Button.js'
 
-export { default as toggleElement } from './field/elements/toggle'
-export { default as LeafButton } from './field/leaves/Button'
+export { default as toggleElement } from './field/elements/toggle.js'
+export { default as LeafButton } from './field/leaves/Button.js'
 export type {
   AdapterArguments,
   ElementNode,
@@ -77,6 +77,6 @@ export type {
   RichTextElement,
   RichTextLeaf,
   TextNode,
-} from './types'
+} from './types.d.ts'
 
-export { nodeIsTextNode } from './types'
+export { nodeIsTextNode } from './types.js'

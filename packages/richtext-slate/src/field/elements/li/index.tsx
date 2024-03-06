@@ -1,6 +1,6 @@
-import type { RichTextCustomElement } from '../../..'
+import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import { ListItemElement } from './ListItem'
+import { ListItemElement } from './ListItem.js'
 
 const listItem: RichTextCustomElement = {
   name: 'li',

@@ -1,6 +1,6 @@
 'use client'
 
-import { createFeaturePropComponent } from '../../../../../createFeaturePropComponent'
-import { _SlateListItemConverter } from './converter'
+import { createFeaturePropComponent } from '../../../../../createFeaturePropComponent.js'
+import { _SlateListItemConverter } from './converter.js'
 
 export const ListItemConverterClient = createFeaturePropComponent(_SlateListItemConverter)

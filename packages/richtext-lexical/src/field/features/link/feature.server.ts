@@ -5,17 +5,17 @@ import type { Field } from 'payload/types'
 import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/client'
 
-import type { HTMLConverter } from '../converters/html/converter/types'
-import type { FeatureProviderProviderServer } from '../types'
-import type { ClientProps } from './feature.client'
-import type { SerializedAutoLinkNode, SerializedLinkNode } from './nodes/types'
+import type { HTMLConverter } from '../converters/html/converter/types.js'
+import type { FeatureProviderProviderServer } from '../types.js'
+import type { ClientProps } from './feature.client.js'
+import type { SerializedAutoLinkNode, SerializedLinkNode } from './nodes/types.js'
 
-import { convertLexicalNodesToHTML } from '../converters/html/converter'
-import { LinkFeatureClientComponent } from './feature.client'
-import { AutoLinkNode } from './nodes/AutoLinkNode'
-import { LinkNode } from './nodes/LinkNode'
-import { transformExtraFields } from './plugins/floatingLinkEditor/utilities'
-import { linkPopulationPromiseHOC } from './populationPromise'
+import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
+import { LinkFeatureClientComponent } from './feature.client.js'
+import { AutoLinkNode } from './nodes/AutoLinkNode.js'
+import { LinkNode } from './nodes/LinkNode.js'
+import { transformExtraFields } from './plugins/floatingLinkEditor/utilities.js'
+import { linkPopulationPromiseHOC } from './populationPromise.js'
 
 export type ExclusiveLinkCollectionsProps =
   | {

@@ -2,12 +2,12 @@
 
 import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from 'lexical'
 
-import type { FeatureProviderProviderClient } from '../types'
+import type { FeatureProviderProviderClient } from '../types.js'
 
-import { IndentDecreaseIcon } from '../../lexical/ui/icons/IndentDecrease'
-import { IndentIncreaseIcon } from '../../lexical/ui/icons/IndentIncrease'
-import { createClientComponent } from '../createClientComponent'
-import { IndentSectionWithEntries } from './floatingSelectToolbarIndentSection'
+import { IndentDecreaseIcon } from '../../lexical/ui/icons/IndentDecrease/index.js'
+import { IndentIncreaseIcon } from '../../lexical/ui/icons/IndentIncrease/index.js'
+import { createClientComponent } from '../createClientComponent.js'
+import { IndentSectionWithEntries } from './floatingSelectToolbarIndentSection.js'
 
 const IndentFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

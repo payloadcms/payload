@@ -1,6 +1,6 @@
 'use client'
 
-import { createFeaturePropComponent } from '../../../../../createFeaturePropComponent'
-import { _SlateRelationshipConverter } from './converter'
+import { createFeaturePropComponent } from '../../../../../createFeaturePropComponent.js'
+import { _SlateRelationshipConverter } from './converter.js'
 
 export const RelationshipConverterClient = createFeaturePropComponent(_SlateRelationshipConverter)

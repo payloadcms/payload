@@ -4,11 +4,11 @@ import type { Field, TabAsField } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 
-import type { BlocksMap } from '../../utilities/createBlocksMap'
+import type { BlocksMap } from '../../utilities/createBlocksMap.d.ts'
 
-import { transformHasManyNumber } from './hasManyNumber'
-import { transformHasManyText } from './hasManyText'
-import { transformRelationship } from './relationship'
+import { transformHasManyNumber } from './hasManyNumber.js'
+import { transformHasManyText } from './hasManyText.js'
+import { transformRelationship } from './relationship.js'
 
 type TraverseFieldsArgs = {
   /**

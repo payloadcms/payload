@@ -1,7 +1,7 @@
-import type { Field } from '../fields/config/types'
+import type { Field } from '../fields/config/types.d.ts'
 
-import { fieldAffectsData } from '../fields/config/types'
-import APIError from './APIError'
+import { fieldAffectsData } from '../fields/config/types.js'
+import APIError from './APIError.js'
 
 class MissingFieldType extends APIError {
   constructor(field: Field) {

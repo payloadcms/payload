@@ -2,14 +2,14 @@
 
 import { INSERT_ORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
 
-import type { FeatureProviderProviderClient } from '../../types'
+import type { FeatureProviderProviderClient } from '../../types.js'
 
-import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList'
-import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
-import { createClientComponent } from '../../createClientComponent'
-import { LexicalListPlugin } from '../plugin'
-import { ORDERED_LIST } from './markdownTransformer'
+import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList/index.js'
+import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection/index.js'
+import { createClientComponent } from '../../createClientComponent.js'
+import { LexicalListPlugin } from '../plugin/index.js'
+import { ORDERED_LIST } from './markdownTransformer.js'
 
 const OrderedListFeatureClient: FeatureProviderProviderClient<undefined> = (props) => {
   return {

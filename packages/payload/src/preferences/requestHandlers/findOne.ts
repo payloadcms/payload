@@ -1,8 +1,8 @@
 import httpStatus from 'http-status'
 
-import type { PayloadHandler } from '../../exports/config'
+import type { PayloadHandler } from '../../exports/config.d.ts'
 
-import findOne from '../operations/findOne'
+import findOne from '../operations/findOne.js'
 
 export const findByIDHandler: PayloadHandler = async (req): Promise<Response> => {
   const result = await findOne({

@@ -1,9 +1,9 @@
-import type { Payload } from '../../..'
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest } from '../../../types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.d.ts'
+import type { Payload } from '../../../index.d.ts'
+import type { PayloadRequest } from '../../../types/index.d.ts'
 
-import { ValidationError } from '../../../errors'
-import { generatePasswordSaltHash } from './generatePasswordSaltHash'
+import { ValidationError } from '../../../errors/index.js'
+import { generatePasswordSaltHash } from './generatePasswordSaltHash.js'
 
 type Args = {
   collection: SanitizedCollectionConfig

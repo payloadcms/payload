@@ -2,7 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field, GroupField } from 'payload/types'
 
-import { getBaseFields } from '../../drawer/baseFields'
+import { getBaseFields } from '../../drawer/baseFields.js'
 
 /**
  * This function is run to enrich the basefields which every link has with potential, custom user-added fields.

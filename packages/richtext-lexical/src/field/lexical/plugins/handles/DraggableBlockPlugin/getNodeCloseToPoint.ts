@@ -2,11 +2,11 @@ import type { LexicalEditor, LexicalNode } from 'lexical'
 
 import { $getNodeByKey } from 'lexical'
 
-import { Point } from '../../../utils/point'
-import { Rect } from '../../../utils/rect'
-import { getCollapsedMargins } from '../utils/getCollapsedMargins'
-import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys'
-import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform'
+import { Point } from '../../../utils/point.js'
+import { Rect } from '../../../utils/rect.js'
+import { getCollapsedMargins } from '../utils/getCollapsedMargins.js'
+import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys.js'
+import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'
 
 // Directions
 const Downward = 1

@@ -2,7 +2,7 @@
 import type { FormState, SanitizedCollectionConfig } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Drawer,
@@ -22,10 +22,10 @@ import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
-import type { ElementProps } from '..'
-import type { UploadData, UploadNode } from '../../nodes/UploadNode'
+import type { UploadData, UploadNode } from '../../nodes/UploadNode.js'
+import type { ElementProps } from '../index.js'
 
-import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider'
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 
 /**
  * This handles the extra fields, e.g. captions or alt text, which are

@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { useElement } from '../../providers/ElementProvider'
+import { useElement } from '../../providers/ElementProvider.js'
 import './index.scss'
 
 export const Blockquote = () => {

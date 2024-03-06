@@ -4,15 +4,15 @@ import type { TypeWithID } from 'payload/types'
 import { eq } from 'drizzle-orm'
 import { ValidationError } from 'payload/errors'
 
-import type { BlockRowToInsert } from '../transform/write/types'
-import type { Args } from './types'
+import type { BlockRowToInsert } from '../transform/write/types.d.ts'
+import type { Args } from './types.d.ts'
 
-import { buildFindManyArgs } from '../find/buildFindManyArgs'
-import { transform } from '../transform/read'
-import { transformForWrite } from '../transform/write'
-import { deleteExistingArrayRows } from './deleteExistingArrayRows'
-import { deleteExistingRowsByPath } from './deleteExistingRowsByPath'
-import { insertArrays } from './insertArrays'
+import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
+import { transform } from '../transform/read/index.js'
+import { transformForWrite } from '../transform/write/index.js'
+import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
+import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
+import { insertArrays } from './insertArrays.js'
 
 export const upsertRow = async <T extends TypeWithID>({
   id,

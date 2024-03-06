@@ -4,12 +4,12 @@ import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/client'
 import { sanitizeFields } from 'payload/config'
 
-import type { AdapterArguments, RichTextCustomElement } from '.'
+import type { AdapterArguments, RichTextCustomElement } from './types.d.ts'
 
-import elementTypes from './field/elements'
-import { linkFieldsSchemaPath } from './field/elements/link/shared'
-import { transformExtraFields } from './field/elements/link/utilities'
-import { uploadFieldsSchemaPath } from './field/elements/upload/shared'
+import elementTypes from './field/elements/index.js'
+import { linkFieldsSchemaPath } from './field/elements/link/shared.js'
+import { transformExtraFields } from './field/elements/link/utilities.js'
+import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
 
 export const getGenerateSchemaMap =
   (args: AdapterArguments): RichTextAdapter['generateSchemaMap'] =>

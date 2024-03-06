@@ -1,6 +1,6 @@
-import type { FeatureProviderProviderServer } from '../../types'
+import type { FeatureProviderProviderServer } from '../../types.js'
 
-import { UnderlineFeatureClientComponent } from './feature.client'
+import { UnderlineFeatureClientComponent } from './feature.client.js'
 
 export const UnderlineFeature: FeatureProviderProviderServer<undefined, undefined> = (props) => {
   return {

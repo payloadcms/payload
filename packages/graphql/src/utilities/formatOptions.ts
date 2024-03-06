@@ -1,6 +1,6 @@
 import type { RadioField, SelectField } from 'payload/types'
 
-import formatName from './formatName'
+import formatName from './formatName.js'
 
 const formatOptions = (field: RadioField | SelectField) => {
   return field.options.reduce((values, option) => {

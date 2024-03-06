@@ -1,6 +1,6 @@
 import path from 'path'
 
-import type { GenerateURL } from '../../types'
+import type { GenerateURL } from '../../types.d.ts'
 
 interface Args {
   baseURL: string

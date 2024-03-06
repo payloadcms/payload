@@ -3,7 +3,7 @@ import type { Block, Field } from 'payload/types'
 import { InvalidConfiguration } from 'payload/errors'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 
-import type { GenericTable } from '../types'
+import type { GenericTable } from '../types.d.ts'
 
 type Args = {
   block: Block
