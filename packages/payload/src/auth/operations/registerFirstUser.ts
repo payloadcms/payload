@@ -1,13 +1,13 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../'
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../types'
+import type { Collection } from '../../collections/config/types.d.ts'
+import type { GeneratedTypes } from '../../index.d.ts'
+import type { PayloadRequest } from '../../types/index.d.ts'
 
-import { Forbidden } from '../../errors'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import { Forbidden } from '../../errors/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments<T extends { [field: number | string | symbol]: unknown }> = {
   collection: Collection
@@ -31,8 +31,8 @@ export const registerFirstUserOperation = async <TSlug extends keyof GeneratedTy
     collection: {
       config,
       config: {
-        auth: { verify },
         slug,
+        auth: { verify },
       },
     },
     data,

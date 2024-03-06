@@ -2,11 +2,11 @@
 import fs from 'fs'
 import { compile } from 'json-schema-to-typescript'
 
-import type { SanitizedConfig } from '../config/types'
+import type { SanitizedConfig } from '../config/types.d.ts'
 
-import loadConfig from '../config/load'
-import { configToJSONSchema } from '../utilities/configToJSONSchema'
-import Logger from '../utilities/logger'
+import loadConfig from '../config/load.js'
+import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
+import Logger from '../utilities/logger.js'
 
 export function generateTypes(config: SanitizedConfig): void {
   const logger = Logger()

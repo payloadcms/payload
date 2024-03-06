@@ -1,6 +1,6 @@
-import type { ValidateOptions } from './config/types'
+import type { ValidateOptions } from './config/types.d.ts'
 
-import { number, password, point, relationship, select, text, textarea } from './validations'
+import { number, password, point, relationship, select, text, textarea } from './validations.js'
 
 const t = jest.fn((string) => string)
 

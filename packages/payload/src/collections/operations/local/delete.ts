@@ -1,13 +1,13 @@
-import type { Payload } from '../../..'
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../types'
-import type { Document, Where } from '../../../types'
-import type { BulkOperationResult } from '../../config/types'
+import type { Payload } from '../../../index.d.ts'
+import type { GeneratedTypes } from '../../../index.d.ts'
+import type { PayloadRequest, RequestContext } from '../../../types/index.d.ts'
+import type { Document, Where } from '../../../types/index.d.ts'
+import type { BulkOperationResult } from '../../config/types.d.ts'
 
-import { APIError } from '../../../errors'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { deleteOperation } from '../delete'
-import { deleteByIDOperation } from '../deleteByID'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { deleteOperation } from '../delete.js'
+import { deleteByIDOperation } from '../deleteByID.js'
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   collection: T

@@ -1,4 +1,4 @@
-import APIError from './APIError'
+import APIError from './APIError.js'
 
 class DuplicateFieldName extends APIError {
   constructor(fieldName: string) {

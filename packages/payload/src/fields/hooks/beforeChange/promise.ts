@@ -1,14 +1,13 @@
 import merge from 'deepmerge'
 
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
-import type { PayloadRequest, RequestContext } from '../../../types'
-import type { Operation } from '../../../types'
-import type { Field, TabAsField } from '../../config/types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.d.ts'
+import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.d.ts'
+import type { Field, TabAsField } from '../../config/types.d.ts'
 
-import { fieldAffectsData, tabHasName } from '../../config/types'
-import { getExistingRowDoc } from './getExistingRowDoc'
-import { traverseFields } from './traverseFields'
+import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { getExistingRowDoc } from './getExistingRowDoc.js'
+import { traverseFields } from './traverseFields.js'
 
 type Args = {
   collection: SanitizedCollectionConfig | null

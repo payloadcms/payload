@@ -1,4 +1,4 @@
-import type { ClientValidate, Field } from '../../fields/config/types'
+import type { ClientValidate, Field } from '../../fields/config/types.d.ts'
 
 export type Data = {
   [key: string]: any

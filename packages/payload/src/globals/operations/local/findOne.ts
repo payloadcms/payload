@@ -1,11 +1,9 @@
-import type { GeneratedTypes, RequestContext } from '../../..'
-import type { Payload } from '../../..'
-import type { PayloadRequest } from '../../../types'
-import type { Document } from '../../../types'
+import type { GeneratedTypes, Payload, RequestContext } from '../../../index.d.ts'
+import type { Document, PayloadRequest } from '../../../types/index.d.ts'
 
-import { APIError } from '../../../errors'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { findOneOperation } from '../findOne'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findOneOperation } from '../findOne.js'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
@@ -25,11 +23,11 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
   const {
+    slug: globalSlug,
     depth,
     draft = false,
     overrideAccess = true,
     showHiddenFields,
-    slug: globalSlug,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -39,12 +37,12 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   }
 
   return findOneOperation({
+    slug: globalSlug as string,
     depth,
     draft,
     globalConfig,
     overrideAccess,
     req: await createLocalReq(options, payload),
     showHiddenFields,
-    slug: globalSlug as string,
   })
 }

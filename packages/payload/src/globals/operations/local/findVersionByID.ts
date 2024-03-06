@@ -1,12 +1,10 @@
-import type { Payload, RequestContext } from '../../..'
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../types'
-import type { Document } from '../../../types'
-import type { TypeWithVersion } from '../../../versions/types'
+import type { GeneratedTypes, Payload, RequestContext } from '../../../index.d.ts'
+import type { Document, PayloadRequest } from '../../../types/index.d.ts'
+import type { TypeWithVersion } from '../../../versions/types.d.ts'
 
-import { APIError } from '../../../errors'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { findVersionByIDOperation } from '../findVersionByID'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { findVersionByIDOperation } from '../findVersionByID.js'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
@@ -28,11 +26,11 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
 ): Promise<TypeWithVersion<GeneratedTypes['globals'][T]>> {
   const {
     id,
+    slug: globalSlug,
     depth,
     disableErrors = false,
     overrideAccess = true,
     showHiddenFields,
-    slug: globalSlug,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)

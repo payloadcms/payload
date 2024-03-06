@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../types'
-import type { User } from '../types'
+import type { Collection } from '../../collections/config/types.d.ts'
+import type { PayloadRequest } from '../../types/index.d.ts'
+import type { User } from '../types.d.ts'
 
 export type Result = {
   collection?: string

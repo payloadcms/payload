@@ -10,11 +10,11 @@ import type {
 import { Config } from '../../config/types'
 import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors'
 import { sanitizeFields } from './sanitize'
-import { DatabaseAdapter } from '../..'
+import type { BaseDatabaseAdapter } from '../../database/types.d.ts'
 
 const dummyConfig: Config = {
   collections: [],
-  db: () => ({}) as DatabaseAdapter,
+  db: () => ({}) as BaseDatabaseAdapter,
 }
 
 describe('sanitizeFields', () => {

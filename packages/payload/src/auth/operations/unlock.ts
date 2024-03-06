@@ -1,12 +1,12 @@
-import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../types'
+import type { Collection } from '../../collections/config/types.d.ts'
+import type { PayloadRequest } from '../../types/index.d.ts'
 
-import { APIError } from '../../errors'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-import executeAccess from '../executeAccess'
-import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts'
+import { APIError } from '../../errors/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import executeAccess from '../executeAccess.js'
+import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
 export type Args = {
   collection: Collection

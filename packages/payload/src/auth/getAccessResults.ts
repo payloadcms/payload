@@ -1,7 +1,7 @@
-import type { AllOperations, PayloadRequest } from '../types'
-import type { Permissions } from './types'
+import type { AllOperations, PayloadRequest } from '../types/index.d.ts'
+import type { Permissions } from './types.d.ts'
 
-import { getEntityPolicies } from '../utilities/getEntityPolicies'
+import { getEntityPolicies } from '../utilities/getEntityPolicies.js'
 
 type GetAccessResultsArgs = {
   req: PayloadRequest
@@ -44,10 +44,10 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
       }
 
       const collectionPolicy = await getEntityPolicies({
+        type: 'collection',
         entity: collection,
         operations: collectionOperations,
         req,
-        type: 'collection',
       })
       results.collections = {
         ...results.collections,
@@ -65,10 +65,10 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
       }
 
       const globalPolicy = await getEntityPolicies({
+        type: 'global',
         entity: global,
         operations: globalOperations,
         req,
-        type: 'global',
       })
       results.globals = {
         ...results.globals,

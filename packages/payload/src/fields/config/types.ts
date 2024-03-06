@@ -13,12 +13,11 @@ import type {
   LabelProps,
   RichTextAdapter,
   RowLabel,
-} from '../../admin/types'
-import type { User } from '../../auth'
-import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
-import type { SanitizedGlobalConfig } from '../../globals/config/types'
-import type { PayloadRequest, RequestContext } from '../../types'
-import type { Operation, Where } from '../../types'
+} from '../../admin/types.d.ts'
+import type { User } from '../../auth/index.d.ts'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
+import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.d.ts'
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */

@@ -1,16 +1,16 @@
 /* eslint-disable no-restricted-syntax */
-import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { Field, FieldAffectingData } from '../../fields/config/types'
-import type { SanitizedGlobalConfig } from '../../globals/config/types'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.d.ts'
+import type { Field, FieldAffectingData } from '../../fields/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
 /* eslint-disable no-await-in-loop */
-import type { Operator, PayloadRequest, Where, WhereField } from '../../types'
-import type { EntityPolicies } from './types'
+import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.d.ts'
+import type { EntityPolicies } from './types.d.ts'
 
-import QueryError from '../../errors/QueryError'
-import { validOperators } from '../../types/constants'
-import { deepCopyObject } from '../../utilities/deepCopyObject'
-import flattenFields from '../../utilities/flattenTopLevelFields'
-import { validateSearchParam } from './validateSearchParams'
+import QueryError from '../../errors/QueryError.js'
+import { validOperators } from '../../types/constants.js'
+import { deepCopyObject } from '../../utilities/deepCopyObject.js'
+import flattenFields from '../../utilities/flattenTopLevelFields.js'
+import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
   errors?: { path: string }[]

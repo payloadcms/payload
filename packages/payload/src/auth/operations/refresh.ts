@@ -1,16 +1,16 @@
 import jwt from 'jsonwebtoken'
 import url from 'url'
 
-import type { BeforeOperationHook, Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../types'
-import type { Document } from '../../types'
+import type { BeforeOperationHook, Collection } from '../../collections/config/types.d.ts'
+import type { PayloadRequest } from '../../types/index.d.ts'
+import type { Document } from '../../types/index.d.ts'
 
-import { buildAfterOperation } from '../../collections/operations/utils'
-import { Forbidden } from '../../errors'
-import { getFieldsToSign } from '../getFieldsToSign'
-import { initTransaction } from '../../utilities/initTransaction'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
+import { buildAfterOperation } from '../../collections/operations/utils.js'
+import { Forbidden } from '../../errors/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { getFieldsToSign } from '../getFieldsToSign.js'
 
 export type Result = {
   exp: number

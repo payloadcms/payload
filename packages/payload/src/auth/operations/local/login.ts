@@ -1,11 +1,11 @@
-import type { Payload, RequestContext } from '../../..'
-import type { GeneratedTypes } from '../../../index'
-import type { PayloadRequest } from '../../../types'
-import type { Result } from '../login'
+import type { Payload, RequestContext } from '../../../index.d.ts'
+import type { GeneratedTypes } from '../../../index.d.ts'
+import type { PayloadRequest } from '../../../types/index.d.ts'
+import type { Result } from '../login.d.ts'
 
-import { APIError } from '../../../errors'
-import { createLocalReq } from '../../../utilities/createLocalReq'
-import { loginOperation } from '../login'
+import { APIError } from '../../../errors/index.js'
+import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { loginOperation } from '../login.js'
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug

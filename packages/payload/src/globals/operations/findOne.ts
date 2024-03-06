@@ -1,14 +1,13 @@
-import type { AccessResult } from '../../config/types'
-import type { PayloadRequest } from '../../types'
-import type { Where } from '../../types'
-import type { SanitizedGlobalConfig } from '../config/types'
+import type { AccessResult } from '../../config/types.d.ts'
+import type { PayloadRequest, Where } from '../../types/index.d.ts'
+import type { SanitizedGlobalConfig } from '../config/types.d.ts'
 
-import executeAccess from '../../auth/executeAccess'
-import { afterRead } from '../../fields/hooks/afterRead'
-import { commitTransaction } from '../../utilities/commitTransaction'
-import { initTransaction } from '../../utilities/initTransaction'
-import { killTransaction } from '../../utilities/killTransaction'
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable'
+import executeAccess from '../../auth/executeAccess.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 type Args = {
   depth?: number

@@ -1,11 +1,11 @@
 import joi from 'joi'
 
-import { endpointsSchema } from '../../config/schema'
+import { endpointsSchema } from '../../config/schema.js'
 import {
   componentSchema,
   customViewSchema,
   livePreviewSchema,
-} from '../../config/shared/componentSchema'
+} from '../../config/shared/componentSchema.js'
 
 const strategyBaseSchema = joi.object().keys({
   logout: joi.boolean(),

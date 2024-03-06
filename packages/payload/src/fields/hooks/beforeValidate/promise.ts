@@ -1,14 +1,14 @@
 /* eslint-disable no-param-reassign */
-import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types'
-import type { PayloadRequest, RequestContext } from '../../../types'
-import type { Field, TabAsField } from '../../config/types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.d.ts'
+import type { PayloadRequest, RequestContext } from '../../../types/index.d.ts'
+import type { Field, TabAsField } from '../../config/types.d.ts'
 
-import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types'
-import getValueWithDefault from '../../getDefaultValue'
-import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc'
-import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc'
-import { traverseFields } from './traverseFields'
+import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
+import getValueWithDefault from '../../getDefaultValue.js'
+import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
+import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
+import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
   collection: SanitizedCollectionConfig | null

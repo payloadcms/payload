@@ -1,9 +1,9 @@
-import type { Payload } from '..'
-import type { Field } from '../fields/config/types'
-import type { PathToQuery } from './queryValidation/types'
+import type { Field } from '../fields/config/types.d.ts'
+import type { Payload } from '../index.d.ts'
+import type { PathToQuery } from './queryValidation/types.d.ts'
 
-import { fieldAffectsData } from '../fields/config/types'
-import flattenFields from '../utilities/flattenTopLevelFields'
+import { fieldAffectsData } from '../fields/config/types.js'
+import flattenFields from '../utilities/flattenTopLevelFields.js'
 
 export async function getLocalizedPaths({
   collectionSlug,

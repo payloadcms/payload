@@ -1,15 +1,16 @@
 import joi from 'joi'
 
-import { endpointsSchema } from '../../config/schema'
+import { endpointsSchema } from '../../config/schema.js'
 import {
   componentSchema,
   customViewSchema,
   livePreviewSchema,
-} from '../../config/shared/componentSchema'
+} from '../../config/shared/componentSchema.js'
 
 const globalSchema = joi
   .object()
   .keys({
+    slug: joi.string().required(),
     access: joi.object({
       read: joi.func(),
       readVersions: joi.func(),
@@ -64,7 +65,6 @@ const globalSchema = joi
       beforeValidate: joi.array().items(joi.func()),
     }),
     label: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
-    slug: joi.string().required(),
     typescript: joi.object().keys({
       interface: joi.string(),
     }),

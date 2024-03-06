@@ -1,6 +1,6 @@
-import type { GlobalConfig } from '../globals/config/types'
+import type { GlobalConfig } from '../globals/config/types.d.ts'
 
-import APIError from './APIError'
+import APIError from './APIError.js'
 
 class DuplicateGlobal extends APIError {
   constructor(config: GlobalConfig) {
