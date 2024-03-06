@@ -8,6 +8,14 @@ const withBundleAnalyzer = bundleAnalyzer({
 export default withBundleAnalyzer(
   withPayload({
     reactStrictMode: false,
+    webpack: (webpackConfig) => {
+      webpackConfig.resolve.extensionAlias = {
+        '.js': ['.ts', '.tsx', '.js', '.jsx'],
+        '.mjs': ['.mts', '.mjs'],
+        '.cjs': ['.cts', '.cjs'],
+      }
+      return webpackConfig
+    },
     async redirects() {
       return [
         {

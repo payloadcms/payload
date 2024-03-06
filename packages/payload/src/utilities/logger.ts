@@ -1,5 +1,5 @@
-import { pino } from 'pino'
-import { PinoPretty } from 'pino-pretty'
+import pino from 'pino'
+import PinoPretty from 'pino-pretty'
 
 export type PayloadLogger = pino.Logger
 
@@ -16,7 +16,7 @@ export const defaultLoggerOptions: pino.LoggerOptions = {
   },
 }
 
-export const prettySyncLoggerDestination = PinoPretty({
+export const prettySyncLoggerDestination = PinoPretty.default({
   ...prettyOptions,
   destination: 1, // stdout
   sync: true,
@@ -28,7 +28,7 @@ const getLogger = (
   destination?: pino.DestinationStream,
 ): PayloadLogger => {
   if (options) {
-    return pino(
+    return pino.default(
       {
         name: options?.name || name,
         enabled: process.env.DISABLE_LOGGING !== 'true',
@@ -38,7 +38,7 @@ const getLogger = (
     )
   }
 
-  return pino(prettySyncLoggerDestination)
+  return pino.default(prettySyncLoggerDestination)
 }
 
 export default getLogger
