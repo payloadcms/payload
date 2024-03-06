@@ -49,7 +49,7 @@ const Localizer: React.FC<{
                     onClick={() => {
                       close()
                       dispatchSearchParams({
-                        type: 'set',
+                        type: 'SET',
                         params: {
                           locale: searchParams.locale,
                         },

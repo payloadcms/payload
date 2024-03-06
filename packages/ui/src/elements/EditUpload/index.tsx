@@ -36,7 +36,7 @@ export const EditUpload: React.FC<{
 }> = ({ fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
   const { closeModal } = useModal()
   const { t } = useTranslation()
-  const { formQueryParams, setFormQueryParams } = useFormQueryParams()
+  const { dispatchFormQueryParams, formQueryParams } = useFormQueryParams()
   const { uploadEdits } = formQueryParams || {}
   const [crop, setCrop] = useState<CropType>({
     height: uploadEdits?.crop?.height || 100,
@@ -81,11 +81,16 @@ export const EditUpload: React.FC<{
   }
 
   const saveEdits = () => {
-    setFormQueryParams({
-      ...formQueryParams,
-      uploadEdits: {
-        crop: crop || undefined,
-        focalPoint: pointPosition ? pointPosition : undefined,
+    dispatchFormQueryParams({
+      type: 'SET',
+      params: {
+        uploadEdits:
+          crop || pointPosition
+            ? {
+                crop: crop || null,
+                focalPoint: pointPosition ? pointPosition : null,
+              }
+            : null,
       },
     })
     closeModal(editDrawerSlug)

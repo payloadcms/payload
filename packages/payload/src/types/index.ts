@@ -54,6 +54,8 @@ export type CustomPayloadRequest<U = any> = {
   payloadDataLoader?: DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
+  /** Query params on the request */
+  query: Record<string, unknown>
   /** The route parameters
    * @example
    * /:collection/:id -> /posts/123

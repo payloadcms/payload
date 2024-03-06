@@ -6,11 +6,13 @@ import isDeepEqual from 'deep-equal'
 import { useRouter } from 'next/navigation'
 import { serialize } from 'object-to-formdata'
 import { wait } from 'payload/utilities'
+import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
 import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types'
 
+import { useFormQueryParams } from '../..'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAuth } from '../../providers/Auth'
@@ -69,6 +71,7 @@ const Form: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
+  const { formQueryParams } = useFormQueryParams()
 
   const config = useConfig()
   const {
@@ -221,7 +224,8 @@ const Form: React.FC<Props> = (props) => {
         let res
 
         if (typeof actionToUse === 'string') {
-          res = await requests[methodToUse.toLowerCase()](actionToUse, {
+          const actionEndpoint = `${actionToUse}${QueryString.stringify(formQueryParams, { addQueryPrefix: true })}`
+          res = await requests[methodToUse.toLowerCase()](actionEndpoint, {
             body: formData,
             headers: {
               'Accept-Language': i18n.language,
@@ -352,6 +356,7 @@ const Form: React.FC<Props> = (props) => {
       i18n,
       waitForAutocomplete,
       beforeSubmit,
+      formQueryParams,
     ],
   )
 
@@ -562,9 +567,14 @@ const Form: React.FC<Props> = (props) => {
     [fields, dispatchFields, onChange],
   )
 
+  const actionString =
+    typeof action === 'string'
+      ? `${action}${QueryString.stringify(formQueryParams, { addQueryPrefix: true })}`
+      : ''
+
   return (
     <form
-      action={action}
+      action={method ? actionString : action}
       className={classes}
       method={method}
       noValidate

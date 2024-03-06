@@ -8,14 +8,14 @@ export type State = qs.ParsedQs
 export type Action = (
   | {
       params: qs.ParsedQs
-      type: 'replace'
+      type: 'REPLACE'
     }
   | {
       params: qs.ParsedQs
-      type: 'set'
+      type: 'SET'
     }
   | {
-      type: 'clear'
+      type: 'CLEAR'
     }
 ) & {
   /**
