@@ -3,6 +3,7 @@
   "version": "3.0.0-alpha.19",
   "main": "./src/index.ts",
   "types": "./dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",

@@ -8,6 +8,7 @@
   "types": "dist/index.d.ts",
   "license": "MIT",
   "author": "dev@payloadcms.com",
+  "type": "module",
   "scripts": {
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",

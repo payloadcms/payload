@@ -5,6 +5,7 @@
   "license": "MIT",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "type": "module",
   "bin": {
     "payload": "bin.js"
   },

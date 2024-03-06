@@ -3,6 +3,7 @@
   "version": "3.0.0-alpha.19",
   "main": "./dist/exports/index.ts",
   "types": "./dist/types.d.ts",
+  "type": "module",
   "scripts": {
     "writeFiles": "npx ts-node ./writeTranslationFiles.ts",
     "build": "pnpm writeFiles && tsc",

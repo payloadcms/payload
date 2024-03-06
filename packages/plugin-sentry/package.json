@@ -6,6 +6,7 @@
   "description": "Sentry plugin for Payload",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "echo \"Build temporarily disabled.\" && exit 0",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",

@@ -5,6 +5,7 @@
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
   "homepage": "https://payloadcms.com",
+  "type": "module",
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload",

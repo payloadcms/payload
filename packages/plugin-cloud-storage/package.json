@@ -4,6 +4,7 @@
   "version": "3.0.0-alpha.19",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "license": "MIT",
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",

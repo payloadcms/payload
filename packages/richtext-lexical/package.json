@@ -8,6 +8,7 @@
   "author": "Payload CMS, Inc.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && ts-node -T ../../scripts/exportPointerFiles.ts ../packages/richtext-lexical dist/exports",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
