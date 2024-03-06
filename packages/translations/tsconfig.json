@@ -3,8 +3,8 @@
     "composite": true, // Make sure typescript knows that this module depends on their references
     "esModuleInterop": true,
     "target": "ESNext",
-    "module": "Node16",
-    "moduleResolution": "Node16",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src",
