@@ -4,7 +4,7 @@ import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
 import * as AWS from '@aws-sdk/client-s3'
 import { fromCognitoIdentityPool } from '@aws-sdk/credential-providers'
 
-import { authAsCognitoUser } from './authAsCognitoUser'
+import { authAsCognitoUser } from './authAsCognitoUser.js'
 
 export type GetStorageClient = () => Promise<{
   identityID: string

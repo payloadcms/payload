@@ -3,7 +3,7 @@ import type { Config } from 'payload/config'
 import nodemailer from 'nodemailer'
 import { defaults } from 'payload/config'
 
-import { payloadCloud } from './plugin'
+import { payloadCloud } from './plugin.js'
 
 describe('plugin', () => {
   describe('not in Payload Cloud', () => {

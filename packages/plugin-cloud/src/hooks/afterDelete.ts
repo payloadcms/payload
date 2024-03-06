@@ -5,10 +5,10 @@ import type {
   TypeWithID,
 } from 'payload/types'
 
-import type { TypeWithPrefix } from '../types'
+import type { TypeWithPrefix } from '../types.d.ts'
 
-import { createKey } from '../utilities/createKey'
-import { getStorageClient } from '../utilities/getStorageClient'
+import { createKey } from '../utilities/createKey.js'
+import { getStorageClient } from '../utilities/getStorageClient.js'
 
 interface Args {
   collection: CollectionConfig
