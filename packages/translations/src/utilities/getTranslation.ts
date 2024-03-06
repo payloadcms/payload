@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import { I18n } from '../types'
+import { I18n } from '../types.js'
 
 export const getTranslation = (
   label: JSX.Element | Record<string, string> | string,
