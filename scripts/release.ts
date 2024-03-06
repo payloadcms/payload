@@ -1,7 +1,7 @@
 import type { ExecSyncOptions } from 'child_process'
+import { execSync } from 'child_process'
 
 import chalk from 'chalk'
-import { execSync } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
@@ -12,6 +12,7 @@ import simpleGit from 'simple-git'
 
 import { getPackageDetails } from './lib/getPackageDetails'
 import { updateChangelog } from './utils/updateChangelog'
+import { fileURLToPath } from 'url'
 
 // Update this list with any packages to publish
 const packageWhitelist = [
@@ -20,14 +21,20 @@ const packageWhitelist = [
   'ui',
   'next',
   'graphql',
-
   'db-mongodb',
+  'db-postgres',
   'richtext-slate',
+  'richtext-lexical',
+  'plugin-cloud',
+  'plugin-cloud-storage',
+  'plugin-seo',
 ]
 
-const rootPath = path.resolve(__dirname, '..')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const cwd = path.resolve(__dirname, '..')
 
-const git = simpleGit(rootPath)
+const git = simpleGit(cwd)
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
@@ -120,16 +127,12 @@ async function main() {
 
   // Prebuild all packages
   header(`\n🔨 Prebuilding all packages...`)
-  await execa('pnpm', ['install'], {
-    cwd: rootPath,
-    stdio: 'inherit',
-  })
 
-  const buildResult = await execa('pnpm', ['build:core', '--output-logs=errors-only'], {
-    cwd: rootPath,
-    // stdio: ['ignore', 'ignore', 'pipe'],
-    stdio: 'inherit',
-  })
+  const execaOpts: execa.Options = { ...execOpts, stdio: 'inherit' }
+
+  await execa('pnpm', ['install'], execaOpts)
+
+  const buildResult = await execa('pnpm', ['build:core', '--output-logs=errors-only'], execaOpts)
   // const buildResult = execSync('pnpm build:all', execOpts)
   if (buildResult.exitCode !== 0) {
     console.error(chalk.bold.red('Build failed'))
@@ -137,10 +140,22 @@ async function main() {
     abort('Build failed')
   }
 
+  const buildPluginsResult = await execa(
+    'pnpm',
+    ['build:plugins', '--output-logs=errors-only'],
+    execaOpts,
+  )
+
+  if (buildPluginsResult.exitCode !== 0) {
+    console.error(chalk.bold.red('Build failed'))
+    console.log(buildPluginsResult.stderr)
+    abort('Build failed')
+  }
+
   // Update changelog
   if (changelog) {
     header(`${logPrefix}📝 Updating changelog...`)
-    await updateChangelog({ newVersion: nextReleaseVersion, dryRun })
+    await updateChangelog({ dryRun, newVersion: nextReleaseVersion })
   } else {
     console.log(chalk.bold.yellow('📝 Skipping changelog update'))
   }
@@ -191,7 +206,7 @@ async function main() {
           cmdArgs.push('--otp', otp)
         }
         const { exitCode } = await execa('pnpm', cmdArgs, {
-          cwd: rootPath,
+          cwd,
           stdio: ['ignore', 'ignore', 'pipe'],
           // stdio: 'inherit',
         })

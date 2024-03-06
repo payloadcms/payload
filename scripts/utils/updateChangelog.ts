@@ -9,10 +9,12 @@ import addStream from 'add-stream'
 import conventionalChangelog from 'conventional-changelog'
 import { default as getConventionalPreset } from 'conventional-changelog-conventionalcommits'
 import { once } from 'events'
-import fse, { createReadStream, createWriteStream } from 'fs-extra'
+import fse from 'fs-extra'
 import minimist from 'minimist'
 import simpleGit from 'simple-git'
 import tempfile from 'tempfile'
+
+const { createReadStream, createWriteStream } = fse
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 const git = simpleGit()
@@ -105,8 +107,9 @@ export const updateChangelog = async ({ newVersion, dryRun }: Args) => {
   await once(emitter, 'finish')
 }
 
-// If file is executed directly, run the function
-if (require.main === module) {
+// module import workaround for ejs
+if (import.meta.url === `file://${process.argv[1]}`) {
+  // This module is being run directly
   const { newVersion } = minimist(process.argv.slice(2))
   updateChangelog({ dryRun: true, newVersion })
     .then(() => {
