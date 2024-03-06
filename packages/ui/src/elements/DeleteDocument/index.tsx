@@ -7,12 +7,12 @@ import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-// import { requests } from '../../../api'
 import { useForm } from '../../forms/Form/context'
 import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useTranslation } from '../../providers/Translation'
 import { MinimalTemplate } from '../../templates/Minimal'
+import { requests } from '../../utilities/api'
 import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
 import { Translation } from '../Translation'
@@ -21,7 +21,7 @@ import './index.scss'
 const baseClass = 'delete-document'
 
 const DeleteDocument: React.FC<Props> = (props) => {
-  const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps, useAsTitle } = props
+  const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps } = props
 
   const {
     routes: { admin, api },
@@ -31,7 +31,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const { setModified } = useForm()
   const [deleting, setDeleting] = useState(false)
   const { toggleModal } = useModal()
-  const history = useRouter()
+  const router = useRouter()
   const { i18n, t } = useTranslation()
   const { title } = useDocumentInfo()
 
@@ -48,33 +48,38 @@ const DeleteDocument: React.FC<Props> = (props) => {
     setDeleting(true)
     setModified(false)
     try {
-      // await requests
-      //   .delete(`${serverURL}${api}/${slug}/${id}`, {
-      //     headers: {
-      //       'Accept-Language': i18n.language,
-      //       'Content-Type': 'application/json',
-      //     },
-      //   })
-      //   .then(async (res) => {
-      //     try {
-      //       const json = await res.json()
-      //       if (res.status < 400) {
-      //         setDeleting(false)
-      //         toggleModal(modalSlug)
-      //         toast.success(json.message || t('general:titleDeleted', { label: getTranslation(singular, i18n), title }))
-      //         return history.push(`${admin}/collections/${slug}`)
-      //       }
-      //       toggleModal(modalSlug)
-      //       if (json.errors) {
-      //         json.errors.forEach((error) => toast.error(error.message))
-      //       } else {
-      //         addDefaultError()
-      //       }
-      //       return false
-      //     } catch (e) {
-      //       return addDefaultError()
-      //     }
-      //   })
+      await requests
+        .delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(async (res) => {
+          try {
+            const json = await res.json()
+
+            if (res.status < 400) {
+              setDeleting(false)
+              toggleModal(modalSlug)
+              toast.success(
+                json.message ||
+                  t('general:titleDeleted', { label: getTranslation(singularLabel, i18n), title }),
+              )
+
+              return router.push(`${admin}/collections/${collectionSlug}`)
+            }
+            toggleModal(modalSlug)
+            if (json.errors) {
+              json.errors.forEach((error) => toast.error(error.message))
+            } else {
+              addDefaultError()
+            }
+            return false
+          } catch (e) {
+            return addDefaultError()
+          }
+        })
     } catch (e) {
       addDefaultError()
     }
@@ -90,7 +95,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
     singularLabel,
     i18n,
     title,
-    history,
+    router,
     admin,
     addDefaultError,
   ])
@@ -113,7 +118,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
             <p>
               <Translation
                 elements={{
-                  '1': ({ children }) => <strong children={children} />,
+                  '1': ({ children }) => <strong>{children}</strong>,
                 }}
                 i18nKey="general:aboutToDelete"
                 t={t}
