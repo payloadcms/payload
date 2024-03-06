@@ -6,9 +6,9 @@ import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { buildTable } from './schema/build'
+import { buildTable } from './schema/build.js'
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.schemaName) {

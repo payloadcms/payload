@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 import type { Field, Where } from 'payload/types'
 
-import { parseParams } from './parseParams'
+import { parseParams } from './parseParams.js'
 
 export async function buildAndOrConditions({
   collectionSlug,

@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { isArrayOfRows } from '../../utilities/isArrayOfRows'
+import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 
 type Args = {
   data: unknown

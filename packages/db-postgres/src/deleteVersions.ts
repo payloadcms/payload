@@ -5,9 +5,9 @@ import { inArray } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { findMany } from './find/findMany'
+import { findMany } from './find/findMany.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: PostgresAdapter,

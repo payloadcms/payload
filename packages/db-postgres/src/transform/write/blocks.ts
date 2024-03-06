@@ -3,10 +3,10 @@ import type { BlockField } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../../types'
-import type { BlockRowToInsert, RelationshipToDelete } from './types'
+import type { PostgresAdapter } from '../../types.d.ts'
+import type { BlockRowToInsert, RelationshipToDelete } from './types.d.ts'
 
-import { traverseFields } from './traverseFields'
+import { traverseFields } from './traverseFields.js'
 
 type Args = {
   adapter: PostgresAdapter

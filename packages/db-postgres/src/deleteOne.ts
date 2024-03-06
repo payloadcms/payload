@@ -3,11 +3,11 @@ import type { PayloadRequest } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { buildFindManyArgs } from './find/buildFindManyArgs'
-import buildQuery from './queries/buildQuery'
-import { transform } from './transform/read'
+import { buildFindManyArgs } from './find/buildFindManyArgs.js'
+import buildQuery from './queries/buildQuery.js'
+import { transform } from './transform/read/index.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: PostgresAdapter,

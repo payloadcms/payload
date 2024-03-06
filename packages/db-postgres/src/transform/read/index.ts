@@ -2,9 +2,9 @@
 import type { SanitizedConfig } from 'payload/config'
 import type { Field, TypeWithID } from 'payload/types'
 
-import { createBlocksMap } from '../../utilities/createBlocksMap'
-import { createPathMap } from '../../utilities/createRelationshipMap'
-import { traverseFields } from './traverseFields'
+import { createBlocksMap } from '../../utilities/createBlocksMap.js'
+import { createPathMap } from '../../utilities/createRelationshipMap.js'
+import { traverseFields } from './traverseFields.js'
 
 type TransformArgs = {
   config: SanitizedConfig

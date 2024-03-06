@@ -3,13 +3,13 @@ import type { Field, PayloadRequest, TypeWithID } from 'payload/types'
 
 import { inArray, sql } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../types'
-import type { ChainedMethods } from './chainMethods'
+import type { PostgresAdapter } from '../types.d.ts'
+import type { ChainedMethods } from './chainMethods.d.ts'
 
-import buildQuery from '../queries/buildQuery'
-import { transform } from '../transform/read'
-import { buildFindManyArgs } from './buildFindManyArgs'
-import { chainMethods } from './chainMethods'
+import buildQuery from '../queries/buildQuery.js'
+import { transform } from '../transform/read/index.js'
+import { buildFindManyArgs } from './buildFindManyArgs.js'
+import { chainMethods } from './chainMethods.js'
 
 type Args = Omit<FindArgs, 'collection'> & {
   adapter: PostgresAdapter

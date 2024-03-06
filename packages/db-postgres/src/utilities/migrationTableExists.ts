@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 
-import type { DrizzleDB } from '../types'
+import type { DrizzleDB } from '../types.d.ts'
 
 export const migrationTableExists = async (db: DrizzleDB): Promise<boolean> => {
   const queryRes = await db.execute(sql`SELECT to_regclass('public.payload_migrations');`)

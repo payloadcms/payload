@@ -1,5 +1,5 @@
-import { convertPathToJSONTraversal } from './convertPathToJSONTraversal'
-import { formatJSONPathSegment } from './formatJSONPathSegment'
+import { convertPathToJSONTraversal } from './convertPathToJSONTraversal.js'
+import { formatJSONPathSegment } from './formatJSONPathSegment.js'
 
 const operatorMap = {
   contains: '~*',

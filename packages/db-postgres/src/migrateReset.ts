@@ -9,9 +9,9 @@ import {
   readMigrationFiles,
 } from 'payload/database'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { migrationTableExists } from './utilities/migrationTableExists'
+import { migrationTableExists } from './utilities/migrationTableExists.js'
 
 /**
  * Run all migrate down functions

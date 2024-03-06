@@ -2,9 +2,9 @@ import type { FindGlobal } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types.d.ts'
 
-import { findMany } from './find/findMany'
+import { findMany } from './find/findMany.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: PostgresAdapter,
