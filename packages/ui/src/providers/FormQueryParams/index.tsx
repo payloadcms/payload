@@ -6,6 +6,8 @@ import type { Action, FormQueryParamsContext, State } from './types'
 
 import { useLocale } from '../Locale'
 
+export type QueryParamTypes = State
+
 export const FormQueryParams = createContext({} as FormQueryParamsContext)
 
 export const FormQueryParamsProvider: React.FC<{
