@@ -5,7 +5,7 @@
   "types": "./dist/types.d.ts",
   "type": "module",
   "scripts": {
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:swc": "swc ./src -d ./dist --config-file --copy-files .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build": "pnpm writeFiles && pnpm build:swc && pnpm build:types",
     "clean": "rimraf {dist,*.tsbuildinfo}",

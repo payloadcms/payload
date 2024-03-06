@@ -471,23 +471,19 @@ async function build() {
       fs.readFileSync(path.resolve(__dirname, SOURCE_DIR, filename), 'utf8'),
     )
 
+    const dest1 = path.resolve(__dirname, `${DESTINATION_ROOT}/client`, filename)
+
     const clientTranslations = sortObject(filterKeys(source, '', clientTranslationKeys))
-    fs.writeFileSync(
-      path.resolve(__dirname, `${DESTINATION_ROOT}/client`, filename),
-      JSON.stringify(clientTranslations, null, 2),
-      {
-        flag: 'w+',
-      },
-    )
+    fs.writeFileSync(dest1, JSON.stringify(clientTranslations, null, 2), {
+      flag: 'w+',
+    })
 
     const serverTranslations = sortObject(filterKeys(source, '', serverTranslationKeys))
-    fs.writeFileSync(
-      path.resolve(__dirname, `${DESTINATION_ROOT}/api`, filename),
-      JSON.stringify(serverTranslations, null, 2),
-      {
-        flag: 'w+',
-      },
-    )
+    const dest2 = path.resolve(__dirname, `${DESTINATION_ROOT}/api`, filename)
+
+    fs.writeFileSync(dest2, JSON.stringify(serverTranslations, null, 2), {
+      flag: 'w+',
+    })
 
     console.info('Rebuilt:', filename)
   }
