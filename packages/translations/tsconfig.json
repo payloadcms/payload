@@ -1,11 +1,14 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "composite": true, // Make sure typescript knows that this module depends on their references
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src",
-    "lib": ["dom", "dom.iterable", "esnext"]
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "noEmit": false /* Do not emit outputs. */,
+    "emitDeclarationOnly": true
   },
   "include": ["src/**/*.ts", "src/**/*.json"],
   "exclude": ["src/all"]

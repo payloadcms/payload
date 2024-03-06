@@ -1,4 +1,4 @@
-import type { FieldAffectingData } from '../fields/config/types'
+import type { FieldAffectingData } from '../fields/config/types.d.ts'
 
 import APIError from './APIError.js'
 
