@@ -1,4 +1,3 @@
-import type { QueryParamTypes } from '@payloadcms/ui'
 import type { EditViewComponent } from 'payload/config'
 import type {
   DocumentPreferences,
@@ -24,10 +23,10 @@ import React, { Fragment } from 'react'
 import type { AdminViewProps } from '../Root'
 import type { GenerateEditViewMetadata } from './getMetaBySegment'
 
+import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle'
+import { NotFoundClient } from '../NotFound/index.client'
 import { getMetaBySegment } from './getMetaBySegment'
 import { getViewsFromConfig } from './getViewsFromConfig'
-import { NotFoundClient } from '../NotFound/index.client'
-import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
@@ -210,9 +209,9 @@ export const Document: React.FC<AdminViewProps> = async ({
         initialState={initialState}
         title={formatTitle({
           collectionConfig,
+          dateFormat: config.admin.dateFormat,
           globalConfig,
           i18n,
-          dateFormat: config.admin.dateFormat,
           value: data?.[collectionConfig?.admin?.useAsTitle] || id?.toString(),
         })}
       />
