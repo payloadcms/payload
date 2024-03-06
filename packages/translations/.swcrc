@@ -2,6 +2,9 @@
   "$schema": "https://json.schemastore.org/swcrc",
   "sourceMaps": "inline",
   "jsc": {
+    "experimental": {
+      "keepImportAssertions": true
+    },
     "target": "esnext",
     "parser": {
       "syntax": "typescript",
