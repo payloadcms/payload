@@ -1,11 +1,11 @@
 import type { UpdateOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import type { MongooseAdapter } from '.'
+import type { MongooseAdapter } from './index.d.ts'
 
-import handleError from './utilities/handleError'
-import sanitizeInternalFields from './utilities/sanitizeInternalFields'
-import { withSession } from './withSession'
+import handleError from './utilities/handleError.js'
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
+import { withSession } from './withSession.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,

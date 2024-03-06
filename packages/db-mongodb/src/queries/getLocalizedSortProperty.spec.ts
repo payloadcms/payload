@@ -1,6 +1,6 @@
 import { sanitizeConfig } from 'payload/config'
 import { Config } from 'payload/config'
-import { getLocalizedSortProperty } from './getLocalizedSortProperty'
+import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 
 const config = {
   localization: {

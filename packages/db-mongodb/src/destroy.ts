@@ -2,7 +2,7 @@ import type { Destroy } from 'payload/database'
 
 import mongoose from 'mongoose'
 
-import type { MongooseAdapter } from './index'
+import type { MongooseAdapter } from './index.d.ts'
 
 export const destroy: Destroy = async function destroy(this: MongooseAdapter) {
   if (this.mongoMemoryServer) {
