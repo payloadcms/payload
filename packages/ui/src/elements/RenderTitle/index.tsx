@@ -10,11 +10,11 @@ import './index.scss'
 const baseClass = 'render-title'
 
 const RenderTitle: React.FC<Props> = (props) => {
-  const { className, element = 'h1', title: titleFromProps } = props
+  const { className, element = 'h1', fallback, title: titleFromProps } = props
 
   const { id, title: titleFromContext } = useDocumentInfo()
 
-  const title = titleFromProps || titleFromContext
+  const title = titleFromProps || titleFromContext || fallback
 
   const idAsTitle = title === id
 

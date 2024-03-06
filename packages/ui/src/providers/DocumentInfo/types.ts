@@ -29,6 +29,7 @@ export type DocumentInfoProps = {
   initialData?: Data
   initialState?: FormState
   onSave?: (data: Data) => Promise<void> | void
+  title?: string
 }
 
 export type DocumentInfo = DocumentInfoProps & {
@@ -36,7 +37,6 @@ export type DocumentInfo = DocumentInfoProps & {
   preferencesKey?: string
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   slug?: string
-  title?: string
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
   versions?: PaginatedDocs<TypeWithVersion<any>>
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>

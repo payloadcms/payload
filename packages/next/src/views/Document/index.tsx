@@ -27,6 +27,7 @@ import type { GenerateEditViewMetadata } from './getMetaBySegment'
 import { getMetaBySegment } from './getMetaBySegment'
 import { getViewsFromConfig } from './getViewsFromConfig'
 import { NotFoundClient } from '../NotFound/index.client'
+import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
@@ -214,6 +215,13 @@ export const Document: React.FC<AdminViewProps> = async ({
         id={id}
         initialData={data}
         initialState={initialState}
+        title={formatTitle({
+          collectionConfig,
+          globalConfig,
+          i18n,
+          dateFormat: config.admin.dateFormat,
+          value: data?.[collectionConfig?.admin?.useAsTitle] || id?.toString(),
+        })}
       />
       <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale.code}`}>
         <FormQueryParamsProvider formQueryParams={formQueryParams}>

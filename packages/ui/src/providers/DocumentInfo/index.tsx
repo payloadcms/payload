@@ -4,7 +4,14 @@ import type { TypeWithTimestamps } from 'payload/types'
 import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from 'payload/types'
 
 import qs from 'qs'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from 'react'
 
 import type { DocumentInfo, DocumentInfoContext, DocumentInfoProps } from './types'
 
@@ -13,6 +20,7 @@ import { useConfig } from '../Config'
 import { useLocale } from '../Locale'
 import { usePreferences } from '../Preferences'
 import { useTranslation } from '../Translation'
+import { documentInfoReducer } from './reducer'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -32,9 +40,17 @@ export const DocumentInfoProvider: React.FC<
     children: React.ReactNode
   }
 > = ({ children, ...rest }) => {
-  const [documentInfo, setDocumentInfo] = useState<DocumentInfo>({
-    ...rest,
-  })
+  const [documentInfo, dispatchDocumentInfo] = useReducer(documentInfoReducer, rest)
+
+  const setDocumentInfo = useCallback(
+    (newInfo: DocumentInfo) => {
+      dispatchDocumentInfo({
+        type: 'SET_DOC_INFO',
+        payload: newInfo,
+      })
+    },
+    [dispatchDocumentInfo],
+  )
 
   const { id, collectionSlug, globalSlug } = documentInfo
 
@@ -60,14 +76,12 @@ export const DocumentInfoProvider: React.FC<
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
-  const [title, setTitle] = useState<string>('')
-
-  const setDocumentTitle = useCallback<DocumentInfoContext['setDocumentTitle']>(
-    (title) => {
-      setTitle(title || id?.toString() || '[untitled]')
-    },
-    [id],
-  )
+  const setDocumentTitle = useCallback((title: string) => {
+    dispatchDocumentInfo({
+      type: 'SET_DOC_TITLE',
+      payload: title,
+    })
+  }, [])
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -295,10 +309,12 @@ export const DocumentInfoProvider: React.FC<
       let docPreferences: DocumentPreferences = rest.docPreferences
       if (!docPreferences) docPreferences = await getDocPreferences()
 
-      setDocumentInfo((existingInfo) => ({
-        ...existingInfo,
-        docPreferences,
-      }))
+      dispatchDocumentInfo({
+        type: 'SET_DOC_INFO',
+        payload: {
+          docPreferences,
+        },
+      })
     }
 
     if (id) {
@@ -317,7 +333,6 @@ export const DocumentInfoProvider: React.FC<
     setDocFieldPreferences,
     setDocumentInfo,
     setDocumentTitle,
-    title,
     unpublishedVersions,
     versions,
   }
