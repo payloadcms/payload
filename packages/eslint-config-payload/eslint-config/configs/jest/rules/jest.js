@@ -1,3 +1,4 @@
+/** @type {import('eslint').Linter.Config} */
 module.exports = {
   rules: {
     'jest/consistent-test-it': ['error', { fn: 'it' }],

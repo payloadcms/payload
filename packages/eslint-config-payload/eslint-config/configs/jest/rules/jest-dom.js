@@ -1,3 +1,4 @@
+/** @type {import('eslint').Linter.Config} */
 module.exports = {
   rules: {
     'jest-dom/prefer-checked': 'error',
