@@ -61,7 +61,7 @@ export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
  * generated from random data and completely anonymous.
  */
 const getEnvID = (): string => {
-  const conf = new Conf()
+  const conf = new Conf.default()
   const ENV_ID = 'envID'
 
   const val = conf.get(ENV_ID)
