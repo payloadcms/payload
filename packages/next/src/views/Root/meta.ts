@@ -1,18 +1,18 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { getNextI18n } from '../../utilities/getNextI18n.js'
-import { generateAccountMetadata } from '../Account/index.js'
-import { generateCreateFirstUserMetadata } from '../CreateFirstUser/index.js'
-import { generateDashboardMetadata } from '../Dashboard/index.js'
-import { generateDocumentMetadata } from '../Document/meta.js'
-import { generateForgotPasswordMetadata } from '../ForgotPassword/index.js'
-import { generateListMetadata } from '../List/index.js'
-import { generateLoginMetadata } from '../Login/index.js'
-import { generateNotFoundMeta } from '../NotFound/meta.js'
-import { generateResetPasswordMetadata } from '../ResetPassword/index.js'
-import { generateUnauthorizedMetadata } from '../Unauthorized/index.js'
-import { generateVerifyMetadata } from '../Verify/index.js'
+import { getNextI18n } from '../../utilities/getNextI18n'
+import { generateAccountMetadata } from '../Account'
+import { generateCreateFirstUserMetadata } from '../CreateFirstUser'
+import { generateDashboardMetadata } from '../Dashboard'
+import { generateDocumentMetadata } from '../Document/meta'
+import { generateForgotPasswordMetadata } from '../ForgotPassword'
+import { generateListMetadata } from '../List'
+import { generateLoginMetadata } from '../Login'
+import { generateNotFoundMeta } from '../NotFound/meta'
+import { generateResetPasswordMetadata } from '../ResetPassword'
+import { generateUnauthorizedMetadata } from '../Unauthorized'
+import { generateVerifyMetadata } from '../Verify'
 
 const oneSegmentMeta = {
   'create-first-user': generateCreateFirstUserMetadata,
@@ -134,7 +134,7 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
   }
 
   if (!meta) {
-    meta = await generateNotFoundMeta({ config, i18n })
+    meta = generateNotFoundMeta({ i18n })
   }
 
   return meta

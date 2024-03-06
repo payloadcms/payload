@@ -17,11 +17,13 @@ import {
   buildStateFromSchema,
   formatFields,
 } from '@payloadcms/ui'
+import queryString from 'qs'
 import React, { Fragment } from 'react'
 
 import type { AdminViewProps } from '../Root'
 import type { GenerateEditViewMetadata } from './getMetaBySegment'
 
+import { NotFoundClient } from '../NotFound/index.client'
 import { getMetaBySegment } from './getMetaBySegment'
 import { getViewsFromConfig } from './getViewsFromConfig'
 

@@ -1,15 +1,15 @@
 import type { Metadata } from 'next'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
-import type { GenerateViewMetadata } from '../Root/index.d.ts'
+import type { GenerateViewMetadata } from '../Root'
 
-import { getNextI18n } from '../../utilities/getNextI18n.js'
-import { generateMetadata as apiMeta } from '../API/meta.js'
-import { generateMetadata as editMeta } from '../Edit/meta.js'
-import { generateMetadata as livePreviewMeta } from '../LivePreview/meta.js'
-import { generateNotFoundMeta } from '../NotFound/meta.js'
-import { generateMetadata as versionMeta } from '../Version/meta.js'
-import { generateMetadata as versionsMeta } from '../Versions/meta.js'
+import { getNextI18n } from '../../utilities/getNextI18n'
+import { generateMetadata as apiMeta } from '../API/meta'
+import { generateMetadata as editMeta } from '../Edit/meta'
+import { generateMetadata as livePreviewMeta } from '../LivePreview/meta'
+import { generateNotFoundMeta } from '../NotFound/meta'
+import { generateMetadata as versionMeta } from '../Version/meta'
+import { generateMetadata as versionsMeta } from '../Versions/meta'
 
 export type GenerateEditViewMetadata = (
   args: Parameters<GenerateViewMetadata>[0] & {
@@ -103,5 +103,5 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     })
   }
 
-  return generateNotFoundMeta({ config, i18n })
+  return generateNotFoundMeta({ i18n })
 }

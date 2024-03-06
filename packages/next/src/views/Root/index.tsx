@@ -3,11 +3,10 @@ import type { Metadata } from 'next'
 import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
 import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import React from 'react'
 
-import type { initPage } from '../../utilities/initPage'
-
+import { initPage } from '../../utilities/initPage'
 import { Account } from '../Account'
 import { CreateFirstUser } from '../CreateFirstUser'
 import { Dashboard } from '../Dashboard'
@@ -20,7 +19,7 @@ import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword'
 import { Unauthorized } from '../Unauthorized'
 import { Verify, verifyBaseClass } from '../Verify'
 
-export { generatePageMetadata } from './meta.js'
+export { generatePageMetadata } from './meta'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -176,49 +175,30 @@ export const RootPage = async ({
       break
   }
 
-  const dbHasUser = await initPageResult.req.payload.db
-    .findOne({
-      collection: userSlug,
-      req: initPageResult.req,
-    })
-    ?.then((doc) => !!doc)
+  let dbHasUser = false
 
-  const createFirstUserRoute = `${adminRoute}/create-first-user`
-
-  if (!dbHasUser && route !== createFirstUserRoute) {
-    redirect(createFirstUserRoute)
+  if (!ViewToRender) {
+    notFound()
   }
 
-  if (dbHasUser && route === createFirstUserRoute) {
-    redirect(adminRoute)
-  }
+  const initPageResult = await initPage(initPageOptions)
 
   if (initPageResult) {
-    if (templateType === 'minimal') {
-      return (
-        <MinimalTemplate className={templateClassName}>
-          <ViewToRender
-            initPageResult={initPageResult}
-            params={params}
-            searchParams={searchParams}
-          />
-        </MinimalTemplate>
-      )
-    } else {
-      return (
-        <DefaultTemplate
-          config={config}
-          i18n={initPageResult.req.i18n}
-          permissions={initPageResult.permissions}
-          user={initPageResult.req.user}
-        >
-          <ViewToRender
-            initPageResult={initPageResult}
-            params={params}
-            searchParams={searchParams}
-          />
-        </DefaultTemplate>
-      )
+    dbHasUser = await initPageResult?.req.payload.db
+      .findOne({
+        collection: userSlug,
+        req: initPageResult?.req,
+      })
+      ?.then((doc) => !!doc)
+
+    const createFirstUserRoute = `${adminRoute}/create-first-user`
+
+    if (!dbHasUser && route !== createFirstUserRoute) {
+      redirect(createFirstUserRoute)
+    }
+
+    if (dbHasUser && route === createFirstUserRoute) {
+      redirect(adminRoute)
     }
   }
 
