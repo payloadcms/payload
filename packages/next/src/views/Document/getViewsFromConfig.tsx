@@ -38,8 +38,6 @@ export const getViewsFromConfig = async ({
   let DefaultView: EditViewComponent = null
   let CustomView: EditViewComponent = null
 
-  const [entityType, entitySlug, createOrID, tabViewName, segmentFive] = routeSegments
-
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
     (globalConfig && globalConfig?.admin?.components?.views)
@@ -51,6 +49,9 @@ export const getViewsFromConfig = async ({
     config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
 
   if (collectionConfig) {
+    const [collectionEntity, collectionSlug, createOrID, nestedViewSlug, segmentFive] =
+      routeSegments
+
     const {
       admin: { hidden },
     } = collectionConfig
@@ -60,7 +61,7 @@ export const getViewsFromConfig = async ({
     }
 
     // `../:id`, or `../create`
-    if (!tabViewName) {
+    if (!nestedViewSlug) {
       switch (createOrID) {
         case 'create': {
           if ('create' in docPermissions && docPermissions?.create?.permission) {
@@ -79,10 +80,10 @@ export const getViewsFromConfig = async ({
       }
     }
 
-    if (tabViewName) {
+    if (nestedViewSlug) {
       // `../:id/versions/:version`, etc
       if (segmentFive) {
-        if (tabViewName === 'versions') {
+        if (nestedViewSlug === 'versions') {
           if (docPermissions?.readVersions?.permission) {
             CustomView = getCustomViewByKey(views, 'Version')
             DefaultView = DefaultVersionView
@@ -92,7 +93,7 @@ export const getViewsFromConfig = async ({
 
       // `../:id/api`, `../:id/preview`, `../:id/versions`, etc
       if (routeSegments?.length === 4) {
-        switch (tabViewName) {
+        switch (nestedViewSlug) {
           case 'api': {
             if (collectionConfig?.admin?.hideAPIURL !== true) {
               CustomView = getCustomViewByKey(views, 'API')
@@ -117,7 +118,7 @@ export const getViewsFromConfig = async ({
           }
 
           default: {
-            const path = `/${tabViewName}`
+            const path = `/${nestedViewSlug}`
             CustomView = getCustomViewByPath(views, path)
             break
           }
@@ -127,6 +128,8 @@ export const getViewsFromConfig = async ({
   }
 
   if (globalConfig) {
+    const [globalEntity, globalSlug, nestedViewSlug] = routeSegments
+
     const {
       admin: { hidden },
     } = globalConfig
@@ -135,14 +138,14 @@ export const getViewsFromConfig = async ({
       return null
     }
 
-    if (!routeSegments?.length) {
+    if (routeSegments?.length === 2) {
       if (docPermissions?.read?.permission) {
         CustomView = getCustomViewByKey(views, 'Default')
         DefaultView = DefaultEditView
       }
-    } else if (routeSegments?.length === 1) {
+    } else if (routeSegments?.length === 3) {
       // `../:slug/api`, `../:slug/preview`, `../:slug/versions`, etc
-      switch (tabViewName) {
+      switch (nestedViewSlug) {
         case 'api': {
           if (globalConfig?.admin?.hideAPIURL !== true) {
             CustomView = getCustomViewByKey(views, 'API')
@@ -176,7 +179,7 @@ export const getViewsFromConfig = async ({
       }
     } else if (routeSegments?.length === 2) {
       // `../:slug/versions/:version`, etc
-      if (tabViewName === 'versions') {
+      if (nestedViewSlug === 'versions') {
         if (docPermissions?.readVersions?.permission) {
           CustomView = getCustomViewByKey(views, 'Version')
           DefaultView = DefaultVersionView

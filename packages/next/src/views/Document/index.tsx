@@ -59,7 +59,7 @@ export const Document: React.FC<AdminViewProps> = async ({
   const segments = Array.isArray(params?.segments) ? params.segments : []
   const [entityType, entitySlug, createOrID] = segments
   const collectionSlug = entityType === 'collections' ? entitySlug : undefined
-  const globalSlug = entitySlug === 'globals' ? entitySlug : undefined
+  const globalSlug = entityType === 'globals' ? entitySlug : undefined
   const isCreating = createOrID === 'create'
   const id = (collectionSlug && !isCreating && createOrID) || undefined
 
