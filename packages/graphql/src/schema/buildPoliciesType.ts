@@ -10,7 +10,7 @@ import type {
 } from 'payload/types'
 
 import { toWords } from 'payload/utilities'
-import formatName from '../utilities/formatName'
+import formatName from '../utilities/formatName.js'
 
 type OperationType = 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'
 

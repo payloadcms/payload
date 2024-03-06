@@ -3,7 +3,7 @@ import { generateExpiredPayloadCookie } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import { Context } from '../types'
+import type { Context } from '../types.d.ts'
 
 function logoutResolver(collection: Collection): any {
   async function resolver(_, args, context: Context) {

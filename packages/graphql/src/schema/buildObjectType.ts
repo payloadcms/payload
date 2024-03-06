@@ -47,13 +47,13 @@ import type {
 
 import { tabHasName } from 'payload/types'
 import { toWords } from 'payload/utilities'
-import combineParentName from '../utilities/combineParentName'
-import formatName from '../utilities/formatName'
-import formatOptions from '../utilities/formatOptions'
-import buildWhereInputType from './buildWhereInputType'
-import isFieldNullable from './isFieldNullable'
-import withNullableType from './withNullableType'
-import { Context } from '../resolvers/types'
+import combineParentName from '../utilities/combineParentName.js'
+import formatName from '../utilities/formatName.js'
+import formatOptions from '../utilities/formatOptions.js'
+import buildWhereInputType from './buildWhereInputType.js'
+import isFieldNullable from './isFieldNullable.js'
+import withNullableType from './withNullableType.js'
+import { Context } from '../resolvers/types.js'
 
 type LocaleInputType = {
   fallbackLocale: {

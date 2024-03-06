@@ -4,7 +4,7 @@ import { GraphQLEnumType } from 'graphql'
 
 import type { SanitizedLocalizationConfig } from 'payload/config'
 
-import formatName from '../utilities/formatName'
+import formatName from '../utilities/formatName.js'
 
 const buildLocaleInputType = (
   localization: SanitizedLocalizationConfig,

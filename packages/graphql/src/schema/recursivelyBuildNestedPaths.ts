@@ -1,7 +1,7 @@
 import type { FieldWithSubFields, TabsField } from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import fieldToSchemaMap from './fieldToWhereInputSchemaMap'
+import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js'
 
 type Args = {
   field: FieldWithSubFields | TabsField
