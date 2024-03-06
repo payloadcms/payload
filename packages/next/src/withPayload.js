@@ -14,14 +14,11 @@ const withPayload = (nextConfig = {}) => {
       },
       serverComponentsExternalPackages: [
         ...(nextConfig?.experimental?.serverComponentsExternalPackages || []),
-        '@payloadcms/db-mongodb',
-        '@payloadcms/db-postgres',
         'drizzle-kit',
         'drizzle-kit/payload',
         'libsql',
         'pino',
         'pino-pretty',
-        'payload',
       ],
     },
     webpack: (webpackConfig, webpackOptions) => {
