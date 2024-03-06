@@ -1,7 +1,8 @@
 'use client'
-import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugin'
+import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugin.js'
 import React from 'react'
 
 export function ClickableLinkPlugin() {
-  return <LexicalClickableLinkPlugin />
+  const Component = LexicalClickableLinkPlugin.default
+  return <Component />
 }

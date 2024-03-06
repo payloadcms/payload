@@ -2,7 +2,7 @@
 import type { LexicalEditor } from 'lexical'
 import type { DragEvent as ReactDragEvent } from 'react'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { eventFiles } from '@lexical/rich-text'
 import { $getNearestNodeFromDOMNode, $getNodeByKey } from 'lexical'
 import * as React from 'react'

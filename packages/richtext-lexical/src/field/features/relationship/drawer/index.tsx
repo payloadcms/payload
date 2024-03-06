@@ -1,5 +1,5 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useListDrawer } from '@payloadcms/ui'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR, type LexicalEditor } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
