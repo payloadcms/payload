@@ -4,8 +4,8 @@ import { mapFields } from '@payloadcms/ui/utilities'
 import { sanitizeFields } from 'payload/config'
 import React from 'react'
 
-import type { ResolvedServerFeatureMap } from './field/features/types'
-import type { GeneratedFeatureProviderComponent } from './types'
+import type { ResolvedServerFeatureMap } from './field/features/types.js'
+import type { GeneratedFeatureProviderComponent } from './types.js'
 
 export const getGenerateComponentMap =
   (args: {

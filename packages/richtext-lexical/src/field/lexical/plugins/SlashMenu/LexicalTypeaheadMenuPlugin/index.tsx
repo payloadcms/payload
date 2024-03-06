@@ -123,7 +123,7 @@ export function getScrollParent(
   return document.body
 }
 
-export { useDynamicPositioning } from './LexicalMenu'
+export { useDynamicPositioning } from './LexicalMenu.js'
 
 export type TypeaheadMenuPluginProps = {
   anchorClassName?: string

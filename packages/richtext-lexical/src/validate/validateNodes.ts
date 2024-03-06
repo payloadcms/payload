@@ -1,7 +1,7 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import type { RichTextField, ValidateOptions } from 'payload/types'
 
-import type { NodeValidation } from '../field/features/types'
+import type { NodeValidation } from '../field/features/types.js'
 
 export async function validateNodes({
   nodeValidations,
