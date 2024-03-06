@@ -1,5 +1,5 @@
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { SanitizedGlobalConfig } from '../globals/config/types'
+import type { SanitizedCollectionConfig } from '../collections/config/types.ts'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 export const getVersionsModelName = (
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig,
