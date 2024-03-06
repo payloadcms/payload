@@ -15,9 +15,9 @@ import { GraphQLJSON } from 'graphql-type-json'
 import type { FieldAffectingData, NumberField, RadioField, SelectField } from 'payload/types'
 
 import { optionIsObject } from 'payload/types'
-import combineParentName from '../utilities/combineParentName'
-import formatName from '../utilities/formatName'
-import operators from './operators'
+import combineParentName from '../utilities/combineParentName.js'
+import formatName from '../utilities/formatName.js'
+import operators from './operators.js'
 
 type staticTypes =
   | 'checkbox'

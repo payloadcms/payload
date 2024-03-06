@@ -2,7 +2,7 @@ import { findOneOperation } from 'payload/operations'
 import type { Document, SanitizedGlobalConfig } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import { Context } from '../types'
+import type { Context } from '../types.d.ts'
 
 export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {
   return async function resolver(_, args, context: Context) {
