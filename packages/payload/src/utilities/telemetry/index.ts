@@ -4,11 +4,11 @@ import { randomBytes } from 'crypto'
 import findUp from 'find-up'
 import fs from 'fs'
 
-import type { Payload } from '../../types'
-import type { AdminInitEvent } from './events/adminInit'
-import type { ServerInitEvent } from './events/serverInit'
+import type { Payload } from '../../types/index.d.ts'
+import type { AdminInitEvent } from './events/adminInit.js'
+import type { ServerInitEvent } from './events/serverInit.js'
 
-import { oneWayHash } from './oneWayHash'
+import { oneWayHash } from './oneWayHash.js'
 
 export type BaseEvent = {
   envID: string

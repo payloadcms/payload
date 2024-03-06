@@ -1,9 +1,9 @@
-import type { Payload } from '..'
-import type { PayloadRequest } from '../exports/types'
-import type { FileToSave } from './types'
+import type { Payload } from '../index.d.ts'
+import type { PayloadRequest } from '../types/index.d.ts'
+import type { FileToSave } from './types.d.ts'
 
-import { FileUploadError } from '../errors'
-import saveBufferToFile from './saveBufferToFile'
+import { FileUploadError } from '../errors/index.js'
+import saveBufferToFile from './saveBufferToFile.js'
 
 export const uploadFiles = async (
   payload: Payload,

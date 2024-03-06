@@ -1,11 +1,11 @@
-import type { CollectionPermission, GlobalPermission, User } from '../auth/types'
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
-import type { Access } from '../config/types'
-import type { FieldAccess } from '../fields/config/types'
-import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { AllOperations, Document, PayloadRequest, Where } from '../types'
+import type { CollectionPermission, GlobalPermission } from '../auth/types.d.ts'
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.d.ts'
+import type { Access } from '../config/types.d.ts'
+import type { FieldAccess } from '../fields/config/types.d.ts'
+import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
+import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.d.ts'
 
-import { tabHasName } from '../fields/config/types'
+import { tabHasName } from '../fields/config/types.js'
 
 type Args = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig

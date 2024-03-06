@@ -1,8 +1,8 @@
 import fs from 'fs'
 import probeImageSize from 'probe-image-size'
 
-import type { PayloadRequest } from '../exports/types'
-import type { ProbedImageSize } from './types'
+import type { PayloadRequest } from '../types/index.d.ts'
+import type { ProbedImageSize } from './types.d.ts'
 
 export default async function (file: PayloadRequest['file']): Promise<ProbedImageSize> {
   if (file.tempFilePath) {

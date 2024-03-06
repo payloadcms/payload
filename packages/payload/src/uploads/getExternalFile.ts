@@ -1,7 +1,7 @@
-import type { PayloadRequest } from '../exports/types'
-import type { File, FileData } from './types'
+import type { PayloadRequest } from '../types/index.ts'
+import type { File, FileData } from './types.d.ts'
 
-import { APIError } from '../errors'
+import { APIError } from '../errors/index.js'
 
 type Args = {
   data: FileData
