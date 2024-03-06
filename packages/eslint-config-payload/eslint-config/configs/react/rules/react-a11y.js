@@ -1,3 +1,5 @@
+/** @type {import('eslint').Linter.Config} */
+
 // Sourced from https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb/rules/react-a11y.js
 
 module.exports = {
