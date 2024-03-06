@@ -37,6 +37,7 @@ function generateQueryString(query: RequestOptions['query'], params: ParsedQs): 
     },
     {
       addQueryPrefix: true,
+      strictNullHandling: true,
     },
   )
 }
@@ -95,7 +96,7 @@ export class NextRESTClient {
     return {
       url,
       slug: slugs.split('/'),
-      params: params ? QueryString.parse(params) : undefined,
+      params: params ? QueryString.parse(params, { strictNullHandling: true }) : undefined,
     }
   }
 

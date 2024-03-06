@@ -9,10 +9,13 @@ import qs from 'qs'
 import type { CollectionRouteHandler } from '../types.d.ts'
 
 export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => {
-  const { searchParams } = req
+  const { search } = req
 
   // parse using `qs` to handle `where` queries
-  const { depth, where } = qs.parse(searchParams.toString()) as {
+  const { depth, where } = qs.parse(search, {
+    ignoreQueryPrefix: true,
+    strictNullHandling: true,
+  }) as {
     depth?: string
     where?: Where
   }
