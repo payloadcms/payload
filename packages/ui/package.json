@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-alpha.16",
+  "version": "3.0.0-alpha.18",
   "main": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "scripts": {
