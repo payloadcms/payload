@@ -68,11 +68,23 @@
     }
   },
   "publishConfig": {
-    "exports": null,
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "./*": {
+        "import": "./src/exports/*.ts",
+        "require": "./src/exports/*.ts",
+        "types": "./src/exports/*.ts"
+      }
+    },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
+
   "engines": {
     "node": ">=18.17.0"
   },

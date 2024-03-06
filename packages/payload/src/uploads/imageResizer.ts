@@ -1,6 +1,8 @@
 import type { OutputInfo } from 'sharp'
 
-import { fromBuffer } from 'file-type'
+import fileType from 'file-type'
+const { fromBuffer } = fileType
+
 import fs from 'fs'
 import sanitize from 'sanitize-filename'
 

@@ -1,6 +1,7 @@
 import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
-import { singular } from 'pluralize'
+import pluralize from 'pluralize'
+const { singular } = pluralize
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
 import type { SanitizedConfig } from '../config/types.d.ts'
@@ -58,10 +59,10 @@ function generateEntitySchemas(
   }, {})
 
   return {
+    type: 'object',
     additionalProperties: false,
     properties,
     required: Object.keys(properties),
-    type: 'object',
   }
 }
 
@@ -104,8 +105,8 @@ export function fieldsToJSONSchema(
           case 'text':
             if (field.hasMany === true) {
               fieldSchema = {
-                items: { type: 'string' },
                 type: withNullableJSONSchemaType('array', isRequired),
+                items: { type: 'string' },
               }
             } else {
               fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
@@ -122,8 +123,8 @@ export function fieldsToJSONSchema(
           case 'number': {
             if (field.hasMany === true) {
               fieldSchema = {
-                items: { type: 'number' },
                 type: withNullableJSONSchemaType('array', isRequired),
+                items: { type: 'number' },
               }
             } else {
               fieldSchema = { type: withNullableJSONSchemaType('number', isRequired) }
@@ -153,10 +154,10 @@ export function fieldsToJSONSchema(
             } else {
               // Maintain backwards compatibility with existing rich text editors
               fieldSchema = {
+                type: withNullableJSONSchemaType('array', isRequired),
                 items: {
                   type: 'object',
                 },
-                type: withNullableJSONSchemaType('array', isRequired),
               }
             }
 
@@ -165,8 +166,8 @@ export function fieldsToJSONSchema(
 
           case 'radio': {
             fieldSchema = {
-              enum: buildOptionEnums(field.options),
               type: withNullableJSONSchemaType('string', isRequired),
+              enum: buildOptionEnums(field.options),
             }
 
             break
@@ -177,16 +178,16 @@ export function fieldsToJSONSchema(
 
             if (field.hasMany) {
               fieldSchema = {
-                items: {
-                  enum: optionEnums,
-                  type: 'string',
-                },
                 type: withNullableJSONSchemaType('array', isRequired),
+                items: {
+                  type: 'string',
+                  enum: optionEnums,
+                },
               }
             } else {
               fieldSchema = {
-                enum: optionEnums,
                 type: withNullableJSONSchemaType('string', isRequired),
+                enum: optionEnums,
               }
             }
 
@@ -195,6 +196,7 @@ export function fieldsToJSONSchema(
 
           case 'point': {
             fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
               items: [
                 {
                   type: 'number',
@@ -205,7 +207,6 @@ export function fieldsToJSONSchema(
               ],
               maxItems: 2,
               minItems: 2,
-              type: withNullableJSONSchemaType('array', isRequired),
             }
             break
           }
@@ -214,9 +215,11 @@ export function fieldsToJSONSchema(
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
                 fieldSchema = {
+                  type: withNullableJSONSchemaType('array', isRequired),
                   items: {
                     oneOf: field.relationTo.map((relation) => {
                       return {
+                        type: 'object',
                         additionalProperties: false,
                         properties: {
                           relationTo: {
@@ -234,16 +237,15 @@ export function fieldsToJSONSchema(
                           },
                         },
                         required: ['value', 'relationTo'],
-                        type: 'object',
                       }
                     }),
                   },
-                  type: withNullableJSONSchemaType('array', isRequired),
                 }
               } else {
                 fieldSchema = {
                   oneOf: field.relationTo.map((relation) => {
                     return {
+                      type: withNullableJSONSchemaType('object', isRequired),
                       additionalProperties: false,
                       properties: {
                         relationTo: {
@@ -261,13 +263,13 @@ export function fieldsToJSONSchema(
                         },
                       },
                       required: ['value', 'relationTo'],
-                      type: withNullableJSONSchemaType('object', isRequired),
                     }
                   }),
                 }
               }
             } else if (field.hasMany) {
               fieldSchema = {
+                type: withNullableJSONSchemaType('array', isRequired),
                 items: {
                   oneOf: [
                     {
@@ -278,7 +280,6 @@ export function fieldsToJSONSchema(
                     },
                   ],
                 },
-                type: withNullableJSONSchemaType('array', isRequired),
               }
             } else {
               fieldSchema = {
@@ -316,6 +317,7 @@ export function fieldsToJSONSchema(
 
           case 'blocks': {
             fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
               items: {
                 oneOf: field.blocks.map((block) => {
                   const blockFieldSchemas = fieldsToJSONSchema(
@@ -325,6 +327,7 @@ export function fieldsToJSONSchema(
                   )
 
                   const blockSchema: JSONSchema4 = {
+                    type: 'object',
                     additionalProperties: false,
                     properties: {
                       ...blockFieldSchemas.properties,
@@ -333,7 +336,6 @@ export function fieldsToJSONSchema(
                       },
                     },
                     required: ['blockType', ...blockFieldSchemas.required],
-                    type: 'object',
                   }
 
                   if (block.interfaceName) {
@@ -347,23 +349,22 @@ export function fieldsToJSONSchema(
                   return blockSchema
                 }),
               },
-              type: withNullableJSONSchemaType('array', isRequired),
             }
             break
           }
 
           case 'array': {
             fieldSchema = {
+              type: withNullableJSONSchemaType('array', isRequired),
               items: {
-                additionalProperties: false,
                 type: 'object',
+                additionalProperties: false,
                 ...fieldsToJSONSchema(
                   collectionIDFieldTypes,
                   field.fields,
                   interfaceNameDefinitions,
                 ),
               },
-              type: withNullableJSONSchemaType('array', isRequired),
             }
 
             if (field.interfaceName) {
@@ -402,8 +403,8 @@ export function fieldsToJSONSchema(
               if (tabHasName(tab)) {
                 // could have interface
                 fieldSchemas.set(tab.name, {
-                  additionalProperties: false,
                   type: 'object',
+                  additionalProperties: false,
                   ...childSchema,
                 })
                 requiredFieldNames.add(tab.name)
@@ -421,8 +422,8 @@ export function fieldsToJSONSchema(
 
           case 'group': {
             fieldSchema = {
-              additionalProperties: false,
               type: 'object',
+              additionalProperties: false,
               ...fieldsToJSONSchema(collectionIDFieldTypes, field.fields, interfaceNameDefinitions),
             }
 
@@ -464,7 +465,7 @@ export function entityToJSONSchema(
     ? entity.typescript.interface
     : singular(toWords(entity.slug, true))
 
-  const idField: FieldAffectingData = { name: 'id', required: true, type: defaultIDType as 'text' }
+  const idField: FieldAffectingData = { name: 'id', type: defaultIDType as 'text', required: true }
   const customIdField = entity.fields.find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   ) as FieldAffectingData
@@ -514,9 +515,9 @@ export function entityToJSONSchema(
   )
 
   return {
+    type: 'object',
     additionalProperties: false,
     title,
-    type: 'object',
     ...fieldsToJSONSchema(collectionIDFieldTypes, entity.fields, interfaceNameDefinitions),
   }
 }
@@ -545,12 +546,12 @@ export function configToJSONSchema(
     additionalProperties: false,
     definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
     // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
+    type: 'object',
     properties: {
       collections: generateEntitySchemas(config.collections || []),
       globals: generateEntitySchemas(config.globals || []),
     },
     required: ['collections', 'globals'],
     title: 'Config',
-    type: 'object',
   }
 }

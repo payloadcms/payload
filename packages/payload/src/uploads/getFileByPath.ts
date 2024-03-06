@@ -1,6 +1,7 @@
-import { fromFile } from 'file-type'
+import fileType from 'file-type'
 import fs from 'fs'
 import path from 'path'
+const { fromFile } = fileType
 
 import type { CustomPayloadRequest } from '../types/index.d.ts'
 

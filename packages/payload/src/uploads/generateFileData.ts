@@ -1,6 +1,7 @@
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
-import { fromBuffer } from 'file-type'
+import fileType from 'file-type'
+const { fromBuffer } = fileType
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import sanitize from 'sanitize-filename'
