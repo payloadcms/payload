@@ -13,10 +13,10 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { GenerateTitle } from '../types'
+import type { GenerateTitle } from '../types.d.ts'
 
-import { defaults } from '../defaults'
-import { LengthIndicator } from '../ui/LengthIndicator'
+import { defaults } from '../defaults.js'
+import { LengthIndicator } from '../ui/LengthIndicator.js'
 import './index.scss'
 
 const { maxLength, minLength } = defaults.title

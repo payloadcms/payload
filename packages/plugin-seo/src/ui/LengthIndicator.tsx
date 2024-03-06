@@ -3,7 +3,7 @@
 import { useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useEffect, useState } from 'react'
 
-import { Pill } from './Pill'
+import { Pill } from './Pill.js'
 
 export const LengthIndicator: React.FC<{
   maxLength?: number

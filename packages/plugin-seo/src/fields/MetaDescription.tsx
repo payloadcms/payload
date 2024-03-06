@@ -8,10 +8,10 @@ import { TextareaInput } from '@payloadcms/ui'
 import { useAllFormFields, useDocumentInfo, useField, useLocale } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { GenerateDescription } from '../types'
+import type { GenerateDescription } from '../types.d.ts'
 
-import { defaults } from '../defaults'
-import { LengthIndicator } from '../ui/LengthIndicator'
+import { defaults } from '../defaults.js'
+import { LengthIndicator } from '../ui/LengthIndicator.js'
 
 const { maxLength, minLength } = defaults.description
 
