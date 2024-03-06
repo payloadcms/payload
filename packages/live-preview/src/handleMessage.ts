@@ -1,4 +1,4 @@
-import { mergeData } from '.'
+import { mergeData } from './mergeData.js'
 
 // For performance reasons, `fieldSchemaJSON` will only be sent once on the initial message
 // We need to cache this value so that it can be used across subsequent messages

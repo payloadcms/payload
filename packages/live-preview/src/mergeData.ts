@@ -1,9 +1,9 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import type { PopulationsByCollection, UpdatedDocument } from './types'
+import type { PopulationsByCollection, UpdatedDocument } from './types.d.ts'
 
-import { traverseFields } from './traverseFields'
+import { traverseFields } from './traverseFields.js'
 
 const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
   const url = `${serverURL}${apiPath}/${endpoint}`

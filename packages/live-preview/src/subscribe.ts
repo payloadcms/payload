@@ -1,4 +1,4 @@
-import { handleMessage } from '.'
+import { handleMessage } from './handleMessage.js'
 
 export const subscribe = <T>(args: {
   apiRoute?: string
