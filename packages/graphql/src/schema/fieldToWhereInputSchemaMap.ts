@@ -96,7 +96,7 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
                 ),
               }),
             },
-            value: { type: GraphQLJSON },
+            value: { type: GraphQLJSON.default },
           },
         }),
       }
