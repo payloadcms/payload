@@ -79,7 +79,8 @@ const replaceVars = ({
     .map((part) => {
       if (part.startsWith('{{') && part.endsWith('}}')) {
         const placeholder = part.substring(2, part.length - 2).trim()
-        return vars[placeholder] || part
+        const value = vars[placeholder]
+        return value !== undefined && value !== null ? value : part
       } else {
         return part
       }
