@@ -1,7 +1,7 @@
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
+import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type { ElementFormatType, NodeKey } from 'lexical'
 
-import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
+import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import {
   $applyNodeReplacement,
   type DOMConversionMap,

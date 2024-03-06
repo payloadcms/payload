@@ -1,6 +1,6 @@
 'use client'
 
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 
 import type { ResolvedClientFeatureMap, SanitizedClientFeatures } from '../../../features/types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'

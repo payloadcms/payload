@@ -1,8 +1,8 @@
 'use client'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,

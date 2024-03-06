@@ -1,4 +1,4 @@
-import { ContentEditable } from '@lexical/react/LexicalContentEditable'
+import { ContentEditable } from '@lexical/react/LexicalContentEditable.js'
 import * as React from 'react'
 
 import './ContentEditable.scss'

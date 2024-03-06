@@ -1,4 +1,4 @@
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
+import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type {
   DOMConversionMap,
   DOMExportOutput,
@@ -10,7 +10,7 @@ import type {
   Spread,
 } from 'lexical'
 
-import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
+import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import ObjectID from 'bson-objectid'
 import React from 'react'
 

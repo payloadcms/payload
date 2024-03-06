@@ -2,7 +2,7 @@
 import type { FormState, SanitizedCollectionConfig } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Drawer,

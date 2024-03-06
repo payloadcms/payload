@@ -1,6 +1,6 @@
 import type { JSONSchema4 } from 'json-schema'
 import type { SerializedEditorState } from 'lexical'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 import type { RichTextAdapter } from 'payload/types'
 
 import { withNullableJSONSchemaType } from 'payload/utilities'

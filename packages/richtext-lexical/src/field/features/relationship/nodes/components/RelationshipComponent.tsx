@@ -1,6 +1,6 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { getTranslation } from '@payloadcms/translations'
 import { Button, useConfig, useDocumentDrawer, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { $getNodeByKey, type ElementFormatType } from 'lexical'
