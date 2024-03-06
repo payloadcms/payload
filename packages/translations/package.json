@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/translations",
-  "version": "3.0.0-alpha.21",
+  "version": "3.0.0-alpha.22",
   "main": "./dist/exports/index.ts",
   "types": "./dist/types.d.ts",
   "type": "module",
