@@ -4,7 +4,6 @@ import type {
   DocumentPreferences,
   Document as DocumentType,
   Field,
-  SanitizedConfig,
   ServerSideEditViewProps,
 } from 'payload/types'
 import type { DocumentPermissions } from 'payload/types'
@@ -38,6 +37,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 }) => {
   const {
     collectionConfig,
+    docID: id,
     globalConfig,
     locale,
     permissions,
@@ -57,11 +57,8 @@ export const Document: React.FC<AdminViewProps> = async ({
   } = initPageResult
 
   const segments = Array.isArray(params?.segments) ? params.segments : []
-  const [entityType, entitySlug, createOrID] = segments
-  const collectionSlug = entityType === 'collections' ? entitySlug : undefined
-  const globalSlug = entityType === 'globals' ? entitySlug : undefined
-  const isCreating = createOrID === 'create'
-  const id = (collectionSlug && !isCreating && createOrID) || undefined
+  const collectionSlug = collectionConfig?.slug || undefined
+  const globalSlug = globalConfig?.slug || undefined
 
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
@@ -180,23 +177,10 @@ export const Document: React.FC<AdminViewProps> = async ({
     uploadEdits: undefined,
   }
 
-  const componentProps: ServerSideEditViewProps = {
-    id,
-    action: `${action}?${queryString.stringify(formQueryParams)}`,
-    apiURL,
-    canAccessAdmin: permissions?.canAccessAdmin,
-    collectionSlug,
-    data,
-    docPermissions,
-    docPreferences,
-    globalSlug,
-    hasSavePermission,
+  const serverSideProps: ServerSideEditViewProps = {
     initPageResult,
-    initialState,
-    isEditing,
-    params,
+    routeSegments: segments,
     searchParams,
-    updatedAt: data?.updatedAt?.toString(),
   }
 
   return (
@@ -226,7 +210,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           <RenderCustomComponent
             CustomComponent={typeof CustomView === 'function' ? CustomView : undefined}
             DefaultComponent={DefaultView}
-            componentProps={componentProps}
+            componentProps={serverSideProps}
           />
         </FormQueryParamsProvider>
       </EditDepthProvider>

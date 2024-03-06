@@ -41,8 +41,10 @@ export const initPage = async ({
   })
 
   const routeSegments = route.replace(payload.config.routes.admin, '').split('/').filter(Boolean)
-  const collectionSlug = routeSegments[0] === 'collections' ? routeSegments[1] : undefined
-  const globalSlug = routeSegments[0] === 'globals' ? routeSegments[1] : undefined
+  const [entityType, entitySlug, createOrID] = routeSegments
+  const collectionSlug = entityType === 'collections' ? entitySlug : undefined
+  const globalSlug = entityType === 'globals' ? entitySlug : undefined
+  const docID = collectionSlug && createOrID !== 'create' ? createOrID : undefined
 
   const { collections, globals, localization, routes } = payload.config
 
@@ -95,6 +97,7 @@ export const initPage = async ({
   return {
     collectionConfig,
     cookies,
+    docID,
     globalConfig,
     locale,
     permissions,

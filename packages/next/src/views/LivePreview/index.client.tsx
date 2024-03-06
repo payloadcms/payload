@@ -1,7 +1,7 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui'
 import type { LivePreviewConfig } from 'payload/config'
-import type { Data, EditViewProps } from 'payload/types'
+import type { Data } from 'payload/types'
 
 import {
   DocumentControls,
@@ -198,15 +198,14 @@ const PreviewView: React.FC = (props) => {
   )
 }
 
-export const LivePreviewClient: React.FC<
-  EditViewProps & {
-    breakpoints: LivePreviewConfig['breakpoints']
-    initialData: Data
-    livePreviewConfig: LivePreviewConfig
-    url: string
-  }
-> = (props) => {
-  const { breakpoints, collectionSlug, globalSlug, url } = props
+export const LivePreviewClient: React.FC<{
+  breakpoints: LivePreviewConfig['breakpoints']
+  initialData: Data
+  livePreviewConfig: LivePreviewConfig
+  url: string
+}> = (props) => {
+  const { breakpoints, url } = props
+  const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
@@ -221,7 +220,6 @@ export const LivePreviewClient: React.FC<
     <Fragment>
       <SetViewActions actions={componentMap?.actionsMap?.Edit?.LivePreview} />
       <LivePreviewProvider
-        {...props}
         breakpoints={breakpoints}
         isPopupOpen={isPopupOpen}
         openPopupWindow={openPopupWindow}

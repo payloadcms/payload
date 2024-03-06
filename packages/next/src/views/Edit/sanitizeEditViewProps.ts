@@ -5,6 +5,5 @@ export const sanitizeEditViewProps = (props: ServerSideEditViewProps) => {
   delete clientSideProps.initPageResult.req
   delete clientSideProps.initPageResult.collectionConfig
   delete clientSideProps.initPageResult.globalConfig
-  delete clientSideProps.searchParams
   return clientSideProps as EditViewProps
 }

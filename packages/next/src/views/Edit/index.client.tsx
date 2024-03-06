@@ -1,7 +1,5 @@
 'use client'
 
-import type { EditViewProps } from 'payload/types'
-
 import {
   LoadingOverlay,
   SetViewActions,
@@ -13,7 +11,7 @@ import { useRouter } from 'next/navigation'
 import React, { Fragment, useEffect } from 'react'
 import { useCallback } from 'react'
 
-export const EditViewClient: React.FC<EditViewProps> = () => {
+export const EditViewClient: React.FC = () => {
   const { id, collectionSlug, getDocPermissions, getVersions, globalSlug, setDocumentInfo } =
     useDocumentInfo()
 

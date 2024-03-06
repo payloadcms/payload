@@ -8,17 +8,18 @@ import React from 'react'
 import { DefaultVersionView } from './Default'
 
 export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
-  const { initPageResult, params } = props
+  const { initPageResult, routeSegments } = props
 
   const {
     collectionConfig,
+    docID: id,
     globalConfig,
     permissions,
-    req: { payload, payload: { config } = {}, user } = {},
+    req: { payload, payload: { config } = {} } = {},
   } = initPageResult
 
   // /entityType/:entitySlug/:id/versions/:versionID
-  const [entityType, entitySlug, id, versions, versionID] = params.segments
+  const [entityType, entitySlug, docID, versions, versionID] = routeSegments
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
@@ -108,17 +109,12 @@ export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
 
   return (
     <DefaultVersionView
-      collectionSlug={collectionSlug}
       doc={doc}
       docPermissions={docPermissions}
-      globalSlug={globalSlug}
-      id={id}
       initialComparisonDoc={mostRecentDoc}
       localeOptions={localeOptions}
       mostRecentDoc={mostRecentDoc}
-      permissions={permissions}
       publishedDoc={publishedDoc}
-      user={user}
       versionID={versionID}
     />
   )

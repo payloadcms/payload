@@ -1,6 +1,5 @@
 'use client'
 import type { LivePreviewConfig } from 'payload/config'
-import type { EditViewProps } from 'payload/types'
 
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -11,7 +10,7 @@ import { customCollisionDetection } from './collisionDetection'
 import { LivePreviewContext } from './context'
 import { sizeReducer } from './sizeReducer'
 
-export type LivePreviewProviderProps = EditViewProps & {
+export type LivePreviewProviderProps = {
   appIsReady?: boolean
   breakpoints?: LivePreviewConfig['breakpoints']
   children: React.ReactNode

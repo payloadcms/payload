@@ -7,6 +7,7 @@ import {
   formatDate,
   useComponentMap,
   useConfig,
+  useDocumentInfo,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
@@ -26,11 +27,8 @@ import './index.scss'
 const baseClass = 'view-version'
 
 export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
-  id,
-  collectionSlug,
   doc,
   docPermissions,
-  globalSlug,
   initialComparisonDoc,
   localeOptions,
   mostRecentDoc,
@@ -40,6 +38,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const config = useConfig()
 
   const { i18n } = useTranslation()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const { getComponentMap, getFieldMap } = useComponentMap()
 

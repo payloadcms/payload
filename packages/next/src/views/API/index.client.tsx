@@ -1,7 +1,5 @@
 'use client'
 
-import type { EditViewProps } from 'payload/types'
-
 import {
   Checkbox,
   CopyToClipboard,
@@ -28,10 +26,8 @@ import './index.scss'
 
 const baseClass = 'query-inspector'
 
-export const APIViewClient: React.FC<EditViewProps> = (props) => {
-  const { collectionSlug, globalSlug } = props
-
-  const { id, initialData } = useDocumentInfo()
+export const APIViewClient: React.FC = () => {
+  const { id, collectionSlug, globalSlug, initialData } = useDocumentInfo()
 
   const searchParams = useSearchParams()
   const { i18n } = useTranslation()

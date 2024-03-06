@@ -23,7 +23,7 @@ export const LivePreviewView: React.FC = async (props: ServerSideEditViewProps) 
   } = initPageResult
 
   // TODO(JAKE): not sure what `data` is or what it should be
-  const { data = {} } = props
+  const data = 'data' in props ? props.data : {}
 
   let livePreviewConfig: LivePreviewConfig = topLevelLivePreviewConfig
 
@@ -62,15 +62,11 @@ export const LivePreviewView: React.FC = async (props: ServerSideEditViewProps) 
       : livePreviewConfig?.url
 
   return (
-    <React.Fragment>
-      <LivePreviewClient
-        breakpoints={breakpoints}
-        collectionSlug={collectionConfig?.slug}
-        globalSlug={globalConfig?.slug}
-        initialData={data}
-        livePreviewConfig={livePreviewConfig}
-        url={url}
-      />
-    </React.Fragment>
+    <LivePreviewClient
+      breakpoints={breakpoints}
+      initialData={data}
+      livePreviewConfig={livePreviewConfig}
+      url={url}
+    />
   )
 }

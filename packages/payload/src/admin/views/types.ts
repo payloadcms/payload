@@ -1,11 +1,9 @@
 import type { Translations } from '@payloadcms/translations'
 
-import type { DocumentPermissions, Permissions, User } from '../../auth'
+import type { Permissions, User } from '../../auth'
 import type { SanitizedCollectionConfig } from '../../collections/config/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
-import type { DocumentPreferences } from '../../preferences/types'
 import type { PayloadRequest } from '../../types'
-import type { Data, FormState } from '../types'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -33,6 +31,7 @@ export type EditViewProps = {
 export type InitPageResult = {
   collectionConfig?: SanitizedCollectionConfig
   cookies: Map<string, string>
+  docID?: string
   globalConfig?: SanitizedGlobalConfig
   locale: Locale
   permissions: Permissions
@@ -40,22 +39,8 @@ export type InitPageResult = {
   translations: Translations
 }
 
-export type ServerSideEditViewProps = EditViewProps & {
-  action?: string
-  apiURL: string
-  canAccessAdmin?: boolean
-  data: Data
-  disableActions?: boolean
-  disableLeaveWithoutSaving?: boolean
-  docPermissions: DocumentPermissions
-  docPreferences: DocumentPreferences
-  hasSavePermission?: boolean
-  id?: string
+export type ServerSideEditViewProps = {
   initPageResult: InitPageResult
-  initialState?: FormState
-  isEditing?: boolean
-  params?: { [key: string]: string | string[] }
+  routeSegments: string[]
   searchParams: { [key: string]: string | string[] | undefined }
-  // isLoading: boolean
-  updatedAt: string
 }

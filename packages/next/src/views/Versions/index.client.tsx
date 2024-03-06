@@ -10,6 +10,7 @@ import {
   SetViewActions,
   Table,
   useComponentMap,
+  useDocumentInfo,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
@@ -18,26 +19,15 @@ import React, { Fragment, useEffect, useRef } from 'react'
 
 export const VersionsViewClient: React.FC<{
   baseClass: string
-  collectionSlug?: string
   columns: Column[]
   fetchURL: string
-  globalSlug?: string
-  id?: number | string
   initialData: PaginatedDocs
   paginationLimits?: SanitizedCollectionConfig['admin']['pagination']['limits']
 }> = (props) => {
-  const {
-    id,
-    baseClass,
-    collectionSlug,
-    columns,
-    fetchURL,
-    globalSlug,
-    initialData,
-    paginationLimits,
-  } = props
+  const { baseClass, columns, fetchURL, initialData, paginationLimits } = props
 
   const { getComponentMap } = useComponentMap()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const componentMap = getComponentMap({
     collectionSlug,

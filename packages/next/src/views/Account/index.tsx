@@ -83,19 +83,10 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
       req,
     })
 
-    const componentProps: ServerSideEditViewProps = {
-      id: user?.id,
-      action: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`,
-      apiURL: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale.code}`,
-      collectionSlug: userSlug,
-      data,
-      docPermissions: collectionPermissions,
-      docPreferences,
-      hasSavePermission: collectionPermissions?.update?.permission,
+    const serverSideProps: ServerSideEditViewProps = {
       initPageResult,
-      initialState,
+      routeSegments: [],
       searchParams,
-      updatedAt: '', // TODO
     }
 
     return (
@@ -118,7 +109,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
             typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
           }
           DefaultComponent={EditView}
-          componentProps={componentProps}
+          componentProps={serverSideProps}
         />
       </Fragment>
     )

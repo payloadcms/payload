@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { SetStepNav } from '../Edit/Default/SetStepNav'
-import { sanitizeEditViewProps } from '../Edit/sanitizeEditViewProps'
 import { buildVersionColumns } from './buildColumns'
 import { VersionsViewClient } from './index.client'
 import './index.scss'
@@ -13,10 +12,11 @@ import './index.scss'
 export const baseClass = 'versions'
 
 export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => {
-  const { id, initPageResult, searchParams } = props
+  const { initPageResult, searchParams } = props
 
   const {
     collectionConfig,
+    docID: id,
     globalConfig,
     req: {
       i18n,
@@ -94,8 +94,6 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
       ? `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
       : ''
 
-  const clientSideProps = sanitizeEditViewProps(props)
-
   return (
     <React.Fragment>
       <SetStepNav
@@ -109,11 +107,9 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
       <main className={baseClass}>
         <Gutter className={`${baseClass}__wrap`}>
           <VersionsViewClient
-            {...clientSideProps}
             baseClass={baseClass}
             columns={columns}
             fetchURL={fetchURL}
-            id={id}
             initialData={versionsData}
             paginationLimits={collectionConfig?.admin?.pagination?.limits}
           />
