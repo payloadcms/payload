@@ -1,4 +1,4 @@
-const fs = require('fs')
+import fs from 'fs'
 
 export function copyFile(source, destination) {
   fs.copyFile(source, destination, (err) => {

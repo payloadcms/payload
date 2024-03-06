@@ -17,7 +17,6 @@ import {
 import * as React from 'react'
 
 const RelationshipComponent = React.lazy(() =>
-  // @ts-expect-error-next-line TypeScript being dumb
   import('./components/RelationshipComponent').then((module) => ({
     default: module.RelationshipComponent,
   })),

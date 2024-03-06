@@ -23,7 +23,6 @@ export type BlockFields = {
 }
 
 const BlockComponent = React.lazy(() =>
-  // @ts-expect-error-next-line TypeScript being dumb
   import('../component').then((module) => ({
     default: module.BlockComponent,
   })),
@@ -88,6 +87,7 @@ export class BlockNode extends DecoratorBlockNode {
     return false
   }
   decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    // @ts-expect-error
     return <BlockComponent formData={this.getFields()} nodeKey={this.getKey()} />
   }
 

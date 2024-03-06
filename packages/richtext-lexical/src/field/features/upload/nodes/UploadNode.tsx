@@ -12,7 +12,6 @@ import {
 } from 'lexical'
 import * as React from 'react'
 
-// @ts-expect-error-next-line TypeScript being dumb
 const RawUploadComponent = React.lazy(async () => await import('../component'))
 
 export type RawUploadPayload = {
@@ -104,6 +103,7 @@ export class UploadNode extends DecoratorBlockNode {
   }
 
   decorate(): JSX.Element {
+    // @ts-expect-error
     return <RawUploadComponent data={this.__data} format={this.__format} nodeKey={this.getKey()} />
   }
 

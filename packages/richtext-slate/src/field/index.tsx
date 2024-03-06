@@ -11,7 +11,6 @@ import type { EnabledFeatures } from './types'
 
 import { createFeatureMap } from './createFeatureMap'
 
-// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const RichTextEditor = lazy(() => import('./RichText'))
 
 const RichTextField: React.FC<

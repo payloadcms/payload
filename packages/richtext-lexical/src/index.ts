@@ -84,7 +84,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }),
 
     LazyFieldComponent: () =>
-      // @ts-expect-error
       import('./field').then((module) => {
         const RichTextField = module.RichTextField
         return import('@payloadcms/ui').then((module2) =>

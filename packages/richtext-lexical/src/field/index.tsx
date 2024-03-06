@@ -14,7 +14,6 @@ import { defaultEditorLexicalConfig } from './lexical/config/client/default'
 import { loadClientFeatures } from './lexical/config/client/loader'
 import { sanitizeClientEditorConfig } from './lexical/config/client/sanitize'
 
-// @ts-expect-error-next-line Just TypeScript being broken // TODO: Open TypeScript issue
 const RichTextEditor = lazy(() => import('./Field'))
 
 export const RichTextField: React.FC<

@@ -5,9 +5,11 @@
   "types": "./dist/types.d.ts",
   "type": "module",
   "scripts": {
-    "writeFiles": "npx ts-node ./writeTranslationFiles.ts",
-    "build": "pnpm writeFiles && tsc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build": "pnpm writeFiles && pnpm build:swc && pnpm build:types",
     "clean": "rimraf {dist,*.tsbuildinfo}",
+    "writeFiles": "npx tsx ./writeTranslationFiles.ts",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "publishConfig": {

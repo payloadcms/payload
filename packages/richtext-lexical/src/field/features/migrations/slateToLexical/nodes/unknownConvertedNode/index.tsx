@@ -17,7 +17,6 @@ export type SerializedUnknownConvertedNode = Spread<
 >
 
 const Component = React.lazy(() =>
-  // @ts-expect-error-next-line TypeScript being dumb
   import('./Component').then((module) => ({
     default: module.UnknownConvertedNodeComponent,
   })),
