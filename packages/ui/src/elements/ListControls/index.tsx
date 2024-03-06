@@ -3,7 +3,10 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData } from 'payload/types'
 import React, { useState } from 'react'
-import AnimateHeight from 'react-animate-height'
+import AnimateHeightWithDefault from 'react-animate-height'
+
+// @ts-expect-error trust me it works
+const AnimateHeight = AnimateHeightWithDefault || AnimateHeightWithDefault.default
 
 import type { Props } from './types'
 

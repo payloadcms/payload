@@ -1,6 +1,9 @@
 'use client'
 import React, { useState } from 'react'
-import AnimateHeight from 'react-animate-height'
+import AnimateHeightWithDefault from 'react-animate-height'
+
+// @ts-expect-error trust me it works
+const AnimateHeight = AnimateHeightWithDefault || AnimateHeightWithDefault.default
 
 import type { Props } from './types'
 
