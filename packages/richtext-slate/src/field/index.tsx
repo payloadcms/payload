@@ -13,7 +13,7 @@ import { createFeatureMap } from './createFeatureMap.js'
 
 const RichTextEditor = lazy(() => import('./RichText.js'))
 
-const RichTextField: React.FC<
+export const RichTextField: React.FC<
   FormFieldBase & {
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
@@ -70,5 +70,3 @@ const RichTextField: React.FC<
     </Suspense>
   )
 }
-
-export default RichTextField

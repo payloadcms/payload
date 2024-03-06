@@ -4,10 +4,10 @@ import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { AdapterArguments } from './types.d.ts'
 
-import RichTextCell from './cell/index.js'
+import { RichTextCell } from './cell/index.js'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise.js'
 import { richTextValidate } from './data/validation.js'
-import RichTextField from './field/index.js'
+import { RichTextField } from './field/index.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 
