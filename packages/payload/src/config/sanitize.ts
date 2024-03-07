@@ -1,6 +1,5 @@
 import { translations } from '@payloadcms/translations/api'
 import merge from 'deepmerge'
-import { isPlainObject } from 'is-plain-object'
 
 import type {
   Config,
@@ -16,6 +15,7 @@ import { InvalidConfiguration } from '../errors/index.js'
 import sanitizeGlobals from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
+import { isPlainObject } from '../utilities/isPlainObject.js'
 import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {

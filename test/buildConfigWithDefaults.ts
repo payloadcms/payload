@@ -30,6 +30,7 @@ import { buildConfig as buildPayloadConfig } from '../packages/payload/src/confi
 //   lexicalEditor,
 // } from '../packages/richtext-lexical/src'
 import { slateEditor } from '../packages/richtext-slate/src/index.js'
+import { CustomDashboard } from './CustomDashboard.js'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
@@ -66,6 +67,13 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',
+    admin: {
+      components: {
+        views: {
+          Dashboard: CustomDashboard,
+        },
+      },
+    },
     editor: slateEditor({
       admin: {
         upload: {

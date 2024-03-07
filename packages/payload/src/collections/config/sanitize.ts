@@ -1,5 +1,4 @@
 import merge from 'deepmerge'
-import { isPlainObject } from 'is-plain-object'
 
 import type { Config } from '../../config/types.d.ts'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.d.ts'
@@ -15,6 +14,7 @@ import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { extractTranslations } from '../../translations/extractTranslations.js'
 import getBaseUploadFields from '../../uploads/getBaseFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
+import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { authDefaults, defaults } from './defaults.js'
 
