@@ -198,6 +198,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       id={id}
       initialData={data}
       initialState={initialState}
+      isEditing={isEditing}
       title={formatTitle({
         collectionConfig,
         dateFormat: config.admin.dateFormat,

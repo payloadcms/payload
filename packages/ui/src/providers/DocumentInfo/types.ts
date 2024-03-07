@@ -28,6 +28,7 @@ export type DocumentInfoProps = {
   id: null | number | string
   initialData?: Data
   initialState?: FormState
+  isEditing?: boolean
   onSave?: (data: Data) => Promise<void> | void
   title?: string
 }

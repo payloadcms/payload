@@ -92,7 +92,7 @@ export const DefaultEditView: React.FC = () => {
     async (json) => {
       reportUpdate({
         id,
-        entitySlug: entitySlug,
+        entitySlug,
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
 
@@ -165,7 +165,6 @@ export const DefaultEditView: React.FC = () => {
               collectionSlug={collectionConfig?.slug}
               globalSlug={globalConfig?.slug}
               id={id}
-              isEditing={Boolean(id)}
               pluralLabel={collectionConfig?.labels?.plural}
               useAsTitle={collectionConfig?.admin?.useAsTitle}
             />

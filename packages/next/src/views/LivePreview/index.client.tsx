@@ -149,7 +149,6 @@ const PreviewView: React.FC = (props) => {
               globalLabel={globalConfig?.label}
               globalSlug={globalSlug}
               id={id}
-              isEditing={Boolean(id)}
               view={t('general:livePreview')}
             />
             <SetDocumentTitle

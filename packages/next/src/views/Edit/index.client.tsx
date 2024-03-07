@@ -13,7 +13,7 @@ import React, { Fragment, useEffect } from 'react'
 import { useCallback } from 'react'
 
 export const EditViewClient: React.FC = () => {
-  const { id, collectionSlug, getDocPermissions, getVersions, globalSlug, setDocumentInfo } =
+  const { collectionSlug, getDocPermissions, getVersions, globalSlug, isEditing, setDocumentInfo } =
     useDocumentInfo()
 
   const {
@@ -29,8 +29,6 @@ export const EditViewClient: React.FC = () => {
     collectionSlug,
     globalSlug,
   })
-
-  const isEditing = Boolean(id && collectionSlug)
 
   const onSave = useCallback(
     async (json: { doc }) => {

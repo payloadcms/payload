@@ -54,8 +54,6 @@ export const APIViewClient: React.FC = () => {
     localization &&
     localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
 
-  const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
-
   let draftsEnabled: boolean = false
   let docEndpoint: string = ''
 
@@ -122,7 +120,6 @@ export const APIViewClient: React.FC = () => {
         globalLabel={globalConfig?.label}
         globalSlug={globalSlug}
         id={id}
-        isEditing={isEditing}
         pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
         useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"

@@ -149,12 +149,12 @@ const Content: React.FC<DocumentDrawerProps> = ({
       collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
-      // hasSavePermission={hasSavePermission}
-      // isEditing={isEditing}
       // isLoading,
       id={id}
       initialData={data}
       initialState={initialState}
+      // hasSavePermission={hasSavePermission}
+      isEditing={isEditing}
       // me: true,
       onSave={onSave}
     >

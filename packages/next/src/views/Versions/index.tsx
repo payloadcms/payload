@@ -100,7 +100,6 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
         collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
-        isEditing
         pluralLabel={collectionConfig?.labels?.plural}
         view={i18n.t('version:versions')}
       />
