@@ -12,7 +12,7 @@ import { LexicalProvider } from './lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'
 
-const RichText: React.FC<
+export const RichText: React.FC<
   FormFieldBase & {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
@@ -113,5 +113,3 @@ function fallbackRender({ error }): React.ReactElement {
     </div>
   )
 }
-
-export default RichText

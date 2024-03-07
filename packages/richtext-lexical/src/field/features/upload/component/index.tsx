@@ -181,7 +181,7 @@ const Component: React.FC<ElementProps> = (props) => {
   )
 }
 
-export default (props: ElementProps): React.ReactNode => {
+export const UploadComponent = (props: ElementProps): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
       <Component {...props} />

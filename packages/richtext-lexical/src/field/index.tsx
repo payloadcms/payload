@@ -14,7 +14,9 @@ import { defaultEditorLexicalConfig } from './lexical/config/client/default.js'
 import { loadClientFeatures } from './lexical/config/client/loader.js'
 import { sanitizeClientEditorConfig } from './lexical/config/client/sanitize.js'
 
-const RichTextEditor = lazy(() => import('./Field.js'))
+const RichTextEditor = lazy(() =>
+  import('./Field.js').then((module) => ({ default: module.RichText })),
+)
 
 export const RichTextField: React.FC<
   FormFieldBase & {
