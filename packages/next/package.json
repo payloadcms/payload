@@ -50,18 +50,7 @@
     "@types/react": "18.2.15",
     "@types/react-dom": "18.2.7",
     "@types/ws": "^8.5.10",
-    "css-loader": "^6.10.0",
-    "css-minimizer-webpack-plugin": "^6.0.0",
-    "file-loader": "6.2.0",
-    "mini-css-extract-plugin": "1.6.2",
-    "payload": "workspace:*",
-    "postcss-loader": "^8.1.1",
-    "postcss-preset-env": "^9.4.0",
-    "sass": "^1.70.0",
-    "sass-loader": "^14.1.1",
-    "swc-loader": "^0.2.6",
-    "terser-webpack-plugin": "^5.3.10",
-    "url-loader": "^4.1.1"
+    "payload": "workspace:*"
   },
   "dependencies": {
     "@dnd-kit/core": "6.0.8",
