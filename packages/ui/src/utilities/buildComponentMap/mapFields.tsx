@@ -352,7 +352,7 @@ export const mapFields = (args: {
     result.push({
       name: 'id',
       type: 'text',
-      Cell: typeof DefaultCell === 'function' ? <DefaultCell name="id" /> : null,
+      Cell: DefaultCell ? <DefaultCell name="id" /> : null,
       Field: <HiddenInput name="id" />,
       Heading: <SortColumn label="ID" name="id" />,
       fieldIsPresentational: false,
