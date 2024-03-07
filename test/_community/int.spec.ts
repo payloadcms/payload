@@ -1,10 +1,10 @@
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { devUser } from '../credentials'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { postsSlug } from './collections/Posts'
-import configPromise from './config'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { devUser } from '../credentials.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { postsSlug } from './collections/Posts/index.js'
+import configPromise from './config.js'
 
 let payload: Payload
 let token: string

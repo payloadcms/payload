@@ -6,11 +6,13 @@
 // })
 
 const customJestConfig = {
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   globalSetup: './test/jest.setup.ts',
   moduleNameMapper: {
-    '\\.(css|scss)$': '<rootDir>/packages/payload/src/bundlers/mocks/emptyModule.js',
+    '\\.(css|scss)$': '<rootDir>/test/helpers/mocks/emptyModule.js',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      '<rootDir>/packages/payload/src/bundlers/mocks/fileMock.js',
+      '<rootDir>/test/helpers/mocks/fileMock.js',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   testEnvironment: 'node',
   testMatch: ['<rootDir>/packages/payload/src/**/*.spec.ts', '<rootDir>/test/**/*int.spec.ts'],
