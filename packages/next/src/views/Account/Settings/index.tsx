@@ -3,7 +3,7 @@ import { Label, ReactSelect } from '@payloadcms/ui'
 import { useTranslation } from '@payloadcms/ui/providers'
 import React from 'react'
 
-import { ToggleTheme } from '../ToggleTheme'
+import { ToggleTheme } from '../ToggleTheme/index.js'
 import './index.scss'
 
 const baseClass = 'payload-settings'

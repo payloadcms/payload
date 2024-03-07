@@ -7,15 +7,15 @@ import {
   buildStateFromSchema,
   formatFields,
 } from '@payloadcms/ui'
-import { notFound } from 'next/navigation'
+import { notFound } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-import type { AdminViewProps } from '../Root'
+import type { AdminViewProps } from '../Root/index.d.ts'
 
-import { EditView } from '../Edit'
-import { Settings } from './Settings'
+import { EditView } from '../Edit/index.js'
+import { Settings } from './Settings/index.js'
 
-export { generateAccountMetadata } from './meta'
+export { generateAccountMetadata } from './meta.js'
 
 export const Account: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
   const {

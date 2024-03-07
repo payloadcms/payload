@@ -1,6 +1,6 @@
-import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment'
+import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
-import { meta } from '../../utilities/meta'
+import { meta } from '../../utilities/meta.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async ({ config }) => {
   return meta({

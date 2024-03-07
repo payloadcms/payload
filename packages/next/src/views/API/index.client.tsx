@@ -15,13 +15,13 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation.js'
 import qs from 'qs'
 import * as React from 'react'
 import { toast } from 'react-toastify'
 
-import { SetStepNav } from '../Edit/Default/SetStepNav'
-import { RenderJSON } from './RenderJSON'
+import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
+import { RenderJSON } from './RenderJSON/index.js'
 import './index.scss'
 
 const baseClass = 'query-inspector'
