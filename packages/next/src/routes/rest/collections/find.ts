@@ -3,14 +3,11 @@ import type { Where } from 'payload/types'
 import httpStatus from 'http-status'
 import { findOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
-import qs from 'qs'
 
 import type { CollectionRouteHandler } from '../types.d.ts'
 
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
-  const { searchParams } = req
-  // parse using `qs` to handle `where` queries
-  const { depth, draft, limit, page, sort, where } = qs.parse(searchParams.toString()) as {
+  const { depth, draft, limit, page, sort, where } = req.query as {
     depth?: string
     draft?: string
     limit?: string

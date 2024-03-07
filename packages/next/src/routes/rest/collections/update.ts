@@ -4,15 +4,11 @@ import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
 import { updateOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
-import qs from 'qs'
 
 import type { CollectionRouteHandler } from '../types.d.ts'
 
 export const update: CollectionRouteHandler = async ({ collection, req }) => {
-  const { searchParams } = req
-
-  // parse using `qs` to handle `where` queries
-  const { depth, draft, where } = qs.parse(searchParams.toString()) as {
+  const { depth, draft, where } = req.query as {
     depth?: string
     draft?: string
     where?: Where
