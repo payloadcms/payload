@@ -80,7 +80,7 @@
     "uuid": "9.0.1"
   },
   "peerDependencies": {
-    "next": "14.1.1-canary.26",
+    "next": "14.2.0-canary.7",
     "payload": "workspace:*",
     "react": "^18.0.0"
   },
