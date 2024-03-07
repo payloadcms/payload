@@ -2,10 +2,10 @@
 import isDeepEqual from 'deep-equal'
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
 
-import { useTranslation } from '../../providers/Translation'
-import { requests } from '../../utilities/api'
-import { useAuth } from '../Auth'
-import { useConfig } from '../Config'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { requests } from '../../utilities/api.js'
+import { useAuth } from '../Auth/index.js'
+import { useConfig } from '../Config/index.js'
 
 type PreferencesContext = {
   getPreference: <T = any>(key: string) => Promise<T> | T

@@ -1,4 +1,4 @@
-import type { Theme } from './types'
+import type { Theme } from './types.js'
 
 export function themeIsValid(string: null | string): string is Theme {
   return string ? ['dark', 'light'].includes(string) : false

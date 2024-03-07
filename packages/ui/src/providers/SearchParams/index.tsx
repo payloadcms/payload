@@ -1,9 +1,9 @@
 'use client'
-import { useSearchParams as useNextSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams as useNextSearchParams, useRouter } from 'next/navigation.js'
 import qs from 'qs'
 import React, { createContext, useContext } from 'react'
 
-import type { Action, SearchParamsContext, State } from './types'
+import type { Action, SearchParamsContext, State } from './types.js'
 
 const initialContext: SearchParamsContext = {
   dispatchSearchParams: () => {},

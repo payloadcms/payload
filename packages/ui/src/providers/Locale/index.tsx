@@ -3,14 +3,14 @@
 import type { Locale } from 'payload/config'
 
 // TODO: abstract the `next/navigation` dependency out from this component
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation.js'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import { findLocaleFromCode } from '../../utilities/findLocaleFromCode'
-import { useAuth } from '../Auth'
-import { useConfig } from '../Config'
-import { usePreferences } from '../Preferences'
-import { useSearchParams } from '../SearchParams'
+import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
+import { useAuth } from '../Auth/index.js'
+import { useConfig } from '../Config/index.js'
+import { usePreferences } from '../Preferences/index.js'
+import { useSearchParams } from '../SearchParams/index.js'
 
 const LocaleContext = createContext({} as Locale)
 

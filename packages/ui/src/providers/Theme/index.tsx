@@ -1,8 +1,6 @@
 'use client'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
-import { canUseDOM } from '../..'
-
 export type Theme = 'dark' | 'light'
 
 export type ThemeContext = {
