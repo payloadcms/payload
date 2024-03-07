@@ -1,5 +1,6 @@
+import type { GenerateViewMetadata } from '../Root/index.d.ts'
+
 import { meta } from '../../utilities/meta.js'
-import { GenerateViewMetadata } from '../Root/index.js'
 
 export const generateAccountMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) => {
   return meta({
