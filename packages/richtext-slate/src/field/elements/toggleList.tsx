@@ -2,11 +2,11 @@ import { Editor, Element, Node, Text, Transforms } from 'slate'
 import { ReactEditor } from 'slate-react'
 
 import { getCommonBlock } from './getCommonBlock.js'
-import isListActive from './isListActive.js'
-import listTypes from './listTypes.js'
+import { isListActive } from './isListActive.js'
+import { listTypes } from './listTypes.js'
 import { unwrapList } from './unwrapList.js'
 
-const toggleList = (editor: Editor, format: string): void => {
+export const toggleList = (editor: Editor, format: string): void => {
   let currentListFormat: string
 
   if (isListActive(editor, 'ol')) currentListFormat = 'ol'
@@ -96,5 +96,3 @@ const toggleList = (editor: Editor, format: string): void => {
 
   ReactEditor.focus(editor)
 }
-
-export default toggleList

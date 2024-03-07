@@ -1,6 +1,6 @@
 import { Editor, Element } from 'slate'
 
-const isElementActive = (editor: Editor, format: string, blockType = 'type'): boolean => {
+export const isElementActive = (editor: Editor, format: string, blockType = 'type'): boolean => {
   if (!editor.selection) return false
 
   const [match] = Array.from(
@@ -12,5 +12,3 @@ const isElementActive = (editor: Editor, format: string, blockType = 'type'): bo
 
   return !!match
 }
-
-export default isElementActive

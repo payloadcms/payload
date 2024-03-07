@@ -3,7 +3,7 @@ import type { Path } from 'slate'
 import { Editor, Element, Transforms } from 'slate'
 
 import { areAllChildrenElements } from './areAllChildrenElements.js'
-import listTypes from './listTypes.js'
+import { listTypes } from './listTypes.js'
 
 export const unwrapList = (editor: Editor, atPath: Path): void => {
   // Remove type for any nodes that have text children -

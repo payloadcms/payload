@@ -4,8 +4,8 @@ import { useListDrawer, useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useCallback } from 'react'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import UploadIcon from '../../../icons/Upload/index.js'
-import ElementButton from '../../Button.js'
+import { UploadIcon } from '../../../icons/Upload/index.js'
+import { ElementButton } from '../../Button.js'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 import { injectVoidElement } from '../../injectVoid.js'
 import './index.scss'
@@ -74,7 +74,7 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
   )
 }
 
-export default (props: ButtonProps): React.ReactNode => {
+export const Button = (props: ButtonProps): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
       <UploadButton {...props} />

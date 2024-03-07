@@ -2,9 +2,7 @@ import type { RichTextCustomElement } from '../../../types.d.ts'
 
 import { ListItemElement } from './ListItem.js'
 
-const listItem: RichTextCustomElement = {
+export const li: RichTextCustomElement = {
   name: 'li',
   Element: ListItemElement,
 }
-
-export default listItem

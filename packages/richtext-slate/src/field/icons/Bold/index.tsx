@@ -1,6 +1,6 @@
 import React from 'react'
 
-const BoldIcon: React.FC = () => (
+export const BoldIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="graphic bold-icon"
@@ -16,5 +16,3 @@ const BoldIcon: React.FC = () => (
     <path d="M0 0h24v24H0z" fill="none" />
   </svg>
 )
-
-export default BoldIcon

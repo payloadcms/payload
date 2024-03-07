@@ -1,6 +1,6 @@
 import React from 'react'
 
-const CodeIcon: React.FC = () => (
+export const CodeIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="graphic inline-code-icon"
@@ -15,5 +15,3 @@ const CodeIcon: React.FC = () => (
     />
   </svg>
 )
-
-export default CodeIcon

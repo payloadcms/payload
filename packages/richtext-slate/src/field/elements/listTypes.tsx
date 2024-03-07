@@ -1,1 +1,1 @@
-export default ['ol', 'ul']
+export const listTypes = ['ol', 'ul']

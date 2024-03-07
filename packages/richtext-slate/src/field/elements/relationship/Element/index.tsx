@@ -32,7 +32,7 @@ type Props = FormFieldBase & {
   richTextComponentMap: Map<string, React.ReactNode>
 }
 
-const Element: React.FC<Props> = () => {
+const RelationshipElement: React.FC<Props> = () => {
   const {
     attributes,
     children,
@@ -191,10 +191,10 @@ const Element: React.FC<Props> = () => {
   )
 }
 
-export default (props: Props): React.ReactNode => {
+export const Element = (props: Props): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props}>
-      <Element {...props} />
+      <RelationshipElement {...props} />
     </EnabledRelationshipsCondition>
   )
 }

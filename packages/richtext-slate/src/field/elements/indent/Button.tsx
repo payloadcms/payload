@@ -7,13 +7,13 @@ import { ReactEditor, useSlate } from 'slate-react'
 
 import type { ElementNode } from '../../../types.d.ts'
 
-import IndentLeft from '../../icons/IndentLeft/index.js'
-import IndentRight from '../../icons/IndentRight/index.js'
+import { IndentLeft } from '../../icons/IndentLeft/index.js'
+import { IndentRight } from '../../icons/IndentRight/index.js'
 import { baseClass } from '../Button.js'
 import { getCommonBlock } from '../getCommonBlock.js'
-import isElementActive from '../isActive.js'
+import { isElementActive } from '../isActive.js'
 import { isBlockElement } from '../isBlockElement.js'
-import listTypes from '../listTypes.js'
+import { listTypes } from '../listTypes.js'
 import { unwrapList } from '../unwrapList.js'
 import { indentType } from './shared.js'
 

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const BlockquoteIcon: React.FC = () => (
+export const BlockquoteIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="graphic blockquote-icon"
@@ -13,5 +13,3 @@ const BlockquoteIcon: React.FC = () => (
     <path d="M0 0h24v24H0z" fill="none" />
   </svg>
 )
-
-export default BlockquoteIcon

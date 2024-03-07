@@ -4,8 +4,8 @@ import { useListDrawer, useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import RelationshipIcon from '../../../icons/Relationship/index.js'
-import ElementButton from '../../Button.js'
+import { RelationshipIcon } from '../../../icons/Relationship/index.js'
+import { ElementButton } from '../../Button.js'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 import { injectVoidElement } from '../../injectVoid.js'
 import './index.scss'
@@ -81,7 +81,7 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   )
 }
 
-export default (props: Props): React.ReactNode => {
+export const Button = (props: Props): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props}>
       <RelationshipButton {...props} />

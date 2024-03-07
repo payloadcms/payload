@@ -2,13 +2,13 @@ import React from 'react'
 
 import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import H2Icon from '../../icons/headings/H2/index.js'
-import ElementButton from '../Button.js'
+import { H2Icon } from '../../icons/headings/H2/index.js'
+import { ElementButton } from '../Button.js'
 import { Heading2 } from './Heading2.js'
 
 const name = 'h2'
 
-const h2: RichTextCustomElement = {
+export const h2: RichTextCustomElement = {
   name,
   Button: () => (
     <ElementButton format={name}>
@@ -17,5 +17,3 @@ const h2: RichTextCustomElement = {
   ),
   Element: Heading2,
 }
-
-export default h2

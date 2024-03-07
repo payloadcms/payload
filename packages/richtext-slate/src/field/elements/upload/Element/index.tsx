@@ -39,7 +39,7 @@ type Props = FormFieldBase & {
   richTextComponentMap: Map<string, React.ReactNode>
 }
 
-const Element: React.FC<Props & { enabledCollectionSlugs?: string[] }> = ({
+const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = ({
   enabledCollectionSlugs,
 }) => {
   const {
@@ -220,10 +220,10 @@ const Element: React.FC<Props & { enabledCollectionSlugs?: string[] }> = ({
   )
 }
 
-export default (props: Props): React.ReactNode => {
+export const Element = (props: Props): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
-      <Element {...props} />
+      <UploadElement {...props} />
     </EnabledRelationshipsCondition>
   )
 }

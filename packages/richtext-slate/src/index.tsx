@@ -64,10 +64,10 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
   }
 }
 
-export { default as ElementButton } from './field/elements/Button.js'
+export { ElementButton } from './field/elements/Button.js'
 
-export { default as toggleElement } from './field/elements/toggle.js'
-export { default as LeafButton } from './field/leaves/Button.js'
+export { toggleElement } from './field/elements/toggle.js'
+export { LeafButton } from './field/leaves/Button.js'
 export type {
   AdapterArguments,
   ElementNode,

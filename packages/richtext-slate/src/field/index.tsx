@@ -11,7 +11,11 @@ import type { EnabledFeatures } from './types.d.ts'
 
 import { createFeatureMap } from './createFeatureMap.js'
 
-const RichTextEditor = lazy(() => import('./RichText.js'))
+const RichTextEditor = lazy(() =>
+  import('./RichText.js').then((module) => ({
+    default: module.RichText,
+  })),
+)
 
 export const RichTextField: React.FC<
   FormFieldBase & {

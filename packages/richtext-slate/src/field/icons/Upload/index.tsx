@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const Upload: React.FC = () => (
+export const UploadIcon: React.FC = () => (
   <svg className="icon icon--upload" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
     <path
       className="fill"
@@ -11,5 +11,3 @@ const Upload: React.FC = () => (
     <circle className="fill" cx="9.69" cy="9.47" r="0.97" />
   </svg>
 )
-
-export default Upload

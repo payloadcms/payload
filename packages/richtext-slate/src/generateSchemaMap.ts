@@ -6,7 +6,7 @@ import { sanitizeFields } from 'payload/config'
 
 import type { AdapterArguments, RichTextCustomElement } from './types.d.ts'
 
-import elementTypes from './field/elements/index.js'
+import { elements as elementTypes } from './field/elements/index.js'
 import { linkFieldsSchemaPath } from './field/elements/link/shared.js'
 import { transformExtraFields } from './field/elements/link/utilities.js'
 import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'

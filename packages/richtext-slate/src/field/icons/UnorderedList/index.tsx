@@ -1,6 +1,6 @@
 import React from 'react'
 
-const UnorderedListIcon: React.FC = () => (
+export const ULIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="graphic unordered-list-icon"
@@ -16,5 +16,3 @@ const UnorderedListIcon: React.FC = () => (
     <path d="M0 0h24v24H0V0z" fill="none" />
   </svg>
 )
-
-export default UnorderedListIcon
