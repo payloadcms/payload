@@ -5,7 +5,7 @@ import type { TextField } from 'payload/types'
 import { Select, useForm } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
-import type { SelectFieldOption } from '../../types'
+import type { SelectFieldOption } from '../../types.js'
 
 export const DynamicFieldSelector: React.FC<TextField> = (props) => {
   const { fields, getDataByPath } = useForm()
