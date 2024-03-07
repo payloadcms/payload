@@ -31,7 +31,7 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
       },
     })
 
-    if (!user) throw new APIError('Verification token is invalid.', httpStatus.BAD_REQUEST)
+    if (!user) throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN)
     if (user && user._verified === true)
       throw new APIError('This account has already been activated.', httpStatus.ACCEPTED)
 

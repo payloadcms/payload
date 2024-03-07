@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import httpStatus from 'http-status'
 
 import type { Collection } from '../../collections/config/types.d.ts'
 import type { PayloadRequest } from '../../types/index.d.ts'
@@ -32,7 +33,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     !Object.prototype.hasOwnProperty.call(args.data, 'token') ||
     !Object.prototype.hasOwnProperty.call(args.data, 'password')
   ) {
-    throw new APIError('Missing required data.')
+    throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)
   }
 
   const {
@@ -63,7 +64,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       },
     })
 
-    if (!user) throw new APIError('Token is either invalid or has expired.')
+    if (!user) throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
 
     // TODO: replace this method
     const { hash, salt } = await generatePasswordSaltHash({ password: data.password })
