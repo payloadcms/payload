@@ -1,4 +1,4 @@
-import Editor from '@monaco-editor/react'
+import EditorDefault from '@monaco-editor/react'
 import React from 'react'
 
 import type { Props } from './types.d.ts'
@@ -6,6 +6,8 @@ import type { Props } from './types.d.ts'
 import { useTheme } from '../../providers/Theme/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import './index.scss'
+
+const Editor = EditorDefault.default
 
 const baseClass = 'code-editor'
 

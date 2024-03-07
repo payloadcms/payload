@@ -2,10 +2,12 @@
 // TODO: abstract the `next/link` dependency out from this component
 import type { LinkProps } from 'next/link.d.ts'
 
-import Link from 'next/link.js'
+import LinkDefault from 'next/link.js'
 import * as React from 'react' // TODO: abstract this out to support all routers
 
 import './index.scss'
+
+const Link = LinkDefault.default
 
 const baseClass = 'popup-button-list'
 
