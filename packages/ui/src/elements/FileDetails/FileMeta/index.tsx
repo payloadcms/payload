@@ -1,12 +1,12 @@
 import { formatFilesize } from 'payload/utilities'
 import React, { useState } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { Edit } from '../../../icons/Edit'
-import CopyToClipboard from '../../CopyToClipboard'
-import { useDocumentDrawer } from '../../DocumentDrawer'
-import { Tooltip } from '../../Tooltip'
+import { Edit } from '../../../icons/Edit/index.js'
+import CopyToClipboard from '../../CopyToClipboard/index.js'
+import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
+import { Tooltip } from '../../Tooltip/index.js'
 import './index.scss'
 
 const baseClass = 'file-meta'

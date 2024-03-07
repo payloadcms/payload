@@ -7,9 +7,9 @@ import type {
 
 import React, { Fragment } from 'react'
 
-import { Gutter } from '../Gutter'
-import RenderTitle from '../RenderTitle'
-import { DocumentTabs } from './Tabs'
+import { Gutter } from '../Gutter/index.js'
+import RenderTitle from '../RenderTitle/index.js'
+import { DocumentTabs } from './Tabs/index.js'
 import './index.scss'
 
 const baseClass = `doc-header`

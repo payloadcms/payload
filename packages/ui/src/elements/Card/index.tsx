@@ -1,8 +1,8 @@
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { Button } from '../Button'
+import { Button } from '../Button/index.js'
 import './index.scss'
 
 const baseClass = 'card'

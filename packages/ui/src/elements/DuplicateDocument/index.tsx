@@ -1,24 +1,24 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
 // import { requests } from '../../../api'
-import { useForm, useFormModified } from '../../forms/Form/context'
-import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
-import { MinimalTemplate } from '../../templates/Minimal'
-import { Button } from '../Button'
-import * as PopupList from '../Popup/PopupButtonList'
+import { useForm, useFormModified } from '../../forms/Form/context.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { MinimalTemplate } from '../../templates/Minimal/index.js'
+import { Button } from '../Button/index.js'
+import * as PopupList from '../Popup/PopupButtonList/index.js'
 import './index.scss'
 
 const baseClass = 'duplicate'
 
-const Duplicate: React.FC<Props> = ({ id, singularLabel, slug }) => {
+const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
   const { push } = useRouter()
   const modified = useFormModified()
   const { toggleModal } = useModal()

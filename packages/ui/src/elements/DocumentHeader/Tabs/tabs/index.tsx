@@ -1,6 +1,6 @@
 import type { DocumentTabConfig } from 'payload/types'
 
-import { VersionsPill } from './VersionsPill'
+import { VersionsPill } from './VersionsPill/index.js'
 
 export const documentViewKeys = [
   'API',

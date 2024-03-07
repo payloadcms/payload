@@ -1,12 +1,12 @@
 import { isImage } from 'payload/utilities'
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { UploadActions } from '../../elements/Upload'
-import { Button } from '../Button'
-import Thumbnail from '../Thumbnail'
-import FileMeta from './FileMeta'
+import { UploadActions } from '../../elements/Upload/index.js'
+import { Button } from '../Button/index.js'
+import Thumbnail from '../Thumbnail/index.js'
+import FileMeta from './FileMeta/index.js'
 import './index.scss'
 
 const baseClass = 'file-details'

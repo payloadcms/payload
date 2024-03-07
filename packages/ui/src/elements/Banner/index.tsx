@@ -1,20 +1,20 @@
-import Link from 'next/link'
+import Link from 'next/link.js'
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type { Props, RenderedTypeProps } from './types'
+import type { Props, RenderedTypeProps } from './types.d.ts'
 
 import './index.scss'
 
 const baseClass = 'banner'
 
 export const Banner: React.FC<Props> = ({
+  type = 'default',
   alignIcon = 'right',
   children,
   className,
   icon,
   onClick,
   to,
-  type = 'default',
 }) => {
   const classes = [
     baseClass,

@@ -3,10 +3,10 @@ import type { Description, Operation } from 'payload/types'
 
 import React from 'react'
 
-import type { FieldMap } from '../../utilities/buildComponentMap/types'
+import type { FieldMap } from '../../utilities/buildComponentMap/types.js'
 
-import RenderFields from '../../forms/RenderFields'
-import { Gutter } from '../Gutter'
+import RenderFields from '../../forms/RenderFields/index.js'
+import { Gutter } from '../Gutter/index.js'
 import './index.scss'
 
 const baseClass = 'document-fields'

@@ -1,11 +1,11 @@
 'use client'
 import React, { useRef, useState } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { Copy } from '../../icons/Copy'
-import { useTranslation } from '../../providers/Translation'
-import { Tooltip } from '../Tooltip'
+import { Copy } from '../../icons/Copy/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
 
 const baseClass = 'copy-to-clipboard'

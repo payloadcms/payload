@@ -2,7 +2,7 @@ import type { DocumentTabConfig, DocumentTabProps } from 'payload/types'
 
 import React, { Fragment } from 'react'
 
-import { DocumentTabLink } from './TabLink'
+import { DocumentTabLink } from './TabLink.js'
 import './index.scss'
 
 export const baseClass = 'doc-tab'

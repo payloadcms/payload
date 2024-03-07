@@ -5,13 +5,13 @@ import AnimateHeightWithDefault from 'react-animate-height'
 // @ts-expect-error trust me it works
 const AnimateHeight = AnimateHeightWithDefault || AnimateHeightWithDefault.default
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { Chevron } from '../../icons/Chevron'
-import { DragHandle } from '../../icons/DragHandle'
-import { useTranslation } from '../../providers/Translation'
+import { Chevron } from '../../icons/Chevron/index.js'
+import { DragHandle } from '../../icons/DragHandle/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
-import { CollapsibleProvider, useCollapsible } from './provider'
+import { CollapsibleProvider, useCollapsible } from './provider.js'
 
 const baseClass = 'collapsible'
 

@@ -12,7 +12,7 @@ import {
 import { SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import React, { useCallback, useId } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
 const DraggableSortable: React.FC<Props> = (props) => {
   const { children, className, ids, onDragEnd } = props

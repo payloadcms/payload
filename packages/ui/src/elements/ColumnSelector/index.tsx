@@ -2,15 +2,15 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { useId } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { Plus } from '../../icons/Plus'
-import { X } from '../../icons/X'
-import { useEditDepth } from '../../providers/EditDepth'
-import { useTranslation } from '../../providers/Translation'
-import DraggableSortable from '../DraggableSortable'
-import Pill from '../Pill'
-import { useTableColumns } from '../TableColumns'
+import { Plus } from '../../icons/Plus/index.js'
+import { X } from '../../icons/X/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import DraggableSortable from '../DraggableSortable/index.js'
+import Pill from '../Pill/index.js'
+import { useTableColumns } from '../TableColumns/index.js'
 import './index.scss'
 
 const baseClass = 'column-selector'

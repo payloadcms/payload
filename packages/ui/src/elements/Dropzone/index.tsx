@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { useTranslation } from '../../providers/Translation'
-import { Button } from '../Button'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import './index.scss'
 
 const handleDragOver = (e: DragEvent) => {

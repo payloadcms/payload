@@ -1,8 +1,8 @@
 'use client'
 import type { SanitizedConfig } from 'payload/types'
 
-import Link from 'next/link'
-import { useParams, usePathname } from 'next/navigation'
+import Link from 'next/link.js'
+import { useParams, usePathname } from 'next/navigation.js'
 import React from 'react'
 
 export const DocumentTabLink: React.FC<{

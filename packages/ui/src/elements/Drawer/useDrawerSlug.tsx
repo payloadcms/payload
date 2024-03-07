@@ -1,13 +1,13 @@
 import { useId } from 'react'
 
-import { formatDrawerSlug } from '.'
-import { useEditDepth } from '../../providers/EditDepth'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { formatDrawerSlug } from './index.js'
 
 export const useDrawerSlug = (slug: string): string => {
   const uuid = useId()
   const editDepth = useEditDepth()
   return formatDrawerSlug({
-    depth: editDepth,
     slug: `${slug}-${uuid}`,
+    depth: editDepth,
   })
 }

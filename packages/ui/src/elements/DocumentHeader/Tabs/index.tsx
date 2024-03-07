@@ -7,12 +7,12 @@ import type {
 
 import React from 'react'
 
-import { ShouldRenderTabs } from './ShouldRenderTabs'
-import { DocumentTab } from './Tab'
-import { getCustomViews } from './getCustomViews'
-import { getViewConfig } from './getViewConfig'
+import { ShouldRenderTabs } from './ShouldRenderTabs.js'
+import { DocumentTab } from './Tab/index.js'
+import { getCustomViews } from './getCustomViews.js'
+import { getViewConfig } from './getViewConfig.js'
 import './index.scss'
-import { tabs as defaultTabs } from './tabs'
+import { tabs as defaultTabs } from './tabs/index.js'
 
 const baseClass = 'doc-tabs'
 
