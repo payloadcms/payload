@@ -1,12 +1,15 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.d.ts'
 
-import { mediaSlug } from '../Media'
+import { mediaSlug } from '../Media/index.js'
 
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
+  },
+  versions: {
+    drafts: true,
   },
   fields: [
     {

@@ -1,11 +1,11 @@
 import path from 'path'
 
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { MediaCollection } from './collections/Media'
-import { PostsCollection, postsSlug } from './collections/Posts'
-import { MenuGlobal } from './globals/Menu'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { MediaCollection } from './collections/Media/index.js'
+import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { MenuGlobal } from './globals/Menu/index.js'
 
 export default buildConfigWithDefaults({
   // ...extend config here
