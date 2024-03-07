@@ -34,6 +34,7 @@ export const EditViewClient: React.FC = () => {
 
   const onSave = useCallback(
     async (json: { doc }) => {
+      console.log('just saved', json)
       void getVersions()
       void getDocPermissions()
 
@@ -60,10 +61,9 @@ export const EditViewClient: React.FC = () => {
   )
 
   useEffect(() => {
-    setDocumentInfo((current) => ({
-      ...current,
+    setDocumentInfo({
       onSave,
-    }))
+    })
   }, [setDocumentInfo, onSave])
 
   // Allow the `DocumentInfoProvider` to hydrate

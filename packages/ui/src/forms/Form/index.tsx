@@ -257,22 +257,6 @@ const Form: React.FC<Props> = (props) => {
           if (typeof onSuccess === 'function') onSuccess(json)
 
           if (redirect) {
-            // const destination = {
-            //   pathname: redirect,
-            //   state: {},
-            // }
-
-            // if (typeof json === 'object' && json.message && !disableSuccessStatus) {
-            //   destination.state = {
-            //     status: [
-            //       {
-            //         message: json.message,
-            //         type: 'success',
-            //       },
-            //     ],
-            //   }
-            // }
-
             router.push(redirect)
           } else if (!disableSuccessStatus) {
             toast.success(json.message || t('general:submissionSuccessful'), { autoClose: 3000 })
