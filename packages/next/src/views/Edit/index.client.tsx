@@ -34,7 +34,6 @@ export const EditViewClient: React.FC = () => {
 
   const onSave = useCallback(
     async (json: { doc }) => {
-      console.log('just saved', json)
       void getVersions()
       void getDocPermissions()
 

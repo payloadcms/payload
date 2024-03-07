@@ -17,7 +17,6 @@ import {
   buildStateFromSchema,
   formatFields,
 } from '@payloadcms/ui'
-import queryString from 'qs'
 import React, { Fragment } from 'react'
 
 import type { AdminViewProps } from '../Root'
@@ -204,7 +203,7 @@ export const Document: React.FC<AdminViewProps> = async ({
         docPreferences={docPreferences}
         globalSlug={globalConfig?.slug}
         hasSavePermission={hasSavePermission}
-        id={id}
+        id={id || ''}
         initialData={data}
         initialState={initialState}
         title={formatTitle({
