@@ -3,6 +3,8 @@ import ConfImport from 'conf'
 import { randomBytes } from 'crypto'
 import findUp from 'find-up'
 import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../types/index.js'
 import type { AdminInitEvent } from './events/adminInit.js'
@@ -99,7 +101,9 @@ const getGitID = (payload: Payload) => {
 }
 
 const getPackageJSON = async (): Promise<PackageJSON> => {
-  const packageJsonPath = await findUp('package.json', { cwd: __dirname })
+  const filename = fileURLToPath(import.meta.url)
+  const dirname = path.dirname(filename)
+  const packageJsonPath = await findUp('package.json', { cwd: dirname })
   const jsonContent: PackageJSON = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
   return jsonContent
 }

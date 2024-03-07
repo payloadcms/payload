@@ -3,6 +3,7 @@ import type { Payload } from '../../packages/payload/src/index.js'
 import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { startMemoryDB } from '../startMemoryDB.js'
 import { postsSlug } from './collections/Posts/index.js'
 import configPromise from './config.js'
 
@@ -17,7 +18,8 @@ describe('_Community Tests', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    payload = await getPayload({ config: configPromise })
+    const config = await startMemoryDB(configPromise)
+    payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
 
     const data = await restClient

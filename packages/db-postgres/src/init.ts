@@ -10,7 +10,7 @@ import type { PostgresAdapter } from './types.js'
 
 import { buildTable } from './schema/build.js'
 
-export const init: Init = async function init(this: PostgresAdapter) {
+export const init: Init = function init(this: PostgresAdapter) {
   if (this.schemaName) {
     this.pgSchema = pgSchema(this.schemaName)
   } else {

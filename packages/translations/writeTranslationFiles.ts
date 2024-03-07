@@ -4,8 +4,8 @@ import { fileURLToPath } from 'url'
 import { ensureDirectoryExists } from './src/utilities/ensureDirExists.js'
 import { copyFile } from './src/utilities/copyFile.js'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const serverTranslationKeys = [
   'authentication:account',
@@ -422,7 +422,7 @@ function buildSchemaFile(type: 'client' | 'server') {
   }
 
   const schemaFileContents = JSON.parse(
-    fs.readFileSync(path.resolve(__dirname, SOURCE_DIR, 'translation-schema.json'), 'utf8'),
+    fs.readFileSync(path.resolve(dirname, SOURCE_DIR, 'translation-schema.json'), 'utf8'),
   )
 
   for (const [group, selectors] of groupedProperties.entries()) {
@@ -450,17 +450,17 @@ function buildSchemaFile(type: 'client' | 'server') {
   schemaFileContents.required = Array.from(groupedProperties.keys())
 
   fs.writeFileSync(
-    path.resolve(__dirname, DESTINATION_DIR, 'translation-schema.json'),
+    path.resolve(dirname, DESTINATION_DIR, 'translation-schema.json'),
     JSON.stringify(schemaFileContents, null, 2),
     { flag: 'w+' },
   )
 }
 
 async function build() {
-  ensureDirectoryExists(path.resolve(__dirname, `${DESTINATION_ROOT}/client`))
-  ensureDirectoryExists(path.resolve(__dirname, `${DESTINATION_ROOT}/api`))
+  ensureDirectoryExists(path.resolve(dirname, `${DESTINATION_ROOT}/client`))
+  ensureDirectoryExists(path.resolve(dirname, `${DESTINATION_ROOT}/api`))
 
-  const filenames = fs.readdirSync(path.resolve(__dirname, SOURCE_DIR))
+  const filenames = fs.readdirSync(path.resolve(dirname, SOURCE_DIR))
 
   // build up the client and server translation files
   for (const filename of filenames) {
@@ -468,11 +468,9 @@ async function build() {
       continue
     }
 
-    const source = JSON.parse(
-      fs.readFileSync(path.resolve(__dirname, SOURCE_DIR, filename), 'utf8'),
-    )
+    const source = JSON.parse(fs.readFileSync(path.resolve(dirname, SOURCE_DIR, filename), 'utf8'))
 
-    const dest1 = path.resolve(__dirname, `${DESTINATION_ROOT}/client`, filename)
+    const dest1 = path.resolve(dirname, `${DESTINATION_ROOT}/client`, filename)
 
     const clientTranslations = sortObject(filterKeys(source, '', clientTranslationKeys))
     fs.writeFileSync(dest1, JSON.stringify(clientTranslations, null, 2), {
@@ -480,7 +478,7 @@ async function build() {
     })
 
     const serverTranslations = sortObject(filterKeys(source, '', serverTranslationKeys))
-    const dest2 = path.resolve(__dirname, `${DESTINATION_ROOT}/api`, filename)
+    const dest2 = path.resolve(dirname, `${DESTINATION_ROOT}/api`, filename)
 
     fs.writeFileSync(dest2, JSON.stringify(serverTranslations, null, 2), {
       flag: 'w+',
@@ -495,12 +493,12 @@ async function build() {
 
   // copy barrel file to both client and api folders
   copyFile(
-    path.resolve(__dirname, `${SOURCE_DIR}/index.ts`),
-    path.resolve(__dirname, `${DESTINATION_ROOT}/api/index.ts`),
+    path.resolve(dirname, `${SOURCE_DIR}/index.ts`),
+    path.resolve(dirname, `${DESTINATION_ROOT}/api/index.ts`),
   )
   copyFile(
-    path.resolve(__dirname, `${SOURCE_DIR}/index.ts`),
-    path.resolve(__dirname, `${DESTINATION_ROOT}/client/index.ts`),
+    path.resolve(dirname, `${SOURCE_DIR}/index.ts`),
+    path.resolve(dirname, `${DESTINATION_ROOT}/client/index.ts`),
   )
 }
 

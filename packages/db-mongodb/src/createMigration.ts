@@ -3,6 +3,7 @@ import type { CreateMigration } from 'payload/database'
 
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 const migrationTemplate = (upSQL?: string, downSQL?: string) => `import {
   MigrateUpArgs,
@@ -23,6 +24,9 @@ export const createMigration: CreateMigration = async function createMigration({
   migrationName,
   payload,
 }) {
+  const filename = fileURLToPath(import.meta.url)
+  const dirname = path.dirname(filename)
+
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
@@ -37,7 +41,7 @@ export const createMigration: CreateMigration = async function createMigration({
 
     const predefinedMigrationName = file.replace('@payloadcms/db-mongodb/', '')
     migrationName = predefinedMigrationName
-    const cleanPath = path.join(__dirname, `../predefinedMigrations/${predefinedMigrationName}.js`)
+    const cleanPath = path.join(dirname, `../predefinedMigrations/${predefinedMigrationName}.js`)
 
     // Check if predefined migration exists
     if (fs.existsSync(cleanPath)) {

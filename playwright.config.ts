@@ -14,5 +14,5 @@ export default defineConfig({
     timeout: 45000,
   },
   workers: 16,
-  globalSetup: require.resolve('./playwright-global-setup'),
+  globalSetup: './playwright-global-setup',
 })

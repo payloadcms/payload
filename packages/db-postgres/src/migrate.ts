@@ -82,7 +82,7 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
-  const { generateDrizzleJson } = require('drizzle-kit/payload')
+  const { generateDrizzleJson } = await import('drizzle-kit/payload')
 
   const start = Date.now()
   const req = { payload } as PayloadRequest

@@ -1,9 +1,9 @@
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise from './config'
-import { arraySlug } from './shared'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise from './config.js'
+import { arraySlug } from './shared.js'
 
 let payload: Payload
 

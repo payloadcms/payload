@@ -1,4 +1,3 @@
-import path from 'path'
 import sharp from 'sharp'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types.d.ts'
@@ -30,7 +29,6 @@ import {
   lexicalEditor,
 } from '../packages/richtext-lexical/src/index.js'
 // import { slateEditor } from '../packages/richtext-slate/src/index.js'
-import { CustomDashboard } from './CustomDashboard.js'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
@@ -67,13 +65,6 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',
-    admin: {
-      components: {
-        views: {
-          Dashboard: CustomDashboard,
-        },
-      },
-    },
     // editor: slateEditor({
     //   admin: {
     //     upload: {
@@ -184,7 +175,6 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             password: 'test',
           },
     ...(config.admin || {}),
-    buildPath: path.resolve(__dirname, '../build'),
   }
 
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {
