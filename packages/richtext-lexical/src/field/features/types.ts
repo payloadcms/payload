@@ -3,7 +3,7 @@ import type { JSONSchema4 } from 'json-schema'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
-import type { RequestContext } from 'payload'
+import type { Payload, RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type { PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
 import type React from 'react'
@@ -68,11 +68,14 @@ export type Feature = {
   }
   generatedTypes?: {
     modifyOutputSchema: ({
+      collectionIDFieldTypes,
       currentSchema,
       field,
       interfaceNameDefinitions,
       isRequired,
+      payload,
     }: {
+      collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
       /**
        * Current schema which will be modified by this function.
        */
@@ -83,6 +86,7 @@ export type Feature = {
        */
       interfaceNameDefinitions: Map<string, JSONSchema4>
       isRequired: boolean
+      payload?: Payload
     }) => JSONSchema4
   }
   hooks?: {
@@ -223,11 +227,14 @@ export type SanitizedFeatures = Required<
   generatedTypes: {
     modifyOutputSchemas: Array<
       ({
+        collectionIDFieldTypes,
         currentSchema,
         field,
         interfaceNameDefinitions,
         isRequired,
+        payload,
       }: {
+        collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
         /**
          * Current schema which will be modified by this function.
          */
@@ -238,6 +245,7 @@ export type SanitizedFeatures = Required<
          */
         interfaceNameDefinitions: Map<string, JSONSchema4>
         isRequired: boolean
+        payload?: Payload
       }) => JSONSchema4
     >
   }
