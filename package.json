@@ -12,6 +12,7 @@
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
     "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\" --filter \"!@payloadcms/plugin-search\" --filter \"!@payloadcms/plugin-redirects\" --filter \"!@payloadcms/plugin-nested-docs\"",
     "build:app": "next build",
+    "build:app:analyze": "cross-env ANALYZE=true next build",
     "build:create-payload-app": "turbo build --filter create-payload-app",
     "build:db-mongodb": "turbo build --filter db-mongodb",
     "build:db-postgres": "turbo build --filter db-postgres",
