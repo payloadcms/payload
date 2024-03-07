@@ -15,6 +15,8 @@ export { default as reduceFieldsToValues } from '../forms/Form/reduceFieldsToVal
 export type { Props as FormProps } from '../forms/Form/types.d.ts'
 export { default as Label } from '../forms/Label/index.js'
 export { default as RenderFields } from '../forms/RenderFields/index.js'
+export { default as FormSubmit } from '../forms/Submit/index.js'
+export { default as Submit } from '../forms/Submit/index.js'
 export { fieldTypes } from '../forms/fields/index.js'
 export { default as SectionTitle } from '../forms/fields/Blocks/SectionTitle/index.js'
 export { default as Checkbox } from '../forms/fields/Checkbox/index.js'
