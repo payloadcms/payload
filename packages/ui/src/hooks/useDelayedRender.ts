@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { useDelay } from './useDelay'
+import { useDelay } from './useDelay.js'
 
 type DelayedRenderProps = {
   /** Time in ms to wait before "mounting" the component. */

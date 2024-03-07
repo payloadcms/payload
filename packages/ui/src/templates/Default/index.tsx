@@ -1,13 +1,13 @@
 import React, { Fragment } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { AppHeader } from '../../elements/Header'
-import { DefaultNav } from '../../elements/Nav'
-import { NavToggler } from '../../elements/Nav/NavToggler'
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { NavHamburger } from './NavHamburger'
-import { Wrapper } from './Wrapper'
+import { AppHeader } from '../../elements/Header/index.js'
+import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
+import { DefaultNav } from '../../elements/Nav/index.js'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { NavHamburger } from './NavHamburger/index.js'
+import { Wrapper } from './Wrapper/index.js'
 import './index.scss'
 
 const baseClass = 'template-default'

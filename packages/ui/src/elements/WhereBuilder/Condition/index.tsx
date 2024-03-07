@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 
-import type { FieldCondition } from '../types'
-import type { Props } from './types'
+import type { FieldCondition } from '../types.d.ts'
+import type { Props } from './types.d.ts'
 
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent'
-import useDebounce from '../../../hooks/useDebounce'
-import { Button } from '../../Button'
-import ReactSelect from '../../ReactSelect'
-import Date from './Date'
-import Number from './Number'
-import Relationship from './Relationship'
-import { Select } from './Select'
-import Text from './Text'
+import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
+import useDebounce from '../../../hooks/useDebounce.js'
+import { Button } from '../../Button/index.js'
+import ReactSelect from '../../ReactSelect/index.js'
+import Date from './Date/index.js'
+import Number from './Number/index.js'
+import Relationship from './Relationship/index.js'
+import { Select } from './Select/index.js'
+import Text from './Text/index.js'
 import './index.scss'
 
 const valueFields = {
@@ -52,9 +52,9 @@ const Condition: React.FC<Props> = (props) => {
 
   useEffect(() => {
     dispatch({
+      type: 'update',
       andIndex,
       orIndex,
-      type: 'update',
       value: debouncedValue || '',
     })
   }, [debouncedValue, dispatch, orIndex, andIndex])
@@ -80,10 +80,10 @@ const Condition: React.FC<Props> = (props) => {
               isClearable={false}
               onChange={(field) => {
                 dispatch({
-                  andIndex: andIndex,
-                  field: field?.value,
-                  orIndex: orIndex,
                   type: 'update',
+                  andIndex,
+                  field: field?.value,
+                  orIndex,
                 })
               }}
               options={fields}
@@ -96,10 +96,10 @@ const Condition: React.FC<Props> = (props) => {
               isClearable={false}
               onChange={(operator) => {
                 dispatch({
+                  type: 'update',
                   andIndex,
                   operator: operator.value,
                   orIndex,
-                  type: 'update',
                 })
                 setInternalOperatorField(operator.value)
               }}
@@ -134,9 +134,9 @@ const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() =>
               dispatch({
+                type: 'remove',
                 andIndex,
                 orIndex,
-                type: 'remove',
               })
             }
             round
@@ -148,11 +148,11 @@ const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() =>
               dispatch({
+                type: 'add',
                 andIndex: andIndex + 1,
                 field: fields[0].value,
                 orIndex,
                 relation: 'and',
-                type: 'add',
               })
             }
             round

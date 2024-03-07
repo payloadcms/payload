@@ -2,9 +2,9 @@
 import queryString from 'qs'
 import { useEffect, useRef, useState } from 'react'
 
-import { useLocale } from '../providers/Locale'
-import { useTranslation } from '../providers/Translation'
-import { requests } from '../utilities/api'
+import { useLocale } from '../providers/Locale/index.js'
+import { useTranslation } from '../providers/Translation/index.js'
+import { requests } from '../utilities/api.js'
 
 type Result = [
   {

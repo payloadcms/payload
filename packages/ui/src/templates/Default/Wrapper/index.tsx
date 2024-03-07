@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import { useNav } from '../../../elements/Nav/context'
+import { useNav } from '../../../elements/Nav/context.js'
 import './index.scss'
 
 export const Wrapper: React.FC<{

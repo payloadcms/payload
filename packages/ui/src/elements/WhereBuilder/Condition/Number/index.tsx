@@ -1,8 +1,8 @@
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useTranslation } from '../../../../providers/Translation'
+import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'condition-value-number'

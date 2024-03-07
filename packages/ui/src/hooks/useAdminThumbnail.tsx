@@ -1,6 +1,7 @@
 import type { GetAdminThumbnail } from 'payload/types'
 
-import { useAddClientFunction, useDocumentInfo } from '..'
+import { useAddClientFunction } from '../providers/ClientFunction/index.js'
+import { useDocumentInfo } from '../providers/DocumentInfo/index.js'
 
 export const useAdminThumbnail = (func: GetAdminThumbnail) => {
   const { collectionSlug } = useDocumentInfo()

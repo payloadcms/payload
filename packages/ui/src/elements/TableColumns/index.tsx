@@ -4,15 +4,15 @@ import type { CellProps } from 'payload/types'
 
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListInfo/types'
-import type { Column } from '../Table/types'
-import type { Action } from './columnReducer'
+import type { ColumnPreferences } from '../../providers/ListInfo/types.d.ts'
+import type { Column } from '../Table/types.d.ts'
+import type { Action } from './columnReducer.js'
 
-import { useComponentMap } from '../../providers/ComponentMapProvider'
-import { useConfig } from '../../providers/Config'
-import { usePreferences } from '../../providers/Preferences'
-import { buildColumns } from './buildColumns'
-import { columnReducer } from './columnReducer'
+import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
+import { buildColumns } from './buildColumns.js'
+import { columnReducer } from './columnReducer.js'
 
 export interface ITableColumns {
   columns: Column[]

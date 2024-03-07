@@ -1,6 +1,6 @@
 import type { Where } from 'payload/types'
 
-import type { Action } from './types'
+import type { Action } from './types.d.ts'
 
 const reducer = (state: Where[], action: Action): Where[] => {
   const newState = [...state]

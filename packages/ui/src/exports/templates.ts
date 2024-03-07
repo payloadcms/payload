@@ -1,2 +1,2 @@
-export { DefaultTemplate } from '../templates/Default'
-export { MinimalTemplate } from '../templates/Minimal'
+export { DefaultTemplate } from '../templates/Default/index.js'
+export { MinimalTemplate } from '../templates/Minimal/index.js'

@@ -1,11 +1,11 @@
 'use client'
-import { usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation.js'
 import React from 'react'
 
-import { useAuth } from '../../providers/Auth'
-import { useConfig } from '../../providers/Config'
-import { DefaultAccountIcon } from './Default'
-import Gravatar from './Gravatar'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { DefaultAccountIcon } from './Default/index.js'
+import Gravatar from './Gravatar/index.js'
 
 const Account = () => {
   const {

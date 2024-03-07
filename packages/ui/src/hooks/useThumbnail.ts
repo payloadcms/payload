@@ -2,8 +2,8 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { isImage } from 'payload/utilities'
 
-import { useComponentMap } from '..'
-import { useConfig } from '../providers/Config'
+import { useComponentMap } from '../providers/ComponentMapProvider/index.js'
+import { useConfig } from '../providers/Config/index.js'
 
 const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i')
 const base64Pattern = new RegExp(/^data:image\/[a-z]+;base64,/)

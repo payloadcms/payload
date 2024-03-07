@@ -2,7 +2,7 @@ import type { SanitizedConfig } from 'payload/config'
 
 import React from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 
 const css = `
   .graphic-logo path {

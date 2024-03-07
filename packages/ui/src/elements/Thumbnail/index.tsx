@@ -1,10 +1,10 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import FileGraphic from '../../graphics/File'
-import useThumbnail from '../../hooks/useThumbnail'
+import FileGraphic from '../../graphics/File/index.js'
+import useThumbnail from '../../hooks/useThumbnail.js'
 import './index.scss'
 
 const baseClass = 'thumbnail'

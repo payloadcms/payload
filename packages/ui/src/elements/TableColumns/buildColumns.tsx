@@ -2,12 +2,12 @@ import type { CellProps, SanitizedCollectionConfig } from 'payload/types'
 
 import React from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListInfo/types'
-import type { FieldMap } from '../../utilities/buildComponentMap/types'
-import type { Column } from '../Table/types'
+import type { ColumnPreferences } from '../../providers/ListInfo/types.d.ts'
+import type { FieldMap } from '../../utilities/buildComponentMap/types.d.ts'
+import type { Column } from '../Table/types.d.ts'
 
-import { SelectAll } from '../SelectAll'
-import { SelectRow } from '../SelectRow'
+import { SelectAll } from '../SelectAll/index.js'
+import { SelectRow } from '../SelectRow/index.js'
 
 export const buildColumns = (args: {
   cellProps: Partial<CellProps>[]

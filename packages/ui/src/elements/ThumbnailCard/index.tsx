@@ -1,10 +1,10 @@
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useTranslation } from '../../providers/Translation'
-import { formatDocTitle } from '../../utilities/formatDocTitle'
-import Thumbnail from '../Thumbnail'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import Thumbnail from '../Thumbnail/index.js'
 import './index.scss'
 
 const baseClass = 'thumbnail-card'

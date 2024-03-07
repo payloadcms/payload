@@ -1,9 +1,9 @@
 'use client'
 import React, { useEffect } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useIntersect } from '../../hooks/useIntersect'
+import { useIntersect } from '../../hooks/useIntersect.js'
 import './index.scss'
 
 export const Tooltip: React.FC<Props> = (props) => {

@@ -3,7 +3,7 @@ import md5 from 'md5'
 import qs from 'qs'
 import React from 'react'
 
-import { useAuth } from '../../../providers/Auth'
+import { useAuth } from '../../../providers/Auth/index.js'
 
 const Gravatar: React.FC = () => {
   const { user } = useAuth()

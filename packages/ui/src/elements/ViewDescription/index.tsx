@@ -2,11 +2,11 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useTranslation } from '../../providers/Translation'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
-import { isComponent } from './types'
+import { isComponent } from './types.js'
 
 const ViewDescription: React.FC<Props> = (props) => {
   const { i18n } = useTranslation()

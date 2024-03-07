@@ -1,10 +1,10 @@
 'use client'
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useTableColumns } from '../TableColumns'
-import { TableCellProvider } from './TableCellProvider'
+import { useTableColumns } from '../TableColumns/index.js'
+import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'
 
 const baseClass = 'table'

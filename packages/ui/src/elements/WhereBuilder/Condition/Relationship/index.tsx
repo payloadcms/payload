@@ -2,15 +2,15 @@ import type { PaginatedDocs } from 'payload/database'
 
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
-import type { Option } from '../../../ReactSelect/types'
-import type { GetResults, Props, ValueWithRelation } from './types'
+import type { Option } from '../../../ReactSelect/types.d.ts'
+import type { GetResults, Props, ValueWithRelation } from './types.d.ts'
 
-import useDebounce from '../../../../hooks/useDebounce'
-import { useConfig } from '../../../../providers/Config'
-import { useTranslation } from '../../../../providers/Translation'
-import ReactSelect from '../../../ReactSelect'
+import useDebounce from '../../../../hooks/useDebounce.js'
+import { useConfig } from '../../../../providers/Config/index.js'
+import { useTranslation } from '../../../../providers/Translation/index.js'
+import ReactSelect from '../../../ReactSelect/index.js'
 import './index.scss'
-import optionsReducer from './optionsReducer'
+import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'
 
@@ -38,7 +38,7 @@ const RelationshipField: React.FC<Props> = (props) => {
   const addOptions = useCallback(
     (data, relation) => {
       const collection = collections.find((coll) => coll.slug === relation)
-      dispatchOptions({ collection, data, hasMultipleRelations, i18n, relation, type: 'ADD' })
+      dispatchOptions({ type: 'ADD', collection, data, hasMultipleRelations, i18n, relation })
     },
     [collections, hasMultipleRelations, i18n],
   )
@@ -200,9 +200,9 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   useEffect(() => {
     dispatchOptions({
+      type: 'CLEAR',
       i18n,
       required: true,
-      type: 'CLEAR',
     })
 
     setHasLoadedFirstOptions(true)
