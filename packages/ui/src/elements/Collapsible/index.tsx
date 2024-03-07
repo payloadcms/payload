@@ -1,8 +1,9 @@
 'use client'
 import React, { useState } from 'react'
-import AnimateHeightDefault from 'react-animate-height'
+import AnimateHeightImport from 'react-animate-height'
 
-const AnimateHeight = AnimateHeightDefault.default
+const AnimateHeight = (AnimateHeightImport.default ||
+  AnimateHeightImport) as typeof AnimateHeightImport.default
 
 import type { Props } from './types.d.ts'
 
