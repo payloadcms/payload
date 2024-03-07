@@ -67,7 +67,7 @@ export const DefaultEditView: React.FC = () => {
 
   const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
 
-  const schemaPath = collectionConfig?.slug || globalConfig?.slug
+  const entitySlug = collectionConfig?.slug || globalConfig?.slug
 
   const fieldMap = getFieldMap({
     collectionSlug: collectionConfig?.slug,
@@ -92,7 +92,7 @@ export const DefaultEditView: React.FC = () => {
     async (json) => {
       reportUpdate({
         id,
-        entitySlug: collectionConfig.slug,
+        entitySlug: entitySlug,
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
 
@@ -112,6 +112,7 @@ export const DefaultEditView: React.FC = () => {
       onSaveFromContext,
       // refreshCookieAsync,
       reportUpdate,
+      entitySlug,
     ],
   )
 
@@ -125,18 +126,18 @@ export const DefaultEditView: React.FC = () => {
           formState: prevFormState,
           globalSlug,
           operation,
-          schemaPath,
+          schemaPath: entitySlug,
         },
         serverURL,
       }),
-    [serverURL, apiRoute, id, operation, schemaPath, collectionSlug, globalSlug],
+    [serverURL, apiRoute, id, operation, entitySlug, collectionSlug, globalSlug],
   )
 
   const RegisterGetThumbnailFunction = componentMap?.[`${collectionSlug}.adminThumbnail`]
 
   return (
     <main className={classes}>
-      <FieldPathProvider path="" schemaPath={schemaPath}>
+      <FieldPathProvider path="" schemaPath={entitySlug}>
         <OperationProvider operation={operation}>
           <Form
             action={action}
