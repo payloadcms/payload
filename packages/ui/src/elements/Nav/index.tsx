@@ -88,7 +88,9 @@ export const DefaultNav: React.FC<{
                   id = `nav-global-${entity.slug}`
                 }
 
-                const Link = LinkWithDefault.default
+                const Link = (LinkWithDefault.default ||
+                  LinkWithDefault) as typeof LinkWithDefault.default
+
                 const LinkElement = Link || 'a'
 
                 return (
