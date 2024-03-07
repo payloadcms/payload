@@ -4,7 +4,7 @@ import type { Permissions, User } from 'payload/auth'
 
 import { useEffect } from 'react'
 
-import { useAuth } from '../../providers/Auth'
+import { useAuth } from '../../providers/Auth/index.js'
 
 export const HydrateClientUser: React.FC<{ permissions: Permissions; user: User }> = ({
   permissions,

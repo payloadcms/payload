@@ -1,12 +1,13 @@
 'use client'
 import type { ElementType } from 'react'
 
-import Link from 'next/link'
+import LinkWithDefault from 'next/link.js'
+const Link = LinkWithDefault.default
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type { Props, RenderedTypeProps } from './types'
+import type { Props, RenderedTypeProps } from './types.js'
 
-import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable'
+import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable/index.js'
 import './index.scss'
 
 const baseClass = 'pill'

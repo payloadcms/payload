@@ -7,7 +7,7 @@ import type {
 
 import React, { useEffect, useMemo, useState } from 'react'
 
-import FileMeta from '../FileDetails/FileMeta'
+import FileMeta from '../FileDetails/FileMeta/index.js'
 import './index.scss'
 
 const baseClass = 'preview-sizes'

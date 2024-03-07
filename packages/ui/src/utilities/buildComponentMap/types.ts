@@ -11,7 +11,7 @@ import type {
   TabsField,
 } from 'payload/types'
 
-import type { fieldTypes } from '../../forms/fields'
+import type { fieldTypes } from '../../forms/fields/index.js'
 
 export type MappedTab = {
   label: TabsField['tabs'][0]['label']

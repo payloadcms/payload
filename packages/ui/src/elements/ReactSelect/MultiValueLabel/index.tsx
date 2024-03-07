@@ -3,14 +3,14 @@ import type { MultiValueProps } from 'react-select'
 import React from 'react'
 import { components as SelectComponents } from 'react-select'
 
-import type { Option } from '../types'
+import type { Option } from '../types.js'
 
 import './index.scss'
 
 const baseClass = 'multi-value-label'
 
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
-  // @ts-ignore-next-line// TODO Fix this - moduleResolution 16 breaks our declare module
+  // @ts-expect-error-next-line// TODO Fix this - moduleResolution 16 breaks our declare module
   const { selectProps: { customProps: { draggableProps } = {} } = {} } = props
 
   return (

@@ -3,12 +3,12 @@ import type { CustomSaveButtonProps, DefaultSaveButtonProps } from 'payload/type
 
 import React, { useRef } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { useForm } from '../../forms/Form/context'
-import FormSubmit from '../../forms/Submit'
-import useHotkey from '../../hooks/useHotkey'
-import { useEditDepth } from '../../providers/EditDepth'
-import { useTranslation } from '../../providers/Translation'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { useForm } from '../../forms/Form/context.js'
+import FormSubmit from '../../forms/Submit/index.js'
+import useHotkey from '../../hooks/useHotkey.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) => {
   const ref = useRef<HTMLButtonElement>(null)

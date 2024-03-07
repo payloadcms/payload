@@ -3,7 +3,7 @@ import type { Field, SanitizedConfig } from 'payload/types'
 import { sanitizeFields } from 'payload/config'
 import { tabHasName } from 'payload/types'
 
-import type { FieldSchemaMap } from './types'
+import type { FieldSchemaMap } from './types.js'
 
 type Args = {
   config: SanitizedConfig

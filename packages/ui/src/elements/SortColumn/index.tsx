@@ -1,15 +1,15 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation.js'
 import queryString from 'qs'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.js'
 
-import { Chevron } from '../../icons/Chevron'
-import { useSearchParams } from '../../providers/SearchParams'
-import { useTranslation } from '../../providers/Translation'
+import { Chevron } from '../../icons/Chevron/index.js'
+import { useSearchParams } from '../../providers/SearchParams/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'sort-column'

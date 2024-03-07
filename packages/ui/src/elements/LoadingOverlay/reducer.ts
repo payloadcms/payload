@@ -1,4 +1,4 @@
-import type { Action, State } from './types'
+import type { Action, State } from './types.js'
 
 export const defaultLoadingOverlayState = {
   isLoading: false,
@@ -9,10 +9,10 @@ export const defaultLoadingOverlayState = {
 
 export const reducer = (state: State, action: Action): State => {
   const loadersCopy = [...state.loaders]
-  const { key = 'user', loadingText, type = 'fullscreen' } = action.payload
+  const { type = 'fullscreen', key = 'user', loadingText } = action.payload
 
   if (action.type === 'add') {
-    loadersCopy.push({ key, loadingText, type })
+    loadersCopy.push({ type, key, loadingText })
   } else if (action.type === 'remove') {
     const index = loadersCopy.findIndex((item) => item.key === key && item.type === type)
     loadersCopy.splice(index, 1)

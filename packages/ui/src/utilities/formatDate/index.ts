@@ -1,7 +1,7 @@
 import { format, formatDistanceToNow } from 'date-fns'
 import * as Locale from 'date-fns/locale'
 
-import { getSupportedDateLocale } from './getSupportedDateLocale'
+import { getSupportedDateLocale } from './getSupportedDateLocale.js'
 
 export const formatDate = (
   date: Date | number | string | undefined,

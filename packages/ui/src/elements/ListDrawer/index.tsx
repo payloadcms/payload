@@ -2,12 +2,12 @@
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
-import type { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types'
+import type { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types.js'
 
-import { useConfig } from '../../providers/Config'
-import { useEditDepth } from '../../providers/EditDepth'
-import { Drawer, DrawerToggler } from '../Drawer'
-import { ListDrawerContent } from './DrawerContent'
+import { useConfig } from '../../providers/Config/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { ListDrawerContent } from './DrawerContent.js'
 import './index.scss'
 
 export const baseClass = 'list-drawer'

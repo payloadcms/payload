@@ -1,8 +1,8 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider'
-import { useTranslation } from '../../providers/Translation'
+import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'list-selection'

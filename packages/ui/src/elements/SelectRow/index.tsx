@@ -1,9 +1,9 @@
 'use client'
 import React from 'react'
 
-import { useTableCell } from '../../elements/Table/TableCellProvider'
-import { CheckboxInput } from '../../forms/fields/Checkbox/Input'
-import { useSelection } from '../../providers/SelectionProvider'
+import { useTableCell } from '../../elements/Table/TableCellProvider/index.js'
+import { CheckboxInput } from '../../forms/fields/Checkbox/Input.js'
+import { useSelection } from '../../providers/SelectionProvider/index.js'
 import './index.scss'
 
 const baseClass = 'select-row'

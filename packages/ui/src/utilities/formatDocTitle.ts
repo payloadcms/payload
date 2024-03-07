@@ -3,7 +3,7 @@ import type { FormField, SanitizedCollectionConfig } from 'payload/types'
 
 import { getObjectDotNotation } from 'payload/utilities'
 
-import { formatDate } from './formatDate'
+import { formatDate } from './formatDate/index.js'
 
 export const formatDocTitle = (args: {
   dateFormat?: any

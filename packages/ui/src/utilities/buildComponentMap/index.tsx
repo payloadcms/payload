@@ -3,10 +3,10 @@ import type { EditViewProps, SanitizedConfig } from 'payload/types'
 
 import React from 'react'
 
-import type { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
+import type { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types.js'
 
-import { mapActions } from './mapActions'
-import { mapFields } from './mapFields'
+import { mapActions } from './mapActions.js'
+import { mapFields } from './mapFields.js'
 
 export const buildComponentMap = (args: {
   DefaultCell: React.FC<any>

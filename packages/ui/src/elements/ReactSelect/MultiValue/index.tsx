@@ -3,9 +3,9 @@ import type { MultiValueProps } from 'react-select'
 import React from 'react'
 import { components as SelectComponents } from 'react-select'
 
-import type { Option } from '../types'
+import type { Option } from '../types.js'
 
-import { useDraggableSortable } from '../../DraggableSortable/useDraggableSortable'
+import { useDraggableSortable } from '../../DraggableSortable/useDraggableSortable/index.js'
 import './index.scss'
 
 const baseClass = 'multi-value'

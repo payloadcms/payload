@@ -1,8 +1,9 @@
 'use client'
 // TODO: abstract the `next/link` dependency out from this component
-import type { LinkProps } from 'next/link'
+import type { LinkProps } from 'next/link.js'
 
-import Link from 'next/link'
+import LinkWithDefault from 'next/link.js'
+const Link = LinkWithDefault.default
 import * as React from 'react' // TODO: abstract this out to support all routers
 
 import './index.scss'

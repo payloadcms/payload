@@ -7,7 +7,7 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useNav } from '../Nav/context.js'
 import './index.scss'
 
-const { default: AnimateHeight } = AnimateHeightImport
+const AnimateHeight = AnimateHeightImport.default
 
 const baseClass = 'nav-group'
 
@@ -30,7 +30,7 @@ const NavGroup: React.FC<Props> = ({ children, label }) => {
         const preferences = (await getPreference(preferencesKey)) || []
         setCollapsed(preferences.indexOf(label) !== -1)
       }
-      setCollapsedFromPreferences()
+      void setCollapsedFromPreferences()
     }
   }, [getPreference, label, preferencesKey])
 
@@ -43,7 +43,7 @@ const NavGroup: React.FC<Props> = ({ children, label }) => {
       } else {
         preferences.push(label)
       }
-      setPreference(preferencesKey, preferences)
+      void setPreference(preferencesKey, preferences)
       setCollapsed(!collapsed)
     }
 

@@ -2,9 +2,9 @@ import type { ClearIndicatorProps } from 'react-select'
 
 import React from 'react'
 
-import type { Option as OptionType } from '../types'
+import type { Option as OptionType } from '../types.js'
 
-import { X } from '../../../icons/X'
+import { X } from '../../../icons/X/index.js'
 import './index.scss'
 
 const baseClass = 'clear-indicator'

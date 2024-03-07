@@ -1,9 +1,9 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import { Chevron } from '../../../icons/Chevron'
-import { useLocale } from '../../../providers/Locale'
-import { useTranslation } from '../../../providers/Translation'
+import { Chevron } from '../../../icons/Chevron/index.js'
+import { useLocale } from '../../../providers/Locale/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'localizer-button'

@@ -3,13 +3,13 @@ import type { ControlProps } from 'react-select'
 import React from 'react'
 import { components as SelectComponents } from 'react-select'
 
-import type { Option } from '../types'
+import type { Option } from '../types.js'
 
 export const Control: React.FC<ControlProps<Option, any>> = (props) => {
   const {
     children,
     innerProps,
-    // @ts-ignore-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
+    // @ts-expect-error-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
     selectProps: { customProps: { disableKeyDown, disableMouseDown } = {} } = {},
   } = props
 
@@ -18,7 +18,6 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
       {...props}
       innerProps={{
         ...innerProps,
-        // @ts-ignore
         onKeyDown: (e) => {
           if (disableKeyDown) {
             e.stopPropagation()

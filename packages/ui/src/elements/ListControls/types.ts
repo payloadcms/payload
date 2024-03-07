@@ -1,6 +1,6 @@
 import type { FieldAffectingData, SanitizedCollectionConfig, Where } from 'payload/types'
 
-import type { Column } from '../Table/types'
+import type { Column } from '../Table/types.js'
 
 export type Props = {
   collectionConfig: SanitizedCollectionConfig

@@ -1,5 +1,3 @@
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
-
 export type Props = {
   className?: string
   dateFormat?: any // TODO: type this

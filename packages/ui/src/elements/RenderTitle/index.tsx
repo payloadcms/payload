@@ -1,10 +1,10 @@
 'use client'
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.js'
 
-import { useDocumentInfo } from '../../providers/DocumentInfo'
-import IDLabel from '../IDLabel'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import IDLabel from '../IDLabel/index.js'
 import './index.scss'
 
 const baseClass = 'render-title'

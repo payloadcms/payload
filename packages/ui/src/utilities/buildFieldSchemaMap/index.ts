@@ -1,8 +1,8 @@
 import type { SanitizedConfig } from 'payload/types'
 
-import type { FieldSchemaMap } from './types'
+import type { FieldSchemaMap } from './types.js'
 
-import { traverseFields } from './traverseFields'
+import { traverseFields } from './traverseFields.js'
 
 export const buildFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
   const result: FieldSchemaMap = new Map()

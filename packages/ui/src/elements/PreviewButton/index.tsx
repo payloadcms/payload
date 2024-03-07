@@ -5,13 +5,13 @@ import type { CustomPreviewButtonProps, DefaultPreviewButtonProps } from 'payloa
 import React, { useCallback, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { useAuth } from '../../providers/Auth'
-import { useConfig } from '../../providers/Config'
-import { useDocumentInfo } from '../../providers/DocumentInfo'
-import { useLocale } from '../../providers/Locale'
-import { useTranslation } from '../../providers/Translation'
-import { Button } from '../Button'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 
 const baseClass = 'preview-btn'
 

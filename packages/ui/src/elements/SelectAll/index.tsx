@@ -2,9 +2,9 @@
 
 import React from 'react'
 
-import { CheckboxInput } from '../../forms/fields/Checkbox/Input'
-import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider'
-import { useTranslation } from '../../providers/Translation'
+import { CheckboxInput } from '../../forms/fields/Checkbox/Input.js'
+import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'select-all'

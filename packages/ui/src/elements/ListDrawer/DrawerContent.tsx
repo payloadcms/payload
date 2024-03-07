@@ -6,26 +6,26 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
-import type { ListPreferences } from '../TableColumns'
-import type { ListDrawerProps } from './types'
+import type { ListPreferences } from '../TableColumns/index.js'
+import type { ListDrawerProps } from './types.js'
 
-import { baseClass } from '.'
-import Label from '../../forms/Label'
-import usePayloadAPI from '../../hooks/usePayloadAPI'
-import { useUseTitleField } from '../../hooks/useUseAsTitle'
-import { X } from '../../icons/X'
-import { useAuth } from '../../providers/Auth'
-import { useComponentMap } from '../../providers/ComponentMapProvider'
-import { useConfig } from '../../providers/Config'
-import { ListInfoProvider } from '../../providers/ListInfo'
-import { usePreferences } from '../../providers/Preferences'
-import { useTranslation } from '../../providers/Translation'
-import { useDocumentDrawer } from '../DocumentDrawer'
-import { LoadingOverlay } from '../Loading'
-import Pill from '../Pill'
-import ReactSelect from '../ReactSelect'
-import { TableColumnsProvider } from '../TableColumns'
-import ViewDescription from '../ViewDescription'
+import Label from '../../forms/Label/index.js'
+import usePayloadAPI from '../../hooks/usePayloadAPI.js'
+import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
+import { X } from '../../icons/X/index.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { ListInfoProvider } from '../../providers/ListInfo/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { LoadingOverlay } from '../Loading/index.js'
+import Pill from '../Pill/index.js'
+import ReactSelect from '../ReactSelect/index.js'
+import { TableColumnsProvider } from '../TableColumns/index.js'
+import ViewDescription from '../ViewDescription/index.js'
+import { baseClass } from './index.js'
 
 const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
@@ -200,7 +200,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       sort,
     }
 
-    setPreference(preferenceKey, newPreferences, true)
+    void setPreference(preferenceKey, newPreferences, true)
   }, [sort, limit, setPreference, preferenceKey])
 
   const onCreateNew = useCallback(

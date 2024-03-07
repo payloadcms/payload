@@ -3,7 +3,7 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 import React, { useEffect, useRef } from 'react'
 
-import { usePreferences } from '../../providers/Preferences'
+import { usePreferences } from '../../providers/Preferences/index.js'
 
 type NavContextType = {
   navOpen: boolean

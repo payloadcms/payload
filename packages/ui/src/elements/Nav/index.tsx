@@ -3,18 +3,18 @@ import type { Permissions, User } from 'payload/auth'
 import type { SanitizedConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import Link from 'next/link'
+import LinkWithDefault from 'next/link.js'
 import { isEntityHidden } from 'payload/utilities'
 import React from 'react'
 
-import type { EntityToGroup } from '../../utilities/groupNavItems'
+import type { EntityToGroup } from '../../utilities/groupNavItems.js'
 
-import { Chevron } from '../../icons/Chevron'
-import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
-import Logout from '../Logout'
-import NavGroup from '../NavGroup'
-import { NavHamburger } from './NavHamburger'
-import { NavWrapper } from './NavWrapper'
+import { Chevron } from '../../icons/Chevron/index.js'
+import { EntityType, groupNavItems } from '../../utilities/groupNavItems.js'
+import Logout from '../Logout/index.js'
+import NavGroup from '../NavGroup/index.js'
+import { NavHamburger } from './NavHamburger/index.js'
+import { NavWrapper } from './NavWrapper/index.js'
 import './index.scss'
 
 const baseClass = 'nav'
@@ -88,6 +88,7 @@ export const DefaultNav: React.FC<{
                   id = `nav-global-${entity.slug}`
                 }
 
+                const Link = LinkWithDefault.default
                 const LinkElement = Link || 'a'
 
                 return (

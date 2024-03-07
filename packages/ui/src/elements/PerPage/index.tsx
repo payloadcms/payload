@@ -1,15 +1,15 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation.js'
 import { collectionDefaults } from 'payload/config'
 import qs from 'qs'
 import React from 'react'
 
-import { Chevron } from '../../icons/Chevron'
-import { useSearchParams } from '../../providers/SearchParams'
-import { useTranslation } from '../../providers/Translation'
-import Popup from '../Popup'
-import * as PopupList from '../Popup/PopupButtonList'
+import { Chevron } from '../../icons/Chevron/index.js'
+import { useSearchParams } from '../../providers/SearchParams/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import * as PopupList from '../Popup/PopupButtonList/index.js'
+import Popup from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'per-page'

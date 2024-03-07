@@ -1,14 +1,14 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.js'
 
-import { Button } from '../../elements/Button'
-import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
+import { Button } from '../../elements/Button/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'stay-logged-in'

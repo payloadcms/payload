@@ -4,17 +4,17 @@ import type { CellProps, Field, FieldWithPath, LabelProps, SanitizedConfig } fro
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import React, { Fragment } from 'react'
 
-import type { Props as FieldDescription } from '../../forms/FieldDescription/types'
-import type { FormFieldBase } from '../../forms/fields/shared'
-import type { FieldMap, MappedField, MappedTab, ReducedBlock } from './types'
+import type { Props as FieldDescription } from '../../forms/FieldDescription/types.js'
+import type { FormFieldBase } from '../../forms/fields/shared.js'
+import type { FieldMap, MappedField, MappedTab, ReducedBlock } from './types.js'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { SortColumn } from '../../elements/SortColumn'
-import DefaultError from '../../forms/Error'
-import DefaultDescription from '../../forms/FieldDescription'
-import DefaultLabel from '../../forms/Label'
-import { fieldTypes } from '../../forms/fields'
-import HiddenInput from '../../forms/fields/HiddenInput'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { SortColumn } from '../../elements/SortColumn/index.js'
+import DefaultError from '../../forms/Error/index.js'
+import DefaultDescription from '../../forms/FieldDescription/index.js'
+import DefaultLabel from '../../forms/Label/index.js'
+import HiddenInput from '../../forms/fields/HiddenInput/index.js'
+import { fieldTypes } from '../../forms/fields/index.js'
 
 export const mapFields = (args: {
   DefaultCell?: React.FC<any>

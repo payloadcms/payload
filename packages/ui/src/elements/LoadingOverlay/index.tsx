@@ -1,12 +1,12 @@
 'use client'
 import React, { createContext } from 'react'
 
-import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types'
+import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types.js'
 
-import { LoadingOverlay } from '../../elements/Loading'
-import { useDelayedRender } from '../../hooks/useDelayedRender'
-import { useTranslation } from '../../providers/Translation'
-import { defaultLoadingOverlayState, reducer } from './reducer'
+import { LoadingOverlay } from '../../elements/Loading/index.js'
+import { useDelayedRender } from '../../hooks/useDelayedRender.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { defaultLoadingOverlayState, reducer } from './reducer.js'
 
 const animatedDuration = 250
 
@@ -29,24 +29,24 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
   })
 
   const toggleLoadingOverlay = React.useCallback<ToggleLoadingOverlay>(
-    ({ isLoading, key, loadingText = fallbackText, type }) => {
+    ({ type, isLoading, key, loadingText = fallbackText }) => {
       if (isLoading) {
         triggerDelayedRender()
         dispatchOverlay({
+          type: 'add',
           payload: {
+            type,
             key,
             loadingText,
-            type,
           },
-          type: 'add',
         })
       } else {
         dispatchOverlay({
-          payload: {
-            key,
-            type,
-          },
           type: 'remove',
+          payload: {
+            type,
+            key,
+          },
         })
       }
     },

@@ -4,13 +4,13 @@ import type { CustomPublishButtonProps, DefaultPublishButtonProps } from 'payloa
 import qs from 'qs'
 import React, { useCallback } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { useForm, useFormModified } from '../../forms/Form/context'
-import FormSubmit from '../../forms/Submit'
-import { useConfig } from '../../providers/Config'
-import { useDocumentInfo } from '../../providers/DocumentInfo'
-import { useLocale } from '../../providers/Locale'
-import { useTranslation } from '../../providers/Translation'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { useForm, useFormModified } from '../../forms/Form/context.js'
+import FormSubmit from '../../forms/Submit/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
   id,

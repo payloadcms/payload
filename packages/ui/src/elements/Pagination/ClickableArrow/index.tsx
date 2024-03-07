@@ -1,8 +1,8 @@
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.js'
 
-import { Chevron } from '../../../icons/Chevron'
+import { Chevron } from '../../../icons/Chevron/index.js'
 import './index.scss'
 
 const baseClass = 'clickable-arrow'

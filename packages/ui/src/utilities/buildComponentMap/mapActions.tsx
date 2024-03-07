@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/t
 
 import React from 'react'
 
-import type { ActionMap } from './types'
+import type { ActionMap } from './types.js'
 
 export const mapActions = (args: {
   collectionConfig?: SanitizedCollectionConfig

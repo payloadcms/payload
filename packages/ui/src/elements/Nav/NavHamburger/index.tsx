@@ -1,8 +1,8 @@
 'use client'
 import React from 'react'
 
-import { Hamburger } from '../../Hamburger'
-import { useNav } from '../context'
+import { Hamburger } from '../../Hamburger/index.js'
+import { useNav } from '../context.js'
 
 export const NavHamburger: React.FC<{
   baseClass?: string

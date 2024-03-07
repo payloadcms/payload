@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.js'
 
 const baseClass = 'paginator__page'
 

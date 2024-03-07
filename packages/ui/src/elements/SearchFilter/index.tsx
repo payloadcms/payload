@@ -1,15 +1,15 @@
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation.js'
 import queryString from 'qs'
 import React, { useEffect, useRef, useState } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.js'
 
-import useDebounce from '../../hooks/useDebounce'
-import { Search } from '../../icons/Search'
-import { useSearchParams } from '../../providers/SearchParams'
-import { useTranslation } from '../../providers/Translation'
+import useDebounce from '../../hooks/useDebounce.js'
+import { Search } from '../../icons/Search/index.js'
+import { useSearchParams } from '../../providers/SearchParams/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'search-filter'

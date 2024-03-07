@@ -3,15 +3,15 @@ import type { CustomSaveDraftButtonProps, DefaultSaveDraftButtonProps } from 'pa
 
 import React, { useCallback, useRef } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { useForm, useFormModified } from '../../forms/Form/context'
-import FormSubmit from '../../forms/Submit'
-import useHotkey from '../../hooks/useHotkey'
-import { useConfig } from '../../providers/Config'
-import { useDocumentInfo } from '../../providers/DocumentInfo'
-import { useEditDepth } from '../../providers/EditDepth'
-import { useLocale } from '../../providers/Locale'
-import { useTranslation } from '../../providers/Translation'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { useForm, useFormModified } from '../../forms/Form/context.js'
+import FormSubmit from '../../forms/Submit/index.js'
+import useHotkey from '../../hooks/useHotkey.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
 

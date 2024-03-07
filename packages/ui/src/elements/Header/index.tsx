@@ -1,17 +1,17 @@
 'use client'
-import Link from 'next/link'
+import LinkWithDefault from 'next/link.js'
 import React, { useEffect, useRef, useState } from 'react'
 
-import Account from '../../graphics/Account'
-import { useActions } from '../../providers/ActionsProvider'
-import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
-import { Hamburger } from '../Hamburger'
-import Localizer from '../Localizer'
-import { LocalizerLabel } from '../Localizer/LocalizerLabel'
-import { NavToggler } from '../Nav/NavToggler'
-import { useNav } from '../Nav/context'
-import StepNav from '../StepNav'
+import Account from '../../graphics/Account/index.js'
+import { useActions } from '../../providers/ActionsProvider/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Hamburger } from '../Hamburger/index.js'
+import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
+import Localizer from '../Localizer/index.js'
+import { NavToggler } from '../Nav/NavToggler/index.js'
+import { useNav } from '../Nav/context.js'
+import StepNav from '../StepNav/index.js'
 import './index.scss'
 
 const baseClass = 'app-header'
@@ -47,6 +47,8 @@ export const AppHeader: React.FC = () => {
       window.removeEventListener('resize', checkIsScrollable)
     }
   }, [actions])
+
+  const Link = LinkWithDefault.default
 
   const LinkElement = Link || 'a'
 

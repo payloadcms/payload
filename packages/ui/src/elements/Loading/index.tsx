@@ -2,11 +2,11 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { LoadingOverlayTypes } from '../../elements/LoadingOverlay/types'
+import type { LoadingOverlayTypes } from '../../elements/LoadingOverlay/types.js'
 
-import { useLoadingOverlay } from '../../elements/LoadingOverlay'
-import { useFormProcessing } from '../../forms/Form/context'
-import { useTranslation } from '../../providers/Translation'
+import { useLoadingOverlay } from '../../elements/LoadingOverlay/index.js'
+import { useFormProcessing } from '../../forms/Form/context.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'loading-overlay'
@@ -60,25 +60,25 @@ type UseLoadingOverlayToggleT = {
 }
 export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({
   name: key,
+  type = 'fullscreen',
   loadingText,
   show,
-  type = 'fullscreen',
 }) => {
   const { toggleLoadingOverlay } = useLoadingOverlay()
 
   React.useEffect(() => {
     toggleLoadingOverlay({
+      type,
       isLoading: show,
       key,
       loadingText: loadingText || undefined,
-      type,
     })
 
     return () => {
       toggleLoadingOverlay({
+        type,
         isLoading: false,
         key,
-        type,
       })
     }
   }, [show, toggleLoadingOverlay, key, type, loadingText])
@@ -95,10 +95,10 @@ type FormLoadingOverlayToggleT = {
 }
 export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({
   name,
+  type = 'fullscreen',
   action,
   formIsLoading = false,
   loadingSuffix,
-  type = 'fullscreen',
 }) => {
   const isProcessing = useFormProcessing()
   const { i18n, t } = useTranslation()

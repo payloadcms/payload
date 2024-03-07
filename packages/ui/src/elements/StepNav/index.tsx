@@ -2,11 +2,11 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, createContext, useContext, useState } from 'react'
 
-import type { Context as ContextType } from './types'
+import type { Context as ContextType } from './types.js'
 
-import IconGraphic from '../../graphics/Icon'
-import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
+import IconGraphic from '../../graphics/Icon/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'step-nav'

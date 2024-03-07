@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
 
-import { useDelay } from '../../hooks/useDelay'
+import { useDelay } from '../../hooks/useDelay.js'
 import './index.scss'
 
 type ShimmerEffectT = {

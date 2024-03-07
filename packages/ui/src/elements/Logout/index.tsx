@@ -1,10 +1,10 @@
 'use client'
 import React from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { LogOut } from '../../icons/LogOut'
-import { useConfig } from '../../providers/Config'
-import { useTranslation } from '../../providers/Translation'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { LogOut } from '../../icons/LogOut/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'nav'
 

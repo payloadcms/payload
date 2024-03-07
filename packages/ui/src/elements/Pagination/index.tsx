@@ -1,14 +1,14 @@
 'use client'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation.js'
 import queryString from 'qs'
 import React from 'react'
 
-import type { Node, Props } from './types'
+import type { Node, Props } from './types.js'
 
-import { useSearchParams } from '../../providers/SearchParams'
-import ClickableArrow from './ClickableArrow'
-import Page from './Page'
-import Separator from './Separator'
+import { useSearchParams } from '../../providers/SearchParams/index.js'
+import ClickableArrow from './ClickableArrow/index.js'
+import Page from './Page/index.js'
+import Separator from './Separator/index.js'
 import './index.scss'
 
 const nodeTypes = {
@@ -70,12 +70,12 @@ export const Pagination: React.FC<Props> = (props) => {
   // Add first page if necessary
   if (currentPage > numberOfNeighbors + 1) {
     nodes.unshift({
+      type: 'Page',
       props: {
         isFirstPage: true,
         page: 1,
         updatePage,
       },
-      type: 'Page',
     })
   }
 
@@ -84,32 +84,32 @@ export const Pagination: React.FC<Props> = (props) => {
   // Add last page if necessary
   if (rangeEndIndex < totalPages) {
     nodes.push({
+      type: 'Page',
       props: {
         isLastPage: true,
         page: totalPages,
         updatePage,
       },
-      type: 'Page',
     })
   }
 
   // Add prev and next arrows based on necessity
   nodes.unshift({
+    type: 'ClickableArrow',
     props: {
       direction: 'right',
       isDisabled: !hasNextPage,
       updatePage: () => updatePage(nextPage),
     },
-    type: 'ClickableArrow',
   })
 
   nodes.unshift({
+    type: 'ClickableArrow',
     props: {
       direction: 'left',
       isDisabled: !hasPrevPage,
       updatePage: () => updatePage(prevPage),
     },
-    type: 'ClickableArrow',
   })
 
   return (

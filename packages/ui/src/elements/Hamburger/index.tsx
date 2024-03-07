@@ -1,8 +1,8 @@
 'use client'
 import React from 'react'
 
-import { Chevron } from '../../icons/Chevron'
-import { useTranslation } from '../../providers/Translation'
+import { Chevron } from '../../icons/Chevron/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'hamburger'

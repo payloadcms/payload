@@ -2,9 +2,9 @@
 import { useWindowInfo } from '@faceless-ui/window-info'
 import React from 'react'
 
-import { usePreferences } from '../../../providers/Preferences'
-import { useTranslation } from '../../../providers/Translation'
-import { useNav } from '../context'
+import { usePreferences } from '../../../providers/Preferences/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { useNav } from '../context.js'
 import './index.scss'
 
 const baseClass = 'nav-toggler'
