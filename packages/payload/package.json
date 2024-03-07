@@ -7,7 +7,7 @@
   "types": "./src/index.ts",
   "type": "module",
   "bin": {
-    "payload": "bin.js"
+    "payload": "bin.cjs"
   },
   "exports": {
     ".": {
