@@ -21,7 +21,6 @@ import { ComponentMapProvider } from '../ComponentMapProvider/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { CustomProvider } from '../CustomProvider/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
-import { DocumentInfoProvider } from '../DocumentInfo/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
@@ -77,15 +76,13 @@ export const RootProvider: React.FC<Props> = ({
                               <LocaleProvider>
                                 <StepNavProvider>
                                   <LoadingOverlayProvider>
-                                    <DocumentInfoProvider>
-                                      <DocumentEventsProvider>
-                                        <ActionsProvider>
-                                          <NavProvider>
-                                            <CustomProvider>{children}</CustomProvider>
-                                          </NavProvider>
-                                        </ActionsProvider>
-                                      </DocumentEventsProvider>
-                                    </DocumentInfoProvider>
+                                    <DocumentEventsProvider>
+                                      <ActionsProvider>
+                                        <NavProvider>
+                                          <CustomProvider>{children}</CustomProvider>
+                                        </NavProvider>
+                                      </ActionsProvider>
+                                    </DocumentEventsProvider>
                                   </LoadingOverlayProvider>
                                 </StepNavProvider>
                               </LocaleProvider>

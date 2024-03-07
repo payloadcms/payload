@@ -19,13 +19,10 @@ export const DocumentHeader: React.FC<{
   config: SanitizedConfig
   customHeader?: React.ReactNode
   globalConfig?: SanitizedGlobalConfig
+  hideTabs?: boolean
   i18n: I18n
 }> = (props) => {
-  const { collectionConfig, config, customHeader, globalConfig, i18n } = props
-
-  const titleFieldConfig = collectionConfig?.fields?.find(
-    (f) => 'name' in f && f?.name === collectionConfig?.admin?.useAsTitle,
-  )
+  const { collectionConfig, config, customHeader, globalConfig, hideTabs, i18n } = props
 
   return (
     <Gutter className={baseClass}>
@@ -34,20 +31,16 @@ export const DocumentHeader: React.FC<{
         <Fragment>
           <RenderTitle
             className={`${baseClass}__title`}
-            dateFormat={
-              titleFieldConfig && 'date' in titleFieldConfig?.admin
-                ? titleFieldConfig?.admin?.date?.displayFormat
-                : undefined
-            }
             fallback={`[${i18n.t('general:untitled')}]`}
-            isDate={titleFieldConfig?.type === 'date'}
           />
-          <DocumentTabs
-            collectionConfig={collectionConfig}
-            config={config}
-            globalConfig={globalConfig}
-            i18n={i18n}
-          />
+          {!hideTabs && (
+            <DocumentTabs
+              collectionConfig={collectionConfig}
+              config={config}
+              globalConfig={globalConfig}
+              i18n={i18n}
+            />
+          )}
         </Fragment>
       )}
     </Gutter>

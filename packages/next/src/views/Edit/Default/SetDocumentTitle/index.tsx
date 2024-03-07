@@ -2,7 +2,7 @@
 import type { ClientConfig } from 'payload/types'
 
 import { useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { formatTitle } from './formatTitle.js'
 
@@ -16,6 +16,8 @@ export const SetDocumentTitle: React.FC<{
   const useAsTitle = collectionConfig?.admin?.useAsTitle
 
   const field = useFormFields(([fields]) => (useAsTitle && fields && fields?.[useAsTitle]) || null)
+
+  const hasInitialized = useRef(false)
 
   const { i18n } = useTranslation()
 
@@ -37,6 +39,11 @@ export const SetDocumentTitle: React.FC<{
   })
 
   useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true
+      return
+    }
+
     setDocumentTitle(title)
   }, [setDocumentTitle, title])
 

@@ -39,5 +39,9 @@ export const formatTitle = ({
     title = getTranslation(globalConfig?.label, i18n) || globalConfig?.slug
   }
 
+  if (!title) {
+    title = `[${i18n.t('general:untitled')}]`
+  }
+
   return title
 }

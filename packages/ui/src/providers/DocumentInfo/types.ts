@@ -25,10 +25,10 @@ export type DocumentInfoProps = {
   docPreferences?: DocumentPreferences
   globalSlug?: SanitizedGlobalConfig['slug']
   hasSavePermission?: boolean
-  id?: number | string
+  id: null | number | string
   initialData?: Data
   initialState?: FormState
-  onSave?: (data: Data) => Promise<void> | void
+  onSave?: (data: Data) => Promise<void>
   title?: string
 }
 

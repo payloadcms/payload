@@ -28,13 +28,6 @@ export type { DocumentInfo, DocumentInfoContext, DocumentInfoProps }
 
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
-/**
- * To initialize documentInfo from the server
- * use the <SetDocumentInfo /> within a RSC component
- * to hydrate the documentInfo on the first render.
- *
- * Otherwise pass props to initialize the documentInfo.
- **/
 export const DocumentInfoProvider: React.FC<
   DocumentInfoProps & {
     children: React.ReactNode

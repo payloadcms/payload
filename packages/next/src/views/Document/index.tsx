@@ -9,15 +9,15 @@ import type { DocumentPermissions } from 'payload/types'
 
 import {
   DocumentHeader,
+  DocumentInfoProvider,
   EditDepthProvider,
   FormQueryParamsProvider,
   HydrateClientUser,
   RenderCustomComponent,
-  SetDocumentInfo,
   buildStateFromSchema,
   formatFields,
 } from '@payloadcms/ui'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { AdminViewProps } from '../Root/index.d.ts'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.d.ts'
@@ -186,7 +186,26 @@ export const Document: React.FC<AdminViewProps> = async ({
   }
 
   return (
-    <Fragment>
+    <DocumentInfoProvider
+      action={action}
+      apiURL={apiURL}
+      collectionSlug={collectionConfig?.slug}
+      disableActions={false}
+      docPermissions={docPermissions}
+      docPreferences={docPreferences}
+      globalSlug={globalConfig?.slug}
+      hasSavePermission={hasSavePermission}
+      id={id}
+      initialData={data}
+      initialState={initialState}
+      title={formatTitle({
+        collectionConfig,
+        dateFormat: config.admin.dateFormat,
+        globalConfig,
+        i18n,
+        value: data?.[collectionConfig?.admin?.useAsTitle] || id?.toString(),
+      })}
+    >
       <DocumentHeader
         collectionConfig={collectionConfig}
         config={payload.config}
@@ -194,26 +213,6 @@ export const Document: React.FC<AdminViewProps> = async ({
         i18n={i18n}
       />
       <HydrateClientUser permissions={permissions} user={user} />
-      <SetDocumentInfo
-        action={action}
-        apiURL={apiURL}
-        collectionSlug={collectionConfig?.slug}
-        disableActions={false}
-        docPermissions={docPermissions}
-        docPreferences={docPreferences}
-        globalSlug={globalConfig?.slug}
-        hasSavePermission={hasSavePermission}
-        id={id || ''}
-        initialData={data}
-        initialState={initialState}
-        title={formatTitle({
-          collectionConfig,
-          dateFormat: config.admin.dateFormat,
-          globalConfig,
-          i18n,
-          value: data?.[collectionConfig?.admin?.useAsTitle] || id?.toString(),
-        })}
-      />
       <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale.code}`}>
         <FormQueryParamsProvider
           initialParams={{
@@ -230,6 +229,6 @@ export const Document: React.FC<AdminViewProps> = async ({
           />
         </FormQueryParamsProvider>
       </EditDepthProvider>
-    </Fragment>
+    </DocumentInfoProvider>
   )
 }

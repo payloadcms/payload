@@ -1,19 +1,21 @@
 import type { Data, DocumentPreferences, ServerSideEditViewProps } from 'payload/types'
 
 import {
+  DocumentHeader,
+  DocumentInfoProvider,
   HydrateClientUser,
   RenderCustomComponent,
-  SetDocumentInfo,
   buildStateFromSchema,
   formatFields,
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { AdminViewProps } from '../Root/index.d.ts'
 
 import { EditView } from '../Edit/index.js'
 import { Settings } from './Settings/index.js'
+import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle.js'
 
 export { generateAccountMetadata } from './meta.js'
 
@@ -21,6 +23,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
   const {
     permissions,
     req: {
+      i18n,
       payload,
       payload: { config },
       user,
@@ -89,20 +92,31 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
     }
 
     return (
-      <Fragment>
-        <HydrateClientUser permissions={permissions} user={user} />
-        <SetDocumentInfo
-          AfterFields={<Settings />}
-          action={`${serverURL}${api}/${userSlug}${data?.id ? `/${data.id}` : ''}`}
-          apiURL={`${serverURL}${api}/${userSlug}${data?.id ? `/${data.id}` : ''}`}
-          collectionSlug={userSlug}
-          docPermissions={collectionPermissions}
-          docPreferences={docPreferences}
-          hasSavePermission={collectionPermissions?.update?.permission}
-          id={user?.id}
-          initialData={data}
-          initialState={initialState}
+      <DocumentInfoProvider
+        AfterFields={<Settings />}
+        action={`${serverURL}${api}/${userSlug}${data?.id ? `/${data.id}` : ''}`}
+        apiURL={`${serverURL}${api}/${userSlug}${data?.id ? `/${data.id}` : ''}`}
+        collectionSlug={userSlug}
+        docPermissions={collectionPermissions}
+        docPreferences={docPreferences}
+        hasSavePermission={collectionPermissions?.update?.permission}
+        id={user?.id}
+        initialData={data}
+        initialState={initialState}
+        title={formatTitle({
+          collectionConfig,
+          dateFormat: config.admin.dateFormat,
+          i18n,
+          value: data?.[collectionConfig?.admin?.useAsTitle] || data?.id?.toString(),
+        })}
+      >
+        <DocumentHeader
+          collectionConfig={collectionConfig}
+          config={payload.config}
+          i18n={i18n}
+          hideTabs
         />
+        <HydrateClientUser permissions={permissions} user={user} />
         <RenderCustomComponent
           CustomComponent={
             typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
@@ -110,7 +124,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
           DefaultComponent={EditView}
           componentProps={serverSideProps}
         />
-      </Fragment>
+      </DocumentInfoProvider>
     )
   }
 

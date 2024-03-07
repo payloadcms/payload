@@ -12,7 +12,9 @@ const baseClass = 'render-title'
 const RenderTitle: React.FC<Props> = (props) => {
   const { className, element = 'h1', fallback, title: titleFromProps } = props
 
-  const { id, title: titleFromContext } = useDocumentInfo()
+  const documentInfo = useDocumentInfo()
+
+  const { id, title: titleFromContext } = documentInfo
 
   const title = titleFromProps || titleFromContext || fallback
 
