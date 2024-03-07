@@ -13,9 +13,9 @@ import React from 'react'
 
 import type { AdminViewProps } from '../Root/index.d.ts'
 
+import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle.js'
 import { EditView } from '../Edit/index.js'
 import { Settings } from './Settings/index.js'
-import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle.js'
 
 export { generateAccountMetadata } from './meta.js'
 
@@ -103,6 +103,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
         id={user?.id}
         initialData={data}
         initialState={initialState}
+        isEditing
         title={formatTitle({
           collectionConfig,
           dateFormat: config.admin.dateFormat,
@@ -113,8 +114,8 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
         <DocumentHeader
           collectionConfig={collectionConfig}
           config={payload.config}
-          i18n={i18n}
           hideTabs
+          i18n={i18n}
         />
         <HydrateClientUser permissions={permissions} user={user} />
         <RenderCustomComponent
