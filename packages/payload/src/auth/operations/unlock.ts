@@ -1,3 +1,5 @@
+import httpStatus from 'http-status'
+
 import type { Collection } from '../../collections/config/types.d.ts'
 import type { PayloadRequest } from '../../types/index.d.ts'
 
@@ -19,7 +21,7 @@ export type Args = {
 
 export const unlockOperation = async (args: Args): Promise<boolean> => {
   if (!Object.prototype.hasOwnProperty.call(args.data, 'email')) {
-    throw new APIError('Missing email.')
+    throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
   }
 
   const {
@@ -49,7 +51,7 @@ export const unlockOperation = async (args: Args): Promise<boolean> => {
     // /////////////////////////////////////
 
     if (!data.email) {
-      throw new APIError('Missing email.')
+      throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
     }
 
     const user = await req.payload.db.findOne({

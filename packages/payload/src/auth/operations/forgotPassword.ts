@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { URL } from 'url'
+import httpStatus from 'http-status'
 
 import type { Collection } from '../../collections/config/types.d.ts'
 import type { PayloadRequest } from '../../types/index.d.ts'
@@ -25,7 +26,7 @@ export type Result = string
 
 export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<null | string> => {
   if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
-    throw new APIError('Missing email.', 400)
+    throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
   }
 
   let args = incomingArgs
@@ -75,7 +76,7 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
     }
 
     if (!data.email) {
-      throw new APIError('Missing email.')
+      throw new APIError('Missing email.', httpStatus.BAD_REQUEST)
     }
 
     let user = await payload.db.findOne<UserDoc>({
@@ -84,6 +85,9 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
       where: { email: { equals: data.email.toLowerCase() } },
     })
 
+    // We don't want to indicate specifically that an email was not found,
+    // as doing so could lead to the exposure of registered emails.
+    // Therefore, we prefer to fail silently.
     if (!user) return null
 
     user.resetPasswordToken = token
