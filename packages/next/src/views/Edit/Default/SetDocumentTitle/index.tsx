@@ -3,7 +3,8 @@ import type { ClientConfig } from 'payload/types'
 
 import { useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui'
 import { useEffect } from 'react'
-import { formatTitle } from './formatTitle'
+
+import { formatTitle } from './formatTitle.js'
 
 export const SetDocumentTitle: React.FC<{
   collectionConfig?: ClientConfig['collections'][0]
@@ -23,16 +24,16 @@ export const SetDocumentTitle: React.FC<{
   const dateFormatFromConfig = config?.admin?.dateFormat
 
   const title = formatTitle({
+    collectionConfig,
+    dateFormat: dateFormatFromConfig,
+    globalConfig,
+    i18n,
     value:
       typeof field === 'string'
         ? field
         : typeof field === 'number'
           ? String(field)
           : (field?.value as string),
-    collectionConfig,
-    globalConfig,
-    i18n,
-    dateFormat: dateFormatFromConfig,
   })
 
   useEffect(() => {

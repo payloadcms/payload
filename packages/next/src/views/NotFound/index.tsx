@@ -1,9 +1,10 @@
+import type { SanitizedConfig } from 'payload/types'
+
+import { DefaultTemplate } from '@payloadcms/ui'
 import React from 'react'
 
-import { NotFoundClient } from './index.client'
-import { DefaultTemplate } from '@payloadcms/ui'
-import { SanitizedConfig } from 'payload/types'
-import { initPage } from '../../utilities/initPage'
+import { initPage } from '../../utilities/initPage.js'
+import { NotFoundClient } from './index.client.js'
 
 export const NotFoundView = async ({
   config: configPromise,
@@ -22,8 +23,8 @@ export const NotFoundView = async ({
 
   const initPageResult = await initPage({
     config,
-    searchParams,
     route: '',
+    searchParams,
   })
 
   return (

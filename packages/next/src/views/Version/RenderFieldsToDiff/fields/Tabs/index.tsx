@@ -1,9 +1,9 @@
 import React from 'react'
 
-import type { Props } from '../types'
+import type { Props } from '../types.d.ts'
 
-import RenderFieldsToDiff from '../..'
-import Nested from '../Nested'
+import RenderFieldsToDiff from '../../index.js'
+import Nested from '../Nested/index.js'
 
 const baseClass = 'tabs-diff'
 

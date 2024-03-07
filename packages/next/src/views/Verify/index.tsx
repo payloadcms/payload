@@ -1,14 +1,14 @@
 import { Logo } from '@payloadcms/ui'
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation.js'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root'
+import type { AdminViewProps } from '../Root/index.d.ts'
 
 import './index.scss'
 
 export const verifyBaseClass = 'verify'
 
-export { generateVerifyMetadata } from './meta'
+export { generateVerifyMetadata } from './meta.js'
 
 export const Verify: React.FC<AdminViewProps> = async ({ initPageResult, params }) => {
   // /:collectionSlug/verify/:token

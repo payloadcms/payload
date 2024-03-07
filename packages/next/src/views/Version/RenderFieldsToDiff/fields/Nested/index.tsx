@@ -1,10 +1,10 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from '../types'
+import type { Props } from '../types.d.ts'
 
-import RenderFieldsToDiff from '../..'
-import Label from '../../Label'
+import Label from '../../Label/index.js'
+import RenderFieldsToDiff from '../../index.js'
 import './index.scss'
 
 const baseClass = 'nested-diff'

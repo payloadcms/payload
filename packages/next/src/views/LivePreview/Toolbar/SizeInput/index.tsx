@@ -1,7 +1,7 @@
 'use client'
 import React, { useCallback, useEffect } from 'react'
 
-import { useLivePreviewContext } from '../../Context/context'
+import { useLivePreviewContext } from '../../Context/context.js'
 import './index.scss'
 
 const baseClass = 'toolbar-input'

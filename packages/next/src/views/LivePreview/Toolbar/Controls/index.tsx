@@ -5,8 +5,8 @@ import type { EditViewProps } from 'payload/types'
 import { Chevron, LinkIcon, Popup, PopupList, X } from '@payloadcms/ui'
 import React from 'react'
 
-import { useLivePreviewContext } from '../../Context/context'
-import { PreviewFrameSizeInput } from '../SizeInput'
+import { useLivePreviewContext } from '../../Context/context.js'
+import { PreviewFrameSizeInput } from '../SizeInput/index.js'
 import './index.scss'
 
 const baseClass = 'live-preview-toolbar-controls'

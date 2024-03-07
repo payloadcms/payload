@@ -5,7 +5,7 @@ import { useConfig, useDebounce, useLocale, useTranslation } from '@payloadcms/u
 import querystring from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
-import { reducer } from './reducer'
+import { reducer } from './reducer.js'
 
 // documents are first set to null when requested
 // set to false when no doc is returned
@@ -73,14 +73,14 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
             const json = await result.json()
             if (json.docs) {
               dispatchDocuments({
+                type: 'ADD_LOADED',
                 docs: json.docs,
                 idsToLoad,
                 relationTo: slug,
-                type: 'ADD_LOADED',
               })
             }
           } else {
-            dispatchDocuments({ docs: [], idsToLoad, relationTo: slug, type: 'ADD_LOADED' })
+            dispatchDocuments({ type: 'ADD_LOADED', docs: [], idsToLoad, relationTo: slug })
           }
         }
       })
@@ -95,7 +95,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
 
   const getRelationships = useCallback(
     async (relationships: { relationTo: string; value: number | string }[]) => {
-      dispatchDocuments({ docs: relationships, type: 'REQUEST' })
+      dispatchDocuments({ type: 'REQUEST', docs: relationships })
     },
     [],
   )

@@ -1,7 +1,7 @@
 'use client'
 import { Button, useTranslation } from '@payloadcms/ui'
 import { useAuth } from '@payloadcms/ui/providers'
-import Link from 'next/link'
+import Link from 'next/link.js'
 import React, { Fragment, useEffect } from 'react'
 
 export const LogoutClient: React.FC<{

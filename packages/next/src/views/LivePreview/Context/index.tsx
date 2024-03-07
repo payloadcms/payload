@@ -4,11 +4,11 @@ import type { LivePreviewConfig } from 'payload/config'
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { usePopupWindow } from '../usePopupWindow'
+import type { usePopupWindow } from '../usePopupWindow.d.ts'
 
-import { customCollisionDetection } from './collisionDetection'
-import { LivePreviewContext } from './context'
-import { sizeReducer } from './sizeReducer'
+import { customCollisionDetection } from './collisionDetection.js'
+import { LivePreviewContext } from './context.js'
+import { sizeReducer } from './sizeReducer.js'
 
 export type LivePreviewProviderProps = {
   appIsReady?: boolean

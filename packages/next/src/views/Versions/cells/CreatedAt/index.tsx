@@ -1,6 +1,6 @@
 'use client'
 import { formatDate, useConfig, useTableCell, useTranslation } from '@payloadcms/ui'
-import Link from 'next/link'
+import Link from 'next/link.js'
 import React from 'react'
 
 type CreatedAtCellProps = {

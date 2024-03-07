@@ -3,7 +3,7 @@ import type { FieldMap, MappedField } from '@payloadcms/ui'
 import type { FieldPermissions } from 'payload/auth'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import type { DiffComponents } from './fields/types'
+import type { DiffComponents } from './fields/types.d.ts'
 
 export type Props = {
   comparison: Record<string, any>

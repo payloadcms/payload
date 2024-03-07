@@ -3,9 +3,9 @@ import type { Metadata } from 'next'
 import { getTranslation } from '@payloadcms/translations'
 import { formatDate } from '@payloadcms/ui'
 
-import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment'
+import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.d.ts'
 
-import { meta } from '../../utilities/meta'
+import { meta } from '../../utilities/meta.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,

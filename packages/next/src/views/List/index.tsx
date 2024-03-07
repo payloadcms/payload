@@ -4,16 +4,16 @@ import {
   RenderCustomComponent,
   TableColumnsProvider,
 } from '@payloadcms/ui'
-import { notFound } from 'next/navigation'
+import { notFound } from 'next/navigation.js'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
-import type { AdminViewProps } from '../Root'
-import type { DefaultListViewProps, ListPreferences } from './Default/types'
+import type { AdminViewProps } from '../Root/index.d.ts'
+import type { DefaultListViewProps, ListPreferences } from './Default/types.d.ts'
 
-import { DefaultListView } from './Default'
+import { DefaultListView } from './Default/index.js'
 
-export { generateListMetadata } from './meta'
+export { generateListMetadata } from './meta.js'
 
 export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
   const {

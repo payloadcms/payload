@@ -2,10 +2,10 @@ import type { Option } from '@payloadcms/ui'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { Document, ServerSideEditViewProps } from 'payload/types'
 
-import { notFound } from 'next/navigation'
+import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import { DefaultVersionView } from './Default'
+import { DefaultVersionView } from './Default/index.js'
 
 export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
   const { initPageResult, routeSegments } = props

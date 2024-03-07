@@ -1,14 +1,14 @@
 import { MinimalTemplate } from '@payloadcms/ui'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root'
+import type { AdminViewProps } from '../Root/index.js'
 
-import { LogoutClient } from './LogoutClient'
+import { LogoutClient } from './LogoutClient.js'
 import './index.scss'
 
 const baseClass = 'logout'
 
-export { generateLogoutMetadata } from './meta'
+export { generateLogoutMetadata } from './meta.js'
 
 export const Logout: React.FC<
   AdminViewProps & {

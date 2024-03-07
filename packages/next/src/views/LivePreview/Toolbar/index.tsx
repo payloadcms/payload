@@ -5,8 +5,8 @@ import { useDraggable } from '@dnd-kit/core'
 import { DragHandle } from '@payloadcms/ui'
 import React from 'react'
 
-import { useLivePreviewContext } from '../Context/context'
-import { ToolbarControls } from './Controls'
+import { useLivePreviewContext } from '../Context/context.js'
+import { ToolbarControls } from './Controls/index.js'
 import './index.scss'
 
 const baseClass = 'live-preview-toolbar'

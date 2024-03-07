@@ -1,17 +1,18 @@
-import { generateAccountMetadata } from '../Account'
-import { generateCreateFirstUserMetadata } from '../CreateFirstUser'
-import { generateDashboardMetadata } from '../Dashboard'
-import { generateForgotPasswordMetadata } from '../ForgotPassword'
-import { generateListMetadata } from '../List'
-import { generateLoginMetadata } from '../Login'
-import { generateResetPasswordMetadata } from '../ResetPassword'
-import { generateUnauthorizedMetadata } from '../Unauthorized'
-import { generateVerifyMetadata } from '../Verify'
-import { Metadata } from 'next'
-import { generateDocumentMetadata } from '../Document/meta'
-import { getNextI18n } from '../../utilities/getNextI18n'
-import { SanitizedConfig } from 'payload/types'
-import { generateNotFoundMeta } from '../NotFound/meta'
+import type { Metadata } from 'next'
+import type { SanitizedConfig } from 'payload/types'
+
+import { getNextI18n } from '../../utilities/getNextI18n.js'
+import { generateAccountMetadata } from '../Account/index.js'
+import { generateCreateFirstUserMetadata } from '../CreateFirstUser/index.js'
+import { generateDashboardMetadata } from '../Dashboard/index.js'
+import { generateDocumentMetadata } from '../Document/meta.js'
+import { generateForgotPasswordMetadata } from '../ForgotPassword/index.js'
+import { generateListMetadata } from '../List/index.js'
+import { generateLoginMetadata } from '../Login/index.js'
+import { generateNotFoundMeta } from '../NotFound/meta.js'
+import { generateResetPasswordMetadata } from '../ResetPassword/index.js'
+import { generateUnauthorizedMetadata } from '../Unauthorized/index.js'
+import { generateVerifyMetadata } from '../Verify/index.js'
 
 const oneSegmentMeta = {
   'create-first-user': generateCreateFirstUserMetadata,
@@ -93,13 +94,13 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
       }
       if (isCollection) {
         // --> /collections/:collectionSlug
-        meta = await generateListMetadata({ config, i18n, collectionConfig })
+        meta = await generateListMetadata({ collectionConfig, config, i18n })
       } else if (isGlobal) {
         // --> /globals/:globalSlug
         meta = await generateDocumentMetadata({
           config,
-          i18n,
           globalConfig,
+          i18n,
           isEditing: false,
           params,
         })
@@ -117,16 +118,16 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
         // --> /collections/:collectionSlug/:id/versions
         // --> /collections/:collectionSlug/:id/versions/:version
         // --> /collections/:collectionSlug/:id/api
-        const isEditing = ['preview', 'versions', 'api', 'create'].includes(segmentTwo)
-        meta = await generateDocumentMetadata({ config, i18n, collectionConfig, isEditing, params })
+        const isEditing = ['api', 'create', 'preview', 'versions'].includes(segmentTwo)
+        meta = await generateDocumentMetadata({ collectionConfig, config, i18n, isEditing, params })
       } else if (isGlobal) {
         // Custom Views
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/versions/:version
         // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/api
-        const isEditing = ['preview', 'versions', 'api', 'create'].includes(segmentTwo)
-        meta = await generateDocumentMetadata({ config, i18n, globalConfig, isEditing, params })
+        const isEditing = ['api', 'create', 'preview', 'versions'].includes(segmentTwo)
+        meta = await generateDocumentMetadata({ config, globalConfig, i18n, isEditing, params })
       }
       break
     }

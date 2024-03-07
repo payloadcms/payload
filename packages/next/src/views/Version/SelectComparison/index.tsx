@@ -7,9 +7,9 @@ import { ReactSelect, fieldBaseClass, formatDate, useConfig } from '@payloadcms/
 import qs from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { mostRecentVersionOption, publishedVersionOption } from '../shared'
+import { mostRecentVersionOption, publishedVersionOption } from '../shared.js'
 import './index.scss'
 
 const baseClass = 'compare-version'

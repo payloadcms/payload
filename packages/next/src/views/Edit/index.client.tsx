@@ -8,7 +8,7 @@ import {
   useDocumentInfo,
   useFormQueryParams,
 } from '@payloadcms/ui'
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useEffect } from 'react'
 import { useCallback } from 'react'
 

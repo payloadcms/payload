@@ -7,10 +7,10 @@ import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import React from 'react'
 import ReactDiffViewer from 'react-diff-viewer-continued'
 
-import type { Props } from '../types'
+import type { Props } from '../types.d.ts'
 
-import Label from '../../Label'
-import { diffStyles } from '../styles'
+import Label from '../../Label/index.js'
+import { diffStyles } from '../styles.js'
 import './index.scss'
 
 const baseClass = 'relationship-diff'

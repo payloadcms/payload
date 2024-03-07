@@ -1,12 +1,12 @@
 import type { ServerSideEditViewProps } from 'payload/types'
 
 import { Gutter } from '@payloadcms/ui'
-import { notFound } from 'next/navigation'
+import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import { SetStepNav } from '../Edit/Default/SetStepNav'
-import { buildVersionColumns } from './buildColumns'
-import { VersionsViewClient } from './index.client'
+import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
+import { buildVersionColumns } from './buildColumns.js'
+import { VersionsViewClient } from './index.client.js'
 import './index.scss'
 
 export const baseClass = 'versions'

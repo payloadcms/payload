@@ -13,9 +13,9 @@ import {
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import APIKey from './APIKey'
+import APIKey from './APIKey.js'
 import './index.scss'
 
 const baseClass = 'auth-fields'
@@ -47,8 +47,8 @@ const Auth: React.FC<Props> = (props) => {
   const handleChangePassword = useCallback(
     async (state: boolean) => {
       if (!state) {
-        dispatchFields({ path: 'password', type: 'REMOVE' })
-        dispatchFields({ path: 'confirm-password', type: 'REMOVE' })
+        dispatchFields({ type: 'REMOVE', path: 'password' })
+        dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
       }
 
       setChangingPassword(state)

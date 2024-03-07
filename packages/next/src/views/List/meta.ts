@@ -1,8 +1,11 @@
-import { meta } from '../../utilities/meta'
+import type { Metadata } from 'next'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import { getTranslation } from '@payloadcms/translations'
-import { GenerateViewMetadata } from '../Root'
-import { Metadata } from 'next'
-import { SanitizedCollectionConfig } from 'payload/types'
+
+import type { GenerateViewMetadata } from '../Root/index.d.ts'
+
+import { meta } from '../../utilities/meta.js'
 
 export const generateListMetadata = async (
   args: Parameters<GenerateViewMetadata>[0] & {

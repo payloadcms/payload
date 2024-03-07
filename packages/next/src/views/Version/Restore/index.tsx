@@ -12,7 +12,7 @@ import {
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
 // import { requests } from '../../../../api'
 import './index.scss'

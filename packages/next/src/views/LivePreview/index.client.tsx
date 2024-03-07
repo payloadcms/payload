@@ -19,14 +19,14 @@ import {
 } from '@payloadcms/ui'
 import React, { Fragment, useCallback } from 'react'
 
-import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
-import { SetDocumentTitle } from '../Edit/Default/SetDocumentTitle'
-import { SetStepNav } from '../Edit/Default/SetStepNav'
-import { LivePreviewProvider } from './Context'
-import { useLivePreviewContext } from './Context/context'
-import { LivePreview } from './Preview'
+import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
+import { SetDocumentTitle } from '../Edit/Default/SetDocumentTitle/index.js'
+import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
+import { useLivePreviewContext } from './Context/context.js'
+import { LivePreviewProvider } from './Context/index.js'
+import { LivePreview } from './Preview/index.js'
 import './index.scss'
-import { usePopupWindow } from './usePopupWindow'
+import { usePopupWindow } from './usePopupWindow.js'
 
 const baseClass = 'live-preview'
 

@@ -17,11 +17,11 @@ import {
 import { Upload } from '@payloadcms/ui/elements'
 import React, { Fragment, useCallback } from 'react'
 
-import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving'
+import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 // import { getTranslation } from '@payloadcms/translations'
-import Auth from './Auth'
-import { SetDocumentTitle } from './SetDocumentTitle'
-import { SetStepNav } from './SetStepNav'
+import Auth from './Auth/index.js'
+import { SetDocumentTitle } from './SetDocumentTitle/index.js'
+import { SetStepNav } from './SetStepNav/index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'

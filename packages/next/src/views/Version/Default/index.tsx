@@ -13,15 +13,15 @@ import {
 } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
-import type { CompareOption, DefaultVersionsViewProps } from './types'
+import type { CompareOption, DefaultVersionsViewProps } from './types.d.ts'
 
-import RenderFieldsToDiff from '../RenderFieldsToDiff'
-import diffComponents from '../RenderFieldsToDiff/fields'
-import Restore from '../Restore'
-import { SelectComparison } from '../SelectComparison'
-import { SelectLocales } from '../SelectLocales'
-import { mostRecentVersionOption } from '../shared'
-import { SetStepNav } from './SetStepNav'
+import diffComponents from '../RenderFieldsToDiff/fields/index.js'
+import RenderFieldsToDiff from '../RenderFieldsToDiff/index.js'
+import Restore from '../Restore/index.js'
+import { SelectComparison } from '../SelectComparison/index.js'
+import { SelectLocales } from '../SelectLocales/index.js'
+import { mostRecentVersionOption } from '../shared.js'
+import { SetStepNav } from './SetStepNav.js'
 import './index.scss'
 
 const baseClass = 'view-version'

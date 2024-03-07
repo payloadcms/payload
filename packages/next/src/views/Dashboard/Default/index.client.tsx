@@ -1,5 +1,6 @@
 'use client'
 import type { EntityToGroup, Group } from '@payloadcms/ui'
+import type { Permissions } from 'payload/auth'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -15,16 +16,15 @@ import {
 import React, { Fragment, useEffect, useState } from 'react'
 
 import './index.scss'
-import { Permissions } from 'payload/auth'
 
 const baseClass = 'dashboard'
 
 export const DefaultDashboardClient: React.FC<{
   Link: React.ComponentType
+  permissions: Permissions
   visibleCollections: string[]
   visibleGlobals: string[]
-  permissions: Permissions
-}> = ({ Link, visibleCollections, visibleGlobals, permissions }) => {
+}> = ({ Link, permissions, visibleCollections, visibleGlobals }) => {
   const config = useConfig()
 
   const {

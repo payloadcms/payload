@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { canUseDOM, formatDocTitle, useConfig, useIntersect, useTranslation } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
-import { useListRelationships } from '../../../RelationshipProvider'
+import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import './index.scss'
 
 type Value = { relationTo: string; value: number | string }

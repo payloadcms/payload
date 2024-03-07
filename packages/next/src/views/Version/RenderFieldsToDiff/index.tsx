@@ -3,10 +3,10 @@ import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import React from 'react'
 
-import type { FieldDiffProps, Props } from './types'
+import type { FieldDiffProps, Props } from './types.d.ts'
 
-import Nested from './fields/Nested'
-import { diffMethods } from './fields/diffMethods'
+import Nested from './fields/Nested/index.js'
+import { diffMethods } from './fields/diffMethods.js'
 import './index.scss'
 
 const baseClass = 'render-field-diffs'
@@ -57,7 +57,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               fieldPermissions: subFieldPermissions,
               i18n,
               isRichText,
-              locales: locales,
+              locales,
               version: versionValue,
             }
 

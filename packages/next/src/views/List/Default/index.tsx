@@ -25,13 +25,13 @@ import {
   SetViewActions,
   UnpublishMany,
 } from '@payloadcms/ui/elements'
-import Link from 'next/link'
+import Link from 'next/link.js'
 import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
-import type { CollectionComponentMap } from '../../../../../ui/src/utilities/buildComponentMap/types'
+import type { CollectionComponentMap } from '../../../../../ui/src/utilities/buildComponentMap/types.d.ts'
 
-import { RelationshipProvider } from './RelationshipProvider'
+import { RelationshipProvider } from './RelationshipProvider/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'

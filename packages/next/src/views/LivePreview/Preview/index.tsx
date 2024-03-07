@@ -10,10 +10,10 @@ import {
 } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
-import { useLivePreviewContext } from '../Context/context'
-import { DeviceContainer } from '../Device'
-import { IFrame } from '../IFrame'
-import { LivePreviewToolbar } from '../Toolbar'
+import { useLivePreviewContext } from '../Context/context.js'
+import { DeviceContainer } from '../Device/index.js'
+import { IFrame } from '../IFrame/index.js'
+import { LivePreviewToolbar } from '../Toolbar/index.js'
 import './index.scss'
 
 const baseClass = 'live-preview-window'

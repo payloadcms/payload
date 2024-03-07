@@ -19,13 +19,13 @@ import {
 } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
-import type { AdminViewProps } from '../Root'
-import type { GenerateEditViewMetadata } from './getMetaBySegment'
+import type { AdminViewProps } from '../Root/index.d.ts'
+import type { GenerateEditViewMetadata } from './getMetaBySegment.d.ts'
 
-import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle'
-import { NotFoundClient } from '../NotFound/index.client'
-import { getMetaBySegment } from './getMetaBySegment'
-import { getViewsFromConfig } from './getViewsFromConfig'
+import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle.js'
+import { NotFoundClient } from '../NotFound/index.client.js'
+import { getMetaBySegment } from './getMetaBySegment.js'
+import { getViewsFromConfig } from './getViewsFromConfig.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 

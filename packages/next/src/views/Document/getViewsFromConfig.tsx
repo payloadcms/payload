@@ -8,13 +8,13 @@ import type {
 
 import { isEntityHidden } from 'payload/utilities'
 
-import { APIView as DefaultAPIView } from '../API'
-import { EditView as DefaultEditView } from '../Edit'
-import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview'
-import { VersionView as DefaultVersionView } from '../Version'
-import { VersionsView as DefaultVersionsView } from '../Versions'
-import { getCustomViewByKey } from './getCustomViewByKey'
-import { getCustomViewByPath } from './getCustomViewByPath'
+import { APIView as DefaultAPIView } from '../API/index.js'
+import { EditView as DefaultEditView } from '../Edit/index.js'
+import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
+import { VersionView as DefaultVersionView } from '../Version/index.js'
+import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
+import { getCustomViewByKey } from './getCustomViewByKey.js'
+import { getCustomViewByPath } from './getCustomViewByPath.js'
 
 export const getViewsFromConfig = async ({
   collectionConfig,

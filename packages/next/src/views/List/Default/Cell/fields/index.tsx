@@ -1,13 +1,13 @@
-import { ArrayCell } from './Array'
-import { BlocksCell } from './Blocks'
-import { CheckboxCell } from './Checkbox'
-import { CodeCell } from './Code'
-import { DateCell } from './Date'
-import { FileCell } from './File'
-import { JSONCell } from './JSON'
-import { RelationshipCell } from './Relationship'
-import { SelectCell } from './Select'
-import { TextareaCell } from './Textarea'
+import { ArrayCell } from './Array/index.js'
+import { BlocksCell } from './Blocks/index.js'
+import { CheckboxCell } from './Checkbox/index.js'
+import { CodeCell } from './Code/index.js'
+import { DateCell } from './Date/index.js'
+import { FileCell } from './File/index.js'
+import { JSONCell } from './JSON/index.js'
+import { RelationshipCell } from './Relationship/index.js'
+import { SelectCell } from './Select/index.js'
+import { TextareaCell } from './Textarea/index.js'
 
 export default {
   File: FileCell,

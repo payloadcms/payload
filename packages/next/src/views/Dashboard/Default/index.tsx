@@ -1,20 +1,20 @@
+import type { Permissions } from 'payload/auth'
 import type { SanitizedConfig } from 'payload/types'
 
 import { Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
 import React from 'react'
 
-import { DefaultDashboardClient } from './index.client'
+import { DefaultDashboardClient } from './index.client.js'
 import './index.scss'
-import { Permissions } from 'payload/auth'
 
 const baseClass = 'dashboard'
 
 export type DashboardProps = {
   Link: React.ComponentType<any>
   config: SanitizedConfig
+  permissions: Permissions
   visibleCollections: string[]
   visibleGlobals: string[]
-  permissions: Permissions
 }
 
 export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
@@ -25,9 +25,9 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
         components: { afterDashboard, beforeDashboard },
       },
     },
+    permissions,
     visibleCollections,
     visibleGlobals,
-    permissions,
   } = props
 
   return (
@@ -39,9 +39,9 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
           beforeDashboard.map((Component, i) => <Component key={i} />)}
         <DefaultDashboardClient
           Link={Link}
+          permissions={permissions}
           visibleCollections={visibleCollections}
           visibleGlobals={visibleGlobals}
-          permissions={permissions}
         />
         {Array.isArray(afterDashboard) &&
           afterDashboard.map((Component, i) => <Component key={i} />)}

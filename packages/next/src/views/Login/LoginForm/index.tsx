@@ -9,14 +9,14 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
-import Link from 'next/link'
+import Link from 'next/link.js'
 import React from 'react'
 
 const baseClass = 'login__form'
 
 import type { FormState } from 'payload/types'
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation.js'
 
 import './index.scss'
 

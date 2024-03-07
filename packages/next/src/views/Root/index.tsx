@@ -3,23 +3,23 @@ import type { Metadata } from 'next'
 import type { InitPageResult, SanitizedConfig } from 'payload/types'
 
 import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
-import { notFound, redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
-import { initPage } from '../../utilities/initPage'
-import { Account } from '../Account'
-import { CreateFirstUser } from '../CreateFirstUser'
-import { Dashboard } from '../Dashboard'
-import { Document as DocumentView } from '../Document'
-import { ForgotPassword, forgotPasswordBaseClass } from '../ForgotPassword'
-import { ListView } from '../List'
-import { Login, loginBaseClass } from '../Login'
-import { Logout, LogoutInactivity } from '../Logout'
-import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword'
-import { Unauthorized } from '../Unauthorized'
-import { Verify, verifyBaseClass } from '../Verify'
+import { initPage } from '../../utilities/initPage.js'
+import { Account } from '../Account/index.js'
+import { CreateFirstUser } from '../CreateFirstUser/index.js'
+import { Dashboard } from '../Dashboard/index.js'
+import { Document as DocumentView } from '../Document/index.js'
+import { ForgotPassword, forgotPasswordBaseClass } from '../ForgotPassword/index.js'
+import { ListView } from '../List/index.js'
+import { Login, loginBaseClass } from '../Login/index.js'
+import { Logout, LogoutInactivity } from '../Logout/index.js'
+import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
+import { Unauthorized } from '../Unauthorized/index.js'
+import { Verify, verifyBaseClass } from '../Verify/index.js'
 
-export { generatePageMetadata } from './meta'
+export { generatePageMetadata } from './meta.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -86,10 +86,10 @@ export const RootPage = async ({
   const isGlobal = segmentOne === 'globals'
   const isCollection = segmentOne === 'collections'
 
-  let initPageOptions: Parameters<typeof initPage>[0] = {
+  const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
-    searchParams,
     route,
+    searchParams,
   }
 
   // TODO: handle custom routes

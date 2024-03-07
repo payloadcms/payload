@@ -1,14 +1,14 @@
 import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
-import Link from 'next/link'
+import Link from 'next/link.js'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
-import type { AdminViewProps } from '../Root'
-import type { DashboardProps } from './Default'
+import type { AdminViewProps } from '../Root/index.d.ts'
+import type { DashboardProps } from './Default/index.d.ts'
 
-import { DefaultDashboard } from './Default'
+import { DefaultDashboard } from './Default/index.js'
 
-export { generateDashboardMetadata } from './meta'
+export { generateDashboardMetadata } from './meta.js'
 
 export const Dashboard: React.FC<AdminViewProps> = ({
   initPageResult,
@@ -41,9 +41,9 @@ export const Dashboard: React.FC<AdminViewProps> = ({
   const componentProps: DashboardProps = {
     Link,
     config,
+    permissions,
     visibleCollections,
     visibleGlobals,
-    permissions,
   }
 
   return (

@@ -1,4 +1,4 @@
-import { meta } from '../../utilities/meta'
+import { meta } from '../../utilities/meta.js'
 
 export const generateForgotPasswordMetadata = async ({ config, i18n: { t } }) => {
   return meta({

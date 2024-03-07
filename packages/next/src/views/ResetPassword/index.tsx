@@ -8,16 +8,16 @@ import {
   Password,
   Translation,
 } from '@payloadcms/ui'
-import Link from 'next/link'
+import Link from 'next/link.js'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root'
+import type { AdminViewProps } from '../Root/index.js'
 
 import './index.scss'
 
 export const resetPasswordBaseClass = 'reset-password'
 
-export { generateResetPasswordMetadata } from './meta'
+export { generateResetPasswordMetadata } from './meta.js'
 
 export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params }) => {
   const { req } = initPageResult

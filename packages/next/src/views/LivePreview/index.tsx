@@ -3,7 +3,7 @@ import type { ServerSideEditViewProps } from 'payload/types'
 
 import React from 'react'
 
-import { LivePreviewClient } from './index.client'
+import { LivePreviewClient } from './index.client.js'
 import './index.scss'
 
 export const LivePreviewView: React.FC = async (props: ServerSideEditViewProps) => {

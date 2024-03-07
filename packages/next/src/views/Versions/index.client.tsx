@@ -14,7 +14,7 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useEffect, useRef } from 'react'
 
 export const VersionsViewClient: React.FC<{

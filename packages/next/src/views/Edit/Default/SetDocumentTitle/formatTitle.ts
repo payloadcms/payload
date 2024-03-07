@@ -1,19 +1,25 @@
-import { I18n, getTranslation } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
+import type {
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+} from 'payload/types'
+
+import { getTranslation } from '@payloadcms/translations'
 import { formatDate } from '@payloadcms/ui'
-import { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
 
 export const formatTitle = ({
-  value,
   collectionConfig,
+  dateFormat: dateFormatFromConfig,
   globalConfig,
   i18n,
-  dateFormat: dateFormatFromConfig,
+  value,
 }: {
-  value: string
   collectionConfig?: SanitizedCollectionConfig
+  dateFormat: SanitizedConfig['admin']['dateFormat']
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
-  dateFormat: SanitizedConfig['admin']['dateFormat']
+  value: string
 }): string => {
   let title: string = value
 

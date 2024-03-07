@@ -4,11 +4,11 @@ import type { OptionObject, SelectField } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from '../types'
+import type { Props } from '../types.d.ts'
 
-import Label from '../../Label'
-import { diffStyles } from '../styles'
-import { DiffViewer } from './DiffViewer'
+import Label from '../../Label/index.js'
+import { diffStyles } from '../styles.js'
+import { DiffViewer } from './DiffViewer/index.js'
 import './index.scss'
 
 const baseClass = 'select-diff'

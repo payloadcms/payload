@@ -1,13 +1,13 @@
 import { Logo } from '@payloadcms/ui'
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-import type { AdminViewProps } from '../Root'
+import type { AdminViewProps } from '../Root/index.js'
 
-import { LoginForm } from './LoginForm'
+import { LoginForm } from './LoginForm/index.js'
 import './index.scss'
 
-export { generateLoginMetadata } from './meta'
+export { generateLoginMetadata } from './meta.js'
 
 export const loginBaseClass = 'login'
 

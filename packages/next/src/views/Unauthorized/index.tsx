@@ -1,10 +1,10 @@
 import React from 'react'
 
-import type { AdminViewProps } from '../Root'
+import type { AdminViewProps } from '../Root/index.d.ts'
 
-import { UnauthorizedClient } from './UnauthorizedClient'
+import { UnauthorizedClient } from './UnauthorizedClient.js'
 
-export { generateUnauthorizedMetadata } from './meta'
+export { generateUnauthorizedMetadata } from './meta.js'
 
 export const Unauthorized: React.FC<AdminViewProps> = ({ initPageResult }) => {
   const {
