@@ -21,7 +21,7 @@ export const getDataAndFile: GetDataAndFile = async ({ collection, config, reque
       data = await request.json()
     } else if (contentType === 'multipart/form-data') {
       // possible upload request
-      if (collection.config.upload) {
+      if (collection?.config?.upload) {
         // load file in memory
         if (!config.upload?.useTempFiles) {
           const formData = await request.formData()
