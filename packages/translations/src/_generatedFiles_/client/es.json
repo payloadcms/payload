@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Está a punto de publicar todas las {{etiquetas}} de la selección. ¿Está seguro?",
     "aboutToRestore": "Estás a punto de restaurar este documento de {{label}} al estado en el que estaba en la fecha {{versionDate}}.",
     "aboutToRestoreGlobal": "Estás a punto de restaurar el {{label}} global al estado en el que estaba en la fecha {{versionDate}}.",
+    "aboutToUnpublish": "Estás a punto de despublicar este documento. ¿Estás seguro?",
     "aboutToUnpublishSelection": "Está a punto de anular la publicación de todos los {{label}} de la selección. ¿Está seguro?",
     "autosave": "Autoguardar",
     "autosavedSuccessfully": "Guardado automáticamente con éxito.",

@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Je staat op het punt om alle {{label}} in de selectie te publiceren. Weet je het zeker?",
     "aboutToRestore": "U staat op het punt dit {{label}} document te herstellen in de staat waarin het zich bevond op {{versionDate}}.",
     "aboutToRestoreGlobal": "U staat op het punt om de global {{label}} te herstellen in de staat waarin het zich bevond op {{versionDate}}.",
+    "aboutToUnpublish": "U staat op het punt om de publicatie van dit document ongedaan te maken. Weet u het zeker?",
     "aboutToUnpublishSelection": "You are about to unpublish all {{label}} in the selection. Are you sure?",
     "autosave": "Automatisch bewaren",
     "autosavedSuccessfully": "Succesvol automatisch bewaard.",

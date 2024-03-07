@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "คุณกำลังจะเผยแพร่ {{label}} ทั้งหมดในส่วนที่เลือก คุณแน่ใจไหม?",
     "aboutToRestore": "คุณกำลังจะคืนค่าเอกสาร {{label}} นี้กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}",
     "aboutToRestoreGlobal": "คุณกำลังจะคืนค่า global {{label}} กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}.",
+    "aboutToUnpublish": "คุณกำลังจะยกเลิกเผยแพร่เอกสารนี้ คุณต้องการดำเนินการต่อหรือไม่?",
     "aboutToUnpublishSelection": "คุณกำลังจะเลิกเผยแพร่ {{label}} ทั้งหมดในส่วนที่เลือก คุณแน่ใจไหม?",
     "autosave": "บันทึกอัตโนมัติ",
     "autosavedSuccessfully": "บันทึกอัตโนมัติสำเร็จ",

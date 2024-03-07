@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Seçimdə olan bütün {{label}}-i dərc etməyə hazırsınız. Əminsiniz?",
     "aboutToRestore": "Bu {{label}} sənədini {{versionDate}} tarixindəki vəziyyətinə bərpa etmək üzrəsiniz.",
     "aboutToRestoreGlobal": "Qlobal {{label}}-i {{versionDate}} tarixindəki vəziyyətinə bərpa etmək üzrəsiniz.",
+    "aboutToUnpublish": "Bu sənədi dərcdən çıxartmağa hazırsınız. Əminsiniz?",
     "aboutToUnpublishSelection": "Seçimdə olan bütün {{label}}-i dərcdən çıxartmağa hazırsınız. Əminsiniz?",
     "autosave": "Avtomatik yadda saxlama",
     "autosavedSuccessfully": "Uğurla avtomatik olaraq yadda saxlandı.",

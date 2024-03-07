@@ -237,6 +237,7 @@
     "aboutToPublishSelection": "選択中のすべての{{label}}を公開しようとしています。よろしいですか？",
     "aboutToRestore": "この {{label}} データを {{versionDate}} 時点のバージョンに復元しようとしています。",
     "aboutToRestoreGlobal": "グローバルな {{label}} データを {{versionDate}} 時点のバージョンに復元しようとしています。",
+    "aboutToUnpublish": "このデータを非公開にしようとしています。よろしいですか？",
     "aboutToUnpublishSelection": "選択したすべての{{label}}の公開を取り消そうとしています。よろしいですか？",
     "autosave": "自動保存",
     "autosavedSuccessfully": "自動保存に成功しました。",

@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Za chwilę opublikujesz wszystkie {{label}} w zaznaczeniu. Jesteś pewny?",
     "aboutToRestore": "Zamierzasz przywrócić dokument {{label}} do stanu, w jakim znajdował się w dniu {{versionDate}}.",
     "aboutToRestoreGlobal": "Zamierzasz przywrócić globalny rekord {{label}} do stanu, w którym znajdował się w dniu {{versionDate}}.",
+    "aboutToUnpublish": "Zamierzasz cofnąć publikację tego dokumentu. Jesteś pewien?",
     "aboutToUnpublishSelection": "Zamierzasz cofnąć publikację wszystkich {{label}} w zaznaczeniu. Jesteś pewny?",
     "autosave": "Autozapis",
     "autosavedSuccessfully": "Pomyślnie zapisano automatycznie.",

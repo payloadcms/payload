@@ -237,6 +237,7 @@
     "aboutToPublishSelection": "您確定即將發佈所選的 {{label}} 嗎？",
     "aboutToRestore": "您將把這個文件{{label}}回復到{{versionDate}}時的狀態",
     "aboutToRestoreGlobal": "您要將痊域的{{label}}回復到{{versionDate}}時的狀態",
+    "aboutToUnpublish": "您即將取消發佈這個文件。您確定嗎？",
     "aboutToUnpublishSelection": "您即將取消發佈所選內容中的所有 {{label}}。您確定嗎？",
     "autosave": "自動儲存",
     "autosavedSuccessfully": "自動儲存成功。",

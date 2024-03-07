@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Stai per pubblicare tutte le {{label}} nella selezione. Sei sicuro?",
     "aboutToRestore": "Stai per ripristinare questo documento {{label}} allo stato in cui si trovava il {{versionDate}}.",
     "aboutToRestoreGlobal": "Stai per ripristinare {{label}} allo stato in cui si trovava il {{versionDate}}.",
+    "aboutToUnpublish": "Stai per annullare la pubblicazione di questo documento. Sei sicuro?",
     "aboutToUnpublishSelection": "Stai per annullare la pubblicazione di tutte le {{label}} nella selezione. Sei sicuro?",
     "autosave": "Salvataggio automatico",
     "autosavedSuccessfully": "Salvataggio automatico riuscito.",

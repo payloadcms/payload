@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Du är på väg att publicera alla {{label}} i urvalet. Är du säker?",
     "aboutToRestore": "Du är på väg att återställa detta {{label}} dokumentet till det tillståndet som det var den {{versionDate}}.",
     "aboutToRestoreGlobal": "Du är på väg att återställa det globala {{label}} till det tillståndet som det var den {{versionDate}}.",
+    "aboutToUnpublish": "Du håller på att avpublicera detta dokumentet. Är du säker?",
     "aboutToUnpublishSelection": "Du är på väg att avpublicera alla {{label}} i urvalet. Är du säker?",
     "autosave": "Automatisk sparning",
     "autosavedSuccessfully": "Autosparades framgångsrikt.",

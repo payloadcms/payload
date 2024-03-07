@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Arra készül, hogy az összes {{label}} elemet közzétegye a kijelölésben. biztos vagy ebben?",
     "aboutToRestore": "Arra készül, hogy visszaállítsa ezt a {{label}} dokumentumot arra az állapotra, amelyben {{versionDate}}  napon volt.",
     "aboutToRestoreGlobal": "Arra készül, hogy visszaállítsa a {{label}} arra az állapotra, amelyben {{versionDate}} napon volt.",
+    "aboutToUnpublish": "A dokumentum közzétételének visszavonására készül. Biztos benne?",
     "aboutToUnpublishSelection": "Arra készül, hogy visszavonja a kijelölésben szereplő összes {{label}} közzétételét. biztos vagy ebben?",
     "autosave": "Automatikus mentés",
     "autosavedSuccessfully": "Automatikus mentés sikeres.",

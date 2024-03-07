@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Seçimdeki tüm {{label}}'i yayınlamak üzeresiniz. Emin misin?",
     "aboutToRestore": "Döküman {{label}}, {{versionDate}} tarihindeki sürümüne geri döndürülecek.",
     "aboutToRestoreGlobal": "Global {{label}}, {{versionDate}} tarihindeki sürümüne geri döndürülecek.",
+    "aboutToUnpublish": "Bu dökümanı yayından kaldırmak üzeresiniz. Devam etmek istiyor musunuz?",
     "aboutToUnpublishSelection": "Seçimdeki tüm {{label}} yayınını kaldırmak üzeresiniz. Emin misin?",
     "autosave": "Otomatik kaydet",
     "autosavedSuccessfully": "Otomatik kaydetme başarılı",

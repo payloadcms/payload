@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "أنت على وشك نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟",
     "aboutToRestore": "أنت على وشك استرجاع هذا المستند {{label}} إلى الحالة التّي كان عليها في {{versionDate}}.",
     "aboutToRestoreGlobal": "أنت على وشك استرجاع الاعداد العامّ {{label}} إلى الحالة التي كان عليها في {{versionDate}}.",
+    "aboutToUnpublish": "أنت على وشك إلغاء نشر هذا المستند. هل أنت متأكّد؟",
     "aboutToUnpublishSelection": "أنت على وشك إلغاء نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟",
     "autosave": "حفظ تلقائي",
     "autosavedSuccessfully": "تمّ الحفظ التّلقائي بنجاح.",

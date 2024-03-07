@@ -237,6 +237,7 @@
     "aboutToPublishSelection": "You are about to publish all {{label}} in the selection. Are you sure?",
     "aboutToRestore": "You are about to restore this {{label}} document to the state that it was in on {{versionDate}}.",
     "aboutToRestoreGlobal": "You are about to restore the global {{label}} to the state that it was in on {{versionDate}}.",
+    "aboutToUnpublish": "You are about to unpublish this document. Are you sure?",
     "aboutToUnpublishSelection": "You are about to unpublish all {{label}} in the selection. Are you sure?",
     "autosave": "Autosave",
     "autosavedSuccessfully": "Autosaved successfully.",

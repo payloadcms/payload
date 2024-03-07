@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Upravo ćete objaviti sve {{label}} u izboru. Jesi li siguran?",
     "aboutToRestore": "Vratit ćete {{label}} dokument u stanje u kojem je bio {{versionDate}}",
     "aboutToRestoreGlobal": "Vratit ćete globalni {{label}} u stanje u kojem je bio {{versionDate}}.",
+    "aboutToUnpublish": "Poništit ćete objavu ovog dokumenta. Jeste li sigurni?",
     "aboutToUnpublishSelection": "Upravo ćete poništiti objavu svih {{label}} u odabiru. Jesi li siguran?",
     "autosave": "Automatsko spremanje",
     "autosavedSuccessfully": "Automatsko spremanje uspješno.",

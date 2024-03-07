@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Bạn có muốn xuất bản tất cả {{label}} không?",
     "aboutToRestore": "Bạn chuẩn bị khôi phục lại {{label}} về phiên bản {{versionDate}}.",
     "aboutToRestoreGlobal": "Bạn chuẩn bị khôi phục lại bản toàn thể (global) của {{label}} về phiên bản {{versionDate}}.",
+    "aboutToUnpublish": "Bạn có muốn ngưng xuất bản?",
     "aboutToUnpublishSelection": "Bạn có muốn ngưng xuất bản tất cả {{label}} không?",
     "autosave": "Tự động lưu dữ liệu",
     "autosavedSuccessfully": "Đã tự động lưu thành công.",

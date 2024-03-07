@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "شما در حال انتشار همه {{label}} برگزیده هستید از این کار اطمینان دارید؟",
     "aboutToRestore": "شما در شرف بازیابی این هستید {{label}} سند به ایالتی که در آن بود {{versionDate}}.",
     "aboutToRestoreGlobal": "شما در حال بازگردانی کلی {{label}} در این {{versionDate}} هستید.",
+    "aboutToUnpublish": "شما در حال لغو انتشار این سند هستید، آیا از این کار اطمینان دارید؟",
     "aboutToUnpublishSelection": "شما در شرف لغو انتشار {{label}} برگزیده هستید. ایا اطمینان دارید؟",
     "autosave": "ذخیره خودکار",
     "autosavedSuccessfully": "با موفقیت ذخیره خودکار شد.",

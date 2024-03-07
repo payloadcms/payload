@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "您即将发布所选内容中的所有 {{label}}。 你确定吗？",
     "aboutToRestore": "您将把这个{{label}}文档恢复到{{versionDate}}时的状态",
     "aboutToRestoreGlobal": "您要将全局的{{label}}恢复到{{versionDate}}时的状态",
+    "aboutToUnpublish": "你即将取消发布这个文档。你确定吗？",
     "aboutToUnpublishSelection": "您即将取消发布所选内容中的所有 {{label}}。 你确定吗？",
     "autosave": "自动保存",
     "autosavedSuccessfully": "自动保存成功。",

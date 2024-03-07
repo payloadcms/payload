@@ -234,6 +234,7 @@
     "aboutToPublishSelection": "선택한 {{label}}을(를) 게시하려고 합니다. 계속하시겠습니까?",
     "aboutToRestore": "이 {{label}} 문서를 {{versionDate}}기준 버전으로 복원하려고 합니다.",
     "aboutToRestoreGlobal": "글로벌 {{label}}을(를) {{versionDate}}기준 버전으로 복원하려고 합니다.",
+    "aboutToUnpublish": "이 문서를 게시 해제하려고 합니다. 계속하시겠습니까?",
     "aboutToUnpublishSelection": "선택한 {{label}}을(를) 게시 해제하려고 합니다. 계속하시겠습니까?",
     "autosave": "자동 저장",
     "autosavedSuccessfully": "자동 저장이 완료되었습니다.",

@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "На път си да публикуваш всички избрани {{label}}. Сигурен ли си?",
     "aboutToRestore": "На път си да възстановиш този {{label}} документ до състоянието му от {{versionDate}}.",
     "aboutToRestoreGlobal": "На път си да възстановиш глобалния докумнт {{label}} до състоянието му от {{versionDate}}.",
+    "aboutToUnpublish": "На път си да скриеш този документ. Сигурен ли си?",
     "aboutToUnpublishSelection": "На път си да скриеш всички избрани {{label}}. Сигурен ли си?",
     "autosave": "Автоматично запазване",
     "autosavedSuccessfully": "Успешно автоматично запазване.",

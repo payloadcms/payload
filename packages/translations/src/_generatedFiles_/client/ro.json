@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Sunteți pe cale să publicați toate {{label}} din selecție. Sunteți sigur?",
     "aboutToRestore": "Sunteți pe cale să readuceți acest document {{label}} în starea în care se afla la data de {{versionDate}}.",
     "aboutToRestoreGlobal": "Sunteți pe cale să readuceți {{label}} global în starea în care se afla la data de {{versionDate}}.",
+    "aboutToUnpublish": "Sunteți pe cale să nepublicați acest document. Sunteți sigur?",
     "aboutToUnpublishSelection": "Sunteți pe punctul de a nepublica toate {{label}} din selecție. Sunteți sigur?",
     "autosave": "Autosalvare",
     "autosavedSuccessfully": "Autosalvare cu succes.",

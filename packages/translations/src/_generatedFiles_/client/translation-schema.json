@@ -927,6 +927,9 @@
         "aboutToRestoreGlobal": {
           "type": "string"
         },
+        "aboutToUnpublish": {
+          "type": "string"
+        },
         "aboutToUnpublishSelection": {
           "type": "string"
         },
@@ -1034,6 +1037,7 @@
         "aboutToPublishSelection",
         "aboutToRestore",
         "aboutToRestoreGlobal",
+        "aboutToUnpublish",
         "aboutToUnpublishSelection",
         "autosave",
         "autosavedSuccessfully",

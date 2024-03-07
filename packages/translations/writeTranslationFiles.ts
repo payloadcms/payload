@@ -311,6 +311,7 @@ const clientTranslationKeys = [
   'version:aboutToPublishSelection',
   'version:aboutToRestore',
   'version:aboutToRestoreGlobal',
+  'version:aboutToUnpublish',
   'version:aboutToUnpublishSelection',
   'version:autosave',
   'version:autosavedSuccessfully',

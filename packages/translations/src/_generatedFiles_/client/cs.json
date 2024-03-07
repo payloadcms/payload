@@ -235,6 +235,7 @@
     "aboutToPublishSelection": "Chystáte se publikovat všechny {{label}} ve výběru. Jsi si jistá?",
     "aboutToRestore": "Chystáte se obnovit tento {{label}} dokument do stavu, v jakém byl {{versionDate}}.",
     "aboutToRestoreGlobal": "Chystáte se obnovit globální {{label}} do stavu, v jakém byl {{versionDate}}.",
+    "aboutToUnpublish": "Chystáte se zrušit publikování tohoto dokumentu. Jste si jisti?",
     "aboutToUnpublishSelection": "Chystáte se zrušit publikování všech {{label}} ve výběru. Jsi si jistá?",
     "autosave": "Automatické uložení",
     "autosavedSuccessfully": "Úspěšně uloženo automaticky.",
