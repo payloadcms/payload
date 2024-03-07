@@ -1,6 +1,6 @@
 import type { Collection, CustomPayloadRequest, SanitizedConfig } from 'payload/types'
 
-import { nextFileUpload } from '../next-fileupload'
+import { nextFileUpload } from '../next-fileupload/index.js'
 
 type GetDataAndFile = (args: {
   collection: Collection

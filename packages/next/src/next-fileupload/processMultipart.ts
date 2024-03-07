@@ -1,13 +1,13 @@
 import Busboy from 'busboy'
 import { APIError } from 'payload/errors'
 
-import type { NextFileUploadOptions, NextFileUploadResponse } from '.'
+import type { NextFileUploadOptions, NextFileUploadResponse } from './index.js'
 
-import { fileFactory } from './fileFactory'
-import { memHandler, tempFileHandler } from './handlers'
-import { processNested } from './processNested'
-import { createUploadTimer } from './uploadTimer'
-import { buildFields, debugLog, isFunc, parseFileName } from './utilities'
+import { fileFactory } from './fileFactory.js'
+import { memHandler, tempFileHandler } from './handlers.js'
+import { processNested } from './processNested.js'
+import { createUploadTimer } from './uploadTimer.js'
+import { buildFields, debugLog, isFunc, parseFileName } from './utilities.js'
 
 const waitFlushProperty = Symbol('wait flush property symbol')
 

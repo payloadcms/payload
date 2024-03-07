@@ -1,1 +1,1 @@
-export { default as withPayload } from '../withPayload'
+export { default as withPayload } from '../withPayload.js'

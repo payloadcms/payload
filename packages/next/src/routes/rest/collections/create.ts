@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import { createOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-import type { CollectionRouteHandler } from '../types'
+import type { CollectionRouteHandler } from '../types.d.ts'
 
 export const create: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req

@@ -1,5 +1,4 @@
 import httpStatus from 'http-status'
-import { CollectionConfig, GlobalConfig } from 'payload/types'
 
 export const endpointsAreDisabled = ({
   endpoints,

@@ -3,7 +3,7 @@ import { extractJWT } from 'payload/auth'
 import { generatePayloadCookie } from 'payload/auth'
 import { refreshOperation } from 'payload/operations'
 
-import type { CollectionRouteHandler } from '../types'
+import type { CollectionRouteHandler } from '../types.d.ts'
 
 export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
   const token = typeof req.data?.token === 'string' ? req.data.token : extractJWT(req)

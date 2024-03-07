@@ -5,7 +5,7 @@ import { findVersionsOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 import qs from 'qs'
 
-import type { GlobalRouteHandler } from '../types'
+import type { GlobalRouteHandler } from '../types.d.ts'
 
 export const findVersions: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { searchParams } = req

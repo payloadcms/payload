@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import { restoreVersionOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-import type { GlobalRouteHandlerWithID } from '../types'
+import type { GlobalRouteHandlerWithID } from '../types.d.ts'
 
 export const restoreVersion: GlobalRouteHandlerWithID = async ({ id, globalConfig, req }) => {
   const { searchParams } = req

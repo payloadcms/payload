@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 import { accessOperation } from 'payload/operations'
 
-import type { BaseRouteHandler } from '../types'
+import type { BaseRouteHandler } from '../types.d.ts'
 
 export const access: BaseRouteHandler = async ({ req }) => {
   const results = await accessOperation({

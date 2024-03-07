@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import { updateOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-import type { GlobalRouteHandler } from '../types'
+import type { GlobalRouteHandler } from '../types.d.ts'
 
 export const update: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { searchParams } = req

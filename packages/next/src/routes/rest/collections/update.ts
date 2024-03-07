@@ -6,7 +6,7 @@ import { updateOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 import qs from 'qs'
 
-import type { CollectionRouteHandler } from '../types'
+import type { CollectionRouteHandler } from '../types.d.ts'
 
 export const update: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req

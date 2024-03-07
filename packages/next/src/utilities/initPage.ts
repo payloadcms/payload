@@ -9,14 +9,14 @@ import type {
 import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui'
-import { headers as getHeaders } from 'next/headers'
-import { notFound, redirect } from 'next/navigation'
+import { headers as getHeaders } from 'next/headers.js'
+import { notFound, redirect } from 'next/navigation.js'
 import { createLocalReq } from 'payload/utilities'
 import qs from 'qs'
 
-import { getPayload } from '../utilities/getPayload'
-import { auth } from './auth'
-import { getRequestLanguage } from './getRequestLanguage'
+import { getPayload } from '../utilities/getPayload.js'
+import { auth } from './auth.js'
+import { getRequestLanguage } from './getRequestLanguage.js'
 
 type Args = {
   config: Promise<SanitizedConfig> | SanitizedConfig

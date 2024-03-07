@@ -2,9 +2,9 @@ import crypto from 'crypto'
 import fs, { WriteStream } from 'fs'
 import path from 'path'
 
-import type { NextFileUploadOptions } from '.'
+import type { NextFileUploadOptions } from './index.d.ts'
 
-import { checkAndMakeDir, debugLog, deleteFile, getTempFilename } from './utilities'
+import { checkAndMakeDir, debugLog, deleteFile, getTempFilename } from './utilities.js'
 
 type Handler = (
   options: NextFileUploadOptions,

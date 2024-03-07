@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
 
-import type { NextFileUploadOptions } from '.'
+import type { NextFileUploadOptions } from './index.js'
 
 // Parameters for safe file name parsing.
 const SAFE_FILE_NAME_REGEX = /[^\w-]/g

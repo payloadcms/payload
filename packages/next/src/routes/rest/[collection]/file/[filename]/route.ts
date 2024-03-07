@@ -6,10 +6,10 @@ import path from 'path'
 import { executeAccess } from 'payload/auth'
 import { APIError, Forbidden } from 'payload/errors'
 
-import { streamFile } from '../../../../../next-stream-file'
-import { createPayloadRequest } from '../../../../../utilities/createPayloadRequest'
-import { RouteError } from '../../../RouteError'
-import { endpointsAreDisabled } from '../../../checkEndpoints'
+import { streamFile } from '../../../../../next-stream-file/index.js'
+import { createPayloadRequest } from '../../../../../utilities/createPayloadRequest.js'
+import { RouteError } from '../../../RouteError.js'
+import { endpointsAreDisabled } from '../../../checkEndpoints.js'
 
 async function checkFileAccess({
   collection,

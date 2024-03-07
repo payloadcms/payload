@@ -6,7 +6,7 @@ const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex]
 
 const { debug } = args
 
-import { install } from './install'
+import { install } from './install.js'
 
 main()
 

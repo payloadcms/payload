@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import { generateExpiredPayloadCookie } from 'payload/auth'
 import { logoutOperation } from 'payload/operations'
 
-import type { CollectionRouteHandler } from '../types'
+import type { CollectionRouteHandler } from '../types.d.ts'
 
 export const logout: CollectionRouteHandler = async ({ collection, req }) => {
   const result = logoutOperation({

@@ -13,10 +13,10 @@ import { getDataLoader } from 'payload/utilities'
 import QueryString from 'qs'
 import { URL } from 'url'
 
-import { getDataAndFile } from './getDataAndFile'
-import { getPayload } from './getPayload'
-import { getRequestLanguage } from './getRequestLanguage'
-import { getRequestLocales } from './getRequestLocales'
+import { getDataAndFile } from './getDataAndFile.js'
+import { getPayload } from './getPayload.js'
+import { getRequestLanguage } from './getRequestLanguage.js'
+import { getRequestLocales } from './getRequestLocales.js'
 
 type Args = {
   config: Promise<SanitizedConfig> | SanitizedConfig

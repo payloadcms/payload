@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 import { verifyEmailOperation } from 'payload/operations'
 
-import type { CollectionRouteHandlerWithID } from '../types'
+import type { CollectionRouteHandlerWithID } from '../types.d.ts'
 
 export const verifyEmail: CollectionRouteHandlerWithID = async ({ id, collection, req }) => {
   await verifyEmailOperation({

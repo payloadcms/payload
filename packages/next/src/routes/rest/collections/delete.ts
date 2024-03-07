@@ -6,7 +6,7 @@ import { deleteOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 import qs from 'qs'
 
-import type { CollectionRouteHandler } from '../types'
+import type { CollectionRouteHandler } from '../types.d.ts'
 
 export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req

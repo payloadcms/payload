@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import { findOneOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-import type { GlobalRouteHandler } from '../types'
+import type { GlobalRouteHandler } from '../types.d.ts'
 
 export const findOne: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { searchParams } = req

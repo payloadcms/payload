@@ -1,4 +1,4 @@
-import type { FileShape, NextFileUploadOptions } from '.'
+import type { FileShape, NextFileUploadOptions } from './index.d.ts'
 
 import {
   checkAndMakeDir,
@@ -7,7 +7,7 @@ import {
   moveFile,
   promiseCallback,
   saveBufferToFile,
-} from './utilities'
+} from './utilities.js'
 
 type MoveFile = (
   filePath: string,

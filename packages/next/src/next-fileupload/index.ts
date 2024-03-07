@@ -2,9 +2,9 @@ import type { BusboyConfig } from 'busboy'
 
 import path from 'path'
 
-import { isEligibleRequest } from './isEligibleRequest'
-import { processMultipart } from './processMultipart'
-import { debugLog } from './utilities'
+import { isEligibleRequest } from './isEligibleRequest.js'
+import { processMultipart } from './processMultipart.js'
+import { debugLog } from './utilities.js'
 
 const DEFAULT_OPTIONS = {
   abortOnLimit: false,

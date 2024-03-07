@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import { generatePayloadCookie } from 'payload/auth'
 import { registerFirstUserOperation } from 'payload/operations'
 
-import type { CollectionRouteHandler } from '../types'
+import type { CollectionRouteHandler } from '../types.d.ts'
 
 export const registerFirstUser: CollectionRouteHandler = async ({ collection, req }) => {
   const result = await registerFirstUserOperation({

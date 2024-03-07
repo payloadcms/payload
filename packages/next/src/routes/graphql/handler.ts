@@ -6,7 +6,7 @@ import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
 import httpStatus from 'http-status'
 
-import { createPayloadRequest } from '../../utilities/createPayloadRequest'
+import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 
 const handleError = async (
   payload: Payload,
