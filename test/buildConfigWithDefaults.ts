@@ -6,30 +6,30 @@ import type { Config, SanitizedConfig } from '../packages/payload/src/config/typ
 import { mongooseAdapter } from '../packages/db-mongodb/src/index.js'
 import { postgresAdapter } from '../packages/db-postgres/src/index.js'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build.js'
-import {
-  AlignFeature,
-  BlockQuoteFeature,
-  BlocksFeature,
-  BoldFeature,
-  CheckListFeature,
-  HeadingFeature,
-  IndentFeature,
-  InlineCodeFeature,
-  ItalicFeature,
-  LinkFeature,
-  OrderedListFeature,
-  ParagraphFeature,
-  RelationshipFeature,
-  StrikethroughFeature,
-  SubscriptFeature,
-  SuperscriptFeature,
-  TreeViewFeature,
-  UnderlineFeature,
-  UnorderedListFeature,
-  UploadFeature,
-  lexicalEditor,
-} from '../packages/richtext-lexical/src'
-// import { slateEditor } from '../packages/richtext-slate/src/index.js'
+// import {
+//   AlignFeature,
+//   BlockQuoteFeature,
+//   BlocksFeature,
+//   BoldFeature,
+//   CheckListFeature,
+//   HeadingFeature,
+//   IndentFeature,
+//   InlineCodeFeature,
+//   ItalicFeature,
+//   LinkFeature,
+//   OrderedListFeature,
+//   ParagraphFeature,
+//   RelationshipFeature,
+//   StrikethroughFeature,
+//   SubscriptFeature,
+//   SuperscriptFeature,
+//   TreeViewFeature,
+//   UnderlineFeature,
+//   UnorderedListFeature,
+//   UploadFeature,
+//   lexicalEditor,
+// } from '../packages/richtext-lexical/src'
+import { slateEditor } from '../packages/richtext-slate/src/index.js'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
@@ -66,42 +66,9 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',
-    // editor: slateEditor({
-    //   admin: {
-    //     upload: {
-    //       collections: {
-    //         media: {
-    //           fields: [
-    //             {
-    //               name: 'alt',
-    //               type: 'text',
-    //             },
-    //           ],
-    //         },
-    //       },
-    //     },
-    //   },
-    // }),
-    editor: lexicalEditor({
-      features: [
-        ParagraphFeature(),
-        RelationshipFeature(),
-        LinkFeature({
-          fields: [
-            {
-              name: 'description',
-              type: 'text',
-            },
-          ],
-        }),
-        CheckListFeature(),
-        UnorderedListFeature(),
-        OrderedListFeature(),
-        AlignFeature(),
-        BlockQuoteFeature(),
-        BoldFeature(),
-        ItalicFeature(),
-        UploadFeature({
+    editor: slateEditor({
+      admin: {
+        upload: {
           collections: {
             media: {
               fields: [
@@ -112,56 +79,89 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
               ],
             },
           },
-        }),
-        UnderlineFeature(),
-        StrikethroughFeature(),
-        SubscriptFeature(),
-        SuperscriptFeature(),
-        InlineCodeFeature(),
-        TreeViewFeature(),
-        HeadingFeature(),
-        IndentFeature(),
-        BlocksFeature({
-          blocks: [
-            {
-              slug: 'myBlock',
-              fields: [
-                {
-                  name: 'someText',
-                  type: 'text',
-                },
-                {
-                  name: 'someTextRequired',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'radios',
-                  type: 'radio',
-                  options: [
-                    {
-                      label: 'Option 1',
-                      value: 'option1',
-                    },
-                    {
-                      label: 'Option 2',
-                      value: 'option2',
-                    },
-                    {
-                      label: 'Option 3',
-                      value: 'option3',
-                    },
-                  ],
-                  validate: (value) => {
-                    return value !== 'option2' ? true : 'Cannot be option2'
-                  },
-                },
-              ],
-            },
-          ],
-        }),
-      ],
+        },
+      },
     }),
+    // editor: lexicalEditor({
+    //   features: [
+    //     ParagraphFeature(),
+    //     RelationshipFeature(),
+    //     LinkFeature({
+    //       fields: [
+    //         {
+    //           name: 'description',
+    //           type: 'text',
+    //         },
+    //       ],
+    //     }),
+    //     CheckListFeature(),
+    //     UnorderedListFeature(),
+    //     OrderedListFeature(),
+    //     AlignFeature(),
+    //     BlockQuoteFeature(),
+    //     BoldFeature(),
+    //     ItalicFeature(),
+    //     UploadFeature({
+    //       collections: {
+    //         media: {
+    //           fields: [
+    //             {
+    //               name: 'alt',
+    //               type: 'text',
+    //             },
+    //           ],
+    //         },
+    //       },
+    //     }),
+    //     UnderlineFeature(),
+    //     StrikethroughFeature(),
+    //     SubscriptFeature(),
+    //     SuperscriptFeature(),
+    //     InlineCodeFeature(),
+    //     TreeViewFeature(),
+    //     HeadingFeature(),
+    //     IndentFeature(),
+    //     BlocksFeature({
+    //       blocks: [
+    //         {
+    //           slug: 'myBlock',
+    //           fields: [
+    //             {
+    //               name: 'someText',
+    //               type: 'text',
+    //             },
+    //             {
+    //               name: 'someTextRequired',
+    //               type: 'text',
+    //               required: true,
+    //             },
+    //             {
+    //               name: 'radios',
+    //               type: 'radio',
+    //               options: [
+    //                 {
+    //                   label: 'Option 1',
+    //                   value: 'option1',
+    //                 },
+    //                 {
+    //                   label: 'Option 2',
+    //                   value: 'option2',
+    //                 },
+    //                 {
+    //                   label: 'Option 3',
+    //                   value: 'option3',
+    //                 },
+    //               ],
+    //               validate: (value) => {
+    //                 return value !== 'option2' ? true : 'Cannot be option2'
+    //               },
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     }),
+    //   ],
+    // }),
     sharp,
     telemetry: false,
     ...testConfig,

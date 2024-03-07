@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { type MappedField, useConfig } from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import React from 'react'
-import ReactDiffViewerDefault from 'react-diff-viewer-continued'
+import ReactDiffViewerImport from 'react-diff-viewer-continued'
 
 import type { Props } from '../types.d.ts'
 
@@ -13,7 +13,8 @@ import Label from '../../Label/index.js'
 import { diffStyles } from '../styles.js'
 import './index.scss'
 
-const ReactDiffViewer = ReactDiffViewerDefault.default
+const ReactDiffViewer = (ReactDiffViewerImport.default ||
+  ReactDiffViewerImport) as unknown as typeof ReactDiffViewerImport.default
 
 const baseClass = 'relationship-diff'
 

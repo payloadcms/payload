@@ -1,5 +1,5 @@
 import { execSync } from 'child_process'
-import Conf from 'conf'
+import ConfImport from 'conf'
 import { randomBytes } from 'crypto'
 import findUp from 'find-up'
 import fs from 'fs'
@@ -9,6 +9,8 @@ import type { AdminInitEvent } from './events/adminInit.js'
 import type { ServerInitEvent } from './events/serverInit.js'
 
 import { oneWayHash } from './oneWayHash.js'
+
+const Conf = (ConfImport.default || ConfImport) as unknown as typeof ConfImport.default
 
 export type BaseEvent = {
   envID: string
@@ -61,7 +63,7 @@ export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
  * generated from random data and completely anonymous.
  */
 const getEnvID = (): string => {
-  const conf = new Conf.default()
+  const conf = new Conf()
   const ENV_ID = 'envID'
 
   const val = conf.get(ENV_ID)

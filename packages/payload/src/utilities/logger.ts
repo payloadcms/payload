@@ -1,7 +1,11 @@
-import pino from 'pino'
-import PinoPretty from 'pino-pretty'
+import pinoImport from 'pino'
+import pinoPrettyImport from 'pino-pretty'
 
-export type PayloadLogger = pino.Logger
+const pino = (pinoImport.default || pinoImport) as unknown as typeof pinoImport.default
+const pinoPretty = (pinoPrettyImport.default ||
+  pinoPrettyImport) as unknown as typeof pinoPrettyImport.default
+
+export type PayloadLogger = pinoImport.default.Logger
 
 const prettyOptions = {
   colorize: true,
@@ -9,14 +13,14 @@ const prettyOptions = {
   translateTime: 'SYS:HH:MM:ss',
 }
 
-export const defaultLoggerOptions: pino.LoggerOptions = {
+export const defaultLoggerOptions: pinoImport.default.LoggerOptions = {
   transport: {
     options: prettyOptions,
     target: 'pino-pretty',
   },
 }
 
-export const prettySyncLoggerDestination = PinoPretty.default({
+export const prettySyncLoggerDestination = pinoPretty({
   ...prettyOptions,
   destination: 1, // stdout
   sync: true,
@@ -24,11 +28,11 @@ export const prettySyncLoggerDestination = PinoPretty.default({
 
 const getLogger = (
   name = 'payload',
-  options?: pino.LoggerOptions,
-  destination?: pino.DestinationStream,
+  options?: pinoImport.default.LoggerOptions,
+  destination?: pinoImport.default.DestinationStream,
 ): PayloadLogger => {
   if (options) {
-    return pino.default(
+    return pino(
       {
         name: options?.name || name,
         enabled: process.env.DISABLE_LOGGING !== 'true',
@@ -38,7 +42,7 @@ const getLogger = (
     )
   }
 
-  return pino.default(prettySyncLoggerDestination)
+  return pino(prettySyncLoggerDestination)
 }
 
 export default getLogger

@@ -1,9 +1,11 @@
 'use client'
 import React from 'react'
-import ReactDiffViewerDefault from 'react-diff-viewer-continued'
+import ReactDiffViewerImport from 'react-diff-viewer-continued'
 
-const ReactDiffViewer = ReactDiffViewerDefault.default
-const DiffMethod = ReactDiffViewerDefault.DiffMethod
+const ReactDiffViewer = (ReactDiffViewerImport.default ||
+  ReactDiffViewerImport) as unknown as typeof ReactDiffViewerImport.default
+
+const DiffMethod = ReactDiffViewerImport.DiffMethod
 
 export const DiffViewer: React.FC<{
   comparisonToRender: string
