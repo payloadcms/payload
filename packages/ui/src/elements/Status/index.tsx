@@ -1,17 +1,15 @@
 'use client'
-import type { Field } from 'payload/types'
-
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
-// import { requests } from '../../../api'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
+import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
 
@@ -77,32 +75,25 @@ const Status: React.FC = () => {
         method = 'post'
       }
 
-      const res = null
-
-      // const res = await requests[method](url, {
-      //   body: JSON.stringify(body),
-      //   headers: {
-      //     'Accept-Language': i18n.language,
-      //     'Content-Type': 'application/json',
-      //   },
-      // })
+      const res = await requests[method](url, {
+        body: JSON.stringify(body),
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
+        },
+      })
 
       if (res.status === 200) {
         let data
-        let fields: Field[]
         const json = await res.json()
 
-        if (global) {
+        if (globalSlug) {
           data = json.result
-          fields = global.fields
-        }
-
-        if (collectionSlug) {
+        } else if (collectionSlug) {
           data = json.doc
-          // fields = collection.fields
         }
 
-        resetForm(fields, data)
+        resetForm(data)
         toast.success(json.message)
         getVersions()
       } else {
@@ -119,19 +110,19 @@ const Status: React.FC = () => {
       }
     },
     [
-      collectionSlug,
-      globalSlug,
-      publishedDoc,
-      serverURL,
       api,
-      id,
-      i18n,
-      locale,
-      resetForm,
+      collectionSlug,
       getVersions,
+      globalSlug,
+      i18n.language,
+      id,
+      locale,
+      publishedDoc,
+      resetForm,
+      revertModalSlug,
+      serverURL,
       t,
       toggleModal,
-      revertModalSlug,
       unPublishModalSlug,
     ],
   )
@@ -140,7 +131,10 @@ const Status: React.FC = () => {
 
   if (statusToRender) {
     return (
-      <div className={baseClass} title={`${t('version:status')}: ${t(statusToRender)}`}>
+      <div
+        className={baseClass}
+        title={`${t('version:status')}: ${t(`version:${statusToRender}`)}`}
+      >
         <div className={`${baseClass}__value-wrap`}>
           <span className={`${baseClass}__label`}>{t('version:status')}:&nbsp;</span>
           <span className={`${baseClass}__value`}>{t(`version:${statusToRender}`)}</span>

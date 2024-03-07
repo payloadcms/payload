@@ -64,7 +64,7 @@ export type SetModified = (modified: boolean) => void
 export type SetSubmitted = (submitted: boolean) => void
 export type SetProcessing = (processing: boolean) => void
 
-export type Reset = (fieldSchema: Field[], data: unknown) => Promise<void>
+export type Reset = (data: unknown) => Promise<void>
 
 export type REPLACE_STATE = {
   optimize?: boolean

@@ -12,12 +12,12 @@ import { toast } from 'react-toastify'
 
 import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types.js'
 
-import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import useThrottledEffect from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/OperationProvider/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -42,7 +42,7 @@ import reduceFieldsToValues from './reduceFieldsToValues.js'
 const baseClass = 'form'
 
 const Form: React.FC<Props> = (props) => {
-  const { id, getDocPreferences } = useDocumentInfo()
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const {
     action,
@@ -84,7 +84,6 @@ const Form: React.FC<Props> = (props) => {
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
-  const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
   /**
@@ -153,7 +152,7 @@ const Form: React.FC<Props> = (props) => {
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
       const {
-        action: actionToUse = action,
+        action: actionArg,
         method: methodToUse = method,
         overrides = {},
         skipValidation,
@@ -222,17 +221,21 @@ const Form: React.FC<Props> = (props) => {
 
       try {
         let res
+        const actionEndpoint =
+          actionArg ||
+          (typeof action === 'string'
+            ? `${action}${QueryString.stringify(formQueryParams, { addQueryPrefix: true })}`
+            : null)
 
-        if (typeof actionToUse === 'string') {
-          const actionEndpoint = `${actionToUse}${QueryString.stringify(formQueryParams, { addQueryPrefix: true })}`
+        if (actionEndpoint) {
           res = await requests[methodToUse.toLowerCase()](actionEndpoint, {
             body: formData,
             headers: {
               'Accept-Language': i18n.language,
             },
           })
-        } else if (typeof actionToUse === 'function') {
-          res = await actionToUse(formData)
+        } else if (typeof action === 'function') {
+          res = await action(formData)
         }
 
         setModified(false)
@@ -385,26 +388,25 @@ const Form: React.FC<Props> = (props) => {
   }, [])
 
   const reset = useCallback(
-    async (fieldSchema: Field[], data: unknown) => {
-      const preferences = await getDocPreferences()
-      // const state = await buildStateFromSchema({
-      //   id,
-      //   // TODO: fix this
-      //   // @ts-ignore-next-line
-      //   config,
-      //   data,
-      //   fieldSchema,
-      //   locale,
-      //   operation,
-      //   preferences,
-      //   t,
-      //   user,
-      // })
+    async (data: unknown) => {
+      const newState = await getFormState({
+        apiRoute,
+        body: {
+          id,
+          collectionSlug,
+          data,
+          globalSlug,
+          operation,
+          schemaPath: collectionSlug || globalSlug,
+        },
+        serverURL,
+      })
+
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      // dispatchFields({ state, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
-    [getDocPreferences],
+    [apiRoute, collectionSlug, dispatchFields, globalSlug, id, operation, serverURL],
   )
 
   const replaceState = useCallback(

@@ -927,6 +927,9 @@
         "aboutToRestoreGlobal": {
           "type": "string"
         },
+        "aboutToRevertToPublished": {
+          "type": "string"
+        },
         "aboutToUnpublish": {
           "type": "string"
         },
@@ -937,6 +940,12 @@
           "type": "string"
         },
         "autosavedSuccessfully": {
+          "type": "string"
+        },
+        "changed": {
+          "type": "string"
+        },
+        "confirmRevertToSaved": {
           "type": "string"
         },
         "compareVersion": {
@@ -985,6 +994,9 @@
           "type": "string"
         },
         "restoring": {
+          "type": "string"
+        },
+        "revertToPublished": {
           "type": "string"
         },
         "saveDraft": {
@@ -1037,10 +1049,13 @@
         "aboutToPublishSelection",
         "aboutToRestore",
         "aboutToRestoreGlobal",
+        "aboutToRevertToPublished",
         "aboutToUnpublish",
         "aboutToUnpublishSelection",
         "autosave",
         "autosavedSuccessfully",
+        "changed",
+        "confirmRevertToSaved",
         "compareVersion",
         "confirmPublish",
         "confirmUnpublish",
@@ -1057,6 +1072,7 @@
         "restoredSuccessfully",
         "restoreThisVersion",
         "restoring",
+        "revertToPublished",
         "saveDraft",
         "selectLocales",
         "selectVersionToCompare",

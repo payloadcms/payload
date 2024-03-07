@@ -214,7 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (autoLoginJson?.token) {
               setTokenAndExpiration(autoLoginJson)
             }
-            router.push(
+            router.replace(
               typeof searchParams['redirect'] === 'string' ? searchParams['redirect'] : admin,
             )
           } else {
