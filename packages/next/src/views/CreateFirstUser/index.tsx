@@ -3,12 +3,12 @@ import type { Field } from 'payload/types'
 import { Form, FormSubmit, buildStateFromSchema, mapFields } from '@payloadcms/ui'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root'
+import type { AdminViewProps } from '../Root/index.d.ts'
 
-import { CreateFirstUserFields } from './index.client'
+import { CreateFirstUserFields } from './index.client.js'
 import './index.scss'
 
-export { generateCreateFirstUserMetadata } from './meta'
+export { generateCreateFirstUserMetadata } from './meta.js'
 
 export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult }) => {
   const {
@@ -47,8 +47,8 @@ export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult
   ]
 
   const createFirstUserFieldMap = mapFields({
-    fieldSchema: fields,
     config,
+    fieldSchema: fields,
     parentPath: userSlug,
   })
 
@@ -71,8 +71,8 @@ export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult
         validationOperation="create"
       >
         <CreateFirstUserFields
-          userSlug={userSlug}
           createFirstUserFieldMap={createFirstUserFieldMap}
+          userSlug={userSlug}
         />
         <FormSubmit>{req.t('general:create')}</FormSubmit>
       </Form>

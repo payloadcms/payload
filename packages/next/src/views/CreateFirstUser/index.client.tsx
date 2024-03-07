@@ -1,11 +1,13 @@
 'use client'
-import { FieldMap, RenderFields, useComponentMap } from '@payloadcms/ui'
+import type { FieldMap } from '@payloadcms/ui'
+
+import { RenderFields, useComponentMap } from '@payloadcms/ui'
 import React from 'react'
 
 export const CreateFirstUserFields: React.FC<{
-  userSlug: string
   createFirstUserFieldMap: FieldMap
-}> = ({ userSlug, createFirstUserFieldMap }) => {
+  userSlug: string
+}> = ({ createFirstUserFieldMap, userSlug }) => {
   const { getFieldMap } = useComponentMap()
 
   const fieldMap = getFieldMap({ collectionSlug: userSlug })
