@@ -23,7 +23,6 @@ export const connect: Connect = async function connect(
   }
 
   const urlToConnect = this.url
-  const successfulConnectionMessage = 'Connected to MongoDB server successfully!'
 
   const connectionOptions: ConnectOptions & { useFacet: undefined } = {
     autoIndex: true,
@@ -49,8 +48,6 @@ export const connect: Connect = async function connect(
         await mongoose.connection.dropDatabase()
         this.payload.logger.info('---- DROPPED DATABASE ----')
       }
-
-      this.payload.logger.info(successfulConnectionMessage)
     }
   } catch (err) {
     this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)

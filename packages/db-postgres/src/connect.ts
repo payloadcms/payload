@@ -93,7 +93,7 @@ export const connect: Connect = async function connect(
   )
     return
 
-  const { pushSchema } = require('drizzle-kit/payload')
+  const { pushSchema } = await import('drizzle-kit/payload')
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(

@@ -334,8 +334,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       await this.db.connect()
     }
 
-    this.logger.info('Starting Payload...')
-
     // Configure email service
     const emailOptions = options.email ? { ...options.email } : this.config.email
     if (options.email && this.config.email) {
