@@ -193,11 +193,15 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   }
   generatedTypes?: {
     modifyOutputSchema: ({
+      collectionIDFieldTypes,
+      config,
       currentSchema,
       field,
       interfaceNameDefinitions,
       isRequired,
     }: {
+      collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+      config?: SanitizedConfig
       /**
        * Current schema which will be modified by this function.
        */
@@ -298,11 +302,15 @@ export type SanitizedServerFeatures = Required<
   generatedTypes: {
     modifyOutputSchemas: Array<
       ({
+        collectionIDFieldTypes,
+        config,
         currentSchema,
         field,
         interfaceNameDefinitions,
         isRequired,
       }: {
+        collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+        config?: SanitizedConfig
         /**
          * Current schema which will be modified by this function.
          */

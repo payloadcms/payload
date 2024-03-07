@@ -123,7 +123,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     generateSchemaMap: getGenerateSchemaMap({
       resolvedFeatureMap,
     }),
-    outputSchema: ({ field, interfaceNameDefinitions, isRequired }) => {
+    outputSchema: ({
+      collectionIDFieldTypes,
+      config,
+      field,
+      interfaceNameDefinitions,
+      isRequired,
+    }) => {
       let outputSchema: JSONSchema4 = {
         // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.
         // In the future, we should
@@ -183,6 +189,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       for (const modifyOutputSchema of finalSanitizedEditorConfig.features.generatedTypes
         .modifyOutputSchemas) {
         outputSchema = modifyOutputSchema({
+          collectionIDFieldTypes,
+          config,
           currentSchema: outputSchema,
           field,
           interfaceNameDefinitions,

@@ -37,10 +37,14 @@ type RichTextAdapterBase<
     schemaPath: string
   }) => Map<string, Field[]>
   outputSchema?: ({
+    collectionIDFieldTypes,
+    config,
     field,
     interfaceNameDefinitions,
     isRequired,
   }: {
+    collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+    config?: SanitizedConfig
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
     /**
      * Allows you to define new top-level interfaces that can be re-used in the output schema.

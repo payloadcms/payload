@@ -6,6 +6,7 @@ import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'
 
+import { cloneDeep } from '../../lexical/utils/cloneDeep.js'
 import { BlocksFeatureClientComponent } from './feature.client.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { blockPopulationPromiseHOC } from './populationPromise.js'
@@ -23,10 +24,12 @@ export const BlocksFeature: FeatureProviderProviderServer<
 
   if (props?.blocks?.length) {
     props.blocks = props.blocks.map((block) => {
+      const blockCopy = cloneDeep(block)
+
       return {
-        ...block,
-        fields: block.fields.concat(baseBlockFields),
-        labels: !block.labels ? formatLabels(block.slug) : block.labels,
+        ...blockCopy,
+        fields: blockCopy.fields.concat(baseBlockFields),
+        labels: !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels,
       }
     })
     //  unSanitizedBlock.fields are sanitized in the React component and not here.
@@ -74,15 +77,45 @@ export const BlocksFeature: FeatureProviderProviderServer<
           return schemaMap
         },
         generatedTypes: {
-          modifyOutputSchema: ({ currentSchema, field, interfaceNameDefinitions }) => {
+          modifyOutputSchema: ({
+            collectionIDFieldTypes,
+            config,
+            currentSchema,
+            field,
+            interfaceNameDefinitions,
+          }) => {
+            if (!props?.blocks?.length) {
+              return currentSchema
+            }
+
+            // sanitize blocks
+            const validRelationships = config.collections.map((c) => c.slug) || []
+
+            const sanitizedBlocks = props.blocks.map((block) => {
+              const blockCopy = cloneDeep(block)
+              return {
+                ...blockCopy,
+                fields: sanitizeFields({
+                  config,
+                  fields: blockCopy.fields,
+                  validRelationships,
+                }),
+              }
+            })
+
             const blocksField: BlockField = {
               name: field?.name + '_lexical_blocks',
               type: 'blocks',
-              blocks: props.blocks,
+              blocks: sanitizedBlocks,
             }
             // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
             // we don't actually use the JSON Schema itself in the generated types yet.
-            fieldsToJSONSchema({}, [blocksField], interfaceNameDefinitions)
+            fieldsToJSONSchema(
+              collectionIDFieldTypes,
+              [blocksField],
+              interfaceNameDefinitions,
+              config,
+            )
 
             return currentSchema
           },

@@ -11,6 +11,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 import { deepCopyObject } from './deepCopyObject.js'
 import { toWords } from './formatLabels.js'
+import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
 const fieldIsRequired = (field: Field) => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
@@ -80,12 +81,18 @@ export function withNullableJSONSchemaType(
 }
 
 export function fieldsToJSONSchema(
+  /**
+   * Used for relationship fields, to determine whether to use a string or number type for the ID.
+   * While there is a default ID field type set by the db adapter, they can differ on a collection-level
+   * if they have custom ID fields.
+   */
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
   fields: Field[],
   /**
    * Allows you to define new top-level interfaces that can be re-used in the output schema.
    */
   interfaceNameDefinitions: Map<string, JSONSchema4>,
+  config?: SanitizedConfig,
 ): {
   properties: {
     [k: string]: JSONSchema4
@@ -147,6 +154,8 @@ export function fieldsToJSONSchema(
           case 'richText': {
             if (field.editor.outputSchema) {
               fieldSchema = field.editor.outputSchema({
+                collectionIDFieldTypes,
+                config,
                 field,
                 interfaceNameDefinitions,
                 isRequired,
@@ -324,6 +333,7 @@ export function fieldsToJSONSchema(
                     collectionIDFieldTypes,
                     block.fields,
                     interfaceNameDefinitions,
+                    config,
                   )
 
                   const blockSchema: JSONSchema4 = {
@@ -363,6 +373,7 @@ export function fieldsToJSONSchema(
                   collectionIDFieldTypes,
                   field.fields,
                   interfaceNameDefinitions,
+                  config,
                 ),
               },
             }
@@ -383,6 +394,7 @@ export function fieldsToJSONSchema(
               collectionIDFieldTypes,
               field.fields,
               interfaceNameDefinitions,
+              config,
             )
             Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
               fieldSchemas.set(propName, propSchema)
@@ -399,6 +411,7 @@ export function fieldsToJSONSchema(
                 collectionIDFieldTypes,
                 tab.fields,
                 interfaceNameDefinitions,
+                config,
               )
               if (tabHasName(tab)) {
                 // could have interface
@@ -424,7 +437,12 @@ export function fieldsToJSONSchema(
             fieldSchema = {
               type: 'object',
               additionalProperties: false,
-              ...fieldsToJSONSchema(collectionIDFieldTypes, field.fields, interfaceNameDefinitions),
+              ...fieldsToJSONSchema(
+                collectionIDFieldTypes,
+                field.fields,
+                interfaceNameDefinitions,
+                config,
+              ),
             }
 
             if (field.interfaceName) {
@@ -496,29 +514,14 @@ export function entityToJSONSchema(
     })
   }
 
-  // used for relationship fields, to determine whether to use a string or number type for the ID
-  const collectionIDFieldTypes: { [key: string]: 'number' | 'string' } = config.collections.reduce(
-    (acc, collection) => {
-      const customCollectionIdField = collection.fields.find(
-        (field) => 'name' in field && field.name === 'id',
-      )
-
-      acc[collection.slug] = defaultIDType === 'text' ? 'string' : 'number'
-
-      if (customCollectionIdField) {
-        acc[collection.slug] = customCollectionIdField.type === 'number' ? 'number' : 'string'
-      }
-
-      return acc
-    },
-    {},
-  )
+  //  Used for relationship fields, to determine whether to use a string or number type for the ID.
+  const collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
 
   return {
     type: 'object',
     additionalProperties: false,
     title,
-    ...fieldsToJSONSchema(collectionIDFieldTypes, entity.fields, interfaceNameDefinitions),
+    ...fieldsToJSONSchema(collectionIDFieldTypes, entity.fields, interfaceNameDefinitions, config),
   }
 }
 

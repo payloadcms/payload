@@ -24,19 +24,20 @@ export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatLabels, formatNames, toWords } from '../utilities/formatLabels.js'
 
-export { getIDType } from '../utilities/getIDType.js'
+export { getCollectionIDFieldTypes } from '../utilities/getCollectionIDFieldTypes.js'
 
+export { getIDType } from '../utilities/getIDType.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { default as getUniqueListBy } from '../utilities/getUniqueListBy.js'
 export { isEntityHidden } from '../utilities/isEntityHidden.js'
 export { isNumber } from '../utilities/isNumber.js'
+
 export { isValidID } from '../utilities/isValidID.js'
 
 export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
-
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
-export { default as wait } from '../utilities/wait.js'
 
+export { default as wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
