@@ -3,7 +3,7 @@ import type { PathToQuery } from 'payload/database'
 import type { Field } from 'payload/types'
 import type { Operator } from 'payload/types'
 
-import ObjectId from 'bson-objectid'
+import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
 import { getLocalizedPaths } from 'payload/database'
 import { fieldAffectsData } from 'payload/types'
@@ -13,6 +13,9 @@ import type { MongooseAdapter } from '../index.d.ts'
 
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
+
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 type SearchParam = {
   path?: string
@@ -205,7 +208,7 @@ export async function buildSearchParam({
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
             result.value.$or.push({
-              [path]: { [operatorKey]: new ObjectId.default(formattedValue) },
+              [path]: { [operatorKey]: new ObjectId(formattedValue) },
             })
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(

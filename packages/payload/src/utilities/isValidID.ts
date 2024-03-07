@@ -1,4 +1,7 @@
-import ObjectId from 'bson-objectid'
+import ObjectIdImport from 'bson-objectid'
+
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 export const isValidID = (
   value: number | string,
@@ -6,7 +9,7 @@ export const isValidID = (
 ): boolean => {
   if (type === 'text' && value) {
     if (['object', 'string'].includes(typeof value)) {
-      const isObjectID = ObjectId.default.isValid(value as string)
+      const isObjectID = ObjectId.isValid(value as string)
       return typeof value === 'string' || isObjectID
     }
     return false
@@ -15,6 +18,6 @@ export const isValidID = (
   if (typeof value === 'number' && !Number.isNaN(value)) return true
 
   if (type === 'ObjectID') {
-    return ObjectId.default.isValid(String(value))
+    return ObjectId.isValid(String(value))
   }
 }

@@ -7,13 +7,14 @@ import type {
   PayloadRequest,
 } from 'payload/types'
 
-import ObjectIdDefault from 'bson-objectid'
+import ObjectIdImport from 'bson-objectid'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import { getDefaultValue } from 'payload/utilities'
 
 import { iterateFields } from './iterateFields.js'
 
-const ObjectId = ObjectIdDefault.default
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 export type AddFieldStatePromiseArgs = {
   /**

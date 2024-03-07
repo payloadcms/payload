@@ -1,6 +1,6 @@
 import type { FormField, FormState, Row } from 'payload/types'
 
-import ObjectIdDefault from 'bson-objectid'
+import ObjectIdImport from 'bson-objectid'
 import equal from 'deep-equal'
 import { deepCopyObject } from 'payload/utilities'
 
@@ -8,7 +8,8 @@ import type { FieldAction } from './types.d.ts'
 
 import { flattenRows, separateRows } from './rows.js'
 
-const ObjectId = ObjectIdDefault.default
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 /**
  * Reducer which modifies the form field state (all the current data of the fields in the form). When called using dispatch, it will return a new state object.

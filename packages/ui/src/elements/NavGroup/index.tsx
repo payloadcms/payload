@@ -7,7 +7,8 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useNav } from '../Nav/context.js'
 import './index.scss'
 
-const AnimateHeight = AnimateHeightImport.default || AnimateHeightImport
+const AnimateHeight = (AnimateHeightImport.default ||
+  AnimateHeightImport) as typeof AnimateHeightImport.default
 
 const baseClass = 'nav-group'
 
