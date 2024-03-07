@@ -1,7 +1,9 @@
 'use client'
 import { Button, useTranslation } from '@payloadcms/ui'
-import Link from 'next/link.js'
+import LinkDefault from 'next/link.js'
 import React from 'react'
+
+const Link = LinkDefault.default
 
 export const UnauthorizedClient: React.FC<{ logoutRoute: string }> = ({ logoutRoute }) => {
   const { t } = useTranslation()

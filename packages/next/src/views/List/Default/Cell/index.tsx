@@ -1,5 +1,5 @@
 'use client'
-import Link from 'next/link.js'
+import LinkDefault from 'next/link.js'
 import React from 'react' // TODO: abstract this out to support all routers
 
 import type { CellProps } from 'payload/types'
@@ -10,6 +10,8 @@ import { TableCellProvider } from '@payloadcms/ui'
 
 import { CodeCell } from './fields/Code/index.js'
 import cellComponents from './fields/index.js'
+
+const Link = LinkDefault.default
 
 export const DefaultCell: React.FC<CellProps> = (props) => {
   const {

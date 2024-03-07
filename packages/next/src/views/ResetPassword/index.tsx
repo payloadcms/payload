@@ -8,7 +8,7 @@ import {
   Password,
   Translation,
 } from '@payloadcms/ui'
-import Link from 'next/link.js'
+import LinkDefault from 'next/link.js'
 import React from 'react'
 
 import type { AdminViewProps } from '../Root/index.js'
@@ -16,6 +16,8 @@ import type { AdminViewProps } from '../Root/index.js'
 import './index.scss'
 
 export const resetPasswordBaseClass = 'reset-password'
+
+const Link = LinkDefault.default
 
 export { generateResetPasswordMetadata } from './meta.js'
 

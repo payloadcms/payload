@@ -1,10 +1,12 @@
 import { Button, Email, Form, FormSubmit, Translation } from '@payloadcms/ui'
-import Link from 'next/link.js'
+import LinkDefault from 'next/link.js'
 import React, { Fragment } from 'react'
 
 import type { AdminViewProps } from '../Root/index.js'
 
 export { generateForgotPasswordMetadata } from './meta.js'
+
+const Link = LinkDefault.default
 
 export const forgotPasswordBaseClass = 'forgot-password'
 

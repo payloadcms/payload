@@ -9,10 +9,11 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
-import Link from 'next/link.js'
+import LinkDefault from 'next/link.js'
 import React from 'react'
 
 const baseClass = 'login__form'
+const Link = LinkDefault.default
 
 import type { FormState } from 'payload/types'
 

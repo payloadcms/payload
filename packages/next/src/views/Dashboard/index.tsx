@@ -1,5 +1,5 @@
 import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
-import Link from 'next/link.js'
+import LinkDefault from 'next/link.js'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
@@ -9,6 +9,8 @@ import type { DashboardProps } from './Default/index.d.ts'
 import { DefaultDashboard } from './Default/index.js'
 
 export { generateDashboardMetadata } from './meta.js'
+
+const Link = LinkDefault.default
 
 export const Dashboard: React.FC<AdminViewProps> = ({
   initPageResult,
