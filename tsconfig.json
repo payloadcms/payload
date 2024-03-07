@@ -4,7 +4,7 @@
     "declarationMap": true,
     "module": "NodeNext",
     "target": "esnext",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Node16",
     "allowJs": true,
     "checkJs": false,
     "esModuleInterop": true,

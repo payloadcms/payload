@@ -10,7 +10,7 @@ import { DefaultDashboard } from './Default/index.js'
 
 export { generateDashboardMetadata } from './meta.js'
 
-const Link = LinkDefault.default
+const Link = LinkDefault
 
 export const Dashboard: React.FC<AdminViewProps> = ({
   initPageResult,
