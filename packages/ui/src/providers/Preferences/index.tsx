@@ -34,6 +34,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   const config = useConfig()
   const { user } = useAuth()
   const { i18n } = useTranslation()
+
   const {
     routes: { api },
     serverURL,
@@ -76,10 +77,12 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
     async (key: string, value: unknown, merge = false): Promise<void> => {
       if (merge === false) {
         preferencesRef.current[key] = value
+
         await requests.post(
           `${serverURL}${api}/payload-preferences/${key}`,
           requestOptions(value, i18n.language),
         )
+
         return
       }
 
@@ -93,9 +96,11 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
       ) {
         // merge the value with any existing preference for the key
         newValue = { ...(currentPreference || {}), ...value }
+
         if (isDeepEqual(newValue, currentPreference)) {
           return
         }
+
         // add the requested changes to a pendingUpdate batch for the key
         pendingUpdate.current[key] = {
           ...pendingUpdate.current[key],
@@ -113,6 +118,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         if (isDeepEqual(pendingUpdate.current[key], preferencesRef.current[key])) {
           return
         }
+
         // preference set in context here to prevent other updatePreference at the same time
         preferencesRef.current[key] = pendingUpdate.current[key]
 
@@ -120,6 +126,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
           `${serverURL}${api}/payload-preferences/${key}`,
           requestOptions(preferencesRef.current[key], i18n.language),
         )
+
         // reset any changes for this key after sending the request
         delete pendingUpdate.current[key]
       }

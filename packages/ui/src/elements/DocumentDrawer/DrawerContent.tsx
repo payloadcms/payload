@@ -177,7 +177,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
       setId(args.doc.id)
 
       if (typeof onSaveFromProps === 'function') {
-        onSaveFromProps({
+        void onSaveFromProps({
           ...args,
           collectionConfig,
         })

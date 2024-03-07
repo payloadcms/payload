@@ -7,7 +7,6 @@ export type { IComponentMapContext } from '../providers/ComponentMapProvider/ind
 export { ConfigProvider, useConfig } from '../providers/Config/index.js'
 export { CustomProvider } from '../providers/CustomProvider/index.js'
 export { useDocumentEvents } from '../providers/DocumentEvents/index.js'
-export { SetDocumentInfo } from '../providers/DocumentInfo/SetDocumentInfo/index.js'
 export { useDocumentInfo } from '../providers/DocumentInfo/index.js'
 export {
   type DocumentInfo,

@@ -101,7 +101,7 @@ export const DefaultEditView: React.FC = () => {
       // }
 
       if (typeof onSaveFromContext === 'function') {
-        onSaveFromContext({
+        void onSaveFromContext({
           ...json,
           operation: id ? 'update' : 'create',
         })

@@ -1,5 +1,4 @@
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -23,7 +22,7 @@ const Localizer: React.FC<{
   const { i18n } = useTranslation()
   const locale = useLocale()
   const { dispatchSearchParams, searchParams } = useSearchParams()
-  const router = useRouter()
+
   if (localization) {
     const { locales } = localization
 
@@ -54,7 +53,6 @@ const Localizer: React.FC<{
                           locale: searchParams.locale,
                         },
                       })
-                      router.refresh()
                     }}
                   >
                     {localeOptionLabel}
