@@ -19,12 +19,12 @@ import type { EnabledFeatures } from './types.d.ts'
 
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'
-import listTypes from './elements/listTypes.js'
-import hotkeys from './hotkeys.js'
+import { listTypes } from './elements/listTypes.js'
+import { hotkeys } from './hotkeys.js'
 import './index.scss'
-import toggleLeaf from './leaves/toggle.js'
-import withEnterBreakOut from './plugins/withEnterBreakOut.js'
-import withHTML from './plugins/withHTML.js'
+import { toggleLeaf } from './leaves/toggle.js'
+import { withEnterBreakOut } from './plugins/withEnterBreakOut.js'
+import { withHTML } from './plugins/withHTML.js'
 import { ElementButtonProvider } from './providers/ElementButtonProvider.js'
 import { ElementProvider } from './providers/ElementProvider.js'
 import { LeafButtonProvider } from './providers/LeafButtonProvider.js'
@@ -40,7 +40,7 @@ declare module 'slate' {
   }
 }
 
-const RichText: React.FC<
+const RichTextField: React.FC<
   FormFieldBase & {
     elements: EnabledFeatures['elements']
     leaves: EnabledFeatures['leaves']
@@ -432,4 +432,4 @@ const RichText: React.FC<
   )
 }
 
-export default withCondition(RichText)
+export const RichText = withCondition(RichTextField)

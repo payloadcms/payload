@@ -50,6 +50,7 @@ export const DocumentControls: React.FC<{
   const config = useConfig()
 
   const collectionConfig = config.collections.find((coll) => coll.slug === slug)
+  const globalConfig = config.globals.find((global) => global.slug === slug)
 
   const {
     admin: { dateFormat },
@@ -83,9 +84,9 @@ export const DocumentControls: React.FC<{
                 </p>
               </li>
             )}
-            {(collectionConfig?.versions?.drafts || global?.versions?.drafts) && (
+            {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
               <Fragment>
-                {(global || (collectionConfig && isEditing)) && (
+                {(globalConfig || (collectionConfig && isEditing)) && (
                   <li
                     className={[`${baseClass}__status`, `${baseClass}__list-item`]
                       .filter(Boolean)
@@ -96,12 +97,12 @@ export const DocumentControls: React.FC<{
                 )}
                 {((collectionConfig?.versions?.drafts &&
                   collectionConfig?.versions?.drafts?.autosave) ||
-                  (global?.versions?.drafts && global?.versions?.drafts?.autosave)) &&
+                  (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
                   hasSavePermission && (
                     <li className={`${baseClass}__list-item`}>
                       {/* <Autosave
                         collection={collectionConfig}
-                        global={global}
+                        global={globalConfig}
                         id={id}
                         publishedDocUpdatedAt={data?.createdAt}
                       /> */}
@@ -147,33 +148,34 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {/* {(collectionConfig?.admin?.preview || global?.admin?.preview) && (
+            {/* {(collectionConfig?.admin?.preview || globalConfig?.admin?.preview) && (
               <PreviewButton
                 CustomComponent={
                   collectionConfig?.admin?.components?.edit?.PreviewButton ||
-                  global?.admin?.components?.elements?.PreviewButton
+                  globalConfig?.admin?.components?.elements?.PreviewButton
                 }
-                generatePreviewURL={collectionConfig?.admin?.preview || global?.admin?.preview}
+                generatePreviewURL={collectionConfig?.admin?.preview || globalConfig?.admin?.preview}
               />
             )} */}
             {hasSavePermission && (
               <React.Fragment>
-                {collectionConfig?.versions?.drafts || global?.versions?.drafts ? (
+                {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (
                   <React.Fragment>
                     {((collectionConfig?.versions?.drafts &&
                       !collectionConfig?.versions?.drafts?.autosave) ||
-                      (global?.versions?.drafts && !global?.versions?.drafts?.autosave)) && (
+                      (globalConfig?.versions?.drafts &&
+                        !globalConfig?.versions?.drafts?.autosave)) && (
                       <SaveDraft
                         CustomComponent={
                           collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
-                          global?.admin?.components?.elements?.SaveDraftButton
+                          globalConfig?.admin?.components?.elements?.SaveDraftButton
                         }
                       />
                     )}
                     <Publish
                       CustomComponent={
                         collectionConfig?.admin?.components?.edit?.PublishButton ||
-                        global?.admin?.components?.elements?.PublishButton
+                        globalConfig?.admin?.components?.elements?.PublishButton
                       }
                     />
                   </React.Fragment>
@@ -181,7 +183,7 @@ export const DocumentControls: React.FC<{
                   <Save
                     CustomComponent={
                       collectionConfig?.admin?.components?.edit?.SaveButton ||
-                      global?.admin?.components?.elements?.SaveButton
+                      globalConfig?.admin?.components?.elements?.SaveButton
                     }
                   />
                 )}

@@ -2,11 +2,11 @@ import React from 'react'
 
 import type { RichTextCustomLeaf } from '../../../types.d.ts'
 
-import UnderlineIcon from '../../icons/Underline/index.js'
-import LeafButton from '../Button.js'
+import { UnderlineIcon } from '../../icons/Underline/index.js'
+import { LeafButton } from '../Button.js'
 import { Underline } from './Underline/index.js'
 
-const underline: RichTextCustomLeaf = {
+export const underline: RichTextCustomLeaf = {
   name: 'underline',
   Button: () => (
     <LeafButton format="underline">
@@ -15,5 +15,3 @@ const underline: RichTextCustomLeaf = {
   ),
   Leaf: Underline,
 }
-
-export default underline

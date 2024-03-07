@@ -72,7 +72,7 @@ const deserialize = (el) => {
   return children
 }
 
-const withHTML = (incomingEditor) => {
+export const withHTML = (incomingEditor) => {
   const { insertData } = incomingEditor
 
   const editor = incomingEditor
@@ -94,5 +94,3 @@ const withHTML = (incomingEditor) => {
 
   return editor
 }
-
-export default withHTML

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const OrderedListIcon: React.FC = () => (
+export const OLIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="graphic ordered-list-icon"
@@ -16,5 +16,3 @@ const OrderedListIcon: React.FC = () => (
     <path d="M0 0h24v24H0z" fill="none" />
   </svg>
 )
-
-export default OrderedListIcon

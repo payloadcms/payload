@@ -8,12 +8,12 @@ import { useSlate } from 'slate-react'
 import type { ButtonProps } from './types.d.ts'
 
 import '../buttons.scss'
-import isElementActive from './isActive.js'
-import toggleElement from './toggle.js'
+import { isElementActive } from './isActive.js'
+import { toggleElement } from './toggle.js'
 
 export const baseClass = 'rich-text__button'
 
-const ElementButton: React.FC<ButtonProps> = (props) => {
+export const ElementButton: React.FC<ButtonProps> = (props) => {
   const { type = 'type', children, className, el = 'button', format, onClick, tooltip } = props
 
   const editor = useSlate()
@@ -49,5 +49,3 @@ const ElementButton: React.FC<ButtonProps> = (props) => {
     </Tag>
   )
 }
-
-export default ElementButton

@@ -2,11 +2,11 @@ import React from 'react'
 
 import type { RichTextCustomLeaf } from '../../../types.d.ts'
 
-import StrikethroughIcon from '../../icons/Strikethrough/index.js'
-import LeafButton from '../Button.js'
+import { StrikethroughIcon } from '../../icons/Strikethrough/index.js'
+import { LeafButton } from '../Button.js'
 import { Strikethrough } from './Strikethrough/index.js'
 
-const strikethrough: RichTextCustomLeaf = {
+export const strikethrough: RichTextCustomLeaf = {
   name: 'strikethrough',
   Button: () => (
     <LeafButton format="strikethrough">
@@ -15,5 +15,3 @@ const strikethrough: RichTextCustomLeaf = {
   ),
   Leaf: Strikethrough,
 }
-
-export default strikethrough

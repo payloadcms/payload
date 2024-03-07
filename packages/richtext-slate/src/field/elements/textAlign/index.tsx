@@ -2,12 +2,12 @@ import React from 'react'
 
 import type { RichTextCustomElement } from '../../../types.d.ts'
 
-import AlignCenterIcon from '../../icons/AlignCenter/index.js'
-import AlignLeftIcon from '../../icons/AlignLeft/index.js'
-import AlignRightIcon from '../../icons/AlignRight/index.js'
-import ElementButton from '../Button.js'
+import { AlignCenterIcon } from '../../icons/AlignCenter/index.js'
+import { AlignLeftIcon } from '../../icons/AlignLeft/index.js'
+import { AlignRightIcon } from '../../icons/AlignRight/index.js'
+import { ElementButton } from '../Button.js'
 
-const alignment: RichTextCustomElement = {
+export const textAlign: RichTextCustomElement = {
   name: 'alignment',
   Button: () => {
     return (
@@ -26,5 +26,3 @@ const alignment: RichTextCustomElement = {
   },
   Element: () => null,
 }
-
-export default alignment
