@@ -54,6 +54,7 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'off',
     'arrow-body-style': 0,
     'import/prefer-default-export': 'off',
+    'no-restricted-exports': ['warn', { restrictDefaultExports: { direct: true } }],
     'no-console': 'warn',
     'no-sparse-arrays': 'off',
     'no-underscore-dangle': 'off',
