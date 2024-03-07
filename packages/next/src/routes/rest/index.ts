@@ -37,6 +37,7 @@ import { findVersions } from './collections/findVersions.js'
 import { restoreVersion } from './collections/restoreVersion.js'
 import { update } from './collections/update.js'
 import { updateByID } from './collections/updateByID.js'
+import { getFile } from './files/getFile.js'
 import { docAccess as docAccessGlobal } from './globals/docAccess.js'
 import { findOne } from './globals/findOne.js'
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID.js'
@@ -55,6 +56,7 @@ const endpoints = {
       'doc-versions-by-id': findVersionByID,
       find,
       findByID,
+      getFile,
       init,
       me,
       versions: findVersions,
@@ -205,7 +207,10 @@ export const GET =
             }
             break
           case 3:
-            if (`doc-${slug2}-by-id` in endpoints.collection.GET) {
+            if (slug2 === 'file') {
+              // /:collection/file/:filename
+              res = await endpoints.collection.GET.getFile({ collection, filename: slug3, req })
+            } else if (`doc-${slug2}-by-id` in endpoints.collection.GET) {
               // /:collection/access/:id
               // /:collection/versions/:id
 

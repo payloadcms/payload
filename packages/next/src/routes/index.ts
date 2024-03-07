@@ -6,5 +6,3 @@ export {
   PATCH as REST_PATCH,
   POST as REST_POST,
 } from './rest/index.js'
-
-export { GET as GET_STATIC_FILE } from './rest/[collection]/file/[filename]/route.js'
