@@ -24,6 +24,12 @@ export const RenderField: React.FC<{
   const path = `${pathFromContext ? `${pathFromContext}.` : ''}${name || ''}`
   const schemaPath = `${schemaPathFromContext ? `${schemaPathFromContext}.` : ''}${name || ''}`
 
+  // if the user cannot read the field, then filter it out
+  // this is different from `admin.readOnly` which is executed based on `operation`
+  if (fieldPermissions?.read?.permission === false) {
+    return null
+  }
+
   // `admin.readOnly` displays the value but prevents the field from being edited
   let readOnly = readOnlyFromProps
 

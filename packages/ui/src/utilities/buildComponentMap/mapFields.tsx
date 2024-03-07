@@ -53,12 +53,6 @@ export const mapFields = (args: {
 
         const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : undefined
 
-        // if the user cannot read the field, then filter it out
-        // this is different from `admin.readOnly` which is executed on the client based on `operation`
-        if (fieldPermissions?.read?.permission === false) {
-          return acc
-        }
-
         const labelProps: LabelProps = {
           htmlFor: 'TODO',
           // TODO: fix types

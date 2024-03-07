@@ -98,7 +98,6 @@ export const DefaultListView: React.FC = () => {
     <div className={baseClass}>
       <SetViewActions actions={actionsMap?.List} />
       {BeforeList}
-      {/* <Meta title={getTranslation(collection.labels.plural, i18n)} /> */}
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
