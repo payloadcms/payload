@@ -2,7 +2,7 @@ import type { ClientConfig, SanitizedCollectionConfig } from 'payload/types'
 
 import { useState } from 'react'
 
-import { useConfig } from '../../../../providers/Config'
+import { useConfig } from '../../../../providers/Config/index.js'
 
 export const useRelatedCollections = (
   relationTo: string | string[],

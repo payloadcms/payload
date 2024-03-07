@@ -1,11 +1,11 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import getDataByPath from '../Form/getDataByPath'
-import getSiblingData from '../Form/getSiblingData'
-import { isComponent } from './types'
+import getDataByPath from '../Form/getDataByPath.js'
+import getSiblingData from '../Form/getSiblingData.js'
+import { isComponent } from './types.js'
 
 const baseClass = 'row-label'
 

@@ -1,9 +1,9 @@
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useTranslation } from '../../../../providers/Translation'
-import useField from '../../../useField'
+import { useTranslation } from '../../../../providers/Translation/index.js'
+import useField from '../../../useField/index.js'
 import './index.scss'
 
 const baseClass = 'section-title'

@@ -1,11 +1,11 @@
 'use client'
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useIntersect } from '../../hooks/useIntersect'
-import { useTranslation } from '../../providers/Translation'
-import { RenderField } from './RenderField'
+import { useIntersect } from '../../hooks/useIntersect.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { RenderField } from './RenderField.js'
 import './index.scss'
 
 const baseClass = 'render-fields'

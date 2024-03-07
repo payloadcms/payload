@@ -1,4 +1,4 @@
-import type { FormFieldBase } from '../shared'
+import type { FormFieldBase } from '../shared.js'
 
 export type Props = FormFieldBase & {
   checked?: boolean

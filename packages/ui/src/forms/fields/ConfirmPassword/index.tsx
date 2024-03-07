@@ -3,14 +3,14 @@ import type { FormField } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useTranslation } from '../../../providers/Translation'
-import Error from '../../Error'
-import { useFormFields } from '../../Form/context'
-import Label from '../../Label'
-import useField from '../../useField'
-import { fieldBaseClass } from '../shared'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import Error from '../../Error/index.js'
+import { useFormFields } from '../../Form/context.js'
+import Label from '../../Label/index.js'
+import useField from '../../useField/index.js'
+import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
 const ConfirmPassword: React.FC<Props> = (props) => {

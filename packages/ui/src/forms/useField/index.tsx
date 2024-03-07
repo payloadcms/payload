@@ -1,18 +1,18 @@
 'use client'
 import { useCallback, useMemo, useRef } from 'react'
 
-import type { UPDATE } from '../Form/types'
-import type { FieldType, Options } from './types'
+import type { UPDATE } from '../Form/types.d.ts'
+import type { FieldType, Options } from './types.d.ts'
 
-import useThrottledEffect from '../../hooks/useThrottledEffect'
-import { useAuth } from '../../providers/Auth'
-import { useConfig } from '../../providers/Config'
-import { useDocumentInfo } from '../../providers/DocumentInfo'
-import { useOperation } from '../../providers/OperationProvider'
-import { useTranslation } from '../../providers/Translation'
-import { useFieldPath } from '../FieldPathProvider'
-import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context'
-import { useReadOnly } from '../ReadOnlyProvider'
+import useThrottledEffect from '../../hooks/useThrottledEffect.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useOperation } from '../../providers/OperationProvider/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { useFieldPath } from '../FieldPathProvider/index.js'
+import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context.js'
+import { useReadOnly } from '../ReadOnlyProvider/index.js'
 
 /**
  * Get and set the value of a form field.

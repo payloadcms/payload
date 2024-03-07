@@ -2,7 +2,7 @@ import type { Validate } from 'payload/types'
 import type { Description } from 'payload/types'
 import type React from 'react'
 
-import type { FormFieldBase } from '../shared'
+import type { FormFieldBase } from '../shared.d.ts'
 
 export type Props = FormFieldBase & {
   autoComplete?: string

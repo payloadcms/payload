@@ -1,8 +1,8 @@
 'use client'
 import React from 'react'
 
-import { Check } from '../../../icons/Check'
-import { Line } from '../../../icons/Line'
+import { Check } from '../../../icons/Check/index.js'
+import { Line } from '../../../icons/Line/index.js'
 
 type Props = {
   AfterInput?: React.ReactNode

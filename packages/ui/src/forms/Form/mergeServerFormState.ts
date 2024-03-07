@@ -1,6 +1,6 @@
 import type { FormState } from 'payload/types'
 
-import { arraysHaveSameStrings } from '../../utilities/arraysHaveSameStrings'
+import { arraysHaveSameStrings } from '../../utilities/arraysHaveSameStrings.js'
 
 const propsToCheck = ['passesCondition', 'valid', 'errorMessage']
 

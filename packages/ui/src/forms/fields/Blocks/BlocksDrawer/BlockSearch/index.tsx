@@ -1,7 +1,7 @@
 import React from 'react'
 
-import SearchIcon from '../../../../../graphics/Search'
-import { useTranslation } from '../../../../../providers/Translation'
+import SearchIcon from '../../../../../graphics/Search/index.js'
+import { useTranslation } from '../../../../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'block-search'

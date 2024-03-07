@@ -1,7 +1,7 @@
 import type { Field, FormState } from 'payload/types'
 
 // import { buildPathSegments } from './buildPathSegments'
-import { getFieldStateFromPaths } from './getFieldStateFromPaths'
+import { getFieldStateFromPaths } from './getFieldStateFromPaths.js'
 
 export const getNestedFieldState = ({
   fieldSchema,

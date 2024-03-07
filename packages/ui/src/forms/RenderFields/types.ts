@@ -1,6 +1,6 @@
 import type { Operation } from 'payload/types'
 
-import type { FieldMap } from '../../utilities/buildComponentMap/types'
+import type { FieldMap } from '../../utilities/buildComponentMap/types.d.ts'
 
 export type Props = {
   className?: string

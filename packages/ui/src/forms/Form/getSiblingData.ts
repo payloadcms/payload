@@ -2,7 +2,7 @@ import type { Data, FormState } from 'payload/types'
 
 import { unflatten } from 'flatley'
 
-import reduceFieldsToValues from './reduceFieldsToValues'
+import reduceFieldsToValues from './reduceFieldsToValues.js'
 
 const getSiblingData = (fields: FormState, path: string): Data => {
   if (path.indexOf('.') === -1) {

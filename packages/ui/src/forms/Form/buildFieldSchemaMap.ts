@@ -1,6 +1,6 @@
 import type { Field } from 'payload/types'
 
-import { createNestedFieldPath } from './createNestedFieldPath'
+import { createNestedFieldPath } from './createNestedFieldPath.js'
 
 /**
  * **Returns Map with array and block field schemas**

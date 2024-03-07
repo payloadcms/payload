@@ -1,12 +1,12 @@
 'use client'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useConfig } from '../../../providers/Config'
-import LabelComp from '../../Label'
-import useField from '../../useField'
-import { UploadInput } from './Input'
+import { useConfig } from '../../../providers/Config/index.js'
+import LabelComp from '../../Label/index.js'
+import useField from '../../useField/index.js'
+import { UploadInput } from './Input.js'
 import './index.scss'
 
 const Upload: React.FC<Props> = (props) => {

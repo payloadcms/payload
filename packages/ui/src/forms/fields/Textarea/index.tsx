@@ -4,15 +4,15 @@ import type { ClientValidate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useConfig } from '../../../providers/Config'
-import { useTranslation } from '../../../providers/Translation'
-import LabelComp from '../../Label'
-import useField from '../../useField'
-import { withCondition } from '../../withCondition'
-import { isFieldRTL } from '../shared'
-import { TextareaInput } from './Input'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import LabelComp from '../../Label/index.js'
+import useField from '../../useField/index.js'
+import { withCondition } from '../../withCondition/index.js'
+import { isFieldRTL } from '../shared.js'
+import { TextareaInput } from './Input.js'
 import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {

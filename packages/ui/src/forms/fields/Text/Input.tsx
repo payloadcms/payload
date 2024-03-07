@@ -4,11 +4,11 @@ import type { ChangeEvent } from 'react'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Option } from '../../../elements/ReactSelect/types'
+import type { Option } from '../../../elements/ReactSelect/types.d.ts'
 
-import ReactSelect from '../../../elements/ReactSelect'
-import { useTranslation } from '../../../providers/Translation'
-import { type FormFieldBase, fieldBaseClass } from '../shared'
+import ReactSelect from '../../../elements/ReactSelect/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { type FormFieldBase, fieldBaseClass } from '../shared.js'
 import './index.scss'
 
 export type TextInputProps = Omit<FormFieldBase, 'type'> & {

@@ -6,7 +6,7 @@ import {
   useContext as useFullContext,
 } from 'use-context-selector'
 
-import type { Context, FormFieldsContext as FormFieldsContextType } from './types'
+import type { Context, FormFieldsContext as FormFieldsContextType } from './types.d.ts'
 
 const FormContext = createContext({} as Context)
 const FormWatchContext = createContext({} as Context)

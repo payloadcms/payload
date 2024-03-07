@@ -3,14 +3,14 @@ import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import { useForm } from '../../Form/context'
-import LabelComp from '../../Label'
-import useField from '../../useField'
-import { withCondition } from '../../withCondition'
-import { fieldBaseClass } from '../shared'
-import { CheckboxInput } from './Input'
+import { useForm } from '../../Form/context.js'
+import LabelComp from '../../Label/index.js'
+import useField from '../../useField/index.js'
+import { withCondition } from '../../withCondition/index.js'
+import { fieldBaseClass } from '../shared.js'
+import { CheckboxInput } from './Input.js'
 import './index.scss'
 
 const baseClass = 'checkbox'

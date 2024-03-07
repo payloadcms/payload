@@ -1,10 +1,10 @@
 'use client'
 import React, { forwardRef } from 'react'
 
-import type { Props } from '../../elements/Button/types'
+import type { Props } from '../../elements/Button/types.d.ts'
 
-import { Button } from '../../elements/Button'
-import { useForm, useFormProcessing } from '../Form/context'
+import { Button } from '../../elements/Button/index.js'
+import { useForm, useFormProcessing } from '../Form/context.js'
 import './index.scss'
 
 const baseClass = 'form-submit'

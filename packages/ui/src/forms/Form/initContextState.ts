@@ -11,7 +11,7 @@ import type {
   SetSubmitted,
   Submit,
   ValidateForm,
-} from './types'
+} from './types.d.ts'
 
 const submit: Submit = () => undefined
 const getSiblingData: GetSiblingData = () => undefined

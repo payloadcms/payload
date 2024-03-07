@@ -2,7 +2,7 @@
 import React from 'react'
 import { Fragment } from 'react'
 
-import { useFormFields } from '../Form/context'
+import { useFormFields } from '../Form/context.js'
 
 export const WatchCondition: React.FC<{
   children: React.ReactNode

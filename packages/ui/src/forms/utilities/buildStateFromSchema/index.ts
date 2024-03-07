@@ -1,6 +1,6 @@
 import type { Data, Field as FieldSchema, FormState, PayloadRequest } from 'payload/types'
 
-import { iterateFields } from './iterateFields'
+import { iterateFields } from './iterateFields.js'
 
 type Args = {
   data?: Data

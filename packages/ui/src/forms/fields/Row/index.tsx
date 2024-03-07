@@ -1,13 +1,13 @@
 'use client'
 import React from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import RenderFields from '../../RenderFields'
-import { withCondition } from '../../withCondition'
-import { fieldBaseClass } from '../shared'
+import RenderFields from '../../RenderFields/index.js'
+import { withCondition } from '../../withCondition/index.js'
+import { fieldBaseClass } from '../shared.js'
 import './index.scss'
-import { RowProvider } from './provider'
+import { RowProvider } from './provider.js'
 
 const baseClass = 'row'
 

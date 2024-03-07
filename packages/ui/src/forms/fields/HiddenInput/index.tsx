@@ -1,10 +1,10 @@
 'use client'
 import React, { useEffect } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import useField from '../../useField'
-import { withCondition } from '../../withCondition'
+import useField from '../../useField/index.js'
+import { withCondition } from '../../withCondition/index.js'
 
 /**
  * This is mainly used to save a value on the form that is not visible to the user.

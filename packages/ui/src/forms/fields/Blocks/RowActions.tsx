@@ -4,11 +4,11 @@ import type { Labels } from 'payload/types'
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
-import type { FieldMap, ReducedBlock } from '../../../utilities/buildComponentMap/types'
+import type { FieldMap, ReducedBlock } from '../../../utilities/buildComponentMap/types.d.ts'
 
-import { ArrayAction } from '../../../elements/ArrayAction'
-import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug'
-import { BlocksDrawer } from './BlocksDrawer'
+import { ArrayAction } from '../../../elements/ArrayAction/index.js'
+import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug.js'
+import { BlocksDrawer } from './BlocksDrawer/index.js'
 
 export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void

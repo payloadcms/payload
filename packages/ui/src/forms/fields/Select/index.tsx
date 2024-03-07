@@ -4,14 +4,14 @@ import type { ClientValidate, Option, OptionObject } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import ReactSelect from '../../../elements/ReactSelect'
-import { useTranslation } from '../../../providers/Translation'
-import LabelComp from '../../Label'
-import useField from '../../useField'
-import { withCondition } from '../../withCondition'
-import { fieldBaseClass } from '../shared'
+import ReactSelect from '../../../elements/ReactSelect/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import LabelComp from '../../Label/index.js'
+import useField from '../../useField/index.js'
+import { withCondition } from '../../withCondition/index.js'
+import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
 const formatOptions = (options: Option[]): OptionObject[] =>

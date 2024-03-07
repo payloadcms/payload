@@ -1,4 +1,4 @@
-import buildStateFromSchema from './index'
+import buildStateFromSchema from './index.js'
 
 describe('Form - buildStateFromSchema', () => {
   const defaultValue = 'Default'
@@ -6,9 +6,9 @@ describe('Form - buildStateFromSchema', () => {
     const fieldSchema = [
       {
         name: 'text',
+        type: 'text',
         defaultValue,
         label: 'Text',
-        type: 'text',
       },
     ]
     const state = await buildStateFromSchema({ fieldSchema })
@@ -20,9 +20,9 @@ describe('Form - buildStateFromSchema', () => {
     const fieldSchema = [
       {
         name: 'text',
+        type: 'text',
         defaultValue,
         label: 'Text',
-        type: 'text',
       },
     ]
     const state = await buildStateFromSchema({ data, fieldSchema })
@@ -34,6 +34,7 @@ describe('Form - buildStateFromSchema', () => {
     const fieldSchema = [
       {
         name: 'text',
+        type: 'text',
         defaultValue: (args) => {
           if (!args.locale) {
             return 'missing locale'
@@ -44,7 +45,6 @@ describe('Form - buildStateFromSchema', () => {
           return 'Default'
         },
         label: 'Text',
-        type: 'text',
       },
     ]
     const state = await buildStateFromSchema({ fieldSchema, locale, user })

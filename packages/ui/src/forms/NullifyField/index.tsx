@@ -2,12 +2,12 @@
 
 import * as React from 'react'
 
-import { Banner } from '../../elements/Banner'
-import { useConfig } from '../../providers/Config'
-import { useLocale } from '../../providers/Locale'
-import { useTranslation } from '../../providers/Translation'
-import { useForm } from '../Form/context'
-import CheckboxInput from '../fields/Checkbox'
+import { Banner } from '../../elements/Banner/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { useForm } from '../Form/context.js'
+import CheckboxInput from '../fields/Checkbox/index.js'
 
 type NullifyLocaleFieldProps = {
   fieldValue?: [] | null | number

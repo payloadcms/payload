@@ -20,7 +20,7 @@ import type {
   MappedField,
   MappedTab,
   ReducedBlock,
-} from '../../utilities/buildComponentMap/types'
+} from '../../utilities/buildComponentMap/types.d.ts'
 
 export const fieldBaseClass = 'field-type'
 

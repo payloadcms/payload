@@ -4,12 +4,12 @@ import type { ClientValidate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types'
+import type { Props } from './types.d.ts'
 
-import DatePickerField from '../../../elements/DatePicker'
-import { useTranslation } from '../../../providers/Translation'
-import useField from '../../useField'
-import { fieldBaseClass } from '../shared'
+import DatePickerField from '../../../elements/DatePicker/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import useField from '../../useField/index.js'
+import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'

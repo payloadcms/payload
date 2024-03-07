@@ -3,16 +3,16 @@ import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Option } from '../../../elements/ReactSelect/types'
-import type { Props } from './types'
+import type { Option } from '../../../elements/ReactSelect/types.d.ts'
+import type { Props } from './types.d.ts'
 
-import { useConfig } from '../../../providers/Config'
-import { useLocale } from '../../../providers/Locale'
-import LabelComp from '../../Label'
-import useField from '../../useField'
-import { withCondition } from '../../withCondition'
-import { isFieldRTL } from '../shared'
-import { TextInput } from './Input'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useLocale } from '../../../providers/Locale/index.js'
+import LabelComp from '../../Label/index.js'
+import useField from '../../useField/index.js'
+import { withCondition } from '../../withCondition/index.js'
+import { isFieldRTL } from '../shared.js'
+import { TextInput } from './Input.js'
 import './index.scss'
 
 const Text: React.FC<Props> = (props) => {

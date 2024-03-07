@@ -1,4 +1,4 @@
-import type { Value } from './types'
+import type { Value } from './types.d.ts'
 
 type RelationMap = {
   [relation: string]: (number | string)[]

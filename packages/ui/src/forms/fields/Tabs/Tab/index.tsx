@@ -2,11 +2,11 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { useState } from 'react'
 
-import type { MappedTab } from '../../../../utilities/buildComponentMap/types'
+import type { MappedTab } from '../../../../utilities/buildComponentMap/types.d.ts'
 
-import { ErrorPill } from '../../../../elements/ErrorPill'
-import { useTranslation } from '../../../../providers/Translation'
-import { WatchChildErrors } from '../../../WatchChildErrors'
+import { ErrorPill } from '../../../../elements/ErrorPill/index.js'
+import { useTranslation } from '../../../../providers/Translation/index.js'
+import { WatchChildErrors } from '../../../WatchChildErrors/index.js'
 import './index.scss'
 
 const baseClass = 'tabs-field__tab-button'

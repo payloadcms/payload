@@ -3,9 +3,9 @@ import type { FieldPermissions } from 'payload/auth'
 
 import React from 'react'
 
-import { useOperation } from '../../providers/OperationProvider'
-import { FieldPathProvider, useFieldPath } from '../FieldPathProvider'
-import { ReadOnlyProvider, useReadOnly } from '../ReadOnlyProvider'
+import { useOperation } from '../../providers/OperationProvider/index.js'
+import { FieldPathProvider, useFieldPath } from '../FieldPathProvider/index.js'
+import { ReadOnlyProvider, useReadOnly } from '../ReadOnlyProvider/index.js'
 
 export const RenderField: React.FC<{
   Field: React.ReactNode
