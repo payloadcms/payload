@@ -25,7 +25,7 @@ import {
   SetViewActions,
   UnpublishMany,
 } from '@payloadcms/ui/elements'
-import LinkDefault from 'next/link.js'
+import LinkImport from 'next/link.js'
 import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
@@ -35,7 +35,7 @@ import { RelationshipProvider } from './RelationshipProvider/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
-const Link = LinkDefault.default
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
   const {

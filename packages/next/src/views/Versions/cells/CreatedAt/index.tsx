@@ -1,9 +1,9 @@
 'use client'
 import { formatDate, useConfig, useTableCell, useTranslation } from '@payloadcms/ui'
-import LinkDefault from 'next/link.js'
+import LinkImport from 'next/link.js'
 import React from 'react'
 
-const Link = LinkDefault.default
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 type CreatedAtCellProps = {
   collectionSlug?: string

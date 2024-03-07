@@ -1,11 +1,11 @@
 'use client'
 import type { SanitizedConfig } from 'payload/types'
 
-import LinkDefault from 'next/link.js'
+import LinkImport from 'next/link.js'
 import { useParams, usePathname } from 'next/navigation.js'
 import React from 'react'
 
-const Link = LinkDefault.default
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DocumentTabLink: React.FC<{
   adminRoute: SanitizedConfig['routes']['admin']

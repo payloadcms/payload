@@ -1,11 +1,11 @@
-import LinkDefault from 'next/link.js'
+import LinkImport from 'next/link.js'
 import React from 'react' // TODO: abstract this out to support all routers
 
 import type { Props, RenderedTypeProps } from './types.d.ts'
 
 import './index.scss'
 
-const Link = LinkDefault.default
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 const baseClass = 'banner'
 

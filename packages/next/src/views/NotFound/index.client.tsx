@@ -1,13 +1,13 @@
 'use client'
 import { Button, Gutter, useConfig, useStepNav, useTranslation } from '@payloadcms/ui'
-import LinkDefault from 'next/link.js'
+import LinkImport from 'next/link.js'
 import React, { useEffect } from 'react'
 
 import './index.scss'
 
 const baseClass = 'not-found'
 
-const Link = LinkDefault.default
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const NotFoundClient: React.FC<{
   marginTop?: 'large'

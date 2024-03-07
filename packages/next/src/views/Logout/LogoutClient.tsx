@@ -1,10 +1,10 @@
 'use client'
 import { Button, useTranslation } from '@payloadcms/ui'
 import { useAuth } from '@payloadcms/ui/providers'
-import LinkDefault from 'next/link.js'
+import LinkImport from 'next/link.js'
 import React, { Fragment, useEffect } from 'react'
 
-const Link = LinkDefault.default
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const LogoutClient: React.FC<{
   adminRoute: string
