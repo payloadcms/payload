@@ -30,6 +30,18 @@ module.exports = {
       files: ['*.js', '*.cjs'],
       extends: ['plugin:@typescript-eslint/disable-type-checked'],
     },
+    {
+      files: ['*.config.ts'],
+      rules: {
+        'no-restricted-exports': 'off',
+      },
+    },
+    {
+      files: ['config.ts'],
+      rules: {
+        'no-restricted-exports': 'off',
+      },
+    },
   ],
   rules: {
     '@typescript-eslint/ban-ts-comment': 'off',
