@@ -37,6 +37,10 @@ export function cloneDeep<T>(object: T, cache: WeakMap<any, any> = new WeakMap()
 
   // Handle Array and Object
   if (typeof object === 'object' && object !== null) {
+    if ('$$typeof' in object && typeof object.$$typeof === 'symbol') {
+      return object
+    }
+
     const clonedObject: any = Array.isArray(object)
       ? []
       : Object.create(Object.getPrototypeOf(object))
