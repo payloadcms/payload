@@ -28,7 +28,7 @@ export type DocumentInfoProps = {
   id: null | number | string
   initialData?: Data
   initialState?: FormState
-  onSave?: (data: Data) => Promise<void>
+  onSave?: (data: Data) => Promise<void> | void
   title?: string
 }
 
@@ -47,6 +47,6 @@ export type DocumentInfoContext = Omit<DocumentInfo, 'docPreferences'> & {
   getDocPreferences: () => Promise<{ [key: string]: unknown }>
   getVersions: () => Promise<void>
   setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
-  setDocumentInfo?: React.Dispatch<React.SetStateAction<DocumentInfo>>
+  setDocumentInfo?: React.Dispatch<React.SetStateAction<Partial<DocumentInfo>>>
   setDocumentTitle: (title: string) => void
 }
