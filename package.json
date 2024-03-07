@@ -139,7 +139,7 @@
     "tempfile": "^3.0.0",
     "ts-node": "10.9.2",
     "tsx": "^4.7.1",
-    "turbo": "^1.12.4",
+    "turbo": "^1.12.5",
     "typescript": "5.2.2",
     "uuid": "^9.0.1",
     "yocto-queue": "^1.0.0"
