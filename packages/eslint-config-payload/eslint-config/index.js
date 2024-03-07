@@ -7,6 +7,7 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
+    'plugin:unicorn/recommended',
     'plugin:perfectionist/recommended-natural',
     'plugin:@typescript-eslint/recommended-type-checked',
     'plugin:regexp/recommended',
@@ -24,7 +25,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'unicorn'],
   overrides: [
     {
       files: ['*.js', '*.cjs'],
