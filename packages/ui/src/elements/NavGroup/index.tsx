@@ -1,11 +1,13 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import AnimateHeightWithDefault from 'react-animate-height'
+import AnimateHeightImport from 'react-animate-height'
 
-import { Chevron } from '../../icons/Chevron'
-import { usePreferences } from '../../providers/Preferences'
-import { useNav } from '../Nav/context'
+import { Chevron } from '../../icons/Chevron/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
+import { useNav } from '../Nav/context.js'
 import './index.scss'
+
+const { default: AnimateHeight } = AnimateHeightImport
 
 const baseClass = 'nav-group'
 
@@ -13,9 +15,6 @@ type Props = {
   children: React.ReactNode
   label: string
 }
-
-// @ts-expect-error trust me it works
-const AnimateHeight = AnimateHeightWithDefault || AnimateHeightWithDefault.default
 
 const NavGroup: React.FC<Props> = ({ children, label }) => {
   const [collapsed, setCollapsed] = useState(true)

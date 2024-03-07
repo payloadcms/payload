@@ -15,5 +15,3 @@ export const bold: RichTextCustomLeaf = {
   ),
   Leaf: Bold,
 }
-
-export default bold

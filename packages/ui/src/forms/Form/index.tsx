@@ -3,26 +3,26 @@ import type { Field, FormState } from 'payload/types'
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import isDeepEqual from 'deep-equal'
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import { wait } from 'payload/utilities'
 import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types'
+import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types.d.ts'
 
-import { useFormQueryParams } from '../..'
-import { useDebouncedEffect } from '../../hooks/useDebouncedEffect'
-import useThrottledEffect from '../../hooks/useThrottledEffect'
-import { useAuth } from '../../providers/Auth'
-import { useConfig } from '../../providers/Config'
-import { useDocumentInfo } from '../../providers/DocumentInfo'
-import { useLocale } from '../../providers/Locale'
-import { useOperation } from '../../providers/OperationProvider'
-import { useTranslation } from '../../providers/Translation'
-import { requests } from '../../utilities/api'
-import { getFormState } from '../../utilities/getFormState'
+import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
+import useThrottledEffect from '../../hooks/useThrottledEffect.js'
+import { useAuth } from '../../providers/Auth/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
+import { useOperation } from '../../providers/OperationProvider/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { requests } from '../../utilities/api.js'
+import { getFormState } from '../../utilities/getFormState.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -30,14 +30,14 @@ import {
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
-} from './context'
-import errorMessages from './errorMessages'
-import { fieldReducer } from './fieldReducer'
-import getDataByPathFunc from './getDataByPath'
-import getSiblingDataFunc from './getSiblingData'
-import initContextState from './initContextState'
-import { mergeServerFormState } from './mergeServerFormState'
-import reduceFieldsToValues from './reduceFieldsToValues'
+} from './context.js'
+import errorMessages from './errorMessages.js'
+import { fieldReducer } from './fieldReducer.js'
+import getDataByPathFunc from './getDataByPath.js'
+import getSiblingDataFunc from './getSiblingData.js'
+import initContextState from './initContextState.js'
+import { mergeServerFormState } from './mergeServerFormState.js'
+import reduceFieldsToValues from './reduceFieldsToValues.js'
 
 const baseClass = 'form'
 

@@ -7,7 +7,7 @@ import { useTranslation } from '@payloadcms/ui/providers'
 import React, { useCallback, useEffect } from 'react'
 
 import './index.scss'
-import { usePreventLeave } from './usePreventLeave'
+import { usePreventLeave } from './usePreventLeave.js'
 
 const modalSlug = 'leave-without-saving'
 
