@@ -1,4 +1,4 @@
-import type { EnabledFeatures } from './types.d.ts'
+import type { EnabledFeatures } from './types.js'
 
 export const createFeatureMap = (
   richTextComponentMap: Map<string, React.ReactNode>,

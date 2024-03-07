@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../collections/config/types.d.ts'
+import type { CollectionConfig } from '../../collections/config/types.js'
 
 export const migrationsCollection: CollectionConfig = {
   slug: 'payload-migrations',

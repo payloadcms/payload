@@ -4,7 +4,7 @@ import type { SingleValueProps } from 'react-select'
 import React, { Fragment, useEffect, useState } from 'react'
 import { components as SelectComponents } from 'react-select'
 
-import type { Option } from '../../types.d.ts'
+import type { Option } from '../../types.js'
 
 import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer/index.js'
 import { Tooltip } from '../../../../../elements/Tooltip/index.js'

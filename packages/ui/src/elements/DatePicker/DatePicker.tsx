@@ -3,7 +3,7 @@ import React from 'react'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { Calendar as CalendarIcon } from '../../icons/Calendar/index.js'
 import { X as XIcon } from '../../icons/X/index.js'

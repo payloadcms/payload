@@ -2,7 +2,7 @@ import type { StorageOptions } from '@google-cloud/storage'
 
 import { Storage } from '@google-cloud/storage'
 
-import type { Adapter, GeneratedAdapter } from '../../types.d.ts'
+import type { Adapter, GeneratedAdapter } from '../../types.js'
 
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'

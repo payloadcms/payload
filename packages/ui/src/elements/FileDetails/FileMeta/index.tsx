@@ -1,7 +1,7 @@
 import { formatFilesize } from 'payload/utilities'
 import React, { useState } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { Edit } from '../../../icons/Edit/index.js'
 import CopyToClipboard from '../../CopyToClipboard/index.js'

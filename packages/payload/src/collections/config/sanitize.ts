@@ -1,7 +1,7 @@
 import merge from 'deepmerge'
 
-import type { Config } from '../../config/types.d.ts'
-import type { CollectionConfig, SanitizedCollectionConfig } from './types.d.ts'
+import type { Config } from '../../config/types.js'
+import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import baseAccountLockFields from '../../auth/baseFields/accountLock.js'
 import baseAPIKeyFields from '../../auth/baseFields/apiKey.js'

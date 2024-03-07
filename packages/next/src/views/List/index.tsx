@@ -8,8 +8,8 @@ import { notFound } from 'next/navigation.js'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
-import type { AdminViewProps } from '../Root/index.d.ts'
-import type { DefaultListViewProps, ListPreferences } from './Default/types.d.ts'
+import type { AdminViewProps } from '../Root/index.js'
+import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
 
 import { DefaultListView } from './Default/index.js'
 

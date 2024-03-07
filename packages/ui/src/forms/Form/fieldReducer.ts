@@ -4,7 +4,7 @@ import ObjectIdImport from 'bson-objectid'
 import equal from 'deep-equal'
 import { deepCopyObject } from 'payload/utilities'
 
-import type { FieldAction } from './types.d.ts'
+import type { FieldAction } from './types.js'
 
 import { flattenRows, separateRows } from './rows.js'
 

@@ -1,7 +1,7 @@
 import { translations } from '@payloadcms/translations/api'
 
-import type { Config } from '../../config/types.d.ts'
-import type { SanitizedGlobalConfig } from './types.d.ts'
+import type { Config } from '../../config/types.js'
+import type { SanitizedGlobalConfig } from './types.js'
 
 import defaultAccess from '../../auth/defaultAccess.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'

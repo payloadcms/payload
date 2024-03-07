@@ -1,6 +1,6 @@
 import type { Destroy } from 'payload/database'
 
-import type { PostgresAdapter } from './types.d.ts'
+import type { PostgresAdapter } from './types.js'
 
 export const destroy: Destroy = async function destroy(this: PostgresAdapter) {
   // TODO: this hangs test suite for some reason

@@ -11,7 +11,7 @@ import {
 } from 'payload/database'
 import prompts from 'prompts'
 
-import type { PostgresAdapter } from './types.d.ts'
+import type { PostgresAdapter } from './types.js'
 
 import { createMigrationTable } from './utilities/createMigrationTable.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'

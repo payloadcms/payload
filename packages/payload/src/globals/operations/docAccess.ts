@@ -1,6 +1,6 @@
-import type { GlobalPermission } from '../../auth/index.d.ts'
-import type { AllOperations, PayloadRequest } from '../../types/index.d.ts'
-import type { SanitizedGlobalConfig } from '../config/types.d.ts'
+import type { GlobalPermission } from '../../auth/index.js'
+import type { AllOperations, PayloadRequest } from '../../types/index.js'
+import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'

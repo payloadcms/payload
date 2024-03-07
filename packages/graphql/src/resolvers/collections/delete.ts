@@ -4,7 +4,7 @@ import type { PayloadRequest } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import type { Context } from '../types.d.ts'
+import type { Context } from '../types.js'
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,

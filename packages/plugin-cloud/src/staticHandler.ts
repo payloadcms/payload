@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
-import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types.d.ts'
+import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types.js'
 
 import { createKey } from './utilities/createKey.js'
 import { getStorageClient } from './utilities/getStorageClient.js'

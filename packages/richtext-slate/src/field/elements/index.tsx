@@ -1,4 +1,4 @@
-import type { RichTextCustomElement } from '../../types.d.ts'
+import type { RichTextCustomElement } from '../../types.js'
 
 import { blockquote } from './blockquote/index.js'
 import { h1 } from './h1/index.js'

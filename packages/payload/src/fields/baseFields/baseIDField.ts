@@ -1,6 +1,6 @@
 import ObjectIdImport from 'bson-objectid'
 
-import type { Field, FieldHook } from '../config/types.d.ts'
+import type { Field, FieldHook } from '../config/types.js'
 
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default

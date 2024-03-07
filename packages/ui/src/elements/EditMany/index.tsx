@@ -5,7 +5,7 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { FieldPathProvider } from '../../forms/FieldPathProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'

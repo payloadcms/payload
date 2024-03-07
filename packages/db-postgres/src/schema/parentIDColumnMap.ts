@@ -1,6 +1,6 @@
 import { integer, numeric, uuid, varchar } from 'drizzle-orm/pg-core'
 
-import type { IDType } from '../types.d.ts'
+import type { IDType } from '../types.js'
 
 export const parentIDColumnMap: Record<
   IDType,

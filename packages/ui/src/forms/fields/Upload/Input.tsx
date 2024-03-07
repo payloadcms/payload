@@ -5,9 +5,9 @@ import type { SanitizedCollectionConfig, UploadField } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.d.ts'
-import type { ListDrawerProps } from '../../../elements/ListDrawer/types.d.ts'
-import type { FilterOptionsResult } from '../Relationship/types.d.ts'
+import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js'
+import type { ListDrawerProps } from '../../../elements/ListDrawer/types.js'
+import type { FilterOptionsResult } from '../Relationship/types.js'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'

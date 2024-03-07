@@ -2,9 +2,9 @@ import type { CellProps, SanitizedCollectionConfig } from 'payload/types'
 
 import React from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListInfo/types.d.ts'
-import type { FieldMap } from '../../utilities/buildComponentMap/types.d.ts'
-import type { Column } from '../Table/types.d.ts'
+import type { ColumnPreferences } from '../../providers/ListInfo/types.js'
+import type { FieldMap } from '../../utilities/buildComponentMap/types.js'
+import type { Column } from '../Table/types.js'
 
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'

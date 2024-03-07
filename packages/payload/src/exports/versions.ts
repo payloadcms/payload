@@ -6,4 +6,4 @@ export { getLatestCollectionVersion } from '../versions/getLatestCollectionVersi
 export { getLatestGlobalVersion } from '../versions/getLatestGlobalVersion.js'
 export { getVersionsModelName } from '../versions/getVersionsModelName.js'
 export { saveVersion } from '../versions/saveVersion.js'
-export type { TypeWithVersion } from '../versions/types.d.ts'
+export type { TypeWithVersion } from '../versions/types.js'

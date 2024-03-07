@@ -1,5 +1,5 @@
-import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
-import type { Document, Payload, PayloadRequest, Where } from '../types/index.d.ts'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
 
 import { docHasTimestamps } from '../types/index.js'
 

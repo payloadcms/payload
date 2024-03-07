@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { RichTextCustomElement } from '../../../types.d.ts'
+import type { RichTextCustomElement } from '../../../types.js'
 
 import { AlignCenterIcon } from '../../icons/AlignCenter/index.js'
 import { AlignLeftIcon } from '../../icons/AlignLeft/index.js'

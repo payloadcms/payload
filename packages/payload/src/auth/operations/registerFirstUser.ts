@@ -1,8 +1,8 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { Collection } from '../../collections/config/types.d.ts'
-import type { GeneratedTypes } from '../../index.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
+import type { Collection } from '../../collections/config/types.js'
+import type { GeneratedTypes } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'

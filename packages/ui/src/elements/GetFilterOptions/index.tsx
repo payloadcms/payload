@@ -3,7 +3,7 @@ import type { FilterOptions } from 'payload/types'
 import equal from 'deep-equal'
 import { useEffect } from 'react'
 
-import type { FilterOptionsResult } from '../../forms/fields/Relationship/types.d.ts'
+import type { FilterOptionsResult } from '../../forms/fields/Relationship/types.js'
 
 import { useAllFormFields } from '../../forms/Form/context.js'
 import getSiblingData from '../../forms/Form/getSiblingData.js'

@@ -6,7 +6,7 @@ import type {
   BeginTransaction,
   CommitTransaction,
   RollbackTransaction,
-} from './types.d.ts'
+} from './types.js'
 
 import { createMigration } from './migrations/createMigration.js'
 import { migrate } from './migrations/migrate.js'

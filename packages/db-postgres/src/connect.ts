@@ -7,7 +7,7 @@ import { numeric, timestamp, varchar } from 'drizzle-orm/pg-core'
 import { Pool } from 'pg'
 import prompts from 'prompts'
 
-import type { PostgresAdapter } from './types.d.ts'
+import type { PostgresAdapter } from './types.js'
 
 const connectWithReconnect = async function ({
   adapter,

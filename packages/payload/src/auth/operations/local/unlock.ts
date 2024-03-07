@@ -1,6 +1,6 @@
-import type { Payload, RequestContext } from '../../../index.d.ts'
-import type { GeneratedTypes } from '../../../index.d.ts'
-import type { PayloadRequest } from '../../../types/index.d.ts'
+import type { Payload, RequestContext } from '../../../index.js'
+import type { GeneratedTypes } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'

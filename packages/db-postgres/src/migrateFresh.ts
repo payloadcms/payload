@@ -9,7 +9,7 @@ import {
 } from 'payload/database'
 import prompts from 'prompts'
 
-import type { PostgresAdapter } from './types.d.ts'
+import type { PostgresAdapter } from './types.js'
 
 import { parseError } from './utilities/parseError.js'
 

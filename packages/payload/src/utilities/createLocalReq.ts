@@ -1,6 +1,6 @@
-import type { Payload, RequestContext } from '../index.d.ts'
-import type { User } from '../auth/types.d.ts'
-import type { PayloadRequest } from '../types/index.d.ts'
+import type { Payload, RequestContext } from '../index.js'
+import type { User } from '../auth/types.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'

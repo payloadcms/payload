@@ -9,7 +9,7 @@ import {
   readMigrationFiles,
 } from 'payload/database'
 
-import type { PostgresAdapter } from './types.d.ts'
+import type { PostgresAdapter } from './types.js'
 
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 

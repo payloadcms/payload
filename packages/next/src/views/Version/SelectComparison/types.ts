@@ -1,7 +1,7 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import type { CompareOption } from '../Default/types.d.ts'
+import type { CompareOption } from '../Default/types.js'
 
 export type Props = {
   baseURL: string

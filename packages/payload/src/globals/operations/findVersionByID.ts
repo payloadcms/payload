@@ -1,8 +1,8 @@
 /* eslint-disable no-underscore-dangle */
-import type { FindGlobalVersionsArgs } from '../../database/types.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
-import type { TypeWithVersion } from '../../versions/types.d.ts'
-import type { SanitizedGlobalConfig } from '../config/types.d.ts'
+import type { FindGlobalVersionsArgs } from '../../database/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { TypeWithVersion } from '../../versions/types.js'
+import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'

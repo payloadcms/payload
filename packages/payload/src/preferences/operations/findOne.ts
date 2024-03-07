@@ -1,6 +1,6 @@
-import type { GeneratedTypes } from '../../index.d.ts'
-import type { Where } from '../../types/index.d.ts'
-import type { PreferenceRequest } from '../types.d.ts'
+import type { GeneratedTypes } from '../../index.js'
+import type { Where } from '../../types/index.js'
+import type { PreferenceRequest } from '../types.js'
 
 async function findOne(
   args: PreferenceRequest,

@@ -1,6 +1,6 @@
 import merge from 'deepmerge'
 
-import type { Field, FieldWithSubFields } from './config/types.d.ts'
+import type { Field, FieldWithSubFields } from './config/types.js'
 
 import { fieldAffectsData, fieldHasSubFields } from './config/types.js'
 

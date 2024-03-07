@@ -13,7 +13,7 @@ import { index, integer, numeric, serial, timestamp, unique, varchar } from 'dri
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types.d.ts'
+import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types.js'
 
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { setColumnID } from './setColumnID.js'

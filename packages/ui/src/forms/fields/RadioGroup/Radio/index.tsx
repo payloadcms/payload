@@ -4,7 +4,7 @@ import type { OptionObject } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { OnChange } from '../types.d.ts'
+import type { OnChange } from '../types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.scss'

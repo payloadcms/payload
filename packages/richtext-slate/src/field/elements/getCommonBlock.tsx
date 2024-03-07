@@ -2,7 +2,7 @@ import type { NodeEntry, NodeMatch } from 'slate'
 
 import { Editor, Node } from 'slate'
 
-import type { ElementNode } from '../../types.d.ts'
+import type { ElementNode } from '../../types.js'
 
 import { isBlockElement } from './isBlockElement.js'
 

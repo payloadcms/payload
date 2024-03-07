@@ -20,7 +20,7 @@ import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { UploadElementType } from '../types.d.ts'
+import type { UploadElementType } from '../types.js'
 
 import { useElement } from '../../../providers/ElementProvider.js'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'

@@ -5,7 +5,7 @@ import type { PayloadRequest } from 'payload/types'
 import { flattenWhereToOperators } from 'payload/database'
 import { buildVersionGlobalFields } from 'payload/versions'
 
-import type { MongooseAdapter } from './index.d.ts'
+import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'

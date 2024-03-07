@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
-import type { FieldCondition } from '../types.d.ts'
-import type { Props } from './types.d.ts'
+import type { FieldCondition } from '../types.js'
+import type { Props } from './types.js'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import useDebounce from '../../../hooks/useDebounce.js'

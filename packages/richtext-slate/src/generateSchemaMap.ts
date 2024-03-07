@@ -4,7 +4,7 @@ import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/client'
 import { sanitizeFields } from 'payload/config'
 
-import type { AdapterArguments, RichTextCustomElement } from './types.d.ts'
+import type { AdapterArguments, RichTextCustomElement } from './types.js'
 
 import { elements as elementTypes } from './field/elements/index.js'
 import { linkFieldsSchemaPath } from './field/elements/link/shared.js'

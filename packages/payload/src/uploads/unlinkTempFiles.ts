@@ -1,9 +1,9 @@
 import fs from 'fs'
 import { promisify } from 'util'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
-import type { SanitizedConfig } from '../config/types.d.ts'
-import type { PayloadRequest } from '../types/index.d.ts'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { mapAsync } from '../utilities/mapAsync.js'
 

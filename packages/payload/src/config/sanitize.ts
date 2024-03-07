@@ -6,7 +6,7 @@ import type {
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
-} from './types.d.ts'
+} from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import sanitizeCollection from '../collections/config/sanitize.js'

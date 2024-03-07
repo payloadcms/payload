@@ -2,7 +2,7 @@ import { findVersionsOperationGlobal } from 'payload/operations'
 import type { Document, PayloadRequest, SanitizedGlobalConfig, Where } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import type { Context } from '../types.d.ts'
+import type { Context } from '../types.js'
 
 export type Resolver = (
   _: unknown,

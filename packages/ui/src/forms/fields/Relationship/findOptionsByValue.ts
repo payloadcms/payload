@@ -1,5 +1,5 @@
-import type { Option } from '../../../elements/ReactSelect/types.d.ts'
-import type { OptionGroup, Value } from './types.d.ts'
+import type { Option } from '../../../elements/ReactSelect/types.js'
+import type { OptionGroup, Value } from './types.js'
 
 type Args = {
   options: OptionGroup[]

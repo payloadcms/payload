@@ -3,7 +3,7 @@ import { generatePayloadCookie } from 'payload/auth'
 import { loginOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-import type { CollectionRouteHandler } from '../types.d.ts'
+import type { CollectionRouteHandler } from '../types.js'
 
 export const login: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req

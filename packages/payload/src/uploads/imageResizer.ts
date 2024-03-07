@@ -6,9 +6,9 @@ const { fromBuffer } = fileType
 import fs from 'fs'
 import sanitize from 'sanitize-filename'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
-import type { SharpDependency } from '../config/types.d.ts'
-import type { CustomPayloadRequest, PayloadRequest, UploadEdits } from '../types/index.d.ts'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SharpDependency } from '../config/types.js'
+import type { CustomPayloadRequest, PayloadRequest, UploadEdits } from '../types/index.js'
 import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types.js'
 
 import { isNumber } from '../utilities/isNumber.js'

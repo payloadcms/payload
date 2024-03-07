@@ -1,6 +1,6 @@
 import path from 'path'
 
-import type { Config } from './types.d.ts'
+import type { Config } from './types.js'
 
 export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {

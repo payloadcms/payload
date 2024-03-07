@@ -2,8 +2,8 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { PayloadRequest } from '../types/index.d.ts'
-import type { TypeWithID } from './config/types.d.ts'
+import type { PayloadRequest } from '../types/index.js'
+import type { TypeWithID } from './config/types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
 import { getIDType } from '../utilities/getIDType.js'

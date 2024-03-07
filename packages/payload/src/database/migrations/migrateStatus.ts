@@ -1,6 +1,6 @@
 import { Table } from 'console-table-printer'
 
-import type { BaseDatabaseAdapter } from '../types.d.ts'
+import type { BaseDatabaseAdapter } from '../types.js'
 
 import { getMigrations } from './getMigrations.js'
 import { readMigrationFiles } from './readMigrationFiles.js'

@@ -4,7 +4,7 @@ import type { Connect } from 'payload/database'
 
 import mongoose from 'mongoose'
 
-import type { MongooseAdapter } from './index.d.ts'
+import type { MongooseAdapter } from './index.js'
 
 export const connect: Connect = async function connect(
   this: MongooseAdapter,

@@ -1,8 +1,4 @@
-import type {
-  Field,
-  FieldAffectingData,
-  FieldPresentationalOnly,
-} from '../fields/config/types.d.ts'
+import type { Field, FieldAffectingData, FieldPresentationalOnly } from '../fields/config/types.js'
 
 import {
   fieldAffectsData,

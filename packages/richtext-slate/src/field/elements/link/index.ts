@@ -1,4 +1,4 @@
-import type { RichTextCustomElement } from '../../../types.d.ts'
+import type { RichTextCustomElement } from '../../../types.js'
 
 import { LinkButton } from './Button/index.js'
 import { LinkElement } from './Element/index.js'

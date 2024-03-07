@@ -3,7 +3,7 @@ import type { FormField } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import Error from '../../Error/index.js'

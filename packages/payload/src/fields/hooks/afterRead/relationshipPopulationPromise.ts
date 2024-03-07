@@ -1,5 +1,5 @@
-import type { PayloadRequest } from '../../../types/index.d.ts'
-import type { RelationshipField, UploadField } from '../../config/types.d.ts'
+import type { PayloadRequest } from '../../../types/index.js'
+import type { RelationshipField, UploadField } from '../../config/types.js'
 
 import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types.js'
 

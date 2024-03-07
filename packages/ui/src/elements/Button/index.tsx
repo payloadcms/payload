@@ -1,7 +1,7 @@
 'use client'
 import React, { Fragment, forwardRef, isValidElement } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { Edit } from '../../icons/Edit/index.js'

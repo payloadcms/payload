@@ -10,7 +10,7 @@ import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types.d.ts'
+import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types.js'
 
 import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'

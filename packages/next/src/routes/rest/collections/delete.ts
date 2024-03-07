@@ -5,7 +5,7 @@ import httpStatus from 'http-status'
 import { deleteOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-import type { CollectionRouteHandler } from '../types.d.ts'
+import type { CollectionRouteHandler } from '../types.js'
 
 export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, where } = req.query as {

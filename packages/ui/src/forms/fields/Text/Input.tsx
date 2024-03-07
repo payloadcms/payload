@@ -4,7 +4,7 @@ import type { ChangeEvent } from 'react'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Option } from '../../../elements/ReactSelect/types.d.ts'
+import type { Option } from '../../../elements/ReactSelect/types.js'
 
 import ReactSelect from '../../../elements/ReactSelect/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'

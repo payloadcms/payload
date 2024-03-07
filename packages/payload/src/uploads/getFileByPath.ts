@@ -3,7 +3,7 @@ import fs from 'fs'
 import path from 'path'
 const { fromFile } = fileType
 
-import type { CustomPayloadRequest } from '../types/index.d.ts'
+import type { CustomPayloadRequest } from '../types/index.js'
 
 const mimeTypeEstimate = {
   svg: 'image/svg+xml',

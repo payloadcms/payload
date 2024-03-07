@@ -1,5 +1,5 @@
-import type { CollectionPermission, GlobalPermission } from '../../auth/index.d.ts'
-import type { Field, FieldAffectingData, TabAsField, UIField } from '../../fields/config/types.d.ts'
+import type { CollectionPermission, GlobalPermission } from '../../auth/index.js'
+import type { Field, FieldAffectingData, TabAsField, UIField } from '../../fields/config/types.js'
 
 export type EntityPolicies = {
   collections?: {

@@ -2,7 +2,7 @@
 import { isImage } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import Error from '../../forms/Error/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'

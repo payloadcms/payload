@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from '../../types/index.d.ts'
-import type { BaseDatabaseAdapter } from '../types.d.ts'
+import type { PayloadRequest } from '../../types/index.js'
+import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'

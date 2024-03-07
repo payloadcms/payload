@@ -1,8 +1,8 @@
 import crypto from 'crypto'
 
-import type { SanitizedCollectionConfig } from '../../collections/config/types.d.ts'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Where } from '../../exports/types.js'
-import type { AuthStrategyFunction, User } from '../index.d.ts'
+import type { AuthStrategyFunction, User } from '../index.js'
 
 export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>

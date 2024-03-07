@@ -6,8 +6,8 @@ import { useFieldPath } from '@payloadcms/ui/forms'
 import { useClientFunctions } from '@payloadcms/ui/providers'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
-import type { RichTextPlugin } from '../types.d.ts'
-import type { EnabledFeatures } from './types.d.ts'
+import type { RichTextPlugin } from '../types.js'
+import type { EnabledFeatures } from './types.js'
 
 import { createFeatureMap } from './createFeatureMap.js'
 

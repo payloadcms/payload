@@ -1,5 +1,5 @@
-import type { CollectionConfig } from '../collections/config/types.d.ts'
-import type { Access, Config } from '../config/types.d.ts'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { Access, Config } from '../config/types.js'
 
 import { deleteHandler } from './requestHandlers/delete.js'
 import { findByIDHandler } from './requestHandlers/findOne.js'

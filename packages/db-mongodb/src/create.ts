@@ -1,7 +1,7 @@
 import type { Create } from 'payload/database'
 import type { Document, PayloadRequest } from 'payload/types'
 
-import type { MongooseAdapter } from './index.d.ts'
+import type { MongooseAdapter } from './index.js'
 
 import handleError from './utilities/handleError.js'
 import { withSession } from './withSession.js'

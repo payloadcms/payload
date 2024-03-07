@@ -3,7 +3,7 @@ import type { Field } from 'payload/types'
 import { Form, FormSubmit, buildStateFromSchema, mapFields } from '@payloadcms/ui'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root/index.d.ts'
+import type { AdminViewProps } from '../Root/index.js'
 
 import { CreateFirstUserFields } from './index.client.js'
 import './index.scss'

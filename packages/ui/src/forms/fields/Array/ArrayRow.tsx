@@ -4,8 +4,8 @@ import type { ArrayField, Operation, Row, RowLabel as RowLabelType } from 'paylo
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types.d.ts'
-import type { FieldMap } from '../../../utilities/buildComponentMap/types.d.ts'
+import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types.js'
+import type { FieldMap } from '../../../utilities/buildComponentMap/types.js'
 
 import { ArrayAction } from '../../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../../elements/Collapsible/index.js'

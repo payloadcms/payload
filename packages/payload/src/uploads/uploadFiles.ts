@@ -1,6 +1,6 @@
-import type { Payload } from '../index.d.ts'
-import type { PayloadRequest } from '../types/index.d.ts'
-import type { FileToSave } from './types.d.ts'
+import type { Payload } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
+import type { FileToSave } from './types.js'
 
 import { FileUploadError } from '../errors/index.js'
 import saveBufferToFile from './saveBufferToFile.js'

@@ -8,21 +8,21 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { DocumentTab, RichTextAdapter } from '../admin/types.d.ts'
-import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.d.ts'
-import type { User } from '../auth/types.d.ts'
+import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
+import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
+import type { User } from '../auth/types.js'
 import type {
   AfterErrorHook,
   Collection,
   CollectionConfig,
   SanitizedCollectionConfig,
-} from '../collections/config/types.d.ts'
-import type { DatabaseAdapterResult } from '../database/types.d.ts'
-import type { ClientConfigField } from '../fields/config/types.d.ts'
-import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.d.ts'
-import type { Payload } from '../index.d.ts'
-import type { PayloadRequest, Where } from '../types/index.d.ts'
-import type { PayloadLogger } from '../utilities/logger.d.ts'
+} from '../collections/config/types.js'
+import type { DatabaseAdapterResult } from '../database/types.js'
+import type { ClientConfigField } from '../fields/config/types.js'
+import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { Payload } from '../index.js'
+import type { PayloadRequest, Where } from '../types/index.js'
+import type { PayloadLogger } from '../utilities/logger.js'
 
 export type BinScriptConfig = {
   key: string

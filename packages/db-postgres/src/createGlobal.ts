@@ -3,7 +3,7 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.d.ts'
+import type { PostgresAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
 

@@ -6,7 +6,7 @@ import fs from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
 
-import type { HandleUpload } from '../../types.d.ts'
+import type { HandleUpload } from '../../types.js'
 
 interface Args {
   collection: CollectionConfig

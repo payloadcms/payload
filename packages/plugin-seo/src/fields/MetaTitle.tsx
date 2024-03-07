@@ -13,7 +13,7 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { GenerateTitle } from '../types.d.ts'
+import type { GenerateTitle } from '../types.js'
 
 import { defaults } from '../defaults.js'
 import { LengthIndicator } from '../ui/LengthIndicator.js'

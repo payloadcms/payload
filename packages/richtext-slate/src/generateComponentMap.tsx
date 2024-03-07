@@ -6,7 +6,7 @@ import { mapFields } from '@payloadcms/ui/utilities'
 import { sanitizeFields } from 'payload/config'
 import React from 'react'
 
-import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from './types.d.ts'
+import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from './types.js'
 
 import { elements as elementTypes } from './field/elements/index.js'
 import { linkFieldsSchemaPath } from './field/elements/link/shared.js'

@@ -1,7 +1,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import getDataByPath from '../Form/getDataByPath.js'
 import getSiblingData from '../Form/getSiblingData.js'

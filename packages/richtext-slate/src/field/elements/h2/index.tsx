@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { RichTextCustomElement } from '../../../types.d.ts'
+import type { RichTextCustomElement } from '../../../types.js'
 
 import { H2Icon } from '../../icons/headings/H2/index.js'
 import { ElementButton } from '../Button.js'

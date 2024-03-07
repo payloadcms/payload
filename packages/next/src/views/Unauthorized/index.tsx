@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { AdminViewProps } from '../Root/index.d.ts'
+import type { AdminViewProps } from '../Root/index.js'
 
 import { UnauthorizedClient } from './UnauthorizedClient.js'
 

@@ -13,7 +13,7 @@ import {
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import APIKey from './APIKey.js'
 import './index.scss'

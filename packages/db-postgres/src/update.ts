@@ -2,8 +2,8 @@ import type { UpdateOne } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { ChainedMethods } from './find/chainMethods.d.ts'
-import type { PostgresAdapter } from './types.d.ts'
+import type { ChainedMethods } from './find/chainMethods.js'
+import type { PostgresAdapter } from './types.js'
 import { chainMethods } from './find/chainMethods.js'
 import buildQuery from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'

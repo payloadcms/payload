@@ -3,7 +3,7 @@ import { Modal, useModal } from '@faceless-ui/modal'
 import React from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

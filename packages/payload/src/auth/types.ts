@@ -1,7 +1,7 @@
 import type { DeepRequired } from 'ts-essentials'
 
-import type { Payload } from '../index.d.ts'
-import type { PayloadRequest, Where } from '../types/index.d.ts'
+import type { Payload } from '../index.js'
+import type { PayloadRequest, Where } from '../types/index.js'
 
 export type Permission = {
   permission: boolean

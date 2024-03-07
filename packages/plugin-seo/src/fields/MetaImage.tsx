@@ -13,7 +13,7 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { GenerateImage } from '../types.d.ts'
+import type { GenerateImage } from '../types.js'
 
 import { Pill } from '../ui/Pill.js'
 

@@ -2,11 +2,11 @@ import type { DeepPartial } from 'ts-essentials'
 
 import httpStatus from 'http-status'
 
-import type { AccessResult } from '../../config/types.d.ts'
-import type { GeneratedTypes } from '../../index.d.ts'
-import type { PayloadRequest, Where } from '../../types/index.d.ts'
-import type { BulkOperationResult, Collection } from '../config/types.d.ts'
-import type { CreateUpdateType } from './create.d.ts'
+import type { AccessResult } from '../../config/types.js'
+import type { GeneratedTypes } from '../../index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
+import type { BulkOperationResult, Collection } from '../config/types.js'
+import type { CreateUpdateType } from './create.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'

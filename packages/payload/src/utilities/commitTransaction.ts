@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../types/index.d.ts'
+import type { PayloadRequest } from '../types/index.js'
 
 /**
  * complete a transaction calling adapter db.commitTransaction and delete the transactionID from req

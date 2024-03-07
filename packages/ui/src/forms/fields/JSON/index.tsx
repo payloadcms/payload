@@ -3,7 +3,7 @@ import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { CodeEditor } from '../../../elements/CodeEditor/index.js'
 import LabelComp from '../../Label/index.js'

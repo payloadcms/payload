@@ -1,6 +1,6 @@
 import * as AWS from '@aws-sdk/client-s3'
 
-import type { Adapter, GeneratedAdapter } from '../../types.d.ts'
+import type { Adapter, GeneratedAdapter } from '../../types.js'
 
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'

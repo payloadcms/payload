@@ -4,7 +4,7 @@ import type { GeneratedTypes } from 'payload'
 import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import type { Context } from '../types.d.ts'
+import type { Context } from '../types.js'
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   _: unknown,

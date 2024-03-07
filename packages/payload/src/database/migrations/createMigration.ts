@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import fs from 'fs'
 
-import type { CreateMigration } from '../types.d.ts'
+import type { CreateMigration } from '../types.js'
 
 import { migrationTemplate } from './migrationTemplate.js'
 

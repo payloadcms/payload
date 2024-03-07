@@ -3,8 +3,8 @@ import { getTranslation } from '@payloadcms/translations'
 import { isNumber } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Option } from '../../../elements/ReactSelect/types.d.ts'
-import type { Props } from './types.d.ts'
+import type { Option } from '../../../elements/ReactSelect/types.js'
+import type { Props } from './types.js'
 
 import ReactSelect from '../../../elements/ReactSelect/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'

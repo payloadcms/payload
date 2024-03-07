@@ -14,4 +14,4 @@ export type {
   Permissions,
   User,
   VerifyConfig,
-} from '../auth/types.d.ts'
+} from '../auth/types.js'

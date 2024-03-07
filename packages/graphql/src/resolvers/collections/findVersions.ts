@@ -4,7 +4,7 @@ import type { PaginatedDocs } from 'payload/database'
 import type { Collection } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import type { Context } from '../types.d.ts'
+import type { Context } from '../types.js'
 
 export type Resolver = (
   _: unknown,

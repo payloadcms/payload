@@ -2,7 +2,7 @@ import type { UseDraggableArguments } from '@dnd-kit/core'
 
 import React, { Fragment } from 'react'
 
-import type { ChildFunction } from './types.d.ts'
+import type { ChildFunction } from './types.js'
 
 import { useDraggableSortable } from '../useDraggableSortable/index.js'
 

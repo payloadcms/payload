@@ -1,4 +1,4 @@
-import type { ValidateOptions } from './config/types.d.ts'
+import type { ValidateOptions } from './config/types.js'
 
 import { number, password, point, relationship, select, text, textarea } from './validations.js'
 

@@ -2,7 +2,7 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props, TogglerProps } from './types.d.ts'
+import type { Props, TogglerProps } from './types.js'
 
 import { X } from '../../icons/X/index.js'
 import { EditDepthContext, useEditDepth } from '../../providers/EditDepth/index.js'

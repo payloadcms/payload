@@ -1,8 +1,8 @@
 import type { I18n } from '@payloadcms/translations'
 
-import type { SanitizedCollectionConfig } from '../../collections/config/types.d.ts'
-import type { SanitizedConfig } from '../../config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { SanitizedConfig } from '../../config/types.js'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 
 export type DocumentTabProps = {
   apiURL?: string

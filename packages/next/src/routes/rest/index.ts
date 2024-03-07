@@ -9,7 +9,7 @@ import type {
   CollectionRouteHandlerWithID,
   GlobalRouteHandler,
   GlobalRouteHandlerWithID,
-} from './types.d.ts'
+} from './types.js'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { RouteError } from './RouteError.js'

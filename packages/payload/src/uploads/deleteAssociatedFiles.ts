@@ -1,9 +1,9 @@
 import fs from 'fs'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
-import type { SanitizedConfig } from '../config/types.d.ts'
-import type { PayloadRequest } from '../types/index.d.ts'
-import type { FileData, FileToSave } from './types.d.ts'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { PayloadRequest } from '../types/index.js'
+import type { FileData, FileToSave } from './types.js'
 
 import { ErrorDeletingFile } from '../errors/index.js'
 import fileExists from './fileExists.js'

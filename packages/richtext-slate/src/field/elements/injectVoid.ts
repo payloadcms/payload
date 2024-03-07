@@ -2,7 +2,7 @@ import type { Element } from 'slate'
 
 import { Editor, Transforms } from 'slate'
 
-import type { ElementNode } from '../../types.d.ts'
+import type { ElementNode } from '../../types.js'
 
 import { isLastSelectedElementEmpty } from './isLastSelectedElementEmpty.js'
 

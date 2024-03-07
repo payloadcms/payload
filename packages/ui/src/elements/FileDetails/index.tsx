@@ -1,7 +1,7 @@
 import { isImage } from 'payload/utilities'
 import React from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { UploadActions } from '../../elements/Upload/index.js'
 import { Button } from '../Button/index.js'

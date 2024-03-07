@@ -1,5 +1,5 @@
-import type { BaseDatabaseAdapter } from '../database/types.d.ts'
-import type { Field } from '../fields/config/types.d.ts'
+import type { BaseDatabaseAdapter } from '../database/types.js'
+import type { Field } from '../fields/config/types.js'
 
 export const getIDType = (
   idField: Field | null,

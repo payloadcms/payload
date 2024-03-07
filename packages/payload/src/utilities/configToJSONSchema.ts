@@ -3,10 +3,10 @@ import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 import pluralize from 'pluralize'
 const { singular } = pluralize
 
-import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
-import type { SanitizedConfig } from '../config/types.d.ts'
-import type { Field, FieldAffectingData, Option } from '../fields/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { Field, FieldAffectingData, Option } from '../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 import { deepCopyObject } from './deepCopyObject.js'

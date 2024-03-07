@@ -1,4 +1,4 @@
-import type { RichTextAdapter, Where } from '../exports/types.d.ts'
+import type { RichTextAdapter, Where } from '../exports/types.js'
 import type {
   ArrayField,
   BlockField,
@@ -18,7 +18,7 @@ import type {
   TextareaField,
   UploadField,
   Validate,
-} from './config/types.d.ts'
+} from './config/types.js'
 
 import { getIDType } from '../utilities/getIDType.js'
 import { isNumber } from '../utilities/isNumber.js'

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { RichTextCustomLeaf } from '../../../types.d.ts'
+import type { RichTextCustomLeaf } from '../../../types.js'
 
 import { UnderlineIcon } from '../../icons/Underline/index.js'
 import { LeafButton } from '../Button.js'

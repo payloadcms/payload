@@ -1,6 +1,6 @@
-import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
-import type { Payload, PayloadRequest, Where } from '../types/index.d.ts'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
 type Args = {
   collection?: SanitizedCollectionConfig

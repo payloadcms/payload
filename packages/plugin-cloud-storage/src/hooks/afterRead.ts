@@ -1,6 +1,6 @@
 import type { CollectionConfig, FieldHook, ImageSize } from 'payload/types'
 
-import type { GenerateFileURL, GeneratedAdapter } from '../types.d.ts'
+import type { GenerateFileURL, GeneratedAdapter } from '../types.js'
 
 interface Args {
   adapter: GeneratedAdapter

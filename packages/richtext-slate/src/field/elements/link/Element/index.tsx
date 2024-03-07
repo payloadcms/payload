@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { LinkElementType } from '../types.d.ts'
+import type { LinkElementType } from '../types.js'
 
 import { useElement } from '../../../providers/ElementProvider.js'
 import { LinkDrawer } from '../LinkDrawer/index.js'

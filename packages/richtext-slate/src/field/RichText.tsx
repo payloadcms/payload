@@ -14,8 +14,8 @@ import { Node, Element as SlateElement, Text, Transforms, createEditor } from 's
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
-import type { ElementNode, RichTextPlugin, TextNode } from '../types.d.ts'
-import type { EnabledFeatures } from './types.d.ts'
+import type { ElementNode, RichTextPlugin, TextNode } from '../types.js'
+import type { EnabledFeatures } from './types.js'
 
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'

@@ -1,4 +1,4 @@
-import type { GlobalConfig } from '../globals/config/types.d.ts'
+import type { GlobalConfig } from '../globals/config/types.js'
 
 import APIError from './APIError.js'
 

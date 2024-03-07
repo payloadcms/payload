@@ -1,7 +1,7 @@
-import type { PaginatedDocs } from '../../database/types.d.ts'
-import type { PayloadRequest, Where } from '../../types/index.d.ts'
-import type { TypeWithVersion } from '../../versions/types.d.ts'
-import type { SanitizedGlobalConfig } from '../config/types.d.ts'
+import type { PaginatedDocs } from '../../database/types.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
+import type { TypeWithVersion } from '../../versions/types.js'
+import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'

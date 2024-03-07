@@ -11,8 +11,8 @@ import {
   getVersionsModelName,
 } from 'payload/versions'
 
-import type { MongooseAdapter } from './index.d.ts'
-import type { CollectionModel } from './types.d.ts'
+import type { MongooseAdapter } from './index.js'
+import type { CollectionModel } from './types.js'
 
 import buildCollectionSchema from './models/buildCollectionSchema.js'
 import { buildGlobalModel } from './models/buildGlobalModel.js'

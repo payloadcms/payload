@@ -2,7 +2,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'

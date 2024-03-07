@@ -1,4 +1,4 @@
-import type { AuthStrategyFunctionArgs, User } from './index.d.ts'
+import type { AuthStrategyFunctionArgs, User } from './index.js'
 
 export const getAuthenticatedUser = async (
   args: AuthStrategyFunctionArgs,

@@ -5,8 +5,8 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
 
-import type { ReducedBlock } from '../../../../utilities/buildComponentMap/types.d.ts'
-import type { Props } from './types.d.ts'
+import type { ReducedBlock } from '../../../../utilities/buildComponentMap/types.js'
+import type { Props } from './types.js'
 
 import { Drawer } from '../../../../elements/Drawer/index.js'
 import { ThumbnailCard } from '../../../../elements/ThumbnailCard/index.js'

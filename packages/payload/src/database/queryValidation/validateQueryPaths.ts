@@ -1,10 +1,10 @@
 /* eslint-disable no-restricted-syntax */
-import type { SanitizedCollectionConfig } from '../../collections/config/types.d.ts'
-import type { Field, FieldAffectingData } from '../../fields/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { Field, FieldAffectingData } from '../../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 /* eslint-disable no-await-in-loop */
-import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.d.ts'
-import type { EntityPolicies } from './types.d.ts'
+import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
+import type { EntityPolicies } from './types.js'
 
 import QueryError from '../../errors/QueryError.js'
 import { validOperators } from '../../types/constants.js'

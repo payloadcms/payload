@@ -3,7 +3,7 @@
 import React, { useCallback } from 'react'
 import { useSlate } from 'slate-react'
 
-import type { ButtonProps } from './types.d.ts'
+import type { ButtonProps } from './types.js'
 
 import '../buttons.scss'
 import { isListActive } from './isListActive.js'

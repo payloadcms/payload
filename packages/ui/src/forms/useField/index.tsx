@@ -1,8 +1,8 @@
 'use client'
 import { useCallback, useMemo, useRef } from 'react'
 
-import type { UPDATE } from '../Form/types.d.ts'
-import type { FieldType, Options } from './types.d.ts'
+import type { UPDATE } from '../Form/types.js'
+import type { FieldType, Options } from './types.js'
 
 import useThrottledEffect from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'

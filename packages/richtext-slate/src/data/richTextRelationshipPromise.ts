@@ -1,6 +1,6 @@
 import type { PayloadRequest, RichTextAdapter, RichTextField } from 'payload/types'
 
-import type { AdapterArguments } from '../types.d.ts'
+import type { AdapterArguments } from '../types.js'
 
 import { populate } from './populate.js'
 import { recurseNestedFields } from './recurseNestedFields.js'

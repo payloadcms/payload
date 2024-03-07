@@ -5,7 +5,7 @@ import { Tooltip } from '@payloadcms/ui'
 import React, { useCallback, useState } from 'react'
 import { useSlate } from 'slate-react'
 
-import type { ButtonProps } from './types.d.ts'
+import type { ButtonProps } from './types.js'
 
 import '../buttons.scss'
 import { isElementActive } from './isActive.js'

@@ -4,8 +4,8 @@ import type { TypeWithID } from 'payload/types'
 import { eq } from 'drizzle-orm'
 import { ValidationError } from 'payload/errors'
 
-import type { BlockRowToInsert } from '../transform/write/types.d.ts'
-import type { Args } from './types.d.ts'
+import type { BlockRowToInsert } from '../transform/write/types.js'
+import type { Args } from './types.js'
 
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { transform } from '../transform/read/index.js'

@@ -3,8 +3,8 @@ import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Option } from '../../../elements/ReactSelect/types.d.ts'
-import type { Props } from './types.d.ts'
+import type { Option } from '../../../elements/ReactSelect/types.js'
+import type { Props } from './types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'

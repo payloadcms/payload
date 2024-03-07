@@ -1,7 +1,7 @@
 import type { ElementType, MouseEvent } from 'react'
 import type React from 'react'
 
-import type { LinkType } from '../../exports/types.d.ts'
+import type { LinkType } from '../../exports/types.js'
 
 export type Props = {
   Link?: LinkType

@@ -3,8 +3,8 @@ import type { Logger } from 'pino'
 
 import nodemailer from 'nodemailer'
 
-import type { EmailOptions, EmailTransport } from '../config/types.d.ts'
-import type { BuildEmailResult, MockEmailHandler } from './types.d.ts'
+import type { EmailOptions, EmailTransport } from '../config/types.js'
+import type { BuildEmailResult, MockEmailHandler } from './types.js'
 
 import { hasTransport, hasTransportOptions } from '../config/types.js'
 import { InvalidConfiguration } from '../errors/index.js'

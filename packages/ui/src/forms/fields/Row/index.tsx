@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import RenderFields from '../../RenderFields/index.js'
 import { withCondition } from '../../withCondition/index.js'

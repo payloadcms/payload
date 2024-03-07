@@ -1,5 +1,5 @@
-import type { Payload } from '../index.d.ts'
-import type { SanitizedCollectionConfig } from './../collections/config/types.d.ts'
+import type { Payload } from '../index.js'
+import type { SanitizedCollectionConfig } from './../collections/config/types.js'
 type CookieOptions = {
   domain?: string
   expires?: Date

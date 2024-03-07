@@ -1,6 +1,6 @@
 import minimist from 'minimist'
 
-import type { BinScript } from '../config/types.d.ts'
+import type { BinScript } from '../config/types.js'
 
 import loadConfig from '../config/load.js'
 import { generateTypes } from './generateTypes.js'

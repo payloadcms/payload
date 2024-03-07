@@ -1,9 +1,9 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../..//index.d.ts'
-import type { Payload } from '../../../index.d.ts'
-import type { Document, PayloadRequest, RequestContext } from '../../../types/index.d.ts'
-import type { File } from '../../../uploads/types.d.ts'
+import type { GeneratedTypes } from '../../..//index.js'
+import type { Payload } from '../../../index.js'
+import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { File } from '../../../uploads/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import getFileByPath from '../../../uploads/getFileByPath.js'

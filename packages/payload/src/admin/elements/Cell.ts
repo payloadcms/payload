@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from '../../collections/config/types.d.ts'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type {
   BlockField,
   DateField,
@@ -7,7 +7,7 @@ import type {
   Labels,
   RelationshipField,
   SelectField,
-} from '../../fields/config/types.d.ts'
+} from '../../fields/config/types.js'
 
 export type CellProps = {
   /**

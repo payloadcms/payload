@@ -2,7 +2,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { useId } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { Plus } from '../../icons/Plus/index.js'
 import { X } from '../../icons/X/index.js'

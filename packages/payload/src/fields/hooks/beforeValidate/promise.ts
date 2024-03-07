@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-import type { SanitizedCollectionConfig } from '../../../collections/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types.d.ts'
-import type { PayloadRequest, RequestContext } from '../../../types/index.d.ts'
-import type { Field, TabAsField } from '../../config/types.d.ts'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
 import getValueWithDefault from '../../getDefaultValue.js'

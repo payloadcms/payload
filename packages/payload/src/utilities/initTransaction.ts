@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../types/index.d.ts'
+import type { PayloadRequest } from '../types/index.js'
 
 /**
  * Starts a new transaction using the db adapter with a random id and then assigns it to the req.transaction

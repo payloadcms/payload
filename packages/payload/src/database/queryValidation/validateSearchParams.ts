@@ -1,8 +1,8 @@
-import type { SanitizedCollectionConfig } from '../../collections/config/types.d.ts'
-import type { Field } from '../../fields/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
-import type { EntityPolicies, PathToQuery } from './types.d.ts'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { Field } from '../../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'

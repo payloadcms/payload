@@ -1,7 +1,7 @@
 import type { PayloadRequest } from 'payload/types'
 import type { Collection, Field, RichTextField } from 'payload/types'
 
-import type { AdapterArguments } from '../types.d.ts'
+import type { AdapterArguments } from '../types.js'
 
 type Arguments = {
   currentDepth?: number

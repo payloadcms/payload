@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
 
-import type { EmailOptions } from '../config/types.d.ts'
-import type { MockEmailHandler } from './types.d.ts'
+import type { EmailOptions } from '../config/types.js'
+import type { MockEmailHandler } from './types.js'
 
 import { defaults as emailDefaults } from './defaults.js'
 

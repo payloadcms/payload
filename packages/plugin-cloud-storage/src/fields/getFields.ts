@@ -3,7 +3,7 @@ import type { CollectionConfig, Field } from 'payload/types'
 
 import path from 'path'
 
-import type { GenerateFileURL, GeneratedAdapter } from '../types.d.ts'
+import type { GenerateFileURL, GeneratedAdapter } from '../types.js'
 
 import { getAfterReadHook } from '../hooks/afterRead.js'
 

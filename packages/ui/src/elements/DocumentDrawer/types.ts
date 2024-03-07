@@ -1,8 +1,8 @@
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.d.ts'
-import type { Props as DrawerProps } from '../Drawer/types.d.ts'
+import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
+import type { Props as DrawerProps } from '../Drawer/types.js'
 
 export type DocumentDrawerProps = Pick<DrawerProps, 'Header'> & {
   collectionSlug: string

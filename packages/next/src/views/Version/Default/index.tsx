@@ -13,7 +13,7 @@ import {
 } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
-import type { CompareOption, DefaultVersionsViewProps } from './types.d.ts'
+import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
 import diffComponents from '../RenderFieldsToDiff/fields/index.js'
 import RenderFieldsToDiff from '../RenderFieldsToDiff/index.js'

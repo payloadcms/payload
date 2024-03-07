@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../collections/config/types.d.ts'
-import type { Field, TabAsField } from '../fields/config/types.d.ts'
-import type { User } from './index.d.ts'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { Field, TabAsField } from '../fields/config/types.js'
+import type { User } from './index.js'
 
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { RichTextCustomElement } from '../../../types.d.ts'
+import type { RichTextCustomElement } from '../../../types.js'
 
 import { OLIcon } from '../../icons/OrderedList/index.js'
 import { ListButton } from '../ListButton.js'

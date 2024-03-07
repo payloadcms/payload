@@ -1,7 +1,7 @@
-import type { AccessResult } from '../../config/types.d.ts'
-import type { PaginatedDocs } from '../../database/types.d.ts'
-import type { PayloadRequest, Where } from '../../types/index.d.ts'
-import type { Collection, TypeWithID } from '../config/types.d.ts'
+import type { AccessResult } from '../../config/types.js'
+import type { PaginatedDocs } from '../../database/types.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
+import type { Collection, TypeWithID } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'

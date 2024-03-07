@@ -2,7 +2,7 @@ import { useTranslation } from '@payloadcms/ui'
 import { ReactSelect, useLocale } from '@payloadcms/ui'
 import React from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import './index.scss'
 

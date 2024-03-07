@@ -3,7 +3,7 @@ import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import LabelComp from '../../Label/index.js'
 import useField from '../../useField/index.js'

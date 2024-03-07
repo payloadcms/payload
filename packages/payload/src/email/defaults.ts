@@ -1,4 +1,4 @@
-import type { EmailOptions } from '../config/types.d.ts'
+import type { EmailOptions } from '../config/types.js'
 
 export const defaults: EmailOptions = {
   fromAddress: 'info@payloadcms.com',

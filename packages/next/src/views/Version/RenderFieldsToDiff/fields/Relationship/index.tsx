@@ -7,7 +7,7 @@ import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import React from 'react'
 import ReactDiffViewerImport from 'react-diff-viewer-continued'
 
-import type { Props } from '../types.d.ts'
+import type { Props } from '../types.js'
 
 import Label from '../../Label/index.js'
 import { diffStyles } from '../styles.js'

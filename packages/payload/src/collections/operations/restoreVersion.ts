@@ -1,9 +1,9 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status'
 
-import type { FindOneArgs } from '../../database/types.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
-import type { Collection, TypeWithID } from '../config/types.d.ts'
+import type { FindOneArgs } from '../../database/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { Collection, TypeWithID } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'

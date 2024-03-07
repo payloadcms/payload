@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
 import type { Where } from 'payload/types'
 
-import type { FormFieldBase } from '../shared.d.ts'
+import type { FormFieldBase } from '../shared.js'
 
 export type Props = FormFieldBase & {
   name: string

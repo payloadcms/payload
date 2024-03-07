@@ -1,7 +1,7 @@
 'use client'
 import React, { useRef, useState } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { Copy } from '../../icons/Copy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

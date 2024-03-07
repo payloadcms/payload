@@ -1,4 +1,4 @@
-import type { Config } from '../config/types.d.ts'
+import type { Config } from '../config/types.js'
 
 import { sanitizeConfig } from '../config/sanitize.js'
 import { configToJSONSchema } from './configToJSONSchema.js'

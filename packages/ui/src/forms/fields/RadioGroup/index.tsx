@@ -2,7 +2,7 @@
 import { optionIsObject } from 'payload/types'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useForm } from '../../Form/context.js'
 import LabelComp from '../../Label/index.js'

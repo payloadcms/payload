@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 import httpStatus from 'http-status'
 
-import type { Collection } from '../../collections/config/types.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
+import type { Collection } from '../../collections/config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'

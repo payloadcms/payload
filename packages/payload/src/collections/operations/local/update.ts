@@ -1,9 +1,9 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes, Payload } from '../../../index.d.ts'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.d.ts'
-import type { File } from '../../../uploads/types.d.ts'
-import type { BulkOperationResult } from '../../config/types.d.ts'
+import type { GeneratedTypes, Payload } from '../../../index.js'
+import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
+import type { File } from '../../../uploads/types.js'
+import type { BulkOperationResult } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import getFileByPath from '../../../uploads/getFileByPath.js'

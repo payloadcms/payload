@@ -3,7 +3,7 @@ import type { FindOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 import type { Document } from 'payload/types'
 
-import type { MongooseAdapter } from './index.d.ts'
+import type { MongooseAdapter } from './index.js'
 
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'
 import { withSession } from './withSession.js'

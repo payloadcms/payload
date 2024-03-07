@@ -1,4 +1,4 @@
-import type { FileShape, NextFileUploadOptions } from './index.d.ts'
+import type { FileShape, NextFileUploadOptions } from './index.js'
 
 import {
   checkAndMakeDir,

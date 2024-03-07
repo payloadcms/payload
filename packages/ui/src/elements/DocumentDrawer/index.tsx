@@ -3,7 +3,7 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
-import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types.d.ts'
+import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types.js'
 
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'

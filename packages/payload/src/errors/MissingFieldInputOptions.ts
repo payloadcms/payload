@@ -1,4 +1,4 @@
-import type { RadioField, SelectField } from '../fields/config/types.d.ts'
+import type { RadioField, SelectField } from '../fields/config/types.js'
 
 import APIError from './APIError.js'
 

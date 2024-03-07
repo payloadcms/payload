@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import FileGraphic from '../../graphics/File/index.js'
 import useThumbnail from '../../hooks/useThumbnail.js'

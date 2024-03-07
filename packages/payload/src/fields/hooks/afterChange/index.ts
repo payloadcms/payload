@@ -1,6 +1,6 @@
-import type { SanitizedCollectionConfig } from '../../../collections/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types.d.ts'
-import type { PayloadRequest, RequestContext } from '../../../types/index.d.ts'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { PayloadRequest, RequestContext } from '../../../types/index.js'
 
 import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'

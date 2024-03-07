@@ -3,7 +3,7 @@ import type { PayloadRequest } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.d.ts'
+import type { PostgresAdapter } from './types.js'
 
 import { buildFindManyArgs } from './find/buildFindManyArgs.js'
 import buildQuery from './queries/buildQuery.js'

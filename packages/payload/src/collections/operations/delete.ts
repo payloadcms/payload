@@ -1,9 +1,9 @@
 import httpStatus from 'http-status'
 
-import type { AccessResult } from '../../config/types.d.ts'
-import type { GeneratedTypes } from '../../index.d.ts'
-import type { PayloadRequest, Where } from '../../types/index.d.ts'
-import type { BeforeOperationHook, Collection } from '../config/types.d.ts'
+import type { AccessResult } from '../../config/types.js'
+import type { GeneratedTypes } from '../../index.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
+import type { BeforeOperationHook, Collection } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'

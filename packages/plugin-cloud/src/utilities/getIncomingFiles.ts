@@ -1,6 +1,6 @@
 import type { FileData, PayloadRequest } from 'payload/types'
 
-import type { File } from '../types.d.ts'
+import type { File } from '../types.js'
 
 export function getIncomingFiles({
   data,

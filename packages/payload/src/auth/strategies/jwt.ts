@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 
-import type { AuthStrategyFunction, User } from '../index.d.ts'
+import type { AuthStrategyFunction, User } from '../index.js'
 
 import { extractJWT } from '../extractJWT.js'
 

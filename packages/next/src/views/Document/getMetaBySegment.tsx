@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
-import type { GenerateViewMetadata } from '../Root/index.d.ts'
+import type { GenerateViewMetadata } from '../Root/index.js'
 
 import { getNextI18n } from '../../utilities/getNextI18n.js'
 import { generateMetadata as apiMeta } from '../API/meta.js'

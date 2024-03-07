@@ -1,4 +1,4 @@
-import type { Field, FieldHook } from '../../fields/config/types.d.ts'
+import type { Field, FieldHook } from '../../fields/config/types.js'
 
 import { extractTranslations } from '../../translations/extractTranslations.js'
 

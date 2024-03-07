@@ -1,4 +1,4 @@
-import type { Where, WhereField } from '../types/index.d.ts'
+import type { Where, WhereField } from '../types/index.js'
 
 // Take a where query and flatten it to all top-level operators
 const flattenWhereToOperators = (query: Where): WhereField[] =>

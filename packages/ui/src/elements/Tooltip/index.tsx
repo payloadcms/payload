@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
 import './index.scss'

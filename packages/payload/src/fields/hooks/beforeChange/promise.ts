@@ -1,9 +1,9 @@
 import merge from 'deepmerge'
 
-import type { SanitizedCollectionConfig } from '../../../collections/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../../../globals/config/types.d.ts'
-import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.d.ts'
-import type { Field, TabAsField } from '../../config/types.d.ts'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'

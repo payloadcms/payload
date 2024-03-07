@@ -2,7 +2,7 @@ import { forgotPasswordOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import type { Context } from '../types.d.ts'
+import type { Context } from '../types.js'
 
 function forgotPasswordResolver(collection: Collection): any {
   async function resolver(_, args, context: Context) {

@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 import { findOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-import type { CollectionRouteHandler } from '../types.d.ts'
+import type { CollectionRouteHandler } from '../types.js'
 
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, draft, limit, page, sort, where } = req.query as {

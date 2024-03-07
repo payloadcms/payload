@@ -1,9 +1,9 @@
-import type { CollectionPermission, GlobalPermission } from '../auth/types.d.ts'
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.d.ts'
-import type { Access } from '../config/types.d.ts'
-import type { FieldAccess } from '../fields/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
-import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.d.ts'
+import type { CollectionPermission, GlobalPermission } from '../auth/types.js'
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
+import type { Access } from '../config/types.js'
+import type { FieldAccess } from '../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { AllOperations, Document, PayloadRequest, Where } from '../types/index.js'
 
 import { tabHasName } from '../fields/config/types.js'
 

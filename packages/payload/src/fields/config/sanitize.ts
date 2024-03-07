@@ -1,5 +1,5 @@
-import type { Config } from '../../config/types.d.ts'
-import type { Field } from './types.d.ts'
+import type { Config } from '../../config/types.js'
+import type { Field } from './types.js'
 
 import {
   DuplicateFieldName,

@@ -1,7 +1,7 @@
 'use client'
 import React, { forwardRef } from 'react'
 
-import type { Props } from '../../elements/Button/types.d.ts'
+import type { Props } from '../../elements/Button/types.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { useForm, useFormProcessing } from '../Form/context.js'

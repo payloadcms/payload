@@ -1,6 +1,6 @@
 'use client'
 // TODO: abstract the `next/link` dependency out from this component
-import type { LinkProps } from 'next/link.d.ts'
+import type { LinkProps } from 'next/link.js'
 
 import LinkImport from 'next/link.js'
 import * as React from 'react' // TODO: abstract this out to support all routers

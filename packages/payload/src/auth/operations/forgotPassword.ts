@@ -2,8 +2,8 @@ import crypto from 'crypto'
 import { URL } from 'url'
 import httpStatus from 'http-status'
 
-import type { Collection } from '../../collections/config/types.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
+import type { Collection } from '../../collections/config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'

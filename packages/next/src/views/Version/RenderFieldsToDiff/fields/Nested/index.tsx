@@ -1,7 +1,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from '../types.d.ts'
+import type { Props } from '../types.js'
 
 import Label from '../../Label/index.js'
 import RenderFieldsToDiff from '../../index.js'

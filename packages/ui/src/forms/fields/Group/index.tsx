@@ -1,7 +1,7 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useCollapsible } from '../../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'

@@ -2,7 +2,7 @@ import type { Data, Field as FieldSchema, FormState, PayloadRequest } from 'payl
 
 import { fieldIsPresentationalOnly } from 'payload/types'
 
-import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.d.ts'
+import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 
 import { addFieldStatePromise } from './addFieldStatePromise.js'
 

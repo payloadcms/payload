@@ -6,8 +6,8 @@ import { and, ilike, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
-import type { GenericColumn, PostgresAdapter } from '../types.d.ts'
-import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.d.ts'
+import type { GenericColumn, PostgresAdapter } from '../types.js'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.js'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { createJSONQuery } from './createJSONQuery/index.js'

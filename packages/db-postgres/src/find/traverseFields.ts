@@ -4,8 +4,8 @@ import type { Field } from 'payload/types'
 import { fieldAffectsData, tabHasName } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../types.d.ts'
-import type { Result } from './buildFindManyArgs.d.ts'
+import type { PostgresAdapter } from '../types.js'
+import type { Result } from './buildFindManyArgs.js'
 
 type TraverseFieldArgs = {
   _locales: Record<string, unknown>

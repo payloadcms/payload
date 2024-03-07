@@ -10,7 +10,7 @@ import type {
 import { Config } from '../../config/types'
 import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors'
 import { sanitizeFields } from './sanitize'
-import type { BaseDatabaseAdapter } from '../../database/types.d.ts'
+import type { BaseDatabaseAdapter } from '../../database/types.js'
 
 const dummyConfig: Config = {
   collections: [],

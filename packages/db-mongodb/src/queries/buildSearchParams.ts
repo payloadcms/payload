@@ -9,7 +9,7 @@ import { getLocalizedPaths } from 'payload/database'
 import { fieldAffectsData } from 'payload/types'
 import { validOperators } from 'payload/types'
 
-import type { MongooseAdapter } from '../index.d.ts'
+import type { MongooseAdapter } from '../index.js'
 
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'

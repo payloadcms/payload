@@ -3,8 +3,8 @@ import type { Field, PayloadRequest, TypeWithID } from 'payload/types'
 
 import { inArray, sql } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../types.d.ts'
-import type { ChainedMethods } from './chainMethods.d.ts'
+import type { PostgresAdapter } from '../types.js'
+import type { ChainedMethods } from './chainMethods.js'
 
 import buildQuery from '../queries/buildQuery.js'
 import { transform } from '../transform/read/index.js'

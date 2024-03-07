@@ -1,5 +1,5 @@
-import type { Field } from '../fields/config/types.d.ts'
-import type { ClientConfig, SanitizedConfig } from './types.d.ts'
+import type { Field } from '../fields/config/types.js'
+import type { ClientConfig, SanitizedConfig } from './types.js'
 
 export const sanitizeField = (f) => {
   const field = { ...f }

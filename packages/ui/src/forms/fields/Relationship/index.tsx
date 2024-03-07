@@ -6,8 +6,8 @@ import { wordBoundariesRegex } from 'payload/utilities'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
-import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.d.ts'
-import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types.d.ts'
+import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js'
+import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types.js'
 
 import { GetFilterOptions } from '../../../elements/GetFilterOptions/index.js'
 import ReactSelect from '../../../elements/ReactSelect/index.js'

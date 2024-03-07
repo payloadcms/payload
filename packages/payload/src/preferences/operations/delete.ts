@@ -1,5 +1,5 @@
-import type { Document, Where } from '../../types/index.d.ts'
-import type { PreferenceRequest } from '../types.d.ts'
+import type { Document, Where } from '../../types/index.js'
+import type { PreferenceRequest } from '../types.js'
 
 import defaultAccess from '../../auth/defaultAccess.js'
 import executeAccess from '../../auth/executeAccess.js'

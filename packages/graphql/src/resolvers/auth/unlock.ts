@@ -2,7 +2,7 @@ import { unlockOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import type { Context } from '../types.d.ts'
+import type { Context } from '../types.js'
 
 function unlockResolver(collection: Collection) {
   async function resolver(_, args, context: Context) {

@@ -5,7 +5,7 @@ import type {
   TypeWithID,
 } from 'payload/types'
 
-import type { TypeWithPrefix } from '../types.d.ts'
+import type { TypeWithPrefix } from '../types.js'
 
 import { createKey } from '../utilities/createKey.js'
 import { getStorageClient } from '../utilities/getStorageClient.js'

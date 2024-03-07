@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { Props } from '../types.d.ts'
+import type { Props } from '../types.js'
 
 import RenderFieldsToDiff from '../../index.js'
 import Nested from '../Nested/index.js'

@@ -1,9 +1,9 @@
 import type { JSONSchema4 } from 'json-schema'
 
-import type { SanitizedConfig } from '../config/types.d.ts'
-import type { Field, RichTextField, Validate } from '../fields/config/types.d.ts'
-import type { PayloadRequest, RequestContext } from '../types/index.d.ts'
-import type { CellComponentProps } from './elements/Cell.d.ts'
+import type { SanitizedConfig } from '../config/types.js'
+import type { Field, RichTextField, Validate } from '../fields/config/types.js'
+import type { PayloadRequest, RequestContext } from '../types/index.js'
+import type { CellComponentProps } from './elements/Cell.js'
 
 export type RichTextFieldProps<
   Value extends object,

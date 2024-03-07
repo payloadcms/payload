@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { getTranslation } from '@payloadcms/translations'
 import { formatDate } from '@payloadcms/ui'
 
-import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.d.ts'
+import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
 import { meta } from '../../utilities/meta.js'
 

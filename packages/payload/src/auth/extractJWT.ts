@@ -1,4 +1,4 @@
-import type { AuthStrategyFunctionArgs } from './index.d.ts'
+import type { AuthStrategyFunctionArgs } from './index.js'
 
 import { parseCookies } from '../utilities/parseCookies.js'
 

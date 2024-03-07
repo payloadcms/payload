@@ -3,8 +3,8 @@ import LinkImport from 'next/link.js'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
-import type { AdminViewProps } from '../Root/index.d.ts'
-import type { DashboardProps } from './Default/index.d.ts'
+import type { AdminViewProps } from '../Root/index.js'
+import type { DashboardProps } from './Default/index.js'
 
 import { DefaultDashboard } from './Default/index.js'
 

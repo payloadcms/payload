@@ -4,7 +4,7 @@ import type { Field, TabAsField } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 
-import type { BlocksMap } from '../../utilities/createBlocksMap.d.ts'
+import type { BlocksMap } from '../../utilities/createBlocksMap.js'
 
 import { transformHasManyNumber } from './hasManyNumber.js'
 import { transformHasManyText } from './hasManyText.js'

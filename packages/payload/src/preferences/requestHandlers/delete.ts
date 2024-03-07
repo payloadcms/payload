@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 
-import type { PayloadHandler } from '../../exports/config.d.ts'
+import type { PayloadHandler } from '../../exports/config.js'
 
 import deleteOperation from '../operations/delete.js'
 

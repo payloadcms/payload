@@ -5,7 +5,7 @@ import { useCallback } from 'react'
 import { Editor, Element, Text, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { ElementNode } from '../../../types.d.ts'
+import type { ElementNode } from '../../../types.js'
 
 import { IndentLeft } from '../../icons/IndentLeft/index.js'
 import { IndentRight } from '../../icons/IndentRight/index.js'

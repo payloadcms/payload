@@ -4,8 +4,8 @@ import type { Dispatch } from 'react'
 
 import { createContext, useContext } from 'react'
 
-import type { usePopupWindow } from '../usePopupWindow.d.ts'
-import type { SizeReducerAction } from './sizeReducer.d.ts'
+import type { usePopupWindow } from '../usePopupWindow.js'
+import type { SizeReducerAction } from './sizeReducer.js'
 
 export interface LivePreviewContextType {
   appIsReady: boolean

@@ -1,6 +1,6 @@
 import type { Where } from 'payload/types'
 
-import type { Action, FieldCondition } from '../types.d.ts'
+import type { Action, FieldCondition } from '../types.js'
 
 export type Props = {
   andIndex: number

@@ -1,7 +1,7 @@
 import type { DBQueryConfig } from 'drizzle-orm'
 import type { Field } from 'payload/types'
 
-import type { PostgresAdapter } from '../types.d.ts'
+import type { PostgresAdapter } from '../types.js'
 
 import { traverseFields } from './traverseFields.js'
 

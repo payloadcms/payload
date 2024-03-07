@@ -1,7 +1,7 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
 
-import type { SanitizedConfig } from './types.d.ts'
+import type { SanitizedConfig } from './types.js'
 
 import { clientFiles } from './clientFiles.js'
 import findConfig from './find.js'

@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
 import type { Field } from 'payload/types'
 
-import type { PostgresAdapter } from '../../types.d.ts'
-import type { RowToInsert } from './types.d.ts'
+import type { PostgresAdapter } from '../../types.js'
+import type { RowToInsert } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 

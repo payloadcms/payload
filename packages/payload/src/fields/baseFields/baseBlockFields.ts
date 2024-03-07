@@ -1,4 +1,4 @@
-import type { Field } from '../config/types.d.ts'
+import type { Field } from '../config/types.js'
 
 import { baseIDField } from './baseIDField.js'
 

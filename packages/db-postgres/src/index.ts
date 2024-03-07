@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
 
-import type { Args, PostgresAdapter } from './types.d.ts'
+import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
 import { create } from './create.js'
@@ -38,7 +38,7 @@ import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
 import { updateVersion } from './updateVersion.js'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types.d.ts'
+export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   function adapter({ payload }: { payload: Payload }) {

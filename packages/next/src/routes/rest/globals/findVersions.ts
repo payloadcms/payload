@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 import { findVersionsOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-import type { GlobalRouteHandler } from '../types.d.ts'
+import type { GlobalRouteHandler } from '../types.js'
 
 export const findVersions: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { depth, limit, page, sort, where } = req.query as {

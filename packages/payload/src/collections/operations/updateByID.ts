@@ -2,10 +2,10 @@ import type { DeepPartial } from 'ts-essentials'
 
 import httpStatus from 'http-status'
 
-import type { FindOneArgs } from '../../database/types.d.ts'
-import type { GeneratedTypes } from '../../index.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
-import type { Collection } from '../config/types.d.ts'
+import type { FindOneArgs } from '../../database/types.js'
+import type { GeneratedTypes } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { Collection } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash.js'

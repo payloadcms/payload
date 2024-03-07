@@ -8,7 +8,7 @@ import mongoose from 'mongoose'
 import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
 
-import type { CollectionModel, GlobalModel } from './types.d.ts'
+import type { CollectionModel, GlobalModel } from './types.js'
 
 import { connect } from './connect.js'
 import { create } from './create.js'
@@ -36,7 +36,7 @@ import { updateGlobalVersion } from './updateGlobalVersion.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types.d.ts'
+export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 import type { DatabaseAdapterObj } from 'payload/database'
 
 export interface Args {

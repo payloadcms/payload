@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto'
 import findUp from 'find-up'
 import fs from 'fs'
 
-import type { Payload } from '../../types/index.d.ts'
+import type { Payload } from '../../types/index.js'
 import type { AdminInitEvent } from './events/adminInit.js'
 import type { ServerInitEvent } from './events/serverInit.js'
 

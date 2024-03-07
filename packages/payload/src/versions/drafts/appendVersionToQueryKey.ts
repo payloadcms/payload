@@ -1,4 +1,4 @@
-import type { Where } from '../../types/index.d.ts'
+import type { Where } from '../../types/index.js'
 
 export const appendVersionToQueryKey = (query: Where): Where => {
   return Object.entries(query).reduce((res, [key, val]) => {

@@ -1,6 +1,6 @@
 import type React from 'react'
 
-import type { Action, OptionGroup, Value } from '../types.d.ts'
+import type { Action, OptionGroup, Value } from '../types.js'
 
 export type Props = {
   dispatchOptions: React.Dispatch<Action>

@@ -1,6 +1,6 @@
 import { getTranslation } from '@payloadcms/translations'
 
-import type { Action, Option, OptionGroup } from './types.d.ts'
+import type { Action, Option, OptionGroup } from './types.js'
 
 import { formatDocTitle } from '../../../utilities/formatDocTitle.js'
 

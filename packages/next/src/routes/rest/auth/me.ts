@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import { extractJWT } from 'payload/auth'
 import { meOperation } from 'payload/operations'
 
-import type { CollectionRouteHandler } from '../types.d.ts'
+import type { CollectionRouteHandler } from '../types.js'
 
 export const me: CollectionRouteHandler = async ({ collection, req }) => {
   const currentToken = extractJWT(req)

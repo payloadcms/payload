@@ -4,7 +4,7 @@ import type { BeginTransaction } from 'payload/database'
 import { APIError } from 'payload/errors'
 import { v4 as uuid } from 'uuid'
 
-import type { MongooseAdapter } from '../index.d.ts'
+import type { MongooseAdapter } from '../index.js'
 
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   this: MongooseAdapter,

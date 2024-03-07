@@ -1,5 +1,5 @@
-import type { Payload } from '../../index.d.ts'
-import type { MigrationData } from '../types.d.ts'
+import type { Payload } from '../../index.js'
+import type { MigrationData } from '../types.js'
 
 /**
  * Gets all existing migrations from the database, excluding the dev migration

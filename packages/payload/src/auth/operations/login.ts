@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
 
-import type { Collection } from '../../collections/config/types.d.ts'
-import type { GeneratedTypes } from '../../index.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
-import type { User } from '../types.d.ts'
+import type { Collection } from '../../collections/config/types.js'
+import type { GeneratedTypes } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { User } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { AuthenticationError, LockedAuth } from '../../errors/index.js'

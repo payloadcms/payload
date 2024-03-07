@@ -8,7 +8,7 @@ import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { DocumentDrawerProps } from './types.d.ts'
+import type { DocumentDrawerProps } from './types.js'
 
 import { FieldPathProvider, useFieldPath } from '../../forms/FieldPathProvider/index.js'
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections.js'

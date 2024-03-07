@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
 import url from 'url'
 
-import type { BeforeOperationHook, Collection } from '../../collections/config/types.d.ts'
-import type { PayloadRequest } from '../../types/index.d.ts'
-import type { Document } from '../../types/index.d.ts'
+import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
+import type { Document } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { Forbidden } from '../../errors/index.js'

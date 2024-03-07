@@ -11,7 +11,7 @@ import {
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root/index.d.ts'
+import type { AdminViewProps } from '../Root/index.js'
 
 import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle.js'
 import { EditView } from '../Edit/index.js'

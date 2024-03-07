@@ -1,4 +1,4 @@
-import type { Where } from '../types/index.d.ts'
+import type { Where } from '../types/index.js'
 
 import { hasWhereAccessResult } from '../auth/index.js'
 

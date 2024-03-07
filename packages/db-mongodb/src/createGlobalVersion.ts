@@ -2,7 +2,7 @@ import type { CreateGlobalVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 import type { Document } from 'payload/types'
 
-import type { MongooseAdapter } from './index.d.ts'
+import type { MongooseAdapter } from './index.js'
 
 import { withSession } from './withSession.js'
 

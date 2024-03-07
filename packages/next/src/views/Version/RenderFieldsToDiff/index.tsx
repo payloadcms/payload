@@ -3,7 +3,7 @@ import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import React from 'react'
 
-import type { FieldDiffProps, Props } from './types.d.ts'
+import type { FieldDiffProps, Props } from './types.js'
 
 import Nested from './fields/Nested/index.js'
 import { diffMethods } from './fields/diffMethods.js'

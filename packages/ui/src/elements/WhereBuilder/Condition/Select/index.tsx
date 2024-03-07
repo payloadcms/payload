@@ -3,7 +3,7 @@ import type { Option, OptionObject } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import ReactSelect from '../../../ReactSelect/index.js'

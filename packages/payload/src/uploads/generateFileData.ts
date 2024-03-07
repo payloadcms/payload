@@ -6,9 +6,9 @@ import fs from 'fs'
 import mkdirp from 'mkdirp'
 import sanitize from 'sanitize-filename'
 
-import type { Collection } from '../collections/config/types.d.ts'
-import type { SanitizedConfig } from '../config/types.d.ts'
-import type { PayloadRequest } from '../types/index.d.ts'
+import type { Collection } from '../collections/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize } from './types.js'
 
 import { FileUploadError, MissingFile } from '../errors/index.js'
@@ -53,7 +53,7 @@ export const generateFileData = async <T>({
 
   let file = req.file
 
-  const uploadEdits = req.query['uploadEdits'] || {}
+  const uploadEdits = req.query['upload.js'] || {}
 
   const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
     collectionConfig.upload

@@ -4,7 +4,7 @@ import { flattenTopLevelFields } from 'payload/utilities'
 import React, { useReducer, useState } from 'react'
 
 // import type { Where } from 'payload/types'
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 // import useThrottledEffect from '../../hooks/useThrottledEffect'

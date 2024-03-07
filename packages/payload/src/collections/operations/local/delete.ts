@@ -1,8 +1,8 @@
-import type { Payload } from '../../../index.d.ts'
-import type { GeneratedTypes } from '../../../index.d.ts'
-import type { PayloadRequest, RequestContext } from '../../../types/index.d.ts'
-import type { Document, Where } from '../../../types/index.d.ts'
-import type { BulkOperationResult } from '../../config/types.d.ts'
+import type { Payload } from '../../../index.js'
+import type { GeneratedTypes } from '../../../index.js'
+import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { Document, Where } from '../../../types/index.js'
+import type { BulkOperationResult } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'

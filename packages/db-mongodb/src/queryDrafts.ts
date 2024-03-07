@@ -4,7 +4,7 @@ import type { PayloadRequest } from 'payload/types'
 
 import { combineQueries, flattenWhereToOperators } from 'payload/database'
 
-import type { MongooseAdapter } from './index.d.ts'
+import type { MongooseAdapter } from './index.js'
 
 import { buildSortParam } from './queries/buildSortParam.js'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js'

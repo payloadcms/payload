@@ -1,7 +1,7 @@
 import type { User } from 'payload/auth'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 export const isEntityHidden = ({
   hidden,

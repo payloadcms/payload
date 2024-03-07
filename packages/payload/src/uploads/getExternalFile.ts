@@ -1,5 +1,5 @@
 import type { PayloadRequest } from '../types/index.ts'
-import type { File, FileData } from './types.d.ts'
+import type { File, FileData } from './types.js'
 
 import { APIError } from '../errors/index.js'
 

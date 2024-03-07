@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import fs, { WriteStream } from 'fs'
 import path from 'path'
 
-import type { NextFileUploadOptions } from './index.d.ts'
+import type { NextFileUploadOptions } from './index.js'
 
 import { checkAndMakeDir, debugLog, deleteFile, getTempFilename } from './utilities.js'
 

@@ -1,6 +1,6 @@
 import type { Config } from 'payload/config'
 
-import type { PluginOptions } from './types.d.ts'
+import type { PluginOptions } from './types.js'
 
 import { getFields } from './fields/getFields.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'

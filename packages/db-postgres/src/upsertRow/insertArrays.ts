@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import type { ArrayRowToInsert } from '../transform/write/types.d.ts'
-import type { DrizzleDB, PostgresAdapter } from '../types.d.ts'
+import type { ArrayRowToInsert } from '../transform/write/types.js'
+import type { DrizzleDB, PostgresAdapter } from '../types.js'
 
 type Args = {
   adapter: PostgresAdapter

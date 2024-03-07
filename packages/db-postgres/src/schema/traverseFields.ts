@@ -22,7 +22,7 @@ import { InvalidConfiguration } from 'payload/errors'
 import { fieldAffectsData, optionIsObject } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { GenericColumns, IDType, PostgresAdapter } from '../types.d.ts'
+import type { GenericColumns, IDType, PostgresAdapter } from '../types.js'
 
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import { buildTable } from './build.js'

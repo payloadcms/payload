@@ -17,7 +17,7 @@ import { FieldPathProvider } from '@payloadcms/ui/forms'
 import { useHotkey } from '@payloadcms/ui/hooks'
 import React, { useCallback, useRef } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { linkFieldsSchemaPath } from '../shared.js'
 import './index.scss'

@@ -10,7 +10,7 @@ import type {
   GenerateTitle,
   GenerateURL,
   PluginConfig,
-} from './types.d.ts'
+} from './types.js'
 
 import { MetaDescription } from './fields/MetaDescription.js'
 import { MetaImage } from './fields/MetaImage.js'

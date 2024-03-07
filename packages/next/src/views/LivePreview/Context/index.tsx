@@ -4,7 +4,7 @@ import type { LivePreviewConfig } from 'payload/config'
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { usePopupWindow } from '../usePopupWindow.d.ts'
+import type { usePopupWindow } from '../usePopupWindow.js'
 
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'

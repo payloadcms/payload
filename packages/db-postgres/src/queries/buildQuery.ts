@@ -4,7 +4,7 @@ import type { Field, Where } from 'payload/types'
 
 import { asc, desc } from 'drizzle-orm'
 
-import type { GenericColumn, GenericTable, PostgresAdapter } from '../types.d.ts'
+import type { GenericColumn, GenericTable, PostgresAdapter } from '../types.js'
 
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { parseParams } from './parseParams.js'

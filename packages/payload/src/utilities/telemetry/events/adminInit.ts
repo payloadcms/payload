@@ -1,5 +1,5 @@
-import type { Payload } from '../../../index.d.ts'
-import type { User } from '../../../auth/types.d.ts'
+import type { Payload } from '../../../index.js'
+import type { User } from '../../../auth/types.js'
 
 import { sendEvent } from '../index.js'
 import { oneWayHash } from '../oneWayHash.js'

@@ -6,8 +6,8 @@ import type {
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
-} from '../../admin/types.d.ts'
-import type { Auth, IncomingAuthType, User } from '../../auth/types.d.ts'
+} from '../../admin/types.js'
+import type { Auth, IncomingAuthType, User } from '../../auth/types.js'
 import type {
   Access,
   EditViewComponent,
@@ -16,16 +16,16 @@ import type {
   EntityDescription,
   GeneratePreviewURL,
   LivePreviewConfig,
-} from '../../config/types.d.ts'
-import type { Field } from '../../fields/config/types.d.ts'
-import type { GeneratedTypes } from '../../index.d.ts'
-import type { PayloadRequest, RequestContext } from '../../types/index.d.ts'
-import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.d.ts'
+} from '../../config/types.js'
+import type { Field } from '../../fields/config/types.js'
+import type { GeneratedTypes } from '../../index.js'
+import type { PayloadRequest, RequestContext } from '../../types/index.js'
+import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
   IncomingCollectionVersions,
   SanitizedCollectionVersions,
-} from '../../versions/types.d.ts'
-import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.d.ts'
+} from '../../versions/types.js'
+import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
 
 export type HookOperationType =
   | 'autosave'

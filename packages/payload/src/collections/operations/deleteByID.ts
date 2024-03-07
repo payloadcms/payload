@@ -1,6 +1,6 @@
-import type { GeneratedTypes } from '../../index.d.ts'
-import type { Document, PayloadRequest } from '../../types/index.d.ts'
-import type { BeforeOperationHook, Collection } from '../config/types.d.ts'
+import type { GeneratedTypes } from '../../index.js'
+import type { Document, PayloadRequest } from '../../types/index.js'
+import type { BeforeOperationHook, Collection } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'

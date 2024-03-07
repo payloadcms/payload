@@ -1,7 +1,7 @@
 import LinkImport from 'next/link.js'
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type { Props, RenderedTypeProps } from './types.d.ts'
+import type { Props, RenderedTypeProps } from './types.js'
 
 import './index.scss'
 

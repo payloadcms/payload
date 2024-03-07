@@ -1,6 +1,6 @@
 import type { RichTextField, Validate } from 'payload/types'
 
-import type { AdapterArguments } from '../types.d.ts'
+import type { AdapterArguments } from '../types.js'
 
 import { defaultRichTextValue } from './defaultValue.js'
 

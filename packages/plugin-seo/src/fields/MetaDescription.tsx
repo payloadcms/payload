@@ -8,7 +8,7 @@ import { TextareaInput } from '@payloadcms/ui'
 import { useAllFormFields, useDocumentInfo, useField, useLocale } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { GenerateDescription } from '../types.d.ts'
+import type { GenerateDescription } from '../types.js'
 
 import { defaults } from '../defaults.js'
 import { LengthIndicator } from '../ui/LengthIndicator.js'

@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useCollapsible } from '../../../elements/Collapsible/provider.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'

@@ -2,7 +2,7 @@ import type { ContainerClient } from '@azure/storage-blob'
 
 import { BlobServiceClient } from '@azure/storage-blob'
 
-import type { Adapter, GeneratedAdapter } from '../../types.d.ts'
+import type { Adapter, GeneratedAdapter } from '../../types.js'
 
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'

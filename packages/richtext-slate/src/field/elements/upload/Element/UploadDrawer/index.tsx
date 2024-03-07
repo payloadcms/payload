@@ -23,7 +23,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 
-import type { UploadElementType } from '../../types.d.ts'
+import type { UploadElementType } from '../../types.js'
 
 import { uploadFieldsSchemaPath } from '../../shared.js'
 

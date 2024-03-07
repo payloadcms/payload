@@ -1,6 +1,6 @@
-import type { PaginatedDocs } from '../../../database/types.d.ts'
-import type { GeneratedTypes, Payload } from '../../../index.d.ts'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.d.ts'
+import type { PaginatedDocs } from '../../../database/types.js'
+import type { GeneratedTypes, Payload } from '../../../index.js'
+import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'

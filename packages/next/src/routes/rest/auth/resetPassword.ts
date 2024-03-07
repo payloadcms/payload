@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import { generatePayloadCookie } from 'payload/auth'
 import { resetPasswordOperation } from 'payload/operations'
 
-import type { CollectionRouteHandler } from '../types.d.ts'
+import type { CollectionRouteHandler } from '../types.js'
 
 export const resetPassword: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req

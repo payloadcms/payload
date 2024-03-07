@@ -7,7 +7,7 @@ import { ReactSelect, fieldBaseClass, formatDate, useConfig } from '@payloadcms/
 import qs from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { mostRecentVersionOption, publishedVersionOption } from '../shared.js'
 import './index.scss'

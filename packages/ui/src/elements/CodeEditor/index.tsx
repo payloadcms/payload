@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 

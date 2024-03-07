@@ -2,7 +2,7 @@
 import fs from 'fs'
 import { compile } from 'json-schema-to-typescript'
 
-import type { SanitizedConfig } from '../config/types.d.ts'
+import type { SanitizedConfig } from '../config/types.js'
 
 import loadConfig from '../config/load.js'
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js'

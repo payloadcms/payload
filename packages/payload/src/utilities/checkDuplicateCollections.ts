@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 
 import DuplicateCollection from '../errors/DuplicateCollection.js'
 

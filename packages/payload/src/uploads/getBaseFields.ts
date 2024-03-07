@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../collections/config/types.d.ts'
-import type { Config } from '../config/types.d.ts'
-import type { Field } from '../fields/config/types.d.ts'
-import type { UploadConfig } from './types.d.ts'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { Config } from '../config/types.js'
+import type { Field } from '../fields/config/types.js'
+import type { UploadConfig } from './types.js'
 
 import { extractTranslations } from '../translations/extractTranslations.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'

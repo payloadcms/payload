@@ -4,8 +4,8 @@ import type { Field } from 'payload/types'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../../types.d.ts'
-import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.d.ts'
+import type { PostgresAdapter } from '../../types.js'
+import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { transformArray } from './array.js'

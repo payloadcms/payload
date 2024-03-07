@@ -3,7 +3,7 @@ import type { DocumentPreferences } from 'payload/types'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { Collapsible } from '../../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'

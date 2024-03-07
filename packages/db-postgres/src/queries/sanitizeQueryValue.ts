@@ -2,7 +2,7 @@ import { APIError } from 'payload/errors'
 import { type Field, type TabAsField, fieldAffectsData } from 'payload/types'
 import { createArrayFromCommaDelineated } from 'payload/utilities'
 
-import type { PostgresAdapter } from '../types.d.ts'
+import type { PostgresAdapter } from '../types.js'
 
 type SanitizeQueryValueArgs = {
   adapter: PostgresAdapter

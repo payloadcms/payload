@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { useAllFormFields, useFormModified } from '../../forms/Form/context.js'
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js'

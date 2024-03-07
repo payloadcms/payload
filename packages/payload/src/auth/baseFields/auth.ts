@@ -1,4 +1,4 @@
-import type { Field } from '../../fields/config/types.d.ts'
+import type { Field } from '../../fields/config/types.js'
 
 import { email } from '../../fields/validations.js'
 import { extractTranslations } from '../../translations/extractTranslations.js'

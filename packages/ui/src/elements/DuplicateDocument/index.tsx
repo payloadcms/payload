@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 // import { requests } from '../../../api'
 import { useForm, useFormModified } from '../../forms/Form/context.js'

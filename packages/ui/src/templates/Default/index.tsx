@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { AppHeader } from '../../elements/Header/index.js'
 import { NavToggler } from '../../elements/Nav/NavToggler/index.js'

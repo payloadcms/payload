@@ -1,7 +1,7 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import type { PopulationsByCollection, UpdatedDocument } from './types.d.ts'
+import type { PopulationsByCollection, UpdatedDocument } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 

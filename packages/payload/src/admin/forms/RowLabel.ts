@@ -1,4 +1,4 @@
-import type { Data } from './Form.d.ts'
+import type { Data } from './Form.js'
 
 export type RowLabelArgs = {
   data: Data

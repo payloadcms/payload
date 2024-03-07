@@ -1,9 +1,9 @@
 import type { ValidationResult } from 'joi'
 import type { Logger } from 'pino'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
-import type { SanitizedGlobalConfig } from '../globals/config/types.d.ts'
-import type { SanitizedConfig } from './types.d.ts'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { SanitizedConfig } from './types.js'
 
 import collectionSchema from '../collections/config/schema.js'
 import fieldSchema, { idField } from '../fields/config/schema.js'

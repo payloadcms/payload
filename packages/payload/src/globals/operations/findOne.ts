@@ -1,6 +1,6 @@
-import type { AccessResult } from '../../config/types.d.ts'
-import type { PayloadRequest, Where } from '../../types/index.d.ts'
-import type { SanitizedGlobalConfig } from '../config/types.d.ts'
+import type { AccessResult } from '../../config/types.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
+import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'

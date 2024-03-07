@@ -19,8 +19,8 @@ import {
 } from '@payloadcms/ui'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root/index.d.ts'
-import type { GenerateEditViewMetadata } from './getMetaBySegment.d.ts'
+import type { AdminViewProps } from '../Root/index.js'
+import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle.js'
 import { NotFoundClient } from '../NotFound/index.client.js'

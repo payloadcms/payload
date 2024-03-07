@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 import { findVersionsOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-import type { CollectionRouteHandler } from '../types.d.ts'
+import type { CollectionRouteHandler } from '../types.js'
 
 export const findVersions: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, limit, page, sort, where } = req.query as {

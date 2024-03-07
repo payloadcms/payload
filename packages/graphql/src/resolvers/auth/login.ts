@@ -3,7 +3,7 @@ import { generatePayloadCookie } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import type { Context } from '../types.d.ts'
+import type { Context } from '../types.js'
 
 function loginResolver(collection: Collection): any {
   async function resolver(_, args, context: Context) {

@@ -2,8 +2,8 @@ import type { PaginatedDocs } from 'payload/database'
 
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
-import type { Option } from '../../../ReactSelect/types.d.ts'
-import type { GetResults, Props, ValueWithRelation } from './types.d.ts'
+import type { Option } from '../../../ReactSelect/types.js'
+import type { GetResults, Props, ValueWithRelation } from './types.js'
 
 import useDebounce from '../../../../hooks/useDebounce.js'
 import { useConfig } from '../../../../providers/Config/index.js'

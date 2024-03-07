@@ -2,7 +2,7 @@ import type { SanitizedConfig } from 'payload/config'
 
 import mongoose from 'mongoose'
 
-import type { GlobalModel } from '../types.d.ts'
+import type { GlobalModel } from '../types.js'
 
 import getBuildQueryPlugin from '../queries/buildQuery.js'
 import buildSchema from './buildSchema.js'

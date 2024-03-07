@@ -1,4 +1,4 @@
-import type { RichTextCustomLeaf } from '../../types.d.ts'
+import type { RichTextCustomLeaf } from '../../types.js'
 
 import { bold } from './bold/index.js'
 import { code } from './code/index.js'

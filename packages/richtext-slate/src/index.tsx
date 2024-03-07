@@ -2,7 +2,7 @@ import type { RichTextAdapter } from 'payload/types'
 
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
-import type { AdapterArguments } from './types.d.ts'
+import type { AdapterArguments } from './types.js'
 
 import { RichTextCell } from './cell/index.js'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise.js'
@@ -77,6 +77,6 @@ export type {
   RichTextElement,
   RichTextLeaf,
   TextNode,
-} from './types.d.ts'
+} from './types.js'
 
 export { nodeIsTextNode } from './types.js'

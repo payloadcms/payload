@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../collections/config/types.d.ts'
+import type { CollectionConfig } from '../collections/config/types.js'
 
 import { extractTranslations } from '../translations/extractTranslations.js'
 

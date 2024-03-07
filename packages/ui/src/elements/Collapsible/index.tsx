@@ -5,7 +5,7 @@ import AnimateHeightImport from 'react-animate-height'
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { DragHandle } from '../../icons/DragHandle/index.js'

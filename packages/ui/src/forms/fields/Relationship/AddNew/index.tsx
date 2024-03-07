@@ -4,9 +4,9 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
-import type { DocumentInfoContext } from '../../../../providers/DocumentInfo/types.d.ts'
-import type { Value } from '../types.d.ts'
-import type { Props } from './types.d.ts'
+import type { DocumentInfoContext } from '../../../../providers/DocumentInfo/types.js'
+import type { Value } from '../types.js'
+import type { Props } from './types.js'
 
 import { Button } from '../../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer/index.js'

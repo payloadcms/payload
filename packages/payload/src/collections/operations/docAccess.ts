@@ -1,6 +1,6 @@
-import type { CollectionPermission } from '../../auth/index.d.ts'
-import type { AllOperations, PayloadRequest } from '../../types/index.d.ts'
-import type { Collection } from '../config/types.d.ts'
+import type { CollectionPermission } from '../../auth/index.js'
+import type { AllOperations, PayloadRequest } from '../../types/index.js'
+import type { Collection } from '../config/types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'

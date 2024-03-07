@@ -5,7 +5,7 @@ import type { CreateMigration } from 'payload/database'
 import fs from 'fs'
 import prompts from 'prompts'
 
-import type { PostgresAdapter } from './types.d.ts'
+import type { PostgresAdapter } from './types.js'
 
 const migrationTemplate = (
   upSQL?: string,

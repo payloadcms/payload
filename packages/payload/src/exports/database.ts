@@ -47,7 +47,7 @@ export type {
   UpdateOneArgs,
   UpdateVersion,
   UpdateVersionArgs,
-} from '../database/types.d.ts'
+} from '../database/types.js'
 
 export * from '../database/queryValidation/types.js'
 
@@ -79,7 +79,7 @@ export { migrationsCollection } from '../database/migrations/migrationsCollectio
 
 export { readMigrationFiles } from '../database/migrations/readMigrationFiles.js'
 
-export type { EntityPolicies, PathToQuery } from '../database/queryValidation/types.d.ts'
+export type { EntityPolicies, PathToQuery } from '../database/queryValidation/types.js'
 
 export { validateQueryPaths } from '../database/queryValidation/validateQueryPaths.js'
 

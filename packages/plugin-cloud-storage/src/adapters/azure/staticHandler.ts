@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import path from 'path'
 
-import type { StaticHandler } from '../../types.d.ts'
+import type { StaticHandler } from '../../types.js'
 
 import { getFilePrefix } from '../../utilities/getFilePrefix.js'
 import getRangeFromHeader from '../../utilities/getRangeFromHeader.js'

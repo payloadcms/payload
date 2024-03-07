@@ -1,4 +1,4 @@
-import type { Payload } from '../../../index.d.ts'
+import type { Payload } from '../../../index.js'
 
 import { sendEvent } from '../index.js'
 

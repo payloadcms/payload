@@ -1,6 +1,6 @@
 import type { UploadField } from 'payload/types'
 
-import type { FormFieldBase } from '../shared.d.ts'
+import type { FormFieldBase } from '../shared.js'
 
 export type Props = FormFieldBase & {
   filterOptions?: UploadField['filterOptions']

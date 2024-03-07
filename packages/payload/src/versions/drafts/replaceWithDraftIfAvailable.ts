@@ -1,8 +1,8 @@
-import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.d.ts'
-import type { AccessResult } from '../../config/types.d.ts'
-import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.d.ts'
-import type { SanitizedGlobalConfig } from '../../globals/config/types.d.ts'
-import type { PayloadRequest, Where } from '../../types/index.d.ts'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
+import type { AccessResult } from '../../config/types.js'
+import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
+import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'

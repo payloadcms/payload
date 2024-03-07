@@ -1,7 +1,7 @@
 import type { FileData, TypeWithID } from 'payload/types'
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
 
-import type { GeneratedAdapter } from '../types.d.ts'
+import type { GeneratedAdapter } from '../types.js'
 
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
 

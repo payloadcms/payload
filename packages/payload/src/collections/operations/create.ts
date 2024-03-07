@@ -2,14 +2,14 @@ import type { MarkOptional } from 'ts-essentials'
 
 import crypto from 'crypto'
 
-import type { GeneratedTypes } from '../../index.d.ts'
-import type { Document, PayloadRequest } from '../../types/index.d.ts'
+import type { GeneratedTypes } from '../../index.js'
+import type { Document, PayloadRequest } from '../../types/index.js'
 import type {
   AfterChangeHook,
   BeforeOperationHook,
   BeforeValidateHook,
   Collection,
-} from '../config/types.d.ts'
+} from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import sendVerificationEmail from '../../auth/sendVerificationEmail.js'

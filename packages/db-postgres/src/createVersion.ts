@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types.d.ts'
+import type { PostgresAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
 

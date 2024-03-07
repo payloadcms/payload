@@ -4,7 +4,7 @@ import type { TypeWithVersion } from 'payload/versions'
 import type { Collection, TypeWithID } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import type { Context } from '../types.d.ts'
+import type { Context } from '../types.js'
 
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,

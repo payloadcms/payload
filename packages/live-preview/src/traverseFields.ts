@@ -1,6 +1,6 @@
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import type { PopulationsByCollection, UpdatedDocument } from './types.d.ts'
+import type { PopulationsByCollection, UpdatedDocument } from './types.js'
 
 import { traverseRichText } from './traverseRichText.js'
 

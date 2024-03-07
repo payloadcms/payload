@@ -1,6 +1,6 @@
-import type { Field } from '../fields/config/types.d.ts'
-import type { Payload } from '../index.d.ts'
-import type { PathToQuery } from './queryValidation/types.d.ts'
+import type { Field } from '../fields/config/types.js'
+import type { Payload } from '../index.js'
+import type { PathToQuery } from './queryValidation/types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
 import flattenFields from '../utilities/flattenTopLevelFields.js'

@@ -1,6 +1,6 @@
 import sanitize from 'sanitize-filename'
 
-import type { PayloadRequest } from '../types/index.d.ts'
+import type { PayloadRequest } from '../types/index.js'
 
 import docWithFilenameExists from './docWithFilenameExists.js'
 import fileExists from './fileExists.js'

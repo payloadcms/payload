@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { Props } from './types.d.ts'
+import type { Props } from './types.js'
 
 import { Button } from '../Button/index.js'
 import './index.scss'

@@ -6,7 +6,7 @@ import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs'
 import path from 'path'
 
-import type { HandleUpload } from '../../types.d.ts'
+import type { HandleUpload } from '../../types.js'
 
 interface Args {
   acl?: 'private' | 'public-read'
