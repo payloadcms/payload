@@ -17,7 +17,7 @@ const swcOptions = {
     paths: undefined,
   },
   module: {
-    type: 'commonjs',
+    type: 'es6',
   },
   sourceMaps: 'inline',
 }

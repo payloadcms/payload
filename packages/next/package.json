@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-alpha.31",
+  "version": "3.0.0-alpha.32",
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "type": "module",
@@ -72,7 +72,7 @@
   },
   "peerDependencies": {
     "http-status": "1.6.2",
-    "next": "14.1.1-canary.26",
+    "next": "14.2.0-canary.7",
     "payload": "workspace:*"
   },
   "publishConfig": {
