@@ -1,11 +1,11 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation.js'
 import { useEffect } from 'react'
 
-import type { DocumentInfo } from '../types'
+import type { DocumentInfo } from '../types.js'
 
-import { useDocumentInfo } from '..'
+import { useDocumentInfo } from '../index.js'
 
 export const SetDocumentInfo: React.FC<DocumentInfo> = (props) => {
   const { setDocumentInfo } = useDocumentInfo()

@@ -1,7 +1,7 @@
 'use client'
 import React, { createContext, useContext, useState } from 'react'
 
-import type { UpdatedDocument } from './types'
+import type { UpdatedDocument } from './types.js'
 
 const Context = createContext({
   mostRecentUpdate: null,

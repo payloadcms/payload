@@ -1,9 +1,9 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import type { ActionMap } from '../../utilities/buildComponentMap/types'
+import type { ActionMap } from '../../utilities/buildComponentMap/types.js'
 
-import { useConfig } from '../Config'
+import { useConfig } from '../Config/index.js'
 
 type ActionsContextType = {
   actions: ActionMap['Edit'][string]

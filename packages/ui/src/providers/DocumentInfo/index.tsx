@@ -13,14 +13,14 @@ import React, {
   useState,
 } from 'react'
 
-import type { DocumentInfo, DocumentInfoContext, DocumentInfoProps } from './types'
+import type { DocumentInfo, DocumentInfoContext, DocumentInfoProps } from './types.js'
 
-import { useAuth } from '../Auth'
-import { useConfig } from '../Config'
-import { useLocale } from '../Locale'
-import { usePreferences } from '../Preferences'
-import { useTranslation } from '../Translation'
-import { documentInfoReducer } from './reducer'
+import { useAuth } from '../Auth/index.js'
+import { useConfig } from '../Config/index.js'
+import { useLocale } from '../Locale/index.js'
+import { usePreferences } from '../Preferences/index.js'
+import { useTranslation } from '../Translation/index.js'
+import { documentInfoReducer } from './reducer.js'
 
 const Context = createContext({} as DocumentInfoContext)
 

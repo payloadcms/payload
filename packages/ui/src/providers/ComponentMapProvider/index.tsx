@@ -1,7 +1,11 @@
 'use client'
 import React, { createContext, useCallback, useContext } from 'react'
 
-import type { ComponentMap, FieldMap, MappedField } from '../../utilities/buildComponentMap/types'
+import type {
+  ComponentMap,
+  FieldMap,
+  MappedField,
+} from '../../utilities/buildComponentMap/types.js'
 
 export type IComponentMapContext = {
   componentMap: ComponentMap

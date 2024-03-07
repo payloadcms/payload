@@ -2,18 +2,18 @@
 import type { Permissions, User } from 'payload/auth'
 
 import { useModal } from '@faceless-ui/modal'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation.js'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { AuthContext } from './types'
+import type { AuthContext } from './types.js'
 
-import useDebounce from '../../hooks/useDebounce'
-import { useTranslation } from '../../providers/Translation'
-import { requests } from '../../utilities/api'
-import { useConfig } from '../Config'
-import { useSearchParams } from '../SearchParams'
+import useDebounce from '../../hooks/useDebounce.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { requests } from '../../utilities/api.js'
+import { useConfig } from '../Config/index.js'
+import { useSearchParams } from '../SearchParams/index.js'
 // import { useLocale } from '../Locale'
 
 const Context = createContext({} as AuthContext)
@@ -149,6 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null)
     revokeTokenAndExpire()
     try {
+      // TODO: I dont think errors from unawaited promises can be caught
       requests.post(`${serverURL}${api}/${userSlug}/logout`)
     } catch (e) {
       toast.error(`Logging out failed: ${e.message}`)
@@ -243,7 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // On mount, get user and set
   useEffect(() => {
-    fetchFullUser()
+    void fetchFullUser()
   }, [fetchFullUser])
 
   // When location changes, refresh cookie

@@ -1,9 +1,9 @@
 'use client'
 import React, { createContext, useContext, useState } from 'react'
 
-import type { ListInfo, ListInfoContext, ListInfoProps } from './types'
+import type { ListInfo, ListInfoContext, ListInfoProps } from './types.js'
 
-import { useConfig } from '../Config'
+import { useConfig } from '../Config/index.js'
 
 const Context = createContext({} as ListInfoContext)
 

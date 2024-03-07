@@ -1,4 +1,4 @@
-import type { DocumentInfo } from '.'
+import type { DocumentInfo } from './index.js'
 
 type SET = {
   payload: Partial<DocumentInfo>
