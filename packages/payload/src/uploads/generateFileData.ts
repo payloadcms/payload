@@ -9,14 +9,14 @@ import sanitize from 'sanitize-filename'
 import type { Collection } from '../collections/config/types.d.ts'
 import type { SanitizedConfig } from '../config/types.d.ts'
 import type { PayloadRequest } from '../types/index.d.ts'
-import type { FileData, FileToSave, ProbedImageSize } from './types.d.ts'
+import type { FileData, FileToSave, ProbedImageSize } from './types.js'
 
 import { FileUploadError, MissingFile } from '../errors/index.js'
 import canResizeImage from './canResizeImage.js'
 import cropImage from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
 import getFileByPath from './getFileByPath.js'
-import getImageSize from './getImageSize.js'
+import { getImageSize } from './getImageSize.js'
 import getSafeFileName from './getSafeFilename.js'
 import resizeAndTransformImageSizes from './imageResizer.js'
 import isImage from './isImage.js'
@@ -133,7 +133,7 @@ export const generateFileData = async <T>({
     }
 
     if (isImage(file.mimetype)) {
-      dimensions = await getImageSize(file)
+      dimensions = getImageSize(file)
       fileData.width = dimensions.width
       fileData.height = dimensions.height
     }

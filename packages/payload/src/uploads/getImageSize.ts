@@ -1,14 +1,15 @@
-import fs from 'fs'
-import probeImageSize from 'probe-image-size'
+import { imageSize } from 'image-size'
 
-import type { PayloadRequest } from '../types/index.d.ts'
-import type { ProbedImageSize } from './types.d.ts'
+import type { PayloadRequest } from '../types/index.js'
+import type { ProbedImageSize } from './types.js'
 
-export default async function (file: PayloadRequest['file']): Promise<ProbedImageSize> {
+export function getImageSize(file: PayloadRequest['file']): ProbedImageSize {
   if (file.tempFilePath) {
-    const data = fs.readFileSync(file.tempFilePath)
-    return probeImageSize.sync(data)
+    const dimensions = imageSize(file.tempFilePath)
+    return { height: dimensions.height, width: dimensions.width }
   }
 
-  return probeImageSize.sync(file.data)
+  const buffer = Buffer.from(file.data)
+  const dimensions = imageSize(buffer)
+  return { height: dimensions.height, width: dimensions.width }
 }

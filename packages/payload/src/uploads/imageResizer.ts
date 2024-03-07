@@ -9,7 +9,7 @@ import sanitize from 'sanitize-filename'
 import type { SanitizedCollectionConfig } from '../collections/config/types.d.ts'
 import type { SharpDependency } from '../config/types.d.ts'
 import type { CustomPayloadRequest, PayloadRequest, UploadEdits } from '../types/index.d.ts'
-import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types.d.ts'
+import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
 import fileExists from './fileExists.js'

@@ -52,6 +52,7 @@
     "find-up": "4.1.0",
     "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
+    "image-size": "^1.1.1",
     "joi": "^17.12.1",
     "json-schema-to-typescript": "11.0.3",
     "jsonwebtoken": "9.0.1",
@@ -62,7 +63,6 @@
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
     "pluralize": "8.0.0",
-    "probe-image-size": "6.0.0",
     "sanitize-filename": "1.6.3",
     "scheduler": "0.23.0",
     "scmp": "2.1.0"
@@ -94,7 +94,6 @@
     "@types/passport-jwt": "3.0.9",
     "@types/passport-local": "1.0.35",
     "@types/pluralize": "0.0.29",
-    "@types/probe-image-size": "7.2.0",
     "@types/react-datepicker": "4.11.2",
     "confusing-browser-globals": "1.0.11",
     "copyfiles": "2.4.1",
@@ -112,8 +111,8 @@
     "release-it": "17.1.1",
     "rimraf": "3.0.2",
     "serve-static": "1.15.0",
-    "ts-essentials": "7.0.3",
-    "sharp": "0.32.6"
+    "sharp": "0.32.6",
+    "ts-essentials": "7.0.3"
   },
   "engines": {
     "node": ">=18.17.0"

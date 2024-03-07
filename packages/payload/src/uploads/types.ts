@@ -1,6 +1,7 @@
 import type express from 'express'
 import type serveStatic from 'serve-static'
 import type { ResizeOptions, Sharp } from 'sharp'
+
 import type { PayloadRequest } from '../types/index.d.ts'
 
 export type FileSize = {
@@ -28,8 +29,6 @@ export type FileData = {
 
 export type ProbedImageSize = {
   height: number
-  mime: string
-  type: string
   width: number
 }
 
