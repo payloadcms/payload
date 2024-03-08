@@ -1,6 +1,7 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
@@ -31,7 +32,8 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const { count, getQueryParams, selectAll, toggleAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
-  const { dispatchSearchParams } = useSearchParams()
+  const router = useRouter()
+  const { stringifyParams } = useSearchParams()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasDeletePermission = collectionPermissions?.delete?.permission
@@ -58,11 +60,14 @@ export const DeleteMany: React.FC<Props> = (props) => {
           if (res.status < 400) {
             toast.success(json.message || t('general:deletedSuccessfully'), { autoClose: 3000 })
             toggleAll()
-            dispatchSearchParams({
-              type: 'SET',
-              browserHistory: 'replace',
-              params: { page: selectAll ? '1' : undefined },
-            })
+            router.replace(
+              stringifyParams({
+                params: {
+                  page: selectAll ? '1' : undefined,
+                },
+                replace: true,
+              }),
+            )
             return null
           }
 
@@ -79,13 +84,14 @@ export const DeleteMany: React.FC<Props> = (props) => {
   }, [
     addDefaultError,
     api,
-    dispatchSearchParams,
     getQueryParams,
     i18n.language,
     modalSlug,
+    router,
     selectAll,
     serverURL,
     slug,
+    stringifyParams,
     t,
     toggleAll,
     toggleModal,

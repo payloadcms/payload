@@ -3,6 +3,7 @@ import type { FormState } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 
 import type { Props } from './types.js'
@@ -100,7 +101,8 @@ export const EditMany: React.FC<Props> = (props) => {
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
   const [selected, setSelected] = useState([])
-  const { dispatchSearchParams } = useSearchParams()
+  const { stringifyParams } = useSearchParams()
+  const router = useRouter()
   const { componentMap } = useComponentMap()
   const [reducedFieldMap, setReducedFieldMap] = useState([])
   const [initialState, setInitialState] = useState<FormState>()
@@ -153,11 +155,11 @@ export const EditMany: React.FC<Props> = (props) => {
   }
 
   const onSuccess = () => {
-    dispatchSearchParams({
-      type: 'SET',
-      browserHistory: 'replace',
-      params: { page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined },
-    })
+    router.replace(
+      stringifyParams({
+        params: { page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined },
+      }),
+    )
   }
 
   return (
