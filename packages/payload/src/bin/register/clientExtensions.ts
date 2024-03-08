@@ -1,4 +1,4 @@
-export const clientFiles = [
+export const CLIENT_EXTENSIONS = [
   '.scss',
   '.css',
   '.svg',

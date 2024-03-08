@@ -3,6 +3,7 @@ import minimist from 'minimist'
 
 import type { BinScript, SanitizedConfig } from '../config/types.js'
 
+// import loadConfig from '../config/load.js'
 import { generateTypes } from './generateTypes.js'
 import { migrate } from './migrate.js'
 

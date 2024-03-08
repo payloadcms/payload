@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { getTsconfig } from 'get-tsconfig'
 import path from 'path'
 import ts from 'typescript'
 import { fileURLToPath, pathToFileURL } from 'url'
 
+import { CLIENT_EXTENSIONS } from './clientExtensions.js'
 import { compile } from './register.js'
 
 interface ResolveContext {
@@ -40,6 +42,18 @@ const EXTENSIONS: string[] = [ts.Extension.Ts, ts.Extension.Tsx, ts.Extension.Dt
 
 export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   const isTS = EXTENSIONS.some((ext) => specifier.endsWith(ext))
+  const isClient = CLIENT_EXTENSIONS.some((ext) => specifier.endsWith(ext))
+
+  if (isClient) {
+    const nextResult = await nextResolve(specifier, context, nextResolve)
+    const specifierSegments = specifier.split('.')
+
+    return {
+      format: '.' + specifierSegments[specifierSegments.length - 1],
+      shortCircuit: true,
+      url: nextResult.url,
+    }
+  }
 
   // entrypoint
   if (!context.parentURL) {
@@ -113,6 +127,16 @@ if (tsconfig.paths) {
 }
 
 export const load: LoadFn = async (url, context, nextLoad) => {
+  if (CLIENT_EXTENSIONS.some((e) => context.format === e)) {
+    const rawSource = '{}'
+
+    return {
+      format: 'json',
+      shortCircuit: true,
+      source: rawSource,
+    }
+  }
+
   if (context.format === 'ts') {
     const { source } = await nextLoad(url, context)
     const code = typeof source === 'string' ? source : Buffer.from(source).toString()
