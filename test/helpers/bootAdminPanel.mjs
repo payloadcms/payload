@@ -19,7 +19,6 @@ export const bootAdminPanel = async ({ port = 3000, appDir }) => {
   createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true)
-      console.log('Requested path: ', parsedUrl.path)
       await handle(req, res, parsedUrl)
     } catch (err) {
       console.error('Error occurred handling', req.url, err)
