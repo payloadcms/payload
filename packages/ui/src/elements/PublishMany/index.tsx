@@ -1,5 +1,5 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -20,6 +20,8 @@ import './index.scss'
 const baseClass = 'publish-many'
 
 export const PublishMany: React.FC<Props> = (props) => {
+  const { Modal, useModal } = facelessUIImport
+
   const { collection: { slug, labels: { plural }, versions } = {} } = props
 
   const {

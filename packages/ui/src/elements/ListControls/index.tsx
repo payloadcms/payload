@@ -1,5 +1,5 @@
 'use client'
-import { useWindowInfo } from '@faceless-ui/window-info'
+import * as facelessUIImport from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData } from 'payload/types'
 import React, { useState } from 'react'
@@ -43,6 +43,8 @@ export const ListControls: React.FC<Props> = (props) => {
     textFieldsToBeSearched,
     titleField,
   } = props
+
+  const { useWindowInfo } = facelessUIImport
 
   const { searchParams } = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)

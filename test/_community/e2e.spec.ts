@@ -19,7 +19,9 @@ describe('Admin Panel', () => {
   let url: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
+    console.log('fewfwefwe')
     const { serverURL } = await initPayloadE2E({ config, dirname })
+    console.log('serverURL', serverURL)
     url = new AdminUrlUtil(serverURL, 'posts')
 
     const context = await browser.newContext()
@@ -28,6 +30,7 @@ describe('Admin Panel', () => {
   })
 
   test('example test', async () => {
+    console.log('url.list', url.list)
     await page.goto(url.list)
 
     const textCell = page.locator('.row-1 .cell-text')

@@ -1,5 +1,5 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
@@ -16,6 +16,8 @@ const baseClass = 'stay-logged-in'
 const modalSlug = 'stay-logged-in'
 
 const StayLoggedInModal: React.FC<Props> = (props) => {
+  const { Modal, useModal } = facelessUIImport
+
   const { refreshCookie } = props
   const router = useRouter()
   const config = useConfig()

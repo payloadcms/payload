@@ -1,7 +1,7 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig } from 'payload/types'
 
-import { useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -37,6 +37,8 @@ export const ExtraFieldsUploadDrawer: React.FC<
     relatedCollection: SanitizedCollectionConfig
   }
 > = (props) => {
+  const { useModal } = facelessUIImport
+
   const {
     data: { fields, relationTo, value },
     drawerSlug,

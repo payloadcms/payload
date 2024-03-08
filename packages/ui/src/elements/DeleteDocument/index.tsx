@@ -1,5 +1,5 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
@@ -22,6 +22,7 @@ const baseClass = 'delete-document'
 
 const DeleteDocument: React.FC<Props> = (props) => {
   const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps } = props
+  const { Modal, useModal } = facelessUIImport
 
   const {
     routes: { admin, api },

@@ -1,7 +1,7 @@
 'use client'
 import type { Labels } from 'payload/types'
 
-import { useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import React from 'react'
 
 import type { FieldMap, ReducedBlock } from '../../../utilities/buildComponentMap/types.js'
@@ -35,6 +35,7 @@ export const RowActions: React.FC<{
     rowCount,
     rowIndex,
   } = props
+  const { useModal } = facelessUIImport
 
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('blocks-drawer')

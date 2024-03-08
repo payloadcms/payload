@@ -1,7 +1,7 @@
 'use client'
 import type { Permissions, User } from 'payload/auth'
 
-import { useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
@@ -21,6 +21,8 @@ const Context = createContext({} as AuthContext)
 const maxTimeoutTime = 2147483647
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { useModal } = facelessUIImport
+
   const { searchParams } = useSearchParams()
   const [user, setUser] = useState<User | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()

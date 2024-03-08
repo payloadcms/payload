@@ -2,7 +2,7 @@
 import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 
-import { useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
@@ -30,6 +30,8 @@ import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
+  const { useModal } = facelessUIImport
+
   const [editor] = useLexicalComposerContext()
 
   const editorRef = useRef<HTMLDivElement | null>(null)

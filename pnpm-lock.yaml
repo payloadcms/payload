@@ -13,6 +13,13 @@ overrides:
   react: ^18.2.0
   react-dom: ^18.2.0
   typescript: 5.2.2
+  playwright: 1.42.1
+  '@playwright/test': 1.42.1
+
+patchedDependencies:
+  playwright@1.42.1:
+    hash: gpgcpfy6yudxurcg3tkrtpf62a
+    path: patches/playwright@1.42.1.patch
 
 importers:
 
@@ -199,6 +206,9 @@ importers:
       pino-pretty:
         specifier: 10.2.0
         version: 10.2.0
+      playwright:
+        specifier: 1.42.1
+        version: 1.42.1(patch_hash=gpgcpfy6yudxurcg3tkrtpf62a)
       prettier:
         specifier: ^3.0.3
         version: 3.2.5
@@ -4643,7 +4653,7 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      playwright: 1.42.1
+      playwright: 1.42.1(patch_hash=gpgcpfy6yudxurcg3tkrtpf62a)
     dev: true
 
   /@pnpm/config.env-replace@1.1.0:
@@ -13541,7 +13551,7 @@ packages:
     hasBin: true
     dev: true
 
-  /playwright@1.42.1:
+  /playwright@1.42.1(patch_hash=gpgcpfy6yudxurcg3tkrtpf62a):
     resolution: {integrity: sha512-PgwB03s2DZBcNRoW+1w9E+VkLBxweib6KTXM0M3tkiT4jVxKSi6PmVJ591J+0u10LUrgxB7dLRbiJqO5s2QPMg==}
     engines: {node: '>=16'}
     hasBin: true
@@ -13550,6 +13560,7 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
+    patched: true
 
   /pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}

@@ -1,5 +1,5 @@
 'use client'
-import { useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { BlocksDrawer, formatDrawerSlug, useEditDepth, useTranslation } from '@payloadcms/ui'
 import {
@@ -55,6 +55,8 @@ const insertBlock = ({
 }
 
 export const BlocksDrawerComponent: React.FC = () => {
+  const { useModal } = facelessUIImport
+
   const [editor] = useLexicalComposerContext()
   const { editorConfig, uuid } = useEditorConfigContext()
 

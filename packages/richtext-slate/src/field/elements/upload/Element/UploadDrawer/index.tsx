@@ -3,7 +3,7 @@
 import type { FormFieldBase } from '@payloadcms/ui/types'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Drawer,
@@ -37,6 +37,8 @@ export const UploadDrawer: React.FC<{
   relatedCollection: SanitizedCollectionConfig
   schemaPath: string
 }> = (props) => {
+  const { useModal } = facelessUIImport
+
   const editor = useSlateStatic()
 
   const { drawerSlug, element, fieldProps, relatedCollection, schemaPath } = props
