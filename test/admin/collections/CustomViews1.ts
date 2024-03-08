@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { CustomEditView } from '../components/views/CustomEdit'
-import { customViews1CollectionSlug } from '../slugs'
+import { CustomEditView } from '../components/views/CustomEdit/index.js'
+import { customViews1CollectionSlug } from '../slugs.js'
 
 export const CustomViews1: CollectionConfig = {
   slug: customViews1CollectionSlug,

@@ -1,26 +1,47 @@
 /* eslint-disable import/no-dynamic-require */
+import type pino from 'pino'
+
 /* eslint-disable global-require */
+import { createRequire } from 'module'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import path from 'path'
 
 import type { SanitizedConfig } from './types.js'
 
-import { clientFiles } from './clientFiles.js'
-import findConfig from './find.js'
+import { CLIENT_EXTENSIONS } from '../bin/register/clientExtensions.js'
+import Logger from '../utilities/logger.js'
+import { findConfig } from './find.js'
+import validate from './validate.js'
 
-const loadConfig = async (): Promise<SanitizedConfig> => {
+const require = createRequire(import.meta.url)
+
+const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
+  const localLogger = logger ?? Logger()
+
   const configPath = findConfig()
 
-  clientFiles.forEach((ext) => {
+  CLIENT_EXTENSIONS.forEach((ext) => {
     require.extensions[ext] = () => null
   })
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const configPromise = require(configPath)
+  const configPromise = await import(configPath)
 
   let config = await configPromise
 
-  if (config.default) config = await config.default
+  if ('default' in config) config = await config.default
 
-  return config
+  if (process.env.NODE_ENV !== 'production') {
+    config = await validate(config, localLogger)
+  }
+
+  return {
+    ...config,
+    paths: {
+      config: configPath,
+      configDir: path.dirname(configPath),
+      rawConfig: configPath,
+    },
+  }
 }
 
 export default loadConfig

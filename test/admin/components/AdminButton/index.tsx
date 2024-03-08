@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'admin-button'
 
-const AdminButton: React.FC = () => {
+export const AdminButton: React.FC = () => {
   return (
     <div
       className={baseClass}
@@ -18,5 +18,3 @@ const AdminButton: React.FC = () => {
     </div>
   )
 }
-
-export default AdminButton

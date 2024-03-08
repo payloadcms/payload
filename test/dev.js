@@ -1,21 +1,20 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { existsSync } from 'fs'
-import { promises } from 'fs'
+import { existsSync, promises, promises as _promises, promises as __promises } from 'fs'
+import json5 from 'json5'
 import minimist from 'minimist'
 import { nextDev } from 'next/dist/cli/next-dev.js'
-import { dirname } from 'path'
-import { resolve } from 'path'
+import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
+
 const { readFile } = promises
-import { promises as _promises } from 'fs'
 const { writeFile } = _promises
-import { promises as __promises } from 'fs'
 const { rm } = __promises
-import json5 from 'json5'
 
 const { parse } = json5
 
 main()
+
+process.env.PAYLOAD_DROP_DATABASE = true
 
 async function main() {
   const {

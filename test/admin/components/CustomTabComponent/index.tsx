@@ -3,11 +3,11 @@
 import React from 'react'
 import { Link, useRouteMatch } from 'react-router-dom'
 
-import type { DocumentTabComponent } from '../../../../packages/payload/src/admin/types'
+import type { DocumentTabComponent } from '../../../../packages/payload/src/admin/types.js'
 
 import './index.scss'
 
-const CustomTabComponent: DocumentTabComponent = (props) => {
+export const CustomTabComponent: DocumentTabComponent = (props) => {
   const { path } = props
   const match = useRouteMatch()
 
@@ -17,5 +17,3 @@ const CustomTabComponent: DocumentTabComponent = (props) => {
     </li>
   )
 }
-
-export default CustomTabComponent

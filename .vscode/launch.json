@@ -3,6 +3,13 @@
   // Hover to view descriptions of existing attributes.
   "configurations": [
     {
+      "command": "pnpm generate:types",
+      "name": "Generate Types CLI",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
       "command": "pnpm run dev _community -- --no-turbo",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Community",
@@ -98,17 +105,6 @@
         "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
       },
       "name": "Build CLI - Webpack",
-      "outputCapture": "std",
-      "request": "launch",
-      "type": "node-terminal"
-    },
-    {
-      "command": "ts-node ./packages/payload/src/bin/index.ts generate:types",
-      "env": {
-        "PAYLOAD_CONFIG_PATH": "test/_community/config.ts",
-        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
-      },
-      "name": "Generate Types CLI",
       "outputCapture": "std",
       "request": "launch",
       "type": "node-terminal"

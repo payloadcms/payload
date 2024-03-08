@@ -1,12 +1,11 @@
-import type { Payload } from '../../packages/payload/src'
-import type { PayloadRequest } from '../../packages/payload/src/types'
-import type { Post, RelyOnRequestHeader, Restricted } from './payload-types'
+import type { Payload, PayloadRequest } from '../../packages/payload/src/types/index.js'
+import type { Post, RelyOnRequestHeader, Restricted } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { Forbidden } from '../../packages/payload/src/errors'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise from './config'
-import { requestHeaders } from './config'
+import { Forbidden } from '../../packages/payload/src/errors/index.js'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise from './config.js'
+import { requestHeaders } from './config.js'
 import {
   firstArrayText,
   hiddenAccessSlug,
@@ -17,7 +16,7 @@ import {
   secondArrayText,
   siblingDataSlug,
   slug,
-} from './shared'
+} from './shared.js'
 
 let payload: Payload
 

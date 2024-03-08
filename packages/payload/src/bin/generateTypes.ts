@@ -4,7 +4,6 @@ import { compile } from 'json-schema-to-typescript'
 
 import type { SanitizedConfig } from '../config/types.js'
 
-import loadConfig from '../config/load.js'
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
 import Logger from '../utilities/logger.js'
 
@@ -35,14 +34,4 @@ export function generateTypes(config: SanitizedConfig): void {
     fs.writeFileSync(outputFile, compiled)
     logger.info(`Types written to ${outputFile}`)
   })
-}
-
-// when generateTypes.js is launched directly
-if (module.id === require.main.id) {
-  const loadConfigAndGenerateTypes = async () => {
-    const config = await loadConfig()
-    generateTypes(config)
-  }
-
-  loadConfigAndGenerateTypes()
 }

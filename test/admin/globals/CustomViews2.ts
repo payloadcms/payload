@@ -1,10 +1,10 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
 
-import CustomTabComponent from '../components/CustomTabComponent'
-import CustomDefaultEditView from '../components/views/CustomEditDefault'
-import CustomView from '../components/views/CustomTab'
-import CustomVersionsView from '../components/views/CustomVersions'
-import { customGlobalViews2GlobalSlug } from '../slugs'
+import { CustomTabComponent } from '../components/CustomTabComponent/index.js'
+import { CustomDefaultEditView } from '../components/views/CustomEditDefault/index.js'
+import { CustomTabView } from '../components/views/CustomTab/index.js'
+import { CustomVersionsView } from '../components/views/CustomVersions/index.js'
+import { customGlobalViews2GlobalSlug } from '../slugs.js'
 
 export const CustomGlobalViews2: GlobalConfig = {
   slug: customGlobalViews2GlobalSlug,
@@ -17,7 +17,7 @@ export const CustomGlobalViews2: GlobalConfig = {
           Versions: CustomVersionsView,
           MyCustomView: {
             path: '/custom-tab-view',
-            Component: CustomView,
+            Component: CustomTabView,
             Tab: {
               label: 'Custom',
               href: '/custom-tab-view',
@@ -25,7 +25,7 @@ export const CustomGlobalViews2: GlobalConfig = {
           },
           MyCustomViewWithCustomTab: {
             path: '/custom-tab-component',
-            Component: CustomView,
+            Component: CustomTabView,
             Tab: CustomTabComponent,
           },
         },
