@@ -9,6 +9,10 @@ import { MenuGlobal } from './globals/Menu/index.js'
 
 export default buildConfigWithDefaults({
   // ...extend config here
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   collections: [PostsCollection, MediaCollection],
   globals: [
     MenuGlobal,

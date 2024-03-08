@@ -166,16 +166,16 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     ...testConfig,
   }
 
-  config.admin = {
-    autoLogin:
-      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
-        ? false
-        : {
-            email: 'dev@payloadcms.com',
-            password: 'test',
-          },
-    ...(config.admin || {}),
-  }
+  // config.admin = {
+  //   autoLogin:
+  //     process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
+  //       ? false
+  //       : {
+  //           email: 'dev@payloadcms.com',
+  //           password: 'test',
+  //         },
+  //   ...(config.admin || {}),
+  // }
 
   if (process.env.PAYLOAD_DISABLE_ADMIN === 'true') {
     if (typeof config.admin !== 'object') config.admin = {}
