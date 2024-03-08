@@ -1,7 +1,6 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
-import { useConfig } from '../../providers/Config/index.js'
+import { useComponentMap } from '../../index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 const css = `
@@ -44,16 +43,14 @@ const PayloadIcon: React.FC = () => {
 
 const Icon: React.FC = () => {
   const {
-    admin: {
-      components: {
-        graphics: { Icon: CustomIcon } = {
-          Icon: undefined,
-        },
-      } = {},
-    } = {},
-  } = useConfig()
+    componentMap: { Icon: CustomIcon },
+  } = useComponentMap()
 
-  return <RenderCustomComponent CustomComponent={CustomIcon} DefaultComponent={PayloadIcon} />
+  if (CustomIcon) {
+    return <Fragment>{CustomIcon}</Fragment>
+  }
+
+  return <PayloadIcon />
 }
 
 export default Icon

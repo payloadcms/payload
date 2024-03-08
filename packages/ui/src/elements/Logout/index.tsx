@@ -1,8 +1,8 @@
 'use client'
-import React from 'react'
+import React, { Fragment } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { LogOut } from '../../icons/LogOut/index.js'
+import { useComponentMap } from '../../index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
@@ -35,27 +35,18 @@ const DefaultLogout: React.FC<{
 }
 
 const Logout: React.FC<{
+  Link?: React.ComponentType
   tabIndex?: number
-}> = ({ tabIndex = 0 }) => {
+}> = ({ Link, tabIndex = 0 }) => {
   const {
-    admin: {
-      components: {
-        logout: { Button: CustomLogout } = {
-          Button: undefined,
-        },
-      } = {},
-    } = {},
-  } = useConfig()
+    componentMap: { LogoutButton: CustomLogout },
+  } = useComponentMap()
 
-  return (
-    <RenderCustomComponent
-      CustomComponent={CustomLogout}
-      DefaultComponent={DefaultLogout}
-      componentProps={{
-        tabIndex,
-      }}
-    />
-  )
+  if (CustomLogout) {
+    return <Fragment>{CustomLogout}</Fragment>
+  }
+
+  return <DefaultLogout Link={Link} tabIndex={tabIndex} />
 }
 
 export default Logout
