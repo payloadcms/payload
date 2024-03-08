@@ -36,9 +36,15 @@ export const readMigrationFiles = async ({
   return Promise.all(
     files.map(async (filePath) => {
       // eval used to circumvent errors bundling
-      const migration = eval(`require('${filePath.replaceAll('\\', '/')}')`)
-      migration.name = path.basename(filePath).split('.')?.[0]
-      return migration
+      const migration = await eval(`import('${filePath.replaceAll('\\', '/')}')`)
+
+      const result: Migration = {
+        name: path.basename(filePath).split('.')?.[0],
+        down: migration.down,
+        up: migration.up,
+      }
+
+      return result
     }),
   )
 }

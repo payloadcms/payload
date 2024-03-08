@@ -389,8 +389,8 @@ export type Migration = MigrationData & {
 }
 
 export type MigrationData = {
-  batch: number
-  id: string
+  batch?: number
+  id?: string
   name: string
 }
 
