@@ -1,7 +1,5 @@
-import type { Response } from 'express'
 import type { Config } from 'payload/config'
-import type { TypeWithID } from 'payload/types'
-import type { CollectionConfig, FileData, PayloadRequest } from 'payload/types'
+import type { CollectionConfig, FileData, PayloadRequest, TypeWithID } from 'payload/types'
 
 export interface File {
   buffer: Buffer

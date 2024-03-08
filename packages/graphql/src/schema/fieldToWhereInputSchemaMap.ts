@@ -1,5 +1,5 @@
 import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
-import GraphQLJSON from 'graphql-type-json'
+import GraphQLJSONImport from 'graphql-type-json'
 
 import type {
   ArrayField,
@@ -27,6 +27,9 @@ import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths.js'
 import { withOperators } from './withOperators.js'
+
+const GraphQLJSON = (GraphQLJSONImport ||
+  GraphQLJSONImport.default) as unknown as typeof GraphQLJSONImport.default
 
 type Args = {
   nestedFieldName?: string
@@ -96,7 +99,7 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
                 ),
               }),
             },
-            value: { type: GraphQLJSON.default },
+            value: { type: GraphQLJSON },
           },
         }),
       }
