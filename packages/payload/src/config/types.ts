@@ -597,7 +597,6 @@ export type Config = {
      * @see https://payloadcms.com/docs/graphql/extending
      */
     queries?: GraphQLExtension
-    schemaOutputFile?: string
   }
   /**
    * Tap into Payload-wide hooks.

@@ -5,10 +5,6 @@ import Uploads from './collections/Upload/index.js'
 
 export default buildConfigWithDefaults({
   collections: [ErrorFieldsCollection, Uploads],
-  graphQL: {
-    schemaOutputFile: './test/field-error-states/schema.graphql',
-  },
-
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
