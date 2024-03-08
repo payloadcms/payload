@@ -2,9 +2,14 @@
 import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
 import type { MutableRefObject, ReactPortal } from 'react'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { mergeRegister } from '@lexical/utils'
-import {
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
+
+import lexicalUtilsImport from '@lexical/utils'
+const { mergeRegister } = lexicalUtilsImport
+
+import lexicalImport from 'lexical'
+const {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_LOW,
@@ -14,7 +19,8 @@ import {
   KEY_ESCAPE_COMMAND,
   KEY_TAB_COMMAND,
   createCommand,
-} from 'lexical'
+} = lexicalImport
+
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import type { MenuTextMatch } from '../useMenuTriggerMatch.js'

@@ -1,4 +1,5 @@
-import { QuoteNode, type SerializedQuoteNode } from '@lexical/rich-text'
+import lexicalRichTextImport, { type SerializedQuoteNode } from '@lexical/rich-text'
+const { QuoteNode } = lexicalRichTextImport
 
 import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'

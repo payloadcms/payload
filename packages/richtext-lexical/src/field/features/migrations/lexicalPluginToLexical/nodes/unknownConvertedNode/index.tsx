@@ -1,7 +1,13 @@
 import type { SerializedLexicalNode, Spread } from 'lexical'
 
-import { addClassNamesToElement } from '@lexical/utils'
-import { DecoratorNode, type EditorConfig, type LexicalNode, type NodeKey } from 'lexical'
+import lexicalUtilsImport from '@lexical/utils'
+const { addClassNamesToElement } = lexicalUtilsImport
+
+import lexicalImport from 'lexical'
+const { DecoratorNode } = lexicalImport
+
+import type { EditorConfig, LexicalNode, NodeKey } from 'lexical'
+
 import * as React from 'react'
 
 export type UnknownConvertedNodeData = {

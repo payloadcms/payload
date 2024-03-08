@@ -1,6 +1,7 @@
 import type { SerializedListItemNode, SerializedListNode } from '@lexical/list'
 
-import { ListItemNode, ListNode } from '@lexical/list'
+import lexicalListImport from '@lexical/list'
+const { ListItemNode, ListNode } = lexicalListImport
 
 import type { HTMLConverter } from '../converters/html/converter/types.js'
 

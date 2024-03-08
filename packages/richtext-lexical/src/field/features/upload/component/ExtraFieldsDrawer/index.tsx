@@ -2,7 +2,8 @@
 import type { FormState, SanitizedCollectionConfig } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
 import { getTranslation } from '@payloadcms/translations'
 import {
   Drawer,
@@ -17,7 +18,9 @@ import {
   useFieldPath,
   useTranslation,
 } from '@payloadcms/ui'
-import { $getNodeByKey } from 'lexical'
+import lexicalImport from 'lexical'
+const { $getNodeByKey } = lexicalImport
+
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'

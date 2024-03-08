@@ -1,6 +1,7 @@
 import type { ElementTransformer } from '@lexical/markdown'
 
-import { $isListNode, ListItemNode, ListNode } from '@lexical/list'
+import lexicalListImport from '@lexical/list'
+const { $isListNode, ListItemNode, ListNode } = lexicalListImport
 
 import { listExport, listReplace } from '../common/markdown.js'
 

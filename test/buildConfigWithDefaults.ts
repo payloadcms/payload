@@ -3,9 +3,10 @@ import sharp from 'sharp'
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types.d.ts'
 
 import { mongooseAdapter } from '../packages/db-mongodb/src/index.js'
+import { postgresAdapter } from '../packages/db-postgres/src/index.js'
 //import { postgresAdapter } from '../packages/db-postgres/src/index.js'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build.js'
-/*import {
+import {
   AlignFeature,
   BlockQuoteFeature,
   BlocksFeature,
@@ -27,22 +28,43 @@ import { buildConfig as buildPayloadConfig } from '../packages/payload/src/confi
   UnorderedListFeature,
   UploadFeature,
   lexicalEditor,
-} from '../packages/richtext-lexical/src/index.js'*/
-import { slateEditor } from '../packages/richtext-slate/src/index.js'
-
+} from '../packages/richtext-lexical/src/index.js'
+//import { slateEditor } from '../packages/richtext-slate/src/index.js'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
     url: 'mongodb://127.0.0.1/payloadtests',
   }),
+  postgres: postgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+    },
+  }),
+  'postgres-custom-schema': postgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+    },
+    schemaName: 'custom',
+  }),
+  'postgres-uuid': postgresAdapter({
+    idType: 'uuid',
+    pool: {
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+    },
+  }),
+  supabase: postgresAdapter({
+    pool: {
+      connectionString:
+        process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
+    },
+  }),
 }
-
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
   const config: Config = {
-    db: databaseAdapters['mongoose'],
+    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',
-    editor: slateEditor({}),
+    //editor: slateEditor({}),
     // editor: slateEditor({
     //   admin: {
     //     upload: {
@@ -59,7 +81,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     //     },
     //   },
     // }),
-    /* editor: lexicalEditor({
+    editor: lexicalEditor({
       features: [
         ParagraphFeature(),
         RelationshipFeature(),
@@ -138,7 +160,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
           ],
         }),
       ],
-    }),*/
+    }),
     sharp,
     telemetry: false,
     ...testConfig,

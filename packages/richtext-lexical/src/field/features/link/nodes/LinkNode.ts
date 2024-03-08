@@ -1,21 +1,28 @@
 import type { BaseSelection } from 'lexical'
 
-import { addClassNamesToElement, isHTMLAnchorElement } from '@lexical/utils'
-import {
+import lexicalUtilsImport from '@lexical/utils'
+const { addClassNamesToElement, isHTMLAnchorElement } = lexicalUtilsImport
+
+import lexicalImport from 'lexical'
+const {
   $applyNodeReplacement,
   $createTextNode,
   $getSelection,
   $isElementNode,
   $isRangeSelection,
-  type DOMConversionMap,
-  type DOMConversionOutput,
-  type EditorConfig,
   ElementNode,
-  type LexicalCommand,
-  type LexicalNode,
-  type NodeKey,
-  type RangeSelection,
   createCommand,
+} = lexicalImport
+
+import type {
+  DOMConversionMap,
+  DOMConversionOutput,
+  EditorConfig,
+  ElementNode as ElementNodeType,
+  LexicalCommand,
+  LexicalNode,
+  NodeKey,
+  RangeSelection,
 } from 'lexical'
 
 import type { LinkPayload } from '../plugins/floatingLinkEditor/types.js'
@@ -143,7 +150,7 @@ export class LinkNode extends ElementNode {
     return this.getLatest().__fields
   }
 
-  insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNode | null {
+  insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNodeType | null {
     const element = this.getParentOrThrow().insertNewAfter(selection, restoreSelection)
     if ($isElementNode(element)) {
       const linkNode = $createLinkNode({ fields: this.__fields })
@@ -284,7 +291,7 @@ export function toggleLink(payload: LinkPayload): void {
       }
     }
 
-    let prevParent: ElementNode | LinkNode | null = null
+    let prevParent: ElementNodeType | LinkNode | null = null
     let linkNode: LinkNode | null = null
 
     nodes.forEach((node) => {

@@ -1,9 +1,11 @@
 'use client'
-import type { ParagraphNode } from 'lexical'
+import type { LexicalEditor, LexicalNode, ParagraphNode } from 'lexical'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { $createParagraphNode } from 'lexical'
-import { $getNodeByKey, type LexicalEditor, type LexicalNode } from 'lexical'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
+import lexicalImport from 'lexical'
+const { $createParagraphNode, $getNodeByKey } = lexicalImport
+
 import * as React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'

@@ -5,7 +5,8 @@ import { createHeadlessEditor } from '@lexical/headless'
 import { useTableCell } from '@payloadcms/ui/elements'
 import { useFieldPath } from '@payloadcms/ui/forms'
 import { useClientFunctions } from '@payloadcms/ui/providers'
-import { $getRoot } from 'lexical'
+import lexicalImport from 'lexical'
+const { $getRoot } = lexicalImport
 import React, { useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../field/features/types.js'

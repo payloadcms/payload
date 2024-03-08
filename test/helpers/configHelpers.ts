@@ -1,5 +1,5 @@
 import getPort from 'get-port'
-import { nextDev } from 'next/dist/cli/next-dev.js'
+//import { nextDev } from 'next/dist/cli/next-dev.js'
 import path from 'path'
 
 import type { SanitizedConfig } from '../../packages/payload/src/config/types.js'
@@ -21,18 +21,17 @@ export async function initPayloadE2E(args: {
   // process.env.TURBOPACK = '1' // Not working due to turbopack pulling in mongoose, pg
   process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, './config.js')
   process.env.PAYLOAD_DROP_DATABASE = 'true'
-  // @ts-expect-error
   //process.env.NODE_ENV = 'test'
 
   const payload = await getPayload({ config })
 
-  const port = 3000
+  const port = await getPort()
   const serverURL = `http://localhost:${port}`
 
-  console.log('serverURL port', port)
   //process.env.APP_ENV = 'test'
   //process.env.__NEXT_TEST_MODE = 'jest'
-  await nextDev({ _: [path.resolve(dirname, '../../')], port })
-  //await bootAdminPanel({ port, appDir: path.resolve(dirname, '../../') })
+
+  //await nextDev({ _: [path.resolve(dirname, '../../')], port }) // Running nextDev directly does not work for ports other than 3000
+  await bootAdminPanel({ port, appDir: path.resolve(dirname, '../../') })
   return { serverURL, payload }
 }

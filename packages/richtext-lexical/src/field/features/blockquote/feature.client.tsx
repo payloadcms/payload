@@ -1,8 +1,13 @@
 'use client'
 
-import { $createQuoteNode, QuoteNode } from '@lexical/rich-text'
-import { $setBlocksType } from '@lexical/selection'
-import { $getSelection } from 'lexical'
+import lexicalRichTextImport from '@lexical/rich-text'
+const { $createQuoteNode, QuoteNode } = lexicalRichTextImport
+
+import lexicalSelectionImport from '@lexical/selection'
+const { $setBlocksType } = lexicalSelectionImport
+
+import lexicalImport from 'lexical'
+const { $getSelection } = lexicalImport
 
 import type { FeatureProviderProviderClient } from '../types.js'
 

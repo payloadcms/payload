@@ -1,13 +1,17 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
-import {
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
+import lexicalUtilsImport from '@lexical/utils'
+const { $insertNodeToNearestRoot, mergeRegister } = lexicalUtilsImport
+import lexicalImport from 'lexical'
+const {
   $getPreviousSelection,
   $getSelection,
   $isParagraphNode,
   $isRangeSelection,
   COMMAND_PRIORITY_EDITOR,
-} from 'lexical'
+} = lexicalImport
+
 import React, { useEffect } from 'react'
 
 import type { BlockFields } from '../nodes/BlocksNode.js'

@@ -1,6 +1,7 @@
 'use client'
 
-import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from 'lexical'
+import lexicalImport from 'lexical'
+const { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } = lexicalImport
 
 import type { FeatureProviderProviderClient } from '../types.js'
 
