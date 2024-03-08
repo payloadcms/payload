@@ -70,17 +70,13 @@ const sanitizeCollections = (
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
 
-      if ('components' in sanitized.admin) {
-        delete sanitized.admin.components
-      }
+      const serverOnlyProperties = ['components', 'hidden', 'preview', 'actions']
 
-      if ('hidden' in sanitized.admin) {
-        delete sanitized.admin.hidden
-      }
-
-      if ('preview' in sanitized.admin) {
-        delete sanitized.admin.preview
-      }
+      serverOnlyProperties.forEach((key) => {
+        if (key in sanitized.admin) {
+          delete sanitized.admin[key]
+        }
+      })
     }
 
     return sanitized
@@ -97,17 +93,13 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
 
-      if ('components' in sanitized.admin) {
-        delete sanitized.admin.components
-      }
+      const serverOnlyProperties = ['components', 'hidden', 'preview', 'actions']
 
-      if ('hidden' in sanitized.admin) {
-        delete sanitized.admin.hidden
-      }
-
-      if ('preview' in sanitized.admin) {
-        delete sanitized.admin.preview
-      }
+      serverOnlyProperties.forEach((key) => {
+        if (key in sanitized.admin) {
+          delete sanitized.admin[key]
+        }
+      })
     }
 
     return sanitized
