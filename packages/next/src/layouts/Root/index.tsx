@@ -58,10 +58,11 @@ export const RootLayout = async ({
     value: language,
   }))
 
-  const componentMap = buildComponentMap({
+  const { componentMap, wrappedChildren } = buildComponentMap({
     DefaultCell,
     DefaultEditView,
     DefaultListView,
+    children,
     config,
     permissions,
   })
@@ -78,7 +79,7 @@ export const RootLayout = async ({
           languageOptions={languageOptions}
           translations={mergedTranslations[lang]}
         >
-          {children}
+          {wrappedChildren}
         </RootProvider>
         <div id="portal" />
       </body>

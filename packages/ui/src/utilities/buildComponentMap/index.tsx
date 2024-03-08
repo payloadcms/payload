@@ -12,14 +12,19 @@ export const buildComponentMap = (args: {
   DefaultCell: React.FC<any>
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<EditViewProps>
+  children: React.ReactNode
   config: SanitizedConfig
   permissions?: Permissions
   readOnly?: boolean
-}): ComponentMap => {
+}): {
+  componentMap: ComponentMap
+  wrappedChildren: React.ReactNode
+} => {
   const {
     DefaultCell,
     DefaultEditView,
     DefaultListView,
+    children,
     config,
     permissions,
     readOnly: readOnlyOverride,
@@ -160,10 +165,30 @@ export const buildComponentMap = (args: {
     }
   }, {})
 
+  const NestProviders = ({ children, providers }) => {
+    const Component = providers[0]
+    if (providers.length > 1) {
+      return (
+        <Component>
+          <NestProviders providers={providers.slice(1)}>{children}</NestProviders>
+        </Component>
+      )
+    }
+    return <Component>{children}</Component>
+  }
+
   return {
-    actions: config.admin?.components?.actions?.map((Component) => <Component />),
-    collections,
-    globals,
-    providers: config.admin?.components?.providers?.map((Component) => <Component />),
+    componentMap: {
+      actions: config.admin?.components?.actions?.map((Component) => <Component />),
+      collections,
+      globals,
+    },
+    wrappedChildren:
+      Array.isArray(config.admin?.components?.providers) &&
+      config.admin?.components?.providers.length > 0 ? (
+        <NestProviders providers={config.admin?.components?.providers}>{children}</NestProviders>
+      ) : (
+        children
+      ),
   }
 }

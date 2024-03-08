@@ -5,7 +5,6 @@ export { useClientFunctions } from '../providers/ClientFunction/index.js'
 export { useComponentMap } from '../providers/ComponentMapProvider/index.js'
 export type { IComponentMapContext } from '../providers/ComponentMapProvider/index.js'
 export { ConfigProvider, useConfig } from '../providers/Config/index.js'
-export { CustomProvider } from '../providers/CustomProvider/index.js'
 export { useDocumentEvents } from '../providers/DocumentEvents/index.js'
 export { useDocumentInfo } from '../providers/DocumentInfo/index.js'
 export {

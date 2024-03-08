@@ -106,5 +106,4 @@ export type ComponentMap = {
   globals: {
     [slug: SanitizedGlobalConfig['slug']]: GlobalComponentMap
   }
-  providers: React.ReactNode[]
 }
