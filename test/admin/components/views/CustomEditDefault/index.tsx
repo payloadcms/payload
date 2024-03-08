@@ -3,12 +3,12 @@
 import React, { Fragment, useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 
-import type { AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
+import type { AdminViewComponent } from '../../../../../packages/payload/src/admin/types.js'
 
-import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav'
-import { useConfig } from '../../../../../packages/ui/src/providers/Config'
+import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav/index.js'
+import { useConfig } from '../../../../../packages/ui/src/providers/Config/index.js'
 
-const CustomDefaultEditView: AdminViewComponent = ({
+export const CustomDefaultEditView: AdminViewComponent = ({
   canAccessAdmin,
   // collection,
   //  global,
@@ -73,5 +73,3 @@ const CustomDefaultEditView: AdminViewComponent = ({
     </Fragment>
   )
 }
-
-export default CustomDefaultEditView

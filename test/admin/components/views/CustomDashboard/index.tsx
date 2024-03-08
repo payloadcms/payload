@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react'
 
-import { AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
+import type { AdminViewComponent } from '../../../../../packages/payload/src/admin/types.js'
 
-const CustomDashboardView: AdminViewComponent = () => {
+export const CustomDashboardView: AdminViewComponent = () => {
   return (
     <Fragment>
       <div
@@ -23,5 +23,3 @@ const CustomDashboardView: AdminViewComponent = () => {
     </Fragment>
   )
 }
-
-export default CustomDashboardView

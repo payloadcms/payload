@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'collection-edit-button'
 
-const CollectionEditButton: React.FC = () => {
+export const CollectionEditButton: React.FC = () => {
   return (
     <div
       className={baseClass}
@@ -18,5 +18,3 @@ const CollectionEditButton: React.FC = () => {
     </div>
   )
 }
-
-export default CollectionEditButton

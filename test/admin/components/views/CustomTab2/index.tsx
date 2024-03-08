@@ -2,11 +2,11 @@
 
 import React, { Fragment, useEffect } from 'react'
 
-import { type AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
-import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav'
-import { customTabViewTitle } from '../../../shared'
+import { type AdminViewComponent } from '../../../../../packages/payload/src/admin/types.js'
+import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav/index.js'
+import { customTabViewTitle } from '../../../shared.js'
 
-const CustomTabView2: AdminViewComponent = () => {
+export const CustomTabView2: AdminViewComponent = () => {
   const { setStepNav } = useStepNav()
 
   // This effect will only run one time and will allow us
@@ -40,5 +40,3 @@ const CustomTabView2: AdminViewComponent = () => {
     </Fragment>
   )
 }
-
-export default CustomTabView2

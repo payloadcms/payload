@@ -1,11 +1,14 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { slateEditor } from '../../../packages/richtext-slate/src'
-import DemoUIFieldCell from '../components/DemoUIField/Cell'
-import DemoUIFieldField from '../components/DemoUIField/Field'
-import { FieldDescriptionComponent, FieldDescriptionFunction } from '../components/FieldDescription'
-import { slugPluralLabel, slugSingularLabel } from '../shared'
-import { postsCollectionSlug } from '../slugs'
+import { slateEditor } from '../../../packages/richtext-slate/src/index.js'
+import { DemoUIFieldCell } from '../components/DemoUIField/Cell.js'
+import { DemoUIField } from '../components/DemoUIField/Field.js'
+import {
+  FieldDescriptionComponent,
+  FieldDescriptionFunction,
+} from '../components/FieldDescription/index.js'
+import { slugPluralLabel, slugSingularLabel } from '../shared.js'
+import { postsCollectionSlug } from '../slugs.js'
 
 export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
@@ -58,7 +61,7 @@ export const Posts: CollectionConfig = {
               label: 'Demo UI Field',
               admin: {
                 components: {
-                  Field: DemoUIFieldField,
+                  Field: DemoUIField,
                   Cell: DemoUIFieldCell,
                 },
               },

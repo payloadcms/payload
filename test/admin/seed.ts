@@ -1,18 +1,18 @@
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { devUser } from '../credentials'
-import { seedDB } from '../helpers/seed'
+import { devUser } from '../credentials.js'
+import { seedDB } from '../helpers/seed.js'
 import {
   collectionSlugs,
+  customIdCollectionId,
+  customIdCollectionSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
   noApiViewCollectionSlug,
   postsCollectionSlug,
   usersCollectionSlug,
-  customIdCollectionSlug,
-  customIdCollectionId,
-} from './slugs'
+} from './slugs.js'
 
 export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({

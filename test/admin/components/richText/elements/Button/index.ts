@@ -1,14 +1,12 @@
-import type { RichTextCustomElement } from '../../../../../../packages/payload/src/fields/config/types'
+import type { RichTextCustomElement } from '../../../../../../packages/richtext-slate/src/types.js'
 
-import Button from './Button'
-import Element from './Element'
-import plugin from './plugin'
+import { ToolbarButton } from './Button/index.js'
+import { ButtonElement } from './Element/index.js'
+import { withButton } from './plugin.js'
 
-const button: RichTextCustomElement = {
+export const button: RichTextCustomElement = {
   name: 'button',
-  Button,
-  Element,
-  plugins: [plugin],
+  Button: ToolbarButton,
+  Element: ButtonElement,
+  plugins: [withButton],
 }
-
-export default button

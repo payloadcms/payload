@@ -3,11 +3,11 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import qs from 'qs'
 
-import type { Payload } from '../../packages/payload/src'
-import type { Geo, Post } from './payload-types'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { Geo, Post } from './payload-types.js'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import wait from '../../packages/payload/src/utilities/wait'
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
+import wait from '../../packages/payload/src/utilities/wait.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
@@ -17,11 +17,11 @@ import {
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
-} from '../helpers'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadE2E } from '../helpers/configHelpers'
-import config from './config'
-import { clearAndSeedEverything } from './seed'
+} from '../helpers.js'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
+import config from './config.js'
+import { clearAndSeedEverything } from './seed.js'
 import {
   customEditLabel,
   customNestedTabViewPath,
@@ -34,7 +34,7 @@ import {
   customViewPath,
   customViewTitle,
   slugPluralLabel,
-} from './shared'
+} from './shared.js'
 import {
   customIdCollectionId,
   customIdCollectionSlug,
@@ -46,7 +46,7 @@ import {
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   postsCollectionSlug,
-} from './slugs'
+} from './slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
 

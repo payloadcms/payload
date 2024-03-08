@@ -1,8 +1,11 @@
-import { Modal, useModal } from '@faceless-ui/modal'
+import facelessUIImport from '@faceless-ui/modal'
+
+const { Modal, useModal } = facelessUIImport
 import React, { Fragment, useCallback } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
+// TODO:
 import Button from '../../../../../../../packages/payload/src/admin/components/elements/Button'
 import Form from '../../../../../../../packages/payload/src/admin/components/forms/Form'
 import reduceFieldsToValues from '../../../../../../../packages/payload/src/admin/components/forms/Form/reduceFieldsToValues'
@@ -24,12 +27,12 @@ const initialFormData = {
 const insertButton = (editor, { href, label, newTab = false, style }: any) => {
   const text = { text: ' ' }
   const button = {
+    type: 'button',
     children: [text],
     href,
     label,
     newTab,
     style,
-    type: 'button',
   }
 
   const nodes = [button, { children: [{ text: '' }] }]
@@ -50,7 +53,7 @@ const insertButton = (editor, { href, label, newTab = false, style }: any) => {
   ReactEditor.focus(editor)
 }
 
-const ToolbarButton: React.FC<{ path: string }> = ({ path }) => {
+export const ToolbarButton: React.FC<{ path: string }> = ({ path }) => {
   const { closeAll, open } = useModal()
   const editor = useSlate()
 
@@ -103,5 +106,3 @@ const ToolbarButton: React.FC<{ path: string }> = ({ path }) => {
     </Fragment>
   )
 }
-
-export default ToolbarButton

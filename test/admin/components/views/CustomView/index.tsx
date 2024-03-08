@@ -1,9 +1,9 @@
 import React from 'react'
 
-import { type AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
-import { customViewTitle } from '../../../shared'
+import { type AdminViewComponent } from '../../../../../packages/payload/src/admin/types.js'
+import { customViewTitle } from '../../../shared.js'
 
-const CustomView: AdminViewComponent = () => {
+export const CustomView: AdminViewComponent = () => {
   return (
     <div
       style={{
@@ -22,5 +22,3 @@ const CustomView: AdminViewComponent = () => {
     </div>
   )
 }
-
-export default CustomView

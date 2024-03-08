@@ -4,14 +4,14 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 
 // As this is the demo project, we import our dependencies from the `src` directory.
-import { useConfig } from '../../../../packages/ui/src/providers/Config'
+import { useConfig } from '../../../../packages/ui/src/providers/Config/index.js'
 
 // In your projects, you can import as follows:
 // import { useConfig } from 'payload/components/utilities';
 
 const baseClass = 'after-nav-links'
 
-const AfterNavLinks: React.FC = () => {
+export const AfterNavLinks: React.FC = () => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()
@@ -50,5 +50,3 @@ const AfterNavLinks: React.FC = () => {
     </div>
   )
 }
-
-export default AfterNavLinks
