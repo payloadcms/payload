@@ -205,6 +205,7 @@ export const mapFields = (args: {
           // TODO: fix types
           // label: 'label' in field ? field.label : undefined,
           blocks,
+          date: 'admin' in field && 'date' in field.admin ? field.admin.date : undefined,
           fieldPermissions,
           hasMany: 'hasMany' in field ? field.hasMany : undefined,
           max: 'max' in field ? field.max : undefined,

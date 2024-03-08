@@ -2,18 +2,16 @@ import React from 'react'
 
 import type { Props } from './types.js'
 
-import DatePicker from '../../../DatePicker/index.js'
+import { DatePickerField } from '../../../DatePicker/index.js'
 
 const baseClass = 'condition-value-date'
 
-const DateField: React.FC<Props> = ({ admin, disabled, onChange, value }) => {
+export const DateField: React.FC<Props> = ({ admin, disabled, onChange, value }) => {
   const { date } = admin || {}
 
   return (
     <div className={baseClass}>
-      <DatePicker {...date} onChange={onChange} readOnly={disabled} value={value} />
+      <DatePickerField {...date} onChange={onChange} readOnly={disabled} value={value} />
     </div>
   )
 }
-
-export default DateField
