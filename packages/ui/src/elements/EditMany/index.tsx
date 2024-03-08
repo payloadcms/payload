@@ -1,7 +1,7 @@
 'use client'
 import type { FormState } from 'payload/types'
 
-import { useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
@@ -89,6 +89,8 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   )
 }
 export const EditMany: React.FC<Props> = (props) => {
+  const { Modal, useModal } = facelessUIImport
+
   const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
   const { permissions } = useAuth()

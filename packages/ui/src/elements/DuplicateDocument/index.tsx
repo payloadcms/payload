@@ -1,5 +1,5 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
@@ -19,6 +19,8 @@ import './index.scss'
 const baseClass = 'duplicate'
 
 const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
+  const { Modal, useModal } = facelessUIImport
+
   const { push } = useRouter()
   const modified = useFormModified()
   const { toggleModal } = useModal()

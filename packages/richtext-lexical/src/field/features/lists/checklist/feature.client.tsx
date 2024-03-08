@@ -1,5 +1,6 @@
 'use client'
-import { INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import lexicalListImport from '@lexical/list'
+const { INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } = lexicalListImport
 
 import type { ClientFeature, FeatureProviderProviderClient } from '../../types.js'
 

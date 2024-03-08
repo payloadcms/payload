@@ -3,7 +3,11 @@ import type { FormFieldBase } from '@payloadcms/ui'
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { LexicalEditor } from 'lexical'
 
-import { type InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer.js'
+import lexicalComposerImport from '@lexical/react/LexicalComposer.js'
+const { LexicalComposer } = lexicalComposerImport
+
+import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
+
 import * as React from 'react'
 
 import type { SanitizedClientEditorConfig } from './config/types.js'

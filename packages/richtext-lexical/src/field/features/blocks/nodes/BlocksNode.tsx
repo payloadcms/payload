@@ -10,7 +10,8 @@ import type {
   Spread,
 } from 'lexical'
 
-import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import lexicalDecoratorBlockNodeImport from '@lexical/react/LexicalDecoratorBlockNode.js'
+const { DecoratorBlockNode } = lexicalDecoratorBlockNodeImport
 import ObjectID from 'bson-objectid'
 import React from 'react'
 

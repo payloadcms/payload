@@ -4,7 +4,7 @@ import type { Connect } from 'payload/database'
 import { eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { numeric, timestamp, varchar } from 'drizzle-orm/pg-core'
-import { Pool } from 'pg'
+import pg from 'pg'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types.js'
@@ -61,7 +61,7 @@ export const connect: Connect = async function connect(
   }
 
   try {
-    this.pool = new Pool(this.poolOptions)
+    this.pool = new pg.Pool(this.poolOptions)
     await connectWithReconnect({ adapter: this, payload: this.payload })
 
     const logger = this.logger || false

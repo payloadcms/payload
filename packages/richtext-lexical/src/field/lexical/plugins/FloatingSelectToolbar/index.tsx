@@ -1,15 +1,21 @@
 'use client'
 import type { LexicalEditor } from 'lexical'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { mergeRegister } from '@lexical/utils'
-import {
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
+
+import lexicalUtilsImport from '@lexical/utils'
+const { mergeRegister } = lexicalUtilsImport
+
+import lexicalImport from 'lexical'
+const {
   $getSelection,
   $isRangeSelection,
   $isTextNode,
   COMMAND_PRIORITY_LOW,
   SELECTION_CHANGE_COMMAND,
-} from 'lexical'
+} = lexicalImport
+
 import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'

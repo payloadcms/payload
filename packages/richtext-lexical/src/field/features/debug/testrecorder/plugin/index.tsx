@@ -1,8 +1,10 @@
 'use client'
 import type { BaseSelection, LexicalEditor } from 'lexical'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
+import lexicalImport from 'lexical'
+const { $createParagraphNode, $createTextNode, $getRoot } = lexicalImport
 import * as React from 'react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 

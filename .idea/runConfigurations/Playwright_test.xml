@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Playwright test" type="JavaScriptTestRunnerPlaywright">
+    <node-interpreter value="project" />
+    <playwright-package value="$PROJECT_DIR$/node_modules/playwright" />
+    <working-dir value="$PROJECT_DIR$" />
+    <envs />
+    <scope-kind value="TEST" />
+    <test-file value="$PROJECT_DIR$/test/_community/e2e.spec.ts" />
+    <test-names>
+      <test-name value="Admin Panel" />
+      <test-name value="example test" />
+    </test-names>
+    <method v="2" />
+  </configuration>
+</component>

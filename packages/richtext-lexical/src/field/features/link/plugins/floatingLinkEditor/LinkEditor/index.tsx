@@ -2,19 +2,24 @@
 import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 
-import { useModal } from '@faceless-ui/modal'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { $findMatchingParent, mergeRegister } from '@lexical/utils'
+import * as facelessUIImport from '@faceless-ui/modal'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
+
+import lexicalUtilsImport from '@lexical/utils'
+const { $findMatchingParent, mergeRegister } = lexicalUtilsImport
 import { getTranslation } from '@payloadcms/translations'
 import { formatDrawerSlug, useConfig, useEditDepth, useTranslation } from '@payloadcms/ui'
-import {
+import lexicalImport from 'lexical'
+const {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
-} from 'lexical'
+} = lexicalImport
+
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../nodes/LinkNode.js'
@@ -30,6 +35,8 @@ import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands.js'
 
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
+  const { useModal } = facelessUIImport
+
   const [editor] = useLexicalComposerContext()
 
   const editorRef = useRef<HTMLDivElement | null>(null)

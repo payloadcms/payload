@@ -1,10 +1,20 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
+
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary.js'
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin.js'
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin.js'
+import lexicalHistoryPluginImport from '@lexical/react/LexicalHistoryPlugin.js'
+const { HistoryPlugin } = lexicalHistoryPluginImport
+
+import lexicalOnChangePluginImport from '@lexical/react/LexicalOnChangePlugin.js'
+const { OnChangePlugin } = lexicalOnChangePluginImport
+
+import lexicalRichTextPluginImport from '@lexical/react/LexicalRichTextPlugin.js'
+const { RichTextPlugin } = lexicalRichTextPluginImport
+
+import lexicalTabIndentationPluginImport from '@lexical/react/LexicalTabIndentationPlugin.js'
+const { TabIndentationPlugin } = lexicalTabIndentationPluginImport
+
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 

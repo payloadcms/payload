@@ -1,4 +1,5 @@
-import { DatabaseError } from 'pg'
+import pg from 'pg'
+const { DatabaseError } = pg
 
 /**
  * Format error message with hint if available

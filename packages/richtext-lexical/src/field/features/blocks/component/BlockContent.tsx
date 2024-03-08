@@ -3,7 +3,8 @@ import type { ReducedBlock } from '@payloadcms/ui/types'
 import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
 import { getTranslation } from '@payloadcms/translations'
 import { RenderFields } from '@payloadcms/ui'
 import {
@@ -17,7 +18,8 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import isDeepEqual from 'deep-equal'
-import { $getNodeByKey } from 'lexical'
+import lexicalImport from 'lexical'
+const { $getNodeByKey } = lexicalImport
 import React, { useCallback } from 'react'
 
 import type { SanitizedClientEditorConfig } from '../../../lexical/config/types.js'

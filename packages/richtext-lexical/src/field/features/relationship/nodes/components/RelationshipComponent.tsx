@@ -1,9 +1,14 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { getTranslation } from '@payloadcms/translations'
 import { Button, useConfig, useDocumentDrawer, usePayloadAPI, useTranslation } from '@payloadcms/ui'
-import { $getNodeByKey, type ElementFormatType } from 'lexical'
+import lexicalImport from 'lexical'
+const { $getNodeByKey } = lexicalImport
+
+import type { ElementFormatType } from 'lexical'
+
 import React, { useCallback, useReducer, useState } from 'react'
 
 import type { RelationshipData } from '../RelationshipNode.js'

@@ -1,5 +1,5 @@
 import { format, formatDistanceToNow } from 'date-fns'
-import * as Locale from 'date-fns/locale'
+import * as Locale from 'date-fns/locale/index.js'
 
 import { getSupportedDateLocale } from './getSupportedDateLocale.js'
 

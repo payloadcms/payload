@@ -1,9 +1,12 @@
 'use client'
-import type { ElementNode, LexicalEditor, LexicalNode } from 'lexical'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { mergeRegister } from '@lexical/utils'
-import {
+import lexicalUtilsImport from '@lexical/utils'
+const { mergeRegister } = lexicalUtilsImport
+
+import lexicalImport from 'lexical'
+const {
   $createTextNode,
   $getSelection,
   $isElementNode,
@@ -11,8 +14,12 @@ import {
   $isNodeSelection,
   $isRangeSelection,
   $isTextNode,
-  TextNode,
-} from 'lexical'
+  TextNode: TextNodeValue,
+} = lexicalImport
+
+import type { ElementNode, LexicalEditor, LexicalNode } from 'lexical'
+
+import { type TextNode } from 'lexical'
 import { useEffect } from 'react'
 
 import type { LinkFields } from '../../nodes/types.js'
@@ -391,7 +398,7 @@ function useAutoLink(
     }
 
     return mergeRegister(
-      editor.registerNodeTransform(TextNode, (textNode: TextNode) => {
+      editor.registerNodeTransform(TextNodeValue, (textNode: TextNode) => {
         const parent = textNode.getParentOrThrow()
         const previous = textNode.getPreviousSibling()
         if ($isAutoLinkNode(parent)) {
