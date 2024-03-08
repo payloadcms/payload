@@ -3,6 +3,7 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 import { ensureDirectoryExists } from './src/utilities/ensureDirExists.js'
 import { copyFile } from './src/utilities/copyFile.js'
+import { translations } from './src/all/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -408,92 +409,29 @@ function sortObject(obj) {
   return sortedObject
 }
 
-function buildSchemaFile(type: 'client' | 'server') {
-  const groupedProperties = new Map()
-
-  const keys = type === 'client' ? clientTranslationKeys : serverTranslationKeys
-  const DESTINATION_DIR = `${DESTINATION_ROOT}/${type === 'client' ? 'client' : 'api'}`
-
-  for (const translationKey of keys) {
-    const [group, selector] = translationKey.split(':')
-    groupedProperties.set(group, groupedProperties.get(group) || new Set())
-    groupedProperties.get(group).add(selector)
-
-    const pluralKeys = ['zero', 'one', 'two', 'few', 'many', 'other']
-    pluralKeys.forEach((pluralKey) => {
-      groupedProperties.get(group).add(`${selector}_${pluralKey}`)
-    })
-  }
-
-  const schemaFileContents = JSON.parse(
-    fs.readFileSync(path.resolve(dirname, SOURCE_DIR, 'translation-schema.json'), 'utf8'),
-  )
-
-  for (const [group, selectors] of groupedProperties.entries()) {
-    const groupProperties = schemaFileContents.properties[group]
-
-    const remainingProperties = {}
-    const remainingRequired: string[] = []
-    for (const selector of selectors) {
-      if (groupProperties.properties?.[selector]) {
-        remainingProperties[selector] = groupProperties.properties[selector]
-        if (groupProperties.required && groupProperties.required.includes(selector)) {
-          remainingRequired.push(selector)
-        }
-      }
-    }
-
-    groupProperties.properties = remainingProperties
-    if (remainingRequired.length) {
-      groupProperties.required = remainingRequired
-    } else {
-      delete groupProperties.required
-    }
-  }
-
-  schemaFileContents.required = Array.from(groupedProperties.keys())
-
-  fs.writeFileSync(
-    path.resolve(dirname, DESTINATION_DIR, 'translation-schema.json'),
-    JSON.stringify(schemaFileContents, null, 2),
-    { flag: 'w+' },
-  )
-}
-
 async function build() {
   ensureDirectoryExists(path.resolve(dirname, `${DESTINATION_ROOT}/client`))
   ensureDirectoryExists(path.resolve(dirname, `${DESTINATION_ROOT}/api`))
 
-  const filenames = fs.readdirSync(path.resolve(dirname, SOURCE_DIR))
-
   // build up the client and server translation files
-  for (const filename of filenames) {
-    if (!filename.endsWith('.json') || filename === 'translation-schema.json') {
-      continue
-    }
+  for (const [locale, values] of Object.entries(translations)) {
+    const dest1 = path.resolve(dirname, `${DESTINATION_ROOT}/client/${locale}.js`)
 
-    const source = JSON.parse(fs.readFileSync(path.resolve(dirname, SOURCE_DIR, filename), 'utf8'))
+    const clientTranslations = sortObject(filterKeys(values, '', clientTranslationKeys))
 
-    const dest1 = path.resolve(dirname, `${DESTINATION_ROOT}/client`, filename)
-
-    const clientTranslations = sortObject(filterKeys(source, '', clientTranslationKeys))
-    fs.writeFileSync(dest1, JSON.stringify(clientTranslations, null, 2), {
+    fs.writeFileSync(dest1, 'export default ' + JSON.stringify(clientTranslations, null, 2), {
       flag: 'w+',
     })
 
-    const serverTranslations = sortObject(filterKeys(source, '', serverTranslationKeys))
-    const dest2 = path.resolve(dirname, `${DESTINATION_ROOT}/api`, filename)
+    const serverTranslations = sortObject(filterKeys(values, '', serverTranslationKeys))
+    const dest2 = path.resolve(dirname, `${DESTINATION_ROOT}/api/${locale}.js`)
 
-    fs.writeFileSync(dest2, JSON.stringify(serverTranslations, null, 2), {
+    fs.writeFileSync(dest2, 'export default ' + JSON.stringify(serverTranslations, null, 2), {
       flag: 'w+',
     })
 
     console.info('Rebuilt:', filename)
   }
-
-  // build up the client and server schema files after the translation files have been built
-  buildSchemaFile('client')
-  buildSchemaFile('server')
 
   // copy barrel file to both client and api folders
   copyFile(
