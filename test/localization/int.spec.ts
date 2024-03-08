@@ -833,9 +833,17 @@ describe('Localization', () => {
       }
       `
 
-      const { en, es } = await client.request(query, null, {
-        Authorization: `JWT ${token}`,
-      })
+      const { data: multipleLocaleData } = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+          query: { locale: 'en' },
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      const { en, es } = multipleLocaleData
 
       expect(en.title).toStrictEqual(englishTitle)
       expect(es.title).toStrictEqual(spanishTitle)
