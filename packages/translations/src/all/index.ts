@@ -1,33 +1,33 @@
-import ar from './ar.json' assert { type: 'json' }
-import az from './az.json' assert { type: 'json' }
-import bg from './bg.json' assert { type: 'json' }
-import cs from './cs.json' assert { type: 'json' }
-import de from './de.json' assert { type: 'json' }
-import en from './en.json' assert { type: 'json' }
-import es from './es.json' assert { type: 'json' }
-import fa from './fa.json' assert { type: 'json' }
-import fr from './fr.json' assert { type: 'json' }
-import hr from './hr.json' assert { type: 'json' }
-import hu from './hu.json' assert { type: 'json' }
-import it from './it.json' assert { type: 'json' }
-import ja from './ja.json' assert { type: 'json' }
-import ko from './ko.json' assert { type: 'json' }
-import my from './my.json' assert { type: 'json' }
-import nb from './nb.json' assert { type: 'json' }
-import nl from './nl.json' assert { type: 'json' }
-import pl from './pl.json' assert { type: 'json' }
-import pt from './pt.json' assert { type: 'json' }
-import ro from './ro.json' assert { type: 'json' }
-import rs from './rs.json' assert { type: 'json' }
-import rsLatin from './rs-latin.json' assert { type: 'json' }
-import ru from './ru.json' assert { type: 'json' }
-import sv from './sv.json' assert { type: 'json' }
-import th from './th.json' assert { type: 'json' }
-import tr from './tr.json' assert { type: 'json' }
-import ua from './ua.json' assert { type: 'json' }
-import vi from './vi.json' assert { type: 'json' }
-import zh from './zh.json' assert { type: 'json' }
-import zhTw from './zh-tw.json' assert { type: 'json' }
+import ar from './ar.js'
+import az from './az.js'
+import bg from './bg.js'
+import cs from './cs.js'
+import de from './de.js'
+import en from './en.js'
+import es from './es.js'
+import fa from './fa.js'
+import fr from './fr.js'
+import hr from './hr.js'
+import hu from './hu.js'
+import it from './it.js'
+import ja from './ja.js'
+import ko from './ko.js'
+import my from './my.js'
+import nb from './nb.js'
+import nl from './nl.js'
+import pl from './pl.js'
+import pt from './pt.js'
+import ro from './ro.js'
+import rs from './rs.js'
+import rsLatin from './rs-latin.js'
+import ru from './ru.js'
+import sv from './sv.js'
+import th from './th.js'
+import tr from './tr.js'
+import ua from './ua.js'
+import vi from './vi.js'
+import zh from './zh.js'
+import zhTw from './zh-tw.js'
 
 export const translations = {
   ar,
@@ -51,7 +51,7 @@ export const translations = {
   pt,
   ro,
   rs,
-  rsLatin,
+  'rs-latin': rsLatin,
   ru,
   sv,
   th,
@@ -59,5 +59,7 @@ export const translations = {
   ua,
   vi,
   zh,
-  zhTw,
+  'zh-tw': zhTw,
+} as {
+  [locale: string]: Record<string, Record<string, string>>
 }

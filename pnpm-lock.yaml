@@ -615,21 +615,12 @@ importers:
       '@swc-node/core':
         specifier: ^1.13.0
         version: 1.13.0(@swc/core@1.4.2)(@swc/types@0.1.5)
-      '@swc-node/register':
-        specifier: ^1.9.0
-        version: 1.9.0(@swc/core@1.4.2)(@swc/types@0.1.5)(typescript@5.2.2)
       '@swc-node/sourcemap-support':
         specifier: ^0.5.0
         version: 0.5.0
-      '@swc/register':
-        specifier: ^0.1.10
-        version: 0.1.10(@swc/core@1.4.2)
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
-      colorette:
-        specifier: ^2.0.20
-        version: 2.0.20
       conf:
         specifier: 10.2.0
         version: 10.2.0
@@ -639,9 +630,6 @@ importers:
       dataloader:
         specifier: 2.2.2
         version: 2.2.2
-      debug:
-        specifier: ^4.3.4
-        version: 4.3.4(supports-color@5.5.0)
       deepmerge:
         specifier: 4.3.1
         version: 4.3.1
@@ -5343,25 +5331,6 @@ packages:
       '@swc/types': 0.1.5
     dev: false
 
-  /@swc-node/register@1.9.0(@swc/core@1.4.2)(@swc/types@0.1.5)(typescript@5.2.2):
-    resolution: {integrity: sha512-i0iYInD4q5v3xQC6bKvs0QtfUxu197CU5qKALmpxEqTYs7sIhQ7KFLe3kP+eAR4gRkJTvAgjQgrokXLN2jZrOw==}
-    peerDependencies:
-      '@swc/core': '>= 1.3'
-      typescript: 5.2.2
-    dependencies:
-      '@swc-node/core': 1.13.0(@swc/core@1.4.2)(@swc/types@0.1.5)
-      '@swc-node/sourcemap-support': 0.5.0
-      '@swc/core': 1.4.2
-      colorette: 2.0.20
-      debug: 4.3.4(supports-color@5.5.0)
-      pirates: 4.0.6
-      tslib: 2.6.2
-      typescript: 5.2.2
-    transitivePeerDependencies:
-      - '@swc/types'
-      - supports-color
-    dev: false
-
   /@swc-node/sourcemap-support@0.5.0:
     resolution: {integrity: sha512-fbhjL5G0YvFoWwNhWleuBUfotiX+USiA9oJqu9STFw+Hb0Cgnddn+HVS/K5fI45mn92e8V+cHD2jgFjk4w2T9Q==}
     dependencies:
@@ -5521,19 +5490,6 @@ packages:
       '@swc/counter': 0.1.3
       jsonc-parser: 3.2.1
     dev: true
-
-  /@swc/register@0.1.10(@swc/core@1.4.2):
-    resolution: {integrity: sha512-6STwH/q4dc3pitXLVkV7sP0Hiy+zBsU2wOF1aXpXR95pnH3RYHKIsDC+gvesfyB7jxNT9OOZgcqOp9RPxVTx9A==}
-    deprecated: Use @swc-node/register instead
-    hasBin: true
-    peerDependencies:
-      '@swc/core': ^1.0.46
-    dependencies:
-      '@swc/core': 1.4.2
-      lodash.clonedeep: 4.5.0
-      pirates: 4.0.6
-      source-map-support: 0.5.21
-    dev: false
 
   /@swc/types@0.1.5:
     resolution: {integrity: sha512-myfUej5naTBWnqOCc/MdVOLVjXUXtIA+NpDrDBKJtLLg2shUjBu3cZmB/85RyitKc55+lUUyl7oRfLOvkr2hsw==}
@@ -12227,10 +12183,6 @@ packages:
   /lodash.capitalize@4.2.1:
     resolution: {integrity: sha512-kZzYOKspf8XVX5AvmQF94gQW0lejFVgb80G85bU4ZWzoJ6C03PQg3coYAUpSTpQWelrZELd3XWgHzw4Ck5kaIw==}
     dev: true
-
-  /lodash.clonedeep@4.5.0:
-    resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
-    dev: false
 
   /lodash.deburr@4.1.0:
     resolution: {integrity: sha512-m/M1U1f3ddMCs6Hq2tAsYThTBDaAKFDX3dwDo97GEYzamXi9SqUpjWi/Rrj/gf3X2n8ktwgZrlP1z6E3v/IExQ==}
