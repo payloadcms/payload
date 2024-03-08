@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { ensureDirectoryExists } from './src/utilities/ensureDirExists.js'
 import { copyFile } from './src/utilities/copyFile.js'
 import { translations } from './src/all/index.js'
+import { exec } from 'child_process'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -442,6 +443,16 @@ async function build() {
     path.resolve(dirname, `${SOURCE_DIR}/index.ts`),
     path.resolve(dirname, `${DESTINATION_ROOT}/client/index.ts`),
   )
+
+  // Run prettier from CLI so that files pass the pre-commit hook:
+  console.info('Running prettier...')
+  exec('prettier --write "**/*.js"', (err, stdout, stderr) => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    console.info(stdout)
+  })
 }
 
 build()
