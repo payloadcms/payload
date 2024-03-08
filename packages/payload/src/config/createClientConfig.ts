@@ -168,13 +168,17 @@ export const createClientConfig = async (
     }
   })
 
-  'localization' in clientConfig &&
-    clientConfig.localization &&
+  if ('localization' in clientConfig && clientConfig.localization) {
+    clientConfig.localization = { ...clientConfig.localization }
+
     clientConfig.localization.locales.forEach((locale) => {
       delete locale.toString
     })
+  }
 
   if ('admin' in clientConfig) {
+    clientConfig.admin = { ...clientConfig.admin }
+
     const serverOnlyAdminProperties: Partial<keyof SanitizedConfig['admin']>[] = ['components']
 
     serverOnlyAdminProperties.forEach((key) => {
