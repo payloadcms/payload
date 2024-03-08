@@ -1,7 +1,6 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { LogOut } from '../../icons/LogOut/index.js'
 import { useComponentMap } from '../../index.js'
 import { useConfig } from '../../providers/Config/index.js'

@@ -181,8 +181,13 @@ export const buildComponentMap = (args: {
 
   const LogoutButton = LogoutButtonComponent ? <LogoutButtonComponent /> : null
 
+  const IconComponent = config.admin?.components?.graphics?.Icon
+
+  const Icon = IconComponent ? <IconComponent /> : null
+
   return {
     componentMap: {
+      Icon,
       LogoutButton,
       actions: config.admin?.components?.actions?.map((Component) => <Component />),
       collections,
