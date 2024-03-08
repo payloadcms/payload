@@ -4,8 +4,7 @@ import type { Props } from './types.js'
 
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
-// @ts-expect-error-next-line Just TypeScript being broken // TODO: Open TypeScript issue
-const DatePicker = lazy(() => import('./DatePicker'))
+const DatePicker = lazy(() => import('./DatePicker.js'))
 
 const DatePickerField: React.FC<Props> = (props) => (
   <Suspense fallback={<ShimmerEffect height={50} />}>

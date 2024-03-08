@@ -4,8 +4,7 @@ import type { Props } from './types.js'
 
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
-// @ts-expect-error-next-line Just TypeScript being broken // TODO: Open TypeScript issue
-const LazyEditor = lazy(() => import('./CodeEditor'))
+const LazyEditor = lazy(() => import('./CodeEditor.js'))
 
 export const CodeEditor: React.FC<Props> = (props) => {
   const { height = '35vh' } = props
