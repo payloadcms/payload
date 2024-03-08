@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+
 import type { GenerateViewMetadata } from '../Root/index.js'
 
 import { meta } from '../../utilities/meta.js'
@@ -5,7 +7,7 @@ import { meta } from '../../utilities/meta.js'
 export const generateResetPasswordMetadata: GenerateViewMetadata = async ({
   config,
   i18n: { t },
-}) => {
+}): Promise<Metadata> => {
   return meta({
     config,
     description: t('authentication:resetPassword'),

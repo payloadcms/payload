@@ -19,7 +19,6 @@ import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ComponentMapProvider } from '../ComponentMapProvider/index.js'
 import { ConfigProvider } from '../Config/index.js'
-import { CustomProvider } from '../CustomProvider/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
@@ -85,9 +84,7 @@ export const RootProvider: React.FC<Props> = ({
                                   <LoadingOverlayProvider>
                                     <DocumentEventsProvider>
                                       <ActionsProvider>
-                                        <NavProvider>
-                                          <CustomProvider>{children}</CustomProvider>
-                                        </NavProvider>
+                                        <NavProvider>{children}</NavProvider>
                                       </ActionsProvider>
                                     </DocumentEventsProvider>
                                   </LoadingOverlayProvider>

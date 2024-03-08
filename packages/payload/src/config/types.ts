@@ -465,7 +465,7 @@ export type Config = {
       /**
        * Wrap the admin dashboard in custom context providers
        */
-      providers?: React.ComponentType<{ children: React.ReactNode }>[]
+      providers?: React.ComponentType<{ children?: React.ReactNode }>[]
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
