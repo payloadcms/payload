@@ -50,7 +50,6 @@ const Localizer: React.FC<{
                           },
                         }),
                       )
-                      console.log('changing locale')
                       router.refresh()
                       close()
                     }}
