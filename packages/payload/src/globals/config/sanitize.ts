@@ -1,4 +1,4 @@
-import { translations } from '@payloadcms/translations/api'
+import { extractTranslations } from 'payload/utilities'
 
 import type { Config } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from './types.js'
@@ -9,6 +9,8 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
+
+const translations = extractTranslations(['general:createdAt', 'general:updatedAt'])
 
 const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
   const { collections, globals } = config
