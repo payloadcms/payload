@@ -50,6 +50,7 @@ const Localizer: React.FC<{
                           },
                         }),
                       )
+                      router.refresh()
                       close()
                     }}
                   >

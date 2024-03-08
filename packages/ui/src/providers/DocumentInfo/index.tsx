@@ -20,7 +20,6 @@ import { useConfig } from '../Config/index.js'
 import { useLocale } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
 import { useTranslation } from '../Translation/index.js'
-import { documentInfoReducer } from './reducer.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
@@ -32,20 +31,11 @@ export const DocumentInfoProvider: React.FC<
   DocumentInfoProps & {
     children: React.ReactNode
   }
-> = ({ children, ...rest }) => {
-  const [documentInfo, dispatchDocumentInfo] = useReducer(documentInfoReducer, rest)
+> = ({ children, ...props }) => {
+  const [documentTitle, setDocumentTitle] = useState(props.title)
+  const [onSave, setOnSave] = useState(() => props.onSave)
 
-  const setDocumentInfo = useCallback(
-    (newInfo: DocumentInfo) => {
-      dispatchDocumentInfo({
-        type: 'SET_DOC_INFO',
-        payload: newInfo,
-      })
-    },
-    [dispatchDocumentInfo],
-  )
-
-  const { id, collectionSlug, globalSlug } = documentInfo
+  const { id, collectionSlug, globalSlug } = props
 
   const {
     collections,
@@ -68,13 +58,6 @@ export const DocumentInfoProvider: React.FC<
 
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
-
-  const setDocumentTitle = useCallback((title: string) => {
-    dispatchDocumentInfo({
-      type: 'SET_DOC_TITLE',
-      payload: title,
-    })
-  }, [])
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -286,8 +269,12 @@ export const DocumentInfoProvider: React.FC<
   }, [getVersions])
 
   useEffect(() => {
+    setDocumentTitle(props.title)
+  }, [props.title])
+
+  useEffect(() => {
     const loadDocPermissions = async () => {
-      const docPermissions: DocumentPermissions = rest.docPermissions
+      const docPermissions: DocumentPermissions = props.docPermissions
       if (!docPermissions) await getDocPermissions()
       else setDocPermissions(docPermissions)
     }
@@ -295,37 +282,21 @@ export const DocumentInfoProvider: React.FC<
     if (collectionSlug || globalSlug) {
       void loadDocPermissions()
     }
-  }, [getDocPermissions, rest.docPermissions, setDocPermissions, collectionSlug, globalSlug])
-
-  useEffect(() => {
-    const loadDocPreferences = async () => {
-      let docPreferences: DocumentPreferences = rest.docPreferences
-      if (!docPreferences) docPreferences = await getDocPreferences()
-
-      dispatchDocumentInfo({
-        type: 'SET_DOC_INFO',
-        payload: {
-          docPreferences,
-        },
-      })
-    }
-
-    if (id) {
-      void loadDocPreferences()
-    }
-  }, [getDocPreferences, preferencesKey, rest.docPreferences, id])
+  }, [getDocPermissions, props.docPermissions, setDocPermissions, collectionSlug, globalSlug])
 
   const value: DocumentInfoContext = {
-    ...documentInfo,
+    ...props,
     docConfig,
     docPermissions,
     getDocPermissions,
     getDocPreferences,
     getVersions,
+    onSave,
     publishedDoc,
     setDocFieldPreferences,
-    setDocumentInfo,
     setDocumentTitle,
+    setOnSave,
+    title: documentTitle,
     unpublishedVersions,
     versions,
   }

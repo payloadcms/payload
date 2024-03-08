@@ -94,6 +94,8 @@ export const UnpublishMany: React.FC<Props> = (props) => {
     slug,
     t,
     toggleModal,
+    router,
+    stringifyParams,
   ])
 
   if (!versions?.drafts || selectAll === SelectAllStatus.None || !hasPermission) {
