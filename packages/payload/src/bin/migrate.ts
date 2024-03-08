@@ -1,8 +1,7 @@
 import type { ParsedArgs } from 'minimist'
 
-import minimist from 'minimist'
+import type { SanitizedConfig } from '../exports/types.js'
 
-import loadConfig from '../config/load.js'
 import payload from '../index.js'
 import { prettySyncLoggerDestination } from '../utilities/logger.js'
 
@@ -27,7 +26,12 @@ const availableCommands = [
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
 
-export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
+type Args = {
+  config: SanitizedConfig
+  parsedArgs: ParsedArgs
+}
+
+export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
   const { _: args, file, forceAcceptWarning, help } = parsedArgs
   if (help) {
     // eslint-disable-next-line no-console
@@ -39,7 +43,7 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
 
   // Barebones instance to access database adapter
   await payload.init({
-    config: loadConfig(),
+    config,
     disableOnInit: true,
     ...prettySyncLogger,
   })
@@ -97,13 +101,4 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
   }
 
   payload.logger.info('Done.')
-}
-
-// When launched directly call migrate
-if (module.id === require.main.id) {
-  const args = minimist(process.argv.slice(2))
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  migrate(args).then(() => {
-    process.exit(0)
-  })
 }

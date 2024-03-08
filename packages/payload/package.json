@@ -7,7 +7,7 @@
   "types": "./src/index.ts",
   "type": "module",
   "bin": {
-    "payload": "bin.cjs"
+    "payload": "bin.js"
   },
   "exports": {
     ".": {
@@ -39,7 +39,8 @@
     "release:major": "release-it major",
     "release:minor": "release-it minor",
     "release:patch": "release-it patch",
-    "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts"
+    "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts",
+    "generate:types": "PAYLOAD_CONFIG_PATH=../../test/_community/config.ts node ./bin.js"
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
@@ -48,6 +49,7 @@
     "console-table-printer": "2.11.2",
     "dataloader": "2.2.2",
     "deepmerge": "4.3.1",
+    "dotenv": "8.6.0",
     "file-type": "16.5.4",
     "find-up": "4.1.0",
     "get-tsconfig": "^4.7.2",

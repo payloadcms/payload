@@ -1,24 +1,21 @@
+/* eslint-disable no-console */
 import minimist from 'minimist'
 
-import type { BinScript } from '../config/types.js'
+import type { BinScript, SanitizedConfig } from '../config/types.js'
 
-import loadConfig from '../config/load.js'
 import { generateTypes } from './generateTypes.js'
-import { loadEnv } from './loadEnv.js'
 import { migrate } from './migrate.js'
 
-loadEnv()
-
-const executeBin = async () => {
+// eslint-disable-next-line no-restricted-exports
+export default async (config: SanitizedConfig) => {
   const args = minimist(process.argv.slice(2))
   const scriptIndex = args._.findIndex((x) => x === 'build')
   const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex]
-  const config = await loadConfig()
   const userBinScript = config.bin.find(({ key }) => key === script)
 
   if (userBinScript) {
     try {
-      const script: BinScript = require(userBinScript.scriptPath)
+      const script: BinScript = await import(userBinScript.scriptPath)
       await script(config)
     } catch (err) {
       console.log(`Could not find associated bin script for the ${userBinScript.key} command`)
@@ -29,7 +26,7 @@ const executeBin = async () => {
   }
 
   if (script.startsWith('migrate')) {
-    migrate(args).then(() => process.exit(0))
+    void migrate({ config, parsedArgs: args }).then(() => process.exit(0))
   } else {
     switch (script.toLowerCase()) {
       case 'generate:types': {
@@ -43,5 +40,3 @@ const executeBin = async () => {
     }
   }
 }
-
-executeBin()
