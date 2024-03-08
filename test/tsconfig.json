@@ -13,7 +13,7 @@
     "src/**/*.d.ts",
     "src/**/*.json",
     "**/*.ts",
-    "**/*.ts",
+    "**/*.tsx",
     "test/**/*.tsx",
     "../packages/**/src/**/*.ts",
     "../packages/**/src/**/*.tsx"],
