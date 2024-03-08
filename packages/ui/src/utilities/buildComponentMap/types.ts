@@ -99,6 +99,7 @@ export type ConfigComponentMapBase = {
 }
 
 export type ComponentMap = {
+  LogoutButton: React.ReactNode
   actions: React.ReactNode[]
   collections: {
     [slug: SanitizedCollectionConfig['slug']]: CollectionComponentMap

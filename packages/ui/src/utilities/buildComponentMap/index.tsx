@@ -177,8 +177,13 @@ export const buildComponentMap = (args: {
     return <Component>{children}</Component>
   }
 
+  const LogoutButtonComponent = config.admin?.components?.logout?.Button
+
+  const LogoutButton = LogoutButtonComponent ? <LogoutButtonComponent /> : null
+
   return {
     componentMap: {
+      LogoutButton,
       actions: config.admin?.components?.actions?.map((Component) => <Component />),
       collections,
       globals,
