@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import type { ActionMap } from '../../utilities/buildComponentMap/types.js'
 
-import { useConfig } from '../Config/index.js'
+import { useComponentMap } from '../ComponentMapProvider/index.js'
 
 type ActionsContextType = {
   actions: ActionMap['Edit'][string]
@@ -22,14 +22,12 @@ export const ActionsProvider = ({ children }) => {
   const [adminActions, setAdminActions] = useState([])
 
   const {
-    admin: {
-      components: { actions: configAdminActions },
-    },
-  } = useConfig()
+    componentMap: { actions },
+  } = useComponentMap()
 
   useEffect(() => {
-    setAdminActions(configAdminActions || [])
-  }, [configAdminActions])
+    setAdminActions(actions || [])
+  }, [actions])
 
   const combinedActions = [...(viewActions || []), ...(adminActions || [])]
 

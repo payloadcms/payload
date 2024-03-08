@@ -161,7 +161,9 @@ export const buildComponentMap = (args: {
   }, {})
 
   return {
+    actions: config.admin?.components?.actions?.map((Component) => <Component />),
     collections,
     globals,
+    providers: config.admin?.components?.providers?.map((Component) => <Component />),
   }
 }

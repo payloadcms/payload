@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { useConfig } from '../Config/index.js'
+import { useComponentMap } from '../ComponentMapProvider/index.js'
 
 const NestProviders = ({ children, providers }) => {
   const Component = providers[0]
@@ -15,13 +15,9 @@ const NestProviders = ({ children, providers }) => {
 }
 
 export const CustomProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const config = useConfig()
-
   const {
-    admin: {
-      components: { providers },
-    },
-  } = config
+    componentMap: { providers },
+  } = useComponentMap()
 
   if (Array.isArray(providers) && providers.length > 0) {
     return <NestProviders providers={providers}>{children}</NestProviders>
