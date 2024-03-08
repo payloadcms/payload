@@ -3,6 +3,7 @@ import type { Data, DocumentPreferences, ServerSideEditViewProps } from 'payload
 import {
   DocumentHeader,
   DocumentInfoProvider,
+  FormQueryParamsProvider,
   HydrateClientUser,
   RenderCustomComponent,
   buildStateFromSchema,
@@ -22,6 +23,7 @@ export { generateAccountMetadata } from './meta.js'
 export const Account: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
   const {
     permissions,
+    locale,
     req: {
       i18n,
       payload,
@@ -118,13 +120,22 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
           i18n={i18n}
         />
         <HydrateClientUser permissions={permissions} user={user} />
-        <RenderCustomComponent
-          CustomComponent={
-            typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
-          }
-          DefaultComponent={EditView}
-          componentProps={serverSideProps}
-        />
+        <FormQueryParamsProvider
+          initialParams={{
+            depth: 0,
+            'fallback-locale': 'null',
+            locale: locale.code,
+            uploadEdits: undefined,
+          }}
+        >
+          <RenderCustomComponent
+            CustomComponent={
+              typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
+            }
+            DefaultComponent={EditView}
+            componentProps={serverSideProps}
+          />
+        </FormQueryParamsProvider>
       </DocumentInfoProvider>
     )
   }
