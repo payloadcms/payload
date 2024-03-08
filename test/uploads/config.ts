@@ -54,7 +54,6 @@ export default buildConfigWithDefaults({
       slug: 'gif-resize',
       fields: [],
       upload: {
-        staticURL: '/media-gif',
         staticDir: path.resolve(process.cwd(), 'test/uploads/media-gif'),
         mimeTypes: ['image/gif'],
         resizeOptions: {
@@ -85,7 +84,6 @@ export default buildConfigWithDefaults({
       slug: 'no-image-sizes',
       fields: [],
       upload: {
-        staticURL: '/no-image-sizes',
         staticDir: path.resolve(process.cwd(), 'test/uploads/no-image-sizes'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         resizeOptions: {
@@ -99,7 +97,6 @@ export default buildConfigWithDefaults({
       slug: 'object-fit',
       fields: [],
       upload: {
-        staticURL: '/object-fit',
         staticDir: path.resolve(process.cwd(), 'test/uploads/object-fit'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
@@ -135,7 +132,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         focalPoint: false,
-        staticURL: '/crop-only',
         staticDir: path.resolve(process.cwd(), 'test/uploads/crop-only'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
@@ -162,7 +158,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         crop: false,
-        staticURL: '/focal-only',
         staticDir: path.resolve(process.cwd(), 'test/uploads/focal-only'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
@@ -189,7 +184,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         staticDir: path.resolve(process.cwd(), 'test/uploads/media'),
-        staticURL: '/test/uploads/media',
         // crop: false,
         // focalPoint: false,
         formatOptions: {
@@ -286,7 +280,6 @@ export default buildConfigWithDefaults({
       slug: enlargeSlug,
       fields: [],
       upload: {
-        staticURL: '/enlarge',
         staticDir: path.resolve(process.cwd(), 'test/uploads/media/enlarge'),
         mimeTypes: [
           'image/png',
@@ -334,7 +327,6 @@ export default buildConfigWithDefaults({
       slug: reduceSlug,
       fields: [],
       upload: {
-        staticURL: '/reduce',
         staticDir: path.resolve(process.cwd(), 'test/uploads/media/reduce'),
         imageSizes: [
           {
@@ -376,27 +368,20 @@ export default buildConfigWithDefaults({
       slug: 'media-trim',
       fields: [],
       upload: {
-        staticURL: '/media-trim',
         staticDir: path.resolve(process.cwd(), 'test/uploads/media-trim'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        trimOptions: {
-          threshold: 0,
-        },
+        trimOptions: 0,
         imageSizes: [
           {
             name: 'trimNumber',
             height: undefined,
-            trimOptions: {
-              threshold: 0,
-            },
+            trimOptions: 0,
             width: 1024,
           },
           {
             name: 'trimString',
             height: undefined,
-            trimOptions: {
-              threshold: 0,
-            },
+            trimOptions: 0,
             width: 1024,
           },
           {
@@ -416,7 +401,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         disableLocalStorage: true,
-        staticURL: '/media',
       },
     },
     {
@@ -424,7 +408,6 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://localhost:3000/media)
-        staticURL: 'http://localhost:3000/media',
         staticDir: path.resolve(process.cwd(), 'test/uploads/media'),
       },
     },
@@ -437,14 +420,12 @@ export default buildConfigWithDefaults({
       upload: {
         filesRequiredOnCreate: false,
         staticDir: path.resolve(process.cwd(), 'test/uploads/optional'),
-        staticURL: '/optional',
       },
     },
     {
       slug: 'required-file',
       fields: [],
       upload: {
-        staticURL: '/required',
         staticDir: path.resolve(process.cwd(), 'test/uploads/required'),
         filesRequiredOnCreate: true,
       },

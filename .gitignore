@@ -8,11 +8,14 @@ test-results
 .devcontainer
 .localstack
 /migrations
-/media
 .localstack
 .turbo
 
 .turbo
+
+# Ignore test directory media folder/files
+/media
+/versions
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,macos,windows,webstorm,sublimetext,visualstudiocode
