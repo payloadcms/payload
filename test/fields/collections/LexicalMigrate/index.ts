@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
 import {
   HTMLConverterFeature,
@@ -9,9 +9,9 @@ import {
   UploadFeature,
   lexicalEditor,
   lexicalHTML,
-} from '../../../../packages/richtext-lexical/src'
-import { lexicalMigrateFieldsSlug } from '../../slugs'
-import { getSimpleLexicalData } from './data'
+} from '../../../../packages/richtext-lexical/src/index.js'
+import { lexicalMigrateFieldsSlug } from '../../slugs.js'
+import { getSimpleLexicalData } from './data.js'
 
 export const LexicalMigrateFields: CollectionConfig = {
   slug: lexicalMigrateFieldsSlug,

@@ -1,6 +1,6 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { arraySlug } from './shared'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { arraySlug } from './shared.js'
 
 export default buildConfigWithDefaults({
   collections: [

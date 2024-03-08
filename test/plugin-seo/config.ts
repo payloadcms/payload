@@ -1,10 +1,10 @@
-import seoPlugin from '../../packages/plugin-seo/src'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { Media } from './collections/Media'
-import { Pages } from './collections/Pages'
-import { Users } from './collections/Users'
-import { seed } from './seed'
+import seoPlugin from '../../packages/plugin-seo/src/index.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { Media } from './collections/Media.js'
+import { Pages } from './collections/Pages.js'
+import { Users } from './collections/Users.js'
+import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
   collections: [Users, Pages, Media],

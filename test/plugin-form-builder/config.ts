@@ -1,11 +1,11 @@
-import type { Block } from '../../packages/payload/src/fields/config/types'
+import type { Block } from '../../packages/payload/src/fields/config/types.js'
 
-import formBuilder, { fields as formFields } from '../../packages/plugin-form-builder/src'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { Pages } from './collections/Pages'
-import { Users } from './collections/Users'
-import { seed } from './seed'
+import formBuilder, { fields as formFields } from '../../packages/plugin-form-builder/src/index.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { Pages } from './collections/Pages.js'
+import { Users } from './collections/Users.js'
+import { seed } from './seed/index.js'
 
 const colorField: Block = {
   slug: 'color',

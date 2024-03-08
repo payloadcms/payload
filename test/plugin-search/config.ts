@@ -1,10 +1,10 @@
-import searchPlugin from '../../packages/plugin-search/src'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { Pages } from './collections/Pages'
-import { Posts } from './collections/Posts'
-import { Users } from './collections/Users'
-import { seed } from './seed'
+import searchPlugin from '../../packages/plugin-search/src/index.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { Pages } from './collections/Pages.js'
+import { Posts } from './collections/Posts.js'
+import { Users } from './collections/Users.js'
+import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
   collections: [Users, Pages, Posts],

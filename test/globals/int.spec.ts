@@ -1,8 +1,8 @@
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise, {
   accessControlSlug,
   arraySlug,
@@ -10,7 +10,7 @@ import configPromise, {
   englishLocale,
   slug,
   spanishLocale,
-} from './config'
+} from './config.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -192,7 +192,7 @@ describe('globals', () => {
       })
 
       expect(defaultValueGlobal.text).toStrictEqual('test')
-      // @ts-ignore
+      // @ts-expect-error
       expect(defaultValueGlobal.group.text).toStrictEqual('test')
     })
   })

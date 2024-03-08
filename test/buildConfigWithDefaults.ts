@@ -1,6 +1,6 @@
 import sharp from 'sharp'
 
-import type { Config, SanitizedConfig } from '../packages/payload/src/config/types.d.ts'
+import type { Config, SanitizedConfig } from '../packages/payload/src/config/types.js'
 
 import { mongooseAdapter } from '../packages/db-mongodb/src/index.js'
 import { postgresAdapter } from '../packages/db-postgres/src/index.js'

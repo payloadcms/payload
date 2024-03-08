@@ -1,9 +1,12 @@
-import type { Payload } from '../../packages/payload/src'
+import type {
+  ArrayField,
+  RelationshipField,
+} from '../../packages/payload/src/fields/config/types.js'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise from './config'
-import type { ArrayField, RelationshipField } from '../../packages/payload/src/fields/config/types'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise from './config.js'
 
 let payload: Payload
 

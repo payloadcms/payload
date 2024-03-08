@@ -1,9 +1,9 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
-import { uploads2Slug } from '../../slugs'
+import { uploads2Slug } from '../../slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

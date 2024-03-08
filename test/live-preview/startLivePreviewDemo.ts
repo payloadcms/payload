@@ -2,7 +2,7 @@ import { spawn } from 'child_process'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

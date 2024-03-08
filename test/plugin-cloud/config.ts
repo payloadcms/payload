@@ -1,11 +1,11 @@
 import dotenv from 'dotenv'
 import path from 'path'
 
-import { payloadCloud } from '../../packages/plugin-cloud/src'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { Media } from './collections/Media'
-import { Users } from './collections/Users'
+import { payloadCloud } from '../../packages/plugin-cloud/src/index.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { Media } from './collections/Media.js'
+import { Users } from './collections/Users.js'
 
 // NOTE: may need to create .env file for testing
 dotenv.config({

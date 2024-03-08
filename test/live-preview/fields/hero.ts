@@ -1,4 +1,4 @@
-import type { Field } from '../../../packages/payload/src/fields/config/types'
+import type { Field } from '../../../packages/payload/src/fields/config/types.js'
 
 export const hero: Field = {
   name: 'hero',

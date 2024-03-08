@@ -1,10 +1,10 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
-import { AfterInput } from './AfterInput'
-import { BeforeInput } from './BeforeInput'
-import CustomError from './CustomError'
-import CustomLabel from './CustomLabel'
-import { defaultText, textFieldsSlug } from './shared'
+import { AfterInput } from './AfterInput.js'
+import { BeforeInput } from './BeforeInput.js'
+import CustomError from './CustomError.js'
+import CustomLabel from './CustomLabel.js'
+import { defaultText, textFieldsSlug } from './shared.js'
 
 const TextFields: CollectionConfig = {
   admin: {

@@ -1,4 +1,4 @@
-import type { Page } from '../payload-types'
+import type { Page } from '../payload-types.js'
 
 export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   slug: 'home',

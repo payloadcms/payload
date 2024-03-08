@@ -1,14 +1,14 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
-import removeFiles from '../helpers/removeFiles'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise from './config'
-import { mediaSlug } from './shared'
+import { getPayload } from '../../packages/payload/src/index.js'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
+import removeFiles from '../helpers/removeFiles.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise from './config.js'
+import { mediaSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

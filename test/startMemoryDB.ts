@@ -1,9 +1,9 @@
 import getPort from 'get-port'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 
-import type { SanitizedConfig } from '../packages/payload/src/config/types'
+import type { SanitizedConfig } from '../packages/payload/src/config/types.js'
 
-import { mongooseAdapter } from '../packages/db-mongodb/src'
+import { mongooseAdapter } from '../packages/db-mongodb/src/index.js'
 
 export const startMemoryDB = async (
   configPromise: Promise<SanitizedConfig>,

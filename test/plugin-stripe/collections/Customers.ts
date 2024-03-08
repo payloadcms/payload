@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { LinkToDoc } from '../../../packages/plugin-stripe/src/ui/LinkToDoc'
-import { customersSlug } from '../shared'
+import { LinkToDoc } from '../../../packages/plugin-stripe/src/ui/LinkToDoc.js'
+import { customersSlug } from '../shared.js'
 
 export const Customers: CollectionConfig = {
   slug: customersSlug,

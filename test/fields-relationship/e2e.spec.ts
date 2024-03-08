@@ -4,19 +4,19 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 import type {
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,
   RelationRestricted,
   RelationTwo,
   RelationWithTitle,
-} from './payload-types'
+} from './payload-types.js'
 
-import wait from '../../packages/payload/src/utilities/wait'
-import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadE2E } from '../helpers/configHelpers'
+import wait from '../../packages/payload/src/utilities/wait.js'
+import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers.js'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
 import {
   relationFalseFilterOptionSlug,
   relationOneSlug,
@@ -26,8 +26,8 @@ import {
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
   slug,
-} from './collectionSlugs'
-import config from './config'
+} from './collectionSlugs.js'
+import config from './config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

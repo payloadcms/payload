@@ -1,6 +1,6 @@
-import type { Block } from '../../../../packages/payload/src/fields/config/types'
+import type { Block } from '../../../../packages/payload/src/fields/config/types.js'
 
-import { lexicalEditor } from '../../../../packages/richtext-lexical/src'
+import { lexicalEditor } from '../../../../packages/richtext-lexical/src/index.js'
 
 export const TextBlock: Block = {
   fields: [

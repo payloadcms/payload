@@ -1,5 +1,5 @@
-import { generateSlateRichText } from '../RichText/generateSlateRichText'
-import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData'
+import { generateSlateRichText } from '../RichText/generateSlateRichText.js'
+import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData.js'
 
 export const lexicalMigrateDocData = {
   title: 'Rich Text',

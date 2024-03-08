@@ -1,9 +1,9 @@
 import * as React from 'react'
 
-import type { CustomPublishButtonProps } from '../../../../packages/payload/src/admin/components/elements/types'
-
 // In your projects, you can import as follows:
 // import { CustomPublishButtonProps } from 'payload/types';
+
+import type { CustomPublishButtonProps } from '../../../../packages/payload/src/admin/elements/PublishButton.js'
 
 import classes from './index.module.scss'
 

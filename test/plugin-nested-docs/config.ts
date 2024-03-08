@@ -1,10 +1,10 @@
-import nestedDocs from '../../packages/plugin-nested-docs/src'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { Categories } from './collections/Categories'
-import { Pages } from './collections/Pages'
-import { Users } from './collections/Users'
-import { seed } from './seed'
+import nestedDocs from '../../packages/plugin-nested-docs/src/index.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { Categories } from './collections/Categories.js'
+import { Pages } from './collections/Pages.js'
+import { Users } from './collections/Users.js'
+import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
   collections: [Pages, Categories, Users],

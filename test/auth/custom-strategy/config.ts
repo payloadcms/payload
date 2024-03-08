@@ -1,11 +1,9 @@
-import type { Request } from 'express'
-
 import { Strategy } from 'passport-strategy'
 
-import type { Payload } from '../../../packages/payload/src'
+import type { Payload } from '../../../packages/payload/src/index.js'
 
-import { buildConfigWithDefaults } from '../../buildConfigWithDefaults'
-import { usersSlug } from './shared'
+import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
+import { usersSlug } from './shared.js'
 
 export const strategyName = 'test-local'
 

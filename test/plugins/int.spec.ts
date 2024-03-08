@@ -1,8 +1,8 @@
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise, { pagesSlug } from './config'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise, { pagesSlug } from './config.js'
 
 let payload: Payload
 

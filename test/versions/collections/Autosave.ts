@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { autosaveCollectionSlug } from '../slugs'
+import { autosaveCollectionSlug } from '../slugs.js'
 
 const AutosavePosts: CollectionConfig = {
   slug: autosaveCollectionSlug,

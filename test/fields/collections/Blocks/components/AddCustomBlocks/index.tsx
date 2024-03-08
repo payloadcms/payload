@@ -1,8 +1,8 @@
 'use client'
 import * as React from 'react'
 
-import { useForm } from '../../../../../../packages/ui/src/forms/Form/context'
-import useField from '../../../../../../packages/ui/src/forms/useField'
+import { useForm } from '../../../../../../packages/ui/src/forms/Form/context.js'
+import useField from '../../../../../../packages/ui/src/forms/useField/index.js'
 import './index.scss'
 
 const baseClass = 'custom-blocks-field-management'

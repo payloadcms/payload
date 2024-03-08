@@ -1,7 +1,7 @@
-import type { Block } from '../../../../packages/payload/src/fields/config/types'
+import type { Block } from '../../../../packages/payload/src/fields/config/types.js'
 
-import { invertBackground } from '../../fields/invertBackground'
-import linkGroup from '../../fields/linkGroup'
+import { invertBackground } from '../../fields/invertBackground.js'
+import linkGroup from '../../fields/linkGroup.js'
 
 export const CallToAction: Block = {
   slug: 'cta',

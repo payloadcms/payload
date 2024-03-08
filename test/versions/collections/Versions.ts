@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { versionCollectionSlug } from '../slugs'
+import { versionCollectionSlug } from '../slugs.js'
 
 const VersionPosts: CollectionConfig = {
   slug: versionCollectionSlug,

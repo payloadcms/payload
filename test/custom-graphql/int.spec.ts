@@ -1,7 +1,7 @@
-import { getPayload } from '../../packages/payload/src'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise from './config'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise from './config.js'
 
 let restClient: NextRESTClient
 

@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
 const validateFieldTransformAction = (hook: string, value) => {
   if (value !== undefined && value !== null && !Array.isArray(value)) {

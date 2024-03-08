@@ -1,8 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 
-import { generateGraphQLSchema } from '../packages/payload/src/bin/generateGraphQLSchema'
-import { setTestEnvPaths } from './helpers/setTestEnvPaths'
+import { generateGraphQLSchema } from '../packages/payload/src/bin/generateGraphQLSchema.'
+import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 

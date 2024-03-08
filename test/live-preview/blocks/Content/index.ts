@@ -1,7 +1,7 @@
-import type { Block, Field } from '../../../../packages/payload/src/fields/config/types'
+import type { Block, Field } from '../../../../packages/payload/src/fields/config/types.js'
 
-import { invertBackground } from '../../fields/invertBackground'
-import link from '../../fields/link'
+import { invertBackground } from '../../fields/invertBackground.js'
+import link from '../../fields/link.js'
 
 const columnFields: Field[] = [
   {

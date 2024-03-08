@@ -1,10 +1,10 @@
 import type {
   BeforeDuplicate,
   CollectionConfig,
-} from '../../../../packages/payload/src/collections/config/types'
-import type { IndexedField } from '../../payload-types'
+} from '../../../../packages/payload/src/collections/config/types.js'
+import type { IndexedField } from '../../payload-types.js'
 
-import { indexedFieldsSlug } from '../../slugs'
+import { indexedFieldsSlug } from '../../slugs.js'
 
 const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
   return {

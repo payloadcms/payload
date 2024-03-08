@@ -1,6 +1,6 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
 
-import { disablePublishGlobalSlug } from '../slugs'
+import { disablePublishGlobalSlug } from '../slugs.js'
 
 const DisablePublishGlobal: GlobalConfig = {
   access: {

@@ -1,18 +1,18 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Page as PayloadPage } from './payload-types'
+import type { Payload } from '../../packages/payload/src/types/index.js'
+import type { Page as PayloadPage } from './payload-types.js'
 
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
-import { initPageConsoleErrorCatch } from '../helpers'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadE2E } from '../helpers/configHelpers'
-import config from '../uploads/config'
-import { mediaSlug } from './shared'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
+import { initPageConsoleErrorCatch } from '../helpers.js'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
+import config from '../uploads/config.js'
+import { mediaSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

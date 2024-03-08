@@ -3,12 +3,12 @@ import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { describeIfInCIOrHasLocalstack } from '../helpers'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise from './config'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { describeIfInCIOrHasLocalstack } from '../helpers.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise from './config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

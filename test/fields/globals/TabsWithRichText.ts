@@ -5,9 +5,9 @@
  * - each tab has a different label in each language. Needs to be a LOCALIZED label, not a single label for all languages. Only then can it be reproduced
  */
 
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
 
-import { lexicalEditor } from '../../../packages/richtext-lexical/src'
+import { lexicalEditor } from '../../../packages/richtext-lexical/src/index.js'
 
 const initializedEditor = lexicalEditor()
 

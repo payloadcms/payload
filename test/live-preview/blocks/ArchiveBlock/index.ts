@@ -1,4 +1,4 @@
-import type { Block } from '../../../../packages/payload/src/fields/config/types'
+import type { Block } from '../../../../packages/payload/src/fields/config/types.js'
 
 export const Archive: Block = {
   slug: 'archive',

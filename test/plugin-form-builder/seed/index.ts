@@ -1,7 +1,7 @@
-import type { Payload } from '../../../packages/payload/src'
-import type { PayloadRequest } from '../../../packages/payload/src/types'
+import type { Payload } from '../../../packages/payload/src/index.js'
+import type { PayloadRequest } from '../../../packages/payload/src/types/index.js'
 
-import { formSubmissionsSlug, formsSlug, pagesSlug } from '../shared'
+import { formSubmissionsSlug, formsSlug, pagesSlug } from '../shared.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')

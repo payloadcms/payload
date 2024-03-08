@@ -1,7 +1,7 @@
 import * as React from 'react'
 
-import useField from '../../../packages/ui/src/forms/useField'
-import { collection1Slug } from '../collectionSlugs'
+import useField from '../../../packages/ui/src/forms/useField/index.js'
+import { collection1Slug } from '../collectionSlugs.js'
 
 export const PrePopulateFieldUI: React.FC<{
   hasMany?: boolean

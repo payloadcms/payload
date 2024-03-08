@@ -1,4 +1,4 @@
-import type { BlockField } from '../../payload-types'
+import type { BlockField } from '../../payload-types.js'
 
 export const getBlocksFieldSeedData = (prefix?: string): any => [
   {

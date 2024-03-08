@@ -1,14 +1,14 @@
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { devUser } from '../credentials'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
-import AutosavePosts from './collections/Autosave'
-import configPromise from './config'
-import AutosaveGlobal from './globals/Autosave'
-import { clearAndSeedEverything } from './seed'
-import { autosaveCollectionSlug, draftCollectionSlug } from './slugs'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { devUser } from '../credentials.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import AutosavePosts from './collections/Autosave.js'
+import configPromise from './config.js'
+import AutosaveGlobal from './globals/Autosave.js'
+import { clearAndSeedEverything } from './seed.js'
+import { autosaveCollectionSlug, draftCollectionSlug } from './slugs.js'
 
 let payload: Payload
 let restClient: NextRESTClient

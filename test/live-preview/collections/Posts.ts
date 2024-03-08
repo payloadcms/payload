@@ -1,11 +1,11 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { Archive } from '../blocks/ArchiveBlock'
-import { CallToAction } from '../blocks/CallToAction'
-import { Content } from '../blocks/Content'
-import { MediaBlock } from '../blocks/MediaBlock'
-import { hero } from '../fields/hero'
-import { tenantsSlug } from '../shared'
+import { Archive } from '../blocks/ArchiveBlock/index.js'
+import { CallToAction } from '../blocks/CallToAction/index.js'
+import { Content } from '../blocks/Content/index.js'
+import { MediaBlock } from '../blocks/MediaBlock/index.js'
+import { hero } from '../fields/hero.js'
+import { tenantsSlug } from '../shared.js'
 
 export const postsSlug = 'posts'
 

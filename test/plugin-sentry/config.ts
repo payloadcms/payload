@@ -1,9 +1,9 @@
-import { sentry } from '../../packages/plugin-sentry/src'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { Posts } from './collections/Posts'
-import { Users } from './collections/Users'
-import { testErrors } from './components'
+import { sentry } from '../../packages/plugin-sentry/src/index.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { Posts } from './collections/Posts.js'
+import { Users } from './collections/Users.js'
+import { testErrors } from './components.js'
 
 export default buildConfigWithDefaults({
   collections: [Posts, Users],

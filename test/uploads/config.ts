@@ -1,12 +1,12 @@
 import path from 'path'
 
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import removeFiles from '../helpers/removeFiles'
-import { Uploads1 } from './collections/Upload1'
-import Uploads2 from './collections/Upload2'
-import AdminThumbnailCol from './collections/admin-thumbnail'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import removeFiles from '../helpers/removeFiles.js'
+import { Uploads1 } from './collections/Upload1/index.js'
+import Uploads2 from './collections/Upload2/index.js'
+import AdminThumbnailCol from './collections/admin-thumbnail/index.js'
 import {
   audioSlug,
   enlargeSlug,
@@ -15,7 +15,7 @@ import {
   relationSlug,
   unstoredMediaSlug,
   versionSlug,
-} from './shared'
+} from './shared.js'
 
 export default buildConfigWithDefaults({
   serverURL: undefined,

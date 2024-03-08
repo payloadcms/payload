@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
-import { numberFieldsSlug } from '../../slugs'
+import { numberFieldsSlug } from '../../slugs.js'
 
 export const defaultNumber = 5
 

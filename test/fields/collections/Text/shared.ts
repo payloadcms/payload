@@ -1,4 +1,4 @@
-import type { TextField } from '../../payload-types'
+import type { TextField } from '../../payload-types.js'
 
 export const defaultText = 'default-text'
 export const textFieldsSlug = 'text-fields'

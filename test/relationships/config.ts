@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../packages/payload/src/collections/config/types.js'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -11,7 +11,7 @@ import {
   relationSlug,
   slug,
   treeSlug,
-} from './shared'
+} from './shared.js'
 
 const openAccess = {
   create: () => true,

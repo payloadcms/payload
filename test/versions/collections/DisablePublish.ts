@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { disablePublishSlug } from '../slugs'
+import { disablePublishSlug } from '../slugs.js'
 
 const DisablePublish: CollectionConfig = {
   access: {

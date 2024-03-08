@@ -1,6 +1,6 @@
-import type { Config } from '../../../packages/payload/src/config/types'
+import type { Config } from '../../../packages/payload/src/config/types.js'
 
-import { applicationEndpoint, rootEndpoint } from '../shared'
+import { applicationEndpoint, rootEndpoint } from '../shared.js'
 
 export const endpoints: Config['endpoints'] = [
   {

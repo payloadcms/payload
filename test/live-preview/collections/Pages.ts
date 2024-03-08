@@ -1,13 +1,13 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { lexicalEditor } from '../../../packages/richtext-lexical/src'
-import { Archive } from '../blocks/ArchiveBlock'
-import { CallToAction } from '../blocks/CallToAction'
-import { Content } from '../blocks/Content'
-import { MediaBlock } from '../blocks/MediaBlock'
-import CollectionLivePreviewButton from '../components/CollectionLivePreviewButton'
-import { hero } from '../fields/hero'
-import { pagesSlug, tenantsSlug } from '../shared'
+import { lexicalEditor } from '../../../packages/richtext-lexical/src/index.js'
+import { Archive } from '../blocks/ArchiveBlock/index.js'
+import { CallToAction } from '../blocks/CallToAction/index.js'
+import { Content } from '../blocks/Content/index.js'
+import { MediaBlock } from '../blocks/MediaBlock/index.js'
+import CollectionLivePreviewButton from '../components/CollectionLivePreviewButton/index.js'
+import { hero } from '../fields/hero.js'
+import { pagesSlug, tenantsSlug } from '../shared.js'
 
 export const Pages: CollectionConfig = {
   slug: pagesSlug,

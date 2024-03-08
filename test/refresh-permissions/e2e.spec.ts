@@ -4,9 +4,9 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { closeNav, initPageConsoleErrorCatch, openNav } from '../helpers'
-import { initPayloadE2E } from '../helpers/configHelpers'
-import config from './config'
+import { closeNav, initPageConsoleErrorCatch, openNav } from '../helpers.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
+import config from './config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

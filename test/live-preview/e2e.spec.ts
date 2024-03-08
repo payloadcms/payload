@@ -1,16 +1,17 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadE2E } from '../helpers/configHelpers'
-import config from './config'
-import { mobileBreakpoint } from './shared'
-import { startLivePreviewDemo } from './startLivePreviewDemo'
+import type { Payload } from '../../packages/payload/src/index.js'
+
+import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
+import config from './config.js'
+import { mobileBreakpoint } from './shared.js'
+import { startLivePreviewDemo } from './startLivePreviewDemo.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

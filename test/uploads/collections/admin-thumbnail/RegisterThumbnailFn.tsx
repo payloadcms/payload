@@ -1,7 +1,7 @@
 'use client'
 import type React from 'react'
 
-import { useAdminThumbnail } from '../../../../packages/ui/src/hooks/useAdminThumbnail'
+import { useAdminThumbnail } from '../../../../packages/ui/src/hooks/useAdminThumbnail.js'
 
 type TypeWithFile = {
   filename: string

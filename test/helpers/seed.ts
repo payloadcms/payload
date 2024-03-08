@@ -1,10 +1,10 @@
 import fs from 'fs'
 import path from 'path'
 
-import { type Payload } from '../../packages/payload/src'
-import { isMongoose } from './isMongoose'
-import { resetDB } from './reset'
-import { createSnapshot, dbSnapshot, restoreFromSnapshot } from './snapshot'
+import { type Payload } from '../../packages/payload/src/index.js'
+import { isMongoose } from './isMongoose.js'
+import { resetDB } from './reset.js'
+import { createSnapshot, dbSnapshot, restoreFromSnapshot } from './snapshot.js'
 
 type SeedFunction = (_payload: Payload) => Promise<void>
 

@@ -1,7 +1,7 @@
-import type { TabsField } from '../../payload-types'
+import type { TabsField } from '../../payload-types.js'
 
-import { getBlocksFieldSeedData } from '../Blocks/shared'
-import { localizedTextValue, namedTabText } from './constants'
+import { getBlocksFieldSeedData } from '../Blocks/shared.js'
+import { localizedTextValue, namedTabText } from './constants.js'
 
 export const tabsDoc: Partial<TabsField> = {
   array: [

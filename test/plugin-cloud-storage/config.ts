@@ -1,17 +1,16 @@
-import * as AWS from '@aws-sdk/client-s3'
 import dotenv from 'dotenv'
 import path from 'path'
 
-import type { Adapter } from '../../packages/plugin-cloud-storage/src/types'
+import type { Adapter } from '../../packages/plugin-cloud-storage/src/types.js'
 
-import { cloudStorage } from '../../packages/plugin-cloud-storage/src'
-import { azureBlobStorageAdapter } from '../../packages/plugin-cloud-storage/src/adapters/azure'
-import { gcsAdapter } from '../../packages/plugin-cloud-storage/src/adapters/gcs'
-import { s3Adapter } from '../../packages/plugin-cloud-storage/src/adapters/s3'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { Media } from './collections/Media'
-import { Users } from './collections/Users'
+import { azureBlobStorageAdapter } from '../../packages/plugin-cloud-storage/src/adapters/azure/index.js'
+import { gcsAdapter } from '../../packages/plugin-cloud-storage/src/adapters/gcs/index.js'
+import { s3Adapter } from '../../packages/plugin-cloud-storage/src/adapters/s3/index.js'
+import { cloudStorage } from '../../packages/plugin-cloud-storage/src/index.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { Media } from './collections/Media.js'
+import { Users } from './collections/Users.js'
 
 let adapter: Adapter
 let uploadOptions

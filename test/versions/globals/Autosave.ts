@@ -1,6 +1,6 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
 
-import { autoSaveGlobalSlug } from '../slugs'
+import { autoSaveGlobalSlug } from '../slugs.js'
 
 const AutosaveGlobal: GlobalConfig = {
   slug: autoSaveGlobalSlug,

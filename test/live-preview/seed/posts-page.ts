@@ -1,4 +1,4 @@
-import type { Page } from '../payload-types'
+import type { Page } from '../payload-types.js'
 
 export const postsPage: Partial<Page> = {
   title: 'Posts',

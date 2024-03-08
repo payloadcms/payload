@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { RowLabelComponent } from '../../../../packages/payload/src/admin/components/forms/RowLabel/types'
+import type { RowLabelComponent } from '../../../../packages/payload/src/admin/forms/RowLabel.js'
 
 export const ArrayRowLabel: RowLabelComponent = ({ data }) => {
   return (

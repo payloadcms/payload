@@ -1,28 +1,28 @@
 import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
 
-import type { Payload } from '../../packages/payload/src'
-import type { PaginatedDocs } from '../../packages/payload/src/database/types'
+import type { PaginatedDocs } from '../../packages/payload/src/database/types.js'
+import type { Payload } from '../../packages/payload/src/index.js'
 import type {
   SerializedBlockNode,
   SerializedLinkNode,
   SerializedRelationshipNode,
   SerializedUploadNode,
-} from '../../packages/richtext-lexical/src'
-import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types'
+} from '../../packages/richtext-lexical/src/index.js'
+import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { devUser } from '../credentials'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
-import { arrayDoc } from './collections/Array/shared'
-import { lexicalDocData } from './collections/Lexical/data'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data'
-import { richTextDocData } from './collections/RichText/data'
-import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText'
-import { textDoc } from './collections/Text/shared'
-import { uploadsDoc } from './collections/Upload/shared'
-import configPromise from './config'
-import { clearAndSeedEverything } from './seed'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { devUser } from '../credentials.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import { arrayDoc } from './collections/Array/shared.js'
+import { lexicalDocData } from './collections/Lexical/data.js'
+import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
+import { richTextDocData } from './collections/RichText/data.js'
+import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
+import { textDoc } from './collections/Text/shared.js'
+import { uploadsDoc } from './collections/Upload/shared.js'
+import configPromise from './config.js'
+import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
@@ -30,7 +30,7 @@ import {
   richTextFieldsSlug,
   textFieldsSlug,
   uploadsSlug,
-} from './slugs'
+} from './slugs.js'
 
 let payload: Payload
 let restClient: NextRESTClient

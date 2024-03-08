@@ -1,5 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
+import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters/html/field/index.js'
 import {
   BlocksFeature,
   HTMLConverterFeature,
@@ -7,11 +8,10 @@ import {
   TreeViewFeature,
   UploadFeature,
   lexicalEditor,
-} from '../../../../packages/richtext-lexical/src'
-import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters/html/field'
-import { slateEditor } from '../../../../packages/richtext-slate/src'
-import { richTextFieldsSlug } from '../../slugs'
-import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks'
+} from '../../../../packages/richtext-lexical/src/index.js'
+import { slateEditor } from '../../../../packages/richtext-slate/src/index.js'
+import { richTextFieldsSlug } from '../../slugs.js'
+import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks.js'
 
 const RichTextFields: CollectionConfig = {
   slug: richTextFieldsSlug,

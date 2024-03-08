@@ -1,8 +1,8 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
 
-import GlobalVersionButton from '../elements/GlobalVersionButton'
-import GlobalVersionsButton from '../elements/GlobalVersionsButton'
-import { draftGlobalSlug } from '../slugs'
+import GlobalVersionButton from '../elements/GlobalVersionButton/index.js'
+import GlobalVersionsButton from '../elements/GlobalVersionsButton/index.js'
+import { draftGlobalSlug } from '../slugs.js'
 
 const DraftGlobal: GlobalConfig = {
   slug: draftGlobalSlug,

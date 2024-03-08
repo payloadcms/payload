@@ -1,28 +1,28 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { LocalizedPost } from './payload-types'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { LocalizedPost } from './payload-types.js'
 
-import wait from '../../packages/payload/src/utilities/wait'
+import wait from '../../packages/payload/src/utilities/wait.js'
 import {
   changeLocale,
   initPageConsoleErrorCatch,
   openDocControls,
   saveDocAndAssert,
-} from '../helpers'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadE2E } from '../helpers/configHelpers'
-import config from './config'
+} from '../helpers.js'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
+import config from './config.js'
 import {
   englishTitle,
   localizedPostsSlug,
   spanishLocale,
   withRequiredLocalizedFields,
-} from './shared'
+} from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

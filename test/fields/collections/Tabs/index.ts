@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
-import { tabsFieldsSlug } from '../../slugs'
-import { getBlocksField } from '../Blocks'
-import { UIField } from './UIField'
-import { namedTabDefaultValue } from './constants'
+import { tabsFieldsSlug } from '../../slugs.js'
+import { getBlocksField } from '../Blocks/index.js'
+import { UIField } from './UIField.js'
+import { namedTabDefaultValue } from './constants.js'
 
 const TabsFields: CollectionConfig = {
   slug: tabsFieldsSlug,

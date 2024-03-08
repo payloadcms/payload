@@ -1,24 +1,25 @@
-import type { Payload } from '../../packages/payload/src'
-import { getPayload } from '../../packages/payload/src'
-import type { NestedAfterReadHook } from './payload-types'
-import { AuthenticationError } from '../../packages/payload/src/errors'
-import { devUser, regularUser } from '../credentials'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
-import { afterOperationSlug } from './collections/AfterOperation'
-import { chainingHooksSlug } from './collections/ChainingHooks'
-import { contextHooksSlug } from './collections/ContextHooks'
-import { dataHooksSlug } from './collections/Data'
-import { hooksSlug } from './collections/Hook'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { NestedAfterReadHook } from './payload-types.js'
+
+import { AuthenticationError } from '../../packages/payload/src/errors/index.js'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { devUser, regularUser } from '../credentials.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import { afterOperationSlug } from './collections/AfterOperation/index.js'
+import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
+import { contextHooksSlug } from './collections/ContextHooks/index.js'
+import { dataHooksSlug } from './collections/Data/index.js'
+import { hooksSlug } from './collections/Hook/index.js'
 import {
   generatedAfterReadText,
   nestedAfterReadHooksSlug,
-} from './collections/NestedAfterReadHooks'
-import { relationsSlug } from './collections/Relations'
-import { transformSlug } from './collections/Transform'
-import { hooksUsersSlug } from './collections/Users'
-import configPromise, { HooksConfig } from './config'
-import { dataHooksGlobalSlug } from './globals/Data'
+} from './collections/NestedAfterReadHooks/index.js'
+import { relationsSlug } from './collections/Relations/index.js'
+import { transformSlug } from './collections/Transform/index.js'
+import { hooksUsersSlug } from './collections/Users/index.js'
+import configPromise, { HooksConfig } from './config.js'
+import { dataHooksGlobalSlug } from './globals/Data/index.js'
 
 let restClient: NextRESTClient
 let payload: Payload

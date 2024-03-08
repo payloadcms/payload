@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
 export const collectionEndpoints: CollectionConfig['endpoints'] = [
   {

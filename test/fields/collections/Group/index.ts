@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
-import { groupFieldsSlug } from '../../slugs'
+import { groupFieldsSlug } from '../../slugs.js'
 
 export const groupDefaultValue = 'set from parent'
 export const groupDefaultChild = 'child takes priority'

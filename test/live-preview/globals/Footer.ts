@@ -1,7 +1,7 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
 
-import GlobalLivePreviewButton from '../components/GlobalLivePreviewButton'
-import link from '../fields/link'
+import GlobalLivePreviewButton from '../components/GlobalLivePreviewButton/index.js'
+import link from '../fields/link.js'
 
 export const Footer: GlobalConfig = {
   slug: 'footer',

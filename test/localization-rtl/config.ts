@@ -1,11 +1,10 @@
 import en from '../../packages/payload/src/translations/en.json'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { ar } from './ar'
-import { Posts } from './collections/posts'
-import { Users } from './collections/users'
-import deepMerge from './deepMerge'
-import { localization } from './localization'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { ar } from './ar.js'
+import { Posts } from './collections/posts.js'
+import { Users } from './collections/users.js'
+import deepMerge from './deepMerge.js'
 
 export default buildConfigWithDefaults({
   collections: [Users, Posts],

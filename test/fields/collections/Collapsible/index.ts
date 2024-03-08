@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
-import { collapsibleFieldsSlug } from '../../slugs'
-import { CollapsibleLabelComponent } from './LabelComponent'
+import { collapsibleFieldsSlug } from '../../slugs.js'
+import { CollapsibleLabelComponent } from './LabelComponent.js'
 
 const CollapsibleFields: CollectionConfig = {
   slug: collapsibleFieldsSlug,

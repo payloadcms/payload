@@ -1,9 +1,9 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import CollectionVersionButton from '../elements/CollectionVersionButton'
-import CollectionVersionsButton from '../elements/CollectionVersionsButton'
-import { CustomPublishButton } from '../elements/CustomSaveButton'
-import { draftCollectionSlug } from '../slugs'
+import CollectionVersionButton from '../elements/CollectionVersionButton/index.js'
+import CollectionVersionsButton from '../elements/CollectionVersionsButton/index.js'
+import { CustomPublishButton } from '../elements/CustomSaveButton/index.js'
+import { draftCollectionSlug } from '../slugs.js'
 
 const DraftPosts: CollectionConfig = {
   slug: draftCollectionSlug,

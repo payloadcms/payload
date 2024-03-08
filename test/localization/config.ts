@@ -1,9 +1,9 @@
-import type { LocalizedPost } from './payload-types'
+import type { LocalizedPost } from './payload-types.js'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { ArrayCollection } from './collections/Array'
-import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { ArrayCollection } from './collections/Array/index.js'
+import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
 import {
   defaultLocale,
   englishTitle,
@@ -19,7 +19,7 @@ import {
   spanishTitle,
   withLocalizedRelSlug,
   withRequiredLocalizedFields,
-} from './shared'
+} from './shared.js'
 
 export type LocalizedPostAllLocale = LocalizedPost & {
   title: {

@@ -2,9 +2,9 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import { initPageConsoleErrorCatch } from '../helpers'
-import { initPayloadE2E } from '../helpers/configHelpers'
-import config from './config'
+import { initPageConsoleErrorCatch } from '../helpers.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
+import config from './config.js'
 
 const { beforeAll, describe } = test
 

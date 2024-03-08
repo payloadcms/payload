@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
-import { jsonFieldsSlug } from '../../slugs'
+import { jsonFieldsSlug } from '../../slugs.js'
 
 type JSONField = {
   createdAt: string
@@ -10,6 +10,7 @@ type JSONField = {
 }
 
 const JSON: CollectionConfig = {
+  slug: jsonFieldsSlug,
   access: {
     read: () => true,
   },
@@ -19,7 +20,6 @@ const JSON: CollectionConfig = {
       type: 'json',
     },
   ],
-  slug: jsonFieldsSlug,
   versions: {
     maxPerDoc: 1,
   },

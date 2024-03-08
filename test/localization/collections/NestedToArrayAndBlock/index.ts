@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
 export const nestedToArrayAndBlockCollectionSlug = 'nested-to-array-and-block'
 

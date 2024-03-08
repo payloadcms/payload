@@ -1,4 +1,4 @@
-import type { Post } from '../payload-types'
+import type { Post } from '../payload-types.js'
 
 export const post3: Omit<Post, 'createdAt' | 'id' | 'updatedAt'> = {
   title: 'Post 3',

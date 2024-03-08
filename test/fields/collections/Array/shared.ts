@@ -1,4 +1,4 @@
-import type { ArrayField } from '../../payload-types'
+import type { ArrayField } from '../../payload-types.js'
 
 export const arrayDoc: Partial<ArrayField> = {
   title: 'array doc 1',

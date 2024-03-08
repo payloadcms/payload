@@ -1,4 +1,4 @@
-import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData'
+import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData.js'
 
 export const LexicalRichTextDoc = {
   title: 'Rich Text',

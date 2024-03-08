@@ -1,11 +1,11 @@
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { devUser } from '../credentials'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise from './config'
-import { postDoc } from './config'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { devUser } from '../credentials.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise from './config.js'
+import { postDoc } from './config.js'
 
 let restClient: NextRESTClient
 let payload: Payload

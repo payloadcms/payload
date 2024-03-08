@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
 import {
   BlocksFeature,
@@ -6,8 +6,8 @@ import {
   TreeViewFeature,
   UploadFeature,
   lexicalEditor,
-} from '../../../../packages/richtext-lexical/src'
-import { lexicalFieldsSlug } from '../../slugs'
+} from '../../../../packages/richtext-lexical/src/index.js'
+import { lexicalFieldsSlug } from '../../slugs.js'
 import {
   ConditionalLayoutBlock,
   RadioButtonsBlock,
@@ -18,7 +18,7 @@ import {
   SubBlockBlock,
   TextBlock,
   UploadAndRichTextBlock,
-} from './blocks'
+} from './blocks.js'
 
 export const LexicalFields: CollectionConfig = {
   slug: lexicalFieldsSlug,

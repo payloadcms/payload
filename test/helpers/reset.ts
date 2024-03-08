@@ -1,9 +1,9 @@
 import { sql } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
-import type { Payload } from '../../packages/payload/src'
+import type { PostgresAdapter } from '../../packages/db-postgres/src/types.js'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { isMongoose } from './isMongoose'
+import { isMongoose } from './isMongoose.js'
 
 export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
   if (isMongoose(_payload)) {

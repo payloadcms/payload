@@ -1,33 +1,32 @@
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
-import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
-import type { Payload } from '../../packages/payload/src'
-import type { PaginatedDocs } from '../../packages/payload/src/database/types'
-import type { GroupField, RichTextField } from './payload-types'
-import type { GroupField } from './payload-types'
+import type { MongooseAdapter } from '../../packages/db-mongodb/src/index.js'
+import type { PaginatedDocs } from '../../packages/payload/src/database/types.js'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { GroupField, RichTextField } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { devUser } from '../credentials'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { isMongoose } from '../helpers/isMongoose'
-import { startMemoryDB } from '../startMemoryDB'
-import { arrayDefaultValue } from './collections/Array'
-import { blocksDoc } from './collections/Blocks/shared'
-import { dateDoc } from './collections/Date/shared'
-import { groupDefaultChild, groupDefaultValue } from './collections/Group'
-import { groupDoc } from './collections/Group/shared'
-import { defaultNumber } from './collections/Number'
-import { numberDoc } from './collections/Number/shared'
-import { pointDoc } from './collections/Point/shared'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { devUser } from '../credentials.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { isMongoose } from '../helpers/isMongoose.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import { arrayDefaultValue } from './collections/Array/index.js'
+import { blocksDoc } from './collections/Blocks/shared.js'
+import { dateDoc } from './collections/Date/shared.js'
+import { groupDefaultChild, groupDefaultValue } from './collections/Group/index.js'
+import { groupDoc } from './collections/Group/shared.js'
+import { defaultNumber } from './collections/Number/index.js'
+import { numberDoc } from './collections/Number/shared.js'
+import { pointDoc } from './collections/Point/shared.js'
 import {
   localizedTextValue,
   namedTabDefaultValue,
   namedTabText,
-} from './collections/Tabs/constants'
-import { tabsDoc } from './collections/Tabs/shared'
-import { defaultText } from './collections/Text/shared'
-import configPromise from './config'
-import { clearAndSeedEverything } from './seed'
+} from './collections/Tabs/constants.js'
+import { tabsDoc } from './collections/Tabs/shared.js'
+import { defaultText } from './collections/Text/shared.js'
+import configPromise from './config.js'
+import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -35,7 +34,7 @@ import {
   relationshipFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
-} from './slugs'
+} from './slugs.js'
 
 let restClient: NextRESTClient
 let user: any

@@ -1,4 +1,4 @@
-import type { CollapsibleField } from '../../payload-types'
+import type { CollapsibleField } from '../../payload-types.js'
 
 export const collapsibleDoc: Partial<CollapsibleField> = {
   text: 'Seeded collapsible doc',

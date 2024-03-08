@@ -1,19 +1,20 @@
-import type { Payload } from '../../packages/payload/src'
-import type { Where } from '../../packages/payload/src/types'
-import type { LocalizedPost, WithLocalizedRelationship } from './payload-types'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { Where } from '../../packages/payload/src/types/index.js'
+import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
-import { englishLocale } from '../globals/config'
-import { idToString } from '../helpers/idToString'
-import { arrayCollectionSlug } from './collections/Array'
-import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock'
-import configPromise from './config'
-import { defaultLocale, localizedSortSlug } from './shared'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { englishLocale } from '../globals/config.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { idToString } from '../helpers/idToString.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import { arrayCollectionSlug } from './collections/Array/index.js'
+import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
+import configPromise from './config.js'
 import {
+  defaultLocale,
   englishTitle,
   localizedPostsSlug,
+  localizedSortSlug,
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
@@ -24,7 +25,7 @@ import {
   spanishTitle,
   withLocalizedRelSlug,
   withRequiredLocalizedFields,
-} from './shared'
+} from './shared.js'
 
 const collection = localizedPostsSlug
 let payload: Payload

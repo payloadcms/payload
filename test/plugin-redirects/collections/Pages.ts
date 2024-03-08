@@ -1,6 +1,6 @@
-import type { CollectionConfig } from 'payload/dist/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { pagesSlug } from '../shared'
+import { pagesSlug } from '../shared.js'
 
 export const Pages: CollectionConfig = {
   slug: pagesSlug,

@@ -1,9 +1,9 @@
-import type { Payload } from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src'
-import wait from '../../packages/payload/src/utilities/wait'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise from './config'
+import { getPayload } from '../../packages/payload/src/index.js'
+import wait from '../../packages/payload/src/utilities/wait.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise from './config.js'
 
 let payload: Payload
 

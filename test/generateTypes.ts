@@ -1,8 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 
-import { generateTypes } from '../packages/payload/src/bin/generateTypes'
-import { setTestEnvPaths } from './helpers/setTestEnvPaths'
+import { generateTypes } from '../packages/payload/src/bin/generateTypes.js'
+import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 

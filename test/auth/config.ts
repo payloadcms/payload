@@ -1,10 +1,10 @@
 import { v4 as uuid } from 'uuid'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { AuthDebug } from './AuthDebug'
-import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js.'
+import { AuthDebug } from './AuthDebug.js'
+import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {

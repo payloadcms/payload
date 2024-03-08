@@ -1,10 +1,10 @@
-import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
-import type { FilterOptionsProps } from '../../packages/payload/src/fields/config/types'
+import type { CollectionConfig } from '../../packages/payload/src/collections/config/types.js'
+import type { FilterOptionsProps } from '../../packages/payload/src/fields/config/types.js'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { PrePopulateFieldUI } from './PrePopulateFieldUI'
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { PrePopulateFieldUI } from './PrePopulateFieldUI/index.js'
 import {
   collection1Slug,
   collection2Slug,
@@ -16,7 +16,7 @@ import {
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
   slug,
-} from './collectionSlugs'
+} from './collectionSlugs.js'
 
 export interface FieldsRelationship {
   createdAt: Date

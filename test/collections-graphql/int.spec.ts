@@ -1,12 +1,12 @@
-import type { Payload } from '../../packages/payload/src'
-import type { Post } from './payload-types'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { Post } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { idToString } from '../helpers/idToString'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { idToString } from '../helpers/idToString.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const title = 'title'
 

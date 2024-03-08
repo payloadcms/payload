@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { createBreadcrumbsField } from '../../../packages/plugin-nested-docs/src/fields/breadcrumbs'
-import createParentField from '../../../packages/plugin-nested-docs/src/fields/parent'
+import { createBreadcrumbsField } from '../../../packages/plugin-nested-docs/src/fields/breadcrumbs.js'
+import createParentField from '../../../packages/plugin-nested-docs/src/fields/parent.js'
 
 export const Categories: CollectionConfig = {
   access: {

@@ -1,34 +1,34 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { RelationshipField, TextField } from './payload-types'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { RelationshipField, TextField } from './payload-types.js'
 
-import wait from '../../packages/payload/src/utilities/wait'
+import wait from '../../packages/payload/src/utilities/wait.js'
 import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
-} from '../helpers'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadE2E } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
-import { jsonDoc } from './collections/JSON/shared'
-import { numberDoc } from './collections/Number/shared'
-import { textDoc } from './collections/Text/shared'
-import config from './config'
-import { clearAndSeedEverything } from './seed'
+} from '../helpers.js'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { RESTClient } from '../helpers/rest.js'
+import { jsonDoc } from './collections/JSON/shared.js'
+import { numberDoc } from './collections/Number/shared.js'
+import { textDoc } from './collections/Text/shared.js'
+import config from './config.js'
+import { clearAndSeedEverything } from './seed.js'
 import {
   collapsibleFieldsSlug,
   pointFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
-} from './slugs'
+} from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

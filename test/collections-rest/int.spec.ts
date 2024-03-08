@@ -1,13 +1,13 @@
 import { randomBytes } from 'crypto'
 
-import type { Payload } from '../../packages/payload/src'
-import type { Relation } from './config'
-import type { Post } from './payload-types'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { Relation } from './config.js'
+import type { Post } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise, {
   customIdNumberSlug,
   customIdSlug,
@@ -15,7 +15,7 @@ import configPromise, {
   pointSlug,
   relationSlug,
   slug,
-} from './config'
+} from './config.js'
 
 let restClient: NextRESTClient
 let payload: Payload

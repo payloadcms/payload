@@ -1,28 +1,28 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { type Payload } from '../../packages/payload/src'
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
-import { devUser } from '../credentials'
-import { seedDB } from '../helpers/seed'
-import { anotherArrayDoc, arrayDoc } from './collections/Array/shared'
-import { blocksDoc } from './collections/Blocks/shared'
-import { codeDoc } from './collections/Code/shared'
-import { collapsibleDoc } from './collections/Collapsible/shared'
-import { conditionalLogicDoc } from './collections/ConditionalLogic/shared'
-import { dateDoc } from './collections/Date/shared'
-import { groupDoc } from './collections/Group/shared'
-import { jsonDoc } from './collections/JSON/shared'
-import { lexicalDocData } from './collections/Lexical/data'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data'
-import { numberDoc } from './collections/Number/shared'
-import { pointDoc } from './collections/Point/shared'
-import { radiosDoc } from './collections/Radio/shared'
-import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data'
-import { selectsDoc } from './collections/Select/shared'
-import { tabsDoc } from './collections/Tabs/shared'
-import { anotherTextDoc, textDoc } from './collections/Text/shared'
-import { uploadsDoc } from './collections/Upload/shared'
+import { type Payload } from '../../packages/payload/src/index.js'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
+import { devUser } from '../credentials.js'
+import { seedDB } from '../helpers/seed.js'
+import { anotherArrayDoc, arrayDoc } from './collections/Array/shared.js'
+import { blocksDoc } from './collections/Blocks/shared.js'
+import { codeDoc } from './collections/Code/shared.js'
+import { collapsibleDoc } from './collections/Collapsible/shared.js'
+import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
+import { dateDoc } from './collections/Date/shared.js'
+import { groupDoc } from './collections/Group/shared.js'
+import { jsonDoc } from './collections/JSON/shared.js'
+import { lexicalDocData } from './collections/Lexical/data.js'
+import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
+import { numberDoc } from './collections/Number/shared.js'
+import { pointDoc } from './collections/Point/shared.js'
+import { radiosDoc } from './collections/Radio/shared.js'
+import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
+import { selectsDoc } from './collections/Select/shared.js'
+import { tabsDoc } from './collections/Tabs/shared.js'
+import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
+import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -44,7 +44,7 @@ import {
   textFieldsSlug,
   uploadsSlug,
   usersSlug,
-} from './slugs'
+} from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

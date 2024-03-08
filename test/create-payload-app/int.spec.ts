@@ -7,7 +7,7 @@ import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
-import { initNext } from '../../packages/create-payload-app/src/lib/init-next'
+import { initNext } from '../../packages/create-payload-app/src/lib/init-next.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

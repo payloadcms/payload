@@ -1,21 +1,21 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src'
-import type { Media, Page, Post, Tenant } from './payload-types'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { Media, Page, Post, Tenant } from './payload-types.js'
 
-import { handleMessage } from '../../packages/live-preview/src/handleMessage'
-import { mergeData } from '../../packages/live-preview/src/mergeData'
-import { traverseRichText } from '../../packages/live-preview/src/traverseRichText'
-import { getPayload } from '../../packages/payload/src'
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
-import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON'
-import { NextRESTClient } from '../helpers/NextRESTClient'
-import { startMemoryDB } from '../startMemoryDB'
-import { Pages } from './collections/Pages'
-import { postsSlug } from './collections/Posts'
-import configPromise from './config'
-import { tenantsSlug } from './shared'
+import { handleMessage } from '../../packages/live-preview/src/handleMessage.js'
+import { mergeData } from '../../packages/live-preview/src/mergeData.js'
+import { traverseRichText } from '../../packages/live-preview/src/traverseRichText.js'
+import { getPayload } from '../../packages/payload/src/index.js'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
+import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON.js'
+import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import { Pages } from './collections/Pages.js'
+import { postsSlug } from './collections/Posts.js'
+import configPromise from './config.js'
+import { tenantsSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -1041,7 +1041,7 @@ describe('Collections - Live Preview', () => {
     const externallyUpdatedRelationship = {
       id: updatedTestPost.id,
       entitySlug: postsSlug,
-      updatedAt: updatedTestPost.updatedAt as string,
+      updatedAt: updatedTestPost.updatedAt,
     }
 
     // Merge again using the `externallyUpdatedRelationship` argument

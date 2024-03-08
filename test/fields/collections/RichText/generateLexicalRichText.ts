@@ -1,4 +1,4 @@
-import { loremIpsum } from './loremIpsum'
+import { loremIpsum } from './loremIpsum.js'
 
 export function generateLexicalRichText() {
   return {

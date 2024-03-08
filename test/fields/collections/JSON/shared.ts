@@ -1,4 +1,4 @@
-import type { JsonField } from '../../payload-types'
+import type { JsonField } from '../../payload-types.js'
 
 export const jsonDoc: Partial<JsonField> = {
   json: {

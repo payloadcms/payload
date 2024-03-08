@@ -1,6 +1,6 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
 
-import { globalEndpoint } from '../shared'
+import { globalEndpoint } from '../shared.js'
 
 export const globalEndpoints: GlobalConfig['endpoints'] = [
   {

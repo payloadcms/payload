@@ -1,8 +1,8 @@
-import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction'
-import { initTransaction } from '../../packages/payload/src/utilities/initTransaction'
-import { killTransaction } from '../../packages/payload/src/utilities/killTransaction'
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
+import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction.js'
+import { initTransaction } from '../../packages/payload/src/utilities/initTransaction.js'
+import { killTransaction } from '../../packages/payload/src/utilities/killTransaction.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 
 const resolveTransactionId = async (_obj, _args, context) => {
   try {

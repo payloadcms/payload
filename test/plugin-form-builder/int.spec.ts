@@ -1,13 +1,13 @@
-import type { Payload } from '../../packages/payload/src'
-import type { Form } from './payload-types'
+import type { Payload } from '../../packages/payload/src/index.js'
+import type { Form } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src'
-import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical'
-import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate'
-import { startMemoryDB } from '../startMemoryDB'
-import configPromise from './config'
-import { formSubmissionsSlug, formsSlug } from './shared'
-import { ValidationError } from '../../packages/payload/src/errors'
+import { ValidationError } from '../../packages/payload/src/errors/index.js'
+import { getPayload } from '../../packages/payload/src/index.js'
+import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
+import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate.js'
+import { startMemoryDB } from '../startMemoryDB.js'
+import configPromise from './config.js'
+import { formSubmissionsSlug, formsSlug } from './shared.js'
 
 let payload: Payload
 let form: Form

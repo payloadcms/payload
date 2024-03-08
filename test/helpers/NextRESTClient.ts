@@ -1,18 +1,18 @@
-import type { Where } from 'payload/types'
+import type { Where } from 'payload/types.js'
 import type { ParsedQs } from 'qs'
 
 import QueryString from 'qs'
 
-import type { SanitizedConfig } from '../../packages/payload/src/config/types'
+import type { SanitizedConfig } from '../../packages/payload/src/config/types.js'
 
-import { GRAPHQL_POST as createGraphqlPOST } from '../../packages/next/src/routes/graphql'
+import { GRAPHQL_POST as createGraphqlPOST } from '../../packages/next/src/routes/graphql/index.js'
 import {
   DELETE as createDELETE,
   GET as createGET,
   PATCH as createPATCH,
   POST as createPOST,
-} from '../../packages/next/src/routes/rest'
-import { devUser } from '../credentials'
+} from '../../packages/next/src/routes/rest/index.js'
+import { devUser } from '../credentials.js'
 
 type ValidPath = `/${string}`
 type RequestOptions = {

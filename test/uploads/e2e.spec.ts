@@ -1,20 +1,20 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Media } from './payload-types'
+import type { Payload } from '../../packages/payload/src/types/index.js'
+import type { Media } from './payload-types.js'
 
-import wait from '../../packages/payload/src/utilities/wait'
-import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadE2E } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
-import { adminThumbnailSrc } from './collections/admin-thumbnail'
-import config from './config'
-import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared'
+import wait from '../../packages/payload/src/utilities/wait.js'
+import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { RESTClient } from '../helpers/rest.js'
+import { adminThumbnailSrc } from './collections/admin-thumbnail/RegisterThumbnailFn.js'
+import config from './config.js'
+import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
