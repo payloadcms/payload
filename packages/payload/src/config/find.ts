@@ -38,7 +38,7 @@ const getTSConfigPaths = (): { outPath: string; srcPath: string } => {
  * @returns The absolute path to the Payload configuration file.
  * @throws An error if no configuration file is found.
  */
-const findConfig = (): string => {
+export const findConfig = (): string => {
   // If the developer has specified a config path,
   // format it if relative and use it directly if absolute
   if (process.env.PAYLOAD_CONFIG_PATH) {
@@ -101,5 +101,3 @@ const findConfig = (): string => {
     'Error: cannot find Payload config. Please create a configuration file located at the root of your current working directory called "payload.config.js" or "payload.config.ts".',
   )
 }
-
-export default findConfig
