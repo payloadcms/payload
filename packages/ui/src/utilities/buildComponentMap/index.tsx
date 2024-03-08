@@ -108,7 +108,7 @@ export const buildComponentMap = (args: {
         DefaultCell,
         config,
         fieldSchema: fields,
-        permissions: entityPermissions.fields,
+        permissions: entityPermissions?.fields,
         readOnly: readOnlyOverride,
       }),
     }
@@ -149,7 +149,7 @@ export const buildComponentMap = (args: {
         DefaultCell,
         config,
         fieldSchema: fields,
-        permissions: entityPermissions.fields,
+        permissions: entityPermissions?.fields,
         readOnly: readOnlyOverride,
       }),
     }
