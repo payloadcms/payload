@@ -688,11 +688,17 @@ export type SanitizedConfig = Omit<
   }
 }
 
-export type ClientConfig = Omit<SanitizedConfig, 'db' | 'endpoints'> & {
-  collections: (Omit<SanitizedCollectionConfig, 'access' | 'endpoints' | 'fields' | 'hooks'> & {
+export type ClientConfig = Omit<SanitizedConfig, 'admin' | 'db' | 'endpoints'> & {
+  admin: Omit<SanitizedConfig['admin'], 'components'>
+  collections: (Omit<
+    SanitizedCollectionConfig,
+    'access' | 'admin' | 'endpoints' | 'fields' | 'hooks'
+  > & {
+    admin: Omit<SanitizedCollectionConfig['admin'], 'components'>
     fields: ClientConfigField[]
   })[]
-  globals: (Omit<SanitizedGlobalConfig, 'access' | 'endpoints' | 'fields' | 'hooks'> & {
+  globals: (Omit<SanitizedGlobalConfig, 'access' | 'admin' | 'endpoints' | 'fields' | 'hooks'> & {
+    admin: Omit<SanitizedGlobalConfig['admin'], 'components'>
     fields: ClientConfigField[]
   })[]
 }
