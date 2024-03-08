@@ -4,14 +4,7 @@ import type { TypeWithTimestamps } from 'payload/types'
 import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from 'payload/types'
 
 import qs from 'qs'
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useReducer,
-  useState,
-} from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import type { DocumentInfo, DocumentInfoContext, DocumentInfoProps } from './types.js'
 
@@ -55,6 +48,7 @@ export const DocumentInfoProvider: React.FC<
   const { code } = useLocale()
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
@@ -78,8 +72,6 @@ export const DocumentInfoProvider: React.FC<
       preferencesKey = `collection-${slug}-${id}`
     }
   }
-
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
   const getVersions = useCallback(async () => {
     let versionFetchURL

@@ -58,7 +58,7 @@ export const EditViewClient: React.FC = () => {
   )
 
   useEffect(() => {
-    setOnSave(onSave)
+    setOnSave(() => onSave)
   }, [setOnSave, onSave])
 
   // Allow the `DocumentInfoProvider` to hydrate
