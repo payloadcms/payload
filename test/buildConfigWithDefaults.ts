@@ -4,7 +4,6 @@ import type { Config, SanitizedConfig } from '../packages/payload/src/config/typ
 
 import { mongooseAdapter } from '../packages/db-mongodb/src/index.js'
 import { postgresAdapter } from '../packages/db-postgres/src/index.js'
-//import { postgresAdapter } from '../packages/db-postgres/src/index.js'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build.js'
 import {
   AlignFeature,

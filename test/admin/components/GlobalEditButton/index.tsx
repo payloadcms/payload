@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'global-edit-button'
 
-const GlobalEditButton: React.FC = () => {
+export const GlobalEditButton: React.FC = () => {
   return (
     <div
       className={baseClass}
@@ -18,5 +18,3 @@ const GlobalEditButton: React.FC = () => {
     </div>
   )
 }
-
-export default GlobalEditButton

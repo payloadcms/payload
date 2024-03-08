@@ -1,6 +1,6 @@
 import type { Editor } from 'slate'
 
-const withButton = (incomingEditor: Editor): Editor => {
+export const withButton = (incomingEditor: Editor): Editor => {
   const editor = incomingEditor
   const { isVoid } = editor
 
@@ -8,5 +8,3 @@ const withButton = (incomingEditor: Editor): Editor => {
 
   return editor
 }
-
-export default withButton

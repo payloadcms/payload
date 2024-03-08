@@ -3,15 +3,15 @@
 import React, { useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 
-import type { AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
+import type { AdminViewComponent } from '../../../../../packages/payload/src/admin/types.js'
 
-import { Button } from '../../../../../packages/ui/src/elements/Button'
+import { Button } from '../../../../../packages/ui/src/elements/Button/index.js'
 // TODO(3.0): Meta?
 // import Meta from '../../../../../packages/payload/src/admin/components/utilities/Meta'
-import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav'
-import { useConfig } from '../../../../../packages/ui/src/providers/Config'
+import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav/index.js'
+import { useConfig } from '../../../../../packages/ui/src/providers/Config/index.js'
 // As this is the demo project, we import our dependencies from the `src` directory.
-import { DefaultTemplate } from '../../../../../packages/ui/src/templates/Default'
+import { DefaultTemplate } from '../../../../../packages/ui/src/templates/Default/index.js'
 
 // In your projects, you can import as follows:
 // import { DefaultTemplate } from 'payload/components/templates';
@@ -24,7 +24,7 @@ import './index.scss'
 
 const baseClass = 'custom-default-view'
 
-const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
+export const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()
@@ -76,5 +76,3 @@ const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
     </DefaultTemplate>
   )
 }
-
-export default CustomDefaultView

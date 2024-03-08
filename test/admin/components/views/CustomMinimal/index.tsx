@@ -2,10 +2,10 @@
 
 import React from 'react'
 
-import { Button } from '../../../../../packages/ui/src/elements/Button'
-import { useConfig } from '../../../../../packages/ui/src/providers/Config'
+import { Button } from '../../../../../packages/ui/src/elements/Button/index.js'
+import { useConfig } from '../../../../../packages/ui/src/providers/Config/index.js'
 // As this is the demo project, we import our dependencies from the `src` directory.
-import { MinimalTemplate } from '../../../../../packages/ui/src/templates/Minimal'
+import { MinimalTemplate } from '../../../../../packages/ui/src/templates/Minimal/index.js'
 
 // In your projects, you can import as follows:
 // import { MinimalTemplate } from 'payload/components/templates';
@@ -16,7 +16,7 @@ import './index.scss'
 
 const baseClass = 'custom-minimal-view'
 
-const CustomMinimalView: React.FC = () => {
+export const CustomMinimalView: React.FC = () => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()
@@ -38,5 +38,3 @@ const CustomMinimalView: React.FC = () => {
     </MinimalTemplate>
   )
 }
-
-export default CustomMinimalView

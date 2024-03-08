@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'collection-list-button'
 
-const CollectionListButton: React.FC = () => {
+export const CollectionListButton: React.FC = () => {
   return (
     <div
       className={baseClass}
@@ -18,5 +18,3 @@ const CollectionListButton: React.FC = () => {
     </div>
   )
 }
-
-export default CollectionListButton

@@ -1,6 +1,4 @@
-import type { CollectionConfig } from 'payload/dist/collections/config/types'
-
-import { customIdCollectionSlug } from '../slugs'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
 export const CustomIdRow: CollectionConfig = {
   slug: 'customIdRow',
