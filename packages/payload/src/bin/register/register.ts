@@ -90,17 +90,7 @@ export function compile(
     return injectInlineSourceMap({ code: outputText, filename, map: sourceMapText })
   }
 
-  let swcRegisterConfig: Options
-  if (process.env.SWCRC) {
-    // when SWCRC environment variable is set to true it will use swcrc file
-    swcRegisterConfig = {
-      swc: {
-        swcrc: true,
-      },
-    }
-  } else {
-    swcRegisterConfig = tsCompilerOptionsToSwcConfig(options, filename)
-  }
+  const swcRegisterConfig: Options = tsCompilerOptionsToSwcConfig(options, filename)
 
   if (async) {
     return transform(sourcecode, filename, swcRegisterConfig).then(({ code, map }) => {
@@ -116,7 +106,6 @@ export function register(options: Partial<ts.CompilerOptions> = {}, hookOpts = {
   const locatedConfig = getTsconfig()
   const tsconfig = locatedConfig.config.compilerOptions as unknown as ts.CompilerOptions
   options = tsconfig
-  // options.module = ts.ModuleKind.CommonJS
   installSourceMapSupport()
   return addHook((code, filename) => compile(code, filename, options), {
     exts: DEFAULT_EXTENSIONS,
