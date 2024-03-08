@@ -4,18 +4,28 @@ import type { ClientConfig, SanitizedConfig } from './types.js'
 export const sanitizeField = (f) => {
   const field = { ...f }
 
-  if ('access' in field) delete field.access
-  if ('hooks' in field) delete field.hooks
-  if ('validate' in field) delete field.validate
-  if ('defaultValue' in field) delete field.defaultValue
-  if ('label' in field) delete field.label
+  const serverOnlyFieldProperties = [
+    'hooks',
+    'access',
+    'validate',
+    'defaultValue',
+    'label',
+    'editor',
+    // `fields`
+    // `blocks`
+    // `tabs`
+    // `admin`
+    // are all handled separately
+  ]
+
+  serverOnlyFieldProperties.forEach((key) => {
+    if (key in field) {
+      delete field[key]
+    }
+  })
 
   if ('fields' in field) {
     field.fields = sanitizeFields(field.fields)
-  }
-
-  if ('editor' in field) {
-    delete field.editor
   }
 
   if ('blocks' in field) {
@@ -33,17 +43,13 @@ export const sanitizeField = (f) => {
   if ('admin' in field) {
     field.admin = { ...field.admin }
 
-    if ('components' in field.admin) {
-      delete field.admin.components
-    }
+    const serverOnlyFieldAdminProperties = ['components', 'condition', 'description']
 
-    if ('condition' in field.admin) {
-      delete field.admin.condition
-    }
-
-    if ('description' in field.admin) {
-      delete field.admin.description
-    }
+    serverOnlyFieldAdminProperties.forEach((key) => {
+      if (key in field.admin) {
+        delete field.admin[key]
+      }
+    })
   }
 
   return field
@@ -56,11 +62,21 @@ const sanitizeCollections = (
     const sanitized = { ...collection }
     sanitized.fields = sanitizeFields(sanitized.fields)
 
-    delete sanitized.hooks
-    delete sanitized.access
-    delete sanitized.endpoints
+    const serverOnlyCollectionProperties = [
+      'hooks',
+      'access',
+      'endpoints',
+      'editor',
+      // `upload`
+      // `admin`
+      // are all handled separately
+    ]
 
-    if ('editor' in sanitized) delete sanitized.editor
+    serverOnlyCollectionProperties.forEach((key) => {
+      if (key in sanitized) {
+        delete sanitized[key]
+      }
+    })
 
     if ('upload' in sanitized && typeof sanitized.upload === 'object') {
       sanitized.upload = { ...sanitized.upload }
@@ -70,9 +86,9 @@ const sanitizeCollections = (
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
 
-      const serverOnlyProperties = ['components', 'hidden', 'preview', 'actions']
+      const serverOnlyCollectionAdminProperties = ['components', 'hidden', 'preview', 'actions']
 
-      serverOnlyProperties.forEach((key) => {
+      serverOnlyCollectionAdminProperties.forEach((key) => {
         if (key in sanitized.admin) {
           delete sanitized.admin[key]
         }
@@ -86,9 +102,21 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
   globals.map((global) => {
     const sanitized = { ...global }
     sanitized.fields = sanitizeFields(sanitized.fields)
-    delete sanitized.hooks
-    delete sanitized.access
-    delete sanitized.endpoints
+
+    const serverOnlyProperties = [
+      'hooks',
+      'access',
+      'endpoints',
+      'editor',
+      // `admin`
+      // is handled separately
+    ]
+
+    serverOnlyProperties.forEach((key) => {
+      if (key in sanitized) {
+        delete sanitized[key]
+      }
+    })
 
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
@@ -113,11 +141,24 @@ export const createClientConfig = async (
   const config = await configPromise
   const clientConfig = { ...config }
 
-  delete clientConfig.endpoints
-  delete clientConfig.db
-  delete clientConfig.editor
-  delete clientConfig.plugins
-  delete clientConfig.sharp
+  const serverOnlyConfigProperties = [
+    'endpoints',
+    'db',
+    'editor',
+    'plugins',
+    'sharp',
+    // `onInit`
+    // `localization`
+    // `collections`
+    // `globals`
+    // are all handled separately
+  ]
+
+  serverOnlyConfigProperties.forEach((key) => {
+    if (key in clientConfig) {
+      delete clientConfig[key]
+    }
+  })
 
   'localization' in clientConfig &&
     clientConfig.localization &&
