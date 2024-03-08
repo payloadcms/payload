@@ -1,4 +1,5 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { Config } from '../../../packages/payload/src/config/types'
 
@@ -15,9 +16,11 @@ import { post3 } from './post-3'
 import { postsPage } from './posts-page'
 import { tenant1 } from './tenant-1'
 import { tenant2 } from './tenant-2'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const seed: Config['onInit'] = async (payload) => {
-  const uploadsDir = path.resolve(__dirname, './media')
+  const uploadsDir = path.resolve(dirname, './media')
   removeFiles(path.normalize(uploadsDir))
 
   await payload.create({
@@ -41,7 +44,7 @@ export const seed: Config['onInit'] = async (payload) => {
 
   const media = await payload.create({
     collection: 'media',
-    filePath: path.resolve(__dirname, 'image-1.jpg'),
+    filePath: path.resolve(dirname, 'image-1.jpg'),
     data: {
       alt: 'Image 1',
     },

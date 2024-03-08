@@ -1,6 +1,7 @@
 import type { Data, FormState } from 'payload/types'
 
-import { unflatten } from 'flatley'
+import flatleyImport from 'flatley'
+const { unflatten } = flatleyImport
 
 import reduceFieldsToValues from './reduceFieldsToValues.js'
 

@@ -36,6 +36,8 @@ import {
   slugPluralLabel,
 } from './shared'
 import {
+  customIdCollectionId,
+  customIdCollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
   globalSlug,
@@ -44,8 +46,6 @@ import {
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   postsCollectionSlug,
-  customIdCollectionSlug,
-  customIdCollectionId,
 } from './slugs'
 
 const { beforeAll, beforeEach, describe } = test
@@ -55,6 +55,11 @@ const description = 'Description'
 
 let payload: Payload
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('admin', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
@@ -63,7 +68,7 @@ describe('admin', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     url = new AdminUrlUtil(serverURL, postsCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
@@ -537,7 +542,7 @@ describe('admin', () => {
     test('should allow custom ID field nested inside an unnamed tab', async () => {
       await page.goto(url.collection('customIdTab') + '/' + customIdCollectionId)
 
-      const idField = await page.locator('#field-id')
+      const idField = page.locator('#field-id')
 
       await expect(idField).toHaveValue(customIdCollectionId)
     })
@@ -545,7 +550,7 @@ describe('admin', () => {
     test('should allow custom ID field nested inside a row', async () => {
       await page.goto(url.collection('customIdRow') + '/' + customIdCollectionId)
 
-      const idField = await page.locator('#field-id')
+      const idField = page.locator('#field-id')
 
       await expect(idField).toHaveValue(customIdCollectionId)
     })

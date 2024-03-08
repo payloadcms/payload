@@ -1,5 +1,6 @@
-import withPayload from './packages/next/src/withPayload.js'
 import bundleAnalyzer from '@next/bundle-analyzer'
+
+import withPayload from './packages/next/src/withPayload.js'
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -8,14 +9,6 @@ const withBundleAnalyzer = bundleAnalyzer({
 export default withBundleAnalyzer(
   withPayload({
     reactStrictMode: false,
-    webpack: (webpackConfig) => {
-      webpackConfig.resolve.extensionAlias = {
-        '.js': ['.ts', '.tsx', '.js', '.jsx'],
-        '.mjs': ['.mts', '.mjs'],
-        '.cjs': ['.cts', '.cjs'],
-      }
-      return webpackConfig
-    },
     async redirects() {
       return [
         {
@@ -24,6 +17,14 @@ export default withBundleAnalyzer(
           source: '/',
         },
       ]
+    },
+    webpack: (webpackConfig) => {
+      webpackConfig.resolve.extensionAlias = {
+        '.cjs': ['.cts', '.cjs'],
+        '.js': ['.ts', '.tsx', '.js', '.jsx'],
+        '.mjs': ['.mts', '.mjs'],
+      }
+      return webpackConfig
     },
   }),
 )

@@ -13,6 +13,8 @@ overrides:
   react: ^18.2.0
   react-dom: ^18.2.0
   typescript: 5.2.2
+  playwright: file:playwright-1.43.0-next.tgz
+  playwright-core: file:playwright-core-1.43.0-next.tgz
 
 importers:
 
@@ -196,6 +198,12 @@ importers:
       pino-pretty:
         specifier: 10.2.0
         version: 10.2.0
+      playwright:
+        specifier: file:/Users/jmikrut/payload/core/playwright-1.43.0-next.tgz
+        version: file:playwright-1.43.0-next.tgz
+      playwright-core:
+        specifier: file:/Users/jmikrut/payload/core/playwright-core-1.43.0-next.tgz
+        version: file:playwright-core-1.43.0-next.tgz
       prettier:
         specifier: ^3.0.3
         version: 3.2.5
@@ -4665,7 +4673,7 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      playwright: 1.42.1
+      playwright: file:playwright-1.43.0-next.tgz
     dev: true
 
   /@pnpm/config.env-replace@1.1.0:
@@ -13582,22 +13590,6 @@ packages:
       find-up: 3.0.0
     dev: false
 
-  /playwright-core@1.42.1:
-    resolution: {integrity: sha512-mxz6zclokgrke9p1vtdy/COWBH+eOZgYUVVU34C73M+4j4HLlQJHtfcqiqqxpP0o8HhMkflvfbquLX5dg6wlfA==}
-    engines: {node: '>=16'}
-    hasBin: true
-    dev: true
-
-  /playwright@1.42.1:
-    resolution: {integrity: sha512-PgwB03s2DZBcNRoW+1w9E+VkLBxweib6KTXM0M3tkiT4jVxKSi6PmVJ591J+0u10LUrgxB7dLRbiJqO5s2QPMg==}
-    engines: {node: '>=16'}
-    hasBin: true
-    dependencies:
-      playwright-core: 1.42.1
-    optionalDependencies:
-      fsevents: 2.3.2
-    dev: true
-
   /pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
     engines: {node: '>=4'}
@@ -16479,6 +16471,26 @@ packages:
   /zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
     dev: false
+
+  file:playwright-1.43.0-next.tgz:
+    resolution: {integrity: sha512-vw1WPxm0BJVOuQeqObJeqRZPkRMEZwBAjdB6H7UB2ZN3mhd/SwnqpmYOU58M3tymjByoNCCU8/1FJucIUG3vLw==, tarball: file:playwright-1.43.0-next.tgz}
+    name: playwright
+    version: 1.43.0-next
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      playwright-core: file:playwright-core-1.43.0-next.tgz
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
+  file:playwright-core-1.43.0-next.tgz:
+    resolution: {integrity: sha512-1l2lYqjxj/TdjjKipJU48O3I64KpVDkbrrDB6ChhWE9FdeLv49iqLPgNQoD0Vde3N1etu/50GWkTtPIQUyZTMw==, tarball: file:playwright-core-1.43.0-next.tgz}
+    name: playwright-core
+    version: 1.43.0-next
+    engines: {node: '>=16'}
+    hasBin: true
+    dev: true
 
   github.com/Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
     resolution: {tarball: https://codeload.github.com/Raynos/readable-stream/tar.gz/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f}

@@ -1,5 +1,5 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import React from 'react'
 import { toast } from 'react-toastify'
 
@@ -15,6 +15,8 @@ import './index.scss'
 const baseClass = 'generate-confirmation'
 
 const GenerateConfirmation: React.FC<Props> = (props) => {
+  const { Modal, useModal } = facelessUIImport
+
   const { highlightField, setKey } = props
 
   const { id } = useDocumentInfo()

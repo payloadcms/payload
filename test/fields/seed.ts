@@ -1,4 +1,5 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { type Payload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
@@ -44,6 +45,8 @@ import {
   uploadsSlug,
   usersSlug,
 } from './slugs'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({
@@ -172,6 +175,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     },
     shouldResetDB: true,
     snapshotKey: 'fieldsTest',
-    uploadsDir: path.resolve(__dirname, './collections/Upload/uploads'),
+    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
   })
 }

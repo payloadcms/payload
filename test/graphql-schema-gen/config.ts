@@ -1,13 +1,16 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   graphQL: {
-    schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
+    schemaOutputFile: path.resolve(dirname, 'schema.graphql'),
   },
   typescript: {
-    outputFile: path.resolve(__dirname, 'schema.ts'),
+    outputFile: path.resolve(dirname, 'schema.ts'),
   },
   collections: [
     {

@@ -13,9 +13,10 @@
     "src/**/*.d.ts",
     "src/**/*.json",
     "**/*.ts",
+    "**/*.ts",
     "test/**/*.tsx",
     "../packages/**/src/**/*.ts",
-  ],
+    "../packages/**/src/**/*.tsx"],
   "plugins": [
     {
       "name": "next",

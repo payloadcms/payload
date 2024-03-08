@@ -2,7 +2,7 @@
 
 import type { FormState } from 'payload/types'
 
-import { useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -33,6 +33,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
   drawerSlug,
   onSave,
 }) => {
+  const { useModal } = facelessUIImport
+
   const config = useConfig()
 
   const {

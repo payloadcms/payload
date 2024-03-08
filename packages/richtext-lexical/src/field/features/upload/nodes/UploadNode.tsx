@@ -1,15 +1,20 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type { ElementFormatType, NodeKey } from 'lexical'
 
-import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import {
-  $applyNodeReplacement,
-  type DOMConversionMap,
-  type DOMConversionOutput,
-  type DOMExportOutput,
-  type LexicalNode,
-  type Spread,
+import lexicalDecoratorBlockNodeImport from '@lexical/react/LexicalDecoratorBlockNode.js'
+const { DecoratorBlockNode } = lexicalDecoratorBlockNodeImport
+
+import lexicalImport from 'lexical'
+const { $applyNodeReplacement } = lexicalImport
+
+import type {
+  DOMConversionMap,
+  DOMConversionOutput,
+  DOMExportOutput,
+  LexicalNode,
+  Spread,
 } from 'lexical'
+
 import * as React from 'react'
 
 const RawUploadComponent = React.lazy(() =>

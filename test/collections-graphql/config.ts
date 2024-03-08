@@ -1,9 +1,12 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export interface Relation {
   id: string
@@ -355,7 +358,7 @@ export default buildConfigWithDefaults({
         },
       }
     },
-    schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
+    schemaOutputFile: path.resolve(dirname, 'schema.graphql'),
   },
   onInit: async (payload) => {
     await payload.create({

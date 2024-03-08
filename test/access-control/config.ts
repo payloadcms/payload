@@ -1,21 +1,22 @@
-import type { FieldAccess } from '../../packages/payload/src/fields/config/types'
+import type { FieldAccess } from '../../packages/payload/src/fields/config/types.js'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { firstArrayText, secondArrayText } from './shared'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 import {
   docLevelAccessSlug,
+  firstArrayText,
   hiddenAccessSlug,
   hiddenFieldsSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
   restrictedSlug,
   restrictedVersionsSlug,
+  secondArrayText,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
   userRestrictedSlug,
-} from './shared'
+} from './shared.js'
 
 const openAccess = {
   create: () => true,

@@ -4,6 +4,7 @@ import type { Config, SanitizedConfig } from '../packages/payload/src/config/typ
 
 import { mongooseAdapter } from '../packages/db-mongodb/src/index.js'
 import { postgresAdapter } from '../packages/db-postgres/src/index.js'
+//import { postgresAdapter } from '../packages/db-postgres/src/index.js'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build.js'
 import {
   AlignFeature,
@@ -28,8 +29,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '../packages/richtext-lexical/src/index.js'
-// import { slateEditor } from '../packages/richtext-slate/src/index.js'
-
+//import { slateEditor } from '../packages/richtext-slate/src/index.js'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
 const databaseAdapters = {
@@ -60,11 +60,11 @@ const databaseAdapters = {
     },
   }),
 }
-
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',
+    //editor: slateEditor({}),
     // editor: slateEditor({
     //   admin: {
     //     upload: {

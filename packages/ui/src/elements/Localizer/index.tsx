@@ -1,4 +1,5 @@
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -21,7 +22,8 @@ const Localizer: React.FC<{
 
   const { i18n } = useTranslation()
   const locale = useLocale()
-  const { dispatchSearchParams, searchParams } = useSearchParams()
+  const { stringifyParams } = useSearchParams()
+  const router = useRouter()
 
   if (localization) {
     const { locales } = localization
@@ -34,25 +36,21 @@ const Localizer: React.FC<{
           render={({ close }) => (
             <PopupList.ButtonGroup>
               {locales.map((localeOption) => {
-                const newParams = {
-                  ...searchParams,
-                  locale: localeOption.code,
-                }
                 const localeOptionLabel = getTranslation(localeOption.label, i18n)
 
                 return (
                   <PopupList.Button
                     active={locale.code === localeOption.code}
-                    href={{ query: newParams }}
                     key={localeOption.code}
                     onClick={() => {
+                      router.replace(
+                        stringifyParams({
+                          params: {
+                            locale: localeOption.code,
+                          },
+                        }),
+                      )
                       close()
-                      dispatchSearchParams({
-                        type: 'SET',
-                        params: {
-                          locale: searchParams.locale,
-                        },
-                      })
                     }}
                   >
                     {localeOptionLabel}

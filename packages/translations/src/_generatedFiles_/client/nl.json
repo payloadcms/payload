@@ -210,7 +210,7 @@
     "near": "nabij"
   },
   "upload": {
-    "crop": "Gewas",
+    "crop": "Bijsnijden",
     "cropToolDescription": "Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.",
     "dragAndDrop": "Sleep een bestand",
     "editImage": "Afbeelding bewerken",
@@ -220,7 +220,7 @@
     "previewSizes": "Voorbeeldgroottes",
     "selectCollectionToBrowse": "Selecteer een collectie om door te bladeren",
     "selectFile": "Selecteer een bestand",
-    "setCropArea": "Stel oogstgebied in",
+    "setCropArea": "Stel bijsnijdgebied in",
     "setFocalPoint": "Stel het brandpunt in",
     "sizesFor": "Maten voor {{label}}",
     "width": "Breedte"

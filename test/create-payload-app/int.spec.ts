@@ -4,9 +4,13 @@ import * as CommentJson from 'comment-json'
 import fs from 'fs'
 import path from 'path'
 import shelljs from 'shelljs'
+import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
 import { initNext } from '../../packages/create-payload-app/src/lib/init-next'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 const readFile = promisify(fs.readFile)
 
 const nextCreateCommands: Partial<Record<'noSrcDir' | 'srcDir', string>> = {
@@ -24,16 +28,13 @@ describe('create-payload-app', () => {
 
   describe('Next.js app template files', () => {
     it('should exist in dist', () => {
-      const distPath = path.resolve(
-        __dirname,
-        '../../packages/create-payload-app/dist/app/(payload)',
-      )
+      const distPath = path.resolve(dirname, '../../packages/create-payload-app/dist/app/(payload)')
       expect(fs.existsSync(distPath)).toBe(true)
     })
   })
 
   describe.each(Object.keys(nextCreateCommands))(`--init-next with %s`, (nextCmdKey) => {
-    const projectDir = path.resolve(__dirname, 'test-app')
+    const projectDir = path.resolve(dirname, 'test-app')
 
     beforeEach(() => {
       if (fs.existsSync(projectDir)) {

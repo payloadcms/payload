@@ -8,12 +8,17 @@ import config from './config'
 
 const { beforeAll, describe } = test
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 describe('field error states', () => {
   let serverURL: string
   let page: Page
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
+    ;({ serverURL } = await initPayloadE2E({ config, dirname }))
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)

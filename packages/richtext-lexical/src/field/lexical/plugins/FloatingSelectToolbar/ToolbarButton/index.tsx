@@ -1,7 +1,12 @@
 'use client'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { mergeRegister } from '@lexical/utils'
-import { $getSelection } from 'lexical'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
+import lexicalUtilsImport from '@lexical/utils'
+const { mergeRegister } = lexicalUtilsImport
+
+import lexicalImport from 'lexical'
+const { $getSelection } = lexicalImport
+
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { FloatingToolbarSectionEntry } from '../types.js'

@@ -2,10 +2,14 @@
 
 import type { HeadingTagType } from '@lexical/rich-text'
 
-import { HeadingNode } from '@lexical/rich-text'
-import { $createHeadingNode } from '@lexical/rich-text'
-import { $setBlocksType } from '@lexical/selection'
-import { $getSelection } from 'lexical'
+import lexicalRichTextImport from '@lexical/rich-text'
+const { $createHeadingNode, HeadingNode } = lexicalRichTextImport
+
+import lexicalSelectionImport from '@lexical/selection'
+const { $setBlocksType } = lexicalSelectionImport
+
+import lexicalImport from 'lexical'
+const { $getSelection } = lexicalImport
 
 import type { FeatureProviderProviderClient } from '../types.js'
 import type { HeadingFeatureProps } from './feature.server.js'

@@ -1,6 +1,7 @@
 'use client'
 
-import { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import lexicalListImport from '@lexical/list'
+const { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } = lexicalListImport
 
 import type { FeatureProviderProviderClient } from '../../types.js'
 

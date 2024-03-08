@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
 import type { Payload } from '../../packages/payload/src'
@@ -13,18 +14,20 @@ import { devUser } from '../credentials'
 import removeFiles from '../helpers/removeFiles'
 import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 let payload: Payload
 let user: TypeWithID & Record<string, unknown>
 const collection = 'posts'
 const title = 'title'
-process.env.PAYLOAD_CONFIG_PATH = path.join(__dirname, 'config.ts')
+process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
     const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
-    payload.db.migrationDir = path.join(__dirname, './migrations')
+    payload.db.migrationDir = path.join(dirname, './migrations')
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -51,7 +54,7 @@ describe('database', () => {
     })
 
     afterAll(() => {
-      removeFiles(path.join(__dirname, './migrations'))
+      removeFiles(path.join(dirname, './migrations'))
     })
 
     it('should run migrate:create', async () => {

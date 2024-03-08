@@ -2,6 +2,8 @@ import type { Page } from '@playwright/test'
 import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
@@ -9,6 +11,8 @@ import { initPayloadE2E } from '../helpers/configHelpers'
 import config from './config'
 import { mobileBreakpoint } from './shared'
 import { startLivePreviewDemo } from './startLivePreviewDemo'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 
@@ -38,7 +42,7 @@ describe('Live Preview', () => {
   }
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL, payload } = await initPayloadE2E({ config, dirname: __dirname }))
+    ;({ serverURL, payload } = await initPayloadE2E({ config, dirname }))
     url = new AdminUrlUtil(serverURL, 'pages')
     const context = await browser.newContext()
     page = await context.newPage()

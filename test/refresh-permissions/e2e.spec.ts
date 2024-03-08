@@ -1,10 +1,14 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { closeNav, initPageConsoleErrorCatch, openNav } from '../helpers'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import config from './config'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 
@@ -13,7 +17,7 @@ describe('refresh-permissions', () => {
   let page: Page
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
+    ;({ serverURL } = await initPayloadE2E({ config, dirname }))
     const context = await browser.newContext()
     page = await context.newPage()
 

@@ -1,7 +1,11 @@
 import type { ElementTransformer } from '@lexical/markdown'
 
-import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text'
-import { $createLineBreakNode } from 'lexical'
+import lexicalRichTextImport from '@lexical/rich-text'
+const { $createQuoteNode, $isQuoteNode, QuoteNode } = lexicalRichTextImport
+
+import lexicalImport from 'lexical'
+const { $createLineBreakNode } = lexicalImport
+
 export const MarkdownTransformer: ElementTransformer = {
   type: 'element',
   dependencies: [QuoteNode],

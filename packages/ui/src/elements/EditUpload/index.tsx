@@ -1,10 +1,10 @@
 'use client'
 import type { Data } from 'payload/types'
+import type CropType from 'react-image-crop'
 
-import { useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import React, { useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
-import type CropType from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
 import { editDrawerSlug } from '../../elements/Upload/index.js'
@@ -35,6 +35,8 @@ export const EditUpload: React.FC<{
   showCrop?: boolean
   showFocalPoint?: boolean
 }> = ({ fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
+  const { Modal, useModal } = facelessUIImport
+
   const { closeModal } = useModal()
   const { t } = useTranslation()
   const { dispatchFormQueryParams, formQueryParams } = useFormQueryParams()

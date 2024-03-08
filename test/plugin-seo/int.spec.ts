@@ -1,4 +1,5 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src'
 
@@ -8,6 +9,8 @@ import removeFiles from '../helpers/removeFiles'
 import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
 import { mediaSlug } from './shared'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 let payload: Payload
 
@@ -16,14 +19,14 @@ describe('@payloadcms/plugin-seo', () => {
   let mediaDoc = null
 
   beforeAll(async () => {
-    const uploadsDir = path.resolve(__dirname, './media')
+    const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
 
     const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
 
     // Create image
-    const filePath = path.resolve(__dirname, './image-1.jpg')
+    const filePath = path.resolve(dirname, './image-1.jpg')
     const file = await getFileByPath(filePath)
 
     mediaDoc = await payload.create({

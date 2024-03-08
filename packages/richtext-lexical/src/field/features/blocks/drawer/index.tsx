@@ -1,14 +1,13 @@
 'use client'
-import { useModal } from '@faceless-ui/modal'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import * as facelessUIImport from '@faceless-ui/modal'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
 import { BlocksDrawer, formatDrawerSlug, useEditDepth, useTranslation } from '@payloadcms/ui'
-import {
-  $getNodeByKey,
-  COMMAND_PRIORITY_EDITOR,
-  type LexicalCommand,
-  type LexicalEditor,
-  createCommand,
-} from 'lexical'
+import lexicalImport from 'lexical'
+const { $getNodeByKey, COMMAND_PRIORITY_EDITOR, createCommand } = lexicalImport
+
+import type { LexicalCommand, LexicalEditor } from 'lexical'
+
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ClientComponentProps } from '../../types.js'
@@ -55,6 +54,8 @@ const insertBlock = ({
 }
 
 export const BlocksDrawerComponent: React.FC = () => {
+  const { useModal } = facelessUIImport
+
   const [editor] = useLexicalComposerContext()
   const { editorConfig, uuid } = useEditorConfigContext()
 

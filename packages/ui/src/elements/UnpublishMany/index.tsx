@@ -1,6 +1,7 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
@@ -21,6 +22,7 @@ const baseClass = 'unpublish-many'
 
 export const UnpublishMany: React.FC<Props> = (props) => {
   const { collection: { slug, labels: { plural }, versions } = {} } = props
+  const { Modal, useModal } = facelessUIImport
 
   const {
     routes: { api },
@@ -31,7 +33,8 @@ export const UnpublishMany: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const { getQueryParams, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
-  const { dispatchSearchParams } = useSearchParams()
+  const { stringifyParams } = useSearchParams()
+  const router = useRouter()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasPermission = collectionPermissions?.update?.permission
@@ -60,11 +63,13 @@ export const UnpublishMany: React.FC<Props> = (props) => {
           toggleModal(modalSlug)
           if (res.status < 400) {
             toast.success(t('general:updatedSuccessfully'))
-            dispatchSearchParams({
-              type: 'SET',
-              browserHistory: 'replace',
-              params: { page: selectAll ? '1' : undefined },
-            })
+            router.replace(
+              stringifyParams({
+                params: {
+                  page: selectAll ? '1' : undefined,
+                },
+              }),
+            )
             return null
           }
 
@@ -81,7 +86,6 @@ export const UnpublishMany: React.FC<Props> = (props) => {
   }, [
     addDefaultError,
     api,
-    dispatchSearchParams,
     getQueryParams,
     i18n.language,
     modalSlug,

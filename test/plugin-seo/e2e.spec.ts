@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { Page as PayloadPage } from './payload-types'
 
@@ -12,6 +13,8 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import config from '../uploads/config'
 import { mediaSlug } from './shared'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 let url: AdminUrlUtil
@@ -21,14 +24,14 @@ let payload: Payload
 
 describe('SEO Plugin', () => {
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E({ config, dirname: __dirname })
+    const { serverURL } = await initPayloadE2E({ config, dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    const filePath = path.resolve(__dirname, './image-1.jpg')
+    const filePath = path.resolve(dirname, './image-1.jpg')
     const file = await getFileByPath(filePath)
 
     const mediaDoc = await payload.create({

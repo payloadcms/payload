@@ -1,5 +1,6 @@
 'use client'
-import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
+import lexicalImport from 'lexical'
+const { $isRangeSelection, FORMAT_TEXT_COMMAND } = lexicalImport
 
 import type { FeatureProviderProviderClient } from '../../types.js'
 

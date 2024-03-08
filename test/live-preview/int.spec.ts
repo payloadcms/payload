@@ -1,4 +1,5 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src'
 import type { Media, Page, Post, Tenant } from './payload-types'
@@ -15,6 +16,8 @@ import { Pages } from './collections/Pages'
 import { postsSlug } from './collections/Posts'
 import configPromise from './config'
 import { tenantsSlug } from './shared'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const schemaJSON = fieldSchemaToJSON(Pages.fields)
 
@@ -55,7 +58,7 @@ describe('Collections - Live Preview', () => {
     })
 
     // Create image
-    const filePath = path.resolve(__dirname, './seed/image-1.jpg')
+    const filePath = path.resolve(dirname, './seed/image-1.jpg')
     const file = await getFileByPath(filePath)
     file.name = 'image-1.jpg'
 

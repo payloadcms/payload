@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-alpha.31",
+  "version": "3.0.0-alpha.34",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./src/index.js",
@@ -44,15 +44,11 @@
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
     "@swc-node/core": "^1.13.0",
-    "@swc-node/register": "^1.9.0",
     "@swc-node/sourcemap-support": "^0.5.0",
-    "@swc/register": "^0.1.10",
     "bson-objectid": "2.0.4",
-    "colorette": "^2.0.20",
     "conf": "10.2.0",
     "console-table-printer": "2.11.2",
     "dataloader": "2.2.2",
-    "debug": "^4.3.4",
     "deepmerge": "4.3.1",
     "dotenv": "8.6.0",
     "file-type": "16.5.4",

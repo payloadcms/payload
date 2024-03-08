@@ -2,8 +2,6 @@
 
 import type { Locale } from 'payload/config'
 
-// TODO: abstract the `next/navigation` dependency out from this component
-import { useRouter } from 'next/navigation.js'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
@@ -18,15 +16,14 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
   const { localization } = useConfig()
 
   const { user } = useAuth()
-
   const defaultLocale =
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
 
-  const { dispatchSearchParams, searchParams } = useSearchParams()
-  const router = useRouter()
+  const { searchParams } = useSearchParams()
+  const localeFromParams = searchParams?.locale || ''
 
   const [localeCode, setLocaleCode] = useState<string>(
-    (searchParams?.locale as string) || defaultLocale,
+    (localeFromParams as string) || defaultLocale,
   )
 
   const [locale, setLocale] = useState<Locale | null>(
@@ -35,53 +32,55 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 
   const { getPreference, setPreference } = usePreferences()
 
-  const localeFromParams = searchParams.locale
-
-  useEffect(() => {
-    async function localeChangeHandler() {
+  const switchLocale = React.useCallback(
+    async (newLocale: string) => {
       if (!localization) {
         return
       }
 
-      // set locale from search param
-      if (localeFromParams && localization.localeCodes.indexOf(localeFromParams as string) > -1) {
-        setLocaleCode(localeFromParams as string)
-        setLocale(findLocaleFromCode(localization, localeFromParams as string))
-        if (user) await setPreference('locale', localeFromParams)
-        return
-      }
+      const localeToSet =
+        localization.localeCodes.indexOf(newLocale) > -1 ? newLocale : defaultLocale
 
-      // set locale from preferences or default
-      let preferenceLocale: string
-      let isPreferenceInConfig: boolean
-      if (user) {
-        preferenceLocale = await getPreference<string>('locale')
-        isPreferenceInConfig =
-          preferenceLocale && localization.localeCodes.indexOf(preferenceLocale) > -1
-        if (isPreferenceInConfig) {
-          setLocaleCode(preferenceLocale)
-          setLocale(findLocaleFromCode(localization, preferenceLocale))
-          return
+      if (localeToSet !== localeCode) {
+        setLocaleCode(localeToSet)
+        setLocale(findLocaleFromCode(localization, localeToSet))
+        try {
+          if (user) await setPreference('locale', localeToSet)
+        } catch (error) {
+          // swallow error
         }
-        await setPreference('locale', defaultLocale)
       }
-      setLocaleCode(defaultLocale)
-      setLocale(findLocaleFromCode(localization, defaultLocale))
-    }
-
-    void localeChangeHandler()
-  }, [defaultLocale, getPreference, localeFromParams, setPreference, user, localization, router])
+    },
+    [localization, setPreference, user, defaultLocale, localeCode],
+  )
 
   useEffect(() => {
-    if (searchParams?.locale) {
-      dispatchSearchParams({
-        type: 'SET',
-        params: {
-          locale: searchParams.locale,
-        },
-      })
+    async function setInitialLocale() {
+      let localeToSet = defaultLocale
+
+      if (typeof localeFromParams === 'string') {
+        localeToSet = localeFromParams
+      } else if (user) {
+        try {
+          localeToSet = await getPreference<string>('locale')
+        } catch (error) {
+          // swallow error
+        }
+      }
+
+      await switchLocale(localeToSet)
     }
-  }, [searchParams.locale, dispatchSearchParams])
+
+    void setInitialLocale()
+  }, [
+    defaultLocale,
+    getPreference,
+    localization,
+    localeFromParams,
+    setPreference,
+    user,
+    switchLocale,
+  ])
 
   return <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>
 }

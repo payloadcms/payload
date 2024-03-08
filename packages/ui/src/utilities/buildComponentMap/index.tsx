@@ -31,7 +31,7 @@ export const buildComponentMap = (args: {
   const collections = config.collections.reduce((acc, collectionConfig) => {
     const { slug, fields } = collectionConfig
 
-    entityPermissions = permissions.collections[collectionConfig.slug]
+    entityPermissions = permissions?.collections?.[collectionConfig.slug]
 
     const editViewFromConfig = collectionConfig?.admin?.components?.views?.Edit
     const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
@@ -108,7 +108,7 @@ export const buildComponentMap = (args: {
         DefaultCell,
         config,
         fieldSchema: fields,
-        permissions: entityPermissions.fields,
+        permissions: entityPermissions?.fields,
         readOnly: readOnlyOverride,
       }),
     }
@@ -123,7 +123,7 @@ export const buildComponentMap = (args: {
   const globals = config.globals.reduce((acc, globalConfig) => {
     const { slug, fields } = globalConfig
 
-    entityPermissions = permissions.globals[globalConfig.slug]
+    entityPermissions = permissions?.globals?.[globalConfig.slug]
 
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
@@ -149,7 +149,7 @@ export const buildComponentMap = (args: {
         DefaultCell,
         config,
         fieldSchema: fields,
-        permissions: entityPermissions.fields,
+        permissions: entityPermissions?.fields,
         readOnly: readOnlyOverride,
       }),
     }

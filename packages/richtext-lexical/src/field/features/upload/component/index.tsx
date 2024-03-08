@@ -1,7 +1,8 @@
 'use client'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
+const { useLexicalComposerContext } = lexicalComposerContextImport
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -15,7 +16,9 @@ import {
   useThumbnail,
   useTranslation,
 } from '@payloadcms/ui'
-import { $getNodeByKey } from 'lexical'
+import lexicalImport from 'lexical'
+const { $getNodeByKey } = lexicalImport
+
 import React, { useCallback, useReducer, useState } from 'react'
 
 import type { ClientComponentProps } from '../../types.js'
