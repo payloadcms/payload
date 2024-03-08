@@ -4,7 +4,7 @@ import './index.scss'
 
 const baseClass = 'after-dashboard'
 
-const AfterDashboard: React.FC = () => {
+export const AfterDashboard: React.FC = () => {
   return (
     <div className={baseClass}>
       <h4>Test Config</h4>
@@ -15,5 +15,3 @@ const AfterDashboard: React.FC = () => {
     </div>
   )
 }
-
-export default AfterDashboard

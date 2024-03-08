@@ -1,9 +1,9 @@
 import React from 'react'
 
-import { type AdminViewComponent } from '../../../../../packages/payload/src/admin/types'
-import { customNestedViewTitle } from '../../../shared'
+import { type AdminViewComponent } from '../../../../../packages/payload/src/admin/types.js'
+import { customNestedViewTitle } from '../../../shared.js'
 
-const CustomNestedView: AdminViewComponent = () => {
+export const CustomNestedView: AdminViewComponent = () => {
   return (
     <div
       style={{
@@ -22,5 +22,3 @@ const CustomNestedView: AdminViewComponent = () => {
     </div>
   )
 }
-
-export default CustomNestedView

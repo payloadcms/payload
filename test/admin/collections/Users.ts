@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import { usersCollectionSlug } from '../slugs'
+import { usersCollectionSlug } from '../slugs.js'
 
 export const Users: CollectionConfig = {
   slug: usersCollectionSlug,

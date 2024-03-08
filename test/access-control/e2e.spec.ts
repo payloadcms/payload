@@ -1,16 +1,17 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { ReadOnlyCollection, RestrictedVersion } from './payload-types'
+import type { Payload } from '../../packages/payload/src/types/index.js'
+import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
-import wait from '../../packages/payload/src/utilities/wait'
-import { exactText, initPageConsoleErrorCatch, openDocControls, openNav } from '../helpers'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadE2E } from '../helpers/configHelpers'
-import config from './config'
+import wait from '../../packages/payload/src/utilities/wait.js'
+import { exactText, initPageConsoleErrorCatch, openDocControls, openNav } from '../helpers.js'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { initPayloadE2E } from '../helpers/configHelpers.js'
+import config from './config.js'
 import {
   docLevelAccessSlug,
   readOnlySlug,
@@ -18,7 +19,7 @@ import {
   restrictedVersionsSlug,
   slug,
   unrestrictedSlug,
-} from './shared'
+} from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

@@ -1,8 +1,8 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
 
-import GlobalAPIButton from '../components/GlobalAPIButton'
-import GlobalEditButton from '../components/GlobalEditButton'
-import { globalSlug } from '../slugs'
+import { GlobalAPIButton } from '../components/GlobalAPIButton/index.js'
+import { GlobalEditButton } from '../components/GlobalEditButton/index.js'
+import { globalSlug } from '../slugs.js'
 
 export const Global: GlobalConfig = {
   slug: globalSlug,

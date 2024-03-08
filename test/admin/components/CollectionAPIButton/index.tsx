@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'collection-api-button'
 
-const CollectionAPIButton: React.FC = () => {
+export const CollectionAPIButton: React.FC = () => {
   return (
     <div
       className={baseClass}
@@ -18,5 +18,3 @@ const CollectionAPIButton: React.FC = () => {
     </div>
   )
 }
-
-export default CollectionAPIButton

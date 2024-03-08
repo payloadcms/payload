@@ -1,17 +1,17 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
-import CustomTabComponent from '../components/CustomTabComponent'
-import CustomTabView from '../components/views/CustomTab'
-import CustomTabView2 from '../components/views/CustomTab2'
-import CustomNestedTabView from '../components/views/CustomTabNested'
-import CustomVersionsView from '../components/views/CustomVersions'
+import { CustomTabComponent } from '../components/CustomTabComponent/index.js'
+import { CustomTabView } from '../components/views/CustomTab/index.js'
+import { CustomTabView2 } from '../components/views/CustomTab2/index.js'
+import { CustomNestedTabView } from '../components/views/CustomTabNested/index.js'
+import { CustomVersionsView } from '../components/views/CustomVersions/index.js'
 import {
   customEditLabel,
   customNestedTabViewPath,
   customTabLabel,
   customTabViewPath,
-} from '../shared'
-import { customViews2CollectionSlug } from '../slugs'
+} from '../shared.js'
+import { customViews2CollectionSlug } from '../slugs.js'
 
 export const CustomViews2: CollectionConfig = {
   slug: customViews2CollectionSlug,

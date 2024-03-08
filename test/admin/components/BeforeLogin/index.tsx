@@ -2,9 +2,9 @@
 
 import React from 'react'
 
-import { useTranslation } from '../../../../packages/ui/src/providers/Translation'
+import { useTranslation } from '../../../../packages/ui/src/providers/Translation/index.js'
 
-const BeforeLogin: React.FC = () => {
+export const BeforeLogin: React.FC = () => {
   const translation = useTranslation()
   return (
     <div>
@@ -20,5 +20,3 @@ const BeforeLogin: React.FC = () => {
     </div>
   )
 }
-
-export default BeforeLogin
