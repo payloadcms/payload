@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "3.0.0-alpha.38",
+  "version": "3.0.0-alpha.40",
   "description": "The officially supported MongoDB database adapter for Payload - Update 2",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
