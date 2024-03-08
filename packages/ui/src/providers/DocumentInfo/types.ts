@@ -48,6 +48,6 @@ export type DocumentInfoContext = Omit<DocumentInfo, 'docPreferences'> & {
   getDocPreferences: () => Promise<{ [key: string]: unknown }>
   getVersions: () => Promise<void>
   setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
-  setDocumentInfo?: React.Dispatch<React.SetStateAction<Partial<DocumentInfo>>>
   setDocumentTitle: (title: string) => void
+  setOnSave: (data: Data) => Promise<void> | void
 }

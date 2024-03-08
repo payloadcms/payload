@@ -13,7 +13,7 @@ import React, { Fragment, useEffect } from 'react'
 import { useCallback } from 'react'
 
 export const EditViewClient: React.FC = () => {
-  const { collectionSlug, getDocPermissions, getVersions, globalSlug, isEditing, setDocumentInfo } =
+  const { collectionSlug, getDocPermissions, getVersions, globalSlug, isEditing, setOnSave } =
     useDocumentInfo()
 
   const {
@@ -58,10 +58,8 @@ export const EditViewClient: React.FC = () => {
   )
 
   useEffect(() => {
-    setDocumentInfo({
-      onSave,
-    })
-  }, [setDocumentInfo, onSave])
+    setOnSave(onSave)
+  }, [setOnSave, onSave])
 
   // Allow the `DocumentInfoProvider` to hydrate
   if (!Edit || (!collectionSlug && !globalSlug)) {

@@ -23,7 +23,6 @@ export default buildConfigWithDefaults({
   },
 
   onInit: async (payload) => {
-    console.log('onInit')
     await payload.create({
       collection: 'users',
       data: {

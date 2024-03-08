@@ -33,7 +33,6 @@ export const initPage = async ({
 }: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
   const localeParam = searchParams?.locale as string
-  console.log('server localeParam', localeParam)
   const payload = await getPayload({ config: configPromise })
 
   const { cookies, permissions, user } = await auth({
