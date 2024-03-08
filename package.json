@@ -122,7 +122,8 @@
     "nodemon": "3.0.3",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
-    "playwright": "1.42.1",
+    "playwright": "file:playwright-1.43.0-next.tgz",
+    "playwright-core": "file:playwright-core-1.43.0-next.tgz",
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
@@ -170,16 +171,13 @@
       "react": "$react",
       "react-dom": "$react-dom",
       "typescript": "$typescript",
-      "playwright": "1.42.1",
-      "@playwright/test": "1.42.1"
+      "playwright": "file:playwright-1.43.0-next.tgz",
+      "playwright-core": "file:playwright-core-1.43.0-next.tgz"
     },
     "allowedDeprecatedVersions": {
       "uuid": "3.4.0",
       "abab": "2",
       "domexception": "4"
-    },
-    "patchedDependencies": {
-      "playwright@1.42.1": "patches/playwright@1.42.1.patch"
     }
   }
 }
