@@ -15,7 +15,7 @@ export const getDataAndFile: GetDataAndFile = async ({ collection, config, reque
   let file: CustomPayloadRequest['file'] = undefined
 
   if (['PATCH', 'POST', 'PUT'].includes(request.method.toUpperCase()) && request.body) {
-    const [contentType] = request.headers.get('Content-Type').split(';')
+    const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
     if (contentType === 'application/json') {
       data = await request.json()

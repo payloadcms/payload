@@ -145,12 +145,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [serverURL, api, userSlug, i18n, redirectToInactivityRoute, setTokenAndExpiration],
   )
 
-  const logOut = useCallback(() => {
+  const logOut = useCallback(async () => {
     setUser(null)
     revokeTokenAndExpire()
     try {
-      // TODO: I dont think errors from unawaited promises can be caught
-      requests.post(`${serverURL}${api}/${userSlug}/logout`)
+      await requests.post(`${serverURL}${api}/${userSlug}/logout`)
     } catch (e) {
       toast.error(`Logging out failed: ${e.message}`)
     }
