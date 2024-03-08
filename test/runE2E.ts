@@ -6,11 +6,11 @@ import slash from 'slash'
 import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const dirname = path.dirname(__filename)
 
 shelljs.env.DISABLE_LOGGING = 'true'
 
-const playwrightBin = path.resolve(__dirname, '../node_modules/.bin/playwright')
+const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
 const { _: args, bail, part } = minimist(process.argv.slice(2))
@@ -18,7 +18,7 @@ const suiteName = args[0]
 
 // Run all
 if (!suiteName) {
-  let files = glob.sync(`${path.resolve(__dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+  let files = glob.sync(`${path.resolve(dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
 
   const totalFiles = files.length
 
@@ -53,7 +53,7 @@ if (!suiteName) {
 } else {
   // Run specific suite
   clearWebpackCache()
-  const suitePath = path.resolve(__dirname, suiteName, 'e2e.spec.ts')
+  const suitePath = path.resolve(dirname, suiteName, 'e2e.spec.ts')
   executePlaywright(suitePath)
 }
 
@@ -68,7 +68,7 @@ if (testRunCodes.some((tr) => tr.code > 0)) process.exit(1)
 function executePlaywright(suitePath: string, bail = false) {
   console.log(`Executing ${suitePath}...`)
   const playwrightCfg = path.resolve(
-    __dirname,
+    dirname,
     '..',
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
@@ -89,6 +89,6 @@ function executePlaywright(suitePath: string, bail = false) {
 }
 
 function clearWebpackCache() {
-  const webpackCachePath = path.resolve(__dirname, '../node_modules/.cache/webpack')
+  const webpackCachePath = path.resolve(dirname, '../node_modules/.cache/webpack')
   shelljs.rm('-rf', webpackCachePath)
 }

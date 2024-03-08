@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import { fileURLToPath } from 'url'
 
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types'
 
@@ -18,6 +19,8 @@ import {
   slug,
   unrestrictedSlug,
 } from './shared'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 /**
  * TODO: Access Control
@@ -39,7 +42,7 @@ describe('access control', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug)

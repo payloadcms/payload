@@ -1,13 +1,16 @@
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 import { uploadsSlug } from '../../slugs'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const Uploads: CollectionConfig = {
   slug: uploadsSlug,
   upload: {
-    staticDir: path.resolve(__dirname, './uploads'),
+    staticDir: path.resolve(dirname, './uploads'),
   },
   fields: [
     {

@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { RelationshipField, TextField } from './payload-types'
 
@@ -28,6 +29,8 @@ import {
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const { afterEach, beforeAll, beforeEach, describe } = test
 
@@ -39,7 +42,7 @@ let serverURL: string
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
 
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
@@ -1845,7 +1848,7 @@ describe('fields', () => {
       // create a jpg upload
       await page
         .locator('.file-field__upload input[type="file"]')
-        .setInputFiles(path.resolve(__dirname, './collections/Upload/payload.jpg'))
+        .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
       await expect(page.locator('.file-field .file-field__filename')).toHaveValue('payload.jpg')
       await page.locator('#action-save').click()
       await wait(200)
@@ -1871,7 +1874,7 @@ describe('fields', () => {
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
-        .setInputFiles(path.resolve(__dirname, './uploads/payload.png'))
+        .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
       await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
       await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
@@ -1897,7 +1900,7 @@ describe('fields', () => {
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
-        .setInputFiles(path.resolve(__dirname, './uploads/payload.png'))
+        .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
       await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
       await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
@@ -1920,7 +1923,7 @@ describe('fields', () => {
       // create file in uploads 3 collection
       await page
         .locator('.file-field__upload input[type="file"]')
-        .setInputFiles(path.resolve(__dirname, './collections/Upload/payload.jpg'))
+        .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
       await expect(page.locator('.file-field .file-field__filename')).toContainText('payload.jpg')
       await page.locator('#action-save').click()
 

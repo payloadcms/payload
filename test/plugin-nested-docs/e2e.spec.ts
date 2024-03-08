@@ -1,11 +1,17 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import type { Page as PayloadPage } from './payload-types'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil'
-import { initPayloadE2E } from '../helpers/configHelpers'
+
 import payload from '../../packages/payload/src'
 import { initPageConsoleErrorCatch } from '../helpers'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil'
+import { initPayloadE2E } from '../helpers/configHelpers'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 let url: AdminUrlUtil
@@ -16,10 +22,10 @@ let draftChildId: string
 let childId: string
 
 type Args = {
-  slug: string
-  title?: string
   parent?: string
-  status?: 'published' | 'draft'
+  slug: string
+  status?: 'draft' | 'published'
+  title?: string
 }
 
 async function createPage({
@@ -31,8 +37,8 @@ async function createPage({
   return payload.create({
     collection: 'pages',
     data: {
-      title: title,
-      slug: slug,
+      title,
+      slug,
       _status: status,
       parent,
     },
@@ -41,7 +47,7 @@ async function createPage({
 
 describe('Nested Docs Plugin', () => {
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname)
+    const { serverURL } = await initPayloadE2E(dirname)
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()

@@ -2,6 +2,7 @@ import { File as FileBuffer } from 'buffer'
 import NodeFormData from 'form-data'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
 import type { Payload } from '../../packages/payload/src'
@@ -20,6 +21,8 @@ import {
   unstoredMediaSlug,
   usersSlug,
 } from './shared'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const getMimeType = (
   filePath: string,
@@ -64,7 +67,7 @@ const bufferToFileBlob = async (filePath: string): Promise<File> =>
 
       // Convert type FileBuffer > unknown > File
       // The File type expects webkitRelativePath, we don't have that
-      resolve(new FileBuffer([data], filename, { type: type }) as unknown as File)
+      resolve(new FileBuffer([data], filename, { type }) as unknown as File)
     })
   })
 
@@ -85,7 +88,7 @@ describe('Collections - Uploads', () => {
     describe('create', () => {
       it('creates from form data given a png', async () => {
         const formData = new FormData()
-        const filePath = path.join(__dirname, './image.png')
+        const filePath = path.join(dirname, './image.png')
 
         formData.append('file', await bufferToFileBlob(filePath))
 
@@ -98,7 +101,7 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(201)
 
         const { sizes } = doc
-        const expectedPath = path.join(__dirname, './media')
+        const expectedPath = path.join(dirname, './media')
 
         // Check for files
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
@@ -122,7 +125,7 @@ describe('Collections - Uploads', () => {
 
       it('creates from form data given an svg', async () => {
         const formData = new FormData()
-        const filePath = path.join(__dirname, './image.svg')
+        const filePath = path.join(dirname, './image.svg')
         formData.append('file', await bufferToFileBlob(filePath))
 
         const response = await restClient.POST(`/${mediaSlug}`, {
@@ -134,7 +137,7 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(201)
 
         // Check for files
-        expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(true)
+        expect(await fileExists(path.join(dirname, './media', doc.filename))).toBe(true)
 
         // Check api response
         expect(doc.mimeType).toEqual('image/svg+xml')
@@ -146,7 +149,7 @@ describe('Collections - Uploads', () => {
 
     it('should have valid image url', async () => {
       const formData = new FormData()
-      const fileBlob = await bufferToFileBlob(path.join(__dirname, './image.svg'))
+      const fileBlob = await bufferToFileBlob(path.join(dirname, './image.svg'))
       formData.append('file', fileBlob)
 
       const response = await restClient.POST(`/${mediaSlug}`, {
@@ -156,7 +159,7 @@ describe('Collections - Uploads', () => {
       const { doc } = await response.json()
 
       expect(response.status).toBe(201)
-      const expectedPath = path.join(__dirname, './media')
+      const expectedPath = path.join(dirname, './media')
       expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
 
       expect(doc.url).not.toContain('undefined')
@@ -164,7 +167,7 @@ describe('Collections - Uploads', () => {
 
     it('creates images that do not require all sizes', async () => {
       const formData = new FormData()
-      const fileBlob = await bufferToFileBlob(path.join(__dirname, './small.png'))
+      const fileBlob = await bufferToFileBlob(path.join(dirname, './small.png'))
       formData.append('file', fileBlob)
 
       const response = await restClient.POST(`/${mediaSlug}`, {
@@ -175,7 +178,7 @@ describe('Collections - Uploads', () => {
 
       expect(response.status).toBe(201)
 
-      const expectedPath = path.join(__dirname, './media')
+      const expectedPath = path.join(dirname, './media')
 
       // Check for files
       expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
@@ -189,7 +192,7 @@ describe('Collections - Uploads', () => {
 
     it('creates images from a different format', async () => {
       const formData = new FormData()
-      const fileBlob = await bufferToFileBlob(path.join(__dirname, './image.jpg'))
+      const fileBlob = await bufferToFileBlob(path.join(dirname, './image.jpg'))
       formData.append('file', fileBlob)
 
       const response = await restClient.POST(`/${mediaSlug}`, {
@@ -200,7 +203,7 @@ describe('Collections - Uploads', () => {
 
       expect(response.status).toBe(201)
 
-      const expectedPath = path.join(__dirname, './media')
+      const expectedPath = path.join(dirname, './media')
 
       // Check for files
       expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
@@ -217,7 +220,7 @@ describe('Collections - Uploads', () => {
 
     it('creates media without storing a file', async () => {
       const formData = new FormData()
-      const fileBlob = await bufferToFileBlob(path.join(__dirname, './unstored.png'))
+      const fileBlob = await bufferToFileBlob(path.join(dirname, './unstored.png'))
       formData.append('file', fileBlob)
 
       // unstored media
@@ -230,14 +233,14 @@ describe('Collections - Uploads', () => {
       expect(response.status).toBe(201)
 
       // Check for files
-      expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(false)
+      expect(await fileExists(path.join(dirname, './media', doc.filename))).toBe(false)
 
       // Check api response
       expect(doc.filename).toBeDefined()
     })
 
     it('should enlarge images if resize options `withoutEnlargement` is set to false', async () => {
-      const small = await getFileByPath(path.resolve(__dirname, './small.png'))
+      const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = await payload.create({
         collection: enlargeSlug,
@@ -248,7 +251,7 @@ describe('Collections - Uploads', () => {
       expect(result).toBeTruthy()
 
       const { sizes } = result as unknown as Enlarge
-      const expectedPath = path.join(__dirname, './media/enlarge')
+      const expectedPath = path.join(dirname, './media/enlarge')
 
       // Check for files
       expect(await fileExists(path.join(expectedPath, small.name))).toBe(true)
@@ -282,7 +285,7 @@ describe('Collections - Uploads', () => {
 
     // This test makes sure that the image resizing is not prevented if only one dimension is larger (due to payload preventing enlargement by default)
     it('should resize images if one desired dimension is smaller and the other is larger', async () => {
-      const small = await getFileByPath(path.resolve(__dirname, './small.png'))
+      const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = (await payload.create({
         collection: enlargeSlug,
@@ -293,7 +296,7 @@ describe('Collections - Uploads', () => {
       expect(result).toBeTruthy()
 
       const { sizes } = result
-      const expectedPath = path.join(__dirname, './media/enlarge')
+      const expectedPath = path.join(dirname, './media/enlarge')
 
       // Check for files
       expect(await fileExists(path.join(expectedPath, sizes.widthLowerHeightLarger.filename))).toBe(
@@ -310,8 +313,8 @@ describe('Collections - Uploads', () => {
 
     it('should not reduce images if resize options `withoutReduction` is set to true', async () => {
       const formData = new NodeFormData()
-      formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')))
-      const small = await getFileByPath(path.resolve(__dirname, './small.png'))
+      formData.append('file', fs.createReadStream(path.join(dirname, './small.png')))
+      const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = await payload.create({
         collection: reduceSlug,
@@ -322,7 +325,7 @@ describe('Collections - Uploads', () => {
       expect(result).toBeTruthy()
 
       const { sizes } = result as unknown as Enlarge
-      const expectedPath = path.join(__dirname, './media/reduce')
+      const expectedPath = path.join(dirname, './media/reduce')
 
       // Check for files
       expect(await fileExists(path.join(expectedPath, small.name))).toBe(true)
@@ -352,7 +355,7 @@ describe('Collections - Uploads', () => {
 
   it('update', async () => {
     // Create image
-    const filePath = path.resolve(__dirname, './image.png')
+    const filePath = path.resolve(dirname, './image.png')
     const file = await getFileByPath(filePath)
     file.name = 'renamed.png'
 
@@ -363,7 +366,7 @@ describe('Collections - Uploads', () => {
     })) as unknown as Media
 
     const formData = new FormData()
-    formData.append('file', await bufferToFileBlob(path.join(__dirname, './small.png')))
+    formData.append('file', await bufferToFileBlob(path.join(dirname, './small.png')))
 
     const response = await restClient.PATCH(`/${mediaSlug}/${mediaDoc.id}`, {
       body: formData,
@@ -372,7 +375,7 @@ describe('Collections - Uploads', () => {
 
     expect(response.status).toBe(200)
 
-    const expectedPath = path.join(__dirname, './media')
+    const expectedPath = path.join(dirname, './media')
 
     // Check that previously existing files were removed
     expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
@@ -381,7 +384,7 @@ describe('Collections - Uploads', () => {
 
   it('update - update many', async () => {
     // Create image
-    const filePath = path.resolve(__dirname, './image.png')
+    const filePath = path.resolve(dirname, './image.png')
     const file = await getFileByPath(filePath)
     file.name = 'renamed.png'
 
@@ -392,7 +395,7 @@ describe('Collections - Uploads', () => {
     })) as unknown as Media
 
     const formData = new FormData()
-    formData.append('file', await bufferToFileBlob(path.join(__dirname, './small.png')))
+    formData.append('file', await bufferToFileBlob(path.join(dirname, './small.png')))
 
     const response = await restClient.PATCH(`/${mediaSlug}`, {
       body: formData,
@@ -408,7 +411,7 @@ describe('Collections - Uploads', () => {
 
     expect(response.status).toBe(200)
 
-    const expectedPath = path.join(__dirname, './media')
+    const expectedPath = path.join(dirname, './media')
 
     // Check that previously existing files were removed
     expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
@@ -417,7 +420,7 @@ describe('Collections - Uploads', () => {
 
   it('should remove existing media on re-upload', async () => {
     // Create temp file
-    const filePath = path.resolve(__dirname, './temp.png')
+    const filePath = path.resolve(dirname, './temp.png')
     const file = await getFileByPath(filePath)
     file.name = 'temp.png'
 
@@ -427,13 +430,13 @@ describe('Collections - Uploads', () => {
       file,
     })) as unknown as Media
 
-    const expectedPath = path.join(__dirname, './media')
+    const expectedPath = path.join(dirname, './media')
 
     // Check that the temp file was created
     expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true)
 
     // Replace the temp file with a new one
-    const newFilePath = path.resolve(__dirname, './temp-renamed.png')
+    const newFilePath = path.resolve(dirname, './temp-renamed.png')
     const newFile = await getFileByPath(newFilePath)
     newFile.name = 'temp-renamed.png'
 
@@ -451,7 +454,7 @@ describe('Collections - Uploads', () => {
 
   it('should remove existing media on re-upload - update many', async () => {
     // Create temp file
-    const filePath = path.resolve(__dirname, './temp.png')
+    const filePath = path.resolve(dirname, './temp.png')
     const file = await getFileByPath(filePath)
     file.name = 'temp.png'
 
@@ -461,13 +464,13 @@ describe('Collections - Uploads', () => {
       file,
     })) as unknown as Media
 
-    const expectedPath = path.join(__dirname, './media')
+    const expectedPath = path.join(dirname, './media')
 
     // Check that the temp file was created
     expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true)
 
     // Replace the temp file with a new one
-    const newFilePath = path.resolve(__dirname, './temp-renamed.png')
+    const newFilePath = path.resolve(dirname, './temp-renamed.png')
     const newFile = await getFileByPath(newFilePath)
     newFile.name = 'temp-renamed-second.png'
 
@@ -487,9 +490,9 @@ describe('Collections - Uploads', () => {
   })
 
   it('should remove extra sizes on update', async () => {
-    const filePath = path.resolve(__dirname, './image.png')
+    const filePath = path.resolve(dirname, './image.png')
     const file = await getFileByPath(filePath)
-    const small = await getFileByPath(path.resolve(__dirname, './small.png'))
+    const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
     const { id } = await payload.create({
       collection: mediaSlug,
@@ -509,9 +512,9 @@ describe('Collections - Uploads', () => {
   })
 
   it('should remove extra sizes on update - update many', async () => {
-    const filePath = path.resolve(__dirname, './image.png')
+    const filePath = path.resolve(dirname, './image.png')
     const file = await getFileByPath(filePath)
-    const small = await getFileByPath(path.resolve(__dirname, './small.png'))
+    const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
     const { id } = await payload.create({
       collection: mediaSlug,
@@ -533,7 +536,7 @@ describe('Collections - Uploads', () => {
   })
 
   it('should allow update removing a relationship', async () => {
-    const filePath = path.resolve(__dirname, './image.png')
+    const filePath = path.resolve(dirname, './image.png')
     const file = await getFileByPath(filePath)
     file.name = 'renamed.png'
 
@@ -562,7 +565,7 @@ describe('Collections - Uploads', () => {
   })
 
   it('should allow update removing a relationship - update many', async () => {
-    const filePath = path.resolve(__dirname, './image.png')
+    const filePath = path.resolve(dirname, './image.png')
     const file = await getFileByPath(filePath)
     file.name = 'renamed.png'
 
@@ -594,7 +597,7 @@ describe('Collections - Uploads', () => {
 
   it('delete', async () => {
     const formData = new FormData()
-    formData.append('file', await bufferToFileBlob(path.join(__dirname, './image.png')))
+    formData.append('file', await bufferToFileBlob(path.join(dirname, './image.png')))
 
     const { doc } = await restClient
       .POST(`/${mediaSlug}`, {
@@ -606,12 +609,12 @@ describe('Collections - Uploads', () => {
     const response2 = await restClient.DELETE(`/${mediaSlug}/${doc.id}`)
     expect(response2.status).toBe(200)
 
-    expect(await fileExists(path.join(__dirname, doc.filename))).toBe(false)
+    expect(await fileExists(path.join(dirname, doc.filename))).toBe(false)
   })
 
   it('delete - update many', async () => {
     const formData = new FormData()
-    formData.append('file', await bufferToFileBlob(path.join(__dirname, './image.png')))
+    formData.append('file', await bufferToFileBlob(path.join(dirname, './image.png')))
 
     const { doc } = await restClient
       .POST(`/${mediaSlug}`, {
@@ -634,7 +637,7 @@ describe('Collections - Uploads', () => {
 
     expect(errors).toHaveLength(0)
 
-    expect(await fileExists(path.join(__dirname, doc.filename))).toBe(false)
+    expect(await fileExists(path.join(dirname, doc.filename))).toBe(false)
   })
 
   describe('filesRequiredOnCreate', () => {
@@ -643,7 +646,7 @@ describe('Collections - Uploads', () => {
       expect(
         async () =>
           await payload.create({
-            // @ts-ignore
+            // @ts-expect-error
             collection: 'optional-file',
             data: {},
           }),
@@ -653,7 +656,7 @@ describe('Collections - Uploads', () => {
     it('should throw an error if no file and filesRequiredOnCreate is true', async () => {
       await expect(async () =>
         payload.create({
-          // @ts-ignore
+          // @ts-expect-error
           collection: 'required-file',
           data: {},
         }),

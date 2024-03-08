@@ -1,7 +1,10 @@
 import { spawn } from 'child_process'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const installNodeModules = async (args: { payload: Payload }): Promise<void> => {
   const { payload } = args
@@ -11,7 +14,7 @@ const installNodeModules = async (args: { payload: Payload }): Promise<void> => 
   return new Promise(function (resolve) {
     // Install the node modules for the Next.js app
     const installation = spawn('yarn', ['install'], {
-      cwd: path.resolve(__dirname, './next-app'),
+      cwd: path.resolve(dirname, './next-app'),
     })
 
     installation.stdout.on('data', (data) => {
@@ -42,7 +45,7 @@ const bootNextApp = async (args: { payload: Payload }): Promise<void> => {
   return new Promise(function (resolve, reject) {
     // Boot up the Next.js app
     const app = spawn('yarn', ['dev'], {
-      cwd: path.resolve(__dirname, './next-app'),
+      cwd: path.resolve(dirname, './next-app'),
     })
 
     app.stdout.on('data', (data) => {

@@ -27,6 +27,8 @@ import type { Page } from '@playwright/test'
 import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import wait from '../../packages/payload/src/utilities/wait'
 import { globalSlug } from '../admin/slugs'
@@ -52,6 +54,8 @@ import {
   draftGlobalSlug,
   postCollectionSlug,
 } from './slugs'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -67,7 +71,7 @@ describe('versions', () => {
   let postURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
     const context = await browser.newContext()
     page = await context.newPage()
 

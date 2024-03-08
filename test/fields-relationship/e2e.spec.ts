@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src'
 import type {
@@ -26,6 +28,8 @@ import {
   slug,
 } from './collectionSlugs'
 import config from './config'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -44,7 +48,7 @@ describe('fields - relationship', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
 

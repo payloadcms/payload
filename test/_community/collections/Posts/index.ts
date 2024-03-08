@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.d.ts'
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
 import { mediaSlug } from '../Media/index.js'
 
@@ -51,6 +51,5 @@ export const PostsCollection: CollectionConfig = {
       ],
     },
   ],
-  versions: true,
   slug: postsSlug,
 }

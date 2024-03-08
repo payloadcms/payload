@@ -1,6 +1,7 @@
 /* eslint-disable jest/require-top-level-describe */
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src'
 
@@ -8,6 +9,8 @@ import { getPayload } from '../../packages/payload/src'
 import { describeIfInCIOrHasLocalstack } from '../helpers'
 import { startMemoryDB } from '../startMemoryDB'
 import configPromise from './config'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 let payload: Payload
 
@@ -43,7 +46,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         const upload = await payload.create({
           collection: 'media',
           data: {},
-          filePath: path.resolve(__dirname, '../uploads/image.png'),
+          filePath: path.resolve(dirname, '../uploads/image.png'),
         })
 
         expect(upload.id).toBeTruthy()

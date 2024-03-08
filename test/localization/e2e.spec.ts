@@ -2,6 +2,8 @@ import type { Page } from '@playwright/test'
 import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { LocalizedPost } from './payload-types'
 
@@ -21,6 +23,8 @@ import {
   spanishLocale,
   withRequiredLocalizedFields,
 } from './shared'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 /**
  * TODO: Localization
@@ -49,7 +53,7 @@ describe('Localization', () => {
   beforeAll(async ({ browser }) => {
     ;({ payload, serverURL } = await initPayloadE2E({
       config,
-      dirname: __dirname,
+      dirname,
     }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)

@@ -1,4 +1,4 @@
-import type { GlobalConfig } from '../../../../packages/payload/src/globals/config/types'
+import type { GlobalConfig } from '../../../../packages/payload/src/globals/config/types.js'
 
 export const menuSlug = 'menu'
 

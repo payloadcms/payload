@@ -6,16 +6,20 @@ import { setTestEnvPaths } from './helpers/setTestEnvPaths'
 
 const [testConfigDir] = process.argv.slice(2)
 
+import { fileURLToPath } from 'url'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 let testDir
 if (testConfigDir) {
-  testDir = path.resolve(__dirname, testConfigDir)
+  testDir = path.resolve(dirname, testConfigDir)
   setTestEnvPaths(testDir)
   generateTypes()
 } else {
   // Generate types for entire directory
-  testDir = __dirname
+  testDir = dirname
 
-  fs.readdirSync(__dirname, { withFileTypes: true })
+  fs.readdirSync(dirname, { withFileTypes: true })
     .filter((f) => f.isDirectory())
     .forEach((dir) => {
       const suiteDir = path.resolve(testDir, dir.name)

@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 import type { Media } from './payload-types'
 
@@ -14,6 +15,8 @@ import { RESTClient } from '../helpers/rest'
 import { adminThumbnailSrc } from './collections/admin-thumbnail'
 import config from './config'
 import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 
@@ -31,7 +34,7 @@ describe('uploads', () => {
   let audioDoc: Media
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname: __dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
@@ -88,7 +91,7 @@ describe('uploads', () => {
   test('should create file upload', async () => {
     await page.goto(mediaURL.create)
 
-    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './image.png'))
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
     const filename = page.locator('.file-field__filename')
 
@@ -201,7 +204,7 @@ describe('uploads', () => {
     await expect(page.locator('[id^=doc-drawer_media_2_]')).toBeVisible()
     await page
       .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
-      .setInputFiles(path.resolve(__dirname, './image.png'))
+      .setInputFiles(path.resolve(dirname, './image.png'))
     await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
     await wait(200)
     await expect(page.locator('.Toastify')).toContainText('successfully')
@@ -227,7 +230,7 @@ describe('uploads', () => {
 
   test('Should detect correct mimeType', async () => {
     await page.goto(mediaURL.create)
-    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './image.png'))
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
     await saveDocAndAssert(page)
 
     const imageID = page.url().split('/').pop()
@@ -265,7 +268,7 @@ describe('uploads', () => {
         const fileChooserPromise = page.waitForEvent('filechooser')
         await page.getByText('Select a file').click()
         const fileChooser = await fileChooserPromise
-        await fileChooser.setFiles(path.join(__dirname, 'test-image.jpg'))
+        await fileChooser.setFiles(path.join(dirname, 'test-image.jpg'))
         await page.locator('.file-field__edit').click()
 
         // set crop
