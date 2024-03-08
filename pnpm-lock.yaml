@@ -199,10 +199,10 @@ importers:
         specifier: 10.2.0
         version: 10.2.0
       playwright:
-        specifier: file:/Users/jmikrut/payload/core/playwright-1.43.0-next.tgz
+        specifier: file:C:\code\payload\playwright-1.43.0-next.tgz
         version: file:playwright-1.43.0-next.tgz
       playwright-core:
-        specifier: file:/Users/jmikrut/payload/core/playwright-core-1.43.0-next.tgz
+        specifier: file:C:\code\payload\playwright-core-1.43.0-next.tgz
         version: file:playwright-core-1.43.0-next.tgz
       prettier:
         specifier: ^3.0.3
