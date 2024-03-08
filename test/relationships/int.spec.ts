@@ -11,7 +11,6 @@ import type {
 } from './payload-types.js'
 
 import { getPayload } from '../../packages/payload/src/index.js'
-import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
@@ -27,15 +26,8 @@ import {
   usersSlug,
 } from './shared.js'
 
-let apiUrl
-let jwt
 let restClient: NextRESTClient
 let payload: Payload
-
-const headers = {
-  'Content-Type': 'application/json',
-}
-const { email, password } = devUser
 
 type EasierChained = { id: string; relation: EasierChained }
 
@@ -757,14 +749,11 @@ describe('Relationships', () => {
               ],
             },
           },
-          headers: {
-            Authorization: `JWT ${token}`,
-          },
         })
         .then((res) => res.json())
 
-      expect(queryOne.result.docs).toHaveLength(1)
-      expect(queryTwo.result.docs).toHaveLength(1)
+      expect(queryOne.docs).toHaveLength(1)
+      expect(queryTwo.docs).toHaveLength(1)
     })
   })
 })
