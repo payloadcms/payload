@@ -8,10 +8,10 @@ module.exports = {
     preset: {
       name: 'conventionalcommits',
       types: [
-        { section: 'Features', type: 'feat' },
-        { section: 'Features', type: 'feature' },
-        { section: 'Bug Fixes', type: 'fix' },
-        { section: 'Documentation', type: 'docs' },
+        { type: 'feat', section: 'Features' },
+        { type: 'feature', section: 'Features' },
+        { type: 'fix', section: 'Bug Fixes' },
+        { type: 'docs', section: 'Documentation' },
       ],
     },
   },
