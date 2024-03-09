@@ -1,18 +1,18 @@
 import type { ExecSyncOptions } from 'child_process'
-import { execSync } from 'child_process'
 
 import chalk from 'chalk'
+import { execSync } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
+import { fileURLToPath } from 'node:url'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
-import simpleGit from 'simple-git'
+import { simpleGit } from 'simple-git'
 
-import { getPackageDetails } from './lib/getPackageDetails'
-import { updateChangelog } from './utils/updateChangelog'
-import { fileURLToPath } from 'url'
+import { getPackageDetails } from './lib/getPackageDetails.js'
+import { updateChangelog } from './utils/updateChangelog.js'
 
 // Update this list with any packages to publish
 const packageWhitelist = [
@@ -37,6 +37,8 @@ const cwd = path.resolve(__dirname, '..')
 const git = simpleGit(cwd)
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
+const execaOpts: execa.Options = { stdio: 'inherit' }
+
 const args = minimist(process.argv.slice(2))
 
 const {
@@ -127,8 +129,6 @@ async function main() {
 
   // Prebuild all packages
   header(`\n🔨 Prebuilding all packages...`)
-
-  const execaOpts: execa.Options = { ...execOpts, stdio: 'inherit' }
 
   await execa('pnpm', ['install'], execaOpts)
 
