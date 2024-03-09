@@ -199,10 +199,10 @@ importers:
         specifier: 10.2.0
         version: 10.2.0
       playwright:
-        specifier: file:/Users/alessio/Documents/GitHub/payload/playwright-1.43.0-next.tgz
+        specifier: file:playwright-1.43.0-next.tgz
         version: file:playwright-1.43.0-next.tgz
       playwright-core:
-        specifier: file:/Users/alessio/Documents/GitHub/payload/playwright-core-1.43.0-next.tgz
+        specifier: file:playwright-core-1.43.0-next.tgz
         version: file:playwright-core-1.43.0-next.tgz
       prettier:
         specifier: ^3.0.3
