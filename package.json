@@ -70,7 +70,7 @@
     "@next/bundle-analyzer": "^14.1.0",
     "@octokit/core": "^5.1.0",
     "@payloadcms/eslint-config": "workspace:*",
-    "@playwright/test": "1.42.1",
+    "@playwright/test": "^1.42.1",
     "@swc/cli": "^0.1.62",
     "@swc/jest": "0.2.36",
     "@testing-library/jest-dom": "6.4.2",
@@ -122,8 +122,8 @@
     "nodemon": "3.0.3",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
-    "playwright": "file:playwright-1.43.0-next.tgz",
-    "playwright-core": "file:playwright-core-1.43.0-next.tgz",
+    "playwright": "^1.42.1",
+    "playwright-core": "^1.42.1",
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
@@ -171,9 +171,7 @@
       "graphql": "^16.8.1",
       "react": "$react",
       "react-dom": "$react-dom",
-      "typescript": "$typescript",
-      "playwright": "file:playwright-1.43.0-next.tgz",
-      "playwright-core": "file:playwright-core-1.43.0-next.tgz"
+      "typescript": "$typescript"
     },
     "allowedDeprecatedVersions": {
       "uuid": "3.4.0",
