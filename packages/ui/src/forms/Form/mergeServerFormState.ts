@@ -11,13 +11,15 @@ export const mergeServerFormState = (
   let changed = false
 
   Object.entries(newState).forEach(([path, newFieldState]) => {
-    newFieldState.initialValue = oldState[path]?.initialValue
-    newFieldState.value = oldState[path].value
+    if (oldState[path]) {
+      newFieldState.initialValue = oldState[path].initialValue
+      newFieldState.value = oldState[path].value
+    }
 
     const oldErrorPaths: string[] = []
     const newErrorPaths: string[] = []
 
-    if (oldState[path].errorPaths instanceof Set) {
+    if (oldState[path] && oldState[path].errorPaths instanceof Set) {
       oldState[path].errorPaths.forEach((path) => oldErrorPaths.push(path))
     }
 
@@ -34,7 +36,7 @@ export const mergeServerFormState = (
     }
 
     propsToCheck.forEach((prop) => {
-      if (newFieldState[prop] != oldState[path][prop]) {
+      if (oldState[path] && newFieldState[prop] != oldState[path][prop]) {
         changed = true
       }
     })
