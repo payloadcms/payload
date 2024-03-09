@@ -8,7 +8,7 @@
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "sourceMap": true,
     "paths": {
-      "@payloadcms/ui": ["../ui/src/exports/index.ts"],
+      "@payloadcms/ui": ["../ui/src/exports/index.js"],
       "@payloadcms/ui/*": ["../ui/src/exports/*"],
       "@payloadcms/ui/scss": ["../ui/src/scss/styles.scss"],
       "@payloadcms/ui/scss/app.scss": ["../ui/src/scss/app.scss"]
