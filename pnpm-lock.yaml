@@ -45,6 +45,9 @@ importers:
       '@playwright/test':
         specifier: 1.42.1
         version: 1.42.1
+      '@swc-node/loader':
+        specifier: ^1.5.0
+        version: 1.5.0(@swc/core@1.4.2)(@swc/types@0.1.5)(typescript@5.2.2)(webpack@5.90.3)
       '@swc/cli':
         specifier: ^0.1.62
         version: 0.1.65(@swc/core@1.4.2)
@@ -132,6 +135,12 @@ importers:
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
+      css-loader:
+        specifier: ^6.10.0
+        version: 6.10.0(webpack@5.90.3)
+      css-minimizer-webpack-plugin:
+        specifier: ^6.0.0
+        version: 6.0.0(webpack@5.90.3)
       dotenv:
         specifier: 8.6.0
         version: 8.6.0
@@ -177,6 +186,9 @@ importers:
       lint-staged:
         specifier: ^14.0.1
         version: 14.0.1
+      mini-css-extract-plugin:
+        specifier: 1.6.2
+        version: 1.6.2(webpack@5.90.3)
       minimist:
         specifier: 1.2.8
         version: 1.2.8
@@ -192,6 +204,9 @@ importers:
       nodemon:
         specifier: 3.0.3
         version: 3.0.3
+      path-browserify:
+        specifier: ^1.0.1
+        version: 1.0.1
       pino:
         specifier: 8.15.0
         version: 8.15.0
@@ -199,11 +214,17 @@ importers:
         specifier: 10.2.0
         version: 10.2.0
       playwright:
-        specifier: file:/Users/jmikrut/payload/core/playwright-1.43.0-next.tgz
+        specifier: file:/Users/alessio/Documents/GitHub/payload/playwright-1.43.0-next.tgz
         version: file:playwright-1.43.0-next.tgz
       playwright-core:
-        specifier: file:/Users/jmikrut/payload/core/playwright-core-1.43.0-next.tgz
+        specifier: file:/Users/alessio/Documents/GitHub/payload/playwright-core-1.43.0-next.tgz
         version: file:playwright-core-1.43.0-next.tgz
+      postcss-loader:
+        specifier: ^8.1.1
+        version: 8.1.1(postcss@8.4.35)(typescript@5.2.2)(webpack@5.90.3)
+      postcss-preset-env:
+        specifier: ^9.5.0
+        version: 9.5.0(postcss@8.4.35)
       prettier:
         specifier: ^3.0.3
         version: 3.2.5
@@ -225,6 +246,9 @@ importers:
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
+      sass-loader:
+        specifier: ^14.1.1
+        version: 14.1.1(sass@1.71.1)(webpack@5.90.3)
       semver:
         specifier: ^7.5.4
         version: 7.6.0
@@ -243,9 +267,18 @@ importers:
       slate:
         specifier: 0.91.4
         version: 0.91.4
+      swc-loader:
+        specifier: ^0.2.6
+        version: 0.2.6(@swc/core@1.4.2)(webpack@5.90.3)
       tempfile:
         specifier: ^3.0.0
         version: 3.0.0
+      terser-webpack-plugin:
+        specifier: ^5.3.10
+        version: 5.3.10(@swc/core@1.4.2)(webpack@5.90.3)
+      ts-loader:
+        specifier: ^9.5.1
+        version: 9.5.1(typescript@5.2.2)(webpack@5.90.3)
       ts-node:
         specifier: 10.9.1
         version: 10.9.1(@swc/core@1.4.2)(@types/node@20.5.7)(typescript@5.2.2)
@@ -261,6 +294,12 @@ importers:
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
+      webpack:
+        specifier: ^5.78.0
+        version: 5.90.3(@swc/core@1.4.2)(webpack-cli@5.1.4)
+      webpack-cli:
+        specifier: ^5.1.4
+        version: 5.1.4(webpack@5.90.3)
       yocto-queue:
         specifier: ^1.0.0
         version: 1.0.0
@@ -1340,7 +1379,7 @@ importers:
         version: 2.3.0
       next:
         specifier: 14.2.0-canary.7
-        version: 14.2.0-canary.7(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.2.0-canary.7(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.71.1)
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -13612,45 +13651,6 @@ packages:
       - babel-plugin-macros
     dev: true
 
-  /next@14.2.0-canary.7(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-X9wrHOzj25uzuECqpaO7SJ34gxZziaJZXdfRQJmEJC5tQ1FmxUm0eZ/SXIw3fPkjX2/04JmavkLJPtD3BA6UyA==}
-    engines: {node: '>=18.17.0'}
-    hasBin: true
-    peerDependencies:
-      '@opentelemetry/api': ^1.1.0
-      react: ^18.2.0
-      react-dom: ^18.2.0
-      sass: ^1.3.0
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-      sass:
-        optional: true
-    dependencies:
-      '@next/env': 14.2.0-canary.7
-      '@swc/helpers': 0.5.5
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001591
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      styled-jsx: 5.1.1(@babel/core@7.24.0)(react@18.2.0)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.2.0-canary.7
-      '@next/swc-darwin-x64': 14.2.0-canary.7
-      '@next/swc-linux-arm64-gnu': 14.2.0-canary.7
-      '@next/swc-linux-arm64-musl': 14.2.0-canary.7
-      '@next/swc-linux-x64-gnu': 14.2.0-canary.7
-      '@next/swc-linux-x64-musl': 14.2.0-canary.7
-      '@next/swc-win32-arm64-msvc': 14.2.0-canary.7
-      '@next/swc-win32-ia32-msvc': 14.2.0-canary.7
-      '@next/swc-win32-x64-msvc': 14.2.0-canary.7
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-    dev: false
-
   /next@14.2.0-canary.7(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.71.1):
     resolution: {integrity: sha512-X9wrHOzj25uzuECqpaO7SJ34gxZziaJZXdfRQJmEJC5tQ1FmxUm0eZ/SXIw3fPkjX2/04JmavkLJPtD3BA6UyA==}
     engines: {node: '>=18.17.0'}
@@ -14208,6 +14208,10 @@ packages:
   /passport-strategy@1.0.0:
     resolution: {integrity: sha512-CB97UUvDKJde2V0KDWWB3lyf6PC3FaZP7YxZ2G8OAtn9p4HI9j9JLP9qjOGZFvyl8uwNT8qM+hGnz/n16NI7oA==}
     engines: {node: '>= 0.4.0'}
+
+  /path-browserify@1.0.1:
+    resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
+    dev: true
 
   /path-exists@3.0.0:
     resolution: {integrity: sha512-bpC7GYwiDYQ4wYLe+FA8lhRjhQCMcQGuSgGGqDkg/QerRWw9CmGRT0iSOVRSZJ29NMLZgIzqaljJ63oaL4NIJQ==}
