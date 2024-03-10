@@ -292,10 +292,10 @@ For auth-enabled Collections, this hook runs after successful `forgotPassword` o
 ```ts
 import { CollectionAfterForgotPasswordHook } from 'payload/types'
 
-const afterForgetPasswordHook: CollectionAfterForgotPasswordHook = async ({
-  context, 
-  collection,  
+const afterForgotPasswordHook: CollectionAfterForgotPasswordHook = async ({
   args, // arguments passed into the operation
+  context, 
+  collection, // The collection which this hook is being run on
 }) => {...}
 ```
 
