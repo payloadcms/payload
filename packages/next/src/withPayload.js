@@ -12,6 +12,10 @@ const withPayload = (nextConfig = {}) => {
           'libsql',
         ],
       },
+      outputFileTracingIncludes: {
+        pino: ['./node_modules/pino'],
+        'pino-pretty': ['./node_modules/pino-pretty'],
+      },
       serverComponentsExternalPackages: [
         ...(nextConfig?.experimental?.serverComponentsExternalPackages || []),
         'drizzle-kit',

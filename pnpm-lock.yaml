@@ -45,9 +45,6 @@ importers:
       '@playwright/test':
         specifier: 1.42.1
         version: 1.42.1
-      '@swc-node/loader':
-        specifier: ^1.5.0
-        version: 1.5.0(@swc/core@1.4.2)(@swc/types@0.1.5)(typescript@5.2.2)(webpack@5.90.3)
       '@swc/cli':
         specifier: ^0.1.62
         version: 0.1.65(@swc/core@1.4.2)
@@ -135,12 +132,6 @@ importers:
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
-      css-loader:
-        specifier: ^6.10.0
-        version: 6.10.0(webpack@5.90.3)
-      css-minimizer-webpack-plugin:
-        specifier: ^6.0.0
-        version: 6.0.0(webpack@5.90.3)
       dotenv:
         specifier: 8.6.0
         version: 8.6.0
@@ -186,9 +177,6 @@ importers:
       lint-staged:
         specifier: ^14.0.1
         version: 14.0.1
-      mini-css-extract-plugin:
-        specifier: 1.6.2
-        version: 1.6.2(webpack@5.90.3)
       minimist:
         specifier: 1.2.8
         version: 1.2.8
@@ -214,17 +202,11 @@ importers:
         specifier: 10.2.0
         version: 10.2.0
       playwright:
-        specifier: file:/Users/alessio/Documents/GitHub/payload/playwright-1.43.0-next.tgz
+        specifier: file:/Users/jmikrut/payload/core/playwright-1.43.0-next.tgz
         version: file:playwright-1.43.0-next.tgz
       playwright-core:
-        specifier: file:/Users/alessio/Documents/GitHub/payload/playwright-core-1.43.0-next.tgz
+        specifier: file:/Users/jmikrut/payload/core/playwright-core-1.43.0-next.tgz
         version: file:playwright-core-1.43.0-next.tgz
-      postcss-loader:
-        specifier: ^8.1.1
-        version: 8.1.1(postcss@8.4.35)(typescript@5.2.2)(webpack@5.90.3)
-      postcss-preset-env:
-        specifier: ^9.5.0
-        version: 9.5.0(postcss@8.4.35)
       prettier:
         specifier: ^3.0.3
         version: 3.2.5
@@ -246,9 +228,6 @@ importers:
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
-      sass-loader:
-        specifier: ^14.1.1
-        version: 14.1.1(sass@1.71.1)(webpack@5.90.3)
       semver:
         specifier: ^7.5.4
         version: 7.6.0
@@ -267,18 +246,9 @@ importers:
       slate:
         specifier: 0.91.4
         version: 0.91.4
-      swc-loader:
-        specifier: ^0.2.6
-        version: 0.2.6(@swc/core@1.4.2)(webpack@5.90.3)
       tempfile:
         specifier: ^3.0.0
         version: 3.0.0
-      terser-webpack-plugin:
-        specifier: ^5.3.10
-        version: 5.3.10(@swc/core@1.4.2)(webpack@5.90.3)
-      ts-loader:
-        specifier: ^9.5.1
-        version: 9.5.1(typescript@5.2.2)(webpack@5.90.3)
       ts-node:
         specifier: 10.9.1
         version: 10.9.1(@swc/core@1.4.2)(@types/node@20.5.7)(typescript@5.2.2)
@@ -294,12 +264,6 @@ importers:
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
-      webpack:
-        specifier: ^5.78.0
-        version: 5.90.3(@swc/core@1.4.2)(webpack-cli@5.1.4)
-      webpack-cli:
-        specifier: ^5.1.4
-        version: 5.1.4(webpack@5.90.3)
       yocto-queue:
         specifier: ^1.0.0
         version: 1.0.0
@@ -633,9 +597,6 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
-      '@swc-node/loader':
-        specifier: ^1.5.0
-        version: 1.5.0(@swc/core@1.4.2)(@swc/types@0.1.5)(typescript@5.2.2)(webpack@5.90.3)
       '@types/react':
         specifier: 18.2.15
         version: 18.2.15
@@ -669,15 +630,12 @@ importers:
       swc-loader:
         specifier: ^0.2.6
         version: 0.2.6(@swc/core@1.4.2)(webpack@5.90.3)
+      swc-plugin-transform-remove-imports:
+        specifier: ^1.12.1
+        version: 1.12.1
       terser-webpack-plugin:
         specifier: ^5.3.10
         version: 5.3.10(@swc/core@1.4.2)(webpack@5.90.3)
-      ts-loader:
-        specifier: ^9.5.1
-        version: 9.5.1(typescript@5.2.2)(webpack@5.90.3)
-      url-loader:
-        specifier: ^4.1.1
-        version: 4.1.1(webpack@5.90.3)
       webpack:
         specifier: ^5.78.0
         version: 5.90.3(@swc/core@1.4.2)(webpack-cli@5.1.4)
@@ -1429,9 +1387,42 @@ importers:
       '@types/uuid':
         specifier: 8.3.4
         version: 8.3.4
+      css-loader:
+        specifier: ^6.10.0
+        version: 6.10.0(webpack@5.90.3)
+      css-minimizer-webpack-plugin:
+        specifier: ^6.0.0
+        version: 6.0.0(webpack@5.90.3)
+      mini-css-extract-plugin:
+        specifier: 1.6.2
+        version: 1.6.2(webpack@5.90.3)
       payload:
         specifier: workspace:*
         version: link:../payload
+      postcss-loader:
+        specifier: ^8.1.1
+        version: 8.1.1(postcss@8.4.35)(typescript@5.2.2)(webpack@5.90.3)
+      postcss-preset-env:
+        specifier: ^9.5.0
+        version: 9.5.0(postcss@8.4.35)
+      sass-loader:
+        specifier: ^14.1.1
+        version: 14.1.1(sass@1.71.1)(webpack@5.90.3)
+      swc-loader:
+        specifier: ^0.2.6
+        version: 0.2.6(@swc/core@1.4.2)(webpack@5.90.3)
+      swc-plugin-transform-remove-imports:
+        specifier: ^1.12.1
+        version: 1.12.1
+      terser-webpack-plugin:
+        specifier: ^5.3.10
+        version: 5.3.10(@swc/core@1.4.2)(webpack@5.90.3)
+      webpack:
+        specifier: ^5.78.0
+        version: 5.90.3(@swc/core@1.4.2)(webpack-cli@5.1.4)
+      webpack-cli:
+        specifier: ^5.1.4
+        version: 5.1.4(webpack@5.90.3)
 
 packages:
 
@@ -5832,47 +5823,14 @@ packages:
     dependencies:
       '@swc/core': 1.4.2
       '@swc/types': 0.1.5
-
-  /@swc-node/loader@1.5.0(@swc/core@1.4.2)(@swc/types@0.1.5)(typescript@5.2.2)(webpack@5.90.3):
-    resolution: {integrity: sha512-g6qIHoya08S5QVOOj85/l9cc9SeIQuO4pcNufRPgVhLQllUntfR5k+g48laVMiDuZ5N8H4VKLqJ78KkscORuSQ==}
-    peerDependencies:
-      typescript: 5.2.2
-      webpack: '>= 5.0.0'
-    dependencies:
-      '@swc-node/core': 1.13.0(@swc/core@1.4.2)(@swc/types@0.1.5)
-      '@swc-node/register': 1.9.0(@swc/core@1.4.2)(@swc/types@0.1.5)(typescript@5.2.2)
-      typescript: 5.2.2
-      webpack: 5.90.3(@swc/core@1.4.2)(webpack-cli@5.1.4)
-    transitivePeerDependencies:
-      - '@swc/core'
-      - '@swc/types'
-      - supports-color
-    dev: true
-
-  /@swc-node/register@1.9.0(@swc/core@1.4.2)(@swc/types@0.1.5)(typescript@5.2.2):
-    resolution: {integrity: sha512-i0iYInD4q5v3xQC6bKvs0QtfUxu197CU5qKALmpxEqTYs7sIhQ7KFLe3kP+eAR4gRkJTvAgjQgrokXLN2jZrOw==}
-    peerDependencies:
-      '@swc/core': '>= 1.3'
-      typescript: 5.2.2
-    dependencies:
-      '@swc-node/core': 1.13.0(@swc/core@1.4.2)(@swc/types@0.1.5)
-      '@swc-node/sourcemap-support': 0.5.0
-      '@swc/core': 1.4.2
-      colorette: 2.0.20
-      debug: 4.3.4(supports-color@5.5.0)
-      pirates: 4.0.6
-      tslib: 2.6.2
-      typescript: 5.2.2
-    transitivePeerDependencies:
-      - '@swc/types'
-      - supports-color
-    dev: true
+    dev: false
 
   /@swc-node/sourcemap-support@0.5.0:
     resolution: {integrity: sha512-fbhjL5G0YvFoWwNhWleuBUfotiX+USiA9oJqu9STFw+Hb0Cgnddn+HVS/K5fI45mn92e8V+cHD2jgFjk4w2T9Q==}
     dependencies:
       source-map-support: 0.5.21
       tslib: 2.6.2
+    dev: false
 
   /@swc/cli@0.1.65(@swc/core@1.4.2):
     resolution: {integrity: sha512-4NcgsvJVHhA7trDnMmkGLLvWMHu2kSy+qHx6QwRhhJhdiYdNUrhdp+ERxen73sYtaeEOYeLJcWrQ60nzKi6rpg==}
@@ -16881,6 +16839,10 @@ packages:
       webpack: 5.90.3(@swc/core@1.4.2)(webpack-cli@5.1.4)
     dev: true
 
+  /swc-plugin-transform-remove-imports@1.12.1:
+    resolution: {integrity: sha512-Ckz0ebo7VZGlt7tB8EG4drB52fOSrG9adrGESZ26Qu9s+OD2hVsZ91JeiZk1LqgCH3CHA1+Vboa+VPQ2dYq8HA==}
+    dev: true
+
   /symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
     dev: true
@@ -17219,22 +17181,6 @@ packages:
       semver: 7.6.0
       typescript: 5.2.2
       yargs-parser: 21.1.1
-    dev: true
-
-  /ts-loader@9.5.1(typescript@5.2.2)(webpack@5.90.3):
-    resolution: {integrity: sha512-rNH3sK9kGZcH9dYzC7CewQm4NtxJTjSEVRJ2DyBZR7f8/wcta+iV44UPCXc5+nzDzivKtlzV6c9P4e+oFhDLYg==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      typescript: 5.2.2
-      webpack: ^5.0.0
-    dependencies:
-      chalk: 4.1.2
-      enhanced-resolve: 5.15.1
-      micromatch: 4.0.5
-      semver: 7.6.0
-      source-map: 0.7.4
-      typescript: 5.2.2
-      webpack: 5.90.3(@swc/core@1.4.2)(webpack-cli@5.1.4)
     dev: true
 
   /ts-node@10.9.1(@swc/core@1.4.2)(@types/node@16.18.85)(typescript@5.2.2):
@@ -17621,22 +17567,6 @@ packages:
   /url-join@5.0.0:
     resolution: {integrity: sha512-n2huDr9h9yzd6exQVnH/jU5mr+Pfx08LRXXZhkLLetAMESRj+anQsTAh940iMrIetKAmry9coFuZQ2jY8/p3WA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    dev: true
-
-  /url-loader@4.1.1(webpack@5.90.3):
-    resolution: {integrity: sha512-3BTV812+AVHHOJQO8O5MkWgZ5aosP7GnROJwvzLS9hWDj00lZ6Z0wNak423Lp9PBZN05N+Jk/N5Si8jRAlGyWA==}
-    engines: {node: '>= 10.13.0'}
-    peerDependencies:
-      file-loader: '*'
-      webpack: ^4.0.0 || ^5.0.0
-    peerDependenciesMeta:
-      file-loader:
-        optional: true
-    dependencies:
-      loader-utils: 2.0.4
-      mime-types: 2.1.35
-      schema-utils: 3.3.0
-      webpack: 5.90.3(@swc/core@1.4.2)(webpack-cli@5.1.4)
     dev: true
 
   /url-parse@1.5.10:

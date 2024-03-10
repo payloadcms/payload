@@ -1,7 +1,11 @@
-@import 'fonts';
-@import 'styles';
+@import './fonts.scss';
+@import './styles.scss';
 @import './toastify.scss';
 @import './colors.scss';
+
+.body {
+  color: palegoldenrod;
+}
 
 :root {
   --base-px: 25;

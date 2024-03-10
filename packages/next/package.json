@@ -8,10 +8,10 @@
     "@payloadcms/next": "./dist/bin/index.js"
   },
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:webpack",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:webpack && rm dist/prod/index.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build:webpack": "webpack --config webpack.config.cjs",
+    "build:webpack": "webpack --config webpack.config.js",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" \"src/app/api/**\" dist/ && pnpm copyfiles:api",
     "copyfiles:api": "copyfiles -u 1 \"src/app/(payload)/**\" dist/template",
@@ -48,7 +48,6 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.1.0",
     "@payloadcms/eslint-config": "workspace:*",
-    "@swc-node/loader": "^1.5.0",
     "@types/react": "18.2.15",
     "@types/react-dom": "18.2.7",
     "@types/ws": "^8.5.10",
@@ -60,9 +59,8 @@
     "postcss-preset-env": "^9.5.0",
     "sass-loader": "^14.1.1",
     "swc-loader": "^0.2.6",
+    "swc-plugin-transform-remove-imports": "^1.12.1",
     "terser-webpack-plugin": "^5.3.10",
-    "ts-loader": "^9.5.1",
-    "url-loader": "^4.1.1",
     "webpack": "^5.78.0",
     "webpack-cli": "^5.1.4"
   },
