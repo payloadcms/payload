@@ -120,7 +120,6 @@
     "next": "14.1.2",
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
-    "path-browserify": "^1.0.1",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
     "playwright": "file:playwright-1.43.0-next.tgz",
