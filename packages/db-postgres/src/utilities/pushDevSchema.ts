@@ -1,10 +1,13 @@
 import { eq } from 'drizzle-orm'
 import { numeric, timestamp, varchar } from 'drizzle-orm/pg-core'
+import { createRequire } from 'module'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from '../types.js'
 
-const { pushSchema } = await import('drizzle-kit/payload')
+const require = createRequire(import.meta.url)
+
+const { pushSchema } = require('drizzle-kit/payload')
 
 /**
  * Pushes the development schema to the database using Drizzle.
