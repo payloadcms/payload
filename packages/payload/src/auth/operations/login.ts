@@ -84,7 +84,7 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
 
     const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null
 
-    let user = await payload.db.findOne<any>({
+    let user = await payload.db.findOne<User>({
       collection: collectionConfig.slug,
       req,
       where: { email: { equals: email.toLowerCase() } },
@@ -94,7 +94,7 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
       throw new AuthenticationError(req.t)
     }
 
-    if (user && isLocked(user.lockUntil)) {
+    if (user && isLocked(user.lockUntil as number)) {
       throw new LockedAuth(req.t)
     }
 
