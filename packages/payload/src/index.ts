@@ -298,6 +298,10 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
+    if (!options?.config) {
+      throw new Error('Error: the payload config is required to initialize payload.')
+    }
+
     this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
 
     this.config = await options.config
@@ -420,7 +424,11 @@ if (!cached) {
   cached = global._payload = { payload: null, promise: null }
 }
 
-export const getPayload = async (options?: InitOptions): Promise<BasePayload<GeneratedTypes>> => {
+export const getPayload = async (options: InitOptions): Promise<BasePayload<GeneratedTypes>> => {
+  if (!options?.config) {
+    throw new Error('Error: the payload config is required for getPayload to work.')
+  }
+
   if (cached.payload) {
     return cached.payload
   }

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-redirects",
-  "version": "1.0.1",
+  "version": "3.0.0-alpha.42",
   "homepage:": "https://payloadcms.com",
   "repository": "git@github.com:payloadcms/plugin-redirects.git",
   "description": "Redirects plugin for Payload",
