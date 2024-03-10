@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@payloadcms/ui": "workspace:*",
-    "ts-deepmerge": "^2.0.1"
+    "deepmerge": "4.3.1"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

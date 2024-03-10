@@ -1,10 +1,10 @@
 import type { Config } from 'payload/config'
 
-import type { SearchConfig } from './types'
+import type { SearchConfig } from './types.js'
 
-import { generateSearchCollection } from './Search'
-import deleteFromSearch from './Search/hooks/deleteFromSearch'
-import syncWithSearch from './Search/hooks/syncWithSearch'
+import deleteFromSearch from './Search/hooks/deleteFromSearch.js'
+import syncWithSearch from './Search/hooks/syncWithSearch.js'
+import { generateSearchCollection } from './Search/index.js'
 
 const Search =
   (incomingSearchConfig: SearchConfig) =>

@@ -27,7 +27,13 @@ const packageWhitelist = [
   'richtext-lexical',
   'plugin-cloud',
   'plugin-cloud-storage',
+  // 'plugin-form-builder',
+  // 'plugin-nested-docs',
+  // 'plugin-redirects',
+  // 'plugin-search',
+  // 'plugin-sentry',
   'plugin-seo',
+  // 'plugin-stripe',
 ]
 
 const __filename = fileURLToPath(import.meta.url)

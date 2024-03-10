@@ -199,10 +199,10 @@ importers:
         specifier: 10.2.0
         version: 10.2.0
       playwright:
-        specifier: file:playwright-1.43.0-next.tgz
+        specifier: file:C:\code\payload\playwright-1.43.0-next.tgz
         version: file:playwright-1.43.0-next.tgz
       playwright-core:
-        specifier: file:playwright-core-1.43.0-next.tgz
+        specifier: file:C:\code\payload\playwright-core-1.43.0-next.tgz
         version: file:playwright-core-1.43.0-next.tgz
       prettier:
         specifier: ^3.0.3
@@ -973,9 +973,9 @@ importers:
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
-      ts-deepmerge:
-        specifier: ^2.0.1
-        version: 2.0.7
+      deepmerge:
+        specifier: 4.3.1
+        version: 4.3.1
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -15514,10 +15514,6 @@ packages:
       typescript: 5.2.2
     dependencies:
       typescript: 5.2.2
-    dev: false
-
-  /ts-deepmerge@2.0.7:
-    resolution: {integrity: sha512-3phiGcxPSSR47RBubQxPoZ+pqXsEsozLo4G4AlSrsMKTFg9TA3l+3he5BqpUi9wiuDbaHWXH/amlzQ49uEdXtg==}
     dev: false
 
   /ts-essentials@7.0.3(typescript@5.2.2):

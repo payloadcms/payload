@@ -1,4 +1,4 @@
-import type { DocToSync, SearchConfig, SyncWithSearch } from '../../types'
+import type { DocToSync, SearchConfig, SyncWithSearch } from '../../types.js'
 
 const syncWithSearch: SyncWithSearch = async (args) => {
   const {
