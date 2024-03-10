@@ -3,9 +3,9 @@ import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload/typ
 import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types'
+import type { StripeConfig } from '../types.js'
 
-import { deepen } from '../utilities/deepen'
+import { deepen } from '../utilities/deepen.js'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })

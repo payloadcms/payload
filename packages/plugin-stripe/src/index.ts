@@ -1,18 +1,16 @@
-import type { NextFunction, Response } from 'express'
-import type { Config, Endpoint } from 'payload/config'
+import type { Config } from 'payload/config'
 import type { PayloadRequest } from 'payload/types'
 
-import express from 'express'
+import bodyParser from 'body-parser'
 
-import type { SanitizedStripeConfig, StripeConfig } from './types'
+import type { SanitizedStripeConfig, StripeConfig } from './types.js'
 
-import { extendWebpackConfig } from './extendWebpackConfig'
-import { getFields } from './fields/getFields'
-import { createNewInStripe } from './hooks/createNewInStripe'
-import { deleteFromStripe } from './hooks/deleteFromStripe'
-import { syncExistingWithStripe } from './hooks/syncExistingWithStripe'
-import { stripeREST } from './routes/rest'
-import { stripeWebhooks } from './routes/webhooks'
+import { getFields } from './fields/getFields.js'
+import { createNewInStripe } from './hooks/createNewInStripe.js'
+import { deleteFromStripe } from './hooks/deleteFromStripe.js'
+import { syncExistingWithStripe } from './hooks/syncExistingWithStripe.js'
+import { stripeREST } from './routes/rest.js'
+import { stripeWebhooks } from './routes/webhooks.js'
 
 const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
@@ -33,10 +31,6 @@ const stripePlugin =
 
     return {
       ...config,
-      admin: {
-        ...config.admin,
-        webpack: extendWebpackConfig(config),
-      },
       collections: collections?.map((collection) => {
         const { hooks: existingHooks } = collection
 
@@ -90,7 +84,8 @@ const stripePlugin =
         ...(config?.endpoints || []),
         {
           handler: [
-            express.raw({ type: 'application/json' }),
+            // TODO: test if this works, was using express.raw() before
+            bodyParser.raw({ type: 'application/json' }),
             async (req, res, next) => {
               await stripeWebhooks({
                 config,
@@ -116,7 +111,7 @@ const stripePlugin =
                     stripeConfig,
                   })
                 },
-                method: 'post' as Endpoint['method'],
+                method: 'post',
                 path: '/stripe/rest',
               },
             ]

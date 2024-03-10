@@ -1,4 +1,4 @@
-import type { SanitizedStripeConfig, StripeWebhookHandler } from '../types'
+import type { SanitizedStripeConfig, StripeWebhookHandler } from '../types.js'
 
 type HandleDeleted = (
   args: Parameters<StripeWebhookHandler>[0] & {

@@ -1,8 +1,8 @@
 import type { Config } from 'payload/config'
 
-import type { SanitizedStripeConfig, StripeConfig } from './types'
+import type { SanitizedStripeConfig, StripeConfig } from './types.js'
 
-import { getFields } from './fields/getFields'
+import { getFields } from './fields/getFields.js'
 
 const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>

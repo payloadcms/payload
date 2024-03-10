@@ -1,21 +1,19 @@
-import type { Response } from 'express'
 import type { Config as PayloadConfig } from 'payload/config'
 import type { PayloadRequest } from 'payload/types'
 
 import Stripe from 'stripe'
 
-import type { StripeConfig } from '../types'
+import type { StripeConfig } from '../types.js'
 
-import { handleWebhooks } from '../webhooks'
+import { handleWebhooks } from '../webhooks/index.js'
 
 export const stripeWebhooks = async (args: {
   config: PayloadConfig
   next: any
   req: PayloadRequest
-  res: Response
   stripeConfig: StripeConfig
 }): Promise<any> => {
-  const { config, req, res, stripeConfig } = args
+  const { config, req, stripeConfig } = args
 
   const { stripeSecretKey, stripeWebhooksEndpointSecret, webhooks } = stripeConfig
 
@@ -32,6 +30,7 @@ export const stripeWebhooks = async (args: {
 
     if (stripeSignature) {
       let event: Stripe.Event | undefined
+      let status: number = 200
 
       try {
         event = stripe.webhooks.constructEvent(
@@ -42,7 +41,7 @@ export const stripeWebhooks = async (args: {
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : err
         req.payload.logger.error(`Error constructing Stripe event: ${msg}`)
-        res.status(400)
+        status = 400
       }
 
       if (event) {
@@ -80,6 +79,12 @@ export const stripeWebhooks = async (args: {
       }
     }
   }
-
-  res.json({ received: true })
+  return Response.json(
+    {
+      received: true,
+    },
+    {
+      status,
+    },
+  )
 }

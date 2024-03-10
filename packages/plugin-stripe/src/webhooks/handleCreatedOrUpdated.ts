@@ -1,8 +1,8 @@
 import { v4 as uuid } from 'uuid'
 
-import type { SanitizedStripeConfig, StripeWebhookHandler } from '../types'
+import type { SanitizedStripeConfig, StripeWebhookHandler } from '../types.js'
 
-import { deepen } from '../utilities/deepen'
+import { deepen } from '../utilities/deepen.js'
 
 type HandleCreatedOrUpdated = (
   args: Parameters<StripeWebhookHandler>[0] & {

@@ -1,7 +1,7 @@
 import type { Config } from 'payload/config'
 import { defaults } from 'payload/config'
 
-import { sentry } from './plugin'
+import { sentry } from './plugin.js'
 
 describe('plugin', () => {
   it('should run the plugin', () => {
@@ -34,13 +34,11 @@ describe('plugin', () => {
 })
 
 function assertPluginRan(config: Config) {
-  expect(config.admin?.webpack).toBeDefined()
   expect(config.hooks?.afterError).toBeDefined()
   expect(config.onInit).toBeDefined()
 }
 
 function assertPluginDidNotRun(config: Config) {
-  expect(config.admin?.webpack).toBeDefined()
   expect(config.hooks?.afterError).toBeUndefined()
   expect(config.onInit).toBeUndefined()
 }

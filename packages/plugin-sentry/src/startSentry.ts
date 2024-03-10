@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { NextFunction, Request, Response } from 'express'
-import type express from 'express'
 import type { Payload } from 'payload'
 
 /* eslint-disable no-console */
 import * as Sentry from '@sentry/node'
 
-import type { PluginOptions } from './types'
+import type { PluginOptions } from './types.js'
 
 export const startSentry = (pluginOptions: PluginOptions, payload: Payload): void => {
   const { dsn, options } = pluginOptions
@@ -17,7 +15,7 @@ export const startSentry = (pluginOptions: PluginOptions, payload: Payload): voi
   try {
     Sentry.init({
       ...options?.init,
-      dsn: dsn,
+      dsn,
       integrations: [
         ...(options?.init?.integrations || []),
         new Sentry.Integrations.Http({ tracing: true }),

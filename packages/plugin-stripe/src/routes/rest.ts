@@ -1,11 +1,10 @@
-import type { Response } from 'express'
 import type { PayloadRequest } from 'payload/types'
 
 import { Forbidden } from 'payload/errors'
 
-import type { StripeConfig } from '../types'
+import type { StripeConfig } from '../types.js'
 
-import { stripeProxy } from '../utilities/stripeProxy'
+import { stripeProxy } from '../utilities/stripeProxy.js'
 
 export const stripeREST = async (args: {
   next: any
@@ -16,7 +15,7 @@ export const stripeREST = async (args: {
   const { req, res, stripeConfig } = args
 
   const {
-    body: {
+    data: {
       stripeArgs, // example: ['cus_MGgt3Tuj3D66f2'] or [{ limit: 100 }, { stripeAccount: 'acct_1J9Z4pKZ4Z4Z4Z4Z' }]
       stripeMethod, // example: 'subscriptions.list',
     },
@@ -38,14 +37,27 @@ export const stripeREST = async (args: {
       stripeSecretKey,
     })
 
-    const { status } = pluginRes
+    const { data, message, status } = pluginRes
 
-    res.status(status).json(pluginRes)
+    return Response.json(
+      {
+        data,
+        message,
+      },
+      {
+        status,
+      },
+    )
   } catch (error: unknown) {
     const message = `An error has occurred in the Stripe plugin REST handler: '${error}'`
     payload.logger.error(message)
-    return res.status(500).json({
-      message,
-    })
+    return Response.json(
+      {
+        message,
+      },
+      {
+        status: 500,
+      },
+    )
   }
 }
