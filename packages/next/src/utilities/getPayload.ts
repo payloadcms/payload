@@ -12,6 +12,10 @@ if (!cached) {
 }
 
 export const getPayload = async (options: InitOptions): Promise<Payload> => {
+  if (!options?.config) {
+    throw new Error('Error: the payload config is required for getPayload to work.')
+  }
+
   if (cached.payload) {
     const config = await options.config
 
