@@ -13,8 +13,6 @@ overrides:
   react: ^18.2.0
   react-dom: ^18.2.0
   typescript: 5.2.2
-  playwright: file:playwright-1.43.0-next.tgz
-  playwright-core: file:playwright-core-1.43.0-next.tgz
 
 importers:
 
@@ -43,7 +41,7 @@ importers:
         specifier: workspace:*
         version: link:packages/eslint-config-payload
       '@playwright/test':
-        specifier: 1.42.1
+        specifier: ^1.42.1
         version: 1.42.1
       '@swc/cli':
         specifier: ^0.1.62
@@ -192,9 +190,6 @@ importers:
       nodemon:
         specifier: 3.0.3
         version: 3.0.3
-      path-browserify:
-        specifier: ^1.0.1
-        version: 1.0.1
       pino:
         specifier: 8.15.0
         version: 8.15.0
@@ -202,11 +197,11 @@ importers:
         specifier: 10.2.0
         version: 10.2.0
       playwright:
-        specifier: file:C:\code\payload\playwright-1.43.0-next.tgz
-        version: file:playwright-1.43.0-next.tgz
+        specifier: ^1.42.1
+        version: 1.42.1
       playwright-core:
-        specifier: file:C:\code\payload\playwright-core-1.43.0-next.tgz
-        version: file:playwright-core-1.43.0-next.tgz
+        specifier: ^1.42.1
+        version: 1.42.1
       prettier:
         specifier: ^3.0.3
         version: 3.2.5
@@ -5182,7 +5177,7 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      playwright: file:playwright-1.43.0-next.tgz
+      playwright: 1.42.1
     dev: true
 
   /@pnpm/config.env-replace@1.1.0:
@@ -14200,10 +14195,6 @@ packages:
     resolution: {integrity: sha512-CB97UUvDKJde2V0KDWWB3lyf6PC3FaZP7YxZ2G8OAtn9p4HI9j9JLP9qjOGZFvyl8uwNT8qM+hGnz/n16NI7oA==}
     engines: {node: '>= 0.4.0'}
 
-  /path-browserify@1.0.1:
-    resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
-    dev: true
-
   /path-exists@3.0.0:
     resolution: {integrity: sha512-bpC7GYwiDYQ4wYLe+FA8lhRjhQCMcQGuSgGGqDkg/QerRWw9CmGRT0iSOVRSZJ29NMLZgIzqaljJ63oaL4NIJQ==}
     engines: {node: '>=4'}
@@ -14444,6 +14435,22 @@ packages:
     dependencies:
       find-up: 3.0.0
     dev: false
+
+  /playwright-core@1.42.1:
+    resolution: {integrity: sha512-mxz6zclokgrke9p1vtdy/COWBH+eOZgYUVVU34C73M+4j4HLlQJHtfcqiqqxpP0o8HhMkflvfbquLX5dg6wlfA==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dev: true
+
+  /playwright@1.42.1:
+    resolution: {integrity: sha512-PgwB03s2DZBcNRoW+1w9E+VkLBxweib6KTXM0M3tkiT4jVxKSi6PmVJ591J+0u10LUrgxB7dLRbiJqO5s2QPMg==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      playwright-core: 1.42.1
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
 
   /pluralize@8.0.0:
     resolution: {integrity: sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==}
@@ -18165,26 +18172,6 @@ packages:
   /zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
     dev: false
-
-  file:playwright-1.43.0-next.tgz:
-    resolution: {integrity: sha512-vw1WPxm0BJVOuQeqObJeqRZPkRMEZwBAjdB6H7UB2ZN3mhd/SwnqpmYOU58M3tymjByoNCCU8/1FJucIUG3vLw==, tarball: file:playwright-1.43.0-next.tgz}
-    name: playwright
-    version: 1.43.0-next
-    engines: {node: '>=16'}
-    hasBin: true
-    dependencies:
-      playwright-core: file:playwright-core-1.43.0-next.tgz
-    optionalDependencies:
-      fsevents: 2.3.2
-    dev: true
-
-  file:playwright-core-1.43.0-next.tgz:
-    resolution: {integrity: sha512-1l2lYqjxj/TdjjKipJU48O3I64KpVDkbrrDB6ChhWE9FdeLv49iqLPgNQoD0Vde3N1etu/50GWkTtPIQUyZTMw==, tarball: file:playwright-core-1.43.0-next.tgz}
-    name: playwright-core
-    version: 1.43.0-next
-    engines: {node: '>=16'}
-    hasBin: true
-    dev: true
 
   github.com/Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
     resolution: {tarball: https://codeload.github.com/Raynos/readable-stream/tar.gz/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f}
