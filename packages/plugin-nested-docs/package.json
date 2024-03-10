@@ -22,7 +22,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^0.18.5 || ^1.0.0 || ^2.0.0"
+    "payload": "workspace:*"
   },
   "exports": {
     ".": {

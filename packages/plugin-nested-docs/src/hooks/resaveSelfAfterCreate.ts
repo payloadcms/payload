@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
 
-import type { PluginConfig } from '../types'
+import type { PluginConfig } from '../types.js'
 
 // This hook automatically re-saves a document after it is created
 // so that we can build its breadcrumbs with the newly created document's ID.
