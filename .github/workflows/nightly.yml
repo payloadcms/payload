@@ -1,0 +1,59 @@
+name: nightly
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every night at 8pm EST converted to UTC
+    - cron: "0 1 * * *"
+
+jobs:
+  core-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - run: pnpm install
+      - run: pnpm run build:all
+
+      - name: Cache build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Nightly
+        run: |
+            npm --no-git-tag-version --prefix packages/payload version prerelease --preid nightly
+            pnpm pack -C packages/payload --no-git-checks
+            npm --no-git-tag-version --prefix packages/db-mongodb version prerelease --preid nightly
+            pnpm pack -C packages/db-mongodb --no-git-checks
+            npm --no-git-tag-version --prefix packages/db-postgres version prerelease --preid nightly
+            pnpm pack -C packages/db-postgres --no-git-checks
