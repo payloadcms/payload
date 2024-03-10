@@ -38,6 +38,11 @@
         "require": "./dist/exports/*.js",
         "types": "./dist/exports/*.d.ts"
       },
+      "./css": {
+        "import": "./dist/prod/styles.css",
+        "require": "./dist/prod/styles.css",
+        "default": "./dist/prod/styles.css"
+      },
       "./scss": {
         "import": "./dist/scss.scss",
         "require": "./dist/scss.scss",

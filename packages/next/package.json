@@ -91,6 +91,11 @@
     "main": "./dist/exports/index.js",
     "types": "./dist/exports/index.d.ts",
     "exports": {
+      "./css": {
+        "import": "./dist/prod/styles.css",
+        "require": "./dist/prod/styles.css",
+        "default": "./dist/prod/styles.css"
+      },
       "./withPayload": {
         "import": "./dist/withPayload.js",
         "require": "./dist/withPayload.js",
