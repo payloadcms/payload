@@ -62,22 +62,23 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
       break
   }
 
-  // determine new `link` prop on only a single cell
-  // it needs to be the first active column, and nothing else
-
-  const withActive = newState.map((column, index) => {
-    if (column.active) {
-      return {
-        ...column,
-        cellProps: {
-          ...column.cellProps,
-          link: index === 0,
-        },
-      }
+  const firstActiveColumnIndex = newState.findIndex((column, index) => {
+    if (column.active && column.accessor !== '_select') {
+      return index
     }
+  })
 
-    return column
+  const withFirstLink = newState.map((column, index) => {
+    const isLink = column.active && firstActiveColumnIndex === index
+
+    return {
+      ...column,
+      cellProps: {
+        ...column.cellProps,
+        link: isLink,
+      },
+    }
   }, [])
 
-  return withActive
+  return withFirstLink
 }
