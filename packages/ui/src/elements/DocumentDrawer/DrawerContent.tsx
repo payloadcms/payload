@@ -14,6 +14,7 @@ import { FieldPathProvider, useFieldPath } from '../../forms/FieldPathProvider/i
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections.js'
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
 import { X } from '../../icons/X/index.js'
+import { useAuth } from '../../index.js'
 import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
@@ -52,7 +53,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const { formQueryParams } = useFormQueryParams()
   const formattedQueryParams = queryString.stringify(formQueryParams)
 
-  const { fields: fieldsFromConfig } = collectionConfig
+  const { permissions } = useAuth()
 
   const { schemaPath } = useFieldPath()
 
@@ -120,6 +121,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
     return <LoadingOverlay />
   }
 
+  const docPermissions = permissions?.collections[collectionSlug]
+
   return (
     <DocumentInfoProvider
       BeforeDocument={
@@ -151,11 +154,12 @@ const Content: React.FC<DocumentDrawerProps> = ({
       collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
+      docPermissions={docPermissions}
+      hasSavePermission={docPermissions?.update?.permission}
       // isLoading,
       id={id}
       initialData={data}
       initialState={initialState}
-      // hasSavePermission={hasSavePermission}
       isEditing={isEditing}
       // me: true,
       onSave={onSave}
@@ -175,7 +179,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
   const [id, setId] = useState<null | number | string>(idFromProps)
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
-    async (args) => {
+    (args) => {
       setId(args.doc.id)
 
       if (typeof onSaveFromProps === 'function') {
