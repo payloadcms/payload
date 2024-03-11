@@ -38,7 +38,7 @@ export const RootLayout = async ({
 
   const payload = await getPayload({ config: configPromise })
 
-  const { cookies, permissions, user } = await auth({
+  const { cookies, permissions } = await auth({
     headers,
     payload,
   })

@@ -106,6 +106,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           collection: collectionSlug,
           depth: 0,
           locale: locale.code,
+          overrideAccess: false,
           user,
         })
       } catch (error) {} // eslint-disable-line no-empty
@@ -148,6 +149,7 @@ export const Document: React.FC<AdminViewProps> = async ({
         slug: globalSlug,
         depth: 0,
         locale: locale.code,
+        overrideAccess: false,
         user,
       })
     } catch (error) {} // eslint-disable-line no-empty
