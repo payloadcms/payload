@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.43",
+  "version": "3.0.0-alpha.44",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -157,7 +157,8 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write"
+      "prettier --write",
+      "eslint --cache --fix"
     ]
   },
   "dependencies": {
