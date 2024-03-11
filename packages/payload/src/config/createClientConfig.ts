@@ -85,6 +85,13 @@ const sanitizeCollections = (
       delete sanitized.upload.handlers
     }
 
+    if ('auth' in sanitized && typeof sanitized.auth === 'object') {
+      sanitized.auth = { ...sanitized.auth }
+      delete sanitized.auth.strategies
+      delete sanitized.auth.forgotPassword
+      delete sanitized.auth.verify
+    }
+
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
 
