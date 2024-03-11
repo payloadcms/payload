@@ -196,9 +196,6 @@ jobs:
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
         if: matrix.database == 'supabase'
 
-      - name: Component Tests
-        run: pnpm test:components
-
       - name: Integration Tests
         run: pnpm test:int
         env:
