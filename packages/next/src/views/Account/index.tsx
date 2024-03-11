@@ -22,8 +22,8 @@ export { generateAccountMetadata } from './meta.js'
 
 export const Account: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
   const {
-    permissions,
     locale,
+    permissions,
     req: {
       i18n,
       payload,
@@ -53,6 +53,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
         id: user.id,
         collection: userSlug,
         depth: 0,
+        overrideAccess: false,
         user,
       })
     } catch (error) {

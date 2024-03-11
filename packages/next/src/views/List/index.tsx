@@ -72,6 +72,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       collection: collectionSlug,
       depth: 0,
       limit,
+      overrideAccess: false,
       user,
     })
 

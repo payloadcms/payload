@@ -15,7 +15,7 @@ export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
     docID: id,
     globalConfig,
     permissions,
-    req: { payload, payload: { config } = {} } = {},
+    req: { payload, payload: { config } = {}, user } = {},
   } = initPageResult
 
   // /entityType/:entitySlug/:id/versions/:versionID
@@ -43,6 +43,8 @@ export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
         collection: slug,
         depth: 1,
         locale: '*',
+        overrideAccess: false,
+        user,
       })
 
       publishedDoc = await payload.findByID({
@@ -51,6 +53,8 @@ export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
         depth: 1,
         draft: false,
         locale: '*',
+        overrideAccess: false,
+        user,
       })
 
       mostRecentDoc = await payload.findByID({
@@ -59,6 +63,8 @@ export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
         depth: 1,
         draft: true,
         locale: '*',
+        overrideAccess: false,
+        user,
       })
     } catch (error) {
       return notFound()
@@ -75,6 +81,8 @@ export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
         slug,
         depth: 1,
         locale: '*',
+        overrideAccess: false,
+        user,
       })
 
       publishedDoc = payload.findGlobal({
@@ -82,6 +90,8 @@ export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
         depth: 1,
         draft: false,
         locale: '*',
+        overrideAccess: false,
+        user,
       })
 
       mostRecentDoc = payload.findGlobal({
@@ -89,6 +99,8 @@ export const VersionView: React.FC = async (props: ServerSideEditViewProps) => {
         depth: 1,
         draft: true,
         locale: '*',
+        overrideAccess: false,
+        user,
       })
     } catch (error) {
       return notFound()

@@ -43,6 +43,7 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
         collection: collectionSlug,
         depth: 0,
         limit: limit ? parseInt(limit?.toString(), 10) : undefined,
+        overrideAccess: false,
         page: page ? parseInt(page.toString(), 10) : undefined,
         sort: sort as string,
         user,
@@ -62,6 +63,7 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
       versionsData = await payload.findGlobalVersions({
         slug: globalSlug,
         depth: 0,
+        overrideAccess: false,
         page: page ? parseInt(page as string, 10) : undefined,
         sort: sort as string,
         user,
