@@ -16,19 +16,6 @@ Run the following command in a Payload project to generate your project's GraphQ
 payload generate:graphQLSchema
 ```
 
-You can run this command whenever you need to regenerate your GraphQL schema and output it to a file, and then you can use the schema for writing your own GraphQL elsewhere in other projects.
-
-### Custom output file path
-
-```js
-{
-  // the remainder of your config
-	graphQL: {
-		schemaOutputFile: path.resolve(__dirname, './graphql/schema.graphql'),
-	},
-}
-```
-
 ### Custom Field Schemas
 
 For `array`, `block`, `group` and named `tab` fields, you can generate top level reusable interfaces. The following group field config:

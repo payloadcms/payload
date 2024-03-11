@@ -358,7 +358,6 @@ export default buildConfigWithDefaults({
         },
       }
     },
-    schemaOutputFile: path.resolve(dirname, 'schema.graphql'),
   },
   onInit: async (payload) => {
     await payload.create({

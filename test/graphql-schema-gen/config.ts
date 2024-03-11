@@ -6,9 +6,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  graphQL: {
-    schemaOutputFile: path.resolve(dirname, 'schema.graphql'),
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'schema.ts'),
   },
