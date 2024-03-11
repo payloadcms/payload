@@ -7,8 +7,6 @@ import type { PostgresAdapter } from '../types.js'
 
 const require = createRequire(import.meta.url)
 
-const { pushSchema } = require('drizzle-kit/payload')
-
 /**
  * Pushes the development schema to the database using Drizzle.
  *
@@ -16,6 +14,8 @@ const { pushSchema } = require('drizzle-kit/payload')
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
 export const pushDevSchema = async (db: PostgresAdapter) => {
+  const { pushSchema } = require('drizzle-kit/payload')
+
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
     db.schema,
