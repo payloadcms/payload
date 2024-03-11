@@ -69,13 +69,13 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
   })
 
   const withFirstLink = newState.map((column, index) => {
-    const isLink = column.active && firstActiveColumnIndex === index
+    const isFirstActiveColumn = column.active && firstActiveColumnIndex === index
 
     return {
       ...column,
       cellProps: {
         ...column.cellProps,
-        link: isLink,
+        link: isFirstActiveColumn,
       },
     }
   }, [])
