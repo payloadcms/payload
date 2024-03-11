@@ -17,14 +17,7 @@ export const buildColumns = (args: {
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }): Column[] => {
-  const {
-    cellProps,
-    columnPreferences,
-    defaultColumns,
-    enableRowSelections,
-    fieldMap,
-    useAsTitle,
-  } = args
+  const { cellProps, columnPreferences, defaultColumns, enableRowSelections, fieldMap } = args
 
   let sortedFieldMap = fieldMap
 
