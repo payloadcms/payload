@@ -94,16 +94,10 @@ const collectionSchema = joi.object().keys({
       maxLoginAttempts: joi.number(),
       removeTokenFromResponses: joi.boolean().valid(true),
       strategies: joi.array().items(
-        joi.alternatives().try(
-          strategyBaseSchema.keys({
-            name: joi.string().required(),
-            strategy: joi.func().maxArity(1).required(),
-          }),
-          strategyBaseSchema.keys({
-            name: joi.string(),
-            strategy: joi.object().required(),
-          }),
-        ),
+        joi.object().keys({
+          name: joi.string().required(),
+          authenticate: joi.func().required(),
+        }),
       ),
       tokenExpiration: joi.number(),
       useAPIKey: joi.boolean(),
