@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.39",
+  "version": "3.0.0-alpha.44",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -8,9 +8,10 @@
   ],
   "scripts": {
     "build": "pnpm run build:core",
+    "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} ++ && npx playwright install",
     "build:all": "turbo build",
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
-    "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\" --filter \"!@payloadcms/plugin-search\" --filter \"!@payloadcms/plugin-redirects\" --filter \"!@payloadcms/plugin-nested-docs\"",
+    "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\"",
     "build:app": "next build",
     "build:app:analyze": "cross-env ANALYZE=true next build",
     "build:create-payload-app": "turbo build --filter create-payload-app",
@@ -40,6 +41,7 @@
     "clean:build": "find . \\( -type d \\( -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -not -path '*/node_modules/*' -exec rm -rf {} +",
     "clean:all": "find . \\( -type d \\( -name node_modules -o -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} +",
     "dev": "cross-env node --no-deprecation ./test/dev.js",
+    "devsafe": "rm -rf .next && cross-env node --no-deprecation ./test/dev.js",
     "dev:generate-graphql-schema": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/generateGraphQLSchema.ts",
     "dev:generate-types": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/generateTypes.ts",
     "dev:postgres": "pnpm --filter payload run dev:postgres",
@@ -70,7 +72,7 @@
     "@next/bundle-analyzer": "^14.1.0",
     "@octokit/core": "^5.1.0",
     "@payloadcms/eslint-config": "workspace:*",
-    "@playwright/test": "1.42.1",
+    "@playwright/test": "^1.42.1",
     "@swc/cli": "^0.1.62",
     "@swc/jest": "0.2.36",
     "@testing-library/jest-dom": "6.4.2",
@@ -122,8 +124,8 @@
     "nodemon": "3.0.3",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
-    "playwright": "file:playwright-1.43.0-next.tgz",
-    "playwright-core": "file:playwright-core-1.43.0-next.tgz",
+    "playwright": "^1.42.1",
+    "playwright-core": "^1.42.1",
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
@@ -155,7 +157,8 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write"
+      "prettier --write",
+      "eslint --cache --fix"
     ]
   },
   "dependencies": {
@@ -171,9 +174,7 @@
       "graphql": "^16.8.1",
       "react": "$react",
       "react-dom": "$react-dom",
-      "typescript": "$typescript",
-      "playwright": "file:playwright-1.43.0-next.tgz",
-      "playwright-core": "file:playwright-core-1.43.0-next.tgz"
+      "typescript": "$typescript"
     },
     "allowedDeprecatedVersions": {
       "uuid": "3.4.0",

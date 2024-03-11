@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/swcrc",
-  "sourceMaps": "inline",
+  "sourceMaps": true,
   "exclude": ["/**/mocks"],
   "jsc": {
     "target": "esnext",

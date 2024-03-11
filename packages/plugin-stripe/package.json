@@ -29,7 +29,7 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^1.1.8 || ^2.0.0"
+    "payload": "workspace:*"
   },
   "dependencies": {
     "@payloadcms/ui": "workspace:*",

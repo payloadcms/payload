@@ -1,39 +1,41 @@
 import type { Block, Field } from 'payload/types'
 
-import type { FieldConfig, PaymentFieldConfig } from '../../types'
+import type { FieldConfig, PaymentFieldConfig } from '../../types.js'
 
-import { DynamicFieldSelector } from './DynamicFieldSelector'
-import { DynamicPriceSelector } from './DynamicPriceSelector'
+import { DynamicFieldSelector } from './DynamicFieldSelector.js'
+import { DynamicPriceSelector } from './DynamicPriceSelector.js'
 
 const name: Field = {
   name: 'name',
+  type: 'text',
   label: 'Name (lowercase, no special characters)',
   required: true,
-  type: 'text',
 }
 
 const label: Field = {
   name: 'label',
+  type: 'text',
   label: 'Label',
   localized: true,
-  type: 'text',
 }
 
 const required: Field = {
   name: 'required',
-  label: 'Required',
   type: 'checkbox',
+  label: 'Required',
 }
 
 const width: Field = {
   name: 'width',
-  label: 'Field Width (percentage)',
   type: 'number',
+  label: 'Field Width (percentage)',
 }
 
 const Select: Block = {
+  slug: 'select',
   fields: [
     {
+      type: 'row',
       fields: [
         {
           ...name,
@@ -48,9 +50,9 @@ const Select: Block = {
           },
         },
       ],
-      type: 'row',
     },
     {
+      type: 'row',
       fields: [
         {
           ...width,
@@ -60,42 +62,42 @@ const Select: Block = {
         },
         {
           name: 'defaultValue',
+          type: 'text',
           admin: {
             width: '50%',
           },
           label: 'Default Value',
           localized: true,
-          type: 'text',
         },
       ],
-      type: 'row',
     },
     {
       name: 'options',
+      type: 'array',
       fields: [
         {
+          type: 'row',
           fields: [
             {
               name: 'label',
+              type: 'text',
               admin: {
                 width: '50%',
               },
               label: 'Label',
               localized: true,
               required: true,
-              type: 'text',
             },
             {
               name: 'value',
+              type: 'text',
               admin: {
                 width: '50%',
               },
               label: 'Value',
               required: true,
-              type: 'text',
             },
           ],
-          type: 'row',
         },
       ],
       label: 'Select Attribute Options',
@@ -103,7 +105,6 @@ const Select: Block = {
         plural: 'Options',
         singular: 'Option',
       },
-      type: 'array',
     },
     required,
   ],
@@ -111,12 +112,13 @@ const Select: Block = {
     plural: 'Select Fields',
     singular: 'Select',
   },
-  slug: 'select',
 }
 
 const Text: Block = {
+  slug: 'text',
   fields: [
     {
+      type: 'row',
       fields: [
         {
           ...name,
@@ -131,9 +133,9 @@ const Text: Block = {
           },
         },
       ],
-      type: 'row',
     },
     {
+      type: 'row',
       fields: [
         {
           ...width,
@@ -143,15 +145,14 @@ const Text: Block = {
         },
         {
           name: 'defaultValue',
+          type: 'text',
           admin: {
             width: '50%',
           },
           label: 'Default Value',
           localized: true,
-          type: 'text',
         },
       ],
-      type: 'row',
     },
     required,
   ],
@@ -159,12 +160,13 @@ const Text: Block = {
     plural: 'Text Fields',
     singular: 'Text',
   },
-  slug: 'text',
 }
 
 const TextArea: Block = {
+  slug: 'textarea',
   fields: [
     {
+      type: 'row',
       fields: [
         {
           ...name,
@@ -179,9 +181,9 @@ const TextArea: Block = {
           },
         },
       ],
-      type: 'row',
     },
     {
+      type: 'row',
       fields: [
         {
           ...width,
@@ -191,15 +193,14 @@ const TextArea: Block = {
         },
         {
           name: 'defaultValue',
+          type: 'text',
           admin: {
             width: '50%',
           },
           label: 'Default Value',
           localized: true,
-          type: 'text',
         },
       ],
-      type: 'row',
     },
     required,
   ],
@@ -207,12 +208,13 @@ const TextArea: Block = {
     plural: 'Text Area Fields',
     singular: 'Text Area',
   },
-  slug: 'textarea',
 }
 
 const Number: Block = {
+  slug: 'number',
   fields: [
     {
+      type: 'row',
       fields: [
         {
           ...name,
@@ -227,9 +229,9 @@ const Number: Block = {
           },
         },
       ],
-      type: 'row',
     },
     {
+      type: 'row',
       fields: [
         {
           ...width,
@@ -239,14 +241,13 @@ const Number: Block = {
         },
         {
           name: 'defaultValue',
+          type: 'number',
           admin: {
             width: '50%',
           },
           label: 'Default Value',
-          type: 'number',
         },
       ],
-      type: 'row',
     },
     required,
   ],
@@ -254,12 +255,13 @@ const Number: Block = {
     plural: 'Number Fields',
     singular: 'Number',
   },
-  slug: 'number',
 }
 
 const Email: Block = {
+  slug: 'email',
   fields: [
     {
+      type: 'row',
       fields: [
         {
           ...name,
@@ -274,7 +276,6 @@ const Email: Block = {
           },
         },
       ],
-      type: 'row',
     },
     width,
     required,
@@ -283,12 +284,13 @@ const Email: Block = {
     plural: 'Email Fields',
     singular: 'Email',
   },
-  slug: 'email',
 }
 
 const State: Block = {
+  slug: 'state',
   fields: [
     {
+      type: 'row',
       fields: [
         {
           ...name,
@@ -303,7 +305,6 @@ const State: Block = {
           },
         },
       ],
-      type: 'row',
     },
     width,
     required,
@@ -312,12 +313,13 @@ const State: Block = {
     plural: 'State Fields',
     singular: 'State',
   },
-  slug: 'state',
 }
 
 const Country: Block = {
+  slug: 'country',
   fields: [
     {
+      type: 'row',
       fields: [
         {
           ...name,
@@ -332,7 +334,6 @@ const Country: Block = {
           },
         },
       ],
-      type: 'row',
     },
     width,
     required,
@@ -341,12 +342,13 @@ const Country: Block = {
     plural: 'Country Fields',
     singular: 'Country',
   },
-  slug: 'country',
 }
 
 const Checkbox: Block = {
+  slug: 'checkbox',
   fields: [
     {
+      type: 'row',
       fields: [
         {
           ...name,
@@ -361,9 +363,9 @@ const Checkbox: Block = {
           },
         },
       ],
-      type: 'row',
     },
     {
+      type: 'row',
       fields: [
         {
           ...width,
@@ -378,19 +380,17 @@ const Checkbox: Block = {
           },
         },
       ],
-      type: 'row',
     },
     {
       name: 'defaultValue',
-      label: 'Default Value',
       type: 'checkbox',
+      label: 'Default Value',
     },
   ],
   labels: {
     plural: 'Checkbox Fields',
     singular: 'Checkbox',
   },
-  slug: 'checkbox',
 }
 
 const Payment = (fieldConfig: PaymentFieldConfig): Block => {
@@ -398,16 +398,18 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
   if (fieldConfig?.paymentProcessor) {
     paymentProcessorField = {
       name: 'paymentProcessor',
+      type: 'select',
       label: 'Payment Processor',
       options: [],
-      type: 'select',
       ...fieldConfig.paymentProcessor,
     }
   }
 
   const fields = {
+    slug: 'payment',
     fields: [
       {
+        type: 'row',
         fields: [
           {
             ...name,
@@ -422,9 +424,9 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             },
           },
         ],
-        type: 'row',
       },
       {
+        type: 'row',
         fields: [
           {
             ...width,
@@ -434,30 +436,31 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
           },
           {
             name: 'basePrice',
+            type: 'number',
             admin: {
               width: '50%',
             },
             label: 'Base Price',
-            type: 'number',
           },
         ],
-        type: 'row',
       },
       paymentProcessorField,
       {
         name: 'priceConditions',
+        type: 'array',
         fields: [
           {
             name: 'fieldToUse',
+            type: 'text',
             admin: {
               components: {
                 Field: DynamicFieldSelector,
               },
             },
-            type: 'text',
           },
           {
             name: 'condition',
+            type: 'select',
             defaultValue: 'hasValue',
             label: 'Condition',
             options: [
@@ -474,19 +477,19 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
                 value: 'notEquals',
               },
             ],
-            type: 'select',
           },
           {
             name: 'valueForCondition',
+            type: 'text',
             admin: {
               condition: (_: any, { condition }: any) =>
                 condition === 'equals' || condition === 'notEquals',
             },
             label: 'Value',
-            type: 'text',
           },
           {
             name: 'operator',
+            type: 'select',
             defaultValue: 'add',
             options: [
               {
@@ -506,10 +509,10 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
                 value: 'divide',
               },
             ],
-            type: 'select',
           },
           {
             name: 'valueType',
+            type: 'radio',
             admin: {
               width: '100%',
             },
@@ -525,17 +528,16 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
                 value: 'valueOfField',
               },
             ],
-            type: 'radio',
           },
           {
             name: 'valueForOperator',
+            type: 'text',
             admin: {
               components: {
                 Field: DynamicPriceSelector,
               },
             },
             label: 'Value',
-            type: 'text',
           },
         ],
         label: 'Price Conditions',
@@ -543,7 +545,6 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
           plural: 'Price Conditions',
           singular: 'Price Condition',
         },
-        type: 'array',
       },
       required,
     ].filter(Boolean) as Field[],
@@ -551,25 +552,24 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
       plural: 'Payment Fields',
       singular: 'Payment',
     },
-    slug: 'payment',
   }
 
   return fields
 }
 
 const Message: Block = {
+  slug: 'message',
   fields: [
     {
       name: 'message',
-      localized: true,
       type: 'richText',
+      localized: true,
     },
   ],
   labels: {
     plural: 'Message Blocks',
     singular: 'Message',
   },
-  slug: 'message',
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

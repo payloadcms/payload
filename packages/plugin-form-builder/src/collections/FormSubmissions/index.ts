@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload/types'
 
-import type { PluginConfig } from '../../types'
+import type { PluginConfig } from '../../types.js'
 
-import createCharge from './hooks/createCharge'
-import sendEmail from './hooks/sendEmail'
+import createCharge from './hooks/createCharge.js'
+import sendEmail from './hooks/sendEmail.js'
 
 // all settings can be overridden by the config
 export const generateSubmissionCollection = (formConfig: PluginConfig): CollectionConfig => {
@@ -31,7 +31,7 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
         },
         relationTo: formSlug,
         required: true,
-        validate: async (value, { payload, req }) => {
+        validate: async (value, { req: { payload }, req }) => {
           /* Don't run in the client side */
           if (!payload) return true
 

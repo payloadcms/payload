@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
-import type { Breadcrumb, PluginConfig } from '../types'
+import type { Breadcrumb, PluginConfig } from '../types.js'
 
 const formatBreadcrumb = (
   pluginConfig: PluginConfig,
@@ -24,9 +24,9 @@ const formatBreadcrumb = (
   }
 
   return {
+    doc: lastDoc.id as string,
     label,
     url,
-    doc: lastDoc.id as string,
   }
 }
 

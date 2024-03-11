@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/swcrc",
-  "sourceMaps": true,
+  "sourceMaps": "inline",
   "jsc": {
     "target": "esnext",
     "parser": {

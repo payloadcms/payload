@@ -114,7 +114,7 @@ describe('Collections - Uploads', () => {
 
         // Check api response
         expect(doc.mimeType).toEqual('image/png')
-        expect(sizes.maintainedAspectRatio.url).toContain('/media/image')
+        expect(sizes.maintainedAspectRatio.url).toContain('/api/media/file/image')
         expect(sizes.maintainedAspectRatio.url).toContain('.png')
         expect(sizes.maintainedAspectRatio.width).toEqual(1024)
         expect(sizes.maintainedAspectRatio.height).toEqual(1024)

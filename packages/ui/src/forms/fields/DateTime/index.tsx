@@ -6,7 +6,7 @@ import React, { useCallback } from 'react'
 
 import type { Props } from './types.js'
 
-import DatePickerField from '../../../elements/DatePicker/index.js'
+import { DatePickerField } from '../../../elements/DatePicker/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import useField from '../../useField/index.js'
 import { fieldBaseClass } from '../shared.js'

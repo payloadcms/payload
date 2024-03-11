@@ -1,8 +1,8 @@
 import type { CollectionAfterChangeHook, CollectionConfig, PayloadRequest } from 'payload/types'
 
-import type { PluginConfig } from '../types'
+import type { PluginConfig } from '../types.js'
 
-import populateBreadcrumbs from '../utilities/populateBreadcrumbs'
+import populateBreadcrumbs from '../utilities/populateBreadcrumbs.js'
 
 type ResaveArgs = {
   collection: CollectionConfig

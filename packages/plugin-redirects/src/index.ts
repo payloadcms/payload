@@ -1,8 +1,8 @@
 import type { Config } from 'payload/config'
 
-import type { PluginConfig } from './types'
+import type { PluginConfig } from './types.js'
 
-import deepMerge from './deepMerge'
+import deepMerge from './deepMerge.js'
 
 const redirects =
   (pluginConfig: PluginConfig) =>
@@ -12,6 +12,7 @@ const redirects =
       ...(incomingConfig?.collections || []),
       deepMerge(
         {
+          slug: 'redirects',
           access: {
             read: (): boolean => true,
           },
@@ -21,16 +22,18 @@ const redirects =
           fields: [
             {
               name: 'from',
+              type: 'text',
               index: true,
               label: 'From URL',
               required: true,
-              type: 'text',
             },
             {
               name: 'to',
+              type: 'group',
               fields: [
                 {
                   name: 'type',
+                  type: 'radio',
                   admin: {
                     layout: 'horizontal',
                   },
@@ -46,33 +49,30 @@ const redirects =
                       value: 'custom',
                     },
                   ],
-                  type: 'radio',
                 },
                 {
                   name: 'reference',
+                  type: 'relationship',
                   admin: {
                     condition: (_, siblingData) => siblingData?.type === 'reference',
                   },
                   label: 'Document to redirect to',
                   relationTo: pluginConfig?.collections || [],
                   required: true,
-                  type: 'relationship',
                 },
                 {
                   name: 'url',
+                  type: 'text',
                   admin: {
                     condition: (_, siblingData) => siblingData?.type === 'custom',
                   },
                   label: 'Custom URL',
                   required: true,
-                  type: 'text',
                 },
               ],
               label: false,
-              type: 'group',
             },
           ],
-          slug: 'redirects',
         },
         pluginConfig?.overrides || {},
       ),

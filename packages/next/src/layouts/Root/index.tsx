@@ -1,6 +1,5 @@
 import type { SanitizedConfig } from 'payload/types'
 
-import { auth } from '@payloadcms/next/utilities/auth'
 import { translations } from '@payloadcms/translations/client'
 import { RootProvider, buildComponentMap } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
@@ -11,6 +10,7 @@ import React from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
 import { ClearRouteCache } from '../../elements/ClearRouteCache/index.js'
+import { auth } from '../../utilities/auth.js'
 import { getPayload } from '../../utilities/getPayload.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { DefaultEditView } from '../../views/Edit/Default/index.js'

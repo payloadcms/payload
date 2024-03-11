@@ -33,8 +33,6 @@ const withPayload = (nextConfig = {}) => {
           ...(incomingWebpackConfig?.externals || []),
           'drizzle-kit',
           'drizzle-kit/payload',
-          'pino',
-          'pino-pretty',
           'sharp',
           'libsql',
         ],

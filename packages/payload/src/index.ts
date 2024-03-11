@@ -273,13 +273,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     [slug: string]: any // TODO: Type this
   } = {}
 
-  delete<T extends keyof TGeneratedTypes['collections']>(
-    options: DeleteOptions<T>,
-  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
-    const { deleteLocal } = localOperations
-    return deleteLocal<T>(this, options)
-  }
-
   /**
    * @description delete one or more documents
    * @param options
@@ -293,12 +286,22 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     options: DeleteManyOptions<T>,
   ): Promise<BulkOperationResult<T>>
 
+  delete<T extends keyof TGeneratedTypes['collections']>(
+    options: DeleteOptions<T>,
+  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
+    const { deleteLocal } = localOperations
+    return deleteLocal<T>(this, options)
+  }
+
   /**
    * @description Initializes Payload
    * @param options
    */
-  // @ts-expect-error // TODO: TypeScript hallucinating again. fix later
   async init(options: InitOptions): Promise<Payload> {
+    if (!options?.config) {
+      throw new Error('Error: the payload config is required to initialize payload.')
+    }
+
     this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
 
     this.config = await options.config
@@ -421,7 +424,11 @@ if (!cached) {
   cached = global._payload = { payload: null, promise: null }
 }
 
-export const getPayload = async (options?: InitOptions): Promise<BasePayload<GeneratedTypes>> => {
+export const getPayload = async (options: InitOptions): Promise<BasePayload<GeneratedTypes>> => {
+  if (!options?.config) {
+    throw new Error('Error: the payload config is required for getPayload to work.')
+  }
+
   if (cached.payload) {
     return cached.payload
   }

@@ -1,5 +1,4 @@
-import type { FormState } from '@payloadcms/ui'
-import type { UIField } from 'payload/types'
+import type { FormState, UIField } from 'payload/types'
 
 import { useConfig, useWatchForm } from '@payloadcms/ui'
 import React from 'react'

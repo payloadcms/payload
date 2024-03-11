@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-redirects",
-  "version": "1.0.1",
+  "version": "3.0.0-alpha.44",
   "homepage:": "https://payloadcms.com",
   "repository": "git@github.com:payloadcms/plugin-redirects.git",
   "description": "Redirects plugin for Payload",
@@ -27,7 +27,7 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.18.5 || ^1.0.0 || ^2.0.0"
+    "payload": "workspace:*"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

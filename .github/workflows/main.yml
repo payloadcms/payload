@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [ opened, reopened, synchronize ]
   push:
-    branches: ['main', 'feat/next-poc']
+    branches: ['main', 'alpha']
 
 jobs:
   changes:
@@ -195,9 +195,6 @@ jobs:
         run: |
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
         if: matrix.database == 'supabase'
-
-      - name: Component Tests
-        run: pnpm test:components
 
       - name: Integration Tests
         run: pnpm test:int

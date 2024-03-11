@@ -7,7 +7,7 @@ import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/i
 import useDebounce from '../../../hooks/useDebounce.js'
 import { Button } from '../../Button/index.js'
 import ReactSelect from '../../ReactSelect/index.js'
-import Date from './Date/index.js'
+import { DateField } from './Date/index.js'
 import Number from './Number/index.js'
 import Relationship from './Relationship/index.js'
 import { Select } from './Select/index.js'
@@ -15,7 +15,7 @@ import Text from './Text/index.js'
 import './index.scss'
 
 const valueFields = {
-  Date,
+  DateField,
   Number,
   Relationship,
   Select,

@@ -12,6 +12,10 @@ if (!cached) {
 }
 
 export const getPayload = async (options: InitOptions): Promise<Payload> => {
+  if (!options?.config) {
+    throw new Error('Error: the payload config is required for getPayload to work.')
+  }
+
   if (cached.payload) {
     const config = await options.config
 
@@ -47,7 +51,8 @@ export const getPayload = async (options: InitOptions): Promise<Payload> => {
 
     if (process.env.NODE_ENV !== 'production') {
       try {
-        const ws = new WebSocket('ws://localhost:3000/_next/webpack-hmr')
+        const port = process.env.PORT || '3000'
+        const ws = new WebSocket(`ws://localhost:${port}/_next/webpack-hmr`)
 
         ws.onmessage = (event) => {
           if (typeof event.data === 'string') {

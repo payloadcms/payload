@@ -1,6 +1,10 @@
+import type { ReactDatePickerProps } from 'react-datepicker'
+
 import * as Locales from 'date-fns/locale'
 import React from 'react'
-import DatePicker, { registerLocale } from 'react-datepicker'
+import ReactDatePickerDefaultImport, { registerLocale } from 'react-datepicker'
+const ReactDatePicker = (ReactDatePickerDefaultImport.default ||
+  ReactDatePickerDefaultImport) as unknown as typeof ReactDatePickerDefaultImport.default
 import 'react-datepicker/dist/react-datepicker.css'
 
 import type { Props } from './types.js'
@@ -61,7 +65,7 @@ const DateTime: React.FC<Props> = (props) => {
     if (typeof onChangeFromProps === 'function') onChangeFromProps(newDate)
   }
 
-  const dateTimePickerProps = {
+  const dateTimePickerProps: ReactDatePickerProps = {
     customInputRef: 'ref',
     dateFormat,
     disabled: readOnly,
@@ -72,6 +76,7 @@ const DateTime: React.FC<Props> = (props) => {
     monthsShown: Math.min(2, monthsToShow),
     onChange,
     placeholderText,
+    popperPlacement: 'bottom-start',
     selected: value && new Date(value),
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
@@ -100,16 +105,10 @@ const DateTime: React.FC<Props> = (props) => {
         <CalendarIcon />
       </div>
       <div className={`${baseClass}__input-wrapper`}>
-        <DatePicker
+        <ReactDatePicker
           {...dateTimePickerProps}
           dropdownMode="select"
           locale={locale}
-          popperModifiers={[
-            {
-              name: 'preventOverflow',
-              enabled: true,
-            },
-          ]}
           showMonthDropdown
           showYearDropdown
         />

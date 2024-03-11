@@ -1,8 +1,8 @@
-import type { Email, FormattedEmail, PluginConfig } from '../../../types'
+import type { Email, FormattedEmail, PluginConfig } from '../../../types.js'
 
-import { serializeLexical } from '../../../utilities/lexical/serializeLexical'
-import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys'
-import { serializeSlate } from '../../../utilities/slate/serializeSlate'
+import { serializeLexical } from '../../../utilities/lexical/serializeLexical.js'
+import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys.js'
+import { serializeSlate } from '../../../utilities/slate/serializeSlate.js'
 
 const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promise<any> => {
   const { data, operation, req } = beforeChangeData

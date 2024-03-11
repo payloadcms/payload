@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload/types'
 
-import type { PluginConfig } from '../types'
+import type { PluginConfig } from '../types.js'
 
-import formatBreadcrumb from './formatBreadcrumb'
-import getParents from './getParents'
+import formatBreadcrumb from './formatBreadcrumb.js'
+import getParents from './getParents.js'
 
 const populateBreadcrumbs = async (
   req: any,

@@ -1,15 +1,16 @@
 import type { CollectionConfig } from 'payload/types'
 
-import deepMerge from 'ts-deepmerge'
+import deepMerge from 'deepmerge'
 
-import type { SearchConfig } from '../types'
+import type { SearchConfig } from '../types.js'
 
-import { LinkToDoc } from './ui'
+import { LinkToDoc } from './ui/index.js'
 
 // all settings can be overridden by the config
 export const generateSearchCollection = (searchConfig: SearchConfig): CollectionConfig =>
   deepMerge(
     {
+      slug: 'search',
       access: {
         create: (): boolean => false,
         read: (): boolean => true,
@@ -24,20 +25,21 @@ export const generateSearchCollection = (searchConfig: SearchConfig): Collection
       fields: [
         {
           name: 'title',
+          type: 'text',
           admin: {
             readOnly: true,
           },
-          type: 'text',
         },
         {
           name: 'priority',
+          type: 'number',
           admin: {
             position: 'sidebar',
           },
-          type: 'number',
         },
         {
           name: 'doc',
+          type: 'relationship',
           admin: {
             position: 'sidebar',
             readOnly: true,
@@ -46,24 +48,22 @@ export const generateSearchCollection = (searchConfig: SearchConfig): Collection
           maxDepth: 0,
           relationTo: searchConfig?.collections || [],
           required: true,
-          type: 'relationship',
         },
         {
           name: 'docUrl',
+          type: 'ui',
           admin: {
             components: {
               Field: LinkToDoc,
             },
             position: 'sidebar',
           },
-          type: 'ui',
         },
       ],
       labels: {
         plural: 'Search Results',
         singular: 'Search Result',
       },
-      slug: 'search',
     },
     searchConfig?.searchOverrides || {},
   )

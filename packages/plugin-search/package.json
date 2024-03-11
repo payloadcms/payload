@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "1.1.0",
+  "version": "3.0.0-alpha.44",
   "homepage:": "https://payloadcms.com",
   "repository": "git@github.com:payloadcms/plugin-search.git",
   "description": "Search plugin for Payload",
@@ -27,12 +27,12 @@
   "author": "dev@trbl.design",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.18.5 || ^1.0.0 || ^2.0.0",
+    "payload": "workspace:*",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
     "@payloadcms/ui": "workspace:*",
-    "ts-deepmerge": "^2.0.1"
+    "deepmerge": "4.3.1"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

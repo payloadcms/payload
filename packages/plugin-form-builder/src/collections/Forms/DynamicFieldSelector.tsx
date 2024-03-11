@@ -34,5 +34,7 @@ export const DynamicFieldSelector: React.FC<TextField> = (props) => {
     }
   }, [fields, getDataByPath])
 
+  // TODO: label from config is Record<string, string> | false | string
+  //  but the FormFieldBase type has only label?: string, changing FormFieldBase breaks other ui components
   return <Select {...props} options={options} />
 }

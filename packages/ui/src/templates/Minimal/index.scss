@@ -9,6 +9,8 @@
   margin-left: auto;
   margin-right: auto;
   min-height: 100%;
+  background-color: var(--theme-bg-color);
+  color: var(--theme-text);
 
   &--width-normal {
     .template-minimal__wrap {

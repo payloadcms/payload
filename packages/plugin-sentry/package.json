@@ -28,7 +28,7 @@
     "dist"
   ],
   "peerDependencies": {
-    "payload": "^1.10.1 || ^2.0.0",
+    "payload": "workspace:*",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
