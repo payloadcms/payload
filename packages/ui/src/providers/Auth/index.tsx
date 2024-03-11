@@ -51,9 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const redirectToInactivityRoute = useCallback(() => {
     if (window.location.pathname.startsWith(admin)) {
-      const redirectParam = `?redirect=${encodeURIComponent(
-        window.location.pathname.replace(admin, ''),
-      )}`
+      const redirectParam = `?redirect=${encodeURIComponent(window.location.pathname)}`
       router.replace(`${admin}${logoutInactivityRoute}${redirectParam}`)
     } else {
       router.replace(`${admin}${logoutInactivityRoute}`)

@@ -56,9 +56,7 @@ export const initPage = async ({
       ? `?${qs.stringify(searchParams)}`
       : ''
 
-    redirect(
-      `${routes.admin}/login?redirect=${payload.config.routes.admin + routeWithoutAdmin + stringifiedSearchParams}`,
-    )
+    redirect(`${routes.admin}/login?redirect=${route + stringifiedSearchParams}`)
   }
 
   const defaultLocale =
