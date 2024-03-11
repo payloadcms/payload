@@ -16,6 +16,7 @@ type Result = {
 export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   const port = await getPort()
   const serverURL = `http://localhost:${port}`
+  process.env.NODE_OPTIONS = '--no-deprecation'
   process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, './config.js')
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.PORT = String(port)
