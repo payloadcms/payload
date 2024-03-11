@@ -57,7 +57,7 @@ export const traverseFields = ({
           const blockSchemaPath = `${schemaPath}.${field.name}.${block.slug}`
           fieldsToSet = sanitizeFields({
             config,
-            fields: block.fields,
+            fields: [...block.fields, { name: 'blockName', type: 'text' }],
             validRelationships,
           })
           schemaMap.set(blockSchemaPath, fieldsToSet)
