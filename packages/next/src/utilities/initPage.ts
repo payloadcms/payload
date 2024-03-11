@@ -40,8 +40,7 @@ export const initPage = async ({
     payload,
   })
 
-  const routeWithoutAdmin = route.replace(payload.config.routes.admin, '')
-  const routeSegments = routeWithoutAdmin.split('/').filter(Boolean)
+  const routeSegments = route.replace(payload.config.routes.admin, '').split('/').filter(Boolean)
   const [entityType, entitySlug, createOrID] = routeSegments
   const collectionSlug = entityType === 'collections' ? entitySlug : undefined
   const globalSlug = entityType === 'globals' ? entitySlug : undefined
