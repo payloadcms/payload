@@ -21,6 +21,11 @@ export const PostsCollection: CollectionConfig = {
       type: 'richText',
     },
     {
+      name: 'relationship',
+      type: 'relationship',
+      relationTo: ['posts'],
+    },
+    {
       name: 'associatedMedia',
       access: {
         create: () => true,

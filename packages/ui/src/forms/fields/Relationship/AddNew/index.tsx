@@ -10,12 +10,11 @@ import type { Props } from './types.js'
 
 import { Button } from '../../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer/index.js'
-import Popup from '../../../../elements/Popup/index.js'
 import * as PopupList from '../../../../elements/Popup/PopupButtonList/index.js'
+import Popup from '../../../../elements/Popup/index.js'
 import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { Plus } from '../../../../icons/Plus/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
-import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.scss'
 import { useRelatedCollections } from './useRelatedCollections.js'
@@ -23,7 +22,7 @@ import { useRelatedCollections } from './useRelatedCollections.js'
 const baseClass = 'relationship-add-new'
 
 export const AddNewRelation: React.FC<Props> = ({
-  dispatchOptions,
+  // dispatchOptions,
   hasMany,
   path,
   relationTo,
@@ -41,7 +40,6 @@ export const AddNewRelation: React.FC<Props> = ({
   const [popupOpen, setPopupOpen] = useState(false)
   const { i18n, t } = useTranslation()
   const [showTooltip, setShowTooltip] = useState(false)
-  const config = useConfig()
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] = useDocumentDrawer(
     {
@@ -87,7 +85,7 @@ export const AddNewRelation: React.FC<Props> = ({
         setSelectedCollection(undefined)
       }
     },
-    [relationTo, collectionConfig, dispatchOptions, i18n, hasMany, setValue, value, config],
+    [relationTo, collectionConfig, hasMany, setValue, value],
   )
 
   const onPopupToggle = useCallback((state) => {
