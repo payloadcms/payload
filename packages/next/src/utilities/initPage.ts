@@ -40,7 +40,8 @@ export const initPage = async ({
     payload,
   })
 
-  const routeSegments = route.replace(payload.config.routes.admin, '').split('/').filter(Boolean)
+  const routeWithoutAdmin = route.replace(payload.config.routes.admin, '')
+  const routeSegments = routeWithoutAdmin.split('/').filter(Boolean)
   const [entityType, entitySlug, createOrID] = routeSegments
   const collectionSlug = entityType === 'collections' ? entitySlug : undefined
   const globalSlug = entityType === 'globals' ? entitySlug : undefined
@@ -55,7 +56,9 @@ export const initPage = async ({
       ? `?${qs.stringify(searchParams)}`
       : ''
 
-    redirect(`${routes.admin}/login?redirect=${route + stringifiedSearchParams}`)
+    redirect(
+      `${routes.admin}/login?redirect=${payload.config.routes.admin + routeWithoutAdmin + stringifiedSearchParams}`,
+    )
   }
 
   const defaultLocale =
