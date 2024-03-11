@@ -22,7 +22,6 @@ export const getFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
 }
 
 export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
-  const { locale, t, user } = req
   const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
 
   // TODO: run ADMIN access control for user
@@ -83,6 +82,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
         equals: docPreferencesKey,
       },
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   })) as any as { docs: { value: DocumentPreferences }[] }
 
   const result = await buildStateFromSchema({
