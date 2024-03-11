@@ -68,6 +68,7 @@
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "devDependencies": {
+    "drizzle-kit": "0.20.14-1f2c838",
     "@aws-sdk/client-s3": "^3.142.0",
     "@next/bundle-analyzer": "^14.1.0",
     "@octokit/core": "^5.1.0",
@@ -180,6 +181,9 @@
       "uuid": "3.4.0",
       "abab": "2",
       "domexception": "4"
+    },
+    "patchedDependencies": {
+      "playwright@1.42.1": "patches/playwright@1.42.1.patch"
     }
   },
   "packageManager": "pnpm@8.15.4+sha256.cea6d0bdf2de3a0549582da3983c70c92ffc577ff4410cbf190817ddc35137c2"
