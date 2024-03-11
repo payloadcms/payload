@@ -1,8 +1,10 @@
 @import '../../scss/styles.scss';
 
 .template-default {
-  [dir='rtl']
-  &__nav-toggler-wrapper {
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+
+  [dir='rtl'] &__nav-toggler-wrapper {
     left: unset;
     right: 0;
   }
