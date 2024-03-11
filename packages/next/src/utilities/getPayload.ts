@@ -19,8 +19,11 @@ export const getPayload = async (options: InitOptions): Promise<Payload> => {
   if (cached.payload) {
     const config = await options.config
 
-    if (cached.reload) {
-      cached.reload = false
+    if (cached.reload === true) {
+      let resolve
+
+      cached.reload = new Promise((res) => (resolve = res))
+
       if (typeof cached.payload.db.destroy === 'function') {
         await cached.payload.db.destroy()
       }
@@ -37,6 +40,11 @@ export const getPayload = async (options: InitOptions): Promise<Payload> => {
 
       await cached.payload.db.init()
       await cached.payload.db.connect({ hotReload: true })
+      resolve()
+    }
+
+    if (cached.reload instanceof Promise) {
+      await cached.reload
     }
 
     return cached.payload
