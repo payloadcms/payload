@@ -17,6 +17,6 @@
 		"noImage": "Sem imagem",
 		"checksPassing": "{{current}}/{{max}} checagens passando",
 		"preview": "Visualizar",
-		"previewDescription": "Exact result listings may vary based on content and search relevancy."
+		"previewDescription": "Resultados exatos podem variar com base no conteúdo e na relevância da pesquisa."
 	}
 }
