@@ -10,6 +10,8 @@ export const startMemoryDB = async (
 ): Promise<SanitizedConfig> => {
   const config = await configPromise
 
+  process.env.NODE_OPTIONS = '--no-deprecation'
+
   console.log('---- CONNECTING TO MEMORY DB ----')
 
   switch (process.env.PAYLOAD_DATABASE) {
