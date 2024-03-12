@@ -26,10 +26,25 @@ export interface Args {
 export const s3Adapter =
   ({ acl, bucket, config = {} }: Args): Adapter =>
   ({ collection, prefix }): GeneratedAdapter => {
+    if (!AWS) {
+      throw new Error(
+        'The packages @aws-sdk/client-s3, @aws-sdk/lib-storage and aws-crt are not installed, but are required for the plugin-cloud-storage S3 adapter. Please install them.',
+      )
+    }
     let storageClient: AWS.S3 | null = null
     const getStorageClient: () => AWS.S3 = () => {
       if (storageClient) return storageClient
-      storageClient = new AWS.S3(config)
+      try {
+        storageClient = new AWS.S3(config)
+      } catch (error) {
+        if (/is not a constructor$/.test(error.message)) {
+          throw new Error(
+            'The packages @aws-sdk/client-s3, @aws-sdk/lib-storage and aws-crt are not installed, but are required for the plugin-cloud-storage S3 adapter. Please install them.',
+          )
+        }
+        // Re-throw other unexpected errors.
+        throw error
+      }
       return storageClient
     }
 
