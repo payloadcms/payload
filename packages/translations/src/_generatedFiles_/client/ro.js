@@ -51,6 +51,7 @@ export default {
     previewing: 'A existat o problemă la previzualizarea acestui document.',
     unableToDeleteCount: 'Nu se poate șterge {{count}} din {{total}} {{label}}.',
     unableToUpdateCount: 'Nu se poate șterge {{count}} din {{total}} {{label}}.',
+    unauthorized: 'neautorizat, trebuie să vă conectați pentru a face această cerere.',
     unknown: 'S-a produs o eroare necunoscută.',
     unspecific: 'S-a produs o eroare.',
   },

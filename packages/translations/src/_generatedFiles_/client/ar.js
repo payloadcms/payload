@@ -51,6 +51,7 @@ export default {
     previewing: 'حدث خطأ في اثناء معاينة هذا المستند.',
     unableToDeleteCount: 'يتعذّر حذف {{count}} من {{total}} {{label}}.',
     unableToUpdateCount: 'يتعذّر تحديث {{count}} من {{total}} {{label}}.',
+    unauthorized: 'غير مصرّح لك ، عليك أن تقوم بتسجيل الدّخول لتتمكّن من تقديم هذا الطّلب.',
     unknown: 'حدث خطأ غير معروف.',
     unspecific: 'حدث خطأ.',
   },

@@ -50,6 +50,7 @@ export default {
     previewing: '预览文件时出现了问题。',
     unableToDeleteCount: '无法从 {{total}} {{label}} 中删除 {{count}}。',
     unableToUpdateCount: '无法更新 {{count}} 个，共 {{total}} 个 {{label}}。',
+    unauthorized: '未经授权，您必须登录才能提出这个请求。',
     unknown: '发生了一个未知的错误。',
     unspecific: '发生了一个错误。',
   },

@@ -50,6 +50,7 @@ export default {
     previewing: 'เกิดปัญหาระหว่างการแสดงตัวอย่างเอกสาร',
     unableToDeleteCount: 'ไม่สามารถลบ {{count}} จาก {{total}} {{label}}',
     unableToUpdateCount: 'ไม่สามารถอัปเดต {{count}} จาก {{total}} {{label}}',
+    unauthorized: 'คุณไม่ได้รับอนุญาต กรุณาเข้าสู่ระบบเพื่อทำคำขอนี้',
     unknown: 'เกิดปัญหาบางอย่างที่ไม่ทราบสาเหตุ',
     unspecific: 'เกิดปัญหาบางอย่าง',
   },

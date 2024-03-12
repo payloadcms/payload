@@ -51,6 +51,7 @@ export default {
     previewing: '이 문서를 미리보는 중에 문제가 발생했습니다.',
     unableToDeleteCount: '총 {{total}}개 중 {{count}}개의 {{label}}을(를) 삭제할 수 없습니다.',
     unableToUpdateCount: '총 {{total}}개 중 {{count}}개의 {{label}}을(를) 업데이트할 수 없습니다.',
+    unauthorized: '권한 없음, 이 요청을 수행하려면 로그인해야 합니다.',
     unknown: '알 수 없는 오류가 발생했습니다.',
     unspecific: '오류가 발생했습니다.',
   },

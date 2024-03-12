@@ -51,6 +51,7 @@ export default {
     previewing: 'Det uppstod ett problem när det här dokumentet skulle förhandsgranskas.',
     unableToDeleteCount: 'Det gick inte att ta bort {{count}} av {{total}} {{label}}.',
     unableToUpdateCount: 'Det gick inte att uppdatera {{count}} av {{total}} {{label}}.',
+    unauthorized: 'Obehörig, du måste vara inloggad för att göra denna begäran.',
     unknown: 'Ett okänt fel har uppstått.',
     unspecific: 'Ett fel har uppstått.',
   },

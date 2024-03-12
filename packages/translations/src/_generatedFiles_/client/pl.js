@@ -51,6 +51,7 @@ export default {
     previewing: 'Wystąpił problem podczas podglądu tego dokumentu.',
     unableToDeleteCount: 'Nie można usunąć {{count}} z {{total}} {{label}}.',
     unableToUpdateCount: 'Nie można zaktualizować {{count}} z {{total}} {{label}}.',
+    unauthorized: 'Brak dostępu, musisz być zalogowany.',
     unknown: 'Wystąpił nieznany błąd.',
     unspecific: 'Wystąpił błąd',
   },

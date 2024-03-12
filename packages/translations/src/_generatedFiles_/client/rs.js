@@ -51,6 +51,7 @@ export default {
     previewing: 'Постоји проблем при прегледу овог документа.',
     unableToDeleteCount: 'Није могуће избрисати {{count}} од {{total}} {{label}}.',
     unableToUpdateCount: 'Није могуће ажурирати {{count}} од {{total}} {{label}}.',
+    unauthorized: 'Нисте ауторизовани да бисте упутили овај захтев.',
     unknown: 'Дошло је до непознате грешке.',
     unspecific: 'Дошло је до грешке.',
   },

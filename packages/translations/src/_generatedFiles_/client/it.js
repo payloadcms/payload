@@ -53,6 +53,7 @@ export default {
     previewing: "Si è verificato un problema durante l'anteprima di questo documento.",
     unableToDeleteCount: 'Impossibile eliminare {{count}} su {{total}} {{label}}.',
     unableToUpdateCount: 'Impossibile aggiornare {{count}} su {{total}} {{label}}.',
+    unauthorized: 'Non autorizzato, devi essere loggato per effettuare questa richiesta.',
     unknown: 'Si è verificato un errore sconosciuto.',
     unspecific: 'Si è verificato un errore.',
   },

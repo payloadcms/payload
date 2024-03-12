@@ -51,6 +51,7 @@ export default {
     previewing: 'Při náhledu tohoto dokumentu došlo k chybě.',
     unableToDeleteCount: 'Nelze smazat {{count}} z {{total}} {{label}}',
     unableToUpdateCount: 'Nelze aktualizovat {{count}} z {{total}} {{label}}.',
+    unauthorized: 'Neautorizováno, pro zadání tohoto požadavku musíte být přihlášeni.',
     unknown: 'Došlo k neznámé chybě.',
     unspecific: 'Došlo k chybě.',
   },

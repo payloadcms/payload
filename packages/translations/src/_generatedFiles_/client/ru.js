@@ -51,6 +51,7 @@ export default {
     previewing: 'При предварительном просмотре этого документа возникла проблема.',
     unableToDeleteCount: 'Не удалось удалить {{count}} из {{total}} {{label}}.',
     unableToUpdateCount: 'Не удалось обновить {{count}} из {{total}} {{label}}.',
+    unauthorized: 'Нет доступа, вы должны войти, чтобы сделать этот запрос.',
     unknown: 'Произошла неизвестная ошибка.',
     unspecific: 'Произошла ошибка.',
   },

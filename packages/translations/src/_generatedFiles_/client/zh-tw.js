@@ -52,6 +52,7 @@ export default {
     previewing: '預覽文件時出現了問題。',
     unableToDeleteCount: '無法從 {{total}} 個中刪除 {{count}} 個 {{label}}。',
     unableToUpdateCount: '無法從 {{total}} 個中更新 {{count}} 個 {{label}}。',
+    unauthorized: '未經授權，您必須登錄才能提出這個請求。',
     unknown: '發生了一個未知的錯誤。',
     unspecific: '發生了一個錯誤。',
   },

@@ -51,6 +51,7 @@ export default {
     previewing: 'Ocurrió un problema al previsualizar este documento.',
     unableToDeleteCount: 'No se pudo eliminar {{count}} de {{total}} {{label}}.',
     unableToUpdateCount: 'No se puede actualizar {{count}} de {{total}} {{label}}.',
+    unauthorized: 'No autorizado, debes iniciar sesión para realizar esta solicitud.',
     unknown: 'Ocurrió un error desconocido.',
     unspecific: 'Ocurrió un error.',
   },

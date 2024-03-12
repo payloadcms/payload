@@ -51,6 +51,7 @@ export default {
     previewing: 'Er was een probleem met het voorvertonen van dit document.',
     unableToDeleteCount: 'Kan {{count}} van {{total}} {{label}} niet verwijderen.',
     unableToUpdateCount: 'Kan {{count}} van {{total}} {{label}} niet updaten.',
+    unauthorized: 'Ongeautoriseerd, u moet ingelogd zijn om dit verzoek te doen.',
     unknown: 'Er is een onbekende fout opgetreden.',
     unspecific: 'Er is een fout opgetreden.',
   },

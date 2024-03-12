@@ -50,6 +50,7 @@ export default {
     previewing: 'مشکلی در پیش‌نمایش این رسانه رخ داد.',
     unableToDeleteCount: 'نمی‌توان {{count}} از {{total}} {{label}} را حذف کرد.',
     unableToUpdateCount: 'امکان به روز رسانی {{count}} خارج از {{total}} {{label}} وجود ندارد.',
+    unauthorized: 'درخواست نامعتبر، جهت فرستادن این درخواست باید وارد شوید.',
     unknown: 'یک خطای ناشناخته رخ داد.',
     unspecific: 'خطایی رخ داد.',
   },

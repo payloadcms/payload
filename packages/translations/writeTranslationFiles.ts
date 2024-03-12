@@ -135,6 +135,7 @@ const clientTranslationKeys = [
   'error:previewing',
   'error:unableToDeleteCount',
   'error:unableToUpdateCount',
+  'error:unauthorized',
   'error:unknown',
   'error:unspecific',
 
