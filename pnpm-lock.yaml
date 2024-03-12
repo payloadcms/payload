@@ -249,6 +249,9 @@ importers:
       slate:
         specifier: 0.91.4
         version: 0.91.4
+      swc-plugin-transform-remove-imports:
+        specifier: ^1.12.1
+        version: 1.12.1
       tempfile:
         specifier: ^3.0.0
         version: 3.0.0

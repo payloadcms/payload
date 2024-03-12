@@ -68,7 +68,6 @@
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "devDependencies": {
-    "drizzle-kit": "0.20.14-1f2c838",
     "@aws-sdk/client-s3": "^3.142.0",
     "@next/bundle-analyzer": "^14.1.0",
     "@octokit/core": "^5.1.0",
@@ -104,6 +103,7 @@
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "dotenv": "8.6.0",
+    "drizzle-kit": "0.20.14-1f2c838",
     "drizzle-orm": "0.29.4",
     "execa": "5.1.1",
     "form-data": "3.0.1",
@@ -140,6 +140,7 @@
     "simple-git": "^3.20.0",
     "slash": "3.0.0",
     "slate": "0.91.4",
+    "swc-plugin-transform-remove-imports": "^1.12.1",
     "tempfile": "^3.0.0",
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
