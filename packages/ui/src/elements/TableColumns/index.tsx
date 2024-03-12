@@ -99,7 +99,7 @@ export const TableColumnsProvider: React.FC<{
       }
     }
 
-    sync()
+    void sync()
   }, [
     preferenceKey,
     getPreference,

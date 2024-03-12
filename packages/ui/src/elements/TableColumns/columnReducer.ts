@@ -25,6 +25,8 @@ type MOVE = {
 export type Action = MOVE | SET | TOGGLE
 
 export const columnReducer = (state: Column[], action: Action): Column[] => {
+  let newState = [...state]
+
   switch (action.type) {
     case 'toggle': {
       const { column } = action.payload
@@ -40,20 +42,43 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
         return col
       })
 
-      return withToggledColumn
+      newState = withToggledColumn
+      break
     }
     case 'move': {
       const { fromIndex, toIndex } = action.payload
       const withMovedColumn = [...state]
       const [columnToMove] = withMovedColumn.splice(fromIndex, 1)
       withMovedColumn.splice(toIndex, 0, columnToMove)
-      return withMovedColumn
+      newState = withMovedColumn
+      break
     }
     case 'set': {
       const { columns } = action.payload
-      return columns
+      newState = columns
+      break
     }
     default:
-      return state
+      break
   }
+
+  const firstActiveColumnIndex = newState.findIndex((column, index) => {
+    if (column.active && column.accessor !== '_select') {
+      return index
+    }
+  })
+
+  const withFirstLink = newState.map((column, index) => {
+    const isFirstActiveColumn = column.active && firstActiveColumnIndex === index
+
+    return {
+      ...column,
+      cellProps: {
+        ...column.cellProps,
+        link: isFirstActiveColumn,
+      },
+    }
+  }, [])
+
+  return withFirstLink
 }

@@ -62,7 +62,18 @@ module.exports = {
     // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
     'class-methods-use-this': 'off',
     // By default, it errors for unused variables. This is annoying, warnings are enough.
-    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      {
+        vars: 'all',
+        args: 'after-used',
+        ignoreRestSiblings: false,
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^ignore',
+      },
+    ],
     '@typescript-eslint/no-use-before-define': 'off',
     'arrow-body-style': 0,
     'import/prefer-default-export': 'off',

@@ -159,6 +159,7 @@ export type Context = {
     data,
     path,
     rowIndex,
+    schemaPath,
   }: {
     data?: Data
     path: string
@@ -166,6 +167,7 @@ export type Context = {
      * by default the new row will be added to the end of the list
      */
     rowIndex?: number
+    schemaPath: string
   }) => Promise<void>
   buildRowErrors: () => void
   createFormData: CreateFormData
@@ -186,10 +188,12 @@ export type Context = {
     data,
     path,
     rowIndex,
+    schemaPath,
   }: {
     data?: Data
     path: string
     rowIndex: number
+    schemaPath: string
   }) => Promise<void>
   replaceState: (state: FormState) => void
   reset: Reset

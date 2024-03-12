@@ -1,5 +1,5 @@
 'use client'
-import type { Field, FormState } from 'payload/types'
+import type { FormState } from 'payload/types'
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import isDeepEqual from 'deep-equal'
@@ -42,7 +42,7 @@ import reduceFieldsToValues from './reduceFieldsToValues.js'
 const baseClass = 'form'
 
 const Form: React.FC<Props> = (props) => {
-  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const {
     action,
@@ -63,7 +63,7 @@ const Form: React.FC<Props> = (props) => {
     waitForAutocomplete,
   } = props
 
-  const method = 'method' in props ? props.method : undefined
+  const method = 'method' in props ? props?.method : undefined
 
   const router = useRouter()
 
@@ -250,6 +250,7 @@ const Form: React.FC<Props> = (props) => {
         const contentType = res.headers.get('content-type')
         const isJSON = contentType && contentType.indexOf('application/json') !== -1
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let json: Record<string, any> = {}
 
         if (isJSON) json = await res.json()
@@ -362,6 +363,7 @@ const Form: React.FC<Props> = (props) => {
     [],
   )
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createFormData = useCallback((overrides: any = {}) => {
     const data = reduceFieldsToValues(contextRef.current.fields, true)
 
@@ -418,19 +420,15 @@ const Form: React.FC<Props> = (props) => {
     [dispatchFields],
   )
 
-  const getFieldStateByPath = useCallback(
-    async ({ data, path }) => {
+  const getFieldStateBySchemaPath = useCallback(
+    async ({ data, schemaPath }) => {
       const fieldSchema = await getFormState({
         apiRoute,
         body: {
           collectionSlug,
           data,
           globalSlug,
-          /**
-            Turns: 'arrayField.0.group123field.arrayField.0.textField'
-            Into: 'arrayField.group123field.arrayField.textField'
-          */
-          schemaPath: `${collectionSlug || globalSlug}.${path}`.replace(/\.\d+\./g, '.'),
+          schemaPath,
         },
         serverURL,
       })
@@ -440,8 +438,8 @@ const Form: React.FC<Props> = (props) => {
   )
 
   const addFieldRow: FormContextType['addFieldRow'] = useCallback(
-    async ({ data, path, rowIndex }) => {
-      const subFieldState = await getFieldStateByPath({ data, path })
+    async ({ data, path, rowIndex, schemaPath }) => {
+      const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
 
       dispatchFields({
         type: 'ADD_ROW',
@@ -451,7 +449,7 @@ const Form: React.FC<Props> = (props) => {
         subFieldState,
       })
     },
-    [getFieldStateByPath, dispatchFields],
+    [getFieldStateBySchemaPath, dispatchFields],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
@@ -462,8 +460,8 @@ const Form: React.FC<Props> = (props) => {
   )
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
-    async ({ data, path, rowIndex }) => {
-      const subFieldState = await getFieldStateByPath({ data, path })
+    async ({ data, path, rowIndex, schemaPath }) => {
+      const subFieldState = await getFieldStateBySchemaPath({ data, schemaPath })
 
       dispatchFields({
         type: 'REPLACE_ROW',
@@ -473,7 +471,7 @@ const Form: React.FC<Props> = (props) => {
         subFieldState,
       })
     },
-    [getFieldStateByPath, dispatchFields],
+    [getFieldStateBySchemaPath, dispatchFields],
   )
 
   contextRef.current.submit = submit
@@ -527,17 +525,13 @@ const Form: React.FC<Props> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState
+          let revalidatedFormState: FormState = fields
 
-          await onChange.reduce(async (priorOnChange, onChangeFn) => {
-            await priorOnChange
-
-            const result = await onChangeFn({
-              formState: fields,
+          for (const onChangeFn of onChange) {
+            revalidatedFormState = await onChangeFn({
+              formState: revalidatedFormState,
             })
-
-            revalidatedFormState = result
-          }, Promise.resolve())
+          }
 
           const { changed, newState } = mergeServerFormState(fields, revalidatedFormState)
 

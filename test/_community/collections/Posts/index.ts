@@ -5,11 +5,9 @@ import { mediaSlug } from '../Media/index.js'
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
+  slug: postsSlug,
   admin: {
     useAsTitle: 'text',
-  },
-  versions: {
-    drafts: true,
   },
   fields: [
     {
@@ -21,13 +19,18 @@ export const PostsCollection: CollectionConfig = {
       type: 'richText',
     },
     {
+      name: 'relationship',
+      type: 'relationship',
+      relationTo: ['posts'],
+    },
+    {
       name: 'associatedMedia',
+      type: 'upload',
       access: {
         create: () => true,
         update: () => false,
       },
       relationTo: mediaSlug,
-      type: 'upload',
     },
     {
       name: 'blocksField',
@@ -37,12 +40,12 @@ export const PostsCollection: CollectionConfig = {
           slug: 'block1',
           fields: [
             {
-              type: 'group',
               name: 'group1',
+              type: 'group',
               fields: [
                 {
-                  type: 'text',
                   name: 'group1Text',
+                  type: 'text',
                 },
               ],
             },
@@ -51,5 +54,7 @@ export const PostsCollection: CollectionConfig = {
       ],
     },
   ],
-  slug: postsSlug,
+  versions: {
+    drafts: true,
+  },
 }

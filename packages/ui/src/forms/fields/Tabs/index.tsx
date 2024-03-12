@@ -32,6 +32,7 @@ const TabsField: React.FC<Props> = (props) => {
     path: pathFromProps,
     permissions,
     readOnly,
+    tabs = [],
   } = props
 
   const { path: pathFromContext, schemaPath } = useFieldPath()
@@ -42,8 +43,6 @@ const TabsField: React.FC<Props> = (props) => {
   const isWithinCollapsible = useCollapsible()
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
   const tabsPrefKey = `tabs-${indexPath}`
-
-  const tabs = 'tabs' in props ? props.tabs : []
 
   useEffect(() => {
     const getInitialPref = async () => {
@@ -62,7 +61,7 @@ const TabsField: React.FC<Props> = (props) => {
 
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
-      setPreference(preferencesKey, {
+      void setPreference(preferencesKey, {
         ...existingPreferences,
         ...(path
           ? {
@@ -133,8 +132,8 @@ const TabsField: React.FC<Props> = (props) => {
               >
                 {Description}
                 <FieldPathProvider
-                  path={'name' in activeTabConfig ? activeTabConfig.name : ''}
-                  schemaPath={schemaPath}
+                  path={`${path ? `${path}.` : ''}${activeTabConfig.name ? `${activeTabConfig.name}` : ''}`}
+                  schemaPath={`${schemaPath ? `${schemaPath}` : ''}${activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
                 >
                   <RenderFields
                     fieldMap={activeTabConfig.subfields}

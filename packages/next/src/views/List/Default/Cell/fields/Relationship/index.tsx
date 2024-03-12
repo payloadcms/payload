@@ -74,16 +74,18 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
         const relatedCollection = collections.find(({ slug }) => slug === relationTo)
 
         const label = formatDocTitle({
-          doc: document === false ? null : document,
+          collectionConfig: relatedCollection,
+          data: document || null,
+          dateFormat: config.admin.dateFormat,
+          fallback: `${t('general:untitled')} - ID: ${value}`,
           i18n,
-          useAsTitle: relatedCollection?.admin?.useAsTitle,
         })
 
         return (
           <React.Fragment key={i}>
             {document === false && `${t('general:untitled')} - ID: ${value}`}
             {document === null && `${t('general:loading')}...`}
-            {document && (label || `${t('general:untitled')} - ID: ${value}`)}
+            {document ? label : null}
             {values.length > i + 1 && ', '}
           </React.Fragment>
         )

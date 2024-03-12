@@ -34,7 +34,7 @@ export default buildConfigWithDefaults({
     const imageFilePath = path.resolve(process.cwd(), './test/uploads/image.png')
     const imageFile = await getFileByPath(imageFilePath)
 
-    const { id: uploadedImage } = await payload.create({
+    await payload.create({
       collection: 'media',
       data: {},
       file: imageFile,

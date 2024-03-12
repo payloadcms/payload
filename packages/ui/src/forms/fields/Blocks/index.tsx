@@ -6,8 +6,8 @@ import type { Props } from './types.js'
 
 import Banner from '../../../elements/Banner/index.js'
 import { Button } from '../../../elements/Button/index.js'
-import DraggableSortable from '../../../elements/DraggableSortable/index.js'
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
+import DraggableSortable from '../../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
@@ -49,13 +49,13 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
-  const minRows = 'minRows' in props ? props.minRows : 0
-  const maxRows = 'maxRows' in props ? props.maxRows : undefined
-  const blocks = 'blocks' in props ? props.blocks : undefined
-  const labelsFromProps = 'labels' in props ? props.labels : undefined
+  const minRows = 'minRows' in props ? props?.minRows : 0
+  const maxRows = 'maxRows' in props ? props?.maxRows : undefined
+  const blocks = 'blocks' in props ? props?.blocks : undefined
+  const labelsFromProps = 'labels' in props ? props?.labels : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, setModified } = useForm()
   const { code: locale } = useLocale()
   const { localization } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
@@ -104,20 +104,19 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string) => {
-      dispatchFields({
-        type: 'ADD_ROW',
-        blockType,
+      await addFieldRow({
+        data: { blockType },
         path,
         rowIndex,
+        schemaPath: `${schemaPath}.${blockType}`,
       })
-
       setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [path, setModified, dispatchFields],
+    [addFieldRow, path, setModified, schemaPath],
   )
 
   const duplicateRow = useCallback(

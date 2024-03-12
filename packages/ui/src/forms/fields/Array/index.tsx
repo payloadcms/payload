@@ -6,8 +6,8 @@ import type { Props } from './types.js'
 
 import Banner from '../../../elements/Banner/index.js'
 import { Button } from '../../../elements/Button/index.js'
-import DraggableSortable from '../../../elements/DraggableSortable/index.js'
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
+import DraggableSortable from '../../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
@@ -45,11 +45,11 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
-  const minRows = 'minRows' in props ? props.minRows : 0
-  const maxRows = 'maxRows' in props ? props.maxRows : undefined
+  const minRows = 'minRows' in props ? props?.minRows : 0
+  const maxRows = 'maxRows' in props ? props?.maxRows : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { dispatchFields, setModified } = useForm()
+  const { addFieldRow, dispatchFields, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -89,6 +89,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const {
     path,
     rows = [],
+    schemaPath,
     showError,
     valid,
     value,
@@ -99,20 +100,15 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   })
 
   const addRow = useCallback(
-    (rowIndex: number) => {
-      dispatchFields({
-        type: 'ADD_ROW',
-        path,
-        rowIndex,
-      })
-
+    async (rowIndex: number) => {
+      await addFieldRow({ path, rowIndex, schemaPath })
       setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [dispatchFields, path, setModified],
+    [addFieldRow, path, setModified, schemaPath],
   )
 
   const duplicateRow = useCallback(

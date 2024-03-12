@@ -1,5 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run Dev _community" type="NodeJSConfigurationType" application-parameters="_community" path-to-js-file="node_modules/.pnpm/nodemon@3.0.3/node_modules/nodemon/bin/nodemon.js" working-dir="$PROJECT_DIR$">
+  <configuration default="false" name="Run Dev _community" type="NodeJSConfigurationType" application-parameters="--no-deprecation _community" path-to-js-file="test/dev.js" working-dir="$PROJECT_DIR$">
+    <envs>
+      <env name="NODE_OPTIONS" value="--no-deprecation" />
+    </envs>
     <method v="2" />
   </configuration>
 </component>

@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.45",
+  "version": "3.0.0-alpha.46",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -103,6 +103,7 @@
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "dotenv": "8.6.0",
+    "drizzle-kit": "0.20.14-1f2c838",
     "drizzle-orm": "0.29.4",
     "execa": "5.1.1",
     "form-data": "3.0.1",
@@ -139,6 +140,7 @@
     "simple-git": "^3.20.0",
     "slash": "3.0.0",
     "slate": "0.91.4",
+    "swc-plugin-transform-remove-imports": "^1.12.1",
     "tempfile": "^3.0.0",
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
@@ -180,6 +182,9 @@
       "uuid": "3.4.0",
       "abab": "2",
       "domexception": "4"
+    },
+    "patchedDependencies": {
+      "playwright@1.42.1": "patches/playwright@1.42.1.patch"
     }
   },
   "packageManager": "pnpm@8.15.4+sha256.cea6d0bdf2de3a0549582da3983c70c92ffc577ff4410cbf190817ddc35137c2"

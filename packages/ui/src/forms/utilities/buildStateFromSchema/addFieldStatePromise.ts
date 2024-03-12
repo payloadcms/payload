@@ -115,6 +115,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     let validationResult: string | true = true
 
     if (typeof validate === 'function' && !skipValidation) {
+      let jsonError
+
+      if (field.type === 'json' && typeof data[field.name] === 'string') {
+        try {
+          JSON.parse(data[field.name] as string)
+        } catch (e) {
+          jsonError = e
+        }
+      }
+
       validationResult = await validate(data?.[field.name], {
         ...field,
         id,
@@ -122,6 +132,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         operation,
         req,
         siblingData: data,
+        // @ts-expect-error-next-line
+        jsonError,
       })
     }
 

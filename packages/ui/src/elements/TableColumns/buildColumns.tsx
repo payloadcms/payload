@@ -17,14 +17,7 @@ export const buildColumns = (args: {
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }): Column[] => {
-  const {
-    cellProps,
-    columnPreferences,
-    defaultColumns,
-    enableRowSelections,
-    fieldMap,
-    useAsTitle,
-  } = args
+  const { cellProps, columnPreferences, defaultColumns, enableRowSelections, fieldMap } = args
 
   let sortedFieldMap = fieldMap
 
@@ -43,7 +36,7 @@ export const buildColumns = (args: {
     })
   }
 
-  let numberOfActiveColumns = 0
+  const activeColumnsIndices = []
 
   const sorted = sortedFieldMap.reduce((acc, field, index) => {
     const columnPreference = columnPreferences?.find(
@@ -56,13 +49,15 @@ export const buildColumns = (args: {
       active = columnPreference.active
     } else if (defaultColumns && Array.isArray(defaultColumns) && defaultColumns.length > 0) {
       active = defaultColumns.includes(field.name)
-    } else if (numberOfActiveColumns < 4) {
+    } else if (activeColumnsIndices.length < 4) {
       active = true
     }
 
-    if (active) {
-      numberOfActiveColumns += 1
+    if (active && !activeColumnsIndices.includes(index)) {
+      activeColumnsIndices.push(index)
     }
+
+    const isFirstActiveColumn = activeColumnsIndices[0] === index
 
     if (field) {
       const column: Column = {
@@ -71,7 +66,7 @@ export const buildColumns = (args: {
         active,
         cellProps: {
           ...cellProps?.[index],
-          link: (numberOfActiveColumns === 1 && active && enableRowSelections) || undefined,
+          link: isFirstActiveColumn,
         },
         components: {
           Cell: field.Cell,

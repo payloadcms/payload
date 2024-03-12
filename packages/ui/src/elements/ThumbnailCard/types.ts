@@ -1,10 +1,10 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig, TypeWithID } from 'payload/types'
 
 export type Props = {
   alignLabel?: 'center' | 'left'
   className?: string
   collection?: SanitizedCollectionConfig
-  doc?: Record<string, unknown>
+  doc?: TypeWithID & { filename?: string }
   label?: string
   onClick?: () => void
   onKeyDown?: () => void

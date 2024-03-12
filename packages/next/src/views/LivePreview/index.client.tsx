@@ -79,7 +79,7 @@ const PreviewView: React.FC = (props) => {
   const { previewWindowType } = useLivePreviewContext()
 
   const onSave = useCallback(
-    async (json) => {
+    (json) => {
       // reportUpdate({
       //   id,
       //   entitySlug: collectionConfig.slug,
@@ -91,7 +91,7 @@ const PreviewView: React.FC = (props) => {
       // }
 
       if (typeof onSaveFromProps === 'function') {
-        onSaveFromProps({
+        void onSaveFromProps({
           ...json,
           operation: id ? 'update' : 'create',
         })
@@ -106,7 +106,7 @@ const PreviewView: React.FC = (props) => {
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) =>
+    ({ formState: prevFormState }) =>
       getFormState({
         apiRoute,
         body: {
@@ -154,6 +154,7 @@ const PreviewView: React.FC = (props) => {
             <SetDocumentTitle
               collectionConfig={collectionConfig}
               config={config}
+              fallback={id?.toString() || ''}
               globalConfig={globalConfig}
             />
             <DocumentControls
