@@ -72,7 +72,7 @@ export const LengthIndicator: React.FC<{
         setBarWidth(1)
       }
     }
-  }, [minLength, maxLength, text])
+  }, [minLength, maxLength, text, t])
 
   const textLength = text?.length || 0
 
