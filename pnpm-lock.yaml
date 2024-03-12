@@ -16,7 +16,7 @@ overrides:
 
 patchedDependencies:
   playwright@1.42.1:
-    hash: im3bk6xpo2wosx5xxzkmgc6cma
+    hash: snj23idnz6qktfxfcravfxvpgu
     path: patches/playwright@1.42.1.patch
 
 importers:
@@ -206,7 +206,7 @@ importers:
         version: 10.2.0
       playwright:
         specifier: ^1.42.1
-        version: 1.42.1(patch_hash=im3bk6xpo2wosx5xxzkmgc6cma)
+        version: 1.42.1(patch_hash=snj23idnz6qktfxfcravfxvpgu)
       playwright-core:
         specifier: ^1.42.1
         version: 1.42.1
@@ -4737,7 +4737,7 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      playwright: 1.42.1(patch_hash=im3bk6xpo2wosx5xxzkmgc6cma)
+      playwright: 1.42.1(patch_hash=snj23idnz6qktfxfcravfxvpgu)
     dev: true
 
   /@pnpm/config.env-replace@1.1.0:
@@ -13976,7 +13976,7 @@ packages:
     hasBin: true
     dev: true
 
-  /playwright@1.42.1(patch_hash=im3bk6xpo2wosx5xxzkmgc6cma):
+  /playwright@1.42.1(patch_hash=snj23idnz6qktfxfcravfxvpgu):
     resolution: {integrity: sha512-PgwB03s2DZBcNRoW+1w9E+VkLBxweib6KTXM0M3tkiT4jVxKSi6PmVJ591J+0u10LUrgxB7dLRbiJqO5s2QPMg==}
     engines: {node: '>=16'}
     hasBin: true
