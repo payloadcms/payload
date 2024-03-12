@@ -9,7 +9,7 @@ export type DocumentDrawerProps = Pick<DrawerProps, 'Header'> & {
   collectionSlug: string
   drawerSlug?: string
   id?: null | number | string
-  initialData: TypeWithID
+  initialData?: TypeWithID
   onSave?: DocumentInfoContext['onSave']
 }
 
