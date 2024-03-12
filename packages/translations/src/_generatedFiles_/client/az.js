@@ -9,6 +9,7 @@ export default {
     changePassword: 'Parolu dəyişdir',
     confirmGeneration: 'Generasiyani təsdiqlə',
     confirmPassword: 'Şifrəni təsdiq et',
+    createFirstUser: 'İlk istifadəçini yaradın',
     emailNotValid: 'Təqdim olunan e-poçt etibarlı deyil',
     emailSent: 'E-poçt göndərildi',
     enableAPIKey: 'API açarını aktivləşdir',

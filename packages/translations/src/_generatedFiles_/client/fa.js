@@ -9,6 +9,7 @@ export default {
     changePassword: 'تغییر گذرواژه',
     confirmGeneration: 'تأیید ساخت',
     confirmPassword: 'تأیید گذرواژه',
+    createFirstUser: 'ایجاد کاربر نخست',
     emailNotValid: 'رایانامه ارائه‌شده درست نیست',
     emailSent: 'رایانامه فرستاده شد',
     enableAPIKey: 'فعال‌سازی کلید اِی‌پی‌آی',

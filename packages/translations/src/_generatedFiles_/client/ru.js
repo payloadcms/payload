@@ -9,6 +9,7 @@ export default {
     changePassword: 'Сменить пароль',
     confirmGeneration: 'Подтвердить генерацию',
     confirmPassword: 'Подтверждение пароля',
+    createFirstUser: 'Создание первого пользователя',
     emailNotValid: 'Указанный адрес электронной почты неверен',
     emailSent: 'Email отправлен',
     enableAPIKey: 'Активировать API ключ',

@@ -9,6 +9,7 @@ export default {
     changePassword: 'Schimbați parola',
     confirmGeneration: 'Confirmați generarea',
     confirmPassword: 'Confirmați parola',
+    createFirstUser: 'Creați primul utilizator',
     emailNotValid: 'Emailul furnizat nu este valid',
     emailSent: 'Email trimis',
     enableAPIKey: 'Activați cheia API',

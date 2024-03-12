@@ -9,6 +9,7 @@ export default {
     changePassword: 'Parolayı Değiştir',
     confirmGeneration: 'Oluştumayı Onayla',
     confirmPassword: 'Parolayı Onayla',
+    createFirstUser: 'İlk kullanıcı oluştur',
     emailNotValid: 'Girilen e-posta geçersiz',
     emailSent: 'E-posta gönderildi',
     enableAPIKey: 'Api anahtarını etkinleştir',

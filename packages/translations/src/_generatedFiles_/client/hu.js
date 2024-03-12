@@ -9,6 +9,7 @@ export default {
     changePassword: 'Jelszó módosítása',
     confirmGeneration: 'Generálás megerősítése',
     confirmPassword: 'Jelszó megerősítése',
+    createFirstUser: 'Első felhasználó létrehozása',
     emailNotValid: 'A megadott e-mail cím érvénytelen',
     emailSent: 'E-mail elküldve',
     enableAPIKey: 'API-kulcs engedélyezése',

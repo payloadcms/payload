@@ -9,6 +9,7 @@ export default {
     changePassword: 'Promeni lozinku',
     confirmGeneration: 'Potvrdi kreiranje',
     confirmPassword: 'Potvrdi lozinku',
+    createFirstUser: 'Kreiraj prvog korisnika',
     emailNotValid: 'Adresa e-pošte nije validna',
     emailSent: 'Poruka e-pošte prosleđena',
     enableAPIKey: 'Omogući API ključ',

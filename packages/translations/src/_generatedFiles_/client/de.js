@@ -9,6 +9,7 @@ export default {
     changePassword: 'Passwort ändern',
     confirmGeneration: 'Generierung bestätigen',
     confirmPassword: 'Passwort bestätigen',
+    createFirstUser: 'Ersten Benutzer erstellen',
     emailNotValid: 'Die angegebene E-Mail-Adresse ist ungültig',
     emailSent: 'E-Mail verschickt',
     enableAPIKey: 'API-Key aktivieren',

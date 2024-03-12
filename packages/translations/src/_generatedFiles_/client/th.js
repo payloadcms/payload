@@ -9,6 +9,7 @@ export default {
     changePassword: 'เปลี่ยนรหัสผ่าน',
     confirmGeneration: 'ยืนยันการสร้าง',
     confirmPassword: 'ยืนยันรหัสผ่าน',
+    createFirstUser: 'สร้างผู้ใช้แรก',
     emailNotValid: 'อีเมลไม่ถูกต้อง',
     emailSent: 'ส่งอีเมลเรียบร้อยแล้ว',
     enableAPIKey: 'เปิดใช้ API Key',

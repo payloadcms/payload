@@ -9,6 +9,7 @@ export default {
     changePassword: '更改密碼',
     confirmGeneration: '確認生成',
     confirmPassword: '確認密碼',
+    createFirstUser: '建立第一個使用者',
     emailNotValid: '提供的電子郵件無效',
     emailSent: '電子郵件已寄出',
     enableAPIKey: '啟用API金鑰',

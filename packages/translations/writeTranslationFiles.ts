@@ -96,6 +96,7 @@ const clientTranslationKeys = [
   'authentication:changePassword',
   'authentication:confirmGeneration',
   'authentication:confirmPassword',
+  'authentication:createFirstUser',
   'authentication:emailNotValid',
   'authentication:emailSent',
   'authentication:enableAPIKey',

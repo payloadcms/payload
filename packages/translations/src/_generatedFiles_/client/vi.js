@@ -9,6 +9,7 @@ export default {
     changePassword: 'Đổi mật khẩu',
     confirmGeneration: 'Xác nhận, tạo API Key',
     confirmPassword: 'Xác nhận mật khẩu',
+    createFirstUser: 'Tạo người dùng đầu tiên',
     emailNotValid: 'Email không chính xác',
     emailSent: 'Email đã được gửi',
     enableAPIKey: 'Kích hoạt API Key',

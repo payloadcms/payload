@@ -9,6 +9,7 @@ export default {
     changePassword: 'စကားဝှက် ပြောင်းလဲမည်။',
     confirmGeneration: 'Generation အတည်ပြု',
     confirmPassword: 'စကားဝှက်အား ထပ်မံ ရိုက်ထည့်ပါ။',
+    createFirstUser: 'ပထမဆုံး အသုံးပြုသူကို ဖန်တီးပါ။',
     emailNotValid: 'ထည့်သွင်းထားသော အီးမေလ်မှာ မှားယွင်းနေပါသည်။',
     emailSent: 'မေးလ် ပို့ထားပါသည်။',
     enableAPIKey: 'API Key ကိုဖွင့်ရန်',

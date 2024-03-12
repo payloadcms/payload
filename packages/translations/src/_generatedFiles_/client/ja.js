@@ -9,6 +9,7 @@ export default {
     changePassword: 'パスワードを変更',
     confirmGeneration: '生成の確認',
     confirmPassword: 'パスワードの確認',
+    createFirstUser: '最初のユーザーを作成',
     emailNotValid: '入力されたメールアドレスは無効です。',
     emailSent: 'Emailが送信されました。',
     enableAPIKey: 'API Keyを許可',

@@ -9,6 +9,7 @@ export default {
     changePassword: 'تغيير كلمة المرور',
     confirmGeneration: 'تأكيد التّوليد',
     confirmPassword: 'تأكيد كلمة المرور',
+    createFirstUser: 'إنشاء المستخدم الأوّل',
     emailNotValid: 'البريد الإلكتروني غير صالح',
     emailSent: 'تمّ ارسال البريد الإلكتروني',
     enableAPIKey: 'تفعيل مفتاح API',
