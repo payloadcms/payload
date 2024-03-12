@@ -37,7 +37,9 @@ export const APIKeyAuthentication =
         const userQuery = await payload.find({
           collection: collectionConfig.slug,
           depth: collectionConfig.auth.depth,
+          limit: 1,
           overrideAccess: true,
+          pagination: false,
           where,
         })
 

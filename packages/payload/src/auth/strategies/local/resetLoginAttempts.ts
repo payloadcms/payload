@@ -23,6 +23,7 @@ export const resetLoginAttempts = async ({
       lockUntil: null,
       loginAttempts: 0,
     },
+    depth: 0,
     overrideAccess: true,
     req,
   })
