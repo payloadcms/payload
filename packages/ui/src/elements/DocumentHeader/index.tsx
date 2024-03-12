@@ -8,7 +8,7 @@ import type {
 import React, { Fragment } from 'react'
 
 import { Gutter } from '../Gutter/index.js'
-import RenderTitle from '../RenderTitle/index.js'
+import { RenderTitle } from '../RenderTitle/index.js'
 import { DocumentTabs } from './Tabs/index.js'
 import './index.scss'
 
@@ -29,10 +29,7 @@ export const DocumentHeader: React.FC<{
       {customHeader && customHeader}
       {!customHeader && (
         <Fragment>
-          <RenderTitle
-            className={`${baseClass}__title`}
-            fallback={`[${i18n.t('general:untitled')}]`}
-          />
+          <RenderTitle className={`${baseClass}__title`} />
           {!hideTabs && (
             <DocumentTabs
               collectionConfig={collectionConfig}

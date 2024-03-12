@@ -9,7 +9,7 @@ import './index.scss'
 
 const baseClass = 'render-title'
 
-const RenderTitle: React.FC<Props> = (props) => {
+export const RenderTitle: React.FC<Props> = (props) => {
   const { className, element = 'h1', fallback, title: titleFromProps } = props
 
   const documentInfo = useDocumentInfo()
@@ -29,9 +29,7 @@ const RenderTitle: React.FC<Props> = (props) => {
         .join(' ')}
       title={title}
     >
-      {idAsTitle ? <IDLabel className={`${baseClass}__id`} id={id} /> : title}
+      {idAsTitle ? <IDLabel className={`${baseClass}__id`} id={id} /> : title || null}
     </Tag>
   )
 }
-
-export default RenderTitle

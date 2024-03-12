@@ -13,6 +13,7 @@ import {
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
+  useEditDepth,
 } from '@payloadcms/ui'
 import { Upload } from '@payloadcms/ui/elements'
 import React, { Fragment, useCallback } from 'react'
@@ -60,6 +61,8 @@ export const DefaultEditView: React.FC = () => {
 
   const { getComponentMap, getFieldMap } = useComponentMap()
 
+  const depth = useEditDepth()
+
   const componentMap = getComponentMap({ collectionSlug, globalSlug })
 
   const collectionConfig =
@@ -89,7 +92,7 @@ export const DefaultEditView: React.FC = () => {
   const classes = [baseClass, id && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
   const onSave = useCallback(
-    async (json) => {
+    (json) => {
       reportUpdate({
         id,
         entitySlug,
@@ -117,7 +120,7 @@ export const DefaultEditView: React.FC = () => {
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) =>
+    ({ formState: prevFormState }) =>
       getFormState({
         apiRoute,
         body: {
@@ -171,6 +174,7 @@ export const DefaultEditView: React.FC = () => {
             <SetDocumentTitle
               collectionConfig={collectionConfig}
               config={config}
+              fallback={depth <= 1 ? id?.toString() : undefined}
               globalConfig={globalConfig}
             />
             <DocumentControls

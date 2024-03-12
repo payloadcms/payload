@@ -1,4 +1,4 @@
-import type { Data, DocumentPreferences, ServerSideEditViewProps } from 'payload/types'
+import type { DocumentPreferences, ServerSideEditViewProps, TypeWithID } from 'payload/types'
 
 import {
   DocumentHeader,
@@ -7,6 +7,7 @@ import {
   HydrateClientUser,
   RenderCustomComponent,
   buildStateFromSchema,
+  formatDocTitle,
   formatFields,
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -14,7 +15,6 @@ import React from 'react'
 
 import type { AdminViewProps } from '../Root/index.js'
 
-import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle.js'
 import { EditView } from '../Edit/index.js'
 import { Settings } from './Settings/index.js'
 
@@ -46,7 +46,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
   if (collectionConfig) {
     const { fields } = collectionConfig
 
-    let data: Data
+    let data: TypeWithID
 
     try {
       data = await payload.findByID({
@@ -77,7 +77,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
           equals: preferencesKey,
         },
       },
-    })) as any as { docs: { value: DocumentPreferences }[] }
+    })) as any as { docs: { value: DocumentPreferences }[] } // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const initialState = await buildStateFromSchema({
       id: user?.id,
@@ -107,11 +107,12 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
         initialData={data}
         initialState={initialState}
         isEditing
-        title={formatTitle({
+        title={formatDocTitle({
           collectionConfig,
+          data,
           dateFormat: config.admin.dateFormat,
+          fallback: data?.id?.toString(),
           i18n,
-          value: data?.[collectionConfig?.admin?.useAsTitle] || data?.id?.toString(),
         })}
       >
         <DocumentHeader
