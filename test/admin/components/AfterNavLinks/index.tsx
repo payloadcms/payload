@@ -1,7 +1,7 @@
 'use client'
 
+import Link from 'next/link'
 import React from 'react'
-import { NavLink } from 'react-router-dom'
 
 // As this is the demo project, we import our dependencies from the `src` directory.
 import { useConfig } from '../../../../packages/ui/src/providers/Config/index.js'
@@ -29,22 +29,14 @@ export const AfterNavLinks: React.FC = () => {
         Custom Routes
       </h4>
       <h4 className="nav__link" style={{ margin: 0 }}>
-        <NavLink
-          activeClassName="active"
-          style={{ textDecoration: 'none' }}
-          to={`${adminRoute}/custom-default-view`}
-        >
+        <Link href={`${adminRoute}/custom-default-view`} style={{ textDecoration: 'none' }}>
           Default Template
-        </NavLink>
+        </Link>
       </h4>
       <h4 className="nav__link" style={{ margin: 0 }}>
-        <NavLink
-          activeClassName="active"
-          style={{ textDecoration: 'none' }}
-          to={`${adminRoute}/custom-minimal-view`}
-        >
+        <Link href={`${adminRoute}/custom-minimal-view`} style={{ textDecoration: 'none' }}>
           Minimal Template
-        </NavLink>
+        </Link>
       </h4>
       <div id="custom-css" />
     </div>

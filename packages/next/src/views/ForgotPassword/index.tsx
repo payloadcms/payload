@@ -2,7 +2,7 @@ import { Button, Email, Form, FormSubmit, Translation } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
-import type { AdminViewProps } from '../Root/index.js'
+import type { AdminViewProps } from 'payload/types'
 
 export { generateForgotPasswordMetadata } from './meta.js'
 

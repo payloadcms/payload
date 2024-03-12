@@ -37,34 +37,58 @@ export default buildConfigWithDefaults({
       // providers: [CustomProvider, CustomProvider],
       actions: [AdminButton],
       afterDashboard: [AfterDashboard],
+      afterNavLinks: [AfterNavLinks],
       beforeLogin: [BeforeLogin],
       logout: {
         Button: Logout,
       },
-      afterNavLinks: [AfterNavLinks],
       views: {
-        // Dashboard: CustomDashboardView,
-        // Account: CustomAccountView,
-        CustomMinimalView: {
-          path: '/custom-minimal-view',
-          Component: CustomMinimalView,
-        },
+        //   // Dashboard: CustomDashboardView,
+        //   // Account: CustomAccountView,
         CustomDefaultView: {
-          path: '/custom-default-view',
           Component: CustomDefaultView,
+          path: '/custom-default-view',
         },
-        CustomView: {
-          path: customViewPath,
-          exact: true,
-          Component: CustomView,
-        },
-        CustomNestedView: {
-          path: customNestedViewPath,
-          Component: CustomNestedView,
-        },
+        // CustomMinimalView: {
+        //   Component: CustomMinimalView,
+        //   path: '/custom-minimal-view',
+        // },
+        // CustomNestedView: {
+        //   Component: CustomNestedView,
+        //   path: customNestedViewPath,
+        // },
+        // CustomView: {
+        //   Component: CustomView,
+        //   exact: true,
+        //   path: customViewPath,
+        // },
       },
     },
   },
+  collections: [
+    Posts,
+    Users,
+    CollectionHidden,
+    CollectionNoApiView,
+    // CustomViews1,
+    // CustomViews2,
+    // CollectionGroup1A,
+    // CollectionGroup1B,
+    // CollectionGroup2A,
+    // CollectionGroup2B,
+    // Geo,
+    // CustomIdTab,
+    // CustomIdRow,
+  ],
+  globals: [
+    GlobalHidden,
+    GlobalNoApiView,
+    // Global,
+    // CustomGlobalViews1,
+    // CustomGlobalViews2,
+    // GlobalGroup1A,
+    // GlobalGroup1B,
+  ],
   i18n: {
     translations: {
       en: {
@@ -78,45 +102,21 @@ export default buildConfigWithDefaults({
     defaultLocale: 'en',
     locales: [
       {
-        label: {
-          es: 'Español',
-          en: 'Spanish',
-        },
         code: 'es',
+        label: {
+          en: 'Spanish',
+          es: 'Español',
+        },
       },
       {
-        label: {
-          es: 'Inglés',
-          en: 'English',
-        },
         code: 'en',
+        label: {
+          en: 'English',
+          es: 'Inglés',
+        },
       },
     ],
   },
-  collections: [
-    Posts,
-    Users,
-    CollectionHidden,
-    CollectionNoApiView,
-    CustomViews1,
-    CustomViews2,
-    CollectionGroup1A,
-    CollectionGroup1B,
-    CollectionGroup2A,
-    CollectionGroup2B,
-    Geo,
-    CustomIdTab,
-    CustomIdRow,
-  ],
-  globals: [
-    GlobalHidden,
-    GlobalNoApiView,
-    Global,
-    CustomGlobalViews1,
-    CustomGlobalViews2,
-    GlobalGroup1A,
-    GlobalGroup1B,
-  ],
   onInit: async (payload) => {
     await clearAndSeedEverything(payload)
   },

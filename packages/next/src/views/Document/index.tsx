@@ -6,6 +6,7 @@ import type {
   ServerSideEditViewProps,
 } from 'payload/types'
 import type { DocumentPermissions } from 'payload/types'
+import type { AdminViewProps } from 'payload/types'
 
 import {
   DocumentHeader,
@@ -20,7 +21,6 @@ import {
 } from '@payloadcms/ui'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root/index.js'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { NotFoundClient } from '../NotFound/index.client.js'

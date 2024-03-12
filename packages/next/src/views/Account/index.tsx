@@ -1,4 +1,5 @@
 import type { DocumentPreferences, ServerSideEditViewProps, TypeWithID } from 'payload/types'
+import type { AdminViewProps } from 'payload/types'
 
 import {
   DocumentHeader,
@@ -12,8 +13,6 @@ import {
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
-
-import type { AdminViewProps } from '../Root/index.js'
 
 import { EditView } from '../Edit/index.js'
 import { Settings } from './Settings/index.js'

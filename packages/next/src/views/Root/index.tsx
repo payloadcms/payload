@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { InitPageResult, SanitizedConfig } from 'payload/types'
+import type { AdminViewProps, SanitizedConfig } from 'payload/types'
 
 import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
 import { notFound, redirect } from 'next/navigation.js'
@@ -18,6 +18,7 @@ import { Logout, LogoutInactivity } from '../Logout/index.js'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
 import { Unauthorized } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 export { generatePageMetadata } from './meta.js'
 
@@ -26,12 +27,6 @@ export type GenerateViewMetadata = (args: {
   i18n: I18n
   params?: { [key: string]: string | string[] }
 }) => Promise<Metadata>
-
-export type AdminViewProps = {
-  initPageResult: InitPageResult
-  params?: { [key: string]: string | string[] | undefined }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
 
 const baseClasses = {
   forgot: forgotPasswordBaseClass,
@@ -92,8 +87,6 @@ export const RootPage = async ({
     searchParams,
   }
 
-  // TODO: handle custom routes
-
   switch (segments.length) {
     case 0: {
       ViewToRender = Dashboard
@@ -119,6 +112,9 @@ export const RootPage = async ({
         ViewToRender = Account
         templateClassName = 'account'
         templateType = 'default'
+      } else {
+        // find custom views
+        ViewToRender = getCustomViewByRoute({ config, route })
       }
       break
     }

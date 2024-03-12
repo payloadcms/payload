@@ -28,6 +28,7 @@ export type { LabelProps } from './forms/Label.js'
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
 export type {
   AdminViewComponent,
+  AdminViewProps,
   EditViewProps,
   InitPageResult,
   ServerSideEditViewProps,
