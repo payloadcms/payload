@@ -26,7 +26,13 @@ export type {
   TypeWithTimestamps,
 } from './../collections/config/types.js'
 
-export type { Access, AccessArgs, ClientConfig, SanitizedConfig } from './../config/types.js'
+export type {
+  Access,
+  AccessArgs,
+  ClientConfig,
+  EditViewComponent,
+  SanitizedConfig,
+} from './../config/types.js'
 
 export type {
   ArrayField,

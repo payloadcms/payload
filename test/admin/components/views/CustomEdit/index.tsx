@@ -1,10 +1,10 @@
-import type { ServerSideEditViewProps } from 'payload/types.js'
+import type { EditViewComponent } from 'payload/types.js'
 
 import { SetStepNav } from '@payloadcms/ui'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
-export const CustomEditView: React.FC<ServerSideEditViewProps> = ({ initPageResult }) => {
+export const CustomEditView: EditViewComponent = ({ initPageResult }) => {
   if (!initPageResult) {
     notFound()
   }

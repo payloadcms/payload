@@ -114,8 +114,6 @@ export const RootPage = async ({
         ViewToRender = Account
         templateClassName = 'account'
         templateType = 'default'
-      } else {
-        ViewToRender = getCustomViewByRoute({ config, route })
       }
       break
     }
@@ -138,8 +136,6 @@ export const RootPage = async ({
         ViewToRender = DocumentView
         templateClassName = 'global-edit'
         templateType = 'default'
-      } else {
-        ViewToRender = getCustomViewByRoute({ config, route })
       }
       break
     }
@@ -175,6 +171,9 @@ export const RootPage = async ({
   }
 
   let dbHasUser = false
+
+  // check for custom view
+  ViewToRender = ViewToRender || getCustomViewByRoute({ config, route })
 
   if (!ViewToRender) {
     notFound()

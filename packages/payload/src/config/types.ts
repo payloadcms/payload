@@ -702,6 +702,35 @@ export type ClientConfig = Omit<SanitizedConfig, 'admin' | 'db' | 'endpoints'> &
   })[]
 }
 
+export type EditConfig =
+  | (
+      | {
+          /**
+           * Replace or modify individual nested routes, or add new ones:
+           * + `Default` - `/admin/collections/:collection/:id`
+           * + `API` - `/admin/collections/:collection/:id/api`
+           * + `LivePreview` - `/admin/collections/:collection/:id/preview`
+           * + `References` - `/admin/collections/:collection/:id/references`
+           * + `Relationships` - `/admin/collections/:collection/:id/relationships`
+           * + `Versions` - `/admin/collections/:collection/:id/versions`
+           * + `Version` - `/admin/collections/:collection/:id/versions/:version`
+           * + `CustomView` - `/admin/collections/:collection/:id/:path`
+           */
+          API?: EditViewComponent | Partial<EditViewConfig>
+          Default?: EditViewComponent | Partial<EditViewConfig>
+          LivePreview?: EditViewComponent | Partial<EditViewConfig>
+          Version?: EditViewComponent | Partial<EditViewConfig>
+          Versions?: EditViewComponent | Partial<EditViewConfig>
+          // TODO: uncomment these as they are built
+          // References?: EditView
+          // Relationships?: EditView
+        }
+      | {
+          [key: string]: EditViewConfig
+        }
+    )
+  | EditViewComponent
+
 export type EntityDescription =
   | (() => string)
   | React.ComponentType<any>
