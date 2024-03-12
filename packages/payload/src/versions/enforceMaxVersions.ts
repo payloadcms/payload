@@ -44,6 +44,7 @@ export const enforceMaxVersions = async ({
     } else if (global) {
       const query = await payload.db.findGlobalVersions({
         global: global.slug,
+        pagination: false,
         req,
         skip: max,
         sort: '-updatedAt',
