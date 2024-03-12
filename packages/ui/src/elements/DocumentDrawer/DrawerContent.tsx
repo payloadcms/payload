@@ -28,6 +28,7 @@ import { RenderTitle } from '../RenderTitle/index.js'
 import { baseClass } from './index.js'
 
 const Content: React.FC<DocumentDrawerProps> = ({
+  id,
   Header,
   collectionSlug,
   drawerSlug,
@@ -63,7 +64,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
 
   // no need to an additional requests when creating new documents
-  const initialID = useRef(initialData.id)
+  const initialID = useRef(id)
 
   const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
     initialID.current ? `${serverURL}${apiRoute}/${collectionSlug}/${initialID.current}` : null,
@@ -81,14 +82,12 @@ const Content: React.FC<DocumentDrawerProps> = ({
     }
   }, [isError, t, isOpen, data, drawerSlug, closeModal, isLoadingDocument])
 
-  const isEditing = Boolean(data.id)
+  const isEditing = Boolean(id)
 
-  const apiURL = data.id
-    ? `${serverURL}${apiRoute}/${collectionSlug}/${data.id}?locale=${locale.code}`
-    : null
+  const apiURL = id ? `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}` : null
 
   const action = `${serverURL}${apiRoute}/${collectionSlug}${
-    isEditing ? `/${data.id}` : ''
+    isEditing ? `/${id}` : ''
   }?${formattedQueryParams}`
 
   // const hasSavePermission =
@@ -101,7 +100,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
         const result = await getFormState({
           apiRoute,
           body: {
-            id: data.id,
+            id,
             collectionSlug,
             data: data || {},
             operation: isEditing ? 'update' : 'create',
@@ -116,7 +115,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
       void getInitialState()
     }
-  }, [apiRoute, data, isEditing, schemaPath, serverURL, collectionSlug])
+  }, [apiRoute, data, isEditing, schemaPath, serverURL, collectionSlug, id])
 
   if (isError) return null
 
@@ -146,7 +145,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
               <X />
             </button>
           </div>
-          {data.id && data.id !== title ? <IDLabel id={data.id.toString()} /> : null}
+          {id && id !== title ? <IDLabel id={id.toString()} /> : null}
         </Gutter>
       }
       action={action}
@@ -157,7 +156,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
       docPermissions={docPermissions}
       hasSavePermission={docPermissions?.update?.permission}
       // isLoading,
-      id={data.id}
+      id={id}
       initialData={data}
       initialState={initialState}
       isEditing={isEditing}
@@ -179,14 +178,10 @@ const Content: React.FC<DocumentDrawerProps> = ({
 // this is so we can utilize the `useDocumentInfo` hook in the `Content` component
 // this drawer is used for both creating and editing documents
 // this means that the `id` may be unknown until the document is created
-export const DocumentDrawerContent: React.FC<
-  DocumentDrawerProps & {
-    id?: null | number | string
-  }
-> = (props) => {
+export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
   const { id: idFromProps, collectionSlug, onSave: onSaveFromProps } = props
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const [doc, setDoc] = useState<TypeWithID>({ id: idFromProps })
+  const [doc, setDoc] = useState<TypeWithID | null>()
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
@@ -204,7 +199,7 @@ export const DocumentDrawerContent: React.FC<
 
   return (
     <FieldPathProvider path="" schemaPath={collectionSlug}>
-      <Content {...props} initialData={doc} onSave={onSave} />
+      <Content {...props} id={idFromProps || doc.id} initialData={doc} onSave={onSave} />
     </FieldPathProvider>
   )
 }

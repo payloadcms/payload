@@ -8,6 +8,7 @@ import type { Props as DrawerProps } from '../Drawer/types.js'
 export type DocumentDrawerProps = Pick<DrawerProps, 'Header'> & {
   collectionSlug: string
   drawerSlug?: string
+  id?: null | number | string
   initialData: TypeWithID
   onSave?: DocumentInfoContext['onSave']
 }

@@ -24,7 +24,7 @@ export const formatDocTitle = ({
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
 }): string => {
-  let title: string = data?.id?.toString()
+  let title: string
 
   if (collectionConfig) {
     const useAsTitle = collectionConfig?.admin?.useAsTitle
