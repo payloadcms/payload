@@ -1,9 +1,8 @@
 'use client'
 
-import type { FormState } from 'payload/types'
+import type { FormState, TypeWithID } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
-import { getTranslation } from '@payloadcms/translations'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -14,7 +13,7 @@ import { FieldPathProvider, useFieldPath } from '../../forms/FieldPathProvider/i
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections.js'
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
 import { X } from '../../icons/X/index.js'
-import { useAuth } from '../../index.js'
+import { formatDocTitle, useAuth } from '../../index.js'
 import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
@@ -25,13 +24,14 @@ import { getFormState } from '../../utilities/getFormState.js'
 import { Gutter } from '../Gutter/index.js'
 import IDLabel from '../IDLabel/index.js'
 import { LoadingOverlay } from '../Loading/index.js'
+import { RenderTitle } from '../RenderTitle/index.js'
 import { baseClass } from './index.js'
 
 const Content: React.FC<DocumentDrawerProps> = ({
-  id,
   Header,
   collectionSlug,
   drawerSlug,
+  initialData,
   onSave,
 }) => {
   const { useModal } = facelessUIImport
@@ -52,6 +52,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const { formQueryParams } = useFormQueryParams()
   const formattedQueryParams = queryString.stringify(formQueryParams)
+  const [title, setTitle] = useState<null | string>(null)
 
   const { permissions } = useAuth()
 
@@ -62,11 +63,11 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
 
   // no need to an additional requests when creating new documents
-  const initialID = useRef(id)
+  const initialID = useRef(initialData.id)
 
   const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
     initialID.current ? `${serverURL}${apiRoute}/${collectionSlug}/${initialID.current}` : null,
-    { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
+    { initialData, initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   )
 
   useEffect(() => {
@@ -80,12 +81,14 @@ const Content: React.FC<DocumentDrawerProps> = ({
     }
   }, [isError, t, isOpen, data, drawerSlug, closeModal, isLoadingDocument])
 
-  const isEditing = Boolean(id)
+  const isEditing = Boolean(data.id)
 
-  const apiURL = id ? `${serverURL}${apiRoute}/${collectionSlug}/${id}?locale=${locale.code}` : null
+  const apiURL = data.id
+    ? `${serverURL}${apiRoute}/${collectionSlug}/${data.id}?locale=${locale.code}`
+    : null
 
   const action = `${serverURL}${apiRoute}/${collectionSlug}${
-    isEditing ? `/${id}` : ''
+    isEditing ? `/${data.id}` : ''
   }?${formattedQueryParams}`
 
   // const hasSavePermission =
@@ -98,7 +101,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
         const result = await getFormState({
           apiRoute,
           body: {
-            id,
+            id: data.id,
             collectionSlug,
             data: data || {},
             operation: isEditing ? 'update' : 'create',
@@ -113,7 +116,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
       void getInitialState()
     }
-  }, [apiRoute, data, id, isEditing, schemaPath, serverURL, collectionSlug])
+  }, [apiRoute, data, isEditing, schemaPath, serverURL, collectionSlug])
 
   if (isError) return null
 
@@ -129,10 +132,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
         <Gutter className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-content`}>
             <h2 className={`${baseClass}__header-text`}>
-              {Header ||
-                t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
-                  label: getTranslation(collectionConfig.labels.singular, i18n),
-                })}
+              {Header || <RenderTitle element="span" onChange={setTitle} />}
             </h2>
             {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
             i.e. changing to a `div` element will fix the animation issue but will break accessibility
@@ -146,7 +146,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
               <X />
             </button>
           </div>
-          {id && <IDLabel id={id.toString()} />}
+          {data.id && data.id !== title ? <IDLabel id={data.id.toString()} /> : null}
         </Gutter>
       }
       action={action}
@@ -157,12 +157,18 @@ const Content: React.FC<DocumentDrawerProps> = ({
       docPermissions={docPermissions}
       hasSavePermission={docPermissions?.update?.permission}
       // isLoading,
-      id={id}
+      id={data.id}
       initialData={data}
       initialState={initialState}
       isEditing={isEditing}
       // me: true,
       onSave={onSave}
+      title={formatDocTitle({
+        collectionConfig,
+        data,
+        dateFormat: config.admin.dateFormat,
+        i18n,
+      })}
     >
       {Edit}
     </DocumentInfoProvider>
@@ -173,14 +179,18 @@ const Content: React.FC<DocumentDrawerProps> = ({
 // this is so we can utilize the `useDocumentInfo` hook in the `Content` component
 // this drawer is used for both creating and editing documents
 // this means that the `id` may be unknown until the document is created
-export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
+export const DocumentDrawerContent: React.FC<
+  DocumentDrawerProps & {
+    id?: null | number | string
+  }
+> = (props) => {
   const { id: idFromProps, collectionSlug, onSave: onSaveFromProps } = props
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const [id, setId] = useState<null | number | string>(idFromProps)
+  const [doc, setDoc] = useState<TypeWithID>({ id: idFromProps })
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
-      setId(args.doc.id)
+      setDoc(args.doc)
 
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
@@ -194,7 +204,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
 
   return (
     <FieldPathProvider path="" schemaPath={collectionSlug}>
-      <Content {...props} id={id} onSave={onSave} />
+      <Content {...props} initialData={doc} onSave={onSave} />
     </FieldPathProvider>
   )
 }

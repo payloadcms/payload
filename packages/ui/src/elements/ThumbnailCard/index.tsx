@@ -2,6 +2,7 @@ import React from 'react'
 
 import type { Props } from './types.js'
 
+import { useConfig } from '../../index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
 import Thumbnail from '../Thumbnail/index.js'
@@ -20,6 +21,8 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     thumbnail,
   } = props
 
+  const config = useConfig()
+
   const { i18n, t } = useTranslation()
 
   const classes = [
@@ -34,14 +37,13 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
   let title = labelFromProps
 
   if (!title) {
-    title =
-      formatDocTitle({
-        doc,
-        i18n,
-        useAsTitle: collection?.admin?.useAsTitle,
-      }) ||
-      (doc?.filename as string) ||
-      `[${t('general:untitled')}]`
+    title = formatDocTitle({
+      collectionConfig: collection,
+      data: doc,
+      dateFormat: config.admin.dateFormat,
+      fallback: doc?.filename,
+      i18n,
+    })
   }
 
   return (

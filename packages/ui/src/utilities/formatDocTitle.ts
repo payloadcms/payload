@@ -1,37 +1,58 @@
 import type { I18n } from '@payloadcms/translations'
-import type { FormField, SanitizedCollectionConfig } from 'payload/types'
+import type {
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+  TypeWithID,
+} from 'payload/types'
 
-import { getObjectDotNotation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
+import { formatDate } from '@payloadcms/ui'
 
-import { formatDate } from './formatDate/index.js'
-
-export const formatDocTitle = (args: {
-  dateFormat?: any
-  doc?: Record<string, any>
-  field?: FormField
+export const formatDocTitle = ({
+  collectionConfig,
+  data,
+  dateFormat: dateFormatFromConfig,
+  fallback,
+  globalConfig,
+  i18n,
+}: {
+  collectionConfig?: SanitizedCollectionConfig
+  data: TypeWithID
+  dateFormat: SanitizedConfig['admin']['dateFormat']
+  fallback?: string
+  globalConfig?: SanitizedGlobalConfig
   i18n: I18n
-  isDate?: boolean
-  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }): string => {
-  const { dateFormat, doc, field: fieldFromProps, i18n, isDate, useAsTitle } = args
+  let title: string = data?.id?.toString()
 
-  if (!fieldFromProps && !doc) {
-    return ''
+  if (collectionConfig) {
+    const useAsTitle = collectionConfig?.admin?.useAsTitle
+
+    if (useAsTitle) {
+      title = data?.[useAsTitle] || title
+
+      if (title) {
+        const fieldConfig = collectionConfig.fields.find(
+          (f) => 'name' in f && f.name === useAsTitle,
+        )
+
+        const isDate = fieldConfig?.type === 'date'
+
+        if (isDate) {
+          const dateFormat = fieldConfig?.admin?.date?.displayFormat || dateFormatFromConfig
+          title = formatDate(title, dateFormat, i18n.language) || title
+        }
+      }
+    }
   }
 
-  const field = fieldFromProps || getObjectDotNotation<FormField>(doc, useAsTitle)
-
-  let title: string
-  if (typeof field === 'string') {
-    title = field
-  } else if (typeof field === 'number') {
-    title = String(field)
-  } else {
-    title = field?.value as string
+  if (globalConfig) {
+    title = getTranslation(globalConfig?.label, i18n) || globalConfig?.slug
   }
 
-  if (title && isDate) {
-    title = formatDate(title, dateFormat, i18n.language)
+  if (!title) {
+    title = fallback || `[${i18n.t('general:untitled')}]`
   }
 
   return title
