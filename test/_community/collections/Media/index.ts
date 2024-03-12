@@ -4,30 +4,30 @@ export const mediaSlug = 'media'
 
 export const MediaCollection: CollectionConfig = {
   slug: mediaSlug,
+  access: {
+    create: () => true,
+    read: () => true,
+  },
+  fields: [],
   upload: {
     crop: true,
     focalPoint: true,
     imageSizes: [
       {
         name: 'thumbnail',
-        width: 200,
         height: 200,
+        width: 200,
       },
       {
         name: 'medium',
-        width: 800,
         height: 800,
+        width: 800,
       },
       {
         name: 'large',
-        width: 1200,
         height: 1200,
+        width: 1200,
       },
     ],
   },
-  access: {
-    read: () => true,
-    create: () => true,
-  },
-  fields: [],
 }
