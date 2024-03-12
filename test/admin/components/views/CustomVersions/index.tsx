@@ -1,44 +1,41 @@
-'use client'
+import type { ServerSideEditViewProps } from 'payload/types.js'
 
-import React, { Fragment, useEffect } from 'react'
-import { Redirect } from 'react-router-dom'
+import { SetStepNav } from '@payloadcms/ui'
+import { notFound, redirect } from 'next/navigation.js'
+import React, { Fragment } from 'react'
 
-import type { AdminViewComponent } from '../../../../../packages/payload/src/admin/types.js'
+export const CustomVersionsView: React.FC<ServerSideEditViewProps> = ({ initPageResult }) => {
+  if (!initPageResult) {
+    notFound()
+  }
 
-import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav/index.js'
-import { useConfig } from '../../../../../packages/ui/src/providers/Config/index.js'
-
-export const CustomVersionsView: AdminViewComponent = ({
-  canAccessAdmin,
-  // collection,
-  // global,
-  user,
-}) => {
   const {
-    routes: { admin: adminRoute },
-  } = useConfig()
-
-  const { setStepNav } = useStepNav()
-
-  // This effect will only run one time and will allow us
-  // to set the step nav to display our custom route name
-
-  useEffect(() => {
-    setStepNav([
-      {
-        label: 'Custom Versions View',
+    permissions: { canAccessAdmin },
+    req: {
+      payload: {
+        config: {
+          routes: { admin: adminRoute },
+        },
       },
-    ])
-  }, [setStepNav])
+      user,
+    },
+  } = initPageResult
 
   // If an unauthorized user tries to navigate straight to this page,
   // Boot 'em out
   if (!user || (user && !canAccessAdmin)) {
-    return <Redirect to={`${adminRoute}/unauthorized`} />
+    return redirect(`${adminRoute}/unauthorized`)
   }
 
   return (
     <Fragment>
+      <SetStepNav
+        nav={[
+          {
+            label: 'Custom Versions View',
+          },
+        ]}
+      />
       <div
         style={{
           marginTop: 'calc(var(--base) * 2)',

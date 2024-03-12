@@ -15,7 +15,6 @@ import { customViews2CollectionSlug } from '../slugs.js'
 
 export const CustomViews2: CollectionConfig = {
   slug: customViews2CollectionSlug,
-  versions: true,
   admin: {
     components: {
       views: {
@@ -26,24 +25,24 @@ export const CustomViews2: CollectionConfig = {
               label: customEditLabel,
             },
           },
-          Versions: CustomVersionsView,
           MyCustomView: {
-            path: '/custom-tab-view',
             Component: CustomTabView,
             Tab: {
-              label: customTabLabel,
               href: '/custom-tab-view',
+              label: customTabLabel,
             },
+            path: '/custom-tab-view',
           },
           MyCustomViewWithCustomTab: {
-            path: customTabViewPath,
             Component: CustomTabView2,
             Tab: CustomTabComponent,
+            path: customTabViewPath,
           },
           MyCustomViewWithNestedPath: {
-            path: customNestedTabViewPath,
             Component: CustomNestedTabView,
+            path: customNestedTabViewPath,
           },
+          Versions: CustomVersionsView,
         },
       },
     },
@@ -54,4 +53,5 @@ export const CustomViews2: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: true,
 }
