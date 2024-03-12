@@ -45,6 +45,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
     },
   )
 
+  // If `initialData`, no need to make a request
   useEffect(() => {
     if (initialData && !hasInitialized.current) {
       hasInitialized.current = true
@@ -81,7 +82,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
     }
 
     if (url) {
-      fetchData()
+      void fetchData()
     } else {
       setIsError(false)
       setIsLoading(false)
@@ -90,7 +91,14 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
     return () => {
       abortController.abort()
     }
-  }, [url, locale, search, i18n.language])
+  }, [url, locale, search, i18n.language, initialData])
+
+  // If `initialData` changes, reset the state
+  useEffect(() => {
+    if (initialData && hasInitialized.current) {
+      setData(initialData)
+    }
+  }, [initialData])
 
   return [{ data, isError, isLoading }, { setParams }]
 }

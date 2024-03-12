@@ -1,17 +1,16 @@
 'use client'
 import type { ClientConfig } from 'payload/types'
 
-import { useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui'
+import { formatDocTitle, useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui'
 import { useEffect, useRef } from 'react'
-
-import { formatTitle } from './formatTitle.js'
 
 export const SetDocumentTitle: React.FC<{
   collectionConfig?: ClientConfig['collections'][0]
   config?: ClientConfig
+  fallback: string
   globalConfig?: ClientConfig['globals'][0]
 }> = (props) => {
-  const { collectionConfig, config, globalConfig } = props
+  const { collectionConfig, config, fallback, globalConfig } = props
 
   const useAsTitle = collectionConfig?.admin?.useAsTitle
 
@@ -25,17 +24,18 @@ export const SetDocumentTitle: React.FC<{
 
   const dateFormatFromConfig = config?.admin?.dateFormat
 
-  const title = formatTitle({
+  const title = formatDocTitle({
     collectionConfig,
+    data: { id: '' },
     dateFormat: dateFormatFromConfig,
-    globalConfig,
-    i18n,
-    value:
+    fallback:
       typeof field === 'string'
         ? field
         : typeof field === 'number'
           ? String(field)
-          : (field?.value as string),
+          : (field?.value as string) || fallback,
+    globalConfig,
+    i18n,
   })
 
   useEffect(() => {

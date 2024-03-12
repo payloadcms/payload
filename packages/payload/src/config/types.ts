@@ -693,7 +693,7 @@ export type ClientConfig = Omit<SanitizedConfig, 'admin' | 'db' | 'endpoints'> &
     SanitizedCollectionConfig,
     'access' | 'admin' | 'endpoints' | 'fields' | 'hooks'
   > & {
-    admin: Omit<SanitizedCollectionConfig['admin'], 'components'>
+    admin: Omit<SanitizedCollectionConfig['admin'], 'components' | 'useAsTitle'>
     fields: ClientConfigField[]
   })[]
   globals: (Omit<SanitizedGlobalConfig, 'access' | 'admin' | 'endpoints' | 'fields' | 'hooks'> & {

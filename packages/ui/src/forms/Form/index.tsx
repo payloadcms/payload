@@ -525,17 +525,13 @@ const Form: React.FC<Props> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState
+          let revalidatedFormState: FormState = fields
 
-          await onChange.reduce(async (priorOnChange, onChangeFn) => {
-            await priorOnChange
-
-            const result = await onChangeFn({
-              formState: fields,
+          for (const onChangeFn of onChange) {
+            revalidatedFormState = await onChangeFn({
+              formState: revalidatedFormState,
             })
-
-            revalidatedFormState = result
-          }, Promise.resolve())
+          }
 
           const { changed, newState } = mergeServerFormState(fields, revalidatedFormState)
 
@@ -587,5 +583,4 @@ const Form: React.FC<Props> = (props) => {
   )
 }
 
-// eslint-disable-next-line no-restricted-exports
 export default Form

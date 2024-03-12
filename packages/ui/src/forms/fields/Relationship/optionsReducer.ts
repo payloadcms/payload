@@ -37,9 +37,11 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       const newOptions = [...state]
 
       const docTitle = formatDocTitle({
-        doc,
+        collectionConfig: collection,
+        data: doc,
+        dateFormat: config.admin.dateFormat,
+        fallback: `${i18n.t('general:untitled')} - ID: ${doc.id}`,
         i18n,
-        useAsTitle: collection.admin.useAsTitle,
       })
 
       const foundOptionGroup = newOptions.find(
@@ -48,7 +50,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id)
 
       if (foundOption) {
-        foundOption.label = docTitle || `${i18n.t('general:untitled')} - ID: ${doc.id}`
+        foundOption.label = docTitle
         foundOption.relationTo = relation
       }
 
@@ -71,15 +73,17 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
           loadedIDs.push({ id: doc.id, relationTo: relation })
 
           const docTitle = formatDocTitle({
-            doc,
+            collectionConfig: collection,
+            data: doc,
+            dateFormat: config.admin.dateFormat,
+            fallback: `${i18n.t('general:untitled')} - ID: ${doc.id}`,
             i18n,
-            useAsTitle: collection.admin.useAsTitle,
           })
 
           return [
             ...docSubOptions,
             {
-              label: docTitle || `${i18n.t('general:untitled')} - ID: ${doc.id}`,
+              label: docTitle,
               relationTo: relation,
               value: doc.id,
             },
