@@ -9,6 +9,7 @@ export default {
     changePassword: 'Endre passord',
     confirmGeneration: 'Bekreft generering',
     confirmPassword: 'Bekreft passord',
+    createFirstUser: 'Opprett første bruker',
     emailNotValid: 'E-posten er ikke gyldig',
     emailSent: 'E-post sendt',
     enableAPIKey: 'Aktiver API-nøkkel',

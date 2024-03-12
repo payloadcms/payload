@@ -9,6 +9,7 @@ export default {
     changePassword: '更改密码',
     confirmGeneration: '确认生成',
     confirmPassword: '确认密码',
+    createFirstUser: '创建第一个用户',
     emailNotValid: '所提供的电子邮件时无效的',
     emailSent: '电子邮件已发送',
     enableAPIKey: '启用API密钥',

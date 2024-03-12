@@ -9,6 +9,7 @@ export default {
     changePassword: 'Wachtwoord wijzigen',
     confirmGeneration: 'Bevestigen',
     confirmPassword: 'Wachtwoord bevestigen',
+    createFirstUser: 'Eerste gebruiker aanmaken',
     emailNotValid: 'Het ingevoerde e-mailadres is niet geldig',
     emailSent: 'E-mail verzonden',
     enableAPIKey: 'Activeer API-sleutel',

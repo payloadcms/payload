@@ -9,6 +9,7 @@ export default {
     changePassword: 'Změnit heslo',
     confirmGeneration: 'Potvrdit generaci',
     confirmPassword: 'Potvrdit heslo',
+    createFirstUser: 'Vytvořit prvního uživatele',
     emailNotValid: 'Zadaný email není platný',
     emailSent: 'Email odeslán',
     enableAPIKey: 'Povolit klíč API',

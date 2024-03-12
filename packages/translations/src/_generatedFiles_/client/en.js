@@ -9,6 +9,7 @@ export default {
     changePassword: 'Change Password',
     confirmGeneration: 'Confirm Generation',
     confirmPassword: 'Confirm Password',
+    createFirstUser: 'Create first user',
     emailNotValid: 'The email provided is not valid',
     emailSent: 'Email Sent',
     enableAPIKey: 'Enable API Key',

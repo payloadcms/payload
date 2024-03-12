@@ -9,6 +9,7 @@ export default {
     changePassword: 'Byt Lösenord',
     confirmGeneration: 'Bekräfta Generering',
     confirmPassword: 'Bekräfta Lösenord',
+    createFirstUser: 'Skapa första användaren',
     emailNotValid: 'Angiven e-postadress är inte giltig',
     emailSent: 'E-posten Skickad',
     enableAPIKey: 'Aktivera API nyckel',
