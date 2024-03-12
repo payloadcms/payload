@@ -5,10 +5,15 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useFieldPath } from '../FieldPathProvider/index.js'
+import { useForm } from '../Form/context.js'
 import './index.scss'
 
 const Label: React.FC<LabelProps> = (props) => {
-  const { htmlFor, label, required = false } = props
+  const { htmlFor: htmlForFromProps, label, required = false } = props
+  const { uuid } = useForm()
+  const { path } = useFieldPath()
+  const htmlFor = htmlForFromProps || `field-${path?.replace(/\./g, '__')}${uuid ? `-${uuid}` : ''}`
 
   const { i18n } = useTranslation()
 
