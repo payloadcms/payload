@@ -54,8 +54,6 @@ export const mapFields = (args: {
         const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : undefined
 
         const labelProps: LabelProps = {
-          htmlFor: 'TODO',
-          // TODO: fix types
           // @ts-expect-error-next-line
           label: 'label' in field ? field.label : null,
           required: 'required' in field ? field.required : undefined,
@@ -197,17 +195,14 @@ export const mapFields = (args: {
               componentProps={labelProps}
             />
           ),
+          blocks,
           className:
             'admin' in field && 'className' in field.admin ? field?.admin?.className : undefined,
-          fieldMap: nestedFieldMap,
-          style: 'admin' in field && 'style' in field.admin ? field?.admin?.style : undefined,
-          width: 'admin' in field && 'width' in field.admin ? field?.admin?.width : undefined,
-          // TODO: fix types
-          // label: 'label' in field ? field.label : undefined,
-          blocks,
           date: 'admin' in field && 'date' in field.admin ? field.admin.date : undefined,
+          fieldMap: nestedFieldMap,
           fieldPermissions,
           hasMany: 'hasMany' in field ? field.hasMany : undefined,
+          label: 'label' in field && typeof field.label === 'string' ? field.label : undefined,
           max: 'max' in field ? field.max : undefined,
           maxRows: 'maxRows' in field ? field.maxRows : undefined,
           min: 'min' in field ? field.min : undefined,
@@ -217,7 +212,9 @@ export const mapFields = (args: {
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
           richTextComponentMap: undefined,
           step: 'admin' in field && 'step' in field.admin ? field.admin.step : undefined,
+          style: 'admin' in field && 'style' in field.admin ? field?.admin?.style : undefined,
           tabs,
+          width: 'admin' in field && 'width' in field.admin ? field?.admin?.width : undefined,
         }
 
         let Field = <FieldComponent {...fieldComponentProps} />
