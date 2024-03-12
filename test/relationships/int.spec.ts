@@ -222,23 +222,21 @@ describe('Relationships', () => {
             password: 'fwddsefe',
           },
         })
-        await Promise.all([
-          payload.create({
-            collection: 'movieReviews',
-            data: {
-              likes: [user3.id, user2.id, user.id, user4.id],
-              movieReviewer: user.id,
-              visibility: 'public',
-            },
-          }),
-          payload.create({
-            collection: 'movieReviews',
-            data: {
-              movieReviewer: user2.id,
-              visibility: 'public',
-            },
-          }),
-        ])
+        await payload.create({
+          collection: 'movieReviews',
+          data: {
+            likes: [user3.id, user2.id, user.id, user4.id],
+            movieReviewer: user.id,
+            visibility: 'public',
+          },
+        })
+        await payload.create({
+          collection: 'movieReviews',
+          data: {
+            movieReviewer: user2.id,
+            visibility: 'public',
+          },
+        })
 
         const query = await payload.find({
           collection: 'movieReviews',
