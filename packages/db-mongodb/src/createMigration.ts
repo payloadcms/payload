@@ -45,7 +45,10 @@ export const createMigration: CreateMigration = async function createMigration({
 
     // Check if predefined migration exists
     if (fs.existsSync(cleanPath)) {
-      const { down, up } = await eval(`import(${cleanPath})`)
+      let migration = await eval(`${require ? 'require' : 'import'}(${cleanPath})`)
+      if ('default' in migration) migration = migration.default
+      const { down, up } = migration
+
       migrationFileContent = migrationTemplate(up, down)
     } else {
       payload.logger.error({
