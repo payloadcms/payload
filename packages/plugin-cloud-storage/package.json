@@ -76,9 +76,9 @@
         "types": "./dist/index.d.ts"
       },
       "./*": {
-        "import": "./src/exports/*.ts",
-        "require": "./src/exports/*.ts",
-        "types": "./src/exports/*.ts"
+        "import": "./src/exports/*.js",
+        "require": "./src/exports/*.js",
+        "types": "./src/exports/*.d.ts"
       }
     },
     "main": "./dist/index.js",
