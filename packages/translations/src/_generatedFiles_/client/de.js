@@ -51,6 +51,7 @@ export default {
     previewing: 'Es gab ein Problem beim Vorschauen dieses Dokuments.',
     unableToDeleteCount: '{{count}} von {{total}} {{label}} konnte nicht gelöscht werden.',
     unableToUpdateCount: '{{count}} von {{total}} {{label}} konnte nicht aktualisiert werden.',
+    unauthorized: 'Nicht autorisiert - du musst angemeldet sein, um diese Anfrage zu stellen.',
     unknown: 'Ein unbekannter Fehler ist aufgetreten.',
     unspecific: 'Ein Fehler ist aufgetreten.',
   },

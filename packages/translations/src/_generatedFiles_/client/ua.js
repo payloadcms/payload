@@ -51,6 +51,7 @@ export default {
     previewing: 'Виникла помилка під час попереднього перегляду цього документа.',
     unableToDeleteCount: 'Не вдалося видалити {{count}} із {{total}} {{label}}.',
     unableToUpdateCount: 'Не вдалося оновити {{count}} із {{total}} {{label}}.',
+    unauthorized: 'Немає доступу, ви повинні увійти, щоб виконати цей запит.',
     unknown: 'Виникла невідома помилка.',
     unspecific: 'Виникла помилка.',
   },

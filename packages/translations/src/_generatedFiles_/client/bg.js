@@ -51,6 +51,7 @@ export default {
     previewing: 'Имаше проблем при предварителното разглеждане на документа.',
     unableToDeleteCount: 'Не беше възможно да се изтрият {{count}} от {{total}} {{label}}.',
     unableToUpdateCount: 'Не беше възможно да се обновят {{count}} от {{total}} {{label}}.',
+    unauthorized: 'Неавторизиран, трябва да влезеш, за да извършиш тази заявка.',
     unknown: 'Неизвестна грешка.',
     unspecific: 'Грешка.',
   },

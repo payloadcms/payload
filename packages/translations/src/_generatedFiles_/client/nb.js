@@ -51,6 +51,7 @@ export default {
     previewing: 'Det oppstod et problem under forhåndsvisning av dokumentet.',
     unableToDeleteCount: 'Kan ikke slette {{count}} av {{total}} {{label}}.',
     unableToUpdateCount: 'Kan ikke oppdatere {{count}} av {{total}} {{label}}.',
+    unauthorized: 'Uautorisert, du må være innlogget for å gjøre denne forespørselen.',
     unknown: 'En ukjent feil har oppstått.',
     unspecific: 'En feil har oppstått.',
   },

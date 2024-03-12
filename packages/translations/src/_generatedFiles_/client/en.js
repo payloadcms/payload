@@ -53,6 +53,7 @@ export default {
     previewing: 'There was a problem previewing this document.',
     unableToDeleteCount: 'Unable to delete {{count}} out of {{total}} {{label}}.',
     unableToUpdateCount: 'Unable to update {{count}} out of {{total}} {{label}}.',
+    unauthorized: 'Unauthorized, you must be logged in to make this request.',
     unknown: 'An unknown error has occurred.',
     unspecific: 'An error has occurred.',
   },

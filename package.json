@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.46",
+  "version": "3.0.0-alpha.48",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -68,7 +68,7 @@
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.142.0",
+    "@aws-sdk/client-s3": "^3.525.0",
     "@next/bundle-analyzer": "^14.1.0",
     "@octokit/core": "^5.1.0",
     "@payloadcms/eslint-config": "workspace:*",

@@ -51,6 +51,7 @@ export default {
     previewing: 'Önizleme başarısız oldu',
     unableToDeleteCount: '{{total}} {{label}} içinden {{count}} silinemiyor.',
     unableToUpdateCount: '{{total}} {{label}} içinden {{count}} güncellenemiyor.',
+    unauthorized: 'Bu işlemi gerçekleştirmek için lütfen giriş yapın.',
     unknown: 'Bilinmeyen bir hata oluştu.',
     unspecific: 'Bir hata oluştu.',
   },

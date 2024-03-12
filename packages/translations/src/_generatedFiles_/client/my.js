@@ -51,6 +51,7 @@ export default {
     previewing: 'ဖိုင်ကို အစမ်းကြည့်ရန် ပြဿနာရှိနေသည်။',
     unableToDeleteCount: '{{total}} {{label}} မှ {{count}} ကို ဖျက်၍မရပါ။',
     unableToUpdateCount: '{{total}} {{label}} မှ {{count}} ကို အပ်ဒိတ်လုပ်၍မရပါ။',
+    unauthorized: 'အခွင့်မရှိပါ။ ဤတောင်းဆိုချက်ကို လုပ်ဆောင်နိုင်ရန် သင်သည် လော့ဂ်အင်ဝင်ရပါမည်။',
     unknown: 'ဘာမှန်းမသိသော error တက်သွားပါသည်။',
     unspecific: 'Error တက်နေပါသည်။',
   },

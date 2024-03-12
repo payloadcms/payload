@@ -50,6 +50,7 @@ export default {
     previewing: 'Lỗi - Đã xảy ra vấn đề khi xem trước bản tài liệu này.',
     unableToDeleteCount: 'Không thể xóa {{count}} trong số {{total}} {{label}}.',
     unableToUpdateCount: 'Không thể cập nhật {{count}} trên {{total}} {{label}}.',
+    unauthorized: 'Lỗi - Bạn cần phải đăng nhập trước khi gửi request sau.',
     unknown: 'Lỗi - Không xác định (unknown error).',
     unspecific: 'Lỗi - Đã xảy ra (unspecific error).',
   },

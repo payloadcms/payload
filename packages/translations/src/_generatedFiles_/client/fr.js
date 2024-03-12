@@ -52,6 +52,7 @@ export default {
     previewing: "Un problème est survenu lors de l'aperçu de ce document.",
     unableToDeleteCount: 'Impossible de supprimer {{count}} sur {{total}} {{label}}.',
     unableToUpdateCount: 'Impossible de mettre à jour {{count}} sur {{total}} {{label}}.',
+    unauthorized: 'Non autorisé, vous devez être connecté pour effectuer cette demande.',
     unknown: "Une erreur inconnue s'est produite.",
     unspecific: 'Une erreur est survenue.',
   },

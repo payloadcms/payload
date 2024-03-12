@@ -53,6 +53,7 @@ export default {
     previewing: 'このデータをプレビューする際に問題が発生しました。',
     unableToDeleteCount: '{{total}} {{label}} から {{count}} を削除できません。',
     unableToUpdateCount: '{{total}} {{label}} のうち {{count}} 個を更新できません。',
+    unauthorized: '認証されていません。このリクエストを行うにはログインが必要です。',
     unknown: '不明なエラーが発生しました。',
     unspecific: 'エラーが発生しました。',
   },

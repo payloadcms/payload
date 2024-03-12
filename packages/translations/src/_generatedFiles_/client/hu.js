@@ -51,6 +51,7 @@ export default {
     previewing: 'Hiba történt a dokumentum előnézetének megtekintése közben.',
     unableToDeleteCount: 'Nem sikerült törölni {{count}}/{{total}} {{label}}.',
     unableToUpdateCount: 'Nem sikerült frissíteni {{count}}/{{total}} {{label}}.',
+    unauthorized: 'Jogosulatlan, a kéréshez be kell jelentkeznie.',
     unknown: 'Ismeretlen hiba történt.',
     unspecific: 'Hiba történt.',
   },

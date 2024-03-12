@@ -51,6 +51,7 @@ export default {
     previewing: 'Bu sənədin ön baxışı zamanı problem yarandı.',
     unableToDeleteCount: '{{count}} dən {{total}} {{label}} silinə bilmir.',
     unableToUpdateCount: '{{count}} dən {{total}} {{label}} yenilənə bilmir.',
+    unauthorized: 'İcazəniz yoxdur, bu tələbi yerinə yetirmək üçün daxil olmalısınız.',
     unknown: 'Naməlum bir xəta baş verdi.',
     unspecific: 'Xəta baş verdi.',
   },
