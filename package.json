@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "pnpm run build:core",
-    "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} ++ && npx playwright install",
+    "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} ++",
     "build:all": "turbo build",
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
     "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\"",
