@@ -24,7 +24,33 @@ export const getFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
 export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
   const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
 
-  // TODO: run ADMIN access control for user
+  const incomingUserSlug = req.user?.collection
+  const adminUserSlug = req.payload.config.admin.user
+
+  // If we have a user slug, test it against the functions
+  if (incomingUserSlug) {
+    const adminAccessFunction = req.payload.collections[incomingUserSlug].config.access?.admin
+
+    // Run the admin access function from the config if it exists
+    if (adminAccessFunction) {
+      const canAccessAdmin = await adminAccessFunction(req)
+
+      if (!canAccessAdmin) {
+        return Response.json(null, {
+          status: httpStatus.UNAUTHORIZED,
+        })
+      }
+      // Match the user collection to the global admin config
+    } else if (adminUserSlug !== incomingUserSlug) {
+      return Response.json(null, {
+        status: httpStatus.UNAUTHORIZED,
+      })
+    }
+  } else {
+    return Response.json(null, {
+      status: httpStatus.UNAUTHORIZED,
+    })
+  }
 
   const fieldSchemaMap = getFieldSchemaMap(req.payload.config)
 
