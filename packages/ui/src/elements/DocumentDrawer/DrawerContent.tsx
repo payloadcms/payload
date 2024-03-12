@@ -199,7 +199,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
 
   return (
     <FieldPathProvider path="" schemaPath={collectionSlug}>
-      <Content {...props} id={idFromProps || doc.id} initialData={doc} onSave={onSave} />
+      <Content {...props} id={idFromProps || doc?.id} initialData={doc} onSave={onSave} />
     </FieldPathProvider>
   )
 }
