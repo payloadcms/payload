@@ -8,8 +8,14 @@ interface Args {
   endpoint: string
 }
 
+type GenericUpload = {
+  id: string
+  url?: string
+  sizes?: Record<string, { url?: string }>
+}
+
 export const getCacheUploadsAfterChangeHook =
-  ({ endpoint }: Args): CollectionAfterChangeHook =>
+  ({ endpoint }: Args): CollectionAfterChangeHook<GenericUpload> =>
   async ({ doc, operation, req }) => {
     if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
 
@@ -37,7 +43,7 @@ export const getCacheUploadsAfterDeleteHook =
   }
 
 type PurgeRequest = {
-  doc: any
+  doc: GenericUpload
   endpoint: string
   operation: string
   req: PayloadRequest
@@ -56,11 +62,20 @@ async function purge({ doc, endpoint, operation, req }: PurgeRequest) {
     return
   }
 
+  const filepaths = [filePath]
+  if (Object.keys(doc.sizes).length) {
+    const urls = Object.values(doc.sizes)
+      .map((size) => size?.url)
+      .filter(Boolean)
+    filepaths.push(...urls)
+  }
+
   const body = {
     cacheKey: process.env.PAYLOAD_CLOUD_CACHE_KEY,
-    filepath: doc.url,
+    filepaths,
     projectID: process.env.PAYLOAD_CLOUD_PROJECT_ID,
   }
+
   req.payload.logger.debug({
     filepath: doc.url,
     msg: 'Attempting to purge cache',
