@@ -8,13 +8,8 @@
   },
   "exclude": ["dist", "build", "node_modules", ".eslintrc.js"],
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.d.ts",
-    "src/**/*.json",
-    "**/*.ts",
-    "**/*.tsx",
-    "test/**/*.tsx",
+    "./**/*.ts",
+    "./**/*.tsx",
     "../packages/**/src/**/*.ts",
     "../packages/**/src/**/*.tsx"],
   "plugins": [

@@ -1,5 +1,7 @@
+/** @type {import('eslint').Linter.Config} */
 module.exports = {
   extends: ['@payloadcms'],
+  ignorePatterns: ['README.md', 'packages/**/*.spec.ts'],
   overrides: [
     {
       files: ['scripts/**'],
