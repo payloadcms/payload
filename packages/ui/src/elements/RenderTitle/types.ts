@@ -3,6 +3,5 @@ export type Props = {
   element?: React.ElementType
   fallback?: string
   fallbackToID?: boolean
-  onChange?: (title: string) => void
   title?: string
 }

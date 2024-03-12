@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import type { Props } from './types.js'
 
@@ -10,7 +10,7 @@ import './index.scss'
 const baseClass = 'render-title'
 
 export const RenderTitle: React.FC<Props> = (props) => {
-  const { className, element = 'h1', fallback, onChange, title: titleFromProps } = props
+  const { className, element = 'h1', fallback, title: titleFromProps } = props
 
   const documentInfo = useDocumentInfo()
 
@@ -21,12 +21,6 @@ export const RenderTitle: React.FC<Props> = (props) => {
   const idAsTitle = title === id
 
   const Tag = element
-
-  useEffect(() => {
-    if (typeof onChange === 'function') {
-      onChange(title)
-    }
-  }, [onChange, title])
 
   return (
     <Tag

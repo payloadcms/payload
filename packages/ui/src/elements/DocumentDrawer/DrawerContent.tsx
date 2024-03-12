@@ -53,7 +53,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const { formQueryParams } = useFormQueryParams()
   const formattedQueryParams = queryString.stringify(formQueryParams)
-  const [title, setTitle] = useState<null | string>(null)
 
   const { permissions } = useAuth()
 
@@ -125,13 +124,20 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   const docPermissions = permissions?.collections[collectionSlug]
 
+  const title = formatDocTitle({
+    collectionConfig,
+    data,
+    dateFormat: config.admin.dateFormat,
+    i18n,
+  })
+
   return (
     <DocumentInfoProvider
       BeforeDocument={
         <Gutter className={`${baseClass}__header`}>
           <div className={`${baseClass}__header-content`}>
             <h2 className={`${baseClass}__header-text`}>
-              {Header || <RenderTitle element="span" onChange={setTitle} />}
+              {Header || <RenderTitle element="span" />}
             </h2>
             {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
             i.e. changing to a `div` element will fix the animation issue but will break accessibility
@@ -160,14 +166,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
       initialData={data}
       initialState={initialState}
       isEditing={isEditing}
-      // me: true,
       onSave={onSave}
-      title={formatDocTitle({
-        collectionConfig,
-        data,
-        dateFormat: config.admin.dateFormat,
-        i18n,
-      })}
+      title={title}
     >
       {Edit}
     </DocumentInfoProvider>
