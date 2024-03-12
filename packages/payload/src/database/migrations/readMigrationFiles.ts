@@ -1,8 +1,13 @@
 import fs from 'fs'
+import { createRequire } from 'module'
 import path from 'path'
 
 import type { Payload } from '../../index.js'
 import type { Migration } from '../types.js'
+
+// Needed for eval require statement
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const require = createRequire(import.meta.url)
 
 /**
  * Read the migration files from disk
@@ -36,7 +41,7 @@ export const readMigrationFiles = async ({
   return Promise.all(
     files.map(async (filePath) => {
       // eval used to circumvent errors bundling
-      const migration = await eval(`import('${filePath.replaceAll('\\', '/')}')`)
+      const migration = await eval(`require('${filePath.replaceAll('\\', '/')}')`)
 
       const result: Migration = {
         name: path.basename(filePath).split('.')?.[0],

@@ -2,8 +2,13 @@
 import type { CreateMigration } from 'payload/database'
 
 import fs from 'fs'
+import { createRequire } from 'module'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+// Needed for eval require statement
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const require = createRequire(import.meta.url)
 
 const migrationTemplate = (upSQL?: string, downSQL?: string) => `import {
   MigrateUpArgs,
@@ -45,7 +50,7 @@ export const createMigration: CreateMigration = async function createMigration({
 
     // Check if predefined migration exists
     if (fs.existsSync(cleanPath)) {
-      const { down, up } = await eval(`import(${cleanPath})`)
+      const { down, up } = await eval(`require(${cleanPath})`)
       migrationFileContent = migrationTemplate(up, down)
     } else {
       payload.logger.error({
