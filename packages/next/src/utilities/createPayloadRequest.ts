@@ -14,7 +14,7 @@ import QueryString from 'qs'
 import { URL } from 'url'
 
 import { getDataAndFile } from './getDataAndFile.js'
-import { getPayload } from './getPayload.js'
+import { getPayloadHMR } from './getPayloadHMR.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 import { getRequestLocales } from './getRequestLocales.js'
 
@@ -32,7 +32,7 @@ export const createPayloadRequest = async ({
   request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise })
 
   const { collections, config } = payload
 
