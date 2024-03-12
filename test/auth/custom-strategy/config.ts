@@ -1,46 +1,30 @@
-import { Strategy } from 'passport-strategy'
-
-import type { Payload } from '../../../packages/payload/src/index.js'
+import type { AuthStrategyFunction } from 'payload/auth.js'
 
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 import { usersSlug } from './shared.js'
 
 export const strategyName = 'test-local'
 
-export class CustomStrategy extends Strategy {
-  ctx: Payload
+const customAuthenticationStrategy: AuthStrategyFunction = async ({ headers, payload }) => {
+  const usersQuery = await payload.find({
+    collection: usersSlug,
+    where: {
+      code: {
+        equals: headers.get('code'),
+      },
+      secret: {
+        equals: headers.get('secret'),
+      },
+    },
+  })
 
-  constructor(ctx: Payload) {
-    super()
-    this.ctx = ctx
-  }
+  const user = usersQuery.docs[0] || null
+  if (!user) return null
 
-  authenticate(req: Request, options?: any): void {
-    if (!req.headers.code && !req.headers.secret) {
-      return this.success(null)
-    }
-    this.ctx
-      .find({
-        collection: usersSlug,
-        where: {
-          code: {
-            equals: req.headers.code,
-          },
-          secret: {
-            equals: req.headers.secret,
-          },
-        },
-      })
-      .then((users) => {
-        if (users.docs && users.docs.length) {
-          const user = users.docs[0]
-          user.collection = usersSlug
-          user._strategy = `${usersSlug}-${strategyName}`
-          this.success(user)
-        } else {
-          this.error(null)
-        }
-      })
+  return {
+    ...user,
+    _strategy: `${usersSlug}-${strategyName}`,
+    collection: usersSlug,
   }
 }
 
@@ -51,45 +35,45 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: usersSlug,
+      access: {
+        create: () => true,
+      },
       auth: {
         disableLocalStrategy: true,
         strategies: [
           {
             name: strategyName,
-            strategy: (ctx) => new CustomStrategy(ctx),
+            authenticate: customAuthenticationStrategy,
           },
         ],
-      },
-      access: {
-        create: () => true,
       },
       fields: [
         {
           name: 'code',
-          label: 'Code',
           type: 'text',
-          unique: true,
           index: true,
+          label: 'Code',
+          unique: true,
         },
         {
           name: 'secret',
-          label: 'Secret',
           type: 'text',
+          label: 'Secret',
         },
         {
           name: 'name',
-          label: 'Name',
           type: 'text',
+          label: 'Name',
         },
         {
           name: 'roles',
-          label: 'Role',
           type: 'select',
-          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
           defaultValue: 'user',
+          hasMany: true,
+          label: 'Role',
+          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
           required: true,
           saveToJWT: true,
-          hasMany: true,
         },
       ],
     },
