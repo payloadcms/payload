@@ -21,8 +21,8 @@ export const RenderField: React.FC<{
 
   const operation = useOperation()
 
-  const path = `${pathFromContext ? `${pathFromContext}.` : ''}${name || ''}`
-  const schemaPath = `${schemaPathFromContext ? `${schemaPathFromContext}.` : ''}${name || ''}`
+  const path = `${pathFromContext ? `${pathFromContext}.` : ''}${name ? `${name}` : ''}`
+  const schemaPath = `${schemaPathFromContext ? `${schemaPathFromContext}` : ''}${name ? `.${name}` : ''}`
 
   // if the user cannot read the field, then filter it out
   // this is different from `admin.readOnly` which is executed based on `operation`
