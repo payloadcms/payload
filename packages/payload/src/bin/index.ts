@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import minimist from 'minimist'
-import { createRequire } from 'module'
 
 import type { BinScript } from '../config/types.js'
 
@@ -9,12 +8,10 @@ import { generateTypes } from './generateTypes.js'
 import { loadEnv } from './loadEnv.js'
 import { migrate } from './migrate.js'
 
-const require = createRequire(import.meta.url)
-
 export const bin = async () => {
   loadEnv()
   const configPath = findConfig()
-  const configPromise = require(configPath)
+  const configPromise = await import(configPath)
   let config = await configPromise
   if (config.default) config = await config.default
 
@@ -27,7 +24,7 @@ export const bin = async () => {
 
   if (userBinScript) {
     try {
-      const script: BinScript = require(userBinScript.scriptPath)
+      const script: BinScript = await import(userBinScript.scriptPath)
       await script(config)
     } catch (err) {
       console.log(`Could not find associated bin script for the ${userBinScript.key} command`)
