@@ -64,7 +64,9 @@ export const createMigration: CreateMigration = async function createMigration({
   const timestamp = `${formattedDate}_${formattedTime}`
 
   const formattedName = migrationName?.replace(/\W/g, '_')
-  const fileName = migrationName ? `${timestamp}_${formattedName}.ts` : `${timestamp}_migration.ts`
+  const fileName = migrationName
+    ? `${timestamp}_${formattedName}.mts`
+    : `${timestamp}_migration.mts`
   const filePath = `${dir}/${fileName}`
   fs.writeFileSync(filePath, migrationFileContent)
   payload.logger.info({ msg: `Migration created at ${filePath}` })
