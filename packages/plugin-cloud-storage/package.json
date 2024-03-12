@@ -66,6 +66,11 @@
       "import": "./src/exports/*.ts",
       "require": "./src/exports/*.ts",
       "types": "./src/exports/*.ts"
+    },
+    "./dist/*": {
+      "import": "./src/*.ts",
+      "require": "./src/*.ts",
+      "types": "./src/*.ts"
     }
   },
   "publishConfig": {
@@ -76,9 +81,14 @@
         "types": "./dist/index.d.ts"
       },
       "./*": {
-        "import": "./src/exports/*.js",
-        "require": "./src/exports/*.js",
-        "types": "./src/exports/*.d.ts"
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
+      },
+      "./dist/*": {
+        "import": "./dist/*.js",
+        "require": "./dist/*.js",
+        "types": "./dist/*.d.ts"
       }
     },
     "main": "./dist/index.js",
