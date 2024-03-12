@@ -12,7 +12,7 @@ import config from './config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Admin Panel', () => {
+test.describe('Admin Panel', () => {
   let page: Page
   let url: AdminUrlUtil
 
