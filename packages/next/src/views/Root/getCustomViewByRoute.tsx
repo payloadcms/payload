@@ -1,4 +1,4 @@
-import type { AdminViewProps, SanitizedConfig } from 'payload/types'
+import type { AdminViewComponent, SanitizedConfig } from 'payload/types'
 
 export const getCustomViewByRoute = ({
   config,
@@ -6,7 +6,7 @@ export const getCustomViewByRoute = ({
 }: {
   config: SanitizedConfig
   route: string
-}): React.FC<AdminViewProps> => {
+}): AdminViewComponent => {
   const {
     admin: {
       components: { views },
