@@ -3,7 +3,6 @@ import type { Payload } from 'payload'
 import type { Migration } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import { createRequire } from 'module'
 import {
   commitTransaction,
   initTransaction,
@@ -17,8 +16,6 @@ import type { PostgresAdapter } from './types.js'
 import { createMigrationTable } from './utilities/createMigrationTable.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
-
-const require = createRequire(import.meta.url)
 
 export async function migrate(this: PostgresAdapter): Promise<void> {
   const { payload } = this
@@ -85,7 +82,9 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
-  const { generateDrizzleJson } = require('drizzle-kit/payload')
+  const { generateDrizzleJson } = require
+    ? require('drizzle-kit/payload')
+    : await import('drizzle-kit/payload')
 
   const start = Date.now()
   const req = { payload } as PayloadRequest
