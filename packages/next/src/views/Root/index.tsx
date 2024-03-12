@@ -66,7 +66,7 @@ export const RootPage = async ({
 
   let ViewToRender: React.FC<AdminViewProps>
   let templateClassName
-  let templateType: 'default' | 'minimal' = 'default'
+  let templateType: 'default' | 'minimal'
 
   let route = adminRoute
 
@@ -89,10 +89,12 @@ export const RootPage = async ({
 
   switch (segments.length) {
     case 0: {
-      ViewToRender = Dashboard
-      templateClassName = 'dashboard'
-      templateType = 'default'
-      initPageOptions.redirectUnauthenticatedUser = true
+      if (route === adminRoute) {
+        ViewToRender = Dashboard
+        templateClassName = 'dashboard'
+        templateType = 'default'
+        initPageOptions.redirectUnauthenticatedUser = true
+      }
       break
     }
     case 1: {
@@ -113,7 +115,6 @@ export const RootPage = async ({
         templateClassName = 'account'
         templateType = 'default'
       } else {
-        // find custom views
         ViewToRender = getCustomViewByRoute({ config, route })
       }
       break
@@ -137,6 +138,8 @@ export const RootPage = async ({
         ViewToRender = DocumentView
         templateClassName = 'global-edit'
         templateType = 'default'
+      } else {
+        ViewToRender = getCustomViewByRoute({ config, route })
       }
       break
     }
@@ -204,7 +207,9 @@ export const RootPage = async ({
         <ViewToRender initPageResult={initPageResult} params={params} searchParams={searchParams} />
       </MinimalTemplate>
     )
-  } else {
+  }
+
+  if (templateType === 'default') {
     return (
       <DefaultTemplate
         config={config}
@@ -216,4 +221,8 @@ export const RootPage = async ({
       </DefaultTemplate>
     )
   }
+
+  return (
+    <ViewToRender initPageResult={initPageResult} params={params} searchParams={searchParams} />
+  )
 }

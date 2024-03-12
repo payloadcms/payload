@@ -43,25 +43,25 @@ export default buildConfigWithDefaults({
         Button: Logout,
       },
       views: {
-        //   // Dashboard: CustomDashboardView,
-        //   // Account: CustomAccountView,
+        // Dashboard: CustomDashboardView,
+        // Account: CustomAccountView,
         CustomDefaultView: {
           Component: CustomDefaultView,
           path: '/custom-default-view',
         },
-        // CustomMinimalView: {
-        //   Component: CustomMinimalView,
-        //   path: '/custom-minimal-view',
-        // },
-        // CustomNestedView: {
-        //   Component: CustomNestedView,
-        //   path: customNestedViewPath,
-        // },
-        // CustomView: {
-        //   Component: CustomView,
-        //   exact: true,
-        //   path: customViewPath,
-        // },
+        CustomMinimalView: {
+          Component: CustomMinimalView,
+          path: '/custom-minimal-view',
+        },
+        CustomNestedView: {
+          Component: CustomNestedView,
+          path: customNestedViewPath,
+        },
+        CustomView: {
+          Component: CustomView,
+          exact: true,
+          path: customViewPath,
+        },
       },
     },
   },
@@ -117,7 +117,7 @@ export default buildConfigWithDefaults({
       },
     ],
   },
-  onInit: async (payload) => {
-    await clearAndSeedEverything(payload)
-  },
+  // onInit: async (payload) => {
+  //   await clearAndSeedEverything(payload)
+  // },
 })
