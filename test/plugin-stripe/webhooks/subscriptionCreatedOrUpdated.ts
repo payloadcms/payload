@@ -72,28 +72,28 @@ export const subscriptionCreatedOrUpdated = async (args) => {
         payload.logger.info(`- Subscription already exists, now updating.`)
         // update existing subscription
         subscriptions[indexOfSubscription] = {
-          stripeProductID: plan.product,
           product: payloadProductID,
           status: subscriptionStatus,
+          stripeProductID: plan.product,
         }
       } else {
         payload.logger.info(`- This is a new subscription, now adding.`)
         // create new subscription
         subscriptions.push({
-          stripeSubscriptionID: eventID,
-          stripeProductID: plan.product,
           product: payloadProductID,
           status: subscriptionStatus,
+          stripeProductID: plan.product,
+          stripeSubscriptionID: eventID,
         })
       }
 
       try {
         await payload.update({
-          collection: 'customers',
           id: foundCustomer.id,
+          collection: 'customers',
           data: {
-            subscriptions,
             skipSync: true,
+            subscriptions,
           },
         })
 

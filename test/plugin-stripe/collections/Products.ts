@@ -4,36 +4,36 @@ import { productsSlug } from '../shared.js'
 
 export const Products: CollectionConfig = {
   slug: productsSlug,
-  timestamps: true,
   admin: {
     defaultColumns: ['name'],
   },
   fields: [
     {
       name: 'name',
-      label: 'Name',
       type: 'text',
+      label: 'Name',
     },
     {
       name: 'price',
-      label: 'Price',
       type: 'group',
       admin: {
-        readOnly: true,
         description: 'All pricing information is managed in Stripe and will be reflected here.',
+        readOnly: true,
       },
       fields: [
         {
           name: 'stripePriceID',
-          label: 'Stripe Price ID',
           type: 'text',
+          label: 'Stripe Price ID',
         },
         {
           name: 'stripeJSON',
-          label: 'Stripe JSON',
           type: 'textarea',
+          label: 'Stripe JSON',
         },
       ],
+      label: 'Price',
     },
   ],
+  timestamps: true,
 }

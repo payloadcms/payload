@@ -32,14 +32,14 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     stripePlugin({
-      stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       isTestKey: true,
       logs: true,
+      rest: false,
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
       sync: [
         {
           collection: 'customers',
-          stripeResourceType: 'customers',
-          stripeResourceTypeSingular: 'customer',
           fields: [
             {
               fieldPath: 'name',
@@ -57,11 +57,11 @@ export default buildConfigWithDefaults({
             //   property: 'plan.name',
             // }
           ],
+          stripeResourceType: 'customers',
+          stripeResourceTypeSingular: 'customer',
         },
         {
           collection: 'products',
-          stripeResourceType: 'products',
-          stripeResourceTypeSingular: 'product',
           fields: [
             {
               fieldPath: 'name',
@@ -72,17 +72,17 @@ export default buildConfigWithDefaults({
               stripeProperty: 'default_price',
             },
           ],
+          stripeResourceType: 'products',
+          stripeResourceTypeSingular: 'product',
         },
       ],
-      rest: false,
       webhooks: {
         'customer.subscription.created': subscriptionCreatedOrUpdated,
-        'customer.subscription.updated': subscriptionCreatedOrUpdated,
         'customer.subscription.deleted': subscriptionDeleted,
+        'customer.subscription.updated': subscriptionCreatedOrUpdated,
         'product.created': syncPriceJSON,
         'product.updated': syncPriceJSON,
       },
-      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
     }),
   ],
 })
