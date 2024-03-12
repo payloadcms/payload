@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-alpha.46",
+  "version": "3.0.0-alpha.47",
   "main": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "type": "module",
