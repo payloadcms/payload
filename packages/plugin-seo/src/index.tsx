@@ -15,7 +15,7 @@ import type {
 import { MetaDescription } from './fields/MetaDescription.js'
 import { MetaImage } from './fields/MetaImage.js'
 import { MetaTitle } from './fields/MetaTitle.js'
-import translations from './translations/index.js'
+import { translations } from './translations/index.js'
 import { Overview } from './ui/Overview.js'
 import { Preview } from './ui/Preview.js'
 
@@ -139,8 +139,8 @@ const seo =
                   tabs: [
                     // append a new tab onto the end of the tabs array, if there is one at the first index
                     // if needed, create a new `Content` tab in the first index for this collection's base fields
-                    ...(collection?.fields?.[0]?.type === 'tabs'
-                      ? collection.fields[0]?.tabs
+                    ...(collection?.fields?.[0]?.type === 'tabs' && collection?.fields?.[0]?.tabs
+                      ? collection.fields[0].tabs
                       : [
                           {
                             fields: [
@@ -234,8 +234,8 @@ const seo =
                   tabs: [
                     // append a new tab onto the end of the tabs array, if there is one at the first index
                     // if needed, create a new `Content` tab in the first index for this global's base fields
-                    ...(global?.fields?.[0].type === 'tabs'
-                      ? global.fields[0]?.tabs
+                    ...(global?.fields?.[0].type === 'tabs' && global?.fields?.[0].tabs
+                      ? global.fields[0].tabs
                       : [
                           {
                             fields: [...(global?.fields || [])],
@@ -254,7 +254,7 @@ const seo =
                 ...global,
                 fields: [
                   ...seoTabs,
-                  ...(global?.fields?.[0].type === 'tabs' ? global?.fields?.slice(1) : []),
+                  ...(global?.fields?.[0].type === 'tabs' ? global.fields.slice(1) : []),
                 ],
               }
             }
@@ -276,4 +276,4 @@ const seo =
     }
   }
 
-export default seo
+export { seo }
