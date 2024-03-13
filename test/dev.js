@@ -1,8 +1,12 @@
 import minimist from 'minimist'
 import { nextDev } from 'next/dist/cli/next-dev.js'
-import { resolve } from 'path'
+import { dirname, resolve } from 'path'
+import { fileURLToPath } from 'url'
 
 import { beforeTest } from './beforeTest.js'
+
+const _filename = fileURLToPath(import.meta.url)
+const _dirname = dirname(_filename)
 
 main()
 
@@ -20,5 +24,5 @@ async function main() {
 
   beforeTest(testSuiteArg)
 
-  nextDev({ _: [resolve(__dirname, '..')], port: process.env.PORT || 3000 })
+  nextDev({ _: [resolve(_dirname, '..')], port: process.env.PORT || 3000 })
 }
