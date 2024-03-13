@@ -124,15 +124,15 @@ module.exports = {
     {
       files: ['*.config.ts'],
       rules: {
-        'no-restricted-exports': 'off',
         ...sharedRules,
+        'no-restricted-exports': 'off',
       },
     },
     {
       files: ['config.ts'],
       rules: {
-        'no-restricted-exports': 'off',
         ...sharedRules,
+        'no-restricted-exports': 'off',
       },
     },
   ],
