@@ -6,7 +6,7 @@ import path from 'path'
 import type { SanitizedConfig } from '../../packages/payload/src/config/types.js'
 import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
+import { getPayloadHMR } from '../../packages/next/src/utilities/getPayloadHMR.js'
 import wait from '../../packages/payload/src/utilities/wait.js'
 import { beforeTest } from '../beforeTest.js'
 
@@ -30,10 +30,9 @@ export async function initPayloadE2E({ config, dirname }: Args): Promise<Result>
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.PORT = String(port)
 
-  const payload = await getPayload({ config })
-
   // @ts-expect-error
   process.env.NODE_ENV = 'test'
+  const payload = await getPayloadHMR({ config })
 
   nextDev({
     _: [path.resolve(dirname, '../../')],
