@@ -56,6 +56,17 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       },
       req,
     })
+
+    await payload.create({
+      collection: 'tags',
+      data: {
+        tagName: 'tag-1',
+        uri: 'tag-uri',
+        _status: 'published',
+      },
+      req,
+    })
+
     return true
   } catch (err) {
     console.error(err)

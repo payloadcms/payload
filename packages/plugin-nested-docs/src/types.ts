@@ -29,4 +29,9 @@ export interface PluginConfig {
    * Should be supplied if using an alternative field name for the 'parent' field in collections
    */
   parentFieldSlug?: string
+  /**
+   * Should be supplied if we want to avoid calling the populateBreadcrumbs function
+   * when this field does not change
+   */
+  urlFieldSlug?: string
 }
