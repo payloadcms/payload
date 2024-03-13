@@ -35,14 +35,13 @@ export const EditViewClient: React.FC = () => {
   })
 
   const onSave = useCallback(
-    // eslint-disable-next-line @typescript-eslint/require-await
-    async (json: { doc }) => {
+    (json: { doc }) => {
       void getVersions()
       void getDocPermissions()
 
       if (!isEditing) {
-        const baseRedirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}`
-        const redirectRoute = locale ? baseRedirectRoute + `?locale=${locale}` : baseRedirectRoute
+        // Redirect to the same locale if it's been set
+        const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
         router.push(redirectRoute)
       } else {
         dispatchFormQueryParams({
@@ -66,8 +65,7 @@ export const EditViewClient: React.FC = () => {
   )
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    setOnSave(() => onSave)
+    void setOnSave(() => onSave)
   }, [setOnSave, onSave])
 
   // Allow the `DocumentInfoProvider` to hydrate
