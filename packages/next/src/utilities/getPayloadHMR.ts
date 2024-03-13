@@ -4,7 +4,11 @@ import type { InitOptions } from 'payload/config'
 import { BasePayload } from 'payload'
 import WebSocket from 'ws'
 
-let cached = global._payload
+let cached: {
+  payload: Payload | null
+  promise: Promise<Payload> | null
+  reload: Promise<boolean> | boolean
+} = global._payload
 
 if (!cached) {
   // eslint-disable-next-line no-multi-assign
@@ -35,8 +39,11 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
         return collections
       }, {})
 
-      // TODO: re-build payload.globals as well as any other properties
-      // that may change on Payload singleton
+      cached.payload.globals = {
+        config: config.globals,
+      }
+
+      // TODO: support HMR for other props in the future (see payload/src/index init()) hat may change on Payload singleton
 
       await cached.payload.db.init()
       await cached.payload.db.connect({ hotReload: true })
