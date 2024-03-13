@@ -16,11 +16,13 @@ import { AdminButton } from './components/AdminButton/index.js'
 import { AfterDashboard } from './components/AfterDashboard/index.js'
 import { AfterNavLinks } from './components/AfterNavLinks/index.js'
 import { BeforeLogin } from './components/BeforeLogin/index.js'
+import { CustomProvider } from './components/CustomProvider/index.js'
 import { Logout } from './components/Logout/index.js'
 import { CustomDefaultView } from './components/views/CustomDefault/index.js'
 import { CustomMinimalView } from './components/views/CustomMinimal/index.js'
 import { CustomView } from './components/views/CustomView/index.js'
 import { CustomNestedView } from './components/views/CustomViewNested/index.js'
+import { CustomViewWithParam } from './components/views/CustomViewWithParam/index.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -29,12 +31,11 @@ import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
 import { clearAndSeedEverything } from './seed.js'
-import { customNestedViewPath, customViewPath } from './shared.js'
+import { customNestedViewPath, customParamViewPath, customViewPath } from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {
     components: {
-      // providers: [CustomProvider, CustomProvider],
       actions: [AdminButton],
       afterDashboard: [AfterDashboard],
       afterNavLinks: [AfterNavLinks],
@@ -42,6 +43,7 @@ export default buildConfigWithDefaults({
       logout: {
         Button: Logout,
       },
+      providers: [CustomProvider, CustomProvider],
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
@@ -55,12 +57,18 @@ export default buildConfigWithDefaults({
         },
         CustomNestedView: {
           Component: CustomNestedView,
+          exact: true,
           path: customNestedViewPath,
         },
         CustomView: {
           Component: CustomView,
           exact: true,
           path: customViewPath,
+          strict: true,
+        },
+        CustomViewWithParam: {
+          Component: CustomViewWithParam,
+          path: customParamViewPath,
         },
       },
     },
@@ -117,7 +125,7 @@ export default buildConfigWithDefaults({
       },
     ],
   },
-  // onInit: async (payload) => {
-  //   await clearAndSeedEverything(payload)
-  // },
+  onInit: async (payload) => {
+    await clearAndSeedEverything(payload)
+  },
 })

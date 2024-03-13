@@ -1,14 +1,13 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { AdminViewComponent, SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
 import { initPage } from '../../utilities/initPage.js'
-import { getCustomViewByRoute } from './getCustomViewByRoute.js'
-import { getViewsFromConfig } from './getViewsFromConfig.jsx'
+import { getViewFromConfig } from './getViewFromConfig.js'
 
 export { generatePageMetadata } from './meta.js'
 
@@ -38,28 +37,21 @@ export const RootPage = async ({
     routes: { admin: adminRoute },
   } = config
 
-  let route = adminRoute
-
-  if (Array.isArray(params.segments)) {
-    route = route + '/' + params.segments.join('/')
-  }
+  const currentRoute = `${adminRoute}${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`
 
   const segments = Array.isArray(params.segments) ? params.segments : []
 
-  const { View, initPageOptions, templateClassName, templateType } = getViewsFromConfig({
+  const { DefaultView, initPageOptions, templateClassName, templateType } = getViewFromConfig({
     adminRoute,
     config,
-    route,
+    currentRoute,
     searchParams,
     segments,
   })
 
   let dbHasUser = false
 
-  // check for custom view
-  const ViewToRender: AdminViewComponent = View || getCustomViewByRoute({ config, route })
-
-  if (!ViewToRender) {
+  if (!DefaultView) {
     notFound()
   }
 
@@ -75,17 +67,17 @@ export const RootPage = async ({
 
     const createFirstUserRoute = `${adminRoute}/create-first-user`
 
-    if (!dbHasUser && route !== createFirstUserRoute) {
+    if (!dbHasUser && currentRoute !== createFirstUserRoute) {
       redirect(createFirstUserRoute)
     }
 
-    if (dbHasUser && route === createFirstUserRoute) {
+    if (dbHasUser && currentRoute === createFirstUserRoute) {
       redirect(adminRoute)
     }
   }
 
   const RenderedView = (
-    <ViewToRender initPageResult={initPageResult} params={params} searchParams={searchParams} />
+    <DefaultView initPageResult={initPageResult} params={params} searchParams={searchParams} />
   )
 
   if (templateType === 'minimal') {

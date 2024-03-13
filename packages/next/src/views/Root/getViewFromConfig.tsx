@@ -13,6 +13,7 @@ import { Logout, LogoutInactivity } from '../Logout/index.js'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
 import { Unauthorized } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 const baseClasses = {
   forgot: forgotPasswordBaseClass,
@@ -30,22 +31,22 @@ const oneSegmentViews = {
   unauthorized: Unauthorized,
 }
 
-export const getViewsFromConfig = ({
+export const getViewFromConfig = ({
   adminRoute,
   config,
-  route,
+  currentRoute,
   searchParams,
   segments,
 }: {
   adminRoute
   config: SanitizedConfig
-  route
+  currentRoute: string
   searchParams: {
     [key: string]: string | string[]
   }
   segments: string[]
 }): {
-  View: AdminViewComponent
+  DefaultView: AdminViewComponent
   initPageOptions: Parameters<typeof initPage>[0]
   templateClassName: string
   templateType: 'default' | 'minimal'
@@ -56,7 +57,7 @@ export const getViewsFromConfig = ({
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
-    route,
+    route: currentRoute,
     searchParams,
   }
 
@@ -67,7 +68,7 @@ export const getViewsFromConfig = ({
 
   switch (segments.length) {
     case 0: {
-      if (route === adminRoute) {
+      if (currentRoute === adminRoute) {
         ViewToRender = Dashboard
         templateClassName = 'dashboard'
         templateType = 'default'
@@ -149,8 +150,12 @@ export const getViewsFromConfig = ({
       break
   }
 
+  if (!ViewToRender) {
+    ViewToRender = getCustomViewByRoute({ config, currentRoute })
+  }
+
   return {
-    View: ViewToRender,
+    DefaultView: ViewToRender,
     initPageOptions,
     templateClassName,
     templateType,
