@@ -1,4 +1,3 @@
-// 'use client'
 import type { FormState } from 'payload/types'
 
 import { Button, Email, Form, FormSubmit, Translation } from '@payloadcms/ui'
