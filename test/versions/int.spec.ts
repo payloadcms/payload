@@ -1,5 +1,4 @@
 import type { Payload } from '../../packages/payload/src/index.js'
-
 import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -53,6 +52,12 @@ describe('Versions', () => {
       .then((res) => res.json())
 
     token = data.loginUser.token
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   beforeEach(async () => {

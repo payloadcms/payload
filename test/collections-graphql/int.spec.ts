@@ -1,7 +1,6 @@
 import type { Payload } from '../../packages/payload/src/index.js'
-import type { Post } from './payload-types.js'
-
 import { getPayload } from '../../packages/payload/src/index.js'
+import type { Post } from './payload-types.js'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { idToString } from '../helpers/idToString.js'
@@ -33,7 +32,7 @@ describe('collections-graphql', () => {
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 

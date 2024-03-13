@@ -2,12 +2,12 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src/index.js'
+import { getPayload } from '../../packages/payload/src/index.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import { handleMessage } from '../../packages/live-preview/src/handleMessage.js'
 import { mergeData } from '../../packages/live-preview/src/mergeData.js'
 import { traverseRichText } from '../../packages/live-preview/src/traverseRichText.js'
-import { getPayload } from '../../packages/payload/src/index.js'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -16,6 +16,7 @@ import { Pages } from './collections/Pages.js'
 import { postsSlug } from './collections/Posts.js'
 import configPromise from './config.js'
 import { tenantsSlug } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -69,6 +70,12 @@ describe('Collections - Live Preview', () => {
       },
       file,
     })
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   it('handles `postMessage`', async () => {

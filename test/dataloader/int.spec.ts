@@ -1,11 +1,9 @@
 import type { Payload } from '../../packages/payload/src/index.js'
-
 import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
-import configPromise from './config.js'
-import { postDoc } from './config.js'
+import configPromise, { postDoc } from './config.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -26,6 +24,12 @@ describe('dataloader', () => {
     })
 
     if (loginResult.token) token = loginResult.token
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   describe('graphql', () => {

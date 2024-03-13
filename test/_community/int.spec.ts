@@ -1,5 +1,4 @@
 import type { Payload } from '../../packages/payload/src/index.js'
-
 import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -36,7 +35,7 @@ describe('_Community Tests', () => {
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 

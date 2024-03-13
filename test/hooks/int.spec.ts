@@ -1,8 +1,8 @@
 import type { Payload } from '../../packages/payload/src/index.js'
+import { getPayload } from '../../packages/payload/src/index.js'
 import type { NestedAfterReadHook } from './payload-types.js'
 
 import { AuthenticationError } from '../../packages/payload/src/errors/index.js'
-import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser, regularUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
@@ -11,10 +11,7 @@ import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
 import { dataHooksSlug } from './collections/Data/index.js'
 import { hooksSlug } from './collections/Hook/index.js'
-import {
-  generatedAfterReadText,
-  nestedAfterReadHooksSlug,
-} from './collections/NestedAfterReadHooks/index.js'
+import { generatedAfterReadText, nestedAfterReadHooksSlug, } from './collections/NestedAfterReadHooks/index.js'
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
@@ -33,7 +30,7 @@ describe('Hooks', () => {
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 

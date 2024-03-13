@@ -6,21 +6,14 @@ import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
 import type { Payload } from '../../packages/payload/src/index.js'
-import type { Enlarge, Media } from './payload-types.js'
-
 import { getPayload } from '../../packages/payload/src/index.js'
+import type { Enlarge, Media } from './payload-types.js'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
-import {
-  enlargeSlug,
-  mediaSlug,
-  reduceSlug,
-  relationSlug,
-  unstoredMediaSlug,
-  usersSlug,
-} from './shared.js'
+import { enlargeSlug, mediaSlug, reduceSlug, relationSlug, unstoredMediaSlug, usersSlug, } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -82,6 +75,12 @@ describe('Collections - Uploads', () => {
     payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
     await restClient.login({ slug: usersSlug })
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   describe('REST', () => {

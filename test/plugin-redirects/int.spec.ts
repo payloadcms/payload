@@ -1,7 +1,6 @@
 import type { Payload } from '../../packages/payload/src/index.js'
-import type { Page } from './payload-types.js'
-
 import { getPayload } from '../../packages/payload/src/index.js'
+import type { Page } from './payload-types.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
 import { pagesSlug } from './shared.js'
@@ -20,6 +19,12 @@ describe('@payloadcms/plugin-redirects', () => {
         title: 'Test',
       },
     })
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   it('should add a redirects collection', async () => {

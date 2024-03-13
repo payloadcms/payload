@@ -6,15 +6,15 @@ import { fileURLToPath } from 'url'
 import type { PostgresAdapter } from '../../packages/db-postgres/src/types.js'
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types.js'
 import type { Payload } from '../../packages/payload/src/index.js'
-import type { PayloadRequest } from '../../packages/payload/src/types/index.js'
-
 import { getPayload } from '../../packages/payload/src/index.js'
+import type { PayloadRequest } from '../../packages/payload/src/types/index.js'
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction.js'
 import { initTransaction } from '../../packages/payload/src/utilities/initTransaction.js'
 import { devUser } from '../credentials.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -40,6 +40,13 @@ describe('database', () => {
 
     user = loginResult.user
   })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   describe('migrations', () => {
     beforeAll(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
