@@ -5,18 +5,23 @@ import type {
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
+import type React from 'react'
 
 import { isEntityHidden } from 'payload/utilities'
+
+import type { AdminViewProps } from '../Root/index.js'
 
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
+import { NotFoundClient } from '../NotFound/index.client.js'
+import { Unauthorized } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
 import { getCustomViewByPath } from './getCustomViewByPath.js'
 
-export const getViewsFromConfig = async ({
+export const getViewsFromConfig = ({
   collectionConfig,
   config,
   docPermissions,
@@ -30,13 +35,18 @@ export const getViewsFromConfig = async ({
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
   user: User
-}): Promise<{
+}): {
   CustomView: EditViewComponent
   DefaultView: EditViewComponent
-} | null> => {
+  /**
+   * The error view to display if CustomView or DefaultView do not exist (could be either due to not found, or unauthorized). Can be null
+   */
+  ErrorView: React.FC<AdminViewProps>
+} | null => {
   // Conditionally import and lazy load the default view
   let DefaultView: EditViewComponent = null
   let CustomView: EditViewComponent = null
+  let ErrorView: React.FC = null
 
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
@@ -67,6 +77,8 @@ export const getViewsFromConfig = async ({
           if ('create' in docPermissions && docPermissions?.create?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = DefaultEditView
+          } else {
+            ErrorView = Unauthorized
           }
           break
         }
@@ -75,6 +87,8 @@ export const getViewsFromConfig = async ({
           if (docPermissions?.read?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = DefaultEditView
+          } else {
+            ErrorView = Unauthorized
           }
         }
       }
@@ -87,6 +101,8 @@ export const getViewsFromConfig = async ({
           if (docPermissions?.readVersions?.permission) {
             CustomView = getCustomViewByKey(views, 'Version')
             DefaultView = DefaultVersionView
+          } else {
+            ErrorView = Unauthorized
           }
         }
       }
@@ -113,6 +129,8 @@ export const getViewsFromConfig = async ({
             if (docPermissions?.readVersions?.permission) {
               CustomView = getCustomViewByKey(views, 'Versions')
               DefaultView = DefaultVersionsView
+            } else {
+              ErrorView = Unauthorized
             }
             break
           }
@@ -142,6 +160,8 @@ export const getViewsFromConfig = async ({
       if (docPermissions?.read?.permission) {
         CustomView = getCustomViewByKey(views, 'Default')
         DefaultView = DefaultEditView
+      } else {
+        ErrorView = Unauthorized
       }
     } else if (routeSegments?.length === 3) {
       // `../:slug/api`, `../:slug/preview`, `../:slug/versions`, etc
@@ -165,6 +185,8 @@ export const getViewsFromConfig = async ({
           if (docPermissions?.readVersions?.permission) {
             CustomView = getCustomViewByKey(views, 'Versions')
             DefaultView = DefaultVersionsView
+          } else {
+            ErrorView = Unauthorized
           }
           break
         }
@@ -173,16 +195,20 @@ export const getViewsFromConfig = async ({
           if (docPermissions?.read?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = DefaultEditView
+          } else {
+            ErrorView = Unauthorized
           }
           break
         }
       }
-    } else if (routeSegments?.length === 2) {
+    } else if (routeSegments?.length === 4) {
       // `../:slug/versions/:version`, etc
       if (nestedViewSlug === 'versions') {
         if (docPermissions?.readVersions?.permission) {
           CustomView = getCustomViewByKey(views, 'Version')
           DefaultView = DefaultVersionView
+        } else {
+          ErrorView = Unauthorized
         }
       }
     }
@@ -191,5 +217,6 @@ export const getViewsFromConfig = async ({
   return {
     CustomView,
     DefaultView,
+    ErrorView,
   }
 }

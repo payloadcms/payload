@@ -84,7 +84,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       collectionConfig.versions?.drafts ? '&draft=true' : ''
     }`
 
-    const collectionViews = await getViewsFromConfig({
+    const collectionViews = getViewsFromConfig({
       collectionConfig,
       config,
       docPermissions,
@@ -96,7 +96,8 @@ export const Document: React.FC<AdminViewProps> = async ({
     DefaultView = collectionViews?.DefaultView
 
     if (!CustomView && !DefaultView) {
-      return <NotFoundClient />
+      const ErrorView = collectionViews?.ErrorView || NotFoundClient
+      return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
     }
 
     if (id) {
@@ -130,7 +131,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       globalConfig.versions?.drafts ? '&draft=true' : ''
     }`
 
-    const globalViews = await getViewsFromConfig({
+    const globalViews = getViewsFromConfig({
       config,
       docPermissions,
       globalConfig,
@@ -142,7 +143,8 @@ export const Document: React.FC<AdminViewProps> = async ({
     DefaultView = globalViews?.DefaultView
 
     if (!CustomView && !DefaultView) {
-      return <NotFoundClient />
+      const ErrorView = globalViews?.ErrorView || NotFoundClient
+      return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
     }
 
     try {
