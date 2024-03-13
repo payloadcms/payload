@@ -1,22 +1,33 @@
+import type { AdminViewComponent } from 'payload/types'
+
+import { Button, Gutter } from '@payloadcms/ui'
+import LinkImport from 'next/link.js'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root/index.js'
-
-import { UnauthorizedClient } from './UnauthorizedClient.js'
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export { generateUnauthorizedMetadata } from './meta.js'
 
-export const Unauthorized: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export const Unauthorized: AdminViewComponent = ({ initPageResult }) => {
   const {
     req: {
+      i18n,
       payload: {
         config: {
           admin: { logoutRoute },
-          routes: { admin },
         },
       },
     },
   } = initPageResult
 
-  return <UnauthorizedClient logoutRoute={`${admin}${logoutRoute}`} />
+  return (
+    <Gutter className="unauthorized">
+      <h2>{i18n.t('error:unauthorized')}</h2>
+      <p>{i18n.t('error:notAllowedToAccessPage')}</p>
+      <br />
+      <Button Link={Link} el="link" to={logoutRoute}>
+        {i18n.t('authentication:logOut')}
+      </Button>
+    </Gutter>
+  )
 }

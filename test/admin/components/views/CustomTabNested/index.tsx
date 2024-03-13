@@ -1,27 +1,25 @@
-'use client'
+import type { ServerSideEditViewProps } from 'payload/types.js'
 
-import React, { Fragment, useEffect } from 'react'
+import { SetStepNav } from '@payloadcms/ui'
+import { notFound } from 'next/navigation.js'
+import React, { Fragment } from 'react'
 
-import { type AdminViewComponent } from '../../../../../packages/payload/src/admin/types.js'
-import { useStepNav } from '../../../../../packages/ui/src/elements/StepNav/index.js'
 import { customNestedTabViewTitle } from '../../../shared.js'
 
-export const CustomNestedTabView: AdminViewComponent = () => {
-  const { setStepNav } = useStepNav()
-
-  // This effect will only run one time and will allow us
-  // to set the step nav to display our custom route name
-
-  useEffect(() => {
-    setStepNav([
-      {
-        label: 'Custom Nested View',
-      },
-    ])
-  }, [setStepNav])
+export const CustomNestedTabView: React.FC<ServerSideEditViewProps> = ({ initPageResult }) => {
+  if (!initPageResult) {
+    notFound()
+  }
 
   return (
     <Fragment>
+      <SetStepNav
+        nav={[
+          {
+            label: 'Custom Nested View',
+          },
+        ]}
+      />
       <div
         style={{
           marginTop: 'calc(var(--base) * 2)',

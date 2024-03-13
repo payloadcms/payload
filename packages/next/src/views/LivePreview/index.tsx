@@ -1,12 +1,12 @@
 import type { LivePreviewConfig } from 'payload/config'
-import type { ServerSideEditViewProps } from 'payload/types'
+import type { EditViewComponent } from 'payload/types'
 
 import React from 'react'
 
 import { LivePreviewClient } from './index.client.js'
 import './index.scss'
 
-export const LivePreviewView: React.FC = async (props: ServerSideEditViewProps) => {
+export const LivePreviewView: EditViewComponent = async (props) => {
   const { initPageResult } = props
 
   const {

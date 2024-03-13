@@ -10,8 +10,7 @@ import type {
 import type { User } from '../../auth/types.js'
 import type {
   Access,
-  EditViewComponent,
-  EditViewConfig,
+  EditConfig,
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
@@ -103,34 +102,7 @@ export type GlobalAdminOptions = {
        * Set to a React component to replace the entire "Edit" view, including all nested routes.
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
-      Edit?:
-        | (
-            | {
-                /**
-                 * Replace or modify individual nested routes, or add new ones:
-                 * + `Default` - `/admin/globals/:slug`
-                 * + `API` - `/admin/globals/:id/api`
-                 * + `LivePreview` - `/admin/globals/:id/preview`
-                 * + `References` - `/admin/globals/:id/references`
-                 * + `Relationships` - `/admin/globals/:id/relationships`
-                 * + `Versions` - `/admin/globals/:id/versions`
-                 * + `Version` - `/admin/globals/:id/versions/:version`
-                 * + `CustomView` - `/admin/globals/:id/:path`
-                 */
-                API?: EditViewComponent | Partial<EditViewConfig>
-                Default?: EditViewComponent | Partial<EditViewConfig>
-                LivePreview?: EditViewComponent | Partial<EditViewConfig>
-                Version?: EditViewComponent | Partial<EditViewConfig>
-                Versions?: EditViewComponent | Partial<EditViewConfig>
-                // TODO: uncomment these as they are built
-                // References?: EditView
-                // Relationships?: EditView
-              }
-            | {
-                [name: string]: EditViewConfig
-              }
-          )
-        | EditViewComponent
+      Edit?: EditConfig
     }
   }
   /**

@@ -6,27 +6,21 @@ import { globalSlug } from '../slugs.js'
 
 export const Global: GlobalConfig = {
   slug: globalSlug,
-  label: {
-    en: 'My Global Label',
-  },
   admin: {
     components: {
       views: {
         Edit: {
-          Default: {
-            actions: [GlobalEditButton],
-          },
           API: {
             actions: [GlobalAPIButton],
+          },
+          Default: {
+            actions: [GlobalEditButton],
           },
         },
       },
     },
     group: 'Group',
     preview: () => 'https://payloadcms.com',
-  },
-  versions: {
-    drafts: true,
   },
   fields: [
     {
@@ -41,4 +35,10 @@ export const Global: GlobalConfig = {
       },
     },
   ],
+  label: {
+    en: 'My Global Label',
+  },
+  versions: {
+    drafts: true,
+  },
 }

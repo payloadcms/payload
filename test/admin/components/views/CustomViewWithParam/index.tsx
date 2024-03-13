@@ -4,11 +4,15 @@ import { Button } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
-import { customNestedViewTitle, customViewPath } from '../../../shared.js'
-
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const CustomNestedView: React.FC<AdminViewProps> = ({ initPageResult }) => {
+import {
+  customParamViewPath,
+  customParamViewPathBase,
+  customParamViewTitle,
+} from '../../../shared.js'
+
+export const CustomViewWithParam: React.FC<AdminViewProps> = ({ initPageResult, params }) => {
   const {
     req: {
       payload: {
@@ -19,6 +23,8 @@ export const CustomNestedView: React.FC<AdminViewProps> = ({ initPageResult }) =
     },
   } = initPageResult
 
+  const paramValue = params?.segments?.[1]
+
   return (
     <div
       style={{
@@ -27,13 +33,12 @@ export const CustomNestedView: React.FC<AdminViewProps> = ({ initPageResult }) =
         paddingRight: 'var(--gutter-h)',
       }}
     >
-      <h1 id="custom-view-title">{customNestedViewTitle}</h1>
-      <p>This custom view was added through the Payload config:</p>
-      <ul>
-        <li>
-          <code>components.views[key].Component</code>
-        </li>
-      </ul>
+      <h1 id="custom-view-title">{customParamViewTitle}</h1>
+      <p>This custom view is using a dynamic URL parameter `ID: {paramValue || 'None'}`</p>
+      <p>
+        This custom view is not `exact` true, so it matches on `{customParamViewPathBase}` we well
+        as `{customParamViewPath}`
+      </p>
       <div className="custom-view__controls">
         <Button Link={Link} buttonStyle="secondary" el="link" to={`${adminRoute}`}>
           Go to Dashboard
@@ -43,9 +48,9 @@ export const CustomNestedView: React.FC<AdminViewProps> = ({ initPageResult }) =
           Link={Link}
           buttonStyle="secondary"
           el="link"
-          to={`${adminRoute}/${customViewPath}`}
+          to={`${adminRoute}/${customParamViewPathBase}${!paramValue ? '/123' : ''}`}
         >
-          Go to Custom View
+          {`Go To ${paramValue ? 'Child' : 'Parent'} Param View`}
         </Button>
       </div>
     </div>

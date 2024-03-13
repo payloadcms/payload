@@ -1,4 +1,4 @@
-import type { ServerSideEditViewProps } from 'payload/types'
+import type { EditViewComponent } from 'payload/types'
 
 import { Gutter } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -11,7 +11,7 @@ import './index.scss'
 
 export const baseClass = 'versions'
 
-export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => {
+export const VersionsView: EditViewComponent = async (props) => {
   const { initPageResult, searchParams } = props
 
   const {
