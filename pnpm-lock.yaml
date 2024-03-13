@@ -10,6 +10,7 @@ overrides:
   dotenv: 8.6.0
   drizzle-orm: 0.29.4
   graphql: ^16.8.1
+  mongodb-memory-server: 8.13.0
   react: ^18.2.0
   react-dom: ^18.2.0
   typescript: 5.2.2
@@ -187,8 +188,8 @@ importers:
         specifier: 1.2.8
         version: 1.2.8
       mongodb-memory-server:
-        specifier: 8.16.0
-        version: 8.16.0
+        specifier: 8.13.0
+        version: 8.13.0
       next:
         specifier: 14.1.2
         version: 14.1.2(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0)
@@ -384,8 +385,8 @@ importers:
         specifier: 4.17.1
         version: 4.17.1
       mongodb-memory-server:
-        specifier: 8.16.0
-        version: 8.16.0
+        specifier: 8.13.0
+        version: 8.13.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -7119,7 +7120,7 @@ packages:
   /axios@1.4.0:
     resolution: {integrity: sha512-S4XCWMEmzvo64T9GfvQDOXgYRDJ/wsSZc7Jvdgx5u1sd0JwsuPLqb3SYmusag+edF6ziyMensPVqLTSc1PiSEA==}
     dependencies:
-      follow-redirects: 1.15.5(debug@4.3.4)
+      follow-redirects: 1.15.5
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -10101,7 +10102,7 @@ packages:
       tabbable: 5.3.3
     dev: false
 
-  /follow-redirects@1.15.5(debug@4.3.4):
+  /follow-redirects@1.15.5:
     resolution: {integrity: sha512-vSFWUON1B+yAw1VN4xMfxgn5fTUiaOzAJCKBwIIgT/+7CuGy9+r+5gITvP62j3RmaD5Ph65UaERdOSRGUzZtgw==}
     engines: {node: '>=4.0'}
     peerDependencies:
@@ -10109,8 +10110,7 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
-    dependencies:
-      debug: 4.3.4(supports-color@5.5.0)
+    dev: false
 
   /for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -12940,15 +12940,14 @@ packages:
       '@types/whatwg-url': 8.2.2
       whatwg-url: 11.0.0
 
-  /mongodb-memory-server-core@8.16.0:
-    resolution: {integrity: sha512-wyNo8yj6se7KH49hQmRtiwide7DnGINUGa1m84RyX1NU9DkCrTwbOV2VbPgd3+55DZfRup/DebU1M1zEv+3Rng==}
+  /mongodb-memory-server-core@8.13.0:
+    resolution: {integrity: sha512-4NTOzYOlRUilwb8CxOKix/XbZmac4cLpmEU03eaHx90lgEp+ARZM2PQtIOEg3nhHo97r9THIEv6Gs4LECokp0Q==}
     engines: {node: '>=12.22.0'}
     dependencies:
       async-mutex: 0.3.2
       camelcase: 6.3.0
       debug: 4.3.4(supports-color@5.5.0)
       find-cache-dir: 3.3.2
-      follow-redirects: 1.15.5(debug@4.3.4)
       get-port: 5.1.1
       https-proxy-agent: 5.0.1
       md5-file: 5.0.0
@@ -12964,12 +12963,12 @@ packages:
       - supports-color
     dev: true
 
-  /mongodb-memory-server@8.16.0:
-    resolution: {integrity: sha512-oaeu2GZWycIysTj18b1gZ6d+CqWeQQZe5f8ml8Z1buaGAn3GcrGdbG5+0fseEO5ANQzcjA92qHhbsImgXeEmIQ==}
+  /mongodb-memory-server@8.13.0:
+    resolution: {integrity: sha512-CyrKMwEmRePn8iQ3LtWQiOJxlGK0eM+NNTq3Yg8m7gaywepFu24mF7s13q87Kfuq0WgBuCJQ4t6VcUZJ4m+KWQ==}
     engines: {node: '>=12.22.0'}
     requiresBuild: true
     dependencies:
-      mongodb-memory-server-core: 8.16.0
+      mongodb-memory-server-core: 8.13.0
       tslib: 2.6.2
     transitivePeerDependencies:
       - aws-crt
