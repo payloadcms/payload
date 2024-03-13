@@ -129,7 +129,7 @@ export interface BaseDatabaseAdapter {
   updateVersion: UpdateVersion
 }
 
-export type Init = (payload: Payload) => Promise<void> | void
+export type Init = () => Promise<void> | void
 
 type ConnectArgs = {
   hotReload: boolean
@@ -137,7 +137,7 @@ type ConnectArgs = {
 
 export type Connect = (args?: ConnectArgs) => Promise<void>
 
-export type Destroy = (payload: Payload) => Promise<void>
+export type Destroy = () => Promise<void>
 
 export type CreateMigration = (args: {
   file?: string
