@@ -8,15 +8,9 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:perfectionist/recommended-natural',
-    'plugin:@typescript-eslint/recommended-type-checked',
     'plugin:regexp/recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    './configs/jest/index.js',
-    './configs/react/index.js',
     'prettier',
   ],
-  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -24,11 +18,49 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint'],
+  plugins: [],
   overrides: [
     {
-      files: ['*.js', '*.cjs'],
-      extends: ['plugin:@typescript-eslint/disable-type-checked'],
+      files: ['**/*.spec.ts'],
+      plugins: ['@typescript-eslint'],
+      extends: [
+        'eslint:recommended',
+        'plugin:perfectionist/recommended-natural',
+        'plugin:@typescript-eslint/recommended-type-checked',
+        'plugin:regexp/recommended',
+        './configs/jest/index.js',
+        'prettier',
+      ],
+      parser: '@typescript-eslint/parser',
+    },
+    {
+      files: ['**/*.ts'],
+      plugins: ['@typescript-eslint'],
+      extends: [
+        'eslint:recommended',
+        'plugin:perfectionist/recommended-natural',
+        'plugin:@typescript-eslint/recommended-type-checked',
+        'plugin:regexp/recommended',
+        './configs/jest/index.js',
+        'prettier',
+      ],
+      parser: '@typescript-eslint/parser',
+    },
+    {
+      files: ['**/*.tsx'],
+      plugins: ['@typescript-eslint'],
+      extends: [
+        'eslint:recommended',
+        'plugin:perfectionist/recommended-natural',
+        'plugin:@typescript-eslint/recommended-type-checked',
+        'plugin:regexp/recommended',
+        'plugin:react/recommended',
+        'plugin:react-hooks/recommended',
+        './configs/jest/index.js',
+        './configs/react/index.js',
+        'prettier',
+      ],
+      parser: '@typescript-eslint/parser',
     },
     {
       files: ['*.config.ts'],
