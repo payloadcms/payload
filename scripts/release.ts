@@ -201,7 +201,7 @@ async function main() {
   const otp = dryRun ? undefined : await question('Enter your 2FA code')
 
   // Publish
-  const results: { name: string; success: boolean }[] = await Promise.all(
+  const results: { name: string; success: boolean; details?: string }[] = await Promise.all(
     packageDetails.map(async (pkg) => {
       try {
         console.log(logPrefix, chalk.bold(`🚀 ${pkg.name} publishing...`))
@@ -211,7 +211,7 @@ async function main() {
         } else {
           cmdArgs.push('--otp', otp)
         }
-        const { exitCode } = await execa('pnpm', cmdArgs, {
+        const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
           cwd,
           stdio: ['ignore', 'ignore', 'pipe'],
           // stdio: 'inherit',
@@ -219,7 +219,7 @@ async function main() {
 
         if (exitCode !== 0) {
           console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n`))
-          return { name: pkg.name, success: false }
+          return { name: pkg.name, success: false, details: stderr }
         }
 
         console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
@@ -232,7 +232,16 @@ async function main() {
   )
 
   console.log(chalk.bold.green(`\n\nResults:\n\n`))
-  console.log(results.map(({ name, success }) => `  ${success ? '✅' : '❌'} ${name}`).join('\n'))
+  console.log(
+    results
+      .map(({ name, success, details }) => {
+        let summary = `  ${success ? '✅' : '❌'} ${name}`
+        if (details) {
+          summary += `\n    ${details}\n`
+        }
+      })
+      .join('\n'),
+  )
 
   // TODO: Push commit and tag
   // const push = await confirm(`Push commits and tags?`)
