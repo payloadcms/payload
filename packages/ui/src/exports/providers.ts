@@ -24,6 +24,7 @@ export type { ColumnPreferences } from '../providers/ListInfo/types.js'
 export { useLocale } from '../providers/Locale/index.js'
 export { OperationProvider } from '../providers/OperationProvider/index.js'
 export { RootProvider } from '../providers/Root/index.js'
+export { useRouteCache } from '../providers/RouteCache/index.js'
 export {
   SelectAllStatus,
   SelectionProvider,

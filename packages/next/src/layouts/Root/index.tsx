@@ -9,7 +9,6 @@ import { deepMerge } from 'payload/utilities'
 import React from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
-import { ClearRouteCache } from '../../elements/ClearRouteCache/index.js'
 import { auth } from '../../utilities/auth.js'
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
@@ -70,7 +69,6 @@ export const RootLayout = async ({
   return (
     <html dir={dir} lang={lang}>
       <body>
-        <ClearRouteCache />
         <RootProvider
           componentMap={componentMap}
           config={clientConfig}

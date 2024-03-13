@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 
 import type { Props } from './types.js'
 
+import { useRouteCache } from '../../index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
@@ -36,6 +37,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
   const { stringifyParams } = useSearchParams()
+  const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasDeletePermission = collectionPermissions?.delete?.permission
@@ -70,6 +72,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
                 replace: true,
               }),
             )
+            clearRouteCache()
             return null
           }
 
@@ -97,6 +100,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
     t,
     toggleAll,
     toggleModal,
+    clearRouteCache,
   ])
 
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
