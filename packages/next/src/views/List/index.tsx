@@ -21,6 +21,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
     collectionConfig,
     permissions,
     req: {
+      locale,
       payload,
       payload: { config },
       user,
@@ -76,7 +77,9 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
     const data = await payload.find({
       collection: collectionSlug,
       depth: 0,
+      fallbackLocale: null,
       limit,
+      locale,
       overrideAccess: false,
       user,
     })
