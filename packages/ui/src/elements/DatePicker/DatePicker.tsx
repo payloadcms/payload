@@ -1,6 +1,5 @@
 import type { ReactDatePickerProps } from 'react-datepicker'
 
-import * as Locales from 'date-fns/locale'
 import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale } from 'react-datepicker'
 const ReactDatePicker = (ReactDatePickerDefaultImport.default ||
@@ -12,7 +11,7 @@ import type { Props } from './types.js'
 import { Calendar as CalendarIcon } from '../../icons/Calendar/index.js'
 import { X as XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { getSupportedDateLocale } from '../../utilities/formatDate/getSupportedDateLocale.js'
+import { getDateLocale } from '../../utilities/formatDate/getDateLocale.js'
 import './index.scss'
 
 const baseClass = 'date-time-picker'
@@ -37,12 +36,13 @@ const DateTime: React.FC<Props> = (props) => {
 
   // Use the user's AdminUI language preference for the locale
   const { i18n } = useTranslation()
-  const locale = getSupportedDateLocale(i18n.language)
+
+  const { locale, localeData } = getDateLocale(i18n.language)
 
   try {
-    registerLocale(locale, Locales[locale])
+    registerLocale(locale, localeData)
   } catch (e) {
-    console.warn(`Could not find DatePicker locale for ${locale}`)
+    console.warn(`Could not find DatePicker locale for ${i18n.language}`)
   }
 
   let dateFormat = customDisplayFormat
