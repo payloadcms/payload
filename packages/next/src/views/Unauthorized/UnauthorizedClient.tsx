@@ -1,5 +1,5 @@
 'use client'
-import { Button, useTranslation } from '@payloadcms/ui'
+import { Button, Gutter, useTranslation } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
@@ -9,13 +9,12 @@ export const UnauthorizedClient: React.FC<{ logoutRoute: string }> = ({ logoutRo
   const { t } = useTranslation()
 
   return (
-    <React.Fragment>
+    <Gutter>
       <h2>{t('error:unauthorized')}</h2>
-      <p>{t('error:notAllowedToAccessPage')}</p>
-      <br />
+      <div>{t('error:notAllowedToAccessPage')}</div>
       <Button Link={Link} el="link" to={logoutRoute}>
         {t('authentication:logOut')}
       </Button>
-    </React.Fragment>
+    </Gutter>
   )
 }
