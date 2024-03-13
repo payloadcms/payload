@@ -330,7 +330,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.db.payload = this
 
     if (this.db?.init) {
-      await this.db.init(this)
+      await this.db.init()
     }
 
     if (!options.disableDBConnect && this.db.connect) {

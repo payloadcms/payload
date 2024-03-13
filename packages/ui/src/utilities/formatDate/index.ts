@@ -1,7 +1,6 @@
 import { format, formatDistanceToNow } from 'date-fns'
-import * as Locale from 'date-fns/locale'
 
-import { getSupportedDateLocale } from './getSupportedDateLocale.js'
+import { getDateLocale } from './getDateLocale.js'
 
 export const formatDate = (
   date: Date | number | string | undefined,
@@ -9,8 +8,8 @@ export const formatDate = (
   locale?: string,
 ): string => {
   const theDate = new Date(date)
-  const currentLocale = Locale[getSupportedDateLocale(locale)]
-  return format(theDate, pattern, { locale: currentLocale })
+  const { localeData } = getDateLocale(locale)
+  return format(theDate, pattern, { locale: localeData })
 }
 
 export const formatTimeToNow = (
@@ -18,6 +17,6 @@ export const formatTimeToNow = (
   locale?: string,
 ): string => {
   const theDate = new Date(date)
-  const currentLocale = Locale[getSupportedDateLocale(locale)]
-  return formatDistanceToNow(theDate, { locale: currentLocale })
+  const { localeData } = getDateLocale(locale)
+  return formatDistanceToNow(theDate, { locale: localeData })
 }

@@ -1,9 +1,7 @@
 'use client'
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext } from 'react'
 
-import type { ListInfo, ListInfoContext, ListInfoProps } from './types.js'
-
-import { useConfig } from '../Config/index.js'
+import type { ListInfoContext, ListInfoProps } from './types.js'
 
 const Context = createContext({} as ListInfoContext)
 
@@ -14,20 +12,5 @@ export const ListInfoProvider: React.FC<
     children: React.ReactNode
   }
 > = ({ children, ...rest }) => {
-  const [listInfo, setListInfo] = useState<ListInfo>({
-    ...rest,
-  })
-
-  const {
-    collections,
-    globals,
-    routes: { api },
-    serverURL,
-  } = useConfig()
-
-  const value: ListInfoContext = {
-    ...listInfo,
-  }
-
-  return <Context.Provider value={value}>{children}</Context.Provider>
+  return <Context.Provider value={{ ...rest }}>{children}</Context.Provider>
 }

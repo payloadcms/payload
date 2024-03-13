@@ -1,6 +1,7 @@
 import type { Block } from '../../packages/payload/src/fields/config/types.js'
 
 import formBuilder, { fields as formFields } from '../../packages/plugin-form-builder/src/index.js'
+import { slateEditor } from '../../packages/richtext-slate/src/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Pages } from './collections/Pages.js'
@@ -9,20 +10,21 @@ import { seed } from './seed/index.js'
 
 const colorField: Block = {
   slug: 'color',
-  labels: {
-    singular: 'Color',
-    plural: 'Colors',
-  },
   fields: [
     {
       name: 'value',
       type: 'text',
     },
   ],
+  labels: {
+    plural: 'Colors',
+    singular: 'Color',
+  },
 }
 
 export default buildConfigWithDefaults({
   collections: [Pages, Users],
+  editor: slateEditor({}),
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -43,27 +45,14 @@ export default buildConfigWithDefaults({
     formBuilder({
       // handlePayment: handleFormPayments,
       // beforeEmail: prepareFormEmails,
-      redirectRelationships: ['pages'],
-      formOverrides: {
-        // labels: {
-        //   singular: 'Contact Form',
-        //   plural: 'Contact Forms'
-        // },
-        fields: [
-          {
-            name: 'custom',
-            type: 'text',
-          },
-        ],
-      },
       fields: {
-        payment: true,
         colorField,
+        payment: true,
         text: {
           ...formFields.text,
           labels: {
-            singular: 'Custom Text Field',
             plural: 'Custom Text Fields',
+            singular: 'Custom Text Field',
           },
         },
         // payment: {
@@ -78,6 +67,19 @@ export default buildConfigWithDefaults({
         //     },
         // },
       },
+      formOverrides: {
+        // labels: {
+        //   singular: 'Contact Form',
+        //   plural: 'Contact Forms'
+        // },
+        fields: [
+          {
+            name: 'custom',
+            type: 'text',
+          },
+        ],
+      },
+      redirectRelationships: ['pages'],
     }),
   ],
 })

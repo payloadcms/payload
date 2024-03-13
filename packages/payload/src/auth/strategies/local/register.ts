@@ -23,6 +23,9 @@ export const registerLocalStrategy = async ({
   const existingUser = await payload.find({
     collection: collection.slug,
     depth: 0,
+    limit: 1,
+    pagination: false,
+    req,
     where: {
       email: {
         equals: doc.email,

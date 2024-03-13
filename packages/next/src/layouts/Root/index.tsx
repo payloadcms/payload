@@ -9,9 +9,8 @@ import { deepMerge } from 'payload/utilities'
 import React from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
-import { ClearRouteCache } from '../../elements/ClearRouteCache/index.js'
 import { auth } from '../../utilities/auth.js'
-import { getPayload } from '../../utilities/getPayload.js'
+import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { DefaultEditView } from '../../views/Edit/Default/index.js'
 import { DefaultCell } from '../../views/List/Default/Cell/index.js'
@@ -36,7 +35,7 @@ export const RootLayout = async ({
 
   const headers = getHeaders()
 
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise })
 
   const { cookies, permissions } = await auth({
     headers,
@@ -70,7 +69,6 @@ export const RootLayout = async ({
   return (
     <html dir={dir} lang={lang}>
       <body>
-        <ClearRouteCache />
         <RootProvider
           componentMap={componentMap}
           config={clientConfig}

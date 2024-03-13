@@ -121,11 +121,9 @@ describe('versions', () => {
       await page.locator('#confirm-publish').click()
 
       // Check that the statuses for each row has been updated to `published`
-      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText(
-        'Published',
-      )
+      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
 
-      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
+      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
     })
 
     test('bulk update - should unpublish many', async () => {
@@ -140,8 +138,8 @@ describe('versions', () => {
       await page.locator('#confirm-unpublish').click()
 
       // Check that the statuses for each row has been updated to `draft`
-      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
-      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
+      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
+      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
     })
 
     test('bulk update - should publish changes', async () => {
@@ -166,11 +164,9 @@ describe('versions', () => {
       )
 
       // Check that the statuses for each row has been updated to `published`
-      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText(
-        'Published',
-      )
+      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
 
-      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
+      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
     })
 
     test('bulk update - should draft changes', async () => {
@@ -195,8 +191,8 @@ describe('versions', () => {
       )
 
       // Check that the statuses for each row has been updated to `draft`
-      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
-      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
+      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
+      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
     })
 
     test('collection - has versions tab', async () => {

@@ -18,19 +18,19 @@ describe('@payloadcms/plugin-form-builder', () => {
     payload = await getPayload({ config })
 
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
-      title: 'Test Form',
-      fields: [
-        {
-          name: 'name',
-          blockType: 'text',
-        },
-      ],
       confirmationMessage: [
         {
           type: 'text',
           text: 'Confirmed.',
         },
       ],
+      fields: [
+        {
+          name: 'name',
+          blockType: 'text',
+        },
+      ],
+      title: 'Test Form',
     }
 
     form = (await payload.create({
@@ -54,19 +54,19 @@ describe('@payloadcms/plugin-form-builder', () => {
   describe('form building', () => {
     it('can create a simple form', async () => {
       const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
-        title: 'Test Form',
-        fields: [
-          {
-            name: 'name',
-            blockType: 'text',
-          },
-        ],
         confirmationMessage: [
           {
             type: 'text',
             text: 'Confirmed.',
           },
         ],
+        fields: [
+          {
+            name: 'name',
+            blockType: 'text',
+          },
+        ],
+        title: 'Test Form',
       }
 
       const testForm = await payload.create({
@@ -81,14 +81,14 @@ describe('@payloadcms/plugin-form-builder', () => {
 
     it('can use form overrides', async () => {
       const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
-        custom: 'custom',
-        title: 'Test Form',
         confirmationMessage: [
           {
             type: 'text',
             text: 'Confirmed.',
           },
         ],
+        custom: 'custom',
+        title: 'Test Form',
       }
 
       const testForm = await payload.create({
@@ -142,7 +142,7 @@ describe('@payloadcms/plugin-form-builder', () => {
       await expect(req).rejects.toThrow(ValidationError)
     })
 
-    it('replaces curly braces with data when using slate serializer', async () => {
+    it('replaces curly braces with data when using slate serializer', () => {
       const mockName = 'Test Submission'
       const mockEmail = 'dev@payloadcms.com'
 
@@ -150,12 +150,12 @@ describe('@payloadcms/plugin-form-builder', () => {
         [
           { text: 'Welcome {{name}}. Here is a dynamic ' },
           {
+            type: 'link',
             children: [
               {
                 text: 'link',
               },
             ],
-            type: 'link',
             url: 'www.test.com?email={{email}}',
           },
         ],
@@ -177,24 +177,17 @@ describe('@payloadcms/plugin-form-builder', () => {
         {
           root: {
             type: 'root',
-            format: '',
-            indent: 0,
-            version: 1,
             children: [
               {
                 type: 'paragraph',
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
                 children: [
                   {
+                    type: 'text',
                     detail: 0,
                     format: 0,
                     mode: 'normal',
                     style: '',
                     text: 'Name: {{name}}',
-                    type: 'text',
                     version: 1,
                   },
                   {
@@ -202,18 +195,25 @@ describe('@payloadcms/plugin-form-builder', () => {
                     version: 1,
                   },
                   {
+                    type: 'text',
                     detail: 0,
                     format: 0,
                     mode: 'normal',
                     style: '',
                     text: 'Email: {{email}}',
-                    type: 'text',
                     version: 1,
                   },
                 ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
               },
             ],
             direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
           },
         },
         [

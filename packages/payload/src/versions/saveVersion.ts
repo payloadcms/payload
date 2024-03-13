@@ -40,6 +40,7 @@ export const saveVersion = async ({
       let docs
       const findVersionArgs = {
         limit: 1,
+        pagination: false,
         req,
         sort: '-updatedAt',
       }

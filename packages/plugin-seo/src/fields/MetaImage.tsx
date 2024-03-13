@@ -23,7 +23,7 @@ type MetaImageProps = UploadInputProps & {
 }
 
 export const MetaImage: React.FC<MetaImageProps> = (props) => {
-  const { Label, hasGenerateImageFn, path, relationTo, required } = props || {}
+  const { Label, hasGenerateImageFn, relationTo, required } = props || {}
 
   const field: FieldType<string> = useField(props as Options)
 

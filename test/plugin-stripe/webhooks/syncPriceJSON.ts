@@ -41,8 +41,8 @@ export const syncPriceJSON = async (args) => {
     const stripePrice = await stripe.prices.retrieve(default_price)
 
     await payload.update({
-      collection: 'products',
       id: payloadProductID,
+      collection: 'products',
       data: {
         price: {
           stripeJSON: JSON.stringify(stripePrice),

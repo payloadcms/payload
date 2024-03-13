@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 
 import type { Props } from './types.js'
 
+import { useRouteCache } from '../../index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
@@ -35,6 +36,7 @@ export const UnpublishMany: React.FC<Props> = (props) => {
   const [submitted, setSubmitted] = useState(false)
   const { stringifyParams } = useSearchParams()
   const router = useRouter()
+  const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasPermission = collectionPermissions?.update?.permission
@@ -70,6 +72,7 @@ export const UnpublishMany: React.FC<Props> = (props) => {
                 },
               }),
             )
+            clearRouteCache()
             return null
           }
 
@@ -95,6 +98,7 @@ export const UnpublishMany: React.FC<Props> = (props) => {
     t,
     toggleModal,
     router,
+    clearRouteCache,
     stringifyParams,
   ])
 

@@ -63,13 +63,13 @@ export async function openNav(page: Page): Promise<void> {
   // this will prevent clicking nav links that are bleeding off the screen
   if (await page.locator('.template-default.template-default--nav-open').isVisible()) return
   await page.locator('#nav-toggler').click()
-  await expect(await page.locator('.template-default.template-default--nav-open')).toBeVisible()
+  await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 
 export async function closeNav(page: Page): Promise<void> {
   if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) return
   await page.locator('#nav-toggler').click()
-  await expect(await page.locator('.template-default.template-default--nav-open')).toBeHidden()
+  await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
 }
 
 export async function openDocControls(page: Page): Promise<void> {
@@ -101,18 +101,14 @@ export const selectTableRow = async (page: Page, title: string): Promise<void> =
   expect(await page.locator(selector).isChecked()).toBe(true)
 }
 
-export const findTableCell = async (
-  page: Page,
-  fieldName: string,
-  rowTitle?: string,
-): Promise<Locator> => {
-  const parentEl = rowTitle ? await findTableRow(page, rowTitle) : page.locator('tbody tr')
+export const findTableCell = (page: Page, fieldName: string, rowTitle?: string): Locator => {
+  const parentEl = rowTitle ? findTableRow(page, rowTitle) : page.locator('tbody tr')
   const cell = parentEl.locator(`td.cell-${fieldName}`)
   expect(cell).toBeTruthy()
   return cell
 }
 
-export const findTableRow = async (page: Page, title: string): Promise<Locator> => {
+export const findTableRow = (page: Page, title: string): Locator => {
   const row = page.locator(`tbody tr:has-text("${title}")`)
   expect(row).toBeTruthy()
   return row
@@ -127,7 +123,12 @@ export const findTableRow = async (page: Page, title: string): Promise<Locator> 
  */
 export function initPageConsoleErrorCatch(page: Page) {
   page.on('console', (msg) => {
-    if (msg.type() === 'error' && !msg.text().includes('the server responded with a status of')) {
+    if (
+      msg.type() === 'error' &&
+      !msg.text().includes('the server responded with a status of') &&
+      !msg.text().includes('Failed to fetch RSC payload for')
+    ) {
+      // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
       // Most importantly, this should catch react errors.
       throw new Error(`Browser console error: ${msg.text()}`)

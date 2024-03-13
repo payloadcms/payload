@@ -1,3 +1,4 @@
+import { slateEditor } from '../../packages/richtext-slate/src/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
@@ -14,19 +15,15 @@ export default buildConfigWithDefaults({
         {
           name: 'owner',
           type: 'relationship',
-          relationTo: 'users',
           hooks: {
             beforeChange: [({ req: { user } }) => user?.id],
           },
+          relationTo: 'users',
         },
       ],
     },
     {
       slug: 'relation-a',
-      labels: {
-        singular: 'Relation A',
-        plural: 'Relation As',
-      },
       fields: [
         {
           name: 'relationship',
@@ -36,15 +33,16 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
+          editor: slateEditor({}),
         },
       ],
+      labels: {
+        plural: 'Relation As',
+        singular: 'Relation A',
+      },
     },
     {
       slug: 'relation-b',
-      labels: {
-        singular: 'Relation B',
-        plural: 'Relation Bs',
-      },
       fields: [
         {
           name: 'relationship',
@@ -54,8 +52,13 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
+          editor: slateEditor({}),
         },
       ],
+      labels: {
+        plural: 'Relation Bs',
+        singular: 'Relation B',
+      },
     },
   ],
   onInit: async (payload) => {
@@ -68,9 +71,9 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
-      user,
       collection: 'posts',
       data: postDoc,
+      user,
     })
   },
 })
