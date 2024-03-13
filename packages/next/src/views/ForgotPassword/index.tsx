@@ -1,3 +1,6 @@
+// 'use client'
+import type { FormState } from 'payload/types'
+
 import { Button, Email, Form, FormSubmit, Translation } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
@@ -19,10 +22,19 @@ export const ForgotPassword: React.FC<AdminViewProps> = ({ initPageResult }) => 
   } = initPageResult
 
   const {
-    admin: { user: userSlug },
+    admin: { autoLogin, user: userSlug },
     routes: { admin, api },
     serverURL,
   } = config
+
+  const prefillForm = autoLogin && autoLogin.prefillOnly
+  const initialState: FormState = {
+    email: {
+      initialValue: prefillForm ? autoLogin.email : undefined,
+      valid: true,
+      value: prefillForm ? autoLogin.email : undefined,
+    },
+  }
 
   // const handleResponse = (res) => {
   //   res.json().then(
@@ -70,6 +82,7 @@ export const ForgotPassword: React.FC<AdminViewProps> = ({ initPageResult }) => 
       <Form
         action={`${serverURL}${api}/${userSlug}/forgot-password`}
         // handleResponse={handleResponse}
+        initialState={initialState}
         method="POST"
       >
         <h1>{i18n.t('authentication:forgotPassword')}</h1>
