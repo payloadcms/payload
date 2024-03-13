@@ -79,20 +79,6 @@ module.exports = {
   plugins: [],
   overrides: [
     {
-      files: ['**/*.spec.ts'],
-      plugins: ['@typescript-eslint'],
-      extends: [
-        'eslint:recommended',
-        'plugin:perfectionist/recommended-natural',
-        'plugin:@typescript-eslint/recommended-type-checked',
-        'plugin:regexp/recommended',
-        './configs/jest/index.js',
-        'prettier',
-      ],
-      parser: '@typescript-eslint/parser',
-      rules: sharedRules,
-    },
-    {
       files: ['**/*.ts'],
       plugins: ['@typescript-eslint'],
       extends: [
@@ -120,6 +106,23 @@ module.exports = {
       ],
       parser: '@typescript-eslint/parser',
       rules: sharedRules,
+    },
+    {
+      files: ['**/*.spec.ts'],
+      plugins: ['@typescript-eslint'],
+      extends: [
+        'eslint:recommended',
+        'plugin:perfectionist/recommended-natural',
+        'plugin:@typescript-eslint/recommended-type-checked',
+        'plugin:regexp/recommended',
+        './configs/jest/index.js',
+        'prettier',
+      ],
+      parser: '@typescript-eslint/parser',
+      rules: {
+        ...sharedRules,
+        '@typescript-eslint/unbound-method': 'off',
+      },
     },
     {
       files: ['*.config.ts'],
