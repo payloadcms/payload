@@ -6,6 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 
+import type { FormProps } from '../../index.js'
 import type { Props } from './types.js'
 
 import { FieldPathProvider } from '../../forms/FieldPathProvider/index.js'
@@ -14,6 +15,7 @@ import Form from '../../forms/Form/index.js'
 import RenderFields from '../../forms/RenderFields/index.js'
 import FormSubmit from '../../forms/Submit/index.js'
 import { X } from '../../icons/X/index.js'
+import { useRouteCache } from '../../index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -34,7 +36,7 @@ const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disab
   const { t } = useTranslation()
 
   const save = useCallback(() => {
-    submit({
+    void submit({
       action,
       method: 'PATCH',
       skipValidation: true,
@@ -52,7 +54,7 @@ const Publish: React.FC<{ action: string; disabled: boolean }> = ({ action, disa
   const { t } = useTranslation()
 
   const save = useCallback(() => {
-    submit({
+    void submit({
       action,
       method: 'PATCH',
       overrides: {
@@ -73,7 +75,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   const { t } = useTranslation()
 
   const save = useCallback(() => {
-    submit({
+    void submit({
       action,
       method: 'PATCH',
       overrides: {
@@ -90,7 +92,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   )
 }
 export const EditMany: React.FC<Props> = (props) => {
-  const { Modal, useModal } = facelessUIImport
+  const { useModal } = facelessUIImport
 
   const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
@@ -109,6 +111,7 @@ export const EditMany: React.FC<Props> = (props) => {
   const [reducedFieldMap, setReducedFieldMap] = useState([])
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
+  const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasUpdatePermission = collectionPermissions?.update?.permission
@@ -152,6 +155,21 @@ export const EditMany: React.FC<Props> = (props) => {
     }
   }, [apiRoute, hasInitializedState, serverURL, slug])
 
+  const onChange: FormProps['onChange'][0] = useCallback(
+    ({ formState: prevFormState }) =>
+      getFormState({
+        apiRoute,
+        body: {
+          collectionSlug: slug,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: slug,
+        },
+        serverURL,
+      }),
+    [serverURL, apiRoute, slug],
+  )
+
   if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
     return null
   }
@@ -162,6 +180,8 @@ export const EditMany: React.FC<Props> = (props) => {
         params: { page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined },
       }),
     )
+    clearRouteCache()
+    closeModal(drawerSlug)
   }
 
   return (
@@ -177,8 +197,7 @@ export const EditMany: React.FC<Props> = (props) => {
         {t('general:edit')}
       </DrawerToggler>
       <Drawer Header={null} slug={drawerSlug}>
-        {/* @ts-expect-error */}
-        <DocumentInfoProvider collection={collection}>
+        <DocumentInfoProvider collectionSlug={slug} id={null}>
           <OperationContext.Provider value="update">
             <div className={`${baseClass}__main`}>
               <div className={`${baseClass}__header`}>
@@ -199,6 +218,7 @@ export const EditMany: React.FC<Props> = (props) => {
                 <Form
                   className={`${baseClass}__form`}
                   initialState={initialState}
+                  onChange={[onChange]}
                   onSuccess={onSuccess}
                 >
                   <FieldSelect fields={fields} setSelected={setSelected} />
