@@ -5,6 +5,7 @@ import React, { useCallback } from 'react'
 
 import type { Props } from './types.js'
 
+import { generateFieldID } from '../../../utilities/generateFieldID.js'
 import { useForm } from '../../Form/context.js'
 import LabelComp from '../../Label/index.js'
 import useField from '../../useField/index.js'
@@ -66,7 +67,7 @@ const Checkbox: React.FC<Props> = (props) => {
 
   const checked = checkedFromProps || Boolean(value)
 
-  const fieldID = id || `field-${path?.replace(/\./g, '__')}${uuid ? `-${uuid}` : ''}`
+  const fieldID = id || generateFieldID(path, uuid)
 
   return (
     <div

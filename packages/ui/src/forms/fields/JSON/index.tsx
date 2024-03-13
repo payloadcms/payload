@@ -34,6 +34,7 @@ const JSONField: React.FC<Props> = (props) => {
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
+  // eslint-disable-next-line react/destructuring-assignment
   const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
 
   const [stringValue, setStringValue] = useState<string>()
@@ -65,9 +66,10 @@ const JSONField: React.FC<Props> = (props) => {
       setStringValue(val)
 
       try {
-        setValue(JSON.parse(val))
+        setValue(val ? JSON.stringify(JSON.parse(val)) : null)
         setJsonError(undefined)
       } catch (e) {
+        setValue(val ? val : null)
         setJsonError(e)
       }
     },
@@ -76,7 +78,9 @@ const JSONField: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (hasLoadedValue) return
-    setStringValue(JSON.stringify(value ? value : initialValue, null, 2))
+    setStringValue(
+      value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
+    )
     setHasLoadedValue(true)
   }, [initialValue, value, hasLoadedValue])
 

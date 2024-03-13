@@ -279,5 +279,4 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   )
 }
 
-// eslint-disable-next-line no-restricted-exports
 export default ArrayFieldType

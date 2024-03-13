@@ -28,7 +28,7 @@ type MetaTitleProps = FormFieldBase & {
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
   const { Label, hasGenerateTitleFn, path, required } = props || {}
-  const { path: pathFromContext, schemaPath } = useFieldPath()
+  const { path: pathFromContext } = useFieldPath()
 
   const { t } = useTranslation()
 

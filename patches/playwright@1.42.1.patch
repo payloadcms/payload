@@ -11,7 +11,7 @@ index c736e9d13ad09e54ee6f1fe000a9c8d8aa853f40..92ca367464c3d582b7496fd57d59d2ff
 +export function createElement() {} // https://github.com/microsoft/playwright/issues/26824 TODO: Maybe create proxy which returns this from react instead? It should be React.createElement
 \ No newline at end of file
 diff --git a/lib/transform/esmLoader.js b/lib/transform/esmLoader.js
-index 80073de7dfc269c6f838e685850b9f32ea0c1f9a..2f940c267e5982c9582d2fa5d3b777b0bf852830 100644
+index 80073de7dfc269c6f838e685850b9f32ea0c1f9a..be536bc0dd0969d692c58e4ca0b99f424bdc88a1 100644
 --- a/lib/transform/esmLoader.js
 +++ b/lib/transform/esmLoader.js
 @@ -5,7 +5,17 @@ var _url = _interopRequireDefault(require("url"));
@@ -32,13 +32,17 @@ index 80073de7dfc269c6f838e685850b9f32ea0c1f9a..2f940c267e5982c9582d2fa5d3b777b0
  /**
   * Copyright (c) Microsoft Corporation.
   *
-@@ -25,6 +35,23 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
+@@ -25,6 +35,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  // Node < 18.6: defaultResolve takes 3 arguments.
  // Node >= 18.6: nextResolve from the chain takes 2 arguments.
  async function resolve(specifier, context, defaultResolve) {
 +
 +  if(specifier?.endsWith('/node_modules/playwright')) {
 +    specifier = specifier.replace('/node_modules/playwright', '/node_modules/playwright/index.mjs')
++  }
++
++  if(specifier?.endsWith('\\node_modules\\playwright')) {
++    specifier = specifier.replace('\\node_modules\\playwright', '\\node_modules\\playwright\\index.mjs')
 +  }
 +
 +  // Continue as usual if the format is not scss, svg, or png.
@@ -56,7 +60,7 @@ index 80073de7dfc269c6f838e685850b9f32ea0c1f9a..2f940c267e5982c9582d2fa5d3b777b0
    var _currentFileDepsColle;
    if (context.parentURL && context.parentURL.startsWith('file://')) {
      const filename = _url.default.fileURLToPath(context.parentURL);
-@@ -41,6 +68,20 @@ async function resolve(specifier, context, defaultResolve) {
+@@ -41,6 +72,20 @@ async function resolve(specifier, context, defaultResolve) {
  // Node < 18.6: defaultLoad takes 3 arguments.
  // Node >= 18.6: nextLoad from the chain takes 2 arguments.
  async function load(moduleUrl, context, defaultLoad) {

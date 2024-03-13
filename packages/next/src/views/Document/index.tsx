@@ -15,6 +15,7 @@ import {
   HydrateClientUser,
   RenderCustomComponent,
   buildStateFromSchema,
+  formatDocTitle,
   formatFields,
 } from '@payloadcms/ui'
 import React from 'react'
@@ -22,7 +23,6 @@ import React from 'react'
 import type { AdminViewProps } from '../Root/index.js'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
-import { formatTitle } from '../Edit/Default/SetDocumentTitle/formatTitle.js'
 import { NotFoundClient } from '../NotFound/index.client.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getViewsFromConfig } from './getViewsFromConfig.js'
@@ -201,12 +201,13 @@ export const Document: React.FC<AdminViewProps> = async ({
       initialData={data}
       initialState={initialState}
       isEditing={isEditing}
-      title={formatTitle({
+      title={formatDocTitle({
         collectionConfig,
+        data,
         dateFormat: config.admin.dateFormat,
+        fallback: id?.toString(),
         globalConfig,
         i18n,
-        value: data?.[collectionConfig?.admin?.useAsTitle] || id?.toString(),
       })}
     >
       <DocumentHeader

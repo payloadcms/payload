@@ -28,7 +28,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '../packages/richtext-lexical/src/index.js'
-//import { slateEditor } from '../packages/richtext-slate/src/index.js'
+// import { slateEditor } from '../packages/richtext-slate/src/index.js'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
 const databaseAdapters = {

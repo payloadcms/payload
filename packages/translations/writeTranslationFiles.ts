@@ -96,6 +96,7 @@ const clientTranslationKeys = [
   'authentication:changePassword',
   'authentication:confirmGeneration',
   'authentication:confirmPassword',
+  'authentication:createFirstUser',
   'authentication:emailNotValid',
   'authentication:emailSent',
   'authentication:enableAPIKey',
@@ -135,6 +136,7 @@ const clientTranslationKeys = [
   'error:previewing',
   'error:unableToDeleteCount',
   'error:unableToUpdateCount',
+  'error:unauthorized',
   'error:unknown',
   'error:unspecific',
 

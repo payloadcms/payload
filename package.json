@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.46",
+  "version": "3.0.0-alpha.48",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "pnpm run build:core",
-    "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} ++ && npx playwright install",
+    "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
     "build:all": "turbo build",
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
     "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\"",
@@ -60,7 +60,7 @@
     "release:beta": "tsx ./scripts/release.ts --bump prerelease --tag beta",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env NODE_OPTIONS=--no-deprecation jest --config=jest.components.config.js",
-    "test:e2e": "NODE_OPTIONS=--no-deprecation npx playwright install --with-deps chromium && NODE_OPTIONS=--no-deprecation tsx ./test/runE2E.ts",
+    "test:e2e": "NODE_OPTIONS=--no-deprecation tsx ./test/runE2E.ts",
     "test:e2e:debug": "cross-env NODE_OPTIONS=--no-deprecation PWDEBUG=1 DISABLE_LOGGING=true playwright test",
     "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation DISABLE_LOGGING=true playwright test --headed",
     "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
@@ -68,8 +68,7 @@
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "devDependencies": {
-    "drizzle-kit": "0.20.14-1f2c838",
-    "@aws-sdk/client-s3": "^3.142.0",
+    "@aws-sdk/client-s3": "^3.525.0",
     "@next/bundle-analyzer": "^14.1.0",
     "@octokit/core": "^5.1.0",
     "@payloadcms/eslint-config": "workspace:*",
@@ -104,6 +103,7 @@
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "dotenv": "8.6.0",
+    "drizzle-kit": "0.20.14-1f2c838",
     "drizzle-orm": "0.29.4",
     "execa": "5.1.1",
     "form-data": "3.0.1",
@@ -140,6 +140,7 @@
     "simple-git": "^3.20.0",
     "slash": "3.0.0",
     "slate": "0.91.4",
+    "swc-plugin-transform-remove-imports": "^1.12.1",
     "tempfile": "^3.0.0",
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",

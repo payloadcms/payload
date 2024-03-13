@@ -1,3 +1,4 @@
+import { promises as _promises } from 'fs'
 import getPort from 'get-port'
 import { nextDev } from 'next/dist/cli/next-dev.js'
 import path from 'path'
@@ -7,6 +8,7 @@ import type { Payload } from '../../packages/payload/src/index.js'
 
 import { getPayload } from '../../packages/payload/src/index.js'
 import wait from '../../packages/payload/src/utilities/wait.js'
+import { beforeTest } from '../beforeTest.js'
 
 type Args = {
   config: Promise<SanitizedConfig>
@@ -19,10 +21,12 @@ type Result = {
 }
 
 export async function initPayloadE2E({ config, dirname }: Args): Promise<Result> {
+  const testSuiteName = dirname.split('/').pop()
+  await beforeTest(testSuiteName)
+
   const port = await getPort()
   const serverURL = `http://localhost:${port}`
   process.env.NODE_OPTIONS = '--no-deprecation'
-  process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, './config.js')
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.PORT = String(port)
 

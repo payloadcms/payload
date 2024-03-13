@@ -5,10 +5,9 @@ import { customersSlug } from '../shared.js'
 
 export const Customers: CollectionConfig = {
   slug: customersSlug,
-  timestamps: true,
   admin: {
-    useAsTitle: 'email',
     defaultColumns: ['email', 'name'],
+    useAsTitle: 'email',
   },
   auth: {
     useAPIKey: true,
@@ -16,12 +15,11 @@ export const Customers: CollectionConfig = {
   fields: [
     {
       name: 'name',
-      label: 'Name',
       type: 'text',
+      label: 'Name',
     },
     {
       name: 'subscriptions',
-      label: 'Subscriptions',
       type: 'array',
       admin: {
         description:
@@ -30,7 +28,6 @@ export const Customers: CollectionConfig = {
       fields: [
         {
           name: 'link',
-          label: 'Link',
           type: 'ui',
           admin: {
             components: {
@@ -38,43 +35,44 @@ export const Customers: CollectionConfig = {
                 LinkToDoc({
                   ...args,
                   isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',
-                  stripeResourceType: 'subscriptions',
                   nameOfIDField: `${args.path}.stripeSubscriptionID`,
+                  stripeResourceType: 'subscriptions',
                 }),
             },
           },
+          label: 'Link',
         },
         {
           name: 'stripeSubscriptionID',
-          label: 'Stripe ID',
           type: 'text',
           admin: {
             readOnly: true,
           },
+          label: 'Stripe ID',
         },
         {
           name: 'stripeProductID',
-          label: 'Product ID',
           type: 'text',
           admin: {
             readOnly: true,
           },
+          label: 'Product ID',
         },
         {
           name: 'product',
           type: 'relationship',
-          relationTo: 'products',
           admin: {
             readOnly: true,
           },
+          relationTo: 'products',
         },
         {
           name: 'status',
-          label: 'Status',
           type: 'select',
           admin: {
             readOnly: true,
           },
+          label: 'Status',
           options: [
             {
               label: 'Active',
@@ -107,6 +105,8 @@ export const Customers: CollectionConfig = {
           ],
         },
       ],
+      label: 'Subscriptions',
     },
   ],
+  timestamps: true,
 }

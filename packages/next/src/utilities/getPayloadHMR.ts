@@ -11,7 +11,7 @@ if (!cached) {
   cached = global._payload = { payload: null, promise: null, reload: false }
 }
 
-export const getPayload = async (options: InitOptions): Promise<Payload> => {
+export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
   }

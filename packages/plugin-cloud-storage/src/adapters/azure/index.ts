@@ -22,10 +22,27 @@ export const azureBlobStorageAdapter = ({
   connectionString,
   containerName,
 }: Args): Adapter => {
+  if (!BlobServiceClient) {
+    throw new Error(
+      'The package @azure/storage-blob is not installed, but is required for the plugin-cloud-storage Azure adapter. Please install it.',
+    )
+  }
+
   let storageClient: ContainerClient | null = null
   const getStorageClient = () => {
     if (storageClient) return storageClient
-    const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
+    let blobServiceClient = null
+    try {
+      blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
+    } catch (error) {
+      if (/is not a constructor$/.test(error.message)) {
+        throw new Error(
+          'The package @azure/storage-blob is not installed, but is required for the plugin-cloud-storage Azure adapter. Please install it.',
+        )
+      }
+      // Re-throw other unexpected errors.
+      throw error
+    }
     return (storageClient = blobServiceClient.getContainerClient(containerName))
   }
 

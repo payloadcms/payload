@@ -49,11 +49,11 @@ export const subscriptionDeleted = async (args) => {
 
       try {
         await payload.update({
-          collection: 'customers',
           id: foundCustomer.id,
+          collection: 'customers',
           data: {
-            subscriptions,
             skipSync: true,
+            subscriptions,
           },
         })
 

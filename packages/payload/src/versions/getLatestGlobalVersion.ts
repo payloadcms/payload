@@ -29,6 +29,7 @@ export const getLatestGlobalVersion = async ({
         global: slug,
         limit: 1,
         locale,
+        pagination: false,
         req,
         sort: '-updatedAt',
       })

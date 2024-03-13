@@ -14,7 +14,7 @@ import { notFound, redirect } from 'next/navigation.js'
 import { createLocalReq } from 'payload/utilities'
 import qs from 'qs'
 
-import { getPayload } from '../utilities/getPayload.js'
+import { getPayloadHMR } from '../utilities/getPayloadHMR.js'
 import { auth } from './auth.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 
@@ -33,7 +33,7 @@ export const initPage = async ({
 }: Args): Promise<InitPageResult> => {
   const headers = getHeaders()
   const localeParam = searchParams?.locale as string
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayloadHMR({ config: configPromise })
 
   const { cookies, permissions, user } = await auth({
     headers,
