@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 
 import type { Props } from './types.js'
 
+import { useRouteCache } from '../../index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
@@ -22,6 +23,7 @@ const baseClass = 'publish-many'
 
 export const PublishMany: React.FC<Props> = (props) => {
   const { Modal, useModal } = facelessUIImport
+  const { clearRouteCache } = useRouteCache()
 
   const { collection: { slug, labels: { plural }, versions } = {} } = props
 
@@ -74,6 +76,8 @@ export const PublishMany: React.FC<Props> = (props) => {
                 },
               }),
             )
+
+            clearRouteCache()
             return null
           }
 
@@ -100,6 +104,7 @@ export const PublishMany: React.FC<Props> = (props) => {
     toggleModal,
     router,
     stringifyParams,
+    clearRouteCache,
   ])
 
   if (!versions?.drafts || selectAll === SelectAllStatus.None || !hasPermission) {
