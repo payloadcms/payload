@@ -24,14 +24,12 @@ export const startMemoryDB = async (
     default: {
       const port = await getPort()
       const db = await MongoMemoryReplSet.create({
-        instanceOpts: [
-          {
-            port,
-          },
-        ],
+        instance: {
+          dbName: `payloadmemory`,
+          port,
+        },
         replSet: {
           count: 3,
-          dbName: `payloadmemory-${port}`,
         },
       })
 
