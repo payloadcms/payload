@@ -39,14 +39,14 @@ export const getViewsFromConfig = ({
   CustomView: EditViewComponent
   DefaultView: EditViewComponent
   /**
-   * The error view to display if CustomView or DefaultView do not exist (could be either due to not found, or unauthorized)
+   * The error view to display if CustomView or DefaultView do not exist (could be either due to not found, or unauthorized). Can be null
    */
   ErrorView: React.FC<AdminViewProps>
 } | null => {
   // Conditionally import and lazy load the default view
   let DefaultView: EditViewComponent = null
   let CustomView: EditViewComponent = null
-  let ErrorView: React.FC = NotFoundClient
+  let ErrorView: React.FC = null
 
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||

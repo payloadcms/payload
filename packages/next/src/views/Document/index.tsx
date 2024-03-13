@@ -96,7 +96,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     DefaultView = collectionViews?.DefaultView
 
     if (!CustomView && !DefaultView) {
-      const ErrorView = collectionViews?.ErrorView
+      const ErrorView = collectionViews?.ErrorView || NotFoundClient
       return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
     }
 
@@ -143,7 +143,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     DefaultView = globalViews?.DefaultView
 
     if (!CustomView && !DefaultView) {
-      const ErrorView = globalViews?.ErrorView
+      const ErrorView = globalViews?.ErrorView || NotFoundClient
       return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
     }
 
