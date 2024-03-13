@@ -9,7 +9,7 @@ export const UnauthorizedClient: React.FC<{ logoutRoute: string }> = ({ logoutRo
   const { t } = useTranslation()
 
   return (
-    <Gutter>
+    <Gutter className="unauthorized">
       <h2>{t('error:unauthorized')}</h2>
       <div>{t('error:notAllowedToAccessPage')}</div>
       <Button Link={Link} el="link" to={logoutRoute}>
