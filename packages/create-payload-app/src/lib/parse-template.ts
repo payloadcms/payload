@@ -1,6 +1,6 @@
 import prompts from 'prompts'
 
-import type { CliArgs, ProjectTemplate } from '../types'
+import type { CliArgs, ProjectTemplate } from '../types.js'
 
 export async function parseTemplate(
   args: CliArgs,
@@ -16,6 +16,7 @@ export async function parseTemplate(
   const response = await prompts(
     {
       name: 'value',
+      type: 'select',
       choices: validTemplates.map((p) => {
         return {
           description: p.description,
@@ -24,7 +25,6 @@ export async function parseTemplate(
         }
       }),
       message: 'Choose project template',
-      type: 'select',
       validate: (value: string) => !!value.length,
     },
     {

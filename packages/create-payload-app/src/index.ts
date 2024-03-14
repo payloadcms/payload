@@ -1,5 +1,5 @@
-import { Main } from './main'
-import { error } from './utils/log'
+import { Main } from './main.js'
+import { error } from './utils/log.js'
 
 async function main(): Promise<void> {
   await new Main().init()

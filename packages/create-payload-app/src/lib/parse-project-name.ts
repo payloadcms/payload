@@ -1,6 +1,6 @@
 import prompts from 'prompts'
 
-import type { CliArgs } from '../types'
+import type { CliArgs } from '../types.js'
 
 export async function parseProjectName(args: CliArgs): Promise<string> {
   if (args['--name']) return args['--name']
@@ -9,8 +9,8 @@ export async function parseProjectName(args: CliArgs): Promise<string> {
   const response = await prompts(
     {
       name: 'value',
-      message: 'Project name?',
       type: 'text',
+      message: 'Project name?',
       validate: (value: string) => !!value.length,
     },
     {

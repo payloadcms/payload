@@ -1,9 +1,11 @@
 import type { CompilerOptions } from 'typescript'
 
 import * as CommentJson from 'comment-json'
+import execa from 'execa'
 import fs from 'fs'
 import path from 'path'
 import shelljs from 'shelljs'
+import tempy from 'tempy'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
@@ -12,12 +14,13 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const readFile = promisify(fs.readFile)
+const writeFile = promisify(fs.writeFile)
+
+const commonNextCreateParams = '--typescript --eslint --no-tailwind --app --import-alias="@/*"'
 
 const nextCreateCommands: Partial<Record<'noSrcDir' | 'srcDir', string>> = {
-  srcDir:
-    'pnpm create next-app@latest . --typescript --eslint --no-tailwind --app --import-alias="@/*" --src-dir',
-  noSrcDir:
-    'pnpm create next-app@latest . --typescript --eslint --no-tailwind --app --import-alias="@/*" --no-src-dir',
+  noSrcDir: `pnpm create next-app@latest . ${commonNextCreateParams} --no-src-dir`,
+  srcDir: `pnpm create next-app@latest . ${commonNextCreateParams} --src-dir`,
 }
 
 describe('create-payload-app', () => {
@@ -34,9 +37,8 @@ describe('create-payload-app', () => {
   })
 
   describe.each(Object.keys(nextCreateCommands))(`--init-next with %s`, (nextCmdKey) => {
-    const projectDir = path.resolve(dirname, 'test-app')
-
-    beforeEach(() => {
+    const projectDir = tempy.directory()
+    beforeEach(async () => {
       if (fs.existsSync(projectDir)) {
         fs.rmdirSync(projectDir, { recursive: true })
       }
@@ -47,7 +49,20 @@ describe('create-payload-app', () => {
       }
 
       // Create a new Next.js project with default options
-      shelljs.exec(nextCreateCommands[nextCmdKey], { cwd: projectDir })
+      console.log(`Running: ${nextCreateCommands[nextCmdKey]} in ${projectDir}`)
+      const [cmd, ...args] = nextCreateCommands[nextCmdKey].split(' ')
+      const { exitCode, stderr } = await execa(cmd, [...args], { cwd: projectDir })
+      if (exitCode !== 0) {
+        console.error({ exitCode, stderr })
+      }
+
+      // WARNING: Big WTF here. Replace improper path string inside tsconfig.json.
+      // For some reason two double quotes are used for the src path when executed in the test environment.
+      // This is likely ESM-related
+      const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
+      let userTsConfigContent = await readFile(tsConfigPath, { encoding: 'utf8' })
+      userTsConfigContent = userTsConfigContent.replace('""@/*""', '"@/*"')
+      await writeFile(tsConfigPath, userTsConfigContent, { encoding: 'utf8' })
     })
 
     afterEach(() => {
@@ -78,9 +93,11 @@ describe('create-payload-app', () => {
       const userTsConfig = CommentJson.parse(userTsConfigContent) as {
         compilerOptions?: CompilerOptions
       }
-      expect(userTsConfig.compilerOptions.paths?.['@payload-config']).toEqual([
+      expect(userTsConfig.compilerOptions.paths?.['@payload-config']).toStrictEqual([
         './payload.config.ts',
       ])
+
+      // TODO: Start the Next.js app and check if it runs
     })
   })
 })

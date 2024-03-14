@@ -1,4 +1,4 @@
-import type { BundlerType, DbType, EditorType } from '../types'
+import type { BundlerType, DbType, EditorType } from '../types.js'
 
 type DbAdapterReplacement = {
   configReplacement: string[]

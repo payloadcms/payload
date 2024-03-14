@@ -2,6 +2,7 @@
   "name": "create-payload-app",
   "version": "1.0.0",
   "license": "MIT",
+  "type": "module",
   "bin": {
     "create-payload-app": "bin/cli.js"
   },
@@ -41,7 +42,6 @@
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.6.2",
-    "@types/prompts": "^2.4.1",
-    "ts-jest": "^29.1.0"
+    "@types/prompts": "^2.4.1"
   }
 }

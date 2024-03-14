@@ -1,10 +1,10 @@
 import fse from 'fs-extra'
 import path from 'path'
-import type { BundlerType, CliArgs, DbType, ProjectTemplate } from '../types'
-import { createProject } from './create-project'
-import { bundlerPackages, dbPackages, editorPackages } from './packages'
+import type { BundlerType, CliArgs, DbType, ProjectTemplate } from '../types.js'
+import { createProject } from './create-project.js'
+import { bundlerPackages, dbPackages, editorPackages } from './packages.js'
 import exp from 'constants'
-import { getValidTemplates } from './templates'
+import { getValidTemplates } from './templates.js'
 
 const projectDir = path.resolve(__dirname, './tmp')
 describe('createProject', () => {

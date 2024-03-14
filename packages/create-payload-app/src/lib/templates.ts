@@ -1,6 +1,6 @@
-import type { ProjectTemplate } from '../types'
+import type { ProjectTemplate } from '../types.js'
 
-import { error, info } from '../utils/log'
+import { error, info } from '../utils/log.js'
 
 export function validateTemplate(templateName: string): boolean {
   const validTemplates = getValidTemplates()
@@ -16,38 +16,38 @@ export function getValidTemplates(): ProjectTemplate[] {
   return [
     {
       name: 'blank',
-      description: 'Blank Template',
       type: 'starter',
+      description: 'Blank Template',
       url: 'https://github.com/payloadcms/payload/templates/blank',
     },
     {
       name: 'website',
-      description: 'Website Template',
       type: 'starter',
+      description: 'Website Template',
       url: 'https://github.com/payloadcms/payload/templates/website',
     },
     {
       name: 'ecommerce',
-      description: 'E-commerce Template',
       type: 'starter',
+      description: 'E-commerce Template',
       url: 'https://github.com/payloadcms/payload/templates/ecommerce',
     },
     {
       name: 'plugin',
-      description: 'Template for creating a Payload plugin',
       type: 'plugin',
+      description: 'Template for creating a Payload plugin',
       url: 'https://github.com/payloadcms/payload-plugin-template',
     },
     {
       name: 'payload-demo',
-      description: 'Payload demo site at https://demo.payloadcms.com',
       type: 'starter',
+      description: 'Payload demo site at https://demo.payloadcms.com',
       url: 'https://github.com/payloadcms/public-demo',
     },
     {
       name: 'payload-website',
-      description: 'Payload website CMS at https://payloadcms.com',
       type: 'starter',
+      description: 'Payload website CMS at https://payloadcms.com',
       url: 'https://github.com/payloadcms/website-cms',
     },
   ]

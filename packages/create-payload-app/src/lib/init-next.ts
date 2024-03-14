@@ -1,18 +1,26 @@
 import type { CompilerOptions } from 'typescript'
 
 import chalk from 'chalk'
-import * as CommentJson from 'comment-json'
+import { parse, stringify } from 'comment-json'
 import { detect } from 'detect-package-manager'
 import execa from 'execa'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
 import path from 'path'
+import { promisify } from 'util'
+const readFile = promisify(fs.readFile)
+const writeFile = promisify(fs.writeFile)
 
-import type { CliArgs } from '../types'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
-import { copyRecursiveSync } from '../utils/copy-recursive-sync'
-import { error, info, debug as origDebug, success, warning } from '../utils/log'
+import { fileURLToPath } from 'node:url'
+
+import type { CliArgs } from '../types.js'
+
+import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
+import { error, info, debug as origDebug, success, warning } from '../utils/log.js'
 
 type InitNextArgs = Pick<CliArgs, '--debug'> & {
   projectDir?: string
@@ -45,13 +53,13 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
 
   ${chalk.bold(`Wrap your existing next.config.js with the withPayload function. Here is an example:`)}
 
-  const { withPayload } = require("@payloadcms/next");
+  import withPayload from '@payloadcms/next/withPayload'
 
   const nextConfig = {
-    // Your Next.js config
-  };
+    // Your Next.js config here
+  }
 
-  module.exports = withPayload(nextConfig);
+  export default withPayload(nextConfig)
 
 `
 
@@ -62,10 +70,10 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
 
 async function addPayloadConfigToTsConfig(projectDir: string) {
   const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
-  const userTsConfigContent = await fse.readFile(tsConfigPath, {
+  const userTsConfigContent = await readFile(tsConfigPath, {
     encoding: 'utf8',
   })
-  const userTsConfig = CommentJson.parse(userTsConfigContent) as {
+  const userTsConfig = parse(userTsConfigContent) as {
     compilerOptions?: CompilerOptions
   }
   if (!userTsConfig.compilerOptions && !('extends' in userTsConfig)) {
@@ -77,7 +85,7 @@ async function addPayloadConfigToTsConfig(projectDir: string) {
       ...(userTsConfig.compilerOptions.paths || {}),
       '@payload-config': ['./payload.config.ts'],
     }
-    await fse.writeFile(tsConfigPath, CommentJson.stringify(userTsConfig, null, 2))
+    await writeFile(tsConfigPath, stringify(userTsConfig, null, 2), { encoding: 'utf8' })
   }
 }
 
@@ -96,6 +104,11 @@ async function applyPayloadTemplateFiles(args: InitNextArgs): Promise<InitNextRe
 
   // Next.js configs can be next.config.js, next.config.mjs, etc.
   const foundConfig = (await globby('next.config.*js', { cwd: projectDir }))?.[0]
+
+  if (!foundConfig) {
+    throw new Error(`No next.config.js found at ${projectDir}`)
+  }
+
   const nextConfigPath = path.resolve(projectDir, foundConfig)
   if (!fs.existsSync(nextConfigPath)) {
     return {
@@ -107,9 +120,9 @@ async function applyPayloadTemplateFiles(args: InitNextArgs): Promise<InitNextRe
   }
 
   const templateFilesPath =
-    __dirname.endsWith('dist') || useDistFiles
-      ? path.resolve(__dirname, '../..', 'dist/app')
-      : path.resolve(__dirname, '../../../../app')
+    dirname.endsWith('dist') || useDistFiles
+      ? path.resolve(dirname, '../..', 'dist/app')
+      : path.resolve(dirname, '../../../../app')
 
   if (debug) logDebug(`Using template files from: ${templateFilesPath}`)
 
@@ -152,7 +165,6 @@ async function installDeps(projectDir: string) {
     '@payloadcms/db-mongodb',
     '@payloadcms/next',
     '@payloadcms/richtext-slate',
-    '@payloadcms/ui',
   ].map((pkg) => `${pkg}@alpha`)
 
   let exitCode = 0

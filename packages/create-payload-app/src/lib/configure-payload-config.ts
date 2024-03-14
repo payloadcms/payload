@@ -1,10 +1,10 @@
 import fse from 'fs-extra'
 import path from 'path'
 
-import type { DbDetails } from '../types'
+import type { DbDetails } from '../types.js'
 
-import { warning } from '../utils/log'
-import { bundlerPackages, dbPackages, editorPackages } from './packages'
+import { warning } from '../utils/log.js'
+import { bundlerPackages, dbPackages, editorPackages } from './packages.js'
 
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {

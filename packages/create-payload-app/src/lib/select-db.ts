@@ -1,7 +1,7 @@
 import slugify from '@sindresorhus/slugify'
 import prompts from 'prompts'
 
-import type { CliArgs, DbDetails, DbType } from '../types'
+import type { CliArgs, DbDetails, DbType } from '../types.js'
 
 type DbChoice = {
   dbConnectionPrefix: `${string}/`
@@ -37,6 +37,7 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
     const dbTypeRes = await prompts(
       {
         name: 'value',
+        type: 'select',
         choices: Object.values(dbChoiceRecord).map((dbChoice) => {
           return {
             title: dbChoice.title,
@@ -44,7 +45,6 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
           }
         }),
         message: 'Select a database',
-        type: 'select',
         validate: (value: string) => !!value.length,
       },
       {
@@ -61,11 +61,11 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
   const dbUriRes = await prompts(
     {
       name: 'value',
+      type: 'text',
       initial: `${dbChoice.dbConnectionPrefix}${
         projectName === '.' ? `payload-${getRandomDigitSuffix()}` : slugify(projectName)
       }`,
       message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
-      type: 'text',
       validate: (value: string) => !!value.length,
     },
     {
@@ -76,8 +76,8 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
   )
 
   return {
-    dbUri: dbUriRes.value,
     type: dbChoice.value,
+    dbUri: dbUriRes.value,
   }
 }
 

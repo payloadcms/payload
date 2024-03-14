@@ -142,6 +142,7 @@
     "slate": "0.91.4",
     "swc-plugin-transform-remove-imports": "^1.12.1",
     "tempfile": "^3.0.0",
+    "tempy": "^1.0.1",
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
     "turbo": "^1.12.5",

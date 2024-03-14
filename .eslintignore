@@ -9,3 +9,4 @@
 **/node_modules
 **/temp
 playwright.config.ts
+jest.config.js

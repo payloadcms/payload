@@ -1,9 +1,9 @@
 import fs from 'fs-extra'
 import path from 'path'
 
-import type { ProjectTemplate } from '../types'
+import type { ProjectTemplate } from '../types.js'
 
-import { error, success } from '../utils/log'
+import { error, success } from '../utils/log.js'
 
 /** Parse and swap .env.example values and write .env */
 export async function writeEnvFile(args: {

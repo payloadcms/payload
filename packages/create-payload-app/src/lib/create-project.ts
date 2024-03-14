@@ -5,10 +5,10 @@ import fse from 'fs-extra'
 import ora from 'ora'
 import path from 'path'
 
-import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../types'
+import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../types.js'
 
-import { error, success, warning } from '../utils/log'
-import { configurePayloadConfig } from './configure-payload-config'
+import { error, success, warning } from '../utils/log.js'
+import { configurePayloadConfig } from './configure-payload-config.js'
 
 async function createOrFindProjectDir(projectDir: string): Promise<void> {
   const pathExists = await fse.pathExists(projectDir)
