@@ -30,6 +30,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     Description,
     Error,
     Label: LabelFromProps,
+    RowLabel,
     className,
     fieldMap,
     forceRender = false,
@@ -221,9 +222,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               {(draggableSortableItemProps) => (
                 <ArrayRow
                   {...draggableSortableItemProps}
+                  CustomRowLabel={RowLabel}
                   addRow={addRow}
                   duplicateRow={duplicateRow}
-                  // CustomRowLabel={CustomRowLabel}
                   fieldMap={fieldMap}
                   forceRender={forceRender}
                   hasMaxRows={hasMaxRows}

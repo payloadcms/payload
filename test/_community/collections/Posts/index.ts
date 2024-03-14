@@ -1,6 +1,8 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
 import { mediaSlug } from '../Media/index.js'
+import { CollapsibleLabel } from './CollapsibleLabel.js'
+import { RowLabel } from './RowLabel.js'
 
 export const postsSlug = 'posts'
 
@@ -50,6 +52,26 @@ export const PostsCollection: CollectionConfig = {
               ],
             },
           ],
+        },
+      ],
+    },
+    {
+      type: 'collapsible',
+      fields: [],
+      label: 'CollapsibleLabel',
+    },
+    {
+      name: 'tester',
+      type: 'array',
+      admin: {
+        components: {
+          RowLabel,
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
         },
       ],
     },

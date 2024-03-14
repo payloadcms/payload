@@ -11,16 +11,16 @@ import { ArrayAction } from '../../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { FieldPropsProvider } from '../../FieldPropsProvider/index.js'
 import { useFormSubmitted } from '../../Form/context.js'
 import { RenderFields } from '../../RenderFields/index.js'
+import { RowLabel } from '../../RowLabel/index.js'
 import HiddenInput from '../HiddenInput/index.js'
 import './index.scss'
 
 const baseClass = 'array-field'
 
 type ArrayRowProps = UseDraggableSortableReturn & {
-  CustomRowLabel?: RowLabelType
+  CustomRowLabel?: React.ReactNode
   addRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
   fieldMap: FieldMap
@@ -40,6 +40,7 @@ type ArrayRowProps = UseDraggableSortableReturn & {
 }
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
+  CustomRowLabel,
   addRow,
   attributes,
   duplicateRow,
@@ -112,11 +113,13 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }}
         header={
           <div className={`${baseClass}__row-header`}>
-            {/* <RowLabel
-              label={CustomRowLabel || fallbackLabel}
+            <RowLabel
+              RowLabelComponent={CustomRowLabel}
+              i18n={i18n}
               path={path}
+              rowLabel={fallbackLabel}
               rowNumber={rowIndex + 1}
-            /> */}
+            />
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }

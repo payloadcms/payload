@@ -1,6 +1,7 @@
 import type { CellProps, Field, FieldWithPath, LabelProps, SanitizedConfig } from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
+import { isPlainObject } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { Props as FieldDescription } from '../../forms/FieldDescription/types.js'
@@ -119,6 +120,19 @@ export const mapFields = (args: {
             return reducedBlock
           })
 
+        let RowLabel: React.ReactNode
+
+        if (
+          'admin' in field &&
+          field.admin.components &&
+          'RowLabel' in field.admin.components &&
+          field.admin.components.RowLabel &&
+          !isPlainObject(field.admin.components.RowLabel)
+        ) {
+          const CustomRowLabel = field.admin.components.RowLabel as React.ComponentType
+          RowLabel = <CustomRowLabel />
+        }
+
         // TODO: these types can get cleaned up
         // i.e. not all fields have `maxRows` or `min` or `max`
         // but this is labor intensive and requires consuming components to be updated
@@ -180,6 +194,7 @@ export const mapFields = (args: {
               componentProps={labelProps}
             />
           ),
+          RowLabel,
           blocks,
           className:
             'admin' in field && 'className' in field.admin ? field?.admin?.className : undefined,
@@ -200,6 +215,15 @@ export const mapFields = (args: {
           style: 'admin' in field && 'style' in field.admin ? field?.admin?.style : undefined,
           tabs,
           width: 'admin' in field && 'width' in field.admin ? field?.admin?.width : undefined,
+        }
+
+        if (
+          field.type === 'collapsible' &&
+          typeof field.label === 'object' &&
+          !isPlainObject(field.label)
+        ) {
+          const CollapsibleLabel = field.label as unknown as React.ComponentType
+          fieldComponentProps.Label = <CollapsibleLabel />
         }
 
         let Field = <FieldComponent {...fieldComponentProps} />

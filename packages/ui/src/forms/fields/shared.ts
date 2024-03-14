@@ -30,6 +30,7 @@ export type FormFieldBase = {
   Description?: React.ReactNode
   Error?: React.ReactNode
   Label?: React.ReactNode
+  RowLabel?: React.ReactNode
   className?: string
   disabled?: boolean
   docPreferences?: DocumentPreferences

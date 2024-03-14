@@ -32,12 +32,13 @@ export { default as getUniqueListBy } from '../utilities/getUniqueListBy.js'
 export { isEntityHidden } from '../utilities/isEntityHidden.js'
 export { isNumber } from '../utilities/isNumber.js'
 
+export { isPlainObject } from '../utilities/isPlainObject.js'
+
 export { isValidID } from '../utilities/isValidID.js'
 
 export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
-
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
-export { default as toKebabCase } from '../utilities/toKebabCase.js'
 
+export { default as toKebabCase } from '../utilities/toKebabCase.js'
 export { default as wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
