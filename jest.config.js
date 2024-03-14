@@ -1,4 +1,4 @@
-/** @type {import('@jest/types').Config} */
+/** @type {import('jest').Config} */
 const customJestConfig = {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   globalSetup: './test/jest.setup.ts',
@@ -8,6 +8,7 @@ const customJestConfig = {
       '<rootDir>/test/helpers/mocks/fileMock.js',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  reporters: ['default', ['github-actions', { silent: false }], 'summary'],
   testEnvironment: 'node',
   testMatch: ['<rootDir>/packages/payload/src/**/*.spec.ts', '<rootDir>/test/**/*int.spec.ts'],
   testTimeout: 90000,
