@@ -97,7 +97,7 @@
     "@types/passport-anonymous": "1.0.3",
     "@types/passport-jwt": "3.0.9",
     "@types/passport-local": "1.0.35",
-    "@types/pluralize": "0.0.29",
+    "@types/pluralize": "0.0.33",
     "@types/react-datepicker": "4.11.2",
     "confusing-browser-globals": "1.0.11",
     "copyfiles": "2.4.1",
