@@ -28,7 +28,7 @@ export const DefaultTemplate: React.FC<Props> = async ({
         Nav: undefined,
       },
     } = {},
-  } = config
+  } = config || {}
 
   return (
     <Fragment>
