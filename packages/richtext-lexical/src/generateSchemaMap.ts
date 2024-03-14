@@ -4,6 +4,8 @@ import { sanitizeFields } from 'payload/config'
 
 import type { ResolvedServerFeatureMap } from './field/features/types.js'
 
+import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
+
 export const getGenerateSchemaMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateSchemaMap'] =>
   ({ config, schemaMap, schemaPath }) => {
@@ -28,7 +30,7 @@ export const getGenerateSchemaMap =
 
         const sanitizedFields = sanitizeFields({
           config,
-          fields,
+          fields: cloneDeep(fields),
           validRelationships,
         })
 

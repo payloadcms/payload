@@ -19,12 +19,24 @@ import { fieldTypes } from '../../forms/fields/index.js'
 export const mapFields = (args: {
   DefaultCell?: React.FC<any>
   config: SanitizedConfig
+  /**
+   * If mapFields is used outside of collections, you might not want it to add an id field
+   */
+  disableAddingID?: boolean
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
   parentPath?: string
   readOnly?: boolean
 }): FieldMap => {
-  const { DefaultCell, config, fieldSchema, filter, parentPath, readOnly: readOnlyOverride } = args
+  const {
+    DefaultCell,
+    config,
+    disableAddingID,
+    fieldSchema,
+    filter,
+    parentPath,
+    readOnly: readOnlyOverride,
+  } = args
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
@@ -355,7 +367,7 @@ export const mapFields = (args: {
   const hasID =
     result.findIndex(({ name, isFieldAffectingData }) => isFieldAffectingData && name === 'id') > -1
 
-  if (!hasID) {
+  if (!disableAddingID && !hasID) {
     result.push({
       name: 'id',
       type: 'text',

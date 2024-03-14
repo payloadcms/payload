@@ -55,23 +55,13 @@ export const BlocksFeature: FeatureProviderProviderServer<
       return {
         ClientComponent: BlocksFeatureClientComponent,
         clientFeatureProps: clientProps,
-        generateSchemaMap: ({ config, props }) => {
-          const validRelationships = config.collections.map((c) => c.slug) || []
-
+        generateSchemaMap: ({ props }) => {
           const schemaMap: {
             [key: string]: Field[]
           } = {}
 
           for (const block of props.blocks) {
-            const unSanitizedFormSchema = block.fields || []
-
-            const formSchema = sanitizeFields({
-              config,
-              fields: unSanitizedFormSchema,
-              validRelationships,
-            })
-
-            schemaMap[block.slug] = formSchema
+            schemaMap[block.slug] = block.fields || []
           }
 
           return schemaMap
