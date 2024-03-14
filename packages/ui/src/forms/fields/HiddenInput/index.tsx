@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 
 import type { Props } from './types.js'
 
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { withCondition } from '../../withCondition/index.js'
 
 /**

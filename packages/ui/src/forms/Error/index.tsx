@@ -4,7 +4,7 @@ import type { ErrorProps } from 'payload/types'
 import React from 'react'
 
 import { Tooltip } from '../../elements/Tooltip/index.js'
-import { useFieldPath } from '../FieldPathProvider/index.js'
+import { useFieldProps } from '../FieldPropsProvider/index.js'
 import { useFormFields, useFormSubmitted } from '../Form/context.js'
 import './index.scss'
 
@@ -18,7 +18,7 @@ const Error: React.FC<ErrorProps> = (props) => {
     showError: showErrorFromProps,
   } = props
 
-  const { path: pathFromContext } = useFieldPath()
+  const { path: pathFromContext } = useFieldProps()
   const path = pathFromProps || pathFromContext
 
   const hasSubmitted = useFormSubmitted()

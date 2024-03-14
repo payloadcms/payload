@@ -3,7 +3,7 @@ import React from 'react'
 import type { Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import useField from '../../../useField/index.js'
+import { useField } from '../../../useField/index.js'
 import './index.scss'
 
 const baseClass = 'section-title'

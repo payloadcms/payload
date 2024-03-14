@@ -65,7 +65,7 @@ export const BlockContent: React.FC<Props> = (props) => {
   const [collapsed, setCollapsed] = React.useState<boolean>(() => {
     let initialState = false
 
-    getDocPreferences().then((currentDocPreferences) => {
+    void getDocPreferences().then((currentDocPreferences) => {
       const currentFieldPreferences = currentDocPreferences?.fields[field.name]
 
       const collapsedMap: { [key: string]: boolean } = currentFieldPreferences?.collapsed
@@ -154,7 +154,7 @@ export const BlockContent: React.FC<Props> = (props) => {
   )
 
   const onCollapsedChange = useCallback(() => {
-    getDocPreferences().then((currentDocPreferences) => {
+    void getDocPreferences().then((currentDocPreferences) => {
       const currentFieldPreferences = currentDocPreferences?.fields[field.name]
 
       const collapsedMap: { [key: string]: boolean } = currentFieldPreferences?.collapsed
@@ -223,6 +223,9 @@ export const BlockContent: React.FC<Props> = (props) => {
           fieldMap={Array.isArray(formSchema) ? formSchema : []}
           forceRender
           margins="small"
+          path=""
+          readOnly={false}
+          schemaPath=""
         />
       </Collapsible>
 

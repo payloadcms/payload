@@ -1,32 +1,44 @@
 'use client'
-import type { FieldPermissions } from 'payload/auth'
+
+import type { FieldPermissions } from 'payload/types'
 
 import React from 'react'
 
 import { useOperation } from '../../providers/OperationProvider/index.js'
-import { FieldPathProvider, useFieldPath } from '../FieldPathProvider/index.js'
-import { ReadOnlyProvider, useReadOnly } from '../ReadOnlyProvider/index.js'
+import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
-export const RenderField: React.FC<{
+type Props = {
   Field: React.ReactNode
-  fieldPermissions: FieldPermissions
+  disabled: boolean
   name?: string
+  path: string
+  permissions?: FieldPermissions
   readOnly?: boolean
-}> = (props) => {
-  const { name, Field, fieldPermissions, readOnly: readOnlyFromProps } = props
+  schemaPath: string
+  siblingPermissions: {
+    [fieldName: string]: FieldPermissions
+  }
+}
 
-  const { path: pathFromContext, schemaPath: schemaPathFromContext } = useFieldPath()
-
-  const readOnlyFromContext = useReadOnly()
-
+export const RenderField: React.FC<Props> = ({
+  name,
+  Field,
+  disabled,
+  path: pathFromProps,
+  permissions,
+  readOnly: readOnlyFromProps,
+  schemaPath: schemaPathFromProps,
+  siblingPermissions,
+}) => {
   const operation = useOperation()
+  const { readOnly: readOnlyFromContext } = useFieldProps()
 
-  const path = `${pathFromContext ? `${pathFromContext}.` : ''}${name ? `${name}` : ''}`
-  const schemaPath = `${schemaPathFromContext ? `${schemaPathFromContext}` : ''}${name ? `.${name}` : ''}`
+  const path = `${pathFromProps ? `${pathFromProps}.` : ''}${name ? `${name}` : ''}`
+  const schemaPath = `${schemaPathFromProps ? `${schemaPathFromProps}` : ''}${name ? `.${name}` : ''}`
 
   // if the user cannot read the field, then filter it out
   // this is different from `admin.readOnly` which is executed based on `operation`
-  if (fieldPermissions?.read?.permission === false) {
+  if (permissions?.read?.permission === false || disabled) {
     return null
   }
 
@@ -37,15 +49,19 @@ export const RenderField: React.FC<{
   if (readOnlyFromContext && readOnly !== false) readOnly = true
 
   // if the user does not have access control to begin with, force it to be read-only
-  if (fieldPermissions?.[operation]?.permission === false) {
+  if (permissions?.[operation]?.permission === false) {
     readOnly = true
   }
 
   return (
-    <ReadOnlyProvider readOnly={readOnly}>
-      <FieldPathProvider path={path} schemaPath={schemaPath}>
-        {Field}
-      </FieldPathProvider>
-    </ReadOnlyProvider>
+    <FieldPropsProvider
+      path={path}
+      permissions={permissions}
+      readOnly={readOnly}
+      schemaPath={schemaPath}
+      siblingPermissions={siblingPermissions}
+    >
+      {Field}
+    </FieldPropsProvider>
   )
 }

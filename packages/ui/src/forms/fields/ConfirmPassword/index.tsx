@@ -9,7 +9,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import Error from '../../Error/index.js'
 import { useFormFields } from '../../Form/context.js'
 import Label from '../../Label/index.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 

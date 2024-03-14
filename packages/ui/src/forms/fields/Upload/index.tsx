@@ -5,7 +5,7 @@ import type { Props } from './types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import LabelComp from '../../Label/index.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { UploadInput } from './Input.js'
 import './index.scss'
 

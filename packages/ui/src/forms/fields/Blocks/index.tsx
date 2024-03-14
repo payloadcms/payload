@@ -19,7 +19,7 @@ import { scrollToID } from '../../../utilities/scrollToID.js'
 import { useForm, useFormSubmitted } from '../../Form/context.js'
 import LabelComp from '../../Label/index.js'
 import { NullifyLocaleField } from '../../NullifyField/index.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { fieldBaseClass } from '../shared.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
@@ -41,7 +41,6 @@ const BlocksField: React.FC<Props> = (props) => {
     label,
     localized,
     path: pathFromProps,
-    permissions,
     readOnly,
     required,
     validate,
@@ -91,6 +90,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const {
     path,
+    permissions,
     rows = [],
     schemaPath,
     showError,

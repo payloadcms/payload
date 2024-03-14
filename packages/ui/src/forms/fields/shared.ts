@@ -31,9 +31,9 @@ export type FormFieldBase = {
   Error?: React.ReactNode
   Label?: React.ReactNode
   className?: string
+  disabled?: boolean
   docPreferences?: DocumentPreferences
   fieldMap?: FieldMap
-  fieldPermissions?: FieldPermissions
   initialSubfieldState?: FormState
   label?: string
   locale?: Locale
