@@ -1,11 +1,13 @@
 import type { EditViewComponent } from 'payload/config'
 import type {
+  AdminViewComponent,
   DocumentPreferences,
   Document as DocumentType,
   Field,
   ServerSideEditViewProps,
 } from 'payload/types'
 import type { DocumentPermissions } from 'payload/types'
+import type { AdminViewProps } from 'payload/types'
 
 import {
   DocumentHeader,
@@ -18,12 +20,13 @@ import {
   formatDocTitle,
   formatFields,
 } from '@payloadcms/ui'
+import { docAccessOperation } from 'payload/operations'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root/index.js'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { NotFoundClient } from '../NotFound/index.client.js'
+import { NotFoundView } from '../NotFound/index.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getViewsFromConfig } from './getViewsFromConfig.js'
 
@@ -61,8 +64,11 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
+  let ViewOverride: EditViewComponent
   let CustomView: EditViewComponent
   let DefaultView: EditViewComponent
+  let ErrorView: AdminViewComponent = NotFoundView
+
   let data: DocumentType
   let docPermissions: DocumentPermissions
   let preferencesKey: string
@@ -72,7 +78,14 @@ export const Document: React.FC<AdminViewProps> = async ({
   let action: string
 
   if (collectionConfig) {
-    docPermissions = permissions?.collections?.[collectionSlug]
+    docPermissions = await docAccessOperation({
+      id,
+      collection: {
+        config: collectionConfig,
+      },
+      req,
+    })
+
     fields = collectionConfig.fields
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
 
@@ -84,19 +97,25 @@ export const Document: React.FC<AdminViewProps> = async ({
       collectionConfig.versions?.drafts ? '&draft=true' : ''
     }`
 
-    const collectionViews = await getViewsFromConfig({
-      collectionConfig,
-      config,
-      docPermissions,
-      routeSegments: segments,
-      user,
-    })
+    const editConfig = collectionConfig?.admin?.components?.views?.Edit
+    ViewOverride = typeof editConfig === 'function' ? editConfig : null
 
-    CustomView = collectionViews?.CustomView
-    DefaultView = collectionViews?.DefaultView
+    if (!ViewOverride) {
+      const collectionViews = getViewsFromConfig({
+        collectionConfig,
+        config,
+        docPermissions,
+        routeSegments: segments,
+        user,
+      })
 
-    if (!CustomView && !DefaultView) {
-      return <NotFoundClient />
+      CustomView = collectionViews?.CustomView
+      DefaultView = collectionViews?.DefaultView
+      ErrorView = collectionViews?.ErrorView
+    }
+
+    if (!CustomView && !DefaultView && !ViewOverride) {
+      return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
     }
 
     if (id) {
@@ -130,37 +149,43 @@ export const Document: React.FC<AdminViewProps> = async ({
       globalConfig.versions?.drafts ? '&draft=true' : ''
     }`
 
-    const globalViews = await getViewsFromConfig({
-      config,
-      docPermissions,
-      globalConfig,
-      routeSegments: segments,
-      user,
-    })
+    const editConfig = globalConfig?.admin?.components?.views?.Edit
+    ViewOverride = typeof editConfig === 'function' ? editConfig : null
 
-    CustomView = globalViews?.CustomView
-    DefaultView = globalViews?.DefaultView
-
-    if (!CustomView && !DefaultView) {
-      return <NotFoundClient />
-    }
-
-    try {
-      data = await payload.findGlobal({
-        slug: globalSlug,
-        depth: 0,
-        fallbackLocale: null,
-        locale: locale.code,
-        overrideAccess: false,
+    if (!ViewOverride) {
+      const globalViews = getViewsFromConfig({
+        config,
+        docPermissions,
+        globalConfig,
+        routeSegments: segments,
         user,
       })
-    } catch (error) {} // eslint-disable-line no-empty
 
-    if (!data) {
-      return <NotFoundClient />
+      CustomView = globalViews?.CustomView
+      DefaultView = globalViews?.DefaultView
+      ErrorView = globalViews?.ErrorView
+
+      if (!CustomView && !DefaultView && !ViewOverride) {
+        return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
+      }
+
+      try {
+        data = await payload.findGlobal({
+          slug: globalSlug,
+          depth: 0,
+          fallbackLocale: null,
+          locale: locale.code,
+          overrideAccess: false,
+          user,
+        })
+      } catch (error) {} // eslint-disable-line no-empty
+
+      if (!data) {
+        return <NotFoundClient />
+      }
+
+      preferencesKey = `global-${globalSlug}`
     }
-
-    preferencesKey = `global-${globalSlug}`
   }
 
   const { docs: [{ value: docPreferences } = { value: null }] = [] } = (await payload.find({
@@ -212,12 +237,14 @@ export const Document: React.FC<AdminViewProps> = async ({
         i18n,
       })}
     >
-      <DocumentHeader
-        collectionConfig={collectionConfig}
-        config={payload.config}
-        globalConfig={globalConfig}
-        i18n={i18n}
-      />
+      {!ViewOverride && (
+        <DocumentHeader
+          collectionConfig={collectionConfig}
+          config={payload.config}
+          globalConfig={globalConfig}
+          i18n={i18n}
+        />
+      )}
       <HydrateClientUser permissions={permissions} user={user} />
       <EditDepthProvider depth={1} key={`${collectionSlug || globalSlug}-${locale.code}`}>
         <FormQueryParamsProvider
@@ -229,7 +256,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           }}
         >
           <RenderCustomComponent
-            CustomComponent={typeof CustomView === 'function' ? CustomView : undefined}
+            CustomComponent={ViewOverride || CustomView}
             DefaultComponent={DefaultView}
             componentProps={serverSideProps}
           />

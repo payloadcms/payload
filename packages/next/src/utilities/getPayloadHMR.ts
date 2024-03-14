@@ -64,7 +64,7 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   try {
     cached.payload = await cached.promise
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
       try {
         const port = process.env.PORT || '3000'
         const ws = new WebSocket(`ws://localhost:${port}/_next/webpack-hmr`)

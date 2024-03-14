@@ -88,7 +88,7 @@
         "./packages/graphql/src"
       ],
       "@payload-config": [
-        "./test/_community/config.ts"
+        "./test/admin/config.ts"
       ]
     }
   },

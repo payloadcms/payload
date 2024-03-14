@@ -6,5 +6,10 @@ import { baseClass } from '../../Tab/index.js'
 
 export const VersionsPill: React.FC = () => {
   const { versions } = useDocumentInfo()
-  return <span className={`${baseClass}__count`}>{versions?.totalDocs?.toString()}</span>
+
+  if (versions?.totalDocs > 0) {
+    return <span className={`${baseClass}__count`}>{versions?.totalDocs?.toString()}</span>
+  }
+
+  return null
 }

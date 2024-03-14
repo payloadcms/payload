@@ -16,11 +16,13 @@ import { AdminButton } from './components/AdminButton/index.js'
 import { AfterDashboard } from './components/AfterDashboard/index.js'
 import { AfterNavLinks } from './components/AfterNavLinks/index.js'
 import { BeforeLogin } from './components/BeforeLogin/index.js'
+import { CustomProvider } from './components/CustomProvider/index.js'
 import { Logout } from './components/Logout/index.js'
 import { CustomDefaultView } from './components/views/CustomDefault/index.js'
 import { CustomMinimalView } from './components/views/CustomMinimal/index.js'
 import { CustomView } from './components/views/CustomView/index.js'
 import { CustomNestedView } from './components/views/CustomViewNested/index.js'
+import { CustomViewWithParam } from './components/views/CustomViewWithParam/index.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -29,69 +31,47 @@ import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
 import { clearAndSeedEverything } from './seed.js'
-import { customNestedViewPath, customViewPath } from './shared.js'
+import { customNestedViewPath, customParamViewPath, customViewPath } from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {
     components: {
-      // providers: [CustomProvider, CustomProvider],
       actions: [AdminButton],
       afterDashboard: [AfterDashboard],
+      afterNavLinks: [AfterNavLinks],
       beforeLogin: [BeforeLogin],
       logout: {
         Button: Logout,
       },
-      afterNavLinks: [AfterNavLinks],
+      providers: [CustomProvider, CustomProvider],
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
-        CustomMinimalView: {
-          path: '/custom-minimal-view',
-          Component: CustomMinimalView,
-        },
         CustomDefaultView: {
-          path: '/custom-default-view',
           Component: CustomDefaultView,
+          path: '/custom-default-view',
         },
-        CustomView: {
-          path: customViewPath,
-          exact: true,
-          Component: CustomView,
+        CustomMinimalView: {
+          Component: CustomMinimalView,
+          path: '/custom-minimal-view',
         },
         CustomNestedView: {
-          path: customNestedViewPath,
           Component: CustomNestedView,
+          exact: true,
+          path: customNestedViewPath,
+        },
+        CustomView: {
+          Component: CustomView,
+          exact: true,
+          path: customViewPath,
+          strict: true,
+        },
+        CustomViewWithParam: {
+          Component: CustomViewWithParam,
+          path: customParamViewPath,
         },
       },
     },
-  },
-  i18n: {
-    translations: {
-      en: {
-        general: {
-          dashboard: 'Home',
-        },
-      },
-    },
-  },
-  localization: {
-    defaultLocale: 'en',
-    locales: [
-      {
-        label: {
-          es: 'Español',
-          en: 'Spanish',
-        },
-        code: 'es',
-      },
-      {
-        label: {
-          es: 'Inglés',
-          en: 'English',
-        },
-        code: 'en',
-      },
-    ],
   },
   collections: [
     Posts,
@@ -117,6 +97,34 @@ export default buildConfigWithDefaults({
     GlobalGroup1A,
     GlobalGroup1B,
   ],
+  i18n: {
+    translations: {
+      en: {
+        general: {
+          dashboard: 'Home',
+        },
+      },
+    },
+  },
+  localization: {
+    defaultLocale: 'en',
+    locales: [
+      {
+        code: 'es',
+        label: {
+          en: 'Spanish',
+          es: 'Español',
+        },
+      },
+      {
+        code: 'en',
+        label: {
+          en: 'English',
+          es: 'Inglés',
+        },
+      },
+    ],
+  },
   onInit: async (payload) => {
     await clearAndSeedEverything(payload)
   },

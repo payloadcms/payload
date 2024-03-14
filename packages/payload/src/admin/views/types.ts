@@ -1,6 +1,6 @@
 import type { Translations } from '@payloadcms/translations'
 
-import type { Permissions, User } from '../../auth/index.js'
+import type { Permissions } from '../../auth/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
@@ -15,8 +15,9 @@ export type AdminViewConfig = {
 }
 
 export type AdminViewProps = {
-  canAccessAdmin?: boolean
-  user: User | null | undefined
+  initPageResult: InitPageResult
+  params?: { [key: string]: string | string[] | undefined }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 export type AdminViewComponent = React.ComponentType<AdminViewProps>

@@ -5,7 +5,6 @@ import { customGlobalViews1GlobalSlug } from '../slugs.js'
 
 export const CustomGlobalViews1: GlobalConfig = {
   slug: customGlobalViews1GlobalSlug,
-  versions: true,
   admin: {
     components: {
       views: {
@@ -19,4 +18,5 @@ export const CustomGlobalViews1: GlobalConfig = {
       type: 'text',
     },
   ],
+  versions: true,
 }

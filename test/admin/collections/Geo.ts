@@ -11,11 +11,11 @@ export const Geo: CollectionConfig = {
     components: {
       views: {
         Edit: {
-          Default: {
-            actions: [CollectionEditButton],
-          },
           API: {
             actions: [CollectionAPIButton],
+          },
+          Default: {
+            actions: [CollectionEditButton],
           },
         },
         List: {

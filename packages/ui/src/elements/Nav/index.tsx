@@ -27,6 +27,10 @@ export const DefaultNav: React.FC<{
 }> = (props) => {
   const { config, i18n, permissions, user } = props
 
+  if (!config) {
+    return null
+  }
+
   const {
     admin: {
       components: { afterNavLinks, beforeNavLinks },

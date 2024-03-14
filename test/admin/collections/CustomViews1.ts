@@ -5,7 +5,6 @@ import { customViews1CollectionSlug } from '../slugs.js'
 
 export const CustomViews1: CollectionConfig = {
   slug: customViews1CollectionSlug,
-  versions: true,
   admin: {
     components: {
       views: {
@@ -21,4 +20,5 @@ export const CustomViews1: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: true,
 }

@@ -54,6 +54,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
   await page.click(selector, { delay: 100 })
   await expect(page.locator('.Toastify')).toContainText('successfully')
+  await wait(500)
   expect(page.url()).not.toContain('create')
 }
 
@@ -73,13 +74,20 @@ export async function closeNav(page: Page): Promise<void> {
 }
 
 export async function openDocControls(page: Page): Promise<void> {
-  await page.locator('.doc-controls__popup .popup-button').click()
-  await expect(page.locator('.doc-controls__popup .popup__content')).toBeVisible()
+  await page.locator('.doc-controls__popup >> .popup-button').click()
+  await expect(page.locator('.doc-controls__popup >> .popup__content')).toBeVisible()
 }
 
 export async function changeLocale(page: Page, newLocale: string) {
   await page.locator('.localizer >> button').first().click()
-  await page.locator(`.localizer >> a[href="/?locale=${newLocale}"]`).click()
+  await page
+    .locator(`.localizer`)
+    .locator(`.popup >> button`, {
+      hasText: newLocale,
+    })
+    .first()
+    .click()
+  await wait(500)
   expect(page.url()).toContain(`locale=${newLocale}`)
 }
 
@@ -125,6 +133,10 @@ export function initPageConsoleErrorCatch(page: Page) {
   page.on('console', (msg) => {
     if (
       msg.type() === 'error' &&
+      // Playwright is seemingly loading CJS files from React Select, but Next loads ESM.
+      // This leads to classnames not matching. Ignore these God-awful errors
+      // https://github.com/JedWatson/react-select/issues/3590
+      !msg.text().includes('did not match. Server:') &&
       !msg.text().includes('the server responded with a status of') &&
       !msg.text().includes('Failed to fetch RSC payload for')
     ) {

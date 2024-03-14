@@ -11,7 +11,7 @@ import {
 import LinkImport from 'next/link.js'
 import React from 'react'
 
-import type { AdminViewProps } from '../Root/index.js'
+import type { AdminViewProps } from 'payload/types'
 
 import './index.scss'
 

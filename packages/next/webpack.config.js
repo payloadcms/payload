@@ -10,7 +10,14 @@ const dirname = path.dirname(filename)
 
 const componentWebpackConfig = {
   entry: path.resolve(dirname, './src/index.ts'),
-  externals: ['react', 'react-dom', 'payload', 'payload/config', 'react-image-crop'],
+  externals: [
+    'react',
+    'react-dom',
+    'payload',
+    'payload/config',
+    'react-image-crop',
+    'payload/operations',
+  ],
   mode: 'production',
   module: {
     rules: [

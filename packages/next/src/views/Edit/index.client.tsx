@@ -9,6 +9,7 @@ import {
   useFormQueryParams,
 } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
+import { useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useEffect } from 'react'
 import { useCallback } from 'react'
 
@@ -24,6 +25,9 @@ export const EditViewClient: React.FC = () => {
   const { dispatchFormQueryParams } = useFormQueryParams()
 
   const { getComponentMap } = useComponentMap()
+  const params = useSearchParams()
+
+  const locale = params.get('locale')
 
   const { Edit, actionsMap } = getComponentMap({
     collectionSlug,
@@ -31,12 +35,14 @@ export const EditViewClient: React.FC = () => {
   })
 
   const onSave = useCallback(
-    async (json: { doc }) => {
+    (json: { doc }) => {
       void getVersions()
       void getDocPermissions()
 
       if (!isEditing) {
-        router.push(`${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}`)
+        // Redirect to the same locale if it's been set
+        const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
+        router.push(redirectRoute)
       } else {
         dispatchFormQueryParams({
           type: 'SET',
@@ -54,11 +60,12 @@ export const EditViewClient: React.FC = () => {
       getVersions,
       isEditing,
       router,
+      locale,
     ],
   )
 
   useEffect(() => {
-    setOnSave(() => onSave)
+    void setOnSave(() => onSave)
   }, [setOnSave, onSave])
 
   // Allow the `DocumentInfoProvider` to hydrate
