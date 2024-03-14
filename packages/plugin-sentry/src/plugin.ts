@@ -1,22 +1,15 @@
 /* eslint-disable no-console */
 import type { Config } from 'payload/config'
 
-import type { PluginOptions } from './types'
+import type { PluginOptions } from './types.js'
 
-import { captureException } from './captureException'
-import { startSentry } from './startSentry'
-import { extendWebpackConfig } from './webpack'
+import { captureException } from './captureException.js'
+import { startSentry } from './startSentry.js'
 
 export const sentry =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
     const config = { ...incomingConfig }
-    const webpack = extendWebpackConfig(incomingConfig)
-
-    config.admin = {
-      ...(config.admin || {}),
-      webpack,
-    }
 
     if (pluginOptions.enabled === false || !pluginOptions.dsn) {
       return config
