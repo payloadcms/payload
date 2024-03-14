@@ -91,8 +91,6 @@ const Relationship: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
-  console.log('filterOptions', filterOptions)
-
   const [drawerIsOpen, setDrawerIsOpen] = useState(false)
 
   const getResults: GetResults = useCallback(
