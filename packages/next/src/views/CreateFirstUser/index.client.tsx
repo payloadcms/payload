@@ -16,6 +16,9 @@ export const CreateFirstUserFields: React.FC<{
     <RenderFields
       fieldMap={[...(fieldMap || []), ...(createFirstUserFieldMap || [])]}
       operation="create"
+      path=""
+      readOnly={false}
+      schemaPath={userSlug}
     />
   )
 }

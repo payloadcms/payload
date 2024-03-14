@@ -6,7 +6,6 @@ import type { Data } from 'payload/types'
 import {
   DocumentControls,
   DocumentFields,
-  FieldPathProvider,
   Form,
   LoadingOverlay,
   OperationProvider,
@@ -127,73 +126,72 @@ const PreviewView: React.FC = (props) => {
 
   return (
     <Fragment>
-      <FieldPathProvider path="" schemaPath={schemaPath}>
-        <OperationProvider operation={operation}>
-          <Form
-            action={action}
-            className={`${baseClass}__form`}
-            disabled={!hasSavePermission}
-            initialState={initialState}
-            method={id ? 'PATCH' : 'POST'}
-            onChange={[onChange]}
-            onSuccess={onSave}
+      <OperationProvider operation={operation}>
+        <Form
+          action={action}
+          className={`${baseClass}__form`}
+          disabled={!hasSavePermission}
+          initialState={initialState}
+          method={id ? 'PATCH' : 'POST'}
+          onChange={[onChange]}
+          onSuccess={onSave}
+        >
+          {((collectionConfig &&
+            !(collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave)) ||
+            (global && !(global.versions?.drafts && global.versions?.drafts?.autosave))) &&
+            !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
+          <SetStepNav
+            collectionSlug={collectionSlug}
+            globalLabel={globalConfig?.label}
+            globalSlug={globalSlug}
+            id={id}
+            view={t('general:livePreview')}
+          />
+          <SetDocumentTitle
+            collectionConfig={collectionConfig}
+            config={config}
+            fallback={id?.toString() || ''}
+            globalConfig={globalConfig}
+          />
+          <DocumentControls
+            apiURL={apiURL}
+            data={data}
+            disableActions={disableActions}
+            hasSavePermission={hasSavePermission}
+            id={id}
+            isEditing={Boolean(id)}
+            permissions={docPermissions}
+            slug={collectionConfig?.slug}
+          />
+          <div
+            className={[baseClass, previewWindowType === 'popup' && `${baseClass}--detached`]
+              .filter(Boolean)
+              .join(' ')}
           >
-            {((collectionConfig &&
-              !(
-                collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave
-              )) ||
-              (global && !(global.versions?.drafts && global.versions?.drafts?.autosave))) &&
-              !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-            <SetStepNav
-              collectionSlug={collectionSlug}
-              globalLabel={globalConfig?.label}
-              globalSlug={globalSlug}
-              id={id}
-              view={t('general:livePreview')}
-            />
-            <SetDocumentTitle
-              collectionConfig={collectionConfig}
-              config={config}
-              fallback={id?.toString() || ''}
-              globalConfig={globalConfig}
-            />
-            <DocumentControls
-              apiURL={apiURL}
-              data={data}
-              disableActions={disableActions}
-              hasSavePermission={hasSavePermission}
-              id={id}
-              isEditing={Boolean(id)}
-              permissions={docPermissions}
-              slug={collectionConfig?.slug}
-            />
             <div
-              className={[baseClass, previewWindowType === 'popup' && `${baseClass}--detached`]
+              className={[
+                `${baseClass}__main`,
+                previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
+              ]
                 .filter(Boolean)
                 .join(' ')}
             >
-              <div
-                className={[
-                  `${baseClass}__main`,
-                  previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                {BeforeDocument}
-                <DocumentFields
-                  AfterFields={AfterFields}
-                  BeforeFields={BeforeFields}
-                  fieldMap={fieldMap}
-                  forceSidebarWrap
-                />
-                {AfterDocument}
-              </div>
-              <LivePreview {...props} />
+              {BeforeDocument}
+              <DocumentFields
+                AfterFields={AfterFields}
+                BeforeFields={BeforeFields}
+                docPermissions={docPermissions}
+                fieldMap={fieldMap}
+                forceSidebarWrap
+                readOnly={!hasSavePermission}
+                schemaPath={collectionSlug}
+              />
+              {AfterDocument}
             </div>
-          </Form>
-        </OperationProvider>
-      </FieldPathProvider>
+            <LivePreview {...props} />
+          </div>
+        </Form>
+      </OperationProvider>
     </Fragment>
   )
 }

@@ -1,4 +1,4 @@
-import type { ClientValidate, Row } from 'payload/types'
+import type { ClientValidate, FieldPermissions, Row } from 'payload/types'
 
 export type Options = {
   disableFormData?: boolean
@@ -16,6 +16,7 @@ export type FieldType<T> = {
   formSubmitted: boolean
   initialValue?: T
   path: string
+  permissions: FieldPermissions
   readOnly?: boolean
   rows?: Row[]
   schemaPath: string

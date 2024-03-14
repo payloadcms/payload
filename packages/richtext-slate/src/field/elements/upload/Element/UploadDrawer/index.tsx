@@ -109,12 +109,15 @@ export const UploadDrawer: React.FC<{
         label: getTranslation(relatedCollection.labels.singular, i18n),
       })}
     >
-      <FieldPathProvider path="" schemaPath="">
-        <Form initialState={initialState} onSubmit={handleUpdateEditData}>
-          <RenderFields fieldMap={Array.isArray(fieldMap) ? fieldMap : []} />
-          <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-        </Form>
-      </FieldPathProvider>
+      <Form initialState={initialState} onSubmit={handleUpdateEditData}>
+        <RenderFields
+          fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
+          path=""
+          readOnly={false}
+          schemaPath=""
+        />
+        <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+      </Form>
     </Drawer>
   )
 }

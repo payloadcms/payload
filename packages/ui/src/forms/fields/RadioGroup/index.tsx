@@ -1,3 +1,5 @@
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 import { optionIsObject } from 'payload/types'
 import React, { useCallback } from 'react'
@@ -6,7 +8,7 @@ import type { Props } from './types.js'
 
 import { useForm } from '../../Form/context.js'
 import LabelComp from '../../Label/index.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { withCondition } from '../../withCondition/index.js'
 import { fieldBaseClass } from '../shared.js'
 import { Radio } from './Radio/index.js'

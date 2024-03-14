@@ -1,25 +1,37 @@
 'use client'
-import type { Description, Operation } from 'payload/types'
+import type { Description, DocumentPermissions } from 'payload/types'
 
 import React from 'react'
 
 import type { FieldMap } from '../../utilities/buildComponentMap/types.js'
 
-import RenderFields from '../../forms/RenderFields/index.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'
 import './index.scss'
 
 const baseClass = 'document-fields'
 
-export const DocumentFields: React.FC<{
+type Args = {
   AfterFields?: React.ReactNode
   BeforeFields?: React.ReactNode
   description?: Description
+  docPermissions: DocumentPermissions
   fieldMap: FieldMap
   forceSidebarWrap?: boolean
-}> = (props) => {
-  const { AfterFields, BeforeFields, description, fieldMap, forceSidebarWrap } = props
+  readOnly: boolean
+  schemaPath: string
+}
 
+export const DocumentFields: React.FC<Args> = ({
+  AfterFields,
+  BeforeFields,
+  description,
+  docPermissions,
+  fieldMap,
+  forceSidebarWrap,
+  readOnly,
+  schemaPath,
+}) => {
   const mainFields = fieldMap.filter(({ isSidebar }) => !isSidebar)
 
   const sidebarFields = fieldMap.filter(({ isSidebar }) => isSidebar)
@@ -47,7 +59,14 @@ export const DocumentFields: React.FC<{
               )}
             </header>
             {BeforeFields}
-            <RenderFields className={`${baseClass}__fields`} fieldMap={mainFields} />
+            <RenderFields
+              className={`${baseClass}__fields`}
+              fieldMap={mainFields}
+              path=""
+              permissions={docPermissions?.['fields']}
+              readOnly={readOnly}
+              schemaPath={schemaPath}
+            />
             {AfterFields}
           </Gutter>
         </div>
@@ -55,7 +74,13 @@ export const DocumentFields: React.FC<{
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-fields`}>
-                <RenderFields fieldMap={sidebarFields} />
+                <RenderFields
+                  fieldMap={sidebarFields}
+                  path=""
+                  permissions={docPermissions?.fields}
+                  readOnly={readOnly}
+                  schemaPath={schemaPath}
+                />
               </div>
             </div>
           </div>

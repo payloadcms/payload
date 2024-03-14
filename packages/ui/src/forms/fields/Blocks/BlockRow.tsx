@@ -12,9 +12,9 @@ import { Collapsible } from '../../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import Pill from '../../../elements/Pill/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { FieldPathProvider } from '../../FieldPathProvider/index.js'
+import { FieldPropsProvider } from '../../FieldPropsProvider/index.js'
 import { useFormSubmitted } from '../../Form/context.js'
-import RenderFields from '../../RenderFields/index.js'
+import { RenderFields } from '../../RenderFields/index.js'
 import HiddenInput from '../HiddenInput/index.js'
 import { RowActions } from './RowActions.js'
 import SectionTitle from './SectionTitle/index.js'
@@ -54,6 +54,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   listeners,
   moveRow,
   path: parentPath,
+  permissions,
   readOnly,
   removeRow,
   row,
@@ -132,17 +133,16 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        <FieldPathProvider path={path} schemaPath={`${schemaPath}.${block.slug}`}>
-          <RenderFields
-            className={`${baseClass}__fields`}
-            fieldMap={block.subfields}
-            forceRender={forceRender}
-            // indexPath={indexPath}
-            margins="small"
-            // permissions={permissions?.blocks?.[row.blockType]?.fields}
-            // readOnly={readOnly}
-          />
-        </FieldPathProvider>
+        <RenderFields
+          className={`${baseClass}__fields`}
+          fieldMap={block.subfields}
+          forceRender={forceRender}
+          margins="small"
+          path={path}
+          permissions={permissions?.blocks?.[block.slug]?.fields}
+          readOnly={readOnly}
+          schemaPath={`${schemaPath}.${block.slug}`}
+        />
       </Collapsible>
     </div>
   )

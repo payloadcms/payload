@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { FieldPathProvider, useFieldPath } from '../../forms/FieldPathProvider/index.js'
+import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections.js'
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
 import { X } from '../../icons/X/index.js'
@@ -56,7 +56,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   const { permissions } = useAuth()
 
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
 
   const { componentMap } = useComponentMap()
 
@@ -197,9 +197,5 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
     [onSaveFromProps, collectionConfig],
   )
 
-  return (
-    <FieldPathProvider path="" schemaPath={collectionSlug}>
-      <Content {...props} id={idFromProps || doc?.id} initialData={doc} onSave={onSave} />
-    </FieldPathProvider>
-  )
+  return <Content {...props} id={idFromProps || doc?.id} initialData={doc} onSave={onSave} />
 }

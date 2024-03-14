@@ -1,5 +1,5 @@
 import type { FieldPermissions } from 'payload/auth'
-import type { ArrayField, Operation, Row, RowLabel as RowLabelType } from 'payload/types'
+import type { ArrayField, Row, RowLabel as RowLabelType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -11,9 +11,9 @@ import { ArrayAction } from '../../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { FieldPathProvider } from '../../FieldPathProvider/index.js'
+import { FieldPropsProvider } from '../../FieldPropsProvider/index.js'
 import { useFormSubmitted } from '../../Form/context.js'
-import RenderFields from '../../RenderFields/index.js'
+import { RenderFields } from '../../RenderFields/index.js'
 import HiddenInput from '../HiddenInput/index.js'
 import './index.scss'
 
@@ -50,6 +50,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   listeners,
   moveRow,
   path: parentPath,
+  permissions,
   readOnly,
   removeRow,
   row,
@@ -122,17 +123,16 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        <FieldPathProvider path={path} schemaPath={parentPath}>
-          <RenderFields
-            className={`${baseClass}__fields`}
-            fieldMap={fieldMap}
-            forceRender={forceRender}
-            // indexPath={indexPath}
-            margins="small"
-            // permissions={permissions?.fields}
-            // readOnly={readOnly}
-          />
-        </FieldPathProvider>
+        <RenderFields
+          className={`${baseClass}__fields`}
+          fieldMap={fieldMap}
+          forceRender={forceRender}
+          margins="small"
+          path={path}
+          permissions={permissions?.fields}
+          readOnly={readOnly}
+          schemaPath={parentPath}
+        />
       </Collapsible>
     </div>
   )

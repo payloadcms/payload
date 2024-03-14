@@ -8,10 +8,9 @@ import React, { useCallback, useState } from 'react'
 
 import type { Props } from './types.js'
 
-import { FieldPathProvider } from '../../forms/FieldPathProvider/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import Form from '../../forms/Form/index.js'
-import RenderFields from '../../forms/RenderFields/index.js'
+import { RenderFields } from '../../forms/RenderFields/index.js'
 import FormSubmit from '../../forms/Submit/index.js'
 import { X } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -34,7 +33,7 @@ const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disab
   const { t } = useTranslation()
 
   const save = useCallback(() => {
-    submit({
+    void submit({
       action,
       method: 'PATCH',
       skipValidation: true,
@@ -52,7 +51,7 @@ const Publish: React.FC<{ action: string; disabled: boolean }> = ({ action, disa
   const { t } = useTranslation()
 
   const save = useCallback(() => {
-    submit({
+    void submit({
       action,
       method: 'PATCH',
       overrides: {
@@ -73,7 +72,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   const { t } = useTranslation()
 
   const save = useCallback(() => {
-    submit({
+    void submit({
       action,
       method: 'PATCH',
       overrides: {
@@ -90,7 +89,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
   )
 }
 export const EditMany: React.FC<Props> = (props) => {
-  const { Modal, useModal } = facelessUIImport
+  const { useModal } = facelessUIImport
 
   const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
 
@@ -195,43 +194,46 @@ export const EditMany: React.FC<Props> = (props) => {
                   <X />
                 </button>
               </div>
-              <FieldPathProvider path="" schemaPath={slug}>
-                <Form
-                  className={`${baseClass}__form`}
-                  initialState={initialState}
-                  onSuccess={onSuccess}
-                >
-                  <FieldSelect fields={fields} setSelected={setSelected} />
-                  {reducedFieldMap.length === 0 ? null : (
-                    <RenderFields fieldMap={reducedFieldMap} />
-                  )}
-                  <div className={`${baseClass}__sidebar-wrap`}>
-                    <div className={`${baseClass}__sidebar`}>
-                      <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                        <div className={`${baseClass}__document-actions`}>
-                          {collection?.versions?.drafts ? (
-                            <React.Fragment>
-                              <Publish
-                                action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
-                                disabled={selected.length === 0}
-                              />
-                              <SaveDraft
-                                action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
-                                disabled={selected.length === 0}
-                              />
-                            </React.Fragment>
-                          ) : (
-                            <Submit
+              <Form
+                className={`${baseClass}__form`}
+                initialState={initialState}
+                onSuccess={onSuccess}
+              >
+                <FieldSelect fields={fields} setSelected={setSelected} />
+                {reducedFieldMap.length === 0 ? null : (
+                  <RenderFields
+                    fieldMap={reducedFieldMap}
+                    path=""
+                    readOnly={false}
+                    schemaPath={slug}
+                  />
+                )}
+                <div className={`${baseClass}__sidebar-wrap`}>
+                  <div className={`${baseClass}__sidebar`}>
+                    <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                      <div className={`${baseClass}__document-actions`}>
+                        {collection?.versions?.drafts ? (
+                          <React.Fragment>
+                            <Publish
                               action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
                               disabled={selected.length === 0}
                             />
-                          )}
-                        </div>
+                            <SaveDraft
+                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
+                              disabled={selected.length === 0}
+                            />
+                          </React.Fragment>
+                        ) : (
+                          <Submit
+                            action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
+                            disabled={selected.length === 0}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
-                </Form>
-              </FieldPathProvider>
+                </div>
+              </Form>
             </div>
           </OperationContext.Provider>
         </DocumentInfoProvider>

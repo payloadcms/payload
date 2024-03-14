@@ -1,6 +1,9 @@
 export { default as Error } from '../forms/Error/index.js'
 export { default as FieldDescription } from '../forms/FieldDescription/index.js'
-export { FieldPathProvider, useFieldPath } from '../forms/FieldPathProvider/index.js'
+export {
+  FieldPropsProvider as FieldPathProvider,
+  useFieldProps as useFieldPath,
+} from '../forms/FieldPropsProvider/index.js'
 export {
   useAllFormFields,
   useForm,
@@ -14,7 +17,7 @@ export { default as Form } from '../forms/Form/index.js'
 export { default as reduceFieldsToValues } from '../forms/Form/reduceFieldsToValues.js'
 export type { Props as FormProps } from '../forms/Form/types.js'
 export { default as Label } from '../forms/Label/index.js'
-export { default as RenderFields } from '../forms/RenderFields/index.js'
+export { RenderFields } from '../forms/RenderFields/index.js'
 export { default as FormSubmit } from '../forms/Submit/index.js'
 export { default as Submit } from '../forms/Submit/index.js'
 export { default as SectionTitle } from '../forms/fields/Blocks/SectionTitle/index.js'
@@ -40,7 +43,7 @@ export { default as UploadField } from '../forms/fields/Upload/index.js'
 export { fieldTypes } from '../forms/fields/index.js'
 
 export { fieldBaseClass } from '../forms/fields/shared.js'
-export { default as useField } from '../forms/useField/index.js'
+export { useField } from '../forms/useField/index.js'
 export type { FieldType, Options } from '../forms/useField/types.js'
 export { default as buildStateFromSchema } from '../forms/utilities/buildStateFromSchema/index.js'
 export type { BuildFormStateArgs } from '../forms/utilities/buildStateFromSchema/index.js'

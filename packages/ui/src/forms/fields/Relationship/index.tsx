@@ -17,7 +17,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useFormProcessing } from '../../Form/context.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { withCondition } from '../../withCondition/index.js'
 import { fieldBaseClass } from '../shared.js'
 import { AddNewRelation } from './AddNew/index.js'
@@ -122,7 +122,7 @@ const Relationship: React.FC<Props> = (props) => {
       })
 
       if (!errorLoading) {
-        relationsToFetch.reduce(async (priorRelation, relation) => {
+        await relationsToFetch.reduce(async (priorRelation, relation) => {
           const relationFilterOption = filterOptionsResult?.[relation]
           let lastLoadedPageToUse
           if (search !== searchArg) {
@@ -208,7 +208,7 @@ const Relationship: React.FC<Props> = (props) => {
                   type: 'ADD',
                   collection,
                   // TODO: fix this
-                  // @ts-ignore-next-line
+                  // @ts-expect-error-next-line
                   config,
                   docs: data.docs,
                   i18n,
@@ -221,7 +221,7 @@ const Relationship: React.FC<Props> = (props) => {
                 type: 'ADD',
                 collection,
                 // TODO: fix this
-                // @ts-ignore-next-line
+                // @ts-expect-error-next-line
                 config,
                 docs: [],
                 i18n,
@@ -257,7 +257,7 @@ const Relationship: React.FC<Props> = (props) => {
   )
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    getResults({ search: searchArg, sort: true, value: valueArg })
+    void getResults({ search: searchArg, sort: true, value: valueArg })
     setSearch(searchArg)
   }, 300)
 
@@ -282,7 +282,7 @@ const Relationship: React.FC<Props> = (props) => {
       value,
     })
 
-    Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
+    void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
       await priorRelation
 
       const idsToLoad = ids.filter((id) => {
@@ -326,7 +326,7 @@ const Relationship: React.FC<Props> = (props) => {
             type: 'ADD',
             collection,
             // TODO: fix this
-            // @ts-ignore-next-line
+            // @ts-expect-error-next-line
             config,
             docs,
             i18n,
@@ -382,7 +382,7 @@ const Relationship: React.FC<Props> = (props) => {
         type: 'UPDATE',
         collection: args.collectionConfig,
         // TODO: fix this
-        // @ts-ignore-next-line
+        // @ts-expect-error-next-line
         config,
         doc: args.doc,
         i18n,
@@ -498,7 +498,7 @@ const Relationship: React.FC<Props> = (props) => {
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
                 setIsLoading(true)
-                getResults({
+                void getResults({
                   onSuccess: () => {
                     setHasLoadedFirstPage(true)
                     setIsLoading(false)
@@ -508,7 +508,7 @@ const Relationship: React.FC<Props> = (props) => {
               }
             }}
             onMenuScrollToBottom={() => {
-              getResults({
+              void getResults({
                 lastFullyLoadedRelation,
                 search,
                 sort: false,

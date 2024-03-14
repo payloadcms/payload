@@ -6,9 +6,9 @@ import type { Props } from './types.js'
 import { useCollapsible } from '../../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { FieldPathProvider, useFieldPath } from '../../FieldPathProvider/index.js'
+import { useFieldProps } from '../../FieldPropsProvider/index.js'
 import LabelComp from '../../Label/index.js'
-import RenderFields from '../../RenderFields/index.js'
+import { RenderFields } from '../../RenderFields/index.js'
 import { WatchChildErrors } from '../../WatchChildErrors/index.js'
 import { withCondition } from '../../withCondition/index.js'
 import { useRow } from '../Row/provider.js'
@@ -21,7 +21,6 @@ const baseClass = 'group-field'
 
 const Group: React.FC<Props> = (props) => {
   const {
-    name,
     Description,
     Label: LabelFromProps,
     className,
@@ -35,7 +34,7 @@ const Group: React.FC<Props> = (props) => {
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
-  const { path, schemaPath } = useFieldPath()
+  const { path, permissions, readOnly, schemaPath } = useFieldProps()
   const { i18n } = useTranslation()
   const isWithinCollapsible = useCollapsible()
   const isWithinGroup = useGroup()
@@ -70,22 +69,26 @@ const Group: React.FC<Props> = (props) => {
           width,
         }}
       >
-        <FieldPathProvider path={path} schemaPath={schemaPath}>
-          <GroupProvider>
-            <div className={`${baseClass}__wrap`}>
-              <div className={`${baseClass}__header`}>
-                {(Label || Description) && (
-                  <header>
-                    {Label}
-                    {Description}
-                  </header>
-                )}
-                {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-              </div>
-              <RenderFields fieldMap={fieldMap} />
+        <GroupProvider>
+          <div className={`${baseClass}__wrap`}>
+            <div className={`${baseClass}__header`}>
+              {(Label || Description) && (
+                <header>
+                  {Label}
+                  {Description}
+                </header>
+              )}
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
-          </GroupProvider>
-        </FieldPathProvider>
+            <RenderFields
+              fieldMap={fieldMap}
+              path={path}
+              permissions={permissions?.fields}
+              readOnly={readOnly}
+              schemaPath={schemaPath}
+            />
+          </div>
+        </GroupProvider>
       </div>
     </Fragment>
   )
