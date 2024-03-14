@@ -264,35 +264,8 @@ export const mapFields = (args: {
          * Handle RichText Field Components, Cell Components, and component maps
          */
         if (field.type === 'richText' && 'editor' in field) {
-          let RichTextFieldComponent
-          let RichTextCellComponent
-
-          const isLazyField = 'LazyFieldComponent' in field.editor
-          const isLazyCell = 'LazyCellComponent' in field.editor
-
-          if (isLazyField) {
-            RichTextFieldComponent = React.lazy(() => {
-              return 'LazyFieldComponent' in field.editor
-                ? field.editor.LazyFieldComponent().then((resolvedComponent) => ({
-                    default: resolvedComponent,
-                  }))
-                : null
-            })
-          } else if ('FieldComponent' in field.editor) {
-            RichTextFieldComponent = field.editor.FieldComponent
-          }
-
-          if (isLazyCell) {
-            RichTextCellComponent = React.lazy(() => {
-              return 'LazyCellComponent' in field.editor
-                ? field.editor.LazyCellComponent().then((resolvedComponent) => ({
-                    default: resolvedComponent,
-                  }))
-                : null
-            })
-          } else if ('CellComponent' in field.editor) {
-            RichTextCellComponent = field.editor.CellComponent
-          }
+          const RichTextFieldComponent = field.editor.FieldComponent
+          const RichTextCellComponent = field.editor.CellComponent
 
           if (typeof field.editor.generateComponentMap === 'function') {
             const result = field.editor.generateComponentMap({ config, schemaPath: path })
