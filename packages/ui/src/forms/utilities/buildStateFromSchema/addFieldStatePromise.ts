@@ -447,6 +447,18 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       case 'upload': {
+        if (typeof field.filterOptions === 'function') {
+          const query = await getFilterOptionsQuery(field.filterOptions, {
+            id,
+            data: fullData,
+            relationTo: field.relationTo,
+            siblingData: data,
+            user: req.user,
+          })
+
+          fieldState.filterOptions = query
+        }
+
         const relationshipValue =
           valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault
             ? valueWithDefault.id
