@@ -97,7 +97,7 @@ const sanitizeCollections = (
 
       const serverOnlyCollectionAdminProperties: Partial<
         keyof SanitizedCollectionConfig['admin']
-      >[] = ['components', 'hidden', 'preview']
+      >[] = ['components', 'hidden', 'preview', 'hooks']
 
       serverOnlyCollectionAdminProperties.forEach((key) => {
         if (key in sanitized.admin) {
@@ -131,13 +131,13 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
 
-      const serverOnlyProperties: Partial<keyof SanitizedGlobalConfig['admin']>[] = [
+      const serverOnlyGlobalAdminProperties: Partial<keyof SanitizedGlobalConfig['admin']>[] = [
         'components',
         'hidden',
         'preview',
       ]
 
-      serverOnlyProperties.forEach((key) => {
+      serverOnlyGlobalAdminProperties.forEach((key) => {
         if (key in sanitized.admin) {
           delete sanitized.admin[key]
         }
