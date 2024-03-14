@@ -1,11 +1,64 @@
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../exports/types.js'
-import type { Field, FieldBase, RichTextField } from '../fields/config/types.js'
-import type { ClientConfig, SanitizedConfig } from './types.js'
+import type { Field, FieldBase } from '../fields/config/types.js'
+import type { SanitizedConfig } from './types.js'
+
+export type ServerOnlyRootProperties = keyof Pick<
+  SanitizedConfig,
+  'db' | 'editor' | 'endpoints' | 'onInit' | 'plugins' | 'sharp'
+>
+
+export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
+
+export type ServerOnlyCollectionProperties = keyof Pick<
+  SanitizedCollectionConfig,
+  'access' | 'endpoints' | 'hooks'
+>
+
+export type ServerOnlyCollectionAdminProperties = keyof Pick<
+  SanitizedCollectionConfig['admin'],
+  'components' | 'hidden' | 'hooks' | 'preview'
+>
+
+export type ServerOnlyGlobalProperties = keyof Pick<
+  SanitizedGlobalConfig,
+  'access' | 'admin' | 'endpoints' | 'fields' | 'hooks'
+>
+
+export type ServerOnlyGlobalAdminProperties = keyof Pick<
+  SanitizedGlobalConfig['admin'],
+  'components' | 'hidden' | 'preview'
+>
+export type ServerOnlyFieldProperties =
+  | 'editor'
+  | 'label'
+  | keyof Pick<FieldBase, 'access' | 'defaultValue' | 'hooks' | 'validate'>
+
+export type ServerOnlyFieldAdminProperties = keyof Pick<
+  FieldBase['admin'],
+  'components' | 'condition' | 'description'
+>
+
+export type ClientConfigField = Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate'>
+
+export type ClientConfig = Omit<SanitizedConfig, 'admin' | ServerOnlyRootProperties> & {
+  admin: Omit<SanitizedConfig['admin'], ServerOnlyRootAdminProperties>
+  collections: (Omit<
+    SanitizedCollectionConfig,
+    'admin' | 'fields' | ServerOnlyCollectionProperties
+  > & {
+    admin: Omit<SanitizedCollectionConfig['admin'], ServerOnlyCollectionAdminProperties & 'fields'>
+    fields: ClientConfigField[]
+  })[]
+  globals: (Omit<SanitizedGlobalConfig, 'admin' | 'fields' | ServerOnlyGlobalProperties> & {
+    admin: Omit<SanitizedGlobalConfig['admin'], ServerOnlyGlobalAdminProperties & 'fields'>
+    fields: ClientConfigField[]
+  })[]
+}
 
 export const sanitizeField = (f: Field) => {
   const field = { ...f }
 
-  const serverOnlyFieldProperties: Partial<keyof FieldBase | keyof RichTextField>[] = [
+  const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
     'access',
     'validate',
@@ -46,7 +99,11 @@ export const sanitizeField = (f: Field) => {
   if ('admin' in field) {
     field.admin = { ...field.admin }
 
-    const serverOnlyFieldAdminProperties = ['components', 'condition', 'description']
+    const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] = [
+      'components',
+      'condition',
+      'description',
+    ]
 
     serverOnlyFieldAdminProperties.forEach((key) => {
       if (key in field.admin) {
@@ -65,7 +122,7 @@ const sanitizeCollections = (
     const sanitized = { ...collection }
     sanitized.fields = sanitizeFields(sanitized.fields)
 
-    const serverOnlyCollectionProperties: Partial<keyof SanitizedCollectionConfig>[] = [
+    const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
       'hooks',
       'access',
       'endpoints',
@@ -95,9 +152,12 @@ const sanitizeCollections = (
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
 
-      const serverOnlyCollectionAdminProperties: Partial<
-        keyof SanitizedCollectionConfig['admin']
-      >[] = ['components', 'hidden', 'preview', 'hooks']
+      const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
+        'components',
+        'hidden',
+        'preview',
+        'hooks',
+      ]
 
       serverOnlyCollectionAdminProperties.forEach((key) => {
         if (key in sanitized.admin) {
@@ -114,12 +174,11 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
     const sanitized = { ...global }
     sanitized.fields = sanitizeFields(sanitized.fields)
 
-    const serverOnlyProperties: Partial<keyof SanitizedGlobalConfig>[] = [
+    const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
       'hooks',
       'access',
       'endpoints',
-      // `admin`
-      // is handled separately
+      // `admin` is handled separately
     ]
 
     serverOnlyProperties.forEach((key) => {
@@ -131,7 +190,7 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
     if ('admin' in sanitized) {
       sanitized.admin = { ...sanitized.admin }
 
-      const serverOnlyGlobalAdminProperties: Partial<keyof SanitizedGlobalConfig['admin']>[] = [
+      const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = [
         'components',
         'hidden',
         'preview',
@@ -155,18 +214,13 @@ export const createClientConfig = async (
   const config = await configPromise
   const clientConfig = { ...config }
 
-  const serverOnlyConfigProperties: Partial<keyof SanitizedConfig>[] = [
+  const serverOnlyConfigProperties: Partial<ServerOnlyRootProperties>[] = [
     'endpoints',
     'db',
     'editor',
     'plugins',
     'sharp',
-    // `admin`
-    // `onInit`
-    // `localization`
-    // `collections`
-    // `globals`
-    // are all handled separately
+    // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
   ]
 
   serverOnlyConfigProperties.forEach((key) => {
@@ -186,7 +240,7 @@ export const createClientConfig = async (
   if ('admin' in clientConfig) {
     clientConfig.admin = { ...clientConfig.admin }
 
-    const serverOnlyAdminProperties: Partial<keyof SanitizedConfig['admin']>[] = ['components']
+    const serverOnlyAdminProperties: Partial<ServerOnlyRootAdminProperties>[] = ['components']
 
     serverOnlyAdminProperties.forEach((key) => {
       if (key in clientConfig.admin) {

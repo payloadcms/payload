@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-use-before-define */
 import type { EditorProps } from '@monaco-editor/react'
 import type { CSSProperties } from 'react'
@@ -136,7 +137,7 @@ export type Validate<
   TValue = any,
   TData = any,
   TSiblingData = any,
-  TFieldConfig extends object = {},
+  TFieldConfig extends object = object,
 > = (
   value: TValue,
   options: ValidateOptions<TData, TSiblingData, TFieldConfig>,
@@ -527,7 +528,7 @@ export type RelationshipValue =
 export type RichTextField<
   Value extends object = any,
   AdapterProps = any,
-  ExtraProperties = {},
+  ExtraProperties = object,
 > = FieldBase & {
   admin?: Admin
   editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
@@ -627,7 +628,7 @@ export type Field =
   | UIField
   | UploadField
 
-export type ClientConfigField = Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate'>
+export type { ClientConfigField } from '../../config/createClientConfig.js'
 
 export type FieldAffectingData =
   | ArrayField
