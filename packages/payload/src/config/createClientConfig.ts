@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../exports/types.js'
 import type { Field, FieldBase } from '../fields/config/types.js'
-import type { SanitizedConfig } from './types.js'
+import type { LivePreviewConfig, SanitizedConfig } from './types.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
@@ -28,6 +28,9 @@ export type ServerOnlyGlobalAdminProperties = keyof Pick<
   SanitizedGlobalConfig['admin'],
   'components' | 'hidden' | 'preview'
 >
+
+export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
+
 export type ServerOnlyFieldProperties =
   | 'editor'
   | 'label'
@@ -41,16 +44,28 @@ export type ServerOnlyFieldAdminProperties = keyof Pick<
 export type ClientConfigField = Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate'>
 
 export type ClientConfig = Omit<SanitizedConfig, 'admin' | ServerOnlyRootProperties> & {
-  admin: Omit<SanitizedConfig['admin'], ServerOnlyRootAdminProperties>
+  admin: Omit<SanitizedConfig['admin'], ServerOnlyRootAdminProperties & 'livePreview'> & {
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+  }
   collections: (Omit<
     SanitizedCollectionConfig,
     'admin' | 'fields' | ServerOnlyCollectionProperties
   > & {
-    admin: Omit<SanitizedCollectionConfig['admin'], ServerOnlyCollectionAdminProperties & 'fields'>
+    admin: Omit<
+      SanitizedCollectionConfig['admin'],
+      ServerOnlyCollectionAdminProperties & 'fields' & 'livePreview'
+    > & {
+      livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+    }
     fields: ClientConfigField[]
   })[]
   globals: (Omit<SanitizedGlobalConfig, 'admin' | 'fields' | ServerOnlyGlobalProperties> & {
-    admin: Omit<SanitizedGlobalConfig['admin'], ServerOnlyGlobalAdminProperties & 'fields'>
+    admin: Omit<
+      SanitizedGlobalConfig['admin'],
+      ServerOnlyGlobalAdminProperties & 'fields' & 'livePreview'
+    > & {
+      livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+    }
     fields: ClientConfigField[]
   })[]
 }
@@ -157,6 +172,7 @@ const sanitizeCollections = (
         'hidden',
         'preview',
         'hooks',
+        // `livePreview` is handled separately
       ]
 
       serverOnlyCollectionAdminProperties.forEach((key) => {
@@ -164,6 +180,11 @@ const sanitizeCollections = (
           delete sanitized.admin[key]
         }
       })
+
+      if ('livePreview' in sanitized.admin) {
+        sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
+        delete sanitized.admin.livePreview.url
+      }
     }
 
     return sanitized
@@ -201,6 +222,11 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
           delete sanitized.admin[key]
         }
       })
+
+      if ('livePreview' in sanitized.admin) {
+        sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
+        delete sanitized.admin.livePreview.url
+      }
     }
 
     return sanitized
@@ -212,7 +238,7 @@ export const createClientConfig = async (
   configPromise: Promise<SanitizedConfig> | SanitizedConfig,
 ): Promise<ClientConfig> => {
   const config = await configPromise
-  const clientConfig = { ...config }
+  const clientConfig: ClientConfig = { ...config }
 
   const serverOnlyConfigProperties: Partial<ServerOnlyRootProperties>[] = [
     'endpoints',
@@ -220,6 +246,7 @@ export const createClientConfig = async (
     'editor',
     'plugins',
     'sharp',
+    'onInit',
     // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
   ]
 
@@ -247,9 +274,12 @@ export const createClientConfig = async (
         delete clientConfig.admin[key]
       }
     })
-  }
 
-  clientConfig.onInit = undefined
+    if ('livePreview' in clientConfig.admin) {
+      clientConfig.admin.livePreview = { ...clientConfig.admin.livePreview }
+      delete clientConfig.admin.livePreview.url
+    }
+  }
 
   clientConfig.collections = sanitizeCollections(clientConfig.collections)
   clientConfig.globals = sanitizeGlobals(clientConfig.globals)
