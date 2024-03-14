@@ -80,10 +80,25 @@ export type Condition<T extends TypeWithID = any, P = any> = (
 ) => boolean
 
 export type FilterOptionsProps<T = any> = {
+  /**
+   * An object containing the full collection or global document currently being edited.
+   */
   data: T
+  /**
+   * The `id` of the current document being edited. `id` is undefined during the `create` operation.
+   */
   id: number | string
+  /**
+   * The collection `slug` to filter against, limited to this field's `relationTo` property.
+   */
   relationTo: string
+  /**
+   * An object containing document data that is scoped to only fields within the same parent of this field.
+   */
   siblingData: unknown
+  /**
+   * An object containing the currently authenticated user.
+   */
   user: Partial<User>
 }
 

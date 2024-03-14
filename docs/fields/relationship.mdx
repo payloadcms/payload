@@ -131,13 +131,13 @@ The `filterOptions` property can either be a `Where` query, or a function return
 prevent all, or a `Where` query. When using a function, it will be
 called with an argument object with the following properties:
 
-| Property      | Description                                                                          |
-|---------------|--------------------------------------------------------------------------------------|
-| `relationTo`  | The `relationTo` to filter against (as defined on the field)                         |
-| `data`        | An object of the full collection or global document currently being edited           |
-| `siblingData` | An object of the document data limited to fields within the same parent to the field |
-| `id`          | The value of the collection `id`, will be `undefined` on create request              |
-| `user`        | The currently authenticated user object                                              |
+| Property      | Description                                                                                                  |
+|---------------|--------------------------------------------------------------------------------------------------------------|
+| `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property                       |
+| `data`        | An object containing the full collection or global document currently being edited                           |
+| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field        |
+| `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation             |
+| `user`        | An object containing the currently authenticated user                                                        |
 
 ### Example
 
