@@ -70,6 +70,13 @@ export const ForgotPassword: React.FC<AdminViewProps> = ({ initPageResult }) => 
       <Form
         action={`${serverURL}${api}/${userSlug}/forgot-password`}
         // handleResponse={handleResponse}
+        initialState={{
+          email: {
+            initialValue: '',
+            valid: false,
+            value: undefined,
+          },
+        }}
         method="POST"
       >
         <h1>{i18n.t('authentication:forgotPassword')}</h1>
