@@ -77,7 +77,7 @@ export const initPage = async ({
       locale: locale.code,
       req: {
         i18n,
-        url: `${payload.config.serverURL}${route}${searchParams ? `?${qs.stringify(searchParams)}` : ''}`,
+        url: `${payload.config.serverURL}${route}${searchParams ? `${qs.stringify(searchParams, { addQueryPrefix: true })}` : ''}`,
       } as PayloadRequest,
       user,
     },

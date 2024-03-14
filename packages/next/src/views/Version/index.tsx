@@ -18,8 +18,7 @@ export const VersionView: EditViewComponent = async (props) => {
     req: { payload, payload: { config } = {}, user } = {},
   } = initPageResult
 
-  // /entityType/:entitySlug/:id/versions/:versionID
-  const [entityType, entitySlug, docID, versions, versionID] = routeSegments
+  const versionID = routeSegments[routeSegments.length - 1]
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
@@ -34,6 +33,7 @@ export const VersionView: EditViewComponent = async (props) => {
   let mostRecentDoc: Document
 
   if (collectionSlug) {
+    // /collections/:slug/:id/versions/:versionID
     slug = collectionSlug
     docPermissions = permissions.collections[collectionSlug]
 
@@ -72,11 +72,12 @@ export const VersionView: EditViewComponent = async (props) => {
   }
 
   if (globalSlug) {
+    // /globals/:slug/versions/:versionID
     slug = globalSlug
     docPermissions = permissions.globals[globalSlug]
 
     try {
-      doc = payload.findGlobalVersionByID({
+      doc = await payload.findGlobalVersionByID({
         id: versionID,
         slug,
         depth: 1,
@@ -85,7 +86,7 @@ export const VersionView: EditViewComponent = async (props) => {
         user,
       })
 
-      publishedDoc = payload.findGlobal({
+      publishedDoc = await payload.findGlobal({
         slug,
         depth: 1,
         draft: false,
@@ -94,7 +95,7 @@ export const VersionView: EditViewComponent = async (props) => {
         user,
       })
 
-      mostRecentDoc = payload.findGlobal({
+      mostRecentDoc = await payload.findGlobal({
         slug,
         depth: 1,
         draft: true,
