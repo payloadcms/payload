@@ -63,7 +63,7 @@ export async function openNav(page: Page): Promise<void> {
   // use the `--nav-open` modifier class to check if the nav is open
   // this will prevent clicking nav links that are bleeding off the screen
   if (await page.locator('.template-default.template-default--nav-open').isVisible()) return
-  await page.locator('#nav-toggler').click()
+  await page.locator('.nav-toggler').click()
   await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 
