@@ -3,7 +3,6 @@ import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 export const collectionSlug = 'users'
 
 export default buildConfigWithDefaults({
-  debug: true,
   admin: {
     user: 'users',
   },
@@ -16,15 +15,16 @@ export default buildConfigWithDefaults({
       fields: [
         {
           name: 'roles',
-          label: 'Role',
           type: 'select',
-          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
           defaultValue: 'user',
+          hasMany: true,
+          label: 'Role',
+          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
           required: true,
           saveToJWT: true,
-          hasMany: true,
         },
       ],
     },
   ],
+  debug: true,
 })

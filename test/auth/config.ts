@@ -8,28 +8,28 @@ import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.j
 
 export default buildConfigWithDefaults({
   admin: {
-    user: 'users',
     autoLogin: {
       email: devUser.email,
       password: devUser.password,
       prefillOnly: true,
     },
+    user: 'users',
   },
   collections: [
     {
       slug,
       auth: {
-        tokenExpiration: 7200, // 2 hours
-        verify: false,
-        maxLoginAttempts: 2,
-        lockTime: 600 * 1000, // lock time in ms
-        useAPIKey: true,
-        depth: 0,
         cookies: {
-          secure: false,
-          sameSite: 'Lax',
           domain: undefined,
+          sameSite: 'Lax',
+          secure: false,
         },
+        depth: 0,
+        lockTime: 600 * 1000, // lock time in ms
+        maxLoginAttempts: 2,
+        tokenExpiration: 7200, // 2 hours
+        useAPIKey: true,
+        verify: false,
       },
       fields: [
         {
@@ -43,19 +43,19 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'roles',
-          label: 'Role',
           type: 'select',
-          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
           defaultValue: ['user'],
+          hasMany: true,
+          label: 'Role',
+          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
           required: true,
           saveToJWT: true,
-          hasMany: true,
         },
         {
           name: 'namedSaveToJWT',
-          label: 'Named Save To JWT',
           type: 'text',
           defaultValue: namedSaveToJWTValue,
+          label: 'Named Save To JWT',
           saveToJWT: saveToJWTKey,
         },
         {
@@ -64,55 +64,53 @@ export default buildConfigWithDefaults({
           fields: [
             {
               name: 'liftedSaveToJWT',
-              label: 'Lifted Save To JWT',
               type: 'text',
-              saveToJWT: 'x-lifted-from-group',
               defaultValue: 'lifted from group',
+              label: 'Lifted Save To JWT',
+              saveToJWT: 'x-lifted-from-group',
             },
           ],
         },
         {
           name: 'groupSaveToJWT',
-          label: 'Group Save To JWT',
           type: 'group',
-          saveToJWT: 'x-group',
           fields: [
             {
               name: 'saveToJWTString',
-              label: 'Save To JWT String',
               type: 'text',
-              saveToJWT: 'x-test',
               defaultValue: 'nested property',
+              label: 'Save To JWT String',
+              saveToJWT: 'x-test',
             },
             {
               name: 'saveToJWTFalse',
-              label: 'Save To JWT False',
               type: 'text',
-              saveToJWT: false,
               defaultValue: 'nested property',
+              label: 'Save To JWT False',
+              saveToJWT: false,
             },
           ],
+          label: 'Group Save To JWT',
+          saveToJWT: 'x-group',
         },
         {
           type: 'tabs',
           tabs: [
             {
               name: 'saveToJWTTab',
-              label: 'Save To JWT Tab',
-              saveToJWT: true,
               fields: [
                 {
                   name: 'test',
                   type: 'text',
-                  saveToJWT: 'x-field',
                   defaultValue: 'yes',
+                  saveToJWT: 'x-field',
                 },
               ],
+              label: 'Save To JWT Tab',
+              saveToJWT: true,
             },
             {
               name: 'tabSaveToJWTString',
-              label: 'Tab Save To JWT String',
-              saveToJWT: 'tab-test',
               fields: [
                 {
                   name: 'includedByDefault',
@@ -120,49 +118,51 @@ export default buildConfigWithDefaults({
                   defaultValue: 'yes',
                 },
               ],
+              label: 'Tab Save To JWT String',
+              saveToJWT: 'tab-test',
             },
             {
-              label: 'No Name',
               fields: [
                 {
                   name: 'tabLiftedSaveToJWT',
-                  label: 'Tab Lifted Save To JWT',
                   type: 'text',
-                  saveToJWT: true,
                   defaultValue: 'lifted from unnamed tab',
+                  label: 'Tab Lifted Save To JWT',
+                  saveToJWT: true,
                 },
                 {
                   name: 'unnamedTabSaveToJWTString',
-                  label: 'Unnamed Tab Save To JWT String',
                   type: 'text',
-                  saveToJWT: 'x-tab-field',
                   defaultValue: 'text',
+                  label: 'Unnamed Tab Save To JWT String',
+                  saveToJWT: 'x-tab-field',
                 },
                 {
                   name: 'unnamedTabSaveToJWTFalse',
-                  label: 'Unnamed Tab Save To JWT False',
                   type: 'text',
-                  saveToJWT: false,
                   defaultValue: 'false',
+                  label: 'Unnamed Tab Save To JWT False',
+                  saveToJWT: false,
                 },
               ],
+              label: 'No Name',
             },
           ],
         },
         {
           name: 'custom',
-          label: 'Custom',
           type: 'text',
+          label: 'Custom',
         },
         {
           name: 'authDebug',
-          label: 'Auth Debug',
           type: 'ui',
           admin: {
             components: {
               Field: AuthDebug,
             },
           },
+          label: 'Auth Debug',
         },
       ],
     },
@@ -203,9 +203,9 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: 'users',
       data: {
+        custom: 'Hello, world!',
         email: devUser.email,
         password: devUser.password,
-        custom: 'Hello, world!',
       },
     })
 

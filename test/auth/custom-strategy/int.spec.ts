@@ -32,9 +32,9 @@ describe('AuthStrategies', () => {
     beforeAll(async () => {
       await restClient.POST(`/${usersSlug}`, {
         body: JSON.stringify({
+          name,
           code,
           secret,
-          name,
         }),
         headers,
       })

@@ -61,7 +61,7 @@ describe('Remove token from auth responses', () => {
     })
 
     const response = await restClient.POST(`/${collectionSlug}/reset-password`, {
-      body: JSON.stringify({ token, password: devUser.password }),
+      body: JSON.stringify({ password: devUser.password, token }),
     })
     const result = await response.json()
 
