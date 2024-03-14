@@ -41,6 +41,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
 
+  const filterOptions = field?.filterOptions
   const value = field?.value as T
   const initialValue = field?.initialValue as T
   const valid = typeof field?.valid === 'boolean' ? field.valid : true
@@ -79,6 +80,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const result: FieldType<T> = useMemo(
     () => ({
       errorMessage: field?.errorMessage,
+      filterOptions,
       formProcessing: processing,
       formSubmitted: submitted,
       initialValue,
@@ -106,6 +108,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       schemaPath,
       readOnly,
       permissions,
+      filterOptions,
     ],
   )
 

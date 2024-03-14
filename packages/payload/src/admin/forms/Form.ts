@@ -1,4 +1,5 @@
 import type { ClientValidate, Field } from '../../fields/config/types.js'
+import type { Where } from '../../types/index.js'
 
 export type Data = {
   [key: string]: any
@@ -11,11 +12,16 @@ export type Row = {
   id: string
 }
 
+export type FilterOptionsResult = {
+  [relation: string]: Where | boolean
+}
+
 export type FormField = {
   disableFormData?: boolean
   errorMessage?: string
   errorPaths?: Set<string>
   fieldSchema?: Field
+  filterOptions?: FilterOptionsResult
   initialValue: unknown
   passesCondition?: boolean
   rows?: Row[]

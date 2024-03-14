@@ -32,7 +32,8 @@ export type ServerOnlyGlobalAdminProperties = keyof Pick<
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
 
 export type ServerOnlyFieldProperties =
-  | 'editor'
+  | 'editor' // This is a `richText` only property
+  | 'filterOptions' // This is a `relationship` and `upload` only property
   | 'label'
   | keyof Pick<FieldBase, 'access' | 'defaultValue' | 'hooks' | 'validate'>
 
@@ -79,8 +80,8 @@ export const sanitizeField = (f: Field) => {
     'validate',
     'defaultValue',
     'label',
-    // This is a `richText` only property
-    'editor',
+    'filterOptions', // This is a `relationship` and `upload` only property
+    'editor', // This is a `richText` only property
     // `fields`
     // `blocks`
     // `tabs`

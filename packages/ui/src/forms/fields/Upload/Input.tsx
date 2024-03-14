@@ -1,13 +1,12 @@
 'use client'
 
-import type { SanitizedCollectionConfig, UploadField } from 'payload/types'
+import type { FilterOptionsResult, SanitizedCollectionConfig, UploadField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../../elements/ListDrawer/types.js'
-import type { FilterOptionsResult } from '../Relationship/types.js'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
@@ -23,7 +22,7 @@ const baseClass = 'upload'
 export type UploadInputProps = FormFieldBase & {
   api?: string
   collection?: SanitizedCollectionConfig
-  filterOptions?: UploadField['filterOptions']
+  filterOptions?: FilterOptionsResult
   onChange?: (e) => void
   relationTo?: UploadField['relationTo']
   serverURL?: string
@@ -34,12 +33,12 @@ export type UploadInputProps = FormFieldBase & {
 export const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {
     Description,
-
     Error,
     Label: LabelFromProps,
     api = '/api',
     className,
     collection,
+    filterOptions,
     label,
     onChange,
     readOnly,
@@ -59,7 +58,6 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
   const [file, setFile] = useState(undefined)
   const [missingFile, setMissingFile] = useState(false)
   const [collectionSlugs] = useState([collection?.slug])
-  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>()
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     collectionSlug: collectionSlugs[0],
@@ -67,7 +65,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
 
   const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
     collectionSlugs,
-    filterOptions: filterOptionsResult,
+    filterOptions,
   })
 
   useEffect(() => {
@@ -131,15 +129,6 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
-        {/* <GetFilterOptions
-          {...{
-            filterOptions,
-            filterOptionsResult,
-            path,
-            relationTo,
-            setFilterOptionsResult,
-          }}
-        /> */}
         {Error}
         {Label}
         {collection?.upload && (
