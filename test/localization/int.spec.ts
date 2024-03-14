@@ -1,8 +1,7 @@
 import type { Payload } from '../../packages/payload/src/index.js'
+import { getPayload } from '../../packages/payload/src/index.js'
 import type { Where } from '../../packages/payload/src/types/index.js'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'
-
-import { getPayload } from '../../packages/payload/src/index.js'
 import { englishLocale } from '../globals/config.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { idToString } from '../helpers/idToString.js'
@@ -18,9 +17,9 @@ import {
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
+  relationshipLocalizedSlug,
   relationSpanishTitle,
   relationSpanishTitle2,
-  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
   withLocalizedRelSlug,
@@ -68,7 +67,7 @@ describe('Localization', () => {
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 

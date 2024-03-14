@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { ConnectOptions } from 'mongoose'
-import type { Connect } from 'payload/database'
-
 import mongoose from 'mongoose'
+import type { Connect } from 'payload/database'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -37,12 +36,14 @@ export const connect: Connect = async function connect(
 
     const client = this.connection.getClient()
 
+
+
     if (!client.options.replicaSet) {
       this.transactionOptions = false
       this.beginTransaction = undefined
     }
 
-    if (!hotReload) {
+    if (!this.mongoMemoryServer && !hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info('---- DROPPING DATABASE ----')
         await mongoose.connection.dropDatabase()
@@ -50,6 +51,7 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
+    console.log(err)
     this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)
     process.exit(1)
   }

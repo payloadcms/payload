@@ -12,6 +12,12 @@ describe('Custom GraphQL', () => {
     restClient = new NextRESTClient(payload.config)
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   describe('Isolated Transaction ID', () => {
     it('should isolate transaction IDs between queries in the same request', async () => {
       const query = `query {

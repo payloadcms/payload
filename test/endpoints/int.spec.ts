@@ -1,4 +1,4 @@
-import { getPayload } from '../../packages/payload/src/index.js'
+import { getPayload, type Payload } from '../../packages/payload/src/index.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
@@ -12,13 +12,20 @@ import {
   rootEndpoint,
 } from './shared.js'
 
+let payload: Payload
 let restClient: NextRESTClient
 
 describe('Endpoints', () => {
   beforeAll(async () => {
     const config = await startMemoryDB(configPromise)
-    await getPayload({ config })
+    payload = await getPayload({ config })
     restClient = new NextRESTClient(config)
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   describe('Collections', () => {

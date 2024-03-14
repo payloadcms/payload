@@ -1,12 +1,12 @@
 import type { TransactionOptions } from 'mongodb'
-import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
+import type { ClientSession, Connection, ConnectOptions } from 'mongoose'
+import mongoose from 'mongoose'
 import type { Payload } from 'payload'
-import type { BaseDatabaseAdapter } from 'payload/database'
+import type { BaseDatabaseAdapter, DatabaseAdapterObj } from 'payload/database'
+import { createDatabaseAdapter } from 'payload/database'
 
 import fs from 'fs'
-import mongoose from 'mongoose'
 import path from 'path'
-import { createDatabaseAdapter } from 'payload/database'
 
 import type { CollectionModel, GlobalModel } from './types.js'
 
@@ -37,7 +37,6 @@ import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
-import type { DatabaseAdapterObj } from 'payload/database'
 
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
@@ -47,6 +46,10 @@ export interface Args {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   }
+  /**
+   * typed as any to avoid dependency
+   */
+  mongoMemoryServer?: any
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
   migrationDir?: string
@@ -91,6 +94,7 @@ export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
   disableIndexHints = false,
+  mongoMemoryServer,
   migrationDir: migrationDirArg,
   transactionOptions = {},
   url,
@@ -109,7 +113,7 @@ export function mongooseAdapter({
       connection: undefined,
       disableIndexHints,
       globals: undefined,
-      mongoMemoryServer: undefined,
+      mongoMemoryServer,
       sessions: {},
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
       url,

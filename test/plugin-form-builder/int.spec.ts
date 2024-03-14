@@ -1,13 +1,13 @@
 import type { Payload } from '../../packages/payload/src/index.js'
+import { getPayload } from '../../packages/payload/src/index.js'
 import type { Form } from './payload-types.js'
 
 import { ValidationError } from '../../packages/payload/src/errors/index.js'
-import { getPayload } from '../../packages/payload/src/index.js'
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
-import { formSubmissionsSlug, formsSlug } from './shared.js'
+import { formsSlug, formSubmissionsSlug } from './shared.js'
 
 let payload: Payload
 let form: Form
@@ -37,6 +37,12 @@ describe('@payloadcms/plugin-form-builder', () => {
       collection: formsSlug,
       data: formConfig,
     })) as unknown as Form
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   describe('plugin collections', () => {

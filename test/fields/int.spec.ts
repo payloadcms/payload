@@ -3,9 +3,8 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { MongooseAdapter } from '../../packages/db-mongodb/src/index.js'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types.js'
 import type { Payload } from '../../packages/payload/src/index.js'
-import type { GroupField, RichTextField } from './payload-types.js'
-
 import { getPayload } from '../../packages/payload/src/index.js'
+import type { GroupField, RichTextField } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { isMongoose } from '../helpers/isMongoose.js'
@@ -18,11 +17,7 @@ import { groupDoc } from './collections/Group/shared.js'
 import { defaultNumber } from './collections/Number/index.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
-import {
-  localizedTextValue,
-  namedTabDefaultValue,
-  namedTabText,
-} from './collections/Tabs/constants.js'
+import { localizedTextValue, namedTabDefaultValue, namedTabText, } from './collections/Tabs/constants.js'
 import { tabsDoc } from './collections/Tabs/shared.js'
 import { defaultText } from './collections/Text/shared.js'
 import configPromise from './config.js'
@@ -57,6 +52,12 @@ describe('Fields', () => {
         password: devUser.password,
       },
     })
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   beforeEach(async () => {

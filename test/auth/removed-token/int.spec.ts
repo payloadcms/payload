@@ -1,11 +1,9 @@
 import type { Payload } from '../../../packages/payload/src/index.js'
-
 import { getPayload } from '../../../packages/payload/src/index.js'
 import { devUser } from '../../credentials.js'
 import { NextRESTClient } from '../../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../../startMemoryDB.js'
-import { collectionSlug } from './config.js'
-import configPromise from './config.js'
+import configPromise, { collectionSlug } from './config.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -24,7 +22,7 @@ describe('Remove token from auth responses', () => {
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 
