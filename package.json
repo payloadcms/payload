@@ -120,7 +120,7 @@
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "14.2.0-canary.21",
+    "next": "14.2.0-canary.22",
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
     "pino": "8.15.0",
