@@ -22,6 +22,8 @@ async function main() {
     process.env.TURBOPACK = '1'
   }
 
+  process.env.PAYLOAD_DROP_DATABASE = 'true'
+
   beforeTest(testSuiteArg)
 
   nextDev({ _: [resolve(_dirname, '..')], port: process.env.PORT || 3000 })

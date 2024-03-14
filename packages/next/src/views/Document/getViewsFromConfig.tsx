@@ -1,20 +1,17 @@
 import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
 import type { EditViewComponent } from 'payload/config'
 import type {
+  AdminViewComponent,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
-import type React from 'react'
 
 import { isEntityHidden } from 'payload/utilities'
-
-import type { AdminViewProps } from '../Root/index.js'
 
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
-import { NotFoundClient } from '../NotFound/index.client.js'
 import { Unauthorized } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
@@ -41,12 +38,12 @@ export const getViewsFromConfig = ({
   /**
    * The error view to display if CustomView or DefaultView do not exist (could be either due to not found, or unauthorized). Can be null
    */
-  ErrorView: React.FC<AdminViewProps>
+  ErrorView: AdminViewComponent
 } | null => {
   // Conditionally import and lazy load the default view
   let DefaultView: EditViewComponent = null
   let CustomView: EditViewComponent = null
-  let ErrorView: React.FC = null
+  let ErrorView: AdminViewComponent = null
 
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||

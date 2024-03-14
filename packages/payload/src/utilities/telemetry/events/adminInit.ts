@@ -1,5 +1,5 @@
-import type { Payload } from '../../../index.js'
 import type { User } from '../../../auth/types.js'
+import type { Payload } from '../../../index.js'
 
 import { sendEvent } from '../index.js'
 import { oneWayHash } from '../oneWayHash.js'
@@ -32,8 +32,8 @@ export const adminInit = ({ headers, payload, user }: Args): void => {
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   sendEvent({
     event: {
-      domainID,
       type: 'admin-init',
+      domainID,
       userID,
     },
     payload,

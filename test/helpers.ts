@@ -133,6 +133,10 @@ export function initPageConsoleErrorCatch(page: Page) {
   page.on('console', (msg) => {
     if (
       msg.type() === 'error' &&
+      // Playwright is seemingly loading CJS files from React Select, but Next loads ESM.
+      // This leads to classnames not matching. Ignore these God-awful errors
+      // https://github.com/JedWatson/react-select/issues/3590
+      !msg.text().includes('did not match. Server:') &&
       !msg.text().includes('the server responded with a status of') &&
       !msg.text().includes('Failed to fetch RSC payload for')
     ) {

@@ -19,6 +19,7 @@ import {
   formatDocTitle,
   formatFields,
 } from '@payloadcms/ui'
+import { docAccessOperation } from 'payload/operations'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -72,7 +73,14 @@ export const Document: React.FC<AdminViewProps> = async ({
   let action: string
 
   if (collectionConfig) {
-    docPermissions = permissions?.collections?.[collectionSlug]
+    docPermissions = await docAccessOperation({
+      id,
+      collection: {
+        config: collectionConfig,
+      },
+      req,
+    })
+
     fields = collectionConfig.fields
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
 
