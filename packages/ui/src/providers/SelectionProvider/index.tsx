@@ -35,7 +35,13 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const contextRef = useRef({} as SelectionContext)
 
   const { code: locale } = useLocale()
-  const [selected, setSelected] = useState<SelectionContext['selected']>({})
+  const [selected, setSelected] = useState<SelectionContext['selected']>(() => {
+    const rows = {}
+    docs.forEach(({ id }) => {
+      rows[id] = false
+    })
+    return rows
+  })
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
   const [count, setCount] = useState(0)
   const { searchParams } = useSearchParams()
@@ -132,18 +138,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     } else {
       setSelectAll(SelectAllStatus.None)
     }
-  }, [docs, selectAll, selected])
-
-  useEffect(() => {
-    const rows = {}
-    if (docs.length) {
-      docs.forEach(({ id }) => {
-        rows[id] = false
-      })
-      setSelected(rows)
-    }
-    setSelectAll(SelectAllStatus.None)
-  }, [docs])
+  }, [selectAll, selected])
 
   useEffect(() => {
     const newCount =

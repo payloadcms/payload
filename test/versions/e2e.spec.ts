@@ -98,7 +98,7 @@ describe('versions', () => {
       const rows = page.locator(`tr`)
       const rowToDelete = rows.filter({ hasText: titleToDelete })
 
-      await rowToDelete.locator('.cell-_select input').click()
+      await rowToDelete.locator('.cell-_select input').check()
       await page.locator('.delete-documents__toggle').click()
       await page.locator('#confirm-delete').click()
 
@@ -198,12 +198,14 @@ describe('versions', () => {
     test('collection - has versions tab', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
-      const docURL = page.url()
-      const pathname = new URL(docURL).pathname
 
       const versionsTab = page.locator('.doc-tab', {
         hasText: 'Versions',
       })
+      await versionsTab.waitFor({ state: 'visible' })
+
+      const docURL = page.url()
+      const pathname = new URL(docURL).pathname
 
       expect(versionsTab).toBeTruthy()
       const href = await versionsTab.locator('a').first().getAttribute('href')
@@ -225,6 +227,7 @@ describe('versions', () => {
       const versionsTab = page.locator('.doc-tab', {
         hasText: 'Versions',
       })
+      await versionsTab.waitFor({ state: 'visible' })
 
       const versionCount = await versionsTab.locator('.doc-tab__count').first().textContent()
       expect(versionCount).toBe('11')
@@ -233,6 +236,9 @@ describe('versions', () => {
     test('collection - has versions route', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
+
+      await page.waitForSelector('.doc-header__title', { state: 'visible' })
+
       await page.goto(`${page.url()}/versions`)
       expect(page.url()).toMatch(/\/versions$/)
     })
@@ -240,6 +246,13 @@ describe('versions', () => {
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
       await page.locator('tbody tr .cell-title a').first().click()
+
+      // Wait for the document to load
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: 'Versions',
+      })
+      await versionsTab.waitFor({ state: 'visible' })
+
       await page.goto(`${page.url()}/versions`)
       await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
     })
@@ -262,6 +275,7 @@ describe('versions', () => {
       const versionsTab = page.locator('.doc-tab', {
         hasText: 'Versions',
       })
+      await versionsTab.waitFor({ state: 'visible' })
 
       expect(versionsTab).toBeTruthy()
       const href = await versionsTab.locator('a').first().getAttribute('href')

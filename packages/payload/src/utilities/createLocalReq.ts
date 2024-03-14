@@ -1,5 +1,5 @@
-import type { Payload, RequestContext } from '../index.js'
 import type { User } from '../auth/types.js'
+import type { Payload, RequestContext } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
@@ -29,32 +29,29 @@ const attachFakeURLProperties = (req: PayloadRequest) => {
    * `ts-ignore` is used below for properties that are 'read-only'
    * since they do not exist yet we can safely ignore the error.
    */
-  try {
-    const urlProperties = new URL(req.payload.config?.serverURL)
-    req.host = urlProperties.host
-    req.protocol = urlProperties.protocol
-    req.pathname = urlProperties.pathname
-    // @ts-expect-error
-    req.searchParams = urlProperties.searchParams
-    // @ts-expect-error
-    req.origin = urlProperties.origin
-    // @ts-expect-error
-    req.url = urlProperties.href
-    return
-  } catch (error) {
-    /** do nothing */
+  let urlObject
+
+  function getURLObject() {
+    if (urlObject) return urlObject
+    const urlToUse = req?.url || req.payload.config?.serverURL || 'http://localhost'
+    try {
+      urlObject = new URL(urlToUse)
+    } catch (error) {
+      urlObject = new URL('http://localhost')
+    }
+
+    return urlObject
   }
 
-  req.host = 'localhost'
-  req.protocol = 'https:'
-  req.pathname = '/'
+  if (!req.host) req.host = getURLObject().host
+  if (!req.protocol) req.protocol = getURLObject().protocol
+  if (!req.pathname) req.pathname = getURLObject().pathname
   // @ts-expect-error
-  req.searchParams = new URLSearchParams()
+  if (!req.searchParams) req.searchParams = getURLObject().searchParams
   // @ts-expect-error
-  req.origin = 'http://localhost'
+  if (!req.origin) req.origin = getURLObject().origin
   // @ts-expect-error
-  req.url = 'http://localhost'
-  return
+  if (!req?.url) req.url = getURLObject().url
 }
 
 type CreateLocalReq = (
@@ -96,7 +93,7 @@ export const createLocalReq: CreateLocalReq = async (
   req.routeParams = req?.routeParams || {}
   req.query = req?.query || {}
 
-  if (!req?.url) attachFakeURLProperties(req)
+  attachFakeURLProperties(req)
 
   return req
 }
