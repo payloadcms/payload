@@ -1,4 +1,4 @@
-import type { ClientValidate, FieldPermissions, Row } from 'payload/types'
+import type { ClientValidate, FieldPermissions, FilterOptionsResult, Row } from 'payload/types'
 
 export type Options = {
   disableFormData?: boolean
@@ -12,6 +12,7 @@ export type Options = {
 
 export type FieldType<T> = {
   errorMessage?: string
+  filterOptions?: FilterOptionsResult
   formProcessing: boolean
   formSubmitted: boolean
   initialValue?: T

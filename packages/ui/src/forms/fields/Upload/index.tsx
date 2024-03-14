@@ -15,7 +15,6 @@ const Upload: React.FC<Props> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
-    filterOptions,
     label,
     path: pathFromProps,
     readOnly,
@@ -45,7 +44,7 @@ const Upload: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { path, setValue, showError, value } = useField<string>({
+  const { filterOptions, path, setValue, showError, value } = useField<string>({
     path: pathFromProps,
     validate: memoizedValidate,
   })

@@ -1,7 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
-import type { Where } from 'payload/types'
 
 import type { FormFieldBase } from '../shared.js'
 
@@ -59,7 +58,3 @@ export type GetResults = (args: {
   sort?: boolean
   value?: Value | Value[]
 }) => Promise<void>
-
-export type FilterOptionsResult = {
-  [relation: string]: Where | boolean
-}

@@ -21,6 +21,17 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'relationship',
       type: 'relationship',
+      filterOptions: ({ id }) => {
+        return {
+          where: [
+            {
+              id: {
+                not_equals: id,
+              },
+            },
+          ],
+        }
+      },
       relationTo: ['posts'],
     },
     {

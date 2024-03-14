@@ -7,9 +7,8 @@ import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js'
-import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types.js'
+import type { GetResults, Option, Props, Value } from './types.js'
 
-import { GetFilterOptions } from '../../../elements/GetFilterOptions/index.js'
 import ReactSelect from '../../../elements/ReactSelect/index.js'
 import { useDebouncedCallback } from '../../../hooks/useDebouncedCallback.js'
 import { useAuth } from '../../../providers/Auth/index.js'
@@ -57,7 +56,6 @@ const Relationship: React.FC<Props> = (props) => {
 
   const relationTo = 'relationTo' in props ? props?.relationTo : undefined
   const hasMany = 'hasMany' in props ? props?.hasMany : undefined
-  const filterOptions = 'filterOptions' in props ? props?.filterOptions : undefined
   const sortOptions = 'sortOptions' in props ? props?.sortOptions : undefined
   const isSortable = 'isSortable' in props ? props?.isSortable : true
   const allowCreate = 'allowCreate' in props ? props?.allowCreate : true
@@ -71,7 +69,6 @@ const Relationship: React.FC<Props> = (props) => {
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
   const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
   const [errorLoading, setErrorLoading] = useState('')
-  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>()
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [hasLoadedFirstPage, setHasLoadedFirstPage] = useState(false)
@@ -87,7 +84,9 @@ const Relationship: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { initialValue, path, setValue, showError, value } = useField<Value | Value[]>({
+  const { filterOptions, initialValue, path, setValue, showError, value } = useField<
+    Value | Value[]
+  >({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })
@@ -123,7 +122,8 @@ const Relationship: React.FC<Props> = (props) => {
 
       if (!errorLoading) {
         await relationsToFetch.reduce(async (priorRelation, relation) => {
-          const relationFilterOption = filterOptionsResult?.[relation]
+          const relationFilterOption = filterOptions?.[relation]
+
           let lastLoadedPageToUse
           if (search !== searchArg) {
             lastLoadedPageToUse = 1
@@ -246,7 +246,7 @@ const Relationship: React.FC<Props> = (props) => {
       lastLoadedPage,
       collections,
       locale,
-      filterOptionsResult,
+      filterOptions,
       serverURL,
       sortOptions,
       api,
@@ -362,7 +362,7 @@ const Relationship: React.FC<Props> = (props) => {
     setEnableWordBoundarySearch(!isIdOnly)
   }, [relationTo, collections])
 
-  // When (`relationTo` || `filterOptionsResult` || `locale`) changes, reset component
+  // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
     if (firstRun.current) {
@@ -374,7 +374,7 @@ const Relationship: React.FC<Props> = (props) => {
     setLastFullyLoadedRelation(-1)
     setLastLoadedPage({})
     setHasLoadedFirstPage(false)
-  }, [relationTo, filterOptionsResult, locale])
+  }, [relationTo, filterOptions, locale])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
@@ -435,15 +435,6 @@ const Relationship: React.FC<Props> = (props) => {
     >
       {Error}
       {Label}
-      <GetFilterOptions
-        {...{
-          filterOptions,
-          filterOptionsResult,
-          path,
-          relationTo,
-          setFilterOptionsResult,
-        }}
-      />
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
