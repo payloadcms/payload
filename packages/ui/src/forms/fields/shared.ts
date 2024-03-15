@@ -42,7 +42,7 @@ export type FormFieldBase = {
   maxLength?: number
   minLength?: number
   path?: string
-  placeholder?: string
+  placeholder?: Record<string, string> | string
   readOnly?: boolean
   required?: boolean
   rtl?: boolean

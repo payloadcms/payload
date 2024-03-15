@@ -34,6 +34,7 @@ export const collectionSlugs: CollectionConfig[] = [
   LexicalFields,
   LexicalMigrateFields,
   {
+    slug: 'users',
     admin: {
       useAsTitle: 'email',
     },
@@ -41,11 +42,10 @@ export const collectionSlugs: CollectionConfig[] = [
     fields: [
       {
         name: 'canViewConditionalField',
-        defaultValue: true,
         type: 'checkbox',
+        defaultValue: true,
       },
     ],
-    slug: 'users',
   },
   ArrayFields,
   BlockFields,

@@ -64,7 +64,8 @@ export const mapFields = (args: {
           description:
             field.admin &&
             'description' in field.admin &&
-            typeof field.admin?.description === 'string'
+            (typeof field.admin?.description === 'string' ||
+              typeof field.admin?.description === 'object')
               ? field.admin.description
               : undefined,
         }
@@ -219,6 +220,10 @@ export const mapFields = (args: {
           maxRows: 'maxRows' in field ? field.maxRows : undefined,
           min: 'min' in field ? field.min : undefined,
           options: 'options' in field ? field.options : undefined,
+          placeholder:
+            'admin' in field && 'placeholder' in field.admin
+              ? field?.admin?.placeholder
+              : undefined,
           readOnly:
             'admin' in field && 'readOnly' in field.admin ? field.admin.readOnly : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
