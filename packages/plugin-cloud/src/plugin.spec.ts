@@ -8,7 +8,7 @@ import { payloadCloud } from './plugin.js'
 describe('plugin', () => {
   describe('not in Payload Cloud', () => {
     // eslint-disable-next-line jest/expect-expect
-    it('should return unmodified config, with webpack aliases', () => {
+    it('should return unmodified config', () => {
       const plugin = payloadCloud()
       const config = plugin(createConfig())
 
@@ -119,26 +119,21 @@ describe('plugin', () => {
 })
 
 function assertCloudStorage(config: Config) {
-  expect(config.admin).toHaveProperty('webpack')
   expect(config.upload?.useTempFiles).toEqual(true)
 }
 
 function assertNoCloudStorage(config: Config) {
-  expect(config.admin).toHaveProperty('webpack')
   expect(config.upload?.useTempFiles).toBeFalsy()
 }
 
 function assertCloudEmail(config: Config) {
-  expect(config.admin).toHaveProperty('webpack')
   if (config.email && 'transport' in config.email) {
     expect(config.email?.transport?.transporter.name).toEqual('SMTP')
   }
 }
 
-/** Asserts that plugin did not run (other than webpack aliases) */
+/** Asserts that plugin did not run */
 function assertNoCloudEmail(config: Config) {
-  expect(config.admin).toHaveProperty('webpack')
-
   // No transport set
   if (!config.email) return
 
