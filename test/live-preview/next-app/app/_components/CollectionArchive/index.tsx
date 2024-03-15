@@ -1,8 +1,9 @@
 import React from 'react'
 
 import type { ArchiveBlockProps } from '../../_blocks/ArchiveBlock/types'
-import { CollectionArchiveBySelection } from './PopulateBySelection'
+
 import { CollectionArchiveByCollection } from './PopulateByCollection'
+import { CollectionArchiveBySelection } from './PopulateBySelection'
 
 export type Props = Omit<ArchiveBlockProps, 'blockType'> & {
   className?: string
@@ -13,7 +14,7 @@ export const CollectionArchive: React.FC<Props> = (props) => {
   const { className, populateBy, selectedDocs } = props
 
   if (populateBy === 'selection') {
-    return <CollectionArchiveBySelection selectedDocs={selectedDocs} className={className} />
+    return <CollectionArchiveBySelection className={className} selectedDocs={selectedDocs} />
   }
 
   if (populateBy === 'collection') {

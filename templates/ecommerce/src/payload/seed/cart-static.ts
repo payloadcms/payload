@@ -2,16 +2,9 @@ import type { Page } from '../payload-types'
 
 export const staticCart: Page = {
   id: '',
-  title: 'Cart',
   slug: 'cart',
-  createdAt: '',
-  updatedAt: '',
   _status: 'published',
-  meta: {
-    title: 'Cart',
-    description:
-      'Your cart will sync to your user profile so you can continue shopping from any device.',
-  },
+  createdAt: '',
   hero: {
     type: 'lowImpact',
     links: [],
@@ -32,28 +25,28 @@ export const staticCart: Page = {
             text: 'This cart saves to local storage so you can continue shopping later. Once you authenticate with Payload, your cart will sync to your user profile so you can continue shopping from any device. ',
           },
           {
-            text: 'Your database does not have a cart page yet.',
             bold: true,
+            text: 'Your database does not have a cart page yet.',
           },
           {
             text: " You are currently seeing a demo page. To manage this page's content, ",
           },
           {
             type: 'link',
-            linkType: 'custom',
-            url: '/admin',
             children: [
               {
                 text: 'log in to the admin dashboard',
               },
             ],
+            linkType: 'custom',
+            url: '/admin',
           },
           {
             text: ' and click "seed your database". If you have already seeded your database, ',
           },
           {
-            text: 'you may need to hard refresh this page to clear the cached request.',
             bold: true,
+            text: 'you may need to hard refresh this page to clear the cached request.',
           },
         ],
       },
@@ -61,14 +54,27 @@ export const staticCart: Page = {
   },
   layout: [
     {
+      blockName: 'CTA',
+      blockType: 'cta',
+      links: [
+        {
+          link: {
+            type: 'custom',
+            appearance: 'primary',
+            label: 'Go to dashboard',
+            reference: null,
+            url: '/admin',
+          },
+        },
+      ],
       richText: [
         {
+          type: 'h4',
           children: [
             {
               text: 'Create a cart page',
             },
           ],
-          type: 'h4',
         },
         {
           children: [
@@ -77,13 +83,13 @@ export const staticCart: Page = {
             },
             {
               type: 'link',
-              linkType: 'custom',
-              url: '/admin',
               children: [
                 {
                   text: 'log in to the admin dashboard',
                 },
               ],
+              linkType: 'custom',
+              url: '/admin',
             },
             {
               text: ' and click "seed your database".',
@@ -91,19 +97,13 @@ export const staticCart: Page = {
           ],
         },
       ],
-      links: [
-        {
-          link: {
-            type: 'custom',
-            url: '/admin',
-            label: 'Go to dashboard',
-            appearance: 'primary',
-            reference: null,
-          },
-        },
-      ],
-      blockName: 'CTA',
-      blockType: 'cta',
     },
   ],
+  meta: {
+    description:
+      'Your cart will sync to your user profile so you can continue shopping from any device.',
+    title: 'Cart',
+  },
+  title: 'Cart',
+  updatedAt: '',
 }

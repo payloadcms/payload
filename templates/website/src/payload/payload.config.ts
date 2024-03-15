@@ -1,10 +1,11 @@
 import { webpackBundler } from '@payloadcms/bundler-webpack' // bundler-import
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
+import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
+
 import { payloadCloud } from '@payloadcms/plugin-cloud'
 import nestedDocs from '@payloadcms/plugin-nested-docs'
 import redirects from '@payloadcms/plugin-redirects'
 import seo from '@payloadcms/plugin-seo'
-import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 import { slateEditor } from '@payloadcms/richtext-slate' // editor-import
 import dotenv from 'dotenv'
 import path from 'path'
@@ -34,7 +35,6 @@ dotenv.config({
 
 export default buildConfig({
   admin: {
-    user: Users.slug,
     bundler: webpackBundler(), // bundler-config
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
@@ -44,7 +44,8 @@ export default buildConfig({
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
       beforeDashboard: [BeforeDashboard],
     },
-    webpack: config => ({
+    user: Users.slug,
+    webpack: (config) => ({
       ...config,
       resolve: {
         ...config.resolve,
@@ -65,26 +66,22 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   // database-adapter-config-end
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   collections: [Pages, Posts, Projects, Media, Categories, Users, Comments],
-  globals: [Settings, Header, Footer],
-  typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
-  },
-  graphQL: {
-    schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
-  },
   cors: [process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(Boolean),
   csrf: [process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(Boolean),
   endpoints: [
     // The seed endpoint is used to populate the database with some example data
     // You should delete this endpoint before deploying your site to production
     {
-      path: '/seed',
-      method: 'get',
       handler: seed,
+      method: 'get',
+      path: '/seed',
     },
   ],
+  globals: [Settings, Header, Footer],
+  graphQL: {
+    schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
+  },
   plugins: [
     redirects({
       collections: ['pages', 'posts'],
@@ -99,4 +96,8 @@ export default buildConfig({
     }),
     payloadCloud(),
   ],
+  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
+  typescript: {
+    outputFile: path.resolve(__dirname, 'payload-types.ts'),
+  },
 })

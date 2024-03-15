@@ -4,13 +4,6 @@ import richText from '../../fields/richText'
 
 export const FormBlock: Block = {
   slug: 'formBlock',
-  labels: {
-    singular: 'Form Block',
-    plural: 'Form Blocks',
-  },
-  graphQL: {
-    singularName: 'FormBlock',
-  },
   fields: [
     {
       name: 'form',
@@ -20,15 +13,22 @@ export const FormBlock: Block = {
     },
     {
       name: 'enableIntro',
-      label: 'Enable Intro Content',
       type: 'checkbox',
+      label: 'Enable Intro Content',
     },
     richText({
       name: 'introContent',
-      label: 'Intro Content',
       admin: {
         condition: (_, { enableIntro }) => Boolean(enableIntro),
       },
+      label: 'Intro Content',
     }),
   ],
+  graphQL: {
+    singularName: 'FormBlock',
+  },
+  labels: {
+    plural: 'Form Blocks',
+    singular: 'Form Block',
+  },
 }

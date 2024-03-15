@@ -1,13 +1,13 @@
 import React, { Fragment } from 'react'
 
-import { Page } from '../../../payload-types'
+import type { Page } from '../../../payload-types'
+
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'
 import RichText from '../../_components/RichText'
-
 import classes from './index.module.scss'
 
-export const HighImpactHero: React.FC<Page['hero']> = ({ richText, media }) => {
+export const HighImpactHero: React.FC<Page['hero']> = ({ media, richText }) => {
   return (
     <Gutter className={classes.hero}>
       <div className={classes.content}>
@@ -17,12 +17,12 @@ export const HighImpactHero: React.FC<Page['hero']> = ({ richText, media }) => {
         {typeof media === 'object' && media !== null && (
           <Fragment>
             <Media
-              resource={media}
               // fill
               imgClassName={classes.image}
               priority
+              resource={media}
             />
-            {media?.caption && <RichText content={media.caption} className={classes.caption} />}
+            {media?.caption && <RichText className={classes.caption} content={media.caption} />}
           </Fragment>
         )}
       </div>

@@ -1,19 +1,21 @@
 'use client'
 
-import { Page as PageType } from '@/payload-types'
-import { useLivePreview } from '../../../../../../packages/live-preview-react/src'
-import React from 'react'
+import type { Page as PageType } from '@/payload-types'
+
 import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
-import { Hero } from '@/app/_components/Hero'
 import { Blocks } from '@/app/_components/Blocks'
+import { Hero } from '@/app/_components/Hero'
+import React from 'react'
+
+import { useLivePreview } from '../../../../../../packages/live-preview-react/src'
 
 export const PageClient: React.FC<{
   page: PageType
 }> = ({ page: initialPage }) => {
   const { data } = useLivePreview<PageType>({
+    depth: 2,
     initialData: initialPage,
     serverURL: PAYLOAD_SERVER_URL,
-    depth: 2,
   })
 
   return (
@@ -23,9 +25,9 @@ export const PageClient: React.FC<{
         blocks={[
           ...(data?.layout ?? []),
           {
-            blockType: 'relationships',
             blockName: 'Relationships',
-            data: data,
+            blockType: 'relationships',
+            data,
           },
         ]}
         disableTopPadding={

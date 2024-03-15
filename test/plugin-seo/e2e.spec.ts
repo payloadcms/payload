@@ -126,7 +126,7 @@ describe('SEO Plugin', () => {
   })
 
   describe('i18n', () => {
-    test('Test support for another language', async () => {
+    test('support for another language', async () => {
       await page.goto(url.edit(id))
       const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'

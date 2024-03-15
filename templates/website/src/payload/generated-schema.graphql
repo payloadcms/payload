@@ -13,7 +13,12 @@ type Query {
   Projects(draft: Boolean, where: Project_where, limit: Int, page: Int, sort: String): Projects
   docAccessProject(id: Int!): projectsDocAccess
   versionProject(id: Int): ProjectVersion
-  versionsProjects(where: versionsProject_where, limit: Int, page: Int, sort: String): versionsProjects
+  versionsProjects(
+    where: versionsProject_where
+    limit: Int
+    page: Int
+    sort: String
+  ): versionsProjects
   Media(id: Int!, draft: Boolean): Media
   allMedia(draft: Boolean, where: Media_where, limit: Int, page: Int, sort: String): allMedia
   docAccessMedia(id: Int!): mediaDocAccess
@@ -29,12 +34,23 @@ type Query {
   Comments(draft: Boolean, where: Comment_where, limit: Int, page: Int, sort: String): Comments
   docAccessComment(id: Int!): commentsDocAccess
   versionComment(id: Int): CommentVersion
-  versionsComments(where: versionsComment_where, limit: Int, page: Int, sort: String): versionsComments
+  versionsComments(
+    where: versionsComment_where
+    limit: Int
+    page: Int
+    sort: String
+  ): versionsComments
   Redirect(id: Int!, draft: Boolean): Redirect
   Redirects(draft: Boolean, where: Redirect_where, limit: Int, page: Int, sort: String): Redirects
   docAccessRedirect(id: Int!): redirectsDocAccess
   PayloadPreference(id: Int!, draft: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
+  PayloadPreferences(
+    draft: Boolean
+    where: PayloadPreference_where
+    limit: Int
+    page: Int
+    sort: String
+  ): PayloadPreferences
   docAccessPayloadPreference(id: Int!): payload_preferencesDocAccess
   Settings(draft: Boolean): Settings
   docAccessSettings: settingsDocAccess
@@ -657,7 +673,8 @@ enum User_roles {
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress
+  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Post_PopulatedAuthors {
   id: String
@@ -14596,14 +14613,24 @@ type Mutation {
   deletePost(id: Int!): Post
   restoreVersionPost(id: Int): Post
   createProject(data: mutationProjectInput!, draft: Boolean): Project
-  updateProject(id: Int!, autosave: Boolean, data: mutationProjectUpdateInput!, draft: Boolean): Project
+  updateProject(
+    id: Int!
+    autosave: Boolean
+    data: mutationProjectUpdateInput!
+    draft: Boolean
+  ): Project
   deleteProject(id: Int!): Project
   restoreVersionProject(id: Int): Project
   createMedia(data: mutationMediaInput!, draft: Boolean): Media
   updateMedia(id: Int!, autosave: Boolean, data: mutationMediaUpdateInput!, draft: Boolean): Media
   deleteMedia(id: Int!): Media
   createCategory(data: mutationCategoryInput!, draft: Boolean): Category
-  updateCategory(id: Int!, autosave: Boolean, data: mutationCategoryUpdateInput!, draft: Boolean): Category
+  updateCategory(
+    id: Int!
+    autosave: Boolean
+    data: mutationCategoryUpdateInput!
+    draft: Boolean
+  ): Category
   deleteCategory(id: Int!): Category
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: Int!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
@@ -14616,14 +14643,29 @@ type Mutation {
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createComment(data: mutationCommentInput!, draft: Boolean): Comment
-  updateComment(id: Int!, autosave: Boolean, data: mutationCommentUpdateInput!, draft: Boolean): Comment
+  updateComment(
+    id: Int!
+    autosave: Boolean
+    data: mutationCommentUpdateInput!
+    draft: Boolean
+  ): Comment
   deleteComment(id: Int!): Comment
   restoreVersionComment(id: Int): Comment
   createRedirect(data: mutationRedirectInput!, draft: Boolean): Redirect
-  updateRedirect(id: Int!, autosave: Boolean, data: mutationRedirectUpdateInput!, draft: Boolean): Redirect
+  updateRedirect(
+    id: Int!
+    autosave: Boolean
+    data: mutationRedirectUpdateInput!
+    draft: Boolean
+  ): Redirect
   deleteRedirect(id: Int!): Redirect
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(id: Int!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
+  updatePayloadPreference(
+    id: Int!
+    autosave: Boolean
+    data: mutationPayloadPreferenceUpdateInput!
+    draft: Boolean
+  ): PayloadPreference
   deletePayloadPreference(id: Int!): PayloadPreference
   updateSettings(data: mutationSettingsInput!, draft: Boolean): Settings
   updateHeader(data: mutationHeaderInput!, draft: Boolean): Header

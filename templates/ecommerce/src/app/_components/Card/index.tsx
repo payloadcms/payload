@@ -1,12 +1,12 @@
 'use client'
 
-import React, { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
+import React, { Fragment, useEffect, useState } from 'react'
 
-import { Product } from '../../../payload/payload-types'
+import type { Product } from '../../../payload/payload-types'
+
 import { Media } from '../Media'
 import { Price } from '../Price'
-
 import classes from './index.module.scss'
 
 const priceFromJSON = (priceJSON): string => {
@@ -36,18 +36,18 @@ const priceFromJSON = (priceJSON): string => {
 export const Card: React.FC<{
   alignItems?: 'center'
   className?: string
-  showCategories?: boolean
-  hideImagesOnMobile?: boolean
-  title?: string
-  relationTo?: 'products'
   doc?: Product
-}> = props => {
+  hideImagesOnMobile?: boolean
+  relationTo?: 'products'
+  showCategories?: boolean
+  title?: string
+}> = (props) => {
   const {
+    className,
+    doc,
+    doc: { slug, categories, meta, priceJSON, title } = {},
     showCategories,
     title: titleFromProps,
-    doc,
-    doc: { slug, title, categories, meta, priceJSON } = {},
-    className,
   } = props
 
   const { description, image: metaImage } = meta || {}
@@ -68,10 +68,10 @@ export const Card: React.FC<{
 
   return (
     <div className={[classes.card, className].filter(Boolean).join(' ')}>
-      <Link href={href} className={classes.mediaWrapper}>
+      <Link className={classes.mediaWrapper} href={href}>
         {!metaImage && <div className={classes.placeholder}>No image</div>}
         {metaImage && typeof metaImage !== 'string' && (
-          <Media imgClassName={classes.image} resource={metaImage} fill />
+          <Media fill imgClassName={classes.image} resource={metaImage} />
         )}
       </Link>
       <div className={classes.content}>
@@ -103,7 +103,7 @@ export const Card: React.FC<{
         )}
         {titleToUse && (
           <h4 className={classes.title}>
-            <Link href={href} className={classes.titleLink}>
+            <Link className={classes.titleLink} href={href}>
               {titleToUse}
             </Link>
           </h4>

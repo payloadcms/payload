@@ -3,9 +3,9 @@
 import React, { Fragment } from 'react'
 
 import type { ArchiveBlockProps } from '../../../_blocks/ArchiveBlock/types'
+
 import { Card } from '../../Card'
 import { Gutter } from '../../Gutter'
-
 import classes from './index.module.scss'
 
 export type Props = {
@@ -29,8 +29,8 @@ export const CollectionArchiveBySelection: React.FC<Props> = (props) => {
               }
 
               return (
-                <div key={index} className={classes.column}>
-                  <Card relationTo="posts" doc={result} showCategories />
+                <div className={classes.column} key={index}>
+                  <Card doc={result} relationTo="posts" showCategories />
                 </div>
               )
             })}

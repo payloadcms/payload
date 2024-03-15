@@ -95,7 +95,7 @@ export const getTableColumnFromPath = ({
       field: {
         name: 'id',
         type: adapter.idType === 'uuid' ? 'text' : 'number',
-      } as TextField | NumberField,
+      } as NumberField | TextField,
       table: adapter.tables[newTableName],
     }
   }

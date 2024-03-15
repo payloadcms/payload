@@ -1,7 +1,8 @@
-import { unlockOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
+import { unlockOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 function unlockResolver(collection: Collection) {

@@ -1,4 +1,5 @@
 import type { Header } from '../../payload-types'
+
 import { PAYLOAD_SERVER_URL } from './serverURL'
 
 export async function fetchHeader(): Promise<Header> {

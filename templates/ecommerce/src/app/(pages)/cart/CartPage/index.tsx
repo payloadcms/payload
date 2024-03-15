@@ -1,9 +1,10 @@
 'use client'
 
-import React, { Fragment } from 'react'
 import Link from 'next/link'
+import React, { Fragment } from 'react'
 
-import { Page, Settings } from '../../../../payload/payload-types'
+import type { Page, Settings } from '../../../../payload/payload-types'
+
 import { Button } from '../../../_components/Button'
 import { HR } from '../../../_components/HR'
 import { LoadingShimmer } from '../../../_components/LoadingShimmer'
@@ -12,19 +13,18 @@ import { Price } from '../../../_components/Price'
 import { RemoveFromCartButton } from '../../../_components/RemoveFromCartButton'
 import { useAuth } from '../../../_providers/Auth'
 import { useCart } from '../../../_providers/Cart'
-
 import classes from './index.module.scss'
 
 export const CartPage: React.FC<{
-  settings: Settings
   page: Page
-}> = props => {
+  settings: Settings
+}> = (props) => {
   const { settings } = props
   const { productsPage } = settings || {}
 
   const { user } = useAuth()
 
-  const { cart, cartIsEmpty, addItemToCart, cartTotal, hasInitializedCart } = useCart()
+  const { addItemToCart, cart, cartIsEmpty, cartTotal, hasInitializedCart } = useCart()
 
   return (
     <Fragment>
@@ -48,7 +48,7 @@ export const CartPage: React.FC<{
               {!user && (
                 <Fragment>
                   {' '}
-                  <Link href={`/login?redirect=%2Fcart`}>Log in</Link>
+                  <Link href="/login?redirect=%2Fcart">Log in</Link>
                   {` to view a saved cart.`}
                 </Fragment>
               )}
@@ -62,7 +62,7 @@ export const CartPage: React.FC<{
                 {!user && (
                   <Fragment>
                     {' '}
-                    <Link href={`/login?redirect=%2Fcart`}>Log in</Link>
+                    <Link href="/login?redirect=%2Fcart">Log in</Link>
                     {` to save your progress.`}
                   </Fragment>
                 )}
@@ -70,9 +70,9 @@ export const CartPage: React.FC<{
               {cart?.items?.map((item, index) => {
                 if (typeof item.product === 'object') {
                   const {
-                    quantity,
                     product,
-                    product: { id, title, meta, stripeProductID },
+                    product: { id, meta, stripeProductID, title },
+                    quantity,
                   } = item
 
                   const isLast = index === (cart?.items?.length || 0) - 1
@@ -82,14 +82,14 @@ export const CartPage: React.FC<{
                   return (
                     <Fragment key={index}>
                       <div className={classes.row}>
-                        <Link href={`/products/${product.slug}`} className={classes.mediaWrapper}>
+                        <Link className={classes.mediaWrapper} href={`/products/${product.slug}`}>
                           {!metaImage && <span className={classes.placeholder}>No image</span>}
                           {metaImage && typeof metaImage !== 'string' && (
                             <Media
                               className={classes.media}
+                              fill
                               imgClassName={classes.image}
                               resource={metaImage}
-                              fill
                             />
                           )}
                         </Link>
@@ -104,11 +104,11 @@ export const CartPage: React.FC<{
                               >
                                 edit this product in the admin panel
                               </Link>
-                              {'.'}
+                              .
                             </p>
                           )}
                           <h5 className={classes.title}>
-                            <Link href={`/products/${product.slug}`} className={classes.titleLink}>
+                            <Link className={classes.titleLink} href={`/products/${product.slug}`}>
                               {title}
                             </Link>
                           </h5>
@@ -116,22 +116,22 @@ export const CartPage: React.FC<{
                             <label>
                               Quantity &nbsp;
                               <input
-                                type="number"
                                 className={classes.quantity}
-                                // fallback to empty string to avoid uncontrolled input error
-                                // this allows the user to user their backspace key to clear the input
-                                value={typeof quantity === 'number' ? quantity : ''}
-                                onChange={e => {
+                                onChange={(e) => {
                                   addItemToCart({
                                     product,
                                     quantity: Number(e.target.value),
                                   })
                                 }}
+                                // fallback to empty string to avoid uncontrolled input error
+                                type="number"
+                                // this allows the user to user their backspace key to clear the input
+                                value={typeof quantity === 'number' ? quantity : ''}
                               />
                             </label>
                             <RemoveFromCartButton product={product} />
                           </div>
-                          <Price product={product} button={false} quantity={quantity} />
+                          <Price button={false} product={product} quantity={quantity} />
                         </div>
                       </div>
                       {!isLast && <HR />}
@@ -143,10 +143,10 @@ export const CartPage: React.FC<{
               <HR />
               <h5 className={classes.cartTotal}>{`Total: ${cartTotal.formatted}`}</h5>
               <Button
+                appearance="primary"
                 className={classes.checkoutButton}
                 href={user ? '/checkout' : '/login?redirect=%2Fcheckout'}
                 label={user ? 'Checkout' : 'Login to checkout'}
-                appearance="primary"
               />
             </div>
           )}

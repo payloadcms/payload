@@ -8,16 +8,16 @@ export const populateAuthors: AfterReadHook = async ({ doc, req: { payload } }) 
   if (doc?.authors) {
     const authorDocs = await Promise.all(
       doc.authors.map(
-        async author =>
+        async (author) =>
           await payload.findByID({
-            collection: 'users',
             id: typeof author === 'object' ? author?.id : author,
+            collection: 'users',
             depth: 0,
           }),
       ),
     )
 
-    doc.populatedAuthors = authorDocs.map(authorDoc => ({
+    doc.populatedAuthors = authorDocs.map((authorDoc) => ({
       id: authorDoc.id,
       name: authorDoc.name,
     }))

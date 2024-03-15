@@ -10,7 +10,7 @@ import { withSession } from './withSession.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { locale, req = {} as PayloadRequest, slug, where },
+  { slug, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.globals
   const options = {
@@ -25,7 +25,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     where: combineQueries({ globalType: { equals: slug } }, where),
   })
 
-  let doc = (await Model.findOne(query, {}, options)) as any
+  let doc = await Model.findOne(query, {}, options)
 
   if (!doc) {
     return null

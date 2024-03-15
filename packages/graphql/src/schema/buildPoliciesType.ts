@@ -1,15 +1,16 @@
-import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import { GraphQLJSONObject } from 'graphql-type-json'
 import type {
   CollectionConfig,
-  SanitizedCollectionConfig,
   Field,
   GlobalConfig,
-  SanitizedGlobalConfig,
+  SanitizedCollectionConfig,
   SanitizedConfig,
+  SanitizedGlobalConfig,
 } from 'payload/types'
 
+import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql'
+import { GraphQLJSONObject } from 'graphql-type-json'
 import { toWords } from 'payload/utilities'
+
 import formatName from '../utilities/formatName.js'
 
 type OperationType = 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'
@@ -142,8 +143,8 @@ type BuildPolicyType = {
     }
 )
 export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
-  const { entity, scope, type, typeSuffix } = args
-  const { fields, graphQL, slug, versions } = entity
+  const { type, entity, scope, typeSuffix } = args
+  const { slug, fields, graphQL, versions } = entity
 
   let operations = []
 
@@ -210,8 +211,8 @@ export default function buildPoliciesType(config: SanitizedConfig): GraphQLObjec
       return
     }
     const collectionPolicyType = buildPolicyType({
-      entity: collection,
       type: 'collection',
+      entity: collection,
       typeSuffix: 'Access',
     })
 
@@ -225,8 +226,8 @@ export default function buildPoliciesType(config: SanitizedConfig): GraphQLObjec
       return
     }
     const globalPolicyType = buildPolicyType({
-      entity: global,
       type: 'global',
+      entity: global,
       typeSuffix: 'Access',
     })
 

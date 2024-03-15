@@ -1,8 +1,9 @@
-import { refreshOperation } from 'payload/operations'
-import { generatePayloadCookie, extractJWT } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
+import { extractJWT, generatePayloadCookie } from 'payload/auth'
+import { refreshOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 function refreshResolver(collection: Collection): any {
@@ -24,9 +25,9 @@ function refreshResolver(collection: Collection): any {
 
     const result = await refreshOperation(options)
     const cookie = generatePayloadCookie({
-      token: result.refreshedToken,
-      payload: context.req.payload,
       collectionConfig: collection.config,
+      payload: context.req.payload,
+      token: result.refreshedToken,
     })
     context.headers['Set-Cookie'] = cookie
 

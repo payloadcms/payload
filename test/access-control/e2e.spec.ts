@@ -232,8 +232,8 @@ describe('access control', () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
 
       // validate that the text input is disabled because the field is "locked"
-      const isDisabled = await page.locator('#field-approvedTitle').isDisabled()
-      expect(isDisabled).toBe(true)
+      const isDisabled = page.locator('#field-approvedTitle')
+      await expect(isDisabled).toBeDisabled()
     })
 
     test('disable operation based on document data', async () => {

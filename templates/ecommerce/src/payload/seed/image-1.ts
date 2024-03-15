@@ -8,28 +8,28 @@ export const image1 = {
         },
         {
           type: 'link',
-          linkType: 'custom',
-          url: 'https://unsplash.com/@henmankk?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
-          newTab: true,
           children: [
             {
               text: 'Keagan Henman',
             },
           ],
+          linkType: 'custom',
+          newTab: true,
+          url: 'https://unsplash.com/@henmankk?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
         },
         {
           text: ' on ',
         },
         {
           type: 'link',
-          linkType: 'custom',
-          url: 'https://unsplash.com/photos/Won79_9oUEk?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
-          newTab: true,
           children: [
             {
               text: 'Unsplash',
             },
           ],
+          linkType: 'custom',
+          newTab: true,
+          url: 'https://unsplash.com/photos/Won79_9oUEk?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
         },
         {
           text: '.',

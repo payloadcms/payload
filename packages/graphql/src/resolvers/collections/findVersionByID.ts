@@ -1,9 +1,10 @@
-import { findVersionByIDOperation } from 'payload/operations'
 import type { PayloadRequest } from 'payload/types'
-import type { TypeWithVersion } from 'payload/versions'
 import type { Collection, TypeWithID } from 'payload/types'
+import type { TypeWithVersion } from 'payload/versions'
 
+import { findVersionByIDOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 export type Resolver<T extends TypeWithID = any> = (

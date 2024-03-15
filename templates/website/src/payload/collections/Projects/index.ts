@@ -14,28 +14,20 @@ import { revalidateProject } from './hooks/revalidateProject'
 
 export const Projects: CollectionConfig = {
   slug: 'projects',
+  access: {
+    create: admins,
+    delete: admins,
+    read: adminsOrPublished,
+    update: admins,
+  },
   admin: {
-    useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
-    preview: doc => {
+    preview: (doc) => {
       return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
         `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/projects/${doc?.slug}`,
       )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
     },
-  },
-  hooks: {
-    beforeChange: [populatePublishedAt],
-    afterChange: [revalidateProject],
-    afterRead: [populateArchiveBlock],
-  },
-  versions: {
-    drafts: true,
-  },
-  access: {
-    read: adminsOrPublished,
-    update: admins,
-    create: admins,
-    delete: admins,
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -46,11 +38,11 @@ export const Projects: CollectionConfig = {
     {
       name: 'categories',
       type: 'relationship',
-      relationTo: 'categories',
-      hasMany: true,
       admin: {
         position: 'sidebar',
       },
+      hasMany: true,
+      relationTo: 'categories',
     },
     {
       name: 'publishedAt',
@@ -63,27 +55,25 @@ export const Projects: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Hero',
           fields: [hero],
+          label: 'Hero',
         },
         {
-          label: 'Content',
           fields: [
             {
               name: 'layout',
               type: 'blocks',
-              required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive],
+              required: true,
             },
           ],
+          label: 'Content',
         },
       ],
     },
     {
       name: 'relatedProjects',
       type: 'relationship',
-      relationTo: 'projects',
-      hasMany: true,
       filterOptions: ({ id }) => {
         return {
           id: {
@@ -91,7 +81,17 @@ export const Projects: CollectionConfig = {
           },
         }
       },
+      hasMany: true,
+      relationTo: 'projects',
     },
     slugField(),
   ],
+  hooks: {
+    afterChange: [revalidateProject],
+    afterRead: [populateArchiveBlock],
+    beforeChange: [populatePublishedAt],
+  },
+  versions: {
+    drafts: true,
+  },
 }

@@ -1,6 +1,8 @@
 import React, { Fragment } from 'react'
 
-import { Page } from '../../../payload/payload-types.js'
+import type { Page } from '../../../payload/payload-types.js'
+import type { VerticalPaddingOptions } from '../VerticalPadding'
+
 import { ArchiveBlock } from '../../_blocks/ArchiveBlock'
 import { CallToActionBlock } from '../../_blocks/CallToAction'
 import { CommentsBlock, type CommentsBlockProps } from '../../_blocks/Comments/index'
@@ -9,22 +11,22 @@ import { MediaBlock } from '../../_blocks/MediaBlock'
 import { RelatedPosts, type RelatedPostsProps } from '../../_blocks/RelatedPosts'
 import { toKebabCase } from '../../_utilities/toKebabCase'
 import { BackgroundColor } from '../BackgroundColor'
-import { VerticalPadding, VerticalPaddingOptions } from '../VerticalPadding'
+import { VerticalPadding } from '../VerticalPadding'
 
 const blockComponents = {
-  cta: CallToActionBlock,
-  content: ContentBlock,
-  mediaBlock: MediaBlock,
   archive: ArchiveBlock,
-  relatedPosts: RelatedPosts,
   comments: CommentsBlock,
+  content: ContentBlock,
+  cta: CallToActionBlock,
+  mediaBlock: MediaBlock,
+  relatedPosts: RelatedPosts,
 }
 
 export const Blocks: React.FC<{
-  blocks: (Page['layout'][0] | RelatedPostsProps | CommentsBlockProps)[]
+  blocks: (CommentsBlockProps | Page['layout'][0] | RelatedPostsProps)[]
   disableTopPadding?: boolean
-}> = props => {
-  const { disableTopPadding, blocks } = props
+}> = (props) => {
+  const { blocks, disableTopPadding } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -64,8 +66,8 @@ export const Blocks: React.FC<{
 
             if (Block) {
               return (
-                <BackgroundColor key={index} invert={blockIsInverted}>
-                  <VerticalPadding top={paddingTop} bottom={paddingBottom}>
+                <BackgroundColor invert={blockIsInverted} key={index}>
+                  <VerticalPadding bottom={paddingBottom} top={paddingTop}>
                     {/* @ts-expect-error */}
                     <Block id={toKebabCase(blockName)} {...block} />
                   </VerticalPadding>

@@ -1,12 +1,13 @@
 'use client'
 
-import React, { Fragment, useEffect } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import React, { Fragment, useEffect } from 'react'
 
-import { Settings } from '../../../../payload/payload-types'
+import type { Settings } from '../../../../payload/payload-types'
+
 import { Button } from '../../../_components/Button'
 import { HR } from '../../../_components/HR'
 import { LoadingShimmer } from '../../../_components/LoadingShimmer'
@@ -17,7 +18,6 @@ import { useCart } from '../../../_providers/Cart'
 import { useTheme } from '../../../_providers/Theme'
 import cssVariables from '../../../cssVariables'
 import { CheckoutForm } from '../CheckoutForm'
-
 import classes from './index.module.scss'
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
@@ -25,14 +25,14 @@ const stripe = loadStripe(apiKey)
 
 export const CheckoutPage: React.FC<{
   settings: Settings
-}> = props => {
+}> = (props) => {
   const {
     settings: { productsPage },
   } = props
 
   const { user } = useAuth()
   const router = useRouter()
-  const [error, setError] = React.useState<string | null>(null)
+  const [error, setError] = React.useState<null | string>(null)
   const [clientSecret, setClientSecret] = React.useState()
   const hasMadePaymentIntent = React.useRef(false)
   const { theme } = useTheme()
@@ -54,8 +54,8 @@ export const CheckoutPage: React.FC<{
           const paymentReq = await fetch(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-payment-intent`,
             {
-              method: 'POST',
               credentials: 'include',
+              method: 'POST',
             },
           )
 
@@ -98,9 +98,9 @@ export const CheckoutPage: React.FC<{
           {cart?.items?.map((item, index) => {
             if (typeof item.product === 'object') {
               const {
-                quantity,
                 product,
-                product: { id, stripeProductID, title, meta },
+                product: { id, meta, stripeProductID, title },
+                quantity,
               } = item
 
               if (!quantity) return null
@@ -117,9 +117,9 @@ export const CheckoutPage: React.FC<{
                       {metaImage && typeof metaImage !== 'string' && (
                         <Media
                           className={classes.media}
+                          fill
                           imgClassName={classes.image}
                           resource={metaImage}
-                          fill
                         />
                       )}
                     </div>
@@ -132,11 +132,11 @@ export const CheckoutPage: React.FC<{
                           >
                             edit this product in the admin panel
                           </Link>
-                          {'.'}
+                          .
                         </p>
                       )}
                       <h6 className={classes.title}>{title}</h6>
-                      <Price product={product} button={false} quantity={quantity} />
+                      <Price button={false} product={product} quantity={quantity} />
                     </div>
                   </div>
                   {!isLast && <HR />}
@@ -156,36 +156,36 @@ export const CheckoutPage: React.FC<{
       {!clientSecret && error && (
         <div className={classes.error}>
           <p>{`Error: ${error}`}</p>
-          <Button label="Back to cart" href="/cart" appearance="secondary" />
+          <Button appearance="secondary" href="/cart" label="Back to cart" />
         </div>
       )}
       {clientSecret && (
         <Fragment>
           {error && <p>{`Error: ${error}`}</p>}
           <Elements
-            stripe={stripe}
             options={{
-              clientSecret,
               appearance: {
                 theme: 'stripe',
                 variables: {
-                  colorText:
-                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
-                  fontSizeBase: '16px',
-                  fontWeightNormal: '500',
-                  fontWeightBold: '600',
+                  borderRadius: '0px',
                   colorBackground:
                     theme === 'dark' ? cssVariables.colors.base850 : cssVariables.colors.base0,
-                  fontFamily: 'Inter, sans-serif',
-                  colorTextPlaceholder: cssVariables.colors.base500,
-                  colorIcon:
-                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
-                  borderRadius: '0px',
                   colorDanger: cssVariables.colors.error500,
                   colorDangerText: cssVariables.colors.error500,
+                  colorIcon:
+                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
+                  colorText:
+                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
+                  colorTextPlaceholder: cssVariables.colors.base500,
+                  fontFamily: 'Inter, sans-serif',
+                  fontSizeBase: '16px',
+                  fontWeightBold: '600',
+                  fontWeightNormal: '500',
                 },
               },
+              clientSecret,
             }}
+            stripe={stripe}
           >
             <CheckoutForm />
           </Elements>

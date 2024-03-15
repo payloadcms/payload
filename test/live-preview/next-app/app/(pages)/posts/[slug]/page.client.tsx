@@ -1,19 +1,21 @@
 'use client'
 
-import { Post as PostType } from '@/payload-types'
-import { useLivePreview } from '../../../../../../../packages/live-preview-react/src'
-import React from 'react'
+import type { Post as PostType } from '@/payload-types'
+
 import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import { Blocks } from '@/app/_components/Blocks'
 import { PostHero } from '@/app/_heros/PostHero'
+import React from 'react'
+
+import { useLivePreview } from '../../../../../../../packages/live-preview-react/src'
 
 export const PostClient: React.FC<{
   post: PostType
 }> = ({ post: initialPost }) => {
   const { data } = useLivePreview<PostType>({
+    depth: 2,
     initialData: initialPost,
     serverURL: PAYLOAD_SERVER_URL,
-    depth: 2,
   })
 
   return (
@@ -21,12 +23,11 @@ export const PostClient: React.FC<{
       <PostHero post={data} />
       <Blocks blocks={data?.layout} />
       <Blocks
-        disableTopPadding
         blocks={[
           {
-            blockType: 'relatedPosts',
             blockName: 'Related Posts',
-            relationTo: 'posts',
+            blockType: 'relatedPosts',
+            docs: data?.relatedPosts,
             introContent: [
               {
                 type: 'h4',
@@ -44,12 +45,12 @@ export const PostClient: React.FC<{
                   },
                   {
                     type: 'link',
-                    url: `/admin/collections/posts/${data?.id}`,
                     children: [
                       {
                         text: 'navigate to the admin dashboard',
                       },
                     ],
+                    url: `/admin/collections/posts/${data?.id}`,
                   },
                   {
                     text: '.',
@@ -57,9 +58,10 @@ export const PostClient: React.FC<{
                 ],
               },
             ],
-            docs: data?.relatedPosts,
+            relationTo: 'posts',
           },
         ]}
+        disableTopPadding
       />
     </React.Fragment>
   )

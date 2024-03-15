@@ -1,6 +1,6 @@
-import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
 import Link from 'next/link'
+import React, { Fragment } from 'react'
 import { Text } from 'slate'
 
 import { Label } from '../Label'
@@ -11,14 +11,14 @@ import { CMSLink } from '../Link'
 type Children = Leaf[]
 
 type Leaf = {
-  type: string
-  value?: {
-    url: string
-    alt: string
-  }
-  children?: Children
-  url?: string
   [key: string]: unknown
+  children?: Children
+  type: string
+  url?: string
+  value?: {
+    alt: string
+    url: string
+  }
 }
 
 const serialize = (children?: Children): React.ReactNode[] =>
@@ -40,7 +40,7 @@ const serialize = (children?: Children): React.ReactNode[] =>
 
       if (node.underline) {
         text = (
-          <span style={{ textDecoration: 'underline' }} key={i}>
+          <span key={i} style={{ textDecoration: 'underline' }}>
             {text}
           </span>
         )
@@ -48,7 +48,7 @@ const serialize = (children?: Children): React.ReactNode[] =>
 
       if (node.strikethrough) {
         text = (
-          <span style={{ textDecoration: 'line-through' }} key={i}>
+          <span key={i} style={{ textDecoration: 'line-through' }}>
             {text}
           </span>
         )
@@ -86,10 +86,10 @@ const serialize = (children?: Children): React.ReactNode[] =>
         return (
           <CMSLink
             key={i}
+            newTab={Boolean(node?.newTab)}
+            reference={node.doc as any}
             type={node.linkType === 'internal' ? 'reference' : 'custom'}
             url={node.url}
-            reference={node.doc as any}
-            newTab={Boolean(node?.newTab)}
           >
             {serialize(node?.children)}
           </CMSLink>

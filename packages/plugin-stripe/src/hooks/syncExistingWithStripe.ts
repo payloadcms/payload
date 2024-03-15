@@ -39,15 +39,12 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
     if (syncConfig) {
       if (operation === 'update') {
         // combine all fields of this object and match their respective values within the document
-        let syncedFields = syncConfig.fields.reduce(
-          (acc, field) => {
-            const { fieldPath, stripeProperty } = field
+        let syncedFields = syncConfig.fields.reduce((acc, field) => {
+          const { fieldPath, stripeProperty } = field
 
-            acc[stripeProperty] = data[fieldPath]
-            return acc
-          },
-          {} as Record<string, any>,
-        )
+          acc[stripeProperty] = data[fieldPath]
+          return acc
+        }, {} as Record<string, any>)
 
         syncedFields = deepen(syncedFields)
 

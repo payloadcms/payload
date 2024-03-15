@@ -1,6 +1,7 @@
 import type { FieldWithSubFields, TabsField } from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
+
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js'
 
 type Args = {
@@ -65,8 +66,8 @@ const recursivelyBuildNestedPaths = ({ field, nestedFieldName2, parentName }: Ar
         return [
           ...nestedFields,
           {
-            key: nestedPathName,
             type: fieldSchema,
+            key: nestedPathName,
           },
         ]
       }

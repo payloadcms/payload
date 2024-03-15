@@ -1,4 +1,5 @@
 import type { GraphQLType } from 'graphql'
+import type { FieldAffectingData, NumberField, RadioField, SelectField } from 'payload/types'
 
 import {
   GraphQLBoolean,
@@ -11,10 +12,8 @@ import {
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 import { GraphQLJSON } from 'graphql-type-json'
-
-import type { FieldAffectingData, NumberField, RadioField, SelectField } from 'payload/types'
-
 import { optionIsObject } from 'payload/types'
+
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import operators from './operators.js'
@@ -38,10 +37,10 @@ type dynamicTypes = 'radio' | 'select'
 const GeoJSONObject = new GraphQLInputObjectType({
   name: 'GeoJSONObject',
   fields: {
+    type: { type: GraphQLString },
     coordinates: {
       type: GraphQLJSON,
     },
-    type: { type: GraphQLString },
   },
 })
 

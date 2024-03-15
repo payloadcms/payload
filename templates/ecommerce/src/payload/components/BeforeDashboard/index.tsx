@@ -1,9 +1,8 @@
+import { Banner } from 'payload/components'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Banner } from 'payload/components'
 
 import { SeedButton } from './SeedButton'
-
 import './index.scss'
 
 const baseClass = 'before-dashboard'
@@ -26,20 +25,20 @@ const BeforeDashboard: React.FC = () => {
           {'Head over to '}
           <a
             href="https://dashboard.stripe.com/test/apikeys"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
-            {'Stripe to obtain your API Keys'}
+            Stripe to obtain your API Keys
           </a>
           {
             '. Create a new account if needed, then copy them into your environment variables and restart your server. See the '
           }
           <a
             href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
-            {'README'}
+            README
           </a>
           {' for more details.'}
         </li>
@@ -57,24 +56,24 @@ const BeforeDashboard: React.FC = () => {
           {'Modify your '}
           <a
             href="https://payloadcms.com/docs/configuration/collections"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
             collections
           </a>
           {' and add more '}
           <a
             href="https://payloadcms.com/docs/fields/overview"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
             fields
           </a>
           {' as needed. If you are new to Payload, we also recommend you check out the '}
           <a
             href="https://payloadcms.com/docs/getting-started/what-is-payload"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
             Getting Started
           </a>
@@ -86,9 +85,9 @@ const BeforeDashboard: React.FC = () => {
       </ul>
       {'Pro Tip: This block is a '}
       <a
-        href={'https://payloadcms.com/docs/admin/components#base-component-overrides'}
-        target="_blank"
+        href="https://payloadcms.com/docs/admin/components#base-component-overrides"
         rel="noopener noreferrer"
+        target="_blank"
       >
         custom component
       </a>

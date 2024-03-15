@@ -64,7 +64,7 @@ which field hook you are utilizing.
 Field Hooks receive one `args` argument that contains the following properties:
 
 | Option                   | Description                                                                                                                                                                                                           |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`data`**               | The data passed to update the document within `create` and `update` operations, and the full document itself in the `afterRead` hook.                                                                                 |
 | **`siblingData`**        | The sibling data passed to a field that the hook is running against.                                                                                                                                                  |
 | **`findMany`**           | Boolean to denote if this hook is running against finding one, or finding many within the `afterRead` hook.                                                                                                           |
@@ -111,11 +111,13 @@ const usernameField: Field = {
   name: 'username',
   type: 'text',
   hooks: {
-    beforeValidate: [({ value }) => {
-      // Trim whitespace and convert to lowercase
-      return value.trim().toLowerCase()
-    }],
-  }
+    beforeValidate: [
+      ({ value }) => {
+        // Trim whitespace and convert to lowercase
+        return value.trim().toLowerCase()
+      },
+    ],
+  },
 }
 ```
 
@@ -136,13 +138,15 @@ const emailField: Field = {
   name: 'email',
   type: 'email',
   hooks: {
-    beforeChange: [({ value, operation }) => {
-      if (operation === 'create') {
-        // Perform additional validation or transformation for 'create' operation
-      }
-      return value
-    }],
-  }
+    beforeChange: [
+      ({ value, operation }) => {
+        if (operation === 'create') {
+          // Perform additional validation or transformation for 'create' operation
+        }
+        return value
+      },
+    ],
+  },
 }
 ```
 
@@ -164,17 +168,21 @@ const membershipStatusField: Field = {
   options: [
     { label: 'Standard', value: 'standard' },
     { label: 'Premium', value: 'premium' },
-    { label: 'VIP', value: 'vip' }
+    { label: 'VIP', value: 'vip' },
   ],
   hooks: {
-    afterChange: [({ value, previousValue, req }) => {
-      if (value !== previousValue) {
-        // Log or perform an action when the membership status changes
-        console.log(`User ID ${req.user.id} changed their membership status from ${previousValue} to ${value}.`)
-        // Here, you can implement actions that could track conversions from one tier to another
-      }
-    }],
-  }
+    afterChange: [
+      ({ value, previousValue, req }) => {
+        if (value !== previousValue) {
+          // Log or perform an action when the membership status changes
+          console.log(
+            `User ID ${req.user.id} changed their membership status from ${previousValue} to ${value}.`,
+          )
+          // Here, you can implement actions that could track conversions from one tier to another
+        }
+      },
+    ],
+  },
 }
 ```
 
@@ -195,11 +203,13 @@ const dateField: Field = {
   name: 'createdAt',
   type: 'date',
   hooks: {
-    afterRead: [({ value }) => {
-      // Format date for display
-      return new Date(value).toLocaleDateString()
-    }],
-  }
+    afterRead: [
+      ({ value }) => {
+        // Format date for display
+        return new Date(value).toLocaleDateString()
+      },
+    ],
+  },
 }
 ```
 

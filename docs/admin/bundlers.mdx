@@ -33,7 +33,7 @@ import { webpackBundler } from '@payloadcms/bundler-webpack'
 export default buildConfig({
   // highlight-start
   admin: {
-    bundler: webpackBundler() // or viteBundler()
+    bundler: webpackBundler(), // or viteBundler()
   },
   // highlight-end
 })
@@ -48,7 +48,7 @@ Since the bundled file is sent to the browser, it can't include any server-only 
 <Banner type="warning">
   <strong>Using environment variables in the admin UI</strong>
   <br />
-  Bundles should not contain sensitive information. By default, Payload
-  excludes env variables from the bundle. If you need to use env variables in your payload config,
-  you need to prefix them with `PAYLOAD_PUBLIC_` to make them available to the client-side code.
+  Bundles should not contain sensitive information. By default, Payload excludes env variables from
+  the bundle. If you need to use env variables in your payload config, you need to prefix them with
+  `PAYLOAD_PUBLIC_` to make them available to the client-side code.
 </Banner>

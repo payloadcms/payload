@@ -1,6 +1,3 @@
-import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
-import GraphQLJSONImport from 'graphql-type-json'
-
 import type {
   ArrayField,
   CheckboxField,
@@ -22,6 +19,9 @@ import type {
   TextareaField,
   UploadField,
 } from 'payload/types'
+
+import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
+import GraphQLJSONImport from 'graphql-type-json'
 
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'

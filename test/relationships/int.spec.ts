@@ -1,7 +1,6 @@
 import { randomBytes } from 'crypto'
 
 import type { Payload } from '../../packages/payload/src/index.js'
-import { getPayload } from '../../packages/payload/src/index.js'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -10,6 +9,8 @@ import type {
   Post,
   Relation,
 } from './payload-types.js'
+
+import { getPayload } from '../../packages/payload/src/index.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'

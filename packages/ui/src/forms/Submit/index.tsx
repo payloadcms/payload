@@ -10,7 +10,7 @@ import './index.scss'
 const baseClass = 'form-submit'
 
 const FormSubmit = forwardRef<HTMLButtonElement, Props>((props, ref) => {
-  const { buttonId: id, children, disabled: disabledFromProps, type = 'submit' } = props
+  const { type = 'submit', buttonId: id, children, disabled: disabledFromProps } = props
   const processing = useFormProcessing()
   const { disabled } = useForm()
   const canSave = !(disabledFromProps || processing || disabled)

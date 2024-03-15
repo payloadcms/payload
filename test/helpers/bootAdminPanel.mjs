@@ -2,7 +2,6 @@ import { createServer } from 'http'
 import next from 'next'
 import { parse } from 'url'
 
-
 const actualNext = next.default || next
 export const bootAdminPanel = async ({ port = 3000, appDir }) => {
   const serverURL = `http://localhost:${port}`

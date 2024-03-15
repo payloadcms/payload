@@ -1,9 +1,12 @@
-import React from 'react'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import React from 'react'
 
-import { Comment, Post } from '../../../../payload/payload-types'
+import type { Post } from '../../../../payload/payload-types'
+
+import { Comment } from '../../../../payload/payload-types'
 import { fetchComments } from '../../../_api/fetchComments'
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
@@ -23,8 +26,8 @@ export default async function Post({ params: { slug } }) {
 
   try {
     post = await fetchDoc<Post>({
-      collection: 'posts',
       slug,
+      collection: 'posts',
       draft: isDraftMode,
     })
   } catch (error) {
@@ -39,20 +42,20 @@ export default async function Post({ params: { slug } }) {
     doc: post?.id,
   })
 
-  const { layout, relatedPosts, enablePremiumContent, premiumContent } = post
+  const { enablePremiumContent, layout, premiumContent, relatedPosts } = post
 
   return (
     <React.Fragment>
       <PostHero post={post} />
       <Blocks blocks={layout} />
-      {enablePremiumContent && <PremiumContent postSlug={slug as string} disableTopPadding />}
+      {enablePremiumContent && <PremiumContent disableTopPadding postSlug={slug as string} />}
       <Blocks
-        disableTopPadding
         blocks={[
           {
-            blockType: 'comments',
             blockName: 'Comments',
-            relationTo: 'posts',
+            blockType: 'comments',
+            comments,
+            doc: post,
             introContent: [
               {
                 type: 'h4',
@@ -70,12 +73,12 @@ export default async function Post({ params: { slug } }) {
                   },
                   {
                     type: 'link',
-                    url: '/admin/collections/comments',
                     children: [
                       {
                         text: 'navigate to the admin dashboard',
                       },
                     ],
+                    url: '/admin/collections/comments',
                   },
                   {
                     text: '.',
@@ -83,13 +86,12 @@ export default async function Post({ params: { slug } }) {
                 ],
               },
             ],
-            doc: post,
-            comments,
+            relationTo: 'posts',
           },
           {
-            blockType: 'relatedPosts',
             blockName: 'Related Posts',
-            relationTo: 'posts',
+            blockType: 'relatedPosts',
+            docs: relatedPosts,
             introContent: [
               {
                 type: 'h4',
@@ -107,12 +109,12 @@ export default async function Post({ params: { slug } }) {
                   },
                   {
                     type: 'link',
-                    url: `/admin/collections/posts/${post.id}`,
                     children: [
                       {
                         text: 'navigate to the admin dashboard',
                       },
                     ],
+                    url: `/admin/collections/posts/${post.id}`,
                   },
                   {
                     text: '.',
@@ -120,9 +122,10 @@ export default async function Post({ params: { slug } }) {
                 ],
               },
             ],
-            docs: relatedPosts,
+            relationTo: 'posts',
           },
         ]}
+        disableTopPadding
       />
     </React.Fragment>
   )
@@ -144,8 +147,8 @@ export async function generateMetadata({ params: { slug } }): Promise<Metadata> 
 
   try {
     post = await fetchDoc<Post>({
-      collection: 'posts',
       slug,
+      collection: 'posts',
       draft: isDraftMode,
     })
   } catch (error) {}

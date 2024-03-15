@@ -9,11 +9,11 @@ export const findOne: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const depth = searchParams.get('depth')
 
   const result = await findOneOperation({
+    slug: globalConfig.slug,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
     globalConfig,
     req,
-    slug: globalConfig.slug,
   })
 
   return Response.json(result, {

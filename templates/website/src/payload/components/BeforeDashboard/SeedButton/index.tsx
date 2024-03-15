@@ -6,7 +6,7 @@ export const SeedButton: React.FC = () => {
   const [error, setError] = useState(null)
 
   const handleClick = useCallback(
-    async e => {
+    async (e) => {
       e.preventDefault()
       if (loading || seeded) return
 
@@ -31,7 +31,7 @@ export const SeedButton: React.FC = () => {
 
   return (
     <Fragment>
-      <a href="/api/seed" target="_blank" rel="noopener noreferrer" onClick={handleClick}>
+      <a href="/api/seed" onClick={handleClick} rel="noopener noreferrer" target="_blank">
         Seed your database
       </a>
       {message}

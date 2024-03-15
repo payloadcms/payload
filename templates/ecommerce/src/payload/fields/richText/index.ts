@@ -1,10 +1,11 @@
-import { slateEditor } from '@payloadcms/richtext-slate'
 import type {
   AdapterArguments,
   RichTextElement,
   RichTextLeaf,
 } from '@payloadcms/richtext-slate/dist/types'
 import type { RichTextField } from 'payload/dist/fields/config/types'
+
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 import deepMerge from '../../utilities/deepMerge'
 import link from '../link'
@@ -29,24 +30,26 @@ const richText: RichText = (
   const slateOptions = deepMerge<AdapterArguments['admin'], AdapterArguments['admin']>(
     overrides?.admin || {},
     {
+      elements: [...elements, ...(additions.elements || [])],
+      leaves: [...leaves, ...(additions.leaves || [])],
       upload: {
         collections: {
           media: {
             fields: [
               {
-                type: 'richText',
                 name: 'caption',
-                label: 'Caption',
+                type: 'richText',
                 editor: slateEditor({
                   admin: {
                     elements: [...elements],
                     leaves: [...leaves],
                   },
                 }),
+                label: 'Caption',
               },
               {
-                type: 'radio',
                 name: 'alignment',
+                type: 'radio',
                 label: 'Alignment',
                 options: [
                   {
@@ -81,8 +84,6 @@ const richText: RichText = (
           },
         },
       },
-      elements: [...elements, ...(additions.elements || [])],
-      leaves: [...leaves, ...(additions.leaves || [])],
     },
   )
 
@@ -96,10 +97,10 @@ const richText: RichText = (
     {
       name: 'richText',
       type: 'richText',
-      required: true,
       editor: slateEditor({
         admin: slateOptions,
       }),
+      required: true,
     },
     fieldOverrides || {},
   )

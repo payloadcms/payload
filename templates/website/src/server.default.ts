@@ -24,11 +24,11 @@ app.get('/', (_, res) => {
 
 const start = async (): Promise<void> => {
   await payload.init({
-    secret: process.env.PAYLOAD_SECRET || '',
     express: app,
     onInit: () => {
       payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`)
     },
+    secret: process.env.PAYLOAD_SECRET || '',
   })
 
   if (process.env.PAYLOAD_SEED === 'true') {

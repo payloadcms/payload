@@ -20,7 +20,8 @@ Ensure you have an npm script called "payload" in your `package.json` file.
 ```
 
 <Banner>
-  Note that you need to run Payload migrations through the package manager that you are using, because Payload should not be globally installed on your system.
+  Note that you need to run Payload migrations through the package manager that you are using,
+  because Payload should not be globally installed on your system.
 </Banner>
 
 ### Migration file contents
@@ -41,15 +42,15 @@ Here is an example migration file:
 ```ts
 import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/your-db-adapter'
 
-export async function up ({ payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
   // Perform changes to your database here.
   // You have access to `payload` as an argument, and
   // everything is done in TypeScript.
-};
+}
 
-export async function down ({ payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
   // Do whatever you need to revert changes if the `up` function fails
-};
+}
 ```
 
 ### Migrations Directory

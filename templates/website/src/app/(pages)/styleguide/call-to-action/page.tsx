@@ -1,6 +1,7 @@
-import React, { Fragment } from 'react'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+
 import Link from 'next/link'
+import React, { Fragment } from 'react'
 
 import { CallToActionBlock } from '../../../_blocks/CallToAction'
 import { Gutter } from '../../../_components/Gutter'
@@ -21,6 +22,17 @@ export default async function CallToActionPage() {
       <VerticalPadding bottom="large" top="none">
         <CallToActionBlock
           blockType="cta"
+          links={[
+            {
+              link: {
+                type: 'custom',
+                appearance: 'primary',
+                label: 'Lorem ipsum dolor sit amet',
+                reference: null,
+                url: '#',
+              },
+            },
+          ]}
           richText={[
             {
               type: 'h4',
@@ -36,17 +48,6 @@ export default async function CallToActionPage() {
                   text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                 },
               ],
-            },
-          ]}
-          links={[
-            {
-              link: {
-                type: 'custom',
-                label: 'Lorem ipsum dolor sit amet',
-                url: '#',
-                reference: null,
-                appearance: 'primary',
-              },
             },
           ]}
         />
@@ -55,6 +56,17 @@ export default async function CallToActionPage() {
         <CallToActionBlock
           blockType="cta"
           invertBackground
+          links={[
+            {
+              link: {
+                type: 'custom',
+                appearance: 'primary',
+                label: 'Lorem ipsum dolor sit amet',
+                reference: null,
+                url: '#',
+              },
+            },
+          ]}
           richText={[
             {
               type: 'h4',
@@ -70,17 +82,6 @@ export default async function CallToActionPage() {
                   text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                 },
               ],
-            },
-          ]}
-          links={[
-            {
-              link: {
-                type: 'custom',
-                label: 'Lorem ipsum dolor sit amet',
-                url: '#',
-                reference: null,
-                appearance: 'primary',
-              },
             },
           ]}
         />
@@ -90,10 +91,10 @@ export default async function CallToActionPage() {
 }
 
 export const metadata: Metadata = {
-  title: 'Call To Action Block',
   description: 'Styleguide for the Call To Action Block',
   openGraph: mergeOpenGraph({
     title: 'Call To Action Block',
     url: '/styleguide/call-to-action',
   }),
+  title: 'Call To Action Block',
 }

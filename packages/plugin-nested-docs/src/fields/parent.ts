@@ -15,9 +15,9 @@ export const createParentField = (
   },
   // filterOptions are assigned dynamically based on the pluginConfig
   // filterOptions: parentFilterOptions(),
+  type: 'relationship',
   maxDepth: 1,
   relationTo,
-  type: 'relationship',
   ...(overrides || {}),
 })
 

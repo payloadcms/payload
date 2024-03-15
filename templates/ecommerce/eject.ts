@@ -10,12 +10,12 @@ const files = ['./next.config.js', './next-env.d.ts', './redirects.js']
 const directories = ['./src/app']
 
 const eject = async (): Promise<void> => {
-  files.forEach(file => {
+  files.forEach((file) => {
     fs.unlinkSync(path.join(__dirname, file))
   })
 
-  directories.forEach(directory => {
-    fs.rm(path.join(__dirname, directory), { recursive: true }, err => {
+  directories.forEach((directory) => {
+    fs.rm(path.join(__dirname, directory), { recursive: true }, (err) => {
       if (err) throw err
     })
   })

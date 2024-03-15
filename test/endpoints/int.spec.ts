@@ -1,4 +1,4 @@
-import { getPayload, type Payload } from '../../packages/payload/src/index.js'
+import { type Payload, getPayload } from '../../packages/payload/src/index.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'

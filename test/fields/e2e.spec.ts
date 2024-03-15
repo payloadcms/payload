@@ -2002,7 +2002,7 @@ describe('fields', () => {
       expect(difference).toBeLessThanOrEqual(tolerance)
     })
 
-    test('should render nested row fields in the correct position ', async () => {
+    test('should render nested row fields in the correct position', async () => {
       await page.goto(url.create)
 
       // These fields are not given explicit `width` values

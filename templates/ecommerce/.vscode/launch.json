@@ -8,7 +8,7 @@
       "command": "yarn dev",
       "name": "Debug Ecommerce",
       "request": "launch",
-      "type": "node-terminal",
-    },
+      "type": "node-terminal"
+    }
   ]
 }

@@ -68,7 +68,7 @@
   color: var(--theme-warning-500);
 }
 
-:global([data-theme="light"]) {
+:global([data-theme='light']) {
   .warning {
     color: var(--theme-error-500);
   }
@@ -120,4 +120,3 @@
   flex-wrap: wrap;
   gap: calc(var(--base) / 2);
 }
-

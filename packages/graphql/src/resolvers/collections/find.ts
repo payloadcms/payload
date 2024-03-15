@@ -1,9 +1,10 @@
-import { findOperation } from 'payload/operations'
 import type { PaginatedDocs } from 'payload/database'
 import type { PayloadRequest, Where } from 'payload/types'
 import type { Collection } from 'payload/types'
 
+import { findOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 export type Resolver = (

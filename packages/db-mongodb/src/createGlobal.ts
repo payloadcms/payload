@@ -17,7 +17,7 @@ export const createGlobal: CreateGlobal = async function createGlobal(
   }
   const options = withSession(this, req.transactionID)
 
-  let [result] = (await Model.create([global], options)) as any
+  let [result] = await Model.create([global], options)
 
   result = JSON.parse(JSON.stringify(result))
 

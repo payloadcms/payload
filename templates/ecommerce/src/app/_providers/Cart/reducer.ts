@@ -6,20 +6,20 @@ type CartType = User['cart']
 
 type CartAction =
   | {
-      type: 'SET_CART'
-      payload: CartType
-    }
-  | {
-      type: 'MERGE_CART'
-      payload: CartType
-    }
-  | {
-      type: 'ADD_ITEM'
       payload: CartItem
+      type: 'ADD_ITEM'
     }
   | {
-      type: 'DELETE_ITEM'
+      payload: CartType
+      type: 'MERGE_CART'
+    }
+  | {
+      payload: CartType
+      type: 'SET_CART'
+    }
+  | {
       payload: Product
+      type: 'DELETE_ITEM'
     }
   | {
       type: 'CLEAR_CART'
@@ -73,7 +73,7 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
         typeof product === 'string' ? product === productId : product?.id === productId,
       ) // eslint-disable-line function-paren-newline
 
-      let withAddedItem = [...(cart?.items || [])]
+      const withAddedItem = [...(cart?.items || [])]
 
       if (indexInCart === -1) {
         withAddedItem.push(incomingItem)

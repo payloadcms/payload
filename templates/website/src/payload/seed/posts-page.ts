@@ -1,16 +1,11 @@
 import type { Page } from '../payload-types'
 
 export const postsPage: Partial<Page> = {
-  title: 'Posts',
   slug: 'posts',
   _status: 'published',
-  meta: {
-    title: 'Payload Website Template',
-    description: 'An open-source website built with Payload and Next.js.',
-    image: '{{IMAGE}}',
-  },
   hero: {
     type: 'lowImpact',
+    media: undefined,
     richText: [
       {
         type: 'h1',
@@ -29,12 +24,12 @@ export const postsPage: Partial<Page> = {
         ],
       },
     ],
-    media: undefined,
   },
   layout: [
     {
       blockName: 'Archive Block',
       blockType: 'archive',
+      categories: [],
       introContent: [
         {
           type: 'h4',
@@ -53,10 +48,15 @@ export const postsPage: Partial<Page> = {
           ],
         },
       ],
+      limit: 10,
       populateBy: 'collection',
       relationTo: 'posts',
-      limit: 10,
-      categories: [],
     },
   ],
+  meta: {
+    description: 'An open-source website built with Payload and Next.js.',
+    image: '{{IMAGE}}',
+    title: 'Payload Website Template',
+  },
+  title: 'Posts',
 }
