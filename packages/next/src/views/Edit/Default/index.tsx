@@ -4,7 +4,6 @@ import type { FormProps } from '@payloadcms/ui'
 import {
   DocumentControls,
   DocumentFields,
-  FieldPathProvider,
   Form,
   FormLoadingOverlayToggle,
   OperationProvider,
@@ -43,6 +42,7 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
+    getDocPreferences,
     globalSlug,
     hasSavePermission,
     initialData: data,
@@ -120,109 +120,114 @@ export const DefaultEditView: React.FC = () => {
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    ({ formState: prevFormState }) =>
-      getFormState({
+    async ({ formState: prevFormState }) => {
+      const docPreferences = await getDocPreferences()
+
+      return getFormState({
         apiRoute,
         body: {
           id,
           collectionSlug,
+          docPreferences,
           formState: prevFormState,
           globalSlug,
           operation,
           schemaPath: entitySlug,
         },
         serverURL,
-      }),
-    [serverURL, apiRoute, id, operation, entitySlug, collectionSlug, globalSlug],
+      })
+    },
+    [serverURL, apiRoute, id, operation, entitySlug, collectionSlug, globalSlug, getDocPreferences],
   )
 
   const RegisterGetThumbnailFunction = componentMap?.[`${collectionSlug}.adminThumbnail`]
 
   return (
     <main className={classes}>
-      <FieldPathProvider path="" schemaPath={entitySlug}>
-        <OperationProvider operation={operation}>
-          <Form
-            action={action}
-            className={`${baseClass}__form`}
-            disabled={!hasSavePermission}
-            initialState={initialState}
-            method={id ? 'PATCH' : 'POST'}
-            onChange={[onChange]}
-            onSuccess={onSave}
-          >
-            <FormLoadingOverlayToggle
-              action={operation}
-              // formIsLoading={isLoading}
-              // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
-              name={`collection-edit--${
-                typeof collectionConfig?.labels?.singular === 'string'
-                  ? collectionConfig.labels.singular
-                  : 'document'
-              }`}
-              type="withoutNav"
-            />
-            {BeforeDocument}
-            {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
-            <SetStepNav
-              collectionSlug={collectionConfig?.slug}
-              globalSlug={globalConfig?.slug}
-              id={id}
-              pluralLabel={collectionConfig?.labels?.plural}
-              useAsTitle={collectionConfig?.admin?.useAsTitle}
-            />
-            <SetDocumentTitle
-              collectionConfig={collectionConfig}
-              config={config}
-              fallback={depth <= 1 ? id?.toString() : undefined}
-              globalConfig={globalConfig}
-            />
-            <DocumentControls
-              apiURL={apiURL}
-              data={data}
-              disableActions={disableActions}
-              hasSavePermission={hasSavePermission}
-              id={id}
-              isEditing={Boolean(id)}
-              permissions={docPermissions}
-              slug={collectionConfig?.slug || globalConfig?.slug}
-            />
-            <DocumentFields
-              AfterFields={AfterFields}
-              BeforeFields={
-                BeforeFields || (
-                  <Fragment>
-                    {auth && (
-                      <Auth
-                        className={`${baseClass}__auth`}
+      <OperationProvider operation={operation}>
+        <Form
+          action={action}
+          className={`${baseClass}__form`}
+          disabled={!hasSavePermission}
+          initialState={initialState}
+          method={id ? 'PATCH' : 'POST'}
+          onChange={[onChange]}
+          onSuccess={onSave}
+        >
+          <FormLoadingOverlayToggle
+            action={operation}
+            // formIsLoading={isLoading}
+            // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
+            name={`collection-edit--${
+              typeof collectionConfig?.labels?.singular === 'string'
+                ? collectionConfig.labels.singular
+                : 'document'
+            }`}
+            type="withoutNav"
+          />
+          {BeforeDocument}
+          {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
+          <SetStepNav
+            collectionSlug={collectionConfig?.slug}
+            globalSlug={globalConfig?.slug}
+            id={id}
+            pluralLabel={collectionConfig?.labels?.plural}
+            useAsTitle={collectionConfig?.admin?.useAsTitle}
+          />
+          <SetDocumentTitle
+            collectionConfig={collectionConfig}
+            config={config}
+            fallback={depth <= 1 ? id?.toString() : undefined}
+            globalConfig={globalConfig}
+          />
+          <DocumentControls
+            apiURL={apiURL}
+            data={data}
+            disableActions={disableActions}
+            hasSavePermission={hasSavePermission}
+            id={id}
+            isEditing={Boolean(id)}
+            permissions={docPermissions}
+            slug={collectionConfig?.slug || globalConfig?.slug}
+          />
+          <DocumentFields
+            AfterFields={AfterFields}
+            BeforeFields={
+              BeforeFields || (
+                <Fragment>
+                  {auth && (
+                    <Auth
+                      className={`${baseClass}__auth`}
+                      collectionSlug={collectionConfig.slug}
+                      email={data?.email}
+                      operation={operation}
+                      readOnly={!hasSavePermission}
+                      requirePassword={!id}
+                      useAPIKey={auth.useAPIKey}
+                      verify={auth.verify}
+                    />
+                  )}
+                  {upload && (
+                    <React.Fragment>
+                      {RegisterGetThumbnailFunction && <RegisterGetThumbnailFunction />}
+                      <Upload
                         collectionSlug={collectionConfig.slug}
-                        email={data?.email}
-                        operation={operation}
-                        readOnly={!hasSavePermission}
-                        requirePassword={!id}
-                        useAPIKey={auth.useAPIKey}
-                        verify={auth.verify}
+                        initialState={initialState}
+                        uploadConfig={upload}
                       />
-                    )}
-                    {upload && (
-                      <React.Fragment>
-                        {RegisterGetThumbnailFunction && <RegisterGetThumbnailFunction />}
-                        <Upload
-                          collectionSlug={collectionConfig.slug}
-                          initialState={initialState}
-                          uploadConfig={upload}
-                        />
-                      </React.Fragment>
-                    )}
-                  </Fragment>
-                )
-              }
-              fieldMap={fieldMap}
-            />
-            {AfterDocument}
-          </Form>
-        </OperationProvider>
-      </FieldPathProvider>
+                    </React.Fragment>
+                  )}
+                </Fragment>
+              )
+            }
+            docPermissions={docPermissions}
+            fieldMap={fieldMap}
+            readOnly={!hasSavePermission}
+            schemaPath={entitySlug}
+          />
+          {AfterDocument}
+        </Form>
+      </OperationProvider>
     </main>
   )
 }
