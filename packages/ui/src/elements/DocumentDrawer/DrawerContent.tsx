@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormState, TypeWithID } from 'payload/types'
+import type { DocumentPreferences, FormState, TypeWithID } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import queryString from 'qs'
@@ -19,6 +19,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormState } from '../../utilities/getFormState.js'
 import { Gutter } from '../Gutter/index.js'
@@ -53,6 +54,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const { formQueryParams } = useFormQueryParams()
   const formattedQueryParams = queryString.stringify(formQueryParams)
+  const { getPreference } = usePreferences()
 
   const { permissions } = useAuth()
 
@@ -96,12 +98,19 @@ const Content: React.FC<DocumentDrawerProps> = ({
   useEffect(() => {
     if (!hasInitializedState.current && (!initialID.current || (initialID.current && data))) {
       const getInitialState = async () => {
+        let docPreferences: DocumentPreferences = { fields: {} }
+
+        if (id) {
+          docPreferences = await getPreference(`collection-${collectionSlug}-${id}`)
+        }
+
         const result = await getFormState({
           apiRoute,
           body: {
             id,
             collectionSlug,
             data: data || {},
+            docPreferences,
             operation: isEditing ? 'update' : 'create',
             schemaPath,
           },
@@ -114,7 +123,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
       void getInitialState()
     }
-  }, [apiRoute, data, isEditing, schemaPath, serverURL, collectionSlug, id])
+  }, [apiRoute, data, isEditing, schemaPath, serverURL, collectionSlug, id, getPreference])
 
   if (isError) return null
 
