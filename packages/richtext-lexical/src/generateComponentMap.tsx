@@ -1,6 +1,5 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { DefaultCell } from '@payloadcms/next/views/List/Default/Cell/index.js'
 import { mapFields } from '@payloadcms/ui/utilities'
 import { sanitizeFields } from 'payload/config'
 import React from 'react'
@@ -83,7 +82,6 @@ export const getGenerateComponentMap =
               })
 
               const mappedFields = mapFields({
-                DefaultCell,
                 config,
                 disableAddingID: true,
                 fieldSchema: sanitizedFields,
