@@ -191,8 +191,8 @@ importers:
         specifier: ^9.0
         version: 9.1.7
       next:
-        specifier: 14.2.0-canary.23
-        version: 14.2.0-canary.23(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.71.1)
+        specifier: 14.2.0-canary.22
+        version: 14.2.0-canary.22(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0)
       node-mocks-http:
         specifier: ^1.14.1
         version: 1.14.1
@@ -1346,8 +1346,8 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       next:
-        specifier: 14.2.0-canary.22
-        version: 14.2.0-canary.22(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 14.2.0-canary.23
+        version: 14.2.0-canary.23(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.71.1)
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -4426,10 +4426,11 @@ packages:
 
   /@next/env@14.2.0-canary.22:
     resolution: {integrity: sha512-c72nBWQcgDwc711vtF0juZ81WPEHJbj22QzEkaqaS2cJty9IiyXTVTVzJHA1dueN9fDFCH3BeWDxoVn4y7MO8A==}
-    dev: false
+    dev: true
 
   /@next/env@14.2.0-canary.23:
     resolution: {integrity: sha512-cBlFB8Y/iE3K2NX/Km4tP4RZGLsv0D72KI9KxmZepKSkaQBSbtHM0YeHnZ51CFe9UQKzQ/1mPnCY89BjiyIQtQ==}
+    dev: false
 
   /@next/eslint-plugin-next@14.1.0:
     resolution: {integrity: sha512-x4FavbNEeXx/baD/zC/SdrvkjSby8nBn8KcCREqk6UuwvwoAPZmaV8TFCAuo/cpovBRTIY67mHhe86MQQm/68Q==}
@@ -4443,7 +4444,7 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
-    dev: false
+    dev: true
     optional: true
 
   /@next/swc-darwin-arm64@14.2.0-canary.23:
@@ -4452,6 +4453,7 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
+    dev: false
     optional: true
 
   /@next/swc-darwin-x64@14.2.0-canary.22:
@@ -4460,7 +4462,7 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
-    dev: false
+    dev: true
     optional: true
 
   /@next/swc-darwin-x64@14.2.0-canary.23:
@@ -4469,6 +4471,7 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
+    dev: false
     optional: true
 
   /@next/swc-linux-arm64-gnu@14.2.0-canary.22:
@@ -4477,7 +4480,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
-    dev: false
+    dev: true
     optional: true
 
   /@next/swc-linux-arm64-gnu@14.2.0-canary.23:
@@ -4486,6 +4489,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
+    dev: false
     optional: true
 
   /@next/swc-linux-arm64-musl@14.2.0-canary.22:
@@ -4494,7 +4498,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
-    dev: false
+    dev: true
     optional: true
 
   /@next/swc-linux-arm64-musl@14.2.0-canary.23:
@@ -4503,6 +4507,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
+    dev: false
     optional: true
 
   /@next/swc-linux-x64-gnu@14.2.0-canary.22:
@@ -4511,7 +4516,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
-    dev: false
+    dev: true
     optional: true
 
   /@next/swc-linux-x64-gnu@14.2.0-canary.23:
@@ -4520,6 +4525,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    dev: false
     optional: true
 
   /@next/swc-linux-x64-musl@14.2.0-canary.22:
@@ -4528,7 +4534,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
-    dev: false
+    dev: true
     optional: true
 
   /@next/swc-linux-x64-musl@14.2.0-canary.23:
@@ -4537,6 +4543,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    dev: false
     optional: true
 
   /@next/swc-win32-arm64-msvc@14.2.0-canary.22:
@@ -4545,7 +4552,7 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
-    dev: false
+    dev: true
     optional: true
 
   /@next/swc-win32-arm64-msvc@14.2.0-canary.23:
@@ -4554,6 +4561,7 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
+    dev: false
     optional: true
 
   /@next/swc-win32-ia32-msvc@14.2.0-canary.22:
@@ -4562,7 +4570,7 @@ packages:
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
-    dev: false
+    dev: true
     optional: true
 
   /@next/swc-win32-ia32-msvc@14.2.0-canary.23:
@@ -4571,6 +4579,7 @@ packages:
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
+    dev: false
     optional: true
 
   /@next/swc-win32-x64-msvc@14.2.0-canary.22:
@@ -4579,7 +4588,7 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
-    dev: false
+    dev: true
     optional: true
 
   /@next/swc-win32-x64-msvc@14.2.0-canary.23:
@@ -4588,6 +4597,7 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
+    dev: false
     optional: true
 
   /@nodelib/fs.scandir@2.1.5:
@@ -12985,7 +12995,7 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
-    dev: false
+    dev: true
 
   /next@14.2.0-canary.23(@babel/core@7.24.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.71.1):
     resolution: {integrity: sha512-HuQYIeSlmBmTueVIxn0Zjxx5I4MD6vG3p6AsFySTF7/hMSF5qFUCHGIj3YJRWsDcUw/LQhuGPNLaGUg119YegQ==}
@@ -13025,6 +13035,7 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+    dev: false
 
   /node-abi@3.56.0:
     resolution: {integrity: sha512-fZjdhDOeRcaS+rcpve7XuwHBmktS1nS1gzgghwKUQQ8nTy2FdSDr6ZT8k6YhvlJeHmmQMYiT/IH9hfco5zeW2Q==}
