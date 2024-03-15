@@ -92,8 +92,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   } = args
 
   if (fieldAffectsData(field)) {
-    const validate = operation === 'update' ? field.validate : undefined
-
+    const validate = operation === 'update' || operation === 'create' ? field.validate : undefined
     const fieldState: FormField = {
       errorPaths: new Set(),
       fieldSchema: includeSchema ? field : undefined,

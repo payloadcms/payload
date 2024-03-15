@@ -15,6 +15,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { FieldPropsProvider } from '../../FieldPropsProvider/index.js'
 import { useFormSubmitted } from '../../Form/context.js'
 import { RenderFields } from '../../RenderFields/index.js'
+import { WatchChildErrors } from '../../WatchChildErrors/index.js'
 import HiddenInput from '../HiddenInput/index.js'
 import { RowActions } from './RowActions.js'
 import SectionTitle from './SectionTitle/index.js'
@@ -68,8 +69,8 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
+  const [errorCount, setErrorCount] = React.useState(0)
 
-  const errorCount = row.errorPaths?.size
   const fieldHasErrors = errorCount > 0 && hasSubmitted
 
   const classNames = [
@@ -88,6 +89,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         transform,
       }}
     >
+      <WatchChildErrors fieldMap={block.subfields} path={path} setErrorCount={setErrorCount} />
       <Collapsible
         actions={
           !readOnly ? (
@@ -114,7 +116,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           attributes,
           listeners,
         }}
-        header={
+        header={(
           <div className={`${baseClass}__block-header`}>
             <span className={`${baseClass}__block-number`}>
               {String(rowIndex + 1).padStart(2, '0')}
@@ -128,7 +130,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
-        }
+        )}
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >

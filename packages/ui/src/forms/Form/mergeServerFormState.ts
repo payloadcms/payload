@@ -19,12 +19,12 @@ export const mergeServerFormState = (
 
   Object.entries(newState).forEach(([path, newFieldState]) => {
     newFieldState.initialValue = oldState[path]?.initialValue
-    newFieldState.value = oldState[path].value
+    newFieldState.value = oldState[path]?.value
 
     const oldErrorPaths: string[] = []
     const newErrorPaths: string[] = []
 
-    if (oldState[path].errorPaths instanceof Set) {
+    if (oldState[path]?.errorPaths instanceof Set) {
       oldState[path].errorPaths.forEach((path) => oldErrorPaths.push(path))
     }
 

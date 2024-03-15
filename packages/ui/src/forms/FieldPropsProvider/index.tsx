@@ -3,6 +3,8 @@ import type { FieldPermissions } from 'payload/types'
 
 import React from 'react'
 
+import { formatPath } from '../../utilities/formatPath.js'
+
 type FieldPropsContextType = {
   path: string
   permissions?: FieldPermissions
@@ -34,12 +36,15 @@ type Props = {
 
 export const FieldPropsProvider: React.FC<Props> = ({
   children,
-  path,
+  path: pathFromProps,
   permissions,
   readOnly,
-  schemaPath,
+  schemaPath: schemaPathFromProps,
   siblingPermissions,
 }) => {
+  const path = formatPath(pathFromProps)
+  const schemaPath = formatPath(schemaPathFromProps)
+
   return (
     <FieldPropsContext.Provider
       value={{

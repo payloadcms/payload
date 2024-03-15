@@ -2,7 +2,7 @@ import type { FieldPermissions } from 'payload/auth'
 import type { ArrayField, Row, RowLabel as RowLabelType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { useState } from 'react'
 
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types.js'
 import type { FieldMap } from '../../../utilities/buildComponentMap/types.js'
@@ -14,6 +14,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { useFormSubmitted } from '../../Form/context.js'
 import { RenderFields } from '../../RenderFields/index.js'
 import { RowLabel } from '../../RowLabel/index.js'
+import { WatchChildErrors } from '../../WatchChildErrors/index.js'
 import HiddenInput from '../HiddenInput/index.js'
 import './index.scss'
 
@@ -64,13 +65,12 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
+  const [errorCount, setErrorCount] = useState(0)
 
   const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
     2,
     '0',
   )}`
-
-  const errorCount = row.errorPaths?.size
   const fieldHasErrors = errorCount > 0 && hasSubmitted
 
   const classNames = [
@@ -79,7 +79,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   ]
     .filter(Boolean)
     .join(' ')
-
+  console.log(fieldMap)
   return (
     <div
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
@@ -89,6 +89,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         transform,
       }}
     >
+      <WatchChildErrors fieldMap={fieldMap} path={path} setErrorCount={setErrorCount} />
       <Collapsible
         actions={
           !readOnly ? (
@@ -111,7 +112,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           attributes,
           listeners,
         }}
-        header={
+        header={(
           <div className={`${baseClass}__row-header`}>
             <RowLabel
               RowLabelComponent={CustomRowLabel}
@@ -122,7 +123,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             />
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
-        }
+        )}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
