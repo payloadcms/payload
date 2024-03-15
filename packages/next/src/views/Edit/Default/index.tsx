@@ -42,6 +42,7 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
+    getDocPreferences,
     globalSlug,
     hasSavePermission,
     initialData: data,
@@ -119,20 +120,24 @@ export const DefaultEditView: React.FC = () => {
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    ({ formState: prevFormState }) =>
-      getFormState({
+    async ({ formState: prevFormState }) => {
+      const docPreferences = await getDocPreferences()
+
+      return getFormState({
         apiRoute,
         body: {
           id,
           collectionSlug,
+          docPreferences,
           formState: prevFormState,
           globalSlug,
           operation,
           schemaPath: entitySlug,
         },
         serverURL,
-      }),
-    [serverURL, apiRoute, id, operation, entitySlug, collectionSlug, globalSlug],
+      })
+    },
+    [serverURL, apiRoute, id, operation, entitySlug, collectionSlug, globalSlug, getDocPreferences],
   )
 
   const RegisterGetThumbnailFunction = componentMap?.[`${collectionSlug}.adminThumbnail`]

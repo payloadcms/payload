@@ -1,5 +1,5 @@
 import type { BuildFormStateArgs, FieldSchemaMap } from '@payloadcms/ui'
-import type { DocumentPreferences, Field, PayloadRequest, SanitizedConfig } from 'payload/types'
+import type { Field, PayloadRequest, SanitizedConfig } from 'payload/types'
 
 import { buildFieldSchemaMap, buildStateFromSchema, reduceFieldsToValues } from '@payloadcms/ui'
 import httpStatus from 'http-status'
@@ -57,8 +57,8 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
   const {
     collectionSlug,
     data: incomingData,
+    docPreferences,
     formState,
-    globalSlug,
     operation,
     schemaPath,
   } = reqData
@@ -90,26 +90,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
 
   const data = incomingData || reduceFieldsToValues(formState || {}, true)
 
-  let id: number | string | undefined
-  let docPreferencesKey: string
-  if (collectionSlug) {
-    id = reqData.id
-    docPreferencesKey = `collection-${collectionSlug}${id ? `-${id}` : ''}`
-  } else {
-    docPreferencesKey = `global-${globalSlug}`
-  }
-
-  const { docs: [{ value: docPreferences } = { value: null }] = [] } = (await req.payload.find({
-    collection: 'payload-preferences',
-    depth: 0,
-    limit: 1,
-    where: {
-      key: {
-        equals: docPreferencesKey,
-      },
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  })) as any as { docs: { value: DocumentPreferences }[] }
+  const id = collectionSlug ? reqData.id : undefined
 
   const result = await buildStateFromSchema({
     id,

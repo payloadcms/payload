@@ -100,7 +100,6 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
         apiURL={`${serverURL}${api}/${userSlug}${data?.id ? `/${data.id}` : ''}`}
         collectionSlug={userSlug}
         docPermissions={collectionPermissions}
-        docPreferences={docPreferences}
         hasSavePermission={collectionPermissions?.update?.permission}
         id={user?.id}
         initialData={data}

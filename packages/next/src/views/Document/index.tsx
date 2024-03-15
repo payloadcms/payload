@@ -221,7 +221,6 @@ export const Document: React.FC<AdminViewProps> = async ({
       collectionSlug={collectionConfig?.slug}
       disableActions={false}
       docPermissions={docPermissions}
-      docPreferences={docPreferences}
       globalSlug={globalConfig?.slug}
       hasSavePermission={hasSavePermission}
       id={id}

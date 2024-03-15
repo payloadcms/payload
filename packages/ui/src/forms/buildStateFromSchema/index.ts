@@ -1,4 +1,10 @@
-import type { Data, Field as FieldSchema, FormState, PayloadRequest } from 'payload/types'
+import type {
+  Data,
+  DocumentPreferences,
+  Field as FieldSchema,
+  FormState,
+  PayloadRequest,
+} from 'payload/types'
 
 import { iterateFields } from './iterateFields.js'
 
@@ -17,6 +23,7 @@ type Args = {
 export type BuildFormStateArgs = {
   collectionSlug?: string
   data?: Data
+  docPreferences?: DocumentPreferences
   formState?: FormState
   globalSlug?: string
   id?: number | string

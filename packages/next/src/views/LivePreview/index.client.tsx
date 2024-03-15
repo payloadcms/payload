@@ -42,6 +42,7 @@ const PreviewView: React.FC = (props) => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
+    getDocPreferences,
     globalSlug,
     hasSavePermission,
     initialData: data,
@@ -105,18 +106,22 @@ const PreviewView: React.FC = (props) => {
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    ({ formState: prevFormState }) =>
-      getFormState({
+    async ({ formState: prevFormState }) => {
+      const docPreferences = await getDocPreferences()
+
+      return getFormState({
         apiRoute,
         body: {
           id,
+          docPreferences,
           formState: prevFormState,
           operation,
           schemaPath,
         },
         serverURL,
-      }),
-    [serverURL, apiRoute, id, operation, schemaPath],
+      })
+    },
+    [serverURL, apiRoute, id, operation, schemaPath, getDocPreferences],
   )
 
   // Allow the `DocumentInfoProvider` to hydrate
