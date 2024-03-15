@@ -47,8 +47,6 @@ export default {
     deletingTitle:
       '{{title}} を削除する際にエラーが発生しました。接続を確認してからもう一度お試しください。',
     loadingDocument: 'IDが {{id}} のデータを読み込む際に問題が発生しました。',
-    localesNotSaved_one: '次のロケールは保存できませんでした：',
-    localesNotSaved_other: '次のロケールは保存できませんでした：',
     noMatchedField: '"{{label}}" に該当するフィールドがありません。',
     notAllowedToAccessPage: 'この画面へのアクセスは許可されていません。',
     previewing: 'このデータをプレビューする際に問題が発生しました。',

@@ -46,8 +46,6 @@ export default {
     correctInvalidFields: '請更正無效區塊。',
     deletingTitle: '刪除{{title}}時出現了錯誤。請檢查您的網路連線並重試。',
     loadingDocument: '加載ID為{{id}}的文件時出現了問題。',
-    localesNotSaved_one: '這個語言環境無法被儲存：',
-    localesNotSaved_other: '以下的語言環境無法被儲存：',
     noMatchedField: '找不到與"{{label}}"匹配的字串',
     notAllowedToAccessPage: '您沒有權限訪問此頁面。',
     previewing: '預覽文件時出現了問題。',

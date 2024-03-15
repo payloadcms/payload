@@ -47,8 +47,6 @@ export default {
     deletingTitle:
       'There was an error while deleting {{title}}. Please check your connection and try again.',
     loadingDocument: 'There was a problem loading the document with ID of {{id}}.',
-    localesNotSaved_one: 'The following locale could not be saved:',
-    localesNotSaved_other: 'The following locales could not be saved:',
     noMatchedField: 'No matched field found for "{{label}}"',
     notAllowedToAccessPage: 'You are not allowed to access this page.',
     previewing: 'There was a problem previewing this document.',
