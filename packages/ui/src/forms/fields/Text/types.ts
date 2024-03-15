@@ -1,6 +1,6 @@
 import type { FormFieldBase } from '../shared.js'
 
-export type Props = FormFieldBase & {
+export type TextFieldProps = FormFieldBase & {
   hasMany?: boolean
   inputRef?: React.MutableRefObject<HTMLInputElement>
   maxRows?: number

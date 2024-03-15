@@ -2,7 +2,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { BlocksFieldProps } from './types.js'
 
 import Banner from '../../../elements/Banner/index.js'
 import { Button } from '../../../elements/Button/index.js'
@@ -27,7 +27,7 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-const BlocksField: React.FC<Props> = (props) => {
+const BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {

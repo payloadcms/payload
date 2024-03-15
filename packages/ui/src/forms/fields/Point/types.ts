@@ -1,6 +1,7 @@
 import type { FormFieldBase } from '../shared.js'
 
-export type Props = FormFieldBase & {
+export type PointFieldProps = FormFieldBase & {
   name?: string
   path?: string
+  step?: number
 }

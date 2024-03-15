@@ -3,7 +3,7 @@ import type { FieldTypes } from 'payload/config'
 
 import type { FormFieldBase } from '../shared.js'
 
-export type Props = FormFieldBase & {
+export type RowFieldProps = FormFieldBase & {
   fieldTypes: FieldTypes
   forceRender?: boolean
   indexPath: string

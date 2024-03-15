@@ -5,7 +5,7 @@ import { isNumber } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../../elements/ReactSelect/types.js'
-import type { Props } from './types.js'
+import type { NumberFieldProps } from './types.js'
 
 import ReactSelect from '../../../elements/ReactSelect/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -15,7 +15,7 @@ import { withCondition } from '../../withCondition/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
-const NumberField: React.FC<Props> = (props) => {
+const NumberField: React.FC<NumberFieldProps> = (props) => {
   const {
     name,
     AfterInput,

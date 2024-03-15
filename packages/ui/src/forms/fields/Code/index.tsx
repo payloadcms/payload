@@ -2,7 +2,7 @@
 'use client'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { CodeFieldProps } from './types.js'
 
 import { CodeEditor } from '../../../elements/CodeEditor/index.js'
 import LabelComp from '../../Label/index.js'
@@ -18,7 +18,7 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const Code: React.FC<Props> = (props) => {
+const Code: React.FC<CodeFieldProps> = (props) => {
   const {
     name,
     AfterInput,

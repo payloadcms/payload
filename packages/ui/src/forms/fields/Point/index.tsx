@@ -5,7 +5,7 @@ import type { ClientValidate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { PointFieldProps } from './types.js'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import LabelComp from '../../Label/index.js'
@@ -16,7 +16,7 @@ import './index.scss'
 
 const baseClass = 'point'
 
-const PointField: React.FC<Props> = (props) => {
+const PointField: React.FC<PointFieldProps> = (props) => {
   const {
     name,
     AfterInput,

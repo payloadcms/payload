@@ -1,8 +1,12 @@
+import type { Option } from 'payload/types.js'
+
 import type { FormFieldBase } from '../shared.js'
 
-export type Props = FormFieldBase & {
+export type RadioFieldProps = FormFieldBase & {
+  layout?: 'horizontal' | 'vertical'
   name?: string
   onChange?: OnChange
+  options?: Option[]
   path?: string
   value?: string
 }

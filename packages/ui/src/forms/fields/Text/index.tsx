@@ -4,7 +4,7 @@ import type { ClientValidate } from 'payload/types'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../../elements/ReactSelect/types.js'
-import type { Props } from './types.js'
+import type { TextFieldProps } from './types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
@@ -15,7 +15,7 @@ import { isFieldRTL } from '../shared.js'
 import { TextInput } from './Input.js'
 import './index.scss'
 
-const Text: React.FC<Props> = (props) => {
+const Text: React.FC<TextFieldProps> = (props) => {
   const {
     name,
     AfterInput,

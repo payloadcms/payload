@@ -4,7 +4,7 @@
 import { optionIsObject } from 'payload/types'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { RadioFieldProps } from './types.js'
 
 import { useForm } from '../../Form/context.js'
 import LabelComp from '../../Label/index.js'
@@ -16,7 +16,7 @@ import './index.scss'
 
 const baseClass = 'radio-group'
 
-const RadioGroup: React.FC<Props> = (props) => {
+const RadioGroup: React.FC<RadioFieldProps> = (props) => {
   const {
     name,
     Description,

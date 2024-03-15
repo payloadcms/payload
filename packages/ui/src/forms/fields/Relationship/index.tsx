@@ -7,7 +7,7 @@ import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js'
-import type { GetResults, Option, Props, Value } from './types.js'
+import type { GetResults, Option, RelationshipFieldProps, Value } from './types.js'
 
 import ReactSelect from '../../../elements/ReactSelect/index.js'
 import { useDebouncedCallback } from '../../../hooks/useDebouncedCallback.js'
@@ -31,7 +31,7 @@ const maxResultsPerRequest = 10
 
 const baseClass = 'relationship'
 
-const Relationship: React.FC<Props> = (props) => {
+const Relationship: React.FC<RelationshipFieldProps> = (props) => {
   const {
     name,
     Description,

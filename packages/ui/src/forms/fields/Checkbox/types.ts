@@ -1,6 +1,6 @@
 import type { FormFieldBase } from '../shared.js'
 
-export type Props = FormFieldBase & {
+export type CheckboxFieldProps = FormFieldBase & {
   checked?: boolean
   disableFormData?: boolean
   id?: string

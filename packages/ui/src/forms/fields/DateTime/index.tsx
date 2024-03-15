@@ -5,7 +5,7 @@ import type { ClientValidate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { DateFieldProps } from './types.js'
 
 import { DatePickerField } from '../../../elements/DatePicker/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -15,7 +15,7 @@ import './index.scss'
 
 const baseClass = 'date-time-field'
 
-const DateTime: React.FC<Props> = (props) => {
+const DateTime: React.FC<DateFieldProps> = (props) => {
   const {
     name,
     AfterInput,

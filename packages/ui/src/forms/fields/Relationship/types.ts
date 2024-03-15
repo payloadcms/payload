@@ -1,11 +1,16 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
 
 import type { FormFieldBase } from '../shared.js'
 
-export type Props = FormFieldBase & {
+export type RelationshipFieldProps = FormFieldBase & {
+  allowCreate?: RelationshipField['admin']['allowCreate']
+  hasMany?: boolean
+  isSortable?: boolean
   name: string
+  relationTo?: RelationshipField['relationTo']
+  sortOptions?: RelationshipField['admin']['sortOptions']
 }
 
 export type Option = {

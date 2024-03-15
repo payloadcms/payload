@@ -1,6 +1,6 @@
 import type { FormFieldBase } from '../shared.js'
 
-export type Props = FormFieldBase & {
+export type EmailFieldProps = FormFieldBase & {
   autoComplete?: string
   name?: string
   path?: string

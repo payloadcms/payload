@@ -3,8 +3,9 @@ import type { FieldTypes } from 'payload/config'
 
 import type { FormFieldBase } from '../shared.js'
 
-export type Props = FormFieldBase & {
+export type CollapsibleFieldProps = FormFieldBase & {
   fieldTypes: FieldTypes
   indexPath: string
+  initCollapsed?: boolean
   permissions: FieldPermissions
 }
