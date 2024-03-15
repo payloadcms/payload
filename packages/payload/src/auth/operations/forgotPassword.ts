@@ -1,6 +1,6 @@
 import crypto from 'crypto'
-import { URL } from 'url'
 import httpStatus from 'http-status'
+import { URL } from 'url'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'

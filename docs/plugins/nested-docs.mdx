@@ -25,7 +25,12 @@ field instead of the original title. This is especially useful if you happen to 
 but different parents.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20nested-docs&template=bug_report.md&title=plugin-nested-docs%3A) with as much detail as possible.
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs). If you need
+  help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've
+  found a bug, please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20nested-docs&template=bug_report.md&title=plugin-nested-docs%3A)
+  with as much detail as possible.
 </Banner>
 
 ##### Core features
@@ -96,7 +101,7 @@ The `breadcrumbs` field is an array which dynamically populates all parent relat
 level and stores the following fields.
 
 | Field   | Description                                                                                                                                                                                                                                                                                  |
-|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `label` | The label of the breadcrumb. This field is automatically set to either the `collection.admin.useAsTitle` (if defined) or is set to the `ID` of the document. You can also dynamically define the `label` by passing a function to the options property of [`generateLabel`](#generateLabel). |
 | `url`   | The URL of the breadcrumb. By default, this field is undefined. You can manually define this field by passing a property called function to the plugin options property of [`generateURL`](#generateURL).                                                                                    |
 
@@ -117,14 +122,14 @@ You can also pass a function to dynamically set the `label` of your breadcrumb.
 // payload.config.ts
 nestedDocs({
   //...
-  generateLabel: (_, doc) => doc.title // NOTE: 'title' is a hypothetical field
+  generateLabel: (_, doc) => doc.title, // NOTE: 'title' is a hypothetical field
 })
 ```
 
 The function takes two arguments and returns a string:
 
 | Argument | Type     | Description                                  |
-|----------|----------|----------------------------------------------|
+| -------- | -------- | -------------------------------------------- |
 | `docs`   | `Array`  | An array of the breadcrumbs up to that point |
 | `doc`    | `Object` | The current document being edited            |
 
@@ -143,7 +148,7 @@ nestedDocs({
 ```
 
 | Argument | Type     | Description                                  |
-|----------|----------|----------------------------------------------|
+| -------- | -------- | -------------------------------------------- |
 | `docs`   | `Array`  | An array of the breadcrumbs up to that point |
 | `doc`    | `Object` | The current document being edited            |
 
@@ -161,7 +166,9 @@ own `breadcrumbs` field to each collection manually. Set this property to the `n
 <Banner type="info">
   <strong>Note:</strong>
   <br />
-  If you opt out of automatically being provided a `parent` or `breadcrumbs` field, you need to make sure that both fields are placed at the top-level of your document. They cannot exist within any nested data structures like a `group`, `array`, or `blocks`.
+  If you opt out of automatically being provided a `parent` or `breadcrumbs` field, you need to make
+  sure that both fields are placed at the top-level of your document. They cannot exist within any
+  nested data structures like a `group`, `array`, or `blocks`.
 </Banner>
 
 ## Overrides
@@ -170,48 +177,49 @@ You can also extend the built-in `parent` and `breadcrumbs` fields per collectio
 and `createBreadcrumbField` methods. They will merge your customizations overtop the plugin's base field configurations.
 
 ```ts
-import { CollectionConfig } from "payload/types";
-import { createParentField } from "@payloadcms/plugin-nested-docs/fields";
-import { createBreadcrumbsField } from "@payloadcms/plugin-nested-docs/fields";
+import { CollectionConfig } from 'payload/types'
+import { createParentField } from '@payloadcms/plugin-nested-docs/fields'
+import { createBreadcrumbsField } from '@payloadcms/plugin-nested-docs/fields'
 
 const examplePageConfig: CollectionConfig = {
-  slug: "pages",
+  slug: 'pages',
   fields: [
     createParentField(
       // First argument is equal to the slug of the collection
       // that the field references
-      "pages",
+      'pages',
 
       // Second argument is equal to field overrides that you specify,
       // which will be merged into the base parent field config
       {
         admin: {
-          position: "sidebar",
+          position: 'sidebar',
         },
         // Note: if you override the `filterOptions` of the `parent` field,
         // be sure to continue to prevent the document from referencing itself as the parent like this:
         // filterOptions: ({ id }) => ({ id: {not_equals: id }})`
-      }
+      },
     ),
     createBreadcrumbsField(
       // First argument is equal to the slug of the collection
       // that the field references
-      "pages",
+      'pages',
 
       // Argument equal to field overrides that you specify,
       // which will be merged into the base `breadcrumbs` field config
       {
-        label: "Page Breadcrumbs",
-      }
+        label: 'Page Breadcrumbs',
+      },
     ),
   ],
-};
+}
 ```
 
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
-  If overriding the `name` of either `breadcrumbs` or `parent` fields, you must specify the `breadcrumbsFieldSlug` or `parentFieldSlug` respectively.
+  If overriding the `name` of either `breadcrumbs` or `parent` fields, you must specify the
+  `breadcrumbsFieldSlug` or `parentFieldSlug` respectively.
 </Banner>
 
 ## Localization

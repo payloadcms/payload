@@ -1,15 +1,14 @@
 'use client'
 
-import React, { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
+import React, { Fragment, useEffect, useState } from 'react'
 
 import { useCart } from '../../_providers/Cart'
-
 import classes from './index.module.scss'
 
 export const CartLink: React.FC<{
   className?: string
-}> = props => {
+}> = (props) => {
   const { className } = props
   const { cart } = useCart()
   const [length, setLength] = useState<number>()

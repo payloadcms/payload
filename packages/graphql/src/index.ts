@@ -1,21 +1,21 @@
 /* eslint-disable no-param-reassign */
-import * as GraphQL from 'graphql'
-import { OperationArgs } from 'graphql-http'
-
-import {
-  fieldExtensionsEstimator,
-  simpleEstimator,
-  createComplexityRule,
-} from 'graphql-query-complexity'
-
+import type { OperationArgs } from 'graphql-http'
 import type { GraphQLInfo } from 'payload/config'
 import type { SanitizedConfig } from 'payload/types'
+
+import * as GraphQL from 'graphql'
+import {
+  createComplexityRule,
+  fieldExtensionsEstimator,
+  simpleEstimator,
+} from 'graphql-query-complexity'
+
 import accessResolver from './resolvers/auth/access.js'
-import initCollections from './schema/initCollections.js'
-import initGlobals from './schema/initGlobals.js'
 import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType.js'
 import buildLocaleInputType from './schema/buildLocaleInputType.js'
 import buildPoliciesType from './schema/buildPoliciesType.js'
+import initCollections from './schema/initCollections.js'
+import initGlobals from './schema/initGlobals.js'
 import { wrapCustomFields } from './utilities/wrapCustomResolver.js'
 
 export async function configToSchema(config: SanitizedConfig): Promise<{
@@ -34,7 +34,17 @@ export async function configToSchema(config: SanitizedConfig): Promise<{
     config: config.globals,
   }
 
-  let graphqlResult: GraphQLInfo = {
+  const graphqlResult: GraphQLInfo = {
+    Mutation: {
+      name: 'Mutation',
+      fields: {},
+    },
+    Query: {
+      name: 'Query',
+      fields: {},
+    },
+    collections,
+    globals,
     types: {
       arrayTypes: {},
       blockInputTypes: {},
@@ -42,16 +52,6 @@ export async function configToSchema(config: SanitizedConfig): Promise<{
       groupTypes: {},
       tabTypes: {},
     },
-    Query: {
-      name: 'Query',
-      fields: {},
-    },
-    Mutation: {
-      name: 'Mutation',
-      fields: {},
-    },
-    collections,
-    globals,
   }
 
   if (config.localization) {
@@ -65,8 +65,8 @@ export async function configToSchema(config: SanitizedConfig): Promise<{
   initGlobals({ config, graphqlResult })
 
   graphqlResult.Query.fields['Access'] = {
-    resolve: accessResolver(config),
     type: buildPoliciesType(config),
+    resolve: accessResolver(config),
   }
 
   if (typeof config.graphQL.queries === 'function') {

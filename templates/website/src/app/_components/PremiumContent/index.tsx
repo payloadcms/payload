@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useEffect } from 'react'
 import Link from 'next/link'
+import React, { useEffect } from 'react'
 
-import { Page } from '../../../payload/payload-types'
+import type { Page } from '../../../payload/payload-types'
+
 import { POST_PREMIUM_CONTENT } from '../../_graphql/posts'
 import { useAuth } from '../../_providers/Auth'
 import { Blocks } from '../Blocks'
@@ -13,10 +14,10 @@ import { Message } from '../Message'
 import { VerticalPadding } from '../VerticalPadding'
 
 export const PremiumContent: React.FC<{
-  postSlug: string
   disableTopPadding?: boolean
-}> = props => {
-  const { postSlug, disableTopPadding } = props
+  postSlug: string
+}> = (props) => {
+  const { disableTopPadding, postSlug } = props
   const { user } = useAuth()
 
   const [isLoading, setIsLoading] = React.useState(false)
@@ -36,20 +37,20 @@ export const PremiumContent: React.FC<{
 
       try {
         const premiumContent = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/graphql`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             query: POST_PREMIUM_CONTENT,
             variables: {
               slug: postSlug,
             },
           }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         })
-          ?.then(res => res.json())
-          ?.then(res => res?.data?.Posts.docs[0]?.premiumContent)
+          ?.then((res) => res.json())
+          ?.then((res) => res?.data?.Posts.docs[0]?.premiumContent)
 
         if (premiumContent) {
           setBlocks(premiumContent)
@@ -59,7 +60,7 @@ export const PremiumContent: React.FC<{
         // this is to prevent a flash of the loading shimmer on fast networks
         const end = Date.now()
         if (end - start < 1000) {
-          await new Promise(resolve => setTimeout(resolve, 500 - (end - start)))
+          await new Promise((resolve) => setTimeout(resolve, 500 - (end - start)))
         }
 
         setIsLoading(false)
@@ -84,13 +85,13 @@ export const PremiumContent: React.FC<{
         <VerticalPadding bottom="large" top="none">
           <Message
             message={
-              <>
+              <React.Fragment>
                 {`This content is gated behind authentication. You must be `}
                 <Link href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}>
                   logged in
                 </Link>
                 {` to view this content.`}
-              </>
+              </React.Fragment>
             }
           />
         </VerticalPadding>

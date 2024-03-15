@@ -32,7 +32,7 @@ export const LinkToDoc: React.FC<
           >
             View in Stripe
           </span>
-          {/* @ts-ignore */}
+          {/* @ts-expect-error */}
           {/* <CopyToClipboard value={href} /> */}
         </div>
         <div

@@ -118,9 +118,7 @@ export const DefaultNav: React.FC<{
         })}
         {Array.isArray(afterNavLinks) && afterNavLinks.map((Component, i) => <Component key={i} />)}
         <div className={`${baseClass}__controls`}>
-          <Logout
-          // tabIndex={!navOpen ? -1 : undefined}
-          />
+          <Logout />
         </div>
       </nav>
       <div className={`${baseClass}__header`}>

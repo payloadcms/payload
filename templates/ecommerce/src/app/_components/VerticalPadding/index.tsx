@@ -5,17 +5,17 @@ import classes from './index.module.scss'
 export type VerticalPaddingOptions = 'large' | 'medium' | 'none'
 
 type Props = {
-  top?: VerticalPaddingOptions
   bottom?: VerticalPaddingOptions
   children: React.ReactNode
   className?: string
+  top?: VerticalPaddingOptions
 }
 
 export const VerticalPadding: React.FC<Props> = ({
-  top = 'medium',
   bottom = 'medium',
-  className,
   children,
+  className,
+  top = 'medium',
 }) => {
   return (
     <div

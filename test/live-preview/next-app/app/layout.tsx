@@ -1,11 +1,12 @@
+import type { Metadata } from 'next'
+
 import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
 import './_css/app.scss'
-import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Payload Live Preview',
   description: 'Payload Live Preview',
+  title: 'Payload Live Preview',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

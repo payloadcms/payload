@@ -9,15 +9,15 @@ export const slugField: Slug = (fieldToUse = 'title', overrides = {}) =>
   deepMerge<Field, Partial<Field>>(
     {
       name: 'slug',
-      label: 'Slug',
       type: 'text',
-      index: true,
       admin: {
         position: 'sidebar',
       },
       hooks: {
         beforeValidate: [formatSlug(fieldToUse)],
       },
+      index: true,
+      label: 'Slug',
     },
     overrides,
   )

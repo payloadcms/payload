@@ -1,34 +1,36 @@
-import React from 'react'
 import Link from 'next/link'
+import React from 'react'
 
-import { Page } from '../../../payload-types'
-import { Button, Props as ButtonProps } from '../Button'
+import type { Page } from '../../../payload-types'
+import type { Props as ButtonProps } from '../Button'
+
+import { Button } from '../Button'
 
 type CMSLinkType = {
-  type?: 'custom' | 'reference'
-  url?: string
-  newTab?: boolean
-  reference?: {
-    value: string | Page
-    relationTo: 'pages' | 'posts'
-  }
-  label?: string
   appearance?: ButtonProps['appearance']
   children?: React.ReactNode
   className?: string
   invert?: ButtonProps['invert']
+  label?: string
+  newTab?: boolean
+  reference?: {
+    relationTo: 'pages' | 'posts'
+    value: Page | string
+  }
+  type?: 'custom' | 'reference'
+  url?: string
 }
 
 export const CMSLink: React.FC<CMSLinkType> = ({
   type,
-  url,
-  newTab,
-  reference,
-  label,
   appearance,
   children,
   className,
   invert,
+  label,
+  newTab,
+  reference,
+  url,
 }) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
@@ -38,11 +40,11 @@ export const CMSLink: React.FC<CMSLinkType> = ({
   if (!href) return null
 
   if (!appearance) {
-    const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+    const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
 
     if (href || url) {
       return (
-        <Link {...newTabProps} href={href || url || ''} className={className}>
+        <Link {...newTabProps} className={className} href={href || url || ''}>
           {label && label}
           {children && children}
         </Link>
@@ -52,12 +54,12 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 
   return (
     <Button
-      className={className}
-      newTab={newTab}
-      href={href}
       appearance={appearance}
-      label={label}
+      className={className}
+      href={href}
       invert={invert}
+      label={label}
+      newTab={newTab}
     />
   )
 }

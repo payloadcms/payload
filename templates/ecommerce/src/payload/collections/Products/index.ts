@@ -15,29 +15,20 @@ import { ProductSelect } from './ui/ProductSelect'
 
 const Products: CollectionConfig = {
   slug: 'products',
+  access: {
+    create: admins,
+    delete: admins,
+    read: () => true,
+    update: admins,
+  },
   admin: {
-    useAsTitle: 'title',
     defaultColumns: ['title', 'stripeProductID', '_status'],
-    preview: doc => {
+    preview: (doc) => {
       return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
         `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/products/${doc.slug}`,
       )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
     },
-  },
-  hooks: {
-    beforeChange: [beforeProductChange],
-    afterChange: [revalidateProduct],
-    afterRead: [populateArchiveBlock],
-    afterDelete: [deleteProductFromCarts],
-  },
-  versions: {
-    drafts: true,
-  },
-  access: {
-    read: () => true,
-    create: admins,
-    update: admins,
-    delete: admins,
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -49,10 +40,10 @@ const Products: CollectionConfig = {
       name: 'publishedOn',
       type: 'date',
       admin: {
-        position: 'sidebar',
         date: {
           pickerAppearance: 'dayAndTime',
         },
+        position: 'sidebar',
       },
       hooks: {
         beforeChange: [
@@ -69,71 +60,69 @@ const Products: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Content',
           fields: [
             {
               name: 'layout',
               type: 'blocks',
-              required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive],
+              required: true,
             },
           ],
+          label: 'Content',
         },
         {
-          label: 'Product Details',
           fields: [
             {
               name: 'stripeProductID',
-              label: 'Stripe Product',
               type: 'text',
               admin: {
                 components: {
                   Field: ProductSelect,
                 },
               },
+              label: 'Stripe Product',
             },
             {
               name: 'priceJSON',
-              label: 'Price JSON',
               type: 'textarea',
               admin: {
-                readOnly: true,
                 hidden: true,
+                readOnly: true,
                 rows: 10,
               },
+              label: 'Price JSON',
             },
             {
               name: 'enablePaywall',
-              label: 'Enable Paywall',
               type: 'checkbox',
+              label: 'Enable Paywall',
             },
             {
               name: 'paywall',
-              label: 'Paywall',
               type: 'blocks',
               access: {
                 read: checkUserPurchases,
               },
               blocks: [CallToAction, Content, MediaBlock, Archive],
+              label: 'Paywall',
             },
           ],
+          label: 'Product Details',
         },
       ],
     },
     {
       name: 'categories',
       type: 'relationship',
-      relationTo: 'categories',
-      hasMany: true,
       admin: {
         position: 'sidebar',
       },
+      hasMany: true,
+      relationTo: 'categories',
     },
     {
       name: 'relatedProducts',
       type: 'relationship',
-      relationTo: 'products',
-      hasMany: true,
       filterOptions: ({ id }) => {
         return {
           id: {
@@ -141,19 +130,30 @@ const Products: CollectionConfig = {
           },
         }
       },
+      hasMany: true,
+      relationTo: 'products',
     },
     slugField(),
     {
       name: 'skipSync',
-      label: 'Skip Sync',
       type: 'checkbox',
       admin: {
+        hidden: true,
         position: 'sidebar',
         readOnly: true,
-        hidden: true,
       },
+      label: 'Skip Sync',
     },
   ],
+  hooks: {
+    afterChange: [revalidateProduct],
+    afterDelete: [deleteProductFromCarts],
+    afterRead: [populateArchiveBlock],
+    beforeChange: [beforeProductChange],
+  },
+  versions: {
+    drafts: true,
+  },
 }
 
 export default Products

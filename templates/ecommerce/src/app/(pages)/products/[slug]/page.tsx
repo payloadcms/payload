@@ -1,9 +1,11 @@
-import React from 'react'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import React from 'react'
 
-import { Product, Product as ProductType } from '../../../../payload/payload-types'
+import type { Product, Product as ProductType } from '../../../../payload/payload-types'
+
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
 import { Blocks } from '../../../_components/Blocks'
@@ -22,8 +24,8 @@ export default async function Product({ params: { slug } }) {
 
   try {
     product = await fetchDoc<Product>({
-      collection: 'products',
       slug,
+      collection: 'products',
       draft: isDraftMode,
     })
   } catch (error) {
@@ -40,14 +42,13 @@ export default async function Product({ params: { slug } }) {
     <React.Fragment>
       <ProductHero product={product} />
       <Blocks blocks={layout} />
-      {product?.enablePaywall && <PaywallBlocks productSlug={slug as string} disableTopPadding />}
+      {product?.enablePaywall && <PaywallBlocks disableTopPadding productSlug={slug as string} />}
       <Blocks
-        disableTopPadding
         blocks={[
           {
-            blockType: 'relatedProducts',
             blockName: 'Related Product',
-            relationTo: 'products',
+            blockType: 'relatedProducts',
+            docs: relatedProducts,
             introContent: [
               {
                 type: 'h4',
@@ -65,12 +66,12 @@ export default async function Product({ params: { slug } }) {
                   },
                   {
                     type: 'link',
-                    url: `/admin/collections/products/${product.id}`,
                     children: [
                       {
                         text: 'navigate to the admin dashboard',
                       },
                     ],
+                    url: `/admin/collections/products/${product.id}`,
                   },
                   {
                     text: '.',
@@ -78,9 +79,10 @@ export default async function Product({ params: { slug } }) {
                 ],
               },
             ],
-            docs: relatedProducts,
+            relationTo: 'products',
           },
         ]}
+        disableTopPadding
       />
     </React.Fragment>
   )
@@ -102,8 +104,8 @@ export async function generateMetadata({ params: { slug } }): Promise<Metadata> 
 
   try {
     product = await fetchDoc<Product>({
-      collection: 'products',
       slug,
+      collection: 'products',
       draft: isDraftMode,
     })
   } catch (error) {}

@@ -13,32 +13,28 @@ import { CustomerSelect } from './ui/CustomerSelect'
 
 const Users: CollectionConfig = {
   slug: 'users',
-  admin: {
-    useAsTitle: 'name',
-    defaultColumns: ['name', 'email'],
-  },
   access: {
-    read: adminsAndUser,
-    create: anyone,
-    update: adminsAndUser,
-    delete: admins,
     admin: ({ req: { user } }) => checkRole(['admin'], user),
+    create: anyone,
+    delete: admins,
+    read: adminsAndUser,
+    update: adminsAndUser,
   },
-  hooks: {
-    beforeChange: [createStripeCustomer],
-    afterChange: [loginAfterCreate],
+  admin: {
+    defaultColumns: ['name', 'email'],
+    useAsTitle: 'name',
   },
   auth: true,
   endpoints: [
     {
-      path: '/:teamID/customer',
-      method: 'get',
       handler: customerProxy,
+      method: 'get',
+      path: '/:teamID/customer',
     },
     {
-      path: '/:teamID/customer',
-      method: 'patch',
       handler: customerProxy,
+      method: 'patch',
+      path: '/:teamID/customer',
     },
   ],
   fields: [
@@ -49,8 +45,16 @@ const Users: CollectionConfig = {
     {
       name: 'roles',
       type: 'select',
-      hasMany: true,
+      access: {
+        create: admins,
+        read: admins,
+        update: admins,
+      },
       defaultValue: ['customer'],
+      hasMany: true,
+      hooks: {
+        beforeChange: [ensureFirstUserIsAdmin],
+      },
       options: [
         {
           label: 'admin',
@@ -61,49 +65,38 @@ const Users: CollectionConfig = {
           value: 'customer',
         },
       ],
-      hooks: {
-        beforeChange: [ensureFirstUserIsAdmin],
-      },
-      access: {
-        read: admins,
-        create: admins,
-        update: admins,
-      },
     },
     {
       name: 'purchases',
-      label: 'Purchases',
       type: 'relationship',
-      relationTo: 'products',
       hasMany: true,
       hooks: {
         beforeChange: [resolveDuplicatePurchases],
       },
+      label: 'Purchases',
+      relationTo: 'products',
     },
     {
       name: 'stripeCustomerID',
-      label: 'Stripe Customer',
       type: 'text',
       access: {
         read: ({ req: { user } }) => checkRole(['admin'], user),
       },
       admin: {
-        position: 'sidebar',
         components: {
           Field: CustomerSelect,
         },
+        position: 'sidebar',
       },
+      label: 'Stripe Customer',
     },
     {
-      label: 'Cart',
       name: 'cart',
       type: 'group',
       fields: [
         {
           name: 'items',
-          label: 'Items',
           type: 'array',
-          interfaceName: 'CartItems',
           fields: [
             {
               name: 'product',
@@ -113,12 +106,14 @@ const Users: CollectionConfig = {
             {
               name: 'quantity',
               type: 'number',
-              min: 0,
               admin: {
                 step: 1,
               },
+              min: 0,
             },
           ],
+          interfaceName: 'CartItems',
+          label: 'Items',
         },
         // If you wanted to maintain a 'created on'
         // or 'last modified' date for the cart
@@ -140,18 +135,23 @@ const Users: CollectionConfig = {
         //   }
         // },
       ],
+      label: 'Cart',
     },
     {
       name: 'skipSync',
-      label: 'Skip Sync',
       type: 'checkbox',
       admin: {
+        hidden: true,
         position: 'sidebar',
         readOnly: true,
-        hidden: true,
       },
+      label: 'Skip Sync',
     },
   ],
+  hooks: {
+    afterChange: [loginAfterCreate],
+    beforeChange: [createStripeCustomer],
+  },
   timestamps: true,
 }
 

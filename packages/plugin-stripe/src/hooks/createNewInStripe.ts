@@ -52,15 +52,12 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
 
       if (syncConfig) {
         // combine all fields of this object and match their respective values within the document
-        let syncedFields = syncConfig.fields.reduce(
-          (acc, field) => {
-            const { fieldPath, stripeProperty } = field
+        let syncedFields = syncConfig.fields.reduce((acc, field) => {
+          const { fieldPath, stripeProperty } = field
 
-            acc[stripeProperty] = dataRef[fieldPath]
-            return acc
-          },
-          {} as Record<string, any>,
-        )
+          acc[stripeProperty] = dataRef[fieldPath]
+          return acc
+        }, {} as Record<string, any>)
 
         syncedFields = deepen(syncedFields)
 
@@ -75,7 +72,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
             try {
               // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
               const stripeResource = await stripe?.[syncConfig.stripeResourceType]?.create(
-                syncedFields as any,
+                syncedFields,
               )
 
               if (logs)
@@ -108,7 +105,7 @@ export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (ar
 
             // NOTE: Typed as "any" because the "create" method is not standard across all Stripe resources
             const stripeResource = await stripe?.[syncConfig.stripeResourceType]?.create(
-              syncedFields as any,
+              syncedFields,
             )
 
             if (logs)

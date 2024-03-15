@@ -9,7 +9,7 @@ import { upsertRow } from './upsertRow/index.js'
 
 export async function updateGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
-  { data, req = {} as PayloadRequest, slug }: UpdateGlobalArgs,
+  { slug, data, req = {} as PayloadRequest }: UpdateGlobalArgs,
 ): Promise<T> {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
@@ -23,8 +23,8 @@ export async function updateGlobal<T extends TypeWithID>(
     data,
     db,
     fields: globalConfig.fields,
-    tableName,
     req,
+    tableName,
   })
 
   return result

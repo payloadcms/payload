@@ -1,34 +1,32 @@
 import type { Project } from '../payload-types'
 export const project1: Partial<Project> = {
-  title: 'Project 1',
   slug: 'project-1',
   _status: 'published',
-  meta: {
-    title: 'Project 1',
-    description: 'This is the first project.',
-    image: '{{IMAGE}}',
-  },
   hero: {
     type: 'lowImpact',
     links: null,
+    media: null,
     richText: [
       {
+        type: 'h1',
         children: [
           {
             text: 'Project 1',
           },
         ],
-        type: 'h1',
       },
     ],
-    media: null,
   },
   layout: [
     {
       blockType: 'content',
       columns: [
         {
-          size: 'twoThirds',
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
               children: [
@@ -38,14 +36,16 @@ export const project1: Partial<Project> = {
               ],
             },
           ],
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'twoThirds',
         },
       ],
     },
   ],
+  meta: {
+    description: 'This is the first project.',
+    image: '{{IMAGE}}',
+    title: 'Project 1',
+  },
   relatedProjects: [], // this is populated by the seed script
+  title: 'Project 1',
 }

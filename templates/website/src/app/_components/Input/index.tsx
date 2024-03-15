@@ -1,34 +1,35 @@
+import type { FieldValues, UseFormRegister } from 'react-hook-form'
+
 import React from 'react'
-import { FieldValues, UseFormRegister } from 'react-hook-form'
 
 import classes from './index.module.scss'
 
 type Props = {
-  name: string
+  disabled?: boolean
+  error: any
   label: string
+  name: string
+  placeholder?: string
   register: UseFormRegister<FieldValues & any>
   required?: boolean
-  error: any
-  type?: 'text' | 'textarea' | 'number' | 'password' | 'email'
+  type?: 'email' | 'number' | 'password' | 'text' | 'textarea'
   validate?: (value: string) => boolean | string
-  placeholder?: string
-  disabled?: boolean
 }
 
 export const Input: React.FC<Props> = ({
   name,
-  label,
-  required,
-  register,
-  error,
   type = 'text',
-  validate,
-  placeholder,
   disabled,
+  error,
+  label,
+  placeholder,
+  register,
+  required,
+  validate,
 }) => {
   return (
     <div className={classes.inputWrap}>
-      <label htmlFor="name" className={classes.label}>
+      <label className={classes.label} htmlFor="name">
         {label}
         {required ? <span className={classes.asterisk}>&nbsp;*</span> : ''}
       </label>
@@ -37,8 +38,8 @@ export const Input: React.FC<Props> = ({
           className={[classes.input, classes.textarea, error && classes.error]
             .filter(Boolean)
             .join(' ')}
-          rows={3}
           placeholder={placeholder}
+          rows={3}
           {...register(name, {
             required,
             validate,
@@ -48,16 +49,16 @@ export const Input: React.FC<Props> = ({
       ) : (
         <input
           className={[classes.input, error && classes.error].filter(Boolean).join(' ')}
-          type={type}
           placeholder={placeholder}
+          type={type}
           {...register(name, {
             required,
             validate,
             ...(type === 'email'
               ? {
                   pattern: {
-                    value: /\S+@\S+\.\S+/,
                     message: 'Please enter a valid email',
+                    value: /\S[^\s@]*@\S+\.\S+/,
                   },
                 }
               : {}),

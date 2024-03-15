@@ -1,14 +1,14 @@
-import React, { Fragment } from 'react'
 import Link from 'next/link'
+import React, { Fragment } from 'react'
 
-import { Product } from '../../../payload/payload-types'
+import type { Product } from '../../../payload/payload-types'
+
 import { AddToCartButton } from '../../_components/AddToCartButton'
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'
 import { Message } from '../../_components/Message'
 import { Price } from '../../_components/Price'
 import RichText from '../../_components/RichText'
-
 import classes from './index.module.scss'
 
 export const ProductHero: React.FC<{
@@ -16,10 +16,10 @@ export const ProductHero: React.FC<{
 }> = ({ product }) => {
   const {
     id,
+    categories,
+    meta: { description, image: metaImage } = {},
     stripeProductID,
     title,
-    categories,
-    meta: { image: metaImage, description } = {},
   } = product
 
   return (
@@ -36,7 +36,7 @@ export const ProductHero: React.FC<{
                 >
                   edit this product in the admin panel
                 </Link>
-                {'.'}
+                .
               </Fragment>
             }
           />
@@ -71,21 +71,21 @@ export const ProductHero: React.FC<{
               <Link href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/products/${id}`}>
                 navigate to the admin dashboard
               </Link>
-              {'.'}
+              .
             </p>
           </div>
-          <Price product={product} button={false} />
-          <AddToCartButton product={product} className={classes.addToCartButton} />
+          <Price button={false} product={product} />
+          <AddToCartButton className={classes.addToCartButton} product={product} />
         </div>
         <div className={classes.media}>
           <div className={classes.mediaWrapper}>
             {!metaImage && <div className={classes.placeholder}>No image</div>}
             {metaImage && typeof metaImage !== 'string' && (
-              <Media imgClassName={classes.image} resource={metaImage} fill />
+              <Media fill imgClassName={classes.image} resource={metaImage} />
             )}
           </div>
           {metaImage && typeof metaImage !== 'string' && metaImage?.caption && (
-            <RichText content={metaImage.caption} className={classes.caption} />
+            <RichText className={classes.caption} content={metaImage.caption} />
           )}
         </div>
       </Gutter>

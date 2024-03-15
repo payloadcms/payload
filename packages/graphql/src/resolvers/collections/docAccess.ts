@@ -1,8 +1,9 @@
-import { docAccessOperation } from 'payload/operations'
-import type { Collection, PayloadRequest } from 'payload/types'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
+import type { Collection, PayloadRequest } from 'payload/types'
 
+import { docAccessOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 export type Resolver = (
@@ -19,8 +20,8 @@ export function docAccessResolver(collection: Collection): Resolver {
   async function resolver(_, args, context: Context) {
     return docAccessOperation({
       id: args.id,
-      req: isolateObjectProperty(context.req, 'transactionID'),
       collection,
+      req: isolateObjectProperty(context.req, 'transactionID'),
     })
   }
 

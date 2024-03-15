@@ -1,14 +1,15 @@
 'use client'
 
-import React, { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
+import React, { Fragment, useEffect, useState } from 'react'
 
-import { Settings } from '../../../../payload/payload-types'
+import type { Settings } from '../../../../payload/payload-types'
+
 import { useAuth } from '../../../_providers/Auth'
 
 export const LogoutPage: React.FC<{
   settings: Settings
-}> = props => {
+}> = (props) => {
   const { settings } = props
   const { productsPage } = settings || {}
   const { logout } = useAuth()
@@ -34,7 +35,7 @@ export const LogoutPage: React.FC<{
         <div>
           <h1>{error || success}</h1>
           <p>
-            {'What would you like to do next?'}
+            What would you like to do next?
             {typeof productsPage === 'object' && productsPage?.slug && (
               <Fragment>
                 {' '}
@@ -43,8 +44,7 @@ export const LogoutPage: React.FC<{
               </Fragment>
             )}
             {` To log back in, `}
-            <Link href="/login">click here</Link>
-            {'.'}
+            <Link href="/login">click here</Link>.
           </p>
         </div>
       )}

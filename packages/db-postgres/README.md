@@ -21,12 +21,10 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI,
-    }
+    },
   }),
   // ...rest of config
 })
-
 ```
 
 More detailed usage can be found in the [Payload Docs](https://payloadcms.com/docs/configuration/overview).
-

@@ -1,6 +1,7 @@
-import React, { Fragment } from 'react'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+
 import Link from 'next/link'
+import React, { Fragment } from 'react'
 
 import staticImage from '../../../../../public/static-image.jpg'
 import { MediaBlock } from '../../../_blocks/MediaBlock'
@@ -20,13 +21,13 @@ export default async function MediaBlockPage() {
         <h1>Media Block</h1>
       </Gutter>
       <VerticalPadding bottom="large" top="none">
-        <MediaBlock position="default" blockType="mediaBlock" media="" staticImage={staticImage} />
+        <MediaBlock blockType="mediaBlock" media="" position="default" staticImage={staticImage} />
         <br />
         <br />
         <MediaBlock
-          position="fullscreen"
           blockType="mediaBlock"
           media=""
+          position="fullscreen"
           staticImage={staticImage}
         />
       </VerticalPadding>
@@ -35,10 +36,10 @@ export default async function MediaBlockPage() {
 }
 
 export const metadata: Metadata = {
-  title: 'Media Block',
   description: 'Styleguide for media block.',
   openGraph: mergeOpenGraph({
     title: 'Media Block',
     url: '/styleguide/media-block',
   }),
+  title: 'Media Block',
 }

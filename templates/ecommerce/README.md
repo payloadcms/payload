@@ -30,17 +30,17 @@ If you have not done so already, you need to have standalone copy of this repo o
 
 #### Method 1 (recommended)
 
-  Go to Payload Cloud and [clone this template](https://payloadcms.com/new/clone/ecommerce). This will create a new repository on your GitHub account with this template's code which you can then clone to your own machine.
+Go to Payload Cloud and [clone this template](https://payloadcms.com/new/clone/ecommerce). This will create a new repository on your GitHub account with this template's code which you can then clone to your own machine.
 
 #### Method 2
 
-  Use the `create-payload-app` CLI to clone this template directly to your machine:
+Use the `create-payload-app` CLI to clone this template directly to your machine:
 
     npx create-payload-app@latest my-project -t ecommerce
 
 #### Method 3
 
-  Use the `git` CLI to clone this template directly to your machine:
+Use the `git` CLI to clone this template directly to your machine:
 
     git clone -n --depth=1 --filter=tree:0 https://github.com/payloadcms/payload my-project && cd my-project && git sparse-checkout set --no-cone templates/ecommerce && git checkout && rm -rf .git && git init && git add . && git mv -f templates/ecommerce/{.,}* . && git add . && git commit -m "Initial commit"
 
@@ -59,7 +59,7 @@ The Payload config is tailored specifically to the needs of most e-commerce busi
 
 ### Collections
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections)  docs for details on how to extend this functionality.
+See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
 
 - #### Users (Authentication)
 
@@ -145,6 +145,7 @@ Logged-in users can have their shopping carts saved to their profiles as they sh
 Payload itself handles no currency exchange. All payments are processed and billed using [Stripe](https://stripe.com). This means you must have access to a Stripe account via an API key, see [Connect Stripe](#connect-stripe) for how to get one. When you create a product in Payload that you wish to sell, it must be connected to a Stripe product by selecting one from the field in the product's sidebar, see [Products](#products) for more details. Once set, data is automatically synced between the two platforms in the following ways:
 
 1. Stripe to Payload using [Stripe Webhooks](https://stripe.com/docs/webhooks):
+
    - `product.created`
    - `product.updated`
    - `price.updated`
@@ -279,7 +280,7 @@ If you prefer another front-end framework or would like to use Payload as a stan
 
 For more details on how setup a custom server, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/main/examples/custom-server).
 
-##  Development
+## Development
 
 To spin up this example locally, follow the [Quick Start](#quick-start). Then [Connect Stripe](#connect-stripe) to enable payments, and [Seed](#seed) the database with a few products and pages.
 
@@ -299,13 +300,12 @@ To seed the database with a few products and pages you can run `yarn seed`. This
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 
-
 ### Conflicting routes
 
->In a monorepo when routes are bootstrapped to the same host, they can conflict with Payload's own routes if they have the same name. In our template we've named the Nextjs API routes to `next` to avoid this conflict.
+> In a monorepo when routes are bootstrapped to the same host, they can conflict with Payload's own routes if they have the same name. In our template we've named the Nextjs API routes to `next` to avoid this conflict.
 >
->This can happen with any other routes conflicting with Payload such as `admin` and we recommend using different names for custom routes.  
->Alternatively you can also rename Payload's own routes via the [configuration](https://payloadcms.com/docs/configuration/overview).
+> This can happen with any other routes conflicting with Payload such as `admin` and we recommend using different names for custom routes.  
+> Alternatively you can also rename Payload's own routes via the [configuration](https://payloadcms.com/docs/configuration/overview).
 
 ## Production
 

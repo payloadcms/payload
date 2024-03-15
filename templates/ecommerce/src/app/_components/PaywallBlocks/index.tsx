@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useEffect } from 'react'
 import Link from 'next/link'
+import React, { useEffect } from 'react'
 
-import { Page } from '../../../payload/payload-types'
+import type { Page } from '../../../payload/payload-types'
+
 import { PRODUCT_PAYWALL } from '../../_graphql/products'
 import { useAuth } from '../../_providers/Auth'
 import { Blocks } from '../Blocks'
@@ -13,10 +14,10 @@ import { Message } from '../Message'
 import { VerticalPadding } from '../VerticalPadding'
 
 export const PaywallBlocks: React.FC<{
-  productSlug: string
   disableTopPadding?: boolean
-}> = props => {
-  const { productSlug, disableTopPadding } = props
+  productSlug: string
+}> = (props) => {
+  const { disableTopPadding, productSlug } = props
   const { user } = useAuth()
 
   const [isLoading, setIsLoading] = React.useState(false)
@@ -36,20 +37,20 @@ export const PaywallBlocks: React.FC<{
 
       try {
         const paywall = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/graphql`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             query: PRODUCT_PAYWALL,
             variables: {
               slug: productSlug,
             },
           }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         })
-          ?.then(res => res.json())
-          ?.then(res => res?.data?.Products.docs[0]?.paywall)
+          ?.then((res) => res.json())
+          ?.then((res) => res?.data?.Products.docs[0]?.paywall)
 
         if (paywall) {
           setBlocks(paywall)
@@ -59,7 +60,7 @@ export const PaywallBlocks: React.FC<{
         // this is to prevent a flash of the loading shimmer on fast networks
         const end = Date.now()
         if (end - start < 1000) {
-          await new Promise(resolve => setTimeout(resolve, 500 - (end - start)))
+          await new Promise((resolve) => setTimeout(resolve, 500 - (end - start)))
         }
 
         setIsLoading(false)
@@ -82,13 +83,13 @@ export const PaywallBlocks: React.FC<{
         <VerticalPadding bottom="large" top="none">
           <Message
             message={
-              <>
+              <React.Fragment>
                 {`This content is gated behind a paywall. You must be `}
                 <Link href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}>
                   logged in
                 </Link>
                 {` as an admin or have purchased this product to view this content.`}
-              </>
+              </React.Fragment>
             }
           />
         </VerticalPadding>

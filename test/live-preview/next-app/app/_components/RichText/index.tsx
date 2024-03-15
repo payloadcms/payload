@@ -1,9 +1,8 @@
 import React from 'react'
 
-import serializeSlate from './serializeSlate'
-import serializeLexical from './serializeLexical'
-
 import classes from './index.module.scss'
+import serializeLexical from './serializeLexical'
+import serializeSlate from './serializeSlate'
 
 const RichText: React.FC<{
   className?: string

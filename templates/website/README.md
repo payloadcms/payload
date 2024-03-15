@@ -31,17 +31,17 @@ If you have not done so already, you need to have standalone copy of this repo o
 
 #### Method 1 (recommended)
 
-  Go to Payload Cloud and [clone this template](https://payloadcms.com/new/clone/website). This will create a new repository on your GitHub account with this template's code which you can then clone to your own machine.
+Go to Payload Cloud and [clone this template](https://payloadcms.com/new/clone/website). This will create a new repository on your GitHub account with this template's code which you can then clone to your own machine.
 
 #### Method 2
 
-  Use the `create-payload-app` CLI to clone this template directly to your machine:
+Use the `create-payload-app` CLI to clone this template directly to your machine:
 
     npx create-payload-app@latest my-project -t website
 
 #### Method 3
 
-  Use the `git` CLI to clone this template directly to your machine:
+Use the `git` CLI to clone this template directly to your machine:
 
     git clone -n --depth=1 --filter=tree:0 https://github.com/payloadcms/payload my-project && cd my-project && git sparse-checkout set --no-cone templates/website && git checkout && rm -rf .git && git init && git add . && git mv -f templates/website/{.,}* . && git add . && git commit -m "Initial commit"
 
@@ -209,7 +209,7 @@ If you prefer another front-end framework or would like to use Payload as a stan
 
 For more details on how setup a custom server, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/main/examples/custom-server).
 
-##  Development
+## Development
 
 To spin up this example locally, follow the [Quick Start](#quick-start). Then [Seed](#seed) the database with a few pages, posts, and projects.
 
@@ -228,24 +228,24 @@ That's it! The Docker instance will help you get up and running quickly while al
 To seed the database with a few pages, posts, and projects you can run `yarn seed`. This template also comes with a `GET /api/seed` endpoint you can use to seed the database from the admin panel.
 
 The seed script will also create two users for demonstration purposes only:
+
 1. Demo Author
-    - Email: `demo-author@payloadcms.com`
-    - Password: `password`
-    - Role: `admin`
+   - Email: `demo-author@payloadcms.com`
+   - Password: `password`
+   - Role: `admin`
 2. Demo User
-    - Email: `demo-user@payloadcms.com`
-    - Password: `password`
-    - Role: `user`
+   - Email: `demo-user@payloadcms.com`
+   - Password: `password`
+   - Role: `user`
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
-
 
 ### Conflicting routes
 
 > In a monorepo when routes are bootstrapped to the same host, they can conflict with Payload's own routes if they have the same name. In our template we've named the Nextjs API routes to `next` to avoid this conflict.
 >
->This can happen with any other routes conflicting with Payload such as `admin` and we recommend using different names for custom routes.  
->Alternatively you can also rename Payload's own routes via the [configuration](https://payloadcms.com/docs/configuration/overview).
+> This can happen with any other routes conflicting with Payload such as `admin` and we recommend using different names for custom routes.  
+> Alternatively you can also rename Payload's own routes via the [configuration](https://payloadcms.com/docs/configuration/overview).
 
 ## Production
 

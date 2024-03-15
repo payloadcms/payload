@@ -1,4 +1,5 @@
 import type { PayloadHandler } from 'payload/config'
+
 import Stripe from 'stripe'
 
 import type { CartItems } from '../payload-types'
@@ -12,7 +13,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 // we then add the price of the product to the total
 // once completed, we pass the `client_secret` of the `PaymentIntent` back to the client which can process the payment
 export const createPaymentIntent: PayloadHandler = async (req, res): Promise<void> => {
-  const { user, payload } = req
+  const { payload, user } = req
 
   if (!user) {
     res.status(401).send('Unauthorized')
@@ -20,8 +21,8 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
   }
 
   const fullUser = await payload.findByID({
-    collection: 'users',
     id: user?.id,
+    collection: 'users',
   })
 
   if (!fullUser) {
@@ -35,15 +36,15 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
     // lookup user in Stripe and create one if not found
     if (!stripeCustomerID) {
       const customer = await stripe.customers.create({
-        email: fullUser?.email,
         name: fullUser?.name,
+        email: fullUser?.email,
       })
 
       stripeCustomerID = customer.id
 
       await payload.update({
-        collection: 'users',
         id: user?.id,
+        collection: 'users',
         data: {
           stripeCustomerID,
         },
@@ -72,9 +73,9 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
         }
 
         const prices = await stripe.prices.list({
-          product: product.stripeProductID,
-          limit: 100,
           expand: ['data.product'],
+          limit: 100,
+          product: product.stripeProductID,
         })
 
         if (prices.data.length === 0) {
@@ -94,9 +95,9 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
-      customer: stripeCustomerID,
       amount: total,
       currency: 'usd',
+      customer: stripeCustomerID,
       payment_method_types: ['card'],
     })
 

@@ -2,6 +2,32 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 import type { GraphQLFieldConfig, GraphQLType } from 'graphql'
+import type { GraphQLInfo } from 'payload/config'
+import type {
+  ArrayField,
+  BlockField,
+  CheckboxField,
+  CodeField,
+  CollapsibleField,
+  DateField,
+  EmailField,
+  Field,
+  GroupField,
+  JSONField,
+  NumberField,
+  PointField,
+  RadioField,
+  RelationshipField,
+  RichTextAdapter,
+  RichTextField,
+  RowField,
+  SanitizedConfig,
+  SelectField,
+  TabsField,
+  TextField,
+  TextareaField,
+  UploadField,
+} from 'payload/types'
 
 import {
   GraphQLBoolean,
@@ -17,43 +43,17 @@ import {
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 /* eslint-disable no-use-before-define */
 import { GraphQLJSON } from 'graphql-type-json'
-
-import type { GraphQLInfo } from 'payload/config'
-import type {
-  RichTextAdapter,
-  SanitizedConfig,
-  ArrayField,
-  BlockField,
-  CheckboxField,
-  CodeField,
-  CollapsibleField,
-  DateField,
-  EmailField,
-  Field,
-  GroupField,
-  JSONField,
-  NumberField,
-  PointField,
-  RadioField,
-  RelationshipField,
-  RichTextField,
-  RowField,
-  SelectField,
-  TabsField,
-  TextField,
-  TextareaField,
-  UploadField,
-} from 'payload/types'
-
 import { tabHasName } from 'payload/types'
 import { toWords } from 'payload/utilities'
+
+import type { Context } from '../resolvers/types.js'
+
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import formatOptions from '../utilities/formatOptions.js'
 import buildWhereInputType from './buildWhereInputType.js'
 import isFieldNullable from './isFieldNullable.js'
 import withNullableType from './withNullableType.js'
-import { Context } from '../resolvers/types.js'
 
 type LocaleInputType = {
   fallbackLocale: {
@@ -73,22 +73,22 @@ export type ObjectTypeConfig = {
 
 type Args = {
   baseFields?: ObjectTypeConfig
+  config: SanitizedConfig
   fields: Field[]
   forceNullable?: boolean
+  graphqlResult: GraphQLInfo
   name: string
   parentName: string
-  graphqlResult: GraphQLInfo
-  config: SanitizedConfig
 }
 
 function buildObjectType({
   name,
   baseFields = {},
+  config,
   fields,
   forceNullable,
-  parentName,
   graphqlResult,
-  config,
+  parentName,
 }: Args): GraphQLObjectType {
   const fieldToSchemaMap = {
     array: (objectTypeConfig: ObjectTypeConfig, field: ArrayField) => {
@@ -98,11 +98,11 @@ function buildObjectType({
       if (!graphqlResult.types.arrayTypes[interfaceName]) {
         const objectType = buildObjectType({
           name: interfaceName,
+          config,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
-          parentName: interfaceName,
           graphqlResult,
-          config,
+          parentName: interfaceName,
         })
 
         if (Object.keys(objectType.getFields()).length) {
@@ -131,6 +131,7 @@ function buildObjectType({
 
           const objectType = buildObjectType({
             name: interfaceName,
+            config,
             fields: [
               ...block.fields,
               {
@@ -139,9 +140,8 @@ function buildObjectType({
               },
             ],
             forceNullable,
-            parentName: interfaceName,
             graphqlResult,
-            config,
+            parentName: interfaceName,
           })
 
           if (Object.keys(objectType.getFields()).length) {
@@ -206,11 +206,11 @@ function buildObjectType({
       if (!graphqlResult.types.groupTypes[interfaceName]) {
         const objectType = buildObjectType({
           name: interfaceName,
+          config,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
-          parentName: interfaceName,
           graphqlResult,
-          config,
+          parentName: interfaceName,
         })
 
         if (Object.keys(objectType.getFields()).length) {
@@ -339,6 +339,11 @@ function buildObjectType({
       }
 
       const relationship = {
+        type: withNullableType(
+          field,
+          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+          forceNullable,
+        ),
         args: relationshipArgs,
         extensions: { complexity: 10 },
         async resolve(parent, args, context: Context) {
@@ -439,11 +444,6 @@ function buildObjectType({
 
           return null
         },
-        type: withNullableType(
-          field,
-          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
-          forceNullable,
-        ),
       }
 
       return {
@@ -454,6 +454,7 @@ function buildObjectType({
     richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
       ...objectTypeConfig,
       [field.name]: {
+        type: withNullableType(field, GraphQLJSON, forceNullable),
         args: {
           depth: {
             type: GraphQLInt,
@@ -486,7 +487,6 @@ function buildObjectType({
 
           return parent[field.name]
         },
-        type: withNullableType(field, GraphQLJSON, forceNullable),
       },
     }),
     row: (objectTypeConfig: ObjectTypeConfig, field: RowField) =>
@@ -520,11 +520,11 @@ function buildObjectType({
           if (!graphqlResult.types.groupTypes[interfaceName]) {
             const objectType = buildObjectType({
               name: interfaceName,
+              config,
               fields: tab.fields,
               forceNullable,
-              parentName: interfaceName,
               graphqlResult,
-              config,
+              parentName: interfaceName,
             })
 
             if (Object.keys(objectType.getFields()).length) {
@@ -596,6 +596,7 @@ function buildObjectType({
       const relatedCollectionSlug = field.relationTo
 
       const upload = {
+        type,
         args: uploadArgs,
         extensions: { complexity: 20 },
         async resolve(parent, args, context: Context) {
@@ -624,7 +625,6 @@ function buildObjectType({
 
           return null
         },
-        type,
       }
 
       const whereFields = graphqlResult.collections[relationTo].config.fields

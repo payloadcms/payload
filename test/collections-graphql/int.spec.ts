@@ -1,6 +1,7 @@
 import type { Payload } from '../../packages/payload/src/index.js'
-import { getPayload } from '../../packages/payload/src/index.js'
 import type { Post } from './payload-types.js'
+
+import { getPayload } from '../../packages/payload/src/index.js'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { idToString } from '../helpers/idToString.js'

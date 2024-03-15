@@ -62,9 +62,7 @@ import express from 'express'
 const app = express()
 
 app.listen(3000, async () => {
-  console.log(
-    "Express is now listening for incoming connections on port 3000."
-  )
+  console.log('Express is now listening for incoming connections on port 3000.')
 })
 ```
 
@@ -86,9 +84,7 @@ const start = async () => {
   })
 
   app.listen(3000, async () => {
-    console.log(
-      "Express is now listening for incoming connections on port 3000."
-    )
+    console.log('Express is now listening for incoming connections on port 3000.')
   })
 }
 
@@ -105,6 +101,7 @@ PAYLOAD_SECRET=your-payload-secret
 Here is a list of all properties available to pass through `payload.init`:
 
 ##### secret
+
 **Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess.
 
 Payload uses this secret key to generate secure user tokens (JWT). Behind the scenes, we do not use your secret key to encrypt directly - instead, we first take the secret key and create an encrypted string using the SHA-256 hash function. Then, we reduce the encrypted string to its first 32 characters. This final value is what Payload uses for encryption.
@@ -126,6 +123,7 @@ A boolean that disables the database connection when Payload starts up.
 An object used to configure SMTP. [Read more](/docs/email/overview).
 
 ##### express
+
 This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
 
 ##### local

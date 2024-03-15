@@ -2,14 +2,14 @@
   /* eslint-disable @next/next/no-img-element */
 }
 
-import React from 'react'
 import Link from 'next/link'
+import React from 'react'
 
-import { Header } from '../../../payload/payload-types'
+import type { Header } from '../../../payload/payload-types'
+
 import { fetchHeader } from '../../_api/fetchGlobals'
 import { Gutter } from '../Gutter'
 import { HeaderNav } from './Nav'
-
 import classes from './index.module.scss'
 
 export async function Header() {
@@ -25,7 +25,7 @@ export async function Header() {
   }
 
   return (
-    <>
+    <React.Fragment>
       <header className={classes.header}>
         <Gutter className={classes.wrap}>
           <Link href="/">
@@ -35,14 +35,14 @@ export async function Header() {
               Instead, we just use CSS to invert the color via `filter: invert(1)` based on `[data-theme="dark"]`
             */}
             <img
-              className={classes.logo}
               alt="Payload Logo"
+              className={classes.logo}
               src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
             />
           </Link>
           <HeaderNav header={header} />
         </Gutter>
       </header>
-    </>
+    </React.Fragment>
   )
 }

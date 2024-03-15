@@ -1,4 +1,5 @@
 import type { BeforeChangeHook } from 'payload/dist/collections/config/types'
+
 import Stripe from 'stripe'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
@@ -6,7 +7,7 @@ const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
 const logs = false
 
-export const beforeProductChange: BeforeChangeHook = async ({ req, data }) => {
+export const beforeProductChange: BeforeChangeHook = async ({ data, req }) => {
   const { payload } = req
   const newDoc: Record<string, unknown> = {
     ...data,
@@ -42,8 +43,8 @@ export const beforeProductChange: BeforeChangeHook = async ({ req, data }) => {
 
   try {
     const allPrices = await stripe.prices.list({
-      product: data.stripeProductID,
       limit: 100,
+      product: data.stripeProductID,
     })
 
     newDoc.priceJSON = JSON.stringify(allPrices)

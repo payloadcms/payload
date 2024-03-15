@@ -1,7 +1,8 @@
-import { restoreVersionOperationGlobal } from 'payload/operations'
 import type { Document, PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
+import { restoreVersionOperationGlobal } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 type Resolver = (

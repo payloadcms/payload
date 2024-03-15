@@ -20,24 +20,24 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
 
 ### Config
 
-| Option             | Description                                                                                                                                                                                         |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
-| **`options`** \*   | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing a `label` string and a `value` string.                                           |
-| **`hasMany`**      | Boolean when, if set to `true`, allows this field to have many selections instead of only one.                                                                                                      |
-| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
-| **`unique`**       | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
-| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
+| Option             | Description                                                                                                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
+| **`options`** \*   | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing a `label` string and a `value` string.                   |
+| **`hasMany`**      | Boolean when, if set to `true`, allows this field to have many selections instead of only one.                                                                              |
+| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                     |
+| **`unique`**       | Enforce that each entry in the Collection has a unique value for this field.                                                                                                |
+| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                |
 | **`index`**        | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
-| **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
-| **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
-| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                    |
-| **`defaultValue`** | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                |
-| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
-| **`required`**     | Require this field to have a value.                                                                                                                                                                 |
-| **`admin`**        | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
-| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
+| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                               |
+| **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                  |
+| **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                     |
+| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                            |
+| **`defaultValue`** | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
+| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
+| **`required`**     | Require this field to have a value.                                                                                                                                         |
+| **`admin`**        | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                    |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 
 _\* An asterisk denotes that a property is required._
 
@@ -122,7 +122,7 @@ export const CustomSelectField: Field = {
         ],
       }),
     },
-  }
+  },
 }
 ```
 
@@ -174,9 +174,9 @@ export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, optio
 If you are looking to create a dynamic select field, the following tutorial will walk you through the process of creating a custom select field that fetches its options from an external API.
 
 <VideoDrawer
- id='Efn9OxSjA6Y'
- label='How to Create a Custom Select Field'
- drawerTitle='How to Create a Custom Select Field: A Step-by-Step Guide'
+  id="Efn9OxSjA6Y"
+  label="How to Create a Custom Select Field"
+  drawerTitle="How to Create a Custom Select Field: A Step-by-Step Guide"
 />
 
 If you want to learn more about custom components check out the [Admin > Custom Component](/docs/admin/components#field-component) docs.

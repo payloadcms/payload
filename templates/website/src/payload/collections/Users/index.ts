@@ -9,19 +9,16 @@ import { loginAfterCreate } from './hooks/loginAfterCreate'
 
 const Users: CollectionConfig = {
   slug: 'users',
-  admin: {
-    useAsTitle: 'name',
-    defaultColumns: ['name', 'email'],
-  },
   access: {
-    read: adminsAndUser,
-    create: anyone,
-    update: adminsAndUser,
-    delete: admins,
     admin: ({ req: { user } }) => checkRole(['admin'], user),
+    create: anyone,
+    delete: admins,
+    read: adminsAndUser,
+    update: adminsAndUser,
   },
-  hooks: {
-    afterChange: [loginAfterCreate],
+  admin: {
+    defaultColumns: ['name', 'email'],
+    useAsTitle: 'name',
   },
   auth: true,
   fields: [
@@ -32,8 +29,16 @@ const Users: CollectionConfig = {
     {
       name: 'roles',
       type: 'select',
-      hasMany: true,
+      access: {
+        create: admins,
+        read: admins,
+        update: admins,
+      },
       defaultValue: ['user'],
+      hasMany: true,
+      hooks: {
+        beforeChange: [ensureFirstUserIsAdmin],
+      },
       options: [
         {
           label: 'admin',
@@ -44,16 +49,11 @@ const Users: CollectionConfig = {
           value: 'user',
         },
       ],
-      hooks: {
-        beforeChange: [ensureFirstUserIsAdmin],
-      },
-      access: {
-        read: admins,
-        create: admins,
-        update: admins,
-      },
     },
   ],
+  hooks: {
+    afterChange: [loginAfterCreate],
+  },
   timestamps: true,
 }
 

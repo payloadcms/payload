@@ -7,8 +7,8 @@ import type { AfterReadHook } from 'payload/dist/collections/config/types'
 export const populateUser: AfterReadHook = async ({ doc, req: { payload } }) => {
   if (doc?.user) {
     const userDoc = await payload.findByID({
-      collection: 'users',
       id: typeof doc.user === 'object' ? doc?.user?.id : doc?.user,
+      collection: 'users',
       depth: 0,
     })
 

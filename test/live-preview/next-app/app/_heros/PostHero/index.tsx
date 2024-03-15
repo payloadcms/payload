@@ -1,25 +1,25 @@
-import React, { Fragment } from 'react'
+import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import Link from 'next/link'
+import React, { Fragment } from 'react'
 
-import { Post } from '../../../payload-types'
+import type { Post } from '../../../payload-types'
+
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'
 import RichText from '../../_components/RichText'
 import { formatDateTime } from '../../_utilities/formatDateTime'
-
 import classes from './index.module.scss'
-import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 
 export const PostHero: React.FC<{
   post: Post
 }> = ({ post }) => {
-  const { id, meta: { image: metaImage, description } = {}, createdAt } = post
+  const { id, createdAt, meta: { description, image: metaImage } = {} } = post
 
   return (
     <Fragment>
       <Gutter className={classes.postHero}>
         <div className={classes.content}>
-          <RichText content={post?.hero?.richText} className={classes.richText} />
+          <RichText className={classes.richText} content={post?.hero?.richText} />
           <p className={classes.meta}>
             {createdAt && (
               <Fragment>
@@ -34,7 +34,7 @@ export const PostHero: React.FC<{
               <Link href={`${PAYLOAD_SERVER_URL}/admin/collections/posts/${id}`}>
                 navigate to the admin dashboard
               </Link>
-              {'.'}
+              .
             </p>
           </div>
         </div>
@@ -42,11 +42,11 @@ export const PostHero: React.FC<{
           <div className={classes.mediaWrapper}>
             {!metaImage && <div className={classes.placeholder}>No image</div>}
             {metaImage && typeof metaImage !== 'string' && (
-              <Media imgClassName={classes.image} resource={metaImage} fill />
+              <Media fill imgClassName={classes.image} resource={metaImage} />
             )}
           </div>
           {metaImage && typeof metaImage !== 'string' && metaImage?.caption && (
-            <RichText content={metaImage.caption} className={classes.caption} />
+            <RichText className={classes.caption} content={metaImage.caption} />
           )}
         </div>
       </Gutter>

@@ -3,42 +3,42 @@ import React from 'react'
 import classes from './index.module.scss'
 
 const defaultLabels = {
-  singular: 'Doc',
   plural: 'Docs',
+  singular: 'Doc',
 }
 
 const defaultCollectionLabels = {
   products: {
-    singular: 'Product',
     plural: 'Products',
+    singular: 'Product',
   },
 }
 
 export const PageRange: React.FC<{
   className?: string
-  totalDocs?: number
-  currentPage?: number
   collection?: string
-  limit?: number
   collectionLabels?: {
-    singular?: string
     plural?: string
+    singular?: string
   }
+  currentPage?: number
+  limit?: number
+  totalDocs?: number
 }> = (props) => {
   const {
     className,
-    totalDocs,
-    currentPage,
     collection,
-    limit,
     collectionLabels: collectionLabelsFromProps,
+    currentPage,
+    limit,
+    totalDocs,
   } = props
 
   const indexStart = (currentPage ? currentPage - 1 : 1) * (limit || 1) + 1
   let indexEnd = (currentPage || 1) * (limit || 1)
   if (totalDocs && indexEnd > totalDocs) indexEnd = totalDocs
 
-  const { singular, plural } =
+  const { plural, singular } =
     collectionLabelsFromProps || defaultCollectionLabels[collection || ''] || defaultLabels || {}
 
   return (

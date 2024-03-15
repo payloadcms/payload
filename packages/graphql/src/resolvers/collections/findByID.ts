@@ -1,9 +1,10 @@
-import { findByIDOperation } from 'payload/operations'
 import type { GeneratedTypes } from 'payload'
 import type { PayloadRequest } from 'payload/types'
 import type { Collection } from 'payload/types'
 
+import { findByIDOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 export type Resolver<T> = (

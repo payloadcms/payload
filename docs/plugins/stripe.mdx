@@ -17,7 +17,12 @@ To build a checkout flow on your front-end you can either use [Stripe Checkout](
 The beauty of this plugin is the entirety of your application's content and business logic can be handled in Payload while Stripe handles solely the billing and payment processing. You can build a completely proprietary application that is endlessly customizable and extendable, on APIs and databases that you own. Hosted services like Shopify or BigCommerce might fracture your application's content then charge you for access.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-stripe). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20stripe&template=bug_report.md&title=plugin-stripe%3A) with as much detail as possible.
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-stripe). If you need help,
+  check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a
+  bug, please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20stripe&template=bug_report.md&title=plugin-stripe%3A)
+  with as much detail as possible.
 </Banner>
 
 ##### Core features
@@ -58,14 +63,14 @@ export default config
 
 ### Options
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `stripeSecretKey` \* | string | `undefined` | Your Stripe secret key |
-| `stripeWebhooksEndpointSecret` | string | `undefined` | Your Stripe webhook endpoint secret |
-| `rest` | boolean | `false` | When `true`, opens the `/api/stripe/rest` endpoint |
-| `webhooks` | object \| function | `undefined` | Either a function to handle all webhooks events, or an object of Stripe webhook handlers, keyed to the name of the event |
-| `sync` | array | `undefined` | An array of sync configs |
-| `logs` | boolean | `false` | When `true`, logs sync events to the console as they happen |
+| Option                         | Type               | Default     | Description                                                                                                              |
+| ------------------------------ | ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `stripeSecretKey` \*           | string             | `undefined` | Your Stripe secret key                                                                                                   |
+| `stripeWebhooksEndpointSecret` | string             | `undefined` | Your Stripe webhook endpoint secret                                                                                      |
+| `rest`                         | boolean            | `false`     | When `true`, opens the `/api/stripe/rest` endpoint                                                                       |
+| `webhooks`                     | object \| function | `undefined` | Either a function to handle all webhooks events, or an object of Stripe webhook handlers, keyed to the name of the event |
+| `sync`                         | array              | `undefined` | An array of sync configs                                                                                                 |
+| `logs`                         | boolean            | `false`     | When `true`, logs sync events to the console as they happen                                                              |
 
 _\* An asterisk denotes that a property is required._
 
@@ -73,10 +78,10 @@ _\* An asterisk denotes that a property is required._
 
 The following custom endpoints are automatically opened for you:
 
-| Endpoint | Method | Description |
-| --- | --- | --- |
-| `/api/stripe/rest` | `POST` | Proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. See the [REST Proxy](#stripe-rest-proxy) section for more details. |
-| `/api/stripe/webhooks` | `POST` | Handles all Stripe webhook events |
+| Endpoint               | Method | Description                                                                                                                                                                                                                                |
+| ---------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/stripe/rest`     | `POST` | Proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. See the [REST Proxy](#stripe-rest-proxy) section for more details. |
+| `/api/stripe/webhooks` | `POST` | Handles all Stripe webhook events                                                                                                                                                                                                          |
 
 ##### Stripe REST Proxy
 
@@ -104,7 +109,8 @@ const res = await fetch(`/api/stripe/rest`, {
 <Banner type="info">
   <strong>Note:</strong>
   <br />
-  The `/api` part of these routes may be different based on the settings defined in your Payload config.
+  The `/api` part of these routes may be different based on the settings defined in your Payload
+  config.
 </Banner>
 
 ## Webhooks
@@ -220,7 +226,8 @@ This option will setup a basic sync between Payload collections and Stripe resou
 <Banner type="info">
   <strong>Note:</strong>
   <br />
-  If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the `stripeWebhooksEndpointSecret` through your config.
+  If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the
+  `stripeWebhooksEndpointSecret` through your config.
 </Banner>
 
 ```ts
@@ -255,7 +262,10 @@ export default config
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
-  Due to limitations in the Stripe API, this currently only works with top-level fields. This is because every Stripe object is a separate entity, making it difficult to abstract into a simple reusable library. In the future, we may find a pattern around this. But for now, cases like that will need to be hard-coded.
+  Due to limitations in the Stripe API, this currently only works with top-level fields. This is
+  because every Stripe object is a separate entity, making it difficult to abstract into a simple
+  reusable library. In the future, we may find a pattern around this. But for now, cases like that
+  will need to be hard-coded.
 </Banner>
 
 Using `sync` will do the following:
@@ -288,4 +298,3 @@ import {
 ## Examples
 
 The [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates) contains an official [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) which demonstrates exactly how to configure this plugin in Payload and implement it on your front-end. You can also check out [How to Build An E-Commerce Site With Next.js](https://payloadcms.com/blog/how-to-build-an-e-commerce-site-with-nextjs) post for a bit more context around this template.
-

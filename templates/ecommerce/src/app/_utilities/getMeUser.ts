@@ -7,8 +7,8 @@ export const getMeUser = async (args?: {
   nullUserRedirect?: string
   validUserRedirect?: string
 }): Promise<{
-  user: User
   token: string
+  user: User
 }> => {
   const { nullUserRedirect, validUserRedirect } = args || {}
   const cookieStore = cookies()
@@ -35,7 +35,7 @@ export const getMeUser = async (args?: {
   }
 
   return {
-    user,
     token,
+    user,
   }
 }

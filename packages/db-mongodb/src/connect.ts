@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { ConnectOptions } from 'mongoose'
-import mongoose from 'mongoose'
 import type { Connect } from 'payload/database'
+
+import mongoose from 'mongoose'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -35,8 +36,6 @@ export const connect: Connect = async function connect(
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
 
     const client = this.connection.getClient()
-
-
 
     if (!client.options.replicaSet) {
       this.transactionOptions = false
