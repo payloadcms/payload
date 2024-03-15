@@ -226,36 +226,17 @@ exact same properties may cause issue. This gives you a way to avoid duplicate n
 to unset values by returning `null`. This is called immediately after `defaultValue` and before validation occurs.
 
 ```ts
-import { CollectionConfig } from 'payload/types'
-// Your auto-generated Page type
-import { Page } from '../payload-types.ts'
+import { Field } from 'payload/types'
 
-const beforeDuplicate: BeforeDuplicate = ({ data }) => {
-  return {
-    ...data,
-    title: `${data.title} Copy`,
-    uniqueField: data.uniqueField ? `${data.uniqueField}-copy` : '',
+const numberField: Field = {
+  name: 'number',
+  type: 'number',
+  hooks: {
+    // increment existing value by 1
+    beforeDuplicate: [({ value }) => {
+      return (value ?? 0) + 1
+    }],
   }
-}
-
-export const Page: CollectionConfig = {
-  slug: 'pages',
-  admin: {
-    hooks: {
-      beforeDuplicate,
-    },
-  },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-    },
-    {
-      name: 'uniqueField',
-      type: 'text',
-      unique: true,
-    },
-  ],
 }
 ```
 
