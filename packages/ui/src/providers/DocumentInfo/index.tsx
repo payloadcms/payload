@@ -228,7 +228,7 @@ export const DocumentInfoProvider: React.FC<
     }
   }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, code])
 
-  const getDocPreferences = useCallback(async () => {
+  const getDocPreferences = useCallback(() => {
     return getPreference<DocumentPreferences>(preferencesKey)
   }, [getPreference, preferencesKey])
 
