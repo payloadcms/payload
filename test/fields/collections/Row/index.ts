@@ -1,6 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 import { rowFieldsSlug } from '../../slugs'
+import { jestFn } from '../jestFn'
+
+export const rowAfterChangeMock = jestFn()
 
 const RowFields: CollectionConfig = {
   slug: rowFieldsSlug,
@@ -71,6 +74,25 @@ const RowFields: CollectionConfig = {
               type: 'text',
             },
           ],
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'nestedText',
+          type: 'text',
+          defaultValue: 'defaultNestedValue',
+          hooks: {
+            afterChange: [
+              ({ value, previousValue }) => {
+                if (value !== previousValue) {
+                  rowAfterChangeMock({ value, previousValue })
+                }
+              },
+            ],
+          },
         },
       ],
     },
