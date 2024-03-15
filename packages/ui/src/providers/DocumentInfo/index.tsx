@@ -49,6 +49,7 @@ export const DocumentInfoProvider: React.FC<
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
+  const [hasSavePermission, setHasSavePermission] = useState<boolean>(null)
 
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
@@ -220,11 +221,14 @@ export const DocumentInfoProvider: React.FC<
         },
       })
       const json = await res.json()
+
       setDocPermissions(json)
+      setHasSavePermission(json?.update?.permission)
     } else {
       // fallback to permissions from the entity type
       // (i.e. create has no id)
       setDocPermissions(permissions?.[pluralType]?.[slug])
+      setHasSavePermission(permissions?.[pluralType]?.[slug]?.update?.permission)
     }
   }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, code])
 
@@ -267,14 +271,27 @@ export const DocumentInfoProvider: React.FC<
   useEffect(() => {
     const loadDocPermissions = async () => {
       const docPermissions: DocumentPermissions = props.docPermissions
-      if (!docPermissions) await getDocPermissions()
-      else setDocPermissions(docPermissions)
+      const hasSavePermission: boolean = props.hasSavePermission
+
+      if (!docPermissions || hasSavePermission === undefined || hasSavePermission === null) {
+        await getDocPermissions()
+      } else {
+        setDocPermissions(docPermissions)
+        setHasSavePermission(hasSavePermission)
+      }
     }
 
     if (collectionSlug || globalSlug) {
       void loadDocPermissions()
     }
-  }, [getDocPermissions, props.docPermissions, setDocPermissions, collectionSlug, globalSlug])
+  }, [
+    getDocPermissions,
+    props.docPermissions,
+    props.hasSavePermission,
+    setDocPermissions,
+    collectionSlug,
+    globalSlug,
+  ])
 
   const value: DocumentInfoContext = {
     ...props,
@@ -283,6 +300,7 @@ export const DocumentInfoProvider: React.FC<
     getDocPermissions,
     getDocPreferences,
     getVersions,
+    hasSavePermission,
     onSave,
     publishedDoc,
     setDocFieldPreferences,
