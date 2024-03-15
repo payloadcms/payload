@@ -8,3 +8,5 @@
 **/dist/**
 **/node_modules
 **/temp
+templates.ts
+scripts
