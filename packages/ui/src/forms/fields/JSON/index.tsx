@@ -23,6 +23,7 @@ const JSONField: React.FC<JSONFieldProps> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
+    editorOptions,
     label,
     path: pathFromProps,
     readOnly,
@@ -33,9 +34,6 @@ const JSONField: React.FC<JSONFieldProps> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  // eslint-disable-next-line react/destructuring-assignment
-  const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
 
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()

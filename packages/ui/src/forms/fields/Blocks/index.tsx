@@ -35,11 +35,15 @@ const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     Description,
     Error,
     Label: LabelFromProps,
+    blocks,
     className,
     forceRender = false,
     indexPath,
     label,
+    labels: labelsFromProps,
     localized,
+    maxRows,
+    minRows,
     path: pathFromProps,
     readOnly,
     required,
@@ -47,11 +51,6 @@ const BlocksField: React.FC<BlocksFieldProps> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const minRows = 'minRows' in props ? props?.minRows : 0
-  const maxRows = 'maxRows' in props ? props?.maxRows : undefined
-  const blocks = 'blocks' in props ? props?.blocks : undefined
-  const labelsFromProps = 'labels' in props ? props?.labels : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()

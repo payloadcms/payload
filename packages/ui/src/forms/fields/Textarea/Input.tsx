@@ -2,11 +2,13 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { type ChangeEvent } from 'react'
 
+import type { TextareaFieldProps } from './types.js'
+
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { type FormFieldBase, fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
-export type TextAreaInputProps = FormFieldBase & {
+export type TextAreaInputProps = TextareaFieldProps & {
   onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void
   rows?: number
   showError?: boolean

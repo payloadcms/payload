@@ -24,7 +24,9 @@ const RadioGroup: React.FC<RadioFieldProps> = (props) => {
     Label: LabelFromProps,
     className,
     label,
+    layout = 'horizontal',
     onChange: onChangeFromProps,
+    options = [],
     path: pathFromProps,
     readOnly,
     required,
@@ -37,10 +39,6 @@ const RadioGroup: React.FC<RadioFieldProps> = (props) => {
   const { uuid } = useForm()
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const options = 'options' in props ? props.options : []
-
-  const layout = 'layout' in props ? props.layout : 'horizontal'
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {

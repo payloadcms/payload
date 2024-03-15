@@ -37,6 +37,8 @@ const ArrayFieldType: React.FC<ArrayFieldProps> = (props) => {
     indexPath,
     label,
     localized,
+    maxRows,
+    minRows,
     path: pathFromProps,
     permissions,
     readOnly,
@@ -45,9 +47,6 @@ const ArrayFieldType: React.FC<ArrayFieldProps> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const minRows = 'minRows' in props ? props?.minRows : 0
-  const maxRows = 'maxRows' in props ? props?.maxRows : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()

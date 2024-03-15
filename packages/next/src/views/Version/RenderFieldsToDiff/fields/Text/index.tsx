@@ -35,7 +35,7 @@ const Text: React.FC<Props> = ({
     <div className={baseClass}>
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {getTranslation(field?.label || '', i18n)}
+        {'label' in field && getTranslation(field?.label || '', i18n)}
       </Label>
       <DiffViewer
         comparisonToRender={comparisonToRender}

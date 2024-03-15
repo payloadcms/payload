@@ -1,26 +1,6 @@
 import type { User } from 'payload/auth'
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
-import type {
-  ArrayField,
-  BlockField,
-  CodeField,
-  DateField,
-  DocumentPreferences,
-  FormState,
-  JSONField,
-  RelationshipField,
-  RowLabel,
-  UploadField,
-  Validate,
-} from 'payload/types'
-import type { Option } from 'payload/types'
-
-import type {
-  FieldMap,
-  MappedField,
-  MappedTab,
-  ReducedBlock,
-} from '../../utilities/buildComponentMap/types.js'
+import type { DocumentPreferences, FormState, Validate } from 'payload/types'
 
 export const fieldBaseClass = 'field-type'
 
@@ -30,26 +10,18 @@ export type FormFieldBase = {
   Description?: React.ReactNode
   Error?: React.ReactNode
   Label?: React.ReactNode
-  RowLabel?: React.ReactNode
   className?: string
   disabled?: boolean
   docPreferences?: DocumentPreferences
-  fieldMap?: FieldMap
-  initialSubfieldState?: FormState
-  label?: string
   locale?: Locale
   localized?: boolean
-  maxLength?: number
-  minLength?: number
   path?: string
-  placeholder?: string
   readOnly?: boolean
   required?: boolean
   rtl?: boolean
   style?: React.CSSProperties
   user?: User
   validate?: Validate
-  width?: string
 }
 
 /**

@@ -130,7 +130,7 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
               >
                 {Description}
                 <RenderFields
-                  fieldMap={activeTabConfig.subfields}
+                  fieldMap={activeTabConfig.fieldMap}
                   forceRender={forceRender}
                   key={
                     activeTabConfig.label

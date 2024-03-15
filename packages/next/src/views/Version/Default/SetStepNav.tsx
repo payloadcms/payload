@@ -36,10 +36,11 @@ export const SetStepNav: React.FC<{
 
       if (mostRecentDoc) {
         if (useAsTitle !== 'id') {
-          const titleField = fieldMap.find(
-            ({ name: fieldName, isFieldAffectingData }) =>
-              isFieldAffectingData && fieldName === useAsTitle,
-          ) as FieldAffectingData
+          const titleField = fieldMap.find((f) => {
+            const { isFieldAffectingData } = f
+            const fieldName = 'name' in f ? f.name : undefined
+            return isFieldAffectingData && fieldName === useAsTitle
+          }) as FieldAffectingData
 
           if (titleField && mostRecentDoc[useAsTitle]) {
             if (titleField.localized) {

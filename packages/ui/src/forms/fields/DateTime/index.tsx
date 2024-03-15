@@ -9,6 +9,7 @@ import type { DateFieldProps } from './types.js'
 
 import { DatePickerField } from '../../../elements/DatePicker/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import LabelComp from '../../Label/index.js'
 import { useField } from '../../useField/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'
@@ -22,8 +23,9 @@ const DateTime: React.FC<DateFieldProps> = (props) => {
     BeforeInput,
     Description,
     Error,
-    Label: LabelComp,
+    Label: LabelFromProps,
     className,
+    date: datePickerProps,
     label,
     path: pathFromProps,
     placeholder,
@@ -34,9 +36,7 @@ const DateTime: React.FC<DateFieldProps> = (props) => {
     width,
   } = props
 
-  const Label = LabelComp || label
-
-  const datePickerProps = 'date' in props ? props.date : {}
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
 

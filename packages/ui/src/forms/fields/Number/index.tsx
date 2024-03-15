@@ -24,24 +24,23 @@ const NumberField: React.FC<NumberFieldProps> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
+    hasMany = false,
     label,
+    max = Infinity,
+    maxRows = Infinity,
+    min = -Infinity,
     onChange: onChangeFromProps,
     path: pathFromProps,
     placeholder,
     readOnly,
     required,
+    step = 1,
     style,
     validate,
     width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const max = 'max' in props ? props.max : Infinity
-  const min = 'min' in props ? props.min : -Infinity
-  const step = 'step' in props ? props.step : 1
-  const hasMany = 'hasMany' in props ? props.hasMany : false
-  const maxRows = 'maxRows' in props ? props.maxRows : Infinity
 
   const { i18n, t } = useTranslation()
 

@@ -2,16 +2,18 @@
 import type { ChangeEvent } from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
+import { TextField } from 'payload/types.js'
 import React from 'react'
 
 import type { Option } from '../../../elements/ReactSelect/types.js'
+import type { TextareaFieldProps } from '../Textarea/types.js'
 
 import ReactSelect from '../../../elements/ReactSelect/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { type FormFieldBase, fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
-export type TextInputProps = Omit<FormFieldBase, 'type'> & {
+export type TextInputProps = Omit<TextareaFieldProps, 'type'> & {
   hasMany?: boolean
   inputRef?: React.MutableRefObject<HTMLInputElement>
   maxRows?: number

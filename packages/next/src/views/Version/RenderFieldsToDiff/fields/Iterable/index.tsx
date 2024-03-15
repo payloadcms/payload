@@ -28,7 +28,7 @@ const Iterable: React.FC<Props> = ({
 
   return (
     <div className={baseClass}>
-      {field.label && (
+      {'label' in field && field.label && (
         <Label>
           {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
           {getTranslation(field.label, i18n)}
@@ -40,12 +40,12 @@ const Iterable: React.FC<Props> = ({
             const versionRow = version?.[i] || {}
             const comparisonRow = comparison?.[i] || {}
 
-            let subFields: MappedField[] = []
+            let fieldMap: MappedField[] = []
 
-            if (field.type === 'array') subFields = field.subfields
+            if (field.type === 'array' && 'fieldMap' in field) fieldMap = field.fieldMap
 
             if (field.type === 'blocks') {
-              subFields = [
+              fieldMap = [
                 // {
                 //   name: 'blockType',
                 //   label: i18n.t('fields:blockType'),
@@ -54,25 +54,28 @@ const Iterable: React.FC<Props> = ({
               ]
 
               if (versionRow?.blockType === comparisonRow?.blockType) {
-                const matchedBlock = field.blocks.find(
-                  (block) => block.slug === versionRow?.blockType,
-                ) || { subfields: [] }
+                const matchedBlock = ('blocks' in field &&
+                  field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
+                  fieldMap: [],
+                }
 
-                subFields = [...subFields, ...matchedBlock.subfields]
+                fieldMap = [...fieldMap, ...matchedBlock.fieldMap]
               } else {
-                const matchedVersionBlock = field.blocks.find(
-                  (block) => block.slug === versionRow?.blockType,
-                ) || { subfields: [] }
+                const matchedVersionBlock = ('blocks' in field &&
+                  field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
+                  fieldMap: [],
+                }
 
-                const matchedComparisonBlock = field.blocks.find(
-                  (block) => block.slug === comparisonRow?.blockType,
-                ) || { subfields: [] }
+                const matchedComparisonBlock = ('blocks' in field &&
+                  field.blocks?.find((block) => block.slug === comparisonRow?.blockType)) || {
+                  fieldMap: [],
+                }
 
-                subFields = getUniqueListBy<MappedField>(
+                fieldMap = getUniqueListBy<MappedField>(
                   [
-                    ...subFields,
-                    ...matchedVersionBlock.subfields,
-                    ...matchedComparisonBlock.subfields,
+                    ...fieldMap,
+                    ...matchedVersionBlock.fieldMap,
+                    ...matchedComparisonBlock.fieldMap,
                   ],
                   'name',
                 )
@@ -84,7 +87,7 @@ const Iterable: React.FC<Props> = ({
                 <RenderFieldsToDiff
                   comparison={comparisonRow}
                   diffComponents={diffComponents}
-                  fieldMap={subFields}
+                  fieldMap={fieldMap}
                   fieldPermissions={permissions}
                   i18n={i18n}
                   locales={locales}
@@ -98,9 +101,10 @@ const Iterable: React.FC<Props> = ({
       {maxRows === 0 && (
         <div className={`${baseClass}__no-rows`}>
           {i18n.t('version:noRowsFound', {
-            label: field.labels?.plural
-              ? getTranslation(field.labels?.plural, i18n)
-              : i18n.t('general:rows'),
+            label:
+              'labels' in field && field.labels?.plural
+                ? getTranslation(field.labels?.plural, i18n)
+                : i18n.t('general:rows'),
           })}
         </div>
       )}

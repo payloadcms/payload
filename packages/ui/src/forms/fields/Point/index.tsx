@@ -30,6 +30,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     placeholder,
     readOnly,
     required,
+    step,
     style,
     validate,
     width,
@@ -38,8 +39,6 @@ const PointField: React.FC<PointFieldProps> = (props) => {
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
-
-  const step = 'step' in props ? props.step : 1
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {

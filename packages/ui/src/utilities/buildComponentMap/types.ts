@@ -10,66 +10,73 @@ import type {
   TabsField,
 } from 'payload/types'
 
+import type { ArrayFieldProps } from '../../forms/fields/Array/types.js'
+import type { BlocksFieldProps } from '../../forms/fields/Blocks/types.js'
+import type { CheckboxFieldProps } from '../../forms/fields/Checkbox/types.js'
+import type { CodeFieldProps } from '../../forms/fields/Code/types.js'
+import type { CollapsibleFieldProps } from '../../forms/fields/Collapsible/types.js'
+import type { DateFieldProps } from '../../forms/fields/DateTime/types.js'
+import type { EmailFieldProps } from '../../forms/fields/Email/types.js'
+import type { GroupFieldProps } from '../../forms/fields/Group/types.js'
+import type { JSONFieldProps } from '../../forms/fields/JSON/types.js'
+import type { NumberFieldProps } from '../../forms/fields/Number/types.js'
+import type { PointFieldProps } from '../../forms/fields/Point/types.js'
+import type { RelationshipFieldProps } from '../../forms/fields/Relationship/types.js'
+import type { RowFieldProps } from '../../forms/fields/Row/types.js'
+import type { SelectFieldProps } from '../../forms/fields/Select/types.js'
+import type { TabsFieldProps } from '../../forms/fields/Tabs/types.js'
+import type { TextFieldProps } from '../../forms/fields/Text/types.js'
+import type { TextareaFieldProps } from '../../forms/fields/Textarea/types.js'
+import type { UploadFieldProps } from '../../forms/fields/Upload/types.js'
 import type { fieldTypes } from '../../forms/fields/index.js'
 
 export type MappedTab = {
+  fieldMap?: FieldMap
   label: TabsField['tabs'][0]['label']
   name?: string
-  subfields?: FieldMap
 }
 
 export type ReducedBlock = {
+  fieldMap: FieldMap
   imageAltText?: string
   imageURL?: string
   labels: BlockField['labels']
   slug: string
-  subfields: FieldMap
 }
 
-export type MappedField = {
+export type FieldComponentProps =
+  | ArrayFieldProps
+  | BlocksFieldProps
+  | CheckboxFieldProps
+  | CodeFieldProps
+  | CollapsibleFieldProps
+  | DateFieldProps
+  | EmailFieldProps
+  | GroupFieldProps
+  | JSONFieldProps
+  | NumberFieldProps
+  | PointFieldProps
+  | RelationshipFieldProps
+  | RowFieldProps
+  | SelectFieldProps
+  | TabsFieldProps
+  | TextFieldProps
+  | TextareaFieldProps
+  | UploadFieldProps
+
+export type MappedFieldBase = {
   Cell: React.ReactNode
   Field: React.ReactNode
   Heading: React.ReactNode
-  /**
-   * On `block` fields only
-   */
-  blocks?: ReducedBlock[]
   disabled?: boolean
-  /**
-   * On `richText` fields only
-   */
-  editor?: RichTextField['editor']
   fieldIsPresentational: boolean
-  fieldMap?: FieldMap
-  hasMany?: boolean
   isFieldAffectingData: boolean
-  isSidebar: boolean
-  label: FieldBase['label']
-  labels: Labels
+  isSidebar?: boolean
   localized: boolean
-  name: string
-  /**
-   * On `select` fields only
-   */
-  options?: Option[]
-  /**
-   * This is the `admin.readOnly` value from the field's config
-   */
-  readOnly: boolean
-  /**
-   * On `relationship` fields only
-   */
-  relationTo?: RelationshipField['relationTo']
-  /**
-   * On `array`, `group`, `collapsible`, and `tabs` fields only
-   */
-  subfields?: FieldMap
-  /**
-   * On `tabs` fields only
-   */
-  tabs?: MappedTab[]
   type: keyof typeof fieldTypes
 }
+
+export type MappedField = FieldComponentProps & MappedFieldBase
 
 export type FieldMap = MappedField[]
 

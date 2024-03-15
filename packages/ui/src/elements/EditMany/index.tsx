@@ -120,7 +120,7 @@ export const EditMany: React.FC<Props> = (props) => {
       const reducedFieldMap = []
       fieldMap.map((field) => {
         selected.map((selectedField) => {
-          if (field.name === selectedField.name) {
+          if ('name' in field && field.name === selectedField.name) {
             reducedFieldMap.push(field)
           }
         })
