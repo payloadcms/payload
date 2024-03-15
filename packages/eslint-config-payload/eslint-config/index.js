@@ -29,10 +29,21 @@ const reactRules = {
   'react/jsx-max-props-per-line': 'off',
   // react/jsx-one-expression-per-line conflicts with prettier. Sometimes react/jsx-one-expression-per-line tells you to put it on a new line, but prettier moves it back.
   'react/jsx-one-expression-per-line': 'off',
+  // react/jsx-wrap-multilines conflicts with prettier. Sometimes react/jsx-wrap-multilines tells you to put it on a new line, but prettier moves it back.
+  'react/jsx-wrap-multilines': 'off',
+  // react/jsx-indent conflicts with prettier. Sometimes react/jsx-indent tells you to put it on a new line, but prettier moves it back.
+  'react/jsx-indent': 'off',
+  // react/jsx-curly-newline conflicts with prettier. Sometimes react/jsx-curly-newline tells you to put it on a new line, but prettier moves it back.
+  'react/jsx-curly-newline': 'off',
   'react/no-unused-prop-types': 'off',
   'react/prop-types': 'off',
   'react/require-default-props': 'off',
+  'react/destructuring-assignment': 'warn',
+  'react/no-unescaped-entities': 'warn',
   'jsx-a11y/anchor-is-valid': 'warn',
+  'jsx-a11y/control-has-associated-label': 'warn',
+  'jsx-a11y/no-static-element-interactions': 'warn',
+  'jsx-a11y/label-has-associated-control': 'warn',
 }
 
 const typescriptRules = {
@@ -93,6 +104,8 @@ module.exports = {
     '**/dist/**',
     '**/node_modules',
     '**/temp',
+    '*.yml',
+    '*.json',
   ],
   env: {
     es6: true,

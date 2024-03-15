@@ -9,3 +9,4 @@
 **/node_modules
 **/temp
 **/all/**
+writeTranslationFiles.ts
