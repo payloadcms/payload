@@ -53,7 +53,11 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {hasRendered &&
-          fieldMap?.map(({ name, Field, disabled, readOnly }, fieldIndex) => {
+          fieldMap?.map((f, fieldIndex) => {
+            const { Field, disabled, readOnly } = f
+
+            const name = 'name' in f ? f.name : undefined
+
             return (
               <RenderField
                 Field={Field}

@@ -40,7 +40,7 @@ export const ComponentMapProvider: React.FC<{
       }
 
       // TODO: better lookup for nested fields, etc.
-      return fieldMap.find((field) => field.name === path)
+      return fieldMap.find((field) => 'name' in field && field.name === path)
     },
     [componentMap],
   )

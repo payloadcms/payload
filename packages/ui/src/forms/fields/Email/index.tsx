@@ -4,7 +4,7 @@ import type { ClientValidate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { EmailFieldProps } from './types.js'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import LabelComp from '../../Label/index.js'
@@ -13,7 +13,7 @@ import { withCondition } from '../../withCondition/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
-export const Email: React.FC<Props> = (props) => {
+export const Email: React.FC<EmailFieldProps> = (props) => {
   const {
     name,
     AfterInput,

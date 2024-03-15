@@ -5,7 +5,7 @@ import type { ClientValidate, Option, OptionObject } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
-import type { Props } from './types.js'
+import type { SelectFieldProps } from './types.js'
 
 import ReactSelect from '../../../elements/ReactSelect/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -27,7 +27,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-export const Select: React.FC<Props> = (props) => {
+export const Select: React.FC<SelectFieldProps> = (props) => {
   const {
     name,
     AfterInput,

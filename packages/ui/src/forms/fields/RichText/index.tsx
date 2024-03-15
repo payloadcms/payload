@@ -1,8 +1,8 @@
 import type React from 'react'
 
-import type { Props } from './types.js'
+import type { RichTextFieldProps } from './types.js'
 
-const RichText: React.FC<Props> = (props) => {
+const RichText: React.FC<RichTextFieldProps> = (props) => {
   return null
 }
 

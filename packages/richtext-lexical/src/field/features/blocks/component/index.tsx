@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { type BlockFields } from '../nodes/BlocksNode.js'
 const baseClass = 'lexical-block'
 
-import type { ReducedBlock } from '@payloadcms/ui/types'
+import type { ReducedBlock } from '@payloadcms/ui'
 import type { FormState } from 'payload/types'
 
 import { v4 as uuid } from 'uuid'

@@ -45,8 +45,10 @@ const RichTextField: React.FC<
     elements: EnabledFeatures['elements']
     leaves: EnabledFeatures['leaves']
     name: string
+    placeholder?: string
     plugins: RichTextPlugin[]
     richTextComponentMap: Map<string, React.ReactNode>
+    width?: string
   }
 > = (props) => {
   const {

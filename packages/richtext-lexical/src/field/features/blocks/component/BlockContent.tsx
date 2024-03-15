@@ -1,5 +1,5 @@
 import type { FieldMap, FormFieldBase } from '@payloadcms/ui'
-import type { ReducedBlock } from '@payloadcms/ui/types'
+import type { ReducedBlock } from '@payloadcms/ui'
 import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 

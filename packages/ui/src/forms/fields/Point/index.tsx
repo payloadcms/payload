@@ -5,7 +5,7 @@ import type { ClientValidate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { PointFieldProps } from './types.js'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import LabelComp from '../../Label/index.js'
@@ -16,7 +16,7 @@ import './index.scss'
 
 const baseClass = 'point'
 
-const PointField: React.FC<Props> = (props) => {
+const PointField: React.FC<PointFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -30,6 +30,7 @@ const PointField: React.FC<Props> = (props) => {
     placeholder,
     readOnly,
     required,
+    step,
     style,
     validate,
     width,
@@ -38,8 +39,6 @@ const PointField: React.FC<Props> = (props) => {
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
-
-  const step = 'step' in props ? props.step : 1
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {

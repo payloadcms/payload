@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import type { Props } from './types.js'
+import type { RowFieldProps } from './types.js'
 
 import { useFieldProps } from '../../FieldPropsProvider/index.js'
 import { RenderFields } from '../../RenderFields/index.js'
@@ -12,7 +12,7 @@ import { RowProvider } from './provider.js'
 
 const baseClass = 'row'
 
-const Row: React.FC<Props> = (props) => {
+const Row: React.FC<RowFieldProps> = (props) => {
   const { className, fieldMap, forceRender = false } = props
 
   const { path, readOnly, schemaPath, siblingPermissions } = useFieldProps()

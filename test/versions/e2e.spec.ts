@@ -304,7 +304,7 @@ describe('versions', () => {
       await expect(
         page.locator('.autosave:has-text("Last saved less than a minute ago")'),
       ).toBeVisible()
-      expect(await titleField.inputValue()).toBe('global title')
+      await expect(titleField).toHaveValue('global title')
 
       // refresh the page and ensure value autosaved
       await page.goto(url.global(autoSaveGlobalSlug))
@@ -339,7 +339,7 @@ describe('versions', () => {
       // change locale back to en
       await changeLocale(page, en)
       // verify en loads its own title
-      expect(await titleField.inputValue()).toEqual(title)
+      await expect(titleField).toHaveValue(title)
       // change non-localized description field
       await descriptionField.fill(newDescription)
       await wait(500)
@@ -352,8 +352,8 @@ describe('versions', () => {
       // title should not be english title
       // description should be new description
       await page.reload()
-      expect(await titleField.inputValue()).toEqual(spanishTitle)
-      expect(await descriptionField.inputValue()).toEqual(newDescription)
+      await expect(titleField).toHaveValue(spanishTitle)
+      await expect(descriptionField).toHaveValue(newDescription)
     })
 
     test('should restore localized docs correctly', async () => {

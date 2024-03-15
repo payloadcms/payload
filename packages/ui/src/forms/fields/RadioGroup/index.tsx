@@ -4,7 +4,7 @@
 import { optionIsObject } from 'payload/types'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { RadioFieldProps } from './types.js'
 
 import { useForm } from '../../Form/context.js'
 import LabelComp from '../../Label/index.js'
@@ -16,7 +16,7 @@ import './index.scss'
 
 const baseClass = 'radio-group'
 
-const RadioGroup: React.FC<Props> = (props) => {
+const RadioGroup: React.FC<RadioFieldProps> = (props) => {
   const {
     name,
     Description,
@@ -24,7 +24,9 @@ const RadioGroup: React.FC<Props> = (props) => {
     Label: LabelFromProps,
     className,
     label,
+    layout = 'horizontal',
     onChange: onChangeFromProps,
+    options = [],
     path: pathFromProps,
     readOnly,
     required,
@@ -37,10 +39,6 @@ const RadioGroup: React.FC<Props> = (props) => {
   const { uuid } = useForm()
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const options = 'options' in props ? props.options : []
-
-  const layout = 'layout' in props ? props.layout : 'horizontal'
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {

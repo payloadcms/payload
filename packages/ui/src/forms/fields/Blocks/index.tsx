@@ -2,7 +2,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { BlocksFieldProps } from './types.js'
 
 import Banner from '../../../elements/Banner/index.js'
 import { Button } from '../../../elements/Button/index.js'
@@ -27,7 +27,7 @@ import './index.scss'
 
 const baseClass = 'blocks-field'
 
-const BlocksField: React.FC<Props> = (props) => {
+const BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -35,11 +35,15 @@ const BlocksField: React.FC<Props> = (props) => {
     Description,
     Error,
     Label: LabelFromProps,
+    blocks,
     className,
     forceRender = false,
     indexPath,
     label,
+    labels: labelsFromProps,
     localized,
+    maxRows,
+    minRows,
     path: pathFromProps,
     readOnly,
     required,
@@ -47,11 +51,6 @@ const BlocksField: React.FC<Props> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const minRows = 'minRows' in props ? props?.minRows : 0
-  const maxRows = 'maxRows' in props ? props?.maxRows : undefined
-  const blocks = 'blocks' in props ? props?.blocks : undefined
-  const labelsFromProps = 'labels' in props ? props?.labels : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()

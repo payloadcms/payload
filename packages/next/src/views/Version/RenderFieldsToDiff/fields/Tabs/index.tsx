@@ -1,3 +1,6 @@
+import type { TabsFieldProps } from 'packages/ui/src/forms/fields/Tabs/types.js'
+import type { MappedFieldBase } from 'packages/ui/src/utilities/buildComponentMap/types.js'
+
 import React from 'react'
 
 import type { Props } from '../types.js'
@@ -7,16 +10,11 @@ import Nested from '../Nested/index.js'
 
 const baseClass = 'tabs-diff'
 
-const Tabs: React.FC<Props> = ({
-  comparison,
-  diffComponents,
-  field,
-  i18n,
-  locale,
-  locales,
-  permissions,
-  version,
-}) => {
+const Tabs: React.FC<
+  Omit<Props, 'field'> & {
+    field: MappedFieldBase & TabsFieldProps
+  }
+> = ({ comparison, diffComponents, field, i18n, locale, locales, permissions, version }) => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
@@ -27,7 +25,7 @@ const Tabs: React.FC<Props> = ({
                 comparison={comparison?.[tab.name]}
                 diffComponents={diffComponents}
                 field={field}
-                fieldMap={tab.subfields}
+                fieldMap={tab.fieldMap}
                 i18n={i18n}
                 key={i}
                 locale={locale}
@@ -42,7 +40,7 @@ const Tabs: React.FC<Props> = ({
             <RenderFieldsToDiff
               comparison={comparison}
               diffComponents={diffComponents}
-              fieldMap={tab.subfields}
+              fieldMap={tab.fieldMap}
               fieldPermissions={permissions}
               i18n={i18n}
               key={i}

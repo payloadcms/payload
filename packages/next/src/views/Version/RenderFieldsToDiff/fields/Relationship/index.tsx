@@ -82,7 +82,7 @@ const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, versio
   let versionToRender = version
   let comparisonToRender = comparison
 
-  if (field.hasMany) {
+  if ('hasMany' in field && field.hasMany) {
     if (Array.isArray(version))
       versionToRender = version
         .map((val) => generateLabelFromValue(collections, field, locale, val))

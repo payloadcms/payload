@@ -23,7 +23,7 @@ const Nested: React.FC<Props> = ({
 }) => {
   return (
     <div className={baseClass}>
-      {field.label && (
+      {'label' in field && field.label && (
         <Label>
           {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
           {getTranslation(field.label, i18n)}

@@ -23,7 +23,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   return (
     <div className={baseClass}>
       {fieldMap?.map((field, i) => {
-        if (field.name === 'id') return null
+        if ('name' in field && field.name === 'id') return null
 
         const Component = diffComponents[field.type]
 
@@ -31,7 +31,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
         const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
 
         if (Component) {
-          if (field.isFieldAffectingData) {
+          if (field.isFieldAffectingData && 'name' in field) {
             const valueIsObject = field.type === 'code' || field.type === 'json'
 
             const versionValue = valueIsObject
@@ -53,7 +53,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               diffComponents,
               diffMethod,
               field,
-              fieldMap: 'subfields' in field ? field.subfields : fieldMap,
+              fieldMap: 'fieldMap' in field ? field.fieldMap : fieldMap,
               fieldPermissions: subFieldPermissions,
               i18n,
               isRichText,
@@ -93,7 +93,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             )
           }
 
-          if (field.type === 'tabs') {
+          if (field.type === 'tabs' && 'fieldMap' in field) {
             const Tabs = diffComponents.tabs
 
             return (
@@ -101,7 +101,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 comparison={comparison}
                 diffComponents={diffComponents}
                 field={field}
-                fieldMap={field.subfields}
+                fieldMap={field.fieldMap}
                 i18n={i18n}
                 key={i}
                 locales={locales}
@@ -111,14 +111,14 @@ const RenderFieldsToDiff: React.FC<Props> = ({
           }
 
           // At this point, we are dealing with a `row`, etc
-          if (field.subfields) {
+          if ('fieldMap' in field) {
             return (
               <Nested
                 comparison={comparison}
                 diffComponents={diffComponents}
                 disableGutter
                 field={field}
-                fieldMap={field.subfields}
+                fieldMap={field.fieldMap}
                 i18n={i18n}
                 key={i}
                 locales={locales}
