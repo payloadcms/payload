@@ -83,7 +83,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       )
     })
 
-  const { List } = componentMap.collections?.[selectedCollectionConfig?.slug] || {}
+  const { CustomListView, DefaultListView } =
+    componentMap.collections?.[selectedCollectionConfig?.slug] || {}
 
   const [selectedOption, setSelectedOption] = useState<{ label: string; value: string }>(() =>
     selectedCollectionConfig
@@ -309,7 +310,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         collectionSlug={selectedCollectionConfig.slug}
         listPreferences={{} as ListPreferences} // TODO: get list preferences
       >
-        {List}
+        {CustomListView || <DefaultListView />}
         <DocumentDrawer onSave={onCreateNew} />
       </TableColumnsProvider>
     </ListInfoProvider>

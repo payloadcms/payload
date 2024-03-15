@@ -10,7 +10,7 @@ import { mapFields } from './mapFields.js'
 export const buildComponentMap = (args: {
   DefaultCell: React.FC<any>
   DefaultEditView: React.FC<EditViewProps>
-  DefaultListView: React.FC<EditViewProps>
+  DefaultListView: React.FC
   children: React.ReactNode
   config: SanitizedConfig
   readOnly?: boolean
@@ -34,7 +34,7 @@ export const buildComponentMap = (args: {
     const editViewFromConfig = collectionConfig?.admin?.components?.views?.Edit
     const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
 
-    const CustomEditView =
+    const CustomEdit =
       typeof editViewFromConfig === 'function'
         ? editViewFromConfig
         : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
@@ -45,7 +45,10 @@ export const buildComponentMap = (args: {
             ? (editViewFromConfig.Default.Component as React.FC<EditViewProps>)
             : undefined
 
-    const CustomListView =
+    // @ts-expect-error
+    const CustomEditView = CustomEdit ? <CustomEdit collectionSlug={slug} /> : null
+
+    const CustomList =
       typeof listViewFromConfig === 'function'
         ? listViewFromConfig
         : typeof listViewFromConfig === 'object' &&
@@ -53,8 +56,7 @@ export const buildComponentMap = (args: {
           ? listViewFromConfig.Component
           : undefined
 
-    const Edit = (CustomEditView as React.FC<EditViewProps>) || DefaultEditView
-    const List = CustomListView || DefaultListView
+    const CustomListView = CustomList ? <CustomList /> : null
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList
 
@@ -97,8 +99,10 @@ export const buildComponentMap = (args: {
       AfterListTable,
       BeforeList,
       BeforeListTable,
-      Edit: <Edit collectionSlug={collectionConfig.slug} />,
-      List: <List collectionSlug={collectionConfig.slug} />,
+      CustomEditView,
+      CustomListView,
+      DefaultEditView,
+      DefaultListView,
       actionsMap: mapActions({
         collectionConfig,
       }),
@@ -122,7 +126,7 @@ export const buildComponentMap = (args: {
 
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
-    const CustomEditView =
+    const CustomEdit =
       typeof editViewFromConfig === 'function'
         ? editViewFromConfig
         : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
@@ -133,10 +137,12 @@ export const buildComponentMap = (args: {
             ? editViewFromConfig.Default.Component
             : undefined
 
-    const Edit = (CustomEditView as React.FC<EditViewProps>) || DefaultEditView
+    // @ts-expect-error
+    const CustomEditView = CustomEdit ? <CustomEdit /> : null
 
     const componentMap: GlobalComponentMap = {
-      Edit: <Edit globalSlug={globalConfig.slug} />,
+      CustomEditView,
+      DefaultEditView,
       actionsMap: mapActions({
         globalConfig,
       }),

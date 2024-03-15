@@ -1,10 +1,6 @@
 import type {
   BlockField,
-  FieldBase,
-  Labels,
-  Option,
-  RelationshipField,
-  RichTextField,
+  EditViewProps,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TabsField,
@@ -93,13 +89,15 @@ export type CollectionComponentMap = ConfigComponentMapBase & {
   AfterListTable: React.ReactNode
   BeforeList: React.ReactNode
   BeforeListTable: React.ReactNode
-  List: React.ReactNode
+  CustomListView: React.ReactNode
+  DefaultListView: React.FC
 }
 
 export type GlobalComponentMap = ConfigComponentMapBase
 
 export type ConfigComponentMapBase = {
-  Edit: React.ReactNode
+  CustomEditView: React.ReactNode
+  DefaultEditView: React.FC<EditViewProps>
   actionsMap: ActionMap
   fieldMap: FieldMap
 }

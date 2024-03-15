@@ -13,6 +13,8 @@ import { useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useEffect } from 'react'
 import { useCallback } from 'react'
 
+import { DefaultEditView } from './Default/index.js'
+
 export const EditViewClient: React.FC = () => {
   const { collectionSlug, getDocPermissions, getVersions, globalSlug, isEditing, setOnSave } =
     useDocumentInfo()
@@ -29,7 +31,7 @@ export const EditViewClient: React.FC = () => {
 
   const locale = params.get('locale')
 
-  const { Edit, actionsMap } = getComponentMap({
+  const { CustomEditView, actionsMap } = getComponentMap({
     collectionSlug,
     globalSlug,
   })
@@ -69,14 +71,14 @@ export const EditViewClient: React.FC = () => {
   }, [setOnSave, onSave])
 
   // Allow the `DocumentInfoProvider` to hydrate
-  if (!Edit || (!collectionSlug && !globalSlug)) {
+  if (!collectionSlug && !globalSlug) {
     return <LoadingOverlay />
   }
 
   return (
     <Fragment>
       <SetViewActions actions={actionsMap?.Edit?.Default} />
-      {Edit}
+      {CustomEditView || <DefaultEditView />}
     </Fragment>
   )
 }

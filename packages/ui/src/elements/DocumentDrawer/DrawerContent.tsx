@@ -57,7 +57,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   const { componentMap } = useComponentMap()
 
-  const { Edit } = componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
+  const { CustomEditView, DefaultEditView } =
+    componentMap[`${collectionSlug ? 'collections' : 'globals'}`][collectionSlug]
 
   // no need to an additional requests when creating new documents
   const initialID = useRef(id)
@@ -174,7 +175,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
       onSave={onSave}
       title={title}
     >
-      {Edit}
+      {CustomEditView || <DefaultEditView />}
     </DocumentInfoProvider>
   )
 }
