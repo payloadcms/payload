@@ -7,6 +7,7 @@ import CustomLabel from './CustomLabel.js'
 import { defaultText, textFieldsSlug } from './shared.js'
 
 const TextFields: CollectionConfig = {
+  slug: textFieldsSlug,
   admin: {
     useAsTitle: 'text',
   },
@@ -14,16 +15,17 @@ const TextFields: CollectionConfig = {
   fields: [
     {
       name: 'text',
-      required: true,
       type: 'text',
+      required: true,
     },
     {
       name: 'localizedText',
-      localized: true,
       type: 'text',
+      localized: true,
     },
     {
       name: 'i18nText',
+      type: 'text',
       admin: {
         description: {
           en: 'en description',
@@ -38,12 +40,11 @@ const TextFields: CollectionConfig = {
         en: 'Text en',
         es: 'Text es',
       },
-      type: 'text',
     },
     {
       name: 'defaultFunction',
-      defaultValue: () => defaultText,
       type: 'text',
+      defaultValue: () => defaultText,
     },
     {
       name: 'defaultAsync',
@@ -58,21 +59,22 @@ const TextFields: CollectionConfig = {
     },
     {
       name: 'overrideLength',
+      type: 'text',
       label: 'Override the 40k text length default',
       maxLength: 50000,
-      type: 'text',
     },
     {
       name: 'fieldWithDefaultValue',
+      type: 'text',
       defaultValue: async () => {
         const defaultValue = new Promise((resolve) => setTimeout(() => resolve('some-value'), 1000))
 
         return defaultValue
       },
-      type: 'text',
     },
     {
       name: 'dependentOnFieldWithDefaultValue',
+      type: 'text',
       hooks: {
         beforeChange: [
           ({ data }) => {
@@ -80,36 +82,35 @@ const TextFields: CollectionConfig = {
           },
         ],
       },
-      type: 'text',
     },
     {
       name: 'customLabel',
+      type: 'text',
       admin: {
         components: {
           Label: CustomLabel,
         },
       },
-      type: 'text',
     },
     {
       name: 'customError',
+      type: 'text',
       admin: {
         components: {
           Error: CustomError,
         },
       },
       minLength: 3,
-      type: 'text',
     },
     {
       name: 'beforeAndAfterInput',
+      type: 'text',
       admin: {
         components: {
           afterInput: [AfterInput],
           beforeInput: [BeforeInput],
         },
       },
-      type: 'text',
     },
     {
       name: 'hasMany',
@@ -141,7 +142,6 @@ const TextFields: CollectionConfig = {
       maxRows: 4,
     },
   ],
-  slug: textFieldsSlug,
 }
 
 export default TextFields
