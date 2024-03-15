@@ -1,4 +1,4 @@
-const sharedRules = {
+const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
   'class-methods-use-this': 'off',
   'arrow-body-style': 0,
@@ -100,7 +100,7 @@ module.exports = {
       extends: [...baseExtends, 'plugin:@typescript-eslint/recommended-type-checked'],
       parser: '@typescript-eslint/parser',
       rules: {
-        ...sharedRules,
+        ...baseRules,
         ...typescriptRules,
       },
     },
@@ -116,7 +116,7 @@ module.exports = {
       ],
       parser: '@typescript-eslint/parser',
       rules: {
-        ...sharedRules,
+        ...baseRules,
         ...typescriptRules,
         ...reactRules,
       },
@@ -131,7 +131,7 @@ module.exports = {
       ],
       parser: '@typescript-eslint/parser',
       rules: {
-        ...sharedRules,
+        ...baseRules,
         ...typescriptRules,
         '@typescript-eslint/unbound-method': 'off',
       },
@@ -139,7 +139,7 @@ module.exports = {
     {
       files: ['*.config.ts'],
       rules: {
-        ...sharedRules,
+        ...baseRules,
         ...typescriptRules,
         'no-restricted-exports': 'off',
       },
@@ -147,7 +147,7 @@ module.exports = {
     {
       files: ['config.ts'],
       rules: {
-        ...sharedRules,
+        ...baseRules,
         ...typescriptRules,
         'no-restricted-exports': 'off',
       },
