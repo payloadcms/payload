@@ -30,7 +30,7 @@ type CreateAccessPromise = (args: {
 }) => Promise<void>
 
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
-  const { id, entity, operations, req, type } = args
+  const { id, type, entity, operations, req } = args
   const { data, payload, user } = req
   const isLoggedIn = !!user
 
@@ -44,9 +44,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     if (entity.slug) {
       if (type === 'global') {
         return payload.findGlobal({
+          slug: entity.slug,
           overrideAccess: true,
           req,
-          slug: entity.slug,
         })
       }
 

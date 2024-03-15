@@ -10,8 +10,8 @@ import './index.scss'
 
 const baseClass = 'render-fields'
 
-const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldMap, forceRender, margins } = props
+export const RenderFields: React.FC<Props> = (props) => {
+  const { className, fieldMap, forceRender, margins, path, permissions, schemaPath } = props
 
   const { i18n } = useTranslation()
   const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
@@ -53,20 +53,24 @@ const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {hasRendered &&
-          fieldMap?.map(({ name, Field, fieldPermissions, readOnly }, fieldIndex) => (
-            <RenderField
-              Field={Field}
-              fieldPermissions={fieldPermissions}
-              key={fieldIndex}
-              name={name}
-              readOnly={readOnly}
-            />
-          ))}
+          fieldMap?.map(({ name, Field, disabled, readOnly }, fieldIndex) => {
+            return (
+              <RenderField
+                Field={Field}
+                disabled={disabled}
+                key={fieldIndex}
+                name={name}
+                path={path}
+                permissions={permissions?.[name]}
+                readOnly={readOnly}
+                schemaPath={schemaPath}
+                siblingPermissions={permissions}
+              />
+            )
+          })}
       </div>
     )
   }
 
   return null
 }
-
-export default RenderFields

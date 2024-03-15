@@ -17,7 +17,7 @@ import { scrollToID } from '../../../utilities/scrollToID.js'
 import { useForm, useFormSubmitted } from '../../Form/context.js'
 import LabelComp from '../../Label/index.js'
 import { NullifyLocaleField } from '../../NullifyField/index.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { fieldBaseClass } from '../shared.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.scss'
@@ -30,6 +30,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     Description,
     Error,
     Label: LabelFromProps,
+    RowLabel,
     className,
     fieldMap,
     forceRender = false,
@@ -221,9 +222,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               {(draggableSortableItemProps) => (
                 <ArrayRow
                   {...draggableSortableItemProps}
+                  CustomRowLabel={RowLabel}
                   addRow={addRow}
                   duplicateRow={duplicateRow}
-                  // CustomRowLabel={CustomRowLabel}
                   fieldMap={fieldMap}
                   forceRender={forceRender}
                   hasMaxRows={hasMaxRows}

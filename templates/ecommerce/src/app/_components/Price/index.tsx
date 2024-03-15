@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 
-import { Product } from '../../../payload/payload-types'
+import type { Product } from '../../../payload/payload-types'
+
 import { AddToCartButton } from '../AddToCartButton'
 import { RemoveFromCartButton } from '../RemoveFromCartButton'
-
 import classes from './index.module.scss'
 
 export const priceFromJSON = (priceJSON: string, quantity: number = 1, raw?: boolean): string => {
@@ -20,8 +20,8 @@ export const priceFromJSON = (priceJSON: string, quantity: number = 1, raw?: boo
       if (raw) return priceValue.toString()
 
       price = (priceValue / 100).toLocaleString('en-US', {
-        style: 'currency',
         currency: 'USD', // TODO: use `parsed.currency`
+        style: 'currency',
       })
 
       if (priceType === 'recurring') {
@@ -40,11 +40,11 @@ export const priceFromJSON = (priceJSON: string, quantity: number = 1, raw?: boo
 }
 
 export const Price: React.FC<{
+  button?: 'addToCart' | 'removeFromCart' | false
   product: Product
   quantity?: number
-  button?: 'addToCart' | 'removeFromCart' | false
-}> = props => {
-  const { product, product: { priceJSON } = {}, button = 'addToCart', quantity } = props
+}> = (props) => {
+  const { button = 'addToCart', product, product: { priceJSON } = {}, quantity } = props
 
   const [price, setPrice] = useState<{
     actualPrice: string
@@ -72,7 +72,7 @@ export const Price: React.FC<{
         </div>
       )}
       {button && button === 'addToCart' && (
-        <AddToCartButton product={product} appearance="default" />
+        <AddToCartButton appearance="default" product={product} />
       )}
       {button && button === 'removeFromCart' && <RemoveFromCartButton product={product} />}
     </div>

@@ -1,14 +1,14 @@
 import type { I18n } from '@payloadcms/translations'
-import type { FormState, RowLabel, RowLabelComponent } from 'payload/types'
+import type { RowLabel, RowLabelComponent } from 'payload/types'
 
 import React from 'react'
 
 export type Props = {
+  RowLabelComponent?: React.ReactNode
   className?: string
-  data: FormState
   i18n: I18n
-  label?: RowLabel
   path: string
+  rowLabel?: Record<string, string> | string
   rowNumber?: number
 }
 

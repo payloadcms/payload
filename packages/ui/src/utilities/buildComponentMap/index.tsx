@@ -1,4 +1,3 @@
-import type { CollectionPermission, GlobalPermission, Permissions } from 'payload/auth'
 import type { EditViewProps, SanitizedConfig } from 'payload/types'
 
 import React from 'react'
@@ -14,7 +13,6 @@ export const buildComponentMap = (args: {
   DefaultListView: React.FC<EditViewProps>
   children: React.ReactNode
   config: SanitizedConfig
-  permissions?: Permissions
   readOnly?: boolean
 }): {
   componentMap: ComponentMap
@@ -26,17 +24,12 @@ export const buildComponentMap = (args: {
     DefaultListView,
     children,
     config,
-    permissions,
     readOnly: readOnlyOverride,
   } = args
-
-  let entityPermissions: CollectionPermission | GlobalPermission
 
   // Collections
   const collections = config.collections.reduce((acc, collectionConfig) => {
     const { slug, fields } = collectionConfig
-
-    entityPermissions = permissions?.collections?.[collectionConfig.slug]
 
     const editViewFromConfig = collectionConfig?.admin?.components?.views?.Edit
     const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
@@ -113,7 +106,6 @@ export const buildComponentMap = (args: {
         DefaultCell,
         config,
         fieldSchema: fields,
-        permissions: entityPermissions?.fields,
         readOnly: readOnlyOverride,
       }),
     }
@@ -127,8 +119,6 @@ export const buildComponentMap = (args: {
   // Globals
   const globals = config.globals.reduce((acc, globalConfig) => {
     const { slug, fields } = globalConfig
-
-    entityPermissions = permissions?.globals?.[globalConfig.slug]
 
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
@@ -154,7 +144,6 @@ export const buildComponentMap = (args: {
         DefaultCell,
         config,
         fieldSchema: fields,
-        permissions: entityPermissions?.fields,
         readOnly: readOnlyOverride,
       }),
     }

@@ -1,5 +1,6 @@
 import type { PayloadHandler } from 'payload/config'
 import type { PayloadRequest } from 'payload/types'
+
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -33,10 +34,10 @@ export const customerProxy: PayloadHandler = async (req: PayloadRequest, res) =>
 
   try {
     let response:
-      | Stripe.Customer
-      | Stripe.DeletedCustomer
       | Array<Stripe.Customer | Stripe.DeletedCustomer>
       | Stripe.ApiList<Stripe.Customer | Stripe.DeletedCustomer>
+      | Stripe.Customer
+      | Stripe.DeletedCustomer
 
     let customer: Stripe.Customer | Stripe.DeletedCustomer | null = null
 

@@ -1,19 +1,20 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import type { PayloadAdminBarProps } from 'payload-admin-bar'
+
 import { useSelectedLayoutSegments } from 'next/navigation'
-import { PayloadAdminBar, PayloadAdminBarProps } from 'payload-admin-bar'
+import { PayloadAdminBar } from 'payload-admin-bar'
+import React, { useEffect } from 'react'
 
 import { useAuth } from '../../_providers/Auth'
 import { Gutter } from '../Gutter'
-
 import classes from './index.module.scss'
 
 const Title: React.FC = () => <span>Dashboard</span>
 
 export const AdminBar: React.FC<{
   adminBarProps?: PayloadAdminBarProps
-}> = props => {
+}> = (props) => {
   const { adminBarProps } = props || {}
   const segments = useSelectedLayoutSegments()
   const collection = segments?.[1] === 'products' ? 'products' : 'pages'
@@ -36,25 +37,25 @@ export const AdminBar: React.FC<{
       <Gutter className={classes.blockContainer}>
         <PayloadAdminBar
           {...adminBarProps}
-          collection={collection}
-          collectionLabels={{
-            singular: collection === 'products' ? 'Product' : 'Page',
-            plural: collection === 'products' ? 'Products' : 'Pages',
-          }}
-          key={user?.id} // use key to get the admin bar to re-run its `me` request
-          cmsURL={process.env.NEXT_PUBLIC_SERVER_URL}
           className={classes.payloadAdminBar}
           classNames={{
-            user: classes.user,
-            logo: classes.logo,
             controls: classes.controls,
+            logo: classes.logo,
+            user: classes.user,
           }}
+          cmsURL={process.env.NEXT_PUBLIC_SERVER_URL}
+          collection={collection}
+          collectionLabels={{
+            plural: collection === 'products' ? 'Products' : 'Pages',
+            singular: collection === 'products' ? 'Product' : 'Page',
+          }}
+          key={user?.id} // use key to get the admin bar to re-run its `me` request
           logo={<Title />}
           style={{
+            backgroundColor: 'transparent',
+            padding: 0,
             position: 'relative',
             zIndex: 'unset',
-            padding: 0,
-            backgroundColor: 'transparent',
           }}
         />
       </Gutter>

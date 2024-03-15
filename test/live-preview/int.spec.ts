@@ -16,6 +16,7 @@ import { Pages } from './collections/Pages.js'
 import { postsSlug } from './collections/Posts.js'
 import configPromise from './config.js'
 import { tenantsSlug } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -69,6 +70,12 @@ describe('Collections - Live Preview', () => {
       },
       file,
     })
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   it('handles `postMessage`', async () => {

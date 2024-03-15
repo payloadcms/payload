@@ -12,6 +12,12 @@ describe('Stripe Plugin', () => {
     payload = await getPayload({ config })
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   it('should create products', async () => {
     const product = await payload.create({
       collection: 'products',

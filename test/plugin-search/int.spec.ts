@@ -13,6 +13,12 @@ describe('@payloadcms/plugin-search', () => {
     payload = await getPayload({ config })
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   it('should add a search collection', async () => {
     const search = await payload.find({
       collection: 'search',

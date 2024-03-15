@@ -1,6 +1,5 @@
 import type { ObjMap } from 'graphql/jsutils/ObjMap.js'
 import type { GraphQLFieldConfig, GraphQLFieldResolver } from 'graphql/type/definition.js'
-
 import type { PayloadRequest } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'

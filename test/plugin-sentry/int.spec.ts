@@ -12,6 +12,12 @@ describe('@payloadcms/plugin-sentry', () => {
     payload = await getPayload({ config })
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   describe('tests', () => {
     it.todo('plugin-sentry tests')
   })

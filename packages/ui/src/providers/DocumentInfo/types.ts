@@ -4,6 +4,7 @@ import type {
   DocumentPermissions,
   DocumentPreferences,
   FormState,
+  InsideFieldsPreferences,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TypeWithID,
@@ -22,7 +23,6 @@ export type DocumentInfoProps = {
   disableActions?: boolean
   disableLeaveWithoutSaving?: boolean
   docPermissions?: DocumentPermissions
-  docPreferences?: DocumentPreferences
   globalSlug?: SanitizedGlobalConfig['slug']
   hasSavePermission?: boolean
   id: null | number | string
@@ -43,11 +43,14 @@ export type DocumentInfo = DocumentInfoProps & {
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
 }
 
-export type DocumentInfoContext = Omit<DocumentInfo, 'docPreferences'> & {
+export type DocumentInfoContext = DocumentInfo & {
   getDocPermissions: () => Promise<void>
-  getDocPreferences: () => Promise<{ [key: string]: unknown }>
+  getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
-  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
+  setDocFieldPreferences: (
+    field: string,
+    fieldPreferences: Partial<InsideFieldsPreferences> & { [key: string]: unknown },
+  ) => void
   setDocumentTitle: (title: string) => void
   setOnSave: (data: Data) => Promise<void> | void
 }

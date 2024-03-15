@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "@types/pluralize": "^0.0.33",
     "payload": "workspace:*",
     "ts-essentials": "7.0.3"
   },

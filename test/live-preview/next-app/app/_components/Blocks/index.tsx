@@ -1,21 +1,24 @@
 import React, { Fragment } from 'react'
 
-import { Page } from '../../../payload-types.js'
+import type { Page } from '../../../payload-types.js'
+import type { RelationshipsBlockProps } from '../../_blocks/Relationships'
+import type { VerticalPaddingOptions } from '../VerticalPadding'
+
 import { ArchiveBlock } from '../../_blocks/ArchiveBlock'
 import { CallToActionBlock } from '../../_blocks/CallToAction'
 import { ContentBlock } from '../../_blocks/Content'
 import { MediaBlock } from '../../_blocks/MediaBlock'
 import { RelatedPosts, type RelatedPostsProps } from '../../_blocks/RelatedPosts'
+import { RelationshipsBlock } from '../../_blocks/Relationships'
 import { toKebabCase } from '../../_utilities/toKebabCase'
 import { BackgroundColor } from '../BackgroundColor'
-import { VerticalPadding, VerticalPaddingOptions } from '../VerticalPadding'
-import { RelationshipsBlock, RelationshipsBlockProps } from '../../_blocks/Relationships'
+import { VerticalPadding } from '../VerticalPadding'
 
 const blockComponents = {
-  cta: CallToActionBlock,
-  content: ContentBlock,
-  mediaBlock: MediaBlock,
   archive: ArchiveBlock,
+  content: ContentBlock,
+  cta: CallToActionBlock,
+  mediaBlock: MediaBlock,
   relatedPosts: RelatedPosts,
   relationships: RelationshipsBlock,
 }
@@ -26,7 +29,7 @@ export const Blocks: React.FC<{
   blocks?: (Block | RelatedPostsProps | RelationshipsBlockProps)[] | null
   disableTopPadding?: boolean
 }> = (props) => {
-  const { disableTopPadding, blocks } = props
+  const { blocks, disableTopPadding } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -66,8 +69,8 @@ export const Blocks: React.FC<{
 
             if (Block) {
               return (
-                <BackgroundColor key={index} invert={blockIsInverted}>
-                  <VerticalPadding top={paddingTop} bottom={paddingBottom}>
+                <BackgroundColor invert={blockIsInverted} key={index}>
+                  <VerticalPadding bottom={paddingBottom} top={paddingTop}>
                     {/* @ts-expect-error */}
                     <Block id={toKebabCase(blockName)} {...block} />
                   </VerticalPadding>

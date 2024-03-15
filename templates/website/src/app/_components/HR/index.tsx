@@ -4,7 +4,7 @@ import classes from './index.module.scss'
 
 export const HR: React.FC<{
   className?: string
-}> = props => {
+}> = (props) => {
   const { className } = props
 
   return <hr className={[className, classes.hr].filter(Boolean).join(' ')} />

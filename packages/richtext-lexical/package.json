@@ -48,11 +48,13 @@
     "@types/react-dom": "18.2.7",
     "payload": "workspace:*",
     "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "@payloadcms/next": "workspace:*"
   },
   "peerDependencies": {
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
+    "@payloadcms/next": "workspace:*",
     "payload": "workspace:*"
   },
   "exports": {

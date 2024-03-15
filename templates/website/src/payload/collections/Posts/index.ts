@@ -15,28 +15,20 @@ import { revalidatePost } from './hooks/revalidatePost'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
+  access: {
+    create: admins,
+    delete: admins,
+    read: adminsOrPublished,
+    update: admins,
+  },
   admin: {
-    useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
-    preview: doc => {
+    preview: (doc) => {
       return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
         `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/posts/${doc?.slug}`,
       )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
     },
-  },
-  hooks: {
-    beforeChange: [populatePublishedAt],
-    afterChange: [revalidatePost],
-    afterRead: [populateArchiveBlock, populateAuthors],
-  },
-  versions: {
-    drafts: true,
-  },
-  access: {
-    read: adminsOrPublished,
-    update: admins,
-    create: admins,
-    delete: admins,
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -47,20 +39,20 @@ export const Posts: CollectionConfig = {
     {
       name: 'categories',
       type: 'relationship',
-      relationTo: 'categories',
-      hasMany: true,
       admin: {
         position: 'sidebar',
       },
+      hasMany: true,
+      relationTo: 'categories',
     },
     {
       name: 'publishedAt',
       type: 'date',
       admin: {
-        position: 'sidebar',
         date: {
           pickerAppearance: 'dayAndTime',
         },
+        position: 'sidebar',
       },
       hooks: {
         beforeChange: [
@@ -76,11 +68,11 @@ export const Posts: CollectionConfig = {
     {
       name: 'authors',
       type: 'relationship',
-      relationTo: 'users',
-      hasMany: true,
       admin: {
         position: 'sidebar',
       },
+      hasMany: true,
+      relationTo: 'users',
     },
     // This field is only used to populate the user data via the `populateAuthors` hook
     // This is because the `user` collection has access control locked to protect user privacy
@@ -88,12 +80,12 @@ export const Posts: CollectionConfig = {
     {
       name: 'populatedAuthors',
       type: 'array',
-      admin: {
-        readOnly: true,
-        disabled: true,
-      },
       access: {
         update: () => false,
+      },
+      admin: {
+        disabled: true,
+        readOnly: true,
       },
       fields: [
         {
@@ -110,22 +102,21 @@ export const Posts: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Hero',
           fields: [hero],
+          label: 'Hero',
         },
         {
-          label: 'Content',
           fields: [
             {
               name: 'layout',
               type: 'blocks',
-              required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive],
+              required: true,
             },
             {
               name: 'enablePremiumContent',
-              label: 'Enable Premium Content',
               type: 'checkbox',
+              label: 'Enable Premium Content',
             },
             {
               name: 'premiumContent',
@@ -136,14 +127,13 @@ export const Posts: CollectionConfig = {
               blocks: [CallToAction, Content, MediaBlock, Archive],
             },
           ],
+          label: 'Content',
         },
       ],
     },
     {
       name: 'relatedPosts',
       type: 'relationship',
-      relationTo: 'posts',
-      hasMany: true,
       filterOptions: ({ id }) => {
         return {
           id: {
@@ -151,7 +141,17 @@ export const Posts: CollectionConfig = {
           },
         }
       },
+      hasMany: true,
+      relationTo: 'posts',
     },
     slugField(),
   ],
+  hooks: {
+    afterChange: [revalidatePost],
+    afterRead: [populateArchiveBlock, populateAuthors],
+    beforeChange: [populatePublishedAt],
+  },
+  versions: {
+    drafts: true,
+  },
 }

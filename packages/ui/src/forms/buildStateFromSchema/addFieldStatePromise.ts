@@ -11,6 +11,7 @@ import ObjectIdImport from 'bson-objectid'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import { getDefaultValue } from 'payload/utilities'
 
+import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -92,6 +93,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   if (fieldAffectsData(field)) {
     const validate = operation === 'update' ? field.validate : undefined
+
     const fieldState: FormField = {
       errorPaths: new Set(),
       fieldSchema: includeSchema ? field : undefined,
@@ -375,6 +377,18 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       case 'relationship': {
+        if (typeof field.filterOptions === 'function') {
+          const query = await getFilterOptionsQuery(field.filterOptions, {
+            id,
+            data: fullData,
+            relationTo: field.relationTo,
+            siblingData: data,
+            user: req.user,
+          })
+
+          fieldState.filterOptions = query
+        }
+
         if (field.hasMany) {
           const relationshipValue = Array.isArray(valueWithDefault)
             ? valueWithDefault.map((relationship) => {
@@ -433,6 +447,18 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       case 'upload': {
+        if (typeof field.filterOptions === 'function') {
+          const query = await getFilterOptionsQuery(field.filterOptions, {
+            id,
+            data: fullData,
+            relationTo: field.relationTo,
+            siblingData: data,
+            user: req.user,
+          })
+
+          fieldState.filterOptions = query
+        }
+
         const relationshipValue =
           valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault
             ? valueWithDefault.id

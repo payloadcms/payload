@@ -10,29 +10,31 @@ import React, {
   useState,
 } from 'react'
 
-import { Product, User } from '../../../payload/payload-types'
+import type { Product, User } from '../../../payload/payload-types'
+import type { CartItem } from './reducer'
+
 import { useAuth } from '../Auth'
-import { CartItem, cartReducer } from './reducer'
+import { cartReducer } from './reducer'
 
 export type CartContext = {
-  cart: User['cart']
   addItemToCart: (item: CartItem) => void
-  deleteItemFromCart: (product: Product) => void
+  cart: User['cart']
   cartIsEmpty: boolean | undefined
-  clearCart: () => void
-  isProductInCart: (product: Product) => boolean
   cartTotal: {
     formatted: string
     raw: number
   }
+  clearCart: () => void
+  deleteItemFromCart: (product: Product) => void
   hasInitializedCart: boolean
+  isProductInCart: (product: Product) => boolean
 }
 
 const Context = createContext({} as CartContext)
 
 export const useCart = () => useContext(Context)
 
-const arrayHasItems = array => Array.isArray(array) && array.length > 0
+const arrayHasItems = (array) => Array.isArray(array) && array.length > 0
 
 /**
  * ensure that cart items are fully populated, filter out any items that are not
@@ -41,7 +43,7 @@ const arrayHasItems = array => Array.isArray(array) && array.length > 0
 const flattenCart = (cart: User['cart']): User['cart'] => ({
   ...cart,
   items: cart.items
-    .map(item => {
+    .map((item) => {
       if (!item?.product || typeof item?.product !== 'object') {
         return null
       }
@@ -63,10 +65,10 @@ const flattenCart = (cart: User['cart']): User['cart'] => ({
 // Step 4B: Sync the cart to Payload and clear local storage
 // Step 5: If the user is logged out, sync the cart to local storage only
 
-export const CartProvider = props => {
+export const CartProvider = (props) => {
   // const { setTimedNotification } = useNotifications();
   const { children } = props
-  const { user, status: authStatus } = useAuth()
+  const { status: authStatus, user } = useAuth()
 
   const [cart, dispatchCart] = useReducer(cartReducer, {})
 
@@ -168,14 +170,14 @@ export const CartProvider = props => {
         const syncCartToPayload = async () => {
           const req = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/${user.id}`, {
             // Make sure to include cookies with fetch
-            credentials: 'include',
-            method: 'PATCH',
             body: JSON.stringify({
               cart: flattenedCart,
             }),
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },
+            method: 'PATCH',
           })
 
           if (req.ok) {
@@ -213,7 +215,7 @@ export const CartProvider = props => {
   )
 
   // this method can be used to add new items AND update existing ones
-  const addItemToCart = useCallback(incomingItem => {
+  const addItemToCart = useCallback((incomingItem) => {
     dispatchCart({
       type: 'ADD_ITEM',
       payload: incomingItem,
@@ -250,8 +252,8 @@ export const CartProvider = props => {
 
     setTotal({
       formatted: (newTotal / 100).toLocaleString('en-US', {
-        style: 'currency',
         currency: 'USD',
+        style: 'currency',
       }),
       raw: newTotal,
     })
@@ -260,14 +262,14 @@ export const CartProvider = props => {
   return (
     <Context.Provider
       value={{
-        cart,
         addItemToCart,
-        deleteItemFromCart,
+        cart,
         cartIsEmpty: hasInitializedCart && !arrayHasItems(cart?.items),
-        clearCart,
-        isProductInCart,
         cartTotal: total,
+        clearCart,
+        deleteItemFromCart,
         hasInitializedCart,
+        isProductInCart,
       }}
     >
       {children && children}

@@ -1,25 +1,27 @@
 'use client'
 
+import type { StaticImageData } from 'next/image'
+
+import NextImage from 'next/image'
 import React from 'react'
-import NextImage, { StaticImageData } from 'next/image'
+
+import type { Props as MediaProps } from '../types'
 
 import cssVariables from '../../../cssVariables'
-import { Props as MediaProps } from '../types'
-
 import classes from './index.module.scss'
 
 const { breakpoints } = cssVariables
 
-export const Image: React.FC<MediaProps> = props => {
+export const Image: React.FC<MediaProps> = (props) => {
   const {
+    alt: altFromProps,
+    fill,
     imgClassName,
     onClick,
     onLoad: onLoadFromProps,
-    resource,
     priority,
-    fill,
+    resource,
     src: srcFromProps,
-    alt: altFromProps,
   } = props
 
   const [isLoading, setIsLoading] = React.useState(true)
@@ -31,10 +33,10 @@ export const Image: React.FC<MediaProps> = props => {
 
   if (!src && resource && typeof resource !== 'string') {
     const {
-      width: fullWidth,
-      height: fullHeight,
-      filename: fullFilename,
       alt: altFromResource,
+      filename: fullFilename,
+      height: fullHeight,
+      width: fullWidth,
     } = resource
 
     width = fullWidth
@@ -53,11 +55,12 @@ export const Image: React.FC<MediaProps> = props => {
 
   return (
     <NextImage
+      alt={alt || ''}
       className={[isLoading && classes.placeholder, classes.image, imgClassName]
         .filter(Boolean)
         .join(' ')}
-      src={src}
-      alt={alt || ''}
+      fill={fill}
+      height={!fill ? height : undefined}
       onClick={onClick}
       onLoad={() => {
         setIsLoading(false)
@@ -65,11 +68,10 @@ export const Image: React.FC<MediaProps> = props => {
           onLoadFromProps()
         }
       }}
-      fill={fill}
-      width={!fill ? width : undefined}
-      height={!fill ? height : undefined}
-      sizes={sizes}
       priority={priority}
+      sizes={sizes}
+      src={src}
+      width={!fill ? width : undefined}
     />
   )
 }

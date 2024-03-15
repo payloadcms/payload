@@ -1,10 +1,11 @@
 import { webpackBundler } from '@payloadcms/bundler-webpack' // bundler-import
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
+import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
+
 import { payloadCloud } from '@payloadcms/plugin-cloud'
 import nestedDocs from '@payloadcms/plugin-nested-docs'
 import redirects from '@payloadcms/plugin-redirects'
 import seo from '@payloadcms/plugin-seo'
-import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 import stripePlugin from '@payloadcms/plugin-stripe'
 import { slateEditor } from '@payloadcms/richtext-slate' // editor-import
 import dotenv from 'dotenv'
@@ -41,7 +42,6 @@ dotenv.config({
 
 export default buildConfig({
   admin: {
-    user: Users.slug,
     bundler: webpackBundler(), // bundler-config
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
@@ -51,7 +51,8 @@ export default buildConfig({
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
       beforeDashboard: [BeforeDashboard],
     },
-    webpack: config => {
+    user: Users.slug,
+    webpack: (config) => {
       return {
         ...config,
         resolve: {
@@ -59,16 +60,16 @@ export default buildConfig({
           alias: {
             ...config.resolve?.alias,
             dotenv: path.resolve(__dirname, './dotenv.js'),
+            express: mockModulePath,
             [path.resolve(__dirname, 'collections/Products/hooks/beforeChange')]: mockModulePath,
+            [path.resolve(__dirname, 'collections/Users/endpoints/customer')]: mockModulePath,
             [path.resolve(__dirname, 'collections/Users/hooks/createStripeCustomer')]:
               mockModulePath,
-            [path.resolve(__dirname, 'collections/Users/endpoints/customer')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
             [path.resolve(__dirname, 'endpoints/seed')]: mockModulePath,
             stripe: mockModulePath,
-            express: mockModulePath,
           },
         },
       }
@@ -80,15 +81,7 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   // database-adapter-config-end
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   collections: [Pages, Products, Orders, Media, Categories, Users],
-  globals: [Settings, Header, Footer],
-  typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
-  },
-  graphQL: {
-    schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
-  },
   cors: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(
     Boolean,
   ),
@@ -97,38 +90,42 @@ export default buildConfig({
   ),
   endpoints: [
     {
-      path: '/create-payment-intent',
-      method: 'post',
       handler: createPaymentIntent,
+      method: 'post',
+      path: '/create-payment-intent',
     },
     {
-      path: '/stripe/customers',
-      method: 'get',
       handler: customersProxy,
+      method: 'get',
+      path: '/stripe/customers',
     },
     {
-      path: '/stripe/products',
-      method: 'get',
       handler: productsProxy,
+      method: 'get',
+      path: '/stripe/products',
     },
     // The seed endpoint is used to populate the database with some example data
     // You should delete this endpoint before deploying your site to production
     {
-      path: '/seed',
-      method: 'get',
       handler: seed,
+      method: 'get',
+      path: '/seed',
     },
   ],
+  globals: [Settings, Header, Footer],
+  graphQL: {
+    schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
+  },
   plugins: [
     stripePlugin({
-      stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
       isTestKey: Boolean(process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY),
-      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
       rest: false,
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
       webhooks: {
+        'price.updated': priceUpdated,
         'product.created': productUpdated,
         'product.updated': productUpdated,
-        'price.updated': priceUpdated,
       },
     }),
     redirects({
@@ -144,4 +141,8 @@ export default buildConfig({
     }),
     payloadCloud(),
   ],
+  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
+  typescript: {
+    outputFile: path.resolve(__dirname, 'payload-types.ts'),
+  },
 })

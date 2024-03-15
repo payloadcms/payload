@@ -1,7 +1,8 @@
-import { verifyEmailOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
+import { verifyEmailOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 function verifyEmailResolver(collection: Collection) {

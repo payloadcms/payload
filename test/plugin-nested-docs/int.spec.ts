@@ -16,6 +16,12 @@ describe('@payloadcms/plugin-nested-docs', () => {
     payload = await getPayload({ config })
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   describe('seed', () => {
     it('should populate two levels of breadcrumbs', async () => {
       const query = await payload.find({

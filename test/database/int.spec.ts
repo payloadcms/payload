@@ -15,6 +15,7 @@ import { devUser } from '../credentials.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -40,6 +41,13 @@ describe('database', () => {
 
     user = loginResult.user
   })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   describe('migrations', () => {
     beforeAll(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {

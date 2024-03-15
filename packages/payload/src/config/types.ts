@@ -18,7 +18,6 @@ import type {
   SanitizedCollectionConfig,
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
-import type { ClientConfigField } from '../fields/config/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
@@ -687,20 +686,7 @@ export type SanitizedConfig = Omit<
   }
 }
 
-export type ClientConfig = Omit<SanitizedConfig, 'admin' | 'db' | 'endpoints'> & {
-  admin: Omit<SanitizedConfig['admin'], 'components'>
-  collections: (Omit<
-    SanitizedCollectionConfig,
-    'access' | 'admin' | 'endpoints' | 'fields' | 'hooks'
-  > & {
-    admin: Omit<SanitizedCollectionConfig['admin'], 'components' | 'useAsTitle'>
-    fields: ClientConfigField[]
-  })[]
-  globals: (Omit<SanitizedGlobalConfig, 'access' | 'admin' | 'endpoints' | 'fields' | 'hooks'> & {
-    admin: Omit<SanitizedGlobalConfig['admin'], 'components'>
-    fields: ClientConfigField[]
-  })[]
-}
+export type { ClientConfig } from '../config/createClientConfig.js'
 
 export type EditConfig =
   | (

@@ -21,6 +21,7 @@ import {
   unstoredMediaSlug,
   usersSlug,
 } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -82,6 +83,12 @@ describe('Collections - Uploads', () => {
     payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
     await restClient.login({ slug: usersSlug })
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   describe('REST', () => {

@@ -7,6 +7,8 @@ import React from 'react'
 import type { ResolvedServerFeatureMap } from './field/features/types.js'
 import type { GeneratedFeatureProviderComponent } from './types.js'
 
+import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
+
 export const getGenerateComponentMap =
   (args: {
     resolvedFeatureMap: ResolvedServerFeatureMap
@@ -75,14 +77,15 @@ export const getGenerateComponentMap =
 
               const sanitizedFields = sanitizeFields({
                 config,
-                fields,
+                fields: cloneDeep(fields),
                 validRelationships,
               })
 
               const mappedFields = mapFields({
                 config,
+                disableAddingID: true,
                 fieldSchema: sanitizedFields,
-                permissions: {},
+                parentPath: `${schemaPath}.feature.${featureKey}.fields.${schemaKey}`,
                 readOnly: false,
               })
 

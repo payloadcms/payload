@@ -10,21 +10,18 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useOperation } from '../../providers/OperationProvider/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useFieldPath } from '../FieldPathProvider/index.js'
+import { useFieldProps } from '../FieldPropsProvider/index.js'
 import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context.js'
-import { useReadOnly } from '../ReadOnlyProvider/index.js'
 
 /**
  * Get and set the value of a form field.
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-const useField = <T,>(options: Options): FieldType<T> => {
+export const useField = <T,>(options: Options): FieldType<T> => {
   const { disableFormData = false, hasRows, validate } = options
 
-  const { path: pathFromContext, schemaPath } = useFieldPath()
-
-  const readOnly = useReadOnly()
+  const { path: pathFromContext, permissions, readOnly, schemaPath } = useFieldProps()
 
   const path = options.path || pathFromContext
 
@@ -44,6 +41,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
 
+  const filterOptions = field?.filterOptions
   const value = field?.value as T
   const initialValue = field?.initialValue as T
   const valid = typeof field?.valid === 'boolean' ? field.valid : true
@@ -82,10 +80,12 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const result: FieldType<T> = useMemo(
     () => ({
       errorMessage: field?.errorMessage,
+      filterOptions,
       formProcessing: processing,
       formSubmitted: submitted,
       initialValue,
       path,
+      permissions,
       readOnly: readOnly || false,
       rows: field?.rows,
       schemaPath,
@@ -107,6 +107,8 @@ const useField = <T,>(options: Options): FieldType<T> => {
       path,
       schemaPath,
       readOnly,
+      permissions,
+      filterOptions,
     ],
   )
 
@@ -190,5 +192,3 @@ const useField = <T,>(options: Options): FieldType<T> => {
 
   return result
 }
-
-export default useField

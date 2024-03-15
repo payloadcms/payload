@@ -1,8 +1,7 @@
-import React from 'react'
 import { Banner } from 'payload/components'
+import React from 'react'
 
 import { SeedButton } from './SeedButton'
-
 import './index.scss'
 
 const baseClass = 'before-dashboard'
@@ -30,24 +29,24 @@ const BeforeDashboard: React.FC = () => {
           {'Modify your '}
           <a
             href="https://payloadcms.com/docs/configuration/collections"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
             collections
           </a>
           {' and add more '}
           <a
             href="https://payloadcms.com/docs/fields/overview"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
             fields
           </a>
           {' as needed. If you are new to Payload, we also recommend you check out the '}
           <a
             href="https://payloadcms.com/docs/getting-started/what-is-payload"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
             Getting Started
           </a>
@@ -59,9 +58,9 @@ const BeforeDashboard: React.FC = () => {
       </ul>
       {'Pro Tip: This block is a '}
       <a
-        href={'https://payloadcms.com/docs/admin/components#base-component-overrides'}
-        target="_blank"
+        href="https://payloadcms.com/docs/admin/components#base-component-overrides"
         rel="noopener noreferrer"
+        target="_blank"
       >
         custom component
       </a>

@@ -1,8 +1,9 @@
-import { resetPasswordOperation } from 'payload/operations'
-import { generatePayloadCookie } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
+import { generatePayloadCookie } from 'payload/auth'
+import { resetPasswordOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 function resetPasswordResolver(collection: Collection): any {
@@ -20,9 +21,9 @@ function resetPasswordResolver(collection: Collection): any {
 
     const result = await resetPasswordOperation(options)
     const cookie = generatePayloadCookie({
-      token: result.token,
-      payload: context.req.payload,
       collectionConfig: collection.config,
+      payload: context.req.payload,
+      token: result.token,
     })
     context.headers['Set-Cookie'] = cookie
 

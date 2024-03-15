@@ -1,9 +1,6 @@
-/* eslint-disable import/no-dynamic-require */
 import type pino from 'pino'
 
-/* eslint-disable global-require */
 import { createRequire } from 'module'
-// eslint-disable-next-line import/no-extraneous-dependencies
 import path from 'path'
 
 import type { SanitizedConfig } from './types.js'

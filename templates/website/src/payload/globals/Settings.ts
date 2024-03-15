@@ -2,12 +2,6 @@ import type { GlobalConfig } from 'payload/types'
 
 export const Settings: GlobalConfig = {
   slug: 'settings',
-  typescript: {
-    interface: 'Settings',
-  },
-  graphQL: {
-    name: 'Settings',
-  },
   access: {
     read: () => true,
   },
@@ -15,14 +9,20 @@ export const Settings: GlobalConfig = {
     {
       name: 'postsPage',
       type: 'relationship',
-      relationTo: 'pages',
       label: 'Posts page',
+      relationTo: 'pages',
     },
     {
       name: 'projectsPage',
       type: 'relationship',
-      relationTo: 'pages',
       label: 'Projects page',
+      relationTo: 'pages',
     },
   ],
+  graphQL: {
+    name: 'Settings',
+  },
+  typescript: {
+    interface: 'Settings',
+  },
 }

@@ -7,7 +7,7 @@ export const priceUpdated: StripeWebhookHandler<{
   data: {
     object: Stripe.Price
   }
-}> = async args => {
+}> = async (args) => {
   const { event, payload, stripe } = args
 
   const stripeProduct = event.data.object.product
@@ -49,13 +49,13 @@ export const priceUpdated: StripeWebhookHandler<{
   try {
     // find all stripe prices that are assigned to "payloadProductID"
     const stripePrices = await stripe.prices.list({
-      product: stripeProductID,
       limit: 100,
+      product: stripeProductID,
     })
 
     await payload.update({
-      collection: 'products',
       id: payloadProductID,
+      collection: 'products',
       data: {
         priceJSON: JSON.stringify(stripePrices),
         skipSync: true,

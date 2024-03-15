@@ -4,10 +4,6 @@ import richText from '../../fields/richText'
 
 export const Archive: Block = {
   slug: 'archive',
-  labels: {
-    singular: 'Archive',
-    plural: 'Archives',
-  },
   fields: [
     richText({
       name: 'introContent',
@@ -29,13 +25,13 @@ export const Archive: Block = {
       ],
     },
     {
-      type: 'select',
       name: 'relationTo',
-      label: 'Collections To Show',
-      defaultValue: 'posts',
+      type: 'select',
       admin: {
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
       },
+      defaultValue: 'posts',
+      label: 'Collections To Show',
       options: [
         {
           label: 'Posts',
@@ -48,57 +44,61 @@ export const Archive: Block = {
       ],
     },
     {
-      type: 'relationship',
       name: 'categories',
-      label: 'Categories To Show',
-      relationTo: 'categories',
-      hasMany: true,
+      type: 'relationship',
       admin: {
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
       },
+      hasMany: true,
+      label: 'Categories To Show',
+      relationTo: 'categories',
     },
     {
-      type: 'number',
       name: 'limit',
-      label: 'Limit',
-      defaultValue: 10,
+      type: 'number',
       admin: {
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
         step: 1,
       },
+      defaultValue: 10,
+      label: 'Limit',
     },
     {
-      type: 'relationship',
       name: 'selectedDocs',
-      label: 'Selection',
-      relationTo: ['posts', 'projects'],
-      hasMany: true,
+      type: 'relationship',
       admin: {
         condition: (_, siblingData) => siblingData.populateBy === 'selection',
       },
+      hasMany: true,
+      label: 'Selection',
+      relationTo: ['posts', 'projects'],
     },
     {
-      type: 'relationship',
       name: 'populatedDocs',
+      type: 'relationship',
+      admin: {
+        condition: (_, siblingData) => siblingData.populateBy === 'collection',
+        description: 'This field is auto-populated after-read',
+        disabled: true,
+      },
+      hasMany: true,
       label: 'Populated Docs',
       relationTo: ['posts', 'projects'],
-      hasMany: true,
-      admin: {
-        disabled: true,
-        description: 'This field is auto-populated after-read',
-        condition: (_, siblingData) => siblingData.populateBy === 'collection',
-      },
     },
     {
-      type: 'number',
       name: 'populatedDocsTotal',
-      label: 'Populated Docs Total',
+      type: 'number',
       admin: {
-        step: 1,
-        disabled: true,
-        description: 'This field is auto-populated after-read',
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
+        description: 'This field is auto-populated after-read',
+        disabled: true,
+        step: 1,
       },
+      label: 'Populated Docs Total',
     },
   ],
+  labels: {
+    plural: 'Archives',
+    singular: 'Archive',
+  },
 }

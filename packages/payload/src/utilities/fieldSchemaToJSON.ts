@@ -19,8 +19,8 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
       case 'group':
         acc.push({
           name: field.name,
-          fields: fieldSchemaToJSON(field.fields),
           type: field.type,
+          fields: fieldSchemaToJSON(field.fields),
         })
 
         break
@@ -28,6 +28,7 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
       case 'array':
         acc.push({
           name: field.name,
+          type: field.type,
           fields: fieldSchemaToJSON([
             ...field.fields,
             {
@@ -35,7 +36,6 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
               type: 'text',
             },
           ]),
-          type: field.type,
         })
 
         break
@@ -43,6 +43,7 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
       case 'blocks':
         acc.push({
           name: field.name,
+          type: field.type,
           blocks: field.blocks.reduce((acc, block) => {
             acc[block.slug] = {
               fields: fieldSchemaToJSON([
@@ -56,7 +57,6 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
 
             return acc
           }, {}),
-          type: field.type,
         })
 
         break
@@ -73,8 +73,8 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
           if ('name' in tab) {
             tabFields.push({
               name: tab.name,
-              fields: fieldSchemaToJSON(tab.fields),
               type: field.type,
+              fields: fieldSchemaToJSON(tab.fields),
             })
             return
           }
@@ -91,9 +91,9 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
       case 'upload':
         acc.push({
           name: field.name,
+          type: field.type,
           hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
           relationTo: field.relationTo,
-          type: field.type,
         })
 
         break

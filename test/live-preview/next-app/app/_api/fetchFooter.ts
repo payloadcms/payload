@@ -1,4 +1,5 @@
 import type { Footer } from '../../payload-types'
+
 import { PAYLOAD_SERVER_URL } from './serverURL'
 
 export async function fetchFooter(): Promise<Footer> {

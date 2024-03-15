@@ -39,6 +39,12 @@ describe('@payloadcms/plugin-form-builder', () => {
     })) as unknown as Form
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   describe('plugin collections', () => {
     it('adds forms collection', async () => {
       const { docs: forms } = await payload.find({ collection: formsSlug })

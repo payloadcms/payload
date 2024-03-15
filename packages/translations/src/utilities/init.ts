@@ -1,4 +1,5 @@
-import { Translations, InitTFunction, InitI18n, I18n } from '../types.js'
+import type { I18n, InitI18n, InitTFunction, Translations } from '../types.js'
+
 import { deepMerge } from './deepMerge.js'
 
 /**
@@ -73,7 +74,7 @@ const replaceVars = ({
     [key: string]: any
   }
 }) => {
-  const parts = translationString.split(/({{.*?}})/)
+  const parts = translationString.split(/(\{\{.*?\}\})/)
 
   return parts
     .map((part) => {
@@ -198,7 +199,6 @@ const initTFunction: InitTFunction = (args) => {
   const languagePreference = matchLanguage(language)
 
   return {
-    translations: mergedTranslations,
     t: (key, vars) => {
       return t({
         key,
@@ -206,6 +206,7 @@ const initTFunction: InitTFunction = (args) => {
         vars,
       })
     },
+    translations: mergedTranslations,
   }
 }
 
@@ -229,9 +230,9 @@ function memoize(fn: Function, keys: string[]) {
 export const initI18n: InitI18n = memoize(
   ({
     config,
+    context,
     language = 'en',
     translations: incomingTranslations,
-    context,
   }: Parameters<InitI18n>[0]) => {
     const { t, translations } = initTFunction({
       config,

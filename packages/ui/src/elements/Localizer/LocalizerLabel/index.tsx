@@ -24,10 +24,9 @@ export const LocalizerLabel: React.FC<{
     >
       <div className={`${baseClass}__label`}>{`${t('general:locale')}:`}</div>
       &nbsp;&nbsp;
-      <span className={`${baseClass}__current-label`}>{`${getTranslation(
-        locale.label,
-        i18n,
-      )}`}</span>
+      <span className={`${baseClass}__current-label`}>
+        {`${getTranslation(locale.label, i18n)}`}
+      </span>
       &nbsp;
       <Chevron className={`${baseClass}__chevron`} />
     </div>

@@ -1,6 +1,7 @@
+import type { Payload } from 'payload'
+
 import fs from 'fs'
 import path from 'path'
-import type { Payload } from 'payload'
 
 import { home } from './home'
 import { image1 } from './image-1'
@@ -40,13 +41,13 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // clear the database
   await Promise.all([
-    ...collections.map(async collection =>
+    ...collections.map(async (collection) =>
       payload.delete({
         collection: collection as 'media',
         where: {},
       }),
     ), // eslint-disable-line function-paren-newline
-    ...globals.map(async global =>
+    ...globals.map(async (global) =>
       payload.updateGlobal({
         slug: global as 'header',
         data: {},
@@ -57,7 +58,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info(`— Seeding demo author and user...`)
 
   await Promise.all(
-    ['demo-author@payloadcms.com', 'demo-user@payloadcms.com'].map(async email => {
+    ['demo-author@payloadcms.com', 'demo-user@payloadcms.com'].map(async (email) => {
       await payload.delete({
         collection: 'users',
         where: {
@@ -73,8 +74,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     await payload.create({
       collection: 'users',
       data: {
-        email: 'demo-author@payloadcms.com',
         name: 'Demo Author',
+        email: 'demo-author@payloadcms.com',
         password: 'password',
         roles: ['admin'],
       },
@@ -82,8 +83,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     await payload.create({
       collection: 'users',
       data: {
-        email: 'demo-user@payloadcms.com',
         name: 'Demo User',
+        email: 'demo-user@payloadcms.com',
         password: 'password',
         roles: ['user'],
       },
@@ -95,13 +96,13 @@ export const seed = async (payload: Payload): Promise<void> => {
   const [image1Doc, image2Doc] = await Promise.all([
     await payload.create({
       collection: 'media',
-      filePath: path.resolve(__dirname, 'image-1.jpg'),
       data: image1,
+      filePath: path.resolve(__dirname, 'image-1.jpg'),
     }),
     await payload.create({
       collection: 'media',
-      filePath: path.resolve(__dirname, 'image-2.jpg'),
       data: image2,
+      filePath: path.resolve(__dirname, 'image-2.jpg'),
     }),
   ])
 
@@ -199,22 +200,22 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   await Promise.all([
     await payload.update({
-      collection: 'posts',
       id: post1Doc.id,
+      collection: 'posts',
       data: {
         relatedPosts: [post2Doc.id, post3Doc.id],
       },
     }),
     await payload.update({
-      collection: 'posts',
       id: post2Doc.id,
+      collection: 'posts',
       data: {
         relatedPosts: [post1Doc.id, post3Doc.id],
       },
     }),
     await payload.update({
-      collection: 'posts',
       id: post3Doc.id,
+      collection: 'posts',
       data: {
         relatedPosts: [post1Doc.id, post2Doc.id],
       },
@@ -233,8 +234,8 @@ export const seed = async (payload: Payload): Promise<void> => {
             comment: `This is a comment on post ${
               index + 1
             }. It has been approved by an admin and is now visible to the public. You can leave your own comment on this post using the form below.`,
-            user: demoUserID,
             doc: post.id,
+            user: demoUserID,
           },
         }),
     ),
@@ -278,22 +279,22 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   await Promise.all([
     await payload.update({
-      collection: 'projects',
       id: project1Doc.id,
+      collection: 'projects',
       data: {
         relatedProjects: [project2Doc.id, project3Doc.id],
       },
     }),
     await payload.update({
-      collection: 'projects',
       id: project2Doc.id,
+      collection: 'projects',
       data: {
         relatedProjects: [project1Doc.id, project3Doc.id],
       },
     }),
     await payload.update({
-      collection: 'projects',
       id: project3Doc.id,
+      collection: 'projects',
       data: {
         relatedProjects: [project1Doc.id, project2Doc.id],
       },
@@ -354,21 +355,21 @@ export const seed = async (payload: Payload): Promise<void> => {
         {
           link: {
             type: 'reference',
+            label: 'Posts',
             reference: {
               relationTo: 'pages',
               value: postsPageDoc.id,
             },
-            label: 'Posts',
           },
         },
         {
           link: {
             type: 'reference',
+            label: 'Projects',
             reference: {
               relationTo: 'pages',
               value: projectsPageDoc.id,
             },
-            label: 'Projects',
           },
         },
       ],

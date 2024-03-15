@@ -1,8 +1,6 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { FilterOptionsResult, SanitizedCollectionConfig } from 'payload/types'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
-
-import type { FilterOptionsResult } from '../../forms/fields/Relationship/types.js'
 
 export type ListDrawerProps = {
   collectionSlugs: string[]

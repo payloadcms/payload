@@ -13,27 +13,20 @@ import { revalidatePage } from './hooks/revalidatePage'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
+  access: {
+    create: admins,
+    delete: admins,
+    read: adminsOrPublished,
+    update: admins,
+  },
   admin: {
-    useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
-    preview: doc => {
+    preview: (doc) => {
       return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/next/preview?url=${encodeURIComponent(
         `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/${doc.slug !== 'home' ? doc.slug : ''}`,
       )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
     },
-  },
-  hooks: {
-    afterChange: [revalidatePage],
-    afterRead: [populateArchiveBlock],
-  },
-  versions: {
-    drafts: true,
-  },
-  access: {
-    read: adminsOrPublished,
-    update: admins,
-    create: admins,
-    delete: admins,
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -45,10 +38,10 @@ export const Pages: CollectionConfig = {
       name: 'publishedOn',
       type: 'date',
       admin: {
-        position: 'sidebar',
         date: {
           pickerAppearance: 'dayAndTime',
         },
+        position: 'sidebar',
       },
       hooks: {
         beforeChange: [
@@ -65,22 +58,29 @@ export const Pages: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Hero',
           fields: [hero],
+          label: 'Hero',
         },
         {
-          label: 'Content',
           fields: [
             {
               name: 'layout',
               type: 'blocks',
-              required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive],
+              required: true,
             },
           ],
+          label: 'Content',
         },
       ],
     },
     slugField(),
   ],
+  hooks: {
+    afterChange: [revalidatePage],
+    afterRead: [populateArchiveBlock],
+  },
+  versions: {
+    drafts: true,
+  },
 }

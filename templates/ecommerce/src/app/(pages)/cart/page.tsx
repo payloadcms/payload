@@ -1,8 +1,10 @@
-import React, { Fragment } from 'react'
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 
-import { Page, Settings } from '../../../payload/payload-types'
+import { notFound } from 'next/navigation'
+import React, { Fragment } from 'react'
+
+import type { Page, Settings } from '../../../payload/payload-types'
+
 import { staticCart } from '../../../payload/seed/cart-static'
 import { fetchDoc } from '../../_api/fetchDoc'
 import { fetchSettings } from '../../_api/fetchGlobals'
@@ -12,7 +14,6 @@ import { Hero } from '../../_components/Hero'
 import { Message } from '../../_components/Message'
 import { generateMeta } from '../../_utilities/generateMeta'
 import { CartPage } from './CartPage'
-
 import classes from './index.module.scss'
 
 // Force this page to be dynamic so that Next.js does not cache it
@@ -24,8 +25,8 @@ export default async function Cart() {
 
   try {
     page = await fetchDoc<Page>({
-      collection: 'pages',
       slug: 'cart',
+      collection: 'pages',
     })
   } catch (error) {
     // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
@@ -67,18 +68,18 @@ export default async function Cart() {
                 {'To enable checkout, you must '}
                 <a
                   href="https://dashboard.stripe.com/test/apikeys"
-                  target="_blank"
                   rel="noopener noreferrer"
+                  target="_blank"
                 >
-                  {'obtain your Stripe API Keys'}
+                  obtain your Stripe API Keys
                 </a>
                 {' then set them as environment variables. See the '}
                 <a
                   href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
-                  target="_blank"
                   rel="noopener noreferrer"
+                  target="_blank"
                 >
-                  {'README'}
+                  README
                 </a>
                 {' for more details.'}
               </Fragment>
@@ -88,7 +89,7 @@ export default async function Cart() {
       )}
       <Hero {...page?.hero} />
       <Gutter>
-        <CartPage settings={settings} page={page} />
+        <CartPage page={page} settings={settings} />
       </Gutter>
       <Blocks blocks={page?.layout} />
     </Fragment>
@@ -100,8 +101,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   try {
     page = await fetchDoc<Page>({
-      collection: 'pages',
       slug: 'cart',
+      collection: 'pages',
     })
   } catch (error) {
     // don't throw an error if the fetch fails

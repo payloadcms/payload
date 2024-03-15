@@ -5,7 +5,7 @@ import type { Props } from './types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import LabelComp from '../../Label/index.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { UploadInput } from './Input.js'
 import './index.scss'
 
@@ -15,7 +15,6 @@ const Upload: React.FC<Props> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
-    filterOptions,
     label,
     path: pathFromProps,
     readOnly,
@@ -45,7 +44,7 @@ const Upload: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { path, setValue, showError, value } = useField<string>({
+  const { filterOptions, path, setValue, showError, value } = useField<string>({
     path: pathFromProps,
     validate: memoizedValidate,
   })

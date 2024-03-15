@@ -23,8 +23,6 @@ export default buildConfig({
   }),
   // ...rest of config
 })
-
 ```
 
 More detailed usage can be found in the [Payload Docs](https://payloadcms.com/docs/configuration/overview).
-

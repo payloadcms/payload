@@ -17,7 +17,7 @@ export const startSentry = (pluginOptions: PluginOptions, payload: Payload): voi
   try {
     Sentry.init({
       ...options?.init,
-      dsn: dsn,
+      dsn,
       integrations: [
         ...(options?.init?.integrations || []),
         new Sentry.Integrations.Http({ tracing: true }),

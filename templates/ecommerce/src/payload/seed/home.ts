@@ -1,71 +1,20 @@
 import type { Page } from '../payload-types'
 
 export const home: Partial<Page> = {
-  title: 'Home',
   slug: 'home',
   _status: 'published',
-  meta: {
-    title: 'Payload E-Commerce Template',
-    description: 'An open-source e-commerce store built with Payload and Next.js.',
-    image: '{{PRODUCT1_IMAGE}}',
-  },
   hero: {
     type: 'highImpact',
-    richText: [
-      {
-        children: [
-          {
-            text: 'Payload E-Commerce Store',
-          },
-        ],
-        type: 'h1',
-      },
-      {
-        children: [
-          {
-            text: 'Welcome to your store! ',
-          },
-          {
-            type: 'link',
-            linkType: 'custom',
-            url: '/admin',
-            children: [
-              {
-                text: 'Visit the admin dashboard',
-              },
-            ],
-          },
-          {
-            text: " to begin managing this site's content. The code for this template is completely open-source and can be found ",
-          },
-          {
-            type: 'link',
-            linkType: 'custom',
-            url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
-            newTab: true,
-            children: [
-              {
-                text: 'here',
-              },
-            ],
-          },
-          {
-            text: '.',
-          },
-        ],
-        type: 'large-body',
-      },
-    ],
     links: [
       {
         link: {
           type: 'reference',
           appearance: 'primary',
+          label: 'Shop now',
           reference: {
             relationTo: 'pages',
             value: '{{PRODUCTS_PAGE_ID}}',
           },
-          label: 'Shop now',
           url: '',
         },
       },
@@ -73,14 +22,59 @@ export const home: Partial<Page> = {
         link: {
           type: 'custom',
           appearance: 'secondary',
-          reference: null,
           label: 'View on GitHub',
-          url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
           newTab: true,
+          reference: null,
+          url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
         },
       },
     ],
     media: '{{PRODUCT1_IMAGE}}',
+    richText: [
+      {
+        type: 'h1',
+        children: [
+          {
+            text: 'Payload E-Commerce Store',
+          },
+        ],
+      },
+      {
+        type: 'large-body',
+        children: [
+          {
+            text: 'Welcome to your store! ',
+          },
+          {
+            type: 'link',
+            children: [
+              {
+                text: 'Visit the admin dashboard',
+              },
+            ],
+            linkType: 'custom',
+            url: '/admin',
+          },
+          {
+            text: " to begin managing this site's content. The code for this template is completely open-source and can be found ",
+          },
+          {
+            type: 'link',
+            children: [
+              {
+                text: 'here',
+              },
+            ],
+            linkType: 'custom',
+            newTab: true,
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
+          },
+          {
+            text: '.',
+          },
+        ],
+      },
+    ],
   },
   layout: [
     {
@@ -88,15 +82,14 @@ export const home: Partial<Page> = {
       blockType: 'content',
       columns: [
         {
-          size: 'full',
           richText: [
             {
+              type: 'h2',
               children: [
                 {
                   text: 'Core Features',
                 },
               ],
-              type: 'h2',
             },
             {
               children: [
@@ -106,17 +99,23 @@ export const home: Partial<Page> = {
               ],
             },
           ],
+          size: 'full',
         },
         {
-          size: 'oneThird',
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
+              type: 'h3',
               children: [
                 {
                   text: 'Admin Dashboard',
                 },
               ],
-              type: 'h3',
             },
             {
               children: [
@@ -125,13 +124,13 @@ export const home: Partial<Page> = {
                 },
                 {
                   type: 'link',
-                  linkType: 'custom',
-                  url: '/admin',
                   children: [
                     {
                       text: 'admin dashboard',
                     },
                   ],
+                  linkType: 'custom',
+                  url: '/admin',
                 },
                 {
                   text: '.',
@@ -139,23 +138,23 @@ export const home: Partial<Page> = {
               ],
             },
           ],
-          enableLink: false,
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'oneThird',
         },
         {
-          size: 'oneThird',
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
+              type: 'h3',
               children: [
                 {
                   text: 'Authentication',
                 },
               ],
-              type: 'h3',
             },
             {
               children: [
@@ -164,26 +163,26 @@ export const home: Partial<Page> = {
                 },
                 {
                   type: 'link',
-                  linkType: 'custom',
-                  url: '/login',
                   children: [
                     {
                       text: 'login',
                     },
                   ],
+                  linkType: 'custom',
+                  url: '/login',
                 },
                 {
                   text: ' and ',
                 },
                 {
                   type: 'link',
-                  linkType: 'custom',
-                  url: '/create-account',
                   children: [
                     {
                       text: 'create account',
                     },
                   ],
+                  linkType: 'custom',
+                  url: '/create-account',
                 },
                 {
                   text: ' flows are complete with email verification and password reset.',
@@ -191,23 +190,23 @@ export const home: Partial<Page> = {
               ],
             },
           ],
-          enableLink: false,
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'oneThird',
         },
         {
-          size: 'oneThird',
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
+              type: 'h3',
               children: [
                 {
                   text: 'Customer Accounts',
                 },
               ],
-              type: 'h3',
             },
             {
               children: [
@@ -216,26 +215,26 @@ export const home: Partial<Page> = {
                 },
                 {
                   type: 'link',
-                  linkType: 'custom',
-                  url: '/account',
                   children: [
                     {
                       text: 'manage their account',
                     },
                   ],
+                  linkType: 'custom',
+                  url: '/account',
                 },
                 {
                   text: ', ',
                 },
                 {
                   type: 'link',
-                  linkType: 'custom',
-                  url: '/orders',
                   children: [
                     {
                       text: 'view their order history',
                     },
                   ],
+                  linkType: 'custom',
+                  url: '/orders',
                 },
                 {
                   text: ', and more without leaving the site.',
@@ -243,24 +242,24 @@ export const home: Partial<Page> = {
               ],
             },
           ],
-          enableLink: false,
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'oneThird',
         },
 
         {
-          size: 'oneThird',
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
+              type: 'h3',
               children: [
                 {
                   text: 'Paywall',
                 },
               ],
-              type: 'h3',
             },
             {
               children: [
@@ -270,23 +269,23 @@ export const home: Partial<Page> = {
               ],
             },
           ],
-          enableLink: false,
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'oneThird',
         },
         {
-          size: 'oneThird',
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
+              type: 'h3',
               children: [
                 {
                   text: 'Shopping Cart',
                 },
               ],
-              type: 'h3',
             },
             {
               children: [
@@ -296,23 +295,23 @@ export const home: Partial<Page> = {
               ],
             },
           ],
-          enableLink: false,
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'oneThird',
         },
         {
-          size: 'oneThird',
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
+              type: 'h3',
               children: [
                 {
                   text: 'Checkout',
                 },
               ],
-              type: 'h3',
             },
             {
               children: [
@@ -322,23 +321,23 @@ export const home: Partial<Page> = {
               ],
             },
           ],
-          enableLink: false,
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'oneThird',
         },
         {
-          size: 'oneThird',
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
+              type: 'h3',
               children: [
                 {
                   text: 'Page Builder',
                 },
               ],
-              type: 'h3',
             },
             {
               children: [
@@ -348,23 +347,23 @@ export const home: Partial<Page> = {
               ],
             },
           ],
-          enableLink: false,
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'oneThird',
         },
         {
-          size: 'oneThird',
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
+              type: 'h3',
               children: [
                 {
                   text: 'SEO',
                 },
               ],
-              type: 'h3',
             },
             {
               children: [
@@ -373,13 +372,13 @@ export const home: Partial<Page> = {
                 },
                 {
                   type: 'link',
-                  linkType: 'custom',
-                  url: '/admin',
                   children: [
                     {
                       text: 'admin dashboard',
                     },
                   ],
+                  linkType: 'custom',
+                  url: '/admin',
                 },
                 {
                   text: '.',
@@ -387,23 +386,23 @@ export const home: Partial<Page> = {
               ],
             },
           ],
-          enableLink: false,
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'oneThird',
         },
         {
-          size: 'oneThird',
+          enableLink: false,
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
+              type: 'h3',
               children: [
                 {
                   text: 'Dark Mode',
                 },
               ],
-              type: 'h3',
             },
             {
               children: [
@@ -413,24 +412,20 @@ export const home: Partial<Page> = {
               ],
             },
           ],
-          enableLink: false,
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'oneThird',
         },
       ],
     },
     {
-      blockType: 'mediaBlock',
       blockName: 'Media Block',
-      position: 'default',
+      blockType: 'mediaBlock',
       media: '{{PRODUCT2_IMAGE}}',
+      position: 'default',
     },
     {
       blockName: 'Archive Block',
       blockType: 'archive',
+      categories: [],
       introContent: [
         {
           type: 'h4',
@@ -451,19 +446,32 @@ export const home: Partial<Page> = {
       ],
       populateBy: 'collection',
       relationTo: 'products',
-      categories: [],
     },
     {
-      blockType: 'cta',
       blockName: 'CTA',
+      blockType: 'cta',
+      links: [
+        {
+          link: {
+            type: 'reference',
+            appearance: 'primary',
+            label: 'Shop now',
+            reference: {
+              relationTo: 'pages',
+              value: '{{PRODUCTS_PAGE_ID}}',
+            },
+            url: '',
+          },
+        },
+      ],
       richText: [
         {
+          type: 'h4',
           children: [
             {
               text: 'Shop now',
             },
           ],
-          type: 'h4',
         },
         {
           children: [
@@ -472,13 +480,13 @@ export const home: Partial<Page> = {
             },
             {
               type: 'link',
-              linkType: 'custom',
-              url: '/admin',
               children: [
                 {
                   text: 'configured in the admin dashboard',
                 },
               ],
+              linkType: 'custom',
+              url: '/admin',
             },
             {
               text: '.',
@@ -486,20 +494,12 @@ export const home: Partial<Page> = {
           ],
         },
       ],
-      links: [
-        {
-          link: {
-            type: 'reference',
-            url: '',
-            label: 'Shop now',
-            appearance: 'primary',
-            reference: {
-              value: '{{PRODUCTS_PAGE_ID}}',
-              relationTo: 'pages',
-            },
-          },
-        },
-      ],
     },
   ],
+  meta: {
+    description: 'An open-source e-commerce store built with Payload and Next.js.',
+    image: '{{PRODUCT1_IMAGE}}',
+    title: 'Payload E-Commerce Template',
+  },
+  title: 'Home',
 }

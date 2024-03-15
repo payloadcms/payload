@@ -1,10 +1,9 @@
-import React from 'react'
 import Link from 'next/link'
+import React from 'react'
 
 import { fetchFooter } from '../../_api/fetchFooter'
 import { Gutter } from '../Gutter'
 import { CMSLink } from '../Link'
-
 import classes from './index.module.scss'
 
 export async function Footer() {
@@ -18,8 +17,8 @@ export async function Footer() {
         <Link href="/">
           <picture>
             <img
-              className={classes.logo}
               alt="Payload Logo"
+              className={classes.logo}
               src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
             />
           </picture>

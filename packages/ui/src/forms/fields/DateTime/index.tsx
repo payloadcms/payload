@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 'use client'
 import type { ClientValidate } from 'payload/types'
 
@@ -8,7 +9,7 @@ import type { Props } from './types.js'
 
 import { DatePickerField } from '../../../elements/DatePicker/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 

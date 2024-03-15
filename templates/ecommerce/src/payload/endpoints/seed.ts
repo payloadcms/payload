@@ -3,7 +3,7 @@ import type { PayloadHandler } from 'payload/config'
 import { seed as seedScript } from '../seed'
 
 export const seed: PayloadHandler = async (req, res): Promise<void> => {
-  const { user, payload } = req
+  const { payload, user } = req
 
   if (!user) {
     res.status(401).json({ error: 'Unauthorized' })

@@ -1,22 +1,22 @@
 import React from 'react'
 
-import { Post } from '../../../payload-types'
+import type { Post } from '../../../payload-types'
+
 import { Card } from '../../_components/Card'
 import { Gutter } from '../../_components/Gutter'
 import RichText from '../../_components/RichText'
-
 import classes from './index.module.scss'
 
 export type RelatedPostsProps = {
-  blockType: 'relatedPosts'
   blockName: string
+  blockType: 'relatedPosts'
+  docs?: (Post | string)[] | null
   introContent?: any
-  docs?: (string | Post)[] | null
   relationTo: 'posts'
 }
 
 export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
-  const { introContent, docs, relationTo } = props
+  const { docs, introContent, relationTo } = props
 
   return (
     <div className={classes.relatedPosts}>
@@ -32,7 +32,6 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
 
             return (
               <div
-                key={index}
                 className={[
                   classes.column,
                   docs.length === 2 && classes['cols-half'],
@@ -40,8 +39,9 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
                 ]
                   .filter(Boolean)
                   .join(' ')}
+                key={index}
               >
-                <Card relationTo={relationTo} doc={doc} showCategories />
+                <Card doc={doc} relationTo={relationTo} showCategories />
               </div>
             )
           })}

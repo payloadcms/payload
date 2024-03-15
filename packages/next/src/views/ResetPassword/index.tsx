@@ -1,3 +1,5 @@
+import type { AdminViewProps } from 'payload/types'
+
 import {
   Button,
   ConfirmPassword,
@@ -10,8 +12,6 @@ import {
 } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
-
-import type { AdminViewProps } from 'payload/types'
 
 import './index.scss'
 

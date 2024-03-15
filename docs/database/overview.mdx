@@ -42,15 +42,15 @@ You should prefer a relational DB like Postgres if:
 
 #### Differences in Payload features
 
-It's important to note that almost everything Payload does is available in all of our officially supported database adapters, including localization, arrays, blocks, etc. 
+It's important to note that almost everything Payload does is available in all of our officially supported database adapters, including localization, arrays, blocks, etc.
 
-The only thing that is not supported in Postgres yet is the [Point field](/docs/fields/point), but that should be added soon. 
+The only thing that is not supported in Postgres yet is the [Point field](/docs/fields/point), but that should be added soon.
 
 It's up to you to choose which database you would like to use.
 
 ## Configuration
 
-To configure the database for your Payload application, an adapter can be assigned to `config.db`. This property is required within your Payload config. 
+To configure the database for your Payload application, an adapter can be assigned to `config.db`. This property is required within your Payload config.
 
 Here's an example:
 
@@ -67,7 +67,7 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI,
-    }
+    },
   }),
 })
 ```

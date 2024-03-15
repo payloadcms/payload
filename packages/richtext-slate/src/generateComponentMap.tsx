@@ -78,7 +78,6 @@ export const getGenerateComponentMap =
             const mappedFields = mapFields({
               config,
               fieldSchema: linkFields,
-              permissions: {},
               readOnly: false,
             })
 
@@ -109,7 +108,6 @@ export const getGenerateComponentMap =
                 const mappedFields = mapFields({
                   config,
                   fieldSchema: uploadFields,
-                  permissions: {},
                   readOnly: false,
                 })
 

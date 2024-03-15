@@ -3,23 +3,22 @@ import React from 'react'
 
 import type { Props } from './types.js'
 
-import getDataByPath from '../Form/getDataByPath.js'
-import getSiblingData from '../Form/getSiblingData.js'
-import { isComponent } from './types.js'
+import { RowLabelProvider } from '../RowLabel/Context/index.js'
 
 const baseClass = 'row-label'
 
 export const RowLabel: React.FC<Props> = (props) => {
-  const { className, data: dataFromProps, i18n, label, path, rowNumber } = props
+  const { RowLabelComponent, className, i18n, path, rowLabel, rowNumber } = props
 
-  const collapsibleData = getSiblingData(dataFromProps, path)
-  const arrayData = getDataByPath(dataFromProps, path)
-  const data = arrayData || collapsibleData
-
-  if (isComponent(label)) {
-    const Label = label
-    return <Label data={data} index={rowNumber} path={path} />
+  if (RowLabelComponent) {
+    return (
+      <RowLabelProvider path={path} rowNumber={rowNumber}>
+        {RowLabelComponent}
+      </RowLabelProvider>
+    )
   }
+
+  const label = typeof rowLabel === 'object' ? getTranslation(rowLabel, i18n) : rowLabel
 
   return (
     <span
@@ -28,13 +27,7 @@ export const RowLabel: React.FC<Props> = (props) => {
         pointerEvents: 'none',
       }}
     >
-      {typeof label === 'function'
-        ? label({
-            data,
-            index: rowNumber,
-            path,
-          })
-        : getTranslation(label, i18n)}
+      {label}
     </span>
   )
 }

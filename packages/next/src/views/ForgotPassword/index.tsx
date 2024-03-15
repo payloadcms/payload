@@ -1,8 +1,8 @@
+import type { AdminViewProps } from 'payload/types'
+
 import { Button, Email, Form, FormSubmit, Translation } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
-
-import type { AdminViewProps } from 'payload/types'
 
 export { generateForgotPasswordMetadata } from './meta.js'
 
@@ -70,6 +70,13 @@ export const ForgotPassword: React.FC<AdminViewProps> = ({ initPageResult }) => 
       <Form
         action={`${serverURL}${api}/${userSlug}/forgot-password`}
         // handleResponse={handleResponse}
+        initialState={{
+          email: {
+            initialValue: '',
+            valid: false,
+            value: undefined,
+          },
+        }}
         method="POST"
       >
         <h1>{i18n.t('authentication:forgotPassword')}</h1>

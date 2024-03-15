@@ -1,5 +1,6 @@
 import type { Block, Field } from '../../../../packages/payload/src/fields/config/types.js'
 
+import { slateEditor } from '../../../../packages/richtext-slate/src/index.js'
 import { invertBackground } from '../../fields/invertBackground.js'
 import link from '../../fields/link.js'
 
@@ -31,6 +32,7 @@ const columnFields: Field[] = [
     name: 'richText',
     label: 'Rich Text',
     type: 'richText',
+    editor: slateEditor({}),
   },
   {
     name: 'enableLink',

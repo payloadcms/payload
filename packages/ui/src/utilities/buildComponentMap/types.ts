@@ -1,4 +1,3 @@
-import type { FieldPermissions } from 'payload/auth'
 import type {
   BlockField,
   FieldBase,
@@ -35,13 +34,13 @@ export type MappedField = {
    * On `block` fields only
    */
   blocks?: ReducedBlock[]
+  disabled?: boolean
   /**
    * On `richText` fields only
    */
   editor?: RichTextField['editor']
   fieldIsPresentational: boolean
   fieldMap?: FieldMap
-  fieldPermissions: FieldPermissions
   hasMany?: boolean
   isFieldAffectingData: boolean
   isSidebar: boolean

@@ -1,10 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/nodemon.json",
-  "watch": ["server.ts"],
   "exec": "ts-node --project tsconfig.server.json src/server.ts -- -I",
   "ext": "js ts",
-    "ignore" : [
-    "src/app"
-  ],
-  "stdin": false
+  "ignore": ["src/app"],
+  "stdin": false,
+  "watch": ["server.ts"]
 }

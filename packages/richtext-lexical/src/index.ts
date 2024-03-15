@@ -3,12 +3,15 @@ import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 import type { RichTextAdapter } from 'payload/types'
 
+import { withMergedProps } from '@payloadcms/ui'
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'
 import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
 import type { AdapterProps } from './types.js'
 
+import { RichTextCell } from './cell/index.js'
+import { RichTextField } from './field/index.js'
 import {
   defaultEditorConfig,
   defaultEditorFeatures,
@@ -71,28 +74,14 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   }
 
   return {
-    LazyCellComponent: () =>
-      // @ts-expect-error
-      import('./cell/index.js').then((module) => {
-        const RichTextCell = module.RichTextCell
-        return import('@payloadcms/ui').then((module2) =>
-          module2.withMergedProps({
-            Component: RichTextCell,
-            toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical }, // lexicalEditorConfig is serializable
-          }),
-        )
-      }),
-
-    LazyFieldComponent: () =>
-      import('./field/index.js').then((module) => {
-        const RichTextField = module.RichTextField
-        return import('@payloadcms/ui').then((module2) =>
-          module2.withMergedProps({
-            Component: RichTextField,
-            toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical }, // lexicalEditorConfig is serializable
-          }),
-        )
-      }),
+    CellComponent: withMergedProps({
+      Component: RichTextCell,
+      toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
+    }),
+    FieldComponent: withMergedProps({
+      Component: RichTextField,
+      toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
+    }),
     afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
       return new Promise<void>((resolve, reject) => {
         const promises: Promise<void>[] = []

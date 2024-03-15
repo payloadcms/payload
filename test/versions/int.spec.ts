@@ -55,6 +55,12 @@ describe('Versions', () => {
     token = data.loginUser.token
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
 

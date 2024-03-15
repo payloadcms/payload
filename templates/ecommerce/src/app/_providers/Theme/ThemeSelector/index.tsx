@@ -2,12 +2,13 @@
 
 import React from 'react'
 
-import { Chevron } from '../../../_components/Chevron'
-import { useTheme } from '..'
-import { getImplicitPreference } from '../shared'
-import { Theme, themeLocalStorageKey } from './types'
+import type { Theme } from './types'
 
+import { useTheme } from '..'
+import { Chevron } from '../../../_components/Chevron'
+import { getImplicitPreference } from '../shared'
 import classes from './index.module.scss'
+import { themeLocalStorageKey } from './types'
 
 export const ThemeSelector: React.FC = () => {
   const selectRef = React.useRef<HTMLSelectElement>(null)
@@ -35,10 +36,10 @@ export const ThemeSelector: React.FC = () => {
     <div className={[classes.selectContainer, !show && classes.hidden].filter(Boolean).join(' ')}>
       <label htmlFor="theme">
         <select
-          id="theme"
-          onChange={e => onThemeChange(e.target.value as Theme & 'auto')}
-          ref={selectRef}
           className={classes.select}
+          id="theme"
+          onChange={(e) => onThemeChange(e.target.value as Theme & 'auto')}
+          ref={selectRef}
         >
           <option value="auto">Auto</option>
           <option value="light">Light</option>

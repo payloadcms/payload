@@ -35,8 +35,8 @@ export async function createVersion<T extends TypeWithID>(
     db,
     fields: buildVersionCollectionFields(collection),
     operation: 'create',
-    tableName,
     req,
+    tableName,
   })
 
   const table = this.tables[tableName]

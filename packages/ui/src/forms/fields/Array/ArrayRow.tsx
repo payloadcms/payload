@@ -1,5 +1,5 @@
 import type { FieldPermissions } from 'payload/auth'
-import type { ArrayField, Operation, Row, RowLabel as RowLabelType } from 'payload/types'
+import type { ArrayField, Row, RowLabel as RowLabelType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -11,16 +11,16 @@ import { ArrayAction } from '../../../elements/ArrayAction/index.js'
 import { Collapsible } from '../../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { FieldPathProvider } from '../../FieldPathProvider/index.js'
 import { useFormSubmitted } from '../../Form/context.js'
-import RenderFields from '../../RenderFields/index.js'
+import { RenderFields } from '../../RenderFields/index.js'
+import { RowLabel } from '../../RowLabel/index.js'
 import HiddenInput from '../HiddenInput/index.js'
 import './index.scss'
 
 const baseClass = 'array-field'
 
 type ArrayRowProps = UseDraggableSortableReturn & {
-  CustomRowLabel?: RowLabelType
+  CustomRowLabel?: React.ReactNode
   addRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
   fieldMap: FieldMap
@@ -40,6 +40,7 @@ type ArrayRowProps = UseDraggableSortableReturn & {
 }
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
+  CustomRowLabel,
   addRow,
   attributes,
   duplicateRow,
@@ -50,6 +51,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   listeners,
   moveRow,
   path: parentPath,
+  permissions,
   readOnly,
   removeRow,
   row,
@@ -111,28 +113,29 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }}
         header={
           <div className={`${baseClass}__row-header`}>
-            {/* <RowLabel
-              label={CustomRowLabel || fallbackLabel}
+            <RowLabel
+              RowLabelComponent={CustomRowLabel}
+              i18n={i18n}
               path={path}
+              rowLabel={fallbackLabel}
               rowNumber={rowIndex + 1}
-            /> */}
+            />
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        <FieldPathProvider path={path} schemaPath={parentPath}>
-          <RenderFields
-            className={`${baseClass}__fields`}
-            fieldMap={fieldMap}
-            forceRender={forceRender}
-            // indexPath={indexPath}
-            margins="small"
-            // permissions={permissions?.fields}
-            // readOnly={readOnly}
-          />
-        </FieldPathProvider>
+        <RenderFields
+          className={`${baseClass}__fields`}
+          fieldMap={fieldMap}
+          forceRender={forceRender}
+          margins="small"
+          path={path}
+          permissions={permissions?.fields}
+          readOnly={readOnly}
+          schemaPath={parentPath}
+        />
       </Collapsible>
     </div>
   )

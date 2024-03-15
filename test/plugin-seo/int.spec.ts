@@ -9,6 +9,7 @@ import removeFiles from '../helpers/removeFiles.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
 import { mediaSlug } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -46,6 +47,12 @@ describe('@payloadcms/plugin-seo', () => {
       },
       depth: 0,
     })
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   it('should add meta title', async () => {

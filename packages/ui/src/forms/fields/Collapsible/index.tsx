@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 'use client'
 import type { DocumentPreferences } from 'payload/types'
 
@@ -10,9 +11,9 @@ import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../../providers/Preferences/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { useFieldPath } from '../../FieldPathProvider/index.js'
+import { useFieldProps } from '../../FieldPropsProvider/index.js'
 import LabelComp from '../../Label/index.js'
-import RenderFields from '../../RenderFields/index.js'
+import { RenderFields } from '../../RenderFields/index.js'
 import { WatchChildErrors } from '../../WatchChildErrors/index.js'
 import { withCondition } from '../../withCondition/index.js'
 import { fieldBaseClass } from '../shared.js'
@@ -23,20 +24,17 @@ const baseClass = 'collapsible-field'
 const CollapsibleField: React.FC<Props> = (props) => {
   const {
     Description,
-    Error,
     Label: LabelFromProps,
     className,
     fieldMap,
     label,
     path: pathFromProps,
-    permissions,
-    readOnly,
     required,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
-  const { path: pathFromContext } = useFieldPath()
+  const { path: pathFromContext, readOnly, schemaPath, siblingPermissions } = useFieldProps()
   const path = pathFromProps || pathFromContext
 
   const { i18n } = useTranslation()
@@ -52,7 +50,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     async (newCollapsedState: boolean) => {
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
-      setPreference(preferencesKey, {
+      void setPreference(preferencesKey, {
         ...existingPreferences,
         ...(path
           ? {
@@ -91,7 +89,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
       }
     }
 
-    fetchInitialState()
+    void fetchInitialState()
   }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
 
   if (typeof collapsedOnMount !== 'boolean') return null
@@ -125,10 +123,11 @@ const CollapsibleField: React.FC<Props> = (props) => {
           <RenderFields
             fieldMap={fieldMap}
             forceRender
-            // indexPath={path}
             margins="small"
-            // permissions={permissions}
-            // readOnly={readOnly}
+            path={path}
+            permissions={siblingPermissions}
+            readOnly={readOnly}
+            schemaPath={schemaPath}
           />
         </Collapsible>
         {Description}

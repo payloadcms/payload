@@ -59,6 +59,12 @@ describe('Fields', () => {
     })
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
     await restClient.login({

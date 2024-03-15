@@ -12,6 +12,12 @@ describe('Collections - Plugins', () => {
     payload = await getPayload({ config })
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   it('created pages collection', async () => {
     const { id } = await payload.create({
       collection: pagesSlug,

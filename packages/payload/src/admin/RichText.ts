@@ -77,20 +77,7 @@ export type RichTextAdapter<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
-> = RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties> &
-  (
-    | {
-        CellComponent: React.FC<
-          CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>
-        >
-        FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
-      }
-    | {
-        LazyCellComponent: () => Promise<
-          React.FC<CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>>
-        >
-        LazyFieldComponent: () => Promise<
-          React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
-        >
-      }
-  )
+> = RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties> & {
+  CellComponent: React.FC<any>
+  FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+}

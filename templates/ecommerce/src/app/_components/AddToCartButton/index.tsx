@@ -1,23 +1,24 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 
-import { Product } from '../../../payload/payload-types'
+import type { Product } from '../../../payload/payload-types'
+import type { Props } from '../Button'
+
 import { useCart } from '../../_providers/Cart'
-import { Button, Props } from '../Button'
-
+import { Button } from '../Button'
 import classes from './index.module.scss'
 
 export const AddToCartButton: React.FC<{
+  appearance?: Props['appearance']
+  className?: string
   product: Product
   quantity?: number
-  className?: string
-  appearance?: Props['appearance']
-}> = props => {
-  const { product, quantity = 1, className, appearance = 'primary' } = props
+}> = (props) => {
+  const { appearance = 'primary', className, product, quantity = 1 } = props
 
-  const { cart, addItemToCart, isProductInCart, hasInitializedCart } = useCart()
+  const { addItemToCart, cart, hasInitializedCart, isProductInCart } = useCart()
 
   const [isInCart, setIsInCart] = useState<boolean>()
   const router = useRouter()
@@ -28,10 +29,6 @@ export const AddToCartButton: React.FC<{
 
   return (
     <Button
-      href={isInCart ? '/cart' : undefined}
-      type={!isInCart ? 'button' : undefined}
-      label={isInCart ? `✓ View in cart` : `Add to cart`}
-      el={isInCart ? 'link' : undefined}
       appearance={appearance}
       className={[
         className,
@@ -41,6 +38,9 @@ export const AddToCartButton: React.FC<{
       ]
         .filter(Boolean)
         .join(' ')}
+      el={isInCart ? 'link' : undefined}
+      href={isInCart ? '/cart' : undefined}
+      label={isInCart ? `✓ View in cart` : `Add to cart`}
       onClick={
         !isInCart
           ? () => {
@@ -53,6 +53,7 @@ export const AddToCartButton: React.FC<{
             }
           : undefined
       }
+      type={!isInCart ? 'button' : undefined}
     />
   )
 }

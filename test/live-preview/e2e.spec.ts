@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import type { ChildProcessWithoutNullStreams } from 'child_process'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -6,6 +7,7 @@ import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src/index.js'
 
+import wait from '../../packages/payload/src/utilities/wait.js'
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/configHelpers.js'
@@ -15,7 +17,7 @@ import { startLivePreviewDemo } from './startLivePreviewDemo.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe } = test
+const { beforeAll, describe, afterAll } = test
 
 let payload: Payload
 
@@ -23,10 +25,11 @@ describe('Live Preview', () => {
   let page: Page
   let serverURL: string
   let url: AdminUrlUtil
+  let nextProcess: ChildProcessWithoutNullStreams
 
   const goToDoc = async (page: Page) => {
     await page.goto(url.list)
-    const linkToDoc = page.locator('tbody tr:first-child .cell-id a').first()
+    const linkToDoc = page.locator('tbody tr:first-child .cell-slug a').first()
     expect(linkToDoc).toBeTruthy()
     await linkToDoc.click()
   }
@@ -48,15 +51,22 @@ describe('Live Preview', () => {
     const context = await browser.newContext()
     page = await context.newPage()
 
-    await startLivePreviewDemo({
+    nextProcess = await startLivePreviewDemo({
       payload,
     })
 
     initPageConsoleErrorCatch(page)
   })
 
+  afterAll(({ browser }) => {
+    if (nextProcess) {
+      nextProcess.kill(9)
+    }
+  })
+
   test('collection - has tab', async () => {
     await goToDoc(page)
+    await wait(500)
     const docURL = page.url()
     const pathname = new URL(docURL).pathname
 

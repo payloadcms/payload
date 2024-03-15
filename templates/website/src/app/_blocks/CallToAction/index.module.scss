@@ -10,7 +10,7 @@ $spacer-h: calc(var(--block-padding) / 2);
   color: var(--theme-elevation-1000);
 }
 
-:global([data-theme="dark"]) {
+:global([data-theme='dark']) {
   .callToAction {
     background-color: var(--theme-elevation-0);
     color: var(--theme-elevation-1000);
@@ -22,7 +22,7 @@ $spacer-h: calc(var(--block-padding) / 2);
   color: var(--theme-elevation-0);
 }
 
-:global([data-theme="dark"]) {
+:global([data-theme='dark']) {
   .invert {
     background-color: var(--theme-elevation-900);
     color: var(--theme-elevation-0);

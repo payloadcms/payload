@@ -1,6 +1,5 @@
 'use client'
 import {
-  FieldPathProvider,
   Form,
   type FormProps,
   getFormState,
@@ -124,25 +123,23 @@ export const BlockComponent: React.FC<Props> = (props) => {
     return (
       reducedBlock &&
       initialState !== false && (
-        <FieldPathProvider path="" schemaPath="">
-          <Form
-            // @ts-expect-error // TODO: Fix this type. Is this correct?
-            fields={fieldMap}
-            initialState={initialState}
-            onChange={[onChange]}
-            submitted={submitted}
-            uuid={uuid()}
-          >
-            <BlockContent
-              baseClass={baseClass}
-              field={parentLexicalRichTextField}
-              formData={formData}
-              formSchema={Array.isArray(fieldMap) ? fieldMap : []}
-              nodeKey={nodeKey}
-              reducedBlock={reducedBlock}
-            />
-          </Form>
-        </FieldPathProvider>
+        <Form
+          // @ts-expect-error // TODO: Fix this type. Is this correct?
+          fields={fieldMap}
+          initialState={initialState}
+          onChange={[onChange]}
+          submitted={submitted}
+          uuid={uuid()}
+        >
+          <BlockContent
+            baseClass={baseClass}
+            field={parentLexicalRichTextField}
+            formData={formData}
+            formSchema={Array.isArray(fieldMap) ? fieldMap : []}
+            nodeKey={nodeKey}
+            reducedBlock={reducedBlock}
+          />
+        </Form>
       )
     )
   }, [

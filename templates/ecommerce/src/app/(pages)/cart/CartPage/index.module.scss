@@ -31,7 +31,7 @@
   color: var(--theme-warning-500);
 }
 
-:global([data-theme="light"]) {
+:global([data-theme='light']) {
   .warning {
     color: var(--theme-error-500);
   }
@@ -91,7 +91,7 @@
   padding: calc(var(--base) * 0.25) calc(var(--base) * 0.25);
 }
 
-:global([data-theme="dark"]) {
+:global([data-theme='dark']) {
   .quantity {
     background-color: var(--theme-elevation-150);
   }

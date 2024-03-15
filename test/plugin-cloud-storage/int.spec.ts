@@ -9,6 +9,7 @@ import { getPayload } from '../../packages/payload/src/index.js'
 import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -19,6 +20,13 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
   })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   const TEST_BUCKET = 'payload-bucket'
 
   let client: AWS.S3Client

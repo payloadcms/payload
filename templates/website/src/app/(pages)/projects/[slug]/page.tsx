@@ -1,9 +1,11 @@
-import React from 'react'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import React from 'react'
 
-import { Project } from '../../../../payload/payload-types'
+import type { Project } from '../../../../payload/payload-types'
+
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
 import { RelatedPosts } from '../../../_blocks/RelatedPosts'
@@ -22,8 +24,8 @@ export default async function Project({ params: { slug } }) {
 
   try {
     project = await fetchDoc<Project>({
-      collection: 'projects',
       slug,
+      collection: 'projects',
       draft: isDraftMode,
     })
   } catch (error) {
@@ -43,9 +45,9 @@ export default async function Project({ params: { slug } }) {
         blocks={[
           ...layout,
           {
-            blockType: 'relatedPosts',
             blockName: 'Related Projects',
-            relationTo: 'projects',
+            blockType: 'relatedPosts',
+            docs: relatedProjects,
             introContent: [
               {
                 type: 'h4',
@@ -63,12 +65,12 @@ export default async function Project({ params: { slug } }) {
                   },
                   {
                     type: 'link',
-                    url: `/admin/collections/projects/${project.id}`,
                     children: [
                       {
                         text: 'navigate to the admin dashboard',
                       },
                     ],
+                    url: `/admin/collections/projects/${project.id}`,
                   },
                   {
                     text: '.',
@@ -76,7 +78,7 @@ export default async function Project({ params: { slug } }) {
                 ],
               },
             ],
-            docs: relatedProjects,
+            relationTo: 'projects',
           },
         ]}
       />
@@ -100,8 +102,8 @@ export async function generateMetadata({ params: { slug } }): Promise<Metadata> 
 
   try {
     project = await fetchDoc<Project>({
-      collection: 'projects',
       slug,
+      collection: 'projects',
       draft: isDraftMode,
     })
   } catch (error) {}

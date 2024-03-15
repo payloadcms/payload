@@ -1,35 +1,34 @@
 import type { Post } from '../payload-types'
 export const post1: Partial<Post> = {
-  title: 'Post 1',
   slug: 'post-1',
   _status: 'published',
-  meta: {
-    title: 'Post 1',
-    description: 'This is the first post.',
-    image: '{{IMAGE}}',
-  },
   authors: ['{{AUTHOR}}'],
+  enablePremiumContent: true,
   hero: {
     type: 'lowImpact',
     links: null,
+    media: null,
     richText: [
       {
+        type: 'h1',
         children: [
           {
             text: 'Post 1',
           },
         ],
-        type: 'h1',
       },
     ],
-    media: null,
   },
   layout: [
     {
       blockType: 'content',
       columns: [
         {
-          size: 'twoThirds',
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
               children: [
@@ -39,28 +38,32 @@ export const post1: Partial<Post> = {
               ],
             },
           ],
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'twoThirds',
         },
       ],
     },
   ],
-  enablePremiumContent: true,
+  meta: {
+    description: 'This is the first post.',
+    image: '{{IMAGE}}',
+    title: 'Post 1',
+  },
   premiumContent: [
     {
       blockType: 'content',
       columns: [
         {
-          size: 'twoThirds',
+          link: {
+            label: '',
+            reference: null,
+            url: '',
+          },
           richText: [
             {
               children: [
                 {
-                  text: 'This is premium content.',
                   bold: true,
+                  text: 'This is premium content.',
                 },
                 {
                   text: ' It is only available to authenticated users. This content can be anything from additional video, text, and content, to download links and more. These are simply layout building blocks configured in the CMS.',
@@ -68,14 +71,11 @@ export const post1: Partial<Post> = {
               ],
             },
           ],
-          link: {
-            reference: null,
-            url: '',
-            label: '',
-          },
+          size: 'twoThirds',
         },
       ],
     },
   ],
   relatedPosts: [], // this is populated by the seed script
+  title: 'Post 1',
 }

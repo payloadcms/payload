@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 'use client'
 import type { ClientValidate } from 'payload/types'
 
@@ -8,7 +9,7 @@ import type { Props } from './types.js'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import LabelComp from '../../Label/index.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { withCondition } from '../../withCondition/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'

@@ -4,13 +4,12 @@ import { translations } from '@payloadcms/translations/client'
 import { RootProvider, buildComponentMap } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
 import { headers as getHeaders } from 'next/headers.js'
+import { parseCookies } from 'payload/auth'
 import { createClientConfig } from 'payload/config'
 import { deepMerge } from 'payload/utilities'
 import React from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
-import { auth } from '../../utilities/auth.js'
-import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { DefaultEditView } from '../../views/Edit/Default/index.js'
 import { DefaultCell } from '../../views/List/Default/Cell/index.js'
@@ -34,13 +33,7 @@ export const RootLayout = async ({
   const clientConfig = await createClientConfig(config)
 
   const headers = getHeaders()
-
-  const payload = await getPayloadHMR({ config: configPromise })
-
-  const { cookies, permissions } = await auth({
-    headers,
-    payload,
-  })
+  const cookies = parseCookies(headers)
 
   const lang =
     getRequestLanguage({
@@ -63,7 +56,6 @@ export const RootLayout = async ({
     DefaultListView,
     children,
     config,
-    permissions,
   })
 
   return (

@@ -1,14 +1,8 @@
 import type { Page } from '../payload-types'
 
 export const cartPage: Partial<Page> = {
-  title: 'Cart',
   slug: 'cart',
   _status: 'published',
-  meta: {
-    title: 'Cart',
-    description:
-      'Your cart will sync to your user profile so you can continue shopping from any device.',
-  },
   hero: {
     type: 'lowImpact',
     links: [],
@@ -30,13 +24,13 @@ export const cartPage: Partial<Page> = {
           },
           {
             type: 'link',
-            linkType: 'custom',
-            url: '/admin',
             children: [
               {
                 text: 'configured in the admin dashboard',
               },
             ],
+            linkType: 'custom',
+            url: '/admin',
           },
         ],
       },
@@ -47,12 +41,11 @@ export const cartPage: Partial<Page> = {
       blockType: 'content',
       columns: [
         {
-          size: 'twoThirds',
           link: {
             type: 'reference',
-            url: '',
-            reference: null,
             label: '',
+            reference: null,
+            url: '',
           },
           richText: [
             {
@@ -63,18 +56,35 @@ export const cartPage: Partial<Page> = {
               ],
             },
           ],
+          size: 'twoThirds',
         },
       ],
     },
     {
+      blockName: 'CTA',
+      blockType: 'cta',
+      links: [
+        {
+          link: {
+            type: 'reference',
+            appearance: 'primary',
+            label: 'Continue shopping',
+            reference: {
+              relationTo: 'pages',
+              value: '{{PRODUCTS_PAGE_ID}}',
+            },
+            url: '',
+          },
+        },
+      ],
       richText: [
         {
+          type: 'h4',
           children: [
             {
               text: 'Continue shopping',
             },
           ],
-          type: 'h4',
         },
         {
           children: [
@@ -83,13 +93,13 @@ export const cartPage: Partial<Page> = {
             },
             {
               type: 'link',
-              linkType: 'custom',
-              url: '/admin',
               children: [
                 {
                   text: 'configured in the admin dashboard',
                 },
               ],
+              linkType: 'custom',
+              url: '/admin',
             },
             {
               text: '.',
@@ -97,22 +107,12 @@ export const cartPage: Partial<Page> = {
           ],
         },
       ],
-      links: [
-        {
-          link: {
-            type: 'reference',
-            url: '',
-            reference: {
-              relationTo: 'pages',
-              value: '{{PRODUCTS_PAGE_ID}}',
-            },
-            label: 'Continue shopping',
-            appearance: 'primary',
-          },
-        },
-      ],
-      blockName: 'CTA',
-      blockType: 'cta',
     },
   ],
+  meta: {
+    description:
+      'Your cart will sync to your user profile so you can continue shopping from any device.',
+    title: 'Cart',
+  },
+  title: 'Cart',
 }

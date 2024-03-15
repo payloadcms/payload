@@ -83,15 +83,15 @@ There are two arguments available to custom validation functions.
 
 | Property      | Description                                                                                                              |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `data`        | An object of the full collection or global document.                                                                     |
-| `siblingData` | An object of the document data limited to fields within the same parent to the field.                                    |
-| `operation`   | Will be "create" or "update" depending on the UI action or API call.                                                     |
-| `id`          | The value of the collection `id`, will be `undefined` on create request.                                                 |
-| `t`           | The function for translating text, [more](/docs/configuration/i18n).                                                     |
-| `user`        | The currently authenticated user object.                                                                                 |
+| `data`        | An object containing the full collection or global document currently being edited                                       |
+| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field                    |
+| `operation`   | Will be `create` or `update` depending on the UI action or API call                                                      |
+| `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation                         |
+| `t`           | The function for translating text, [more](/docs/configuration/i18n)                                                      |
+| `user`        | An object containing the currently authenticated user                                                                    |
 | `payload`     | If the `validate` function is being executed on the server, Payload will be exposed for easily running local operations. |
 
-Example:
+### Example
 
 ```ts
 import { CollectionConfig } from 'payload/types'

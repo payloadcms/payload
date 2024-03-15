@@ -13,6 +13,12 @@ describe('Config', () => {
     payload = await getPayload({ config })
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   describe('payload config', () => {
     it('allows a custom field at the config root', () => {
       const { config } = payload

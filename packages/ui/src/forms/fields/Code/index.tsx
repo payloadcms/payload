@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 'use client'
 import React, { useCallback } from 'react'
 
@@ -5,7 +6,7 @@ import type { Props } from './types.js'
 
 import { CodeEditor } from '../../../elements/CodeEditor/index.js'
 import LabelComp from '../../Label/index.js'
-import useField from '../../useField/index.js'
+import { useField } from '../../useField/index.js'
 import { withCondition } from '../../withCondition/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'

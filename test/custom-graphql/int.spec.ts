@@ -1,15 +1,24 @@
+import type { Payload } from '../../packages/payload/src/index.js'
+
 import { getPayload } from '../../packages/payload/src/index.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
 
 let restClient: NextRESTClient
+let payload: Payload
 
 describe('Custom GraphQL', () => {
   beforeAll(async () => {
     const config = await startMemoryDB(configPromise)
-    const payload = await getPayload({ config })
+    payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   describe('Isolated Transaction ID', () => {

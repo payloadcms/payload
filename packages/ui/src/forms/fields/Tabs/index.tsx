@@ -11,8 +11,8 @@ import { useCollapsible } from '../../../elements/Collapsible/provider.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../../providers/Preferences/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { FieldPathProvider, useFieldPath } from '../../FieldPathProvider/index.js'
-import RenderFields from '../../RenderFields/index.js'
+import { useFieldProps } from '../../FieldPropsProvider/index.js'
+import { RenderFields } from '../../RenderFields/index.js'
 import { withCondition } from '../../withCondition/index.js'
 import { fieldBaseClass } from '../shared.js'
 import { TabComponent } from './Tab/index.js'
@@ -26,16 +26,14 @@ const TabsField: React.FC<Props> = (props) => {
     name,
     Description,
     className,
-    fieldMap,
     forceRender = false,
     indexPath,
     path: pathFromProps,
-    permissions,
     readOnly,
     tabs = [],
   } = props
 
-  const { path: pathFromContext, schemaPath } = useFieldPath()
+  const { path: pathFromContext, permissions, schemaPath } = useFieldProps()
   const path = pathFromContext || pathFromProps || name
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
@@ -131,28 +129,24 @@ const TabsField: React.FC<Props> = (props) => {
                   .join(' ')}
               >
                 {Description}
-                <FieldPathProvider
+                <RenderFields
+                  fieldMap={activeTabConfig.subfields}
+                  forceRender={forceRender}
+                  key={
+                    activeTabConfig.label
+                      ? getTranslation(activeTabConfig.label, i18n)
+                      : activeTabConfig['name']
+                  }
+                  margins="small"
                   path={`${path ? `${path}.` : ''}${activeTabConfig.name ? `${activeTabConfig.name}` : ''}`}
+                  permissions={
+                    'name' in activeTabConfig && permissions?.fields?.[activeTabConfig.name]?.fields
+                      ? permissions?.fields?.[activeTabConfig.name]?.fields
+                      : permissions?.fields
+                  }
+                  readOnly={readOnly}
                   schemaPath={`${schemaPath ? `${schemaPath}` : ''}${activeTabConfig.name ? `.${activeTabConfig.name}` : ''}`}
-                >
-                  <RenderFields
-                    fieldMap={activeTabConfig.subfields}
-                    forceRender={forceRender}
-                    // indexPath={indexPath}
-                    key={
-                      activeTabConfig.label
-                        ? getTranslation(activeTabConfig.label, i18n)
-                        : activeTabConfig['name']
-                    }
-                    margins="small"
-                    // permissions={
-                    //   'name' in activeTabConfig && permissions?.[activeTabConfig.name]
-                    //     ? permissions[activeTabConfig.name].fields
-                    //     : permissions
-                    // }
-                    // readOnly={readOnly}
-                  />
-                </FieldPathProvider>
+                />
               </div>
             </React.Fragment>
           )}

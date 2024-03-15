@@ -2,7 +2,17 @@ export * from './../types/index.js'
 export type * from '../admin/types.js'
 export type * from '../uploads/types.js'
 
-export type { DocumentPermissions } from '../auth/index.js'
+export type { DocumentPermissions, FieldPermissions } from '../auth/index.js'
+
+export type {
+  CollapsedPreferences,
+  DocumentPreferences,
+  FieldsPreferences,
+  InsideFieldsPreferences,
+  PreferenceRequest,
+  PreferenceUpdateRequest,
+  TabsPreferences,
+} from '../preferences/types.js'
 
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
@@ -117,7 +127,5 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './../globals/config/types.js'
-
-export type { DocumentPreferences } from './../preferences/types.js'
 
 export { validOperators } from './../types/constants.js'

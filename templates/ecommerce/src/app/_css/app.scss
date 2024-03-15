@@ -1,7 +1,7 @@
 @use './queries.scss' as *;
 @use './colors.scss' as *;
 @use './type.scss' as *;
-@import "./theme.scss";
+@import './theme.scss';
 
 :root {
   --base: 24px;
@@ -32,8 +32,8 @@ html {
   -webkit-font-smoothing: antialiased;
   opacity: 0;
 
-  &[data-theme=dark],
-  &[data-theme=light] {
+  &[data-theme='dark'],
+  &[data-theme='light'] {
     opacity: initial;
   }
 }
@@ -94,7 +94,7 @@ p {
   margin: var(--base) 0;
 
   @include mid-break {
-    margin: calc(var(--base) * .75) 0;
+    margin: calc(var(--base) * 0.75) 0;
   }
 }
 
@@ -108,12 +108,12 @@ a {
   color: currentColor;
 
   &:focus {
-    opacity: .8;
+    opacity: 0.8;
     outline: none;
   }
 
   &:active {
-    opacity: .7;
+    opacity: 0.7;
     outline: none;
   }
 }

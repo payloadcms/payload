@@ -1,9 +1,10 @@
-import * as React from 'react'
+import type { TextField } from 'payload/dist/fields/config/types'
+
 import { Select, useFormFields } from 'payload/components/forms'
 import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
-import { TextField } from 'payload/dist/fields/config/types'
+import * as React from 'react'
 
-export const CustomerSelect: React.FC<TextField> = props => {
+export const CustomerSelect: React.FC<TextField> = (props) => {
   const { name, label } = props
   const [options, setOptions] = React.useState<
     {
@@ -61,8 +62,8 @@ export const CustomerSelect: React.FC<TextField> = props => {
       <p style={{ marginBottom: '0' }}>{typeof label === 'string' ? label : 'Customer'}</p>
       <p
         style={{
-          marginBottom: '0.75rem',
           color: 'var(--theme-elevation-400)',
+          marginBottom: '0.75rem',
         }}
       >
         {`Select the related Stripe customer or `}
@@ -70,13 +71,13 @@ export const CustomerSelect: React.FC<TextField> = props => {
           href={`https://dashboard.stripe.com/${
             process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY ? 'test/' : ''
           }customers/create`}
-          target="_blank"
           rel="noopener noreferrer"
           style={{ color: 'var(--theme-text' }}
+          target="_blank"
         >
           create a new one
         </a>
-        {'.'}
+        .
       </p>
       <Select {...props} label="" options={options} />
       {Boolean(stripeCustomerID) && (
@@ -89,24 +90,24 @@ export const CustomerSelect: React.FC<TextField> = props => {
               }}
             >
               {`Manage "${
-                options.find(option => option.value === stripeCustomerID)?.label || 'Unknown'
+                options.find((option) => option.value === stripeCustomerID)?.label || 'Unknown'
               }" in Stripe`}
             </span>
             <CopyToClipboard value={href} />
           </div>
           <div
             style={{
+              fontWeight: '600',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              fontWeight: '600',
             }}
           >
             <a
               href={`https://dashboard.stripe.com/${
                 process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY ? 'test/' : ''
               }customers/${stripeCustomerID}`}
-              target="_blank"
               rel="noreferrer noopener"
+              target="_blank"
             >
               {href}
             </a>

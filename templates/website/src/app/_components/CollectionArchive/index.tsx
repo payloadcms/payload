@@ -1,15 +1,15 @@
 'use client'
 
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import qs from 'qs'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { Post, Project } from '../../../payload/payload-types'
 import type { ArchiveBlockProps } from '../../_blocks/ArchiveBlock/types'
+
 import { Card } from '../Card'
 import { Gutter } from '../Gutter'
 import { PageRange } from '../PageRange'
 import { Pagination } from '../Pagination'
-
 import classes from './index.module.scss'
 
 type Result = {
@@ -37,7 +37,7 @@ export type Props = {
   sort?: string
 }
 
-export const CollectionArchive: React.FC<Props> = props => {
+export const CollectionArchive: React.FC<Props> = (props) => {
   const {
     categories: catsFromProps,
     className,
@@ -58,7 +58,7 @@ export const CollectionArchive: React.FC<Props> = props => {
       : populateBy === 'selection'
         ? selectedDocs
         : []
-    )?.map(doc => doc.value),
+    )?.map((doc) => doc.value),
     hasNextPage: false,
     hasPrevPage: false,
     nextPage: 1,
@@ -76,7 +76,7 @@ export const CollectionArchive: React.FC<Props> = props => {
   const [page, setPage] = useState(1)
 
   const categories = (catsFromProps || [])
-    .map(cat => (typeof cat === 'object' ? cat.id : cat))
+    .map((cat) => (typeof cat === 'object' ? cat.id : cat))
     .join(',')
 
   const scrollToRef = useCallback(() => {

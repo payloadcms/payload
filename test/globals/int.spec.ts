@@ -21,6 +21,13 @@ describe('globals', () => {
     payload = await getPayload({ config })
     restClient = new NextRESTClient(config)
   })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   describe('REST', () => {
     it('should create', async () => {
       const title = 'update'

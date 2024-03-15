@@ -42,7 +42,7 @@ export const connect: Connect = async function connect(
       this.beginTransaction = undefined
     }
 
-    if (!hotReload) {
+    if (!this.mongoMemoryServer && !hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info('---- DROPPING DATABASE ----')
         await mongoose.connection.dropDatabase()
@@ -50,6 +50,7 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
+    console.log(err)
     this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)
     process.exit(1)
   }

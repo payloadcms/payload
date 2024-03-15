@@ -1,7 +1,8 @@
 'use client'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 
-import { createHeadlessEditor } from '@lexical/headless'
+import lexicalHeadlessImport from '@lexical/headless'
+const { createHeadlessEditor } = lexicalHeadlessImport
 import { useTableCell } from '@payloadcms/ui/elements'
 import { useFieldPath } from '@payloadcms/ui/forms'
 import { useClientFunctions } from '@payloadcms/ui/providers'

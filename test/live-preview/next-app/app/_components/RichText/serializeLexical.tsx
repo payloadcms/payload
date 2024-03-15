@@ -1,4 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
+
 import { CMSLink } from '../Link'
 import { Media } from '../Media'
 
@@ -55,10 +56,10 @@ const serializer = (
         return (
           <CMSLink
             key={i}
+            newTab={Boolean(node?.newTab)}
+            reference={node.doc as any}
             type={node.linkType === 'internal' ? 'reference' : 'custom'}
             url={node.url}
-            reference={node.doc as any}
-            newTab={Boolean(node?.newTab)}
           >
             {serializer(node?.children, renderUploadFilenameOnly)}
           </CMSLink>

@@ -19,8 +19,8 @@ export const create: Create = async function create(
     db,
     fields: collection.fields,
     operation: 'create',
-    tableName: toSnakeCase(collectionSlug),
     req,
+    tableName: toSnakeCase(collectionSlug),
   })
 
   return result

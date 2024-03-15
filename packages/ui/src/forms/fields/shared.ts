@@ -1,4 +1,4 @@
-import type { FieldPermissions, User } from 'payload/auth'
+import type { User } from 'payload/auth'
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import type {
   ArrayField,
@@ -30,10 +30,11 @@ export type FormFieldBase = {
   Description?: React.ReactNode
   Error?: React.ReactNode
   Label?: React.ReactNode
+  RowLabel?: React.ReactNode
   className?: string
+  disabled?: boolean
   docPreferences?: DocumentPreferences
   fieldMap?: FieldMap
-  fieldPermissions?: FieldPermissions
   initialSubfieldState?: FormState
   label?: string
   locale?: Locale
@@ -41,7 +42,7 @@ export type FormFieldBase = {
   maxLength?: number
   minLength?: number
   path?: string
-  placeholder?: string
+  placeholder?: Record<string, string> | string
   readOnly?: boolean
   required?: boolean
   rtl?: boolean
@@ -50,6 +51,21 @@ export type FormFieldBase = {
   validate?: Validate
   width?: string
 } & (
+  | {
+      // For `array` fields
+      label?: RowLabel
+      labels?: ArrayField['labels']
+      maxRows?: ArrayField['maxRows']
+      minRows?: ArrayField['minRows']
+    }
+  | {
+      // For `blocks` fields
+      blocks?: ReducedBlock[]
+      labels?: BlockField['labels']
+      maxRows?: BlockField['maxRows']
+      minRows?: BlockField['minRows']
+      slug?: string
+    }
   | {
       // For `code` fields
       editorOptions?: CodeField['admin']['editorOptions']
@@ -68,9 +84,23 @@ export type FormFieldBase = {
       editorOptions?: JSONField['admin']['editorOptions']
     }
   | {
+      // For `number` fields
+      hasMany?: boolean
+      max?: number
+      maxRows?: number
+      min?: number
+      step?: number
+    }
+  | {
       // For `radio` fields
       layout?: 'horizontal' | 'vertical'
       options?: Option[]
+    }
+  | {
+      // For `relationship` fields
+      allowCreate?: RelationshipField['admin']['allowCreate']
+      relationTo?: RelationshipField['relationTo']
+      sortOptions?: RelationshipField['admin']['sortOptions']
     }
   | {
       // For `richText` fields
@@ -88,36 +118,6 @@ export type FormFieldBase = {
   | {
       // For `upload` fields
       relationTo?: UploadField['relationTo']
-    }
-  | {
-      allowCreate?: RelationshipField['admin']['allowCreate']
-      filterOptions?: RelationshipField['filterOptions']
-      // For `relationship` fields
-      relationTo?: RelationshipField['relationTo']
-      sortOptions?: RelationshipField['admin']['sortOptions']
-    }
-  | {
-      blocks?: ReducedBlock[]
-      labels?: BlockField['labels']
-      maxRows?: BlockField['maxRows']
-      minRows?: BlockField['minRows']
-      // For `blocks` fields
-      slug?: string
-    }
-  | {
-      hasMany?: boolean
-      max?: number
-      maxRows?: number
-      min?: number
-      // For `number` fields
-      step?: number
-    }
-  | {
-      label?: RowLabel
-      labels?: ArrayField['labels']
-      maxRows?: ArrayField['maxRows']
-      // For `array` fields
-      minRows?: ArrayField['minRows']
     }
   | {
       tabs?: MappedTab[]

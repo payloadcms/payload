@@ -1,8 +1,7 @@
 import type { GraphQLScalarType } from 'graphql'
+import type { SanitizedLocalizationConfig } from 'payload/config'
 
 import { GraphQLEnumType } from 'graphql'
-
-import type { SanitizedLocalizationConfig } from 'payload/config'
 
 import formatName from '../utilities/formatName.js'
 

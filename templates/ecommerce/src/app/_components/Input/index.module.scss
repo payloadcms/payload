@@ -36,7 +36,7 @@
   color: var(--color-error-500);
 }
 
-:global([data-theme="dark"]) {
+:global([data-theme='dark']) {
   .input {
     background-color: var(--theme-elevation-150);
   }

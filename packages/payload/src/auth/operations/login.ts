@@ -235,10 +235,6 @@ export const loginOperation = async <TSlug extends keyof GeneratedTypes['collect
       result,
     })
 
-    if (collectionConfig.auth.removeTokenFromResponses) {
-      delete result.token
-    }
-
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////

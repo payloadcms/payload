@@ -2,11 +2,11 @@ import type { CollectionConfig } from 'payload/types'
 
 const Categories: CollectionConfig = {
   slug: 'categories',
-  admin: {
-    useAsTitle: 'title',
-  },
   access: {
     read: () => true,
+  },
+  admin: {
+    useAsTitle: 'title',
   },
   fields: [
     {

@@ -1,9 +1,11 @@
-import { accessOperation } from 'payload/operations'
 import type { SanitizedConfig } from 'payload/types'
 
-import formatName from '../../utilities/formatName.js'
-import { Context } from '../types.js'
+import { accessOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
+import type { Context } from '../types.js'
+
+import formatName from '../../utilities/formatName.js'
 const formatConfigNames = (results, configs) => {
   const formattedResults = { ...results }
 

@@ -1,9 +1,11 @@
-import React from 'react'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
+import React from 'react'
 
-import { Page } from '../../../payload/payload-types'
+import type { Page } from '../../../payload/payload-types'
+
 import { staticHome } from '../../../payload/seed/home-static'
 import { fetchDoc } from '../../_api/fetchDoc'
 import { fetchDocs } from '../../_api/fetchDocs'
@@ -26,8 +28,8 @@ export default async function Page({ params: { slug = 'home' } }) {
 
   try {
     page = await fetchDoc<Page>({
-      collection: 'pages',
       slug,
+      collection: 'pages',
       draft: isDraftMode,
     })
   } catch (error) {
@@ -77,8 +79,8 @@ export async function generateMetadata({ params: { slug = 'home' } }): Promise<M
 
   try {
     page = await fetchDoc<Page>({
-      collection: 'pages',
       slug,
+      collection: 'pages',
       draft: isDraftMode,
     })
   } catch (error) {

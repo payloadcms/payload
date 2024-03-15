@@ -1,35 +1,6 @@
-const sharedRules = {
-  '@typescript-eslint/ban-ts-comment': 'off',
-  '@typescript-eslint/consistent-type-imports': 'warn',
-  '@typescript-eslint/no-explicit-any': 'warn',
-
-  // Type-aware any rules:
-  '@typescript-eslint/no-unsafe-assignment': 'off',
-  '@typescript-eslint/no-unsafe-member-access': 'off',
-  '@typescript-eslint/no-unsafe-call': 'off',
-  '@typescript-eslint/no-unsafe-argument': 'off',
-  '@typescript-eslint/no-unsafe-return': 'off',
-  // This rule doesn't work well in .tsx files
-  '@typescript-eslint/no-misused-promises': 'off',
-  // Type-aware any rules end
-  // ts-expect should always be preferred over ts-ignore
-  '@typescript-eslint/prefer-ts-expect-error': 'warn',
+const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
   'class-methods-use-this': 'off',
-  // By default, it errors for unused variables. This is annoying, warnings are enough.
-  '@typescript-eslint/no-unused-vars': [
-    'warn',
-    {
-      vars: 'all',
-      args: 'after-used',
-      ignoreRestSiblings: false,
-      argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_',
-      destructuredArrayIgnorePattern: '^_',
-      caughtErrorsIgnorePattern: '^ignore',
-    },
-  ],
-  '@typescript-eslint/no-use-before-define': 'off',
   'arrow-body-style': 0,
   'import/prefer-default-export': 'off',
   'no-restricted-exports': ['warn', { restrictDefaultExports: { direct: true } }],
@@ -38,10 +9,7 @@ const sharedRules = {
   'no-underscore-dangle': 'off',
   'no-use-before-define': 'off',
   'object-shorthand': 'warn',
-  'react/no-unused-prop-types': 'off',
-  'react/prop-types': 'off',
-  'react/require-default-props': 'off',
-
+  'no-useless-escape': 'warn',
   'perfectionist/sort-objects': [
     'error',
     {
@@ -56,19 +24,83 @@ const sharedRules = {
   ],
 }
 
+const reactRules = {
+  'react/no-unused-prop-types': 'off',
+  'react/prop-types': 'off',
+  'react/require-default-props': 'off',
+  'react/destructuring-assignment': 'warn',
+  'react/no-unescaped-entities': 'warn',
+  'jsx-a11y/anchor-is-valid': 'warn',
+  'jsx-a11y/control-has-associated-label': 'warn',
+  'jsx-a11y/no-static-element-interactions': 'warn',
+  'jsx-a11y/label-has-associated-control': 'warn',
+}
+
+const typescriptRules = {
+  '@typescript-eslint/no-use-before-define': 'off',
+  '@typescript-eslint/ban-ts-comment': 'off',
+
+  // Type-aware any rules:
+  '@typescript-eslint/no-unsafe-assignment': 'off',
+  '@typescript-eslint/no-unsafe-member-access': 'off',
+  '@typescript-eslint/no-unsafe-call': 'off',
+  '@typescript-eslint/no-unsafe-argument': 'off',
+  '@typescript-eslint/no-unsafe-return': 'off',
+  '@typescript-eslint/unbound-method': 'warn',
+  // This rule doesn't work well in .tsx files
+  '@typescript-eslint/no-misused-promises': 'off',
+  '@typescript-eslint/consistent-type-imports': 'warn',
+  '@typescript-eslint/no-explicit-any': 'warn',
+  // Type-aware any rules end
+  // ts-expect should always be preferred over ts-ignore
+  '@typescript-eslint/prefer-ts-expect-error': 'warn',
+  // By default, it errors for unused variables. This is annoying, warnings are enough.
+  '@typescript-eslint/no-unused-vars': [
+    'warn',
+    {
+      vars: 'all',
+      args: 'after-used',
+      ignoreRestSiblings: false,
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+      destructuredArrayIgnorePattern: '^_',
+      caughtErrorsIgnorePattern: '^ignore',
+    },
+  ],
+  '@typescript-eslint/no-base-to-string': 'warn',
+  '@typescript-eslint/restrict-template-expressions': 'warn',
+  '@typescript-eslint/no-redundant-type-constituents': 'warn',
+  '@typescript-eslint/no-unnecessary-type-constraint': 'warn',
+  '@typescript-eslint/ban-types': 'warn',
+}
+
+const baseExtends = [
+  'eslint:recommended',
+  'plugin:perfectionist/recommended-natural',
+  'plugin:regexp/recommended',
+]
+
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
+  ignorePatterns: [
+    '*.d.ts',
+    '**/tsconfig.json',
+    'package.json',
+    '*.MD',
+    '.tmp',
+    '**/.git',
+    '**/build',
+    '**/dist/**',
+    '**/node_modules',
+    '**/temp',
+    '*.yml',
+    '*.json',
+  ],
   env: {
     es6: true,
     browser: true,
     node: true,
   },
-  extends: [
-    'eslint:recommended',
-    'plugin:perfectionist/recommended-natural',
-    'plugin:regexp/recommended',
-    'prettier',
-  ],
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -76,70 +108,74 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: [],
+  plugins: [], // Plugins are defined in the overrides to be more specific and only target the files they are meant for.
   overrides: [
     {
       files: ['**/*.ts'],
       plugins: ['@typescript-eslint'],
       extends: [
-        'eslint:recommended',
-        'plugin:perfectionist/recommended-natural',
+        ...baseExtends,
         'plugin:@typescript-eslint/recommended-type-checked',
-        'plugin:regexp/recommended',
-        'prettier',
+        'prettier', // prettier needs to come last. It disables eslint rules conflicting with prettier
       ],
       parser: '@typescript-eslint/parser',
-      rules: sharedRules,
+      rules: {
+        ...baseRules,
+        ...typescriptRules,
+      },
     },
     {
       files: ['**/*.tsx'],
       plugins: ['@typescript-eslint'],
       extends: [
-        'eslint:recommended',
-        'plugin:perfectionist/recommended-natural',
+        ...baseExtends,
         'plugin:@typescript-eslint/recommended-type-checked',
-        'plugin:regexp/recommended',
         'plugin:react/recommended',
         'plugin:react-hooks/recommended',
         './configs/react/index.js',
-        'prettier',
+        'prettier', // prettier needs to come last. It disables eslint rules conflicting with prettier
       ],
       parser: '@typescript-eslint/parser',
-      rules: sharedRules,
+      rules: {
+        ...baseRules,
+        ...typescriptRules,
+        ...reactRules,
+      },
     },
     {
       files: ['**/*.spec.ts'],
       plugins: ['@typescript-eslint'],
       extends: [
-        'eslint:recommended',
-        'plugin:perfectionist/recommended-natural',
+        ...baseExtends,
         'plugin:@typescript-eslint/recommended-type-checked',
-        'plugin:regexp/recommended',
         './configs/jest/index.js',
-        'prettier',
+        'prettier', // prettier needs to come last. It disables eslint rules conflicting with prettier
       ],
       parser: '@typescript-eslint/parser',
       rules: {
-        ...sharedRules,
+        ...baseRules,
+        ...typescriptRules,
         '@typescript-eslint/unbound-method': 'off',
       },
     },
     {
       files: ['*.config.ts'],
       rules: {
-        ...sharedRules,
+        ...baseRules,
+        ...typescriptRules,
         'no-restricted-exports': 'off',
       },
     },
     {
       files: ['config.ts'],
       rules: {
-        ...sharedRules,
+        ...baseRules,
+        ...typescriptRules,
         'no-restricted-exports': 'off',
       },
     },
   ],
-  rules: sharedRules,
+  rules: {}, // Rules are defined in the overrides to be more specific and only target the files they are meant for.
   settings: {
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts', '.tsx'],

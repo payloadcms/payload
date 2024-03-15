@@ -43,9 +43,9 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     db,
     fields,
     operation: 'update',
+    req,
     tableName,
     where,
-    req,
   })
 
   return result

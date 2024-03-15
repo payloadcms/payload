@@ -1,5 +1,7 @@
 import type { Field } from '../../../packages/payload/src/fields/config/types.js'
 
+import { slateEditor } from '../../../packages/richtext-slate/src/index.js'
+
 export const hero: Field = {
   name: 'hero',
   label: false,
@@ -30,6 +32,7 @@ export const hero: Field = {
       name: 'richText',
       label: 'Rich Text',
       type: 'richText',
+      editor: slateEditor({}),
     },
     {
       name: 'media',

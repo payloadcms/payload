@@ -11,13 +11,13 @@ export const update: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const autosave = searchParams.get('autosave') === 'true'
 
   const result = await updateOperationGlobal({
+    slug: globalConfig.slug,
     autosave,
     data: req.data,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft,
     globalConfig,
     req,
-    slug: globalConfig.slug,
   })
 
   let message = req.t('general:updatedSuccessfully')

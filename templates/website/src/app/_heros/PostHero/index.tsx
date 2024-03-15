@@ -1,12 +1,12 @@
-import React, { Fragment } from 'react'
 import Link from 'next/link'
+import React, { Fragment } from 'react'
 
-import { Post } from '../../../payload/payload-types'
+import type { Post } from '../../../payload/payload-types'
+
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'
 import RichText from '../../_components/RichText'
 import { formatDateTime } from '../../_utilities/formatDateTime'
-
 import classes from './index.module.scss'
 
 export const PostHero: React.FC<{
@@ -14,11 +14,11 @@ export const PostHero: React.FC<{
 }> = ({ post }) => {
   const {
     id,
-    title,
     categories,
-    meta: { image: metaImage, description } = {},
-    publishedAt,
+    meta: { description, image: metaImage } = {},
     populatedAuthors,
+    publishedAt,
+    title,
   } = post
 
   return (
@@ -81,7 +81,7 @@ export const PostHero: React.FC<{
               <Link href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/posts/${id}`}>
                 navigate to the admin dashboard
               </Link>
-              {'.'}
+              .
             </p>
           </div>
         </div>
@@ -89,11 +89,11 @@ export const PostHero: React.FC<{
           <div className={classes.mediaWrapper}>
             {!metaImage && <div className={classes.placeholder}>No image</div>}
             {metaImage && typeof metaImage !== 'string' && (
-              <Media imgClassName={classes.image} resource={metaImage} fill />
+              <Media fill imgClassName={classes.image} resource={metaImage} />
             )}
           </div>
           {metaImage && typeof metaImage !== 'string' && metaImage?.caption && (
-            <RichText content={metaImage.caption} className={classes.caption} />
+            <RichText className={classes.caption} content={metaImage.caption} />
           )}
         </div>
       </Gutter>
