@@ -50,7 +50,7 @@
   height: calc(var(--base) * 5);
 }
 
-:global([data-theme="dark"]) {
+:global([data-theme='dark']) {
   .input {
     background-color: var(--theme-elevation-150);
   }

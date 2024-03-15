@@ -1,5 +1,6 @@
 import { initOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 function initResolver(collection: string) {

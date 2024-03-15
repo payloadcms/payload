@@ -6,8 +6,8 @@ const baseClass = 'rich-text-label'
 
 const LabelElement: React.FC<{
   attributes: any
-  element: any
   children: React.ReactNode
+  element: any
 }> = ({ attributes, children }) => (
   <div {...attributes}>
     <span className={baseClass}>{children}</span>

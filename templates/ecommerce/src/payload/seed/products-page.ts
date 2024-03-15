@@ -1,13 +1,8 @@
 import type { Page } from '../payload-types'
 
-export const productsPage: Omit<Page, 'updatedAt' | 'createdAt' | 'id'> = {
-  title: 'Products',
+export const productsPage: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   slug: 'products',
   _status: 'published',
-  meta: {
-    title: 'Shop all products',
-    description: 'Shop everything from goods and services to digital assets and gated content.',
-  },
   hero: {
     type: 'lowImpact',
     media: null,
@@ -34,6 +29,7 @@ export const productsPage: Omit<Page, 'updatedAt' | 'createdAt' | 'id'> = {
     {
       blockName: 'Archive Block',
       blockType: 'archive',
+      categories: [],
       introContent: [
         {
           type: 'h4',
@@ -52,10 +48,14 @@ export const productsPage: Omit<Page, 'updatedAt' | 'createdAt' | 'id'> = {
           ],
         },
       ],
+      limit: 10,
       populateBy: 'collection',
       relationTo: 'products',
-      limit: 10,
-      categories: [],
     },
   ],
+  meta: {
+    description: 'Shop everything from goods and services to digital assets and gated content.',
+    title: 'Shop all products',
+  },
+  title: 'Products',
 }

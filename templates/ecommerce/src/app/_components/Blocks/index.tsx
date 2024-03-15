@@ -1,6 +1,8 @@
 import React, { Fragment } from 'react'
 
-import { Page } from '../../../payload/payload-types.js'
+import type { Page } from '../../../payload/payload-types.js'
+import type { VerticalPaddingOptions } from '../VerticalPadding/index'
+
 import { ArchiveBlock } from '../../_blocks/ArchiveBlock'
 import { CallToActionBlock } from '../../_blocks/CallToAction'
 import { ContentBlock } from '../../_blocks/Content'
@@ -8,21 +10,21 @@ import { MediaBlock } from '../../_blocks/MediaBlock'
 import { RelatedProducts, type RelatedProductsProps } from '../../_blocks/RelatedProducts'
 import { toKebabCase } from '../../_utilities/toKebabCase'
 import { BackgroundColor } from '../BackgroundColor/index'
-import { VerticalPadding, VerticalPaddingOptions } from '../VerticalPadding/index'
+import { VerticalPadding } from '../VerticalPadding/index'
 
 const blockComponents = {
-  cta: CallToActionBlock,
-  content: ContentBlock,
-  mediaBlock: MediaBlock,
   archive: ArchiveBlock,
+  content: ContentBlock,
+  cta: CallToActionBlock,
+  mediaBlock: MediaBlock,
   relatedProducts: RelatedProducts,
 }
 
 export const Blocks: React.FC<{
   blocks: (Page['layout'][0] | RelatedProductsProps)[]
   disableTopPadding?: boolean
-}> = props => {
-  const { disableTopPadding, blocks } = props
+}> = (props) => {
+  const { blocks, disableTopPadding } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -62,8 +64,8 @@ export const Blocks: React.FC<{
 
             if (Block) {
               return (
-                <BackgroundColor key={index} invert={blockIsInverted}>
-                  <VerticalPadding top={paddingTop} bottom={paddingBottom}>
+                <BackgroundColor invert={blockIsInverted} key={index}>
+                  <VerticalPadding bottom={paddingBottom} top={paddingTop}>
                     <Block
                       // @ts-expect-error
                       id={toKebabCase(blockName)}

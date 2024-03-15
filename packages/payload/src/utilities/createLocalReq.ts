@@ -1,5 +1,5 @@
-import type { Payload, RequestContext } from '../index.js'
 import type { User } from '../auth/types.js'
+import type { Payload, RequestContext } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'

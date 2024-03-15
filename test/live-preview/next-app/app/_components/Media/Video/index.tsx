@@ -1,14 +1,14 @@
 'use client'
 
+import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import React, { useEffect, useRef } from 'react'
 
-import { Props as MediaProps } from '../types'
+import type { Props as MediaProps } from '../types'
 
 import classes from './index.module.scss'
-import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 
 export const Video: React.FC<MediaProps> = (props) => {
-  const { videoClassName, resource, onClick } = props
+  const { onClick, resource, videoClassName } = props
 
   const videoRef = useRef<HTMLVideoElement>(null)
   // const [showFallback] = useState<boolean>()
@@ -28,13 +28,13 @@ export const Video: React.FC<MediaProps> = (props) => {
 
     return (
       <video
-        playsInline
         autoPlay
-        muted
-        loop
-        controls={false}
         className={[classes.video, videoClassName].filter(Boolean).join(' ')}
+        controls={false}
+        loop
+        muted
         onClick={onClick}
+        playsInline
         ref={videoRef}
       >
         <source src={`${PAYLOAD_SERVER_URL}/media/${filename}`} />

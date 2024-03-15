@@ -1,32 +1,34 @@
+import type { FieldValues, UseFormRegister } from 'react-hook-form'
+
 import React from 'react'
-import { FieldValues, UseFormRegister, Validate } from 'react-hook-form'
+import { Validate } from 'react-hook-form'
 
 import classes from './index.module.scss'
 
 type Props = {
-  name: string
+  disabled?: boolean
+  error: any
   label: string
+  name: string
   register: UseFormRegister<FieldValues & any>
   required?: boolean
-  error: any
-  type?: 'text' | 'number' | 'password' | 'email'
+  type?: 'email' | 'number' | 'password' | 'text'
   validate?: (value: string) => boolean | string
-  disabled?: boolean
 }
 
 export const Input: React.FC<Props> = ({
   name,
-  label,
-  required,
-  register,
-  error,
   type = 'text',
-  validate,
   disabled,
+  error,
+  label,
+  register,
+  required,
+  validate,
 }) => {
   return (
     <div className={classes.inputWrap}>
-      <label htmlFor="name" className={classes.label}>
+      <label className={classes.label} htmlFor="name">
         {label}
         {required ? <span className={classes.asterisk}>&nbsp;*</span> : ''}
       </label>
@@ -39,8 +41,8 @@ export const Input: React.FC<Props> = ({
           ...(type === 'email'
             ? {
                 pattern: {
-                  value: /\S+@\S+\.\S+/,
                   message: 'Please enter a valid email',
+                  value: /\S[^\s@]*@\S+\.\S+/,
                 },
               }
             : {}),

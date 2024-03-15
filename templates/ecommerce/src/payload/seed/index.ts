@@ -1,6 +1,7 @@
+import type { Payload } from 'payload'
+
 import fs from 'fs'
 import path from 'path'
-import type { Payload } from 'payload'
 
 import { cartPage } from './cart-page'
 import { home } from './home'
@@ -38,13 +39,13 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // clear the database
   await Promise.all([
-    ...collections.map(async collection =>
+    ...collections.map(async (collection) =>
       payload.delete({
         collection: collection as 'media',
         where: {},
       }),
     ), // eslint-disable-line function-paren-newline
-    ...globals.map(async global =>
+    ...globals.map(async (global) =>
       payload.updateGlobal({
         slug: global as 'header',
         data: {},
@@ -57,18 +58,18 @@ export const seed = async (payload: Payload): Promise<void> => {
   const [image1Doc, image2Doc, image3Doc] = await Promise.all([
     await payload.create({
       collection: 'media',
-      filePath: path.resolve(__dirname, 'image-1.jpg'),
       data: image1,
+      filePath: path.resolve(__dirname, 'image-1.jpg'),
     }),
     await payload.create({
       collection: 'media',
-      filePath: path.resolve(__dirname, 'image-2.jpg'),
       data: image2,
+      filePath: path.resolve(__dirname, 'image-2.jpg'),
     }),
     await payload.create({
       collection: 'media',
-      filePath: path.resolve(__dirname, 'image-3.jpg'),
       data: image3,
+      filePath: path.resolve(__dirname, 'image-3.jpg'),
     }),
   ])
 
@@ -143,22 +144,22 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   await Promise.all([
     await payload.update({
-      collection: 'products',
       id: product1Doc.id,
+      collection: 'products',
       data: {
         relatedProducts: [product2Doc.id, product3Doc.id],
       },
     }),
     await payload.update({
-      collection: 'products',
       id: product2Doc.id,
+      collection: 'products',
       data: {
         relatedProducts: [product1Doc.id, product3Doc.id],
       },
     }),
     await payload.update({
-      collection: 'products',
       id: product3Doc.id,
+      collection: 'products',
       data: {
         relatedProducts: [product1Doc.id, product2Doc.id],
       },
@@ -217,11 +218,11 @@ export const seed = async (payload: Payload): Promise<void> => {
         {
           link: {
             type: 'reference',
+            label: 'Shop',
             reference: {
               relationTo: 'pages',
               value: productsPageDoc.id,
             },
-            label: 'Shop',
           },
         },
       ],

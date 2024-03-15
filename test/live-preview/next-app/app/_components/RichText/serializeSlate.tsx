@@ -1,6 +1,7 @@
-import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
+import React, { Fragment } from 'react'
 import { Text } from 'slate'
+
 import { CMSLink } from '../Link'
 import { Media } from '../Media'
 
@@ -8,11 +9,11 @@ import { Media } from '../Media'
 type Children = Leaf[]
 
 type Leaf = {
-  type: string
-  value?: any
-  children?: Children
-  url?: string
   [key: string]: unknown
+  children?: Children
+  type: string
+  url?: string
+  value?: any
 }
 
 const serializeSlate = (
@@ -37,7 +38,7 @@ const serializeSlate = (
 
       if (node.underline) {
         text = (
-          <span style={{ textDecoration: 'underline' }} key={i}>
+          <span key={i} style={{ textDecoration: 'underline' }}>
             {text}
           </span>
         )
@@ -45,7 +46,7 @@ const serializeSlate = (
 
       if (node.strikethrough) {
         text = (
-          <span style={{ textDecoration: 'line-through' }} key={i}>
+          <span key={i} style={{ textDecoration: 'line-through' }}>
             {text}
           </span>
         )
@@ -106,10 +107,10 @@ const serializeSlate = (
         return (
           <CMSLink
             key={i}
+            newTab={Boolean(node?.newTab)}
+            reference={node.doc as any}
             type={node.linkType === 'internal' ? 'reference' : 'custom'}
             url={node.url}
-            reference={node.doc as any}
-            newTab={Boolean(node?.newTab)}
           >
             {serializeSlate(node?.children, renderUploadFilenameOnly)}
           </CMSLink>

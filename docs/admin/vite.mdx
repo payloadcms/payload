@@ -6,7 +6,8 @@ desc: NEEDS TO BE WRITTEN
 ---
 
 <Banner type="info">
-  The Vite bundler is currently in beta. If you would like to help us test this package, we'd love to hear from you if you find any [bugs or issues](https://github.com/payloadcms/payload/issues/)!
+  The Vite bundler is currently in beta. If you would like to help us test this package, we'd love
+  to hear from you if you find any [bugs or issues](https://github.com/payloadcms/payload/issues/)!
 </Banner>
 
 Payload has a Vite bundler that you can install and bundle the Admin Panel with. This is an alternative to the [Webpack](/docs/admin/webpack) bundler and might give some performance boosts to your development workflow.
@@ -27,7 +28,7 @@ export default buildConfig({
   collections: [],
   admin: {
     bundler: viteBundler(),
-  }
+  },
 })
 ```
 
@@ -36,7 +37,8 @@ Vite works fundamentally differently than Webpack. In development mode, it will 
 It then uses Rollup to create production builds of your admin UI. With Vite, you should see a decent performance boost—especially after your first cold start. However, that first cold start might take a few more seconds.
 
 <Banner type="warning">
-  In most cases, Vite should work out of the box. But existing Payload plugins may need to make compatibility changes to support Vite.
+  In most cases, Vite should work out of the box. But existing Payload plugins may need to make
+  compatibility changes to support Vite.
 </Banner>
 
 This is because Vite aliases work fundamentally differently than Webpack aliases, and Payload relies on aliasing server-only code out of the Payload config to ensure that the bundled admin JS works within your browser.

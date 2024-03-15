@@ -1,11 +1,11 @@
 import React from 'react'
 
-import { Page } from '../../../payload-types'
+import type { Page } from '../../../payload-types'
+
 import { Gutter } from '../../_components/Gutter'
 import { CMSLink } from '../../_components/Link'
 import RichText from '../../_components/RichText'
 import { VerticalPadding } from '../../_components/VerticalPadding'
-
 import classes from './index.module.scss'
 
 type Props = Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'cta' }>
@@ -14,7 +14,7 @@ export const CallToActionBlock: React.FC<
   Props & {
     id?: string
   }
-> = ({ links, richText, invertBackground }) => {
+> = ({ invertBackground, links, richText }) => {
   return (
     <Gutter>
       <VerticalPadding

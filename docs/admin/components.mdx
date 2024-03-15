@@ -13,29 +13,29 @@ To swap in your own React component, first, consult the list of available compon
 <Banner type="success">
   <strong>Tip:</strong>
   <br />
-  Custom components will automatically be provided with all props that the default component normally
-  accepts.
+  Custom components will automatically be provided with all props that the default component
+  normally accepts.
 </Banner>
 
 ### Base Component Overrides
 
 You can override a set of admin panel-wide components by providing a component to your base Payload config's `admin.components` property. The following options are available:
 
-| Path                  | Description                                                                                                                                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                         |
-| **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                         |
-| **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                     |
-| **`BeforeDashboard`** | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                         |
-| **`AfterDashboard`**  | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/main/test/admin/components/AfterDashboard/index.tsx)   |
-| **`BeforeLogin`**     | Array of components to inject into the built-in Login, _before_ the default login form.                                                                                                                     |
-| **`AfterLogin`**      | Array of components to inject into the built-in Login, _after_ the default login form.                                                                                                                      |
-| **`logout.Button`**   | A custom React component.                                                                                                                                                                                   |
-| **`graphics.Icon`**   | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo.                                                                                                          |
-| **`graphics.Logo`**   | The full logo to be used in contexts like the `Login` view.                                                                                                                                                 |
-| **`providers`**       | Define your own provider components that will wrap the Payload Admin UI. [More](#custom-providers)                                                                                                          |
-| **`actions`**         | Array of custom components to be rendered in the Payload Admin UI header, providing additional interactivity and functionality.                                                                             |
-| **`views`**           | Override or create new views within the Payload Admin UI. [More](#views)                                                                                                                                    |
+| Path                  | Description                                                                                                                                                                                               |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Nav`**             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                       |
+| **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
+| **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
+| **`BeforeDashboard`** | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
+| **`AfterDashboard`**  | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/main/test/admin/components/AfterDashboard/index.tsx) |
+| **`BeforeLogin`**     | Array of components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
+| **`AfterLogin`**      | Array of components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
+| **`logout.Button`**   | A custom React component.                                                                                                                                                                                 |
+| **`graphics.Icon`**   | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo.                                                                                                        |
+| **`graphics.Logo`**   | The full logo to be used in contexts like the `Login` view.                                                                                                                                               |
+| **`providers`**       | Define your own provider components that will wrap the Payload Admin UI. [More](#custom-providers)                                                                                                        |
+| **`actions`**         | Array of custom components to be rendered in the Payload Admin UI header, providing additional interactivity and functionality.                                                                           |
+| **`views`**           | Override or create new views within the Payload Admin UI. [More](#views)                                                                                                                                  |
 
 Here is a full example showing how to swap some of these components for your own.
 
@@ -77,10 +77,10 @@ export default buildConfig({
 
 You can easily swap entire views with your own by using the `admin.components.views` property. At the root level, Payload renders the following views by default, all of which can be overridden:
 
-| Property           | Description                                                                                                                  |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| **`Account`**      | The Account view is used to show the currently logged in user's Account page.                                                |
-| **`Dashboard`**    | The main landing page of the Admin panel.                                                                                    |
+| Property        | Description                                                                   |
+| --------------- | ----------------------------------------------------------------------------- |
+| **`Account`**   | The Account view is used to show the currently logged in user's Account page. |
+| **`Dashboard`** | The main landing page of the Admin panel.                                     |
 
 To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. For example:
 
@@ -135,7 +135,10 @@ To add a _new_ view to the Admin Panel, simply add another key to the `views` ob
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
-  Routes are cascading. This means that unless explicitly given the `exact` property, they will match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all routes in your application. Alternatively, you could define your nested route _before_ your parent route.
+  Routes are cascading. This means that unless explicitly given the `exact` property, they will
+  match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all
+  routes in your application. Alternatively, you could define your nested route _before_ your parent
+  route.
 </Banner>
 
 _For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/main/test/admin/components)._
@@ -214,7 +217,7 @@ export const MyCollection: SanitizedCollectionConfig = {
         PreviewButton: CustomPreviewButton,
       },
     },
-  }
+  },
 }
 ```
 
@@ -222,10 +225,10 @@ export const MyCollection: SanitizedCollectionConfig = {
 
 To swap out entire views on collections, you can use the `admin.components.views` property on the collection's config. Payload renders the following views by default, all of which can be overridden:
 
-| Property           | Description                                                                                                                  |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| **`Edit`**         | The Edit view is used to edit a single document for a given collection.                                                      |
-| **`List`**         | The List view is used to show a list of documents for a given collection.                                                    |
+| Property   | Description                                                               |
+| ---------- | ------------------------------------------------------------------------- |
+| **`Edit`** | The Edit view is used to edit a single document for a given collection.   |
+| **`List`** | The List view is used to show a list of documents for a given collection. |
 
 To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, tabs, etc, _as well as all nested routes_.
 
@@ -310,9 +313,9 @@ As with Collections, you can override components on a global-by-global basis via
 
 To swap out views for globals, you can use the `admin.components.views` property on the global's config. Payload renders the following views by default, all of which can be overridden:
 
-| Property           | Description                                                                                                                  |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| **`Edit`**         | The Edit view is used to edit a single document for a given Global.                                                          |
+| Property   | Description                                                         |
+| ---------- | ------------------------------------------------------------------- |
+| **`Edit`** | The Edit view is used to edit a single document for a given Global. |
 
 To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, and tabs, _as well as all nested views_.
 
@@ -379,13 +382,13 @@ You can also add _new_ tabs to the `Edit` view by adding another key to the `com
 
 You can easily swap individual collection or global edit views. To do this, pass an _object_ to the `admin.components.views.Edit` property of the config. Payload renders the following views by default, all of which can be overridden:
 
-| Property           | Description                                                                                                                  |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| **`Default`**      | The Default view is the primary view in which your document is edited.                                                       |
-| **`Versions`**     | The Versions view is used to view the version history of a single document. [More details](../versions)                      |
-| **`Version`**      | The Version view is used to view a single version of a single document for a given collection. [More details](../versions).  |
-| **`API`**          | The API view is used to display the REST API JSON response for a given document.                                             |
-| **`LivePreview`**  | The LivePreview view is used to display the Live Preview interface. [More details](../live-preview)                          |
+| Property          | Description                                                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **`Default`**     | The Default view is the primary view in which your document is edited.                                                      |
+| **`Versions`**    | The Versions view is used to view the version history of a single document. [More details](../versions)                     |
+| **`Version`**     | The Version view is used to view a single version of a single document for a given collection. [More details](../versions). |
+| **`API`**         | The API view is used to display the REST API JSON response for a given document.                                            |
+| **`LivePreview`** | The LivePreview view is used to display the Live Preview interface. [More details](../live-preview)                         |
 
 Here is an example:
 
@@ -396,7 +399,8 @@ export const MyCollection: SanitizedCollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: { // You can also define `components.views.Edit` as a component, this will override _all_ nested views
+        Edit: {
+          // You can also define `components.views.Edit` as a component, this will override _all_ nested views
           Default: MyCustomDefaultTab,
           Versions: MyCustomVersionsTab,
           Version: MyCustomVersionTab,
@@ -423,7 +427,7 @@ export const MyCollection: SanitizedCollectionConfig = {
             Component: MyCustomTab,
             path: '/my-custom-tab',
             // You an swap the entire tab component out for your own
-            Tab: MyCustomTab
+            Tab: MyCustomTab,
           },
           AnotherCustomView: {
             Component: AnotherCustomView,
@@ -432,7 +436,7 @@ export const MyCollection: SanitizedCollectionConfig = {
             Tab: {
               label: 'Another Custom View',
               href: '/another-custom-view',
-            }
+            },
           },
         },
       },
@@ -539,7 +543,6 @@ const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
   const { value, setValue } = useField<string>({ path })
   // highlight-end
 
-
   return <input onChange={(e) => setValue(e.target.value)} value={value} />
 }
 ```
@@ -553,11 +556,11 @@ const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
 
 These are the props that will be passed to your custom Label.
 
-| Property         | Description                                                      |
-| ---------------- | ---------------------------------------------------------------- |
-| **`htmlFor`**    | Property used to set `for` attribute for label.                  |
-| **`label`**      | Label value provided in field, it can be used with i18n.         |
-| **`required`**   | A boolean value that represents if the field is required or not. |
+| Property       | Description                                                      |
+| -------------- | ---------------------------------------------------------------- |
+| **`htmlFor`**  | Property used to set `for` attribute for label.                  |
+| **`label`**    | Label value provided in field, it can be used with i18n.         |
+| **`required`** | A boolean value that represents if the field is required or not. |
 
 #### Example
 
@@ -579,10 +582,12 @@ const CustomLabel: React.FC<Props> = (props) => {
   const { i18n } = useTranslation()
 
   if (label) {
-    return (<span>
-      {getTranslation(label, i18n)}
-      {required && <span className="required">*</span>}
-    </span>);
+    return (
+      <span>
+        {getTranslation(label, i18n)}
+        {required && <span className="required">*</span>}
+      </span>
+    )
   }
 
   return null
@@ -593,10 +598,10 @@ const CustomLabel: React.FC<Props> = (props) => {
 
 These are the props that will be passed to your custom Error.
 
-| Property         | Description                                                   |
-| ---------------- | ------------------------------------------------------------- |
-| **`message`**    | The error message.                                            |
-| **`showError`**  | A boolean value that represents if the error should be shown. |
+| Property        | Description                                                   |
+| --------------- | ------------------------------------------------------------- |
+| **`message`**   | The error message.                                            |
+| **`showError`** | A boolean value that represents if the error should be shown. |
 
 #### Example
 
@@ -612,8 +617,8 @@ const CustomError: React.FC<Props> = (props) => {
   const { message, showError } = props
 
   if (showError) {
-    return <p style={{color: 'red'}}>{message}</p>
-  } else return null;
+    return <p style={{ color: 'red' }}>{message}</p>
+  } else return null
 }
 ```
 
@@ -630,7 +635,15 @@ import { Field } from 'payload/types'
 import './style.scss'
 
 const ClearButton: React.FC = () => {
-  return <button onClick={() => {/* ... */}}>X</button>
+  return (
+    <button
+      onClick={() => {
+        /* ... */
+      }}
+    >
+      X
+    </button>
+  )
 }
 
 const titleField: Field = {
@@ -638,12 +651,12 @@ const titleField: Field = {
   type: 'text',
   admin: {
     components: {
-      afterInput: [ClearButton]
-    }
-  }
+      afterInput: [ClearButton],
+    },
+  },
 }
 
-export default titleField;
+export default titleField
 ```
 
 ## Custom providers

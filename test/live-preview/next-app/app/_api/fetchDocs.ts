@@ -1,4 +1,5 @@
 import type { Config } from '../../payload-types'
+
 import { PAYLOAD_SERVER_URL } from './serverURL'
 
 export const fetchDocs = async <T>(collection: keyof Config['collections']): Promise<T[]> => {

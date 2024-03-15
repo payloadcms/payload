@@ -20,13 +20,31 @@ type Query {
   Dummies(draft: Boolean, where: Dummy_where, limit: Int, page: Int, sort: String): Dummies
   docAccessDummy(id: String!): dummyDocAccess
   PayloadApiTestOne(id: String!, draft: Boolean): PayloadApiTestOne
-  PayloadApiTestOnes(draft: Boolean, where: PayloadApiTestOne_where, limit: Int, page: Int, sort: String): PayloadApiTestOnes
+  PayloadApiTestOnes(
+    draft: Boolean
+    where: PayloadApiTestOne_where
+    limit: Int
+    page: Int
+    sort: String
+  ): PayloadApiTestOnes
   docAccessPayloadApiTestOne(id: String!): payload_api_test_onesDocAccess
   PayloadApiTestTwo(id: String!, draft: Boolean): PayloadApiTestTwo
-  PayloadApiTestTwos(draft: Boolean, where: PayloadApiTestTwo_where, limit: Int, page: Int, sort: String): PayloadApiTestTwos
+  PayloadApiTestTwos(
+    draft: Boolean
+    where: PayloadApiTestTwo_where
+    limit: Int
+    page: Int
+    sort: String
+  ): PayloadApiTestTwos
   docAccessPayloadApiTestTwo(id: String!): payload_api_test_twosDocAccess
   PayloadPreference(id: String!, draft: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
+  PayloadPreferences(
+    draft: Boolean
+    where: PayloadPreference_where
+    limit: Int
+    page: Int
+    sort: String
+  ): PayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
   QueryWithInternalError: QueryWithInternalError
@@ -54,7 +72,8 @@ scalar DateTime
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress
+  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Users {
   docs: [User]
@@ -4282,28 +4301,63 @@ type Mutation {
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createPoint(data: mutationPointInput!, draft: Boolean): Point
-  updatePoint(id: String!, autosave: Boolean, data: mutationPointUpdateInput!, draft: Boolean): Point
+  updatePoint(
+    id: String!
+    autosave: Boolean
+    data: mutationPointUpdateInput!
+    draft: Boolean
+  ): Point
   deletePoint(id: String!): Point
   createPost(data: mutationPostInput!, draft: Boolean): Post
   updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, draft: Boolean): Post
   deletePost(id: String!): Post
   createCustomId(data: mutationCustomIdInput!, draft: Boolean): CustomId
-  updateCustomId(id: Int!, autosave: Boolean, data: mutationCustomIdUpdateInput!, draft: Boolean): CustomId
+  updateCustomId(
+    id: Int!
+    autosave: Boolean
+    data: mutationCustomIdUpdateInput!
+    draft: Boolean
+  ): CustomId
   deleteCustomId(id: Int!): CustomId
   createRelation(data: mutationRelationInput!, draft: Boolean): Relation
-  updateRelation(id: String!, autosave: Boolean, data: mutationRelationUpdateInput!, draft: Boolean): Relation
+  updateRelation(
+    id: String!
+    autosave: Boolean
+    data: mutationRelationUpdateInput!
+    draft: Boolean
+  ): Relation
   deleteRelation(id: String!): Relation
   createDummy(data: mutationDummyInput!, draft: Boolean): Dummy
-  updateDummy(id: String!, autosave: Boolean, data: mutationDummyUpdateInput!, draft: Boolean): Dummy
+  updateDummy(
+    id: String!
+    autosave: Boolean
+    data: mutationDummyUpdateInput!
+    draft: Boolean
+  ): Dummy
   deleteDummy(id: String!): Dummy
   createPayloadApiTestOne(data: mutationPayloadApiTestOneInput!, draft: Boolean): PayloadApiTestOne
-  updatePayloadApiTestOne(id: String!, autosave: Boolean, data: mutationPayloadApiTestOneUpdateInput!, draft: Boolean): PayloadApiTestOne
+  updatePayloadApiTestOne(
+    id: String!
+    autosave: Boolean
+    data: mutationPayloadApiTestOneUpdateInput!
+    draft: Boolean
+  ): PayloadApiTestOne
   deletePayloadApiTestOne(id: String!): PayloadApiTestOne
   createPayloadApiTestTwo(data: mutationPayloadApiTestTwoInput!, draft: Boolean): PayloadApiTestTwo
-  updatePayloadApiTestTwo(id: String!, autosave: Boolean, data: mutationPayloadApiTestTwoUpdateInput!, draft: Boolean): PayloadApiTestTwo
+  updatePayloadApiTestTwo(
+    id: String!
+    autosave: Boolean
+    data: mutationPayloadApiTestTwoUpdateInput!
+    draft: Boolean
+  ): PayloadApiTestTwo
   deletePayloadApiTestTwo(id: String!): PayloadApiTestTwo
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
+  updatePayloadPreference(
+    id: String!
+    autosave: Boolean
+    data: mutationPayloadPreferenceUpdateInput!
+    draft: Boolean
+  ): PayloadPreference
   deletePayloadPreference(id: String!): PayloadPreference
 }
 

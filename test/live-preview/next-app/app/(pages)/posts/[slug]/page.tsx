@@ -1,7 +1,8 @@
-import React from 'react'
 import { notFound } from 'next/navigation'
+import React from 'react'
 
-import { Post } from '../../../../payload-types'
+import type { Post } from '../../../../payload-types'
+
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
 import { PostClient } from './page.client'
@@ -11,8 +12,8 @@ export default async function Post({ params: { slug = '' } }) {
 
   try {
     post = await fetchDoc<Post>({
-      collection: 'posts',
       slug,
+      collection: 'posts',
     })
   } catch (error) {
     console.error(error) // eslint-disable-line no-console

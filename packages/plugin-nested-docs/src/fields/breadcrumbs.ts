@@ -5,8 +5,8 @@ export const createBreadcrumbsField = (
   overrides: Partial<ArrayField> = {},
 ): Field => ({
   name: 'breadcrumbs',
-  localized: true,
   type: 'array',
+  localized: true,
   ...(overrides || {}),
   admin: {
     readOnly: true,
@@ -15,32 +15,32 @@ export const createBreadcrumbsField = (
   fields: [
     {
       name: 'doc',
+      type: 'relationship',
       admin: {
         disabled: true,
       },
       maxDepth: 0,
       relationTo,
-      type: 'relationship',
     },
     {
+      type: 'row',
       fields: [
         {
           name: 'url',
+          type: 'text',
           admin: {
             width: '50%',
           },
           label: 'URL',
-          type: 'text',
         },
         {
           name: 'label',
+          type: 'text',
           admin: {
             width: '50%',
           },
-          type: 'text',
         },
       ],
-      type: 'row',
     },
     ...(overrides?.fields || []),
   ],

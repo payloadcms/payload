@@ -1,9 +1,10 @@
-import * as React from 'react'
+import type { TextField } from 'payload/dist/fields/config/types'
+
 import { Select, Text, useFormFields } from 'payload/components/forms'
 import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
-import { TextField } from 'payload/dist/fields/config/types'
+import * as React from 'react'
 
-export const LinkToPaymentIntent: React.FC<TextField> = props => {
+export const LinkToPaymentIntent: React.FC<TextField> = (props) => {
   const { name, label } = props
 
   const { value: stripePaymentIntentID } = useFormFields(([fields]) => fields[name]) || {}
@@ -27,23 +28,23 @@ export const LinkToPaymentIntent: React.FC<TextField> = props => {
                 color: '#9A9A9A',
               }}
             >
-              {`Manage in Stripe`}
+              Manage in Stripe
             </span>
             <CopyToClipboard value={href} />
           </div>
           <div
             style={{
+              fontWeight: '600',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              fontWeight: '600',
             }}
           >
             <a
               href={`https://dashboard.stripe.com/${
                 process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY ? 'test/' : ''
               }customers/${stripePaymentIntentID}`}
-              target="_blank"
               rel="noreferrer noopener"
+              target="_blank"
             >
               {href}
             </a>

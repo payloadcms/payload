@@ -4,6 +4,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { ChainedMethods } from './find/chainMethods.js'
 import type { PostgresAdapter } from './types.js'
+
 import { chainMethods } from './find/chainMethods.js'
 import buildQuery from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
@@ -70,8 +71,8 @@ export const updateOne: UpdateOne = async function updateOne(
     db,
     fields: collection.fields,
     operation: 'update',
-    tableName: toSnakeCase(collectionSlug),
     req,
+    tableName: toSnakeCase(collectionSlug),
   })
 
   return result

@@ -16,7 +16,6 @@ To use the Slate editor, first you need to install it:
 npm install --save @payloadcms/richtext-slate
 ```
 
-
 After installation, you can pass it to your top-level Payload config:
 
 ```ts
@@ -28,7 +27,7 @@ export default buildConfig({
     // your collections here
   ],
   // Pass the Slate editor to the root config
-  editor: slateEditor({})
+  editor: slateEditor({}),
 })
 ```
 
@@ -52,11 +51,11 @@ export const Pages: CollectionConfig = {
           ],
           leaves: [
             // customize leaves allowed in Slate editor here
-          ]
-        }
-      })
-    }
-  ]
+          ],
+        },
+      }),
+    },
+  ],
 }
 ```
 

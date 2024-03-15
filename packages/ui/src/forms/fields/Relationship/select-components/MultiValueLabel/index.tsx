@@ -19,11 +19,11 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const {
     data: { label, relationTo, value },
     selectProps: {
-      // @ts-ignore-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
+      // @ts-expect-error-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
       customProps: {
-        // @ts-ignore-next-line// TODO Fix this - moduleResolution 16 breaks our declare module
+        // @ts-expect-error-next-line// TODO Fix this - moduleResolution 16 breaks our declare module
         draggableProps,
-        // @ts-ignore-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
+        // @ts-expect-error-next-line // TODO Fix this - moduleResolution 16 breaks our declare module
         setDrawerIsOpen,
         // onSave,
       } = {},

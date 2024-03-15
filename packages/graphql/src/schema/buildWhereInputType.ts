@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-use-before-define */
-import { GraphQLInputObjectType, GraphQLList } from 'graphql'
-
 import type { Field, FieldAffectingData } from 'payload/types'
 
+/* eslint-disable no-use-before-define */
+import { GraphQLInputObjectType, GraphQLList } from 'graphql'
 import { fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly } from 'payload/types'
+import { flattenTopLevelFields } from 'payload/utilities'
+
 import formatName from '../utilities/formatName.js'
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js'
 import { withOperators } from './withOperators.js'
-import { flattenTopLevelFields } from 'payload/utilities'
 
 type Args = {
   fields: Field[]

@@ -15,7 +15,12 @@ All form submissions are stored directly in your database and are managed direct
 Forms can be as simple or complex as you need, from a basic contact form, to a multi-step lead generation engine, or even a donation form that processes payment. You may not need to reach for third-party services like HubSpot or Mailchimp for this, but instead use your own first-party tooling, built directly into your own application.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-form-builder). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20form-builder&template=bug_report.md&title=plugin-form-builder%3A) with as much detail as possible.
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-form-builder). If you need
+  help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've
+  found a bug, please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20form-builder&template=bug_report.md&title=plugin-form-builder%3A)
+  with as much detail as possible.
 </Banner>
 
 ##### Core Features
@@ -52,7 +57,7 @@ const config = buildConfig({
   plugins: [
     formBuilder({
       // see below for a list of available options
-    })
+    }),
   ],
 })
 
@@ -79,8 +84,8 @@ formBuilder({
     checkbox: true,
     number: true,
     message: true,
-    payment: false
-  }
+    payment: false,
+  },
 })
 ```
 
@@ -92,7 +97,7 @@ The `redirectRelationships` property is an array of collection slugs that, when 
 // payload.config.ts
 formBuilder({
   // ...
-  redirectRelationships: ['pages']
+  redirectRelationships: ['pages'],
 })
 ```
 
@@ -110,7 +115,7 @@ formBuilder({
       ...email,
       html: email.html, // transform the html in any way you'd like (maybe wrap it in an html template?)
     }))
-  }
+  },
 })
 ```
 
@@ -123,18 +128,18 @@ Override anything on the `forms` collection by sending a [Payload Collection Con
 formBuilder({
   // ...
   formOverrides: {
-    slug: "contact-forms",
+    slug: 'contact-forms',
     access: {
       read: () => true,
       update: () => false,
     },
     fields: [
       {
-        name: "custom-field",
-        type: "text"
-      }
-    ]
-  }
+        name: 'custom-field',
+        type: 'text',
+      },
+    ],
+  },
 })
 ```
 
@@ -143,7 +148,12 @@ formBuilder({
 Override anything on the `form-submissions` collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections) to the `formSubmissionOverrides` property.
 
 <Banner type="warning">
-  By default, this plugin relies on [Payload access control](https://payloadcms.com/docs/access-control/collections) to restrict the `update` and `read` operations on the `form-submissions` collection. This is because _anyone_ should be able to create a form submission, even from a public-facing website, but _no one_ should be able to update a submission one it has been created, or read a submission unless they have permission. You can override this behavior or any other property as needed.
+  By default, this plugin relies on [Payload access
+  control](https://payloadcms.com/docs/access-control/collections) to restrict the `update` and
+  `read` operations on the `form-submissions` collection. This is because _anyone_ should be able to
+  create a form submission, even from a public-facing website, but _no one_ should be able to update
+  a submission one it has been created, or read a submission unless they have permission. You can
+  override this behavior or any other property as needed.
 </Banner>
 
 ```ts
@@ -151,8 +161,8 @@ Override anything on the `form-submissions` collection by sending a [Payload Col
 formBuilder({
   // ...
   formSubmissionOverrides: {
-    slug: "leads",
-  }
+    slug: 'leads',
+  },
 })
 ```
 
@@ -164,7 +174,7 @@ First import the utility function. This will execute all of the price conditions
 
 ```ts
 // payload.config.ts
-import { getPaymentTotal } from '@payloadcms/plugin-form-builder';
+import { getPaymentTotal } from '@payloadcms/plugin-form-builder'
 ```
 
 Then in your plugin's config:
@@ -175,14 +185,14 @@ formBuilder({
   // ...
   handlePayment: async ({ form, submissionData }) => {
     // first calculate the price
-    const paymentField =  form.fields?.find((field) => field.blockType === 'payment');
+    const paymentField = form.fields?.find((field) => field.blockType === 'payment')
     const price = getPaymentTotal({
       basePrice: paymentField.basePrice,
       priceConditions: paymentField.priceConditions,
       fieldValues: submissionData,
-    });
+    })
     // then asynchronously process the payment here
-  }
+  },
 })
 ```
 
@@ -192,139 +202,140 @@ Each field represents a form input. To override default settings pass either a b
 
 <Banner type="info">
   <strong>Note:</strong>
-  "Fields" here is in reference to the _fields to build forms with_, not to be confused with the _fields of a collection_ which are set via `formOverrides.fields`.
+  "Fields" here is in reference to the _fields to build forms with_, not to be confused with the _fields
+  of a collection_ which are set via `formOverrides.fields`.
 </Banner>
 
 #### Text
 
 Maps to a `text` input in your front-end. Used to collect a simple string.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | string | The name of the field. |
-| `label` | string | The label of the field. |
-| `defaultValue` | string | The default value of the field. |
-| `width` | string | The width of the field on the front-end. |
-| `required` | checkbox | Whether or not the field is required when submitted. |
+| Property       | Type     | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- |
+| `name`         | string   | The name of the field.                               |
+| `label`        | string   | The label of the field.                              |
+| `defaultValue` | string   | The default value of the field.                      |
+| `width`        | string   | The width of the field on the front-end.             |
+| `required`     | checkbox | Whether or not the field is required when submitted. |
 
 #### Textarea
 
 Maps to a `textarea` input on your front-end. Used to collect a multi-line string.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | string | The name of the field. |
-| `label` | string | The label of the field. |
-| `defaultValue` | string | The default value of the field. |
-| `width` | string | The width of the field on the front-end. |
-| `required` | checkbox | Whether or not the field is required when submitted. |
+| Property       | Type     | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- |
+| `name`         | string   | The name of the field.                               |
+| `label`        | string   | The label of the field.                              |
+| `defaultValue` | string   | The default value of the field.                      |
+| `width`        | string   | The width of the field on the front-end.             |
+| `required`     | checkbox | Whether or not the field is required when submitted. |
 
 #### Select
 
 Maps to a `select` input on your front-end. Used to display a list of options.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | string | The name of the field. |
-| `label` | string | The label of the field. |
-| `defaultValue` | string | The default value of the field. |
-| `width` | string | The width of the field on the front-end. |
-| `required` | checkbox | Whether or not the field is required when submitted. |
-| `options` | array | An array of objects with `label` and `value` properties. |
+| Property       | Type     | Description                                              |
+| -------------- | -------- | -------------------------------------------------------- |
+| `name`         | string   | The name of the field.                                   |
+| `label`        | string   | The label of the field.                                  |
+| `defaultValue` | string   | The default value of the field.                          |
+| `width`        | string   | The width of the field on the front-end.                 |
+| `required`     | checkbox | Whether or not the field is required when submitted.     |
+| `options`      | array    | An array of objects with `label` and `value` properties. |
 
 #### Email (field)
 
 Maps to a `text` input with type `email` on your front-end. Used to collect an email address.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | string | The name of the field. |
-| `label` | string | The label of the field. |
-| `defaultValue` | string | The default value of the field. |
-| `width` | string | The width of the field on the front-end. |
-| `required` | checkbox | Whether or not the field is required when submitted. |
+| Property       | Type     | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- |
+| `name`         | string   | The name of the field.                               |
+| `label`        | string   | The label of the field.                              |
+| `defaultValue` | string   | The default value of the field.                      |
+| `width`        | string   | The width of the field on the front-end.             |
+| `required`     | checkbox | Whether or not the field is required when submitted. |
 
 #### State
 
 Maps to a `select` input on your front-end. Used to collect a US state.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | string | The name of the field. |
-| `label` | string | The label of the field. |
-| `defaultValue` | string | The default value of the field. |
-| `width` | string | The width of the field on the front-end. |
-| `required` | checkbox | Whether or not the field is required when submitted. |
+| Property       | Type     | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- |
+| `name`         | string   | The name of the field.                               |
+| `label`        | string   | The label of the field.                              |
+| `defaultValue` | string   | The default value of the field.                      |
+| `width`        | string   | The width of the field on the front-end.             |
+| `required`     | checkbox | Whether or not the field is required when submitted. |
 
 #### Country
 
 Maps to a `select` input on your front-end. Used to collect a country.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | string | The name of the field. |
-| `label` | string | The label of the field. |
-| `defaultValue` | string | The default value of the field. |
-| `width` | string | The width of the field on the front-end. |
-| `required` | checkbox | Whether or not the field is required when submitted. |
+| Property       | Type     | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- |
+| `name`         | string   | The name of the field.                               |
+| `label`        | string   | The label of the field.                              |
+| `defaultValue` | string   | The default value of the field.                      |
+| `width`        | string   | The width of the field on the front-end.             |
+| `required`     | checkbox | Whether or not the field is required when submitted. |
 
 #### Checkbox
 
 Maps to a `checkbox` input on your front-end. Used to collect a boolean value.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | string | The name of the field. |
-| `label` | string | The label of the field. |
-| `defaultValue` | checkbox | The default value of the field. |
-| `width` | string | The width of the field on the front-end. |
-| `required` | checkbox | Whether or not the field is required when submitted. |
+| Property       | Type     | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- |
+| `name`         | string   | The name of the field.                               |
+| `label`        | string   | The label of the field.                              |
+| `defaultValue` | checkbox | The default value of the field.                      |
+| `width`        | string   | The width of the field on the front-end.             |
+| `required`     | checkbox | Whether or not the field is required when submitted. |
 
 #### Number
 
 Maps to a `number` input on your front-end. Used to collect a number.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | string | The name of the field. |
-| `label` | string | The label of the field. |
-| `defaultValue` | string | The default value of the field. |
-| `width` | string | The width of the field on the front-end. |
-| `required` | checkbox | Whether or not the field is required when submitted. || `defaultValue` | number | The default value of the field. |
+| Property       | Type     | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- | --- | -------------- | ------ | ------------------------------- |
+| `name`         | string   | The name of the field.                               |
+| `label`        | string   | The label of the field.                              |
+| `defaultValue` | string   | The default value of the field.                      |
+| `width`        | string   | The width of the field on the front-end.             |
+| `required`     | checkbox | Whether or not the field is required when submitted. |     | `defaultValue` | number | The default value of the field. |
 
 #### Message
 
 Maps to a `RichText` component on your front-end. Used to display an arbitrary message to the user anywhere in the form.
 
-| property | type | description |
-| --- | --- | --- |
+| property  | type     | description                         |
+| --------- | -------- | ----------------------------------- |
 | `message` | richText | The message to display on the form. |
 
 #### Payment
 
 Add this field to your form if it should collect payment. Upon submission, the `handlePayment` callback is executed with the form and submission data. You can use this to integrate with any third-party payment processing API.
 
-| property | type | description |
-| --- | --- | --- |
-| `name` | string | The name of the field. |
-| `label` | string | The label of the field. |
-| `defaultValue` | number | The default value of the field. |
-| `width` | string | The width of the field on the front-end. |
-| `required` | checkbox | Whether or not the field is required when submitted. |
-| `priceConditions` | array | An array of objects that define the price conditions. See below for more details. |
+| property          | type     | description                                                                       |
+| ----------------- | -------- | --------------------------------------------------------------------------------- |
+| `name`            | string   | The name of the field.                                                            |
+| `label`           | string   | The label of the field.                                                           |
+| `defaultValue`    | number   | The default value of the field.                                                   |
+| `width`           | string   | The width of the field on the front-end.                                          |
+| `required`        | checkbox | Whether or not the field is required when submitted.                              |
+| `priceConditions` | array    | An array of objects that define the price conditions. See below for more details. |
 
 ##### Price Conditions
 
 Each of the `priceConditions` are executed by the `getPaymentTotal` utility that this plugin provides. You can call this function in your `handlePayment` callback to dynamically calculate the total price of a form upon submission based on the user's input. For example, you could create a price condition that says "if the user selects 'yes' for this checkbox, add $10 to the total price".
 
-| property | type | description |
-| --- | --- | --- |
-| `fieldToUse` | relationship | The field to use to determine the price. |
-| `condition` | string | The condition to use to determine the price. |
-| `valueForOperator` | string | The value to use for the operator. |
-| `operator` | string | The operator to use to determine the price. |
-| `valueType` | string | The type of value to use to determine the price. |
-| `value` | string | The value to use to determine the price. |
+| property           | type         | description                                      |
+| ------------------ | ------------ | ------------------------------------------------ |
+| `fieldToUse`       | relationship | The field to use to determine the price.         |
+| `condition`        | string       | The condition to use to determine the price.     |
+| `valueForOperator` | string       | The value to use for the operator.               |
+| `operator`         | string       | The operator to use to determine the price.      |
+| `valueType`        | string       | The type of value to use to determine the price. |
+| `value`            | string       | The value to use to determine the price.         |
 
 #### Field Overrides
 
@@ -344,11 +355,11 @@ formBuilder({
     text: {
       ...fields.text,
       labels: {
-        singular: "Custom Text Field",
-        plural: "Custom Text Fields",
-      }
-    }
-  }
+        singular: 'Custom Text Field',
+        plural: 'Custom Text Fields',
+      },
+    },
+  },
 })
 ```
 
@@ -388,6 +399,7 @@ Below are some common troubleshooting tips. To help other developers, please con
 ## Screenshots
 
 ![screenshot 1](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-1.jpg?raw=true)
+
 <br />
 ![screenshot 2](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-2.jpg?raw=true)
 <br />

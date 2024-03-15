@@ -15,7 +15,12 @@ As users are editing documents within the admin panel, they have the option to "
 To help you visualize what your page might look like in a search engine, a preview is rendered on page just beneath the meta fields. This preview is updated in real-time as you edit your metadata. There are also visual indicators to help you write effective meta, such as a character counter for the title and description fields. You can even inject your own custom fields into the `meta` field group as your application requires, like `og:title` or `json-ld`. If you've ever used something like Yoast SEO, this plugin might feel very familiar.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-seo). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-seo%3A) with as much detail as possible.
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-seo). If you need help,
+  check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a
+  bug, please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-seo%3A)
+  with as much detail as possible.
 </Banner>
 
 ##### Core features
@@ -86,10 +91,10 @@ An array of global slugs to enable SEO. Enabled globals receive a `meta` field w
 
 An array of fields that allows you to inject your own custom fields onto the `meta` field group. The following fields are provided by default:
 
-  - `title`: text
-  - `description`: textarea
-  - `image`: upload (if an `uploadsCollection` is provided)
-  - `preview`: ui
+- `title`: text
+- `description`: textarea
+- `image`: upload (if an `uploadsCollection` is provided)
+- `preview`: ui
 
 ##### `uploadsCollection`
 
@@ -100,7 +105,9 @@ Set the `uploadsCollection` to your application's upload-enabled collection slug
 When the `tabbedUI` property is `true`, it appends an `SEO` tab onto your config using Payload's [Tabs Field](https://payloadcms.com/docs/fields/tabs). If your collection is not already tab-enabled, meaning the first field in your config is not of type `tabs`, then one will be created for you called `Content`. Defaults to `false`.
 
 <Banner type="info">
-  If you wish to continue to use top-level or sidebar fields with `tabbedUI`, you must not let the default `Content` tab get created for you (see the note above). Instead, you must define the first field of your config with type `tabs` and place all other fields adjacent to this one.
+  If you wish to continue to use top-level or sidebar fields with `tabbedUI`, you must not let the
+  default `Content` tab get created for you (see the note above). Instead, you must define the first
+  field of your config with type `tabs` and place all other fields adjacent to this one.
 </Banner>
 
 ##### `generateTitle`
@@ -126,7 +133,7 @@ A function that allows you to return any meta description, including from docume
 {
   // ...
   seoPlugin({
-    generateDescription: ({ ...docInfo, doc, locale }) => doc?.excerpt?.value
+    generateDescription: ({ ...docInfo, doc, locale }) => doc?.excerpt?.value,
   })
 }
 ```
@@ -140,7 +147,7 @@ A function that allows you to return any meta image, including from document's c
 {
   // ...
   seoPlugin({
-    generateImage: ({ ...docInfo, doc, locale }) => doc?.featuredImage?.value
+    generateImage: ({ ...docInfo, doc, locale }) => doc?.featuredImage?.value,
   })
 }
 ```
@@ -154,7 +161,8 @@ A function called by the search preview component to display the actual URL of y
 {
   // ...
   seoPlugin({
-    generateURL: ({ ...docInfo, doc, locale }) => `https://yoursite.com/${collection?.slug}/${doc?.slug?.value}`
+    generateURL: ({ ...docInfo, doc, locale }) =>
+      `https://yoursite.com/${collection?.slug}/${doc?.slug?.value}`,
   })
 }
 ```
@@ -168,7 +176,7 @@ Rename the meta group interface name that is generated for TypeScript and GraphQ
 {
   // ...
   seoPlugin({
-    interfaceName: 'customInterfaceNameSEO'
+    interfaceName: 'customInterfaceNameSEO',
   })
 }
 ```

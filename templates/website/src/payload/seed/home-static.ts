@@ -2,25 +2,20 @@ import type { Page } from '../payload-types'
 
 export const staticHome: Page = {
   id: '',
-  title: 'Home',
   slug: 'home',
   createdAt: '',
-  updatedAt: '',
-  meta: {
-    title: 'Payload Website Template',
-    description: 'An open-source website built with Payload and Next.js.',
-  },
   hero: {
     type: 'lowImpact',
     links: null,
+    media: '',
     richText: [
       {
+        type: 'h1',
         children: [
           {
             text: 'Payload Website Template',
           },
         ],
-        type: 'h1',
       },
       {
         children: [
@@ -28,28 +23,28 @@ export const staticHome: Page = {
             text: 'Welcome to your website! ',
           },
           {
-            text: 'Your database is currently empty.',
             bold: true,
+            text: 'Your database is currently empty.',
           },
           {
             text: ' To seed your database with a few pages, posts, and projects, ',
           },
           {
             type: 'link',
-            linkType: 'custom',
-            url: '/admin',
             children: [
               {
                 text: 'log in to the admin dashboard',
               },
             ],
+            linkType: 'custom',
+            url: '/admin',
           },
           {
             text: ' and click "seed your database". If you have already seeded your database, ',
           },
           {
-            text: 'you may need to hard refresh this page to clear the cached request.',
             bold: true,
+            text: 'you may need to hard refresh this page to clear the cached request.',
           },
         ],
       },
@@ -60,14 +55,14 @@ export const staticHome: Page = {
           },
           {
             type: 'link',
-            linkType: 'custom',
-            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
-            newTab: true,
             children: [
               {
                 text: 'here',
               },
             ],
+            linkType: 'custom',
+            newTab: true,
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
           },
           {
             text: '.',
@@ -75,18 +70,30 @@ export const staticHome: Page = {
         ],
       },
     ],
-    media: '',
   },
   layout: [
     {
+      blockName: 'CTA',
+      blockType: 'cta',
+      links: [
+        {
+          link: {
+            type: 'custom',
+            appearance: 'primary',
+            label: 'Go to dashboard',
+            reference: null,
+            url: '/admin',
+          },
+        },
+      ],
       richText: [
         {
+          type: 'h4',
           children: [
             {
               text: 'Seed your database',
             },
           ],
-          type: 'h4',
         },
         {
           children: [
@@ -95,13 +102,13 @@ export const staticHome: Page = {
             },
             {
               type: 'link',
-              linkType: 'custom',
-              url: '/admin',
               children: [
                 {
                   text: 'log in to the admin dashboard',
                 },
               ],
+              linkType: 'custom',
+              url: '/admin',
             },
             {
               text: ' and click "seed your database".',
@@ -109,19 +116,12 @@ export const staticHome: Page = {
           ],
         },
       ],
-      links: [
-        {
-          link: {
-            type: 'custom',
-            url: '/admin',
-            label: 'Go to dashboard',
-            appearance: 'primary',
-            reference: null,
-          },
-        },
-      ],
-      blockName: 'CTA',
-      blockType: 'cta',
     },
   ],
+  meta: {
+    description: 'An open-source website built with Payload and Next.js.',
+    title: 'Payload Website Template',
+  },
+  title: 'Home',
+  updatedAt: '',
 }

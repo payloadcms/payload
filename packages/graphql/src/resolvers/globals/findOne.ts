@@ -1,7 +1,8 @@
-import { findOneOperation } from 'payload/operations'
 import type { Document, SanitizedGlobalConfig } from 'payload/types'
 
+import { findOneOperation } from 'payload/operations'
 import { isolateObjectProperty } from 'payload/utilities'
+
 import type { Context } from '../types.js'
 
 export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {

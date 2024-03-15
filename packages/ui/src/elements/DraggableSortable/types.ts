@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import type { DragEndEvent } from '@dnd-kit/core'
 import type { Ref } from 'react'
 

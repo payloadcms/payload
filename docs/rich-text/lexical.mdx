@@ -11,7 +11,9 @@ One of Payload's goals is to build the best rich text editor experience that we 
 Classically, we've used SlateJS to work toward this goal, but building custom elements into Slate has proven to be more difficult than we'd like, and we've been keeping our options open.
 
 <Banner type="warning">
-  Payload's Lexical rich text editor is currently in beta. It's stable enough to use as you build on Payload, so if you're up for helping us fine-tune it, you should use it. But if you're looking for stability, use Slate instead.
+  Payload's Lexical rich text editor is currently in beta. It's stable enough to use as you build on
+  Payload, so if you're up for helping us fine-tune it, you should use it. But if you're looking for
+  stability, use Slate instead.
 </Banner>
 
 Lexical is extremely impressive and trivializes a lot of the hard parts of building new elements into a rich text editor. It has a few distinct advantages over Slate, including the following:
@@ -38,7 +40,7 @@ export default buildConfig({
     // your collections here
   ],
   // Pass the Lexical editor to the root config
-  editor: lexicalEditor({})
+  editor: lexicalEditor({}),
 })
 ```
 
@@ -46,9 +48,7 @@ You can also override Lexical settings on a field-by-field basis as follows:
 
 ```ts
 import type { CollectionConfig } from 'payload/types'
-import {
-  lexicalEditor
-} from '@payloadcms/richtext-lexical'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -57,9 +57,9 @@ export const Pages: CollectionConfig = {
       name: 'content',
       type: 'richText',
       // Pass the Lexical editor here and override base settings as necessary
-      editor: lexicalEditor({})
-    }
-  ]
+      editor: lexicalEditor({}),
+    },
+  ],
 }
 ```
 
@@ -82,7 +82,7 @@ import {
   BlocksFeature,
   LinkFeature,
   UploadFeature,
-  lexicalEditor
+  lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import { Banner } from '../blocks/Banner'
 import { CallToAction } from '../blocks/CallToAction'
@@ -126,12 +126,9 @@ import { CallToAction } from '../blocks/CallToAction'
       // This is incredibly powerful. You can re-use your Payload blocks
       // directly in the Lexical editor as follows:
       BlocksFeature({
-        blocks: [
-          Banner,
-          CallToAction,
-        ],
+        blocks: [Banner, CallToAction],
       }),
-    ]
+    ],
   })
 }
 ```
@@ -141,7 +138,7 @@ import { CallToAction } from '../blocks/CallToAction'
 Here's an overview of all the included features:
 
 | Feature Name                   | Included by default | Description                                                                                                                                                                            |
-|--------------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`BoldTextFeature`**          | Yes                 | Handles the bold text format                                                                                                                                                           |
 | **`ItalicTextFeature`**        | Yes                 | Handles the italic text format                                                                                                                                                         |
 | **`UnderlineTextFeature`**     | Yes                 | Handles the underline text format                                                                                                                                                      |
@@ -153,7 +150,7 @@ Here's an overview of all the included features:
 | **`HeadingFeature`**           | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                   |
 | **`AlignFeature`**             | Yes                 | Allows you to align text left, centered and right                                                                                                                                      |
 | **`IndentFeature`**            | Yes                 | Allows you to indent text with the tab key                                                                                                                                             |
-| **`UnorderedListFeature`**      | Yes                 | Adds unordered lists (ul)                                                                                                                                                              |
+| **`UnorderedListFeature`**     | Yes                 | Adds unordered lists (ul)                                                                                                                                                              |
 | **`OrderedListFeature`**       | Yes                 | Adds ordered lists (ol)                                                                                                                                                                |
 | **`CheckListFeature`**         | Yes                 | Adds checklists                                                                                                                                                                        |
 | **`LinkFeature`**              | Yes                 | Allows you to create internal and external links                                                                                                                                       |
@@ -187,11 +184,7 @@ To add HTML generation directly within the collection, follow the example below:
 ```ts
 import type { CollectionConfig } from 'payload/types'
 
-import {
-  HTMLConverterFeature,
-  lexicalEditor,
-  lexicalHTML
-} from '@payloadcms/richtext-lexical'
+import { HTMLConverterFeature, lexicalEditor, lexicalHTML } from '@payloadcms/richtext-lexical'
 
 const Pages: CollectionConfig = {
   slug: 'pages',
@@ -211,6 +204,7 @@ const Pages: CollectionConfig = {
   ],
 }
 ```
+
 The `lexicalHTML()` function creates a new field that automatically converts the referenced lexical richText field into HTML through an afterRead hook.
 
 #### Generating HTML in the Frontend:
@@ -225,13 +219,17 @@ import {
   consolidateHTMLConverters,
 } from '@payloadcms/richtext-lexical'
 
-async function lexicalToHTML(editorData: SerializedEditorState, editorConfig: SanitizedEditorConfig) {
+async function lexicalToHTML(
+  editorData: SerializedEditorState,
+  editorConfig: SanitizedEditorConfig,
+) {
   return await convertLexicalToHTML({
     converters: consolidateHTMLConverters({ editorConfig }),
     data: editorData,
   })
 }
 ```
+
 This method employs `convertLexicalToHTML` from `@payloadcms/richtext-lexical`, which converts the serialized editor state into HTML.
 
 Because every `Feature` is able to provide html converters, and because the `htmlFeature` can modify those or provide their own, we need to consolidate them with the default html Converters using the `consolidateHTMLConverters` function.
@@ -286,9 +284,13 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
             //...
           },
         ],
-        plugins: [/*...*/],
+        plugins: [
+          /*...*/
+        ],
         props: props,
-        slashMenu: {/*...*/},
+        slashMenu: {
+          /*...*/
+        },
       }
     },
     key: 'upload',
@@ -299,6 +301,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
 ### Headless Editor
 
 Lexical provides a seamless way to perform conversions between various other formats:
+
 - HTML to Lexical (or, importing HTML into the lexical editor)
 - Markdown to Lexical (or, importing Markdown into the lexical editor)
 - Lexical to Markdown
@@ -307,12 +310,9 @@ A headless editor can perform such conversions outside of the main editor instan
 
 ```ts
 import { createHeadlessEditor } from '@lexical/headless' // <= make sure this package is installed
-import {
-  getEnabledNodes,
-  sanitizeEditorConfig,
-} from '@payloadcms/richtext-lexical'
+import { getEnabledNodes, sanitizeEditorConfig } from '@payloadcms/richtext-lexical'
 
-const yourEditorConfig; // <= your editor config here
+const yourEditorConfig // <= your editor config here
 
 const headlessEditor = createHeadlessEditor({
   nodes: getEnabledNodes({
@@ -345,23 +345,26 @@ Once you have your headless editor instance, you can use it to convert HTML to L
 
 ```ts
 import { $generateNodesFromDOM } from '@lexical/html'
-import { $getRoot,$getSelection } from 'lexical'
-import { JSDOM } from 'jsdom';
+import { $getRoot, $getSelection } from 'lexical'
+import { JSDOM } from 'jsdom'
 
-headlessEditor.update(() => {
-  // In a headless environment you can use a package such as JSDom to parse the HTML string.
-  const dom = new JSDOM(htmlString)
+headlessEditor.update(
+  () => {
+    // In a headless environment you can use a package such as JSDom to parse the HTML string.
+    const dom = new JSDOM(htmlString)
 
-  // Once you have the DOM instance it's easy to generate LexicalNodes.
-  const nodes = $generateNodesFromDOM(headlessEditor, dom.window.document)
+    // Once you have the DOM instance it's easy to generate LexicalNodes.
+    const nodes = $generateNodesFromDOM(headlessEditor, dom.window.document)
 
-  // Select the root
-  $getRoot().select()
+    // Select the root
+    $getRoot().select()
 
-  // Insert them at a selection.
-  const selection = $getSelection()
-  selection.insertNodes(nodes)
-}, { discrete: true })
+    // Insert them at a selection.
+    const selection = $getSelection()
+    selection.insertNodes(nodes)
+  },
+  { discrete: true },
+)
 
 // Do this if you then want to get the editor JSON
 const editorJSON = headlessEditor.getEditorState().toJSON()
@@ -374,7 +377,8 @@ This has been taken from the [lexical serialization & deserialization docs](http
 <Banner type="success">
   <strong>Note:</strong>
   <br />
-  Using the <code>discrete: true</code> flag ensures instant updates to the editor state. If immediate reading of the updated state isn't necessary, you can omit the flag.
+  Using the <code>discrete: true</code> flag ensures instant updates to the editor state. If
+  immediate reading of the updated state isn't necessary, you can omit the flag.
 </Banner>
 
 ### Markdown => Lexical
@@ -388,7 +392,12 @@ import { sanitizeEditorConfig } from '@payloadcms/richtext-lexical'
 const yourSanitizedEditorConfig = sanitizeEditorConfig(yourEditorConfig) // <= your editor config here
 const markdown = `# Hello World`
 
-headlessEditor.update(() => { $convertFromMarkdownString(markdown, yourSanitizedEditorConfig.features.markdownTransformers) }, { discrete: true })
+headlessEditor.update(
+  () => {
+    $convertFromMarkdownString(markdown, yourSanitizedEditorConfig.features.markdownTransformers)
+  },
+  { discrete: true },
+)
 
 // Do this if you then want to get the editor JSON
 const editorJSON = headlessEditor.getEditorState().toJSON()
@@ -406,7 +415,7 @@ Here's the code for it:
 ```ts
 import { $convertToMarkdownString } from '@lexical/markdown'
 import { sanitizeEditorConfig } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from "lexical"
+import type { SerializedEditorState } from 'lexical'
 
 const yourSanitizedEditorConfig = sanitizeEditorConfig(yourEditorConfig) // <= your editor config here
 const yourEditorState: SerializedEditorState // <= your current editor state here
@@ -427,7 +436,6 @@ headlessEditor.getEditorState().read(() => {
 
 The `.setEditorState()` function immediately updates your editor state. Thus, there's no need for the `discrete: true` flag when reading the state afterward.
 
-
 ### Lexical => Plain Text
 
 Export content from the Lexical editor into plain text using these steps:
@@ -438,8 +446,8 @@ Export content from the Lexical editor into plain text using these steps:
 Here's the code for it:
 
 ```ts
-import type { SerializedEditorState } from "lexical"
-import { $getRoot } from "lexical"
+import type { SerializedEditorState } from 'lexical'
+import { $getRoot } from 'lexical'
 
 const yourEditorState: SerializedEditorState // <= your current editor state here
 
@@ -451,9 +459,10 @@ try {
 }
 
 // Export to plain text
-const plainTextContent = headlessEditor.getEditorState().read(() => {
-  return $getRoot().getTextContent()
-}) || ''
+const plainTextContent =
+  headlessEditor.getEditorState().read(() => {
+    return $getRoot().getTextContent()
+  }) || ''
 ```
 
 ## Migrating from Slate
@@ -469,10 +478,7 @@ Simply add the `SlateToLexicalFeature` to your editor:
 ```ts
 import type { CollectionConfig } from 'payload/types'
 
-import {
-  SlateToLexicalFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
+import { SlateToLexicalFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 const Pages: CollectionConfig = {
   slug: 'pages',
@@ -481,10 +487,7 @@ const Pages: CollectionConfig = {
       name: 'nameOfYourRichTextField',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          SlateToLexicalFeature({})
-        ],
+        features: ({ defaultFeatures }) => [...defaultFeatures, SlateToLexicalFeature({})],
       }),
     },
   ],
@@ -494,6 +497,7 @@ const Pages: CollectionConfig = {
 and done! Now, everytime this lexical editor is initialized, it converts the slate date to lexical on-the-fly. If the data is already in lexical format, it will just pass it through.
 
 This is by far the easiest way to migrate from Slate to Lexical, although it does come with a few caveats:
+
 - There is a performance hit when initializing the lexical editor
 - The editor will still output the Slate data in the output JSON, as the on-the-fly converter only runs for the admin panel
 
@@ -535,7 +539,8 @@ export async function convertAll(payload: Payload, collectionName: string, field
     const promises = batch.map(async (doc: YourDocumentType) => {
       const richText = doc[fieldName]
 
-      if (richText && Array.isArray(richText) && !('root' in richText)) { // It's Slate data - skip already-converted data
+      if (richText && Array.isArray(richText) && !('root' in richText)) {
+        // It's Slate data - skip already-converted data
         const converted = convertSlateToLexical({
           converters: converters,
           slateData: richText,
@@ -604,7 +609,7 @@ import type { CollectionConfig } from 'payload/types'
 import {
   SlateToLexicalFeature,
   lexicalEditor,
-  defaultSlateConverters
+  defaultSlateConverters,
 } from '@payloadcms/richtext-lexical'
 
 import { YourCustomConverter } from '../converters/YourCustomConverter'
@@ -619,10 +624,7 @@ const Pages: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           SlateToLexicalFeature({
-            converters: [
-              ...defaultSlateConverters,
-              YourCustomConverter
-            ]
+            converters: [...defaultSlateConverters, YourCustomConverter],
           }),
         ],
       }),

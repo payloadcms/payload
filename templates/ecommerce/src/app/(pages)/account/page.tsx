@@ -1,6 +1,7 @@
-import React, { Fragment } from 'react'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+
 import Link from 'next/link'
+import React, { Fragment } from 'react'
 
 import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
@@ -10,7 +11,6 @@ import { LowImpactHero } from '../../_heros/LowImpact'
 import { getMeUser } from '../../_utilities/getMeUser'
 import { mergeOpenGraph } from '../../_utilities/mergeOpenGraph'
 import AccountForm from './AccountForm'
-
 import classes from './index.module.scss'
 
 export default async function Account() {
@@ -26,7 +26,6 @@ export default async function Account() {
         <RenderParams className={classes.params} />
       </Gutter>
       <LowImpactHero
-        type="lowImpact"
         media={null}
         richText={[
           {
@@ -45,16 +44,17 @@ export default async function Account() {
               },
               {
                 type: 'link',
-                url: '/admin/collections/users',
                 children: [
                   {
                     text: 'login to the admin dashboard.',
                   },
                 ],
+                url: '/admin/collections/users',
               },
             ],
           },
         ]}
+        type="lowImpact"
       />
       <Gutter className={classes.account}>
         <AccountForm />
@@ -70,7 +70,7 @@ export default async function Account() {
             <ul className={classes.purchases}>
               {user?.purchases?.map((purchase, index) => {
                 return (
-                  <li key={index} className={classes.purchase}>
+                  <li className={classes.purchase} key={index}>
                     {typeof purchase === 'string' ? (
                       <p>{purchase}</p>
                     ) : (
@@ -93,23 +93,23 @@ export default async function Account() {
           intent. As you order products, they will appear in your "purchased products" list.
         </p>
         <Button
+          appearance="primary"
           className={classes.ordersButton}
           href="/orders"
-          appearance="primary"
           label="View orders"
         />
         <HR />
-        <Button href="/logout" appearance="secondary" label="Log out" />
+        <Button appearance="secondary" href="/logout" label="Log out" />
       </Gutter>
     </Fragment>
   )
 }
 
 export const metadata: Metadata = {
-  title: 'Account',
   description: 'Create an account or log in to your existing account.',
   openGraph: mergeOpenGraph({
     title: 'Account',
     url: '/account',
   }),
+  title: 'Account',
 }

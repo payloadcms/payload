@@ -1,5 +1,5 @@
-import React from 'react'
 import * as Sentry from '@sentry/react'
+import React from 'react'
 export const testErrors = () => {
   const notFound = async () => {
     const req = await fetch('http://localhost:3000/api/users/notFound', {
@@ -9,53 +9,53 @@ export const testErrors = () => {
 
   const cannotCreate = async () => {
     const req = await fetch('http://localhost:3000/api/posts', {
-      method: 'POST',
       body: JSON.stringify({
         text: 'New post',
       }),
+      method: 'POST',
     })
   }
 
   const badLogin = async () => {
     const req = await fetch('http://localhost:3000/api/users/login', {
-      method: 'POST',
       body: JSON.stringify({
         email: 'sorry@whoareyou.com',
         password: '123456',
       }),
+      method: 'POST',
     })
   }
 
   const badReq = async () => {
     const req = await fetch('http://localhost:3000/api/users/forgot-password', {
-      method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
+      method: 'POST',
     })
   }
 
   const badReset = async () => {
     const req = await fetch('http://localhost:3000/api/users/reset-password', {
-      method: 'POST',
+      body: JSON.stringify({
+        password: 'newPassword',
+        token: '7eac3830ffcfc7f9f66c00315dabeb11575dba91',
+      }),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        token: '7eac3830ffcfc7f9f66c00315dabeb11575dba91',
-        password: 'newPassword',
-      }),
+      method: 'POST',
     })
   }
 
   const badVerify = async () => {
     const req = await fetch('http://localhost:3000/api/users/unlock', {
-      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      method: 'POST',
     })
   }
 
@@ -63,27 +63,27 @@ export const testErrors = () => {
     <Sentry.ErrorBoundary>
       <h4>Test Errors</h4>
       <div style={{ display: 'flex', gap: '10px' }}>
-        <button style={{ marginBottom: '20px' }} onClick={() => notFound()} type="button">
+        <button onClick={() => notFound()} style={{ marginBottom: '20px' }} type="button">
           Not Found
         </button>
 
-        <button style={{ marginBottom: '20px' }} onClick={() => cannotCreate()} type="button">
+        <button onClick={() => cannotCreate()} style={{ marginBottom: '20px' }} type="button">
           Forbidden
         </button>
 
-        <button style={{ marginBottom: '20px' }} onClick={() => badLogin()} type="button">
+        <button onClick={() => badLogin()} style={{ marginBottom: '20px' }} type="button">
           Bad login
         </button>
 
-        <button style={{ marginBottom: '20px' }} onClick={() => badReq()} type="button">
+        <button onClick={() => badReq()} style={{ marginBottom: '20px' }} type="button">
           TypeError
         </button>
 
-        <button style={{ marginBottom: '20px' }} onClick={() => badReset()} type="button">
+        <button onClick={() => badReset()} style={{ marginBottom: '20px' }} type="button">
           Bad Reset
         </button>
 
-        <button style={{ marginBottom: '20px' }} onClick={() => badVerify()} type="button">
+        <button onClick={() => badVerify()} style={{ marginBottom: '20px' }} type="button">
           Bad Verify
         </button>
       </div>

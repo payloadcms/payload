@@ -2,9 +2,9 @@
 
 module.exports = {
   breakpoints: {
-    s: 768,
-    m: 1024,
     l: 1440,
+    m: 1024,
+    s: 768,
   },
   colors: {
     base0: 'rgb(255, 255, 255)',

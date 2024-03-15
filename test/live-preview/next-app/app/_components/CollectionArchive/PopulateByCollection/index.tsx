@@ -1,58 +1,58 @@
 'use client'
 
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import qs from 'qs'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
-import { Post } from '../../../../payload-types'
+import type { Post } from '../../../../payload-types'
 import type { ArchiveBlockProps } from '../../../_blocks/ArchiveBlock/types'
+
 import { Card } from '../../Card'
 import { Gutter } from '../../Gutter'
 import { PageRange } from '../../PageRange'
 import { Pagination } from '../../Pagination'
-
 import classes from './index.module.scss'
-import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 
 type Result = {
-  totalDocs: number
   docs: (Post | string)[]
-  page: number
-  totalPages: number
-  hasPrevPage: boolean
   hasNextPage: boolean
+  hasPrevPage: boolean
   nextPage: number
+  page: number
   prevPage: number
+  totalDocs: number
+  totalPages: number
 }
 
 export type Props = Omit<ArchiveBlockProps, 'blockType'> & {
   className?: string
-  showPageRange?: boolean
   onResultChange?: (result: Result) => void // eslint-disable-line no-unused-vars
+  showPageRange?: boolean
   sort?: string
 }
 
 export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
   const {
+    categories: catsFromProps,
     className,
-    relationTo,
-    showPageRange,
-    onResultChange,
-    sort = '-createdAt',
     limit = 10,
+    onResultChange,
     populatedDocs,
     populatedDocsTotal,
-    categories: catsFromProps,
+    relationTo,
+    showPageRange,
+    sort = '-createdAt',
   } = props
 
   const [results, setResults] = useState<Result>({
-    totalDocs: typeof populatedDocsTotal === 'number' ? populatedDocsTotal : 0,
     docs: populatedDocs?.map((doc) => doc.value) || [],
-    page: 1,
-    totalPages: 1,
-    hasPrevPage: false,
     hasNextPage: false,
-    prevPage: 1,
+    hasPrevPage: false,
     nextPage: 1,
+    page: 1,
+    prevPage: 1,
+    totalDocs: typeof populatedDocsTotal === 'number' ? populatedDocsTotal : 0,
+    totalPages: 1,
   })
 
   const [isLoading, setIsLoading] = useState(false)
@@ -90,6 +90,9 @@ export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
 
     const searchQuery = qs.stringify(
       {
+        depth: 1,
+        limit,
+        page,
         sort,
         where: {
           ...(catsFromProps && catsFromProps?.length > 0
@@ -105,9 +108,6 @@ export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
               }
             : {}),
         },
-        limit,
-        page,
-        depth: 1,
       },
       { encode: false },
     )
@@ -144,17 +144,17 @@ export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
 
   return (
     <div className={[classes.collectionArchive, className].filter(Boolean).join(' ')}>
-      <div ref={scrollRef} className={classes.scrollRef} />
+      <div className={classes.scrollRef} ref={scrollRef} />
       {!isLoading && error && <Gutter>{error}</Gutter>}
       <Fragment>
         {showPageRange !== false && (
           <Gutter>
             <div className={classes.pageRange}>
               <PageRange
-                totalDocs={results.totalDocs}
-                currentPage={results.page}
                 collection={relationTo}
+                currentPage={results.page}
                 limit={limit}
+                totalDocs={results.totalDocs}
               />
             </div>
           </Gutter>
@@ -167,8 +167,8 @@ export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
               }
 
               return (
-                <div key={index} className={classes.column}>
-                  <Card relationTo="posts" doc={result} showCategories />
+                <div className={classes.column} key={index}>
+                  <Card doc={result} relationTo="posts" showCategories />
                 </div>
               )
             })}
@@ -176,9 +176,9 @@ export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
           {results.totalPages > 1 && (
             <Pagination
               className={classes.pagination}
+              onClick={setPage}
               page={results.page}
               totalPages={results.totalPages}
-              onClick={setPage}
             />
           )}
         </Gutter>

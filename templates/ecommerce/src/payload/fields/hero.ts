@@ -7,15 +7,13 @@ import largeBody from './richText/largeBody'
 
 export const hero: Field = {
   name: 'hero',
-  label: false,
   type: 'group',
   fields: [
     {
-      type: 'select',
       name: 'type',
-      label: 'Type',
-      required: true,
+      type: 'select',
       defaultValue: 'lowImpact',
+      label: 'Type',
       options: [
         {
           label: 'None',
@@ -34,6 +32,7 @@ export const hero: Field = {
           value: 'lowImpact',
         },
       ],
+      required: true,
     },
     richText({
       admin: {
@@ -49,11 +48,12 @@ export const hero: Field = {
     {
       name: 'media',
       type: 'upload',
-      relationTo: 'media',
-      required: true,
       admin: {
         condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
       },
+      relationTo: 'media',
+      required: true,
     },
   ],
+  label: false,
 }

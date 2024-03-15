@@ -2,10 +2,10 @@ import type { Payload } from 'payload'
 
 export const revalidate = async (args: {
   collection: string
-  slug: string
   payload: Payload
+  slug: string
 }): Promise<void> => {
-  const { collection, slug, payload } = args
+  const { slug, collection, payload } = args
 
   try {
     const res = await fetch(

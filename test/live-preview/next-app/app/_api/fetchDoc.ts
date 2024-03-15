@@ -1,12 +1,14 @@
 import QueryString from 'qs'
+
 import type { Config } from '../../payload-types'
+
 import { PAYLOAD_SERVER_URL } from './serverURL'
 
 export const fetchDoc = async <T>(args: {
   collection: keyof Config['collections']
-  slug?: string
-  id?: string
   depth?: number
+  id?: string
+  slug?: string
 }): Promise<T> => {
   const { collection, slug, id, depth = 2 } = args || {}
 

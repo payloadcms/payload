@@ -1,7 +1,9 @@
-import React, { Fragment } from 'react'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 
-import { Settings } from '../../../payload/payload-types'
+import React, { Fragment } from 'react'
+
+import type { Settings } from '../../../payload/payload-types'
+
 import { fetchSettings } from '../../_api/fetchGlobals'
 import { Gutter } from '../../_components/Gutter'
 import { Message } from '../../_components/Message'
@@ -9,7 +11,6 @@ import { LowImpactHero } from '../../_heros/LowImpact'
 import { getMeUser } from '../../_utilities/getMeUser'
 import { mergeOpenGraph } from '../../_utilities/mergeOpenGraph'
 import { CheckoutPage } from './CheckoutPage'
-
 import classes from './index.module.scss'
 
 export default async function Checkout() {
@@ -39,18 +40,18 @@ export default async function Checkout() {
                 {'To enable checkout, you must '}
                 <a
                   href="https://dashboard.stripe.com/test/apikeys"
-                  target="_blank"
                   rel="noopener noreferrer"
+                  target="_blank"
                 >
-                  {'obtain your Stripe API Keys'}
+                  obtain your Stripe API Keys
                 </a>
                 {' then set them as environment variables. See the '}
                 <a
                   href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
-                  target="_blank"
                   rel="noopener noreferrer"
+                  target="_blank"
                 >
-                  {'README'}
+                  README
                 </a>
                 {' for more details.'}
               </Fragment>
@@ -59,7 +60,6 @@ export default async function Checkout() {
         </Gutter>
       )}
       <LowImpactHero
-        type="lowImpact"
         media={null}
         richText={[
           {
@@ -78,19 +78,19 @@ export default async function Checkout() {
               },
               {
                 type: 'link',
-                url: 'https://stripe.com/docs/testing#cards',
                 children: [
                   {
                     text: 'test credit card',
                   },
                 ],
+                url: 'https://stripe.com/docs/testing#cards',
               },
               {
                 text: ' like ',
               },
               {
-                text: '4242 4242 4242 4242',
                 bold: true,
+                text: '4242 4242 4242 4242',
               },
               {
                 text: ' with any future date and CVC. An order will be generated in Stripe and will appear in your account. In production, this checkout form will require a real card with sufficient funds.',
@@ -98,6 +98,7 @@ export default async function Checkout() {
             ],
           },
         ]}
+        type="lowImpact"
       />
       <Gutter className={classes.checkoutPage}>
         <CheckoutPage settings={settings} />
@@ -107,10 +108,10 @@ export default async function Checkout() {
 }
 
 export const metadata: Metadata = {
-  title: 'Account',
   description: 'Create an account or log in to your existing account.',
   openGraph: mergeOpenGraph({
     title: 'Account',
     url: '/account',
   }),
+  title: 'Account',
 }

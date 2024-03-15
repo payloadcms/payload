@@ -1,14 +1,14 @@
-import React, { Fragment } from 'react'
-
-import { Page } from '../../../payload-types'
-
-import classes from './index.module.scss'
 import { Gutter } from '@/app/_components/Gutter'
 import RichText from '@/app/_components/RichText'
+import React, { Fragment } from 'react'
+
+import type { Page } from '../../../payload-types'
+
+import classes from './index.module.scss'
 
 export type RelationshipsBlockProps = {
-  blockType: 'relationships'
   blockName: string
+  blockType: 'relationships'
   data: Page
 }
 
@@ -29,7 +29,7 @@ export const RelationshipsBlock: React.FC<RelationshipsBlockProps> = (props) => 
           <b>Rich Text — Lexical:</b>
         </p>
         {data?.richTextLexical && (
-          <RichText serializer="lexical" content={data.richTextLexical} renderUploadFilenameOnly />
+          <RichText content={data.richTextLexical} renderUploadFilenameOnly serializer="lexical" />
         )}
         <p>
           <b>Upload:</b>

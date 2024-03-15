@@ -23,9 +23,9 @@ export async function migrateFresh(
     const { confirm: acceptWarning } = await prompts(
       {
         name: 'confirm',
+        type: 'confirm',
         initial: false,
         message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
-        type: 'confirm',
       },
       {
         onCancel: () => {

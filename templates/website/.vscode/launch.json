@@ -8,7 +8,7 @@
       "command": "yarn dev",
       "name": "Debug Website",
       "request": "launch",
-      "type": "node-terminal",
-    },
+      "type": "node-terminal"
+    }
   ]
 }

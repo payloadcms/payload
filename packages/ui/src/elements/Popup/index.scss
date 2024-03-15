@@ -80,11 +80,10 @@
   ////////////////////////////////
   // HORIZONTAL ALIGNMENT
   ////////////////////////////////
-  [dir='rtl']
-  &--h-align-left {
+  [dir='rtl'] &--h-align-left {
     .popup__caret {
       right: var(--popup-padding);
-      left: unset
+      left: unset;
     }
   }
   &--h-align-left {
@@ -104,16 +103,15 @@
     }
   }
 
-  [dir='rtl']
-  &--h-align-right {
+  [dir='rtl'] &--h-align-right {
     .popup__content {
       right: unset;
-      left:0
+      left: 0;
     }
 
     .popup__caret {
       right: unset;
-      left: var(--popup-padding)
+      left: var(--popup-padding);
     }
   }
 

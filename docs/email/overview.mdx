@@ -25,13 +25,13 @@ in the `email` property object of your payload init call. Payload will make use 
 
 The following options are configurable in the `email` property object as part of the options object when calling payload.init().
 
-| Option                   | Description                                                                                                                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`fromName`** \*        | The name part of the From field that will be seen on the delivered email                                                                                                                     |
-| **`fromAddress`** \*     | The email address part of the From field that will be used when delivering email                                                                                                             |
-| **`transport`**          | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set                                                                                 |
+| Option                   | Description                                                                                                                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`fromName`** \*        | The name part of the From field that will be seen on the delivered email                                                                                                               |
+| **`fromAddress`** \*     | The email address part of the From field that will be used when delivering email                                                                                                       |
+| **`transport`**          | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set                                                                           |
 | **`transportOptions`**   | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com) or see the examples below |
-| **`logMockCredentials`** | If set to true and no transport/transportOptions, ethereal credentials will be logged to console on startup                                                                                  |
+| **`logMockCredentials`** | If set to true and no transport/transportOptions, ethereal credentials will be logged to console on startup                                                                            |
 
 _\* An asterisk denotes that a property is required._
 

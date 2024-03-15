@@ -28,7 +28,7 @@ export const PageRange: React.FC<{
   currentPage?: number
   limit?: number
   totalDocs?: number
-}> = props => {
+}> = (props) => {
   const {
     className,
     collection,

@@ -10,45 +10,42 @@ import { LinkToPaymentIntent } from './ui/LinkToPaymentIntent'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
-  admin: {
-    useAsTitle: 'createdAt',
-    defaultColumns: ['createdAt', 'orderedBy'],
-    preview: doc => `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/orders/${doc.id}`,
-  },
-  hooks: {
-    afterChange: [updateUserPurchases, clearUserCart],
-  },
   access: {
-    read: adminsOrOrderedBy,
-    update: admins,
     create: adminsOrLoggedIn,
     delete: admins,
+    read: adminsOrOrderedBy,
+    update: admins,
+  },
+  admin: {
+    defaultColumns: ['createdAt', 'orderedBy'],
+    preview: (doc) => `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/orders/${doc.id}`,
+    useAsTitle: 'createdAt',
   },
   fields: [
     {
       name: 'orderedBy',
       type: 'relationship',
-      relationTo: 'users',
       hooks: {
         beforeChange: [populateOrderedBy],
       },
+      relationTo: 'users',
     },
     {
       name: 'stripePaymentIntentID',
-      label: 'Stripe Payment Intent ID',
       type: 'text',
       admin: {
-        position: 'sidebar',
         components: {
           Field: LinkToPaymentIntent,
         },
+        position: 'sidebar',
       },
+      label: 'Stripe Payment Intent ID',
     },
     {
       name: 'total',
       type: 'number',
-      required: true,
       min: 0,
+      required: true,
     },
     {
       name: 'items',
@@ -73,4 +70,7 @@ export const Orders: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    afterChange: [updateUserPurchases, clearUserCart],
+  },
 }

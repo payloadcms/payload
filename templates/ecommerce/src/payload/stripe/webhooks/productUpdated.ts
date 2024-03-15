@@ -7,7 +7,7 @@ export const productUpdated: StripeWebhookHandler<{
   data: {
     object: Stripe.Product
   }
-}> = async args => {
+}> = async (args) => {
   const { event, payload, stripe } = args
 
   const {
@@ -53,8 +53,8 @@ export const productUpdated: StripeWebhookHandler<{
 
     // find all stripe prices that are assigned to "payloadProductID"
     prices = await stripe.prices.list({
-      product: stripeProductID,
       limit: 100,
+      product: stripeProductID,
     })
   } catch (error: unknown) {
     payload.logger.error(`- Error looking up prices: ${error}`)
@@ -64,8 +64,8 @@ export const productUpdated: StripeWebhookHandler<{
     if (logs) payload.logger.info(`- Updating document...`)
 
     await payload.update({
-      collection: 'products',
       id: payloadProductID,
+      collection: 'products',
       data: {
         // name: stripeProductName,
         // description: stripeDescription,

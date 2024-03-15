@@ -104,6 +104,7 @@ By default the browser bundle will now include all the code from that file and a
 To fix this, we need to alias the `createStripeSubscription` file to a different file that can safely be included in the browser bundle.
 
 First, we will create a mock file to replace the server-only file when bundling:
+
 ```js
 // mocks/modules.js
 
@@ -131,7 +132,7 @@ import { Subscriptions } from './collections/Subscriptions'
 const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
 const fullFilePath = path.resolve(
   __dirname,
-  'collections/Subscriptions/hooks/createStripeSubscription'
+  'collections/Subscriptions/hooks/createStripeSubscription',
 )
 
 export default buildConfig({
@@ -173,24 +174,23 @@ export default buildConfig({
   admin: {
     bundler: viteBundler(),
     vite: (incomingViteConfig) => {
-      const existingAliases = incomingViteConfig?.resolve?.alias || {};
-      let aliasArray: { find: string | RegExp; replacement: string; }[] = [];
+      const existingAliases = incomingViteConfig?.resolve?.alias || {}
+      let aliasArray: { find: string | RegExp; replacement: string }[] = []
 
       // Pass the existing Vite aliases
       if (Array.isArray(existingAliases)) {
-        aliasArray = existingAliases;
+        aliasArray = existingAliases
       } else {
-        aliasArray = Object.values(existingAliases);
+        aliasArray = Object.values(existingAliases)
       }
-
 
       // highlight-start
       // Add your own aliases using the find and replacement keys
       // remember, vite aliases are exact-match only
       aliasArray.push({
         find: '../server-only-module',
-        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js')
-      });
+        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js'),
+      })
       // highlight-end
 
       return {
@@ -198,8 +198,8 @@ export default buildConfig({
         resolve: {
           ...(incomingViteConfig?.resolve || {}),
           alias: aliasArray,
-        }
-      };
+        },
+      }
     },
   },
 })

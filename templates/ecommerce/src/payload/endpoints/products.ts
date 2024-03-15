@@ -1,5 +1,6 @@
 import type { PayloadHandler } from 'payload/config'
 import type { PayloadRequest } from 'payload/types'
+
 import Stripe from 'stripe'
 
 import { checkRole } from '../collections/Users/checkRole'

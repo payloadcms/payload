@@ -1,22 +1,7 @@
 /* eslint-disable no-use-before-define */
 import type { GraphQLInputFieldConfig, GraphQLScalarType, GraphQLType } from 'graphql'
-
-import {
-  GraphQLBoolean,
-  GraphQLEnumType,
-  GraphQLFloat,
-  GraphQLInputObjectType,
-  GraphQLInt,
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLString,
-} from 'graphql'
-import { GraphQLJSON } from 'graphql-type-json'
-
 import type { GraphQLInfo } from 'payload/config'
 import type {
-  SanitizedCollectionConfig,
-  SanitizedConfig,
   ArrayField,
   BlockField,
   CheckboxField,
@@ -33,20 +18,34 @@ import type {
   RelationshipField,
   RichTextField,
   RowField,
+  SanitizedCollectionConfig,
+  SanitizedConfig,
   SelectField,
   TabsField,
   TextField,
   TextareaField,
   UploadField,
 } from 'payload/types'
+
+import {
+  GraphQLBoolean,
+  GraphQLEnumType,
+  GraphQLFloat,
+  GraphQLInputObjectType,
+  GraphQLInt,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLString,
+} from 'graphql'
+import { GraphQLJSON } from 'graphql-type-json'
 import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/types'
 import { toWords } from 'payload/utilities'
+import { flattenTopLevelFields } from 'payload/utilities'
 
-import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
+import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequiredSubfield.js'
 import withNullableType from './withNullableType.js'
-import { flattenTopLevelFields } from 'payload/utilities'
 
 const idFieldTypes = {
   number: GraphQLInt,
@@ -73,31 +72,31 @@ export type InputObjectTypeConfig = {
 }
 
 type BuildMutationInputTypeArgs = {
-  name: string
+  config: SanitizedConfig
   fields: Field[]
-  parentName: string
   forceNullable?: boolean
   graphqlResult: GraphQLInfo
-  config: SanitizedConfig
+  name: string
+  parentName: string
 }
 
 export function buildMutationInputType({
   name,
+  config,
   fields,
-  parentName,
   forceNullable = false,
   graphqlResult,
-  config,
+  parentName,
 }: BuildMutationInputTypeArgs): GraphQLInputObjectType | null {
   const fieldToSchemaMap = {
     array: (inputObjectTypeConfig: InputObjectTypeConfig, field: ArrayField) => {
       const fullName = combineParentName(parentName, toWords(field.name, true))
       let type: GraphQLList<GraphQLType> | GraphQLType = buildMutationInputType({
         name: fullName,
-        fields: field.fields,
-        parentName: fullName,
-        graphqlResult,
         config,
+        fields: field.fields,
+        graphqlResult,
+        parentName: fullName,
       })
 
       if (!type) return inputObjectTypeConfig
@@ -139,10 +138,10 @@ export function buildMutationInputType({
       const fullName = combineParentName(parentName, toWords(field.name, true))
       let type: GraphQLType = buildMutationInputType({
         name: fullName,
-        fields: field.fields,
-        parentName: fullName,
-        graphqlResult,
         config,
+        fields: field.fields,
+        graphqlResult,
+        parentName: fullName,
       })
 
       if (!type) return inputObjectTypeConfig
@@ -271,10 +270,10 @@ export function buildMutationInputType({
           const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)
           let type: GraphQLType = buildMutationInputType({
             name: fullName,
-            fields: tab.fields,
-            parentName: fullName,
-            graphqlResult,
             config,
+            fields: tab.fields,
+            graphqlResult,
+            parentName: fullName,
           })
 
           if (!type) return acc

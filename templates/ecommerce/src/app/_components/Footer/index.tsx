@@ -1,12 +1,12 @@
-import React from 'react'
 import Link from 'next/link'
+import React from 'react'
 
-import { Footer } from '../../../payload/payload-types'
+import type { Footer } from '../../../payload/payload-types'
+
 import { fetchFooter, fetchGlobals } from '../../_api/fetchGlobals'
 import { ThemeSelector } from '../../_providers/Theme/ThemeSelector'
 import { Gutter } from '../Gutter'
 import { CMSLink } from '../Link'
-
 import classes from './index.module.scss'
 
 export async function Footer() {
@@ -29,8 +29,8 @@ export async function Footer() {
         <Link href="/">
           <picture>
             <img
-              className={classes.logo}
               alt="Payload Logo"
+              className={classes.logo}
               src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
             />
           </picture>
@@ -43,12 +43,12 @@ export async function Footer() {
           <Link href="/admin">Admin</Link>
           <Link
             href="https://github.com/payloadcms/payload/tree/main/templates/ecommerce"
-            target="_blank"
             rel="noopener noreferrer"
+            target="_blank"
           >
             Source Code
           </Link>
-          <Link href="https://payloadcms.com" target="_blank" rel="noopener noreferrer">
+          <Link href="https://payloadcms.com" rel="noopener noreferrer" target="_blank">
             Payload
           </Link>
         </nav>

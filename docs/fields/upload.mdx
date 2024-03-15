@@ -20,10 +20,10 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 </Banner>
 
 <LightDarkImage
-srcLight="https://payloadcms.com/images/docs/fields/upload.png"
-srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
-alt="Shows an upload field in the Payload admin panel"
-caption="Admin panel screenshot of an Upload field"
+  srcLight="https://payloadcms.com/images/docs/fields/upload.png"
+  srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
+  alt="Shows an upload field in the Payload admin panel"
+  caption="Admin panel screenshot of an Upload field"
 />
 
 **Example uses:**
@@ -35,7 +35,7 @@ caption="Admin panel screenshot of an Upload field"
 ### Config
 
 | Option               | Description                                                                                                                                                                 |
-|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*        | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
 | **`*relationTo`** \* | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>        |
 | **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                   |
@@ -85,13 +85,13 @@ The `filterOptions` property can either be a `Where` query, or a function return
 prevent all, or a `Where` query. When using a function, it will be
 called with an argument object with the following properties:
 
-| Property      | Description                                                                                                  |
-|---------------|--------------------------------------------------------------------------------------------------------------|
-| `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property                       |
-| `data`        | An object containing the full collection or global document currently being edited                           |
-| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field        |
-| `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation             |
-| `user`        | An object containing the currently authenticated user                                                        |
+| Property      | Description                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property                |
+| `data`        | An object containing the full collection or global document currently being edited                    |
+| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field |
+| `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation      |
+| `user`        | An object containing the currently authenticated user                                                 |
 
 ### Example
 

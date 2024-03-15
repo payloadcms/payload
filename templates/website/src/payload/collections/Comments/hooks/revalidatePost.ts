@@ -8,13 +8,13 @@ export const revalidatePost: AfterChangeHook = async ({ doc: commentDoc, req: { 
     // lookup the full parent doc to get the slug
     if (typeof commentDoc.doc === 'string') {
       const parentDoc = await payload.findByID({
-        collection: 'posts',
         id: commentDoc.doc,
+        collection: 'posts',
         depth: 0,
       })
 
       if (parentDoc) {
-        revalidate({ payload, collection: 'posts', slug: parentDoc.slug })
+        revalidate({ slug: parentDoc.slug, collection: 'posts', payload })
       } else {
         payload.logger.error(
           `Parent doc for comment '${commentDoc.id}' was not found, could not revalidate`,

@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken'
 import httpStatus from 'http-status'
+import jwt from 'jsonwebtoken'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'

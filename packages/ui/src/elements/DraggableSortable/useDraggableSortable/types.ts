@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities'
 import type { HTMLAttributes } from 'react'
 
