@@ -79,7 +79,18 @@ const baseExtends = [
 
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
-  ignorePatterns: ['*.d.ts', '**/tsconfig.json', 'package.json', '*.MD'],
+  ignorePatterns: [
+    '*.d.ts',
+    '**/tsconfig.json',
+    'package.json',
+    '*.MD',
+    '.tmp',
+    '**/.git',
+    '**/build',
+    '**/dist/**',
+    '**/node_modules',
+    '**/temp',
+  ],
   env: {
     es6: true,
     browser: true,
