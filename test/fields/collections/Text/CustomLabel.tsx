@@ -1,10 +1,11 @@
 'use client'
 
-import { useFieldPath } from '@payloadcms/ui'
 import React from 'react'
 
+import { useFieldProps } from '../../../../packages/ui/src/forms/FieldPropsProvider/index.js'
+
 const CustomLabel = () => {
-  const { path } = useFieldPath()
+  const { path } = useFieldProps()
   return (
     <label className="custom-label" htmlFor={`field-${path.replace(/\./g, '__')}`}>
       #label
