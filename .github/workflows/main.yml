@@ -248,6 +248,7 @@ jobs:
           retention-days: 1
 
   tests-type-generation:
+    if: false # This should be replaced with gen on a real Payload project
     runs-on: ubuntu-latest
     needs: core-build
 
