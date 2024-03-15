@@ -29,9 +29,11 @@ export const SelectComparison: React.FC<Props> = (props) => {
   const [lastLoadedPage, setLastLoadedPage] = useState(1)
   const [errorLoading, setErrorLoading] = useState('')
   const { i18n, t } = useTranslation()
+  const loadedAllOptionsRef = React.useRef(false)
 
   const getResults = useCallback(
     async ({ lastLoadedPage: lastLoadedPageArg }) => {
+      if (loadedAllOptionsRef.current) return
       const query: {
         [key: string]: unknown
         where: Where
@@ -44,6 +46,11 @@ export const SelectComparison: React.FC<Props> = (props) => {
             {
               id: {
                 not_equals: versionID,
+              },
+            },
+            {
+              latest: {
+                not_equals: true,
               },
             },
           ],
@@ -79,6 +86,9 @@ export const SelectComparison: React.FC<Props> = (props) => {
             })),
           ])
 
+          if (!data.hasNextPage) {
+            loadedAllOptionsRef.current = true
+          }
           setLastLoadedPage(data.page)
         }
       } else {
@@ -89,13 +99,8 @@ export const SelectComparison: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
-    getResults({ lastLoadedPage: 1 })
+    void getResults({ lastLoadedPage: 1 })
   }, [getResults])
-
-  useEffect(() => {
-    if (publishedDoc?._status === 'published')
-      setOptions((currentOptions) => [publishedVersionOption, ...currentOptions])
-  }, [publishedDoc])
 
   return (
     <div
@@ -110,9 +115,12 @@ export const SelectComparison: React.FC<Props> = (props) => {
           isSearchable={false}
           onChange={onChange}
           onMenuScrollToBottom={() => {
-            getResults({ lastLoadedPage: lastLoadedPage + 1 })
+            void getResults({ lastLoadedPage: lastLoadedPage + 1 })
           }}
-          options={options}
+          options={[
+            ...(publishedDoc?._status === 'published' ? [publishedVersionOption] : []),
+            ...options,
+          ]}
           placeholder={t('version:selectVersionToCompare')}
           value={value}
         />

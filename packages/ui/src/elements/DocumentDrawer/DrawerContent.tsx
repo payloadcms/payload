@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormState, TypeWithID } from 'payload/types'
+import type { DocumentPreferences, FormState, TypeWithID } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import queryString from 'qs'
@@ -9,16 +9,16 @@ import { toast } from 'react-toastify'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections.js'
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
 import { X } from '../../icons/X/index.js'
-import { formatDocTitle, useAuth } from '../../index.js'
+import { formatDocTitle } from '../../index.js'
 import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormState } from '../../utilities/getFormState.js'
 import { Gutter } from '../Gutter/index.js'
@@ -53,10 +53,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const { formQueryParams } = useFormQueryParams()
   const formattedQueryParams = queryString.stringify(formQueryParams)
-
-  const { permissions } = useAuth()
-
-  const { schemaPath } = useFieldProps()
+  const { getPreference } = usePreferences()
 
   const { componentMap } = useComponentMap()
 
@@ -96,14 +93,21 @@ const Content: React.FC<DocumentDrawerProps> = ({
   useEffect(() => {
     if (!hasInitializedState.current && (!initialID.current || (initialID.current && data))) {
       const getInitialState = async () => {
+        let docPreferences: DocumentPreferences = { fields: {} }
+
+        if (id) {
+          docPreferences = await getPreference(`collection-${collectionSlug}-${id}`)
+        }
+
         const result = await getFormState({
           apiRoute,
           body: {
             id,
             collectionSlug,
             data: data || {},
+            docPreferences,
             operation: isEditing ? 'update' : 'create',
-            schemaPath,
+            schemaPath: collectionSlug,
           },
           serverURL,
         })
@@ -114,15 +118,13 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
       void getInitialState()
     }
-  }, [apiRoute, data, isEditing, schemaPath, serverURL, collectionSlug, id])
+  }, [apiRoute, data, isEditing, collectionSlug, serverURL, id, getPreference])
 
   if (isError) return null
 
   if (!initialState || isLoadingDocument) {
     return <LoadingOverlay />
   }
-
-  const docPermissions = permissions?.collections[collectionSlug]
 
   const title = formatDocTitle({
     collectionConfig,
@@ -159,8 +161,11 @@ const Content: React.FC<DocumentDrawerProps> = ({
       collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
-      docPermissions={docPermissions}
-      hasSavePermission={docPermissions?.update?.permission}
+      // Do NOT pass in the docPermissions we have here. This is because the permissions we have here do not have their where: { } returns resolved.
+      // If we set it to null though, the DocumentInfoProvider will fully-fetch the permissions from the server, and the where: { } returns will be resolved.
+      docPermissions={null}
+      // Same reason as above. We need to fully-fetch the docPreferences from the server. This is done in DocumentInfoProvider if we set it to null here.
+      hasSavePermission={null}
       // isLoading,
       id={id}
       initialData={data}

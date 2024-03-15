@@ -1,3 +1,5 @@
+import type { MongooseAdapter } from 'packages/db-mongodb/src/index.js'
+
 import fs from 'fs'
 import path from 'path'
 
@@ -9,12 +11,12 @@ import { createSnapshot, dbSnapshot, restoreFromSnapshot } from './snapshot.js'
 type SeedFunction = (_payload: Payload) => Promise<void>
 
 export async function seedDB({
-  shouldResetDB,
   _payload,
-  snapshotKey,
-  seedFunction,
-  uploadsDir,
   collectionSlugs,
+  seedFunction,
+  shouldResetDB,
+  snapshotKey,
+  uploadsDir,
 }: {
   _payload: Payload
   collectionSlugs: string[]

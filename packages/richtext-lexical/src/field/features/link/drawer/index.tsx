@@ -2,7 +2,6 @@ import type { FormState } from 'payload/types'
 
 import {
   Drawer,
-  FieldPathProvider,
   Form,
   type FormProps,
   FormSubmit,
@@ -79,7 +78,6 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
     <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
       {initialState !== false && (
         <Form
-          // @ts-expect-error // TODO: Fix this type. Is this correct?
           fields={Array.isArray(fieldMap) ? fieldMap : []}
           initialState={initialState}
           onChange={[onChange]}

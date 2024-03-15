@@ -241,6 +241,7 @@ export default {
     requiresAtLeast: 'Bu sahə ən azı {{count}} {{label}} tələb edir.',
   },
   version: {
+    type: 'Növ',
     aboutToPublishSelection: 'Seçimdə olan bütün {{label}}-i dərc etməyə hazırsınız. Əminsiniz?',
     aboutToRestore:
       'Bu {{label}} sənədini {{versionDate}} tarixindəki vəziyyətinə bərpa etmək üzrəsiniz.',
@@ -261,6 +262,7 @@ export default {
     confirmVersionRestoration: 'Versiyanın bərpasını təsdiq edin',
     draft: 'Qaralama',
     draftSavedSuccessfully: 'Qaralama uğurla yadda saxlandı.',
+    lastSavedAgo: '{{distance}} əvvəl son yadda saxlanıldı',
     noFurtherVersionsFound: 'Başqa versiyalar tapılmadı',
     noRowsFound: 'Heç bir {{label}} tapılmadı',
     preview: 'Öncədən baxış',
@@ -268,6 +270,7 @@ export default {
     publish: 'Dərc et',
     publishChanges: 'Dəyişiklikləri dərc et',
     published: 'Dərc edilmiş',
+    publishing: 'Nəşr',
     restoreThisVersion: 'Bu versiyanı bərpa et',
     restoredSuccessfully: 'Uğurla bərpa edildi.',
     restoring: 'Bərpa olunur...',
@@ -276,7 +279,6 @@ export default {
     selectLocales: 'Göstərmək üçün lokalları seçin',
     selectVersionToCompare: 'Müqayisə üçün bir versiya seçin',
     showLocales: 'Lokalları göstər:',
-    type: 'Növ',
     unpublish: 'Dərcdən çıxart',
     unpublishing: 'Dərcdən çıxarılır...',
     version: 'Versiya',

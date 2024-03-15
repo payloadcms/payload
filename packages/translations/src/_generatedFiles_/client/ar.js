@@ -237,6 +237,7 @@ export default {
     requiresAtLeast: 'هذا الحقل يتطلب على الأقل {{count}} {{label}}.',
   },
   version: {
+    type: 'النّوع',
     aboutToPublishSelection: 'أنت على وشك نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟',
     aboutToRestore:
       'أنت على وشك استرجاع هذا المستند {{label}} إلى الحالة التّي كان عليها في {{versionDate}}.',
@@ -255,6 +256,7 @@ export default {
     confirmVersionRestoration: 'تأكيد إستعادة النّسخة',
     draft: 'مسودّة',
     draftSavedSuccessfully: 'تمّ حفظ المسودّة بنجاح.',
+    lastSavedAgo: 'تم الحفظ آخر مرة قبل {{distance}}',
     noFurtherVersionsFound: 'لم يتمّ العثور على نسخات أخرى',
     noRowsFound: 'لم يتمّ العثور على {{label}}',
     preview: 'معاينة',
@@ -262,6 +264,7 @@ export default {
     publish: 'نشر',
     publishChanges: 'نشر التّغييرات',
     published: 'تمّ النّشر',
+    publishing: 'نشر',
     restoreThisVersion: 'استعادة هذه النّسخة',
     restoredSuccessfully: 'تمّت الاستعادة بنحاح.',
     restoring: 'تتمّ الاستعادة...',
@@ -270,7 +273,6 @@ export default {
     selectLocales: 'حدّد اللّغات المراد عرضها',
     selectVersionToCompare: 'حدّد نسخة للمقارنة',
     showLocales: 'اظهر اللّغات:',
-    type: 'النّوع',
     unpublish: 'الغاء النّشر',
     unpublishing: 'يتمّ الغاء النّشر...',
     version: 'النّسخة',

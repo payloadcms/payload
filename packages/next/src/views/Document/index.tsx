@@ -78,13 +78,17 @@ export const Document: React.FC<AdminViewProps> = async ({
   let action: string
 
   if (collectionConfig) {
-    docPermissions = await docAccessOperation({
-      id,
-      collection: {
-        config: collectionConfig,
-      },
-      req,
-    })
+    try {
+      docPermissions = await docAccessOperation({
+        id,
+        collection: {
+          config: collectionConfig,
+        },
+        req,
+      })
+    } catch (error) {
+      return <NotFoundClient />
+    }
 
     fields = collectionConfig.fields
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
@@ -124,6 +128,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           id,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           fallbackLocale: null,
           locale: locale.code,
           overrideAccess: false,
@@ -173,6 +178,7 @@ export const Document: React.FC<AdminViewProps> = async ({
         data = await payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           fallbackLocale: null,
           locale: locale.code,
           overrideAccess: false,
@@ -221,7 +227,6 @@ export const Document: React.FC<AdminViewProps> = async ({
       collectionSlug={collectionConfig?.slug}
       disableActions={false}
       docPermissions={docPermissions}
-      docPreferences={docPreferences}
       globalSlug={globalConfig?.slug}
       hasSavePermission={hasSavePermission}
       id={id}

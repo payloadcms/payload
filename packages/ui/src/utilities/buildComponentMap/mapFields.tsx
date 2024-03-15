@@ -88,7 +88,8 @@ export const mapFields = (args: {
           description:
             field.admin &&
             'description' in field.admin &&
-            typeof field.admin?.description === 'string'
+            (typeof field.admin?.description === 'string' ||
+              typeof field.admin?.description === 'object')
               ? field.admin.description
               : undefined,
         }

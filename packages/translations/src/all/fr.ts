@@ -370,6 +370,7 @@ export default {
     publish: 'Publier',
     publishChanges: 'Publier les modifications',
     published: 'Publié',
+    publishing: 'Publication',
     restoreThisVersion: 'Restaurer cette version',
     restoredSuccessfully: 'Restauré(e) avec succès.',
     restoring: 'Restauration en cours...',

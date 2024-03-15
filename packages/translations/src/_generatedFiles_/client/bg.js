@@ -239,6 +239,7 @@ export default {
     requiresAtLeast: 'Това поле изисква поне {{count}} {{label}}.',
   },
   version: {
+    type: 'Тип',
     aboutToPublishSelection: 'На път си да публикуваш всички избрани {{label}}. Сигурен ли си?',
     aboutToRestore:
       'На път си да възстановиш този {{label}} документ до състоянието му от {{versionDate}}.',
@@ -258,6 +259,7 @@ export default {
     confirmVersionRestoration: 'Потвърди възстановяване на версия',
     draft: 'Чернова',
     draftSavedSuccessfully: 'Чернова запазена успешно.',
+    lastSavedAgo: 'последно запазено преди {{distance}}',
     noFurtherVersionsFound: 'Не са открити повече версии',
     noRowsFound: 'Не е открит {{label}}',
     preview: 'Предварителен преглед',
@@ -265,6 +267,7 @@ export default {
     publish: 'Публикувай',
     publishChanges: 'Публикувай промените',
     published: 'Публикувано',
+    publishing: 'Публикуване',
     restoreThisVersion: 'Възстанови тази версия',
     restoredSuccessfully: 'Успешно възстановяване.',
     restoring: 'Възстановяване...',
@@ -273,7 +276,6 @@ export default {
     selectLocales: 'Избери локализации за показване',
     selectVersionToCompare: 'Избери версия за сравняване',
     showLocales: 'Покажи преводи:',
-    type: 'Тип',
     unpublish: 'Скрий',
     unpublishing: 'Скриване...',
     version: 'Версия',

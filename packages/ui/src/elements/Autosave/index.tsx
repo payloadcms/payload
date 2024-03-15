@@ -18,7 +18,12 @@ import './index.scss'
 
 const baseClass = 'autosave'
 
-const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdatedAt }) => {
+const Autosave: React.FC<Props> = ({
+  id,
+  collection,
+  global: globalDoc,
+  publishedDocUpdatedAt,
+}) => {
   const {
     routes: { admin, api },
     serverURL,
@@ -52,6 +57,10 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
   // can bail out if modified becomes false while
   // timing out during autosave
   modifiedRef.current = modified
+
+  // Store locale in ref so the autosave func
+  // can always retrieve the most to date locale
+  localeRef.current = locale
 
   const createCollectionDoc = useCallback(async () => {
     const res = await fetch(
@@ -88,9 +97,8 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
   }, [id, collection, createCollectionDoc])
 
   // When debounced fields change, autosave
-
   useEffect(() => {
-    const autosave = async () => {
+    const autosave = () => {
       if (modified) {
         setSaving(true)
 
@@ -102,8 +110,8 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
           method = 'PATCH'
         }
 
-        if (global) {
-          url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true&locale=${localeRef.current}`
+        if (globalDoc) {
+          url = `${serverURL}${api}/globals/${globalDoc.slug}?draft=true&autosave=true&locale=${localeRef.current}`
           method = 'POST'
         }
 
@@ -114,7 +122,6 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
                 ...reduceFieldsToValues(fieldRef.current, true),
                 _status: 'draft',
               }
-
               const res = await fetch(url, {
                 body: JSON.stringify(body),
                 credentials: 'include',
@@ -138,19 +145,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
     }
 
     void autosave()
-  }, [
-    i18n,
-    debouncedFields,
-    modified,
-    serverURL,
-    api,
-    collection,
-    global,
-    id,
-    getVersions,
-    localeRef,
-    modifiedRef,
-  ])
+  }, [i18n, debouncedFields, modified, serverURL, api, collection, globalDoc, id, getVersions])
 
   useEffect(() => {
     if (versions?.docs?.[0]) {
@@ -162,7 +157,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
 
   return (
     <div className={baseClass}>
-      {saving && t('version:saving')}
+      {saving && t('general:saving')}
       {!saving && lastSaved && (
         <React.Fragment>
           {t('version:lastSavedAgo', {

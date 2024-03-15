@@ -2,9 +2,12 @@
 
 import React from 'react'
 
-const CustomLabel: React.FC<{ htmlFor: string }> = ({ htmlFor }) => {
+import { useFieldProps } from '../../../../packages/ui/src/forms/FieldPropsProvider/index.js'
+
+const CustomLabel = () => {
+  const { path } = useFieldProps()
   return (
-    <label className="custom-label" htmlFor={htmlFor}>
+    <label className="custom-label" htmlFor={`field-${path.replace(/\./g, '__')}`}>
       #label
     </label>
   )

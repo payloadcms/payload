@@ -357,6 +357,7 @@ export default {
     publish: 'Objaviti',
     publishChanges: 'Objavi promjene',
     published: 'Objavljeno',
+    publishing: 'Objavljivanje',
     restoreThisVersion: 'Vrati ovu verziju',
     restoredSuccessfully: 'Uspješno vraćeno.',
     restoring: 'Vraćanje...',
