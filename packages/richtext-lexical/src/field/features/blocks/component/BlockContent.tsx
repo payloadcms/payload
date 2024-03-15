@@ -20,6 +20,8 @@ import {
 import isDeepEqual from 'deep-equal'
 import lexicalImport from 'lexical'
 const { $getNodeByKey } = lexicalImport
+import type { CollapsedPreferences } from 'payload/types'
+
 import React, { useCallback } from 'react'
 
 import type { SanitizedClientEditorConfig } from '../../../lexical/config/types.js'
@@ -68,15 +70,16 @@ export const BlockContent: React.FC<Props> = (props) => {
     void getDocPreferences().then((currentDocPreferences) => {
       const currentFieldPreferences = currentDocPreferences?.fields[field.name]
 
-      const collapsedMap: { [key: string]: boolean } = currentFieldPreferences?.collapsed
+      const collapsedArray = currentFieldPreferences?.collapsed
 
-      if (collapsedMap && collapsedMap[formData.id] !== undefined) {
-        setCollapsed(collapsedMap[formData.id])
-        initialState = collapsedMap[formData.id]
+      if (collapsedArray && collapsedArray.includes(formData.id)) {
+        initialState = true
+        setCollapsed(true)
       }
     })
     return initialState
   })
+
   const hasSubmitted = useFormSubmitted()
 
   const [errorCount, setErrorCount] = React.useState(0)
@@ -153,22 +156,34 @@ export const BlockContent: React.FC<Props> = (props) => {
     [editor, nodeKey, hasSubmitted, formData],
   )
 
-  const onCollapsedChange = useCallback(() => {
-    void getDocPreferences().then((currentDocPreferences) => {
-      const currentFieldPreferences = currentDocPreferences?.fields[field.name]
+  const onCollapsedChange = useCallback(
+    (changedCollapsed: boolean) => {
+      void getDocPreferences().then((currentDocPreferences) => {
+        const currentFieldPreferences = currentDocPreferences?.fields[field.name]
 
-      const collapsedMap: { [key: string]: boolean } = currentFieldPreferences?.collapsed
+        const collapsedArray = currentFieldPreferences?.collapsed
 
-      const newCollapsed: { [key: string]: boolean } =
-        collapsedMap && collapsedMap?.size ? collapsedMap : {}
+        const newCollapsed: CollapsedPreferences =
+          collapsedArray && collapsedArray?.length ? collapsedArray : []
 
-      newCollapsed[formData.id] = !collapsed
+        if (changedCollapsed) {
+          if (!newCollapsed.includes(formData.id)) {
+            newCollapsed.push(formData.id)
+          }
+        } else {
+          if (newCollapsed.includes(formData.id)) {
+            newCollapsed.splice(newCollapsed.indexOf(formData.id), 1)
+          }
+        }
 
-      setDocFieldPreferences(field.name, {
-        collapsed: newCollapsed,
+        setDocFieldPreferences(field.name, {
+          collapsed: newCollapsed,
+          hello: 'hi',
+        })
       })
-    })
-  }, [collapsed, getDocPreferences, field.name, setDocFieldPreferences, formData.id])
+    },
+    [getDocPreferences, field.name, setDocFieldPreferences, formData.id],
+  )
 
   const removeBlock = useCallback(() => {
     editor.update(() => {
@@ -214,8 +229,8 @@ export const BlockContent: React.FC<Props> = (props) => {
         }
         key={0}
         onToggle={(collapsed) => {
+          onCollapsedChange(collapsed)
           setCollapsed(collapsed)
-          onCollapsedChange()
         }}
       >
         <RenderFields

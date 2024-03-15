@@ -1,4 +1,5 @@
 import type { TransactionOptions } from 'mongodb'
+import type { MongoMemoryReplSet } from 'mongodb-memory-server'
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter, DatabaseAdapterObj } from 'payload/database'
@@ -52,7 +53,7 @@ export interface Args {
   /**
    * typed as any to avoid dependency
    */
-  mongoMemoryServer?: any
+  mongoMemoryServer?: MongoMemoryReplSet
   transactionOptions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
@@ -65,7 +66,7 @@ export type MongooseAdapter = BaseDatabaseAdapter &
     }
     connection: Connection
     globals: GlobalModel
-    mongoMemoryServer: any
+    mongoMemoryServer: MongoMemoryReplSet
     sessions: Record<number | string, ClientSession>
     versions: {
       [slug: string]: CollectionModel
@@ -81,7 +82,7 @@ declare module 'payload' {
     }
     connection: Connection
     globals: GlobalModel
-    mongoMemoryServer: any
+    mongoMemoryServer: MongoMemoryReplSet
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
     versions: {

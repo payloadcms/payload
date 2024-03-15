@@ -48,6 +48,10 @@ module.exports = {
   parserOptions: {
     project: ['./tsconfig.json'],
     tsconfigRootDir: __dirname,
+    EXPERIMENTAL_useSourceOfProjectReferenceRedirect: true,
+    EXPERIMENTAL_useProjectService: true,
+    sourceType: 'module',
+    ecmaVersion: 'latest',
   },
   root: true,
 }

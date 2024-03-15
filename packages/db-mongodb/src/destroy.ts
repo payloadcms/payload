@@ -6,9 +6,10 @@ import type { MongooseAdapter } from './index.js'
 
 export const destroy: Destroy = async function destroy(this: MongooseAdapter) {
   if (this.mongoMemoryServer) {
-    this.mongoMemoryServer.stop()
+    await this.mongoMemoryServer.stop()
+  } else {
+    await mongoose.disconnect()
   }
 
-  await mongoose.disconnect()
   Object.keys(mongoose.models).map((model) => mongoose.deleteModel(model))
 }

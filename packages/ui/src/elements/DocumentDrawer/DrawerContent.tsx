@@ -9,11 +9,10 @@ import { toast } from 'react-toastify'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections.js'
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
 import { X } from '../../icons/X/index.js'
-import { formatDocTitle, useAuth } from '../../index.js'
+import { formatDocTitle } from '../../index.js'
 import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
@@ -55,10 +54,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const { formQueryParams } = useFormQueryParams()
   const formattedQueryParams = queryString.stringify(formQueryParams)
   const { getPreference } = usePreferences()
-
-  const { permissions } = useAuth()
-
-  const { schemaPath } = useFieldProps()
 
   const { componentMap } = useComponentMap()
 
@@ -112,7 +107,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
             data: data || {},
             docPreferences,
             operation: isEditing ? 'update' : 'create',
-            schemaPath,
+            schemaPath: collectionSlug,
           },
           serverURL,
         })
@@ -123,15 +118,13 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
       void getInitialState()
     }
-  }, [apiRoute, data, isEditing, schemaPath, serverURL, collectionSlug, id, getPreference])
+  }, [apiRoute, data, isEditing, collectionSlug, serverURL, id, getPreference])
 
   if (isError) return null
 
   if (!initialState || isLoadingDocument) {
     return <LoadingOverlay />
   }
-
-  const docPermissions = permissions?.collections[collectionSlug]
 
   const title = formatDocTitle({
     collectionConfig,
@@ -168,8 +161,11 @@ const Content: React.FC<DocumentDrawerProps> = ({
       collectionSlug={collectionConfig.slug}
       disableActions
       disableLeaveWithoutSaving
-      docPermissions={docPermissions}
-      hasSavePermission={docPermissions?.update?.permission}
+      // Do NOT pass in the docPermissions we have here. This is because the permissions we have here do not have their where: { } returns resolved.
+      // If we set it to null though, the DocumentInfoProvider will fully-fetch the permissions from the server, and the where: { } returns will be resolved.
+      docPermissions={null}
+      // Same reason as above. We need to fully-fetch the docPreferences from the server. This is done in DocumentInfoProvider if we set it to null here.
+      hasSavePermission={null}
       // isLoading,
       id={id}
       initialData={data}
