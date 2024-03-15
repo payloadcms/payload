@@ -39,6 +39,7 @@ import buildObjectType from './buildObjectType.js'
 import buildPaginatedListType from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import buildWhereInputType from './buildWhereInputType.js'
+import duplicateResolver from '../resolvers/collections/duplicate.js'
 
 type InitCollectionsGraphQLArgs = {
   config: SanitizedConfig
@@ -235,6 +236,14 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
         id: { type: new GraphQLNonNull(idType) },
       },
       resolve: getDeleteResolver(collection),
+    }
+
+    graphqlResult.Mutation.fields[`duplicate${singularName}`] = {
+      type: collection.graphQL.type,
+      args: {
+        id: { type: new GraphQLNonNull(idType) },
+      },
+      resolve: duplicateResolver(collection),
     }
 
     if (collectionConfig.versions) {

@@ -265,7 +265,7 @@ export const promise = async <T>({
     // Execute beforeDuplicate hook
     if (duplicate && field.hooks?.beforeDuplicate) {
       if (field.hooks?.beforeDuplicate) {
-        await field.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
+        await field.hooks.beforeDuplicate.reduce(async (priorHook, currentHook) => {
           await priorHook
 
           const hookedValue = await currentHook({

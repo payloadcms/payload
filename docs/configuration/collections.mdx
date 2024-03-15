@@ -167,53 +167,6 @@ those three fields plus the ID field.
   so your admin queries can remain performant.
 </Banner>
 
-### Admin Hooks
-
-In addition to collection hooks themselves, Payload provides for admin UI-specific hooks that you can leverage.
-
-**`beforeDuplicate`**
-
-The `beforeDuplicate` hook is an async function that accepts an object containing the data to duplicate, as well as the
-locale of the doc to duplicate. Within this hook, you can modify the data to be duplicated, which is useful in cases
-where you have unique fields that need to be incremented or similar, as well as if you want to automatically modify a
-document's `title`.
-
-Example:
-
-```ts
-import { BeforeDuplicate, CollectionConfig } from 'payload/types'
-// Your auto-generated Page type
-import { Page } from '../payload-types.ts'
-
-const beforeDuplicate: BeforeDuplicate<Page> = ({ data }) => {
-  return {
-    ...data,
-    title: `${data.title} Copy`,
-    uniqueField: data.uniqueField ? `${data.uniqueField}-copy` : '',
-  }
-}
-
-export const Page: CollectionConfig = {
-  slug: 'pages',
-  admin: {
-    hooks: {
-      beforeDuplicate,
-    },
-  },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-    },
-    {
-      name: 'uniqueField',
-      type: 'text',
-      unique: true,
-    },
-  ],
-}
-```
-
 ### TypeScript
 
 You can import collection types as follows:

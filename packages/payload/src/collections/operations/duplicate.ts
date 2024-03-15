@@ -110,14 +110,16 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       req,
     })
 
+    if (!docWithLocales && !hasWherePolicy) throw new NotFound(req.t)
+    if (!docWithLocales && hasWherePolicy) throw new Forbidden(req.t)
+
+    // remove the createdAt timestamp and rely on the db to default it
+    delete docWithLocales.createdAt
+
     // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
     if (shouldSaveDraft) {
       docWithLocales._status = 'draft'
     }
-
-    if (!docWithLocales && !hasWherePolicy) throw new NotFound(req.t)
-    if (!docWithLocales && hasWherePolicy) throw new Forbidden(req.t)
-
 
     let locales = [undefined]
     let versionDoc
@@ -239,7 +241,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
         })
       } else {
         versionDoc = await req.payload.db.updateOne({
-          id,
+          id: versionDoc.id,
           collection: collectionConfig.slug,
           data: result,
           locale,
@@ -255,7 +257,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     let result = versionDoc
     if (collectionConfig.versions) {
       result = await saveVersion({
-        id,
+        id: versionDoc.id,
         collection: collectionConfig,
         docWithLocales: {
           ...versionDoc,

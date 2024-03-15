@@ -186,7 +186,6 @@ export default {
     submissionSuccessful: '成功送出。',
     submit: '送出',
     successfullyCreated: '成功建立{{label}}',
-    successfullyDuplicated: '成功複製{{label}}',
     thisLanguage: '中文 (繁體)',
     titleDeleted: '{{label}} "{{title}}"已被成功刪除。',
     unauthorized: '未經授權',

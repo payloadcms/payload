@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Innsending vellykket.',
     submit: 'Send inn',
     successfullyCreated: '{{label}} ble opprettet.',
-    successfullyDuplicated: '{{label}} ble duplisert.',
     thisLanguage: 'Norsk',
     titleDeleted: '{{label}} "{{title}}" ble slettet.',
     unauthorized: 'Ikke autorisert',

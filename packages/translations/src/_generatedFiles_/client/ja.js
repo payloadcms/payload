@@ -188,7 +188,6 @@ export default {
     submissionSuccessful: '送信が成功しました。',
     submit: '送信',
     successfullyCreated: '{{label}} が作成されました。',
-    successfullyDuplicated: '{{label}} が複製されました。',
     thisLanguage: 'Japanese',
     titleDeleted: '{{label}} "{{title}}" が削除されました。',
     unauthorized: '未認証',

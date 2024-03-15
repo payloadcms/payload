@@ -190,7 +190,6 @@ export default {
     submissionSuccessful: 'Gönderme başarılı',
     submit: 'Gönder',
     successfullyCreated: '{{label}} başarıyla oluşturuldu.',
-    successfullyDuplicated: '{{label}} başarıyla kopyalandı.',
     thisLanguage: 'Türkçe',
     titleDeleted: '{{label}} {{title}} başarıyla silindi.',
     unauthorized: 'Yetkisiz',

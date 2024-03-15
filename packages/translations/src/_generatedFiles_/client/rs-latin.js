@@ -188,7 +188,6 @@ export default {
     submissionSuccessful: 'Uspešno slanje',
     submit: 'Potvrdi',
     successfullyCreated: '{{label}} uspešno kreirano.',
-    successfullyDuplicated: '{{label}} uspešno duplicirano.',
     thisLanguage: 'Srpski (latinica)',
     titleDeleted: '{{label}} "{{title}}" uspešno obrisano.',
     unauthorized: 'Niste autorizovani',

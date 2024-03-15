@@ -21,6 +21,7 @@ functionalities to be easily reusable across your projects.
 
 - [beforeValidate](#beforevalidate)
 - [beforeChange](#beforechange)
+- beforeDuplicate(#beforeduplicate)
 - [afterChange](#afterchange)
 - [afterRead](#afterread)
 
@@ -38,6 +39,7 @@ const ExampleField: Field = {
   hooks: {
     beforeValidate: [(args) => {...}],
     beforeChange: [(args) => {...}],
+    beforeDuplicate: [(args) => {...}],
     afterChange: [(args) => {...}],
     afterRead: [(args) => {...}],
   }
@@ -216,6 +218,46 @@ const dateField: Field = {
 Here, the `afterRead` hook for the `dateField` is used to format the date into a more readable format
 using `toLocaleDateString()`. This hook modifies the way the date is presented to the user, making it more
 user-friendly.
+
+### beforeDuplicate
+
+The `beforeDuplicate` field hook is only called when duplicating a document. It may be used when documents having the
+exact same properties may cause issue. This gives you a way to avoid duplicate names on `unique`, `required` fields or
+to unset values by returning `null`. This is called immediately after `defaultValue` and before validation occurs.
+
+```ts
+import { CollectionConfig } from 'payload/types'
+// Your auto-generated Page type
+import { Page } from '../payload-types.ts'
+
+const beforeDuplicate: BeforeDuplicate = ({ data }) => {
+  return {
+    ...data,
+    title: `${data.title} Copy`,
+    uniqueField: data.uniqueField ? `${data.uniqueField}-copy` : '',
+  }
+}
+
+export const Page: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    hooks: {
+      beforeDuplicate,
+    },
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    {
+      name: 'uniqueField',
+      type: 'text',
+      unique: true,
+    },
+  ],
+}
+```
 
 ## TypeScript
 

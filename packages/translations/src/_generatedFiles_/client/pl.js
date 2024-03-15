@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Zgłoszenie zakończone powodzeniem.',
     submit: 'Zatwierdź',
     successfullyCreated: 'Pomyślnie utworzono {{label}}.',
-    successfullyDuplicated: 'Pomyślnie zduplikowano {{label}}',
     thisLanguage: 'Polski',
     titleDeleted: 'Pomyślnie usunięto {{label}} {{title}}',
     unauthorized: 'Brak autoryzacji',

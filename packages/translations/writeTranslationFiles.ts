@@ -30,6 +30,7 @@ const serverTranslationKeys = [
   'fields:chooseDocumentToLink',
   'fields:openInNewTab',
 
+  'general:copy',
   'general:createdAt',
   'general:deletedCountSuccessfully',
   'general:deletedSuccessfully',

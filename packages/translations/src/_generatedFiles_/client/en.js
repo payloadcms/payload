@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Submission Successful.',
     submit: 'Submit',
     successfullyCreated: '{{label}} successfully created.',
-    successfullyDuplicated: '{{label}} successfully duplicated.',
     thisLanguage: 'English',
     titleDeleted: '{{label}} "{{title}}" successfully deleted.',
     unauthorized: 'Unauthorized',
