@@ -4,6 +4,7 @@ import type { PluginConfig } from '../types'
 
 import formatBreadcrumb from './formatBreadcrumb'
 import getParents from './getParents'
+import shouldPopulateBreadcrumbs from './shouldPopulateBreadcrumbs'
 
 const populateBreadcrumbs = async (
   req: any,
@@ -12,6 +13,10 @@ const populateBreadcrumbs = async (
   data: any,
   originalDoc?: any,
 ): Promise<any> => {
+  if (!shouldPopulateBreadcrumbs(pluginConfig, data, collection, originalDoc)) {
+    return data
+  }
+
   const newData = data
   const breadcrumbDocs = [
     ...(await getParents(req, pluginConfig, collection, {

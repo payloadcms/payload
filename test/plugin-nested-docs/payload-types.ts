@@ -9,12 +9,18 @@
 export interface Config {
   collections: {
     pages: Page
+    categories: Category
+    tags: Tag
     users: User
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
   globals: {}
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
 export interface Page {
   id: string
   title: string
@@ -33,6 +39,51 @@ export interface Page {
   createdAt: string
   _status?: ('draft' | 'published') | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string
+  name: string
+  categorization?:
+    | {
+        doc?: (string | null) | Category
+        url?: string | null
+        label?: string | null
+        test?: string | null
+        id?: string | null
+      }[]
+    | null
+  owner?: (string | null) | Category
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: string
+  tagName: string
+  uri: string
+  parent?: (string | null) | Tag
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | Tag
+        url?: string | null
+        label?: string | null
+        id?: string | null
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
   updatedAt: string
@@ -46,6 +97,10 @@ export interface User {
   lockUntil?: string | null
   password: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user: {
@@ -65,6 +120,10 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
   name?: string | null

@@ -1,7 +1,16 @@
 import type { ArrayField, RelationshipField } from '../../packages/payload/src/fields/config/types'
 
 import payload from '../../packages/payload/src'
+import getParents from '../../packages/plugin-nested-docs/src/utilities/getParents'
 import { initPayloadTest } from '../helpers/configHelpers'
+
+jest.mock('../../packages/plugin-nested-docs/src/utilities/getParents', () => {
+  const original = jest.requireActual('../../packages/plugin-nested-docs/src/utilities/getParents')
+  return {
+    __esModule: true,
+    default: jest.fn(original.default),
+  }
+})
 
 describe('Nested Docs', () => {
   beforeAll(async () => {
@@ -38,6 +47,19 @@ describe('Nested Docs', () => {
       expect(query.docs[0].breadcrumbs[2].url).toStrictEqual(
         '/parent-page/child-page/grandchild-page',
       )
+    })
+
+    it('should populate breadcrumbs with custom field for url', async () => {
+      const query = await payload.find({
+        collection: 'tags',
+        where: {
+          tagName: {
+            equals: 'tag-1',
+          },
+        },
+      })
+
+      expect(query.docs[0].breadcrumbs[0].url).toStrictEqual('/tag-uri')
     })
   })
 
@@ -96,6 +118,55 @@ describe('Nested Docs', () => {
       expect(grandchild.categorization[1].doc).toStrictEqual(child.id)
       expect(grandchild.categorization[1].label).toStrictEqual('child')
       expect(grandchild.categorization[2].label).toStrictEqual('grandchild')
+    })
+  })
+
+  describe('performance', () => {
+    let tagRef
+
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    beforeAll(async () => {
+      tagRef = await payload.find({
+        collection: 'tags',
+        where: {
+          tagName: {
+            equals: 'tag-1',
+          },
+        },
+      })
+    })
+
+    afterAll(() => {
+      jest.clearAllMocks()
+    })
+
+    it('should not call getParents if the values are the same', async () => {
+      const newTagValue = await payload.update({
+        collection: 'tags',
+        id: tagRef.docs[0].id,
+        data: {
+          uri: 'tag-uri',
+        },
+      })
+
+      expect(getParents).toHaveBeenCalledTimes(0)
+      expect(newTagValue.breadcrumbs[0].url).toStrictEqual('/tag-uri')
+    })
+
+    it('should call getParents when the values change', async () => {
+      const newTagValue = await payload.update({
+        collection: 'tags',
+        id: tagRef.docs[0].id,
+        data: {
+          uri: 'new-uri',
+        },
+      })
+
+      expect(getParents).toHaveBeenCalledTimes(1)
+      expect(newTagValue.breadcrumbs[0].url).toStrictEqual('/new-uri')
     })
   })
 })
