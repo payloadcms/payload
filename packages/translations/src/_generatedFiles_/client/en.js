@@ -242,6 +242,7 @@ export default {
     requiresAtLeast: 'This field requires at least {{count}} {{label}}.',
   },
   version: {
+    type: 'Type',
     aboutToPublishSelection:
       'You are about to publish all {{label}} in the selection. Are you sure?',
     aboutToRestore:
@@ -263,6 +264,7 @@ export default {
     confirmVersionRestoration: 'Confirm version Restoration',
     draft: 'Draft',
     draftSavedSuccessfully: 'Draft saved successfully.',
+    lastSavedAgo: 'Last saved {{distance}} ago',
     noFurtherVersionsFound: 'No further versions found',
     noRowsFound: 'No {{label}} found',
     preview: 'Preview',
@@ -270,6 +272,7 @@ export default {
     publish: 'Publish',
     publishChanges: 'Publish changes',
     published: 'Published',
+    publishing: 'Publishing',
     restoreThisVersion: 'Restore this version',
     restoredSuccessfully: 'Restored Successfully.',
     restoring: 'Restoring...',
@@ -278,7 +281,6 @@ export default {
     selectLocales: 'Select locales to display',
     selectVersionToCompare: 'Select a version to compare',
     showLocales: 'Show locales:',
-    type: 'Type',
     unpublish: 'Unpublish',
     unpublishing: 'Unpublishing...',
     version: 'Version',

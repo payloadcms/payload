@@ -236,6 +236,7 @@ export default {
     requiresAtLeast: 'ต้องมีอย่างน้อย {{count}} {{label}}',
   },
   version: {
+    type: 'ประเภท',
     aboutToPublishSelection: 'คุณกำลังจะเผยแพร่ {{label}} ทั้งหมดในส่วนที่เลือก คุณแน่ใจไหม?',
     aboutToRestore:
       'คุณกำลังจะคืนค่าเอกสาร {{label}} นี้กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}',
@@ -255,6 +256,7 @@ export default {
     confirmVersionRestoration: 'ยืนยันการกู้คืนเวอร์ชัน',
     draft: 'ฉบับร่าง',
     draftSavedSuccessfully: 'บันทึกร่างสำเร็จ',
+    lastSavedAgo: 'บันทึกครั้งล่าสุด {{distance}} ที่ผ่านมา',
     noFurtherVersionsFound: 'ไม่พบเวอร์ชันอื่น ๆ',
     noRowsFound: 'ไม่พบ {{label}}',
     preview: 'ตัวอย่าง',
@@ -262,6 +264,7 @@ export default {
     publish: 'เผยแพร่',
     publishChanges: 'เผยแพร่การแก้ไข',
     published: 'เผยแพร่แล้ว',
+    publishing: 'การเผยแพร่',
     restoreThisVersion: 'กู้คืนเวอร์ชันนี้',
     restoredSuccessfully: 'กู้คืนเวอร์ชันสำเร็จ',
     restoring: 'กำลังกู้คืน...',
@@ -270,7 +273,6 @@ export default {
     selectLocales: 'เลือกภาษาที่ต้องการแสดง',
     selectVersionToCompare: 'เลือกเวอร์ชันที่ต้องการเปรียบเทียบ',
     showLocales: 'แสดงภาษา:',
-    type: 'ประเภท',
     unpublish: 'หยุดเผยแพร่',
     unpublishing: 'กำลังหยุดการเผยแพร่...',
     version: 'เวอร์ชัน',

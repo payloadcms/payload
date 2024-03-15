@@ -367,6 +367,7 @@ export default {
     publish: 'Publicați',
     publishChanges: 'Publicați modificările',
     published: 'Publicat',
+    publishin: 'Publicare',
     restoreThisVersion: 'Restaurați această versiune',
     restoredSuccessfully: 'Restaurat cu succes.',
     restoring: 'Restaurare...',

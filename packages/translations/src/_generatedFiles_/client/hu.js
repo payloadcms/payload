@@ -240,6 +240,7 @@ export default {
     requiresAtLeast: 'Ehhez a mezőhöz legalább {{count}} {{label}} szükséges.',
   },
   version: {
+    type: 'Típus',
     aboutToPublishSelection:
       'Arra készül, hogy az összes {{label}} elemet közzétegye a kijelölésben. biztos vagy ebben?',
     aboutToRestore:
@@ -261,6 +262,7 @@ export default {
     confirmVersionRestoration: 'Verzió-visszaállítás megerősítése',
     draft: 'Piszkozat',
     draftSavedSuccessfully: 'A piszkozat sikeresen mentve.',
+    lastSavedAgo: 'Utoljára mentve {{distance}} órája',
     noFurtherVersionsFound: 'További verziók nem találhatók',
     noRowsFound: 'Nem található {{label}}',
     preview: 'Előnézet',
@@ -268,6 +270,7 @@ export default {
     publish: 'Közzététel',
     publishChanges: 'Módosítások közzététele',
     published: 'Közzétett',
+    publishing: 'Közzététel',
     restoreThisVersion: 'A verzió visszaállítása',
     restoredSuccessfully: 'Sikeresen visszaállítva.',
     restoring: 'Visszaállítás...',
@@ -276,7 +279,6 @@ export default {
     selectLocales: 'Megjelenítendő nyelvek kiválasztása',
     selectVersionToCompare: 'Válassza ki az összehasonlítani kívánt verziót',
     showLocales: 'Nyelvek megjelenítése:',
-    type: 'Típus',
     unpublish: 'Közzététel visszavonása',
     unpublishing: 'Közzététel visszavonása...',
     version: 'Verzió',

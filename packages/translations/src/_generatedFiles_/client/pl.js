@@ -240,6 +240,7 @@ export default {
     requiresAtLeast: 'To pole wymaga co najmniej {{count}} {{label}}.',
   },
   version: {
+    type: 'Typ',
     aboutToPublishSelection:
       'Za chwilę opublikujesz wszystkie {{label}} w zaznaczeniu. Jesteś pewny?',
     aboutToRestore:
@@ -261,6 +262,7 @@ export default {
     confirmVersionRestoration: 'Potwierdź przywrócenie wersji',
     draft: 'Szkic',
     draftSavedSuccessfully: 'Wersja robocza została pomyślnie zapisana.',
+    lastSavedAgo: 'Ostatnio zapisane {{distance}} temu',
     noFurtherVersionsFound: 'Nie znaleziono dalszych wersji',
     noRowsFound: 'Nie znaleziono {{label}}',
     preview: 'Podgląd',
@@ -276,7 +278,6 @@ export default {
     selectLocales: 'Wybierz ustawienia regionalne do wyświetlenia',
     selectVersionToCompare: 'Wybierz wersję do porównania',
     showLocales: 'Pokaż ustawienia regionalne:',
-    type: 'Typ',
     unpublish: 'Cofnij publikację',
     unpublishing: 'Cofanie publikacji...',
     version: 'Wersja',

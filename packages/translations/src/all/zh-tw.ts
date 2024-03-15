@@ -347,6 +347,7 @@ export default {
     publish: '發佈',
     publishChanges: '發佈修改',
     published: '已發佈',
+    publishing: '發布',
     restoreThisVersion: '回復此版本',
     restoredSuccessfully: '回復成功。',
     restoring: '回復中...',

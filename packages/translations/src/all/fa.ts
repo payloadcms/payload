@@ -357,6 +357,7 @@ export default {
     publish: 'انتشار',
     publishChanges: 'انتشار تغییرات',
     published: 'انتشار یافته',
+    publishing: 'انتشار',
     restoreThisVersion: 'این نگارش را بازیابی کنید',
     restoredSuccessfully: 'با موفقیت بازیابی شد.',
     restoring: 'در حال بازیابی...',

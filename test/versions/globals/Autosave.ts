@@ -4,16 +4,6 @@ import { autoSaveGlobalSlug } from '../slugs.js'
 
 const AutosaveGlobal: GlobalConfig = {
   slug: autoSaveGlobalSlug,
-  label: 'Autosave Global',
-  admin: {
-    preview: () => 'https://payloadcms.com',
-  },
-  versions: {
-    max: 20,
-    drafts: {
-      autosave: true,
-    },
-  },
   access: {
     read: ({ req: { user } }) => {
       if (user) {
@@ -36,14 +26,24 @@ const AutosaveGlobal: GlobalConfig = {
       }
     },
   },
+  admin: {
+    preview: () => 'https://payloadcms.com',
+  },
   fields: [
     {
       name: 'title',
       type: 'text',
-      required: true,
       localized: true,
+      required: true,
     },
   ],
+  label: 'Autosave Global',
+  versions: {
+    drafts: {
+      autosave: true,
+    },
+    max: 20,
+  },
 }
 
 export default AutosaveGlobal

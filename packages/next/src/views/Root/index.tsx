@@ -24,7 +24,7 @@ export const RootPage = async ({
 }: {
   config: Promise<SanitizedConfig>
   params: {
-    [key: string]: string | string[]
+    segments: string[]
   }
   searchParams: {
     [key: string]: string | string[]

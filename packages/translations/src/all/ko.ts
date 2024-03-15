@@ -354,6 +354,7 @@ export default {
     publish: '게시',
     publishChanges: '변경 사항 게시',
     published: '게시됨',
+    publishing: '게시',
     restoreThisVersion: '이 버전 복원',
     restoredSuccessfully: '복원이 완료되었습니다.',
     restoring: '복원 중...',

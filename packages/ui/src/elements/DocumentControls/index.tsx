@@ -1,11 +1,10 @@
 'use client'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload/types'
 
 import React, { Fragment } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
-import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDate } from '../../utilities/formatDate/index.js'
 import Autosave from '../Autosave/index.js'
@@ -100,12 +99,12 @@ export const DocumentControls: React.FC<{
                   (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
                   hasSavePermission && (
                     <li className={`${baseClass}__list-item`}>
-                      {/* <Autosave
+                      <Autosave
                         collection={collectionConfig}
                         global={globalConfig}
                         id={id}
                         publishedDocUpdatedAt={data?.createdAt}
-                      /> */}
+                      />
                     </li>
                   )}
               </Fragment>

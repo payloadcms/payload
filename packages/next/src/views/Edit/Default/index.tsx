@@ -188,7 +188,7 @@ export const DefaultEditView: React.FC = () => {
             id={id}
             isEditing={Boolean(id)}
             permissions={docPermissions}
-            slug={collectionConfig?.slug}
+            slug={collectionConfig?.slug || globalConfig?.slug}
           />
           <DocumentFields
             AfterFields={AfterFields}
