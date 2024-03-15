@@ -8,7 +8,7 @@ import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
 
 type PreferencesContext = {
-  getPreference: <T = any>(key: string) => Promise<T> | T
+  getPreference: <T = any>(key: string) => Promise<T>
   /**
    * @param key - a string identifier for the property being set
    * @param value - preference data to store
