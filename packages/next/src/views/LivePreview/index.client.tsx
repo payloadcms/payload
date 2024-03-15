@@ -138,7 +138,8 @@ const PreviewView: React.FC = (props) => {
         >
           {((collectionConfig &&
             !(collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave)) ||
-            (global && !(global.versions?.drafts && global.versions?.drafts?.autosave))) &&
+            (globalConfig &&
+              !(globalConfig.versions?.drafts && globalConfig.versions?.drafts?.autosave))) &&
             !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetStepNav
             collectionSlug={collectionSlug}
@@ -188,7 +189,7 @@ const PreviewView: React.FC = (props) => {
               />
               {AfterDocument}
             </div>
-            <LivePreview {...props} />
+            <LivePreview collectionSlug={collectionSlug} globalSlug={globalSlug} />
           </div>
         </Form>
       </OperationProvider>
@@ -199,7 +200,6 @@ const PreviewView: React.FC = (props) => {
 export const LivePreviewClient: React.FC<{
   breakpoints: LivePreviewConfig['breakpoints']
   initialData: Data
-  livePreviewConfig: LivePreviewConfig
   url: string
 }> = (props) => {
   const { breakpoints, url } = props

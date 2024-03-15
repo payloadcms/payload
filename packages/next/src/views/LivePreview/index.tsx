@@ -61,12 +61,5 @@ export const LivePreviewView: EditViewComponent = async (props) => {
         })
       : livePreviewConfig?.url
 
-  return (
-    <LivePreviewClient
-      breakpoints={breakpoints}
-      initialData={data}
-      livePreviewConfig={livePreviewConfig}
-      url={url}
-    />
-  )
+  return <LivePreviewClient breakpoints={breakpoints} initialData={data} url={url} />
 }
