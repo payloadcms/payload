@@ -229,6 +229,9 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
+      - name: Install Playwright
+        run: pnpm exec playwright install
+
       - name: E2E Tests
         uses: nick-fields/retry@v2
         with:
