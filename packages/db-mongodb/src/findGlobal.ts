@@ -25,7 +25,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     where: combineQueries({ globalType: { equals: slug } }, where),
   })
 
-  let doc = await Model.findOne(query, {}, options)
+  let doc = (await Model.findOne(query, {}, options)) as any
 
   if (!doc) {
     return null
