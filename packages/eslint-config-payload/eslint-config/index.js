@@ -67,6 +67,7 @@ const typescriptRules = {
   '@typescript-eslint/no-base-to-string': 'warn',
   '@typescript-eslint/restrict-template-expressions': 'warn',
   '@typescript-eslint/no-redundant-type-constituents': 'warn',
+  '@typescript-eslint/no-unnecessary-type-constraint': 'warn',
   '@typescript-eslint/ban-types': 'warn',
 }
 
