@@ -240,6 +240,7 @@ export default {
     requiresAtLeast: 'Acest domeniu necesită cel puțin {{count}} {{label}}.',
   },
   version: {
+    type: 'Tip',
     aboutToPublishSelection:
       'Sunteți pe cale să publicați toate {{label}} din selecție. Sunteți sigur?',
     aboutToRestore:
@@ -261,6 +262,7 @@ export default {
     confirmVersionRestoration: 'Confirmați restaurarea versiunii',
     draft: 'Proiect',
     draftSavedSuccessfully: 'Proiect salvat cu succes.',
+    lastSavedAgo: 'Ultima salvare acum {{distance}}',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',
     noRowsFound: 'Nu s-a găsit niciun {{label}}',
     preview: 'Previzualizare',
@@ -276,7 +278,6 @@ export default {
     selectLocales: 'Selectați localitățile de afișat',
     selectVersionToCompare: 'Selectați o versiune pentru a compara',
     showLocales: 'Afișați localitățile:',
-    type: 'Tip',
     unpublish: 'Dezpublicare',
     unpublishing: 'Dezpublicare...',
     version: 'Versiune',

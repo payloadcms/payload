@@ -361,6 +361,7 @@ export default {
     publish: 'Publicar',
     publishChanges: 'Publicar cambios',
     published: 'Publicado',
+    publishing: 'Publishing',
     restoreThisVersion: 'Restaurar esta versión',
     restoredSuccessfully: 'Restaurado éxito.',
     restoring: 'Restaurando...',

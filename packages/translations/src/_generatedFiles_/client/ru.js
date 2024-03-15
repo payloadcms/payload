@@ -241,6 +241,7 @@ export default {
     requiresAtLeast: 'Это поле требует не менее {{count}} {{label}}',
   },
   version: {
+    type: 'Тип',
     aboutToPublishSelection: 'Вы собираетесь опубликовать все {{label}} в выборе. Вы уверены?',
     aboutToRestore:
       'Вы собираетесь восстановить этот документ {{label}} в состояние, в котором он находился {{versionDate}}.',
@@ -261,6 +262,7 @@ export default {
     confirmVersionRestoration: 'Подтвердить восстановление версии',
     draft: 'Черновик',
     draftSavedSuccessfully: 'Черновик успешно сохранен.',
+    lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
     noFurtherVersionsFound: 'Другие версии не найдены',
     noRowsFound: 'Не найдено {{label}}',
     preview: 'Предпросмотр',
@@ -268,6 +270,7 @@ export default {
     publish: 'Публиковать',
     publishChanges: 'Опубликовать изменения',
     published: 'Опубликовано',
+    publishing: 'Публикация',
     restoreThisVersion: 'Восстановить эту версию',
     restoredSuccessfully: 'Восстановлен успешно.',
     restoring: 'Восстановление...',
@@ -276,7 +279,6 @@ export default {
     selectLocales: 'Выберите локали для отображения',
     selectVersionToCompare: 'Выбрать версию для сравнения',
     showLocales: 'Показать локали:',
-    type: 'Тип',
     unpublish: 'Отменить публикацию',
     unpublishing: 'Отмена публикации...',
     version: 'Версия',

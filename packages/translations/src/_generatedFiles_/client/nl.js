@@ -241,6 +241,7 @@ export default {
     requiresAtLeast: 'Dit veld vereist minstens {{count}} {{label}}.',
   },
   version: {
+    type: 'Type',
     aboutToPublishSelection:
       'Je staat op het punt om alle {{label}} in de selectie te publiceren. Weet je het zeker?',
     aboutToRestore:
@@ -263,6 +264,7 @@ export default {
     confirmVersionRestoration: 'Bevestig te herstellen versie',
     draft: 'Concept',
     draftSavedSuccessfully: 'Concept succesvol bewaard.',
+    lastSavedAgo: 'Laatst opgeslagen {{distance}} geleden',
     noFurtherVersionsFound: 'Geen verdere versies gevonden',
     noRowsFound: 'Geen {{label}} gevonden',
     preview: 'Voorbeeld',
@@ -270,6 +272,7 @@ export default {
     publish: 'Publiceren',
     publishChanges: 'Publiceer wijzigingen',
     published: 'Gepubliceerd',
+    publishing: 'Publicatie',
     restoreThisVersion: 'Herstel deze versie',
     restoredSuccessfully: 'Herstelling succesvol.',
     restoring: 'Herstellen...',
@@ -278,7 +281,6 @@ export default {
     selectLocales: 'Selecteer locales om weer te geven',
     selectVersionToCompare: 'Selecteer een versie om te vergelijken',
     showLocales: 'Toon locales:',
-    type: 'Type',
     unpublish: 'Publicatie ongedaan maken',
     unpublishing: 'Publicatie ongedaan maken...',
     version: 'Versie',

@@ -239,6 +239,7 @@ export default {
     requiresAtLeast: 'Це поле потребує не менше {{count}} {{label}}.',
   },
   version: {
+    type: 'Тип',
     aboutToPublishSelection: 'Ви збираєтеся опублікувати всі {{label}} у добірці. Ти впевнений?',
     aboutToRestore:
       'Ви збираєтесь відновити цей документ {{label}} до стану, в якому він знаходився {{versionDate}}.',
@@ -259,6 +260,7 @@ export default {
     confirmVersionRestoration: 'Підтвердити відновлення версії',
     draft: 'Чернетка',
     draftSavedSuccessfully: 'Чернетка успішно збережена.',
+    lastSavedAgo: 'Останній раз збережено {{distance}} тому',
     noFurtherVersionsFound: 'Інших версій не знайдено',
     noRowsFound: 'Не знайдено {{label}}',
     preview: 'Попередній перегляд',
@@ -266,6 +268,7 @@ export default {
     publish: 'Опублікувати',
     publishChanges: 'Опублікувати зміни',
     published: 'Опубліковано',
+    publishing: 'Публікація',
     restoreThisVersion: 'Відновити цю версію',
     restoredSuccessfully: 'Відновлено успішно.',
     restoring: 'Відеовлення...',
@@ -274,7 +277,6 @@ export default {
     selectLocales: 'Виберіть переклад для відображення',
     selectVersionToCompare: 'Виберіть версію для порівняння',
     showLocales: 'Показати переклади:',
-    type: 'Тип',
     unpublish: 'Відмінити публікацію',
     unpublishing: 'Відміна публікації...',
     version: 'Версія',

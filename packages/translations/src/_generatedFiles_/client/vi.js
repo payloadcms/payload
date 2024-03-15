@@ -238,6 +238,7 @@ export default {
     requiresAtLeast: 'Field này cần tối thiểu {{count}} {{label}}.',
   },
   version: {
+    type: 'Loại',
     aboutToPublishSelection: 'Bạn có muốn xuất bản tất cả {{label}} không?',
     aboutToRestore: 'Bạn chuẩn bị khôi phục lại {{label}} về phiên bản {{versionDate}}.',
     aboutToRestoreGlobal:
@@ -255,6 +256,7 @@ export default {
     confirmVersionRestoration: 'Xác nhận, khôi phục về phiên bản trước',
     draft: 'Bản nháp',
     draftSavedSuccessfully: 'Bản nháp đã được lưu thành công.',
+    lastSavedAgo: 'Lần lưu cuối cùng {{distance}} trước đây',
     noFurtherVersionsFound: 'Không tìm thấy phiên bản cũ hơn',
     noRowsFound: 'Không tìm thấy: {{label}}',
     preview: 'Bản xem trước',
@@ -262,6 +264,7 @@ export default {
     publish: 'Công bố',
     publishChanges: 'Xuất bản tài liệu',
     published: 'Đã xuất bản',
+    publishing: 'Xuất bản',
     restoreThisVersion: 'Khôi phục về phiên bản này',
     restoredSuccessfully: 'Đã khôi phục thành công.',
     restoring: 'Đang khôi phục...',
@@ -270,7 +273,6 @@ export default {
     selectLocales: 'Chọn mã khu vực để hiện thị',
     selectVersionToCompare: 'Chọn phiên bản để so sánh',
     showLocales: 'Hiển thị mã khu vực:',
-    type: 'Loại',
     unpublish: 'Ẩn tài liệu',
     unpublishing: 'Đang ẩn tài liệu...',
     version: 'Phiên bản',

@@ -361,6 +361,7 @@ export default {
     publish: 'Dərc et',
     publishChanges: 'Dəyişiklikləri dərc et',
     published: 'Dərc edilmiş',
+    publishing: 'Nəşr',
     restoreThisVersion: 'Bu versiyanı bərpa et',
     restoredSuccessfully: 'Uğurla bərpa edildi.',
     restoring: 'Bərpa olunur...',

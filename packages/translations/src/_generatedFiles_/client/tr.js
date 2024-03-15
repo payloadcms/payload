@@ -242,6 +242,7 @@ export default {
     requiresAtLeast: 'Bu alan en az {{count}} adet {{label}} gerektirmektedir.',
   },
   version: {
+    type: 'Tür',
     aboutToPublishSelection: "Seçimdeki tüm {{label}}'i yayınlamak üzeresiniz. Emin misin?",
     aboutToRestore: 'Döküman {{label}}, {{versionDate}} tarihindeki sürümüne geri döndürülecek.',
     aboutToRestoreGlobal:
@@ -260,6 +261,7 @@ export default {
     confirmVersionRestoration: 'Sürümü Geri Getirmeyi Onayla',
     draft: 'Taslak',
     draftSavedSuccessfully: 'Taslak başarıyla kaydedildi.',
+    lastSavedAgo: 'Son kaydedildi {{distance}} önce',
     noFurtherVersionsFound: 'Başka sürüm bulunamadı.',
     noRowsFound: '{{label}} bulunamadı',
     preview: 'Önizleme',
@@ -267,6 +269,7 @@ export default {
     publish: 'Yayınla',
     publishChanges: 'Değişiklikleri yayınla',
     published: 'Yayınlandı',
+    publishing: 'Yayınlama',
     restoreThisVersion: 'Bu sürüme geri döndür',
     restoredSuccessfully: 'Geri getirme başarılı.',
     restoring: 'Geri döndürülüyor...',
@@ -275,7 +278,6 @@ export default {
     selectLocales: 'Görüntülenecek yerel ayarları seçin',
     selectVersionToCompare: 'Karşılaştırılacak bir sürüm seçin',
     showLocales: 'Yerel ayarları göster:',
-    type: 'Tür',
     unpublish: 'Yayından Kaldır',
     unpublishing: 'Yayından kaldırılıyor...',
     version: 'Sürüm',

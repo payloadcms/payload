@@ -357,6 +357,7 @@ export default {
     publish: 'Publikovat',
     publishChanges: 'Publikovat změny',
     published: 'Publikováno',
+    publishing: 'Publikování',
     restoreThisVersion: 'Obnovit tuto verzi',
     restoredSuccessfully: 'Úspěšně obnoveno.',
     restoring: 'Obnovování...',

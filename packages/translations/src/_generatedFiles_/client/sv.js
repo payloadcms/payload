@@ -240,6 +240,7 @@ export default {
     requiresAtLeast: 'Detta fält kräver minst {{count}} {{label}}.',
   },
   version: {
+    type: 'Typ',
     aboutToPublishSelection: 'Du är på väg att publicera alla {{label}} i urvalet. Är du säker?',
     aboutToRestore:
       'Du är på väg att återställa detta {{label}} dokumentet till det tillståndet som det var den {{versionDate}}.',
@@ -260,6 +261,7 @@ export default {
     confirmVersionRestoration: 'Bekräfta Versionsåterställning',
     draft: 'Utkast',
     draftSavedSuccessfully: 'Utkastet sparades framgångsrikt.',
+    lastSavedAgo: 'Senast sparad för {{distance}} sedan',
     noFurtherVersionsFound: 'Inga fler versioner hittades',
     noRowsFound: 'Inga {{label}} hittades',
     preview: 'Förhandsvisa',
@@ -267,6 +269,7 @@ export default {
     publish: 'Publicera',
     publishChanges: 'Publicera ändringar',
     published: 'Publicerad',
+    publishing: 'Publicering',
     restoreThisVersion: 'Återställ den här versionen',
     restoredSuccessfully: 'Återställd framgångsrikt.',
     restoring: 'Återställer...',
@@ -275,7 +278,6 @@ export default {
     selectLocales: 'Välj språk att visa',
     selectVersionToCompare: 'Välj en version att jämföra',
     showLocales: 'Visa språk:',
-    type: 'Typ',
     unpublish: 'Avpublicera',
     unpublishing: 'Avpublicerar...',
     version: 'Version',

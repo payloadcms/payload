@@ -359,6 +359,7 @@ export default {
     publish: 'Publicera',
     publishChanges: 'Publicera ändringar',
     published: 'Publicerad',
+    publishing: 'Publicering',
     restoreThisVersion: 'Återställ den här versionen',
     restoredSuccessfully: 'Återställd framgångsrikt.',
     restoring: 'Återställer...',

@@ -241,6 +241,7 @@ export default {
     requiresAtLeast: 'Dieses Feld muss mindestens {{count}} {{label}} enthalten.',
   },
   version: {
+    type: 'Typ',
     aboutToPublishSelection:
       'Sie sind dabei, alle {{label}} in der Auswahl zu veröffentlichen. Bist du dir sicher?',
     aboutToRestore: 'Du bist dabei, {{label}} auf den Stand vom {{versionDate}} zurücksetzen.',
@@ -261,6 +262,7 @@ export default {
     confirmVersionRestoration: ' Wiederherstellung der Version bestätigen',
     draft: 'Entwurf',
     draftSavedSuccessfully: 'Entwurf erfolgreich gespeichert.',
+    lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
     noFurtherVersionsFound: 'Keine weiteren Versionen vorhanden',
     noRowsFound: 'Kein {{label}} gefunden',
     preview: 'Vorschau',
@@ -268,6 +270,7 @@ export default {
     publish: 'Veröffentlichen',
     publishChanges: 'Änderungen veröffentlichen',
     published: 'Veröffentlicht',
+    publishing: 'Veröffentlichung',
     restoreThisVersion: 'Diese Version wiederherstellen',
     restoredSuccessfully: 'Erfolgreich wiederhergestellt.',
     restoring: 'wiederherstellen...',
@@ -276,7 +279,6 @@ export default {
     selectLocales: 'Wähle anzuzeigende Sprachumgebungen',
     selectVersionToCompare: 'Wähle Version zum Vergleich',
     showLocales: 'Sprachumgebungen anzeigen:',
-    type: 'Typ',
     unpublish: 'Auf Entwurf setzen',
     unpublishing: 'Setze auf Entwurf...',
     version: 'Version',

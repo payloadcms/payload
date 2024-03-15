@@ -243,6 +243,7 @@ export default {
     requiresAtLeast: 'ဤအကွက်သည် အနည်းဆုံး {{count}} {{label}} လိုအပ်သည်',
   },
   version: {
+    type: 'အမျိုးအစား',
     aboutToPublishSelection:
       'သင်သည် ရွေးချယ်မှုတွင် {{label}} အားလုံးကို ထုတ်ဝေပါတော့မည်။ သေချာလား?',
     aboutToRestore:
@@ -264,6 +265,7 @@ export default {
     confirmVersionRestoration: 'ဗားရှင်းပြန်လည် အသုံးပြုခြင်းကို အတည်ပြုပါ။',
     draft: 'မူကြမ်း',
     draftSavedSuccessfully: 'မူကြမ်းကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။',
+    lastSavedAgo: 'နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး',
     noFurtherVersionsFound: 'နောက်ထပ်ဗားရှင်းများ မတွေ့ပါ။',
     noRowsFound: '{{label}} အားမတွေ့ပါ။',
     preview: 'နမူနာပြရန်',
@@ -271,6 +273,7 @@ export default {
     publish: 'ထုတ်ဝေသည်။',
     publishChanges: 'အပြောင်းအလဲများကို တင်ခဲ့သည်။',
     published: 'တင်ပြီးပြီ။',
+    publishing: 'ထုတ်ဝေခြင်း',
     restoreThisVersion: 'ဤဗားရှင်းကိုကို ပြန်ယူမည်။',
     restoredSuccessfully: 'အောင်မြင်စွာ ပြန်လည်ရယူခဲ့သည်။',
     restoring: 'ပြန်ယူနေဆဲ...',
@@ -279,7 +282,6 @@ export default {
     selectLocales: 'ပြသရန် ဒေသန္တရများကို ရွေးပါ။',
     selectVersionToCompare: 'နှိုင်းယှဉ်ရန် ဗားရှင်းကို ရွေးပါ။',
     showLocales: 'ဒေသန္တရများကိုပြပါ။:',
-    type: 'အမျိုးအစား',
     unpublish: 'ပြန်ဖြုတ်မည်။',
     unpublishing: 'ပြန်ဖြုတ်နေဆဲ ...',
     version: 'ဗားရှင်း',
