@@ -24,7 +24,7 @@ module.exports = {
       ],
     },
     {
-      files: ['config.ts'],
+      files: ['**/*.ts'],
       rules: {
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
