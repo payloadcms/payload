@@ -27,6 +27,8 @@ const baseRules = {
 const reactRules = {
   // react/jsx-max-props-per-line conflicts with prettier. Sometimes react/jsx-max-props-per-line tells you to put it on a new line, but prettier moves it back.
   'react/jsx-max-props-per-line': 'off',
+  // react/jsx-one-expression-per-line conflicts with prettier. Sometimes react/jsx-one-expression-per-line tells you to put it on a new line, but prettier moves it back.
+  'react/jsx-one-expression-per-line': 'off',
   'react/no-unused-prop-types': 'off',
   'react/prop-types': 'off',
   'react/require-default-props': 'off',
