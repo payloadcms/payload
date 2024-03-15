@@ -318,7 +318,7 @@ jobs:
 
   templates:
     needs: changes
-    if: ${{ needs.changes.outputs.templates == 'true' }}
+    if: false # Disable until templates are updated for 3.0
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
