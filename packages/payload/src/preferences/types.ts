@@ -16,11 +16,12 @@ export type TabsPreferences = Array<{
   [path: string]: number
 }>
 
+export type InsideFieldsPreferences = {
+  collapsed: CollapsedPreferences
+  tabIndex: number
+}
 export type FieldsPreferences = {
-  [key: string]: {
-    collapsed: CollapsedPreferences
-    tabIndex: number
-  }
+  [key: string]: InsideFieldsPreferences
 }
 
 export type DocumentPreferences = {

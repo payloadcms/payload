@@ -4,6 +4,7 @@ import type {
   DocumentPermissions,
   DocumentPreferences,
   FormState,
+  InsideFieldsPreferences,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TypeWithID,
@@ -45,9 +46,12 @@ export type DocumentInfo = DocumentInfoProps & {
 
 export type DocumentInfoContext = Omit<DocumentInfo, 'docPreferences'> & {
   getDocPermissions: () => Promise<void>
-  getDocPreferences: () => Promise<{ [key: string]: unknown }>
+  getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
-  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
+  setDocFieldPreferences: (
+    field: string,
+    fieldPreferences: Partial<InsideFieldsPreferences> & { [key: string]: unknown },
+  ) => void
   setDocumentTitle: (title: string) => void
   setOnSave: (data: Data) => Promise<void> | void
 }
