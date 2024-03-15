@@ -87,8 +87,9 @@ export async function changeLocale(page: Page, newLocale: string) {
     })
     .first()
     .click()
+  const regexPattern = new RegExp(`locale=${newLocale}`)
+  await expect(page).toHaveURL(regexPattern)
   await wait(500)
-  expect(page.url()).toContain(`locale=${newLocale}`)
 }
 
 export function exactText(text: string) {

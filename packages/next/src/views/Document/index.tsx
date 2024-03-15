@@ -124,6 +124,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           id,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           fallbackLocale: null,
           locale: locale.code,
           overrideAccess: false,
@@ -173,6 +174,7 @@ export const Document: React.FC<AdminViewProps> = async ({
         data = await payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           fallbackLocale: null,
           locale: locale.code,
           overrideAccess: false,

@@ -38,6 +38,7 @@ import {
   exactText,
   findTableCell,
   initPageConsoleErrorCatch,
+  saveDocAndAssert,
   selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -289,13 +290,21 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
-    // TODO: This test is flaky and fails sometimes
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       // fill out global title and wait for autosave
       await page.goto(url.global(autoSaveGlobalSlug))
-      await page.locator('#field-title').fill('global title')
-      await wait(1000)
+      await wait(500)
+      const titleField = page.locator('#field-title')
+      await expect(titleField).toBeVisible()
+
+      await titleField.fill('global title')
+      await wait(500)
+      await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
+      await expect(
+        page.locator('.autosave:has-text("Last saved less than a minute ago")'),
+      ).toBeVisible()
+      expect(await titleField.inputValue()).toBe('global title')
 
       // refresh the page and ensure value autosaved
       await page.goto(url.global(autoSaveGlobalSlug))
@@ -303,60 +312,77 @@ describe('versions', () => {
     })
 
     test('should retain localized data during autosave', async () => {
-      const locale = 'en'
-      const spanishLocale = 'es'
+      const en = 'en'
+      const es = 'es'
       const title = 'english title'
       const spanishTitle = 'spanish title'
       const description = 'description'
       const newDescription = 'new description'
 
       await page.goto(autosaveURL.create)
-      await page.locator('#field-title').fill(title)
-      await page.locator('#field-description').fill(description)
-      await wait(500) // wait for autosave
+      await expect(page.locator('.id-label')).toBeVisible()
+      await wait(500)
+      const titleField = page.locator('#field-title')
+      const descriptionField = page.locator('#field-description')
 
-      await changeLocale(page, spanishLocale)
-      await page.locator('#field-title').fill(spanishTitle)
-      await wait(500) // wait for autosave
+      // fill out en doc
+      await titleField.fill(title)
+      await descriptionField.fill(description)
+      await wait(500)
 
-      await changeLocale(page, locale)
-      await page.locator('#field-description').fill(newDescription)
-      await wait(500) // wait for autosave
+      // change locale to spanish
+      await changeLocale(page, es)
+      // set localized title field
+      await titleField.fill(spanishTitle)
+      await wait(500)
 
-      await changeLocale(page, spanishLocale)
-      await wait(500) // wait for autosave
+      // change locale back to en
+      await changeLocale(page, en)
+      // verify en loads its own title
+      expect(await titleField.inputValue()).toEqual(title)
+      // change non-localized description field
+      await descriptionField.fill(newDescription)
+      await wait(500)
 
+      // change locale to spanish
+      await changeLocale(page, es)
+      await wait(500)
+
+      // reload page in spanish
+      // title should not be english title
+      // description should be new description
       await page.reload()
-      await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
-      await expect(page.locator('#field-description')).toHaveValue(newDescription)
+      expect(await titleField.inputValue()).toEqual(spanishTitle)
+      expect(await descriptionField.inputValue()).toEqual(newDescription)
     })
 
     test('should restore localized docs correctly', async () => {
-      const spanishLocale = 'es'
+      const es = 'es'
       const spanishTitle = 'spanish title'
       const englishTitle = 'english title'
 
       await page.goto(url.create)
+      await wait(500)
 
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-description').fill('unchanged description')
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       // change locale to spanish
-      await changeLocale(page, spanishLocale)
+      await changeLocale(page, es)
 
       // fill out doc in spanish
       await page.locator('#field-title').fill(spanishTitle)
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       // fill out draft content in spanish
       await page.locator('#field-title').fill(`${spanishTitle}--draft`)
-      await page.locator('#action-save-draft').click()
+      await saveDocAndAssert(page, '#action-save-draft')
 
       // revert to last published version
       await page.locator('#action-revert-to-published').click()
-      await page.locator('#action-revert-to-published-confirm').click()
+      await saveDocAndAssert(page, '#action-revert-to-published-confirm')
 
       // verify that spanish content is reverted correctly
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
@@ -365,12 +391,14 @@ describe('versions', () => {
     test('collection - autosave should only update the current document', async () => {
       // create and save first doc
       await page.goto(autosaveURL.create)
+      await wait(500)
       await page.locator('#field-title').fill('first post title')
       await page.locator('#field-description').fill('first post description')
       await page.locator('#action-save').click()
 
       // create and save second doc
       await page.goto(autosaveURL.create)
+      await wait(500)
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
       await page.locator('#action-save').click()
@@ -378,7 +406,7 @@ describe('versions', () => {
       // update second doc and wait for autosave
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
-      await wait(1000)
+      await wait(500)
 
       // verify that the first doc is unchanged
       await page.goto(autosaveURL.list)
@@ -389,9 +417,10 @@ describe('versions', () => {
 
     test('should save versions with custom IDs', async () => {
       await page.goto(customIDURL.create)
+      await wait(500)
       await page.locator('#field-id').fill('custom')
       await page.locator('#field-title').fill('title')
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       await page.goto(customIDURL.list)
       await page.locator('tbody tr .cell-id a').click()
