@@ -25,16 +25,6 @@ const baseRules = {
 }
 
 const reactRules = {
-  // react/jsx-max-props-per-line conflicts with prettier. Sometimes react/jsx-max-props-per-line tells you to put it on a new line, but prettier moves it back.
-  'react/jsx-max-props-per-line': 'off',
-  // react/jsx-one-expression-per-line conflicts with prettier. Sometimes react/jsx-one-expression-per-line tells you to put it on a new line, but prettier moves it back.
-  'react/jsx-one-expression-per-line': 'off',
-  // react/jsx-wrap-multilines conflicts with prettier. Sometimes react/jsx-wrap-multilines tells you to put it on a new line, but prettier moves it back.
-  'react/jsx-wrap-multilines': 'off',
-  // react/jsx-indent conflicts with prettier. Sometimes react/jsx-indent tells you to put it on a new line, but prettier moves it back.
-  'react/jsx-indent': 'off',
-  // react/jsx-curly-newline conflicts with prettier. Sometimes react/jsx-curly-newline tells you to put it on a new line, but prettier moves it back.
-  'react/jsx-curly-newline': 'off',
   'react/no-unused-prop-types': 'off',
   'react/prop-types': 'off',
   'react/require-default-props': 'off',
@@ -88,7 +78,6 @@ const baseExtends = [
   'eslint:recommended',
   'plugin:perfectionist/recommended-natural',
   'plugin:regexp/recommended',
-  'prettier',
 ]
 
 /** @type {import('eslint').Linter.Config} */
@@ -124,7 +113,11 @@ module.exports = {
     {
       files: ['**/*.ts'],
       plugins: ['@typescript-eslint'],
-      extends: [...baseExtends, 'plugin:@typescript-eslint/recommended-type-checked'],
+      extends: [
+        ...baseExtends,
+        'plugin:@typescript-eslint/recommended-type-checked',
+        'prettier', // prettier needs to come last. It disables eslint rules conflicting with prettier
+      ],
       parser: '@typescript-eslint/parser',
       rules: {
         ...baseRules,
@@ -140,6 +133,7 @@ module.exports = {
         'plugin:react/recommended',
         'plugin:react-hooks/recommended',
         './configs/react/index.js',
+        'prettier', // prettier needs to come last. It disables eslint rules conflicting with prettier
       ],
       parser: '@typescript-eslint/parser',
       rules: {
@@ -155,6 +149,7 @@ module.exports = {
         ...baseExtends,
         'plugin:@typescript-eslint/recommended-type-checked',
         './configs/jest/index.js',
+        'prettier', // prettier needs to come last. It disables eslint rules conflicting with prettier
       ],
       parser: '@typescript-eslint/parser',
       rules: {
