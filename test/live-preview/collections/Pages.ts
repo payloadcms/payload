@@ -1,6 +1,7 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
 
 import { lexicalEditor } from '../../../packages/richtext-lexical/src/index.js'
+import { slateEditor } from '../../../packages/richtext-slate/src/index.js'
 import { Archive } from '../blocks/ArchiveBlock/index.js'
 import { CallToAction } from '../blocks/CallToAction/index.js'
 import { Content } from '../blocks/Content/index.js'
@@ -76,6 +77,7 @@ export const Pages: CollectionConfig = {
               label: 'Rich Text — Slate',
               type: 'richText',
               name: 'richTextSlate',
+              editor: slateEditor({}),
             },
             {
               label: 'Rich Text — Lexical',

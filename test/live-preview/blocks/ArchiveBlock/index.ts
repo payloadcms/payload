@@ -1,5 +1,7 @@
 import type { Block } from '../../../../packages/payload/src/fields/config/types.js'
 
+import { slateEditor } from '../../../../packages/richtext-slate/src/index.js'
+
 export const Archive: Block = {
   slug: 'archive',
   labels: {
@@ -11,6 +13,7 @@ export const Archive: Block = {
       name: 'introContent',
       label: 'Intro Content',
       type: 'richText',
+      editor: slateEditor({}),
     },
     {
       name: 'populateBy',
