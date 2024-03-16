@@ -70,7 +70,7 @@ describe('Hooks', () => {
       })
     })
 
-    it('should execute hooks in correct order on create', async () => {
+    it('should execute hooks in correct order on create', () => {
       expect(doc.collectionAfterChange).toBeTruthy()
       expect(doc.collectionAfterRead).toBeTruthy()
       expect(doc.collectionBeforeChange).toBeTruthy()

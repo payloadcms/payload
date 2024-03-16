@@ -95,7 +95,7 @@ describe('Fields', () => {
         data: { text },
       })
 
-      await expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue)
+      expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue)
     })
 
     it('should localize an array of strings using hasMany', async () => {
@@ -326,7 +326,7 @@ describe('Fields', () => {
       })
     })
 
-    it('creates with default values', async () => {
+    it('creates with default values', () => {
       expect(doc.number).toEqual(numberDoc.number)
       expect(doc.min).toEqual(numberDoc.min)
       expect(doc.max).toEqual(numberDoc.max)
@@ -642,7 +642,7 @@ describe('Fields', () => {
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
     })
 
-    it('should create with defaultValue', async () => {
+    it('should create with defaultValue', () => {
       expect(doc.items).toMatchObject(arrayDefaultValue)
       expect(doc.localized).toMatchObject(arrayDefaultValue)
     })
@@ -783,12 +783,12 @@ describe('Fields', () => {
       })
     })
 
-    it('should create with defaultValue', async () => {
+    it('should create with defaultValue', () => {
       expect(document.group.defaultParent).toStrictEqual(groupDefaultValue)
       expect(document.group.defaultChild).toStrictEqual(groupDefaultChild)
     })
 
-    it('should not have duplicate keys', async () => {
+    it('should not have duplicate keys', () => {
       expect(document.arrayOfGroups[0]).toMatchObject({
         id: expect.any(String),
         groupItem: {
@@ -808,15 +808,15 @@ describe('Fields', () => {
       })
     })
 
-    it('should create with fields inside a named tab', async () => {
+    it('should create with fields inside a named tab', () => {
       expect(document.tab.text).toStrictEqual(namedTabText)
     })
 
-    it('should create with defaultValue inside a named tab', async () => {
+    it('should create with defaultValue inside a named tab', () => {
       expect(document.tab.defaultValue).toStrictEqual(namedTabDefaultValue)
     })
 
-    it('should create with defaultValue inside a named tab with no other values', async () => {
+    it('should create with defaultValue inside a named tab with no other values', () => {
       expect(document.namedTabWithDefaultValue.defaultValue).toStrictEqual(namedTabDefaultValue)
     })
 

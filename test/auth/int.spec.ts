@@ -49,13 +49,13 @@ describe('Auth', () => {
       token = data.loginUser.token
     })
 
-    it('should login', async () => {
+    it('should login', () => {
       expect(user.id).toBeDefined()
       expect(user.email).toEqual(devUser.email)
       expect(token).toBeDefined()
     })
 
-    it('should have fields saved to JWT', async () => {
+    it('should have fields saved to JWT', () => {
       const decoded = jwtDecode<User>(token)
       const { collection, email: jwtEmail, exp, iat, roles } = decoded
 
@@ -136,7 +136,7 @@ describe('Auth', () => {
         expect(data.user.email).toBeDefined()
       })
 
-      it('should have fields saved to JWT', async () => {
+      it('should have fields saved to JWT', () => {
         const decoded = jwtDecode<User>(token)
         const {
           collection,
@@ -331,7 +331,7 @@ describe('Auth', () => {
           data = await response.json()
         })
 
-        it('should create', async () => {
+        it('should create', () => {
           expect(data.doc.key).toStrictEqual(key)
           expect(data.doc.value.property).toStrictEqual(property)
         })
