@@ -1,3 +1,4 @@
+import type { LanguageTranslations } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/types'
 
 import { translations } from '@payloadcms/translations/client'
@@ -50,6 +51,12 @@ export const RootLayout = async ({
     value: language,
   }))
 
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async function loadLanguageTranslations(lang: string): Promise<LanguageTranslations> {
+    'use server'
+    return mergedTranslations[lang]
+  }
+
   const { componentMap, wrappedChildren } = buildComponentMap({
     DefaultCell,
     DefaultEditView,
@@ -67,6 +74,8 @@ export const RootLayout = async ({
           fallbackLang={clientConfig.i18n.fallbackLanguage}
           lang={lang}
           languageOptions={languageOptions}
+          // eslint-disable-next-line react/jsx-no-bind
+          loadLanguageTranslations={loadLanguageTranslations}
           translations={mergedTranslations[lang]}
         >
           {wrappedChildren}

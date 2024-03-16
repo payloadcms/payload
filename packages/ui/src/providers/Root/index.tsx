@@ -35,6 +35,7 @@ type Props = {
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
   lang: string
   languageOptions: LanguageOptions
+  loadLanguage?: (lang: string) => Promise<LanguageTranslations>
   translations: LanguageTranslations
 }
 
@@ -45,6 +46,7 @@ export const RootProvider: React.FC<Props> = ({
   fallbackLang,
   lang,
   languageOptions,
+  loadLanguage,
   translations,
 }) => {
   const { ModalContainer, ModalProvider } = facelessUIImport || {
@@ -64,6 +66,7 @@ export const RootProvider: React.FC<Props> = ({
                 fallbackLang={fallbackLang}
                 lang={lang}
                 languageOptions={languageOptions}
+                loadLanguage={loadLanguage}
                 translations={translations}
               >
                 <WindowInfoProvider
