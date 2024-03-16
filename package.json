@@ -60,11 +60,11 @@
     "release:beta": "tsx ./scripts/release.ts --bump prerelease --tag beta",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env NODE_OPTIONS=--no-deprecation jest --config=jest.components.config.js",
-    "test:e2e": "NODE_OPTIONS=--no-deprecation tsx ./test/runE2E.ts",
-    "test:e2e:debug": "cross-env NODE_OPTIONS=--no-deprecation PWDEBUG=1 DISABLE_LOGGING=true playwright test",
-    "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation DISABLE_LOGGING=true playwright test --headed",
-    "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
+    "test:e2e": "NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 tsx ./test/runE2E.ts",
+    "test:e2e:debug": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PWDEBUG=1 DISABLE_LOGGING=true playwright test",
+    "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true playwright test --headed",
+    "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "devDependencies": {
