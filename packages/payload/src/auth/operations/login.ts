@@ -8,7 +8,7 @@ import type { PayloadRequest } from '../../express/types'
 import type { User } from '../types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'
-import { AuthenticationError, LockedAuth } from '../../errors'
+import { AuthenticationError, LockedAuth, UnverifiedAuth } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { commitTransaction } from '../../utilities/commitTransaction'
 import getCookieExpiration from '../../utilities/getCookieExpiration'
@@ -94,8 +94,12 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       where: { email: { equals: email.toLowerCase() } },
     })
 
-    if (!user || (args.collection.config.auth.verify && user._verified === false)) {
+    if (!user) {
       throw new AuthenticationError(req.t)
+    }
+
+    if (args.collection.config.auth.verify && user._verified === false) {
+      throw new UnverifiedAuth(req.t)
     }
 
     if (user && isLocked(user.lockUntil)) {

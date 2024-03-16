@@ -288,6 +288,53 @@ describe('Auth', () => {
         expect(doc).toHaveProperty('roles')
       })
 
+      it('should block login for an unverified user', async () => {
+        const unverifedEmail = 'verify@me.com'
+        const response = await fetch(`${apiUrl}/public-users`, {
+          body: JSON.stringify({
+            email: unverifedEmail,
+            password,
+            roles: ['editor'],
+          }),
+          headers: {
+            Authorization: `JWT ${token}`,
+            'Content-Type': 'application/json',
+          },
+          method: 'post',
+        })
+
+        expect(response.status).toBe(201)
+
+        const userResult = await payload.find({
+          collection: 'public-users',
+          limit: 1,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: unverifedEmail,
+            },
+          },
+        })
+
+        const { _verificationToken, _verified } = userResult.docs[0]
+
+        expect(_verified).toBe(false)
+        expect(_verificationToken).toBeDefined()
+
+        const loginResult = await fetch(`${apiUrl}/public-users/login`, {
+          body: JSON.stringify({
+            email: unverifedEmail,
+            password,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'post',
+        })
+
+        expect(loginResult.status).toEqual(401)
+      })
+
       it('should allow verification of a user', async () => {
         const emailToVerify = 'verify@me.com'
         const response = await fetch(`${apiUrl}/public-users`, {

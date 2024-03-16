@@ -334,6 +334,9 @@
         "userLocked": {
           "type": "string"
         },
+        "userUnverified": {
+          "type": "string"
+        },
         "valueMustBeUnique": {
           "type": "string"
         },
@@ -376,6 +379,7 @@
         "unableToDeleteCount",
         "unableToUpdateCount",
         "userLocked",
+        "userUnverified",
         "valueMustBeUnique",
         "verificationTokenInvalid"
       ],
