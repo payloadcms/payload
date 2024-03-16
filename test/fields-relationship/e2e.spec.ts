@@ -16,7 +16,7 @@ import type {
 import wait from '../../packages/payload/src/utilities/wait.js'
 import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import {
   relationFalseFilterOptionSlug,
   relationOneSlug,

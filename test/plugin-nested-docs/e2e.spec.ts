@@ -9,7 +9,7 @@ import type { Page as PayloadPage } from './payload-types.js'
 import payload from '../../packages/payload/src/index.js'
 import { initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

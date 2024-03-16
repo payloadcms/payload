@@ -15,7 +15,7 @@ import {
   saveDocHotkeyAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { numberDoc } from './collections/Number/shared.js'

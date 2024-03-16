@@ -11,7 +11,7 @@ import type { LexicalField } from './payload-types.js'
 
 import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import config from './config.js'
