@@ -10,6 +10,7 @@ import payload from '../../packages/payload/src/index.js'
 import { initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import config from './config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -47,7 +48,7 @@ async function createPage({
 
 describe('Nested Docs Plugin', () => {
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(dirname)
+    const { serverURL } = await initPayloadE2E({ config, dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
@@ -80,7 +81,6 @@ describe('Nested Docs Plugin', () => {
     const slugClass = '#field-slug'
     const publishButtonClass = '#action-save'
     const draftButtonClass = '#action-save-draft'
-    const statusClass = '.status__value-wrap'
 
     test('Parent slug updates breadcrumbs in child', async () => {
       await page.goto(url.edit(childId))
@@ -95,9 +95,9 @@ describe('Nested Docs Plugin', () => {
       await page.goto(url.edit(parentId))
 
       slug = page.locator(slugClass).nth(0)
-      slug.fill('updated-parent-slug')
+      await slug.fill('updated-parent-slug')
       await expect(slug).toHaveValue('updated-parent-slug')
-      page.locator(publishButtonClass).nth(0).click()
+      await page.locator(publishButtonClass).nth(0).click()
 
       await page.waitForTimeout(1500)
 
@@ -115,8 +115,8 @@ describe('Nested Docs Plugin', () => {
 
       await page.goto(url.edit(parentId))
 
-      page.locator(slugClass).nth(0).fill('parent-updated-draft')
-      page.locator(draftButtonClass).nth(0).click()
+      await page.locator(slugClass).nth(0).fill('parent-updated-draft')
+      await page.locator(draftButtonClass).nth(0).click()
 
       await page.waitForTimeout(1500)
 

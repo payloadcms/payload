@@ -47,7 +47,7 @@ describe('auth', () => {
   })
 
   describe('authenticated users', () => {
-    beforeAll(async ({ browser }) => {
+    beforeAll(({ browser }) => {
       url = new AdminUrlUtil(serverURL, slug)
     })
 
