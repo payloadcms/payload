@@ -2,16 +2,14 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src/index.js'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import { handleMessage } from '../../packages/live-preview/src/handleMessage.js'
 import { mergeData } from '../../packages/live-preview/src/mergeData.js'
 import { traverseRichText } from '../../packages/live-preview/src/traverseRichText.js'
-import { getPayload } from '../../packages/payload/src/index.js'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
 import { Pages } from './collections/Pages.js'
 import { postsSlug } from './collections/Posts.js'
 import configPromise from './config.js'
@@ -25,6 +23,8 @@ const schemaJSON = fieldSchemaToJSON(Pages.fields)
 let payload: Payload
 let restClient: NextRESTClient
 
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+
 function collectionPopulationRequestHandler({ endpoint }: { endpoint: string }) {
   return restClient.GET(`/${endpoint}`)
 }
@@ -37,9 +37,7 @@ describe('Collections - Live Preview', () => {
   let media: Media
 
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
 
     tenant = await payload.create({
       collection: tenantsSlug,

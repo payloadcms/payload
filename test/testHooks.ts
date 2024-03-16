@@ -13,8 +13,6 @@ type TestHooks = {
 }
 
 export const createTestHooks = async (testSuiteName = '_community'): Promise<TestHooks> => {
-  console.log('\nUsing config:', testSuiteName, '\n')
-
   const tsConfigPath = path.resolve(dirname, '..', 'tsconfig.json')
   const tsConfig = await json5.parse(await readFile(tsConfigPath, 'utf8'))
   const originalPayloadConfigTsValue =

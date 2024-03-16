@@ -1,6 +1,7 @@
 import { randomBytes } from 'crypto'
 
 import type { Payload } from '../../packages/payload/src/index.js'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -10,9 +11,7 @@ import type {
   Relation,
 } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import {
   chainedRelSlug,
@@ -33,9 +32,8 @@ type EasierChained = { id: string; relation: EasierChained }
 
 describe('Relationships', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
+
     await restClient.login({ slug: usersSlug })
   })
 

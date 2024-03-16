@@ -1,9 +1,8 @@
-import type { Payload } from '../../packages/payload/src/index.js'
+import type { Payload } from '../../packages/payload/types.js'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 import configPromise from './config.js'
 
@@ -18,9 +17,8 @@ describe('_Community Tests', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    const initialized = await initPayloadInt(configPromise)
+    ;({ payload, restClient } = initialized)
 
     const data = await restClient
       .POST('/users/login', {

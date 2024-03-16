@@ -3,10 +3,9 @@ import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
-import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
 import { mediaSlug } from './shared.js'
 
@@ -22,9 +21,7 @@ describe('@payloadcms/plugin-seo', () => {
   beforeAll(async () => {
     const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
-
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
+    ;({ payload } = await initPayloadInt(configPromise))
 
     // Create image
     const filePath = path.resolve(dirname, './image-1.jpg')

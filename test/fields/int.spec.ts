@@ -3,11 +3,11 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { MongooseAdapter } from '../../packages/db-mongodb/src/index.js'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types.js'
 import type { Payload } from '../../packages/payload/src/index.js'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { GroupField, RichTextField } from './payload-types.js'
 
 import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
@@ -39,12 +39,12 @@ import {
 let restClient: NextRESTClient
 let user: any
 let payload: Payload
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 describe('Fields', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
+
     await restClient.login({
       slug: 'users',
       credentials: devUser,

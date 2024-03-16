@@ -1254,7 +1254,3 @@ export interface LexicalBlocksRadioButtonsBlock {
   blockName?: string | null
   blockType: 'radioButtons'
 }
-
-declare module 'payload' {
-  export interface GeneratedTypes extends Config {}
-}

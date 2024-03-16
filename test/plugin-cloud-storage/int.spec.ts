@@ -1,13 +1,11 @@
-/* eslint-disable jest/require-top-level-describe */
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { describeIfInCIOrHasLocalstack } from '../helpers.js'
-import { startMemoryDB } from '../startMemoryDB.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -17,8 +15,7 @@ let payload: Payload
 
 describe('@payloadcms/plugin-cloud-storage', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
+    ;({ payload } = await initPayloadInt(configPromise))
   })
 
   afterAll(async () => {

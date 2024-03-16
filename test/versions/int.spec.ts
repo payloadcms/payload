@@ -1,9 +1,8 @@
 import type { Payload } from '../../packages/payload/src/index.js'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import AutosavePosts from './collections/Autosave.js'
 import configPromise from './config.js'
 import AutosaveGlobal from './globals/Autosave.js'
@@ -35,9 +34,7 @@ const formatGraphQLID = (id: number | string) =>
 
 describe('Versions', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
 
     const login = `
       mutation {

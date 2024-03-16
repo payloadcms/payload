@@ -1,15 +1,16 @@
 import { promises as _promises } from 'fs'
 import { createServer } from 'http'
 import nextImport from 'next'
-import { startMemoryDB } from 'test/startMemoryDB.js'
 import { parse } from 'url'
 
 import type { SanitizedConfig } from '../../packages/payload/src/config/types.js'
-import type { Payload } from '../../packages/payload/src/index.js'
 
 import { getPayloadHMR } from '../../packages/next/src/utilities/getPayloadHMR.js'
+import { type Payload, getPayload } from '../../packages/payload/src/index.js'
 import wait from '../../packages/payload/src/utilities/wait.js'
+import { startMemoryDB } from '../startMemoryDB.js'
 import { createTestHooks } from '../testHooks.js'
+import { NextRESTClient } from './NextRESTClient.js'
 
 type Args = {
   config: Promise<SanitizedConfig>

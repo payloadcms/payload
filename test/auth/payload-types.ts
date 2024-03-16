@@ -118,15 +118,3 @@ export interface PayloadMigration {
   updatedAt: string
   createdAt: string
 }
-
-declare module 'payload' {
-  export interface GeneratedTypes {
-    collections: {
-      users: User
-      'api-keys': ApiKey
-      'public-users': PublicUser
-      'payload-preferences': PayloadPreference
-      'payload-migrations': PayloadMigration
-    }
-  }
-}

@@ -8,12 +8,11 @@ import type { TypeWithID } from '../../packages/payload/src/collections/config/t
 import type { Payload } from '../../packages/payload/src/index.js'
 import type { PayloadRequest } from '../../packages/payload/src/types/index.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction.js'
 import { initTransaction } from '../../packages/payload/src/utilities/initTransaction.js'
 import { devUser } from '../credentials.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
-import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -27,8 +26,7 @@ process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
+    ;({ payload } = await initPayloadInt(configPromise))
     payload.db.migrationDir = path.join(dirname, './migrations')
 
     const loginResult = await payload.login({
