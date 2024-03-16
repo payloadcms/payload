@@ -1,12 +1,21 @@
-module.exports = () => {
-  process.env.PAYLOAD_DISABLE_ADMIN = 'true'
-  process.env.PAYLOAD_DROP_DATABASE = 'true'
+import { createTestHooks } from './testHooks.js'
 
-  if (process.env.PAYLOAD_DATABASE) {
-    console.log('\n\nUsing database:', process.env.PAYLOAD_DATABASE)
-  } else {
-    console.log('\n\nNo database specified, using default')
-  }
+let afterTest: () => Promise<void> | undefined
+beforeAll(async () => {
+  ;({ afterTest } = await createTestHooks())
+})
 
-  process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER = 's3'
+process.env.PAYLOAD_DISABLE_ADMIN = 'true'
+process.env.PAYLOAD_DROP_DATABASE = 'true'
+
+if (process.env.PAYLOAD_DATABASE) {
+  console.log('\n\nUsing database:', process.env.PAYLOAD_DATABASE)
+} else {
+  console.log('\n\nNo database specified, using default')
 }
+
+process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER = 's3'
+
+afterAll(async () => {
+  await afterTest()
+})
