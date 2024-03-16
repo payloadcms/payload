@@ -1,6 +1,7 @@
 import { promises as _promises } from 'fs'
 import { createServer } from 'http'
 import nextImport from 'next'
+import { startMemoryDB } from 'test/startMemoryDB.js'
 import { parse } from 'url'
 
 import type { SanitizedConfig } from '../../packages/payload/src/config/types.js'
@@ -8,7 +9,7 @@ import type { Payload } from '../../packages/payload/src/index.js'
 
 import { getPayloadHMR } from '../../packages/next/src/utilities/getPayloadHMR.js'
 import wait from '../../packages/payload/src/utilities/wait.js'
-import { beforeTest } from '../beforeTest.js'
+import { createTestHooks } from '../testHooks.js'
 
 type Args = {
   config: Promise<SanitizedConfig>
@@ -22,16 +23,18 @@ type Result = {
 
 export async function initPayloadE2E({ config, dirname }: Args): Promise<Result> {
   const testSuiteName = dirname.split('/').pop()
-  await beforeTest(testSuiteName)
+  const { beforeTest } = await createTestHooks(testSuiteName)
+  await beforeTest()
 
   process.env.NODE_OPTIONS = '--no-deprecation'
   process.env.PAYLOAD_DROP_DATABASE = 'true'
 
   // @ts-expect-error
   process.env.NODE_ENV = 'test'
-  const payload = await getPayloadHMR({ config })
 
-  // const port = await getPort()
+  const configWithMemoryDB = await startMemoryDB(config)
+  const payload = await getPayloadHMR({ config: configWithMemoryDB })
+
   const port = 3000
   process.env.PORT = String(port)
   const serverURL = `http://localhost:${port}`
@@ -59,7 +62,7 @@ export async function initPayloadE2E({ config, dirname }: Args): Promise<Result>
 
   await serverPromise
 
-  await wait(3000)
+  await wait(port)
 
   return { payload, serverURL }
 }
