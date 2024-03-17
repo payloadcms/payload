@@ -5,6 +5,8 @@ import type { ClientConfig } from 'payload/types'
 import { t } from '@payloadcms/translations'
 import React, { createContext, useContext } from 'react'
 
+import { useRouteCache } from '../RouteCache/index.js'
+
 export type LanguageOptions = {
   label: string
   value: string
@@ -31,49 +33,38 @@ type Props = {
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
   lang: string
   languageOptions: LanguageOptions
-  loadLanguageTranslations?: (lang: string) => Promise<LanguageTranslations>
+  switchLanguageServerAction?: (lang: string) => Promise<void>
   translations: LanguageTranslations
 }
 
 export const TranslationProvider: React.FC<Props> = ({
   children,
   fallbackLang,
-  lang: langFromProps,
+  lang,
   languageOptions,
-  loadLanguageTranslations: loadLanguageAction,
-  translations: translationsFromProps,
+  switchLanguageServerAction,
+  translations,
 }) => {
-  const [language, setLanguage] = React.useState(langFromProps)
-  const [translations, setTranslations] =
-    React.useState<LanguageTranslations>(translationsFromProps)
+  const { clearRouteCache } = useRouteCache()
 
-  const loadedLanguageRef = React.useRef<Record<string, LanguageTranslations>>({
-    [langFromProps]: translationsFromProps,
-  })
-
-  const nextT = React.useCallback(
-    (key: string, vars?: Record<string, any>): string =>
-      t({
-        key,
-        translations,
-        vars,
-      }),
-    [translations],
-  )
+  const nextT = (key: string, vars?: Record<string, unknown>): string =>
+    t({
+      key,
+      translations,
+      vars,
+    })
 
   const switchLanguage = React.useCallback(
     async (lang: string) => {
-      if (loadedLanguageRef.current?.[lang]) {
-        setTranslations(loadedLanguageRef.current[lang])
-        return
+      try {
+        await switchLanguageServerAction(lang)
+        clearRouteCache()
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Error loading language: "${lang}"`, error)
       }
-
-      const loaded = await loadLanguageAction(lang)
-      loadedLanguageRef.current[lang] = loaded
-      setTranslations(loaded)
-      setLanguage(lang)
     },
-    [loadLanguageAction],
+    [switchLanguageServerAction, clearRouteCache],
   )
 
   return (
@@ -81,7 +72,7 @@ export const TranslationProvider: React.FC<Props> = ({
       value={{
         i18n: {
           fallbackLanguage: fallbackLang,
-          language,
+          language: lang,
           t: nextT,
         },
         languageOptions,

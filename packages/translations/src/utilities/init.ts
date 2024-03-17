@@ -228,12 +228,7 @@ function memoize(fn: Function, keys: string[]) {
 }
 
 export const initI18n: InitI18n = memoize(
-  ({
-    config,
-    context,
-    language = 'en',
-    translations: incomingTranslations,
-  }: Parameters<InitI18n>[0]) => {
+  ({ config, language = 'en', translations: incomingTranslations }: Parameters<InitI18n>[0]) => {
     const { t, translations } = initTFunction({
       config,
       language: language || config.fallbackLanguage,

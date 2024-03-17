@@ -1,10 +1,9 @@
-import type { LanguageTranslations } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/types'
 
 import { translations } from '@payloadcms/translations/client'
 import { RootProvider, buildComponentMap } from '@payloadcms/ui'
 import '@payloadcms/ui/scss/app.scss'
-import { headers as getHeaders } from 'next/headers.js'
+import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { parseCookies } from 'payload/auth'
 import { createClientConfig } from 'payload/config'
 import { deepMerge } from 'payload/utilities'
@@ -38,6 +37,7 @@ export const RootLayout = async ({
 
   const lang =
     getRequestLanguage({
+      config,
       cookies,
       headers,
     }) ?? clientConfig.i18n.fallbackLanguage
@@ -52,9 +52,13 @@ export const RootLayout = async ({
   }))
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  async function loadLanguageTranslations(lang: string): Promise<LanguageTranslations> {
+  async function switchLanguageServerAction(lang: string): Promise<void> {
     'use server'
-    return mergedTranslations[lang]
+    nextCookies().set({
+      name: `${config.cookiePrefix || 'payload'}-lng'`,
+      path: '/',
+      value: lang,
+    })
   }
 
   const { componentMap, wrappedChildren } = buildComponentMap({
@@ -75,7 +79,7 @@ export const RootLayout = async ({
           lang={lang}
           languageOptions={languageOptions}
           // eslint-disable-next-line react/jsx-no-bind
-          loadLanguageTranslations={loadLanguageTranslations}
+          switchLanguageServerAction={switchLanguageServerAction}
           translations={mergedTranslations[lang]}
         >
           {wrappedChildren}
