@@ -1,9 +1,7 @@
 import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
 import type {
-  Data,
   DocumentPermissions,
   DocumentPreferences,
-  FormState,
   InsideFieldsPreferences,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
@@ -26,10 +24,7 @@ export type DocumentInfoProps = {
   globalSlug?: SanitizedGlobalConfig['slug']
   hasSavePermission?: boolean
   id: null | number | string
-  initialData?: Data
-  initialState?: FormState
   isEditing?: boolean
-  onSave?: (data: Data) => Promise<void> | void
   title?: string
 }
 
@@ -52,5 +47,4 @@ export type DocumentInfoContext = DocumentInfo & {
     fieldPreferences: Partial<InsideFieldsPreferences> & { [key: string]: unknown },
   ) => void
   setDocumentTitle: (title: string) => void
-  setOnSave: (data: Data) => Promise<void> | void
 }

@@ -1,6 +1,7 @@
-import type { EditViewComponent } from 'payload/config'
+import type { EditViewComponent } from 'payload/types'
+
 import type {
-  AdminViewComponent,
+  RootAdminViewComponent,
   DocumentPreferences,
   Document as DocumentType,
   Field,
@@ -67,7 +68,7 @@ export const Document: React.FC<AdminViewProps> = async ({
   let ViewOverride: EditViewComponent
   let CustomView: EditViewComponent
   let DefaultView: EditViewComponent
-  let ErrorView: AdminViewComponent = NotFoundView
+  let ErrorView: RootAdminViewComponent = NotFoundView
 
   let data: DocumentType
   let docPermissions: DocumentPermissions
@@ -218,6 +219,8 @@ export const Document: React.FC<AdminViewProps> = async ({
     initPageResult,
     routeSegments: segments,
     searchParams,
+    initialData: data,
+    initialState,
   }
 
   return (
@@ -230,8 +233,6 @@ export const Document: React.FC<AdminViewProps> = async ({
       globalSlug={globalConfig?.slug}
       hasSavePermission={hasSavePermission}
       id={id}
-      initialData={data}
-      initialState={initialState}
       isEditing={isEditing}
       title={formatDocTitle({
         collectionConfig,

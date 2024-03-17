@@ -26,7 +26,6 @@ export const DocumentInfoProvider: React.FC<
   }
 > = ({ children, ...props }) => {
   const [documentTitle, setDocumentTitle] = useState(props.title)
-  const [onSave, setOnSave] = useState(() => props.onSave)
 
   const { id, collectionSlug, globalSlug } = props
 
@@ -301,11 +300,9 @@ export const DocumentInfoProvider: React.FC<
     getDocPreferences,
     getVersions,
     hasSavePermission,
-    onSave,
     publishedDoc,
     setDocFieldPreferences,
     setDocumentTitle,
-    setOnSave,
     title: documentTitle,
     unpublishedVersions,
     versions,

@@ -23,11 +23,12 @@ import { toast } from 'react-toastify'
 import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
 import './index.scss'
+import { ClientSideEditViewComponent } from 'packages/payload/src/exports/types.js'
 
 const baseClass = 'query-inspector'
 
-export const APIViewClient: React.FC = () => {
-  const { id, collectionSlug, globalSlug, initialData } = useDocumentInfo()
+export const APIViewClient: ClientSideEditViewComponent = ({ initialData }) => {
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const searchParams = useSearchParams()
   const { i18n } = useTranslation()

@@ -91,6 +91,8 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
       initPageResult,
       routeSegments: [],
       searchParams,
+      initialData: data,
+      initialState,
     }
 
     return (
@@ -102,8 +104,6 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
         docPermissions={collectionPermissions}
         hasSavePermission={collectionPermissions?.update?.permission}
         id={user?.id}
-        initialData={data}
-        initialState={initialState}
         isEditing
         title={formatDocTitle({
           collectionConfig,

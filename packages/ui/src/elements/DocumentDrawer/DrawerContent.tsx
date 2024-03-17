@@ -134,6 +134,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
     i18n,
   })
 
+  const ViewToRender = CustomEditView || DefaultEditView
+
   return (
     <DocumentInfoProvider
       BeforeDocument={
@@ -169,13 +171,10 @@ const Content: React.FC<DocumentDrawerProps> = ({
       hasSavePermission={null}
       // isLoading,
       id={id}
-      initialData={data}
-      initialState={initialState}
       isEditing={isEditing}
-      onSave={onSave}
       title={title}
     >
-      {CustomEditView || <DefaultEditView />}
+      <ViewToRender initialData={data} initialState={initialState} onSave={onSave} />
     </DocumentInfoProvider>
   )
 }

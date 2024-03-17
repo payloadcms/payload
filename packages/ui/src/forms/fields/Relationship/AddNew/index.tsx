@@ -1,10 +1,9 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientSideEditViewProps, SanitizedCollectionConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
-import type { DocumentInfoContext } from '../../../../providers/DocumentInfo/types.js'
 import type { Value } from '../types.js'
 import type { Props } from './types.js'
 
@@ -47,7 +46,7 @@ export const AddNewRelation: React.FC<Props> = ({
     },
   )
 
-  const onSave: DocumentInfoContext['onSave'] = useCallback(
+  const onSave: ClientSideEditViewProps['onSave'] = useCallback(
     ({ doc, operation }) => {
       if (operation === 'create') {
         const newValue: Value = Array.isArray(relationTo)

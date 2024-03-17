@@ -1,4 +1,4 @@
-import type { EditViewProps, SanitizedConfig } from 'payload/types'
+import type { ClientSideEditViewProps, SanitizedConfig } from 'payload/types'
 
 import React from 'react'
 
@@ -9,7 +9,7 @@ import { mapFields } from './mapFields.js'
 
 export const buildComponentMap = (args: {
   DefaultCell: React.FC<any>
-  DefaultEditView: React.FC<EditViewProps>
+  DefaultEditView: React.FC<ClientSideEditViewProps>
   DefaultListView: React.FC
   children: React.ReactNode
   config: SanitizedConfig
@@ -32,9 +32,8 @@ export const buildComponentMap = (args: {
     const { slug, fields } = collectionConfig
 
     const editViewFromConfig = collectionConfig?.admin?.components?.views?.Edit
-    const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
 
-    const CustomEdit =
+    const CustomEditView =
       typeof editViewFromConfig === 'function'
         ? editViewFromConfig
         : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
@@ -42,21 +41,18 @@ export const buildComponentMap = (args: {
           : typeof editViewFromConfig?.Default === 'object' &&
               'Component' in editViewFromConfig.Default &&
               typeof editViewFromConfig.Default.Component === 'function'
-            ? (editViewFromConfig.Default.Component as React.FC<EditViewProps>)
+            ? editViewFromConfig.Default.Component
             : undefined
 
-    // @ts-expect-error
-    const CustomEditView = CustomEdit ? <CustomEdit collectionSlug={slug} /> : null
+    const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
 
-    const CustomList =
+    const CustomListView =
       typeof listViewFromConfig === 'function'
         ? listViewFromConfig
         : typeof listViewFromConfig === 'object' &&
             typeof listViewFromConfig.Component === 'function'
           ? listViewFromConfig.Component
           : undefined
-
-    const CustomListView = CustomList ? <CustomList /> : null
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList
 
@@ -86,12 +82,15 @@ export const buildComponentMap = (args: {
         afterListTable?.map((Component) => <Component />)) ||
       null
 
-    let AdminThumbnail = null
+    let AdminThumbnailComp: React.ComponentType = null
+
     if (typeof collectionConfig?.upload?.adminThumbnail === 'function') {
-      AdminThumbnail = collectionConfig?.upload?.adminThumbnail
+      AdminThumbnailComp = collectionConfig?.upload?.adminThumbnail
     } else if (typeof collectionConfig?.upload?.adminThumbnail === 'string') {
-      AdminThumbnail = () => collectionConfig?.upload?.adminThumbnail
+      AdminThumbnailComp = (() => collectionConfig?.upload?.adminThumbnail) as React.ComponentType
     }
+
+    const AdminThumbnail = AdminThumbnailComp ? <AdminThumbnailComp /> : null
 
     const componentMap: CollectionComponentMap = {
       AdminThumbnail,
@@ -100,8 +99,8 @@ export const buildComponentMap = (args: {
       BeforeList,
       BeforeListTable,
       CustomEditView,
-      CustomListView,
       DefaultEditView,
+      CustomListView,
       DefaultListView,
       actionsMap: mapActions({
         collectionConfig,
@@ -126,7 +125,7 @@ export const buildComponentMap = (args: {
 
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
-    const CustomEdit =
+    const CustomEditView =
       typeof editViewFromConfig === 'function'
         ? editViewFromConfig
         : typeof editViewFromConfig === 'object' && typeof editViewFromConfig.Default === 'function'
@@ -136,9 +135,6 @@ export const buildComponentMap = (args: {
               typeof editViewFromConfig.Default.Component === 'function'
             ? editViewFromConfig.Default.Component
             : undefined
-
-    // @ts-expect-error
-    const CustomEditView = CustomEdit ? <CustomEdit /> : null
 
     const componentMap: GlobalComponentMap = {
       CustomEditView,

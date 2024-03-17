@@ -8,8 +8,8 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { DocumentTab, RichTextAdapter } from '../admin/types.js'
-import type { AdminView, ServerSideEditViewProps } from '../admin/views/types.js'
+import type { RichTextAdapter } from '../admin/types.js'
+import type { RootAdminView } from '../admin/views/types.js'
 import type { User } from '../auth/types.js'
 import type {
   AfterErrorHook,
@@ -257,35 +257,7 @@ export type Endpoint<U = User> = {
   root?: never
 }
 
-export type EditViewComponent = React.ComponentType<ServerSideEditViewProps>
-
-export type EditViewConfig =
-  | {
-      /**
-       * Add a new Edit view to the admin panel
-       * i.e. you can render a custom view that has no tab, if desired
-       * Or override a specific properties of an existing one
-       * i.e. you can customize the `Default` view tab label, if desired
-       */
-      Tab?: DocumentTab
-      path?: string
-    }
-  | {
-      Component: EditViewComponent
-      path: string
-    }
-  | {
-      actions?: React.ComponentType<any>[]
-    }
-
-/**
- * Override existing views
- * i.e. Dashboard, Account, API, LivePreview, etc.
- * Path is not available here
- * All Tab properties become optional
- * i.e. you can change just the label, if desired
- */
-export type EditView = EditViewComponent | EditViewConfig
+export type { EditConfig, EditViewConfig } from '../admin/views/types.js'
 
 export type Locale = {
   /**
@@ -473,11 +445,11 @@ export type Config = {
        */
       views?: {
         /** Add custom admin views */
-        [key: string]: AdminView
+        [key: string]: RootAdminView
         /** Replace the account screen */
-        Account?: AdminView
+        Account?: RootAdminView
         /** Replace the admin homepage */
-        Dashboard?: AdminView
+        Dashboard?: RootAdminView
       }
     }
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
@@ -687,35 +659,6 @@ export type SanitizedConfig = Omit<
 }
 
 export type { ClientConfig } from '../config/createClientConfig.js'
-
-export type EditConfig =
-  | (
-      | {
-          /**
-           * Replace or modify individual nested routes, or add new ones:
-           * + `Default` - `/admin/collections/:collection/:id`
-           * + `API` - `/admin/collections/:collection/:id/api`
-           * + `LivePreview` - `/admin/collections/:collection/:id/preview`
-           * + `References` - `/admin/collections/:collection/:id/references`
-           * + `Relationships` - `/admin/collections/:collection/:id/relationships`
-           * + `Versions` - `/admin/collections/:collection/:id/versions`
-           * + `Version` - `/admin/collections/:collection/:id/versions/:version`
-           * + `CustomView` - `/admin/collections/:collection/:id/:path`
-           */
-          API?: EditViewComponent | Partial<EditViewConfig>
-          Default?: EditViewComponent | Partial<EditViewConfig>
-          LivePreview?: EditViewComponent | Partial<EditViewConfig>
-          Version?: EditViewComponent | Partial<EditViewConfig>
-          Versions?: EditViewComponent | Partial<EditViewConfig>
-          // TODO: uncomment these as they are built
-          // References?: EditView
-          // Relationships?: EditView
-        }
-      | {
-          [key: string]: EditViewConfig
-        }
-    )
-  | EditViewComponent
 
 export type EntityDescription =
   | (() => string)

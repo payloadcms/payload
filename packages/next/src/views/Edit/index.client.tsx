@@ -10,13 +10,14 @@ import {
 } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
 import { useSearchParams } from 'next/navigation.js'
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment } from 'react'
 import { useCallback } from 'react'
 
 import { DefaultEditView } from './Default/index.js'
+import { ClientSideEditViewComponent } from 'packages/payload/src/config/types.js'
 
-export const EditViewClient: React.FC = () => {
-  const { collectionSlug, getDocPermissions, getVersions, globalSlug, isEditing, setOnSave } =
+export const EditViewClient: ClientSideEditViewComponent = ({ initialData, initialState }) => {
+  const { collectionSlug, getDocPermissions, getVersions, globalSlug, isEditing } =
     useDocumentInfo()
 
   const {
@@ -66,19 +67,17 @@ export const EditViewClient: React.FC = () => {
     ],
   )
 
-  useEffect(() => {
-    void setOnSave(() => onSave)
-  }, [setOnSave, onSave])
-
   // Allow the `DocumentInfoProvider` to hydrate
   if (!collectionSlug && !globalSlug) {
     return <LoadingOverlay />
   }
 
+  const ViewToRender = CustomEditView || DefaultEditView
+
   return (
     <Fragment>
       <SetViewActions actions={actionsMap?.Edit?.Default} />
-      {CustomEditView || <DefaultEditView />}
+      <ViewToRender onSave={onSave} initialData={initialData} initialState={initialState} />
     </Fragment>
   )
 }

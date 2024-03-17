@@ -229,6 +229,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return <LoadingOverlay />
   }
 
+  const ViewToRender = CustomListView || DefaultListView
+
   return (
     <ListInfoProvider
       Header={
@@ -310,7 +312,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         collectionSlug={selectedCollectionConfig.slug}
         listPreferences={{} as ListPreferences} // TODO: get list preferences
       >
-        {CustomListView || <DefaultListView />}
+        <ViewToRender />
         <DocumentDrawer onSave={onCreateNew} />
       </TableColumnsProvider>
     </ListInfoProvider>

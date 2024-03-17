@@ -23,13 +23,13 @@ import Auth from './Auth/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import { SetStepNav } from './SetStepNav/index.js'
 import './index.scss'
+import { ClientSideEditViewComponent } from 'packages/payload/src/config/types.js'
 
 const baseClass = 'collection-edit'
 
-// This component receives props only on _pages_
-// When rendered within a drawer, props are empty
-// This is solely to support custom edit views which get server-rendered
-export const DefaultEditView: React.FC = () => {
+export const DefaultEditView: ClientSideEditViewComponent = (props) => {
+  const { onSave: onSaveFromProps, initialData, initialState } = props
+
   const {
     id,
     AfterDocument,
@@ -45,9 +45,6 @@ export const DefaultEditView: React.FC = () => {
     getDocPreferences,
     globalSlug,
     hasSavePermission,
-    initialData: data,
-    initialState,
-    onSave: onSaveFromContext,
   } = useDocumentInfo()
 
   const config = useConfig()
@@ -103,8 +100,8 @@ export const DefaultEditView: React.FC = () => {
       //   await refreshCookieAsync()
       // }
 
-      if (typeof onSaveFromContext === 'function') {
-        void onSaveFromContext({
+      if (typeof onSaveFromProps === 'function') {
+        void onSaveFromProps({
           ...json,
           operation: id ? 'update' : 'create',
         })
@@ -112,7 +109,7 @@ export const DefaultEditView: React.FC = () => {
     },
     [
       id,
-      onSaveFromContext,
+      onSaveFromProps,
       // refreshCookieAsync,
       reportUpdate,
       entitySlug,
@@ -182,7 +179,7 @@ export const DefaultEditView: React.FC = () => {
           />
           <DocumentControls
             apiURL={apiURL}
-            data={data}
+            data={initialData}
             disableActions={disableActions}
             hasSavePermission={hasSavePermission}
             id={id}
@@ -199,7 +196,7 @@ export const DefaultEditView: React.FC = () => {
                     <Auth
                       className={`${baseClass}__auth`}
                       collectionSlug={collectionConfig.slug}
-                      email={data?.email}
+                      email={initialData?.email}
                       operation={operation}
                       readOnly={!hasSavePermission}
                       requirePassword={!id}

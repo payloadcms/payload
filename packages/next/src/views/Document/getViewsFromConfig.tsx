@@ -1,7 +1,7 @@
 import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
-import type { EditViewComponent } from 'payload/config'
+import type { ClientSideEditViewComponent, ServerSideEditViewComponent } from 'payload/types'
 import type {
-  AdminViewComponent,
+  RootAdminViewComponent,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -34,17 +34,17 @@ export const getViewsFromConfig = ({
   routeSegments: string[]
   user: User
 }): {
-  CustomView: EditViewComponent
-  DefaultView: EditViewComponent
+  CustomView: ClientSideEditViewComponent
+  DefaultView: ClientSideEditViewComponent
   /**
    * The error view to display if CustomView or DefaultView do not exist (could be either due to not found, or unauthorized). Can be null
    */
-  ErrorView: AdminViewComponent
+  ErrorView: RootAdminViewComponent
 } | null => {
   // Conditionally import and lazy load the default view
-  let DefaultView: EditViewComponent = null
-  let CustomView: EditViewComponent = null
-  let ErrorView: AdminViewComponent = null
+  let DefaultView: ServerSideEditViewComponent = null
+  let CustomView: ClientSideEditViewComponent = null
+  let ErrorView: RootAdminViewComponent = null
 
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||

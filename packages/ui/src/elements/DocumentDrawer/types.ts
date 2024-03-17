@@ -1,8 +1,7 @@
-import type { TypeWithID } from 'payload/types.js'
+import type { ClientSideEditViewProps, TypeWithID } from 'payload/types.js'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
-import type { DocumentInfoContext } from '../../providers/DocumentInfo/types.js'
 import type { Props as DrawerProps } from '../Drawer/types.js'
 
 export type DocumentDrawerProps = Pick<DrawerProps, 'Header'> & {
@@ -10,7 +9,7 @@ export type DocumentDrawerProps = Pick<DrawerProps, 'Header'> & {
   drawerSlug?: string
   id?: null | number | string
   initialData?: TypeWithID
-  onSave?: DocumentInfoContext['onSave']
+  onSave?: ClientSideEditViewProps['onSave']
 }
 
 export type DocumentTogglerProps = HTMLAttributes<HTMLButtonElement> & {
