@@ -339,6 +339,31 @@ yourEditorConfig.features = [
 ]
 ```
 
+###Using configs outside payload
+
+There are times where you may want to initiate a headless editor outside of payload but you need access to the payload configs. For example when using NodeJS to seed existing data into payload. 
+
+The Payload config is isomorphic, in that it loads both server-side and client-side code into the same config. When we import the payload config outside of payload, we need to explictly exclude these file extensions so that they are not loaded on the server.
+
+```ts
+const clientFiles = [
+  ".scss",
+  ".css",
+  ".svg",
+  ".png",
+  ".jpg",
+  ".eot",
+  ".ttf",
+  ".woff",
+  ".woff2",
+];
+clientFiles.forEach((ext) => {
+  require.extensions[ext] = () => null;
+});
+import { defaultEditorConfig, defaultEditorFeatures } from '@payloadcms/richtext-lexical' // <= make sure this package is installed
+```
+NOTE: This needs to be done BEFORE importing the editor configs.
+
 ### HTML => Lexical
 
 Once you have your headless editor instance, you can use it to convert HTML to Lexical:
