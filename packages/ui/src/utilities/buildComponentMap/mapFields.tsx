@@ -63,7 +63,9 @@ export const mapFields = (args: {
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let CustomFieldComponent: React.ComponentType<FieldComponentProps>
+    let CustomFieldComponent: React.ComponentType<FieldComponentProps> =
+      field.admin?.components?.Field
+
     const CustomCellComponent = field.admin?.components?.Cell
 
     const isHidden = field?.admin && 'hidden' in field.admin && field.admin.hidden
