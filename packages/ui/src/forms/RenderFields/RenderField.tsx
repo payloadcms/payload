@@ -1,15 +1,22 @@
 'use client'
 
+import type { FieldTypes } from 'payload/config.js'
 import type { FieldPermissions } from 'payload/types'
 
 import React from 'react'
 
+import type { FieldComponentProps, MappedField } from '../../utilities/buildComponentMap/types.js'
+
+import { HiddenInput } from '../../index.js'
+import { useFieldComponents } from '../../providers/FieldComponentsProvider/index.js'
 import { useOperation } from '../../providers/OperationProvider/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
 type Props = {
-  Field: React.ReactNode
+  CustomField: MappedField['CustomField']
   disabled: boolean
+  fieldComponentProps?: FieldComponentProps
+  isHidden?: boolean
   name?: string
   path: string
   permissions?: FieldPermissions
@@ -18,12 +25,16 @@ type Props = {
   siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
+  type: keyof FieldTypes
 }
 
 export const RenderField: React.FC<Props> = ({
   name,
-  Field,
+  type,
+  CustomField,
   disabled,
+  fieldComponentProps,
+  isHidden,
   path: pathFromProps,
   permissions,
   readOnly: readOnlyFromProps,
@@ -32,6 +43,7 @@ export const RenderField: React.FC<Props> = ({
 }) => {
   const operation = useOperation()
   const { readOnly: readOnlyFromContext } = useFieldProps()
+  const fieldComponents = useFieldComponents()
 
   const path = `${pathFromProps ? `${pathFromProps}.` : ''}${name ? `${name}` : ''}`
   const schemaPath = `${schemaPathFromProps ? `${schemaPathFromProps}` : ''}${name ? `.${name}` : ''}`
@@ -53,6 +65,12 @@ export const RenderField: React.FC<Props> = ({
     readOnly = true
   }
 
+  const DefaultField = isHidden ? HiddenInput : fieldComponents[type]
+
+  if (!CustomField && !DefaultField) {
+    return null
+  }
+
   return (
     <FieldPropsProvider
       path={path}
@@ -61,7 +79,7 @@ export const RenderField: React.FC<Props> = ({
       schemaPath={schemaPath}
       siblingPermissions={siblingPermissions}
     >
-      {Field}
+      {CustomField || <DefaultField {...fieldComponentProps} />}
     </FieldPropsProvider>
   )
 }

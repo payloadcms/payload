@@ -59,10 +59,12 @@ export const buildColumns = (args: {
 
     const isFirstActiveColumn = activeColumnsIndices[0] === index
 
+    const name = 'name' in field ? field.name : undefined
+
     if (field) {
       const column: Column = {
-        name: 'name' in field ? field.name : undefined,
-        accessor: 'name' in field ? field.name : undefined,
+        name,
+        accessor: name,
         active,
         cellProps: {
           ...cellProps?.[index],
@@ -72,7 +74,7 @@ export const buildColumns = (args: {
           Cell: field.Cell,
           Heading: field.Heading,
         },
-        label: 'label' in field ? field.label : undefined,
+        label: 'label' in field.fieldComponentProps ? field.fieldComponentProps.label : undefined,
       }
 
       acc.push(column)

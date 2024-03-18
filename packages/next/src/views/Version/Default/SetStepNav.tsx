@@ -1,9 +1,5 @@
 import type { FieldMap, StepNavItem } from '@payloadcms/ui'
-import type {
-  FieldAffectingData,
-  SanitizedCollectionConfig,
-  SanitizedGlobalConfig,
-} from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -53,8 +49,8 @@ export const SetStepNav: React.FC<{
           const titleField = fieldMap.find((f) => {
             const { isFieldAffectingData } = f
             const fieldName = 'name' in f ? f.name : undefined
-            return isFieldAffectingData && fieldName === useAsTitle
-          }) as FieldAffectingData
+            return Boolean(isFieldAffectingData && fieldName === useAsTitle)
+          })
 
           if (titleField && mostRecentDoc[useAsTitle]) {
             if (titleField.localized) {

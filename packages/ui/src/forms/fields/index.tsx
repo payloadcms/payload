@@ -25,7 +25,7 @@ import textarea from './Textarea/index.js'
 import ui from './UI/index.js'
 import upload from './Upload/index.js'
 
-export const fieldTypes: FieldTypes = {
+export const fieldComponents: FieldTypes = {
   array,
   blocks,
   checkbox,

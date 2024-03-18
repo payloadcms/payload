@@ -44,6 +44,11 @@ const Relationship: React.FC<RelationshipFieldProps> = (props) => {
     style,
     validate,
     width,
+    relationTo,
+    hasMany,
+    sortOptions,
+    isSortable = true,
+    allowCreate = true,
   } = props
 
   const config = useConfig()
@@ -53,12 +58,6 @@ const Relationship: React.FC<RelationshipFieldProps> = (props) => {
     routes: { api },
     serverURL,
   } = config
-
-  const relationTo = 'relationTo' in props ? props?.relationTo : undefined
-  const hasMany = 'hasMany' in props ? props?.hasMany : undefined
-  const sortOptions = 'sortOptions' in props ? props?.sortOptions : undefined
-  const isSortable = 'isSortable' in props ? props?.isSortable : true
-  const allowCreate = 'allowCreate' in props ? props?.allowCreate : true
 
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()

@@ -55,7 +55,7 @@ export { type TextAreaInputProps, TextareaInput } from '../forms/fields/Textarea
 export { default as Textarea } from '../forms/fields/Textarea/index.js'
 export { UploadInput, type UploadInputProps } from '../forms/fields/Upload/Input.js'
 export { default as UploadField } from '../forms/fields/Upload/index.js'
-export { fieldTypes } from '../forms/fields/index.js'
+export { fieldComponents } from '../forms/fields/index.js'
 export { fieldBaseClass } from '../forms/fields/shared.js'
 export { useField } from '../forms/useField/index.js'
 export type { FieldType, Options } from '../forms/useField/types.js'
