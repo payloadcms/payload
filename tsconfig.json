@@ -54,6 +54,12 @@
       "@payloadcms/plugin-cloud": [
         "./packages/plugin-cloud/src"
       ],
+      "@payloadcms/live-preview-react": [
+        "./packages/live-preview-react/src/index.ts"
+      ],
+      "@payloadcms/live-preview": [
+        "./packages/live-preview/src/index.ts"
+      ],
       "@payloadcms/plugin-cloud-storage": [
         "./packages/plugin-cloud-storage/src"
       ],

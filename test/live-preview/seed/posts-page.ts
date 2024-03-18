@@ -2,7 +2,7 @@ import type { Page } from '../payload-types.js'
 
 export const postsPage: Partial<Page> = {
   title: 'Posts',
-  slug: 'posts',
+  slug: 'live-preview/posts',
   meta: {
     title: 'Payload Website Template',
     description: 'An open-source website built with Payload and Next.js.',

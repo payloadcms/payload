@@ -19,6 +19,9 @@ export default withBundleAnalyzer(
         },
       ]
     },
+    images: {
+      domains: ['localhost'],
+    },
     webpack: (webpackConfig) => {
       webpackConfig.resolve.extensionAlias = {
         '.cjs': ['.cts', '.cjs'],
