@@ -481,7 +481,7 @@ export const mapFields = (args: {
             }
 
             if (RichTextFieldComponent) {
-              // FieldComponent = RichTextFieldComponent
+              CustomFieldComponent = RichTextFieldComponent
             }
 
             if (RichTextCellComponent) {

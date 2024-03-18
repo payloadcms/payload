@@ -71,7 +71,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 fieldComponentProps={fieldComponentProps}
                 key={fieldIndex}
                 name={name}
-                path={path} // eslint-disable-line no-console
+                path={path}
                 permissions={permissions?.[name]}
                 readOnly={readOnly}
                 schemaPath={schemaPath}
