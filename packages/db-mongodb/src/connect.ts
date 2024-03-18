@@ -35,6 +35,12 @@ export const connect: Connect = async function connect(
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
 
+    // If we are running a replica set with MongoDB Memory Server,
+    // wait until the replica set elects a primary before proceeding
+    if (this.mongoMemoryServer) {
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+    }
+
     const client = this.connection.getClient()
 
     if (!client.options.replicaSet) {
