@@ -11,17 +11,17 @@ import { useForm } from '../Form/context.js'
 import './index.scss'
 
 const Label: React.FC<LabelProps> = (props) => {
-  const { htmlFor: htmlForFromProps, label, required = false } = props
+  const { htmlFor: htmlForFromProps, label: labelFromProps, required = false } = props
   const { uuid } = useForm()
   const { path } = useFieldProps()
   const htmlFor = htmlForFromProps || generateFieldID(path, uuid)
 
   const { i18n } = useTranslation()
 
-  if (label) {
+  if (labelFromProps) {
     return (
       <label className="field-label" htmlFor={htmlFor}>
-        {getTranslation(label, i18n)}
+        {getTranslation(labelFromProps, i18n)}
         {required && <span className="required">*</span>}
       </label>
     )

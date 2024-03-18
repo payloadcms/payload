@@ -3,6 +3,7 @@ export type * from '../admin/types.js'
 export type * from '../uploads/types.js'
 
 export type { DocumentPermissions, FieldPermissions } from '../auth/index.js'
+export type { MeOperationResult } from '../auth/operations/me.js'
 
 export type {
   CollapsedPreferences,

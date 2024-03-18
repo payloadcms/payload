@@ -1,5 +1,6 @@
 'use client'
-import type { Permissions, User } from 'payload/auth'
+import type { ClientUser, Permissions } from 'payload/auth'
+import type { MeOperationResult } from 'payload/types.js'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -24,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { useModal } = facelessUIImport
 
   const { searchParams } = useSearchParams()
-  const [user, setUser] = useState<User | null>()
+  const [user, setUser] = useState<ClientUser | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpiration, setTokenExpiration] = useState<number>()
   const pathname = usePathname()
@@ -94,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (request.status === 200) {
               const json = await request.json()
               setUser(json.user)
+
               setTokenAndExpiration(json)
             } else {
               setUser(null)
@@ -117,7 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   )
 
   const refreshCookieAsync = useCallback(
-    async (skipSetUser?: boolean): Promise<User> => {
+    async (skipSetUser?: boolean): Promise<ClientUser> => {
       try {
         const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
           headers: {
@@ -187,10 +189,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
 
       if (request.status === 200) {
-        const json = await request.json()
+        const json: MeOperationResult = await request.json()
 
         if (json?.user) {
           setUser(json.user)
+
           if (json?.token) {
             setTokenAndExpiration(json)
           }
@@ -317,4 +320,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   )
 }
 
-export const useAuth = <T = User,>(): AuthContext<T> => useContext(Context) as AuthContext<T>
+export const useAuth = <T = ClientUser,>(): AuthContext<T> => useContext(Context) as AuthContext<T>

@@ -1,6 +1,6 @@
 'use client'
 
-import type { User } from 'payload/auth'
+import type { ClientUser } from 'payload/auth'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useAuth, useConfig } from '@payloadcms/ui/providers'
@@ -8,7 +8,7 @@ import * as React from 'react'
 
 type options = {
   uploads: boolean
-  user: User
+  user: ClientUser
 }
 
 type FilteredCollectionsT = (
