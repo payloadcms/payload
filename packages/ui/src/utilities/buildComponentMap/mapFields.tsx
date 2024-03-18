@@ -64,7 +64,7 @@ export const mapFields = (args: {
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
     let CustomFieldComponent: React.ComponentType<FieldComponentProps>
-    let CellComponent = field.admin?.components?.Cell
+    const CustomCellComponent = field.admin?.components?.Cell
 
     if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
       if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
@@ -485,7 +485,7 @@ export const mapFields = (args: {
             }
 
             if (RichTextCellComponent) {
-              CellComponent = RichTextCellComponent
+              cellComponentProps.CellComponentOverride = <RichTextCellComponent />
             }
 
             break
@@ -625,7 +625,7 @@ export const mapFields = (args: {
 
         const Cell = (
           <RenderCustomComponent
-            CustomComponent={CellComponent}
+            CustomComponent={CustomCellComponent}
             DefaultComponent={DefaultCell}
             componentProps={cellComponentProps}
           />
