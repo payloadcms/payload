@@ -18,10 +18,10 @@ export const PostsCollection: CollectionConfig = {
       type: 'row',
       fields: [],
     },
-    // {
-    //   name: 'richText',
-    //   type: 'richText',
-    // },
+    {
+      name: 'richText',
+      type: 'richText',
+    },
     {
       name: 'relationship',
       type: 'relationship',
