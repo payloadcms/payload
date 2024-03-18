@@ -13,7 +13,7 @@ export type LanguageOptions = {
 }[]
 
 const Context = createContext<{
-  i18n: Omit<I18n, 'translations'>
+  i18n: I18n
   languageOptions: LanguageOptions
   switchLanguage?: (lang: string) => Promise<void>
   t: (key: string, vars?: Record<string, any>) => string
@@ -22,6 +22,7 @@ const Context = createContext<{
     fallbackLanguage: 'en',
     language: 'en',
     t: (key) => key,
+    translations: {},
   },
   languageOptions: undefined,
   switchLanguage: undefined,
@@ -74,6 +75,9 @@ export const TranslationProvider: React.FC<Props> = ({
           fallbackLanguage: fallbackLang,
           language: lang,
           t: nextT,
+          translations: {
+            [lang]: translations,
+          },
         },
         languageOptions,
         switchLanguage,
