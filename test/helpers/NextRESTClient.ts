@@ -1,9 +1,9 @@
-import type { Where } from 'payload/types.js'
 import type { ParsedQs } from 'qs'
 
 import QueryString from 'qs'
 
 import type { SanitizedConfig } from '../../packages/payload/src/config/types.js'
+import type { Where } from '../../packages/payload/src/types/index.js'
 
 import { GRAPHQL_POST as createGraphqlPOST } from '../../packages/next/src/routes/graphql/index.js'
 import {

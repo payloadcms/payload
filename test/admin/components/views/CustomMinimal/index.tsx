@@ -12,10 +12,9 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 // import { Button } from 'payload/components/elements';
 // import { useConfig } from 'payload/components/utilities';
 
-import type { AdminViewProps } from 'payload/types.js'
+import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
-import { customViewPath } from 'test/admin/shared.js'
-
+import { customViewPath } from '../../../shared.js'
 import './index.scss'
 
 const baseClass = 'custom-minimal-view'
