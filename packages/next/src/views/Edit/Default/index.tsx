@@ -110,7 +110,7 @@ export const DefaultEditView: React.FC = () => {
 
       // If we're editing the doc of the logged in user,
       // Refresh the cookie to get new permissions
-      if (collectionSlug === user?.collection && id === user.id) {
+      if (user && collectionSlug === user?.collection && id === user?.id) {
         void refreshCookieAsync()
       }
 
@@ -136,7 +136,7 @@ export const DefaultEditView: React.FC = () => {
       entitySlug,
       collectionSlug,
       user?.collection,
-      user.id,
+      user?.id,
       getVersions,
       getDocPermissions,
       isEditing,
