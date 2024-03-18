@@ -235,7 +235,6 @@ export default {
     requiresAtLeast: '该字段至少需要{{count}} {{label}}。',
   },
   version: {
-    type: '类型',
     aboutToPublishSelection: '您即将发布所选内容中的所有 {{label}}。 你确定吗？',
     aboutToRestore: '您将把这个{{label}}文档恢复到{{versionDate}}时的状态',
     aboutToRestoreGlobal: '您要将全局的{{label}}恢复到{{versionDate}}时的状态',
@@ -269,6 +268,7 @@ export default {
     selectLocales: '选择要显示的语言',
     selectVersionToCompare: '选择要比较的版本',
     showLocales: '显示语言：',
+    type: '类型',
     unpublish: '取消发布',
     unpublishing: '取消发布中...',
     version: '版本',

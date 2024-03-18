@@ -240,7 +240,6 @@ export default {
     requiresAtLeast: 'Acest domeniu necesită cel puțin {{count}} {{label}}.',
   },
   version: {
-    type: 'Tip',
     aboutToPublishSelection:
       'Sunteți pe cale să publicați toate {{label}} din selecție. Sunteți sigur?',
     aboutToRestore:
@@ -278,6 +277,7 @@ export default {
     selectLocales: 'Selectați localitățile de afișat',
     selectVersionToCompare: 'Selectați o versiune pentru a compara',
     showLocales: 'Afișați localitățile:',
+    type: 'Tip',
     unpublish: 'Dezpublicare',
     unpublishing: 'Dezpublicare...',
     version: 'Versiune',

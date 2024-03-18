@@ -240,7 +240,6 @@ export default {
     requiresAtLeast: 'Ehhez a mezőhöz legalább {{count}} {{label}} szükséges.',
   },
   version: {
-    type: 'Típus',
     aboutToPublishSelection:
       'Arra készül, hogy az összes {{label}} elemet közzétegye a kijelölésben. biztos vagy ebben?',
     aboutToRestore:
@@ -279,6 +278,7 @@ export default {
     selectLocales: 'Megjelenítendő nyelvek kiválasztása',
     selectVersionToCompare: 'Válassza ki az összehasonlítani kívánt verziót',
     showLocales: 'Nyelvek megjelenítése:',
+    type: 'Típus',
     unpublish: 'Közzététel visszavonása',
     unpublishing: 'Közzététel visszavonása...',
     version: 'Verzió',

@@ -239,7 +239,6 @@ export default {
     requiresAtLeast: 'این رشته حداقل نیازمند {{count}} {{label}}.',
   },
   version: {
-    type: 'تایپ کنید',
     aboutToPublishSelection:
       'شما در حال انتشار همه {{label}} برگزیده هستید از این کار اطمینان دارید؟',
     aboutToRestore:
@@ -276,6 +275,7 @@ export default {
     selectLocales: 'زبان‌ها را برای نمایش انتخاب کنید',
     selectVersionToCompare: 'نگارشی را برای مقایسه انتخاب کنید',
     showLocales: 'نمایش زبان‌ها:',
+    type: 'تایپ کنید',
     unpublish: 'لغو انتشار',
     unpublishing: 'در حال لغو انتشار...',
     version: 'نگارش',

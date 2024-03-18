@@ -240,7 +240,6 @@ export default {
     requiresAtLeast: 'Dette feltet krever minst {{count}} {{label}}.',
   },
   version: {
-    type: 'Type',
     aboutToPublishSelection:
       'Du er i ferd med å publisere alle {{label}} i utvalget. Er du sikker?',
     aboutToRestore:
@@ -279,6 +278,7 @@ export default {
     selectLocales: 'Velg språk å vise',
     selectVersionToCompare: 'Velg en versjon å sammenligne',
     showLocales: 'Vis språk:',
+    type: 'Type',
     unpublish: 'Avpubliser',
     unpublishing: 'Avpubliserer...',
     version: 'Versjon',
