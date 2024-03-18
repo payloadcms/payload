@@ -4,7 +4,18 @@ import type { LivePreviewConfig, SanitizedConfig } from './types.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
-  'db' | 'editor' | 'endpoints' | 'onInit' | 'plugins' | 'sharp'
+  | 'bin'
+  | 'cors'
+  | 'csrf'
+  | 'db'
+  | 'editor'
+  | 'endpoints'
+  | 'hooks'
+  | 'onInit'
+  | 'plugins'
+  | 'secret'
+  | 'sharp'
+  | 'typescript'
 >
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
@@ -248,6 +259,12 @@ export const createClientConfig = async (
     'plugins',
     'sharp',
     'onInit',
+    'secret',
+    'hooks',
+    'bin',
+    'typescript',
+    'cors',
+    'csrf',
     // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
   ]
 

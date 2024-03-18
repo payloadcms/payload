@@ -52,5 +52,4 @@ export type DocumentInfoContext = DocumentInfo & {
     fieldPreferences: Partial<InsideFieldsPreferences> & { [key: string]: unknown },
   ) => void
   setDocumentTitle: (title: string) => void
-  setOnSave: (data: Data) => Promise<void> | void
 }

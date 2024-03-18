@@ -37,7 +37,6 @@ import { SortColumn } from '../../elements/SortColumn/index.js'
 import DefaultError from '../../forms/Error/index.js'
 import DefaultDescription from '../../forms/FieldDescription/index.js'
 import DefaultLabel from '../../forms/Label/index.js'
-import { fieldComponents } from '../../forms/fields/index.js'
 import { HiddenInput } from '../../index.js'
 
 export const mapFields = (args: {
@@ -64,8 +63,8 @@ export const mapFields = (args: {
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let CustomFieldComponent: React.ComponentType<FieldComponentProps> =
-      field.admin?.components?.Field
+    let CustomFieldComponent: React.ComponentType<FieldComponentProps>
+    let CellComponent = field.admin?.components?.Cell
 
     if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
       if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
@@ -470,6 +469,25 @@ export const mapFields = (args: {
             }
 
             fieldComponentProps = richTextField
+
+            const RichTextFieldComponent = field.editor.FieldComponent
+            const RichTextCellComponent = field.editor.CellComponent
+
+            if (typeof field.editor.generateComponentMap === 'function') {
+              const result = field.editor.generateComponentMap({ config, schemaPath: path })
+              // @ts-expect-error-next-line // TODO: the `richTextComponentMap` is not found on the union type
+              fieldComponentProps.richTextComponentMap = result
+              cellComponentProps.richTextComponentMap = result
+            }
+
+            if (RichTextFieldComponent) {
+              // FieldComponent = RichTextFieldComponent
+            }
+
+            if (RichTextCellComponent) {
+              CellComponent = RichTextCellComponent
+            }
+
             break
           }
           case 'row': {
@@ -605,28 +623,9 @@ export const mapFields = (args: {
           }
         }
 
-        /**
-         * Handle RichText Field Components, Cell Components, and component maps
-         */
-        if (field.type === 'richText' && 'editor' in field) {
-          const RichTextFieldComponent = field.editor.FieldComponent
-          const RichTextCellComponent = field.editor.CellComponent
-
-          if (typeof field.editor.generateComponentMap === 'function') {
-            const result = field.editor.generateComponentMap({ config, schemaPath: path })
-            // @ts-expect-error-next-line // TODO: the `richTextComponentMap` is not found on the union type
-            fieldComponentProps.richTextComponentMap = result
-            cellComponentProps.richTextComponentMap = result
-          }
-
-          if (RichTextCellComponent) {
-            cellComponentProps.CellComponentOverride = <RichTextCellComponent />
-          }
-        }
-
         const Cell = (
           <RenderCustomComponent
-            CustomComponent={field.admin?.components?.Cell}
+            CustomComponent={CellComponent}
             DefaultComponent={DefaultCell}
             componentProps={cellComponentProps}
           />
@@ -651,13 +650,13 @@ export const mapFields = (args: {
         )
 
         const reducedField: MappedField = {
-          fieldComponentProps,
           type: field.type,
           Cell,
           CustomField: CustomFieldComponent ? (
             <CustomFieldComponent {...fieldComponentProps} />
           ) : null,
           Heading,
+          fieldComponentProps,
           fieldIsPresentational,
           isFieldAffectingData,
           isSidebar:
@@ -677,12 +676,12 @@ export const mapFields = (args: {
 
   if (!disableAddingID && !hasID) {
     result.push({
-      fieldComponentProps: {
-        name: 'id',
-      },
       type: 'text',
       Cell: DefaultCell ? <DefaultCell name="id" /> : null,
       Heading: <SortColumn label="ID" name="id" />,
+      fieldComponentProps: {
+        name: 'id',
+      },
       fieldIsPresentational: false,
       isFieldAffectingData: true,
       // label: 'ID',
