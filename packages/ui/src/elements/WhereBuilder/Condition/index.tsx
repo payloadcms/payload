@@ -115,7 +115,7 @@ const Condition: React.FC<Props> = (props) => {
             <RenderCustomComponent
               CustomComponent={activeField?.props?.admin?.components?.Filter}
               DefaultComponent={ValueComponent}
-              fieldComponentProps={{
+              componentProps={{
                 ...activeField?.props,
                 disabled: !operatorValue,
                 onChange: setInternalValue,

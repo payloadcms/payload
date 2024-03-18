@@ -237,7 +237,6 @@ export default {
     requiresAtLeast: '該字串至少需要 {{count}} 個 {{label}}。',
   },
   version: {
-    type: '類型',
     aboutToPublishSelection: '您確定即將發佈所選的 {{label}} 嗎？',
     aboutToRestore: '您將把這個文件{{label}}回復到{{versionDate}}時的狀態',
     aboutToRestoreGlobal: '您要將痊域的{{label}}回復到{{versionDate}}時的狀態',
@@ -271,6 +270,7 @@ export default {
     selectLocales: '選擇要顯示的語言',
     selectVersionToCompare: '選擇要比較的版本',
     showLocales: '顯示語言：',
+    type: '類型',
     unpublish: '取消發佈',
     unpublishing: '取消發佈中...',
     version: '版本',

@@ -242,7 +242,6 @@ export default {
     requiresAtLeast: 'Bu alan en az {{count}} adet {{label}} gerektirmektedir.',
   },
   version: {
-    type: 'Tür',
     aboutToPublishSelection: "Seçimdeki tüm {{label}}'i yayınlamak üzeresiniz. Emin misin?",
     aboutToRestore: 'Döküman {{label}}, {{versionDate}} tarihindeki sürümüne geri döndürülecek.',
     aboutToRestoreGlobal:
@@ -278,6 +277,7 @@ export default {
     selectLocales: 'Görüntülenecek yerel ayarları seçin',
     selectVersionToCompare: 'Karşılaştırılacak bir sürüm seçin',
     showLocales: 'Yerel ayarları göster:',
+    type: 'Tür',
     unpublish: 'Yayından Kaldır',
     unpublishing: 'Yayından kaldırılıyor...',
     version: 'Sürüm',

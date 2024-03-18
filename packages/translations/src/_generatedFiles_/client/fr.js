@@ -243,7 +243,6 @@ export default {
     requiresAtLeast: 'Ce champ doit avoir au moins {{count}} {{label}}.',
   },
   version: {
-    type: 'Type',
     aboutToPublishSelection:
       'Vous êtes sur le point de publier tous les {{label}} de la sélection. Es-tu sûr?',
     aboutToRestore:
@@ -283,6 +282,7 @@ export default {
     selectLocales: 'Sélectionnez les paramètres régionaux à afficher',
     selectVersionToCompare: 'Sélectionnez une version à comparer',
     showLocales: 'Afficher les paramètres régionaux :',
+    type: 'Type',
     unpublish: 'Annuler la publication',
     unpublishing: 'Annulation en cours...',
     version: 'Version',

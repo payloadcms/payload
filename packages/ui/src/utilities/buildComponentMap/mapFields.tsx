@@ -141,7 +141,7 @@ export const mapFields = (args: {
               (field.admin.description as React.FC<any>)
             }
             DefaultComponent={DefaultDescription}
-            fieldComponentProps={descriptionProps}
+            componentProps={descriptionProps}
           />
         )
 
@@ -154,7 +154,7 @@ export const mapFields = (args: {
               field.admin?.components?.Error
             }
             DefaultComponent={DefaultError}
-            fieldComponentProps={{ path }}
+            componentProps={{ path }}
           />
         )
 
@@ -167,7 +167,7 @@ export const mapFields = (args: {
               field.admin?.components?.Label
             }
             DefaultComponent={DefaultLabel}
-            fieldComponentProps={labelProps}
+            componentProps={labelProps}
           />
         )
 
@@ -627,7 +627,7 @@ export const mapFields = (args: {
           <RenderCustomComponent
             CustomComponent={CellComponent}
             DefaultComponent={DefaultCell}
-            fieldComponentProps={cellComponentProps}
+            componentProps={cellComponentProps}
           />
         )
 

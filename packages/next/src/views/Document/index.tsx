@@ -214,7 +214,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     req,
   })
 
-  const serverSideProps: ServerSideEditViewProps = {
+  const viewComponentProps: ServerSideEditViewProps = {
     initPageResult,
     routeSegments: segments,
     searchParams,
@@ -263,7 +263,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           <RenderCustomComponent
             CustomComponent={ViewOverride || CustomView}
             DefaultComponent={DefaultView}
-            fieldComponentProps={serverSideProps}
+            componentProps={viewComponentProps}
           />
         </FormQueryParamsProvider>
       </EditDepthProvider>

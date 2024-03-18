@@ -240,7 +240,6 @@ export default {
     requiresAtLeast: 'Esse campo requer no máximo {{count}} {{label}}.',
   },
   version: {
-    type: 'Tipo',
     aboutToPublishSelection:
       'Você está prestes a publicar todos os {{label}} da seleção. Tem certeza?',
     aboutToRestore:
@@ -279,6 +278,7 @@ export default {
     selectLocales: 'Selecione as localizações para exibir',
     selectVersionToCompare: 'Selecione uma versão para comparar',
     showLocales: 'Exibir localizações:',
+    type: 'Tipo',
     unpublish: 'Despublicar',
     unpublishing: 'Despublicando...',
     version: 'Versão',

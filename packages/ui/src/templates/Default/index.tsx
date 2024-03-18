@@ -42,7 +42,7 @@ export const DefaultTemplate: React.FC<Props> = async ({
         <RenderCustomComponent
           CustomComponent={CustomNav}
           DefaultComponent={DefaultNav}
-          fieldComponentProps={{
+          componentProps={{
             config,
             i18n,
             permissions,
