@@ -679,7 +679,9 @@ export const mapFields = (args: {
     result.findIndex((f) => 'name' in f && f.isFieldAffectingData && f.name === 'id') > -1
 
   if (!disableAddingID && !hasID) {
+    // TODO: For all fields (not just this one) we need to add the name to both .fieldComponentProps.name AND .name. This can probably be improved
     result.push({
+      name: 'id',
       type: 'text',
       Cell: DefaultCell ? <DefaultCell name="id" /> : null,
       Heading: <SortColumn label="ID" name="id" />,
