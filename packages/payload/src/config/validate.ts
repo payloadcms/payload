@@ -45,7 +45,7 @@ const validateFields = (
   return errors
 }
 
-const validateCollections = async (collections: SanitizedCollectionConfig[]): Promise<string[]> => {
+const validateCollections = (collections: SanitizedCollectionConfig[]): string[] => {
   const errors: string[] = []
   collections.forEach((collection) => {
     const result = collectionSchema.validate(collection, { abortEarly: false })
@@ -75,16 +75,13 @@ const validateGlobals = (globals: SanitizedGlobalConfig[]): string[] => {
   return errors
 }
 
-const validateSchema = async (
-  config: SanitizedConfig,
-  logger: Logger,
-): Promise<SanitizedConfig> => {
+export const validateSchema = (config: SanitizedConfig, logger: Logger): SanitizedConfig => {
   const result = schema.validate(config, {
     abortEarly: false,
   })
 
   const nestedErrors = [
-    ...(await validateCollections(config.collections)),
+    ...validateCollections(config.collections),
     ...validateGlobals(config.globals),
   ]
 
@@ -112,5 +109,3 @@ const validateSchema = async (
 
   return result.value
 }
-
-export default validateSchema
