@@ -67,6 +67,7 @@ export type MappedField = {
   fieldComponentProps: FieldComponentProps
   fieldIsPresentational: boolean
   isFieldAffectingData: boolean
+  isHidden?: boolean
   isSidebar?: boolean
   localized: boolean
   name?: string

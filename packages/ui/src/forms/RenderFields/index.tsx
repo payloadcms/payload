@@ -60,6 +60,7 @@ export const RenderFields: React.FC<Props> = (props) => {
               disabled,
               fieldComponentProps,
               fieldComponentProps: { readOnly },
+              isHidden,
             } = f
 
             const name = 'name' in f ? f.name : undefined
@@ -69,6 +70,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 CustomField={CustomField}
                 disabled={disabled}
                 fieldComponentProps={fieldComponentProps}
+                isHidden={isHidden}
                 key={fieldIndex}
                 name={name}
                 path={path}

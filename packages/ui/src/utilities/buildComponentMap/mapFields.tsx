@@ -66,9 +66,11 @@ export const mapFields = (args: {
     let CustomFieldComponent: React.ComponentType<FieldComponentProps>
     const CustomCellComponent = field.admin?.components?.Cell
 
+    const isHidden = field?.admin && 'hidden' in field.admin && field.admin.hidden
+
     if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
       if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
-        if (field.admin && 'hidden' in field.admin && field?.admin?.hidden) {
+        if (isHidden) {
           if (CustomFieldComponent) {
             CustomFieldComponent = HiddenInput
           }
@@ -660,6 +662,7 @@ export const mapFields = (args: {
           fieldComponentProps,
           fieldIsPresentational,
           isFieldAffectingData,
+          isHidden,
           isSidebar:
             'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar',
           localized: 'localized' in field ? field.localized : false,
@@ -682,10 +685,11 @@ export const mapFields = (args: {
       Heading: <SortColumn label="ID" name="id" />,
       fieldComponentProps: {
         name: 'id',
+        label: 'ID',
       },
       fieldIsPresentational: false,
       isFieldAffectingData: true,
-      // label: 'ID',
+      isHidden: true,
       localized: undefined,
     })
   }

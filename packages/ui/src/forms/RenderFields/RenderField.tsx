@@ -7,6 +7,7 @@ import React from 'react'
 
 import type { FieldComponentProps, MappedField } from '../../utilities/buildComponentMap/types.js'
 
+import { HiddenInput } from '../../index.js'
 import { useFieldComponents } from '../../providers/FieldComponentsProvider/index.js'
 import { useOperation } from '../../providers/OperationProvider/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
@@ -15,6 +16,7 @@ type Props = {
   CustomField: MappedField['CustomField']
   disabled: boolean
   fieldComponentProps?: FieldComponentProps
+  isHidden?: boolean
   name?: string
   path: string
   permissions?: FieldPermissions
@@ -32,6 +34,7 @@ export const RenderField: React.FC<Props> = ({
   CustomField,
   disabled,
   fieldComponentProps,
+  isHidden,
   path: pathFromProps,
   permissions,
   readOnly: readOnlyFromProps,
@@ -62,7 +65,7 @@ export const RenderField: React.FC<Props> = ({
     readOnly = true
   }
 
-  const DefaultField = fieldComponents[type]
+  const DefaultField = isHidden ? HiddenInput : fieldComponents[type]
 
   if (!CustomField && !DefaultField) {
     return null
