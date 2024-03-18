@@ -1,10 +1,10 @@
 'use client'
 
-import { useLivePreview } from '@payloadcms/live-preview-react'
 import React from 'react'
 
 import type { Post as PostType } from '../../../../../test/live-preview/payload-types.js'
 
+import { useLivePreview } from '../../../../../packages/live-preview-react/src/index.js'
 import { PAYLOAD_SERVER_URL } from '../../../_api/serverURL.js'
 import { Blocks } from '../../../_components/Blocks/index.js'
 import { PostHero } from '../../../_heros/PostHero/index.js'
