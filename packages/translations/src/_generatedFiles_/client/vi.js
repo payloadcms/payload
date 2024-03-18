@@ -238,7 +238,6 @@ export default {
     requiresAtLeast: 'Field này cần tối thiểu {{count}} {{label}}.',
   },
   version: {
-    type: 'Loại',
     aboutToPublishSelection: 'Bạn có muốn xuất bản tất cả {{label}} không?',
     aboutToRestore: 'Bạn chuẩn bị khôi phục lại {{label}} về phiên bản {{versionDate}}.',
     aboutToRestoreGlobal:
@@ -273,6 +272,7 @@ export default {
     selectLocales: 'Chọn mã khu vực để hiện thị',
     selectVersionToCompare: 'Chọn phiên bản để so sánh',
     showLocales: 'Hiển thị mã khu vực:',
+    type: 'Loại',
     unpublish: 'Ẩn tài liệu',
     unpublishing: 'Đang ẩn tài liệu...',
     version: 'Phiên bản',

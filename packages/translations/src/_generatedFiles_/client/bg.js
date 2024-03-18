@@ -239,7 +239,6 @@ export default {
     requiresAtLeast: 'Това поле изисква поне {{count}} {{label}}.',
   },
   version: {
-    type: 'Тип',
     aboutToPublishSelection: 'На път си да публикуваш всички избрани {{label}}. Сигурен ли си?',
     aboutToRestore:
       'На път си да възстановиш този {{label}} документ до състоянието му от {{versionDate}}.',
@@ -276,6 +275,7 @@ export default {
     selectLocales: 'Избери локализации за показване',
     selectVersionToCompare: 'Избери версия за сравняване',
     showLocales: 'Покажи преводи:',
+    type: 'Тип',
     unpublish: 'Скрий',
     unpublishing: 'Скриване...',
     version: 'Версия',

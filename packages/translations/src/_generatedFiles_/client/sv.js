@@ -240,7 +240,6 @@ export default {
     requiresAtLeast: 'Detta fält kräver minst {{count}} {{label}}.',
   },
   version: {
-    type: 'Typ',
     aboutToPublishSelection: 'Du är på väg att publicera alla {{label}} i urvalet. Är du säker?',
     aboutToRestore:
       'Du är på väg att återställa detta {{label}} dokumentet till det tillståndet som det var den {{versionDate}}.',
@@ -278,6 +277,7 @@ export default {
     selectLocales: 'Välj språk att visa',
     selectVersionToCompare: 'Välj en version att jämföra',
     showLocales: 'Visa språk:',
+    type: 'Typ',
     unpublish: 'Avpublicera',
     unpublishing: 'Avpublicerar...',
     version: 'Version',

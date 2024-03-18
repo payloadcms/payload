@@ -238,7 +238,6 @@ export default {
     requiresAtLeast: 'Toto pole vyžaduje alespoň {{count}} {{label}}.',
   },
   version: {
-    type: 'Typ',
     aboutToPublishSelection: 'Chystáte se publikovat všechny {{label}} ve výběru. Jsi si jistá?',
     aboutToRestore:
       'Chystáte se obnovit tento {{label}} dokument do stavu, v jakém byl {{versionDate}}.',
@@ -276,6 +275,7 @@ export default {
     selectLocales: 'Vyberte místní verze pro zobrazení',
     selectVersionToCompare: 'Vyberte verzi pro porovnání',
     showLocales: 'Zobrazit místní verze:',
+    type: 'Typ',
     unpublish: 'Zrušit publikování',
     unpublishing: 'Zrušuji publikování...',
     version: 'Verze',

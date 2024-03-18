@@ -241,7 +241,6 @@ export default {
     requiresAtLeast: 'Dieses Feld muss mindestens {{count}} {{label}} enthalten.',
   },
   version: {
-    type: 'Typ',
     aboutToPublishSelection:
       'Sie sind dabei, alle {{label}} in der Auswahl zu veröffentlichen. Bist du dir sicher?',
     aboutToRestore: 'Du bist dabei, {{label}} auf den Stand vom {{versionDate}} zurücksetzen.',
@@ -279,6 +278,7 @@ export default {
     selectLocales: 'Wähle anzuzeigende Sprachumgebungen',
     selectVersionToCompare: 'Wähle Version zum Vergleich',
     showLocales: 'Sprachumgebungen anzeigen:',
+    type: 'Typ',
     unpublish: 'Auf Entwurf setzen',
     unpublishing: 'Setze auf Entwurf...',
     version: 'Version',

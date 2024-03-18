@@ -467,6 +467,8 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
+            fieldComponentProps = richTextField
+
             const RichTextFieldComponent = field.editor.FieldComponent
             const RichTextCellComponent = field.editor.CellComponent
 
@@ -485,7 +487,6 @@ export const mapFields = (args: {
               CellComponent = RichTextCellComponent
             }
 
-            fieldComponentProps = richTextField
             break
           }
           case 'row': {

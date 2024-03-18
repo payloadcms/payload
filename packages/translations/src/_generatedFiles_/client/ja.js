@@ -240,7 +240,6 @@ export default {
     requiresAtLeast: '少なくとも {{count}} {{label}} 以上が必要です。',
   },
   version: {
-    type: 'タイプ',
     aboutToPublishSelection: '選択中のすべての{{label}}を公開しようとしています。よろしいですか？',
     aboutToRestore:
       'この {{label}} データを {{versionDate}} 時点のバージョンに復元しようとしています。',
@@ -278,6 +277,7 @@ export default {
     selectLocales: '表示するロケールを選択',
     selectVersionToCompare: '比較するバージョンを選択',
     showLocales: 'ロケールを表示:',
+    type: 'タイプ',
     unpublish: '非公開',
     unpublishing: '非公開中...',
     version: 'バージョン',

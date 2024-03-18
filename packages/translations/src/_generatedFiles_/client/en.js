@@ -242,7 +242,6 @@ export default {
     requiresAtLeast: 'This field requires at least {{count}} {{label}}.',
   },
   version: {
-    type: 'Type',
     aboutToPublishSelection:
       'You are about to publish all {{label}} in the selection. Are you sure?',
     aboutToRestore:
@@ -281,6 +280,7 @@ export default {
     selectLocales: 'Select locales to display',
     selectVersionToCompare: 'Select a version to compare',
     showLocales: 'Show locales:',
+    type: 'Type',
     unpublish: 'Unpublish',
     unpublishing: 'Unpublishing...',
     version: 'Version',
