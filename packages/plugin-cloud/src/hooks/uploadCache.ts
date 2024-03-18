@@ -10,8 +10,8 @@ interface Args {
 
 type GenericUpload = {
   id: string
-  url?: string
   sizes?: Record<string, { url?: string }>
+  url?: string
 }
 
 export const getCacheUploadsAfterChangeHook =
@@ -63,29 +63,29 @@ async function purge({ doc, endpoint, operation, req }: PurgeRequest) {
   }
 
   const filepaths = [filePath]
-  if (Object.keys(doc.sizes).length) {
-    const urls = Object.values(doc.sizes)
-      .map((size) => size?.url)
-      .filter(Boolean)
-    filepaths.push(...urls)
-  }
-
-  const body = {
-    cacheKey: process.env.PAYLOAD_CLOUD_CACHE_KEY,
-    filepaths,
-    projectID: process.env.PAYLOAD_CLOUD_PROJECT_ID,
-  }
-
-  req.payload.logger.debug({
-    filepath: doc.url,
-    msg: 'Attempting to purge cache',
-    operation,
-    project: {
-      id: process.env.PAYLOAD_CLOUD_PROJECT_ID,
-    },
-  })
-
   try {
+    if (doc.sizes && Object.keys(doc.sizes).length) {
+      const urls = Object.values(doc.sizes)
+        .map((size) => size?.url)
+        .filter(Boolean)
+      filepaths.push(...urls)
+    }
+
+    const body = {
+      cacheKey: process.env.PAYLOAD_CLOUD_CACHE_KEY,
+      filepaths,
+      projectID: process.env.PAYLOAD_CLOUD_PROJECT_ID,
+    }
+
+    req.payload.logger.debug({
+      filepaths,
+      msg: 'Purging cache for filepaths',
+      operation,
+      project: {
+        id: process.env.PAYLOAD_CLOUD_PROJECT_ID,
+      },
+    })
+
     const purgeRes = await fetch(`${endpoint}/api/purge-cache`, {
       body: JSON.stringify({
         ...body,
@@ -102,6 +102,10 @@ async function purge({ doc, endpoint, operation, req }: PurgeRequest) {
       statusCode: purgeRes.status,
     })
   } catch (err: unknown) {
-    req.payload.logger.error({ body, err, msg: '/purge-cache call failed' })
+    req.payload.logger.error({
+      data: { id: doc.id, filepaths },
+      err,
+      msg: '/purge-cache call failed',
+    })
   }
 }
