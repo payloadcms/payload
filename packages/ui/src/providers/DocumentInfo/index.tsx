@@ -300,7 +300,6 @@ export const DocumentInfoProvider: React.FC<
     getDocPreferences,
     getVersions,
     hasSavePermission,
-    isEditingUser: Boolean(props.isEditingUser),
     onSave: props.onSave,
     publishedDoc,
     setDocFieldPreferences,
