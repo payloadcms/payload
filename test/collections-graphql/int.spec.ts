@@ -5,6 +5,7 @@ import { getPayload } from '../../packages/payload/src/index.js'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { idToString } from '../helpers/idToString.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
@@ -15,6 +16,8 @@ let payload: Payload
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
+
     const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
@@ -616,7 +619,7 @@ describe('collections-graphql', () => {
 
           it('should sort find results by nearest distance', async () => {
             // creating twice as many records as we are querying to get a random sample
-            await mapAsync([...Array(10)], async () => {
+            await mapAsync([...Array(10)], () => {
               // setTimeout used to randomize the creation timestamp
               setTimeout(async () => {
                 await payload.create({

@@ -10,7 +10,7 @@ import type { Page as PayloadPage } from './payload-types.js'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import config from '../uploads/config.js'
 import { mediaSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)

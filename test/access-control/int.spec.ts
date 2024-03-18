@@ -2,10 +2,8 @@ import type { Payload, PayloadRequest } from '../../packages/payload/src/types/i
 import type { Post, RelyOnRequestHeader, Restricted } from './payload-types.js'
 
 import { Forbidden } from '../../packages/payload/src/errors/index.js'
-import { getPayload } from '../../packages/payload/src/index.js'
-import { startMemoryDB } from '../startMemoryDB.js'
-import configPromise from './config.js'
-import { requestHeaders } from './config.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import configPromise, { requestHeaders } from './config.js'
 import {
   firstArrayText,
   hiddenAccessSlug,
@@ -25,8 +23,7 @@ describe('Access Control', () => {
   let restricted: Restricted
 
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
+    ;({ payload } = await initPayloadInt(configPromise))
   })
 
   beforeEach(async () => {
@@ -43,7 +40,7 @@ describe('Access Control', () => {
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 

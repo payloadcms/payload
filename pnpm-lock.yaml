@@ -163,6 +163,9 @@ importers:
       glob:
         specifier: 8.1.0
         version: 8.1.0
+      globby:
+        specifier: 11.1.0
+        version: 11.1.0
       husky:
         specifier: ^8.0.3
         version: 8.0.3

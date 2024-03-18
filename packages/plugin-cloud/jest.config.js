@@ -1,9 +1,9 @@
 import baseConfig from '../../jest.config.js'
 
-/** @type {import('@jest/types').Config} */
+/** @type {import('jest').Config} */
 const customJestConfig = {
   ...baseConfig,
-  globalSetup: null,
+  setupFilesAfterEnv: null,
   testMatch: ['**/src/**/?(*.)+(spec|test|it-test).[tj]s?(x)'],
   testTimeout: 20000,
 }

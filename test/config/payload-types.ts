@@ -77,7 +77,3 @@ export interface MyGlobal {
   updatedAt?: string | null
   createdAt?: string | null
 }
-
-declare module 'payload' {
-  export interface GeneratedTypes extends Config {}
-}

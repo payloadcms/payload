@@ -1,8 +1,7 @@
 import type { Payload } from '../../packages/payload/src/index.js'
 import type { Page } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
-import { startMemoryDB } from '../startMemoryDB.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import { pagesSlug } from './shared.js'
 
@@ -11,8 +10,7 @@ let page: Page
 
 describe('@payloadcms/plugin-redirects', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
+    ;({ payload } = await initPayloadInt(configPromise))
 
     page = await payload.create({
       collection: 'pages',

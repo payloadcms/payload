@@ -1,6 +1,7 @@
-import { type Payload, getPayload } from '../../packages/payload/src/index.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+
+import { type Payload } from '../../packages/payload/src/index.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import {
   applicationEndpoint,
@@ -17,9 +18,7 @@ let restClient: NextRESTClient
 
 describe('Endpoints', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(config)
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
   })
 
   afterAll(async () => {

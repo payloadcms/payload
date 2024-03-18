@@ -19,7 +19,7 @@ import {
   saveDocHotkeyAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import config from './config.js'
 import { clearAndSeedEverything } from './seed.js'
 import {

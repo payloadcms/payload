@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 import payload from '../../packages/payload/src/index.js'
 import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import config from './config.js'
 import { apiKeysSlug, slug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
@@ -47,7 +47,7 @@ describe('auth', () => {
   })
 
   describe('authenticated users', () => {
-    beforeAll(async ({ browser }) => {
+    beforeAll(({ browser }) => {
       url = new AdminUrlUtil(serverURL, slug)
     })
 

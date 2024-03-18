@@ -546,30 +546,3 @@ export interface PayloadMigration {
   updatedAt: string
   createdAt: string
 }
-
-declare module 'payload' {
-  export interface GeneratedTypes {
-    collections: {
-      relation: Relation
-      audio: Audio
-      'gif-resize': GifResize
-      'no-image-sizes': NoImageSize
-      'crop-only': CropOnly
-      'focal-only': FocalOnly
-      media: Media
-      enlarge: Enlarge
-      reduce: Reduce
-      'media-trim': MediaTrim
-      'unstored-media': UnstoredMedia
-      'externally-served-media': ExternallyServedMedia
-      'uploads-1': Uploads1
-      'uploads-2': Uploads2
-      'admin-thumbnail': AdminThumbnail
-      'optional-file': OptionalFile
-      'required-file': RequiredFile
-      users: User
-      'payload-preferences': PayloadPreference
-      'payload-migrations': PayloadMigration
-    }
-  }
-}

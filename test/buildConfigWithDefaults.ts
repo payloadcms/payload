@@ -162,6 +162,9 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     }),
     sharp,
     telemetry: false,
+    typescript: {
+      declare: false,
+    },
     ...testConfig,
   }
 

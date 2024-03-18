@@ -15,7 +15,7 @@ import {
   saveDocHotkeyAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { numberDoc } from './collections/Number/shared.js'
@@ -1336,7 +1336,7 @@ describe('fields', () => {
         // check new first block value
         const richTextField = page.locator('#field-blocks__0__text')
         const richTextValue = await richTextField.innerText()
-        await expect(richTextValue).toContain('Rich text')
+        expect(richTextValue).toContain('Rich text')
       })
     })
   })
@@ -1377,7 +1377,7 @@ describe('fields', () => {
       await expect(dateField).toHaveValue('')
     })
 
-    describe('localized dates', async () => {
+    describe('localized dates', () => {
       describe('EST', () => {
         test.use({
           geolocation: {
@@ -1476,7 +1476,7 @@ describe('fields', () => {
     let url: AdminUrlUtil
     const tableRowLocator = 'table > tbody > tr'
 
-    beforeAll(async () => {
+    beforeAll(() => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields')
     })
 
@@ -1576,11 +1576,10 @@ describe('fields', () => {
     test('should hide relationship add new button', async () => {
       await page.goto(url.create)
       // expect the button to not exist in the field
-      await expect(
-        await page
-          .locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button')
-          .count(),
-      ).toEqual(0)
+      const count = await page
+        .locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button')
+        .count()
+      expect(count).toEqual(0)
     })
 
     test('should clear relationship values', async () => {

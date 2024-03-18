@@ -1,7 +1,6 @@
 import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
-import { startMemoryDB } from '../startMemoryDB.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import { arraySlug } from './shared.js'
 
@@ -9,13 +8,12 @@ let payload: Payload
 
 describe('array-update', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
+    ;({ payload } = await initPayloadInt(configPromise))
   })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload)
+      await payload.db.destroy()
     }
   })
 

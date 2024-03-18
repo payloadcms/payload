@@ -1,11 +1,12 @@
 import type { Payload } from '../../packages/payload/src/index.js'
 import type { Where } from '../../packages/payload/src/types/index.js'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'
 
 import { getPayload } from '../../packages/payload/src/index.js'
 import { englishLocale } from '../globals/config.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { idToString } from '../helpers/idToString.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
@@ -36,9 +37,7 @@ describe('Localization', () => {
   let postWithLocalizedData: LocalizedPost
 
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
 
     // @ts-expect-error Force typing
     post1 = await payload.create({
@@ -912,8 +911,6 @@ describe('Localization', () => {
       })
 
       // should return the value of the fallback locale
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       expect(updatedSpanishDoc.items[0].text).toStrictEqual(englishTitle)
     })
   })
