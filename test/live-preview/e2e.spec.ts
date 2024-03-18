@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { ChildProcessWithoutNullStreams } from 'child_process'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -13,7 +12,6 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import config from './config.js'
 import { mobileBreakpoint } from './shared.js'
-import { startLivePreviewDemo } from './startLivePreviewDemo.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -25,7 +23,6 @@ describe('Live Preview', () => {
   let page: Page
   let serverURL: string
   let url: AdminUrlUtil
-  let nextProcess: ChildProcessWithoutNullStreams
 
   const goToDoc = async (page: Page) => {
     await page.goto(url.list)
@@ -51,17 +48,7 @@ describe('Live Preview', () => {
     const context = await browser.newContext()
     page = await context.newPage()
 
-    nextProcess = await startLivePreviewDemo({
-      payload,
-    })
-
     initPageConsoleErrorCatch(page)
-  })
-
-  afterAll(({ browser }) => {
-    if (nextProcess) {
-      nextProcess.kill(9)
-    }
   })
 
   test('collection - has tab', async () => {
@@ -73,7 +60,6 @@ describe('Live Preview', () => {
     const livePreviewTab = page.locator('.doc-tab', {
       hasText: exactText('Live Preview'),
     })
-
     expect(livePreviewTab).toBeTruthy()
     const href = await livePreviewTab.locator('a').first().getAttribute('href')
     expect(href).toBe(`${pathname}/preview`)
@@ -82,6 +68,7 @@ describe('Live Preview', () => {
   test('collection - has route', async () => {
     const url = page.url()
     await goToCollectionPreview(page)
+    await wait(500)
     expect(page.url()).toBe(`${url}/preview`)
   })
 
