@@ -1,11 +1,8 @@
-import path from 'path'
-
 import type { Config } from './types.js'
 
 export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
     avatar: 'default',
-    buildPath: path.resolve(process.cwd(), './build'),
     components: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
     disable: false,
