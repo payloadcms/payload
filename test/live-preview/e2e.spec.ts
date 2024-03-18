@@ -29,6 +29,9 @@ describe('Live Preview', () => {
     const linkToDoc = page.locator('tbody tr:first-child .cell-slug a').first()
     expect(linkToDoc).toBeTruthy()
     await linkToDoc.click()
+    const linkDocHref = await linkToDoc.getAttribute('href')
+
+    await page.waitForURL(`**${linkDocHref}`)
   }
 
   const goToCollectionPreview = async (page: Page): Promise<void> => {
@@ -53,22 +56,24 @@ describe('Live Preview', () => {
 
   test('collection - has tab', async () => {
     await goToDoc(page)
-    await wait(500)
-    const docURL = page.url()
-    const pathname = new URL(docURL).pathname
 
     const livePreviewTab = page.locator('.doc-tab', {
       hasText: exactText('Live Preview'),
     })
     expect(livePreviewTab).toBeTruthy()
+
     const href = await livePreviewTab.locator('a').first().getAttribute('href')
+    const docURL = page.url()
+    const pathname = new URL(docURL).pathname
+
     expect(href).toBe(`${pathname}/preview`)
   })
 
   test('collection - has route', async () => {
+    await goToDoc(page)
     const url = page.url()
     await goToCollectionPreview(page)
-    await wait(500)
+
     expect(page.url()).toBe(`${url}/preview`)
   })
 
