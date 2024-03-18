@@ -7,19 +7,16 @@ import { cookies, headers } from 'next/headers.js'
 
 import { getRequestLanguage } from './getRequestLanguage.js'
 
-export const getNextI18n = async ({
+export const getNextI18n = ({
   config,
   language,
 }: {
   config: SanitizedConfig
   language?: string
-}): Promise<I18n> => {
-  const i18n = initI18n({
+}): I18n =>
+  initI18n({
     config: config.i18n,
     context: 'client',
-    language: language || getRequestLanguage({ cookies: cookies(), headers: headers() }),
+    language: language || getRequestLanguage({ config, cookies: cookies(), headers: headers() }),
     translations,
   })
-
-  return i18n
-}

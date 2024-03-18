@@ -67,6 +67,7 @@ export const createPayloadRequest = async ({
   }
 
   const language = getRequestLanguage({
+    config,
     cookies,
     headers: request.headers,
   })

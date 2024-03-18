@@ -20,6 +20,7 @@ import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ComponentMapProvider } from '../ComponentMapProvider/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
+import { FieldComponentsProvider } from '../FieldComponentsProvider/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
@@ -27,7 +28,6 @@ import { RouteCache } from '../RouteCache/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { TranslationProvider } from '../Translation/index.js'
-import { FieldComponentsProvider } from '../FieldComponentsProvider/index.js'
 
 type Props = {
   children: React.ReactNode
@@ -36,6 +36,7 @@ type Props = {
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
   lang: string
   languageOptions: LanguageOptions
+  switchLanguageServerAction?: (lang: string) => Promise<void>
   translations: LanguageTranslations
 }
 
@@ -46,6 +47,7 @@ export const RootProvider: React.FC<Props> = ({
   fallbackLang,
   lang,
   languageOptions,
+  switchLanguageServerAction,
   translations,
 }) => {
   const { ModalContainer, ModalProvider } = facelessUIImport || {
@@ -66,6 +68,7 @@ export const RootProvider: React.FC<Props> = ({
                   fallbackLang={fallbackLang}
                   lang={lang}
                   languageOptions={languageOptions}
+                  switchLanguageServerAction={switchLanguageServerAction}
                   translations={translations}
                 >
                   <WindowInfoProvider

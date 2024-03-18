@@ -1,9 +1,11 @@
 'use client'
-import type { I18n, LanguageTranslations, Translations } from '@payloadcms/translations'
+import type { I18n, LanguageTranslations } from '@payloadcms/translations'
 import type { ClientConfig } from 'payload/types'
 
 import { t } from '@payloadcms/translations'
 import React, { createContext, useContext } from 'react'
+
+import { useRouteCache } from '../RouteCache/index.js'
 
 export type LanguageOptions = {
   label: string
@@ -13,6 +15,7 @@ export type LanguageOptions = {
 const Context = createContext<{
   i18n: I18n
   languageOptions: LanguageOptions
+  switchLanguage?: (lang: string) => Promise<void>
   t: (key: string, vars?: Record<string, any>) => string
 }>({
   i18n: {
@@ -22,22 +25,48 @@ const Context = createContext<{
     translations: {},
   },
   languageOptions: undefined,
+  switchLanguage: undefined,
   t: (key) => key,
 })
 
-export const TranslationProvider: React.FC<{
+type Props = {
   children: React.ReactNode
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
   lang: string
   languageOptions: LanguageOptions
+  switchLanguageServerAction: (lang: string) => Promise<void>
   translations: LanguageTranslations
-}> = ({ children, fallbackLang, lang, languageOptions, translations }) => {
-  const nextT = (key: string, vars?: Record<string, any>): string =>
+}
+
+export const TranslationProvider: React.FC<Props> = ({
+  children,
+  fallbackLang,
+  lang,
+  languageOptions,
+  switchLanguageServerAction,
+  translations,
+}) => {
+  const { clearRouteCache } = useRouteCache()
+
+  const nextT = (key: string, vars?: Record<string, unknown>): string =>
     t({
       key,
       translations,
       vars,
     })
+
+  const switchLanguage = React.useCallback(
+    async (lang: string) => {
+      try {
+        await switchLanguageServerAction(lang)
+        clearRouteCache()
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Error loading language: "${lang}"`, error)
+      }
+    },
+    [switchLanguageServerAction, clearRouteCache],
+  )
 
   return (
     <Context.Provider
@@ -46,9 +75,12 @@ export const TranslationProvider: React.FC<{
           fallbackLanguage: fallbackLang,
           language: lang,
           t: nextT,
-          translations: translations as Translations,
+          translations: {
+            [lang]: translations,
+          },
         },
         languageOptions,
+        switchLanguage,
         t: nextT,
       }}
     >

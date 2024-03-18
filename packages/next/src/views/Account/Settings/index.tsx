@@ -13,7 +13,7 @@ export const Settings: React.FC<{
 }> = (props) => {
   const { className } = props
 
-  const { i18n, languageOptions, t } = useTranslation()
+  const { i18n, languageOptions, switchLanguage, t } = useTranslation()
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
@@ -22,8 +22,9 @@ export const Settings: React.FC<{
         <Label htmlFor="language-select" label={t('general:language')} />
         <ReactSelect
           inputId="language-select"
-          // TODO(i18n): wire up onChange / changeLanguage fn
-          // onChange={({ value }) => i18n.changeLanguage(value)}
+          onChange={async ({ value }) => {
+            await switchLanguage(value)
+          }}
           options={languageOptions}
           value={languageOptions.find((language) => language.value === i18n.language)}
         />
