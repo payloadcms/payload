@@ -133,7 +133,7 @@ export const CollectionArchiveByCollection: React.FC<Props> = (props) => {
       }
     }
 
-    makeRequest()
+    void makeRequest()
 
     return () => {
       if (timer) clearTimeout(timer)

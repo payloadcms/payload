@@ -62,7 +62,7 @@ export const initPage = async ({
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
   const localeCode = localeParam || defaultLocale
   const locale = localization && findLocaleFromCode(localization, localeCode)
-  const language = getRequestLanguage({ cookies, headers })
+  const language = getRequestLanguage({ config: payload.config, cookies, headers })
 
   const i18n = initI18n({
     config: payload.config.i18n,

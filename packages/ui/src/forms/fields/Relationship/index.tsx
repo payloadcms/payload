@@ -37,18 +37,18 @@ const Relationship: React.FC<RelationshipFieldProps> = (props) => {
     Description,
     Error,
     Label,
+    allowCreate = true,
     className,
+    hasMany,
+    isSortable = true,
     path: pathFromProps,
     readOnly,
+    relationTo,
     required,
+    sortOptions,
     style,
     validate,
     width,
-    relationTo,
-    hasMany,
-    sortOptions,
-    isSortable = true,
-    allowCreate = true,
   } = props
 
   const config = useConfig()

@@ -33,11 +33,11 @@ const Textarea: React.FC<TextareaFieldProps> = (props) => {
     path: pathFromProps,
     placeholder,
     required,
+    rows,
     rtl,
     style,
     validate,
     width,
-    rows,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />

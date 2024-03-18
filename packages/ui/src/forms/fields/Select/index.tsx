@@ -36,18 +36,18 @@ export const Select: React.FC<SelectFieldProps> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
+    hasMany = false,
+    isClearable = true,
+    isSortable = true,
     label,
     onChange: onChangeFromProps,
+    options: optionsFromProps = [],
     path: pathFromProps,
     readOnly,
     required,
     style,
     validate,
     width,
-    options: optionsFromProps = [],
-    hasMany = false,
-    isClearable = true,
-    isSortable = true,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
