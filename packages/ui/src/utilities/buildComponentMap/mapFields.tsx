@@ -37,8 +37,7 @@ import { SortColumn } from '../../elements/SortColumn/index.js'
 import DefaultError from '../../forms/Error/index.js'
 import DefaultDescription from '../../forms/FieldDescription/index.js'
 import DefaultLabel from '../../forms/Label/index.js'
-import HiddenInput from '../../forms/fields/HiddenInput/index.js'
-import { fieldTypes } from '../../forms/fields/index.js'
+import { HiddenInput } from '../../index.js'
 
 export const mapFields = (args: {
   DefaultCell?: React.FC<any>
@@ -64,13 +63,15 @@ export const mapFields = (args: {
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let FieldComponent = field.admin?.components?.Field || fieldTypes[field.type]
-    let CellComponent = field.admin?.components?.Cell
+    let CustomFieldComponent: React.ComponentType<FieldComponentProps>
+    const CustomCellComponent = field.admin?.components?.Cell
 
     if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
       if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
         if (field.admin && 'hidden' in field.admin && field?.admin?.hidden) {
-          FieldComponent = fieldTypes.hidden
+          if (CustomFieldComponent) {
+            CustomFieldComponent = HiddenInput
+          }
         }
 
         const isFieldAffectingData = fieldAffectsData(field)
@@ -480,11 +481,11 @@ export const mapFields = (args: {
             }
 
             if (RichTextFieldComponent) {
-              FieldComponent = RichTextFieldComponent
+              CustomFieldComponent = RichTextFieldComponent
             }
 
             if (RichTextCellComponent) {
-              CellComponent = RichTextCellComponent
+              cellComponentProps.CellComponentOverride = <RichTextCellComponent />
             }
 
             break
@@ -622,11 +623,9 @@ export const mapFields = (args: {
           }
         }
 
-        const Field = <FieldComponent {...fieldComponentProps} />
-
         const Cell = (
           <RenderCustomComponent
-            CustomComponent={CellComponent}
+            CustomComponent={CustomCellComponent}
             DefaultComponent={DefaultCell}
             componentProps={cellComponentProps}
           />
@@ -651,11 +650,14 @@ export const mapFields = (args: {
         )
 
         const reducedField: MappedField = {
-          ...fieldComponentProps,
+          name: 'name' in field ? field.name : undefined,
           type: field.type,
           Cell,
-          Field,
+          CustomField: CustomFieldComponent ? (
+            <CustomFieldComponent {...fieldComponentProps} />
+          ) : null,
           Heading,
+          fieldComponentProps,
           fieldIsPresentational,
           isFieldAffectingData,
           isSidebar:
@@ -663,9 +665,7 @@ export const mapFields = (args: {
           localized: 'localized' in field ? field.localized : false,
         }
 
-        if (FieldComponent) {
-          acc.push(reducedField)
-        }
+        acc.push(reducedField)
       }
     }
 
@@ -677,11 +677,12 @@ export const mapFields = (args: {
 
   if (!disableAddingID && !hasID) {
     result.push({
-      name: 'id',
       type: 'text',
       Cell: DefaultCell ? <DefaultCell name="id" /> : null,
-      Field: <HiddenInput name="id" />,
       Heading: <SortColumn label="ID" name="id" />,
+      fieldComponentProps: {
+        name: 'id',
+      },
       fieldIsPresentational: false,
       isFieldAffectingData: true,
       // label: 'ID',

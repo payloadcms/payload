@@ -2,18 +2,20 @@ import type { FieldMap } from '../../utilities/buildComponentMap/types.js'
 
 export const buildPathSegments = (parentPath: string, fieldMap: FieldMap): string[] => {
   const pathNames = fieldMap.reduce((acc, subField) => {
-    if ('fieldMap' in subField) {
-      if (subField.fieldMap && subField.isFieldAffectingData) {
+    if ('fieldMap' in subField.fieldComponentProps) {
+      const fieldMap = subField.fieldComponentProps.fieldMap
+
+      if (fieldMap && subField.isFieldAffectingData) {
         // group, block, array
         const name = 'name' in subField ? subField.name : 'unnamed'
         acc.push(parentPath ? `${parentPath}.${name}.` : `${name}.`)
-      } else if (subField.fieldMap) {
+      } else if (fieldMap) {
         // rows, collapsibles, unnamed-tab
-        acc.push(...buildPathSegments(parentPath, subField.fieldMap))
+        acc.push(...buildPathSegments(parentPath, fieldMap))
       } else if (subField.type === 'tabs') {
         // tabs
-        'tabs' in subField &&
-          subField.tabs?.forEach((tab) => {
+        'tabs' in subField.fieldComponentProps &&
+          subField.fieldComponentProps?.tabs?.forEach((tab) => {
             let tabPath = parentPath
             if ('name' in tab) {
               tabPath = parentPath ? `${parentPath}.${tab.name}` : tab.name

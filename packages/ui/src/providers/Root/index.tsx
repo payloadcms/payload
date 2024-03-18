@@ -27,6 +27,7 @@ import { RouteCache } from '../RouteCache/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { TranslationProvider } from '../Translation/index.js'
+import { FieldComponentsProvider } from '../FieldComponentsProvider/index.js'
 
 type Props = {
   children: React.ReactNode
@@ -59,50 +60,52 @@ export const RootProvider: React.FC<Props> = ({
       <RouteCache>
         <ConfigProvider config={config}>
           <ComponentMapProvider componentMap={componentMap}>
-            <ClientFunctionProvider>
-              <TranslationProvider
-                fallbackLang={fallbackLang}
-                lang={lang}
-                languageOptions={languageOptions}
-                translations={translations}
-              >
-                <WindowInfoProvider
-                  breakpoints={{
-                    l: '(max-width: 1440px)',
-                    m: '(max-width: 1024px)',
-                    s: '(max-width: 768px)',
-                    xs: '(max-width: 400px)',
-                  }}
+            <FieldComponentsProvider>
+              <ClientFunctionProvider>
+                <TranslationProvider
+                  fallbackLang={fallbackLang}
+                  lang={lang}
+                  languageOptions={languageOptions}
+                  translations={translations}
                 >
-                  <ScrollInfoProvider>
-                    <SearchParamsProvider>
-                      <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                        <AuthProvider>
-                          <PreferencesProvider>
-                            <ThemeProvider>
-                              <ParamsProvider>
-                                <LocaleProvider>
-                                  <StepNavProvider>
-                                    <LoadingOverlayProvider>
-                                      <DocumentEventsProvider>
-                                        <ActionsProvider>
-                                          <NavProvider>{children}</NavProvider>
-                                        </ActionsProvider>
-                                      </DocumentEventsProvider>
-                                    </LoadingOverlayProvider>
-                                  </StepNavProvider>
-                                </LocaleProvider>
-                              </ParamsProvider>
-                            </ThemeProvider>
-                          </PreferencesProvider>
-                          <ModalContainer />
-                        </AuthProvider>
-                      </ModalProvider>
-                    </SearchParamsProvider>
-                  </ScrollInfoProvider>
-                </WindowInfoProvider>
-              </TranslationProvider>
-            </ClientFunctionProvider>
+                  <WindowInfoProvider
+                    breakpoints={{
+                      l: '(max-width: 1440px)',
+                      m: '(max-width: 1024px)',
+                      s: '(max-width: 768px)',
+                      xs: '(max-width: 400px)',
+                    }}
+                  >
+                    <ScrollInfoProvider>
+                      <SearchParamsProvider>
+                        <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                          <AuthProvider>
+                            <PreferencesProvider>
+                              <ThemeProvider>
+                                <ParamsProvider>
+                                  <LocaleProvider>
+                                    <StepNavProvider>
+                                      <LoadingOverlayProvider>
+                                        <DocumentEventsProvider>
+                                          <ActionsProvider>
+                                            <NavProvider>{children}</NavProvider>
+                                          </ActionsProvider>
+                                        </DocumentEventsProvider>
+                                      </LoadingOverlayProvider>
+                                    </StepNavProvider>
+                                  </LocaleProvider>
+                                </ParamsProvider>
+                              </ThemeProvider>
+                            </PreferencesProvider>
+                            <ModalContainer />
+                          </AuthProvider>
+                        </ModalProvider>
+                      </SearchParamsProvider>
+                    </ScrollInfoProvider>
+                  </WindowInfoProvider>
+                </TranslationProvider>
+              </ClientFunctionProvider>
+            </FieldComponentsProvider>
           </ComponentMapProvider>
         </ConfigProvider>
       </RouteCache>

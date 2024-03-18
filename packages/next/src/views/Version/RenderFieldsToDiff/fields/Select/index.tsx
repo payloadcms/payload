@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { SelectFieldProps } from 'packages/ui/src/forms/fields/Select/types.js'
-import type { MappedFieldBase } from 'packages/ui/src/utilities/buildComponentMap/types.js'
+import type { MappedField } from 'packages/ui/src/utilities/buildComponentMap/types.js'
 import type { OptionObject, SelectField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -48,7 +48,7 @@ const getTranslatedOptions = (
 
 const Select: React.FC<
   Omit<Props, 'field'> & {
-    field: MappedFieldBase & SelectFieldProps
+    field: MappedField & SelectFieldProps
   }
 > = ({ comparison, diffMethod, field, i18n, locale, version }) => {
   let placeholder = ''

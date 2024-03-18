@@ -18,24 +18,24 @@ export const PostsCollection: CollectionConfig = {
       type: 'row',
       fields: [],
     },
-    // {
-    //   name: 'richText',
-    //   type: 'richText',
-    // },
+    {
+      name: 'richText',
+      type: 'richText',
+    },
     {
       name: 'relationship',
       type: 'relationship',
-      filterOptions: ({ id }) => {
-        return {
-          where: [
-            {
-              id: {
-                not_equals: id,
-              },
-            },
-          ],
-        }
-      },
+      // filterOptions: ({ id }) => {
+      //   return {
+      //     where: [
+      //       {
+      //         id: {
+      //           not_equals: id,
+      //         },
+      //       },
+      //     ],
+      //   }
+      // },
       relationTo: ['posts'],
     },
     {
