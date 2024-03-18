@@ -65,6 +65,7 @@ export const mapFields = (args: {
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
     let FieldComponent = field.admin?.components?.Field || fieldTypes[field.type]
+    let CellComponent = field.admin?.components?.Cell
 
     if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
       if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
@@ -325,7 +326,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: nestedFieldMap,
-              fieldTypes,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -468,6 +468,25 @@ export const mapFields = (args: {
             }
 
             fieldComponentProps = richTextField
+
+            const RichTextFieldComponent = field.editor.FieldComponent
+            const RichTextCellComponent = field.editor.CellComponent
+
+            if (typeof field.editor.generateComponentMap === 'function') {
+              const result = field.editor.generateComponentMap({ config, schemaPath: path })
+              // @ts-expect-error-next-line // TODO: the `richTextComponentMap` is not found on the union type
+              fieldComponentProps.richTextComponentMap = result
+              cellComponentProps.richTextComponentMap = result
+            }
+
+            if (RichTextFieldComponent) {
+              FieldComponent = RichTextFieldComponent
+            }
+
+            if (RichTextCellComponent) {
+              CellComponent = RichTextCellComponent
+            }
+
             break
           }
           case 'row': {
@@ -476,7 +495,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: nestedFieldMap,
-              fieldTypes,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -604,34 +622,11 @@ export const mapFields = (args: {
           }
         }
 
-        let Field = <FieldComponent {...fieldComponentProps} />
-
-        /**
-         * Handle RichText Field Components, Cell Components, and component maps
-         */
-        if (field.type === 'richText' && 'editor' in field) {
-          const RichTextFieldComponent = field.editor.FieldComponent
-          const RichTextCellComponent = field.editor.CellComponent
-
-          if (typeof field.editor.generateComponentMap === 'function') {
-            const result = field.editor.generateComponentMap({ config, schemaPath: path })
-            // @ts-expect-error-next-line // TODO: the `richTextComponentMap` is not found on the union type
-            fieldComponentProps.richTextComponentMap = result
-            cellComponentProps.richTextComponentMap = result
-          }
-
-          if (RichTextFieldComponent) {
-            Field = <RichTextFieldComponent {...fieldComponentProps} />
-          }
-
-          if (RichTextCellComponent) {
-            cellComponentProps.CellComponentOverride = <RichTextCellComponent />
-          }
-        }
+        const Field = <FieldComponent {...fieldComponentProps} />
 
         const Cell = (
           <RenderCustomComponent
-            CustomComponent={field.admin?.components?.Cell}
+            CustomComponent={CellComponent}
             DefaultComponent={DefaultCell}
             componentProps={cellComponentProps}
           />

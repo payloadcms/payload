@@ -40,7 +40,7 @@
     "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache && rimraf .next",
     "clean:build": "find . \\( -type d \\( -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -not -path '*/node_modules/*' -exec rm -rf {} +",
     "clean:all": "find . \\( -type d \\( -name node_modules -o -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} +",
-    "dev": "tsx ./test/dev.ts",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts",
     "devsafe": "rimraf .next && pnpm dev",
     "dev:generate-graphql-schema": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/generateGraphQLSchema.ts",
     "dev:generate-types": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/generateTypes.ts",
@@ -147,7 +147,7 @@
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
     "turbo": "^1.12.5",
-    "typescript": "5.2.2",
+    "typescript": "5.4.2",
     "uuid": "^9.0.1",
     "yocto-queue": "^1.0.0"
   },

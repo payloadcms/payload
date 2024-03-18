@@ -4,9 +4,7 @@ import type {
 } from '../../packages/payload/src/fields/config/types.js'
 import type { Payload } from '../../packages/payload/src/index.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
 
 let payload: Payload
