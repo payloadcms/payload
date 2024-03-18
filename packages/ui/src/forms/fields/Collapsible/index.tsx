@@ -27,10 +27,10 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     Label: LabelFromProps,
     className,
     fieldMap,
+    initCollapsed = false,
     label,
     path: pathFromProps,
     required,
-    initCollapsed = false,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />

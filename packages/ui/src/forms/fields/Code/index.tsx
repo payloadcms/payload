@@ -27,15 +27,15 @@ const Code: React.FC<CodeFieldProps> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
+    editorOptions = {},
     label,
+    language = 'javascript',
     path: pathFromProps,
     readOnly,
     required,
     style,
     validate,
     width,
-    editorOptions = {},
-    language = 'javascript',
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />

@@ -41,7 +41,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({
     return acc
   }, [])
 
-  const componentProps: DashboardProps = {
+  const fieldComponentProps: DashboardProps = {
     Link,
     config,
     permissions,
@@ -57,7 +57,7 @@ export const Dashboard: React.FC<AdminViewProps> = ({
           typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
         }
         DefaultComponent={DefaultDashboard}
-        componentProps={componentProps}
+        fieldComponentProps={fieldComponentProps}
       />
     </Fragment>
   )

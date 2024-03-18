@@ -141,7 +141,7 @@ export const mapFields = (args: {
               (field.admin.description as React.FC<any>)
             }
             DefaultComponent={DefaultDescription}
-            componentProps={descriptionProps}
+            fieldComponentProps={descriptionProps}
           />
         )
 
@@ -154,7 +154,7 @@ export const mapFields = (args: {
               field.admin?.components?.Error
             }
             DefaultComponent={DefaultError}
-            componentProps={{ path }}
+            fieldComponentProps={{ path }}
           />
         )
 
@@ -167,7 +167,7 @@ export const mapFields = (args: {
               field.admin?.components?.Label
             }
             DefaultComponent={DefaultLabel}
-            componentProps={labelProps}
+            fieldComponentProps={labelProps}
           />
         )
 
@@ -627,7 +627,7 @@ export const mapFields = (args: {
           <RenderCustomComponent
             CustomComponent={CellComponent}
             DefaultComponent={DefaultCell}
-            componentProps={cellComponentProps}
+            fieldComponentProps={cellComponentProps}
           />
         )
 
@@ -650,6 +650,7 @@ export const mapFields = (args: {
         )
 
         const reducedField: MappedField = {
+          name: 'name' in field ? field.name : undefined,
           type: field.type,
           Cell,
           CustomField: CustomFieldComponent ? (

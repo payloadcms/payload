@@ -31,7 +31,7 @@ const generateLabelFromValue = (
   let valueToReturn = '' as any
 
   const relationTo =
-    'relationTo' in field?.fieldComponentProps ? field.fieldComponentProps.relationTo : undefined
+    'relationTo' in field.fieldComponentProps ? field.fieldComponentProps.relationTo : undefined
 
   if (value === null || typeof value === 'undefined') {
     return String(value)
@@ -98,7 +98,7 @@ const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, versio
   }
 
   const label =
-    'label' in field?.fieldComponentProps && typeof field.fieldComponentProps.label !== 'boolean'
+    'label' in field.fieldComponentProps && typeof field.fieldComponentProps.label !== 'boolean'
       ? field.fieldComponentProps.label
       : ''
 

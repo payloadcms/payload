@@ -95,7 +95,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
     <RenderCustomComponent
       CustomComponent={CustomComponent}
       DefaultComponent={DefaultSaveDraftButton}
-      componentProps={{
+      fieldComponentProps={{
         DefaultButton: DefaultSaveDraftButton,
         disabled: !canSaveDraft,
         label: t('version:saveDraft'),

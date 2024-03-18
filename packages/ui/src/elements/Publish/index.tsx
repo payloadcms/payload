@@ -99,7 +99,7 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
     <RenderCustomComponent
       CustomComponent={CustomComponent}
       DefaultComponent={DefaultPublishButton}
-      componentProps={{
+      fieldComponentProps={{
         id: 'action-save',
         DefaultButton: DefaultPublishButton,
         canPublish: hasPublishPermission,

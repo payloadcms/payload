@@ -3,16 +3,16 @@ import React from 'react'
 export const RenderCustomComponent: React.FC<{
   CustomComponent?: React.ComponentType<any>
   DefaultComponent: React.ComponentType<any>
-  componentProps?: Record<string, any>
+  fieldComponentProps?: Record<string, any>
 }> = (props) => {
-  const { CustomComponent, DefaultComponent, componentProps = {} } = props
+  const { CustomComponent, DefaultComponent, fieldComponentProps = {} } = props
 
   if (CustomComponent) {
-    return <CustomComponent {...componentProps} />
+    return <CustomComponent {...fieldComponentProps} />
   }
 
   if (DefaultComponent) {
-    return <DefaultComponent {...componentProps} />
+    return <DefaultComponent {...fieldComponentProps} />
   }
 
   return null

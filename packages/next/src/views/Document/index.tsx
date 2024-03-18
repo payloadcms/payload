@@ -263,7 +263,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           <RenderCustomComponent
             CustomComponent={ViewOverride || CustomView}
             DefaultComponent={DefaultView}
-            componentProps={serverSideProps}
+            fieldComponentProps={serverSideProps}
           />
         </FormQueryParamsProvider>
       </EditDepthProvider>

@@ -85,7 +85,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       user,
     })
 
-    const componentProps: DefaultListViewProps = {
+    const fieldComponentProps: DefaultListViewProps = {
       collectionSlug,
     }
 
@@ -107,7 +107,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
             <RenderCustomComponent
               CustomComponent={CustomListView}
               DefaultComponent={DefaultListView}
-              componentProps={componentProps}
+              fieldComponentProps={fieldComponentProps}
             />
           </TableColumnsProvider>
         </ListInfoProvider>

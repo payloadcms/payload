@@ -133,7 +133,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
               typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
             }
             DefaultComponent={EditView}
-            componentProps={serverSideProps}
+            fieldComponentProps={serverSideProps}
           />
         </FormQueryParamsProvider>
       </DocumentInfoProvider>

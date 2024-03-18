@@ -1,5 +1,5 @@
 import type { TabsFieldProps } from 'packages/ui/src/forms/fields/Tabs/types.js'
-import type { MappedFieldBase } from 'packages/ui/src/utilities/buildComponentMap/types.js'
+import type { MappedField } from 'packages/ui/src/utilities/buildComponentMap/types.js'
 
 import React from 'react'
 
@@ -12,7 +12,7 @@ const baseClass = 'tabs-diff'
 
 const Tabs: React.FC<
   Omit<Props, 'field'> & {
-    field: MappedFieldBase & TabsFieldProps
+    field: MappedField & TabsFieldProps
   }
 > = ({ comparison, diffComponents, field, i18n, locale, locales, permissions, version }) => {
   return (

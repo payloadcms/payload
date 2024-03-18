@@ -28,10 +28,10 @@ const Iterable: React.FC<Props> = ({
 
   return (
     <div className={baseClass}>
-      {'label' in field?.fieldComponentProps && field.fieldComponentProps.label && (
+      {'label' in field.fieldComponentProps && field.fieldComponentProps.label && (
         <Label>
           {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {getTranslation(field?.fieldComponentProps.label, i18n)}
+          {getTranslation(field.fieldComponentProps.label, i18n)}
         </Label>
       )}
       {maxRows > 0 && (
@@ -42,7 +42,7 @@ const Iterable: React.FC<Props> = ({
 
             let fieldMap: MappedField[] = []
 
-            if (field.type === 'array' && 'fieldMap' in field?.fieldComponentProps)
+            if (field.type === 'array' && 'fieldMap' in field.fieldComponentProps)
               fieldMap = field.fieldComponentProps.fieldMap
 
             if (field.type === 'blocks') {
@@ -55,7 +55,7 @@ const Iterable: React.FC<Props> = ({
               ]
 
               if (versionRow?.blockType === comparisonRow?.blockType) {
-                const matchedBlock = ('blocks' in field?.fieldComponentProps &&
+                const matchedBlock = ('blocks' in field.fieldComponentProps &&
                   field.fieldComponentProps.blocks?.find(
                     (block) => block.slug === versionRow?.blockType,
                   )) || {
@@ -64,14 +64,14 @@ const Iterable: React.FC<Props> = ({
 
                 fieldMap = [...fieldMap, ...matchedBlock.fieldMap]
               } else {
-                const matchedVersionBlock = ('blocks' in field?.fieldComponentProps &&
+                const matchedVersionBlock = ('blocks' in field.fieldComponentProps &&
                   field.fieldComponentProps.blocks?.find(
                     (block) => block.slug === versionRow?.blockType,
                   )) || {
                   fieldMap: [],
                 }
 
-                const matchedComparisonBlock = ('blocks' in field?.fieldComponentProps &&
+                const matchedComparisonBlock = ('blocks' in field.fieldComponentProps &&
                   field.fieldComponentProps.blocks?.find(
                     (block) => block.slug === comparisonRow?.blockType,
                   )) || {
@@ -109,7 +109,7 @@ const Iterable: React.FC<Props> = ({
         <div className={`${baseClass}__no-rows`}>
           {i18n.t('version:noRowsFound', {
             label:
-              'labels' in field?.fieldComponentProps && field.fieldComponentProps.labels?.plural
+              'labels' in field.fieldComponentProps && field.fieldComponentProps.labels?.plural
                 ? getTranslation(field.fieldComponentProps.labels.plural, i18n)
                 : i18n.t('general:rows'),
           })}

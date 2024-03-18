@@ -41,7 +41,7 @@ export const Save: React.FC<Props> = ({ CustomComponent }) => {
     <RenderCustomComponent
       CustomComponent={CustomComponent}
       DefaultComponent={DefaultSaveButton}
-      componentProps={{
+      fieldComponentProps={{
         DefaultButton: DefaultSaveButton,
         label: t('general:save'),
         save: submit,

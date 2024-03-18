@@ -23,8 +23,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   return (
     <div className={baseClass}>
       {fieldMap?.map((field, i) => {
-        if ('name' in field?.fieldComponentProps && field.fieldComponentProps.name === 'id')
-          return null
+        if ('name' in field && field.name === 'id') return null
 
         const Component = diffComponents[field.type]
 
@@ -32,8 +31,8 @@ const RenderFieldsToDiff: React.FC<Props> = ({
         const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
 
         if (Component) {
-          if (field.isFieldAffectingData && 'name' in field?.fieldComponentProps) {
-            const fieldName = field.fieldComponentProps.name
+          if (field.isFieldAffectingData && 'name' in field) {
+            const fieldName = field.name
             const valueIsObject = field.type === 'code' || field.type === 'json'
 
             const versionValue = valueIsObject
@@ -56,8 +55,8 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               diffMethod,
               field,
               fieldMap:
-                'fieldMap' in field?.fieldComponentProps
-                  ? field.fieldComponentProps.fieldMap
+                'fieldMap' in field.fieldComponentProps
+                  ? field.fieldComponentProps?.fieldMap
                   : fieldMap,
               fieldPermissions: subFieldPermissions,
               i18n,
@@ -98,7 +97,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
             )
           }
 
-          if (field.type === 'tabs' && 'fieldMap' in field?.fieldComponentProps) {
+          if (field.type === 'tabs' && 'fieldMap' in field.fieldComponentProps) {
             const Tabs = diffComponents.tabs
 
             return (
@@ -116,7 +115,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
           }
 
           // At this point, we are dealing with a `row`, etc
-          if ('fieldMap' in field?.fieldComponentProps) {
+          if ('fieldMap' in field.fieldComponentProps) {
             return (
               <Nested
                 comparison={comparison}

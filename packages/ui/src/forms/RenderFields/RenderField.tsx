@@ -1,18 +1,20 @@
 'use client'
 
+import type { FieldTypes } from 'payload/config.js'
 import type { FieldPermissions } from 'payload/types'
 
 import React from 'react'
 
+import type { FieldComponentProps, MappedField } from '../../utilities/buildComponentMap/types.js'
+
+import { useFieldComponents } from '../../providers/FieldComponentsProvider/index.js'
 import { useOperation } from '../../providers/OperationProvider/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
-import { FieldComponentProps, MappedField } from '../../utilities/buildComponentMap/types.js'
-import { useFieldComponents } from '../../providers/FieldComponentsProvider/index.js'
-import { FieldTypes } from 'payload/config.js'
 
 type Props = {
   CustomField: MappedField['CustomField']
   disabled: boolean
+  fieldComponentProps?: FieldComponentProps
   name?: string
   path: string
   permissions?: FieldPermissions
@@ -21,21 +23,20 @@ type Props = {
   siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
-  fieldComponentProps?: FieldComponentProps
   type: keyof FieldTypes
 }
 
 export const RenderField: React.FC<Props> = ({
   name,
+  type,
   CustomField,
   disabled,
+  fieldComponentProps,
   path: pathFromProps,
   permissions,
   readOnly: readOnlyFromProps,
   schemaPath: schemaPathFromProps,
   siblingPermissions,
-  type,
-  fieldComponentProps,
 }) => {
   const operation = useOperation()
   const { readOnly: readOnlyFromContext } = useFieldProps()
