@@ -236,7 +236,6 @@ export default {
     requiresAtLeast: 'ต้องมีอย่างน้อย {{count}} {{label}}',
   },
   version: {
-    type: 'ประเภท',
     aboutToPublishSelection: 'คุณกำลังจะเผยแพร่ {{label}} ทั้งหมดในส่วนที่เลือก คุณแน่ใจไหม?',
     aboutToRestore:
       'คุณกำลังจะคืนค่าเอกสาร {{label}} นี้กลับไปอยู่ในเวอร์ชันเมื่อวันที่ {{versionDate}}',
@@ -273,6 +272,7 @@ export default {
     selectLocales: 'เลือกภาษาที่ต้องการแสดง',
     selectVersionToCompare: 'เลือกเวอร์ชันที่ต้องการเปรียบเทียบ',
     showLocales: 'แสดงภาษา:',
+    type: 'ประเภท',
     unpublish: 'หยุดเผยแพร่',
     unpublishing: 'กำลังหยุดการเผยแพร่...',
     version: 'เวอร์ชัน',

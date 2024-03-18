@@ -239,7 +239,6 @@ export default {
     requiresAtLeast: 'Це поле потребує не менше {{count}} {{label}}.',
   },
   version: {
-    type: 'Тип',
     aboutToPublishSelection: 'Ви збираєтеся опублікувати всі {{label}} у добірці. Ти впевнений?',
     aboutToRestore:
       'Ви збираєтесь відновити цей документ {{label}} до стану, в якому він знаходився {{versionDate}}.',
@@ -277,6 +276,7 @@ export default {
     selectLocales: 'Виберіть переклад для відображення',
     selectVersionToCompare: 'Виберіть версію для порівняння',
     showLocales: 'Показати переклади:',
+    type: 'Тип',
     unpublish: 'Відмінити публікацію',
     unpublishing: 'Відміна публікації...',
     version: 'Версія',

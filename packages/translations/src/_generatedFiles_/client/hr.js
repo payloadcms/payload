@@ -239,7 +239,6 @@ export default {
     requiresAtLeast: 'Ovo polje zahtjeva minimalno {{count}} {{label}}.',
   },
   version: {
-    type: 'Tip',
     aboutToPublishSelection: 'Upravo ćete objaviti sve {{label}} u izboru. Jesi li siguran?',
     aboutToRestore: 'Vratit ćete {{label}} dokument u stanje u kojem je bio {{versionDate}}',
     aboutToRestoreGlobal: 'Vratit ćete globalni {{label}} u stanje u kojem je bio {{versionDate}}.',
@@ -275,6 +274,7 @@ export default {
     selectLocales: 'Odaberite jezike',
     selectVersionToCompare: 'Odaberite verziju za usporedbu',
     showLocales: 'Prikaži jezike:',
+    type: 'Tip',
     unpublish: 'Poništi objavu',
     unpublishing: 'Poništavanje objave...',
     version: 'Verzija',

@@ -12,20 +12,37 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "exports": {
+      ".": {
+        "import": "./dist/exports/index.ts",
+        "require": "./dist/exports/index.ts",
+        "types": "./dist/exports/*.d.ts"
+      },
+      "./api": {
+        "import": "./dist/_generatedFiles_/api/index.ts",
+        "require": "./dist/_generatedFiles_/api/index.ts",
+        "types": "./dist/_generatedFiles_/exports/*.d.ts"
+      },
+      "./client": {
+        "import": "./dist/_generatedFiles_/client/index.ts",
+        "require": "./dist/_generatedFiles_/client/index.ts",
+        "types": "./dist/_generatedFiles_/exports/*.d.ts"
+      }
+    }
   },
   "exports": {
     ".": {
-      "import": "./dist/exports/index.js",
-      "require": "./dist/exports/index.js"
+      "import": "./src/exports/index.ts",
+      "require": "./src/exports/index.ts"
     },
     "./api": {
-      "import": "./dist/_generatedFiles_/api/index.js",
-      "require": "./dist/_generatedFiles_/api/index.js"
+      "import": "./src/_generatedFiles_/api/index.ts",
+      "require": "./src/_generatedFiles_/api/index.ts"
     },
     "./client": {
-      "import": "./dist/_generatedFiles_/client/index.js",
-      "require": "./dist/_generatedFiles_/client/index.js"
+      "import": "./src/_generatedFiles_/client/index.ts",
+      "require": "./src/_generatedFiles_/client/index.ts"
     }
   },
   "devDependencies": {

@@ -237,7 +237,6 @@ export default {
     requiresAtLeast: 'هذا الحقل يتطلب على الأقل {{count}} {{label}}.',
   },
   version: {
-    type: 'النّوع',
     aboutToPublishSelection: 'أنت على وشك نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟',
     aboutToRestore:
       'أنت على وشك استرجاع هذا المستند {{label}} إلى الحالة التّي كان عليها في {{versionDate}}.',
@@ -273,6 +272,7 @@ export default {
     selectLocales: 'حدّد اللّغات المراد عرضها',
     selectVersionToCompare: 'حدّد نسخة للمقارنة',
     showLocales: 'اظهر اللّغات:',
+    type: 'النّوع',
     unpublish: 'الغاء النّشر',
     unpublishing: 'يتمّ الغاء النّشر...',
     version: 'النّسخة',

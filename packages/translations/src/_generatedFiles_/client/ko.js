@@ -238,7 +238,6 @@ export default {
     requiresAtLeast: '이 입력란운 최소한 {{count}} {{label}}이 필요합니다.',
   },
   version: {
-    type: '유형',
     aboutToPublishSelection: '선택한 {{label}}을(를) 게시하려고 합니다. 계속하시겠습니까?',
     aboutToRestore: '이 {{label}} 문서를 {{versionDate}}기준 버전으로 복원하려고 합니다.',
     aboutToRestoreGlobal: '글로벌 {{label}}을(를) {{versionDate}}기준 버전으로 복원하려고 합니다.',
@@ -273,6 +272,7 @@ export default {
     selectLocales: '표시할 locale 선택',
     selectVersionToCompare: '비교할 버전 선택',
     showLocales: 'locale 표시:',
+    type: '유형',
     unpublish: '게시 해제',
     unpublishing: '게시 해제 중...',
     version: '버전',

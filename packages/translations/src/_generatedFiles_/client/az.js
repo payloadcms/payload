@@ -241,7 +241,6 @@ export default {
     requiresAtLeast: 'Bu sahə ən azı {{count}} {{label}} tələb edir.',
   },
   version: {
-    type: 'Növ',
     aboutToPublishSelection: 'Seçimdə olan bütün {{label}}-i dərc etməyə hazırsınız. Əminsiniz?',
     aboutToRestore:
       'Bu {{label}} sənədini {{versionDate}} tarixindəki vəziyyətinə bərpa etmək üzrəsiniz.',
@@ -279,6 +278,7 @@ export default {
     selectLocales: 'Göstərmək üçün lokalları seçin',
     selectVersionToCompare: 'Müqayisə üçün bir versiya seçin',
     showLocales: 'Lokalları göstər:',
+    type: 'Növ',
     unpublish: 'Dərcdən çıxart',
     unpublishing: 'Dərcdən çıxarılır...',
     version: 'Versiya',

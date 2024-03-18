@@ -241,7 +241,6 @@ export default {
     requiresAtLeast: 'Dit veld vereist minstens {{count}} {{label}}.',
   },
   version: {
-    type: 'Type',
     aboutToPublishSelection:
       'Je staat op het punt om alle {{label}} in de selectie te publiceren. Weet je het zeker?',
     aboutToRestore:
@@ -281,6 +280,7 @@ export default {
     selectLocales: 'Selecteer locales om weer te geven',
     selectVersionToCompare: 'Selecteer een versie om te vergelijken',
     showLocales: 'Toon locales:',
+    type: 'Type',
     unpublish: 'Publicatie ongedaan maken',
     unpublishing: 'Publicatie ongedaan maken...',
     version: 'Versie',
