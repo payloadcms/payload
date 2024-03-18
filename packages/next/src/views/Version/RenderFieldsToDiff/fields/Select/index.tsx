@@ -1,4 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
+import type { SelectFieldProps } from 'packages/ui/src/forms/fields/Select/types.js'
+import type { MappedField } from 'packages/ui/src/utilities/buildComponentMap/types.js'
 import type { OptionObject, SelectField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -44,7 +46,11 @@ const getTranslatedOptions = (
   return typeof options === 'string' ? options : getTranslation(options.label, i18n)
 }
 
-const Select: React.FC<Props> = ({ comparison, diffMethod, field, i18n, locale, version }) => {
+const Select: React.FC<
+  Omit<Props, 'field'> & {
+    field: MappedField & SelectFieldProps
+  }
+> = ({ comparison, diffMethod, field, i18n, locale, version }) => {
   let placeholder = ''
 
   if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
@@ -63,7 +69,7 @@ const Select: React.FC<Props> = ({ comparison, diffMethod, field, i18n, locale, 
     <div className={baseClass}>
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {getTranslation(field.label || '', i18n)}
+        {'label' in field && getTranslation(field.label || '', i18n)}
       </Label>
       <DiffViewer
         comparisonToRender={comparisonToRender}

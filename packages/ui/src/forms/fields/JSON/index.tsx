@@ -3,7 +3,7 @@ import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types.js'
+import type { JSONFieldProps } from './types.js'
 
 import { CodeEditor } from '../../../elements/CodeEditor/index.js'
 import LabelComp from '../../Label/index.js'
@@ -14,7 +14,7 @@ import './index.scss'
 
 const baseClass = 'json-field'
 
-const JSONField: React.FC<Props> = (props) => {
+const JSONField: React.FC<JSONFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -23,6 +23,7 @@ const JSONField: React.FC<Props> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
+    editorOptions,
     label,
     path: pathFromProps,
     readOnly,
@@ -33,9 +34,6 @@ const JSONField: React.FC<Props> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  // eslint-disable-next-line react/destructuring-assignment
-  const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
 
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()

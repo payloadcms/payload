@@ -3,6 +3,7 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import type { SanitizedConfig } from '../packages/payload/src/config/types.js'
 
 import { mongooseAdapter } from '../packages/db-mongodb/src/index.js'
+import Logger from '../packages/payload/src/utilities/logger.js'
 
 export const startMemoryDB = async (
   configPromise: Promise<SanitizedConfig>,
@@ -11,7 +12,8 @@ export const startMemoryDB = async (
 
   process.env.NODE_OPTIONS = '--no-deprecation'
 
-  console.log('---- CONNECTING TO MEMORY DB ----')
+  const logger = Logger()
+  logger.info('---- CONNECTING TO MEMORY DB ----')
 
   switch (process.env.PAYLOAD_DATABASE) {
     case 'postgres':

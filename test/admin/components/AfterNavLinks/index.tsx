@@ -1,6 +1,8 @@
 'use client'
 
-import Link from 'next/link'
+import LinkImport from 'next/link.js'
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
 import React from 'react'
 
 // As this is the demo project, we import our dependencies from the `src` directory.

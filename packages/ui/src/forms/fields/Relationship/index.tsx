@@ -7,7 +7,7 @@ import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js'
-import type { GetResults, Option, Props, Value } from './types.js'
+import type { GetResults, Option, RelationshipFieldProps, Value } from './types.js'
 
 import ReactSelect from '../../../elements/ReactSelect/index.js'
 import { useDebouncedCallback } from '../../../hooks/useDebouncedCallback.js'
@@ -31,16 +31,21 @@ const maxResultsPerRequest = 10
 
 const baseClass = 'relationship'
 
-const Relationship: React.FC<Props> = (props) => {
+const Relationship: React.FC<RelationshipFieldProps> = (props) => {
   const {
     name,
     Description,
     Error,
     Label,
+    allowCreate = true,
     className,
+    hasMany,
+    isSortable = true,
     path: pathFromProps,
     readOnly,
+    relationTo,
     required,
+    sortOptions,
     style,
     validate,
     width,
@@ -53,12 +58,6 @@ const Relationship: React.FC<Props> = (props) => {
     routes: { api },
     serverURL,
   } = config
-
-  const relationTo = 'relationTo' in props ? props?.relationTo : undefined
-  const hasMany = 'hasMany' in props ? props?.hasMany : undefined
-  const sortOptions = 'sortOptions' in props ? props?.sortOptions : undefined
-  const isSortable = 'isSortable' in props ? props?.isSortable : true
-  const allowCreate = 'allowCreate' in props ? props?.allowCreate : true
 
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()

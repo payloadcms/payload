@@ -32,11 +32,11 @@ export const RenderFields: React.FC<Props> = (props) => {
   }, [shouldRender, hasRendered])
 
   if (!fieldMap || (Array.isArray(fieldMap) && fieldMap.length === 0)) {
-    console.error('No fieldMap provided when calling RenderFields')
+    console.error('No fieldMap provided when calling RenderFields') // eslint-disable-line no-console
   }
 
   if (!i18n) {
-    console.error('Need to implement i18n when calling RenderFields')
+    console.error('Need to implement i18n when calling RenderFields') // eslint-disable-line no-console
   }
 
   if (fieldMap) {
@@ -53,11 +53,24 @@ export const RenderFields: React.FC<Props> = (props) => {
         ref={intersectionRef}
       >
         {hasRendered &&
-          fieldMap?.map(({ name, Field, disabled, readOnly }, fieldIndex) => {
+          fieldMap?.map((f, fieldIndex) => {
+            const {
+              type,
+              CustomField,
+              disabled,
+              fieldComponentProps,
+              fieldComponentProps: { readOnly },
+              isHidden,
+            } = f
+
+            const name = 'name' in f ? f.name : undefined
+
             return (
               <RenderField
-                Field={Field}
+                CustomField={CustomField}
                 disabled={disabled}
+                fieldComponentProps={fieldComponentProps}
+                isHidden={isHidden}
                 key={fieldIndex}
                 name={name}
                 path={path}
@@ -65,6 +78,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 readOnly={readOnly}
                 schemaPath={schemaPath}
                 siblingPermissions={permissions}
+                type={type}
               />
             )
           })}

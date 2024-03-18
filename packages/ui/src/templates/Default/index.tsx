@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { Props } from './types.js'
 
@@ -30,8 +30,9 @@ export const DefaultTemplate: React.FC<Props> = async ({
     } = {},
   } = config || {}
 
+  // #nav-toggler needs to be wrapped in a div, not Fragment. This fixes https://github.com/shadcn-ui/ui/issues/1355#issuecomment-1909192594
   return (
-    <Fragment>
+    <div>
       <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
         <NavToggler className={`${baseClass}__nav-toggler`}>
           <NavHamburger />
@@ -53,6 +54,6 @@ export const DefaultTemplate: React.FC<Props> = async ({
           {children}
         </div>
       </Wrapper>
-    </Fragment>
+    </div>
   )
 }

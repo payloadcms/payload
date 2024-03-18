@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../../elements/ListDrawer/types.js'
+import type { UploadFieldProps } from './types.js'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
@@ -14,12 +15,12 @@ import FileDetails from '../../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../../elements/ListDrawer/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import LabelComp from '../../Label/index.js'
-import { type FormFieldBase, fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
 const baseClass = 'upload'
 
-export type UploadInputProps = FormFieldBase & {
+export type UploadInputProps = Omit<UploadFieldProps, 'filterOptions'> & {
   api?: string
   collection?: SanitizedCollectionConfig
   filterOptions?: FilterOptionsResult

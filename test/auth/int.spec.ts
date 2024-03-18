@@ -2,11 +2,10 @@ import jwtDecode from 'jwt-decode'
 
 import type { User } from '../../packages/payload/src/auth/index.js'
 import type { Payload } from '../../packages/payload/src/index.js'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 
@@ -17,9 +16,7 @@ const { email, password } = devUser
 
 describe('Auth', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
   })
 
   afterAll(async () => {
@@ -52,13 +49,13 @@ describe('Auth', () => {
       token = data.loginUser.token
     })
 
-    it('should login', async () => {
+    it('should login', () => {
       expect(user.id).toBeDefined()
       expect(user.email).toEqual(devUser.email)
       expect(token).toBeDefined()
     })
 
-    it('should have fields saved to JWT', async () => {
+    it('should have fields saved to JWT', () => {
       const decoded = jwtDecode<User>(token)
       const { collection, email: jwtEmail, exp, iat, roles } = decoded
 
@@ -139,7 +136,7 @@ describe('Auth', () => {
         expect(data.user.email).toBeDefined()
       })
 
-      it('should have fields saved to JWT', async () => {
+      it('should have fields saved to JWT', () => {
         const decoded = jwtDecode<User>(token)
         const {
           collection,
@@ -334,7 +331,7 @@ describe('Auth', () => {
           data = await response.json()
         })
 
-        it('should create', async () => {
+        it('should create', () => {
           expect(data.doc.key).toStrictEqual(key)
           expect(data.doc.value.property).toStrictEqual(property)
         })

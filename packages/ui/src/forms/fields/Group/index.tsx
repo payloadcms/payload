@@ -1,7 +1,7 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import type { Props } from './types.js'
+import type { GroupFieldProps } from './types.js'
 
 import { useCollapsible } from '../../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
@@ -19,7 +19,7 @@ import { GroupProvider, useGroup } from './provider.js'
 
 const baseClass = 'group-field'
 
-const Group: React.FC<Props> = (props) => {
+const Group: React.FC<GroupFieldProps> = (props) => {
   const {
     Description,
     Label: LabelFromProps,

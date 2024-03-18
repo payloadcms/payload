@@ -96,7 +96,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               blockType={row.blockType}
               blocks={blocks}
               duplicateRow={duplicateRow}
-              fieldMap={block.subfields}
+              fieldMap={block.fieldMap}
               hasMaxRows={hasMaxRows}
               labels={labels}
               moveRow={moveRow}
@@ -135,7 +135,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         <HiddenInput name={`${path}.id`} value={row.id} />
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldMap={block.subfields}
+          fieldMap={block.fieldMap}
           forceRender={forceRender}
           margins="small"
           path={path}

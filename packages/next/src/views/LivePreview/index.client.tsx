@@ -1,7 +1,12 @@
 'use client'
-import type { FormProps } from '@payloadcms/ui'
+import type { FieldMap, FormProps } from '@payloadcms/ui'
 import type { LivePreviewConfig } from 'payload/config'
-import type { Data } from 'payload/types'
+import type {
+  ClientConfig,
+  Data,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from 'payload/types'
 
 import {
   DocumentControls,
@@ -29,7 +34,25 @@ import { usePopupWindow } from './usePopupWindow.js'
 
 const baseClass = 'live-preview'
 
-const PreviewView: React.FC = (props) => {
+type Props = {
+  apiRoute: string
+  collectionConfig?: SanitizedCollectionConfig
+  config: ClientConfig
+  fieldMap: FieldMap
+  globalConfig?: SanitizedGlobalConfig
+  schemaPath: string
+  serverURL: string
+}
+
+const PreviewView: React.FC<Props> = ({
+  apiRoute,
+  collectionConfig,
+  config,
+  fieldMap,
+  globalConfig,
+  schemaPath,
+  serverURL,
+}) => {
   const {
     id,
     AfterDocument,
@@ -49,29 +72,6 @@ const PreviewView: React.FC = (props) => {
     initialState,
     onSave: onSaveFromProps,
   } = useDocumentInfo()
-
-  const config = useConfig()
-
-  const {
-    collections,
-    globals,
-    routes: { api: apiRoute },
-    serverURL,
-  } = config
-
-  const { getFieldMap } = useComponentMap()
-
-  const collectionConfig =
-    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
-
-  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
-
-  const schemaPath = collectionSlug || globalSlug
-
-  const fieldMap = getFieldMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
 
   const operation = id ? 'update' : 'create'
 
@@ -167,7 +167,7 @@ const PreviewView: React.FC = (props) => {
             id={id}
             isEditing={Boolean(id)}
             permissions={docPermissions}
-            slug={collectionConfig?.slug}
+            slug={collectionConfig?.slug || globalConfig?.slug}
           />
           <div
             className={[baseClass, previewWindowType === 'popup' && `${baseClass}--detached`]
@@ -190,7 +190,7 @@ const PreviewView: React.FC = (props) => {
                 fieldMap={fieldMap}
                 forceSidebarWrap
                 readOnly={!hasSavePermission}
-                schemaPath={collectionSlug}
+                schemaPath={collectionSlug || globalSlug}
               />
               {AfterDocument}
             </div>
@@ -210,26 +210,58 @@ export const LivePreviewClient: React.FC<{
   const { breakpoints, url } = props
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
+  const config = useConfig()
+
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
     url,
   })
 
+  const {
+    collections,
+    globals,
+    routes: { api: apiRoute },
+    serverURL,
+  } = config
+
+  const collectionConfig =
+    collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
+
+  const globalConfig = globalSlug && globals.find((global) => global.slug === globalSlug)
+
+  const schemaPath = collectionSlug || globalSlug
+
   const { getComponentMap } = useComponentMap()
 
   const componentMap = getComponentMap({ collectionSlug, globalSlug })
+
+  const { getFieldMap } = useComponentMap()
+
+  const fieldMap = getFieldMap({
+    collectionSlug: collectionConfig?.slug,
+    globalSlug: globalConfig?.slug,
+  })
 
   return (
     <Fragment>
       <SetViewActions actions={componentMap?.actionsMap?.Edit?.LivePreview} />
       <LivePreviewProvider
         breakpoints={breakpoints}
+        fieldSchema={collectionConfig?.fields || globalConfig?.fields}
         isPopupOpen={isPopupOpen}
         openPopupWindow={openPopupWindow}
         popupRef={popupRef}
         url={url}
       >
-        <PreviewView />
+        <PreviewView
+          apiRoute={apiRoute}
+          collectionConfig={collectionConfig}
+          config={config}
+          fieldMap={fieldMap}
+          globalConfig={globalConfig}
+          schemaPath={schemaPath}
+          serverURL={serverURL}
+        />
       </LivePreviewProvider>
     </Fragment>
   )

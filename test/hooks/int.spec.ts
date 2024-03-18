@@ -1,11 +1,10 @@
 import type { Payload } from '../../packages/payload/src/index.js'
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { NestedAfterReadHook } from './payload-types.js'
 
 import { AuthenticationError } from '../../packages/payload/src/errors/index.js'
-import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser, regularUser } from '../credentials.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
@@ -26,9 +25,7 @@ let payload: Payload
 
 describe('Hooks', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
   })
 
   afterAll(async () => {
@@ -73,7 +70,7 @@ describe('Hooks', () => {
       })
     })
 
-    it('should execute hooks in correct order on create', async () => {
+    it('should execute hooks in correct order on create', () => {
       expect(doc.collectionAfterChange).toBeTruthy()
       expect(doc.collectionAfterRead).toBeTruthy()
       expect(doc.collectionBeforeChange).toBeTruthy()

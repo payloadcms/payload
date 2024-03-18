@@ -363,6 +363,7 @@ export default {
     publish: 'Veröffentlichen',
     publishChanges: 'Änderungen veröffentlichen',
     published: 'Veröffentlicht',
+    publishing: 'Veröffentlichung',
     restoreThisVersion: 'Diese Version wiederherstellen',
     restoredSuccessfully: 'Erfolgreich wiederhergestellt.',
     restoring: 'wiederherstellen...',

@@ -1,11 +1,11 @@
-import type { Permissions, User } from 'payload/auth'
+import type { ClientUser, Permissions } from 'payload/auth'
 
-export type AuthContext<T = User> = {
+export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<void>
   logOut: () => void
   permissions?: Permissions
   refreshCookie: (forceRefresh?: boolean) => void
-  refreshCookieAsync: () => Promise<User>
+  refreshCookieAsync: () => Promise<ClientUser>
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: Permissions) => void
   setUser: (user: T) => void

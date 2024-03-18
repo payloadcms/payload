@@ -2,7 +2,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { ArrayFieldProps } from './types.js'
 
 import Banner from '../../../elements/Banner/index.js'
 import { Button } from '../../../elements/Button/index.js'
@@ -24,7 +24,7 @@ import './index.scss'
 
 const baseClass = 'array-field'
 
-const ArrayFieldType: React.FC<Props> = (props) => {
+const ArrayFieldType: React.FC<ArrayFieldProps> = (props) => {
   const {
     name,
     Description,
@@ -37,6 +37,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     indexPath,
     label,
     localized,
+    maxRows,
+    minRows,
     path: pathFromProps,
     permissions,
     readOnly,
@@ -45,9 +47,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const minRows = 'minRows' in props ? props?.minRows : 0
-  const maxRows = 'maxRows' in props ? props?.maxRows : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -66,7 +65,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   })()
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
-  const getLabels = (p: Props) => {
+  const getLabels = (p: ArrayFieldProps) => {
     if ('labels' in p && p?.labels) return p.labels
     if ('label' in p && p?.label) return { plural: undefined, singular: p.label }
     return { plural: t('general:rows'), singular: t('general:row') }

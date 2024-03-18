@@ -261,6 +261,7 @@ export default {
     confirmVersionRestoration: 'Confirmați restaurarea versiunii',
     draft: 'Proiect',
     draftSavedSuccessfully: 'Proiect salvat cu succes.',
+    lastSavedAgo: 'Ultima salvare acum {{distance}}',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',
     noRowsFound: 'Nu s-a găsit niciun {{label}}',
     preview: 'Previzualizare',

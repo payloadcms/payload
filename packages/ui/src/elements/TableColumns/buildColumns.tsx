@@ -27,8 +27,8 @@ export const buildColumns = (args: {
     // sort the fields to the order of `defaultColumns` or `columnPreferences`
     // TODO: flatten top level field, i.e. `flattenTopLevelField()` from `payload` but that is typed for `Field`, not `fieldMap`
     sortedFieldMap = fieldMap.sort((a, b) => {
-      const aIndex = sortTo.findIndex((column) => column.accessor === a.name)
-      const bIndex = sortTo.findIndex((column) => column.accessor === b.name)
+      const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === a.name)
+      const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === b.name)
       if (aIndex === -1 && bIndex === -1) return 0
       if (aIndex === -1) return 1
       if (bIndex === -1) return -1
@@ -40,7 +40,7 @@ export const buildColumns = (args: {
 
   const sorted = sortedFieldMap.reduce((acc, field, index) => {
     const columnPreference = columnPreferences?.find(
-      (preference) => preference.accessor === field.name,
+      (preference) => 'name' in field && preference.accessor === field.name,
     )
 
     let active = false
@@ -48,7 +48,7 @@ export const buildColumns = (args: {
     if (columnPreference) {
       active = columnPreference.active
     } else if (defaultColumns && Array.isArray(defaultColumns) && defaultColumns.length > 0) {
-      active = defaultColumns.includes(field.name)
+      active = 'name' in field && defaultColumns.includes(field.name)
     } else if (activeColumnsIndices.length < 4) {
       active = true
     }
@@ -59,10 +59,12 @@ export const buildColumns = (args: {
 
     const isFirstActiveColumn = activeColumnsIndices[0] === index
 
+    const name = 'name' in field ? field.name : undefined
+
     if (field) {
       const column: Column = {
-        name: field.name,
-        accessor: field.name,
+        name,
+        accessor: name,
         active,
         cellProps: {
           ...cellProps?.[index],
@@ -72,7 +74,7 @@ export const buildColumns = (args: {
           Cell: field.Cell,
           Heading: field.Heading,
         },
-        label: field.label,
+        label: 'label' in field.fieldComponentProps ? field.fieldComponentProps.label : undefined,
       }
 
       acc.push(column)

@@ -2,7 +2,7 @@
 'use client'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { CodeFieldProps } from './types.js'
 
 import { CodeEditor } from '../../../elements/CodeEditor/index.js'
 import LabelComp from '../../Label/index.js'
@@ -18,7 +18,7 @@ const prismToMonacoLanguageMap = {
 
 const baseClass = 'code-field'
 
-const Code: React.FC<Props> = (props) => {
+const Code: React.FC<CodeFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -27,7 +27,9 @@ const Code: React.FC<Props> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
+    editorOptions = {},
     label,
+    language = 'javascript',
     path: pathFromProps,
     readOnly,
     required,
@@ -37,9 +39,6 @@ const Code: React.FC<Props> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
-  const language = 'language' in props ? props.language : 'javascript'
 
   const memoizedValidate = useCallback(
     (value, options) => {

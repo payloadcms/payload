@@ -361,6 +361,7 @@ export default {
     publish: 'Yayınla',
     publishChanges: 'Değişiklikleri yayınla',
     published: 'Yayınlandı',
+    publishing: 'Yayınlama',
     restoreThisVersion: 'Bu sürüme geri döndür',
     restoredSuccessfully: 'Geri getirme başarılı.',
     restoring: 'Geri döndürülüyor...',

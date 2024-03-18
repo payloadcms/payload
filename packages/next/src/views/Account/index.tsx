@@ -87,7 +87,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
       req,
     })
 
-    const serverSideProps: ServerSideEditViewProps = {
+    const viewComponentProps: ServerSideEditViewProps = {
       initPageResult,
       routeSegments: [],
       searchParams,
@@ -133,7 +133,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
               typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
             }
             DefaultComponent={EditView}
-            componentProps={serverSideProps}
+            componentProps={viewComponentProps}
           />
         </FormQueryParamsProvider>
       </DocumentInfoProvider>

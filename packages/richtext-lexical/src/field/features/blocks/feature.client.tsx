@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReducedBlock } from '@payloadcms/ui/types'
+import type { ReducedBlock } from '@payloadcms/ui'
 
 import { getTranslation } from '@payloadcms/translations'
 

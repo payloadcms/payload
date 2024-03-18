@@ -364,6 +364,7 @@ export default {
     publish: 'Közzététel',
     publishChanges: 'Módosítások közzététele',
     published: 'Közzétett',
+    publishing: 'Közzététel',
     restoreThisVersion: 'A verzió visszaállítása',
     restoredSuccessfully: 'Sikeresen visszaállítva.',
     restoring: 'Visszaállítás...',

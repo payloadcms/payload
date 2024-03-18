@@ -44,7 +44,7 @@ export const DocumentTabLink: React.FC<{
     <li className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}>
       <Link
         className={`${baseClass}__link`}
-        href={!isActive ? href : ''}
+        href={!isActive || href !== pathname ? href : ''}
         {...(newTab && { rel: 'noopener noreferrer', target: '_blank' })}
         tabIndex={isActive ? -1 : 0}
       >

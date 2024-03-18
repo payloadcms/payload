@@ -406,12 +406,6 @@ export type Config = {
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?: 'default' | 'gravatar' | React.ComponentType<any>
     /**
-     * Specify an absolute path for where to store the built Admin panel bundle used in production.
-     *
-     * @default "/build"
-     * */
-    buildPath?: string
-    /**
      * Add extra and/or replace built-in components with custom components
      *
      * @see https://payloadcms.com/docs/admin/components

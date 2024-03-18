@@ -4,7 +4,7 @@ import type { DocumentPreferences } from 'payload/types'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types.js'
+import type { CollapsibleFieldProps } from './types.js'
 
 import { Collapsible } from '../../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
@@ -21,12 +21,13 @@ import './index.scss'
 
 const baseClass = 'collapsible-field'
 
-const CollapsibleField: React.FC<Props> = (props) => {
+const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   const {
     Description,
     Label: LabelFromProps,
     className,
     fieldMap,
+    initCollapsed = false,
     label,
     path: pathFromProps,
     required,
@@ -38,7 +39,6 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const path = pathFromProps || pathFromContext
 
   const { i18n } = useTranslation()
-  const initCollapsed = 'initCollapsed' in props ? props.initCollapsed : false
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()

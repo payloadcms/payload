@@ -14,8 +14,7 @@ export const LocalizerLabel: React.FC<{
 }> = (props) => {
   const { ariaLabel, className } = props
   const locale = useLocale()
-  const { t } = useTranslation()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   return (
     <div

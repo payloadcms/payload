@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { closeNav, initPageConsoleErrorCatch, openNav } from '../helpers.js'
-import { initPayloadE2E } from '../helpers/configHelpers.js'
+import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import config from './config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

@@ -5,7 +5,7 @@ import { isNumber } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../../elements/ReactSelect/types.js'
-import type { Props } from './types.js'
+import type { NumberFieldProps } from './types.js'
 
 import ReactSelect from '../../../elements/ReactSelect/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -15,7 +15,7 @@ import { withCondition } from '../../withCondition/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
-const NumberField: React.FC<Props> = (props) => {
+const NumberField: React.FC<NumberFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -24,24 +24,23 @@ const NumberField: React.FC<Props> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
+    hasMany = false,
     label,
+    max = Infinity,
+    maxRows = Infinity,
+    min = -Infinity,
     onChange: onChangeFromProps,
     path: pathFromProps,
     placeholder,
     readOnly,
     required,
+    step = 1,
     style,
     validate,
     width,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const max = 'max' in props ? props.max : Infinity
-  const min = 'min' in props ? props.min : -Infinity
-  const step = 'step' in props ? props.step : 1
-  const hasMany = 'hasMany' in props ? props.hasMany : false
-  const maxRows = 'maxRows' in props ? props.maxRows : Infinity
 
   const { i18n, t } = useTranslation()
 

@@ -359,6 +359,7 @@ export default {
     publish: 'Публикувай',
     publishChanges: 'Публикувай промените',
     published: 'Публикувано',
+    publishing: 'Публикуване',
     restoreThisVersion: 'Възстанови тази версия',
     restoredSuccessfully: 'Успешно възстановяване.',
     restoring: 'Възстановяване...',

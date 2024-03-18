@@ -353,6 +353,7 @@ export default {
     publish: 'نشر',
     publishChanges: 'نشر التّغييرات',
     published: 'تمّ النّشر',
+    publishing: 'نشر',
     restoreThisVersion: 'استعادة هذه النّسخة',
     restoredSuccessfully: 'تمّت الاستعادة بنحاح.',
     restoring: 'تتمّ الاستعادة...',

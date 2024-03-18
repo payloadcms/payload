@@ -128,6 +128,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           id,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           fallbackLocale: null,
           locale: locale.code,
           overrideAccess: false,
@@ -177,6 +178,7 @@ export const Document: React.FC<AdminViewProps> = async ({
         data = await payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           fallbackLocale: null,
           locale: locale.code,
           overrideAccess: false,
@@ -212,7 +214,7 @@ export const Document: React.FC<AdminViewProps> = async ({
     req,
   })
 
-  const serverSideProps: ServerSideEditViewProps = {
+  const viewComponentProps: ServerSideEditViewProps = {
     initPageResult,
     routeSegments: segments,
     searchParams,
@@ -261,7 +263,7 @@ export const Document: React.FC<AdminViewProps> = async ({
           <RenderCustomComponent
             CustomComponent={ViewOverride || CustomView}
             DefaultComponent={DefaultView}
-            componentProps={serverSideProps}
+            componentProps={viewComponentProps}
           />
         </FormQueryParamsProvider>
       </EditDepthProvider>

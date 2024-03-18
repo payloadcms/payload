@@ -5,11 +5,7 @@ export type LanguageTranslations = {
 }
 
 export type Translations = {
-  [language: string]:
-    | {
-        $schema: string
-      }
-    | LanguageTranslations
+  [language: string]: LanguageTranslations
 }
 
 export type TFunction = (key: string, options?: Record<string, any>) => string

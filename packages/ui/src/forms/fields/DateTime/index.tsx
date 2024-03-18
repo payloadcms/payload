@@ -5,25 +5,27 @@ import type { ClientValidate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { DateFieldProps } from './types.js'
 
 import { DatePickerField } from '../../../elements/DatePicker/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import LabelComp from '../../Label/index.js'
 import { useField } from '../../useField/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
 
-const DateTime: React.FC<Props> = (props) => {
+const DateTime: React.FC<DateFieldProps> = (props) => {
   const {
     name,
     AfterInput,
     BeforeInput,
     Description,
     Error,
-    Label: LabelComp,
+    Label: LabelFromProps,
     className,
+    date: datePickerProps,
     label,
     path: pathFromProps,
     placeholder,
@@ -34,9 +36,7 @@ const DateTime: React.FC<Props> = (props) => {
     width,
   } = props
 
-  const Label = LabelComp || label
-
-  const datePickerProps = 'date' in props ? props.date : {}
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
 

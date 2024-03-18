@@ -5,7 +5,7 @@ import type { ClientValidate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { TextareaFieldProps } from './types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -16,7 +16,7 @@ import { isFieldRTL } from '../shared.js'
 import { TextareaInput } from './Input.js'
 import './index.scss'
 
-const Textarea: React.FC<Props> = (props) => {
+const Textarea: React.FC<TextareaFieldProps> = (props) => {
   const {
     name,
     AfterInput,
@@ -33,6 +33,7 @@ const Textarea: React.FC<Props> = (props) => {
     path: pathFromProps,
     placeholder,
     required,
+    rows,
     rtl,
     style,
     validate,
@@ -40,8 +41,6 @@ const Textarea: React.FC<Props> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const rows = 'rows' in props ? props.rows : undefined
 
   const { i18n } = useTranslation()
 

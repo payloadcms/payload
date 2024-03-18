@@ -85,15 +85,3 @@ export interface PayloadMigration {
   updatedAt: string
   createdAt: string
 }
-
-declare module 'payload' {
-  export interface GeneratedTypes {
-    collections: {
-      users: User
-      pages: Page
-      media: Media
-      'payload-preferences': PayloadPreference
-      'payload-migrations': PayloadMigration
-    }
-  }
-}

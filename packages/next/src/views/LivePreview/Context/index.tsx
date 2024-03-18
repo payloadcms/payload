@@ -1,7 +1,9 @@
 'use client'
 import type { LivePreviewConfig } from 'payload/config'
+import type { Field } from 'payload/types'
 
 import { DndContext } from '@dnd-kit/core'
+import { fieldSchemaToJSON } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { usePopupWindow } from '../usePopupWindow.js'
@@ -18,18 +20,26 @@ export type LivePreviewProviderProps = {
     height: number
     width: number
   }
+  fieldSchema: Field[]
   isPopupOpen?: boolean
   openPopupWindow?: ReturnType<typeof usePopupWindow>['openPopupWindow']
   popupRef?: React.MutableRefObject<Window>
   url?: string
 }
 
-export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) => {
-  const { breakpoints, children, isPopupOpen, openPopupWindow, popupRef, url } = props
-
+export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
+  breakpoints,
+  children,
+  fieldSchema,
+  isPopupOpen,
+  openPopupWindow,
+  popupRef,
+  url,
+}) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
 
   const [appIsReady, setAppIsReady] = useState(false)
+  const [listeningForMessages, setListeningForMessages] = useState(false)
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
@@ -49,21 +59,9 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
 
-  // const [fieldSchemaJSON] = useState(() => {
-  //   let fields: Field[]
-
-  //   if ('collection' in props) {
-  //     const { collection } = props
-  //     fields = collection.fields
-  //   }
-
-  //   if ('global' in props) {
-  //     const { global } = props
-  //     fields = global.fields
-  //   }
-
-  //   return fieldSchemaToJSON(fields)
-  // })
+  const [fieldSchemaJSON] = useState(() => {
+    return fieldSchemaToJSON(fieldSchema)
+  })
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
@@ -138,10 +136,12 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
 
     window.addEventListener('message', handleMessage)
 
+    setListeningForMessages(true)
+
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [url])
+  }, [url, listeningForMessages])
 
   const handleWindowChange = useCallback(
     (type: 'iframe' | 'popup') => {
@@ -155,10 +155,12 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
   // when the user closes the popup window, switch back to the iframe
   // the `usePopupWindow` reports the `isPopupOpen` state for us to use here
   useEffect(() => {
-    if (!isPopupOpen) {
+    const newPreviewWindowType = isPopupOpen ? 'popup' : 'iframe'
+
+    if (newPreviewWindowType !== previewWindowType) {
       handleWindowChange('iframe')
     }
-  }, [isPopupOpen, handleWindowChange])
+  }, [previewWindowType, isPopupOpen, handleWindowChange])
 
   return (
     <LivePreviewContext.Provider
@@ -166,7 +168,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
         appIsReady,
         breakpoint,
         breakpoints,
-        fieldSchemaJSON: [],
+        fieldSchemaJSON,
         iframeHasLoaded,
         iframeRef,
         isPopupOpen,
@@ -191,7 +193,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
       }}
     >
       <DndContext collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>
-        {children}
+        {listeningForMessages && children}
       </DndContext>
     </LivePreviewContext.Provider>
   )

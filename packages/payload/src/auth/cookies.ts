@@ -61,7 +61,7 @@ type GetCookieExpirationArgs = {
   */
   seconds: number
 }
-const getCookieExpiration = ({ seconds = 7200 }: GetCookieExpirationArgs) => {
+export const getCookieExpiration = ({ seconds = 7200 }: GetCookieExpirationArgs) => {
   const currentTime = new Date()
   currentTime.setSeconds(currentTime.getSeconds() + seconds)
   return currentTime

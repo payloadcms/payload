@@ -2,13 +2,13 @@ import jwt from 'jsonwebtoken'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
-import type { User } from '../types.js'
+import type { ClientUser, User } from '../types.js'
 
-export type Result = {
+export type MeOperationResult = {
   collection?: string
   exp?: number
   token?: string
-  user?: User
+  user?: ClientUser
 }
 
 export type Arguments = {
@@ -21,8 +21,8 @@ export const meOperation = async ({
   collection,
   currentToken,
   req,
-}: Arguments): Promise<Result> => {
-  let result: Result = {
+}: Arguments): Promise<MeOperationResult> => {
+  let result: MeOperationResult = {
     user: null,
   }
 

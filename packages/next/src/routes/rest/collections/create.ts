@@ -1,3 +1,4 @@
+import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
 import { createOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
@@ -23,7 +24,7 @@ export const create: CollectionRouteHandler = async ({ collection, req }) => {
     {
       doc,
       message: req.t('general:successfullyCreated', {
-        label: collection.config.labels.singular,
+        label: getTranslation(collection.config.labels.singular, req.i18n),
       }),
     },
     {

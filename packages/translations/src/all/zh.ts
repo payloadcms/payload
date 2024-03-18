@@ -345,6 +345,7 @@ export default {
     publish: '发布',
     publishChanges: '发布修改',
     published: '已发布',
+    publishing: '发布',
     restoreThisVersion: '恢复此版本',
     restoredSuccessfully: '恢复成功。',
     restoring: '恢复中...',

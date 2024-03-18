@@ -43,10 +43,10 @@ export const BlocksFeature: FeatureProviderProviderServer<
   for (const block of props.blocks) {
     clientProps.reducedBlocks.push({
       slug: block.slug,
+      fieldMap: [],
       imageAltText: block.imageAltText,
       imageURL: block.imageURL,
       labels: block.labels,
-      subfields: [],
     })
   }
 

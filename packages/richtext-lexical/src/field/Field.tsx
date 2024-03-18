@@ -17,6 +17,7 @@ export const RichText: React.FC<
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
+    width?: string
   }
 > = (props) => {
   const {

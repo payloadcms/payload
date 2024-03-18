@@ -1,21 +1,49 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": true,
-    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "rootDir": "../" /* Specify the root folder within your source files. */
+    "rootDir": "..", /* Specify the root folder within your source files. */
+    "declaration": true,
+    "declarationMap": true,
+    "target": "esnext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": false,
+    "types": [
+      "jest",
+      "node",
+      "@types/jest"
+    ],
+    "incremental": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+
+    }
   },
-  "exclude": ["dist", "build", "node_modules", ".eslintrc.js"],
+  "exclude": ["dist", "build", "node_modules", ".eslintrc.js", "dist/**/*.js", "**/dist/**/*.js"],
   "include": [
     "./**/*.ts",
-    "./**/*.tsx",
     "../packages/**/src/**/*.ts",
     "../packages/**/src/**/*.tsx"
   ],
-  "plugins": [
-    {
-      "name": "next"
-    }
-  ]
+  "references": [],
 }
+

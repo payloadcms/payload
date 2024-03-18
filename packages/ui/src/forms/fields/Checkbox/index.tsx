@@ -3,7 +3,7 @@ import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { CheckboxFieldProps } from './types.js'
 
 import { generateFieldID } from '../../../utilities/generateFieldID.js'
 import { useForm } from '../../Form/context.js'
@@ -16,7 +16,7 @@ import './index.scss'
 
 const baseClass = 'checkbox'
 
-const Checkbox: React.FC<Props> = (props) => {
+const Checkbox: React.FC<CheckboxFieldProps> = (props) => {
   const {
     id,
     name,

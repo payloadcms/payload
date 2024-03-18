@@ -360,6 +360,7 @@ export default {
     publish: 'Publisere',
     publishChanges: 'Publiser endringer',
     published: 'Publisert',
+    publishing: 'Publisering',
     restoreThisVersion: 'Gjenopprett denne versjonen',
     restoredSuccessfully: 'Gjenopprettet.',
     restoring: 'Gjenoppretter...',

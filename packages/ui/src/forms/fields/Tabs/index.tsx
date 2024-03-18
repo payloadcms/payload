@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types.js'
+import type { TabsFieldProps } from './types.js'
 
 import { useCollapsible } from '../../../elements/Collapsible/provider.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
@@ -21,7 +21,7 @@ import { TabsProvider } from './provider.js'
 
 const baseClass = 'tabs-field'
 
-const TabsField: React.FC<Props> = (props) => {
+const TabsField: React.FC<TabsFieldProps> = (props) => {
   const {
     name,
     Description,
@@ -130,7 +130,7 @@ const TabsField: React.FC<Props> = (props) => {
               >
                 {Description}
                 <RenderFields
-                  fieldMap={activeTabConfig.subfields}
+                  fieldMap={activeTabConfig.fieldMap}
                   forceRender={forceRender}
                   key={
                     activeTabConfig.label

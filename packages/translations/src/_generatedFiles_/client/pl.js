@@ -261,6 +261,7 @@ export default {
     confirmVersionRestoration: 'Potwierdź przywrócenie wersji',
     draft: 'Szkic',
     draftSavedSuccessfully: 'Wersja robocza została pomyślnie zapisana.',
+    lastSavedAgo: 'Ostatnio zapisane {{distance}} temu',
     noFurtherVersionsFound: 'Nie znaleziono dalszych wersji',
     noRowsFound: 'Nie znaleziono {{label}}',
     preview: 'Podgląd',

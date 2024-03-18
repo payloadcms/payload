@@ -8,18 +8,22 @@ import {
   FormLoadingOverlayToggle,
   OperationProvider,
   getFormState,
+  useAuth,
   useComponentMap,
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
+  useFormQueryParams,
 } from '@payloadcms/ui'
 import { Upload } from '@payloadcms/ui/elements'
+import { useRouter } from 'next/navigation.js'
+import { useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 // import { getTranslation } from '@payloadcms/translations'
-import Auth from './Auth/index.js'
+import { Auth } from './Auth/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import { SetStepNav } from './SetStepNav/index.js'
 import './index.scss'
@@ -42,26 +46,34 @@ export const DefaultEditView: React.FC = () => {
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
+    getDocPermissions,
     getDocPreferences,
+    getVersions,
     globalSlug,
     hasSavePermission,
     initialData: data,
     initialState,
-    onSave: onSaveFromContext,
+    isEditing,
   } = useDocumentInfo()
 
+  const { refreshCookieAsync, user } = useAuth()
   const config = useConfig()
+  const router = useRouter()
+  const { dispatchFormQueryParams } = useFormQueryParams()
+  const { getComponentMap, getFieldMap } = useComponentMap()
+  const params = useSearchParams()
+  const depth = useEditDepth()
+  const { reportUpdate } = useDocumentEvents()
 
   const {
+    admin: { user: userSlug },
     collections,
     globals,
-    routes: { api: apiRoute },
+    routes: { admin: adminRoute, api: apiRoute },
     serverURL,
   } = config
 
-  const { getComponentMap, getFieldMap } = useComponentMap()
-
-  const depth = useEditDepth()
+  const locale = params.get('locale')
 
   const componentMap = getComponentMap({ collectionSlug, globalSlug })
 
@@ -76,8 +88,6 @@ export const DefaultEditView: React.FC = () => {
     collectionSlug: collectionConfig?.slug,
     globalSlug: globalConfig?.slug,
   })
-
-  const { reportUpdate } = useDocumentEvents()
 
   const operation = id ? 'update' : 'create'
 
@@ -99,23 +109,42 @@ export const DefaultEditView: React.FC = () => {
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
 
-      // if (auth && id === user.id) {
-      //   await refreshCookieAsync()
-      // }
+      // If we're editing the doc of the logged-in user,
+      // Refresh the cookie to get new permissions
+      if (user && collectionSlug === userSlug && id === user.id) {
+        void refreshCookieAsync()
+      }
 
-      if (typeof onSaveFromContext === 'function') {
-        void onSaveFromContext({
-          ...json,
-          operation: id ? 'update' : 'create',
+      void getVersions()
+      void getDocPermissions()
+
+      if (!isEditing) {
+        // Redirect to the same locale if it's been set
+        const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
+        router.push(redirectRoute)
+      } else {
+        dispatchFormQueryParams({
+          type: 'SET',
+          params: {
+            uploadEdits: null,
+          },
         })
       }
     },
     [
-      id,
-      onSaveFromContext,
-      // refreshCookieAsync,
       reportUpdate,
+      id,
       entitySlug,
+      collectionSlug,
+      user,
+      getVersions,
+      getDocPermissions,
+      isEditing,
+      refreshCookieAsync,
+      adminRoute,
+      locale,
+      router,
+      dispatchFormQueryParams,
     ],
   )
 
@@ -188,7 +217,7 @@ export const DefaultEditView: React.FC = () => {
             id={id}
             isEditing={Boolean(id)}
             permissions={docPermissions}
-            slug={collectionConfig?.slug}
+            slug={collectionConfig?.slug || globalConfig?.slug}
           />
           <DocumentFields
             AfterFields={AfterFields}

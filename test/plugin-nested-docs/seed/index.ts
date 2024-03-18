@@ -1,9 +1,7 @@
 import type { Payload } from '../../../packages/payload/src/index.js'
-import type { PayloadRequest } from '../../../packages/payload/src/types/index.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
-  const req = {} as PayloadRequest
 
   try {
     await payload.create({
@@ -12,7 +10,6 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         email: 'demo@payloadcms.com',
         password: 'demo',
       },
-      req,
     })
 
     const { id: parentID } = await payload.create({
@@ -22,7 +19,6 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Parent page',
         _status: 'published',
       },
-      req,
     })
 
     const { id: childID } = await payload.create({
@@ -33,7 +29,6 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Child page',
         _status: 'published',
       },
-      req,
     })
 
     await payload.create({
@@ -44,7 +39,6 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Grandchild page',
         _status: 'published',
       },
-      req,
     })
 
     await payload.create({
@@ -54,7 +48,6 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Sister page',
         _status: 'published',
       },
-      req,
     })
     return true
   } catch (err) {

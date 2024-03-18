@@ -3,7 +3,7 @@ import type { FormField } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+import type { ConfirmPasswordFieldProps } from './types.js'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import Error from '../../Error/index.js'
@@ -13,7 +13,7 @@ import { useField } from '../../useField/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'
 
-const ConfirmPassword: React.FC<Props> = (props) => {
+const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
   const { disabled } = props
 
   const password = useFormFields<FormField>(([fields]) => fields.password)

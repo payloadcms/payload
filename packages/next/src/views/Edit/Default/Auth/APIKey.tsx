@@ -6,6 +6,7 @@ import {
   GenerateConfirmation,
   Label,
   fieldBaseClass,
+  useConfig,
   useField,
   useFormFields,
   useTranslation,
@@ -17,10 +18,11 @@ import { v4 as uuidv4 } from 'uuid'
 const path = 'apiKey'
 const baseClass = 'api-key'
 
-const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
+export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
   const [initialAPIKey, setInitialAPIKey] = useState(null)
   const [highlightedField, setHighlightedField] = useState(false)
   const { t } = useTranslation()
+  const config = useConfig()
 
   const apiKey = useFormFields(([fields]) => fields[path])
 
@@ -31,7 +33,12 @@ const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
       data: {},
       maxLength: 48,
       minLength: 24,
-      req: { t } as PayloadRequest,
+      req: {
+        payload: {
+          config,
+        },
+        t,
+      } as PayloadRequest,
       siblingData: {},
     })
 
@@ -100,5 +107,3 @@ const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
     </React.Fragment>
   )
 }
-
-export default APIKey
