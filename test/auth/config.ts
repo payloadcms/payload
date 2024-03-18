@@ -17,6 +17,9 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
+      admin: {
+        useAsTitle: 'custom',
+      },
       slug,
       auth: {
         cookies: {
@@ -197,6 +200,16 @@ export default buildConfigWithDefaults({
         verify: true,
       },
       fields: [],
+    },
+    {
+      slug: 'relationsCollection',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: 'users',
+        },
+      ],
     },
   ],
   onInit: async (payload) => {

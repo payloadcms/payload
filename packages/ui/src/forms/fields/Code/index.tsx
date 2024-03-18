@@ -27,7 +27,9 @@ const Code: React.FC<CodeFieldProps> = (props) => {
     Error,
     Label: LabelFromProps,
     className,
+    editorOptions = {},
     label,
+    language = 'javascript',
     path: pathFromProps,
     readOnly,
     required,
@@ -37,9 +39,6 @@ const Code: React.FC<CodeFieldProps> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
-  const language = 'language' in props ? props.language : 'javascript'
 
   const memoizedValidate = useCallback(
     (value, options) => {

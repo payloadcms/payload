@@ -17,6 +17,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm run dev live-preview -- --no-turbo",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Live Preview",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run dev plugin-cloud-storage",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev - plugin-cloud-storage",

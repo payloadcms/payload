@@ -7,7 +7,7 @@ import type {
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/types.js'
-import type { Auth, IncomingAuthType, User } from '../../auth/types.js'
+import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
   EditConfig,
@@ -270,7 +270,7 @@ export type CollectionAdminOptions = {
   /**
    * Exclude the collection from the admin nav and routes
    */
-  hidden?: ((args: { user: User }) => boolean) | boolean
+  hidden?: ((args: { user: ClientUser }) => boolean) | boolean
   /**
    * Hide the API URL within the Edit view
    */

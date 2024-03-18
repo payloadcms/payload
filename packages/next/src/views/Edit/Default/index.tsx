@@ -66,6 +66,7 @@ export const DefaultEditView: React.FC = () => {
   const { reportUpdate } = useDocumentEvents()
 
   const {
+    admin: { user: userSlug },
     collections,
     globals,
     routes: { admin: adminRoute, api: apiRoute },
@@ -108,9 +109,9 @@ export const DefaultEditView: React.FC = () => {
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
 
-      // If we're editing the doc of the logged in user,
+      // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
-      if (user && collectionSlug === user?.collection && id === user?.id) {
+      if (user && collectionSlug === userSlug && id === user.id) {
         void refreshCookieAsync()
       }
 
@@ -135,8 +136,7 @@ export const DefaultEditView: React.FC = () => {
       id,
       entitySlug,
       collectionSlug,
-      user?.collection,
-      user?.id,
+      user,
       getVersions,
       getDocPermissions,
       isEditing,

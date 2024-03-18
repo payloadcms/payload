@@ -27,6 +27,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     Label: LabelFromProps,
     className,
     fieldMap,
+    initCollapsed = false,
     label,
     path: pathFromProps,
     required,
@@ -38,7 +39,6 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   const path = pathFromProps || pathFromContext
 
   const { i18n } = useTranslation()
-  const initCollapsed = 'initCollapsed' in props ? props.initCollapsed : false
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()

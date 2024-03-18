@@ -34,7 +34,7 @@ type Props = {
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
   lang: string
   languageOptions: LanguageOptions
-  switchLanguageServerAction?: (lang: string) => Promise<void>
+  switchLanguageServerAction: (lang: string) => Promise<void>
   translations: LanguageTranslations
 }
 

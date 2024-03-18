@@ -33,6 +33,7 @@ const Textarea: React.FC<TextareaFieldProps> = (props) => {
     path: pathFromProps,
     placeholder,
     required,
+    rows,
     rtl,
     style,
     validate,
@@ -40,8 +41,6 @@ const Textarea: React.FC<TextareaFieldProps> = (props) => {
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const rows = 'rows' in props ? props.rows : undefined
 
   const { i18n } = useTranslation()
 
