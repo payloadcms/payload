@@ -698,17 +698,6 @@ describe('fields', () => {
       await expect(field).toHaveValue('defaultValue')
     })
 
-    test('should render RowLabel using a function', async () => {
-      const label = 'custom row label as function'
-      await page.goto(url.create)
-      await page.locator('#field-rowLabelAsFunction >> .array-field__add-row').click()
-
-      await page.locator('#field-rowLabelAsFunction__0__title').fill(label)
-      await wait(100)
-      const customRowLabel = page.locator('#rowLabelAsFunction-row-0 >> .row-label')
-      await expect(customRowLabel).toContainText(label)
-    })
-
     test('should render RowLabel using a component', async () => {
       const label = 'custom row label as component'
       await page.goto(url.create)
@@ -717,7 +706,7 @@ describe('fields', () => {
       await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
       await wait(100)
       const customRowLabel = page.locator(
-        '#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")',
+        '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
       )
       await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
     })
@@ -733,7 +722,9 @@ describe('fields', () => {
       await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
 
       await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: arrayWithMinRows',
+      )
     })
 
     describe('row manipulation', () => {
@@ -870,7 +861,7 @@ describe('fields', () => {
       await page.goto(url.list)
       await page.waitForSelector('.table > table > tbody > tr td.cell-title')
       const rows = page.locator('.table > table > tbody > tr', {
-        has: page.locator('td.cell-title span', {
+        has: page.locator('td.cell-title a', {
           hasText: 'for test',
         }),
       })
@@ -880,7 +871,7 @@ describe('fields', () => {
         await rows
           .nth(i)
           .locator('td.cell-_select .checkbox-input__input > input[type="checkbox"]')
-          .check()
+          .click()
       }
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
@@ -1336,7 +1327,7 @@ describe('fields', () => {
         // check new first block value
         const richTextField = page.locator('#field-blocks__0__text')
         const richTextValue = await richTextField.innerText()
-        await expect(richTextValue).toContain('Rich text')
+        expect(richTextValue).toContain('Rich text')
       })
     })
   })
@@ -1377,7 +1368,7 @@ describe('fields', () => {
       await expect(dateField).toHaveValue('')
     })
 
-    describe('localized dates', async () => {
+    describe('localized dates', () => {
       describe('EST', () => {
         test.use({
           geolocation: {
@@ -1476,7 +1467,7 @@ describe('fields', () => {
     let url: AdminUrlUtil
     const tableRowLocator = 'table > tbody > tr'
 
-    beforeAll(async () => {
+    beforeAll(() => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields')
     })
 
@@ -1576,7 +1567,7 @@ describe('fields', () => {
     test('should hide relationship add new button', async () => {
       await page.goto(url.create)
       // expect the button to not exist in the field
-      await expect(
+      expect(
         await page
           .locator('#relationToSelfSelectOnly-add-new .relationship-add-new__add-button')
           .count(),

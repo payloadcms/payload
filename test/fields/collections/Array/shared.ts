@@ -1,7 +1,19 @@
 import type { ArrayField } from '../../payload-types.js'
 
 export const arrayDoc: Partial<ArrayField> = {
-  title: 'array doc 1',
+  arrayWithMinRows: [
+    {
+      text: 'first row',
+    },
+    {
+      text: 'second row',
+    },
+  ],
+  collapsedArray: [
+    {
+      text: 'initialize collapsed',
+    },
+  ],
   items: [
     {
       text: 'first row',
@@ -22,11 +34,10 @@ export const arrayDoc: Partial<ArrayField> = {
       text: 'sixth row',
     },
   ],
-  collapsedArray: [
-    {
-      text: 'initialize collapsed',
-    },
-  ],
+  title: 'array doc 1',
+}
+
+export const anotherArrayDoc: Partial<ArrayField> = {
   arrayWithMinRows: [
     {
       text: 'first row',
@@ -35,10 +46,11 @@ export const arrayDoc: Partial<ArrayField> = {
       text: 'second row',
     },
   ],
-}
-
-export const anotherArrayDoc: Partial<ArrayField> = {
-  title: 'array doc 2',
+  collapsedArray: [
+    {
+      text: 'initialize collapsed',
+    },
+  ],
   items: [
     {
       text: 'first row',
@@ -50,17 +62,5 @@ export const anotherArrayDoc: Partial<ArrayField> = {
       text: 'third row',
     },
   ],
-  collapsedArray: [
-    {
-      text: 'initialize collapsed',
-    },
-  ],
-  arrayWithMinRows: [
-    {
-      text: 'first row',
-    },
-    {
-      text: 'second row',
-    },
-  ],
+  title: 'array doc 2',
 }

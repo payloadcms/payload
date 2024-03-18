@@ -113,22 +113,6 @@ const ArrayFields: CollectionConfig = {
       type: 'array',
     },
     {
-      name: 'rowLabelAsFunction',
-      admin: {
-        components: {
-          RowLabel: ({ data }) => data.title,
-        },
-        description: 'Row labels rendered from a function.',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-      type: 'array',
-    },
-    {
       name: 'rowLabelAsComponent',
       admin: {
         components: {

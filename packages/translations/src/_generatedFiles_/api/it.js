@@ -44,6 +44,8 @@ export default {
     deletedSuccessfully: 'Eliminato con successo.',
     email: 'Email',
     notFound: 'Non Trovato',
+    row: 'Riga',
+    rows: 'Righe',
     successfullyCreated: '{{label}} creato con successo.',
     thisLanguage: 'Italiano',
     updatedAt: 'Aggiornato il',
@@ -72,6 +74,7 @@ export default {
       'Questo valore deve essere più lungo della lunghezza minima di {{minLength}} caratteri.',
     notValidDate: '"{{value}}" non è una data valida.',
     required: 'Questo campo è obbligatorio.',
+    requiresAtLeast: 'Questo campo richiede almeno {{count}} {{label}}.',
     requiresNoMoreThan: 'Questo campo richiede non più di {{count}} {{label}}.',
     requiresTwoNumbers: 'Questo campo richiede due numeri.',
     shorterThanMax:

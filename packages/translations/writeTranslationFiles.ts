@@ -1,10 +1,12 @@
+/* eslint-disable no-console */
+import { exec } from 'child_process'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
-import { ensureDirectoryExists } from './src/utilities/ensureDirExists.js'
-import { copyFile } from './src/utilities/copyFile.js'
+
 import { translations } from './src/all/index.js'
-import { exec } from 'child_process'
+import { copyFile } from './src/utilities/copyFile.js'
+import { ensureDirectoryExists } from './src/utilities/ensureDirExists.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -43,6 +45,8 @@ const serverTranslationKeys = [
   'general:updatedSuccessfully',
   'general:updatedCountSuccessfully',
   'general:value',
+  'general:row',
+  'general:rows',
 
   'error:deletingFile',
   'error:emailOrPasswordIncorrect',
@@ -72,6 +76,7 @@ const serverTranslationKeys = [
   'validation:longerThanMin',
   'validation:notValidDate',
   'validation:required',
+  'validation:requiresAtLeast',
   'validation:requiresNoMoreThan',
   'validation:requiresTwoNumbers',
   'validation:shorterThanMax',
@@ -412,48 +417,54 @@ function sortObject(obj) {
   return sortedObject
 }
 
-async function build() {
-  ensureDirectoryExists(path.resolve(dirname, `${DESTINATION_ROOT}/client`))
-  ensureDirectoryExists(path.resolve(dirname, `${DESTINATION_ROOT}/api`))
+function build() {
+  return new Promise((resolve, reject) => {
+    ensureDirectoryExists(path.resolve(dirname, `${DESTINATION_ROOT}/client`))
+    ensureDirectoryExists(path.resolve(dirname, `${DESTINATION_ROOT}/api`))
 
-  // build up the client and server translation files
-  for (const [locale, values] of Object.entries(translations)) {
-    const dest1 = path.resolve(dirname, `${DESTINATION_ROOT}/client/${locale}.js`)
+    try {
+      // build up the client and server translation files
+      for (const [locale, values] of Object.entries(translations)) {
+        const dest1 = path.resolve(dirname, `${DESTINATION_ROOT}/client/${locale}.js`)
 
-    const clientTranslations = sortObject(filterKeys(values, '', clientTranslationKeys))
+        const clientTranslations = sortObject(filterKeys(values, '', clientTranslationKeys))
 
-    fs.writeFileSync(dest1, 'export default ' + JSON.stringify(clientTranslations, null, 2), {
-      flag: 'w+',
-    })
+        fs.writeFileSync(dest1, 'export default ' + JSON.stringify(clientTranslations, null, 2), {
+          flag: 'w+',
+        })
 
-    const serverTranslations = sortObject(filterKeys(values, '', serverTranslationKeys))
-    const dest2 = path.resolve(dirname, `${DESTINATION_ROOT}/api/${locale}.js`)
+        const serverTranslations = sortObject(filterKeys(values, '', serverTranslationKeys))
+        const dest2 = path.resolve(dirname, `${DESTINATION_ROOT}/api/${locale}.js`)
 
-    fs.writeFileSync(dest2, 'export default ' + JSON.stringify(serverTranslations, null, 2), {
-      flag: 'w+',
-    })
+        fs.writeFileSync(dest2, 'export default ' + JSON.stringify(serverTranslations, null, 2), {
+          flag: 'w+',
+        })
 
-    console.info('Rebuilt:', filename)
-  }
+        console.info('Rebuilt:', filename)
+      }
 
-  // copy barrel file to both client and api folders
-  copyFile(
-    path.resolve(dirname, `${SOURCE_DIR}/index.ts`),
-    path.resolve(dirname, `${DESTINATION_ROOT}/api/index.ts`),
-  )
-  copyFile(
-    path.resolve(dirname, `${SOURCE_DIR}/index.ts`),
-    path.resolve(dirname, `${DESTINATION_ROOT}/client/index.ts`),
-  )
+      // Copy barrel file to both client and api folders
+      copyFile(
+        path.resolve(dirname, `${SOURCE_DIR}/index.ts`),
+        path.resolve(dirname, `${DESTINATION_ROOT}/api/index.ts`),
+      )
+      copyFile(
+        path.resolve(dirname, `${SOURCE_DIR}/index.ts`),
+        path.resolve(dirname, `${DESTINATION_ROOT}/client/index.ts`),
+      )
 
-  // Run prettier from CLI so that files pass the pre-commit hook:
-  console.info('Running prettier...')
-  exec('prettier --write "**/*.js"', (err, stdout, stderr) => {
-    if (err) {
-      console.error(err)
-      return
+      // Run prettier from CLI so that files pass the pre-commit hook:
+      console.info('Running prettier...')
+      exec('prettier --write "**/*.js"', (err, stdout) => {
+        if (err) {
+          console.error(err)
+        } else {
+          console.info(stdout)
+        }
+      })
+    } catch (error) {
+      reject(error)
     }
-    console.info(stdout)
   })
 }
 

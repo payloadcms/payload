@@ -44,6 +44,8 @@ export default {
     deletedSuccessfully: 'Изтрито успешно.',
     email: 'Имейл',
     notFound: 'Няма открит',
+    row: 'ред',
+    rows: 'Редове',
     successfullyCreated: '{{label}} успешно създаден.',
     thisLanguage: 'Български',
     updatedAt: 'Обновен на',
@@ -72,6 +74,7 @@ export default {
       'Тази стойност трябва да е по-голяма от минималната стойност от {{minLength}} символа.',
     notValidDate: '"{{value}}" не е валидна дата.',
     required: 'Това поле е задължително.',
+    requiresAtLeast: 'Това поле изисква поне {{count}} {{label}}.',
     requiresNoMoreThan: 'Това поле изисква не повече от {{count}} {{label}}.',
     requiresTwoNumbers: 'Това поле изисква 2 числа.',
     shorterThanMax:

@@ -45,6 +45,8 @@ export default {
     deletedSuccessfully: 'Supprimé(e) avec succès.',
     email: 'E-mail',
     notFound: 'Pas trouvé',
+    row: 'Ligne',
+    rows: 'Lignes',
     successfullyCreated: '{{label}} créé(e) avec succès.',
     thisLanguage: 'Français',
     updatedAt: 'Modifié le',
@@ -73,6 +75,7 @@ export default {
       'Cette valeur doit être supérieure à la longueur minimale de {{minLength}} caractères.',
     notValidDate: '"{{value}}" n\'est pas une date valide.',
     required: 'Ce champ est requis.',
+    requiresAtLeast: 'Ce champ doit avoir au moins {{count}} {{label}}.',
     requiresNoMoreThan: 'Ce champ ne doit pas avoir plus de {{count}} {{label}}.',
     requiresTwoNumbers: 'Ce champ doit avoir deux chiffres.',
     shorterThanMax:

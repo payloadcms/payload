@@ -219,6 +219,7 @@ export const mapFields = (args: {
           max: 'max' in field ? field.max : undefined,
           maxRows: 'maxRows' in field ? field.maxRows : undefined,
           min: 'min' in field ? field.min : undefined,
+          minRows: 'minRows' in field ? field.minRows : undefined,
           options: 'options' in field ? field.options : undefined,
           placeholder:
             'admin' in field && 'placeholder' in field.admin
