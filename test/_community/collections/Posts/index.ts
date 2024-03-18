@@ -14,6 +14,10 @@ export const PostsCollection: CollectionConfig = {
       name: 'text',
       type: 'text',
     },
+    {
+      type: 'row',
+      fields: [],
+    },
     // {
     //   name: 'richText',
     //   type: 'richText',
