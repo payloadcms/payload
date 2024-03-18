@@ -48,7 +48,9 @@ export const buildColumns = (args: {
     if (columnPreference) {
       active = columnPreference.active
     } else if (defaultColumns && Array.isArray(defaultColumns) && defaultColumns.length > 0) {
-      active = 'name' in field && defaultColumns.includes(field.name)
+      active =
+        'name' in field?.fieldComponentProps &&
+        defaultColumns.includes(field.fieldComponentProps.name)
     } else if (activeColumnsIndices.length < 4) {
       active = true
     }
@@ -59,10 +61,12 @@ export const buildColumns = (args: {
 
     const isFirstActiveColumn = activeColumnsIndices[0] === index
 
+    const name = 'name' in field?.fieldComponentProps ? field.fieldComponentProps.name : undefined
+
     if (field) {
       const column: Column = {
-        name: 'name' in field ? field.name : undefined,
-        accessor: 'name' in field ? field.name : undefined,
+        name,
+        accessor: name,
         active,
         cellProps: {
           ...cellProps?.[index],
@@ -72,7 +76,7 @@ export const buildColumns = (args: {
           Cell: field.Cell,
           Heading: field.Heading,
         },
-        label: 'label' in field ? field.label : undefined,
+        label: 'label' in field?.fieldComponentProps ? field.fieldComponentProps.label : undefined,
       }
 
       acc.push(column)

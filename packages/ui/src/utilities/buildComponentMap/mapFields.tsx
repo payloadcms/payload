@@ -37,8 +37,8 @@ import { SortColumn } from '../../elements/SortColumn/index.js'
 import DefaultError from '../../forms/Error/index.js'
 import DefaultDescription from '../../forms/FieldDescription/index.js'
 import DefaultLabel from '../../forms/Label/index.js'
-import HiddenInput from '../../forms/fields/HiddenInput/index.js'
-import { fieldTypes } from '../../forms/fields/index.js'
+import { fieldComponents } from '../../forms/fields/index.js'
+import { HiddenInput } from '../../index.js'
 
 export const mapFields = (args: {
   DefaultCell?: React.FC<any>
@@ -64,12 +64,15 @@ export const mapFields = (args: {
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let FieldComponent = field.admin?.components?.Field || fieldTypes[field.type]
+    let CustomFieldComponent: React.ComponentType<FieldComponentProps> =
+      field.admin?.components?.Field
 
     if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
       if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
         if (field.admin && 'hidden' in field.admin && field?.admin?.hidden) {
-          FieldComponent = fieldTypes.hidden
+          if (CustomFieldComponent) {
+            CustomFieldComponent = HiddenInput
+          }
         }
 
         const isFieldAffectingData = fieldAffectsData(field)
@@ -325,7 +328,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: nestedFieldMap,
-              fieldTypes,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -476,7 +478,6 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: nestedFieldMap,
-              fieldTypes,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -604,8 +605,6 @@ export const mapFields = (args: {
           }
         }
 
-        let Field = <FieldComponent {...fieldComponentProps} />
-
         /**
          * Handle RichText Field Components, Cell Components, and component maps
          */
@@ -618,10 +617,6 @@ export const mapFields = (args: {
             // @ts-expect-error-next-line // TODO: the `richTextComponentMap` is not found on the union type
             fieldComponentProps.richTextComponentMap = result
             cellComponentProps.richTextComponentMap = result
-          }
-
-          if (RichTextFieldComponent) {
-            Field = <RichTextFieldComponent {...fieldComponentProps} />
           }
 
           if (RichTextCellComponent) {
@@ -656,10 +651,12 @@ export const mapFields = (args: {
         )
 
         const reducedField: MappedField = {
-          ...fieldComponentProps,
+          fieldComponentProps,
           type: field.type,
           Cell,
-          Field,
+          CustomField: CustomFieldComponent ? (
+            <CustomFieldComponent {...fieldComponentProps} />
+          ) : null,
           Heading,
           fieldIsPresentational,
           isFieldAffectingData,
@@ -668,9 +665,7 @@ export const mapFields = (args: {
           localized: 'localized' in field ? field.localized : false,
         }
 
-        if (FieldComponent) {
-          acc.push(reducedField)
-        }
+        acc.push(reducedField)
       }
     }
 
@@ -682,10 +677,11 @@ export const mapFields = (args: {
 
   if (!disableAddingID && !hasID) {
     result.push({
-      name: 'id',
+      fieldComponentProps: {
+        name: 'id',
+      },
       type: 'text',
       Cell: DefaultCell ? <DefaultCell name="id" /> : null,
-      Field: <HiddenInput name="id" />,
       Heading: <SortColumn label="ID" name="id" />,
       fieldIsPresentational: false,
       isFieldAffectingData: true,

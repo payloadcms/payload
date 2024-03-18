@@ -28,7 +28,7 @@ import type { TabsFieldProps } from '../../forms/fields/Tabs/types.js'
 import type { TextFieldProps } from '../../forms/fields/Text/types.js'
 import type { TextareaFieldProps } from '../../forms/fields/Textarea/types.js'
 import type { UploadFieldProps } from '../../forms/fields/Upload/types.js'
-import type { fieldTypes } from '../../forms/fields/index.js'
+import { FieldTypes } from 'payload/config.js'
 
 export type MappedTab = {
   fieldMap?: FieldMap
@@ -66,17 +66,18 @@ export type FieldComponentProps =
 
 export type MappedFieldBase = {
   Cell: React.ReactNode
-  Field: React.ReactNode
+  CustomField?: React.ReactNode
   Heading: React.ReactNode
   disabled?: boolean
   fieldIsPresentational: boolean
   isFieldAffectingData: boolean
   isSidebar?: boolean
   localized: boolean
-  type: keyof typeof fieldTypes
+  type: keyof FieldTypes
+  fieldComponentProps: FieldComponentProps
 }
 
-export type MappedField = FieldComponentProps & MappedFieldBase
+export type MappedField = MappedFieldBase
 
 export type FieldMap = MappedField[]
 

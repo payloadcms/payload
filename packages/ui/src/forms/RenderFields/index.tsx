@@ -54,13 +54,20 @@ export const RenderFields: React.FC<Props> = (props) => {
       >
         {hasRendered &&
           fieldMap?.map((f, fieldIndex) => {
-            const { Field, disabled, readOnly } = f
+            const {
+              CustomField,
+              disabled,
+              fieldComponentProps,
+              fieldComponentProps: { readOnly },
+              type,
+            } = f
 
-            const name = 'name' in f ? f.name : undefined
+            const name = 'name' in fieldComponentProps ? fieldComponentProps.name : undefined
 
             return (
               <RenderField
-                Field={Field}
+                fieldComponentProps={fieldComponentProps}
+                CustomField={CustomField}
                 disabled={disabled}
                 key={fieldIndex}
                 name={name}
@@ -69,6 +76,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 readOnly={readOnly}
                 schemaPath={schemaPath}
                 siblingPermissions={permissions}
+                type={type}
               />
             )
           })}

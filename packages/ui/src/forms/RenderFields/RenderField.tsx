@@ -6,9 +6,12 @@ import React from 'react'
 
 import { useOperation } from '../../providers/OperationProvider/index.js'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
+import { FieldComponentProps, MappedField } from '../../utilities/buildComponentMap/types.js'
+import { useFieldComponents } from '../../providers/FieldComponentsProvider/index.js'
+import { FieldTypes } from 'payload/config.js'
 
 type Props = {
-  Field: React.ReactNode
+  CustomField: MappedField['CustomField']
   disabled: boolean
   name?: string
   path: string
@@ -18,20 +21,25 @@ type Props = {
   siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
+  fieldComponentProps?: FieldComponentProps
+  type: keyof FieldTypes
 }
 
 export const RenderField: React.FC<Props> = ({
   name,
-  Field,
+  CustomField,
   disabled,
   path: pathFromProps,
   permissions,
   readOnly: readOnlyFromProps,
   schemaPath: schemaPathFromProps,
   siblingPermissions,
+  type,
+  fieldComponentProps,
 }) => {
   const operation = useOperation()
   const { readOnly: readOnlyFromContext } = useFieldProps()
+  const fieldComponents = useFieldComponents()
 
   const path = `${pathFromProps ? `${pathFromProps}.` : ''}${name ? `${name}` : ''}`
   const schemaPath = `${schemaPathFromProps ? `${schemaPathFromProps}` : ''}${name ? `.${name}` : ''}`
@@ -53,6 +61,12 @@ export const RenderField: React.FC<Props> = ({
     readOnly = true
   }
 
+  const DefaultField = fieldComponents[type]
+
+  if (!CustomField && !DefaultField) {
+    return null
+  }
+
   return (
     <FieldPropsProvider
       path={path}
@@ -61,7 +75,7 @@ export const RenderField: React.FC<Props> = ({
       schemaPath={schemaPath}
       siblingPermissions={siblingPermissions}
     >
-      {Field}
+      {CustomField || <DefaultField {...fieldComponentProps} />}
     </FieldPropsProvider>
   )
 }

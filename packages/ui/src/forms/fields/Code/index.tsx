@@ -34,12 +34,11 @@ const Code: React.FC<CodeFieldProps> = (props) => {
     style,
     validate,
     width,
+    editorOptions = {},
+    language = 'javascript',
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
-
-  const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
-  const language = 'language' in props ? props.language : 'javascript'
 
   const memoizedValidate = useCallback(
     (value, options) => {
