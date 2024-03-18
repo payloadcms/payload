@@ -4,7 +4,8 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import payload from '../../packages/payload/src/index.js'
+import type { Payload } from '../../packages/payload/src/index.js'
+
 import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
@@ -12,6 +13,7 @@ import config from './config.js'
 import { apiKeysSlug, slug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+let payload: Payload
 
 /**
  * TODO: Auth
@@ -33,7 +35,8 @@ describe('auth', () => {
   let apiURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL } = await initPayloadE2E({ config, dirname }))
+    ;({ serverURL, payload } = await initPayloadE2E({ config, dirname }))
+    apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, slug)
 
     const context = await browser.newContext()

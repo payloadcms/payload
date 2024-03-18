@@ -85,7 +85,7 @@
     "@types/fs-extra": "^11.0.2",
     "@types/jest": "29.5.12",
     "@types/minimist": "1.2.2",
-    "@types/node": "20.5.7",
+    "@types/node": "20.11.28",
     "@types/prompts": "^2.4.5",
     "@types/qs": "6.9.7",
     "@types/react": "18.2.15",
