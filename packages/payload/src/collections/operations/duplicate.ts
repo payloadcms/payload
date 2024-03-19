@@ -77,13 +77,10 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     }
     const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
 
-    // TODO: what to do about user collections?
-
     // /////////////////////////////////////
-    // Access
+    // Read Access
     // /////////////////////////////////////
 
-    // TODO: which access control should be used?
     const accessResults = !overrideAccess
       ? await executeAccess({ id, req }, collectionConfig.access.read)
       : true
@@ -96,10 +93,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       collection: collectionConfig.slug,
       locale: req.locale,
       req,
-      where: combineQueries(
-        { id: { equals: id } },
-        accessResults
-      ),
+      where: combineQueries({ id: { equals: id } }, accessResults),
     }
 
     const docWithLocales = await getLatestCollectionVersion({
@@ -120,6 +114,10 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     if (shouldSaveDraft) {
       docWithLocales._status = 'draft'
     }
+
+    // /////////////////////////////////////
+    // Iterate locales of document and call the db create or update functions
+    // /////////////////////////////////////
 
     let locales = [undefined]
     let versionDoc
@@ -144,6 +142,14 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
         req,
         showHiddenFields: true,
       })
+
+      // /////////////////////////////////////
+      // Create Access
+      // /////////////////////////////////////
+
+      if (operation === 'create' && !overrideAccess) {
+        await executeAccess({ data: originalDoc, req }, collectionConfig.access.create)
+      }
 
       // /////////////////////////////////////
       // beforeValidate - Fields
