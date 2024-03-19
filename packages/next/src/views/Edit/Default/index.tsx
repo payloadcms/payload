@@ -54,6 +54,7 @@ export const DefaultEditView: React.FC = () => {
     initialData: data,
     initialState,
     isEditing,
+    onSave: onSaveFromContext,
   } = useDocumentInfo()
 
   const { refreshCookieAsync, user } = useAuth()
@@ -118,20 +119,29 @@ export const DefaultEditView: React.FC = () => {
       void getVersions()
       void getDocPermissions()
 
-      if (!isEditing) {
-        // Redirect to the same locale if it's been set
-        const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
-        router.push(redirectRoute)
-      } else {
-        dispatchFormQueryParams({
-          type: 'SET',
-          params: {
-            uploadEdits: null,
-          },
+      if (typeof onSaveFromContext === 'function') {
+        void onSaveFromContext({
+          ...json,
+          operation: id ? 'update' : 'create',
         })
+      } else {
+        if (!isEditing) {
+          // Redirect to the same locale if it's been set
+          const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
+          router.push(redirectRoute)
+        } else {
+          dispatchFormQueryParams({
+            type: 'SET',
+            params: {
+              uploadEdits: null,
+            },
+          })
+        }
       }
     },
     [
+      onSaveFromContext,
+      userSlug,
       reportUpdate,
       id,
       entitySlug,
