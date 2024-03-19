@@ -3,8 +3,6 @@ import * as facelessUIImport from '@faceless-ui/modal'
 import React from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.js'
-
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
@@ -14,7 +12,12 @@ import './index.scss'
 
 const baseClass = 'generate-confirmation'
 
-const GenerateConfirmation: React.FC<Props> = (props) => {
+export type GenerateConfirmationProps = {
+  highlightField: (Boolean) => void
+  setKey: () => void
+}
+
+const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props) => {
   const { Modal, useModal } = facelessUIImport
 
   const { highlightField, setKey } = props

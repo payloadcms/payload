@@ -7,10 +7,11 @@ import './index.scss'
 
 const baseClass = 'list-selection'
 
-type Props = {
+export type ListSelectionProps = {
   label: string
 }
-export const ListSelection: React.FC<Props> = ({ label }) => {
+
+export const ListSelection: React.FC<ListSelectionProps> = ({ label }) => {
   const { count, selectAll, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
 

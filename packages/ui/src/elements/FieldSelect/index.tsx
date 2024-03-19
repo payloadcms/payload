@@ -8,12 +8,12 @@ import { useForm } from '../../forms/Form/context.js'
 import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath.js'
 import { Label } from '../../forms/Label/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import ReactSelect from '../ReactSelect/index.js'
+import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
 
 const baseClass = 'field-select'
 
-type Props = {
+export type FieldSelectProps = {
   fields: Field[]
   setSelected: (fields: FieldWithPath[]) => void
 }
@@ -75,7 +75,7 @@ const reduceFields = (
 
     return [...fieldsToUse, formattedField]
   }, [])
-export const FieldSelect: React.FC<Props> = ({ fields, setSelected }) => {
+export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected }) => {
   const { i18n, t } = useTranslation()
   const [options] = useState(() => reduceFields(fields, i18n))
   const { dispatchFields, getFields } = useForm()

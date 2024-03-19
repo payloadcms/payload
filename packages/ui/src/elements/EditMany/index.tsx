@@ -7,14 +7,12 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
-import type { Props } from './types.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import Form from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import FormSubmit from '../../forms/Submit/index.js'
+import { FormSubmit } from '../../forms/Submit/index.js'
 import { X } from '../../icons/X/index.js'
-import { useRouteCache } from '../../index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -29,6 +27,12 @@ import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
 
 const baseClass = 'edit-many'
+
+import type { SanitizedCollectionConfig } from 'payload/types'
+
+export type EditManyProps = {
+  collection: SanitizedCollectionConfig
+}
 
 const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
   const { submit } = useForm()
@@ -90,7 +94,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
     </FormSubmit>
   )
 }
-export const EditMany: React.FC<Props> = (props) => {
+export const EditMany: React.FC<EditManyProps> = (props) => {
   const { useModal } = facelessUIImport
 
   const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
