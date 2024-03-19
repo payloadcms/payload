@@ -12,7 +12,6 @@
   },
   "type": "module",
   "devDependencies": {
-    "typescript": "5.4.2",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",

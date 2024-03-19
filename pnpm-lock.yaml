@@ -1511,9 +1511,6 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../packages/payload
-      typescript:
-        specifier: 5.4.2
-        version: 5.4.2
 
 packages:
 
