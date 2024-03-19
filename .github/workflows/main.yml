@@ -219,7 +219,7 @@ jobs:
           - _community
           # - access-control
           # - admin
-          # - auth
+          - auth
           # - field-error-states
           # - fields-relationship
           # - fields
