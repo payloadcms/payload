@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Search: React.FC = () => (
+export const Search: React.FC = () => (
   <svg
     className="search"
     fill="none"
@@ -21,5 +21,3 @@ const Search: React.FC = () => (
     />
   </svg>
 )
-
-export default Search

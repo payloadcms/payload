@@ -5,6 +5,8 @@ import type { ActionMap } from '../ComponentMap/buildComponentMap/types.js'
 
 import { useComponentMap } from '../ComponentMap/index.jsx'
 
+export { SetViewActions } from './SetViewActions/index.jsx'
+
 type ActionsContextType = {
   actions: ActionMap['Edit'][string]
   setViewActions: (actions: ActionMap['Edit'][string]) => void

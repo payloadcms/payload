@@ -10,7 +10,7 @@ import type { ReducedBlock } from '../../../providers/ComponentMap/buildComponen
 
 import { Drawer } from '../../../elements/Drawer/index.js'
 import { ThumbnailCard } from '../../../elements/ThumbnailCard/index.js'
-import DefaultBlockImage from '../../../graphics/DefaultBlockImage/index.js'
+import { DefaultBlockImage } from '../../../graphics/DefaultBlockImage/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { BlockSearch } from './BlockSearch/index.js'
 import './index.scss'

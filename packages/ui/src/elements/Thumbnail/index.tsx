@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 
 import type { Props } from './types.js'
 
-import FileGraphic from '../../graphics/File/index.js'
+import { File } from '../../graphics/File/index.js'
 import useThumbnail from '../../hooks/useThumbnail.js'
 import './index.scss'
 
@@ -35,7 +35,7 @@ const Thumbnail: React.FC<Props> = (props) => {
   return (
     <div className={classes}>
       {src && <img alt={filename as string} src={src} />}
-      {!src && <FileGraphic />}
+      {!src && <File />}
     </div>
   )
 }
