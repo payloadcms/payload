@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "workspaces:": [
-    "packages/*"
+    "packages/*",
+    "test/*"
   ],
   "scripts": {
     "build": "pnpm run build:core",
