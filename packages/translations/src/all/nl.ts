@@ -363,6 +363,7 @@ export default {
     publish: 'Publiceren',
     publishChanges: 'Publiceer wijzigingen',
     published: 'Gepubliceerd',
+    publishing: 'Publicatie',
     restoreThisVersion: 'Herstel deze versie',
     restoredSuccessfully: 'Herstelling succesvol.',
     restoring: 'Herstellen...',

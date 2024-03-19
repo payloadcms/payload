@@ -239,6 +239,7 @@ export default {
     requiresAtLeast: 'این رشته حداقل نیازمند {{count}} {{label}}.',
   },
   version: {
+    type: 'تایپ کنید',
     aboutToPublishSelection:
       'شما در حال انتشار همه {{label}} برگزیده هستید از این کار اطمینان دارید؟',
     aboutToRestore:
@@ -258,6 +259,7 @@ export default {
     confirmVersionRestoration: 'تأیید بازیابی نگارش',
     draft: 'پیش‌نویس',
     draftSavedSuccessfully: 'پیش‌نویس با موفقیت ذخیره شد.',
+    lastSavedAgo: 'آخرین بار {{distance}} پیش ذخیره شد',
     noFurtherVersionsFound: 'نگارش دیگری یافت نشد',
     noRowsFound: 'هیچ {{label}} یافت نشد',
     preview: 'پیش‌نمایش',
@@ -265,6 +267,7 @@ export default {
     publish: 'انتشار',
     publishChanges: 'انتشار تغییرات',
     published: 'انتشار یافته',
+    publishing: 'انتشار',
     restoreThisVersion: 'این نگارش را بازیابی کنید',
     restoredSuccessfully: 'با موفقیت بازیابی شد.',
     restoring: 'در حال بازیابی...',
@@ -273,7 +276,6 @@ export default {
     selectLocales: 'زبان‌ها را برای نمایش انتخاب کنید',
     selectVersionToCompare: 'نگارشی را برای مقایسه انتخاب کنید',
     showLocales: 'نمایش زبان‌ها:',
-    type: 'تایپ کنید',
     unpublish: 'لغو انتشار',
     unpublishing: 'در حال لغو انتشار...',
     version: 'نگارش',

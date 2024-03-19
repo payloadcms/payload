@@ -240,6 +240,7 @@ export default {
     requiresAtLeast: '少なくとも {{count}} {{label}} 以上が必要です。',
   },
   version: {
+    type: 'タイプ',
     aboutToPublishSelection: '選択中のすべての{{label}}を公開しようとしています。よろしいですか？',
     aboutToRestore:
       'この {{label}} データを {{versionDate}} 時点のバージョンに復元しようとしています。',
@@ -260,6 +261,7 @@ export default {
     confirmVersionRestoration: 'バージョン復元の確認',
     draft: 'ドラフト',
     draftSavedSuccessfully: '下書きは正常に保存されました。',
+    lastSavedAgo: '{{distance}}前に最後に保存されました',
     noFurtherVersionsFound: 'その他のバージョンは見つかりませんでした。',
     noRowsFound: '{{label}} は未設定です',
     preview: 'プレビュー',
@@ -267,6 +269,7 @@ export default {
     publish: '公開する',
     publishChanges: '変更内容を公開',
     published: '公開済み',
+    publishing: '公開',
     restoreThisVersion: 'このバージョンを復元',
     restoredSuccessfully: '正常に復元されました。',
     restoring: '復元しています...',
@@ -275,7 +278,6 @@ export default {
     selectLocales: '表示するロケールを選択',
     selectVersionToCompare: '比較するバージョンを選択',
     showLocales: 'ロケールを表示:',
-    type: 'タイプ',
     unpublish: '非公開',
     unpublishing: '非公開中...',
     version: 'バージョン',

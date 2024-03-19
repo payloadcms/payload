@@ -360,6 +360,7 @@ export default {
     publish: '公開する',
     publishChanges: '変更内容を公開',
     published: '公開済み',
+    publishing: '公開',
     restoreThisVersion: 'このバージョンを復元',
     restoredSuccessfully: '正常に復元されました。',
     restoring: '復元しています...',

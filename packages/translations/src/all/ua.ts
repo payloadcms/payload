@@ -358,6 +358,7 @@ export default {
     publish: 'Опублікувати',
     publishChanges: 'Опублікувати зміни',
     published: 'Опубліковано',
+    publishing: 'Публікація',
     restoreThisVersion: 'Відновити цю версію',
     restoredSuccessfully: 'Відновлено успішно.',
     restoring: 'Відеовлення...',

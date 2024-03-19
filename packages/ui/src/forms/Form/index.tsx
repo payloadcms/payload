@@ -533,7 +533,7 @@ const Form: React.FC<Props> = (props) => {
             })
           }
 
-          const { changed, newState } = mergeServerFormState(fields, revalidatedFormState)
+          const { changed, newState } = mergeServerFormState(fields || {}, revalidatedFormState)
 
           if (changed) {
             dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: newState })

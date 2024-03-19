@@ -362,6 +362,7 @@ export default {
     publish: 'Публиковать',
     publishChanges: 'Опубликовать изменения',
     published: 'Опубликовано',
+    publishing: 'Публикация',
     restoreThisVersion: 'Восстановить эту версию',
     restoredSuccessfully: 'Восстановлен успешно.',
     restoring: 'Восстановление...',

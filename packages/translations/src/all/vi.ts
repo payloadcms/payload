@@ -354,6 +354,7 @@ export default {
     publish: 'Công bố',
     publishChanges: 'Xuất bản tài liệu',
     published: 'Đã xuất bản',
+    publishing: 'Xuất bản',
     restoreThisVersion: 'Khôi phục về phiên bản này',
     restoredSuccessfully: 'Đã khôi phục thành công.',
     restoring: 'Đang khôi phục...',

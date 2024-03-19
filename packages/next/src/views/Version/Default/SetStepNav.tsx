@@ -1,5 +1,9 @@
 import type { FieldMap, StepNavItem } from '@payloadcms/ui'
-import type { FieldAffectingData, SanitizedCollectionConfig } from 'payload/types'
+import type {
+  FieldAffectingData,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from 'payload/types'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -11,10 +15,20 @@ export const SetStepNav: React.FC<{
   collectionSlug?: string
   doc: any
   fieldMap: FieldMap
+  globalConfig?: SanitizedGlobalConfig
   globalSlug?: string
   id?: number | string
   mostRecentDoc: any
-}> = ({ id, collectionConfig, collectionSlug, doc, fieldMap, globalSlug, mostRecentDoc }) => {
+}> = ({
+  id,
+  collectionConfig,
+  collectionSlug,
+  doc,
+  fieldMap,
+  globalConfig,
+  globalSlug,
+  mostRecentDoc,
+}) => {
   const config = useConfig()
   const { setStepNav } = useStepNav()
   const { i18n, t } = useTranslation()
@@ -77,12 +91,12 @@ export const SetStepNav: React.FC<{
     if (globalSlug) {
       nav = [
         {
-          label: global.label,
-          url: `${adminRoute}/globals/${global.slug}`,
+          label: globalConfig.label,
+          url: `${adminRoute}/globals/${globalConfig.slug}`,
         },
         {
           label: 'Versions',
-          url: `${adminRoute}/globals/${global.slug}/versions`,
+          url: `${adminRoute}/globals/${globalConfig.slug}/versions`,
         },
         {
           label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
@@ -103,6 +117,8 @@ export const SetStepNav: React.FC<{
     t,
     i18n,
     collectionConfig,
+    fieldMap,
+    globalConfig,
   ])
 
   return null

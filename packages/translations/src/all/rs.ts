@@ -355,6 +355,7 @@ export default {
     publish: 'Објавити',
     publishChanges: 'Објави промене',
     published: 'Објављено',
+    publishing: 'Objavljivanje',
     restoreThisVersion: 'Врати ову верзију',
     restoredSuccessfully: 'Успешно враћено.',
     restoring: 'Враћање...',

@@ -66,7 +66,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     ? formatDate(doc.createdAt, dateFormat, i18n.language)
     : ''
 
-  const originalDocFetchURL = `${serverURL}${apiRoute}${globalSlug ? 'globals/' : ''}/${
+  const originalDocFetchURL = `${serverURL}${apiRoute}/${globalSlug ? 'globals/' : ''}${
     collectionSlug || globalSlug
   }${collectionSlug ? `/${id}` : ''}`
 
@@ -101,6 +101,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         collectionSlug={collectionSlug}
         doc={doc}
         fieldMap={fieldMap}
+        globalConfig={globalConfig}
         globalSlug={globalSlug}
         id={id}
         mostRecentDoc={mostRecentDoc}
@@ -152,7 +153,15 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 ? locales.map(({ label }) => (typeof label === 'string' ? label : undefined))
                 : []
             }
-            version={doc?.version}
+            version={
+              globalConfig
+                ? {
+                    ...doc?.version,
+                    createdAt: doc?.version?.createdAt || doc.createdAt,
+                    updatedAt: doc?.version?.updatedAt || doc.updatedAt,
+                  }
+                : doc?.version
+            }
           />
         )}
       </Gutter>

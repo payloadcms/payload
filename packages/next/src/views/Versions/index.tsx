@@ -67,11 +67,6 @@ export const VersionsView: EditViewComponent = async (props) => {
         page: page ? parseInt(page as string, 10) : undefined,
         sort: sort as string,
         user,
-        where: {
-          parent: {
-            equals: id,
-          },
-        },
       })
     } catch (error) {
       console.error(error) // eslint-disable-line no-console
