@@ -4,7 +4,7 @@ import type { FieldCondition } from '../types.js'
 import type { Props } from './types.js'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
-import useDebounce from '../../../hooks/useDebounce.js'
+import { useDebounce } from '../../../hooks/useDebounce.js'
 import { Button } from '../../Button/index.js'
 import ReactSelect from '../../ReactSelect/index.js'
 import { DateField } from './Date/index.js'

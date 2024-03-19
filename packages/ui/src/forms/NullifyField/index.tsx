@@ -3,7 +3,7 @@
 import * as React from 'react'
 
 import { Banner } from '../../elements/Banner/index.js'
-import { CheckboxInput } from '../../fields/Checkbox/Input.js'
+import { Checkbox } from '../../fields/Checkbox/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -58,7 +58,7 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
 
   return (
     <Banner>
-      <CheckboxInput
+      <Checkbox
         checked={checked}
         id={`field-${path.replace(/\./g, '__')}`}
         label={t('general:fallbackToDefaultLocale')}

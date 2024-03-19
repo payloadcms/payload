@@ -1,4 +1,4 @@
-import type { FieldBase } from 'payload/types.js'
+import type { FieldBase } from 'payload/types'
 
 import type { FormFieldBase } from '../shared.js'
 
