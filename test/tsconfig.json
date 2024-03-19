@@ -35,7 +35,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./auth/config.ts"
+        "./_community/config.ts"
       ]
     }
   },
