@@ -1,4 +1,6 @@
 'use client'
+import type { FieldAffectingData, SanitizedCollectionConfig, Where } from 'payload/types'
+
 import * as facelessUIImport from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData } from 'payload/types'
@@ -8,15 +10,13 @@ import AnimateHeightImport from 'react-animate-height'
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import type { Props } from './types.js'
-
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import ColumnSelector from '../ColumnSelector/index.js'
 import { DeleteMany } from '../DeleteMany/index.js'
 import { EditMany } from '../EditMany/index.js'
-import Pill from '../Pill/index.js'
+import { Pill } from '../Pill/index.js'
 import { PublishMany } from '../PublishMany/index.js'
 import SearchFilter from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
@@ -26,12 +26,24 @@ import './index.scss'
 
 const baseClass = 'list-controls'
 
+export type ListControlsProps = {
+  collectionConfig: SanitizedCollectionConfig
+  enableColumns?: boolean
+  enableSort?: boolean
+  handleSearchChange?: (search: string) => void
+  handleSortChange?: (sort: string) => void
+  handleWhereChange?: (where: Where) => void
+  modifySearchQuery?: boolean
+  textFieldsToBeSearched?: FieldAffectingData[]
+  titleField: FieldAffectingData
+}
+
 /**
  * The ListControls component is used to render the controls (search, filter, where)
  * for a collection's list view. You can find those directly above the table which lists
  * the collection's documents.
  */
-export const ListControls: React.FC<Props> = (props) => {
+export const ListControls: React.FC<ListControlsProps> = (props) => {
   const {
     collectionConfig,
     enableColumns = true,

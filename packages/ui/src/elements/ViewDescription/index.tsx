@@ -2,13 +2,24 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types.js'
-
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
-import { isComponent } from './types.js'
 
-const ViewDescription: React.FC<Props> = (props) => {
+export type DescriptionFunction = () => string
+
+export type DescriptionComponent = React.ComponentType<any>
+
+type Description = DescriptionComponent | DescriptionFunction | Record<string, string> | string
+
+export type ViewDescriptionProps = {
+  description?: Description
+}
+
+export function isComponent(description: Description): description is DescriptionComponent {
+  return React.isValidElement(description)
+}
+
+const ViewDescription: React.FC<ViewDescriptionProps> = (props) => {
   const { i18n } = useTranslation()
   const { description } = props
 

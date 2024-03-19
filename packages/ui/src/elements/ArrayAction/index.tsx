@@ -6,7 +6,7 @@ import { MoreIcon } from '../../icons/More/index.js'
 import { Plus } from '../../icons/Plus/index.js'
 import { X } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import * as PopupList from '../Popup/PopupButtonList/index.js'
+import { PopupList } from '../Popup/index.js'
 import Popup from '../Popup/index.js'
 import './index.scss'
 

@@ -1,17 +1,29 @@
 import { isImage } from 'payload/utilities'
 import React from 'react'
 
-import type { Props } from './types.js'
-
 import { UploadActions } from '../../elements/Upload/index.js'
 import { Button } from '../Button/index.js'
-import Thumbnail from '../Thumbnail/index.js'
-import FileMeta from './FileMeta/index.js'
+import { Thumbnail } from '../Thumbnail/index.js'
+import { FileMeta } from './FileMeta/index.js'
 import './index.scss'
 
 const baseClass = 'file-details'
 
-const FileDetails: React.FC<Props> = (props) => {
+import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload/types'
+
+export type FileDetailsProps = {
+  canEdit?: boolean
+  collectionSlug: string
+  doc: Data & {
+    sizes?: FileSizes
+  }
+  handleRemove?: () => void
+  hasImageSizes?: boolean
+  imageCacheTag?: string
+  uploadConfig: SanitizedCollectionConfig['upload']
+}
+
+const FileDetails: React.FC<FileDetailsProps> = (props) => {
   const { canEdit, collectionSlug, doc, handleRemove, hasImageSizes, imageCacheTag, uploadConfig } =
     props
 

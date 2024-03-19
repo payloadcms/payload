@@ -1,15 +1,15 @@
 'use client'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.js'
-
-import { useRouteCache } from '../../index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -21,7 +21,11 @@ import './index.scss'
 
 const baseClass = 'publish-many'
 
-export const PublishMany: React.FC<Props> = (props) => {
+export type PublishManyProps = {
+  collection: SanitizedCollectionConfig
+}
+
+export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const { Modal, useModal } = facelessUIImport
   const { clearRouteCache } = useRouteCache()
 

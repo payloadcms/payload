@@ -1,12 +1,18 @@
 import React from 'react'
 
-import type { Props } from './types.js'
-
 import './index.scss'
 
 const baseClass = 'popup-button'
 
-export const PopupTrigger: React.FC<Props> = (props) => {
+export type PopupTriggerProps = {
+  active: boolean
+  button: React.ReactNode
+  buttonType: 'custom' | 'default' | 'none'
+  className?: string
+  setActive: (active: boolean) => void
+}
+
+export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
   const { active, button, buttonType, className, setActive } = props
 
   const classes = [baseClass, className, `${baseClass}--${buttonType}`].filter(Boolean).join(' ')

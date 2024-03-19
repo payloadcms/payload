@@ -1,7 +1,17 @@
 import { formatFilesize } from 'payload/utilities'
 import React, { useState } from 'react'
 
-import type { Props } from './types.js'
+export type FileMetaProps = {
+  collection?: string
+  filename: string
+  filesize: number
+  height?: number
+  id?: string
+  mimeType: string
+  sizes?: unknown
+  url: string
+  width?: number
+}
 
 import { Edit } from '../../../icons/Edit/index.js'
 import { CopyToClipboard } from '../../CopyToClipboard/index.js'
@@ -11,7 +21,7 @@ import './index.scss'
 
 const baseClass = 'file-meta'
 
-const FileMeta: React.FC<Props> = (props) => {
+export const FileMeta: React.FC<FileMetaProps> = (props) => {
   const { id, collection, filename, filesize, height, mimeType, url: fileURL, width } = props
 
   const [hovered, setHovered] = useState(false)
@@ -59,5 +69,3 @@ const FileMeta: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default FileMeta

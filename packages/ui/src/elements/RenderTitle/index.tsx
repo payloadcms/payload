@@ -1,15 +1,21 @@
 'use client'
 import React from 'react'
 
-import type { Props } from './types.js'
-
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import IDLabel from '../IDLabel/index.js'
 import './index.scss'
 
 const baseClass = 'render-title'
 
-export const RenderTitle: React.FC<Props> = (props) => {
+export type RenderTitleProps = {
+  className?: string
+  element?: React.ElementType
+  fallback?: string
+  fallbackToID?: boolean
+  title?: string
+}
+
+export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
   const { className, element = 'h1', fallback, title: titleFromProps } = props
 
   const documentInfo = useDocumentInfo()

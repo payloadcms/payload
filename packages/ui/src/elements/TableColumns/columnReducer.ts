@@ -1,4 +1,4 @@
-import type { Column } from '../Table/types.js'
+import type { Column } from '../Table/index.js'
 
 type TOGGLE = {
   payload: {
