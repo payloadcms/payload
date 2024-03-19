@@ -1,7 +1,6 @@
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { usePathname, useRouter } from 'next/navigation.js'
-import queryString from 'qs'
 import React, { useEffect, useRef, useState } from 'react'
 
 import type { Props } from './types.js'
@@ -15,13 +14,7 @@ import './index.scss'
 const baseClass = 'search-filter'
 
 const SearchFilter: React.FC<Props> = (props) => {
-  const {
-    fieldLabel = 'ID',
-    fieldName = 'id',
-    handleChange,
-    listSearchableFields,
-    modifySearchQuery = true,
-  } = props
+  const { fieldLabel = 'ID', fieldName = 'id', handleChange, listSearchableFields } = props
 
   const { searchParams } = useSearchParams()
   const router = useRouter()
@@ -40,17 +33,6 @@ const SearchFilter: React.FC<Props> = (props) => {
   useEffect(() => {
     if (debouncedSearch !== previousSearch) {
       if (handleChange) handleChange(debouncedSearch)
-
-      if (modifySearchQuery) {
-        const search = queryString.stringify({
-          ...searchParams,
-          page: 1,
-          search: debouncedSearch || undefined,
-        })
-
-        router.replace(`${pathname}?${search}`)
-      }
-
       setPreviousSearch(debouncedSearch)
     }
   }, [
@@ -60,24 +42,26 @@ const SearchFilter: React.FC<Props> = (props) => {
     fieldName,
     searchParams,
     handleChange,
-    modifySearchQuery,
     listSearchableFields,
     pathname,
   ])
 
   useEffect(() => {
     if (listSearchableFields?.length > 0) {
-      placeholder.current = listSearchableFields.reduce<string>((prev, curr, i) => {
-        if (i === 0) {
-          return `${t('general:searchBy', {
-            label: getTranslation(curr.label || curr.name, i18n),
-          })}`
-        }
-        if (i === listSearchableFields.length - 1) {
-          return `${prev} ${t('general:or')} ${getTranslation(curr.label || curr.name, i18n)}`
-        }
-        return `${prev}, ${getTranslation(curr.label || curr.name, i18n)}`
-      }, '')
+      placeholder.current = listSearchableFields.reduce(
+        (placeholderText: string, field, i: number) => {
+          if (i === 0) {
+            return `${t('general:searchBy', {
+              label: getTranslation(field.label || field.name, i18n),
+            })}`
+          }
+          if (i === listSearchableFields.length - 1) {
+            return `${placeholderText} ${t('general:or')} ${getTranslation(field.label || field.name, i18n)}`
+          }
+          return `${placeholderText}, ${getTranslation(field?.label || field?.name, i18n)}`
+        },
+        '',
+      )
     } else {
       placeholder.current = t('general:searchBy', { label: getTranslation(fieldLabel, i18n) })
     }

@@ -11,6 +11,7 @@ const AnimateHeight = (AnimateHeightImport.default ||
 import type { Props } from './types.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
+import { useListInfo } from '../../index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import ColumnSelector from '../ColumnSelector/index.js'
@@ -36,15 +37,13 @@ export const ListControls: React.FC<Props> = (props) => {
     collectionConfig,
     enableColumns = true,
     enableSort = false,
-    handleSearchChange,
-    handleSortChange,
-    handleWhereChange,
     modifySearchQuery = true,
     textFieldsToBeSearched,
     titleField,
   } = props
 
   const { useWindowInfo } = facelessUIImport
+  const { handleSearchChange, handleWhereChange } = useListInfo()
 
   const { searchParams } = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
@@ -57,106 +56,107 @@ export const ListControls: React.FC<Props> = (props) => {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
 
+  const searchLabel = titleField && getTranslation(titleField.label || titleField.name, i18n)
+
   return (
-    <div className={baseClass}>
-      <div className={`${baseClass}__wrap`}>
-        <SearchFilter
-          fieldLabel={
-            (titleField && getTranslation(titleField.label || titleField.name, i18n)) ?? undefined
-          }
-          fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
-          handleChange={handleSearchChange}
-          listSearchableFields={textFieldsToBeSearched}
-          modifySearchQuery={modifySearchQuery}
-        />
-        <div className={`${baseClass}__buttons`}>
-          <div className={`${baseClass}__buttons-wrap`}>
-            {!smallBreak && (
-              <React.Fragment>
-                <EditMany collection={collectionConfig} />
-                <PublishMany collection={collectionConfig} />
-                <UnpublishMany collection={collectionConfig} />
-                <DeleteMany collection={collectionConfig} />
-              </React.Fragment>
-            )}
-            {enableColumns && (
+    <form>
+      <div className={baseClass}>
+        <div className={`${baseClass}__wrap`}>
+          <SearchFilter
+            fieldLabel={typeof searchLabel === 'string' ? searchLabel : undefined}
+            fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
+            handleChange={handleSearchChange}
+            listSearchableFields={textFieldsToBeSearched}
+          />
+          <div className={`${baseClass}__buttons`}>
+            <div className={`${baseClass}__buttons-wrap`}>
+              {!smallBreak && (
+                <React.Fragment>
+                  <EditMany collection={collectionConfig} />
+                  <PublishMany collection={collectionConfig} />
+                  <UnpublishMany collection={collectionConfig} />
+                  <DeleteMany collection={collectionConfig} />
+                </React.Fragment>
+              )}
+              {enableColumns && (
+                <Pill
+                  aria-controls={`${baseClass}-columns`}
+                  aria-expanded={visibleDrawer === 'columns'}
+                  className={`${baseClass}__toggle-columns ${
+                    visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''
+                  }`}
+                  icon={<Chevron />}
+                  onClick={() =>
+                    setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
+                  }
+                  pillStyle="light"
+                >
+                  {t('general:columns')}
+                </Pill>
+              )}
               <Pill
-                aria-controls={`${baseClass}-columns`}
-                aria-expanded={visibleDrawer === 'columns'}
-                className={`${baseClass}__toggle-columns ${
-                  visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''
+                aria-controls={`${baseClass}-where`}
+                aria-expanded={visibleDrawer === 'where'}
+                className={`${baseClass}__toggle-where ${
+                  visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''
                 }`}
                 icon={<Chevron />}
-                onClick={() =>
-                  setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
-                }
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
                 pillStyle="light"
               >
-                {t('general:columns')}
+                {t('general:filters')}
               </Pill>
-            )}
-            <Pill
-              aria-controls={`${baseClass}-where`}
-              aria-expanded={visibleDrawer === 'where'}
-              className={`${baseClass}__toggle-where ${
-                visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''
-              }`}
-              icon={<Chevron />}
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-              pillStyle="light"
-            >
-              {t('general:filters')}
-            </Pill>
-            {enableSort && (
-              <Pill
-                aria-controls={`${baseClass}-sort`}
-                aria-expanded={visibleDrawer === 'sort'}
-                className={`${baseClass}__toggle-sort`}
-                icon={<Chevron />}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-                pillStyle="light"
-              >
-                {t('general:sort')}
-              </Pill>
-            )}
+              {enableSort && (
+                <Pill
+                  aria-controls={`${baseClass}-sort`}
+                  aria-expanded={visibleDrawer === 'sort'}
+                  className={`${baseClass}__toggle-sort`}
+                  icon={<Chevron />}
+                  onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+                  pillStyle="light"
+                >
+                  {t('general:sort')}
+                </Pill>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-      {enableColumns && (
+        {enableColumns && (
+          <AnimateHeight
+            className={`${baseClass}__columns`}
+            height={visibleDrawer === 'columns' ? 'auto' : 0}
+            id={`${baseClass}-columns`}
+          >
+            <ColumnSelector collectionSlug={collectionConfig.slug} />
+          </AnimateHeight>
+        )}
         <AnimateHeight
-          className={`${baseClass}__columns`}
-          height={visibleDrawer === 'columns' ? 'auto' : 0}
-          id={`${baseClass}-columns`}
+          className={`${baseClass}__where`}
+          height={visibleDrawer === 'where' ? 'auto' : 0}
+          id={`${baseClass}-where`}
         >
-          <ColumnSelector collectionSlug={collectionConfig.slug} />
+          <WhereBuilder
+            collectionPluralLabel={collectionConfig?.labels?.plural}
+            collectionSlug={collectionConfig.slug}
+            handleChange={handleWhereChange}
+            modifySearchQuery={modifySearchQuery}
+          />
         </AnimateHeight>
-      )}
-      <AnimateHeight
-        className={`${baseClass}__where`}
-        height={visibleDrawer === 'where' ? 'auto' : 0}
-        id={`${baseClass}-where`}
-      >
-        <WhereBuilder
-          collectionPluralLabel={collectionConfig?.labels?.plural}
-          collectionSlug={collectionConfig.slug}
-          handleChange={handleWhereChange}
-          modifySearchQuery={modifySearchQuery}
-        />
-      </AnimateHeight>
-      {enableSort && (
-        <AnimateHeight
-          className={`${baseClass}__sort`}
-          height={visibleDrawer === 'sort' ? 'auto' : 0}
-          id={`${baseClass}-sort`}
-        >
-          <p>Sort Complex</p>
-          {/* <SortComplex
+        {enableSort && (
+          <AnimateHeight
+            className={`${baseClass}__sort`}
+            height={visibleDrawer === 'sort' ? 'auto' : 0}
+            id={`${baseClass}-sort`}
+          >
+            <p>Sort Complex</p>
+            {/* <SortComplex
             collection={collection}
             handleChange={handleSortChange}
             modifySearchQuery={modifySearchQuery}
           /> */}
-        </AnimateHeight>
-      )}
-    </div>
+          </AnimateHeight>
+        )}
+      </div>
+    </form>
   )
 }

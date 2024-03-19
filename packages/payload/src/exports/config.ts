@@ -3,7 +3,11 @@ export * from '../config/types.js'
 
 export type { FieldTypes } from '../admin/forms/FieldTypes.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
-export { createClientConfig } from '../config/createClientConfig.js'
+export {
+  createClientCollectionConfig,
+  createClientConfig,
+  createClientGlobalConfig,
+} from '../config/createClientConfig.js'
 export { defaults } from '../config/defaults.js'
 export { sanitizeConfig } from '../config/sanitize.js'
 export { baseBlockFields } from '../fields/baseFields/baseBlockFields.js'

@@ -44,9 +44,6 @@ export const DefaultListView: React.FC = () => {
     data,
     handlePageChange,
     handlePerPageChange,
-    handleSearchChange,
-    handleSortChange,
-    handleWhereChange,
     hasCreatePermission,
     limit,
     modifySearchParams,
@@ -95,6 +92,12 @@ export const DefaultListView: React.FC = () => {
     ])
   }, [setStepNav, labels])
 
+  const listSelectionLabelOrComponent = getTranslation(collectionConfig.labels.plural, i18n)
+  const listSelectionLabel =
+    typeof listSelectionLabelOrComponent === 'string'
+      ? listSelectionLabelOrComponent
+      : collectionSlug
+
   return (
     <div className={baseClass}>
       <SetViewActions actions={actionsMap?.List} />
@@ -115,9 +118,7 @@ export const DefaultListView: React.FC = () => {
                     {i18n.t('general:createNew')}
                   </Pill>
                 )}
-                {!smallBreak && (
-                  <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
-                )}
+                {!smallBreak && <ListSelection label={listSelectionLabel} />}
                 {/* {description && (
                   <div className={`${baseClass}__sub-header`}>
                     <ViewDescription description={description} />
@@ -128,11 +129,7 @@ export const DefaultListView: React.FC = () => {
           </header>
           <ListControls
             collectionConfig={collectionConfig}
-            // textFieldsToBeSearched={textFieldsToBeSearched}
-            // handleSearchChange={handleSearchChange}
-            // handleSortChange={handleSortChange}
-            // handleWhereChange={handleWhereChange}
-            // modifySearchQuery={modifySearchParams}
+            modifySearchQuery={modifySearchParams}
             titleField={titleField}
           />
           {BeforeListTable}
@@ -199,9 +196,7 @@ export const DefaultListView: React.FC = () => {
                   {smallBreak && (
                     <div className={`${baseClass}__list-selection`}>
                       <Fragment>
-                        <ListSelection
-                          label={getTranslation(collectionConfig.labels.plural, i18n)}
-                        />
+                        <ListSelection label={listSelectionLabel} />
                         <div className={`${baseClass}__list-selection-actions`}>
                           <EditMany collection={collectionConfig} />
                           <PublishMany collection={collectionConfig} />

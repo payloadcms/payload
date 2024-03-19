@@ -142,106 +142,118 @@ export const sanitizeField = (f: Field) => {
   return field
 }
 
+export const createClientCollectionConfig = (
+  collection: SanitizedCollectionConfig,
+): ClientConfig['collections'][0] => {
+  const sanitized = { ...collection }
+  sanitized.fields = sanitizeFields(sanitized.fields)
+
+  const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
+    'hooks',
+    'access',
+    'endpoints',
+    // `upload`
+    // `admin`
+    // are all handled separately
+  ]
+
+  serverOnlyCollectionProperties.forEach((key) => {
+    if (key in sanitized) {
+      delete sanitized[key]
+    }
+  })
+
+  if ('upload' in sanitized && typeof sanitized.upload === 'object') {
+    sanitized.upload = { ...sanitized.upload }
+    delete sanitized.upload.handlers
+  }
+
+  if ('auth' in sanitized && typeof sanitized.auth === 'object') {
+    sanitized.auth = { ...sanitized.auth }
+    delete sanitized.auth.strategies
+    delete sanitized.auth.forgotPassword
+    delete sanitized.auth.verify
+  }
+
+  if ('admin' in sanitized) {
+    sanitized.admin = { ...sanitized.admin }
+
+    const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
+      'components',
+      'hidden',
+      'preview',
+      'hooks',
+      // `livePreview` is handled separately
+    ]
+
+    serverOnlyCollectionAdminProperties.forEach((key) => {
+      if (key in sanitized.admin) {
+        delete sanitized.admin[key]
+      }
+    })
+
+    if ('livePreview' in sanitized.admin) {
+      sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
+      delete sanitized.admin.livePreview.url
+    }
+  }
+
+  return sanitized
+}
+
 const sanitizeCollections = (
   collections: SanitizedConfig['collections'],
 ): ClientConfig['collections'] =>
   collections.map((collection) => {
-    const sanitized = { ...collection }
-    sanitized.fields = sanitizeFields(sanitized.fields)
-
-    const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
-      'hooks',
-      'access',
-      'endpoints',
-      // `upload`
-      // `admin`
-      // are all handled separately
-    ]
-
-    serverOnlyCollectionProperties.forEach((key) => {
-      if (key in sanitized) {
-        delete sanitized[key]
-      }
-    })
-
-    if ('upload' in sanitized && typeof sanitized.upload === 'object') {
-      sanitized.upload = { ...sanitized.upload }
-      delete sanitized.upload.handlers
-    }
-
-    if ('auth' in sanitized && typeof sanitized.auth === 'object') {
-      sanitized.auth = { ...sanitized.auth }
-      delete sanitized.auth.strategies
-      delete sanitized.auth.forgotPassword
-      delete sanitized.auth.verify
-    }
-
-    if ('admin' in sanitized) {
-      sanitized.admin = { ...sanitized.admin }
-
-      const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
-        'components',
-        'hidden',
-        'preview',
-        'hooks',
-        // `livePreview` is handled separately
-      ]
-
-      serverOnlyCollectionAdminProperties.forEach((key) => {
-        if (key in sanitized.admin) {
-          delete sanitized.admin[key]
-        }
-      })
-
-      if ('livePreview' in sanitized.admin) {
-        sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
-        delete sanitized.admin.livePreview.url
-      }
-    }
-
-    return sanitized
+    return createClientCollectionConfig(collection)
   })
 
-const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['globals'] =>
-  globals.map((global) => {
-    const sanitized = { ...global }
-    sanitized.fields = sanitizeFields(sanitized.fields)
+export const createClientGlobalConfig = (
+  globalConfig: SanitizedGlobalConfig,
+): ClientConfig['globals'][0] => {
+  const sanitized = { ...globalConfig }
+  sanitized.fields = sanitizeFields(sanitized.fields)
 
-    const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
-      'hooks',
-      'access',
-      'endpoints',
-      // `admin` is handled separately
+  const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
+    'hooks',
+    'access',
+    'endpoints',
+    // `admin` is handled separately
+  ]
+
+  serverOnlyProperties.forEach((key) => {
+    if (key in sanitized) {
+      delete sanitized[key]
+    }
+  })
+
+  if ('admin' in sanitized) {
+    sanitized.admin = { ...sanitized.admin }
+
+    const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = [
+      'components',
+      'hidden',
+      'preview',
     ]
 
-    serverOnlyProperties.forEach((key) => {
-      if (key in sanitized) {
-        delete sanitized[key]
+    serverOnlyGlobalAdminProperties.forEach((key) => {
+      if (key in sanitized.admin) {
+        delete sanitized.admin[key]
       }
     })
 
-    if ('admin' in sanitized) {
-      sanitized.admin = { ...sanitized.admin }
-
-      const serverOnlyGlobalAdminProperties: Partial<ServerOnlyGlobalAdminProperties>[] = [
-        'components',
-        'hidden',
-        'preview',
-      ]
-
-      serverOnlyGlobalAdminProperties.forEach((key) => {
-        if (key in sanitized.admin) {
-          delete sanitized.admin[key]
-        }
-      })
-
-      if ('livePreview' in sanitized.admin) {
-        sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
-        delete sanitized.admin.livePreview.url
-      }
+    if ('livePreview' in sanitized.admin) {
+      sanitized.admin.livePreview = { ...sanitized.admin.livePreview }
+      delete sanitized.admin.livePreview.url
     }
+  }
 
-    return sanitized
+  return sanitized
+}
+
+const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['globals'] =>
+  globals.map((globalConfig) => {
+    return createClientGlobalConfig(globalConfig)
   })
 
 export const sanitizeFields = (fields: Field[]): Field[] => fields.map(sanitizeField)

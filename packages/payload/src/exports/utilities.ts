@@ -37,8 +37,9 @@ export { isPlainObject } from '../utilities/isPlainObject.js'
 export { isValidID } from '../utilities/isValidID.js'
 
 export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
-export { setsAreEqual } from '../utilities/setsAreEqual.js'
+export { mergeListSearchAndWhere } from '../utilities/mergeListSearchAndWhere.js'
 
+export { setsAreEqual } from '../utilities/setsAreEqual.js'
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
 export { default as wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
