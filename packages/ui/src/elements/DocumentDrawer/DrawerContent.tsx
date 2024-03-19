@@ -9,7 +9,6 @@ import { toast } from 'react-toastify'
 
 import type { DocumentDrawerProps } from './types.js'
 
-import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
 import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections.js'
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
 import { X } from '../../icons/X/index.js'
@@ -57,8 +56,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const { getPreference } = usePreferences()
 
   const { permissions } = useAuth()
-
-  const { schemaPath } = useFieldProps()
 
   const { componentMap } = useComponentMap()
 
@@ -112,7 +109,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
             data: data || {},
             docPreferences,
             operation: isEditing ? 'update' : 'create',
-            schemaPath,
+            schemaPath: collectionSlug,
           },
           serverURL,
         })
@@ -123,7 +120,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
       void getInitialState()
     }
-  }, [apiRoute, data, isEditing, schemaPath, serverURL, collectionSlug, id, getPreference])
+  }, [apiRoute, data, isEditing, collectionSlug, serverURL, collectionSlug, id])
 
   if (isError) return null
 
