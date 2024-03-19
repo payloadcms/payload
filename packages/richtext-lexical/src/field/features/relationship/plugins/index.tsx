@@ -3,7 +3,6 @@ import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.
 const { useLexicalComposerContext } = lexicalComposerContextImport
 import lexicalUtilsImport from '@lexical/utils'
 const { $insertNodeToNearestRoot } = lexicalUtilsImport
-import { useConfig } from '@payloadcms/ui'
 import lexicalImport from 'lexical'
 const {
   $getPreviousSelection,
@@ -16,6 +15,7 @@ const {
 
 import type { LexicalCommand } from 'lexical'
 
+import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useEffect } from 'react'
 import React from 'react'
 

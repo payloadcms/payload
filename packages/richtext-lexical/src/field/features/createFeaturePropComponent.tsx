@@ -2,10 +2,11 @@
 
 import type React from 'react'
 
-import { useAddClientFunction, useFieldPath } from '@payloadcms/ui'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useAddClientFunction } from '@payloadcms/ui/providers/ClientFunction'
 
 const useLexicalFeatureProp = <T,>(featureKey: string, componentKey: string, prop: T) => {
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
 
   useAddClientFunction(
     `lexicalFeature.${schemaPath}.${featureKey}.components.${componentKey}`,

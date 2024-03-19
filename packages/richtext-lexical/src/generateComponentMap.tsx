@@ -1,6 +1,6 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { mapFields } from '@payloadcms/ui/utilities'
+import { mapFields } from '@payloadcms/ui/providers/ComponentMap'
 import { sanitizeFields } from 'payload/config'
 import React from 'react'
 

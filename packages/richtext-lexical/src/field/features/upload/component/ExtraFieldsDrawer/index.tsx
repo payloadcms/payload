@@ -5,22 +5,19 @@ import * as facelessUIImport from '@faceless-ui/modal'
 import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
 const { useLexicalComposerContext } = lexicalComposerContextImport
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Drawer,
-  FieldPathProvider,
-  Form,
-  type FormProps,
-  FormSubmit,
-  RenderFields,
-  getFormState,
-  useConfig,
-  useDocumentInfo,
-  useFieldPath,
-  useTranslation,
-} from '@payloadcms/ui'
 import lexicalImport from 'lexical'
 const { $getNodeByKey } = lexicalImport
+import type { Props as FormProps } from '@payloadcms/ui/forms/Form'
 
+import { Drawer } from '@payloadcms/ui/elements/Drawer'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
+import { FormSubmit } from '@payloadcms/ui/forms/Submit'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
@@ -55,7 +52,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
 
   const { i18n, t } = useTranslation()
   const { id } = useDocumentInfo()
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
   const config = useConfig()
   const [initialState, setInitialState] = useState<FormState | false>(false)
   const {
@@ -131,7 +128,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
     >
       {initialState !== false && (
         <Form
-          // @ts-expect-error // TODO: Fix this type. Is this correct?
+          // @ts-expect-error TODO: Fix this
           fields={fieldMap}
           initialState={initialState}
           onChange={[onChange]}
