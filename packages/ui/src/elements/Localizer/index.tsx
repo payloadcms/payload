@@ -2,19 +2,19 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
-import { useRouteCache } from '../../index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import * as PopupList from '../Popup/PopupButtonList/index.js'
-import Popup from '../Popup/index.js'
+import { PopupList } from '../Popup/index.js'
+import { Popup } from '../Popup/index.js'
 import { LocalizerLabel } from './LocalizerLabel/index.js'
 import './index.scss'
 
 const baseClass = 'localizer'
 
-const Localizer: React.FC<{
+export const Localizer: React.FC<{
   className?: string
 }> = (props) => {
   const { className } = props
@@ -72,5 +72,3 @@ const Localizer: React.FC<{
 
   return null
 }
-
-export default Localizer

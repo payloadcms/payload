@@ -13,7 +13,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { Button } from '../Button/index.js'
-import * as PopupList from '../Popup/PopupButtonList/index.js'
+import { PopupList } from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'duplicate'

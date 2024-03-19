@@ -1,10 +1,16 @@
 import React from 'react'
 
-import type { Props } from './types.js'
+export type PageProps = {
+  isCurrent?: boolean
+  isFirstPage?: boolean
+  isLastPage?: boolean
+  page?: number
+  updatePage?: (page) => void
+}
 
 const baseClass = 'paginator__page'
 
-const Page: React.FC<Props> = ({
+export const Page: React.FC<PageProps> = ({
   isCurrent,
   isFirstPage = false,
   isLastPage = false,
@@ -26,5 +32,3 @@ const Page: React.FC<Props> = ({
     </button>
   )
 }
-
-export default Page
