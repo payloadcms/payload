@@ -70,6 +70,8 @@ export type LivePreviewConfig = {
     | string
 }
 
+export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
+
 type GeneratePreviewURLOptions = {
   locale: string
   token: string
@@ -679,13 +681,6 @@ export type SanitizedConfig = Omit<
     rawConfig: string
   }
 }
-
-export type {
-  ClientCollectionConfig,
-  ClientConfig,
-  ClientConfigField,
-  ClientGlobalConfig,
-} from '../config/createClientConfig.js'
 
 export type EditConfig =
   | (
