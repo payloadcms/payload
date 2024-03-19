@@ -114,6 +114,7 @@
     "postcss-preset-env": "^9.5.0",
     "sass-loader": "^14.1.1",
     "swc-loader": "^0.2.6",
+    "swc-plugin-transform-remove-imports": "^1.12.1",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
     "mini-css-extract-plugin": "1.6.2",
