@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/types'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -17,7 +17,6 @@ import {
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
-import { FieldPathProvider } from '@payloadcms/ui/forms'
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
@@ -34,7 +33,7 @@ export const UploadDrawer: React.FC<{
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
   }
-  relatedCollection: SanitizedCollectionConfig
+  relatedCollection: ClientCollectionConfig
   schemaPath: string
 }> = (props) => {
   const { useModal } = facelessUIImport

@@ -1,5 +1,5 @@
 import type { FieldMap, StepNavItem } from '@payloadcms/ui'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -7,11 +7,11 @@ import { formatDate, useConfig, useLocale, useStepNav, useTranslation } from '@p
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{
-  collectionConfig?: SanitizedCollectionConfig
+  collectionConfig?: ClientCollectionConfig
   collectionSlug?: string
   doc: any
   fieldMap: FieldMap
-  globalConfig?: SanitizedGlobalConfig
+  globalConfig?: ClientGlobalConfig
   globalSlug?: string
   id?: number | string
   mostRecentDoc: any

@@ -154,7 +154,7 @@ export const sanitizeField = (f: Field) => {
 
 const sanitizeCollections = (
   collections: SanitizedConfig['collections'],
-): ClientConfig['collections'] =>
+): ClientCollectionConfig[] =>
   collections.map((collection) => {
     const sanitized = { ...collection }
     sanitized.fields = sanitizeFields(sanitized.fields)
@@ -212,7 +212,7 @@ const sanitizeCollections = (
     return sanitized
   })
 
-const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['globals'] =>
+const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientGlobalConfig[] =>
   globals.map((global) => {
     const sanitized = { ...global }
     sanitized.fields = sanitizeFields(sanitized.fields)

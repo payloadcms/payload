@@ -1,12 +1,7 @@
 'use client'
 import type { FieldMap, FormProps } from '@payloadcms/ui'
 import type { LivePreviewConfig } from 'payload/config'
-import type {
-  ClientConfig,
-  Data,
-  SanitizedCollectionConfig,
-  SanitizedGlobalConfig,
-} from 'payload/types'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, Data } from 'payload/types'
 
 import {
   DocumentControls,
@@ -36,10 +31,10 @@ const baseClass = 'live-preview'
 
 type Props = {
   apiRoute: string
-  collectionConfig?: SanitizedCollectionConfig
+  collectionConfig?: ClientCollectionConfig
   config: ClientConfig
   fieldMap: FieldMap
-  globalConfig?: SanitizedGlobalConfig
+  globalConfig?: ClientGlobalConfig
   schemaPath: string
   serverURL: string
 }

@@ -1,5 +1,5 @@
 import type { FieldTypes } from '../exports/config.js'
-import type { Field } from '../fields/config/types.js'
+import type { ClientConfigField } from '../fields/config/types.js'
 
 export type FieldSchemaJSON = {
   blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
@@ -11,15 +11,17 @@ export type FieldSchemaJSON = {
   type: keyof FieldTypes
 }[]
 
-export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
+export const fieldSchemaToJSON = (fields: ClientConfigField[]): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 
     switch (field.type) {
       case 'group':
         acc.push({
+          // @ts-expect-error
           name: field.name,
           type: field.type,
+          // @ts-expect-error
           fields: fieldSchemaToJSON(field.fields),
         })
 
@@ -27,9 +29,11 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
 
       case 'array':
         acc.push({
+          // @ts-expect-error
           name: field.name,
           type: field.type,
           fields: fieldSchemaToJSON([
+            // @ts-expect-error
             ...field.fields,
             {
               name: 'id',
@@ -42,8 +46,10 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
 
       case 'blocks':
         acc.push({
+          // @ts-expect-error
           name: field.name,
           type: field.type,
+          // @ts-expect-error
           blocks: field.blocks.reduce((acc, block) => {
             acc[block.slug] = {
               fields: fieldSchemaToJSON([
@@ -63,12 +69,14 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
 
       case 'row':
       case 'collapsible':
+        // @ts-expect-error
         result = result.concat(fieldSchemaToJSON(field.fields))
         break
 
       case 'tabs': {
         let tabFields = []
 
+        // @ts-expect-error
         field.tabs.forEach((tab) => {
           if ('name' in tab) {
             tabFields.push({
@@ -90,9 +98,11 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
       case 'relationship':
       case 'upload':
         acc.push({
+          // @ts-expect-error
           name: field.name,
           type: field.type,
           hasMany: 'hasMany' in field ? Boolean(field.hasMany) : false, // TODO: type this
+          // @ts-expect-error
           relationTo: field.relationTo,
         })
 

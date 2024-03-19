@@ -1,12 +1,10 @@
-import type { ClientConfig, SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 import { useState } from 'react'
 
 import { useConfig } from '../../../../providers/Config/index.js'
 
-export const useRelatedCollections = (
-  relationTo: string | string[],
-): ClientConfig['collections'] => {
+export const useRelatedCollections = (relationTo: string | string[]): ClientCollectionConfig[] => {
   const config = useConfig()
 
   const [relatedCollections] = useState(() => {

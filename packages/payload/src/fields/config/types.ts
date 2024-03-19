@@ -700,7 +700,7 @@ export type FieldWithMany = RelationshipField | SelectField
 
 export type FieldWithMaxDepth = RelationshipField | UploadField
 
-export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
+export function fieldHasSubFields(field: ClientConfigField | Field): field is FieldWithSubFields {
   return (
     field.type === 'group' ||
     field.type === 'array' ||
@@ -743,11 +743,15 @@ export function fieldHasMaxDepth(field: Field): field is FieldWithMaxDepth {
   )
 }
 
-export function fieldIsPresentationalOnly(field: Field | TabAsField): field is UIField {
+export function fieldIsPresentationalOnly(
+  field: ClientConfigField | Field | TabAsField,
+): field is UIField {
   return field.type === 'ui'
 }
 
-export function fieldAffectsData(field: Field | TabAsField): field is FieldAffectingData {
+export function fieldAffectsData(
+  field: ClientConfigField | Field | TabAsField,
+): field is FieldAffectingData {
   return 'name' in field && !fieldIsPresentationalOnly(field)
 }
 
