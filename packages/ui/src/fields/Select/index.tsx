@@ -5,14 +5,14 @@ import type { ClientValidate, FieldBase, Option, OptionObject } from 'payload/ty
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
-import type { FormFieldBase } from '../shared.js'
+import type { FormFieldBase } from '../shared/index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export type SelectFieldProps = FormFieldBase & {

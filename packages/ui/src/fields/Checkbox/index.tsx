@@ -10,7 +10,7 @@ import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
-import { fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared/index.js'
 import { CheckboxInput } from './Input.js'
 import './index.scss'
 

@@ -25,6 +25,8 @@ import { Textarea as textarea } from './Textarea/index.js'
 import { UI as ui } from './UI/index.js'
 import { Upload as upload } from './Upload/index.js'
 
+export * from './shared/index.js'
+
 export const fieldComponents: FieldTypes = {
   array,
   blocks,

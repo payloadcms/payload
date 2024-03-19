@@ -2,7 +2,7 @@ import type { FieldBase, TextareaField as TextareaFieldType } from 'payload/type
 
 import { type ChangeEvent } from 'react'
 
-import type { FormFieldBase } from '../shared.js'
+import type { FormFieldBase } from '../shared/index.js'
 
 export type TextareaFieldProps = FormFieldBase & {
   label?: FieldBase['label']

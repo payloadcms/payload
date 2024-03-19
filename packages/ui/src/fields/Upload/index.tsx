@@ -1,6 +1,7 @@
 'use client'
 import React, { useCallback } from 'react'
 
+import type { UploadInputProps } from './Input.js'
 import type { UploadFieldProps } from './types.js'
 
 import { Label as LabelComp } from '../../forms/Label/index.js'
@@ -10,6 +11,7 @@ import { UploadInput } from './Input.js'
 import './index.scss'
 
 export { UploadFieldProps, UploadInput }
+export type { UploadInputProps }
 
 export const Upload: React.FC<UploadFieldProps> = (props) => {
   const {

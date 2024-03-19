@@ -2,7 +2,10 @@
 
 import type { FormField, UIField } from 'payload/types'
 
-import { useAllFormFields, useDocumentInfo, useLocale, useTranslation } from '@payloadcms/ui'
+import { useAllFormFields } from '@payloadcms/ui/forms/Form'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useLocale } from '@payloadcms/ui/providers/Locale'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useEffect, useState } from 'react'
 
 import type { GenerateURL } from '../types.js'

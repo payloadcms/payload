@@ -5,7 +5,7 @@ import type { FieldBase } from 'payload/types'
 import React, { Fragment } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { FormFieldBase } from '../shared.js'
+import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -17,7 +17,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useRow } from '../Row/provider.js'
 import { useTabs } from '../Tabs/provider.js'
-import { fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 import { GroupProvider, useGroup } from './provider.js'
 

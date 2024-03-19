@@ -586,6 +586,13 @@ export const Form: React.FC<Props> = (props) => {
 export * from './types.js'
 
 export {
+  FormContext,
+  FormFieldsContext,
+  FormWatchContext,
+  ModifiedContext,
+  ProcessingContext,
+  SubmittedContext,
+  useAllFormFields,
   useForm,
   useFormFields,
   useFormModified,

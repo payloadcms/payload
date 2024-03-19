@@ -10,13 +10,13 @@ import { useForm } from '../../forms/Form/context.js'
 import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared/index.js'
 import { Radio } from './Radio/index.js'
 import './index.scss'
 
 const baseClass = 'radio-group'
 
-import type { FormFieldBase } from '../shared.js'
+import type { FormFieldBase } from '../shared/index.js'
 
 export type RadioFieldProps = FormFieldBase & {
   label?: FieldBase['label']
