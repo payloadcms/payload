@@ -22,15 +22,7 @@ const combineLabel = (prefix: JSX.Element, field: MappedField): JSX.Element => {
   return (
     <Fragment>
       <span style={{ display: 'inline-block' }}>{prefix}</span>
-      {prefix ? (
-        <Fragment>
-          &nbsp;
-          {'>'}
-          &nbsp;
-        </Fragment>
-      ) : (
-        ''
-      )}
+      {prefix ? <Fragment>{' > '}</Fragment> : ''}
       <span style={{ display: 'inline-block' }}>{field.fieldComponentProps.Label}</span>
     </Fragment>
   )
@@ -50,7 +42,7 @@ const reduceFields = (
     // escape for a variety of reasons
     if (
       isFieldAffectingData &&
-      (field.admin?.disableBulkEdit ||
+      (field.disableBulkEdit ||
         field.unique ||
         field.isHidden ||
         field.fieldComponentProps?.readOnly)
@@ -107,6 +99,7 @@ export const FieldSelect: React.FC<Props> = ({ fieldMap, setSelected }) => {
   const [options] = useState(() => reduceFields(fieldMap))
 
   const { dispatchFields, getFields } = useForm()
+
   const handleChange = (selected) => {
     const activeFields = getFields()
     if (selected === null) {
@@ -114,6 +107,7 @@ export const FieldSelect: React.FC<Props> = ({ fieldMap, setSelected }) => {
     } else {
       setSelected(selected.map(({ value }) => value))
     }
+
     // remove deselected values from form state
     if (selected === null || Object.keys(activeFields || []).length > selected.length) {
       Object.keys(activeFields).forEach((path) => {
