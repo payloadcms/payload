@@ -24,7 +24,7 @@ import { LoadingOverlay } from '../Loading/index.js'
 import { Pill } from '../Pill/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
-import ViewDescription from '../ViewDescription/index.js'
+import { ViewDescription } from '../ViewDescription/index.js'
 import { baseClass } from './index.js'
 
 const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {

@@ -143,5 +143,3 @@ export const DeleteMany: React.FC<Props> = (props) => {
     </React.Fragment>
   )
 }
-
-export default DeleteMany

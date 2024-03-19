@@ -17,7 +17,7 @@ const baseClass = 'stay-logged-in'
 
 const modalSlug = 'stay-logged-in'
 
-const StayLoggedInModal: React.FC<StayLoggedInProps> = (props) => {
+export const StayLoggedInModal: React.FC<StayLoggedInProps> = (props) => {
   const { Modal, useModal } = facelessUIImport
 
   const { refreshCookie } = props
@@ -60,5 +60,3 @@ const StayLoggedInModal: React.FC<StayLoggedInProps> = (props) => {
     </Modal>
   )
 }
-
-export default StayLoggedInModal

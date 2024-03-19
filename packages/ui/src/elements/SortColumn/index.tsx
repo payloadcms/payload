@@ -83,5 +83,3 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
     </div>
   )
 }
-
-export default SortColumn

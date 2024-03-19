@@ -25,7 +25,7 @@ export type Props = {
   publishedDocUpdatedAt: string
 }
 
-const Autosave: React.FC<Props> = ({
+export const Autosave: React.FC<Props> = ({
   id,
   collection,
   global: globalDoc,
@@ -175,5 +175,3 @@ const Autosave: React.FC<Props> = ({
     </div>
   )
 }
-
-export default Autosave

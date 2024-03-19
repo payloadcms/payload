@@ -29,7 +29,7 @@ export type Props = {
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
-const DeleteDocument: React.FC<Props> = (props) => {
+export const DeleteDocument: React.FC<Props> = (props) => {
   const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps } = props
   const { Modal, useModal } = facelessUIImport
 
@@ -159,5 +159,3 @@ const DeleteDocument: React.FC<Props> = (props) => {
 
   return null
 }
-
-export default DeleteDocument

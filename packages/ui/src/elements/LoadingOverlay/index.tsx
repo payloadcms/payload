@@ -81,4 +81,3 @@ export const useLoadingOverlay = (): LoadingOverlayContext => {
 
   return contextHook
 }
-export default Context

@@ -17,23 +17,24 @@ import { useDebounce } from '../../../hooks/useDebounce.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { DateField } from './Date/index.js'
-import Number from './Number/index.js'
-import Relationship from './Relationship/index.js'
+import { NumberField } from './Number/index.js'
+import { RelationshipField } from './Relationship/index.js'
 import { Select } from './Select/index.js'
 import Text from './Text/index.js'
 import './index.scss'
 
-const valueFields = {
-  DateField,
-  Number,
-  Relationship,
+type ComponentType = 'Date' | 'Number' | 'Relationship' | 'Select' | 'Text'
+const valueFields: Record<ComponentType, React.FC> = {
+  Date: DateField,
+  Number: NumberField,
+  Relationship: RelationshipField,
   Select,
   Text,
 }
 
 const baseClass = 'condition'
 
-const Condition: React.FC<Props> = (props) => {
+export const Condition: React.FC<Props> = (props) => {
   const { andIndex, dispatch, fields, orIndex, value } = props
   const fieldName = Object.keys(value)[0]
   const [activeField, setActiveField] = useState<FieldCondition>(() =>
@@ -171,5 +172,3 @@ const Condition: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default Condition

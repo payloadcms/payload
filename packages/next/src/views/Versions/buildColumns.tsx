@@ -6,7 +6,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import SortColumn from '@payloadcms/ui/elements/SortColumn'
+import { SortColumn } from '@payloadcms/ui/elements/SortColumn'
 import React from 'react'
 
 import { AutosaveCell } from './cells/AutosaveCell/index.js'

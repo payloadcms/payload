@@ -16,7 +16,7 @@ const baseClass = 'condition-value-relationship'
 
 const maxResultsPerRequest = 10
 
-const RelationshipField: React.FC<Props> = (props) => {
+export const RelationshipField: React.FC<Props> = (props) => {
   const { admin: { isSortable } = {}, disabled, hasMany, onChange, relationTo, value } = props
 
   const {
@@ -303,5 +303,3 @@ const RelationshipField: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default RelationshipField

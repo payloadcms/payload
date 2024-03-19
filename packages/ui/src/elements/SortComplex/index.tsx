@@ -23,7 +23,7 @@ import './index.scss'
 
 const baseClass = 'sort-complex'
 
-const SortComplex: React.FC<SortComplexProps> = (props) => {
+export const SortComplex: React.FC<SortComplexProps> = (props) => {
   const { collection, handleChange, modifySearchQuery = true } = props
 
   const router = useRouter()
@@ -98,5 +98,3 @@ const SortComplex: React.FC<SortComplexProps> = (props) => {
     </div>
   )
 }
-
-export default SortComplex

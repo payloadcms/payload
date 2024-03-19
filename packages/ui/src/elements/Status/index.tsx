@@ -15,7 +15,7 @@ import './index.scss'
 
 const baseClass = 'status'
 
-const Status: React.FC = () => {
+export const Status: React.FC = () => {
   const { Modal, useModal } = facelessUIImport
 
   const {
@@ -207,5 +207,3 @@ const Status: React.FC = () => {
 
   return null
 }
-
-export default Status

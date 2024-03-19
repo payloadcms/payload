@@ -11,7 +11,7 @@ import type { UploadFieldProps } from './types.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
-import FileDetails from '../../elements/FileDetails/index.js'
+import { FileDetails } from '../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

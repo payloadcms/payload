@@ -23,7 +23,7 @@ export type FileDetailsProps = {
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 
-const FileDetails: React.FC<FileDetailsProps> = (props) => {
+export const FileDetails: React.FC<FileDetailsProps> = (props) => {
   const { canEdit, collectionSlug, doc, handleRemove, hasImageSizes, imageCacheTag, uploadConfig } =
     props
 
@@ -68,5 +68,3 @@ const FileDetails: React.FC<FileDetailsProps> = (props) => {
     </div>
   )
 }
-
-export default FileDetails
