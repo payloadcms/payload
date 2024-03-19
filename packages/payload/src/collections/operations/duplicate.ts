@@ -151,7 +151,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       // /////////////////////////////////////
 
       if (operation === 'create' && !overrideAccess) {
-        await executeAccess({ data: result, req }, collectionConfig.access.create)
+        await executeAccess({ data, req }, collectionConfig.access.create)
       }
 
       // /////////////////////////////////////
