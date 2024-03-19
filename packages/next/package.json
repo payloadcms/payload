@@ -74,48 +74,22 @@
     "payload": "workspace:*"
   },
   "publishConfig": {
-    "main": "./dist/exports/index.js",
-    "types": "./dist/exports/index.d.ts",
+    "main": "./dist/index.js",
+    "types": "./dist/index.js",
     "exports": {
       "./css": {
         "import": "./dist/prod/styles.css",
         "require": "./dist/prod/styles.css",
         "default": "./dist/prod/styles.css"
       },
-      "./withPayload": {
-        "import": "./dist/withPayload.js",
-        "require": "./dist/withPayload.js",
-        "types": "./dist/withPayload.d.ts"
-      },
       ".": {
         "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "require": "./dist/index.js"
       },
-      "./utilities/*": {
-        "import": "./dist/utilities/*.js",
-        "require": "./dist/utilities/*.js",
-        "types": "./dist/utilities/*.d.ts"
-      },
-      "./layouts/*": {
-        "import": "./dist/layouts/*.js",
-        "require": "./dist/layouts/*.js",
-        "types": "./dist/layouts/*.d.ts"
-      },
-      "./views/*": {
-        "import": "./dist/views/*.js",
-        "require": "./dist/views/*.js",
-        "types": "./dist/views/*.d.ts"
-      },
-      "./app/*": {
-        "import": "./dist/app/*.js",
-        "require": "./dist/app/*.js",
-        "types": "./dist/app/*.d.ts"
-      },
-      "./routes": {
-        "import": "./dist/routes/index.js",
-        "require": "./dist/routes/index.js",
-        "types": "./dist/routes/index.d.ts"
+      "./*": {
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
       }
     },
     "registry": "https://registry.npmjs.org/"
