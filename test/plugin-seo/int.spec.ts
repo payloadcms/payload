@@ -1,9 +1,9 @@
+import type { Payload } from 'payload'
+
 import path from 'path'
+import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src/index.js'
-
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
 import configPromise from './config.js'

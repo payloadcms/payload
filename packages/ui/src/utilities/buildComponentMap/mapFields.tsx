@@ -659,7 +659,7 @@ export const mapFields = (args: {
           Cell,
           CustomField: CustomFieldComponent ? (
             <CustomFieldComponent {...fieldComponentProps} />
-          ) : null,
+          ) : undefined,
           Heading,
           fieldComponentProps,
           fieldIsPresentational,

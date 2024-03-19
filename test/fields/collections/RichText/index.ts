@@ -1,6 +1,5 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
-import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters/html/field/index.js'
 import {
   BlocksFeature,
   HTMLConverterFeature,
@@ -8,8 +7,10 @@ import {
   TreeViewFeature,
   UploadFeature,
   lexicalEditor,
-} from '../../../../packages/richtext-lexical/src/index.js'
-import { slateEditor } from '../../../../packages/richtext-slate/src/index.js'
+} from '@payloadcms/richtext-lexical'
+import { slateEditor } from '@payloadcms/richtext-slate'
+
+import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters/html/field/index.js'
 import { richTextFieldsSlug } from '../../slugs.js'
 import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks.js'
 

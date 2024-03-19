@@ -1,4 +1,5 @@
-import { sentry } from '../../packages/plugin-sentry/src/index.js'
+import { sentry } from '@payloadcms/plugin-sentry'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Posts } from './collections/Posts.js'

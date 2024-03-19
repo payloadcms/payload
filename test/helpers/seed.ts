@@ -1,9 +1,9 @@
-import type { MongooseAdapter } from 'packages/db-mongodb/src/index.js'
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 
 import fs from 'fs'
 import path from 'path'
+import { type Payload } from 'payload'
 
-import { type Payload } from '../../packages/payload/src/index.js'
 import { isMongoose } from './isMongoose.js'
 import { resetDB } from './reset.js'
 import { createSnapshot, dbSnapshot, restoreFromSnapshot } from './snapshot.js'

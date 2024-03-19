@@ -1,10 +1,11 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src/index.js'
 import type {
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,
@@ -13,7 +14,6 @@ import type {
   RelationWithTitle,
 } from './payload-types.js'
 
-import wait from '../../packages/payload/src/utilities/wait.js'
 import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'

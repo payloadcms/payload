@@ -1,5 +1,5 @@
 // const payload = require('payload');
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',

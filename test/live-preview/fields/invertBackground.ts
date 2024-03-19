@@ -1,4 +1,4 @@
-import type { CheckboxField } from '../../../packages/payload/src/fields/config/types.js'
+import type { CheckboxField } from 'payload/types'
 
 export const invertBackground: CheckboxField = {
   name: 'invertBackground',

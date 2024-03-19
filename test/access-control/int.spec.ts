@@ -1,7 +1,9 @@
-import type { Payload, PayloadRequest } from '../../packages/payload/src/types/index.js'
+import type { Payload, PayloadRequest } from 'payload/types'
+
+import { Forbidden } from 'payload/errors'
+
 import type { Post, RelyOnRequestHeader, Restricted } from './payload-types.js'
 
-import { Forbidden } from '../../packages/payload/src/errors/index.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise, { requestHeaders } from './config.js'
 import {

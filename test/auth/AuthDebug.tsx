@@ -1,11 +1,10 @@
 'use client'
 
+import type { User } from 'payload/auth'
+import type { UIField } from 'payload/types'
+
+import { useAuth } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
-
-import type { User } from '../../packages/payload/src/auth/types.js'
-import type { UIField } from '../../packages/payload/src/fields/config/types.js'
-
-import { useAuth } from '../../packages/ui/src/providers/Auth/index.js'
 
 export const AuthDebug: React.FC<UIField> = () => {
   const [state, setState] = useState<User | null | undefined>()

@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import type { RowLabelComponent } from 'payload/types'
 
-import type { RowLabelComponent } from '../../../../packages/payload/src/admin/forms/RowLabel.js'
+import React from 'react'
 
 import { useRowLabel } from '../../../../packages/ui/src/forms/RowLabel/Context/index.js'
 

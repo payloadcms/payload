@@ -1,4 +1,4 @@
-import { APIError } from '../../../packages/payload/src/errors/index.js'
+import { APIError } from 'payload/errors'
 
 export const subscriptionDeleted = async (args) => {
   const {

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
 import {
   HTMLConverterFeature,
@@ -9,7 +9,8 @@ import {
   UploadFeature,
   lexicalEditor,
   lexicalHTML,
-} from '../../../../packages/richtext-lexical/src/index.js'
+} from '@payloadcms/richtext-lexical'
+
 import { lexicalMigrateFieldsSlug } from '../../slugs.js'
 import { getSimpleLexicalData } from './data.js'
 

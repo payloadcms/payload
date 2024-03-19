@@ -1,4 +1,5 @@
-import nestedDocs from '../../packages/plugin-nested-docs/src/index.js'
+import nestedDocs from '@payloadcms/plugin-nested-docs'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Categories } from './collections/Categories.js'

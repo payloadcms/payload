@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from '../../packages/payload/src/config/types.js'
+import type { SanitizedConfig } from 'payload/config'
 
 import { APIError } from '../../packages/payload/errors.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'

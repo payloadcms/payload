@@ -1,9 +1,8 @@
+import { Button } from '@payloadcms/ui'
+// As this is the demo project, we import our dependencies from the `src` directory.
+import { MinimalTemplate } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
-
-import { Button } from '../../../../../packages/ui/src/elements/Button/index.js'
-// As this is the demo project, we import our dependencies from the `src` directory.
-import { MinimalTemplate } from '../../../../../packages/ui/src/templates/Minimal/index.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
@@ -12,10 +11,9 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 // import { Button } from 'payload/components/elements';
 // import { useConfig } from 'payload/components/utilities';
 
-import type { AdminViewProps } from 'payload/types.js'
+import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
-import { customViewPath } from 'test/admin/shared.js'
-
+import { customViewPath } from '../../../shared.js'
 import './index.scss'
 
 const baseClass = 'custom-minimal-view'

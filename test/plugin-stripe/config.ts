@@ -1,4 +1,5 @@
-import stripePlugin from '../../packages/plugin-stripe/src/index.js'
+import stripePlugin from '@payloadcms/plugin-stripe'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Customers } from './collections/Customers.js'

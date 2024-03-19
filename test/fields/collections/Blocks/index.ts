@@ -1,5 +1,5 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
-import type { BlockField } from '../../../../packages/payload/src/fields/config/types.js'
+import type { CollectionConfig } from 'payload/types'
+import type { BlockField } from 'payload/types'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs.js'
 import { AddCustomBlocks } from './components/AddCustomBlocks/index.js'

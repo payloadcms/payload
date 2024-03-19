@@ -1,7 +1,8 @@
-import type { Block } from '../../packages/payload/src/fields/config/types.js'
+import type { Block } from 'payload/types'
 
-import formBuilder, { fields as formFields } from '../../packages/plugin-form-builder/src/index.js'
-import { slateEditor } from '../../packages/richtext-slate/src/index.js'
+import formBuilder, { fields as formFields } from '@payloadcms/plugin-form-builder'
+import { slateEditor } from '@payloadcms/richtext-slate'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Pages } from './collections/Pages.js'

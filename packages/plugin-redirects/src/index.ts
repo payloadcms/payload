@@ -79,4 +79,4 @@ const redirects =
     ],
   })
 
-export default redirects
+export { redirects }

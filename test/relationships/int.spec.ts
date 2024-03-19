@@ -1,6 +1,7 @@
+import type { Payload } from 'payload'
+
 import { randomBytes } from 'crypto'
 
-import type { Payload } from '../../packages/payload/src/index.js'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
   ChainedRelation,

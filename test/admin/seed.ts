@@ -1,11 +1,10 @@
-import type { Payload } from '../../packages/payload/src/index.js'
+import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
 import {
   collectionSlugs,
   customIdCollectionId,
-  customIdCollectionSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
@@ -30,7 +29,7 @@ export async function clearAndSeedEverything(_payload: Payload) {
           },
         }),
         ...[...Array(11)].map(() => {
-          _payload.create({
+          void _payload.create({
             collection: postsCollectionSlug,
             data: {
               title: 'Title',

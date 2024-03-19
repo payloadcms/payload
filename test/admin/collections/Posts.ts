@@ -1,6 +1,7 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
-import { slateEditor } from '../../../packages/richtext-slate/src/index.js'
+import { slateEditor } from '@payloadcms/richtext-slate'
+
 import { DemoUIFieldCell } from '../components/DemoUIField/Cell.js'
 import { DemoUIField } from '../components/DemoUIField/Field.js'
 import {
@@ -12,27 +13,19 @@ import { postsCollectionSlug } from '../slugs.js'
 
 export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
-  labels: {
-    singular: slugSingularLabel,
-    plural: slugPluralLabel,
-  },
   admin: {
-    description: 'Description',
-    listSearchableFields: ['id', 'title', 'description', 'number'],
-    group: 'One',
-    useAsTitle: 'title',
     defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
+    description: 'Description',
+    group: 'One',
+    listSearchableFields: ['id', 'title', 'description', 'number'],
     preview: () => 'https://payloadcms.com',
-  },
-  versions: {
-    drafts: true,
+    useAsTitle: 'title',
   },
   fields: [
     {
       type: 'tabs',
       tabs: [
         {
-          label: 'Tab 1',
           fields: [
             {
               name: 'title',
@@ -56,17 +49,18 @@ export const Posts: CollectionConfig = {
               }),
             },
             {
-              type: 'ui',
               name: 'demoUIField',
-              label: 'Demo UI Field',
+              type: 'ui',
               admin: {
                 components: {
-                  Field: DemoUIField,
                   Cell: DemoUIFieldCell,
+                  Field: DemoUIField,
                 },
               },
+              label: 'Demo UI Field',
             },
           ],
+          label: 'Tab 1',
         },
       ],
     },
@@ -83,21 +77,21 @@ export const Posts: CollectionConfig = {
     {
       name: 'relationship',
       type: 'relationship',
-      relationTo: 'posts',
       admin: {
         position: 'sidebar',
       },
+      relationTo: 'posts',
     },
     {
       name: 'sidebarField',
       type: 'text',
-      admin: {
-        position: 'sidebar',
-        description:
-          'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
-      },
       access: {
         update: () => false,
+      },
+      admin: {
+        description:
+          'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
+        position: 'sidebar',
       },
     },
     {
@@ -122,4 +116,11 @@ export const Posts: CollectionConfig = {
       },
     },
   ],
+  labels: {
+    plural: slugPluralLabel,
+    singular: slugSingularLabel,
+  },
+  versions: {
+    drafts: true,
+  },
 }

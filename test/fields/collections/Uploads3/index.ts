@@ -1,7 +1,7 @@
+import type { CollectionConfig } from 'payload/types'
+
 import path from 'path'
 import { fileURLToPath } from 'url'
-
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
 
 import { uploads3Slug } from '../../slugs.js'
 const filename = fileURLToPath(import.meta.url)

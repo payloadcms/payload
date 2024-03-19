@@ -145,6 +145,9 @@ importers:
       drizzle-orm:
         specifier: 0.29.4
         version: 0.29.4(@libsql/client@0.5.2)(@types/pg@8.10.2)(@types/react@18.2.15)(pg@8.11.3)(react@18.2.0)
+      escape-html:
+        specifier: ^1.0.3
+        version: 1.0.3
       execa:
         specifier: 5.1.1
         version: 5.1.1
@@ -1439,6 +1442,75 @@ importers:
       webpack-cli:
         specifier: ^5.1.4
         version: 5.1.4(webpack@5.90.3)
+
+  test:
+    devDependencies:
+      '@payloadcms/db-mongodb':
+        specifier: workspace:*
+        version: link:../packages/db-mongodb
+      '@payloadcms/db-postgres':
+        specifier: workspace:*
+        version: link:../packages/db-postgres
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../packages/eslint-config-payload
+      '@payloadcms/graphql':
+        specifier: workspace:*
+        version: link:../packages/graphql
+      '@payloadcms/live-preview':
+        specifier: workspace:*
+        version: link:../packages/live-preview
+      '@payloadcms/live-preview-react':
+        specifier: workspace:*
+        version: link:../packages/live-preview-react
+      '@payloadcms/next':
+        specifier: workspace:*
+        version: link:../packages/next
+      '@payloadcms/plugin-cloud':
+        specifier: workspace:*
+        version: link:../packages/plugin-cloud
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../packages/plugin-cloud-storage
+      '@payloadcms/plugin-form-builder':
+        specifier: workspace:*
+        version: link:../packages/plugin-form-builder
+      '@payloadcms/plugin-nested-docs':
+        specifier: workspace:*
+        version: link:../packages/plugin-nested-docs
+      '@payloadcms/plugin-redirects':
+        specifier: workspace:*
+        version: link:../packages/plugin-redirects
+      '@payloadcms/plugin-search':
+        specifier: workspace:*
+        version: link:../packages/plugin-search
+      '@payloadcms/plugin-sentry':
+        specifier: workspace:*
+        version: link:../packages/plugin-sentry
+      '@payloadcms/plugin-seo':
+        specifier: workspace:*
+        version: link:../packages/plugin-seo
+      '@payloadcms/plugin-stripe':
+        specifier: workspace:*
+        version: link:../packages/plugin-stripe
+      '@payloadcms/richtext-lexical':
+        specifier: workspace:*
+        version: link:../packages/richtext-lexical
+      '@payloadcms/richtext-slate':
+        specifier: workspace:*
+        version: link:../packages/richtext-slate
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../packages/translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../packages/ui
+      create-payload-app:
+        specifier: workspace:*
+        version: link:../packages/create-payload-app
+      payload:
+        specifier: workspace:*
+        version: link:../packages/payload
 
 packages:
 

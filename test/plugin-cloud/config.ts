@@ -1,7 +1,7 @@
+import { payloadCloud } from '@payloadcms/plugin-cloud'
 import dotenv from 'dotenv'
 import path from 'path'
 
-import { payloadCloud } from '../../packages/plugin-cloud/src/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -14,8 +14,6 @@ dotenv.config({
 
 export default buildConfigWithDefaults({
   collections: [Media, Users],
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
-  plugins: [payloadCloud()],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -25,4 +23,6 @@ export default buildConfigWithDefaults({
       },
     })
   },
+  plugins: [payloadCloud()],
+  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
 })
