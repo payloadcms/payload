@@ -1,7 +1,7 @@
+import type { Payload } from 'payload'
+
 import path from 'path'
 import { fileURLToPath } from 'url'
-
-import type { Payload } from 'payload'
 
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'

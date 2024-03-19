@@ -3,14 +3,11 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { Payload } from 'payload'
 import type { PaginatedDocs } from 'payload/database'
 
-import { getPayload } from 'payload'
-
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { GroupField, RichTextField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { isMongoose } from '../helpers/isMongoose.js'
-import { startMemoryDB } from '../startMemoryDB.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'

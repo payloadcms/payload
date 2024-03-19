@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-
 import type { CollectionConfig } from 'payload/types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'

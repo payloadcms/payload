@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from 'payload'
 import type {
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,

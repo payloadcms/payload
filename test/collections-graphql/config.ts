@@ -1,7 +1,7 @@
+import type { CollectionConfig } from 'payload/types'
+
 import path from 'path'
 import { fileURLToPath } from 'url'
-
-import type { CollectionConfig } from 'payload/types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'

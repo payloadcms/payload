@@ -1,8 +1,8 @@
+import type { Payload } from 'payload'
+
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import { fileURLToPath } from 'url'
-
-import type { Payload } from 'payload'
 
 import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'

@@ -25,7 +25,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import { slateEditor } from '@payloadcms/richtext-slate'
+// import { slateEditor } from '@payloadcms/richtext-slate'
 import { type Config, buildConfig } from 'payload/config'
 import sharp from 'sharp'
 // process.env.PAYLOAD_DATABASE = 'postgres'
