@@ -3,7 +3,7 @@ import type { Description, DocumentPermissions } from 'payload/types'
 
 import React from 'react'
 
-import type { FieldMap } from '../../utilities/buildComponentMap/types.js'
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'

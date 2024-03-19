@@ -1,9 +1,9 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import type { ActionMap } from '../../utilities/buildComponentMap/types.js'
+import type { ActionMap } from '../ComponentMap/buildComponentMap/types.js'
 
-import { useComponentMap } from '../ComponentMapProvider/index.js'
+import { useComponentMap } from '../ComponentMap/index.jsx'
 
 type ActionsContextType = {
   actions: ActionMap['Edit'][string]
@@ -37,3 +37,5 @@ export const ActionsProvider = ({ children }) => {
     </ActionsContext.Provider>
   )
 }
+
+export { SetViewActions } from './SetViewActions/index.jsx'

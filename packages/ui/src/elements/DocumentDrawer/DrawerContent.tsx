@@ -13,7 +13,7 @@ import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/us
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
 import { X } from '../../icons/X/index.js'
 import { formatDocTitle } from '../../index.js'
-import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
+import { useComponentMap } from '../../providers/ComponentMap/index.jsx'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'

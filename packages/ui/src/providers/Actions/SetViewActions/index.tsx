@@ -3,9 +3,9 @@ import type React from 'react'
 
 import { useEffect } from 'react'
 
-import type { ActionMap } from '../../../utilities/buildComponentMap/types.js'
+import type { ActionMap } from '../../ComponentMap/buildComponentMap/types.js'
 
-import { useActions } from '../index.js'
+import { useActions } from '../index.jsx'
 
 export const SetViewActions: React.FC<{ actions: ActionMap['Edit'][string] }> = ({ actions }) => {
   const { setViewActions } = useActions()

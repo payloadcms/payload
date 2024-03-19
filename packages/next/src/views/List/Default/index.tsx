@@ -29,7 +29,7 @@ import LinkImport from 'next/link.js'
 import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
-import type { CollectionComponentMap } from '../../../../../ui/src/utilities/buildComponentMap/types.js'
+import type { CollectionComponentMap } from '../../../../../ui/src/providers/ComponentMap/buildComponentMap/types.js'
 
 import { RelationshipProvider } from './RelationshipProvider/index.js'
 import './index.scss'

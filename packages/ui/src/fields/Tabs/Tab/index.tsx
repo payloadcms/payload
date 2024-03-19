@@ -2,7 +2,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { useState } from 'react'
 
-import type { MappedTab } from '../../../utilities/buildComponentMap/types.js'
+import type { MappedTab } from '../../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'

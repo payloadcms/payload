@@ -1,11 +1,11 @@
 'use client'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
-
-import type { Props } from './types.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -19,6 +19,15 @@ import { Translation } from '../Translation/index.js'
 import './index.scss'
 
 const baseClass = 'delete-document'
+
+export type Props = {
+  buttonId?: string
+  collectionSlug: SanitizedCollectionConfig['slug']
+  id?: string
+  singularLabel: SanitizedCollectionConfig['labels']['singular']
+  title?: string
+  useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
+}
 
 const DeleteDocument: React.FC<Props> = (props) => {
   const { id, buttonId, collectionSlug, singularLabel, title: titleFromProps } = props

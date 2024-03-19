@@ -26,6 +26,12 @@
       "default": "./src/elements/*/index.tsx",
       "types": "./src/elements/*/index.tsx"
     },
+    "./fields/*": {
+      "import": "./src/fields/*/index.tsx",
+      "require": "./src/fields/*/index.tsx",
+      "default": "./src/fields/*/index.tsx",
+      "types": "./src/fields/*/index.tsx"
+    },
     "./forms/*": {
       "import": "./src/forms/*/index.tsx",
       "require": "./src/forms/*/index.tsx",
@@ -63,10 +69,10 @@
       "types": "./src/templates/*/index.tsx"
     },
     "./utilities/*": {
-      "import": "./src/utilities/*/index.tsx",
-      "require": "./src/utilities/*/index.tsx",
-      "default": "./src/utilities/*/index.tsx",
-      "types": "./src/utilities/*/index.tsx"
+      "import": "./src/utilities/*.ts",
+      "require": "./src/utilities/*.ts",
+      "default": "./src/utilities/*.ts",
+      "types": "./src/utilities/*.ts"
     },
     "./scss": {
       "import": "./src/scss.scss",

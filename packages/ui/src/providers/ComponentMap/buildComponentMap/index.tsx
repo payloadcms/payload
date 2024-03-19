@@ -4,8 +4,8 @@ import React from 'react'
 
 import type { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types.js'
 
-import { mapActions } from './mapActions.js'
-import { mapFields } from './mapFields.js'
+import { mapActions } from './mapActions.jsx'
+import { mapFields } from './mapFields.jsx'
 
 export const buildComponentMap = (args: {
   DefaultCell: React.FC<any>

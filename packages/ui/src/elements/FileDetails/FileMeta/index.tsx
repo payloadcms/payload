@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import type { Props } from './types.js'
 
 import { Edit } from '../../../icons/Edit/index.js'
-import CopyToClipboard from '../../CopyToClipboard/index.js'
+import { CopyToClipboard } from '../../CopyToClipboard/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { Tooltip } from '../../Tooltip/index.js'
 import './index.scss'

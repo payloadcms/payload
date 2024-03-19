@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { CheckboxInput } from '../../forms/fields/Checkbox/Input.js'
-import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider/index.js'
+import { SelectAllStatus, useSelection } from '../../providers/Selection/index.jsx'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 

@@ -4,7 +4,7 @@ import type { FieldBase } from 'payload/types'
 
 import React, { Fragment } from 'react'
 
-import type { FieldMap } from '../../utilities/buildComponentMap/types.js'
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'

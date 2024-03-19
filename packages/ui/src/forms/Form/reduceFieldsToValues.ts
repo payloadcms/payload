@@ -9,7 +9,7 @@ const { unflatten: flatleyUnflatten } = flatleyImport
  * @param ignoreDisableFormData - if true, will include fields that have `disableFormData` set to true, for example, blocks or arrays fields.
  *
  */
-const reduceFieldsToValues = (
+export const reduceFieldsToValues = (
   fields: FormState,
   unflatten?: boolean,
   ignoreDisableFormData?: boolean,
@@ -28,5 +28,3 @@ const reduceFieldsToValues = (
 
   return data
 }
-
-export default reduceFieldsToValues

@@ -6,10 +6,10 @@ import type { ArrayField as ArrayFieldType } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { FieldMap } from '../../utilities/buildComponentMap/types.js'
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared.js'
 
-import Banner from '../../elements/Banner/index.js'
+import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
 import DraggableSortableItem from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import DraggableSortable from '../../elements/DraggableSortable/index.js'

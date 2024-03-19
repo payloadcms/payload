@@ -4,7 +4,10 @@ import type { Labels } from 'payload/types'
 import * as facelessUIImport from '@faceless-ui/modal'
 import React from 'react'
 
-import type { FieldMap, ReducedBlock } from '../../utilities/buildComponentMap/types.js'
+import type {
+  FieldMap,
+  ReducedBlock,
+} from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'

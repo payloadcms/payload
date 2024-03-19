@@ -1,7 +1,7 @@
 'use client'
 import type React from 'react'
 
-import type { FieldMap } from '../../utilities/buildComponentMap/types.js'
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import useThrottledEffect from '../../hooks/useThrottledEffect.js'
 import { useAllFormFields, useFormSubmitted } from '../Form/context.js'

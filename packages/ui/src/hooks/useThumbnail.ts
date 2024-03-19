@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { isImage } from 'payload/utilities'
 
-import { useComponentMap } from '../providers/ComponentMapProvider/index.js'
+import { useComponentMap } from '../providers/ComponentMap/index.jsx'
 import { useConfig } from '../providers/Config/index.js'
 
 const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i')

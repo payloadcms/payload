@@ -1,6 +1,6 @@
 import type React from 'react'
 
-import type { MappedField } from '../../utilities/buildComponentMap/types.js'
+import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared.js'
 
 export type RichTextFieldProps = FormFieldBase & {

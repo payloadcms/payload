@@ -6,7 +6,7 @@ import React, { useState } from 'react'
 
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath.js'
-import Label from '../../forms/Label/index.js'
+import { Label } from '../../forms/Label/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import ReactSelect from '../ReactSelect/index.js'
 import './index.scss'

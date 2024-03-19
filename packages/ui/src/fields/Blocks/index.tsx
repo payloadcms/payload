@@ -28,7 +28,10 @@ const baseClass = 'blocks-field'
 import type { FieldPermissions } from 'payload/auth'
 import type { BlockField, FieldBase } from 'payload/types'
 
-import type { FieldMap, ReducedBlock } from '../../utilities/buildComponentMap/types.js'
+import type {
+  FieldMap,
+  ReducedBlock,
+} from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared.js'
 
 export type BlocksFieldProps = FormFieldBase & {

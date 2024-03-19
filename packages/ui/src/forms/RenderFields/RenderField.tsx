@@ -5,11 +5,14 @@ import type { FieldPermissions } from 'payload/types'
 
 import React from 'react'
 
-import type { FieldComponentProps, MappedField } from '../../utilities/buildComponentMap/types.js'
+import type {
+  FieldComponentProps,
+  MappedField,
+} from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { HiddenInput } from '../../index.js'
-import { useFieldComponents } from '../../providers/FieldComponentsProvider/index.js'
-import { useOperation } from '../../providers/OperationProvider/index.js'
+import { useFieldComponents } from '../../providers/FieldComponents/index.jsx'
+import { useOperation } from '../../providers/Operation/index.jsx'
 import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.js'
 
 type Props = {

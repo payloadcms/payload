@@ -2,10 +2,10 @@
 import React, { useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
+import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types.js'
+
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
-
-import type { Props } from './types.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { DragHandle } from '../../icons/DragHandle/index.js'
@@ -14,6 +14,20 @@ import './index.scss'
 import { CollapsibleProvider, useCollapsible } from './provider.js'
 
 const baseClass = 'collapsible'
+
+export { CollapsibleProvider, useCollapsible }
+
+export type Props = {
+  actions?: React.ReactNode
+  children: React.ReactNode
+  className?: string
+  collapsed?: boolean
+  collapsibleStyle?: 'default' | 'error'
+  dragHandleProps?: DragHandleProps
+  header?: React.ReactNode
+  initCollapsed?: boolean
+  onToggle?: (collapsed: boolean) => void
+}
 
 export const Collapsible: React.FC<Props> = ({
   actions,

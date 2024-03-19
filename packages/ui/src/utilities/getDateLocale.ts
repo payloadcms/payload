@@ -1,6 +1,6 @@
 import type { Locale } from 'date-fns'
 
-import { dateLocales } from '../../utilities/formatDate/locales.js'
+import { dateLocales } from './dateLocales.js'
 
 export const getDateLocale = (
   locale = 'enUS',

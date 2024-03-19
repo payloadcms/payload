@@ -3,7 +3,7 @@ import LinkWithDefault from 'next/link.js'
 import React, { useEffect, useRef, useState } from 'react'
 
 import Account from '../../graphics/Account/index.js'
-import { useActions } from '../../providers/ActionsProvider/index.js'
+import { useActions } from '../../providers/Actions/index.jsx'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Hamburger } from '../Hamburger/index.js'

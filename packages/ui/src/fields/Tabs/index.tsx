@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { FieldMap, MappedTab } from '../../utilities/buildComponentMap/types.js'
+import type { FieldMap, MappedTab } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'

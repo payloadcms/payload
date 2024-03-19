@@ -1,4 +1,4 @@
-import type { FieldTypes } from 'payload/config.js'
+import type { FieldTypes } from 'payload/config'
 import type {
   BlockField,
   SanitizedCollectionConfig,
@@ -6,24 +6,24 @@ import type {
   TabsField,
 } from 'payload/types'
 
-import type { ArrayFieldProps } from '../../forms/fields/Array/types.js'
-import type { BlocksFieldProps } from '../../forms/fields/Blocks/types.js'
-import type { CheckboxFieldProps } from '../../forms/fields/Checkbox/types.js'
-import type { CodeFieldProps } from '../../forms/fields/Code/types.js'
-import type { CollapsibleFieldProps } from '../../forms/fields/Collapsible/types.js'
-import type { DateFieldProps } from '../../forms/fields/DateTime/types.js'
-import type { EmailFieldProps } from '../../forms/fields/Email/types.js'
-import type { GroupFieldProps } from '../../forms/fields/Group/types.js'
-import type { JSONFieldProps } from '../../forms/fields/JSON/types.js'
-import type { NumberFieldProps } from '../../forms/fields/Number/types.js'
-import type { PointFieldProps } from '../../forms/fields/Point/types.js'
-import type { RelationshipFieldProps } from '../../forms/fields/Relationship/types.js'
-import type { RowFieldProps } from '../../forms/fields/Row/types.js'
-import type { SelectFieldProps } from '../../forms/fields/Select/types.js'
-import type { TabsFieldProps } from '../../forms/fields/Tabs/types.js'
-import type { TextFieldProps } from '../../forms/fields/Text/types.js'
-import type { TextareaFieldProps } from '../../forms/fields/Textarea/types.js'
-import type { UploadFieldProps } from '../../forms/fields/Upload/types.js'
+import type { ArrayFieldProps } from '../../../fields/Array/index.js'
+import type { BlocksFieldProps } from '../../../fields/Blocks/index.js'
+import type { CheckboxFieldProps } from '../../../fields/Checkbox/types.js'
+import type { CodeFieldProps } from '../../../fields/Code/index.js'
+import type { CollapsibleFieldProps } from '../../../fields/Collapsible/index.js'
+import type { DateFieldProps } from '../../../fields/DateTime/index.js'
+import type { EmailFieldProps } from '../../../fields/Email/index.js'
+import type { GroupFieldProps } from '../../../fields/Group/index.js'
+import type { JSONFieldProps } from '../../../fields/JSON/index.js'
+import type { NumberFieldProps } from '../../../fields/Number/index.js'
+import type { PointFieldProps } from '../../../fields/Point/index.js'
+import type { RelationshipFieldProps } from '../../../fields/Relationship/index.js'
+import type { RowFieldProps } from '../../../fields/Row/types.js'
+import type { SelectFieldProps } from '../../../fields/Select/index.js'
+import type { TabsFieldProps } from '../../../fields/Tabs/index.js'
+import type { TextFieldProps } from '../../../fields/Text/types.js'
+import type { TextareaFieldProps } from '../../../fields/Textarea/types.js'
+import type { UploadFieldProps } from '../../../fields/Upload/types.js'
 
 export type MappedTab = {
   fieldMap?: FieldMap

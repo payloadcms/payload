@@ -1,17 +1,17 @@
 'use client'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.js'
-
-import { useRouteCache } from '../../index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
-import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider/index.js'
+import { SelectAllStatus, useSelection } from '../../providers/Selection/index.jsx'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
@@ -20,6 +20,11 @@ import Pill from '../Pill/index.js'
 import './index.scss'
 
 const baseClass = 'delete-documents'
+
+export type Props = {
+  collection: SanitizedCollectionConfig
+  title?: string
+}
 
 export const DeleteMany: React.FC<Props> = (props) => {
   const { Modal, useModal } = facelessUIImport
