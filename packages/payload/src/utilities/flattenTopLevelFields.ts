@@ -1,9 +1,5 @@
-import type {
-  ClientConfigField,
-  Field,
-  FieldAffectingData,
-  FieldPresentationalOnly,
-} from '../fields/config/types.js'
+import type { ClientFieldConfig } from '../fields/config/client.js'
+import type { Field, FieldAffectingData, FieldPresentationalOnly } from '../fields/config/types.js'
 
 import {
   fieldAffectsData,
@@ -19,7 +15,7 @@ import {
  * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
  */
 const flattenFields = (
-  fields: (ClientConfigField | Field)[],
+  fields: (ClientFieldConfig | Field)[],
   keepPresentationalFields?: boolean,
 ): (FieldAffectingData | FieldPresentationalOnly)[] => {
   return fields.reduce((fieldsToUse, field) => {

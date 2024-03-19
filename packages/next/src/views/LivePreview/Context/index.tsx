@@ -1,6 +1,6 @@
 'use client'
 import type { LivePreviewConfig } from 'payload/config'
-import type { ClientConfigField, Field } from 'payload/types'
+import type { ClientFieldConfig, Field } from 'payload/types'
 
 import { DndContext } from '@dnd-kit/core'
 import { fieldSchemaToJSON } from 'payload/utilities'
@@ -20,7 +20,7 @@ export type LivePreviewProviderProps = {
     height: number
     width: number
   }
-  fieldSchema: ClientConfigField[]
+  fieldSchema: ClientFieldConfig[]
   isPopupOpen?: boolean
   openPopupWindow?: ReturnType<typeof usePopupWindow>['openPopupWindow']
   popupRef?: React.MutableRefObject<Window>
