@@ -94,12 +94,6 @@ export const DefaultListView: React.FC = () => {
     ])
   }, [setStepNav, labels])
 
-  const listSelectionLabelOrComponent = getTranslation(collectionConfig.labels.plural, i18n)
-  const listSelectionLabel =
-    typeof listSelectionLabelOrComponent === 'string'
-      ? listSelectionLabelOrComponent
-      : collectionSlug
-
   return (
     <div className={baseClass}>
       <SetViewActions actions={actionsMap?.List} />
@@ -120,7 +114,9 @@ export const DefaultListView: React.FC = () => {
                     {i18n.t('general:createNew')}
                   </Pill>
                 )}
-                {!smallBreak && <ListSelection label={listSelectionLabel} />}
+                {!smallBreak && (
+                  <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
+                )}
                 {/* {description && (
                   <div className={`${baseClass}__sub-header`}>
                     <ViewDescription description={description} />
@@ -199,7 +195,9 @@ export const DefaultListView: React.FC = () => {
                   {smallBreak && (
                     <div className={`${baseClass}__list-selection`}>
                       <Fragment>
-                        <ListSelection label={listSelectionLabel} />
+                        <ListSelection
+                          label={getTranslation(collectionConfig.labels.plural, i18n)}
+                        />
                         <div className={`${baseClass}__list-selection-actions`}>
                           <EditMany collection={collectionConfig} fieldMap={fieldMap} />
                           <PublishMany collection={collectionConfig} />

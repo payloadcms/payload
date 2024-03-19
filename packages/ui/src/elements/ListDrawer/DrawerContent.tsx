@@ -86,17 +86,14 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const { List } = componentMap.collections?.[selectedCollectionConfig?.slug] || {}
 
-  const [selectedOption, setSelectedOption] = useState<{ label: string; value: string }>(() => {
-    const labelOrComponent = getTranslation(selectedCollectionConfig.labels.singular, i18n)
-    const label =
-      typeof labelOrComponent === 'string' ? labelOrComponent : selectedCollectionConfig.slug
-    if (selectedCollectionConfig) {
-      return {
-        label,
-        value: selectedCollectionConfig.slug,
-      }
-    }
-  })
+  const [selectedOption, setSelectedOption] = useState<{ label: string; value: string }>(() =>
+    selectedCollectionConfig
+      ? {
+          label: getTranslation(selectedCollectionConfig.labels.singular, i18n),
+          value: selectedCollectionConfig.slug,
+        }
+      : undefined,
+  )
 
   // const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig))
 

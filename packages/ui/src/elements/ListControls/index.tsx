@@ -38,9 +38,6 @@ export const ListControls: React.FC<Props> = (props) => {
     enableColumns = true,
     enableSort = false,
     fieldMap,
-    handleSearchChange,
-    handleSortChange,
-    handleWhereChange,
     modifySearchQuery = true,
     textFieldsToBeSearched,
     titleField,
@@ -157,8 +154,8 @@ export const ListControls: React.FC<Props> = (props) => {
             handleChange={handleSortChange}
             modifySearchQuery={modifySearchQuery}
           /> */}
-          </AnimateHeight>
-        )}
-      </div>
+        </AnimateHeight>
+      )}
+    </div>
   )
 }
