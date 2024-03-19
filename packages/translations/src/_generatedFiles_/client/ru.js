@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Успешно отправлено.',
     submit: 'Отправить',
     successfullyCreated: '{{label}} успешно создан.',
-    successfullyDuplicated: '{{label}} успешно продублирован.',
     thisLanguage: 'Русский',
     titleDeleted: '{{label}} {{title}} успешно удалено.',
     unauthorized: 'Нет доступа',

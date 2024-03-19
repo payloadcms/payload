@@ -188,7 +188,6 @@ export default {
     submissionSuccessful: 'Успішно відправлено.',
     submit: 'Відправити',
     successfullyCreated: '{{label}} успішно створено.',
-    successfullyDuplicated: '{{label}} успішно продубльовано.',
     thisLanguage: 'Українська',
     titleDeleted: '{{label}} "{{title}}" успішно видалено.',
     unauthorized: 'Немає доступу',

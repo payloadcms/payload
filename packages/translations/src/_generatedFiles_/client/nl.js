@@ -190,7 +190,6 @@ export default {
     submissionSuccessful: 'Indiening succesvol.',
     submit: 'Indienen',
     successfullyCreated: '{{label}} succesvol aangemaakt.',
-    successfullyDuplicated: '{{label}} succesvol gedupliceerd.',
     thisLanguage: 'Nederlands',
     titleDeleted: '{{label}} "{{title}}" succesvol verwijderd.',
     unauthorized: 'Onbevoegd',

@@ -27,7 +27,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
   SanitizedCollectionConfig['admin'],
-  'components' | 'hidden' | 'hooks' | 'preview'
+  'components' | 'hidden' | 'preview'
 >
 
 export type ServerOnlyGlobalProperties = keyof Pick<
@@ -193,7 +193,6 @@ const sanitizeCollections = (
         'components',
         'hidden',
         'preview',
-        'hooks',
         // `livePreview` is handled separately
       ]
 

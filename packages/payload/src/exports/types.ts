@@ -25,7 +25,6 @@ export type {
   AfterReadHook as CollectionAfterReadHook,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
-  BeforeDuplicate,
   BeforeLoginHook as CollectionBeforeLoginHook,
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeReadHook as CollectionBeforeReadHook,

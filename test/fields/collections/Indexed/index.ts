@@ -1,31 +1,10 @@
-import type { BeforeDuplicate, CollectionConfig } from 'payload/types'
-import type { IndexedField } from '../../payload-types.js'
+import type {
+  CollectionConfig} from 'payload/types'
 
 import { indexedFieldsSlug } from '../../slugs.js'
 
-const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
-  return {
-    ...data,
-    collapsibleLocalizedUnique: data.collapsibleLocalizedUnique
-      ? `${data.collapsibleLocalizedUnique}-copy`
-      : '',
-    collapsibleTextUnique: data.collapsibleTextUnique ? `${data.collapsibleTextUnique}-copy` : '',
-    group: {
-      ...(data.group || {}),
-      localizedUnique: data.group?.localizedUnique ? `${data.group?.localizedUnique}-copy` : '',
-    },
-    uniqueText: data.uniqueText ? `${data.uniqueText}-copy` : '',
-  }
-}
-
 const IndexedFields: CollectionConfig = {
   slug: indexedFieldsSlug,
-  // used to assert that versions also get indexes
-  admin: {
-    hooks: {
-      beforeDuplicate,
-    },
-  },
   fields: [
     {
       name: 'text',

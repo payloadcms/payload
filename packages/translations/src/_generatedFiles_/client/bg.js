@@ -188,7 +188,6 @@ export default {
     submissionSuccessful: 'Успешно подаване.',
     submit: 'Подай',
     successfullyCreated: '{{label}} успешно създаден.',
-    successfullyDuplicated: '{{label}} успешно дупликиран.',
     thisLanguage: 'Български',
     titleDeleted: '{{label}} "{{title}}" успешно изтрит.',
     unauthorized: 'Неавторизиран',

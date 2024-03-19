@@ -187,7 +187,6 @@ export default {
     submissionSuccessful: 'Gửi thành công.',
     submit: 'Gửi',
     successfullyCreated: '{{label}} đã được tạo thành công.',
-    successfullyDuplicated: '{{label}} đã được sao chép thành công.',
     thisLanguage: 'Vietnamese (Tiếng Việt)',
     titleDeleted: '{{label}} {{title}} đã được xóa thành công.',
     unauthorized: 'Không có quyền truy cập.',

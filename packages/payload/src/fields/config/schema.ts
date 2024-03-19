@@ -45,6 +45,7 @@ export const baseField = joi
         afterChange: joi.array().items(joi.func()).default([]),
         afterRead: joi.array().items(joi.func()).default([]),
         beforeChange: joi.array().items(joi.func()).default([]),
+        beforeDuplicate: joi.array().items(joi.func()).default([]),
         beforeValidate: joi.array().items(joi.func()).default([]),
       })
       .default(),

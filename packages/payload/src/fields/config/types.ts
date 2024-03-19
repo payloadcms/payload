@@ -183,6 +183,10 @@ export interface FieldBase {
     afterChange?: FieldHook[]
     afterRead?: FieldHook[]
     beforeChange?: FieldHook[]
+    /**
+     * Runs before a document is duplicated to prevent errors in unique fields or return null to use defaultValue.
+     */
+    beforeDuplicate?: FieldHook[]
     beforeValidate?: FieldHook[]
   }
   index?: boolean

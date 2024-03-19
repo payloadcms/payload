@@ -188,7 +188,6 @@ export default {
     submissionSuccessful: 'Uspješno slanje',
     submit: 'Podnesi',
     successfullyCreated: '{{label}} uspješno kreirano.',
-    successfullyDuplicated: '{{label}} uspješno duplicirano.',
     thisLanguage: 'Hrvatski',
     titleDeleted: '{{label}} "{{title}}" uspješno obrisano.',
     unauthorized: 'Neovlašteno',
