@@ -17,7 +17,7 @@ const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
   const { disabled } = props
 
   const password = useFormFields<FormField>(([fields]) => fields.password)
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
 
   const validate = useCallback(
     (value: string) => {
@@ -36,7 +36,7 @@ const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
 
   const path = 'confirm-password'
 
-  const { errorMessage, setValue, showError, value } = useField({
+  const { setValue, showError, value } = useField({
     disableFormData: true,
     path,
     validate,
