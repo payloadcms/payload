@@ -1,5 +1,5 @@
 import path from 'path'
-import { getFileByPath } from 'payload/utilities'
+import { getFileByPath } from 'payload/uploads'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'

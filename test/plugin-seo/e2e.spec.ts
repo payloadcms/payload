@@ -3,7 +3,7 @@ import type { Payload } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { getFileByPath } from 'payload/utilities'
+import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 
 import type { Page as PayloadPage } from './payload-types.js'

@@ -6,7 +6,6 @@ export { extractTranslations } from '../translations/extractTranslations.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
-export { default as getFileByPath } from '../uploads/getFileByPath.js'
 export { default as isImage } from '../uploads/isImage.js'
 
 export { combineMerge } from '../utilities/combineMerge.js'

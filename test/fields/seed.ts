@@ -1,6 +1,6 @@
 import path from 'path'
 import { type Payload } from 'payload'
-import { getFileByPath } from 'payload/utilities'
+import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'

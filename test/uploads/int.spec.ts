@@ -5,7 +5,7 @@ import NodeFormData from 'form-data'
 import fs from 'fs'
 import path from 'path'
 import { getPayload } from 'payload'
-import { getFileByPath } from 'payload/utilities'
+import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
