@@ -1,5 +1,7 @@
+export { buildComponentMap } from '../utilities/buildComponentMap/index.js'
 export { mapFields } from '../utilities/buildComponentMap/mapFields.js'
 export type { FieldMap, MappedField } from '../utilities/buildComponentMap/types.js'
+export type { ReducedBlock } from '../utilities/buildComponentMap/types.js'
 export { buildFieldSchemaMap } from '../utilities/buildFieldSchemaMap/index.js'
 export type { FieldSchemaMap } from '../utilities/buildFieldSchemaMap/types.js'
 export { default as canUseDOM } from '../utilities/canUseDOM.js'

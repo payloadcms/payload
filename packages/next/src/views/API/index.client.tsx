@@ -1,20 +1,15 @@
 'use client'
 
+import { CopyToClipboard, Gutter, SetViewActions } from '@payloadcms/ui/elements'
+import { Checkbox, Form, Number as NumberInput, Select } from '@payloadcms/ui/forms'
+import { MinimizeMaximize } from '@payloadcms/ui/icons'
 import {
-  Checkbox,
-  CopyToClipboard,
-  Form,
-  Gutter,
-  MinimizeMaximize,
-  Number as NumberInput,
-  Select,
-  SetViewActions,
   useComponentMap,
   useConfig,
   useDocumentInfo,
   useLocale,
   useTranslation,
-} from '@payloadcms/ui'
+} from '@payloadcms/ui/providers'
 import { useSearchParams } from 'next/navigation.js'
 import qs from 'qs'
 import * as React from 'react'

@@ -1,16 +1,10 @@
 import type { DocumentPreferences, ServerSideEditViewProps, TypeWithID } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
-import {
-  DocumentHeader,
-  DocumentInfoProvider,
-  FormQueryParamsProvider,
-  HydrateClientUser,
-  RenderCustomComponent,
-  buildStateFromSchema,
-  formatDocTitle,
-  formatFields,
-} from '@payloadcms/ui'
+import { DocumentHeader, HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui/elements'
+import { buildStateFromSchema } from '@payloadcms/ui/form-utilities'
+import { DocumentInfoProvider, FormQueryParamsProvider } from '@payloadcms/ui/providers'
+import { formatDocTitle, formatFields } from '@payloadcms/ui/utilities'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 

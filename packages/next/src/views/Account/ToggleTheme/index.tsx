@@ -1,7 +1,9 @@
 'use client'
-import type { OnChange, Theme } from '@payloadcms/ui'
+import type { OnChange } from '@payloadcms/ui/forms'
+import type { Theme } from '@payloadcms/ui/providers'
 
-import { RadioGroupInput, useTheme, useTranslation } from '@payloadcms/ui'
+import { RadioGroupInput } from '@payloadcms/ui/forms'
+import { useTheme, useTranslation } from '@payloadcms/ui/providers'
 import React, { useCallback } from 'react'
 
 export const ToggleTheme: React.FC = () => {

@@ -49,8 +49,6 @@
   ],
   "include": [
     "./**/*.ts",
-    "../packages/**/*.ts",
-    "../packages/**/*.tsx",
     ".next/types/**/*.ts"
   ],
   "references": []

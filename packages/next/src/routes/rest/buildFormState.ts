@@ -1,7 +1,9 @@
-import type { BuildFormStateArgs, FieldSchemaMap } from '@payloadcms/ui'
+import type { BuildFormStateArgs } from '@payloadcms/ui/form-utilities'
+import type { FieldSchemaMap } from '@payloadcms/ui/utilities'
 import type { Field, PayloadRequest, SanitizedConfig } from 'payload/types'
 
-import { buildFieldSchemaMap, buildStateFromSchema, reduceFieldsToValues } from '@payloadcms/ui'
+import { buildStateFromSchema, reduceFieldsToValues } from '@payloadcms/ui/form-utilities'
+import { buildFieldSchemaMap } from '@payloadcms/ui/utilities'
 import httpStatus from 'http-status'
 
 let cached = global._payload_fieldSchemaMap

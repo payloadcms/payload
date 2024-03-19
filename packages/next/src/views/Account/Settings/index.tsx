@@ -1,5 +1,6 @@
 'use client'
-import { Label, ReactSelect } from '@payloadcms/ui'
+import { ReactSelect } from '@payloadcms/ui/elements'
+import { Label } from '@payloadcms/ui/forms'
 import { useTranslation } from '@payloadcms/ui/providers'
 import React from 'react'
 
