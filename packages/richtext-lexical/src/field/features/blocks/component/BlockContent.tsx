@@ -8,7 +8,7 @@ import isDeepEqual from 'deep-equal'
 import lexicalImport from 'lexical'
 const { $getNodeByKey } = lexicalImport
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { FieldMap, ReducedBlock } from '@payloadcms/ui/providers/ComponentMap'
+import type { FieldMap, ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { CollapsedPreferences } from 'payload/types'
 
 import { Button } from '@payloadcms/ui/elements/Button'

@@ -1,5 +1,5 @@
 'use client'
-import type { FieldMap } from '@payloadcms/ui/providers/ComponentMap'
+import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 
 import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'

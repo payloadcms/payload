@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReducedBlock } from '@payloadcms/ui/providers/ComponentMap'
+import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
 
 import { getTranslation } from '@payloadcms/translations'
 

@@ -4,7 +4,7 @@ import type { AdminViewProps } from 'payload/types'
 import { Form } from '@payloadcms/ui/forms/Form'
 import { FormSubmit } from '@payloadcms/ui/forms/Submit'
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
-import { mapFields } from '@payloadcms/ui/providers/ComponentMap'
+import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
 import React from 'react'
 
 import { CreateFirstUserFields } from './index.client.js'

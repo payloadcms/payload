@@ -1,5 +1,5 @@
 'use client'
-import type { MappedField } from '@payloadcms/ui/providers/ComponentMap'
+import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { ClientConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'

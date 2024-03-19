@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { type BlockFields } from '../nodes/BlocksNode.js'
 const baseClass = 'lexical-block'
 
-import type { ReducedBlock } from '@payloadcms/ui/providers/ComponentMap'
+import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { FormState } from 'payload/types'
 
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'

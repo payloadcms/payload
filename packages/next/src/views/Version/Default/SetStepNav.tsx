@@ -1,5 +1,5 @@
 import type { StepNavItem } from '@payloadcms/ui/elements/StepNav'
-import type { FieldMap } from '@payloadcms/ui/providers/ComponentMap'
+import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 import type React from 'react'
 
