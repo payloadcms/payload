@@ -90,10 +90,11 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
     </FormSubmit>
   )
 }
+
 export const EditMany: React.FC<Props> = (props) => {
   const { useModal } = facelessUIImport
 
-  const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
+  const { collection: { slug, fields, labels: { plural } } = {}, collection, fieldMap } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()
@@ -219,7 +220,7 @@ export const EditMany: React.FC<Props> = (props) => {
                 onChange={[onChange]}
                 onSuccess={onSuccess}
               >
-                <FieldSelect fields={fields} setSelected={setSelected} />
+                <FieldSelect fieldMap={fieldMap} setSelected={setSelected} />
                 {reducedFieldMap.length === 0 ? null : (
                   <RenderFields
                     fieldMap={reducedFieldMap}

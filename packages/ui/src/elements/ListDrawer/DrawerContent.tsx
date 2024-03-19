@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 import type { Where } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
@@ -75,13 +75,14 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return collectionSlugs.includes(slug)
   })
 
-  const [selectedCollectionConfig, setSelectedCollectionConfig] =
-    useState<SanitizedCollectionConfig>(() => {
+  const [selectedCollectionConfig, setSelectedCollectionConfig] = useState<ClientCollectionConfig>(
+    () => {
       return (
         enabledCollectionConfigs.find(({ slug }) => slug === selectedCollection) ||
         enabledCollectionConfigs?.[0]
       )
-    })
+    },
+  )
 
   const { List } = componentMap.collections?.[selectedCollectionConfig?.slug] || {}
 

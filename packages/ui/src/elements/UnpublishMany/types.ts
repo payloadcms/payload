@@ -1,5 +1,5 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 export type Props = {
-  collection: SanitizedCollectionConfig
+  collection: ClientCollectionConfig
 }

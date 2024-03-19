@@ -1,11 +1,11 @@
-import type { Field, FieldWithPath } from 'payload/types'
+import type { FieldWithPath } from 'payload/types'
 
-import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
+
+import type { FieldMap, MappedField } from '../../index.js'
 
 import { useForm } from '../../forms/Form/context.js'
-import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath.js'
+import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
 import Label from '../../forms/Label/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import ReactSelect from '../ReactSelect/index.js'
@@ -14,71 +14,92 @@ import './index.scss'
 const baseClass = 'field-select'
 
 type Props = {
-  fields: Field[]
+  fieldMap: FieldMap
   setSelected: (fields: FieldWithPath[]) => void
 }
 
-const combineLabel = (prefix, field, i18n): string =>
-  `${prefix === '' ? '' : `${prefix} > `}${getTranslation(field.label || field.name, i18n) || ''}`
+const combineLabel = (prefix: JSX.Element, field: MappedField): JSX.Element => {
+  return (
+    <Fragment>
+      <span style={{ display: 'inline-block' }}>{prefix}</span>
+      {prefix ? <Fragment>{' > '}</Fragment> : ''}
+      <span style={{ display: 'inline-block' }}>{field.fieldComponentProps.Label}</span>
+    </Fragment>
+  )
+}
+
 const reduceFields = (
-  fields: Field[],
-  i18n,
+  fieldMap: FieldMap,
   path = '',
-  labelPrefix = '',
-): { label: string; value: FieldWithPath }[] =>
-  fields.reduce((fieldsToUse, field) => {
+  labelPrefix: JSX.Element = null,
+): { Label: JSX.Element; value: FieldWithPath }[] => {
+  if (!fieldMap) {
+    return []
+  }
+
+  return fieldMap?.reduce((fieldsToUse, field) => {
+    const { isFieldAffectingData } = field
     // escape for a variety of reasons
     if (
-      fieldAffectsData(field) &&
-      (field.admin?.disableBulkEdit ||
+      isFieldAffectingData &&
+      (field.disableBulkEdit ||
         field.unique ||
-        field.hidden ||
-        field.admin?.hidden ||
-        field.admin?.readOnly)
+        field.isHidden ||
+        field.fieldComponentProps?.readOnly)
     ) {
       return fieldsToUse
     }
-    if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
+
+    if (
+      !(field.type === 'array' || field.type === 'blocks') &&
+      'fieldMap' in field.fieldComponentProps
+    ) {
       return [
         ...fieldsToUse,
         ...reduceFields(
-          field.fields,
-          i18n,
-          createNestedFieldPath(path, field),
-          combineLabel(labelPrefix, field, i18n),
+          field.fieldComponentProps.fieldMap,
+          createNestedClientFieldPath(path, field),
+          combineLabel(labelPrefix, field),
         ),
       ]
     }
-    if (field.type === 'tabs') {
+
+    if (field.type === 'tabs' && 'fieldMap' in field.fieldComponentProps) {
       return [
         ...fieldsToUse,
-        ...field.tabs.reduce((tabFields, tab) => {
-          return [
-            ...tabFields,
-            ...reduceFields(
-              tab.fields,
-              i18n,
-              tabHasName(tab) ? createNestedFieldPath(path, field) : path,
-              combineLabel(labelPrefix, field, i18n),
-            ),
-          ]
+        ...field.fieldComponentProps.fieldMap.reduce((tabFields, tab) => {
+          if ('fieldMap' in tab.fieldComponentProps) {
+            return [
+              ...tabFields,
+              ...reduceFields(
+                tab.fieldComponentProps.fieldMap,
+                'name' in tab && tab.name ? createNestedClientFieldPath(path, field) : path,
+                combineLabel(labelPrefix, field),
+              ),
+            ]
+          }
         }, []),
       ]
     }
+
     const formattedField = {
-      label: combineLabel(labelPrefix, field, i18n),
+      label: combineLabel(labelPrefix, field),
       value: {
         ...field,
-        path: createNestedFieldPath(path, field),
+        path: createNestedClientFieldPath(path, field),
       },
     }
 
     return [...fieldsToUse, formattedField]
   }, [])
-export const FieldSelect: React.FC<Props> = ({ fields, setSelected }) => {
-  const { i18n, t } = useTranslation()
-  const [options] = useState(() => reduceFields(fields, i18n))
+}
+
+export const FieldSelect: React.FC<Props> = ({ fieldMap, setSelected }) => {
+  const { t } = useTranslation()
+  const [options] = useState(() => reduceFields(fieldMap))
+
   const { dispatchFields, getFields } = useForm()
+
   const handleChange = (selected) => {
     const activeFields = getFields()
     if (selected === null) {
@@ -86,6 +107,7 @@ export const FieldSelect: React.FC<Props> = ({ fields, setSelected }) => {
     } else {
       setSelected(selected.map(({ value }) => value))
     }
+
     // remove deselected values from form state
     if (selected === null || Object.keys(activeFields || []).length > selected.length) {
       Object.keys(activeFields).forEach((path) => {
