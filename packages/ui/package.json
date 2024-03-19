@@ -33,10 +33,10 @@
       "types": "./src/forms/*/index.tsx"
     },
     "./graphics/*": {
-      "import": "./src/graphics/**/index.tsx",
-      "require": "./src/graphics/**/index.tsx",
-      "default": "./src/graphics/**/index.tsx",
-      "types": "./src/graphics/**/index.tsx"
+      "import": "./src/graphics/*/index.tsx",
+      "require": "./src/graphics/*/index.tsx",
+      "default": "./src/graphics/*/index.tsx",
+      "types": "./src/graphics/*/index.tsx"
     },
     "./hooks/*": {
       "import": "./src/hooks/*.ts",
@@ -51,10 +51,10 @@
       "types": "./src/icons/*/index.tsx"
     },
     "./providers/*": {
-      "import": "./src/providers/**/index.tsx",
-      "require": "./src/providers/**/index.tsx",
-      "default": "./src/providers/**/index.tsx",
-      "types": "./src/providers/**/index.tsx"
+      "import": "./src/providers/*/index.tsx",
+      "require": "./src/providers/*/index.tsx",
+      "default": "./src/providers/*/index.tsx",
+      "types": "./src/providers/*/index.tsx"
     },
     "./templates/*": {
       "import": "./src/templates/*/index.tsx",
