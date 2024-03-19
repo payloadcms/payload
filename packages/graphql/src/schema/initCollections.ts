@@ -27,6 +27,7 @@ import verifyEmail from '../resolvers/auth/verifyEmail.js'
 import createResolver from '../resolvers/collections/create.js'
 import getDeleteResolver from '../resolvers/collections/delete.js'
 import { docAccessResolver } from '../resolvers/collections/docAccess.js'
+import duplicateResolver from '../resolvers/collections/duplicate.js'
 import findResolver from '../resolvers/collections/find.js'
 import findByIDResolver from '../resolvers/collections/findByID.js'
 import findVersionByIDResolver from '../resolvers/collections/findVersionByID.js'
@@ -39,7 +40,6 @@ import buildObjectType from './buildObjectType.js'
 import buildPaginatedListType from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import buildWhereInputType from './buildWhereInputType.js'
-import duplicateResolver from '../resolvers/collections/duplicate.js'
 
 type InitCollectionsGraphQLArgs = {
   config: SanitizedConfig
