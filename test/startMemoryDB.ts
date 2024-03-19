@@ -13,7 +13,6 @@ export const startMemoryDB = async (
   process.env.NODE_OPTIONS = '--no-deprecation'
 
   const logger = Logger()
-  logger.info('---- CONNECTING TO MEMORY DB ----')
 
   switch (process.env.PAYLOAD_DATABASE) {
     case 'postgres':
@@ -23,6 +22,7 @@ export const startMemoryDB = async (
     }
 
     default: {
+      if (!process.env.CI) logger.info('---- CONNECTING TO MEMORY DB ----')
       const db = await MongoMemoryReplSet.create({
         replSet: {
           count: 3,
