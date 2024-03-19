@@ -7,6 +7,8 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
+export { SetStepNav } from './SetStepNav.js'
+
 export type StepNavItem = {
   label: Record<string, string> | string
   url?: string

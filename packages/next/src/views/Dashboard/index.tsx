@@ -1,6 +1,7 @@
 import type { AdminViewProps } from 'payload/types'
 
-import { HydrateClientUser, RenderCustomComponent } from '@payloadcms/ui'
+import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
+import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
 import LinkImport from 'next/link.js'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
