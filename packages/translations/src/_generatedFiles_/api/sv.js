@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Text att visa',
   },
   general: {
+    copy: 'Kopiera',
     createdAt: 'Skapad Vid',
     deletedCountSuccessfully: 'Raderade {{count}} {{label}} framgångsrikt.',
     deletedSuccessfully: 'Togs bort framgångsrikt.',
@@ -47,6 +48,7 @@ export default {
     row: 'Rad',
     rows: 'Rader',
     successfullyCreated: '{{label}} skapades framgångsrikt.',
+    successfullyDuplicated: '{{label}} duplicerades framgångsrikt.',
     thisLanguage: 'Svenska',
     updatedAt: 'Uppdaterades Vid',
     updatedCountSuccessfully: 'Uppdaterade {{count}} {{label}} framgångsrikt.',

@@ -40,6 +40,7 @@ export default {
     textToDisplay: 'Текст для отображения',
   },
   general: {
+    copy: 'Скопировать',
     createdAt: 'Дата создания',
     deletedCountSuccessfully: 'Удалено {{count}} {{label}} успешно.',
     deletedSuccessfully: 'Удален успешно.',
@@ -48,6 +49,7 @@ export default {
     row: 'Строка',
     rows: 'Строки',
     successfullyCreated: '{{label}} успешно создан.',
+    successfullyDuplicated: '{{label}} успешно продублирован.',
     thisLanguage: 'Русский',
     updatedAt: 'Дата правки',
     updatedCountSuccessfully: 'Обновлено {{count}} {{label}} успешно.',

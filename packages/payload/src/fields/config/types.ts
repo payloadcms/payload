@@ -19,7 +19,7 @@ import type { User } from '../../auth/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
-import type { ClientConfigField } from './types.js'
+import type { ClientFieldConfig } from './client.js'
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
@@ -183,6 +183,10 @@ export interface FieldBase {
     afterChange?: FieldHook[]
     afterRead?: FieldHook[]
     beforeChange?: FieldHook[]
+    /**
+     * Runs before a document is duplicated to prevent errors in unique fields or return null to use defaultValue.
+     */
+    beforeDuplicate?: FieldHook[]
     beforeValidate?: FieldHook[]
   }
   index?: boolean
@@ -644,8 +648,6 @@ export type Field =
   | UIField
   | UploadField
 
-export type { ClientConfigField } from '../../config/createClientConfig.js'
-
 export type FieldAffectingData =
   | ArrayField
   | BlockField
@@ -700,7 +702,7 @@ export type FieldWithMany = RelationshipField | SelectField
 
 export type FieldWithMaxDepth = RelationshipField | UploadField
 
-export function fieldHasSubFields(field: ClientConfigField | Field): field is FieldWithSubFields {
+export function fieldHasSubFields(field: ClientFieldConfig | Field): field is FieldWithSubFields {
   return (
     field.type === 'group' ||
     field.type === 'array' ||
@@ -744,13 +746,13 @@ export function fieldHasMaxDepth(field: Field): field is FieldWithMaxDepth {
 }
 
 export function fieldIsPresentationalOnly(
-  field: ClientConfigField | Field | TabAsField,
+  field: ClientFieldConfig | Field | TabAsField,
 ): field is UIField {
   return field.type === 'ui'
 }
 
 export function fieldAffectsData(
-  field: ClientConfigField | Field | TabAsField,
+  field: ClientFieldConfig | Field | TabAsField,
 ): field is FieldAffectingData {
   return 'name' in field && !fieldIsPresentationalOnly(field)
 }

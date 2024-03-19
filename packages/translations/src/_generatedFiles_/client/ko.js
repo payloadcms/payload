@@ -188,7 +188,6 @@ export default {
     submissionSuccessful: '제출이 완료되었습니다.',
     submit: '제출',
     successfullyCreated: '{{label}}이(가) 생성되었습니다.',
-    successfullyDuplicated: '{{label}}이(가) 복제되었습니다.',
     thisLanguage: '한국어',
     titleDeleted: '{{label}} "{{title}}"을(를) 삭제했습니다.',
     unauthorized: '권한 없음',

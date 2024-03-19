@@ -40,6 +40,7 @@ export default {
     textToDisplay: 'Texto a mostrar',
   },
   general: {
+    copy: 'Copiar',
     createdAt: 'Fecha de creación',
     deletedCountSuccessfully: 'Se eliminó {{count}} {{label}} con éxito.',
     deletedSuccessfully: 'Borrado exitosamente.',
@@ -48,6 +49,7 @@ export default {
     row: 'Fila',
     rows: 'Filas',
     successfullyCreated: '{{label}} creado correctamente.',
+    successfullyDuplicated: '{{label}} duplicado correctamente.',
     thisLanguage: 'Español',
     updatedAt: 'Fecha de modificado',
     updatedCountSuccessfully: '{{count}} {{label}} actualizado con éxito.',

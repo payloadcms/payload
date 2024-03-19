@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Tekst om weer te geven',
   },
   general: {
+    copy: 'Kopiëren',
     createdAt: 'Aangemaakt op',
     deletedCountSuccessfully: '{{count}} {{label}} succesvol verwijderd.',
     deletedSuccessfully: 'Succesvol verwijderd.',
@@ -47,6 +48,7 @@ export default {
     row: 'Rij',
     rows: 'Rijen',
     successfullyCreated: '{{label}} succesvol aangemaakt.',
+    successfullyDuplicated: '{{label}} succesvol gedupliceerd.',
     thisLanguage: 'Nederlands',
     updatedAt: 'Aangepast op',
     updatedCountSuccessfully: '{{count}} {{label}} succesvol bijgewerkt.',

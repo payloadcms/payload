@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Tekst do wyświetlenia',
   },
   general: {
+    copy: 'Skopiuj',
     createdAt: 'Data utworzenia',
     deletedCountSuccessfully: 'Pomyślnie usunięto {{count}} {{label}}.',
     deletedSuccessfully: 'Pomyślnie usunięto.',
@@ -47,6 +48,7 @@ export default {
     row: 'Wiersz',
     rows: 'Wiersze',
     successfullyCreated: 'Pomyślnie utworzono {{label}}.',
+    successfullyDuplicated: 'Pomyślnie zduplikowano {{label}}',
     thisLanguage: 'Polski',
     updatedAt: 'Data edycji',
     updatedCountSuccessfully: 'Pomyślnie zaktualizowano {{count}} {{label}}.',

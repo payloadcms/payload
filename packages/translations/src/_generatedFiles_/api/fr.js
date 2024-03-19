@@ -40,6 +40,7 @@ export default {
     textToDisplay: 'Texte à afficher',
   },
   general: {
+    copy: 'Copie',
     createdAt: 'Créé(e) à',
     deletedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
     deletedSuccessfully: 'Supprimé(e) avec succès.',
@@ -48,6 +49,7 @@ export default {
     row: 'Ligne',
     rows: 'Lignes',
     successfullyCreated: '{{label}} créé(e) avec succès.',
+    successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
     thisLanguage: 'Français',
     updatedAt: 'Modifié le',
     updatedCountSuccessfully: '{{count}} {{label}} mis à jour avec succès.',

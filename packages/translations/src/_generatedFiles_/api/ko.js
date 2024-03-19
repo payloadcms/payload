@@ -39,6 +39,7 @@ export default {
     textToDisplay: '표시할 텍스트',
   },
   general: {
+    copy: '복사',
     createdAt: '생성 일시',
     deletedCountSuccessfully: '{{count}}개의 {{label}}를 삭제했습니다.',
     deletedSuccessfully: '삭제되었습니다.',
@@ -47,6 +48,7 @@ export default {
     row: '행',
     rows: '행',
     successfullyCreated: '{{label}}이(가) 생성되었습니다.',
+    successfullyDuplicated: '{{label}}이(가) 복제되었습니다.',
     thisLanguage: '한국어',
     updatedAt: '업데이트 일시',
     updatedCountSuccessfully: '{{count}}개의 {{label}}을(를) 업데이트했습니다.',

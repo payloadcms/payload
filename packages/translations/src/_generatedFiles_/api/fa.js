@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'متن برای نمایش',
   },
   general: {
+    copy: 'رونوشت',
     createdAt: 'ساخته شده در',
     deletedCountSuccessfully: 'تعداد {{count}} {{label}} با موفقیت پاک گردید.',
     deletedSuccessfully: 'با موفقیت حذف شد.',
@@ -47,6 +48,7 @@ export default {
     row: 'ردیف',
     rows: 'ردیف‌ها',
     successfullyCreated: '{{label}} با موفقیت ساخته شد.',
+    successfullyDuplicated: '{{label}} با موفقیت رونوشت شد.',
     thisLanguage: 'فارسی',
     updatedAt: 'بروز شده در',
     updatedCountSuccessfully: 'تعداد {{count}} با عنوان {{label}} با موفقیت بروزرسانی شدند.',

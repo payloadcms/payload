@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Megjelenítendő szöveg',
   },
   general: {
+    copy: 'Másolás',
     createdAt: 'Létrehozva:',
     deletedCountSuccessfully: '{{count}} {{label}} sikeresen törölve.',
     deletedSuccessfully: 'Sikeresen törölve.',
@@ -47,6 +48,7 @@ export default {
     row: 'Sor',
     rows: 'Sorok',
     successfullyCreated: '{{label}} sikeresen létrehozva.',
+    successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
     thisLanguage: 'Magyar',
     updatedAt: 'Frissítve:',
     updatedCountSuccessfully: '{{count}} {{label}} sikeresen frissítve.',

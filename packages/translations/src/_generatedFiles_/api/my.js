@@ -40,6 +40,7 @@ export default {
     textToDisplay: 'ပြသရန် စာသား',
   },
   general: {
+    copy: 'ကူးယူမည်။',
     createdAt: 'ဖန်တီးခဲ့သည့်အချိန်',
     deletedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
     deletedSuccessfully: 'အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
@@ -48,6 +49,7 @@ export default {
     row: 'အတန်း',
     rows: 'Rows',
     successfullyCreated: '{{label}} အောင်မြင်စွာဖန်တီးခဲ့သည်။',
+    successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',
     thisLanguage: 'မြန်မာစာ',
     updatedAt: 'ပြင်ဆင်ခဲ့သည့်အချိန်',
     updatedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ခဲ့သည်။',

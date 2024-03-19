@@ -72,8 +72,6 @@ export default {
     invalidFileType: '無效的文件類型',
     invalidFileTypeValue: '無效的文件類型： {{value}}',
     loadingDocument: '加載ID為{{id}}的文件時出現了問題。',
-    localesNotSaved_one: '這個語言環境無法被儲存：',
-    localesNotSaved_other: '以下的語言環境無法被儲存：',
     missingEmail: '缺少電子郵件。',
     missingIDOfDocument: '缺少需要更新的文檔的ID。',
     missingIDOfVersion: '缺少版本的ID。',

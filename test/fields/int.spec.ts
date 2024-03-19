@@ -619,6 +619,23 @@ describe('Fields', () => {
 
       expect(result.id).toBeDefined()
     })
+
+    it('should duplicate with unique fields', async () => {
+      const data = {
+        text: 'a',
+      }
+      const doc = await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+      const result = await payload.duplicate({
+        collection: 'indexed-fields',
+        id: doc.id,
+      })
+
+      expect(result.id).not.toEqual(doc.id)
+      expect(result.uniqueRequiredText).toStrictEqual('uniqueRequired - Copy')
+    })
   })
 
   describe('array', () => {

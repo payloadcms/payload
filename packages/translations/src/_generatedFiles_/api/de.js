@@ -40,6 +40,7 @@ export default {
     textToDisplay: 'Angezeigter Text',
   },
   general: {
+    copy: 'Kopieren',
     createdAt: 'Erstellt am',
     deletedCountSuccessfully: '{{count}} {{label}} erfolgreich gelöscht.',
     deletedSuccessfully: 'Erfolgreich gelöscht.',
@@ -48,6 +49,7 @@ export default {
     row: 'Zeile',
     rows: 'Zeilen',
     successfullyCreated: '{{label}} erfolgreich erstellt.',
+    successfullyDuplicated: '{{label}} wurde erfolgreich dupliziert.',
     thisLanguage: 'Deutsch',
     updatedAt: 'Aktualisiert am',
     updatedCountSuccessfully: '{{count}} {{label}} erfolgreich aktualisiert.',

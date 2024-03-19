@@ -30,6 +30,7 @@ import { create } from './collections/create.js'
 import { deleteDoc } from './collections/delete.js'
 import { deleteByID } from './collections/deleteByID.js'
 import { docAccess } from './collections/docAccess.js'
+import { duplicate } from './collections/duplicate.js'
 import { find } from './collections/find.js'
 import { findByID } from './collections/findByID.js'
 import { findVersionByID } from './collections/findVersionByID.js'
@@ -71,6 +72,7 @@ const endpoints = {
       'doc-access-by-id': docAccess,
       'doc-verify-by-id': verifyEmail,
       'doc-versions-by-id': restoreVersion,
+      duplicate,
       'first-register': registerFirstUser,
       'forgot-password': forgotPassword,
       login,
@@ -356,6 +358,9 @@ export const POST =
               res = await (
                 endpoints.collection.POST[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
               )({ id: slug3, collection, req })
+            } else if (slug3 === 'duplicate') {
+              // /:collection/:id/duplicate
+              res = await endpoints.collection.POST.duplicate({ id: slug2, collection, req })
             }
             break
         }

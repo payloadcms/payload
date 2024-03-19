@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Envio bem-sucedido.',
     submit: 'Enviar',
     successfullyCreated: '{{label}} criado com sucesso.',
-    successfullyDuplicated: '{{label}} duplicado com sucesso.',
     thisLanguage: 'Português',
     titleDeleted: '{{label}} {{title}} excluído com sucesso.',
     unauthorized: 'Não autorizado',

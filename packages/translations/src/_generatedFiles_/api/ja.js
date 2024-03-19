@@ -39,6 +39,7 @@ export default {
     textToDisplay: '表示するテキスト',
   },
   general: {
+    copy: 'コピー',
     createdAt: '作成日',
     deletedCountSuccessfully: '{{count}}つの{{label}}を正常に削除しました。',
     deletedSuccessfully: '正常に削除されました。',
@@ -47,6 +48,7 @@ export default {
     row: '列',
     rows: '列',
     successfullyCreated: '{{label}} が作成されました。',
+    successfullyDuplicated: '{{label}} が複製されました。',
     thisLanguage: 'Japanese',
     updatedAt: '更新日',
     updatedCountSuccessfully: '{{count}}つの{{label}}を正常に更新しました。',

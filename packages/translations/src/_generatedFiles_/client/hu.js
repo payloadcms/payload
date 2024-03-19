@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Beküldés sikeres.',
     submit: 'Beküldés',
     successfullyCreated: '{{label}} sikeresen létrehozva.',
-    successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
     thisLanguage: 'Magyar',
     titleDeleted: '{{label}} "{{title}}" sikeresen törölve.',
     unauthorized: 'Jogosulatlan',

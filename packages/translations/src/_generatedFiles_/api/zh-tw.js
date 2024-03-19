@@ -37,6 +37,7 @@ export default {
     textToDisplay: '要顯示的文字',
   },
   general: {
+    copy: '複製',
     createdAt: '建立於',
     deletedCountSuccessfully: '已成功刪除 {{count}} 個 {{label}}。',
     deletedSuccessfully: '已成功刪除。',
@@ -45,6 +46,7 @@ export default {
     row: '行',
     rows: '行',
     successfullyCreated: '成功建立{{label}}',
+    successfullyDuplicated: '成功複製{{label}}',
     thisLanguage: '中文 (繁體)',
     updatedAt: '更新於',
     updatedCountSuccessfully: '已成功更新 {{count}} 個 {{label}}。',

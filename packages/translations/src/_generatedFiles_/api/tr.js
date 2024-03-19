@@ -40,6 +40,7 @@ export default {
     textToDisplay: 'Görüntülenecek metin',
   },
   general: {
+    copy: 'Kopyala',
     createdAt: 'Oluşturma tarihi',
     deletedCountSuccessfully: '{{count}} {{label}} başarıyla silindi.',
     deletedSuccessfully: 'Başarıyla silindi.',
@@ -48,6 +49,7 @@ export default {
     row: 'Satır',
     rows: 'Satır',
     successfullyCreated: '{{label}} başarıyla oluşturuldu.',
+    successfullyDuplicated: '{{label}} başarıyla kopyalandı.',
     thisLanguage: 'Türkçe',
     updatedAt: 'Güncellenme tarihi',
     updatedCountSuccessfully: '{{count}} {{label}} başarıyla güncellendi.',

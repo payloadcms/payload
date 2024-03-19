@@ -40,6 +40,7 @@ export default {
     textToDisplay: 'Text de afișat',
   },
   general: {
+    copy: 'Copiați',
     createdAt: 'Creat la',
     deletedCountSuccessfully: 'Șterse cu succes {{count}} {{label}}.',
     deletedSuccessfully: 'Șters cu succes.',
@@ -48,6 +49,7 @@ export default {
     row: 'Rând',
     rows: 'Rânduri',
     successfullyCreated: '{{label}} creat(ă) cu succes.',
+    successfullyDuplicated: '{{label}} duplicat(ă) cu succes.',
     thisLanguage: 'Română',
     updatedAt: 'Actualizat la',
     updatedCountSuccessfully: 'Actualizate {{count}} {{label}} cu succes.',

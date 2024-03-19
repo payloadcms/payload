@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Текст към дисплей',
   },
   general: {
+    copy: 'Копирай',
     createdAt: 'Създаден на',
     deletedCountSuccessfully: 'Изтрити {{count}} {{label}} успешно.',
     deletedSuccessfully: 'Изтрито успешно.',
@@ -47,6 +48,7 @@ export default {
     row: 'ред',
     rows: 'Редове',
     successfullyCreated: '{{label}} успешно създаден.',
+    successfullyDuplicated: '{{label}} успешно дупликиран.',
     thisLanguage: 'Български',
     updatedAt: 'Обновен на',
     updatedCountSuccessfully: 'Обновени {{count}} {{label}} успешно.',

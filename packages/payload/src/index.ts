@@ -21,6 +21,7 @@ import type {
   ManyOptions as DeleteManyOptions,
   Options as DeleteOptions,
 } from './collections/operations/local/delete.js'
+import type { Options as DuplicateOptions } from './collections/operations/local/duplicate.js'
 import type { Options as FindOptions } from './collections/operations/local/find.js'
 import type { Options as FindByIDOptions } from './collections/operations/local/findByID.js'
 import type { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID.js'
@@ -82,14 +83,21 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   decrypt = decrypt
 
+  duplicate = async <T extends keyof TGeneratedTypes['collections']>(
+    options: DuplicateOptions<T>,
+  ): Promise<TGeneratedTypes['collections'][T]> => {
+    const { duplicate } = localOperations
+    return duplicate<T>(this, options)
+  }
+
   email: BuildEmailResult
 
   emailOptions: EmailOptions
 
-  encrypt = encrypt
-
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
+
+  encrypt = encrypt
 
   extensions: (args: {
     args: OperationArgs<any>
@@ -186,18 +194,18 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   logger: pino.Logger
 
+  /**
+   * @description Find document by ID
+   * @param options
+   * @returns document with specified ID
+   */
+
   login = async <T extends keyof TGeneratedTypes['collections']>(
     options: LoginOptions<T>,
   ): Promise<LoginResult & { user: TGeneratedTypes['collections'][T] }> => {
     const { login } = localOperations.auth
     return login<T>(this, options)
   }
-
-  /**
-   * @description Find document by ID
-   * @param options
-   * @returns document with specified ID
-   */
 
   resetPassword = async <T extends keyof TGeneratedTypes['collections']>(
     options: ResetPasswordOptions<T>,

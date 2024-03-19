@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Tekst som skal vises',
   },
   general: {
+    copy: 'Kopiér',
     createdAt: 'Opprettet',
     deletedCountSuccessfully: 'Slettet {{count}} {{label}}.',
     deletedSuccessfully: 'Slettet.',
@@ -47,6 +48,7 @@ export default {
     row: 'Rad',
     rows: 'Rader',
     successfullyCreated: '{{label}} ble opprettet.',
+    successfullyDuplicated: '{{label}} ble duplisert.',
     thisLanguage: 'Norsk',
     updatedAt: 'Oppdatert',
     updatedCountSuccessfully: 'Oppdaterte {{count}} {{label}} vellykket.',

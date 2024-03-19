@@ -38,6 +38,7 @@ export default {
     textToDisplay: 'النصّ الذي تريد إظهاره',
   },
   general: {
+    copy: 'نسخ',
     createdAt: 'تمّ الإنشاء في',
     deletedCountSuccessfully: 'تمّ حذف {{count}} {{label}} بنجاح.',
     deletedSuccessfully: 'تمّ الحذف بنجاح.',
@@ -46,6 +47,7 @@ export default {
     row: 'سطر',
     rows: 'أسطُر',
     successfullyCreated: '{{label}} تم إنشاؤها بنجاح.',
+    successfullyDuplicated: '{{label}} تم استنساخها بنجاح.',
     thisLanguage: 'العربية',
     updatedAt: 'تم التحديث في',
     updatedCountSuccessfully: 'تم تحديث {{count}} {{label}} بنجاح.',

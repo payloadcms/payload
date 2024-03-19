@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Tekst za prikaz',
   },
   general: {
+    copy: 'Kopiraj',
     createdAt: 'Kreirano u',
     deletedCountSuccessfully: 'Uspešno izbrisano {{count}} {{label}}.',
     deletedSuccessfully: 'Uspešno izbrisano.',
@@ -47,6 +48,7 @@ export default {
     row: 'Red',
     rows: 'Redovi',
     successfullyCreated: '{{label}} uspešno kreirano.',
+    successfullyDuplicated: '{{label}} uspešno duplicirano.',
     thisLanguage: 'Srpski (latinica)',
     updatedAt: 'Ažurirano u',
     updatedCountSuccessfully: 'Uspešno ažurirano {{count}} {{label}}.',

@@ -188,7 +188,6 @@ export default {
     submissionSuccessful: 'Odeslání úspěšné.',
     submit: 'Odeslat',
     successfullyCreated: '{{label}} úspěšně vytvořeno.',
-    successfullyDuplicated: '{{label}} úspěšně duplikováno.',
     thisLanguage: 'Čeština',
     titleDeleted: '{{label}} "{{title}}" úspěšně smazáno.',
     unauthorized: 'Neoprávněný',

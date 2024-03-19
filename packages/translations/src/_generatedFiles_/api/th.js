@@ -38,6 +38,7 @@ export default {
     textToDisplay: 'ข้อความสำหรับแสดงผล',
   },
   general: {
+    copy: 'คัดลอก',
     createdAt: 'สร้างเมื่อ',
     deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
     deletedSuccessfully: 'ลบสำเร็จ',
@@ -46,6 +47,7 @@ export default {
     row: 'แถว',
     rows: 'แถว',
     successfullyCreated: 'สร้าง {{label}} สำเร็จ',
+    successfullyDuplicated: 'สำเนา {{label}} สำเร็จ',
     thisLanguage: 'ไทย',
     updatedAt: 'แก้ไขเมื่อ',
     updatedCountSuccessfully: 'อัปเดต {{count}} {{label}} เรียบร้อยแล้ว',

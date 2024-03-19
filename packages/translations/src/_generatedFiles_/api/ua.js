@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Текст для відображення',
   },
   general: {
+    copy: 'Скопіювати',
     createdAt: 'Дата створення',
     deletedCountSuccessfully: 'Успішно видалено {{count}} {{label}}.',
     deletedSuccessfully: 'Успішно видалено.',
@@ -47,6 +48,7 @@ export default {
     row: 'Рядок',
     rows: 'Рядки',
     successfullyCreated: '{{label}} успішно створено.',
+    successfullyDuplicated: '{{label}} успішно продубльовано.',
     thisLanguage: 'Українська',
     updatedAt: 'Змінено',
     updatedCountSuccessfully: 'Успішно оновлено {{count}} {{label}}.',

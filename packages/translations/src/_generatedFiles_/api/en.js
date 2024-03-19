@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Text to display',
   },
   general: {
+    copy: 'Copy',
     createdAt: 'Created At',
     deletedCountSuccessfully: 'Deleted {{count}} {{label}} successfully.',
     deletedSuccessfully: 'Deleted successfully.',
@@ -47,6 +48,7 @@ export default {
     row: 'Row',
     rows: 'Rows',
     successfullyCreated: '{{label}} successfully created.',
+    successfullyDuplicated: '{{label}} successfully duplicated.',
     thisLanguage: 'English',
     updatedAt: 'Updated At',
     updatedCountSuccessfully: 'Updated {{count}} {{label}} successfully.',

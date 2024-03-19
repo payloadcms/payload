@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Text k zobrazení',
   },
   general: {
+    copy: 'Kopírovat',
     createdAt: 'Vytvořeno v',
     deletedCountSuccessfully: 'Úspěšně smazáno {{count}} {{label}}.',
     deletedSuccessfully: 'Úspěšně odstraněno.',
@@ -47,6 +48,7 @@ export default {
     row: 'Řádek',
     rows: 'Řádky',
     successfullyCreated: '{{label}} úspěšně vytvořeno.',
+    successfullyDuplicated: '{{label}} úspěšně duplikováno.',
     thisLanguage: 'Čeština',
     updatedAt: 'Aktualizováno v',
     updatedCountSuccessfully: 'Úspěšně aktualizováno {{count}} {{label}}.',

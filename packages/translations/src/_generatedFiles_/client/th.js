@@ -187,7 +187,6 @@ export default {
     submissionSuccessful: 'ส่งสำเร็จ',
     submit: 'ส่ง',
     successfullyCreated: 'สร้าง {{label}} สำเร็จ',
-    successfullyDuplicated: 'สำเนา {{label}} สำเร็จ',
     thisLanguage: 'ไทย',
     titleDeleted: 'ลบ {{label}} "{{title}}" สำเร็จ',
     unauthorized: 'ไม่ได้รับอนุญาต',

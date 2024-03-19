@@ -39,6 +39,7 @@ export default {
     textToDisplay: 'Văn bản để hiển thị',
   },
   general: {
+    copy: 'Sao chép',
     createdAt: 'Ngày tạo',
     deletedCountSuccessfully: 'Đã xóa thành công {{count}} {{label}}.',
     deletedSuccessfully: 'Đã xoá thành công.',
@@ -47,6 +48,7 @@ export default {
     row: 'Hàng',
     rows: 'Những hàng',
     successfullyCreated: '{{label}} đã được tạo thành công.',
+    successfullyDuplicated: '{{label}} đã được sao chép thành công.',
     thisLanguage: 'Vietnamese (Tiếng Việt)',
     updatedAt: 'Ngày cập nhật',
     updatedCountSuccessfully: 'Đã cập nhật thành công {{count}} {{label}}.',

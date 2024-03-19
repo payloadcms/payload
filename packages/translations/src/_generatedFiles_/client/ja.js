@@ -47,8 +47,6 @@ export default {
     deletingTitle:
       '{{title}} を削除する際にエラーが発生しました。接続を確認してからもう一度お試しください。',
     loadingDocument: 'IDが {{id}} のデータを読み込む際に問題が発生しました。',
-    localesNotSaved_one: '次のロケールは保存できませんでした：',
-    localesNotSaved_other: '次のロケールは保存できませんでした：',
     noMatchedField: '"{{label}}" に該当するフィールドがありません。',
     notAllowedToAccessPage: 'この画面へのアクセスは許可されていません。',
     previewing: 'このデータをプレビューする際に問題が発生しました。',
@@ -190,7 +188,6 @@ export default {
     submissionSuccessful: '送信が成功しました。',
     submit: '送信',
     successfullyCreated: '{{label}} が作成されました。',
-    successfullyDuplicated: '{{label}} が複製されました。',
     thisLanguage: 'Japanese',
     titleDeleted: '{{label}} "{{title}}" が削除されました。',
     unauthorized: '未認証',

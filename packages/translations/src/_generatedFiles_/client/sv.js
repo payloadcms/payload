@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Inlämningen Lyckades.',
     submit: 'Lämna in',
     successfullyCreated: '{{label}} skapades framgångsrikt.',
-    successfullyDuplicated: '{{label}} duplicerades framgångsrikt.',
     thisLanguage: 'Svenska',
     titleDeleted: '{{label}} "{{title}}" togs bort framgångsrikt.',
     unauthorized: 'Obehörig',

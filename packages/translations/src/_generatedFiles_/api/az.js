@@ -40,6 +40,7 @@ export default {
     textToDisplay: 'Göstəriləcək mətn',
   },
   general: {
+    copy: 'Kopyala',
     createdAt: 'Yaradıldığı tarix',
     deletedCountSuccessfully: '{{count}} {{label}} uğurla silindi.',
     deletedSuccessfully: 'Uğurla silindi.',
@@ -48,6 +49,7 @@ export default {
     row: 'Sətir',
     rows: 'Sətirlər',
     successfullyCreated: '{{label}} uğurla yaradıldı.',
+    successfullyDuplicated: '{{label}} uğurla dublikatlandı.',
     thisLanguage: 'Azərbaycan dili',
     updatedAt: 'Yeniləndiyi tarix',
     updatedCountSuccessfully: '{{count}} {{label}} uğurla yeniləndi.',
