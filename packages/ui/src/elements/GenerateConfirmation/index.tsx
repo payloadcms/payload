@@ -17,7 +17,7 @@ export type GenerateConfirmationProps = {
   setKey: () => void
 }
 
-const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props) => {
+export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props) => {
   const { Modal, useModal } = facelessUIImport
 
   const { highlightField, setKey } = props
@@ -52,7 +52,7 @@ const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props) => {
           <p>
             <Translation
               elements={{
-                1: ({ children }) => <strong children={children} />,
+                1: ({ children }) => <strong>{children}</strong>,
               }}
               i18nKey="authentication:generatingNewAPIKeyWillInvalidate"
               t={t}
@@ -74,5 +74,3 @@ const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props) => {
     </React.Fragment>
   )
 }
-
-export default GenerateConfirmation
