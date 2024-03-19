@@ -1,10 +1,11 @@
-import { randomBytes } from 'crypto'
+import type { Payload } from 'payload'
 
-import type { Payload } from '../../packages/payload/src/index.js'
+import { randomBytes } from 'crypto'
+import { getPayload } from 'payload'
+
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
@@ -1021,6 +1022,7 @@ describe('collections-rest', () => {
 
           it('should sort find results by nearest distance', async () => {
             // creating twice as many records as we are querying to get a random sample
+            // eslint-disable-next-line @typescript-eslint/require-await
             await mapAsync([...Array(10)], async () => {
               // setTimeout used to randomize the creation timestamp
               setTimeout(async () => {

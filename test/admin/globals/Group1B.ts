@@ -1,4 +1,4 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
+import type { GlobalConfig } from 'payload/types'
 
 import { group2GlobalSlug } from '../slugs.js'
 

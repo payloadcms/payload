@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src/types/index.js'
 import type { Page as PayloadPage } from './payload-types.js'
 
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'

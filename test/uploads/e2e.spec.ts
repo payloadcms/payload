@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src/types/index.js'
+import type { Payload } from 'payload/types'
 import type { Media } from './payload-types.js'
 
 import wait from '../../packages/payload/src/utilities/wait.js'

@@ -3,7 +3,7 @@ import React, { Fragment } from 'react'
 
 import type { EditViewComponent } from '../../../../../packages/payload/types.js'
 
-import { SetStepNav } from '../../../../../packages/ui/src/index.js'
+import { SetStepNav } from '@payloadcms/ui'
 
 export const CustomEditView: EditViewComponent = ({ initPageResult }) => {
   if (!initPageResult) {

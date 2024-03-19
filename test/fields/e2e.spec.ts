@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src/index.js'
+import type { Payload } from 'payload'
 import type { RelationshipField, TextField } from './payload-types.js'
 
 import wait from '../../packages/payload/src/utilities/wait.js'

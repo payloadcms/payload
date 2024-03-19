@@ -1,4 +1,4 @@
-import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types.js'
+import type { GlobalConfig } from 'payload/types'
 
 import { CustomEditView } from '../components/views/CustomEdit/index.js'
 import { customGlobalViews1GlobalSlug } from '../slugs.js'

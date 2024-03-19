@@ -1,4 +1,4 @@
-import type { FieldAccess } from '../../packages/payload/src/fields/config/types.js'
+import type { FieldAccess } from 'payload/types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'

@@ -1,9 +1,9 @@
 import LinkImport from 'next/link.js'
 import React from 'react'
 
-import { Button } from '../../../../../packages/ui/src/elements/Button/index.js'
+import { Button } from '@payloadcms/ui'
 // As this is the demo project, we import our dependencies from the `src` directory.
-import { MinimalTemplate } from '../../../../../packages/ui/src/templates/Minimal/index.js'
+import { MinimalTemplate } from '@payloadcms/ui'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 

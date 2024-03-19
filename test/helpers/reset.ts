@@ -1,7 +1,7 @@
-import { sql } from 'drizzle-orm'
+import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { Payload } from 'payload'
 
-import type { PostgresAdapter } from '../../packages/db-postgres/src/types.js'
-import type { Payload } from '../../packages/payload/src/index.js'
+import { sql } from 'drizzle-orm'
 
 import { isMongoose } from './isMongoose.js'
 

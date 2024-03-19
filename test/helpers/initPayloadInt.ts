@@ -1,6 +1,7 @@
-import type { SanitizedConfig } from '../../packages/payload/src/config/types.js'
+import type { SanitizedConfig } from 'payload/config'
 
-import { type Payload, getPayload } from '../../packages/payload/src/index.js'
+import { type Payload, getPayload } from 'payload'
+
 import { startMemoryDB } from '../startMemoryDB.js'
 import { NextRESTClient } from './NextRESTClient.js'
 

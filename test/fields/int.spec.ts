@@ -1,12 +1,13 @@
+import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
+import type { Payload } from 'payload'
+import type { PaginatedDocs } from 'payload/database'
 
-import type { MongooseAdapter } from '../../packages/db-mongodb/src/index.js'
-import type { PaginatedDocs } from '../../packages/payload/src/database/types.js'
-import type { Payload } from '../../packages/payload/src/index.js'
+import { getPayload } from 'payload'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { GroupField, RichTextField } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import { startMemoryDB } from '../startMemoryDB.js'

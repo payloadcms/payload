@@ -1,6 +1,7 @@
-import type { Block, Field } from '../../../../packages/payload/src/fields/config/types.js'
+import type { Block, Field } from 'payload/types'
 
-import { slateEditor } from '../../../../packages/richtext-slate/src/index.js'
+import { slateEditor } from '@payloadcms/richtext-slate'
+
 import { invertBackground } from '../../fields/invertBackground.js'
 import link from '../../fields/link.js'
 

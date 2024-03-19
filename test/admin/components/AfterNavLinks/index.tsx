@@ -1,12 +1,14 @@
 'use client'
 
+import { useConfig } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 import React from 'react'
 
 // As this is the demo project, we import our dependencies from the `src` directory.
-import { useConfig } from '../../../../packages/ui/src/providers/Config/index.js'
+// import { useConfig } from '@payloadcms/ui'
+// import { useConfig } from '@payloadcms/ui'
 
 // In your projects, you can import as follows:
 // import { useConfig } from 'payload/components/utilities';

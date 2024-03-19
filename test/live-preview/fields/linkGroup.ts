@@ -1,4 +1,5 @@
-import type { ArrayField, Field } from '../../../packages/payload/src/fields/config/types.js'
+import type { ArrayField, Field } from 'payload/types'
+
 import type { LinkAppearances } from './link.js'
 
 import deepMerge from '../utilities/deepMerge.js'

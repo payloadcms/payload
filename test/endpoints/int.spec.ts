@@ -1,6 +1,6 @@
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
-import { type Payload } from '../../packages/payload/src/index.js'
+import { type Payload } from 'payload'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import {

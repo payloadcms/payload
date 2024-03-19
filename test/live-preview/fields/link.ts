@@ -1,4 +1,4 @@
-import type { Field } from '../../../packages/payload/src/fields/config/types.js'
+import type { Field } from 'payload/types'
 
 import deepMerge from '../utilities/deepMerge.js'
 

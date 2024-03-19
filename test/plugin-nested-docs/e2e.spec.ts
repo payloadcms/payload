@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 
 import type { Page as PayloadPage } from './payload-types.js'
 
-import payload from '../../packages/payload/src/index.js'
+import payload from 'payload'
 import { initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'

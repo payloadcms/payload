@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src/index.js'
+import type { Payload } from 'payload'
 
 import wait from '../../packages/payload/src/utilities/wait.js'
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'

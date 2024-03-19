@@ -1,6 +1,6 @@
 import path from 'path'
 
-import type { Payload, PayloadRequest } from '../../../packages/payload/src/index.js'
+import type { Payload, PayloadRequest } from 'payload'
 
 import getFileByPath from '../../../packages/payload/src/uploads/getFileByPath.js'
 import { mediaSlug } from '../shared.js'

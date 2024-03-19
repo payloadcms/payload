@@ -1,7 +1,9 @@
-import type { Payload } from '../../packages/payload/src/index.js'
+import type { Payload } from 'payload'
+
+import { ValidationError } from 'payload/errors'
+
 import type { Form } from './payload-types.js'
 
-import { ValidationError } from '../../packages/payload/src/errors/index.js'
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'

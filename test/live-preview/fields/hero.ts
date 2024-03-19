@@ -1,6 +1,6 @@
-import type { Field } from '../../../packages/payload/src/fields/config/types.js'
+import type { Field } from 'payload/types'
 
-import { slateEditor } from '../../../packages/richtext-slate/src/index.js'
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 export const hero: Field = {
   name: 'hero',

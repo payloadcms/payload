@@ -1,15 +1,13 @@
+import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { Payload } from 'payload'
+import type { PayloadRequest, TypeWithID } from 'payload/types'
+
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
 import path from 'path'
+import { commitTransaction, initTransaction } from 'payload/database'
 import { fileURLToPath } from 'url'
 
-import type { PostgresAdapter } from '../../packages/db-postgres/src/types.js'
-import type { TypeWithID } from '../../packages/payload/src/collections/config/types.js'
-import type { Payload } from '../../packages/payload/src/index.js'
-import type { PayloadRequest } from '../../packages/payload/src/types/index.js'
-
-import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction.js'
-import { initTransaction } from '../../packages/payload/src/utilities/initTransaction.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
 import { CustomTabComponent } from '../components/CustomTabComponent/index.js'
 import { CustomTabView } from '../components/views/CustomTab/index.js'

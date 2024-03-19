@@ -1,5 +1,5 @@
-import type { CollectionConfig } from '../../packages/payload/src/collections/config/types.js'
-import type { FilterOptionsProps } from '../../packages/payload/src/fields/config/types.js'
+import type { CollectionConfig } from 'payload/types'
+import type { FilterOptionsProps } from 'payload/types'
 
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -105,7 +105,7 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'relationshipFilteredAsync',
-          filterOptions: async (args: FilterOptionsProps<FieldsRelationship>) => {
+          filterOptions: (args: FilterOptionsProps<FieldsRelationship>) => {
             return {
               id: {
                 equals: args.data.relationship,
@@ -410,13 +410,13 @@ export default buildConfigWithDefaults({
       })
     })
     ;[...Array(15)].forEach((_, i) => {
-      payload.create({
+      void payload.create({
         collection: collection1Slug,
         data: {
           name: `relationship-test ${i}`,
         },
       })
-      payload.create({
+      void payload.create({
         collection: collection2Slug,
         data: {
           name: `relationship-test ${i}`,
