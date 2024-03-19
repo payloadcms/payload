@@ -1,6 +1,6 @@
 import type { SanitizedConfig } from 'payload/config'
 
-import { APIError } from '../../packages/payload/errors.js'
+import { APIError } from '../../packages/payload/src/errors/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AfterOperation from './collections/AfterOperation/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
