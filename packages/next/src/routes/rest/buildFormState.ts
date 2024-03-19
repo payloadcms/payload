@@ -25,7 +25,6 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
   const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
 
   const incomingUserSlug = req.user?.collection
-  console.log('teest')
   const adminUserSlug = req.payload.config.admin.user
 
   // If we have a user slug, test it against the functions
