@@ -1,6 +1,6 @@
 import path from 'path'
+import { getFileByPath } from 'payload/utilities'
 
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import removeFiles from '../helpers/removeFiles.js'

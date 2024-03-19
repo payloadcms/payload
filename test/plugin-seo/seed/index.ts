@@ -1,8 +1,8 @@
-import path from 'path'
-
 import type { Payload, PayloadRequest } from 'payload'
 
-import getFileByPath from '../../../packages/payload/src/uploads/getFileByPath.js'
+import path from 'path'
+import { getFileByPath } from 'payload/utilities'
+
 import { mediaSlug } from '../shared.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {

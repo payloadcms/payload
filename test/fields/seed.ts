@@ -1,8 +1,8 @@
 import path from 'path'
 import { type Payload } from 'payload'
+import { getFileByPath } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
 import { anotherArrayDoc, arrayDoc } from './collections/Array/shared.js'

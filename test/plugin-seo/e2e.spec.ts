@@ -3,11 +3,11 @@ import type { Payload } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { getFileByPath } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { Page as PayloadPage } from './payload-types.js'
 
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'

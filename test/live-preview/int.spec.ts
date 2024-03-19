@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
+import { getFileByPath } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -9,7 +10,6 @@ import type { Media, Page, Post, Tenant } from './payload-types.js'
 import { handleMessage } from '../../packages/live-preview/src/handleMessage.js'
 import { mergeData } from '../../packages/live-preview/src/mergeData.js'
 import { traverseRichText } from '../../packages/live-preview/src/traverseRichText.js'
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { Pages } from './collections/Pages.js'
 import { postsSlug } from './collections/Posts.js'
 import configPromise from './config.js'
