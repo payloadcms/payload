@@ -1,13 +1,13 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import { wait } from 'payload/utilities'
+import { mapAsync } from 'payload/utilities'
 import qs from 'qs'
 
-import type { Payload } from '../../packages/payload/src/index.js'
 import type { Geo, Post } from './payload-types.js'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
-import wait from '../../packages/payload/src/utilities/wait.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
@@ -872,8 +872,8 @@ describe('admin', () => {
         const whereQueryJSON = {
           point: {
             within: {
-              coordinates: [polygon],
               type: 'Polygon',
+              coordinates: [polygon],
             },
           },
         }
@@ -1299,8 +1299,8 @@ async function deleteAllPosts() {
   await Promise.all([
     ...posts.docs.map((post) => {
       return payload.delete({
-        collection: postsCollectionSlug,
         id: post.id,
+        collection: postsCollectionSlug,
       })
     }),
   ])

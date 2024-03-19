@@ -1,12 +1,12 @@
+import type { SerializedBlockNode } from '@payloadcms/richtext-lexical'
 import type { Page } from '@playwright/test'
 import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src/index.js'
-import type { SerializedBlockNode } from '../../packages/richtext-lexical/src/index.js'
 import type { LexicalField } from './payload-types.js'
 
 import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
@@ -20,7 +20,7 @@ import { lexicalFieldsSlug } from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe, beforeEach } = test
+const { beforeAll, beforeEach, describe } = test
 
 let payload: Payload
 let client: RESTClient
@@ -42,7 +42,7 @@ async function navigateToLexicalFields() {
 describe('lexical', () => {
   beforeAll(async ({ browser }) => {
     ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
-    client = new RESTClient(null, { serverURL, defaultSlug: 'rich-text-fields' })
+    client = new RESTClient(null, { defaultSlug: 'rich-text-fields', serverURL })
     await client.login()
 
     const context = await browser.newContext()
@@ -53,7 +53,7 @@ describe('lexical', () => {
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
     await client.logout()
-    client = new RESTClient(null, { serverURL, defaultSlug: 'rich-text-fields' })
+    client = new RESTClient(null, { defaultSlug: 'rich-text-fields', serverURL })
     await client.login()
   })
 
@@ -131,12 +131,12 @@ describe('lexical', () => {
     const lexicalDoc: LexicalField = (
       await payload.find({
         collection: lexicalFieldsSlug,
+        depth: 0,
         where: {
           title: {
             equals: lexicalDocData.title,
           },
         },
-        depth: 0,
       })
     ).docs[0] as never
 
@@ -196,12 +196,12 @@ describe('lexical', () => {
     const lexicalDoc: LexicalField = (
       await payload.find({
         collection: lexicalFieldsSlug,
+        depth: 0,
         where: {
           title: {
             equals: lexicalDocData.title,
           },
         },
-        depth: 0,
       })
     ).docs[0] as never
 
@@ -335,12 +335,12 @@ describe('lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -408,12 +408,12 @@ describe('lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -551,12 +551,12 @@ describe('lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -617,12 +617,12 @@ describe('lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 

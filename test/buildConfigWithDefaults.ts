@@ -1,10 +1,7 @@
-import sharp from 'sharp'
+import type { SanitizedConfig } from 'payload/types'
 
-import type { Config, SanitizedConfig } from '../packages/payload/src/config/types.js'
-
-import { mongooseAdapter } from '../packages/db-mongodb/src/index.js'
-import { postgresAdapter } from '../packages/db-postgres/src/index.js'
-import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build.js'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { postgresAdapter } from '@payloadcms/db-postgres'
 import {
   AlignFeature,
   BlockQuoteFeature,
@@ -27,8 +24,10 @@ import {
   UnorderedListFeature,
   UploadFeature,
   lexicalEditor,
-} from '../packages/richtext-lexical/src/index.js'
-// import { slateEditor } from '../packages/richtext-slate/src/index.js'
+} from '@payloadcms/richtext-lexical'
+// import { slateEditor } from '@payloadcms/richtext-slate'
+import { type Config, buildConfig } from 'payload/config'
+import sharp from 'sharp'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
 const databaseAdapters = {
@@ -184,5 +183,5 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     config.admin.disable = true
   }
 
-  return buildPayloadConfig(config)
+  return buildConfig(config)
 }

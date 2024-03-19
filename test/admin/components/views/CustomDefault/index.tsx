@@ -4,7 +4,7 @@ import React from 'react'
 
 import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
-import { Button, DefaultTemplate, SetStepNav } from '../../../../../packages/ui/src/index.js'
+import { Button, DefaultTemplate, SetStepNav } from '@payloadcms/ui'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 

@@ -1,4 +1,5 @@
-import { slateEditor } from '../../packages/richtext-slate/src/index.js'
+import { slateEditor } from '@payloadcms/richtext-slate'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 

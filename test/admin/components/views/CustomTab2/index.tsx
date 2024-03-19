@@ -3,7 +3,7 @@ import React, { Fragment } from 'react'
 
 import type { ServerSideEditViewProps } from '../../../../../packages/payload/types.js'
 
-import { SetStepNav } from '../../../../../packages/ui/src/index.js'
+import { SetStepNav } from '@payloadcms/ui'
 import { customTabViewTitle } from '../../../shared.js'
 
 export const CustomTabView2: React.FC<ServerSideEditViewProps> = ({ initPageResult }) => {

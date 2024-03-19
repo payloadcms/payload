@@ -1,12 +1,12 @@
+import type { SanitizedConfig } from 'payload/config'
+
 import { createServer } from 'http'
 import nextImport from 'next'
+import { type Payload } from 'payload'
+import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
-import type { SanitizedConfig } from '../../packages/payload/src/config/types.js'
-
 import { getPayloadHMR } from '../../packages/next/src/utilities/getPayloadHMR.js'
-import { type Payload } from '../../packages/payload/src/index.js'
-import wait from '../../packages/payload/src/utilities/wait.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import { createTestHooks } from '../testHooks.js'
 

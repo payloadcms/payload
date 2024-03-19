@@ -1,16 +1,17 @@
+import type { Payload } from 'payload'
+
 import { File as FileBuffer } from 'buffer'
 import NodeFormData from 'form-data'
 import fs from 'fs'
 import path from 'path'
+import { getPayload } from 'payload'
+import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 
-import type { Payload } from '../../packages/payload/src/index.js'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
@@ -653,7 +654,6 @@ describe('Collections - Uploads', () => {
       expect(
         async () =>
           await payload.create({
-            // @ts-expect-error
             collection: 'optional-file',
             data: {},
           }),
@@ -663,7 +663,6 @@ describe('Collections - Uploads', () => {
     it('should throw an error if no file and filesRequiredOnCreate is true', async () => {
       await expect(async () =>
         payload.create({
-          // @ts-expect-error
           collection: 'required-file',
           data: {},
         }),

@@ -1,7 +1,7 @@
+import type { Config } from 'payload/config'
+
 import path from 'path'
 import { fileURLToPath } from 'url'
-
-import type { Config } from '../../../packages/payload/src/config/types.js'
 
 import { devUser } from '../../credentials.js'
 import removeFiles from '../../helpers/removeFiles.js'

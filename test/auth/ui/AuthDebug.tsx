@@ -1,9 +1,8 @@
+import type { User } from 'payload/auth'
+import type { UIField } from 'payload/types'
+
+import { useAuth } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
-
-import type { User } from '../../../packages/payload/src/auth/index.js'
-import type { UIField } from '../../../packages/payload/src/fields/config/types.js'
-
-import { useAuth } from '../../../packages/ui/src/providers/Auth/index.js'
 
 export const AuthDebug: React.FC<UIField> = () => {
   const [state, setState] = useState<User | null | undefined>()
@@ -11,7 +10,7 @@ export const AuthDebug: React.FC<UIField> = () => {
 
   useEffect(() => {
     if (user) {
-      fetch(`/api/users/${user.id}`)
+      void fetch(`/api/users/${user.id}`)
         .then((r) => r.json())
         .then((newUser) => {
           setState(newUser)

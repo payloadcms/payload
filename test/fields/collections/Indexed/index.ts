@@ -1,7 +1,4 @@
-import type {
-  BeforeDuplicate,
-  CollectionConfig,
-} from '../../../../packages/payload/src/collections/config/types.js'
+import type { BeforeDuplicate, CollectionConfig } from 'payload/types'
 import type { IndexedField } from '../../payload-types.js'
 
 import { indexedFieldsSlug } from '../../slugs.js'

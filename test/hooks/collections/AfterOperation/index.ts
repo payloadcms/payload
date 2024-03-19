@@ -1,7 +1,4 @@
-import type {
-  AfterOperationHook,
-  CollectionConfig,
-} from '../../../../packages/payload/src/collections/config/types.js'
+import type { CollectionAfterOperationHook, CollectionConfig } from 'payload/types'
 
 import { AfterOperation } from '../../payload-types.js'
 
@@ -12,7 +9,7 @@ const AfterOperation: CollectionConfig = {
   hooks: {
     // beforeRead: [(operation) => operation.doc],
     afterOperation: [
-      async ({ result, operation }) => {
+      ({ result, operation }) => {
         if (operation === 'create') {
           if ('docs' in result) {
             return {
@@ -65,7 +62,7 @@ const AfterOperation: CollectionConfig = {
 
         return result
       },
-    ] as AfterOperationHook<AfterOperation>[],
+    ] as CollectionAfterOperationHook<AfterOperation>[],
   },
   fields: [
     {

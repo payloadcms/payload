@@ -1,8 +1,8 @@
+import type { SanitizedConfig } from 'payload/config'
+
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 
-import type { SanitizedConfig } from '../packages/payload/src/config/types.js'
-
-import { mongooseAdapter } from '../packages/db-mongodb/src/index.js'
 import Logger from '../packages/payload/src/utilities/logger.js'
 
 export const startMemoryDB = async (
@@ -31,8 +31,8 @@ export const startMemoryDB = async (
       })
 
       config.db = mongooseAdapter({
-        url: db.getUri(),
         mongoMemoryServer: db,
+        url: db.getUri(),
       })
 
       return config

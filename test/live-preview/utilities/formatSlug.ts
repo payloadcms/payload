@@ -1,4 +1,4 @@
-import type { FieldHook } from '../../../packages/payload/src/fields/config/types.js'
+import type { FieldHook } from 'payload/types'
 
 const format = (val: string): string =>
   val

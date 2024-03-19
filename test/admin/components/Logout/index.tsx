@@ -2,8 +2,8 @@
 
 import React from 'react'
 
-import { LogOut } from '../../../../packages/ui/src/icons/LogOut/index.js'
-import { useConfig } from '../../../../packages/ui/src/providers/Config/index.js'
+import { LogOut } from '@payloadcms/ui'
+import { useConfig } from '@payloadcms/ui'
 
 export const Logout: React.FC = () => {
   const config = useConfig()

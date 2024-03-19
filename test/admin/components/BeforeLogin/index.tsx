@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { useTranslation } from '../../../../packages/ui/src/providers/Translation/index.js'
+import { useTranslation } from '@payloadcms/ui'
 
 export const BeforeLogin: React.FC = () => {
   const translation = useTranslation()

@@ -1,4 +1,4 @@
-// import { Button } from '../../../../../packages/ui/src/index.js'
+// import { Button } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
@@ -6,7 +6,7 @@ import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import { Button } from '../../../../../packages/ui/src/elements/Button/index.js'
+import { Button } from '@payloadcms/ui'
 import { customNestedViewPath, customViewTitle } from '../../../shared.js'
 
 export const CustomView: React.FC<AdminViewProps> = ({ initPageResult }) => {

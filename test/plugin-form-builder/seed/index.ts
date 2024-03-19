@@ -1,5 +1,5 @@
-import type { Payload } from '../../../packages/payload/src/index.js'
-import type { PayloadRequest } from '../../../packages/payload/src/types/index.js'
+import type { Payload } from 'payload'
+import type { PayloadRequest } from 'payload/types'
 
 import { formSubmissionsSlug, formsSlug, pagesSlug } from '../shared.js'
 
@@ -29,7 +29,6 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     const { id: formID } = await payload.create({
       collection: formsSlug,
       data: {
-        title: 'Contact Form',
         confirmationMessage: [
           {
             type: 'paragraph',
@@ -38,18 +37,19 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         ],
         fields: [
           {
+            name: 'name',
             blockType: 'text',
             label: 'Name',
-            name: 'name',
             required: true,
           },
           {
+            name: 'email',
             blockType: 'email',
             label: 'Email',
-            name: 'email',
             required: true,
           },
         ],
+        title: 'Contact Form',
       },
     })
 
@@ -73,9 +73,9 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     await payload.create({
       collection: pagesSlug,
       data: {
-        title: 'Contact',
         slug: 'contact',
         form: formID,
+        title: 'Contact',
       },
     })
 

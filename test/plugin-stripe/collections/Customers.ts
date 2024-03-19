@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
 import { LinkToDoc } from '../../../packages/plugin-stripe/src/ui/LinkToDoc.js'
 import { customersSlug } from '../shared.js'

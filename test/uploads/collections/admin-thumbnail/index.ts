@@ -1,6 +1,6 @@
 import path from 'path'
 
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
 import { RegisterAdminThumbnailFn } from './RegisterThumbnailFn.js'
 

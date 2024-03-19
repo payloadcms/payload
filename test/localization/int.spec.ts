@@ -1,9 +1,11 @@
-import type { Payload } from '../../packages/payload/src/index.js'
-import type { Where } from '../../packages/payload/src/types/index.js'
+import type { Payload } from 'payload'
+import type { Where } from 'payload/types'
+
+import { getPayload } from 'payload'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { englishLocale } from '../globals/config.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -288,8 +290,8 @@ describe('Localization', () => {
         const post = await payload.create({
           collection: localizedSortSlug,
           data: {
-            title: `EN ${i}`,
             date: new Date(),
+            title: `EN ${i}`,
           },
           locale: englishLocale,
         })
@@ -298,8 +300,8 @@ describe('Localization', () => {
           id: post.id,
           collection: localizedSortSlug,
           data: {
-            title: `ES ${i}`,
             date: new Date(),
+            title: `ES ${i}`,
           },
           locale: spanishLocale,
         })
@@ -629,11 +631,11 @@ describe('Localization', () => {
       const reversedArrayRows = [...globalArray.array].reverse()
 
       const updatedGlobal = await payload.updateGlobal({
+        slug: 'global-array',
         data: {
           array: reversedArrayRows,
         },
         locale: 'all',
-        slug: 'global-array',
       })
 
       expect(updatedGlobal.array[0].text.en).toStrictEqual('test en 2')
@@ -736,10 +738,10 @@ describe('Localization', () => {
       const { data } = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({ query }),
-          query: { locale: 'en' },
           headers: {
             Authorization: `JWT ${token}`,
           },
+          query: { locale: 'en' },
         })
         .then((res) => res.json())
       const result = data.meUser
@@ -763,10 +765,10 @@ describe('Localization', () => {
       const { data } = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({ query: create }),
-          query: { locale: 'en' },
           headers: {
             Authorization: `JWT ${token}`,
           },
+          query: { locale: 'en' },
         })
         .then((res) => res.json())
       const createResult = data.createLocalizedPost
@@ -786,10 +788,10 @@ describe('Localization', () => {
       const { data: updateData } = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({ query: update }),
-          query: { locale: 'en' },
           headers: {
             Authorization: `JWT ${token}`,
           },
+          query: { locale: 'en' },
         })
         .then((res) => res.json())
       const updateResult = updateData.updateLocalizedPost
@@ -835,10 +837,10 @@ describe('Localization', () => {
       const { data: multipleLocaleData } = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({ query }),
-          query: { locale: 'en' },
           headers: {
             Authorization: `JWT ${token}`,
           },
+          query: { locale: 'en' },
         })
         .then((res) => res.json())
 
@@ -962,44 +964,44 @@ describe('Localization', () => {
     it('should be equal to the created document', async () => {
       const { id, blocks } = await payload.create({
         collection: nestedToArrayAndBlockCollectionSlug,
-        locale: defaultLocale,
         data: {
           blocks: [
             {
-              blockType: 'block',
               array: [
                 {
                   text: 'english',
                   textNotLocalized: 'test',
                 },
               ],
+              blockType: 'block',
             },
           ],
         },
+        locale: defaultLocale,
       })
 
       await payload.update({
-        collection: nestedToArrayAndBlockCollectionSlug,
-        locale: spanishLocale,
         id,
+        collection: nestedToArrayAndBlockCollectionSlug,
         data: {
           blocks: (blocks as { array: { text: string }[] }[]).map((block) => ({
             ...block,
             array: block.array.map((item) => ({ ...item, text: 'spanish' })),
           })),
         },
+        locale: spanishLocale,
       })
 
       const docDefaultLocale = await payload.findByID({
+        id,
         collection: nestedToArrayAndBlockCollectionSlug,
         locale: defaultLocale,
-        id,
       })
 
       const docSpanishLocale = await payload.findByID({
+        id,
         collection: nestedToArrayAndBlockCollectionSlug,
         locale: spanishLocale,
-        id,
       })
 
       const rowDefault = docDefaultLocale.blocks[0].array[0]

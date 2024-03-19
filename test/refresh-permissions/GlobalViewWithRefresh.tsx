@@ -1,17 +1,17 @@
+import type { EditViewProps } from 'payload/types'
+
+import { useAuth } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
-import type { EditViewProps as Props } from '../../packages/payload/src/admin/views/types.js'
-
 import { EditView as DefaultEditView } from '../../packages/next/src/views/Edit/index.js'
-import { useAuth } from '../../packages/ui/src/providers/Auth/index.js'
 
-const GlobalView: React.FC<Props> = (props) => {
+const GlobalView: React.FC<EditViewProps> = (props) => {
   const { onSave } = props
   const { refreshPermissions } = useAuth()
   const modifiedOnSave = useCallback(
     (...args) => {
       onSave.call(null, ...args)
-      refreshPermissions()
+      void refreshPermissions()
     },
     [onSave, refreshPermissions],
   )

@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { useField } from '../../../packages/ui/src/forms/useField/index.js'
+import { useField } from '@payloadcms/ui'
 import { collection1Slug } from '../collectionSlugs.js'
 
 export const PrePopulateFieldUI: React.FC<{
