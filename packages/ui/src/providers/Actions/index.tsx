@@ -3,9 +3,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import type { ActionMap } from '../ComponentMap/buildComponentMap/types.js'
 
-import { useComponentMap } from '../ComponentMap/index.jsx'
+import { useComponentMap } from '../ComponentMap/index.js'
 
-export { SetViewActions } from './SetViewActions/index.jsx'
+export { SetViewActions } from './SetViewActions/index.js'
 
 type ActionsContextType = {
   actions: ActionMap['Edit'][string]
@@ -39,5 +39,3 @@ export const ActionsProvider = ({ children }) => {
     </ActionsContext.Provider>
   )
 }
-
-export { SetViewActions } from './SetViewActions/index.jsx'

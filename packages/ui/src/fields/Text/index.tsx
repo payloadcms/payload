@@ -2,7 +2,6 @@
 import type { ClientValidate } from 'payload/types'
 import type {} from 'payload/types'
 
-import { TextField } from 'payload/types'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'

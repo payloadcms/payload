@@ -1,7 +1,7 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import { SelectAllStatus, useSelection } from '../../providers/Selection/index.jsx'
+import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 

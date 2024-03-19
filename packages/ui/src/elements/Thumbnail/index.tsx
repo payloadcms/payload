@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import type { Props } from './types.js'
 
 import { File } from '../../graphics/File/index.js'
-import useThumbnail from '../../hooks/useThumbnail.js'
+import { useThumbnail } from '../../hooks/useThumbnail.js'
 import './index.scss'
 
 const baseClass = 'thumbnail'

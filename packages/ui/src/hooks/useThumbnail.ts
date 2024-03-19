@@ -2,15 +2,13 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { isImage } from 'payload/utilities'
 
-import { useComponentMap } from '../providers/ComponentMap/index.jsx'
+import { useComponentMap } from '../providers/ComponentMap/index.js'
 import { useConfig } from '../providers/Config/index.js'
 
-const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i')
-const base64Pattern = new RegExp(/^data:image\/[a-z]+;base64,/)
+const absoluteURLPattern = /^(?:[a-z]+:)?\/\//i
+const base64Pattern = /^data:image\/[a-z]+;base64,/
 
-// /api/[collectionSlug]/file/[filename]
-
-const useThumbnail = (
+export const useThumbnail = (
   collectionSlug: string,
   uploadConfig: SanitizedCollectionConfig['upload'],
   doc: Record<string, unknown>,
@@ -66,5 +64,3 @@ const useThumbnail = (
 
   return false
 }
-
-export default useThumbnail

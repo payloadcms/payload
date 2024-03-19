@@ -4,8 +4,8 @@ import type { Where } from 'payload/types'
 import queryString from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
-import { useLocale } from '../Locale/index.jsx'
-import { useSearchParams } from '../SearchParams/index.jsx'
+import { useLocale } from '../Locale/index.js'
+import { useSearchParams } from '../SearchParams/index.js'
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',

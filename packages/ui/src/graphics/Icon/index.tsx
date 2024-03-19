@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
+import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 const css = `

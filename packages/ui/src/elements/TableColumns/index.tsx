@@ -8,7 +8,7 @@ import type { ColumnPreferences } from '../../providers/ListInfo/types.js'
 import type { Column } from '../Table/types.js'
 import type { Action } from './columnReducer.js'
 
-import { useComponentMap } from '../../providers/ComponentMap/index.jsx'
+import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { buildColumns } from './buildColumns.js'
