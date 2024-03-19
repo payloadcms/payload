@@ -1,8 +1,10 @@
 'use client'
+import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 
-import { type FormFieldBase, ShimmerEffect } from '@payloadcms/ui'
-import { useClientFunctions } from '@payloadcms/ui/providers'
+import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useClientFunctions } from '@payloadcms/ui/providers/ClientFunction'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
 import type { GeneratedFeatureProviderComponent } from '../types.js'
@@ -25,7 +27,7 @@ export const RichTextField: React.FC<
   }
 > = (props) => {
   const { lexicalEditorConfig, richTextComponentMap } = props
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
   const clientFunctions = useClientFunctions()
   const [hasLoadedFeatures, setHasLoadedFeatures] = useState(false)
 
@@ -106,7 +108,7 @@ export const RichTextField: React.FC<
             )
             const featureComponents: React.ReactNode[] = featureComponentKeys.map((key) => {
               return richTextComponentMap.get(key)
-            }) as React.ReactNode[] // TODO: Type better
+            }) // TODO: Type better
 
             return (
               <React.Fragment key={featureProvider.key}>

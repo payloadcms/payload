@@ -1,5 +1,4 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui'
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { LexicalEditor } from 'lexical'
 
@@ -7,6 +6,7 @@ import lexicalComposerImport from '@lexical/react/LexicalComposer.js'
 const { LexicalComposer } = lexicalComposerImport
 
 import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
+import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 
 import * as React from 'react'
 

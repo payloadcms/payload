@@ -4,7 +4,7 @@ import type { TextNode } from 'lexical'
 import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
 const { useLexicalComposerContext } = lexicalComposerContextImport
 
-import { useTranslation } from '@payloadcms/ui'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'

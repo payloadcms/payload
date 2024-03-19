@@ -2,7 +2,8 @@ import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 import type React from 'react'
 
-import { reduceFieldsToValues, useAllFormFields } from '@payloadcms/ui'
+import { useAllFormFields } from '@payloadcms/ui/forms/Form'
+import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 import { useEffect } from 'react'
 
 type Props = {
