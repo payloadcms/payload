@@ -680,7 +680,12 @@ export type SanitizedConfig = Omit<
   }
 }
 
-export type { ClientConfig } from '../config/createClientConfig.js'
+export type {
+  ClientCollectionConfig,
+  ClientConfig,
+  ClientConfigField,
+  ClientGlobalConfig,
+} from '../config/createClientConfig.js'
 
 export type EditConfig =
   | (

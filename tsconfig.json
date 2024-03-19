@@ -45,12 +45,6 @@
       "@payloadcms/db-mongodb": [
         "./packages/db-mongodb/src"
       ],
-      "@payloadcms/live-preview": [
-        "./packages/live-preview/src"
-      ],
-      "@payloadcms/live-preview-react": [
-        "./packages/live-preview-react/src/index.ts"
-      ],
       "@payloadcms/richtext-lexical": [
         "./packages/richtext-lexical/src"
       ],
