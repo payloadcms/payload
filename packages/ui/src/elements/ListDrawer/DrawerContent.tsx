@@ -11,7 +11,7 @@ import type { ListDrawerProps } from './types.js'
 
 import Label from '../../forms/Label/index.js'
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
-import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
+import { useUseTitleField } from '../../hooks/useUseAsTitle.sx'
 import { X } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'

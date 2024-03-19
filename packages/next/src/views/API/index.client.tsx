@@ -2,7 +2,7 @@
 
 import { CopyToClipboard, Gutter, SetViewActions } from '@payloadcms/ui/elements'
 import { Checkbox, Form, Number as NumberInput, Select } from '@payloadcms/ui/forms'
-import { MinimizeMaximize } from '@payloadcms/ui/icons'
+import { MinimizeMaximize } from '@payloadcms/ui/icons/MinimizeMaximize'
 import {
   useComponentMap,
   useConfig,

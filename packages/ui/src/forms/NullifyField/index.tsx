@@ -3,11 +3,11 @@
 import * as React from 'react'
 
 import { Banner } from '../../elements/Banner/index.js'
+import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useForm } from '../Form/context.js'
-import CheckboxInput from '../fields/Checkbox/index.js'
 
 type NullifyLocaleFieldProps = {
   fieldValue?: [] | null | number

@@ -4,10 +4,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types.js'
 
-import Error from '../../forms/Error/index.js'
+import { fieldBaseClass } from '../../fields/shared.js'
+import { Error } from '../../forms/Error/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js'
-import { fieldBaseClass } from '../../forms/fields/shared.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

@@ -10,6 +10,8 @@ import './index.scss'
 
 const baseClass = 'render-fields'
 
+export { Props }
+
 export const RenderFields: React.FC<Props> = (props) => {
   const { className, fieldMap, forceRender, margins, path, permissions, schemaPath } = props
 

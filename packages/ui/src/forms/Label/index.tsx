@@ -10,7 +10,7 @@ import { useFieldProps } from '../FieldPropsProvider/index.js'
 import { useForm } from '../Form/context.js'
 import './index.scss'
 
-const Label: React.FC<LabelProps> = (props) => {
+export const Label: React.FC<LabelProps> = (props) => {
   const { htmlFor: htmlForFromProps, label: labelFromProps, required = false } = props
   const { uuid } = useForm()
   const { path } = useFieldProps()
@@ -29,5 +29,3 @@ const Label: React.FC<LabelProps> = (props) => {
 
   return null
 }
-
-export default Label

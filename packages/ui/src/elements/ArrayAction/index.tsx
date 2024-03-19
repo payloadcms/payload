@@ -1,7 +1,5 @@
 import React from 'react'
 
-import type { Props } from './types.js'
-
 import { Chevron } from '../../icons/Chevron/index.js'
 import { Copy } from '../../icons/Copy/index.js'
 import { MoreIcon } from '../../icons/More/index.js'
@@ -13,6 +11,16 @@ import Popup from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'array-actions'
+
+export type Props = {
+  addRow: (current: number, blockType?: string) => void
+  duplicateRow: (current: number) => void
+  hasMaxRows: boolean
+  index: number
+  moveRow: (from: number, to: number) => void
+  removeRow: (index: number) => void
+  rowCount: number
+}
 
 export const ArrayAction: React.FC<Props> = ({
   addRow,

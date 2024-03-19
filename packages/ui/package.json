@@ -1,8 +1,6 @@
 {
   "name": "@payloadcms/ui",
   "version": "3.0.0-alpha.48",
-  "main": "./src/index.ts",
-  "types": "./dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:webpack && rm dist/prod/index.js",
@@ -16,11 +14,59 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "exports": {
-    ".": "./src/exports/index.ts",
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.dts"
+    "./assets": {
+      "import": "./src/assets/index.tsx",
+      "require": "./src/assets/index.tsx",
+      "default": "./src/assets/index.tsx",
+      "types": "./src/assets/index.tsx"
+    },
+    "./elements/*": {
+      "import": "./src/elements/*/index.tsx",
+      "require": "./src/elements/*/index.tsx",
+      "default": "./src/elements/*/index.tsx",
+      "types": "./src/elements/*/index.tsx"
+    },
+    "./forms/*": {
+      "import": "./src/forms/*/index.tsx",
+      "require": "./src/forms/*/index.tsx",
+      "default": "./src/forms/*/index.tsx",
+      "types": "./src/forms/*/index.tsx"
+    },
+    "./graphics/*": {
+      "import": "./src/graphics/*/index.tsx",
+      "require": "./src/graphics/*/index.tsx",
+      "default": "./src/graphics/*/index.tsx",
+      "types": "./src/graphics/*/index.tsx"
+    },
+    "./hooks/*": {
+      "import": "./src/hooks/*.ts",
+      "require": "./src/hooks/*.ts",
+      "default": "./src/hooks/*.ts",
+      "types": "./src/hooks/*.ts"
+    },
+    "./icons/*": {
+      "import": "./src/icons/*/index.tsx",
+      "require": "./src/icons/*/index.tsx",
+      "default": "./src/icons/*/index.tsx",
+      "types": "./src/icons/*/index.tsx"
+    },
+    "./providers/*": {
+      "import": "./src/providers/*/index.tsx",
+      "require": "./src/providers/*/index.tsx",
+      "default": "./src/providers/*/index.tsx",
+      "types": "./src/providers/*/index.tsx"
+    },
+    "./templates/*": {
+      "import": "./src/templates/*/index.tsx",
+      "require": "./src/templates/*/index.tsx",
+      "default": "./src/templates/*/index.tsx",
+      "types": "./src/templates/*/index.tsx"
+    },
+    "./utilities/*": {
+      "import": "./src/utilities/*/index.tsx",
+      "require": "./src/utilities/*/index.tsx",
+      "default": "./src/utilities/*/index.tsx",
+      "types": "./src/utilities/*/index.tsx"
     },
     "./scss": {
       "import": "./src/scss.scss",
