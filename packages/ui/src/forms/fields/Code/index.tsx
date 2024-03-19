@@ -49,7 +49,7 @@ const Code: React.FC<CodeFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path, setValue, showError, value } = useField({
+  const { setValue, showError, value } = useField({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })

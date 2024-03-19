@@ -1,5 +1,5 @@
 import type { FieldPermissions } from 'payload/auth'
-import type { ArrayField, Row, RowLabel as RowLabelType } from 'payload/types'
+import type { ArrayField, Row } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -14,7 +14,6 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { useFormSubmitted } from '../../Form/context.js'
 import { RenderFields } from '../../RenderFields/index.js'
 import { RowLabel } from '../../RowLabel/index.js'
-import HiddenInput from '../HiddenInput/index.js'
 import './index.scss'
 
 const baseClass = 'array-field'
@@ -125,7 +124,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <HiddenInput name={`${path}.id`} value={row.id} />
         <RenderFields
           className={`${baseClass}__fields`}
           fieldMap={fieldMap}
