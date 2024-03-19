@@ -45,9 +45,6 @@ export const DefaultListView: React.FC = () => {
     data,
     handlePageChange,
     handlePerPageChange,
-    handleSearchChange,
-    handleSortChange,
-    handleWhereChange,
     hasCreatePermission,
     limit,
     modifySearchParams,
@@ -130,12 +127,8 @@ export const DefaultListView: React.FC = () => {
           </header>
           <ListControls
             collectionConfig={collectionConfig}
-            // textFieldsToBeSearched={textFieldsToBeSearched}
-            // handleSearchChange={handleSearchChange}
-            // handleSortChange={handleSortChange}
-            // handleWhereChange={handleWhereChange}
             fieldMap={fieldMap}
-            // modifySearchQuery={modifySearchParams}
+            modifySearchQuery={modifySearchParams}
             titleField={titleField}
           />
           {BeforeListTable}

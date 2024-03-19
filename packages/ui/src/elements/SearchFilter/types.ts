@@ -5,5 +5,4 @@ export type Props = {
   fieldName?: string
   handleChange?: (search: string) => void
   listSearchableFields?: FieldAffectingData[]
-  modifySearchQuery?: boolean
 }

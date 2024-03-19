@@ -11,6 +11,7 @@ const AnimateHeight = (AnimateHeightImport.default ||
 import type { Props } from './types.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
+import { useListInfo } from '../../index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import ColumnSelector from '../ColumnSelector/index.js'
@@ -37,15 +38,13 @@ export const ListControls: React.FC<Props> = (props) => {
     enableColumns = true,
     enableSort = false,
     fieldMap,
-    handleSearchChange,
-    handleSortChange,
-    handleWhereChange,
     modifySearchQuery = true,
     textFieldsToBeSearched,
     titleField,
   } = props
 
   const { useWindowInfo } = facelessUIImport
+  const { handleSearchChange, handleWhereChange } = useListInfo()
 
   const { searchParams } = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
@@ -68,7 +67,6 @@ export const ListControls: React.FC<Props> = (props) => {
           fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
           handleChange={handleSearchChange}
           listSearchableFields={textFieldsToBeSearched}
-          modifySearchQuery={modifySearchQuery}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
