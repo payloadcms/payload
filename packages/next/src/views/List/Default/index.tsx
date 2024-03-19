@@ -1,4 +1,7 @@
 'use client'
+
+import type { CollectionComponentMap } from '@payloadcms/ui'
+
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -29,8 +32,6 @@ import LinkImport from 'next/link.js'
 import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
-import type { CollectionComponentMap } from '../../../../../ui/src/utilities/buildComponentMap/types.js'
-
 import { RelationshipProvider } from './RelationshipProvider/index.js'
 import './index.scss'
 
@@ -60,7 +61,8 @@ export const DefaultListView: React.FC = () => {
 
   const componentMap = getComponentMap({ collectionSlug }) as CollectionComponentMap
 
-  const { AfterList, AfterListTable, BeforeList, BeforeListTable, actionsMap } = componentMap || {}
+  const { AfterList, AfterListTable, BeforeList, BeforeListTable, actionsMap, fieldMap } =
+    componentMap || {}
 
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
@@ -132,6 +134,7 @@ export const DefaultListView: React.FC = () => {
             // handleSearchChange={handleSearchChange}
             // handleSortChange={handleSortChange}
             // handleWhereChange={handleWhereChange}
+            fieldMap={fieldMap}
             // modifySearchQuery={modifySearchParams}
             titleField={titleField}
           />
@@ -203,7 +206,7 @@ export const DefaultListView: React.FC = () => {
                           label={getTranslation(collectionConfig.labels.plural, i18n)}
                         />
                         <div className={`${baseClass}__list-selection-actions`}>
-                          <EditMany collection={collectionConfig} />
+                          <EditMany collection={collectionConfig} fieldMap={fieldMap} />
                           <PublishMany collection={collectionConfig} />
                           <UnpublishMany collection={collectionConfig} />
                           <DeleteMany collection={collectionConfig} />

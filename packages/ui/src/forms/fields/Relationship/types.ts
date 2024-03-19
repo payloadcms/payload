@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig, RelationshipField } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
 
 import type { FormFieldBase } from '../shared.js'
@@ -38,7 +38,7 @@ type CLEAR = {
 }
 
 type UPDATE = {
-  collection: SanitizedCollectionConfig
+  collection: ClientCollectionConfig
   config: SanitizedConfig
   doc: any
   i18n: I18n
@@ -46,7 +46,7 @@ type UPDATE = {
 }
 
 type ADD = {
-  collection: SanitizedCollectionConfig
+  collection: ClientCollectionConfig
   config: SanitizedConfig
   docs: any[]
   i18n: I18n

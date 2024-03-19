@@ -2,6 +2,8 @@ import type { Field } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 
+import type { MappedField } from '../../index.js'
+
 export const createNestedFieldPath = (parentPath: string, field: Field): string => {
   if (parentPath) {
     if (fieldAffectsData(field)) {
@@ -16,4 +18,18 @@ export const createNestedFieldPath = (parentPath: string, field: Field): string 
   }
 
   return ''
+}
+
+export const createNestedClientFieldPath = (parentPath: string, field: MappedField): string => {
+  if (parentPath) {
+    if (field.isFieldAffectingData) {
+      return `${parentPath}.${field.name}`
+    }
+  }
+
+  if (field.isFieldAffectingData) {
+    return field.name
+  }
+
+  return field.name
 }

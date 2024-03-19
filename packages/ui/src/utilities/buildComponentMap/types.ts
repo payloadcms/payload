@@ -63,6 +63,7 @@ export type MappedField = {
   Cell: React.ReactNode
   CustomField?: React.ReactNode
   Heading: React.ReactNode
+  disableBulkEdit?: boolean
   disabled?: boolean
   fieldComponentProps: FieldComponentProps
   fieldIsPresentational: boolean
@@ -72,6 +73,7 @@ export type MappedField = {
   localized: boolean
   name?: string
   type: keyof FieldTypes
+  unique?: boolean
 }
 
 export type FieldMap = MappedField[]

@@ -55,31 +55,41 @@ export type ServerOnlyFieldAdminProperties = keyof Pick<
 
 export type ClientConfigField = Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate'>
 
-export type ClientConfig = Omit<SanitizedConfig, 'admin' | ServerOnlyRootProperties> & {
+export type ClientCollectionConfig = Omit<
+  SanitizedCollectionConfig,
+  'admin' | 'fields' | ServerOnlyCollectionProperties
+> & {
+  admin: Omit<
+    SanitizedCollectionConfig['admin'],
+    ServerOnlyCollectionAdminProperties & 'fields' & 'livePreview'
+  > & {
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+  }
+  fields: ClientConfigField[]
+}
+
+export type ClientGlobalConfig = Omit<
+  SanitizedGlobalConfig,
+  'admin' | 'fields' | ServerOnlyGlobalProperties
+> & {
+  admin: Omit<
+    SanitizedGlobalConfig['admin'],
+    ServerOnlyGlobalAdminProperties & 'fields' & 'livePreview'
+  > & {
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+  }
+  fields: ClientConfigField[]
+}
+
+export type ClientConfig = Omit<
+  SanitizedConfig,
+  'admin' | 'collections' | 'globals' | ServerOnlyRootProperties
+> & {
   admin: Omit<SanitizedConfig['admin'], ServerOnlyRootAdminProperties & 'livePreview'> & {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   }
-  collections: (Omit<
-    SanitizedCollectionConfig,
-    'admin' | 'fields' | ServerOnlyCollectionProperties
-  > & {
-    admin: Omit<
-      SanitizedCollectionConfig['admin'],
-      ServerOnlyCollectionAdminProperties & 'fields' & 'livePreview'
-    > & {
-      livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-    }
-    fields: ClientConfigField[]
-  })[]
-  globals: (Omit<SanitizedGlobalConfig, 'admin' | 'fields' | ServerOnlyGlobalProperties> & {
-    admin: Omit<
-      SanitizedGlobalConfig['admin'],
-      ServerOnlyGlobalAdminProperties & 'fields' & 'livePreview'
-    > & {
-      livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-    }
-    fields: ClientConfigField[]
-  })[]
+  collections: ClientCollectionConfig[]
+  globals: ClientGlobalConfig[]
 }
 
 export const sanitizeField = (f: Field) => {
@@ -144,7 +154,7 @@ export const sanitizeField = (f: Field) => {
 
 const sanitizeCollections = (
   collections: SanitizedConfig['collections'],
-): ClientConfig['collections'] =>
+): ClientCollectionConfig[] =>
   collections.map((collection) => {
     const sanitized = { ...collection }
     sanitized.fields = sanitizeFields(sanitized.fields)
@@ -202,7 +212,7 @@ const sanitizeCollections = (
     return sanitized
   })
 
-const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['globals'] =>
+const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientGlobalConfig[] =>
   globals.map((global) => {
     const sanitized = { ...global }
     sanitized.fields = sanitizeFields(sanitized.fields)
@@ -299,8 +309,10 @@ export const createClientConfig = async (
     }
   }
 
-  clientConfig.collections = sanitizeCollections(clientConfig.collections)
-  clientConfig.globals = sanitizeGlobals(clientConfig.globals)
+  clientConfig.collections = sanitizeCollections(
+    clientConfig.collections as SanitizedCollectionConfig[],
+  )
+  clientConfig.globals = sanitizeGlobals(clientConfig.globals as SanitizedGlobalConfig[])
 
   return clientConfig
 }

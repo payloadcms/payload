@@ -36,6 +36,7 @@ export const ListControls: React.FC<Props> = (props) => {
     collectionConfig,
     enableColumns = true,
     enableSort = false,
+    fieldMap,
     handleSearchChange,
     handleSortChange,
     handleWhereChange,
@@ -73,7 +74,7 @@ export const ListControls: React.FC<Props> = (props) => {
           <div className={`${baseClass}__buttons-wrap`}>
             {!smallBreak && (
               <React.Fragment>
-                <EditMany collection={collectionConfig} />
+                <EditMany collection={collectionConfig} fieldMap={fieldMap} />
                 <PublishMany collection={collectionConfig} />
                 <UnpublishMany collection={collectionConfig} />
                 <DeleteMany collection={collectionConfig} />

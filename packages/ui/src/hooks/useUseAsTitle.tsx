@@ -1,9 +1,9 @@
-import type { FieldAffectingData, SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig, FieldAffectingData } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 import { flattenTopLevelFields } from 'payload/utilities'
 
-export const useUseTitleField = (collection: SanitizedCollectionConfig): FieldAffectingData => {
+export const useUseTitleField = (collection: ClientCollectionConfig): FieldAffectingData => {
   const {
     admin: { useAsTitle },
     fields,

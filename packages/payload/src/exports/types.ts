@@ -40,7 +40,10 @@ export type {
 export type {
   Access,
   AccessArgs,
+  ClientCollectionConfig,
   ClientConfig,
+  ClientConfigField,
+  ClientGlobalConfig,
   EditViewComponent,
   SanitizedConfig,
 } from './../config/types.js'
