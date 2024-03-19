@@ -9,7 +9,7 @@ import React, { useCallback, useState } from 'react'
 import type { Props as FormProps } from '../../forms/Form/index.js'
 
 import { useForm } from '../../forms/Form/context.js'
-import Form from '../../forms/Form/index.js'
+import { Form } from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { X } from '../../icons/X/index.js'

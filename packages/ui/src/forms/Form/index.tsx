@@ -39,8 +39,6 @@ import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { reduceFieldsToValues } from './reduceFieldsToValues.js'
 
-export * from './types.js'
-
 const baseClass = 'form'
 
 const Form: React.FC<Props> = (props) => {
@@ -585,4 +583,13 @@ const Form: React.FC<Props> = (props) => {
   )
 }
 
-export default Form
+export * from './types.js'
+
+export {
+  useForm,
+  useFormFields,
+  useFormModified,
+  useFormProcessing,
+  useFormSubmitted,
+  useWatchForm,
+} from './context.js'
