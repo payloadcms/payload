@@ -188,7 +188,6 @@ export default {
     submissionSuccessful: 'تمت الإرسال بنجاح.',
     submit: 'إرسال',
     successfullyCreated: '{{label}} تم إنشاؤها بنجاح.',
-    successfullyDuplicated: '{{label}} تم استنساخها بنجاح.',
     thisLanguage: 'العربية',
     titleDeleted: 'تم حذف {{label}} "{{title}}" بنجاح.',
     unauthorized: 'غير مصرح به',

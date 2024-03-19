@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-
-import type { CollectionConfig } from '../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import ArrayFields from './collections/Array/index.js'

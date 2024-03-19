@@ -1,11 +1,7 @@
 import joi from 'joi'
 
 import { endpointsSchema } from '../../config/schema.js'
-import {
-  componentSchema,
-  customViewSchema,
-  livePreviewSchema,
-} from '../../config/shared/componentSchema.js'
+import { componentSchema, customViewSchema, livePreviewSchema, } from '../../config/shared/componentSchema.js'
 
 const strategyBaseSchema = joi.object().keys({
   logout: joi.boolean(),
@@ -65,9 +61,6 @@ const collectionSchema = joi.object().keys({
     group: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
     hidden: joi.alternatives().try(joi.boolean(), joi.func()),
     hideAPIURL: joi.bool(),
-    hooks: joi.object({
-      beforeDuplicate: joi.func(),
-    }),
     listSearchableFields: joi.array().items(joi.string()),
     livePreview: joi.object(livePreviewSchema),
     pagination: joi.object({

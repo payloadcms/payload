@@ -4,8 +4,8 @@
   "homepage:": "https://payloadcms.com",
   "repository": "git@github.com:payloadcms/plugin-sentry.git",
   "description": "Sentry plugin for Payload",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "type": "module",
   "scripts": {
     "build": "echo \"Build temporarily disabled.\" && exit 0",
@@ -50,5 +50,23 @@
     "payload": "workspace:*",
     "ts-jest": "^29.1.0",
     "webpack": "^5.78.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    }
   }
 }

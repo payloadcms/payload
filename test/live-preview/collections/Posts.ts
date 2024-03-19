@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
 import { Archive } from '../blocks/ArchiveBlock/index.js'
 import { CallToAction } from '../blocks/CallToAction/index.js'

@@ -1,6 +1,7 @@
 import auth from '../../../auth/operations/local/index.js'
 import create from './create.js'
 import deleteLocal from './delete.js'
+import { duplicate } from './duplicate.js'
 import find from './find.js'
 import findByID from './findByID.js'
 import findVersionByID from './findVersionByID.js'
@@ -12,6 +13,7 @@ export default {
   auth,
   create,
   deleteLocal,
+  duplicate,
   find,
   findByID,
   findVersionByID,

@@ -26,6 +26,7 @@ import type { Options as FindByIDOptions } from './collections/operations/local/
 import type { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID.js'
 import type { Options as FindVersionsOptions } from './collections/operations/local/findVersions.js'
 import type { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion.js'
+import type { Options as DuplicateOptions } from './collections/operations/local/duplicate.js'
 import type {
   ByIDOptions as UpdateByIDOptions,
   ManyOptions as UpdateManyOptions,
@@ -46,7 +47,7 @@ import { decrypt, encrypt } from './auth/crypto.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import localOperations from './collections/operations/local/index.js'
-import validate from './config/validate.js'
+import { validateSchema } from './config/validate.js'
 import buildEmail from './email/build.js'
 import { defaults as emailDefaults } from './email/defaults.js'
 import sendEmail from './email/sendEmail.js'
@@ -307,7 +308,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.config = await options.config
 
     if (process.env.NODE_ENV !== 'production') {
-      await validate(this.config, this.logger)
+      validateSchema(this.config, this.logger)
     }
 
     if (!this.config.secret) {
@@ -410,6 +411,13 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
     const { update } = localOperations
     return update<T>(this, options)
+  }
+
+  duplicate = async <T extends keyof TGeneratedTypes['collections']>(
+    options: DuplicateOptions<T>,
+  ): Promise<TGeneratedTypes['collections'][T]> => {
+    const { duplicate } = localOperations
+    return duplicate<T>(this, options)
   }
 }
 

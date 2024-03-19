@@ -1,4 +1,4 @@
-import type { Payload } from '../../packages/payload/src/index.js'
+import type { Payload } from 'payload'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'

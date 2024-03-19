@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
 import { CustomEditView } from '../components/views/CustomEdit/index.js'
 import { customViews1CollectionSlug } from '../slugs.js'

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types.js'
+import type { CollectionConfig } from 'payload/types'
 
 import {
   BlocksFeature,
@@ -6,7 +6,7 @@ import {
   TreeViewFeature,
   UploadFeature,
   lexicalEditor,
-} from '../../../../packages/richtext-lexical/src/index.js'
+} from '@payloadcms/richtext-lexical'
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
   ConditionalLayoutBlock,

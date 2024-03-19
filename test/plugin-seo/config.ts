@@ -1,4 +1,5 @@
-import { seo } from '../../packages/plugin-seo/src/index.js'
+import { seo } from '@payloadcms/plugin-seo'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'

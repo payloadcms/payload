@@ -10,6 +10,7 @@ import {
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
+import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import validations from '../validations.js'
 import { fieldAffectsData, tabHasName } from './types.js'
 
@@ -129,6 +130,8 @@ export const sanitizeFields = ({
 
       if (!field.hooks) field.hooks = {}
       if (!field.access) field.access = {}
+
+      setDefaultBeforeDuplicate(field)
     }
 
     if (!field.admin) {

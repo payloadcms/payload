@@ -1,7 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Permissions } from 'payload/auth'
-import type { SanitizedCollectionConfig } from 'payload/types'
-import type { SanitizedGlobalConfig } from 'payload/types'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -12,11 +11,11 @@ export enum EntityType {
 
 export type EntityToGroup =
   | {
-      entity: SanitizedCollectionConfig
+      entity: ClientCollectionConfig
       type: EntityType.collection
     }
   | {
-      entity: SanitizedGlobalConfig
+      entity: ClientGlobalConfig
       type: EntityType.global
     }
 

@@ -1,8 +1,8 @@
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 
 export type Props = {
-  collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
+  collection?: ClientCollectionConfig
+  global?: ClientGlobalConfig
   id?: number | string
   publishedDocUpdatedAt: string
 }

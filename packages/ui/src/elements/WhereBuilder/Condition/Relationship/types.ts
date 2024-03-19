@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { PaginatedDocs } from 'payload/database'
-import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig, RelationshipField } from 'payload/types'
 
 export type Props = {
   disabled?: boolean
@@ -22,7 +22,7 @@ type CLEAR = {
 }
 
 type ADD = {
-  collection: SanitizedCollectionConfig
+  collection: ClientCollectionConfig
   data: PaginatedDocs<any>
   hasMultipleRelations: boolean
   i18n: I18n

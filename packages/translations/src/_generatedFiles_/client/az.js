@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Təqdimat uğurlu oldu.',
     submit: 'Təqdim et',
     successfullyCreated: '{{label}} uğurla yaradıldı.',
-    successfullyDuplicated: '{{label}} uğurla dublikatlandı.',
     thisLanguage: 'Azərbaycan dili',
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
     unauthorized: 'İcazəsiz',

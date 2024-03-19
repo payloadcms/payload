@@ -191,7 +191,6 @@ export default {
     submissionSuccessful: 'Soumission réussie.',
     submit: 'Soumettre',
     successfullyCreated: '{{label}} créé(e) avec succès.',
-    successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
     thisLanguage: 'Français',
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
     unauthorized: 'Non autorisé',

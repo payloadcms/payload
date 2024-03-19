@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "noEmit": false /* Do not emit outputs. */,
-    "emitDeclarationOnly": true,
+    "noEmit": true,
     "rootDir": "..", /* Specify the root folder within your source files. */
     "declaration": true,
     "declarationMap": true,

@@ -15,12 +15,12 @@ import { toast } from 'react-toastify'
 
 import type { Props } from './types.js'
 
-import APIKey from './APIKey.js'
+import { APIKey } from './APIKey.js'
 import './index.scss'
 
 const baseClass = 'auth-fields'
 
-const Auth: React.FC<Props> = (props) => {
+export const Auth: React.FC<Props> = (props) => {
   const {
     className,
     collectionSlug,
@@ -45,7 +45,7 @@ const Auth: React.FC<Props> = (props) => {
   } = useConfig()
 
   const handleChangePassword = useCallback(
-    async (state: boolean) => {
+    (state: boolean) => {
       if (!state) {
         dispatchFields({ type: 'REMOVE', path: 'password' })
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
@@ -163,5 +163,3 @@ const Auth: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default Auth

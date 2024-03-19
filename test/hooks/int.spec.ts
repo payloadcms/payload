@@ -1,8 +1,10 @@
-import type { Payload } from '../../packages/payload/src/index.js'
+import type { Payload } from 'payload'
+
+import { AuthenticationError } from 'payload/errors'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { NestedAfterReadHook } from './payload-types.js'
 
-import { AuthenticationError } from '../../packages/payload/src/errors/index.js'
 import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'

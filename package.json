@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "workspaces:": [
-    "packages/*"
+    "packages/*",
+    "test/*"
   ],
   "scripts": {
     "build": "pnpm run build:core",
@@ -105,6 +106,7 @@
     "dotenv": "8.6.0",
     "drizzle-kit": "0.20.14-1f2c838",
     "drizzle-orm": "0.29.4",
+    "escape-html": "^1.0.3",
     "execa": "5.1.1",
     "form-data": "3.0.1",
     "fs-extra": "10.1.0",

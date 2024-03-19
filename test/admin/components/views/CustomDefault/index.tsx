@@ -1,16 +1,15 @@
-import type { AdminViewProps } from 'payload/types.js'
-
-import { Button, DefaultTemplate, SetStepNav } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
 
+import type { AdminViewProps } from '../../../../../packages/payload/types.js'
+
+import { Button, DefaultTemplate, SetStepNav } from '@payloadcms/ui'
+
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import { customViewPath } from 'test/admin/shared.js'
-
+import { customViewPath } from '../../../shared.js'
 import './index.scss'
-
 const baseClass = 'custom-default-view'
 
 export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) => {

@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Trimitere cu succes.',
     submit: 'Trimite',
     successfullyCreated: '{{label}} creat(ă) cu succes.',
-    successfullyDuplicated: '{{label}} duplicat(ă) cu succes.',
     thisLanguage: 'Română',
     titleDeleted: '{{label}} "{{title}}" șters cu succes.',
     unauthorized: 'neautorizat(ă)',

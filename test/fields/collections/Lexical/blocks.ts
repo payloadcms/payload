@@ -1,6 +1,7 @@
-import type { ArrayField, Block } from '../../../../packages/payload/src/fields/config/types.js'
+import type { ArrayField, Block } from 'payload/types'
 
-import { lexicalEditor } from '../../../../packages/richtext-lexical/src/index.js'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
 import { textFieldsSlug } from '../Text/shared.js'
 
 export const BlockColumns = ({ name }: { name: string }): ArrayField => ({

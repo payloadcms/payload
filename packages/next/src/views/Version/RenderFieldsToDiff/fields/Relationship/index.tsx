@@ -1,5 +1,5 @@
 'use client'
-import type { ClientConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { type MappedField, useConfig } from '@payloadcms/ui'
@@ -21,7 +21,7 @@ const baseClass = 'relationship-diff'
 type RelationshipValue = Record<string, any>
 
 const generateLabelFromValue = (
-  collections: ClientConfig['collections'],
+  collections: ClientCollectionConfig[],
   field: MappedField,
   locale: string,
   value: { relationTo: string; value: RelationshipValue } | RelationshipValue,

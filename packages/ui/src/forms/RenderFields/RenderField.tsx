@@ -67,7 +67,7 @@ export const RenderField: React.FC<Props> = ({
 
   const DefaultField = isHidden ? HiddenInput : fieldComponents[type]
 
-  if (!CustomField && !DefaultField) {
+  if (CustomField === undefined && !DefaultField) {
     return null
   }
 
@@ -79,7 +79,7 @@ export const RenderField: React.FC<Props> = ({
       schemaPath={schemaPath}
       siblingPermissions={siblingPermissions}
     >
-      {CustomField || <DefaultField {...fieldComponentProps} />}
+      {CustomField !== undefined ? CustomField : <DefaultField {...fieldComponentProps} />}
     </FieldPropsProvider>
   )
 }

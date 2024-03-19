@@ -1,14 +1,14 @@
 'use client'
-import type { ClientConfig } from 'payload/types'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload/types'
 
 import { formatDocTitle, useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui'
 import { useEffect, useRef } from 'react'
 
 export const SetDocumentTitle: React.FC<{
-  collectionConfig?: ClientConfig['collections'][0]
+  collectionConfig?: ClientCollectionConfig
   config?: ClientConfig
   fallback: string
-  globalConfig?: ClientConfig['globals'][0]
+  globalConfig?: ClientGlobalConfig
 }> = (props) => {
   const { collectionConfig, config, fallback, globalConfig } = props
 

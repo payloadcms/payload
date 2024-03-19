@@ -1,9 +1,9 @@
 'use client'
 
+import type { DocumentTabComponent } from 'payload/types'
+
 import React from 'react'
 import { Link, useRouteMatch } from 'react-router-dom'
-
-import type { DocumentTabComponent } from '../../../../packages/payload/src/admin/types.js'
 
 import './index.scss'
 

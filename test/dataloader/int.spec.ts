@@ -1,4 +1,5 @@
-import type { Payload } from '../../packages/payload/src/index.js'
+import type { Payload } from 'payload'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
@@ -92,8 +93,8 @@ describe('dataloader', () => {
       expect(relationB.id).toBeDefined()
 
       await payload.update({
-        collection: 'relation-a',
         id: relationA.id,
+        collection: 'relation-a',
         data: {
           relationship: relationB.id,
           richText: [
@@ -105,32 +106,32 @@ describe('dataloader', () => {
               ],
             },
             {
+              type: 'relationship',
               children: [
                 {
                   text: '',
                 },
               ],
-              type: 'relationship',
+              relationTo: 'relation-b',
               value: {
                 id: relationB.id,
               },
-              relationTo: 'relation-b',
             },
           ],
         },
       })
 
       const relationANoDepth = await payload.findByID({
-        collection: 'relation-a',
         id: relationA.id,
+        collection: 'relation-a',
         depth: 0,
       })
 
       expect(relationANoDepth.relationship).toStrictEqual(relationB.id)
 
       const relationAWithDepth = await payload.findByID({
-        collection: 'relation-a',
         id: relationA.id,
+        collection: 'relation-a',
         depth: 4,
       })
 

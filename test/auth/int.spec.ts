@@ -1,7 +1,8 @@
+import type { Payload } from 'payload'
+import type { User } from 'payload/auth'
+
 import jwtDecode from 'jwt-decode'
 
-import type { User } from '../../packages/payload/src/auth/index.js'
-import type { Payload } from '../../packages/payload/src/index.js'
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'

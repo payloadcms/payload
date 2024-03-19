@@ -1,5 +1,5 @@
 import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
-import type { SanitizedConfig } from 'packages/payload/src/exports/types.js'
+import type { SanitizedConfig } from 'payload/config'
 
 import { matchLanguage } from '@payloadcms/translations'
 

@@ -8,7 +8,7 @@ import type { SanitizedConfig } from './types.js'
 import { CLIENT_EXTENSIONS } from '../bin/register/clientExtensions.js'
 import Logger from '../utilities/logger.js'
 import { findConfig } from './find.js'
-import validate from './validate.js'
+import { validateSchema } from './validate.js'
 
 const require = createRequire(import.meta.url)
 
@@ -28,7 +28,7 @@ const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
   if ('default' in config) config = await config.default
 
   if (process.env.NODE_ENV !== 'production') {
-    config = await validate(config, localLogger)
+    config = validateSchema(config, localLogger)
   }
 
   return {

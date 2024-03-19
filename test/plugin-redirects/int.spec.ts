@@ -1,4 +1,5 @@
-import type { Payload } from '../../packages/payload/src/index.js'
+import type { Payload } from 'payload'
+
 import type { Page } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'

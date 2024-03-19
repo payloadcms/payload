@@ -46,7 +46,7 @@ export default [
     hidden: true,
     hooks: {
       beforeValidate: [
-        async ({ data, req, value }) => {
+        ({ data, req, value }) => {
           if (data.apiKey) {
             return crypto
               .createHmac('sha1', req.payload.secret)

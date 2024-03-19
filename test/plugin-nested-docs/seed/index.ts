@@ -1,4 +1,4 @@
-import type { Payload } from '../../../packages/payload/src/index.js'
+import type { Payload } from 'payload'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')

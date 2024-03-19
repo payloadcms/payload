@@ -27,6 +27,7 @@ import verifyEmail from '../resolvers/auth/verifyEmail.js'
 import createResolver from '../resolvers/collections/create.js'
 import getDeleteResolver from '../resolvers/collections/delete.js'
 import { docAccessResolver } from '../resolvers/collections/docAccess.js'
+import duplicateResolver from '../resolvers/collections/duplicate.js'
 import findResolver from '../resolvers/collections/find.js'
 import findByIDResolver from '../resolvers/collections/findByID.js'
 import findVersionByIDResolver from '../resolvers/collections/findVersionByID.js'
@@ -235,6 +236,14 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
         id: { type: new GraphQLNonNull(idType) },
       },
       resolve: getDeleteResolver(collection),
+    }
+
+    graphqlResult.Mutation.fields[`duplicate${singularName}`] = {
+      type: collection.graphQL.type,
+      args: {
+        id: { type: new GraphQLNonNull(idType) },
+      },
+      resolve: duplicateResolver(collection),
     }
 
     if (collectionConfig.versions) {

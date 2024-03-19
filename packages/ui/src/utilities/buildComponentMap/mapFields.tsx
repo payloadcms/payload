@@ -63,7 +63,9 @@ export const mapFields = (args: {
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let CustomFieldComponent: React.ComponentType<FieldComponentProps>
+    let CustomFieldComponent: React.ComponentType<FieldComponentProps> =
+      field.admin?.components?.Field
+
     const CustomCellComponent = field.admin?.components?.Cell
 
     const isHidden = field?.admin && 'hidden' in field.admin && field.admin.hidden
@@ -657,8 +659,10 @@ export const mapFields = (args: {
           Cell,
           CustomField: CustomFieldComponent ? (
             <CustomFieldComponent {...fieldComponentProps} />
-          ) : null,
+          ) : undefined,
           Heading,
+          disableBulkEdit:
+            'admin' in field && 'disableBulkEdit' in field.admin && field.admin.disableBulkEdit,
           fieldComponentProps,
           fieldIsPresentational,
           isFieldAffectingData,
@@ -666,6 +670,7 @@ export const mapFields = (args: {
           isSidebar:
             'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar',
           localized: 'localized' in field ? field.localized : false,
+          unique: 'unique' in field ? field.unique : false,
         }
 
         acc.push(reducedField)
@@ -679,7 +684,9 @@ export const mapFields = (args: {
     result.findIndex((f) => 'name' in f && f.isFieldAffectingData && f.name === 'id') > -1
 
   if (!disableAddingID && !hasID) {
+    // TODO: For all fields (not just this one) we need to add the name to both .fieldComponentProps.name AND .name. This can probably be improved
     result.push({
+      name: 'id',
       type: 'text',
       Cell: DefaultCell ? <DefaultCell name="id" /> : null,
       Heading: <SortColumn label="ID" name="id" />,

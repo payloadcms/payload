@@ -1,6 +1,6 @@
-import type { Block } from '../../../../packages/payload/src/fields/config/types.js'
+import type { Block } from 'payload/types'
 
-import { slateEditor } from '../../../../packages/richtext-slate/src/index.js'
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 export const Archive: Block = {
   slug: 'archive',

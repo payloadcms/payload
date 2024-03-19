@@ -1,8 +1,8 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
-  SanitizedCollectionConfig,
+  ClientCollectionConfig,
+  ClientGlobalConfig,
   SanitizedConfig,
-  SanitizedGlobalConfig,
   TypeWithID,
 } from 'payload/types'
 
@@ -17,11 +17,11 @@ export const formatDocTitle = ({
   globalConfig,
   i18n,
 }: {
-  collectionConfig?: SanitizedCollectionConfig
+  collectionConfig?: ClientCollectionConfig
   data: TypeWithID
   dateFormat: SanitizedConfig['admin']['dateFormat']
   fallback?: string
-  globalConfig?: SanitizedGlobalConfig
+  globalConfig?: ClientGlobalConfig
   i18n: I18n
 }): string => {
   let title: string
@@ -40,7 +40,9 @@ export const formatDocTitle = ({
         const isDate = fieldConfig?.type === 'date'
 
         if (isDate) {
-          const dateFormat = fieldConfig?.admin?.date?.displayFormat || dateFormatFromConfig
+          const dateFormat =
+            ('date' in fieldConfig.admin && fieldConfig?.admin?.date?.displayFormat) ||
+            dateFormatFromConfig
           title = formatDate(title, dateFormat, i18n.language) || title
         }
       }

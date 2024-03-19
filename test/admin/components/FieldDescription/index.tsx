@@ -1,9 +1,6 @@
-import React from 'react'
+import type { DescriptionComponent, DescriptionFunction } from 'payload/types'
 
-import type {
-  DescriptionComponent,
-  DescriptionFunction,
-} from '../../../../packages/payload/src/admin/types.js'
+import React from 'react'
 
 export const FieldDescriptionComponent: DescriptionComponent<string> = ({ path, value }) => {
   return (

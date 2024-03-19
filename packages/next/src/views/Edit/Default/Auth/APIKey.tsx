@@ -18,7 +18,7 @@ import { v4 as uuidv4 } from 'uuid'
 const path = 'apiKey'
 const baseClass = 'api-key'
 
-const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
+export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
   const [initialAPIKey, setInitialAPIKey] = useState(null)
   const [highlightedField, setHighlightedField] = useState(false)
   const { t } = useTranslation()
@@ -107,5 +107,3 @@ const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
     </React.Fragment>
   )
 }
-
-export default APIKey

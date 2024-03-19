@@ -1,16 +1,17 @@
-import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
-
-import type { PaginatedDocs } from '../../packages/payload/src/database/types.js'
-import type { Payload } from '../../packages/payload/src/index.js'
 import type {
   SerializedBlockNode,
   SerializedLinkNode,
   SerializedRelationshipNode,
   SerializedUploadNode,
-} from '../../packages/richtext-lexical/src/index.js'
+} from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
+import type { Payload } from 'payload'
+import type { PaginatedDocs } from 'payload/database'
+
+import { getPayload } from 'payload'
+
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
-import { getPayload } from '../../packages/payload/src/index.js'
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
@@ -105,12 +106,12 @@ describe('Lexical', () => {
       const richTextDoc: RichTextField = (
         await payload.find({
           collection: richTextFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: richTextDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -141,12 +142,12 @@ describe('Lexical', () => {
       const richTextDoc: RichTextField = (
         await payload.find({
           collection: richTextFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: richTextDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -181,12 +182,12 @@ describe('Lexical', () => {
       const richTextDoc: RichTextField = (
         await payload.find({
           collection: richTextFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: richTextDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -228,12 +229,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalMigrateField = (
         await payload.find({
           collection: lexicalMigrateFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalMigrateDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -244,12 +245,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalMigrateField = (
         await payload.find({
           collection: lexicalMigrateFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalMigrateDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -260,12 +261,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalMigrateField = (
         await payload.find({
           collection: lexicalMigrateFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalMigrateDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -281,12 +282,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -305,12 +306,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -329,12 +330,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -360,12 +361,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -396,12 +397,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 0,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 0,
         })
       ).docs[0] as never
 
@@ -427,12 +428,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 1,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 1,
         })
       ).docs[0] as never
 
@@ -474,12 +475,12 @@ describe('Lexical', () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
+          depth: 2,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          depth: 2,
         })
       ).docs[0] as never
 

@@ -10,6 +10,7 @@ type Args<T> = {
   context: RequestContext
   data: T
   doc: T
+  duplicate: boolean
   fields: (Field | TabAsField)[]
   global: SanitizedGlobalConfig | null
   id?: number | string
@@ -26,6 +27,7 @@ export const traverseFields = async <T>({
   context,
   data,
   doc,
+  duplicate,
   fields,
   global,
   operation,
@@ -43,6 +45,7 @@ export const traverseFields = async <T>({
         context,
         data,
         doc,
+        duplicate,
         field,
         global,
         operation,

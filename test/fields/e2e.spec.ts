@@ -1,13 +1,13 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { Payload } from '../../packages/payload/src/index.js'
 import type { RelationshipField, TextField } from './payload-types.js'
 
-import wait from '../../packages/payload/src/utilities/wait.js'
 import {
   exactText,
   initPageConsoleErrorCatch,
