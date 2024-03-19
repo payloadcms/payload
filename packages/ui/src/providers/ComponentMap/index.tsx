@@ -84,4 +84,4 @@ export const useComponentMap = (): IComponentMapContext => useContext(ComponentM
 
 export { buildComponentMap } from './buildComponentMap/index.js'
 export { mapFields } from './buildComponentMap/mapFields.js'
-export type { FieldMap } from './buildComponentMap/types.js'
+export type { FieldMap, MappedField } from './buildComponentMap/types.js'

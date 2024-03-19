@@ -1,6 +1,6 @@
 import type { AdminViewProps } from 'payload/types'
 
-import { MinimalTemplate } from '@payloadcms/ui'
+import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import React from 'react'
 
 import { LogoutClient } from './LogoutClient.js'
