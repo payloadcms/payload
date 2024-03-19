@@ -1,8 +1,8 @@
 'use client'
+import type { FormState, SanitizedCollectionConfig } from 'payload/types'
+
 import { isImage } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
-
-import type { Props } from './types.js'
 
 import { fieldBaseClass } from '../../fields/shared.js'
 import { Error } from '../../forms/Error/index.js'
@@ -50,7 +50,15 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
   )
 }
 
-export const Upload: React.FC<Props> = (props) => {
+export type UploadProps = {
+  collectionSlug: string
+  initialState?: FormState
+  onChange?: (file?: File) => void
+  updatedAt?: string
+  uploadConfig: SanitizedCollectionConfig['upload']
+}
+
+export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, initialState, onChange, updatedAt, uploadConfig } = props
 
   const submitted = useFormSubmitted()

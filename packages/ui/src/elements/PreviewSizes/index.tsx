@@ -71,13 +71,15 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
   )
 }
 
-const PreviewSizes: React.FC<{
+export type PreviewSizesProps = {
   doc: Data & {
     sizes?: FilesSizesWithUrl
   }
   imageCacheTag?: string
   uploadConfig: SanitizedCollectionConfig['upload']
-}> = ({ doc, imageCacheTag, uploadConfig }) => {
+}
+
+export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, uploadConfig }) => {
   const { imageSizes } = uploadConfig
   const { sizes } = doc
 
@@ -154,4 +156,3 @@ const PreviewSizes: React.FC<{
     </div>
   )
 }
-export default PreviewSizes

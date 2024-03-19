@@ -5,11 +5,9 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.js'
-
-import { useRouteCache } from '../../index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -21,7 +19,13 @@ import './index.scss'
 
 const baseClass = 'unpublish-many'
 
-export const UnpublishMany: React.FC<Props> = (props) => {
+import type { SanitizedCollectionConfig } from 'payload/types'
+
+export type UnpublishManyProps = {
+  collection: SanitizedCollectionConfig
+}
+
+export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { collection: { slug, labels: { plural }, versions } = {} } = props
   const { Modal, useModal } = facelessUIImport
 

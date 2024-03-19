@@ -1,10 +1,57 @@
-// import queryString from 'qs'
+import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload/types'
+
 import { getTranslation } from '@payloadcms/translations'
 import { flattenTopLevelFields } from 'payload/utilities'
 import React, { useReducer, useState } from 'react'
 
-// import type { Where } from 'payload/types'
-import type { Props } from './types.js'
+export type WhereBuilderProps = {
+  collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
+  collectionSlug: SanitizedCollectionConfig['slug']
+  handleChange?: (where: Where) => void
+  modifySearchQuery?: boolean
+}
+
+export type FieldCondition = {
+  component?: string
+  label: string
+  operators: {
+    label: string
+    value: Operator
+  }[]
+  props: Field
+  value: string
+}
+
+export type Relation = 'and' | 'or'
+
+export type ADD = {
+  andIndex?: number
+  field: string
+  orIndex?: number
+  relation?: Relation
+  type: 'add'
+}
+
+export type REMOVE = {
+  andIndex: number
+  orIndex: number
+  type: 'remove'
+}
+
+export type UPDATE = {
+  andIndex: number
+  field?: string
+  operator?: string
+  orIndex: number
+  type: 'update'
+  value?: unknown
+}
+
+export type Action = ADD | REMOVE | UPDATE
+
+export type State = {
+  or: Where[]
+}
 
 import { useConfig } from '../../providers/Config/index.js'
 // import useThrottledEffect from '../../hooks/useThrottledEffect'
@@ -58,7 +105,7 @@ const reduceFields = (fields, i18n) =>
  * The WhereBuilder component is used to render the filter controls for a collection's list view.
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
-const WhereBuilder: React.FC<Props> = (props) => {
+const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, collectionSlug, handleChange, modifySearchQuery = true } = props
   const { i18n, t } = useTranslation()
 

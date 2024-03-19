@@ -28,12 +28,13 @@ const RecursiveTranslation: React.FC<{
   )
 }
 
-type TranslationProps = {
+export type TranslationProps = {
   elements?: Record<string, React.FC<{ children: React.ReactNode }>>
   i18nKey: string
   t: TFunction
   variables?: Record<string, unknown>
 }
+
 export const Translation: React.FC<TranslationProps> = ({ elements, i18nKey, t, variables }) => {
   const stringWithVariables = t(i18nKey, variables || {})
 
