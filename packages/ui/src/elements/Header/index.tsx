@@ -2,7 +2,7 @@
 import LinkWithDefault from 'next/link.js'
 import React, { useEffect, useRef, useState } from 'react'
 
-import Account from '../../graphics/Account/index.js'
+import { Account } from '../../graphics/Account/index.js'
 import { useActions } from '../../providers/ActionsProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

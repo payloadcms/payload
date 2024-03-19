@@ -5,7 +5,7 @@ import React from 'react'
 
 import { useAuth } from '../../../providers/Auth/index.js'
 
-const Gravatar: React.FC = () => {
+export const Gravatar: React.FC = () => {
   const { user } = useAuth()
 
   const hash = md5(user.email.trim().toLowerCase())
@@ -27,5 +27,3 @@ const Gravatar: React.FC = () => {
     />
   )
 }
-
-export default Gravatar

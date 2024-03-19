@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import { useComponentMap } from '../../index.js'
+import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 const css = `
@@ -41,7 +41,7 @@ const PayloadIcon: React.FC = () => {
   )
 }
 
-const Icon: React.FC = () => {
+export const Icon: React.FC = () => {
   const {
     componentMap: { Icon: CustomIcon },
   } = useComponentMap()
@@ -52,5 +52,3 @@ const Icon: React.FC = () => {
 
   return <PayloadIcon />
 }
-
-export default Icon

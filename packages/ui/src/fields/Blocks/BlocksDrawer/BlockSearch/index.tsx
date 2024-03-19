@@ -1,6 +1,6 @@
 import React from 'react'
 
-import SearchIcon from '../../../../graphics/Search/index.js'
+import { Search } from '../../../../graphics/Search/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.scss'
 
@@ -21,7 +21,7 @@ export const BlockSearch: React.FC<{ setSearchTerm: (term: string) => void }> = 
         onChange={handleChange}
         placeholder={t('fields:searchForBlock')}
       />
-      <SearchIcon />
+      <Search />
     </div>
   )
 }

@@ -5,9 +5,9 @@ import React from 'react'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DefaultAccountIcon } from './Default/index.js'
-import Gravatar from './Gravatar/index.js'
+import { Gravatar } from './Gravatar/index.js'
 
-const Account = () => {
+export const Account = () => {
   const {
     admin: { avatar: Avatar },
     routes: { admin: adminRoute },
@@ -22,8 +22,6 @@ const Account = () => {
   if (Avatar) return <Avatar active={isOnAccountPage} />
   return <DefaultAccountIcon active={isOnAccountPage} />
 }
-
-export default Account
 
 function isClassComponent(component) {
   return typeof component === 'function' && !!component.prototype.isReactComponent
