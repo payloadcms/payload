@@ -11,12 +11,12 @@ const { $getNodeByKey } = lexicalImport
 import { Button } from '@payloadcms/ui/elements/Button'
 import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
 import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
+import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
 import { File } from '@payloadcms/ui/graphics/File'
 import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
 import { useThumbnail } from '@payloadcms/ui/hooks/useThumbnail'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { useDrawerSlug } from 'packages/ui/src/elements/Drawer/useDrawerSlug.js'
 import React, { useCallback, useReducer, useState } from 'react'
 
 import type { ClientComponentProps } from '../../types.js'

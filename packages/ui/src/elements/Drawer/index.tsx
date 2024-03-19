@@ -16,6 +16,8 @@ const zBase = 100
 export const formatDrawerSlug = ({ slug, depth }: { depth: number; slug: string }): string =>
   `drawer_${depth}_${slug}`
 
+export { useDrawerSlug } from './useDrawerSlug.js'
+
 export const DrawerToggler: React.FC<TogglerProps> = ({
   slug,
   children,
