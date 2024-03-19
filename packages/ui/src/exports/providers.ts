@@ -16,7 +16,6 @@ export {
 export { EditDepthContext, EditDepthProvider } from '../providers/EditDepth/index.js'
 export { useEditDepth } from '../providers/EditDepth/index.js'
 export { FormQueryParams, FormQueryParamsProvider } from '../providers/FormQueryParams/index.js'
-export type { QueryParamTypes } from '../providers/FormQueryParams/index.js'
 export { useFormQueryParams } from '../providers/FormQueryParams/index.js'
 export { useListInfo } from '../providers/ListInfo/index.js'
 export { ListInfoProvider } from '../providers/ListInfo/index.js'
@@ -31,5 +30,4 @@ export {
   useSelection,
 } from '../providers/SelectionProvider/index.js'
 export { useTheme } from '../providers/Theme/index.js'
-export type { Theme } from '../providers/Theme/types.js'
 export { useTranslation } from '../providers/Translation/index.js'
