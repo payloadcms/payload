@@ -5,7 +5,7 @@ import React from 'react'
 import type { TextAreaInputProps } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
-import { fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {

@@ -2,7 +2,6 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 
 import { type FormFieldBase, ShimmerEffect } from '@payloadcms/ui'
-import { useFieldPath } from '@payloadcms/ui/forms'
 import { useClientFunctions } from '@payloadcms/ui/providers'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 

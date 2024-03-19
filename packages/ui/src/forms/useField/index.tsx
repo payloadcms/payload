@@ -4,6 +4,8 @@ import { useCallback, useMemo, useRef } from 'react'
 import type { UPDATE } from '../Form/types.js'
 import type { FieldType, Options } from './types.js'
 
+export type { FieldType, Options }
+
 import useThrottledEffect from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'

@@ -9,14 +9,14 @@ import { DatePickerField } from '../../elements/DatePicker/index.js'
 import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'date-time-field'
 
 import type { DateField, FieldBase } from 'payload/types'
 
-import type { FormFieldBase } from '../shared.js'
+import type { FormFieldBase } from '../shared/index.js'
 
 import { withCondition } from '../../forms/withCondition/index.js'
 

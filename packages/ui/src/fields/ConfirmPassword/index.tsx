@@ -8,7 +8,7 @@ import { useFormFields } from '../../forms/Form/context.js'
 import { Label } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 export type ConfirmPasswordFieldProps = {

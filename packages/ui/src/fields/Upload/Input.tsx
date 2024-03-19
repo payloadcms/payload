@@ -15,7 +15,7 @@ import FileDetails from '../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { fieldBaseClass } from '../shared.js'
+import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'upload'

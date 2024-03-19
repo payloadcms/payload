@@ -2,7 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
 
-import type { FormFieldBase } from '../shared.js'
+import type { FormFieldBase } from '../shared/index.js'
 
 export type RelationshipFieldProps = FormFieldBase & {
   allowCreate?: RelationshipField['admin']['allowCreate']

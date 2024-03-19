@@ -1,16 +1,16 @@
 'use client'
 
-import type { FieldType, FormFieldBase, Options } from '@payloadcms/ui'
+import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+import type { Options } from '@payloadcms/ui/forms/useField'
+import type { FieldType } from '@payloadcms/ui/forms/useField'
 
-import { useFieldPath } from '@payloadcms/ui'
-import {
-  TextInput,
-  useAllFormFields,
-  useDocumentInfo,
-  useField,
-  useLocale,
-  useTranslation,
-} from '@payloadcms/ui'
+import { TextInput } from '@payloadcms/ui/fields/Text'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useAllFormFields } from '@payloadcms/ui/forms/Form'
+import { useField } from '@payloadcms/ui/forms/useField'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useLocale } from '@payloadcms/ui/providers/Locale'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback } from 'react'
 
 import type { GenerateTitle } from '../types.js'
@@ -28,7 +28,7 @@ type MetaTitleProps = FormFieldBase & {
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
   const { Label, hasGenerateTitleFn, path, required } = props || {}
-  const { path: pathFromContext } = useFieldPath()
+  const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation()
 

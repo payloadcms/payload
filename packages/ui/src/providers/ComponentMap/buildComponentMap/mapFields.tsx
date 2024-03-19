@@ -22,7 +22,7 @@ import type { TabsFieldProps } from '../../../fields/Tabs/index.js'
 import type { TextFieldProps } from '../../../fields/Text/types.js'
 import type { TextareaFieldProps } from '../../../fields/Textarea/types.js'
 import type { UploadFieldProps } from '../../../fields/Upload/types.js'
-import type { FormFieldBase } from '../../../fields/shared.js'
+import type { FormFieldBase } from '../../../fields/shared/index.js'
 import type { Props as FieldDescription } from '../../../forms/FieldDescription/types.js'
 import type {
   FieldComponentProps,

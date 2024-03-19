@@ -2,7 +2,7 @@ import type { FieldBase, TextField } from 'payload/types'
 import type { ChangeEvent } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
-import type { FormFieldBase } from '../shared.js'
+import type { FormFieldBase } from '../shared/index.js'
 
 export type TextFieldProps = FormFieldBase & {
   hasMany?: boolean

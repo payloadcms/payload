@@ -12,7 +12,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { isFieldRTL } from '../shared.js'
+import { isFieldRTL } from '../shared/index.js'
 import { TextareaInput } from './Input.js'
 import './index.scss'
 
