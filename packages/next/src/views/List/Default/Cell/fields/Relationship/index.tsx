@@ -2,7 +2,11 @@
 import type { CellComponentProps, CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { canUseDOM, formatDocTitle, useConfig, useIntersect, useTranslation } from '@payloadcms/ui'
+import { useIntersect } from '@payloadcms/ui/hooks/useIntersect'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { canUseDOM } from '@payloadcms/ui/utilities/canUseDOM'
+import { formatDocTitle } from '@payloadcms/ui/utilities/formatDocTitle'
 import React, { useEffect, useState } from 'react'
 
 import { useListRelationships } from '../../../RelationshipProvider/index.js'

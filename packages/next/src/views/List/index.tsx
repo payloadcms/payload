@@ -1,11 +1,9 @@
 import type { AdminViewProps } from 'payload/types'
 
-import {
-  HydrateClientUser,
-  ListInfoProvider,
-  RenderCustomComponent,
-  TableColumnsProvider,
-} from '@payloadcms/ui'
+import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
+import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
+import { TableColumnsProvider } from '@payloadcms/ui/elements/TableColumns'
+import { ListInfoProvider } from '@payloadcms/ui/providers/ListInfo'
 import { notFound } from 'next/navigation.js'
 import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'

@@ -1,7 +1,10 @@
 'use client'
 import type { TypeWithID } from 'payload/types'
 
-import { useConfig, useDebounce, useLocale, useTranslation } from '@payloadcms/ui'
+import { useDebounce } from '@payloadcms/ui/hooks/useDebounce'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useLocale } from '@payloadcms/ui/providers/Locale'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import querystring from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
@@ -42,7 +45,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   } = config
 
   const loadRelationshipDocs = useCallback(
-    async (reloadAll = false) => {
+    (reloadAll = false) => {
       Object.entries(debouncedDocuments).forEach(async ([slug, docs]) => {
         const idsToLoad: (number | string)[] = []
 
@@ -89,12 +92,12 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   )
 
   useEffect(() => {
-    loadRelationshipDocs(locale && prevLocale.current !== locale)
+    void loadRelationshipDocs(locale && prevLocale.current !== locale)
     prevLocale.current = locale
   }, [locale, loadRelationshipDocs])
 
   const getRelationships = useCallback(
-    async (relationships: { relationTo: string; value: number | string }[]) => {
+    (relationships: { relationTo: string; value: number | string }[]) => {
       dispatchDocuments({ type: 'REQUEST', docs: relationships })
     },
     [],

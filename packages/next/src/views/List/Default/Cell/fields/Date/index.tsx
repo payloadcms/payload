@@ -1,7 +1,9 @@
 'use client'
 import type { CellComponentProps, CellProps } from 'payload/types'
 
-import { formatDate, useConfig, useTranslation } from '@payloadcms/ui'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 import React from 'react'
 
 export interface DateCellProps extends CellComponentProps<string> {
