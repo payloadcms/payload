@@ -45,8 +45,7 @@
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
       }
-    },
-    "registry": "https://registry.npmjs.org/"
+    }
   },
   "files": [
     "dist"
