@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload/types'
+import type { Where } from 'payload/types'
 
 import {
   HydrateClientUser,
@@ -7,7 +7,9 @@ import {
   TableColumnsProvider,
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
-import { isEntityHidden } from 'payload/utilities'
+import { createClientCollectionConfig } from 'packages/payload/src/collections/config/client.js'
+import { type AdminViewProps } from 'payload/types'
+import { isEntityHidden, isNumber, mergeListSearchAndWhere } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
@@ -25,6 +27,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       locale,
       payload,
       payload: { config },
+      query,
       user,
     },
   } = initPageResult
@@ -43,6 +46,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
         collection: 'payload-preferences',
         depth: 0,
         limit: 1,
+        user,
         where: {
           key: {
             equals: `${collectionSlug}-list`,
@@ -73,31 +77,53 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       CustomListView = CustomList.Component
     }
 
-    const limit = Number(searchParams?.limit) || collectionConfig.admin.pagination.defaultLimit
+    const page = isNumber(query?.page) ? query.page : 0
+    const whereQuery = mergeListSearchAndWhere({
+      collectionConfig,
+      query: {
+        search: typeof query?.search === 'string' ? query.search : undefined,
+        where: (query?.where as Where) || undefined,
+      },
+    })
+    const limit = isNumber(query?.limit)
+      ? query.limit
+      : listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+    const sort =
+      query?.sort && typeof query.sort === 'string'
+        ? query.sort
+        : listPreferences?.sort || undefined
 
     const data = await payload.find({
       collection: collectionSlug,
       depth: 0,
+      draft: true,
       fallbackLocale: null,
       limit,
       locale,
       overrideAccess: false,
+      page,
+      sort,
       user,
+      where: whereQuery || {},
     })
 
     const viewComponentProps: DefaultListViewProps = {
       collectionSlug,
+      listSearchableFields: collectionConfig.admin.listSearchableFields,
     }
 
     return (
       <Fragment>
         <HydrateClientUser permissions={permissions} user={user} />
         <ListInfoProvider
+          collectionConfig={createClientCollectionConfig(collectionConfig)}
           collectionSlug={collectionSlug}
           data={data}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
           limit={limit}
+          listSearchableFields={collectionConfig.admin.listSearchableFields}
           newDocumentURL={`${admin}/collections/${collectionSlug}/create`}
+          page={page}
         >
           <TableColumnsProvider
             collectionSlug={collectionSlug}

@@ -71,13 +71,16 @@ export const initPage = async ({
     translations,
   })
 
+  const queryString = `${qs.stringify(searchParams, { addQueryPrefix: true })}`
+
   const req = await createLocalReq(
     {
       fallbackLocale: null,
       locale: locale.code,
       req: {
         i18n,
-        url: `${payload.config.serverURL}${route}${searchParams ? `${qs.stringify(searchParams, { addQueryPrefix: true })}` : ''}`,
+        query: qs.parse(queryString, { ignoreQueryPrefix: true }),
+        url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
       } as PayloadRequest,
       user,
     },

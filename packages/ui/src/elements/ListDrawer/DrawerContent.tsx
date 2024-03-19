@@ -247,6 +247,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               )}
             </div>
             <button
+              aria-label={t('general:close')}
               className={`${baseClass}__header-close`}
               onClick={() => {
                 closeModal(drawerSlug)
@@ -277,6 +278,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           )}
         </header>
       }
+      collectionConfig={selectedCollectionConfig}
       collectionSlug={selectedCollectionConfig.slug}
       data={data}
       handlePageChange={setPage}
