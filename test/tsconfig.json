@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "noEmit": true,
-    "rootDir": "..", /* Specify the root folder within your source files. */
+    "rootDir": ".", /* Specify the root folder within your source files. */
     "declaration": true,
     "declarationMap": true,
     "target": "esnext",
@@ -34,15 +34,24 @@
       }
     ],
     "paths": {
-
+      "@payload-config": [
+        "./auth/config.ts"
+      ]
     }
   },
-  "exclude": ["dist", "build", "node_modules", ".eslintrc.js", "dist/**/*.js", "**/dist/**/*.js"],
+  "exclude": [
+    "dist",
+    "build",
+    "node_modules",
+    ".eslintrc.js",
+    "dist/**/*.js",
+    "**/dist/**/*.js"
+  ],
   "include": [
     "./**/*.ts",
-    "../packages/**/src/**/*.ts",
-    "../packages/**/src/**/*.tsx"
+    "../packages/**/*.ts",
+    "../packages/**/*.tsx",
+    ".next/types/**/*.ts"
   ],
-  "references": [],
+  "references": []
 }
-

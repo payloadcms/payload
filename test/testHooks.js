@@ -7,12 +7,7 @@ const { readFile, writeFile, rm } = promises
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-type TestHooks = {
-  afterTest: () => Promise<void>
-  beforeTest: () => Promise<void>
-}
-
-export const createTestHooks = async (testSuiteName = '_community'): Promise<TestHooks> => {
+export const createTestHooks = async (testSuiteName = '_community') => {
   const tsConfigPath = path.resolve(dirname, '..', 'tsconfig.json')
   const tsConfig = await json5.parse(await readFile(tsConfigPath, 'utf8'))
   const originalPayloadConfigTsValue =

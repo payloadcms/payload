@@ -1,8 +1,8 @@
 {
   "name": "@payloadcms/next",
   "version": "3.0.0-alpha.48",
-  "main": "./src/index.ts",
-  "types": "./src/index.d.ts",
+  "main": "./src/index.js",
+  "types": "./src/index.js",
   "type": "module",
   "bin": {
     "@payloadcms/next": "./dist/bin/index.js"
@@ -20,29 +20,15 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "require": "./src/index.js",
+      "types": "./src/index.js"
+    },
     "./*": {
-      "import": "./dist/exports/*.js",
-      "require": "./dist/exports/*.js",
-      "types": "./dist/exports/*.ts"
-    },
-    "./utilities/*": {
-      "import": "./dist/utilities/*.js",
-      "require": "./dist/utilities/*.js",
-      "types": "./src/utilities/*.ts"
-    },
-    "./layouts/*": {
-      "import": "./dist/layouts/*.js",
-      "require": "./dist/layouts/*.js",
-      "types": "./src/layouts/*.ts"
-    },
-    "./views/*": {
-      "import": "./dist/views/*.js",
-      "require": "./dist/views/*.js",
-      "types": "./src/views/*.ts"
-    },
-    "./routes": {
-      "import": "./dist/routes/index.js",
-      "require": "./dist/routes/index.js"
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
     }
   },
   "devDependencies": {
