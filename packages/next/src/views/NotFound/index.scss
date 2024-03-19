@@ -2,6 +2,7 @@
 
 .not-found {
   margin-top: var(--base);
+  display: flex;
 
   & > * {
     &:first-child {
