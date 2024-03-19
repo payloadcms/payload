@@ -73,9 +73,10 @@ export async function seedDB({
   // Dropping the db breaks indexes (on mongoose - did not test extensively on postgres yet), so we recreate them here
   if (shouldResetDB) {
     if (isMongoose(_payload)) {
+      const db = _payload.db as MongooseAdapter
       await Promise.all([
-        ...collectionSlugs.map(async (collectionSlug) => {
-          await _payload.db.collections[collectionSlug].createIndexes()
+        Object.entries(db.collections).map(async ([_, collection]) => {
+          await collection.createIndexes()
         }),
       ])
     }
