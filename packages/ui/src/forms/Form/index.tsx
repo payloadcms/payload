@@ -23,6 +23,7 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { getFormState } from '../../utilities/getFormState.js'
+import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -37,11 +38,10 @@ import { getDataByPath as getDataByPathFunc } from './getDataByPath.js'
 import { getSiblingData as getSiblingDataFunc } from './getSiblingData.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
-import { reduceFieldsToValues } from './reduceFieldsToValues.js'
 
 const baseClass = 'form'
 
-const Form: React.FC<Props> = (props) => {
+export const Form: React.FC<Props> = (props) => {
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const {

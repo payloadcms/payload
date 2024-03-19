@@ -14,10 +14,10 @@
   },
   "exports": {
     "./assets": {
-      "import": "./src/assets/index.tsx",
-      "require": "./src/assets/index.tsx",
-      "default": "./src/assets/index.tsx",
-      "types": "./src/assets/index.tsx"
+      "import": "./src/assets/index.ts",
+      "require": "./src/assets/index.ts",
+      "default": "./src/assets/index.ts",
+      "types": "./src/assets/index.tx"
     },
     "./elements/*": {
       "import": "./src/elements/*/index.tsx",
@@ -78,8 +78,7 @@
       "require": "./src/scss.scss",
       "default": "./src/scss.scss"
     },
-    "./scss/app.scss": "./src/scss/app.scss",
-    "./assets/*": "./src/assets/*"
+    "./scss/app.scss": "./src/scss/app.scss"
   },
   "publishConfig": {
     "exports": {

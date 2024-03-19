@@ -1,8 +1,8 @@
 'use client'
-import type { FieldMap } from '@payloadcms/ui/utilities'
+import type { FieldMap } from '@payloadcms/ui/providers/ComponentMap'
 
-import { RenderFields } from '@payloadcms/ui/forms'
-import { useComponentMap } from '@payloadcms/ui/providers'
+import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import React from 'react'
 
 export const CreateFirstUserFields: React.FC<{

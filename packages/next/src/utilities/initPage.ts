@@ -8,7 +8,7 @@ import type {
 
 import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/client'
-import { findLocaleFromCode } from '@payloadcms/ui/utilities'
+import { findLocaleFromCode } from '@payloadcms/ui/utilities/findLocaleFromCode'
 import { headers as getHeaders } from 'next/headers.js'
 import { notFound, redirect } from 'next/navigation.js'
 import { createLocalReq } from 'payload/utilities'

@@ -3,7 +3,7 @@ import type { Data, FormState } from 'payload/types'
 import flatleyImport from 'flatley'
 const { unflatten } = flatleyImport
 
-import { reduceFieldsToValues } from './reduceFieldsToValues.js'
+import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 
 export const getSiblingData = (fields: FormState, path: string): Data => {
   if (path.indexOf('.') === -1) {
