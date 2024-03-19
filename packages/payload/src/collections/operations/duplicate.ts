@@ -120,11 +120,12 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     // /////////////////////////////////////
 
     let locales = [undefined]
-    let versionDoc
 
     if (config.localization) {
       locales = config.localization.locales.map(({ code }) => code)
     }
+
+    let result
 
     await locales.reduce(async (previousPromise, locale: string | undefined, i) => {
       await previousPromise
@@ -143,23 +144,25 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
         showHiddenFields: true,
       })
 
+      let data = { ...originalDoc }
+
       // /////////////////////////////////////
       // Create Access
       // /////////////////////////////////////
 
       if (operation === 'create' && !overrideAccess) {
-        await executeAccess({ data: originalDoc, req }, collectionConfig.access.create)
+        await executeAccess({ data: result, req }, collectionConfig.access.create)
       }
 
       // /////////////////////////////////////
       // beforeValidate - Fields
       // /////////////////////////////////////
 
-      let data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+      data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
         id,
         collection: collectionConfig,
         context: req.context,
-        data: originalDoc,
+        data,
         doc: originalDoc,
         duplicate: true,
         global: null,
@@ -183,7 +186,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
             operation,
             originalDoc,
             req,
-          })) || data
+          })) || result
       }, Promise.resolve())
 
       // /////////////////////////////////////
@@ -199,16 +202,16 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
             context: req.context,
             data,
             operation,
-            originalDoc,
+            originalDoc: result,
             req,
-          })) || data
+          })) || result
       }, Promise.resolve())
 
       // /////////////////////////////////////
       // beforeChange - Fields
       // /////////////////////////////////////
 
-      const result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+      result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
         id,
         collection: collectionConfig,
         context: req.context,
@@ -220,47 +223,22 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
         req,
         skipValidation: shouldSaveDraft,
       })
-
-      // /////////////////////////////////////
-      // Handle potential password update
-      // /////////////////////////////////////
-
-      // const dataToUpdate: Record<string, unknown> = { ...result }
-
-      // if (shouldSavePassword && typeof password === 'string') {
-      //   const { hash, salt } = await generatePasswordSaltHash({ password })
-      //   dataToUpdate.salt = salt
-      //   dataToUpdate.hash = hash
-      //   delete dataToUpdate.password
-      //   delete data.password
-      // }
-
-      // /////////////////////////////////////
-      // Create / Update
-      // /////////////////////////////////////
-
-      if (i === 0) {
-        versionDoc = await payload.db.create({
-          collection: collectionConfig.slug,
-          data: result,
-          req,
-        })
-      } else {
-        versionDoc = await req.payload.db.updateOne({
-          id: versionDoc.id,
-          collection: collectionConfig.slug,
-          data: result,
-          locale,
-          req,
-        })
-      }
     }, Promise.resolve())
+
+    // /////////////////////////////////////
+    // Create / Update
+    // /////////////////////////////////////
+
+    const versionDoc = await payload.db.create({
+      collection: collectionConfig.slug,
+      data: docWithLocales,
+      req,
+    })
 
     // /////////////////////////////////////
     // Create version
     // /////////////////////////////////////
 
-    let result = versionDoc
     if (collectionConfig.versions) {
       result = await saveVersion({
         id: versionDoc.id,
