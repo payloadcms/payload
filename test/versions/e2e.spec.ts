@@ -28,9 +28,9 @@ import type { Payload } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import wait from '../../packages/payload/src/utilities/wait.js'
 import { globalSlug } from '../admin/slugs.js'
 import {
   changeLocale,

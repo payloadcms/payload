@@ -2,12 +2,12 @@ import type { Page } from '@playwright/test'
 import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import { wait } from 'payload/utilities'
+import { mapAsync } from 'payload/utilities'
 import qs from 'qs'
 
 import type { Geo, Post } from './payload-types.js'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
-import wait from '../../packages/payload/src/utilities/wait.js'
 import {
   checkBreadcrumb,
   checkPageTitle,

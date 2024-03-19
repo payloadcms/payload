@@ -39,6 +39,7 @@ export { isPlainObject } from '../utilities/isPlainObject.js'
 export { isValidID } from '../utilities/isValidID.js'
 export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 
+export { mapAsync } from '../utilities/mapAsync.js'
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
 export { default as wait } from '../utilities/wait.js'

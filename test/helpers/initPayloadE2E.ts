@@ -3,10 +3,10 @@ import type { SanitizedConfig } from 'payload/config'
 import { createServer } from 'http'
 import nextImport from 'next'
 import { type Payload } from 'payload'
+import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
 import { getPayloadHMR } from '../../packages/next/src/utilities/getPayloadHMR.js'
-import wait from '../../packages/payload/src/utilities/wait.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import { createTestHooks } from '../testHooks.js'
 

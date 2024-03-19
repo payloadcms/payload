@@ -3,11 +3,11 @@ import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { LocalizedPost } from './payload-types.js'
 
-import wait from '../../packages/payload/src/utilities/wait.js'
 import {
   changeLocale,
   initPageConsoleErrorCatch,

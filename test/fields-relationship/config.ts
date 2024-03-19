@@ -1,7 +1,8 @@
 import type { CollectionConfig } from 'payload/types'
 import type { FilterOptionsProps } from 'payload/types'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
+import { mapAsync } from 'payload/utilities'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { PrePopulateFieldUI } from './PrePopulateFieldUI/index.js'

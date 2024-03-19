@@ -1,6 +1,6 @@
+import { mapAsync } from 'payload/utilities'
 import { v4 as uuid } from 'uuid'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { AuthDebug } from './AuthDebug.js'

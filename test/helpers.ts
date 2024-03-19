@@ -1,9 +1,9 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+import { wait } from 'payload/utilities'
 import shelljs from 'shelljs'
 
-import wait from '../packages/payload/src/utilities/wait.js'
 import { devUser } from './credentials.js'
 
 type FirstRegisterArgs = {

@@ -1,4 +1,5 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { Payload } from 'payload'
+import type { PayloadRequest } from 'payload/types'
 
 import path from 'path'
 import { getFileByPath } from 'payload/utilities'

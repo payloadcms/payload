@@ -2,11 +2,11 @@ import type { Payload } from 'payload'
 
 import { randomBytes } from 'crypto'
 import { getPayload } from 'payload'
+import { mapAsync } from 'payload/utilities'
 
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise, {

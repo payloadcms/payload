@@ -3,11 +3,11 @@ import type { Payload } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
-import wait from '../../packages/payload/src/utilities/wait.js'
 import { exactText, initPageConsoleErrorCatch, openDocControls, openNav } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
