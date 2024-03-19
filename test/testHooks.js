@@ -8,10 +8,10 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const createTestHooks = async (testSuiteName = '_community') => {
-  const tsConfigPath = path.resolve(dirname, '..', 'tsconfig.json')
+  const tsConfigPath = path.resolve(dirname, 'tsconfig.json')
   const tsConfig = await json5.parse(await readFile(tsConfigPath, 'utf8'))
   const originalPayloadConfigTsValue =
-    tsConfig.compilerOptions.paths['@payload-config'] ?? './test/_community/config.ts'
+    tsConfig.compilerOptions.paths['@payload-config'] ?? './_community/config.ts'
 
   return {
     /**
@@ -19,13 +19,13 @@ export const createTestHooks = async (testSuiteName = '_community') => {
      */
     beforeTest: async () => {
       // Delete next webpack cache
-      const nextWebpackCache = path.resolve(dirname, '..', '.next/cache/webpack')
+      const nextWebpackCache = path.resolve(dirname, '.next/cache/webpack')
       if (existsSync(nextWebpackCache)) {
         await rm(nextWebpackCache, { recursive: true })
       }
 
       // Set '@payload-config' in tsconfig.json
-      tsConfig.compilerOptions.paths['@payload-config'] = [`./test/${testSuiteName}/config.ts`]
+      tsConfig.compilerOptions.paths['@payload-config'] = [`./${testSuiteName}/config.ts`]
       await writeFile(tsConfigPath, JSON.stringify(tsConfig, null, 2))
 
       const PAYLOAD_CONFIG_PATH = path.resolve(testSuiteName, 'config')
