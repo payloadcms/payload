@@ -12,7 +12,7 @@ import type { Props as ReactSelectAdapterProps } from './types.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import DraggableSortable from '../DraggableSortable/index.js'
+import { DraggableSortable } from '../DraggableSortable/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { MultiValue } from './MultiValue/index.js'

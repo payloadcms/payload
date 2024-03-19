@@ -1,11 +1,11 @@
 'use client'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
-
-import type { Props } from './types.js'
 
 // import { requests } from '../../../api'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
@@ -18,7 +18,13 @@ import './index.scss'
 
 const baseClass = 'duplicate'
 
-const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
+export type Props = {
+  id: string
+  singularLabel: SanitizedCollectionConfig['labels']['singular']
+  slug: string
+}
+
+export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) => {
   const { Modal, useModal } = facelessUIImport
 
   const { push } = useRouter()
@@ -47,11 +53,7 @@ const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
         return
       }
 
-      const saveDocument = async ({
-        id,
-        duplicateID = '',
-        locale = '',
-      }): Promise<null | string> => {
+      const saveDocument = ({ id, duplicateID = '', locale = '' }): Promise<null | string> => {
         const data = null
 
         // const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
@@ -163,16 +165,15 @@ const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
       modified,
       localization,
       t,
+      singularLabel,
       i18n,
       setModified,
       toggleModal,
       modalSlug,
-      serverURL,
-      api,
-      slug,
       id,
       push,
       admin,
+      slug,
     ],
   )
 
@@ -208,5 +209,3 @@ const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
     </React.Fragment>
   )
 }
-
-export default Duplicate

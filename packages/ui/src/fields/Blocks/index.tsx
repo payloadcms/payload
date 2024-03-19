@@ -2,10 +2,10 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
 
-import Banner from '../../elements/Banner/index.js'
+import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
-import DraggableSortableItem from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
-import DraggableSortable from '../../elements/DraggableSortable/index.js'
+import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
+import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'

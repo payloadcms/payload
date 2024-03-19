@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
 import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types.js'
 
-import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections.js'
+import { useRelatedCollections } from '../../fields/Relationship/AddNew/useRelatedCollections.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
