@@ -1,9 +1,9 @@
 'use client'
 import React, { createContext, useContext } from 'react'
 
-import type { ColumnPreferences, ListInfo, ListInfoContext, ListInfoProps } from './types.js'
+import type { ListInfoContext, ListInfoProps } from './types.js'
 
-export type { ColumnPreferences, ListInfo, ListInfoContext, ListInfoProps }
+export type * from './types.js'
 
 const Context = createContext({} as ListInfoContext)
 
