@@ -14,7 +14,7 @@ export type SearchFilterProps = {
   modifySearchQuery?: boolean
 }
 
-import useDebounce from '../../hooks/useDebounce.js'
+import { useDebounce } from '../../hooks/useDebounce.js'
 import { Search } from '../../icons/Search/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

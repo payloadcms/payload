@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useReducer, useRef, useState } from 'rea
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { GetResults, Option, RelationshipFieldProps, Value } from './types.js'
 
-import ReactSelect from '../../elements/ReactSelect/index.js'
+import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useFormProcessing } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

@@ -2,7 +2,7 @@ import type { Where } from 'payload/types'
 
 import React, { useEffect, useState } from 'react'
 
-import type { Action, FieldCondition } from '../index.js'
+import type { Action, FieldCondition } from '../types.js'
 
 export type Props = {
   andIndex: number
@@ -15,7 +15,7 @@ export type Props = {
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { Button } from '../../Button/index.js'
-import ReactSelect from '../../ReactSelect/index.js'
+import { ReactSelect } from '../../ReactSelect/index.js'
 import { DateField } from './Date/index.js'
 import Number from './Number/index.js'
 import Relationship from './Relationship/index.js'

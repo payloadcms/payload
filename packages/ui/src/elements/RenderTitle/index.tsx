@@ -2,7 +2,7 @@
 import React from 'react'
 
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import IDLabel from '../IDLabel/index.js'
+import { IDLabel } from '../IDLabel/index.js'
 import './index.scss'
 
 const baseClass = 'render-title'

@@ -3,7 +3,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import React from 'react'
 
-import { AppHeader } from '../../elements/AppHeader/index.jsx'
+import { AppHeader } from '../../elements/AppHeader/index.js'
 import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'

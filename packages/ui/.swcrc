@@ -7,16 +7,6 @@
       "syntax": "typescript",
       "tsx": true,
       "dts": true
-    },
-    "experimental": {
-      "plugins": [
-        [
-          "swc-plugin-transform-remove-imports",
-          {
-            "test": "\\.(scss|css)$"
-          }
-        ]
-      ]
     }
   },
   "module": {

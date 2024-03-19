@@ -1,7 +1,7 @@
 import type { Data, FieldAffectingData, SanitizedCollectionConfig, Where } from 'payload/types'
 import type React from 'react'
 
-import type { Column } from '../../elements/Table/types.js'
+import type { Column } from '../../elements/Table/index.js'
 
 export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
 

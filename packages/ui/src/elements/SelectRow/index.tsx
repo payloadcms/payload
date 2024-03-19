@@ -2,7 +2,7 @@
 import React from 'react'
 
 import { useTableCell } from '../../elements/Table/TableCellProvider/index.js'
-import { CheckboxInput } from '../../forms/fields/Checkbox/Input.js'
+import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useSelection } from '../../providers/Selection/index.js'
 import './index.scss'
 

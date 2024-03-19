@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { FormFieldBase } from '../shared.js'
 
-import ReactSelect from '../../elements/ReactSelect/index.js'
+import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

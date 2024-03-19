@@ -18,7 +18,7 @@ export type SortComplexProps = {
 
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import ReactSelect from '../ReactSelect/index.js'
+import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
 
 const baseClass = 'sort-complex'

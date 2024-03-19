@@ -10,7 +10,7 @@ import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMa
 
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
-import Pill from '../../elements/Pill/index.js'
+import { Pill } from '../../elements/Pill/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

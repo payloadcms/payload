@@ -4,7 +4,7 @@ import React from 'react'
 
 import type { TextInputProps } from './types.js'
 
-import ReactSelect from '../../elements/ReactSelect/index.js'
+import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared.js'
 import './index.scss'

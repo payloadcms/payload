@@ -8,7 +8,7 @@ import type { GetResults, Props, ValueWithRelation } from './types.js'
 import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import ReactSelect from '../../../ReactSelect/index.js'
+import { ReactSelect } from '../../../ReactSelect/index.js'
 import './index.scss'
 import optionsReducer from './optionsReducer.js'
 

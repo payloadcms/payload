@@ -66,7 +66,7 @@ const removeFromKeys = (code: string) => {
  * @param param0.editDepth {boolean} This ensures that the hotkey is only triggered for the most top-level drawer in case there are nested drawers
  * @param func The callback function
  */
-const useHotkey = (
+export const useHotkey = (
   options: {
     cmdCtrlKey: boolean
     editDepth: number
@@ -139,5 +139,3 @@ const useHotkey = (
     }
   }, [keydown, keyup])
 }
-
-export default useHotkey

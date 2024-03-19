@@ -2,7 +2,7 @@
 import React, { Fragment } from 'react'
 
 import { LogOut } from '../../icons/LogOut/index.js'
-import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
+import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 

@@ -9,7 +9,7 @@ import { X } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
-import Pill from '../Pill/index.js'
+import { Pill } from '../Pill/index.js'
 import { useTableColumns } from '../TableColumns/index.js'
 import './index.scss'
 
