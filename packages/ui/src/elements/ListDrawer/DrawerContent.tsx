@@ -85,14 +85,17 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const { List } = componentMap.collections?.[selectedCollectionConfig?.slug] || {}
 
-  const [selectedOption, setSelectedOption] = useState<{ label: string; value: string }>(() =>
-    selectedCollectionConfig
-      ? {
-          label: getTranslation(selectedCollectionConfig.labels.singular, i18n),
-          value: selectedCollectionConfig.slug,
-        }
-      : undefined,
-  )
+  const [selectedOption, setSelectedOption] = useState<{ label: string; value: string }>(() => {
+    const labelOrComponent = getTranslation(selectedCollectionConfig.labels.singular, i18n)
+    const label =
+      typeof labelOrComponent === 'string' ? labelOrComponent : selectedCollectionConfig.slug
+    if (selectedCollectionConfig) {
+      return {
+        label,
+        value: selectedCollectionConfig.slug,
+      }
+    }
+  })
 
   // const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig))
 
@@ -246,6 +249,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               )}
             </div>
             <button
+              aria-label={t('general:close')}
               className={`${baseClass}__header-close`}
               onClick={() => {
                 closeModal(drawerSlug)
@@ -276,6 +280,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           )}
         </header>
       }
+      collectionConfig={selectedCollectionConfig}
       collectionSlug={selectedCollectionConfig.slug}
       data={data}
       handlePageChange={setPage}
