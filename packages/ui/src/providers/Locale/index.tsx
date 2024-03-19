@@ -89,5 +89,3 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
  * A hook that returns the current locale object.
  */
 export const useLocale = (): Locale => useContext(LocaleContext)
-
-export default LocaleContext

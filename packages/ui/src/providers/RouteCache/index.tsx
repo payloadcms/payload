@@ -3,7 +3,9 @@
 import { usePathname, useRouter } from 'next/navigation.js'
 import React, { createContext, useCallback, useContext, useEffect } from 'react'
 
-import type { RouteCacheContext } from './types.js'
+export type RouteCacheContext = {
+  clearRouteCache: () => void
+}
 
 const Context = createContext<RouteCacheContext>({
   clearRouteCache: () => {},
