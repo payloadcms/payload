@@ -23,10 +23,12 @@ import { SetViewActions } from '@payloadcms/ui/providers/Actions'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useListInfo } from '@payloadcms/ui/providers/ListInfo'
+import { useListQuery } from '@payloadcms/ui/providers/ListQuery'
+import { useSearchParams } from '@payloadcms/ui/providers/SearchParams'
 import { SelectionProvider } from '@payloadcms/ui/providers/Selection'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import LinkImport from 'next/link.js'
-import { formatFilesize } from 'payload/utilities'
+import { formatFilesize, isNumber } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
 import './index.scss'
@@ -35,18 +37,9 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
-  const {
-    Header,
-    collectionSlug,
-    data,
-    handlePageChange,
-    handlePerPageChange,
-    hasCreatePermission,
-    limit,
-    modifySearchParams,
-    newDocumentURL,
-    titleField,
-  } = useListInfo()
+  const { Header, collectionSlug, hasCreatePermission, newDocumentURL, titleField } = useListInfo()
+  const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
+  const { searchParams } = useSearchParams()
 
   const config = useConfig()
 
@@ -124,7 +117,6 @@ export const DefaultListView: React.FC = () => {
           <ListControls
             collectionConfig={collectionConfig}
             fieldMap={fieldMap}
-            modifySearchQuery={modifySearchParams}
             titleField={titleField}
           />
           {BeforeListTable}
@@ -162,7 +154,6 @@ export const DefaultListView: React.FC = () => {
           {data.docs && data.docs.length > 0 && (
             <div className={`${baseClass}__page-controls`}>
               <Pagination
-                disableHistoryChange={modifySearchParams === false}
                 hasNextPage={data.hasNextPage}
                 hasPrevPage={data.hasPrevPage}
                 limit={data.limit}
@@ -184,9 +175,10 @@ export const DefaultListView: React.FC = () => {
                   </div>
                   <PerPage
                     handleChange={handlePerPageChange}
-                    limit={limit}
+                    limit={
+                      isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
+                    }
                     limits={collectionConfig?.admin?.pagination?.limits}
-                    modifySearchParams={modifySearchParams}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />
                   {smallBreak && (

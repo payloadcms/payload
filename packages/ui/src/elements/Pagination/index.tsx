@@ -1,9 +1,6 @@
 'use client'
-import { usePathname, useRouter } from 'next/navigation.js'
-import queryString from 'qs'
 import React from 'react'
 
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { ClickableArrow } from './ClickableArrow/index.js'
 import { Page } from './Page/index.js'
 import { Separator } from './Separator/index.js'
@@ -18,7 +15,6 @@ const nodeTypes = {
 const baseClass = 'paginator'
 
 export type PaginationProps = {
-  disableHistoryChange?: boolean
   hasNextPage?: boolean
   hasPrevPage?: boolean
   limit?: number
@@ -45,12 +41,7 @@ export type Node =
   | number
 
 export const Pagination: React.FC<PaginationProps> = (props) => {
-  const router = useRouter()
-  const { searchParams } = useSearchParams()
-  const pathname = usePathname()
-
   const {
-    disableHistoryChange = false,
     hasNextPage = false,
     hasPrevPage = false,
     nextPage = null,
@@ -64,15 +55,6 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
   if (!totalPages || totalPages <= 1) return null
 
   const updatePage = (page) => {
-    if (!disableHistoryChange) {
-      const newParams = {
-        ...searchParams,
-      }
-
-      newParams.page = page
-      router.push(pathname + queryString.stringify(newParams, { addQueryPrefix: true }))
-    }
-
     if (typeof onChange === 'function') onChange(page)
   }
 

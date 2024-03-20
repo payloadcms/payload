@@ -1,5 +1,3 @@
-import QueryString from 'qs'
-
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { FieldAffectingData } from '../fields/config/types.js'
 import type { Where } from '../types/index.js'
@@ -45,7 +43,7 @@ type Args = {
 
 export const mergeListSearchAndWhere = ({ collectionConfig, query }: Args): Where => {
   const search = query?.search || undefined
-  let where = QueryString.parse(typeof query?.where === 'string' ? query.where : '') as Where
+  let where = query?.where || undefined
 
   if (search) {
     let copyOfWhere = { ...(where || {}) }
