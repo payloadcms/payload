@@ -185,24 +185,27 @@ describe('Localization', () => {
 
     test('should duplicate localized checkbox correctly', async () => {
       await page.goto(url.create)
-      await changeLocale(page, defaultLocale)
+      await page.waitForURL(`**${url.create}`)
+
+      //await changeLocale(page, defaultLocale, true)
       await fillValues({ description, title: englishTitle })
       await page.locator('#field-localizedCheckbox').click()
 
       await page.locator('#action-save').click()
       // wait for navigation to update route
+      await page.waitForURL(`**${url.collection(localizedPostsSlug)}/**`)
       await wait(500)
-
       // ensure spanish is not checked
       await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
 
       // duplicate doc
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
 
       // wait for navigation to update route
+      await page.waitForURL(`**${url.collection(localizedPostsSlug)}/**`)
       await wait(500)
 
       // finally change locale to spanish
@@ -213,7 +216,7 @@ describe('Localization', () => {
     test('should duplicate even if missing some localized data', async () => {
       // create a localized required doc
       await page.goto(urlWithRequiredLocalizedFields.create)
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()
