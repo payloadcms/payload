@@ -35,7 +35,6 @@ import type {
 } from './types.js'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
-import { SortColumn } from '../../../elements/SortColumn/index.js'
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
 import { Error as DefaultError } from '../../../forms/Error/index.js'
 import { FieldDescription as DefaultDescription } from '../../../forms/FieldDescription/index.js'
@@ -640,24 +639,6 @@ export const mapFields = (args: {
           }
         }
 
-        const Heading = (
-          <SortColumn
-            disable={
-              ('disableSort' in field && Boolean(field.disableSort)) ||
-              fieldIsPresentationalOnly(field) ||
-              undefined
-            }
-            label={
-              'label' in field && field.label && typeof field.label !== 'function'
-                ? field.label
-                : 'name' in field
-                  ? field.name
-                  : undefined
-            }
-            name={'name' in field ? field.name : undefined}
-          />
-        )
-
         const reducedField: MappedField = {
           name: 'name' in field ? field.name : undefined,
           type: field.type,
@@ -667,7 +648,6 @@ export const mapFields = (args: {
           CustomField: CustomFieldComponent ? (
             <CustomFieldComponent {...fieldComponentProps} />
           ) : undefined,
-          Heading,
           cellComponentProps,
           disableBulkEdit:
             'admin' in field && 'disableBulkEdit' in field.admin && field.admin.disableBulkEdit,
@@ -696,7 +676,6 @@ export const mapFields = (args: {
     result.push({
       name: 'id',
       type: 'text',
-      Heading: <SortColumn label="ID" name="id" />,
       cellComponentProps: {
         name: 'id',
       },

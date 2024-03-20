@@ -1,14 +1,16 @@
-import type { CellProps, SanitizedCollectionConfig } from 'payload/types'
-
+import { type CellProps, type SanitizedCollectionConfig } from 'payload/types'
 import React from 'react'
 
-import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { ColumnPreferences } from '../../providers/ListInfo/types.js'
 import type { Column } from '../Table/index.js'
 
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
+import { SortColumn } from '../SortColumn/index.js'
 import { DefaultCell } from '../Table/DefaultCell/index.js'
+
+const fieldIsPresentationalOnly = (field: MappedField): boolean => field.type === 'ui'
 
 export const buildColumns = (args: {
   cellProps: Partial<CellProps>[]
@@ -69,6 +71,24 @@ export const buildColumns = (args: {
         <DefaultCell {...field.cellComponentProps} />
       )
 
+    const Heading = (
+      <SortColumn
+        disable={
+          ('disableSort' in field && Boolean(field.disableSort)) ||
+          fieldIsPresentationalOnly(field) ||
+          undefined
+        }
+        label={
+          'label' in field.fieldComponentProps && field.fieldComponentProps.label
+            ? field.fieldComponentProps.label
+            : 'name' in field
+              ? field.name
+              : undefined
+        }
+        name={'name' in field ? field.name : undefined}
+      />
+    )
+
     if (field) {
       const column: Column = {
         name,
@@ -80,7 +100,7 @@ export const buildColumns = (args: {
         },
         components: {
           Cell,
-          Heading: field.Heading,
+          Heading,
         },
         label: 'label' in field.fieldComponentProps ? field.fieldComponentProps.label : undefined,
       }
