@@ -9,7 +9,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const componentWebpackConfig = {
-  entry: path.resolve(dirname, './src/index.ts'),
+  entry: path.resolve(dirname, './src/index.js'),
   externals: [
     'react',
     'react-dom',
