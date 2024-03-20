@@ -234,7 +234,9 @@ describe('fields', () => {
       await page.keyboard.press('Enter')
       await page.click('#action-save', { delay: 100 })
 
-      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: withMinRows',
+      )
     })
   })
 
@@ -735,11 +737,16 @@ describe('fields', () => {
         const assertText3 = 'array row 3'
         const assertGroupText3 = 'text in group in row 3'
         await page.goto(url.create)
+        await page.locator('#field-potentiallyEmptyArray').scrollIntoViewIfNeeded()
+        await wait(300)
 
         // Add 3 rows
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
+        await wait(300)
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
+        await wait(300)
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
+        await wait(300)
 
         // Fill out row 1
         await page.locator('#field-potentiallyEmptyArray__0__text').fill(assertText0)
@@ -877,25 +884,28 @@ describe('fields', () => {
       await page.locator('.field-select .rs__control').click()
 
       const arrayOption = page.locator('.rs__option', {
-        hasText: exactText('Items'),
+        hasText: 'Items',
       })
 
       await expect(arrayOption).toBeVisible()
 
       await arrayOption.click()
-      const addRowButton = page.locator('#field-items > .btn.array-field__add-row')
+      await wait(200)
+
+      const addRowButton = page.locator('#field-items > .array-field__add-row')
 
       await expect(addRowButton).toBeVisible()
 
       await addRowButton.click()
+      await wait(200)
 
-      const targetInput = page.locator('#field-items__0__text')
+      const targetInput = page.locator('#field-items__2__text')
 
       await expect(targetInput).toBeVisible()
 
       await targetInput.fill(bulkText)
 
-      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+      await page.locator('#edit-array-fields .form-submit .edit-many__save').click()
       await expect(page.locator('.Toastify__toast--success')).toContainText(
         'Updated 3 Array Fields successfully.',
       )
