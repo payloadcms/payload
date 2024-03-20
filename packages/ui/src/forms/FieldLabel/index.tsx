@@ -10,7 +10,7 @@ import { useFieldProps } from '../FieldPropsProvider/index.js'
 import { useForm } from '../Form/context.js'
 import './index.scss'
 
-export const Label: React.FC<LabelProps> = (props) => {
+export const FieldLabel: React.FC<LabelProps> = (props) => {
   const { htmlFor: htmlForFromProps, label: labelFromProps, required = false } = props
   const { uuid } = useForm()
   const { path } = useFieldProps()

@@ -13,7 +13,6 @@ import 'react-toastify/dist/ReactToastify.css'
 
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { DefaultEditView } from '../../views/Edit/Default/index.js'
-import { DefaultCell } from '../../views/List/Default/Cell/index.js'
 import { DefaultListView } from '../../views/List/Default/index.js'
 
 export const metadata = {
@@ -63,7 +62,6 @@ export const RootLayout = async ({
   }
 
   const { componentMap, wrappedChildren } = buildComponentMap({
-    DefaultCell,
     DefaultEditView,
     DefaultListView,
     children,

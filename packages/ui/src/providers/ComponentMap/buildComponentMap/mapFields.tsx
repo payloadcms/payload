@@ -1,3 +1,4 @@
+import type { FieldDescriptionProps } from '@payloadcms/ui/forms/FieldDescription'
 import type { CellProps, Field, FieldWithPath, LabelProps, SanitizedConfig } from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
@@ -25,7 +26,6 @@ import type { TextFieldProps } from '../../../fields/Text/types.js'
 import type { TextareaFieldProps } from '../../../fields/Textarea/types.js'
 import type { UploadFieldProps } from '../../../fields/Upload/types.js'
 import type { FormFieldBase } from '../../../fields/shared/index.js'
-import type { Props as FieldDescription } from '../../../forms/FieldDescription/types.js'
 import type {
   FieldComponentProps,
   FieldMap,
@@ -34,15 +34,9 @@ import type {
   ReducedBlock,
 } from './types.js'
 
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
-import { SortColumn } from '../../../elements/SortColumn/index.js'
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
-import { Error as DefaultError } from '../../../forms/Error/index.js'
-import { FieldDescription as DefaultDescription } from '../../../forms/FieldDescription/index.js'
-import { Label as DefaultLabel } from '../../../forms/Label/index.js'
 
 export const mapFields = (args: {
-  DefaultCell?: React.FC<any>
   config: SanitizedConfig
   /**
    * If mapFields is used outside of collections, you might not want it to add an id field
@@ -54,7 +48,6 @@ export const mapFields = (args: {
   readOnly?: boolean
 }): FieldMap => {
   const {
-    DefaultCell,
     config,
     disableAddingID,
     fieldSchema,
@@ -92,7 +85,7 @@ export const mapFields = (args: {
           required: 'required' in field ? field.required : undefined,
         }
 
-        const descriptionProps: FieldDescription = {
+        const descriptionProps: FieldDescriptionProps = {
           description:
             field.admin &&
             'description' in field.admin &&
@@ -107,7 +100,6 @@ export const mapFields = (args: {
           field.fields &&
           Array.isArray(field.fields) &&
           mapFields({
-            DefaultCell,
             config,
             fieldSchema: field.fields,
             filter,
@@ -115,75 +107,83 @@ export const mapFields = (args: {
             readOnly: readOnlyOverride,
           })
 
-        const AfterInput = 'admin' in field &&
-          'components' in field.admin &&
-          'afterInput' in field.admin.components &&
-          Array.isArray(field.admin?.components?.afterInput) && (
-            <Fragment>
-              {field.admin.components.afterInput.map((Component, i) => (
-                <Component key={i} />
-              ))}
-            </Fragment>
-          )
+        const AfterInput =
+          ('admin' in field &&
+            'components' in field.admin &&
+            'afterInput' in field.admin.components &&
+            Array.isArray(field.admin?.components?.afterInput) && (
+              <Fragment>
+                {field.admin.components.afterInput.map((Component, i) => (
+                  <Component key={i} />
+                ))}
+              </Fragment>
+            )) ||
+          null
 
-        const BeforeInput = 'admin' in field &&
-          field.admin?.components &&
-          'beforeInput' in field.admin.components &&
-          Array.isArray(field.admin.components.beforeInput) && (
-            <Fragment>
-              {field.admin.components.beforeInput.map((Component, i) => (
-                <Component key={i} />
-              ))}
-            </Fragment>
-          )
+        const BeforeInput =
+          ('admin' in field &&
+            field.admin?.components &&
+            'beforeInput' in field.admin.components &&
+            Array.isArray(field.admin.components.beforeInput) && (
+              <Fragment>
+                {field.admin.components.beforeInput.map((Component, i) => (
+                  <Component key={i} />
+                ))}
+              </Fragment>
+            )) ||
+          null
 
-        const Description = (
-          <RenderCustomComponent
-            CustomComponent={
-              field.admin &&
-              'description' in field.admin &&
-              field.admin.description &&
-              typeof field.admin.description === 'function' &&
-              (field.admin.description as React.FC<any>)
-            }
-            DefaultComponent={DefaultDescription}
-            componentProps={descriptionProps}
-          />
-        )
+        const CustomDescriptionComponent =
+          (field.admin &&
+            'description' in field.admin &&
+            field.admin.description &&
+            typeof field.admin.description === 'function' &&
+            (field.admin.description as React.FC<any>)) ||
+          undefined
 
-        const Error = (
-          <RenderCustomComponent
-            CustomComponent={
-              'admin' in field &&
-              field.admin.components &&
-              'Error' in field.admin.components &&
-              field.admin?.components?.Error
-            }
-            DefaultComponent={DefaultError}
-            componentProps={{ path }}
-          />
-        )
+        const CustomDescription =
+          CustomDescriptionComponent !== undefined ? (
+            <CustomDescriptionComponent {...(descriptionProps || {})} />
+          ) : undefined
 
-        const Label = (
-          <RenderCustomComponent
-            CustomComponent={
-              'admin' in field &&
-              field.admin?.components &&
-              'Label' in field.admin.components &&
-              field.admin?.components?.Label
-            }
-            DefaultComponent={DefaultLabel}
-            componentProps={labelProps}
-          />
-        )
+        const CustomErrorComponent =
+          ('admin' in field &&
+            field.admin?.components &&
+            'Error' in field.admin.components &&
+            field.admin?.components?.Error) ||
+          undefined
+
+        const errorProps = {
+          path,
+        }
+
+        const CustomError =
+          CustomErrorComponent !== undefined ? (
+            <CustomErrorComponent {...(errorProps || {})} />
+          ) : undefined
+
+        const CustomLabelComponent =
+          ('admin' in field &&
+            field.admin?.components &&
+            'Label' in field.admin.components &&
+            field.admin?.components?.Label) ||
+          undefined
+
+        const CustomLabel =
+          CustomLabelComponent !== undefined ? (
+            <CustomLabelComponent {...(labelProps || {})} />
+          ) : undefined
 
         const baseFieldProps: FormFieldBase = {
           AfterInput,
           BeforeInput,
-          Description,
-          Error,
-          Label,
+          CustomDescription,
+          CustomError,
+          CustomLabel,
+          descriptionProps,
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
+          errorProps,
+          labelProps,
           path,
           required: 'required' in field ? field.required : undefined,
         }
@@ -240,7 +240,6 @@ export const mapFields = (args: {
           case 'blocks': {
             const blocks = field.blocks.map((block) => {
               const blockFieldMap = mapFields({
-                DefaultCell,
                 config,
                 fieldSchema: block.fields,
                 filter,
@@ -329,7 +328,7 @@ export const mapFields = (args: {
 
             const collapsibleField: Omit<CollapsibleFieldProps, 'indexPath' | 'permissions'> = {
               ...baseFieldProps,
-              Label: CollapsibleLabel,
+              CustomLabel: CollapsibleLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: nestedFieldMap,
@@ -530,7 +529,6 @@ export const mapFields = (args: {
             // `tabs` fields require a field map of each of its tab's nested fields
             const tabs = field.tabs.map((tab) => {
               const tabFieldMap = mapFields({
-                DefaultCell,
                 config,
                 fieldSchema: tab.fields,
                 filter,
@@ -645,40 +643,16 @@ export const mapFields = (args: {
           }
         }
 
-        const Cell = (
-          <RenderCustomComponent
-            CustomComponent={CustomCellComponent}
-            DefaultComponent={DefaultCell}
-            componentProps={cellComponentProps}
-          />
-        )
-
-        const Heading = (
-          <SortColumn
-            disable={
-              ('disableSort' in field && Boolean(field.disableSort)) ||
-              fieldIsPresentationalOnly(field) ||
-              undefined
-            }
-            label={
-              'label' in field && field.label && typeof field.label !== 'function'
-                ? field.label
-                : 'name' in field
-                  ? field.name
-                  : undefined
-            }
-            name={'name' in field ? field.name : undefined}
-          />
-        )
-
         const reducedField: MappedField = {
           name: 'name' in field ? field.name : undefined,
           type: field.type,
-          Cell,
+          CustomCell: CustomCellComponent ? (
+            <CustomCellComponent {...cellComponentProps} />
+          ) : undefined,
           CustomField: CustomFieldComponent ? (
             <CustomFieldComponent {...fieldComponentProps} />
           ) : undefined,
-          Heading,
+          cellComponentProps,
           disableBulkEdit:
             'admin' in field && 'disableBulkEdit' in field.admin && field.admin.disableBulkEdit,
           fieldComponentProps,
@@ -706,8 +680,9 @@ export const mapFields = (args: {
     result.push({
       name: 'id',
       type: 'text',
-      Cell: DefaultCell ? <DefaultCell name="id" /> : null,
-      Heading: <SortColumn label="ID" name="id" />,
+      cellComponentProps: {
+        name: 'id',
+      },
       fieldComponentProps: {
         name: 'id',
         label: 'ID',

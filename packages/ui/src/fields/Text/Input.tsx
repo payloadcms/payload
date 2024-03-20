@@ -1,5 +1,8 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React from 'react'
 
 import type { TextInputProps } from './types.js'
@@ -13,12 +16,15 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
+    descriptionProps,
+    errorProps,
     hasMany,
     inputRef,
+    labelProps,
     maxRows,
     onChange,
     onKeyDown,
@@ -52,8 +58,8 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      {Error}
-      {Label}
+      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}
@@ -97,7 +103,11 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           {AfterInput}
         </div>
       )}
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

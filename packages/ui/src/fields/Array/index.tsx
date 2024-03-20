@@ -4,6 +4,9 @@ import type { FieldBase } from 'payload/types'
 import type { ArrayField as ArrayFieldType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React, { useCallback } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
@@ -15,7 +18,6 @@ import { DraggableSortableItem } from '../../elements/DraggableSortable/Draggabl
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -46,15 +48,17 @@ export type ArrayFieldProps = FormFieldBase & {
 export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const {
     name,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     RowLabel,
     className,
+    descriptionProps,
+    errorProps,
     fieldMap,
     forceRender = false,
     indexPath,
-    label,
+    labelProps,
     localized,
     maxRows,
     minRows,
@@ -64,8 +68,6 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
     required,
     validate,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -194,11 +196,17 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && <div className={`${baseClass}__error-wrap`}>{Error}</div>}
+      {showError && (
+        <div className={`${baseClass}__error-wrap`}>
+          {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+        </div>
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
-            <h3 className={`${baseClass}__title`}>{Label}</h3>
+            <h3 className={`${baseClass}__title`}>
+              {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+            </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
@@ -226,7 +234,11 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        {Description}
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

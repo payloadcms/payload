@@ -2,6 +2,9 @@
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { SerializedEditorState } from 'lexical'
 
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useField } from '@payloadcms/ui/forms/useField'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -23,11 +26,14 @@ export const RichText: React.FC<
 > = (props) => {
   const {
     name,
-    Description,
-    Error,
-    Label,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
+    descriptionProps,
     editorConfig,
+    errorProps,
+    labelProps,
     path: pathFromProps,
     readOnly,
     required,
@@ -75,8 +81,8 @@ export const RichText: React.FC<
       }}
     >
       <div className={`${baseClass}__wrap`}>
-        {Error}
-        {Label}
+        {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+        {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}
@@ -99,7 +105,11 @@ export const RichText: React.FC<
             value={value}
           />
         </ErrorBoundary>
-        {Description}
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
       </div>
     </div>
   )

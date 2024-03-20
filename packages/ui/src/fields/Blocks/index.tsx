@@ -10,7 +10,6 @@ import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -27,6 +26,10 @@ const baseClass = 'blocks-field'
 
 import type { FieldPermissions } from 'payload/auth'
 import type { BlockField, FieldBase } from 'payload/types'
+
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 
 import type {
   FieldMap,
@@ -54,14 +57,16 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
 
   const {
     name,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     blocks,
     className,
+    descriptionProps,
+    errorProps,
     forceRender = false,
     indexPath,
-    label,
+    labelProps,
     labels: labelsFromProps,
     localized,
     maxRows,
@@ -71,8 +76,6 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     required,
     validate,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -207,11 +210,17 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && <div className={`${baseClass}__error-wrap`}>{Error}</div>}
+      {showError && (
+        <div className={`${baseClass}__error-wrap`}>
+          {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+        </div>
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
-            <h3>{Label}</h3>
+            <h3>
+              {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+            </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
@@ -239,7 +248,11 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        {Description}
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

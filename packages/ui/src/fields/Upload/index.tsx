@@ -4,7 +4,6 @@ import React, { useCallback } from 'react'
 import type { UploadInputProps } from './Input.js'
 import type { UploadFieldProps } from './types.js'
 
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { UploadInput } from './Input.js'
@@ -15,11 +14,14 @@ export type { UploadInputProps }
 
 export const Upload: React.FC<UploadFieldProps> = (props) => {
   const {
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
+    descriptionProps,
+    errorProps,
     label,
+    labelProps,
     path: pathFromProps,
     readOnly,
     relationTo,
@@ -28,8 +30,6 @@ export const Upload: React.FC<UploadFieldProps> = (props) => {
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const {
     collections,
@@ -64,13 +64,16 @@ export const Upload: React.FC<UploadFieldProps> = (props) => {
   if (collection.upload) {
     return (
       <UploadInput
-        Description={Description}
-        Error={Error}
-        Label={Label}
+        CustomDescription={CustomDescription}
+        CustomError={CustomError}
+        CustomLabel={CustomLabel}
         api={api}
         className={className}
         collection={collection}
+        descriptionProps={descriptionProps}
+        errorProps={errorProps}
         filterOptions={filterOptions}
+        labelProps={labelProps}
         onChange={onChange}
         path={path}
         readOnly={readOnly}

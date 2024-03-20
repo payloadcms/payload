@@ -2,6 +2,9 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { Where } from 'payload/types'
 
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { wordBoundariesRegex } from 'payload/utilities'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
@@ -36,13 +39,16 @@ export { RelationshipFieldProps }
 const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   const {
     name,
-    Description,
-    Error,
-    Label,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     allowCreate = true,
     className,
+    descriptionProps,
+    errorProps,
     hasMany,
     isSortable = true,
+    labelProps,
     path: pathFromProps,
     readOnly,
     relationTo,
@@ -434,8 +440,8 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
         width,
       }}
     >
-      {Error}
-      {Label}
+      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
@@ -527,7 +533,11 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
         </div>
       )}
       {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

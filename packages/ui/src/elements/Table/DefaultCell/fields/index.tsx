@@ -9,7 +9,7 @@ import { RelationshipCell } from './Relationship/index.js'
 import { SelectCell } from './Select/index.js'
 import { TextareaCell } from './Textarea/index.js'
 
-export default {
+export const cellComponents = {
   File: FileCell,
   array: ArrayCell,
   blocks: BlocksCell,

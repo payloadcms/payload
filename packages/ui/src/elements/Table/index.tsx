@@ -5,6 +5,8 @@ import React from 'react'
 
 export * from './TableCellProvider/index.js'
 
+import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
+
 import { useTableColumns } from '../TableColumns/index.js'
 import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'
@@ -27,6 +29,7 @@ export type Props = {
   columns?: Column[]
   customCellContext?: Record<string, unknown>
   data: unknown[]
+  fieldMap: FieldMap
 }
 
 export const Table: React.FC<Props> = ({ columns: columnsFromProps, customCellContext, data }) => {

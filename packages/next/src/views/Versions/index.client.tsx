@@ -49,7 +49,7 @@ export const VersionsViewClient: React.FC<{
       )}
       {versionCount > 0 && (
         <React.Fragment>
-          <Table columns={columns} data={data?.docs} />
+          <Table columns={columns} data={data?.docs} fieldMap={componentMap?.fieldMap} />
           <div className={`${baseClass}__page-controls`}>
             <Pagination
               hasNextPage={data.hasNextPage}

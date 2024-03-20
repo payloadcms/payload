@@ -4,6 +4,7 @@ import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { FieldType, Options } from '@payloadcms/ui/forms/useField'
 
 import { TextareaInput } from '@payloadcms/ui/fields/Textarea'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useAllFormFields } from '@payloadcms/ui/forms/Form'
 import { useField } from '@payloadcms/ui/forms/useField'
@@ -26,7 +27,7 @@ type MetaDescriptionProps = FormFieldBase & {
 }
 
 export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
-  const { Label, hasGenerateDescriptionFn, path, required } = props
+  const { CustomLabel, hasGenerateDescriptionFn, labelProps, path, required } = props
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation()
@@ -75,8 +76,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {Label}
-
+          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
           {required && (
             <span
               style={{
@@ -131,7 +131,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
         }}
       >
         <TextareaInput
-          Error={errorMessage} // TODO: Fix
+          CustomError={errorMessage}
           onChange={setValue}
           path={pathFromContext}
           required={required}

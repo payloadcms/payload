@@ -5,6 +5,7 @@ import type { Options } from '@payloadcms/ui/forms/useField'
 import type { FieldType } from '@payloadcms/ui/forms/useField'
 
 import { TextInput } from '@payloadcms/ui/fields/Text'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useAllFormFields } from '@payloadcms/ui/forms/Form'
 import { useField } from '@payloadcms/ui/forms/useField'
@@ -27,7 +28,7 @@ type MetaTitleProps = FormFieldBase & {
 }
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
-  const { Label, hasGenerateTitleFn, path, required } = props || {}
+  const { CustomLabel, hasGenerateTitleFn, labelProps, path, required } = props || {}
   const { path: pathFromContext } = useFieldProps()
 
   const { t } = useTranslation()
@@ -76,8 +77,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {Label}
-
+          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
           {required && (
             <span
               style={{
@@ -88,7 +88,6 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
               *
             </span>
           )}
-
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -133,7 +132,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <TextInput
-          Error={errorMessage} // TODO: fix errormessage
+          CustomError={errorMessage}
           onChange={setValue}
           path={pathFromContext}
           required={required}

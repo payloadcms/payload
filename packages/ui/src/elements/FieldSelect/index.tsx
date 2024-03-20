@@ -4,9 +4,9 @@ import React, { Fragment, useState } from 'react'
 
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
-import { Label } from '../../forms/Label/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
@@ -23,7 +23,18 @@ const combineLabel = (prefix: JSX.Element, field: MappedField): JSX.Element => {
     <Fragment>
       <span style={{ display: 'inline-block' }}>{prefix}</span>
       {prefix ? <Fragment>{' > '}</Fragment> : ''}
-      <span style={{ display: 'inline-block' }}>{field.fieldComponentProps.Label}</span>
+      <span style={{ display: 'inline-block' }}>
+        {'CustomLabel' in field.fieldComponentProps &&
+        field.fieldComponentProps.CustomLabel !== undefined ? (
+          field.fieldComponentProps.CustomLabel
+        ) : (
+          <FieldLabel
+            {...(('labelProps' in field.fieldComponentProps &&
+              field.fieldComponentProps.labelProps) ||
+              {})}
+          />
+        )}
+      </span>
     </Fragment>
   )
 }
@@ -45,7 +56,7 @@ const reduceFields = (
       (field.disableBulkEdit ||
         field.unique ||
         field.isHidden ||
-        field.fieldComponentProps?.readOnly)
+        ('readOnly' in field.fieldComponentProps && field.fieldComponentProps.readOnly))
     ) {
       return fieldsToUse
     }
@@ -128,7 +139,7 @@ export const FieldSelect: React.FC<FieldSelectProps> = ({ fieldMap, setSelected 
 
   return (
     <div className={baseClass}>
-      <Label label={t('fields:selectFieldsToEdit')} />
+      <FieldLabel label={t('fields:selectFieldsToEdit')} />
       <ReactSelect isMulti onChange={handleChange} options={options} />
     </div>
   )

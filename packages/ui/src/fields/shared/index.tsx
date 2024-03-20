@@ -1,18 +1,23 @@
 import type { User } from 'payload/auth'
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
-import type { DocumentPreferences, Validate } from 'payload/types'
+import type { DocumentPreferences, ErrorProps, LabelProps, Validate } from 'payload/types'
+
+import type { FieldDescriptionProps } from '../../forms/FieldDescription/types.js'
 
 export const fieldBaseClass = 'field-type'
 
 export type FormFieldBase = {
   AfterInput?: React.ReactNode
   BeforeInput?: React.ReactNode
-  Description?: React.ReactNode
-  Error?: React.ReactNode
-  Label?: React.ReactNode
+  CustomDescription?: React.ReactNode
+  CustomError?: React.ReactNode
+  CustomLabel?: React.ReactNode
   className?: string
+  descriptionProps?: FieldDescriptionProps
   disabled?: boolean
   docPreferences?: DocumentPreferences
+  errorProps?: ErrorProps
+  labelProps?: LabelProps
   locale?: Locale
   localized?: boolean
   path?: string
