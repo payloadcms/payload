@@ -64,7 +64,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
           },
         })
         .then(async (res) => {
-          const { doc, message } = await res.json()
+          const { doc, errors, message } = await res.json()
           if (res.status < 400) {
             toast.success(
               message ||
@@ -77,7 +77,9 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
             router.push(`${admin}/collections/${slug}/${doc.id}?locale=${locale.code}`)
           } else {
             toast.error(
-              message || t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
+              errors?.[0].message ||
+                message ||
+                t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
               { autoClose: 5000 },
             )
           }
