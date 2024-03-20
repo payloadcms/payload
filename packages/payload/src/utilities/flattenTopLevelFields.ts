@@ -5,6 +5,7 @@ import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsPresentationalOnly,
+  tabHasName,
 } from '../fields/config/types.js'
 
 /**
@@ -25,6 +26,20 @@ const flattenFields = (
 
     if (fieldHasSubFields(field)) {
       return [...fieldsToUse, ...flattenFields(field.fields, keepPresentationalFields)]
+    }
+
+    if (field.type === 'tabs' && 'tabs' in field) {
+      return [
+        ...fieldsToUse,
+        ...field.tabs.reduce((tabFields, tab) => {
+          return [
+            ...tabFields,
+            ...(tabHasName(tab)
+              ? [{ ...tab, type: 'tab' }]
+              : flattenFields(tab.fields, keepPresentationalFields)),
+          ]
+        }, []),
+      ]
     }
 
     return fieldsToUse
