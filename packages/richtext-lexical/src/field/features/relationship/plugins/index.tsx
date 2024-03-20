@@ -39,7 +39,7 @@ export function RelationshipPlugin(props?: RelationshipFeatureProps): React.Reac
     enabledRelations = props?.enabledCollections
   } else if (props?.disabledCollections) {
     enabledRelations = collections
-      .filter(({ slug }) => !(props?.disabledCollections).includes(slug))
+      .filter(({ slug }) => !props?.disabledCollections?.includes(slug))
       .map(({ slug }) => slug)
   }
 

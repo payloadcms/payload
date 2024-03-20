@@ -25,7 +25,7 @@ const setSubmitted: SetSubmitted = () => undefined
 const reset: Reset = () => undefined
 
 export const initContextState: Context = {
-  addFieldRow: async () => undefined,
+  addFieldRow: () => undefined,
   buildRowErrors: () => undefined,
   createFormData,
   disabled: false,
@@ -38,7 +38,7 @@ export const initContextState: Context = {
   getFields: (): FormState => ({}),
   getSiblingData,
   removeFieldRow: () => undefined,
-  replaceFieldRow: async () => undefined,
+  replaceFieldRow: () => undefined,
   replaceState: () => undefined,
   reset,
   setModified,

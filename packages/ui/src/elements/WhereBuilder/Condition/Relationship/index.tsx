@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import type { PaginatedDocs } from 'payload/database'
 
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
@@ -48,6 +49,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
       lastLoadedPage: lastLoadedPageArg,
       search: searchArg,
+      // eslint-disable-next-line @typescript-eslint/require-await
     }) => {
       let lastLoadedPageToUse = typeof lastLoadedPageArg !== 'undefined' ? lastLoadedPageArg : 1
       const lastFullyLoadedRelationToUse =
@@ -187,6 +189,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
           const data = await response.json()
           addOptions({ docs: [data] }, relation)
         } else {
+          // eslint-disable-next-line no-console
           console.error(t('error:loadingDocument', { id }))
         }
       }

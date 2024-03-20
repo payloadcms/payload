@@ -569,6 +569,7 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
+              hasMany: field.hasMany,
               maxLength: field.maxLength,
               minLength: field.minLength,
               placeholder: field.admin?.placeholder,

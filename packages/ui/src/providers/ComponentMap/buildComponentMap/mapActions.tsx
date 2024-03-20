@@ -39,6 +39,7 @@ export const mapActions = (args: {
     listActions.forEach((action) => {
       const Action = action
       if (typeof Action === 'function') {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         result.List = [...result.List, <Action />]
       }
     })

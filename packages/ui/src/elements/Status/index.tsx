@@ -95,8 +95,10 @@ export const Status: React.FC = () => {
           data = json.doc
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         resetForm(data)
         toast.success(json.message)
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         getVersions()
       } else {
         toast.error(t('error:unPublishingDocument'))

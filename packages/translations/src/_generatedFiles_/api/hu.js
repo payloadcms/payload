@@ -45,6 +45,8 @@ export default {
     deletedSuccessfully: 'Sikeresen törölve.',
     email: 'E-mail',
     notFound: 'Nem található',
+    row: 'Sor',
+    rows: 'Sorok',
     successfullyCreated: '{{label}} sikeresen létrehozva.',
     successfullyDuplicated: '{{label}} sikeresen duplikálódott.',
     thisLanguage: 'Magyar',
@@ -74,6 +76,7 @@ export default {
       'Ennek az értéknek hosszabbnak kell lennie, mint a minimális {{minLength}} karakter hosszúság.',
     notValidDate: '" {{value}} " nem érvényes dátum.',
     required: 'Ez a mező kötelező.',
+    requiresAtLeast: 'Ehhez a mezőhöz legalább {{count}} {{label}} szükséges.',
     requiresNoMoreThan: 'Ehhez a mezőhöz legfeljebb {{count}} {{label}} szükséges.',
     requiresTwoNumbers: 'Ehhez a mezőhöz két szám szükséges.',
     shorterThanMax:

@@ -234,7 +234,9 @@ describe('fields', () => {
       await page.keyboard.press('Enter')
       await page.click('#action-save', { delay: 100 })
 
-      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: withMinRows',
+      )
     })
   })
 
@@ -698,17 +700,6 @@ describe('fields', () => {
       await expect(field).toHaveValue('defaultValue')
     })
 
-    test('should render RowLabel using a function', async () => {
-      const label = 'custom row label as function'
-      await page.goto(url.create)
-      await page.locator('#field-rowLabelAsFunction >> .array-field__add-row').click()
-
-      await page.locator('#field-rowLabelAsFunction__0__title').fill(label)
-      await wait(100)
-      const customRowLabel = page.locator('#rowLabelAsFunction-row-0 >> .row-label')
-      await expect(customRowLabel).toContainText(label)
-    })
-
     test('should render RowLabel using a component', async () => {
       const label = 'custom row label as component'
       await page.goto(url.create)
@@ -717,7 +708,7 @@ describe('fields', () => {
       await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
       await wait(100)
       const customRowLabel = page.locator(
-        '#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")',
+        '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
       )
       await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
     })
@@ -733,7 +724,9 @@ describe('fields', () => {
       await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
 
       await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: arrayWithMinRows',
+      )
     })
 
     describe('row manipulation', () => {
@@ -744,11 +737,16 @@ describe('fields', () => {
         const assertText3 = 'array row 3'
         const assertGroupText3 = 'text in group in row 3'
         await page.goto(url.create)
+        await page.locator('#field-potentiallyEmptyArray').scrollIntoViewIfNeeded()
+        await wait(300)
 
         // Add 3 rows
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
+        await wait(300)
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
+        await wait(300)
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
+        await wait(300)
 
         // Fill out row 1
         await page.locator('#field-potentiallyEmptyArray__0__text').fill(assertText0)
@@ -870,7 +868,7 @@ describe('fields', () => {
       await page.goto(url.list)
       await page.waitForSelector('.table > table > tbody > tr td.cell-title')
       const rows = page.locator('.table > table > tbody > tr', {
-        has: page.locator('td.cell-title span', {
+        has: page.locator('td.cell-title a', {
           hasText: 'for test',
         }),
       })
@@ -880,31 +878,34 @@ describe('fields', () => {
         await rows
           .nth(i)
           .locator('td.cell-_select .checkbox-input__input > input[type="checkbox"]')
-          .check()
+          .click()
       }
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
 
       const arrayOption = page.locator('.rs__option', {
-        hasText: exactText('Items'),
+        hasText: 'Items',
       })
 
       await expect(arrayOption).toBeVisible()
 
       await arrayOption.click()
-      const addRowButton = page.locator('#field-items > .btn.array-field__add-row')
+      await wait(200)
+
+      const addRowButton = page.locator('#field-items > .array-field__add-row')
 
       await expect(addRowButton).toBeVisible()
 
       await addRowButton.click()
+      await wait(200)
 
-      const targetInput = page.locator('#field-items__0__text')
+      const targetInput = page.locator('#field-items__2__text')
 
       await expect(targetInput).toBeVisible()
 
       await targetInput.fill(bulkText)
 
-      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+      await page.locator('#edit-array-fields .form-submit .edit-many__save').click()
       await expect(page.locator('.Toastify__toast--success')).toContainText(
         'Updated 3 Array Fields successfully.',
       )

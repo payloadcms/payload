@@ -10,6 +10,7 @@ import {
   lexicalEditor,
   lexicalHTML,
 } from '@payloadcms/richtext-lexical'
+
 import { lexicalMigrateFieldsSlug } from '../../slugs.js'
 import { getSimpleLexicalData } from './data.js'
 
