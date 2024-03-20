@@ -24,7 +24,7 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormState } from '../../utilities/getFormState.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
-import { FieldSelect } from '../FieldSelect/index.jsx'
+import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
 
 const baseClass = 'edit-many'
