@@ -74,7 +74,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
       setStringValue(val)
 
       try {
-        setValue(val ? JSON.stringify(JSON.parse(val)) : null)
+        setValue(val ? JSON.parse(val) : null)
         setJsonError(undefined)
       } catch (e) {
         setValue(val ? val : null)
