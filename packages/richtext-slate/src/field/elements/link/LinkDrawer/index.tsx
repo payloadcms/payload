@@ -1,20 +1,18 @@
 'use client'
 
-import {
-  Drawer,
-  Form,
-  type FormProps,
-  FormSubmit,
-  RenderFields,
-  getFormState,
-  useConfig,
-  useDocumentInfo,
-  useEditDepth,
-  useFieldPath,
-  useTranslation,
-} from '@payloadcms/ui'
-import { FieldPathProvider } from '@payloadcms/ui/forms'
-import { useHotkey } from '@payloadcms/ui/hooks'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
+
+import { Drawer } from '@payloadcms/ui/elements/Drawer'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
+import { FormSubmit } from '@payloadcms/ui/forms/Submit'
+import { useHotkey } from '@payloadcms/ui/hooks/useHotkey'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types.js'
@@ -31,7 +29,7 @@ export const LinkDrawer: React.FC<Props> = ({
   initialState,
 }) => {
   const { t } = useTranslation()
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
   const fieldMapPath = `${schemaPath}.${linkFieldsSchemaPath}`
   const { id } = useDocumentInfo()
   const config = useConfig()

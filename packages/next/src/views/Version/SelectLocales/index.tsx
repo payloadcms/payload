@@ -1,5 +1,6 @@
-import { useTranslation } from '@payloadcms/ui'
-import { ReactSelect, useLocale } from '@payloadcms/ui'
+import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
+import { useLocale } from '@payloadcms/ui/providers/Locale'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
 import type { Props } from './types.js'

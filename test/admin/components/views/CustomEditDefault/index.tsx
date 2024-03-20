@@ -1,4 +1,4 @@
-import { SetStepNav } from '@payloadcms/ui'
+import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 

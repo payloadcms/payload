@@ -1,6 +1,7 @@
 'use client'
-import { useForm } from '@payloadcms/ui'
-import { useField } from '@payloadcms/ui'
+
+import { useForm } from '@payloadcms/ui/forms/Form'
+import { useField } from '@payloadcms/ui/forms/useField'
 import * as React from 'react'
 
 import './index.scss'

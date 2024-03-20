@@ -9,17 +9,15 @@ import type {
 import type { DocumentPermissions } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
-import {
-  DocumentHeader,
-  DocumentInfoProvider,
-  EditDepthProvider,
-  FormQueryParamsProvider,
-  HydrateClientUser,
-  RenderCustomComponent,
-  buildStateFromSchema,
-  formatDocTitle,
-  formatFields,
-} from '@payloadcms/ui'
+import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
+import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
+import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
+import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
+import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
+import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
+import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
+import { formatDocTitle } from '@payloadcms/ui/utilities/formatDocTitle'
+import { formatFields } from '@payloadcms/ui/utilities/formatFields'
 import { docAccessOperation } from 'payload/operations'
 import React from 'react'
 

@@ -11,7 +11,7 @@ const handleDragOver = (e: DragEvent) => {
 
 const baseClass = 'dropzone'
 
-type Props = {
+export type Props = {
   className?: string
   mimeTypes?: string[]
   onChange: (e: FileList) => void

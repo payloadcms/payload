@@ -1,11 +1,18 @@
+import type { FieldAffectingData } from 'payload/types'
+
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { usePathname, useRouter } from 'next/navigation.js'
 import React, { useEffect, useRef, useState } from 'react'
 
-import type { Props } from './types.js'
+export type SearchFilterProps = {
+  fieldLabel?: string
+  fieldName?: string
+  handleChange?: (search: string) => void
+  listSearchableFields?: FieldAffectingData[]
+}
 
-import useDebounce from '../../hooks/useDebounce.js'
+import { useDebounce } from '../../hooks/useDebounce.js'
 import { Search } from '../../icons/Search/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -13,7 +20,7 @@ import './index.scss'
 
 const baseClass = 'search-filter'
 
-const SearchFilter: React.FC<Props> = (props) => {
+export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
   const { fieldLabel = 'ID', fieldName = 'id', handleChange, listSearchableFields } = props
 
   const { searchParams } = useSearchParams()
@@ -80,5 +87,3 @@ const SearchFilter: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default SearchFilter

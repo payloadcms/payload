@@ -4,6 +4,8 @@ import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
 import type { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types.js'
 
+export * from './types.js'
+
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'

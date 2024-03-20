@@ -1,14 +1,11 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Button,
-  MinimalTemplate,
-  Modal,
-  Pill,
-  useConfig,
-  useModal,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements/Button'
+import { Modal, useModal } from '@payloadcms/ui/elements/Modal'
+import { Pill } from '@payloadcms/ui/elements/Pill'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 

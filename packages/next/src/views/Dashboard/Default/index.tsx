@@ -1,7 +1,9 @@
 import type { Permissions } from 'payload/auth'
 import type { SanitizedConfig } from 'payload/types'
 
-import { Gutter, SetStepNav, SetViewActions } from '@payloadcms/ui'
+import { Gutter } from '@payloadcms/ui/elements/Gutter'
+import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
+import { SetViewActions } from '@payloadcms/ui/providers/Actions'
 import React from 'react'
 
 import { DefaultDashboardClient } from './index.client.js'

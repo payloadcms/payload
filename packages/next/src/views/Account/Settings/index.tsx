@@ -1,6 +1,7 @@
 'use client'
-import { Label, ReactSelect } from '@payloadcms/ui'
-import { useTranslation } from '@payloadcms/ui/providers'
+import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
+import { Label } from '@payloadcms/ui/forms/Label'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
 import { ToggleTheme } from '../ToggleTheme/index.js'

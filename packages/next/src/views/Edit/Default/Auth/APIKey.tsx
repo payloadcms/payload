@@ -1,22 +1,20 @@
 'use client'
 import type { PayloadRequest } from 'payload/types'
 
-import {
-  CopyToClipboard,
-  GenerateConfirmation,
-  Label,
-  fieldBaseClass,
-  useConfig,
-  useField,
-  useFormFields,
-  useTranslation,
-} from '@payloadcms/ui'
+import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
+import { GenerateConfirmation } from '@payloadcms/ui/elements/GenerateConfirmation'
+import { useFormFields } from '@payloadcms/ui/forms/Form'
+import { Label } from '@payloadcms/ui/forms/Label'
+import { useField } from '@payloadcms/ui/forms/useField'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { text } from 'payload/fields/validations'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 const path = 'apiKey'
 const baseClass = 'api-key'
+const fieldBaseClass = 'field-type'
 
 export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
   const [initialAPIKey, setInitialAPIKey] = useState(null)

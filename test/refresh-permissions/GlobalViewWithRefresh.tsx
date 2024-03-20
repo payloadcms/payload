@@ -1,6 +1,6 @@
 import type { EditViewProps } from 'payload/types'
 
-import { useAuth } from '@payloadcms/ui'
+import { useAuth } from '@payloadcms/ui/providers/Auth'
 import React, { useCallback } from 'react'
 
 import { EditView as DefaultEditView } from '../../packages/next/src/views/Edit/index.js'

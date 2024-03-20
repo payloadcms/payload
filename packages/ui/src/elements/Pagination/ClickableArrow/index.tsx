@@ -1,13 +1,17 @@
 import React from 'react'
 
-import type { Props } from './types.js'
-
 import { Chevron } from '../../../icons/Chevron/index.js'
 import './index.scss'
 
 const baseClass = 'clickable-arrow'
 
-const ClickableArrow: React.FC<Props> = (props) => {
+export type ClickableArrowProps = {
+  direction?: 'left' | 'right'
+  isDisabled?: boolean
+  updatePage?: () => void
+}
+
+export const ClickableArrow: React.FC<ClickableArrowProps> = (props) => {
   const { direction = 'right', isDisabled = false, updatePage } = props
 
   const classes = [
@@ -29,5 +33,3 @@ const ClickableArrow: React.FC<Props> = (props) => {
     </button>
   )
 }
-
-export default ClickableArrow

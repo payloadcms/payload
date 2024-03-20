@@ -1,21 +1,25 @@
 'use client'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import { getTranslation } from '@payloadcms/translations'
 import React, { useId } from 'react'
-
-import type { Props } from './types.js'
 
 import { Plus } from '../../icons/Plus/index.js'
 import { X } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import DraggableSortable from '../DraggableSortable/index.js'
-import Pill from '../Pill/index.js'
+import { DraggableSortable } from '../DraggableSortable/index.js'
+import { Pill } from '../Pill/index.js'
 import { useTableColumns } from '../TableColumns/index.js'
 import './index.scss'
 
 const baseClass = 'column-selector'
 
-const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
+export type Props = {
+  collectionSlug: SanitizedCollectionConfig['slug']
+}
+
+export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
   const { i18n } = useTranslation()
@@ -66,5 +70,3 @@ const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
     </DraggableSortable>
   )
 }
-
-export default ColumnSelector

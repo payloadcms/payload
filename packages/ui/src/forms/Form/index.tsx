@@ -10,7 +10,12 @@ import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types.js'
+import type {
+  Context as FormContextType,
+  FormProps,
+  GetDataByPath,
+  SubmitOptions,
+} from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import useThrottledEffect from '../../hooks/useThrottledEffect.js'
@@ -19,10 +24,11 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useFormQueryParams } from '../../providers/FormQueryParams/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
-import { useOperation } from '../../providers/OperationProvider/index.js'
+import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { getFormState } from '../../utilities/getFormState.js'
+import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import {
   FormContext,
   FormFieldsContext,
@@ -31,17 +37,16 @@ import {
   ProcessingContext,
   SubmittedContext,
 } from './context.js'
-import errorMessages from './errorMessages.js'
+import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
-import getDataByPathFunc from './getDataByPath.js'
-import getSiblingDataFunc from './getSiblingData.js'
-import initContextState from './initContextState.js'
+import { getDataByPath as getDataByPathFunc } from './getDataByPath.js'
+import { getSiblingData as getSiblingDataFunc } from './getSiblingData.js'
+import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
-import reduceFieldsToValues from './reduceFieldsToValues.js'
 
 const baseClass = 'form'
 
-const Form: React.FC<Props> = (props) => {
+export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const {
@@ -583,4 +588,20 @@ const Form: React.FC<Props> = (props) => {
   )
 }
 
-export default Form
+export * from './types.js'
+
+export {
+  FormContext,
+  FormFieldsContext,
+  FormWatchContext,
+  ModifiedContext,
+  ProcessingContext,
+  SubmittedContext,
+  useAllFormFields,
+  useForm,
+  useFormFields,
+  useFormModified,
+  useFormProcessing,
+  useFormSubmitted,
+  useWatchForm,
+} from './context.js'

@@ -1,17 +1,15 @@
+import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { FormState } from 'payload/types'
 
-import {
-  Drawer,
-  Form,
-  type FormProps,
-  FormSubmit,
-  RenderFields,
-  getFormState,
-  useConfig,
-  useDocumentInfo,
-  useTranslation,
-} from '@payloadcms/ui'
-import { useFieldPath } from '@payloadcms/ui'
+import { Drawer } from '@payloadcms/ui/elements/Drawer'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
+import { FormSubmit } from '@payloadcms/ui/forms/Submit'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -24,7 +22,7 @@ const baseClass = 'lexical-link-edit-drawer'
 export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, stateData }) => {
   const { t } = useTranslation()
   const { id } = useDocumentInfo()
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
   const config = useConfig()
   const [initialState, setInitialState] = useState<FormState | false>(false)
   const {

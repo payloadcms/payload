@@ -1,4 +1,4 @@
-import { useField } from '@payloadcms/ui'
+import { useField } from '@payloadcms/ui/forms/useField'
 import * as React from 'react'
 
 import { collection1Slug } from '../collectionSlugs.js'

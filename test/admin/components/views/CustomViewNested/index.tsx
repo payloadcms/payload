@@ -1,4 +1,4 @@
-import { Button } from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements/Button'
 import LinkImport from 'next/link.js'
 import React from 'react'
 

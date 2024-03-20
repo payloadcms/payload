@@ -4,7 +4,7 @@ import './index.scss'
 
 const baseClass = 'id-label'
 
-const IDLabel: React.FC<{ className?: string; id: string; prefix?: string }> = ({
+export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string }> = ({
   id,
   className,
   prefix = 'ID:',
@@ -15,5 +15,3 @@ const IDLabel: React.FC<{ className?: string; id: string; prefix?: string }> = (
     {id}
   </div>
 )
-
-export default IDLabel

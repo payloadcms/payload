@@ -1,7 +1,8 @@
 'use client'
 
-import { useWatchForm } from '@payloadcms/ui'
 import React from 'react'
+
+import { useWatchForm } from '../../Form/context.js'
 
 type RowLabelType<T = unknown> = {
   data: T

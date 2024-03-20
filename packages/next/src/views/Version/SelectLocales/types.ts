@@ -1,7 +1,7 @@
-import type { Option } from '@payloadcms/ui'
+import type { OptionObject } from 'payload/types'
 
 export type Props = {
-  onChange: (options: Option[]) => void
-  options: Option[]
-  value: Option[]
+  onChange: (options: OptionObject[]) => void
+  options: OptionObject[]
+  value: OptionObject[]
 }

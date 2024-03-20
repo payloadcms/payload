@@ -7,7 +7,8 @@ import type {
 } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatDate } from '@payloadcms/ui'
+
+import { formatDate } from '../utilities/formatDate.js'
 
 export const formatDocTitle = ({
   collectionConfig,

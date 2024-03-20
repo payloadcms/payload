@@ -6,6 +6,8 @@ import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
+import { Button } from '@payloadcms/ui/elements/Button'
+
 import {
   customParamViewPath,
   customParamViewPathBase,

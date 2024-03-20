@@ -1,6 +1,6 @@
 'use client'
 import type { ClientUser, Permissions } from 'payload/auth'
-import type { MeOperationResult } from 'payload/types.js'
+import type { MeOperationResult } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -8,14 +8,24 @@ import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { AuthContext } from './types.js'
-
-import useDebounce from '../../hooks/useDebounce.js'
+import { useDebounce } from '../../hooks/useDebounce.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../SearchParams/index.js'
-// import { useLocale } from '../Locale'
+
+export type AuthContext<T = ClientUser> = {
+  fetchFullUser: () => Promise<void>
+  logOut: () => void
+  permissions?: Permissions
+  refreshCookie: (forceRefresh?: boolean) => void
+  refreshCookieAsync: () => Promise<ClientUser>
+  refreshPermissions: () => Promise<void>
+  setPermissions: (permissions: Permissions) => void
+  setUser: (user: T) => void
+  token?: string
+  user?: T | null
+}
 
 const Context = createContext({} as AuthContext)
 

@@ -2,7 +2,8 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui'
+import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
+import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 

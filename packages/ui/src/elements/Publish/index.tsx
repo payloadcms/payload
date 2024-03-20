@@ -6,7 +6,7 @@ import React, { useCallback } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
-import FormSubmit from '../../forms/Submit/index.js'
+import { FormSubmit } from '../../forms/Submit/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'

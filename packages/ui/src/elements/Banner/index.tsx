@@ -1,13 +1,32 @@
-import LinkImport from 'next/link.js'
-import React from 'react' // TODO: abstract this out to support all routers
+import LinkImport from 'next/link.js' // TODO: abstract this out to support all routers
+import type { MouseEvent } from 'react'
 
-import type { Props, RenderedTypeProps } from './types.js'
+import React from 'react'
 
 import './index.scss'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 const baseClass = 'banner'
+
+type onClick = (event: MouseEvent) => void
+
+export type Props = {
+  alignIcon?: 'left' | 'right'
+  children?: React.ReactNode
+  className?: string
+  icon?: React.ReactNode
+  onClick?: onClick
+  to?: string
+  type?: 'default' | 'error' | 'info' | 'success'
+}
+
+export type RenderedTypeProps = {
+  children?: React.ReactNode
+  className?: string
+  onClick?: onClick
+  to: string
+}
 
 export const Banner: React.FC<Props> = ({
   type = 'default',
@@ -43,5 +62,3 @@ export const Banner: React.FC<Props> = ({
     </RenderedType>
   )
 }
-
-export default Banner

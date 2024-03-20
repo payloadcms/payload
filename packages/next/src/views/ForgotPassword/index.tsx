@@ -1,6 +1,10 @@
 import type { AdminViewProps } from 'payload/types'
 
-import { Button, Email, Form, FormSubmit, Translation } from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements/Button'
+import { Translation } from '@payloadcms/ui/elements/Translation'
+import { Email } from '@payloadcms/ui/fields/Email'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { FormSubmit } from '@payloadcms/ui/forms/Submit'
 import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 

@@ -8,7 +8,7 @@ export type Preferences = {
   [key: string]: unknown
 }
 
-export type Props = (
+export type FormProps = (
   | {
       action: (formData: FormData) => Promise<void>
     }

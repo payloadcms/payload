@@ -1,5 +1,5 @@
-import type { Option } from '@payloadcms/ui'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
+import type { OptionObject } from 'payload/types'
 import type { Document, EditViewComponent } from 'payload/types'
 
 import { notFound } from 'next/navigation.js'
@@ -108,7 +108,7 @@ export const VersionView: EditViewComponent = async (props) => {
     }
   }
 
-  const localeOptions: Option[] =
+  const localeOptions: OptionObject[] =
     localization &&
     localization?.locales &&
     localization.locales.map(({ code, label }) => ({

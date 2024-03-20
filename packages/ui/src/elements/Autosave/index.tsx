@@ -1,24 +1,31 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
+
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.js'
-
 import { useAllFormFields, useFormModified } from '../../forms/Form/context.js'
-import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js'
-import useDebounce from '../../hooks/useDebounce.js'
+import { useDebounce } from '../../hooks/useDebounce.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatTimeToNow } from '../../utilities/formatDate/index.js'
+import { formatTimeToNow } from '../../utilities/formatDate.js'
+import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import './index.scss'
 
 const baseClass = 'autosave'
 
-const Autosave: React.FC<Props> = ({
+export type Props = {
+  collection?: ClientCollectionConfig
+  global?: ClientGlobalConfig
+  id?: number | string
+  publishedDocUpdatedAt: string
+}
+
+export const Autosave: React.FC<Props> = ({
   id,
   collection,
   global: globalDoc,
@@ -168,5 +175,3 @@ const Autosave: React.FC<Props> = ({
     </div>
   )
 }
-
-export default Autosave

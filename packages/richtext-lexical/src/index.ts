@@ -3,7 +3,7 @@ import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps } from '@payloadcms/ui'
+import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'

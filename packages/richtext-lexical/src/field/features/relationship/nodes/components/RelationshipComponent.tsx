@@ -3,12 +3,16 @@ import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.
 const { useLexicalComposerContext } = lexicalComposerContextImport
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { getTranslation } from '@payloadcms/translations'
-import { Button, useConfig, useDocumentDrawer, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import lexicalImport from 'lexical'
 const { $getNodeByKey } = lexicalImport
 
 import type { ElementFormatType } from 'lexical'
 
+import { Button } from '@payloadcms/ui/elements/Button'
+import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
+import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useReducer, useState } from 'react'
 
 import type { RelationshipData } from '../RelationshipNode.js'

@@ -4,12 +4,13 @@ import * as React from 'react'
 import { useDelay } from '../../hooks/useDelay.js'
 import './index.scss'
 
-type ShimmerEffectT = {
+export type ShimmerEffectProps = {
   animationDelay?: string
   height?: number | string
   width?: number | string
 }
-export const ShimmerEffect: React.FC<ShimmerEffectT> = ({
+
+export const ShimmerEffect: React.FC<ShimmerEffectProps> = ({
   animationDelay = '0ms',
   height = '60px',
   width = '100%',
@@ -32,7 +33,7 @@ export const ShimmerEffect: React.FC<ShimmerEffectT> = ({
   )
 }
 
-type StaggeredShimmersT = {
+export type StaggeredShimmersProps = {
   className?: string
   count: number
   height?: number | string
@@ -41,7 +42,8 @@ type StaggeredShimmersT = {
   shimmerItemClassName?: string
   width?: number | string
 }
-export const StaggeredShimmers: React.FC<StaggeredShimmersT> = ({
+
+export const StaggeredShimmers: React.FC<StaggeredShimmersProps> = ({
   className,
   count,
   height,

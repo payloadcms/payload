@@ -1,10 +1,11 @@
 'use client'
 
-import type { TextFieldProps } from '@payloadcms/ui/forms'
+import type { TextFieldProps } from '@payloadcms/ui/fields/Text'
 import type { Data } from 'payload/types'
 
-import { useLocale, useWatchForm } from '@payloadcms/ui'
-import { Text } from '@payloadcms/ui/forms'
+import { Text } from '@payloadcms/ui/fields/Text'
+import { useWatchForm } from '@payloadcms/ui/forms/Form'
+import { useLocale } from '@payloadcms/ui/providers/Locale'
 import React, { useEffect, useState } from 'react'
 
 type FieldWithID = {

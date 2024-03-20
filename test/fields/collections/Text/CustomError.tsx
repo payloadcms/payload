@@ -1,7 +1,7 @@
 'use client'
 
-import { useFormFields, useFormSubmitted } from '@payloadcms/ui'
-import { useField } from '@payloadcms/ui'
+import { useFormFields, useFormSubmitted } from '@payloadcms/ui/forms/Form'
+import { useField } from '@payloadcms/ui/forms/useField'
 import React from 'react'
 
 const CustomError: React.FC<any> = (props) => {

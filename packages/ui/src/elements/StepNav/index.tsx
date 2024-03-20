@@ -2,12 +2,22 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, createContext, useContext, useState } from 'react'
 
-import type { Context as ContextType } from './types.js'
-
-import IconGraphic from '../../graphics/Icon/index.js'
+import { Icon } from '../../graphics/Icon/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
+
+export { SetStepNav } from './SetStepNav.js'
+
+export type StepNavItem = {
+  label: Record<string, string> | string
+  url?: string
+}
+
+export type ContextType = {
+  setStepNav: (items: StepNavItem[]) => void
+  stepNav: StepNavItem[]
+}
 
 const baseClass = 'step-nav'
 
@@ -51,7 +61,7 @@ const StepNav: React.FC<{
       {stepNav.length > 0 ? (
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
           <LinkElement className={`${baseClass}__home`} href={admin} tabIndex={0}>
-            <IconGraphic />
+            <Icon />
           </LinkElement>
           <span>/</span>
           {stepNav.map((item, i) => {
@@ -80,13 +90,11 @@ const StepNav: React.FC<{
         </nav>
       ) : (
         <div className={[baseClass, className].filter(Boolean).join(' ')}>
-          <IconGraphic />
+          <Icon />
         </div>
       )}
     </Fragment>
   )
 }
 
-export { StepNavProvider, useStepNav }
-
-export default StepNav
+export { StepNav, StepNavProvider, useStepNav }

@@ -1,11 +1,12 @@
 'use client'
+
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
-
-import type { Props } from './types.js'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -13,12 +14,18 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
-import * as PopupList from '../Popup/PopupButtonList/index.js'
+import { PopupList } from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'duplicate'
 
-const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
+export type Props = {
+  id: string
+  singularLabel: SanitizedCollectionConfig['labels']['singular']
+  slug: string
+}
+
+export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) => {
   const { Modal, useModal } = facelessUIImport
 
   const router = useRouter()
@@ -123,5 +130,3 @@ const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
     </React.Fragment>
   )
 }
-
-export default Duplicate

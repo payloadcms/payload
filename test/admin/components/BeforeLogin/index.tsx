@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslation } from '@payloadcms/ui'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
 export const BeforeLogin: React.FC = () => {

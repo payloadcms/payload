@@ -1,5 +1,5 @@
 'use client'
-import { useResize } from '@payloadcms/ui'
+import { useResize } from '@payloadcms/ui/hooks/useResize'
 import React, { useEffect } from 'react'
 
 import { useLivePreviewContext } from '../Context/context.js'

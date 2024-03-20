@@ -1,21 +1,20 @@
 'use client'
-import type { FieldMap, FormProps } from '@payloadcms/ui'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
+import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { LivePreviewConfig } from 'payload/config'
 import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, Data } from 'payload/types'
 
-import {
-  DocumentControls,
-  DocumentFields,
-  Form,
-  LoadingOverlay,
-  OperationProvider,
-  SetViewActions,
-  getFormState,
-  useComponentMap,
-  useConfig,
-  useDocumentInfo,
-  useTranslation,
-} from '@payloadcms/ui'
+import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
+import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
+import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { SetViewActions } from '@payloadcms/ui/providers/Actions'
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { OperationProvider } from '@payloadcms/ui/providers/Operation'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'

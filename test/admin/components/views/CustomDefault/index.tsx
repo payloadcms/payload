@@ -1,4 +1,4 @@
-import { Button, DefaultTemplate, SetStepNav } from '@payloadcms/ui'
+import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import LinkImport from 'next/link.js'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
@@ -6,6 +6,9 @@ import React from 'react'
 import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
+import { Button } from '@payloadcms/ui/elements/Button'
+import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'

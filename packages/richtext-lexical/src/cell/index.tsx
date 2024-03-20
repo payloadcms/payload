@@ -3,11 +3,11 @@ import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.
 
 import lexicalHeadlessImport from '@lexical/headless'
 const { createHeadlessEditor } = lexicalHeadlessImport
-import { useTableCell } from '@payloadcms/ui/elements'
-import { useFieldPath } from '@payloadcms/ui/forms'
-import { useClientFunctions } from '@payloadcms/ui/providers'
 import lexicalImport from 'lexical'
 const { $getRoot } = lexicalImport
+import { useTableCell } from '@payloadcms/ui/elements/Table'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useClientFunctions } from '@payloadcms/ui/providers/ClientFunction'
 import React, { useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../field/features/types.js'
@@ -25,7 +25,7 @@ export const RichTextCell: React.FC<{
   const { lexicalEditorConfig } = props
 
   const [preview, setPreview] = React.useState('Loading...')
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
 
   const { cellData, richTextComponentMap } = useTableCell()
 

@@ -1,5 +1,4 @@
 'use client'
-import type { Where } from 'payload/types.js'
 
 import { useRouter } from 'next/navigation.js'
 import { isNumber } from 'payload/utilities'
@@ -7,6 +6,9 @@ import QueryString from 'qs'
 import React, { createContext, useContext } from 'react'
 
 import type { ListInfoContext, ListInfoProps } from './types.js'
+
+export type * from './types.js'
+import type { Where } from 'payload/types'
 
 import { usePreferences } from '../Preferences/index.js'
 

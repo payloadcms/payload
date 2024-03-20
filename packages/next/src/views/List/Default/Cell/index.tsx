@@ -5,8 +5,9 @@ import React from 'react' // TODO: abstract this out to support all routers
 import type { CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig, useTableCell, useTranslation } from '@payloadcms/ui'
-import { TableCellProvider } from '@payloadcms/ui'
+import { TableCellProvider, useTableCell } from '@payloadcms/ui/elements/Table'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 
 import { CodeCell } from './fields/Code/index.js'
 import cellComponents from './fields/index.js'

@@ -1,16 +1,17 @@
 'use client'
 import React, { Fragment } from 'react'
 
-import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider/index.js'
+import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
 const baseClass = 'list-selection'
 
-type Props = {
+export type ListSelectionProps = {
   label: string
 }
-export const ListSelection: React.FC<Props> = ({ label }) => {
+
+export const ListSelection: React.FC<ListSelectionProps> = ({ label }) => {
   const { count, selectAll, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
 

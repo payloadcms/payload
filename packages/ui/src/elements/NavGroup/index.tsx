@@ -17,7 +17,7 @@ type Props = {
   label: string
 }
 
-const NavGroup: React.FC<Props> = ({ children, label }) => {
+export const NavGroup: React.FC<Props> = ({ children, label }) => {
   const [collapsed, setCollapsed] = useState(true)
   const [animate, setAnimate] = useState(false)
   const { getPreference, setPreference } = usePreferences()
@@ -83,5 +83,3 @@ const NavGroup: React.FC<Props> = ({ children, label }) => {
 
   return <React.Fragment>{children}</React.Fragment>
 }
-
-export default NavGroup

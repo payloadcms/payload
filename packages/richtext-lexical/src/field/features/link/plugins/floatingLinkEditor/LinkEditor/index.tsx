@@ -9,7 +9,6 @@ const { useLexicalComposerContext } = lexicalComposerContextImport
 import lexicalUtilsImport from '@lexical/utils'
 const { $findMatchingParent, mergeRegister } = lexicalUtilsImport
 import { getTranslation } from '@payloadcms/translations'
-import { formatDrawerSlug, useConfig, useEditDepth, useTranslation } from '@payloadcms/ui'
 import lexicalImport from 'lexical'
 const {
   $getSelection,
@@ -20,6 +19,10 @@ const {
   SELECTION_CHANGE_COMMAND,
 } = lexicalImport
 
+import { formatDrawerSlug } from '@payloadcms/ui/elements/Drawer'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../nodes/LinkNode.js'
