@@ -16,6 +16,7 @@ import type { GroupFieldProps } from '../../forms/fields/Group/types.js'
 import type { JSONFieldProps } from '../../forms/fields/JSON/types.js'
 import type { NumberFieldProps } from '../../forms/fields/Number/types.js'
 import type { PointFieldProps } from '../../forms/fields/Point/types.js'
+import type { RadioFieldProps } from '../../forms/fields/RadioGroup/types.js'
 import type { RelationshipFieldProps } from '../../forms/fields/Relationship/types.js'
 import type { RichTextFieldProps } from '../../forms/fields/RichText/types.js'
 import type { RowFieldProps } from '../../forms/fields/Row/types.js'
@@ -459,6 +460,22 @@ export const mapFields = (args: {
             }
 
             fieldComponentProps = relationshipField
+            break
+          }
+          case 'radio': {
+            const radioField: RadioFieldProps = {
+              ...baseFieldProps,
+              name: field.name,
+              className: field.admin?.className,
+              disabled: field.admin?.disabled,
+              options: field.options,
+              readOnly: field.admin?.readOnly,
+              required: field.required,
+              style: field.admin?.style,
+              width: field.admin?.width,
+            }
+
+            fieldComponentProps = radioField
             break
           }
           case 'richText': {
