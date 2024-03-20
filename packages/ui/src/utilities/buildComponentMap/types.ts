@@ -18,6 +18,7 @@ import type { JSONFieldProps } from '../../forms/fields/JSON/types.js'
 import type { NumberFieldProps } from '../../forms/fields/Number/types.js'
 import type { PointFieldProps } from '../../forms/fields/Point/types.js'
 import type { RelationshipFieldProps } from '../../forms/fields/Relationship/types.js'
+import type { RichTextFieldProps } from '../../forms/fields/RichText/types.js'
 import type { RowFieldProps } from '../../forms/fields/Row/types.js'
 import type { SelectFieldProps } from '../../forms/fields/Select/types.js'
 import type { TabsFieldProps } from '../../forms/fields/Tabs/types.js'
@@ -52,6 +53,7 @@ export type FieldComponentProps =
   | NumberFieldProps
   | PointFieldProps
   | RelationshipFieldProps
+  | RichTextFieldProps
   | RowFieldProps
   | SelectFieldProps
   | TabsFieldProps
