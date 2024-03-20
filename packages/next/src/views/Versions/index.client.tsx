@@ -1,19 +1,16 @@
 'use client'
-import type { Column } from '@payloadcms/ui'
 import type { PaginatedDocs } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import {
-  LoadingOverlayToggle,
-  Pagination,
-  PerPage,
-  SetViewActions,
-  Table,
-  useComponentMap,
-  useDocumentInfo,
-  usePayloadAPI,
-  useTranslation,
-} from '@payloadcms/ui'
+import { LoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
+import { Pagination } from '@payloadcms/ui/elements/Pagination'
+import { PerPage } from '@payloadcms/ui/elements/PerPage'
+import { type Column, Table } from '@payloadcms/ui/elements/Table'
+import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
+import { SetViewActions } from '@payloadcms/ui/providers/Actions'
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useEffect, useRef } from 'react'
 

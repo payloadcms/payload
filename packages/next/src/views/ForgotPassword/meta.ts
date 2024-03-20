@@ -1,4 +1,4 @@
-import type { GenerateViewMetadata } from '../Root/index.jsx'
+import type { GenerateViewMetadata } from '../Root/index.js'
 
 import { meta } from '../../utilities/meta.js'
 

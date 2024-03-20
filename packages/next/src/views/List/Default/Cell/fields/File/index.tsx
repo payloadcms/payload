@@ -1,7 +1,7 @@
 'use client'
 import type { CellComponentProps } from 'payload/types'
 
-import { Thumbnail } from '@payloadcms/ui'
+import { Thumbnail } from '@payloadcms/ui/elements/Thumbnail'
 import React from 'react'
 
 import './index.scss'

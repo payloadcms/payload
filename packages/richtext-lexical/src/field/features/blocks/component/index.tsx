@@ -1,21 +1,21 @@
 'use client'
-import {
-  Form,
-  type FormProps,
-  getFormState,
-  useConfig,
-  useDocumentInfo,
-  useFieldPath,
-  useFormSubmitted,
-} from '@payloadcms/ui'
+
+import type { FormProps } from '@payloadcms/ui/forms/Form'
+
+import { Form } from '@payloadcms/ui/forms/Form'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { type BlockFields } from '../nodes/BlocksNode.js'
 const baseClass = 'lexical-block'
 
-import type { ReducedBlock } from '@payloadcms/ui'
+import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { FormState } from 'payload/types'
 
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useFormSubmitted } from '@payloadcms/ui/forms/Form'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import { v4 as uuid } from 'uuid'
 
 import type { ClientComponentProps } from '../../types.js'
@@ -42,7 +42,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const config = useConfig()
   const submitted = useFormSubmitted()
   const { id } = useDocumentInfo()
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
   const { editorConfig, field: parentLexicalRichTextField } = useEditorConfigContext()
 
   const [initialState, setInitialState] = useState<FormState | false>(false)
@@ -124,7 +124,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       reducedBlock &&
       initialState !== false && (
         <Form
-          // @ts-expect-error // TODO: Fix this type. Is this correct?
+          // @ts-expect-error TODO: Fix this
           fields={fieldMap}
           initialState={initialState}
           onChange={[onChange]}

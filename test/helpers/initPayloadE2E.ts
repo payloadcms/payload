@@ -1,12 +1,13 @@
 import type { SanitizedConfig } from 'payload/config'
 
+import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { createServer } from 'http'
 import nextImport from 'next'
+import path from 'path'
 import { type Payload } from 'payload'
 import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
-import { getPayloadHMR } from '../../packages/next/src/utilities/getPayloadHMR.js'
 import { startMemoryDB } from '../startMemoryDB.js'
 import { createTestHooks } from '../testHooks.js'
 
@@ -39,7 +40,13 @@ export async function initPayloadE2E({ config, dirname }: Args): Promise<Result>
   const serverURL = `http://localhost:${port}`
 
   // @ts-expect-error
-  const app = nextImport({ dev: true, hostname: 'localhost', port })
+  const app = nextImport({
+    dev: true,
+    hostname: 'localhost',
+    port,
+    dir: path.resolve(dirname, '../../'),
+  })
+
   const handle = app.getRequestHandler()
 
   let resolveServer

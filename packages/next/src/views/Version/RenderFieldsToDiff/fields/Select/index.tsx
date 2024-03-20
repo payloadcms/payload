@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SelectFieldProps } from '@payloadcms/ui'
-import type { MappedField } from '@payloadcms/ui/utilities'
+import type { SelectFieldProps } from '@payloadcms/ui/fields/Select'
+import type { MappedField } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { OptionObject, SelectField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'

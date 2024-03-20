@@ -5,10 +5,10 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react'
 import type { Option } from '../../../ReactSelect/types.js'
 import type { GetResults, Props, ValueWithRelation } from './types.js'
 
-import useDebounce from '../../../../hooks/useDebounce.js'
+import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import ReactSelect from '../../../ReactSelect/index.js'
+import { ReactSelect } from '../../../ReactSelect/index.js'
 import './index.scss'
 import optionsReducer from './optionsReducer.js'
 
@@ -16,7 +16,7 @@ const baseClass = 'condition-value-relationship'
 
 const maxResultsPerRequest = 10
 
-const RelationshipField: React.FC<Props> = (props) => {
+export const RelationshipField: React.FC<Props> = (props) => {
   const { admin: { isSortable } = {}, disabled, hasMany, onChange, relationTo, value } = props
 
   const {
@@ -303,5 +303,3 @@ const RelationshipField: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default RelationshipField

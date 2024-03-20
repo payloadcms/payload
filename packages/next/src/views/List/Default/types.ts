@@ -1,4 +1,4 @@
-import type { ColumnPreferences } from '@payloadcms/ui'
+import type { ColumnPreferences } from '@payloadcms/ui/providers/ListInfo'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 export type DefaultListViewProps = {

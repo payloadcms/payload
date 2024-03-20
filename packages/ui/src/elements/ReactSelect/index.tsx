@@ -9,10 +9,11 @@ import CreatableSelect from 'react-select/creatable'
 
 import type { Option } from './types.js'
 import type { Props as ReactSelectAdapterProps } from './types.js'
+export type { Option } from './types.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import DraggableSortable from '../DraggableSortable/index.js'
+import { DraggableSortable } from '../DraggableSortable/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { MultiValue } from './MultiValue/index.js'
@@ -187,7 +188,7 @@ const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
   )
 }
 
-const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
+export const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
   const { isMulti, isSortable } = props
 
   if (isMulti && isSortable) {
@@ -196,5 +197,3 @@ const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
 
   return <SelectAdapter {...props} />
 }
-
-export default ReactSelect

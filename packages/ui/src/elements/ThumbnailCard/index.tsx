@@ -1,16 +1,27 @@
+import type { SanitizedCollectionConfig, TypeWithID } from 'payload/types'
+
 import React from 'react'
 
-import type { Props } from './types.js'
-
-import { useConfig } from '../../index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
-import Thumbnail from '../Thumbnail/index.js'
+import { Thumbnail } from '../Thumbnail/index.js'
 import './index.scss'
+
+export type ThumbnailCardProps = {
+  alignLabel?: 'center' | 'left'
+  className?: string
+  collection?: SanitizedCollectionConfig
+  doc?: TypeWithID & { filename?: string }
+  label?: string
+  onClick?: () => void
+  onKeyDown?: () => void
+  thumbnail?: React.ReactNode
+}
 
 const baseClass = 'thumbnail-card'
 
-export const ThumbnailCard: React.FC<Props> = (props) => {
+export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
   const {
     alignLabel,
     className,

@@ -2,12 +2,15 @@
 import * as facelessUIImport from '@faceless-ui/modal'
 import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
 const { useLexicalComposerContext } = lexicalComposerContextImport
-import { BlocksDrawer, formatDrawerSlug, useEditDepth, useTranslation } from '@payloadcms/ui'
 import lexicalImport from 'lexical'
 const { $getNodeByKey, COMMAND_PRIORITY_EDITOR, createCommand } = lexicalImport
 
 import type { LexicalCommand, LexicalEditor } from 'lexical'
 
+import { formatDrawerSlug } from '@payloadcms/ui/elements/Drawer'
+import { BlocksDrawer } from '@payloadcms/ui/fields/Blocks/BlocksDrawer'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ClientComponentProps } from '../../types.js'

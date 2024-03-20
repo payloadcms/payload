@@ -3,12 +3,10 @@ import { usePathname, useRouter } from 'next/navigation.js'
 import queryString from 'qs'
 import React from 'react'
 
-import type { Node, Props } from './types.js'
-
 import { useSearchParams } from '../../providers/SearchParams/index.js'
-import ClickableArrow from './ClickableArrow/index.js'
-import Page from './Page/index.js'
-import Separator from './Separator/index.js'
+import { ClickableArrow } from './ClickableArrow/index.js'
+import { Page } from './Page/index.js'
+import { Separator } from './Separator/index.js'
 import './index.scss'
 
 const nodeTypes = {
@@ -19,7 +17,34 @@ const nodeTypes = {
 
 const baseClass = 'paginator'
 
-export const Pagination: React.FC<Props> = (props) => {
+export type PaginationProps = {
+  disableHistoryChange?: boolean
+  hasNextPage?: boolean
+  hasPrevPage?: boolean
+  limit?: number
+  nextPage?: number
+  numberOfNeighbors?: number
+  onChange?: (page: number) => void
+  page?: number
+  prevPage?: number
+  totalPages?: number
+}
+
+export type Node =
+  | {
+      props?: {
+        direction?: 'left' | 'right'
+        isDisabled?: boolean
+        isFirstPage?: boolean
+        isLastPage?: boolean
+        page?: number
+        updatePage: (page?: number) => void
+      }
+      type: 'ClickableArrow' | 'Page' | 'Separator'
+    }
+  | number
+
+export const Pagination: React.FC<PaginationProps> = (props) => {
   const router = useRouter()
   const { searchParams } = useSearchParams()
   const pathname = usePathname()

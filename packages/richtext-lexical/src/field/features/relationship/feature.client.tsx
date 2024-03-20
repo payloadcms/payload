@@ -1,6 +1,6 @@
 'use client'
 
-import { withMergedProps } from '@payloadcms/ui'
+import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 import type { RelationshipFeatureProps } from './feature.server.js'

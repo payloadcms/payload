@@ -1,4 +1,4 @@
-import type { TypeWithID } from 'payload/types.js'
+import type { TypeWithID } from 'payload/types'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 

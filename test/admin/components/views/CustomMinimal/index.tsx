@@ -1,9 +1,7 @@
 import LinkImport from 'next/link.js'
 import React from 'react'
 
-import { Button } from '@payloadcms/ui'
 // As this is the demo project, we import our dependencies from the `src` directory.
-import { MinimalTemplate } from '@payloadcms/ui'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
@@ -11,6 +9,9 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 // import { MinimalTemplate } from 'payload/components/templates';
 // import { Button } from 'payload/components/elements';
 // import { useConfig } from 'payload/components/utilities';
+
+import { Button } from '@payloadcms/ui/elements/Button'
+import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 
 import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 

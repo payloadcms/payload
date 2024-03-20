@@ -10,7 +10,7 @@ import './index.scss'
 
 const baseClass = 'field-error'
 
-const Error: React.FC<ErrorProps> = (props) => {
+export const Error: React.FC<ErrorProps> = (props) => {
   const {
     alignCaret = 'right',
     message: messageFromProps,
@@ -39,5 +39,3 @@ const Error: React.FC<ErrorProps> = (props) => {
 
   return null
 }
-
-export default Error

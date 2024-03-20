@@ -2,7 +2,7 @@
 import type { CellComponentProps, CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '@payloadcms/ui'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
 export interface ArrayCellProps extends CellComponentProps<Record<string, unknown>[]> {

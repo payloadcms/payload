@@ -4,7 +4,9 @@ import * as facelessUIImport from '@faceless-ui/modal'
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
-import type { Props } from './types.js'
+export type StayLoggedInProps = {
+  refreshCookie: () => void
+}
 
 import { Button } from '../../elements/Button/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -15,7 +17,7 @@ const baseClass = 'stay-logged-in'
 
 const modalSlug = 'stay-logged-in'
 
-const StayLoggedInModal: React.FC<Props> = (props) => {
+export const StayLoggedInModal: React.FC<StayLoggedInProps> = (props) => {
   const { Modal, useModal } = facelessUIImport
 
   const { refreshCookie } = props
@@ -58,5 +60,3 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
     </Modal>
   )
 }
-
-export default StayLoggedInModal

@@ -4,11 +4,13 @@ import { useCallback, useMemo, useRef } from 'react'
 import type { UPDATE } from '../Form/types.js'
 import type { FieldType, Options } from './types.js'
 
+export type { FieldType, Options }
+
 import useThrottledEffect from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useOperation } from '../../providers/OperationProvider/index.js'
+import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useFieldProps } from '../FieldPropsProvider/index.js'
 import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context.js'

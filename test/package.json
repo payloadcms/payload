@@ -4,7 +4,7 @@
   "description": "Payload test suite",
   "private": true,
   "scripts": {
-    "dev": "pnpm -C \"../\" run dev",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation node ./dev.js",
     "test": "pnpm -C \"../\" run test",
     "test:e2e": "pnpm -C \"../\" run test:e2e",
     "test:int": "pnpm -C \"../\" run test:int",

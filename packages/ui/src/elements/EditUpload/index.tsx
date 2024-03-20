@@ -27,14 +27,22 @@ const Input: React.FC<{ name: string; onChange: (value: string) => void; value: 
   </div>
 )
 
-export const EditUpload: React.FC<{
+export type EditUploadProps = {
   doc?: Data
   fileName: string
   fileSrc: string
   imageCacheTag?: string
   showCrop?: boolean
   showFocalPoint?: boolean
-}> = ({ fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
+}
+
+export const EditUpload: React.FC<EditUploadProps> = ({
+  fileName,
+  fileSrc,
+  imageCacheTag,
+  showCrop,
+  showFocalPoint,
+}) => {
   const { Modal, useModal } = facelessUIImport
 
   const { closeModal } = useModal()

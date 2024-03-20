@@ -3,15 +3,13 @@
 import type { FormState } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
-import {
-  getFormState,
-  reduceFieldsToValues,
-  useConfig,
-  useDocumentInfo,
-  useDrawerSlug,
-  useTranslation,
-} from '@payloadcms/ui'
-import { useFieldPath } from '@payloadcms/ui/forms'
+import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
@@ -25,7 +23,7 @@ import { linkFieldsSchemaPath } from '../shared.js'
 import { unwrapLink } from '../utilities.js'
 
 /**
- * This function is called when an new link is created - not when an existing link is edited.
+ * This function is called when a new link is created - not when an existing link is edited.
  */
 const insertLink = (editor, fields) => {
   const isCollapsed = editor.selection && Range.isCollapsed(editor.selection)
@@ -75,7 +73,7 @@ export const LinkButton: React.FC = () => {
   const { closeModal, openModal } = useModal()
   const drawerSlug = useDrawerSlug('rich-text-link')
   const { id, collectionSlug } = useDocumentInfo()
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
 
   const { richTextComponentMap } = fieldProps
 

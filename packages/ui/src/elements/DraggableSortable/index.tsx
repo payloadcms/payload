@@ -14,7 +14,9 @@ import React, { useCallback, useId } from 'react'
 
 import type { Props } from './types.js'
 
-const DraggableSortable: React.FC<Props> = (props) => {
+export { Props }
+
+export const DraggableSortable: React.FC<Props> = (props) => {
   const { children, className, ids, onDragEnd } = props
 
   const id = useId()
@@ -66,5 +68,3 @@ const DraggableSortable: React.FC<Props> = (props) => {
     </DndContext>
   )
 }
-
-export default DraggableSortable

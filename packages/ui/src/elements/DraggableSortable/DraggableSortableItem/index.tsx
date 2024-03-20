@@ -34,5 +34,3 @@ export const DraggableSortableItem: React.FC<
     </Fragment>
   )
 }
-
-export default DraggableSortableItem

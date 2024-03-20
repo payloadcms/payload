@@ -3,7 +3,7 @@ import type { FormState } from 'payload/types'
 import flatleyImport from 'flatley'
 const { unflatten } = flatleyImport
 
-const getDataByPath = <T = unknown>(fields: FormState, path: string): T => {
+export const getDataByPath = <T = unknown>(fields: FormState, path: string): T => {
   const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1)
   const name = path.split('.').pop()
 
@@ -22,5 +22,3 @@ const getDataByPath = <T = unknown>(fields: FormState, path: string): T => {
 
   return unflattenedData?.[name]
 }
-
-export default getDataByPath

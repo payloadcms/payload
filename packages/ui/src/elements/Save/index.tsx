@@ -5,8 +5,8 @@ import React, { useRef } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm } from '../../forms/Form/context.js'
-import FormSubmit from '../../forms/Submit/index.js'
-import useHotkey from '../../hooks/useHotkey.js'
+import { FormSubmit } from '../../forms/Submit/index.js'
+import { useHotkey } from '../../hooks/useHotkey.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 

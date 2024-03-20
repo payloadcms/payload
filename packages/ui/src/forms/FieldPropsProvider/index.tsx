@@ -3,7 +3,7 @@ import type { FieldPermissions } from 'payload/types'
 
 import React from 'react'
 
-type FieldPropsContextType = {
+export type FieldPropsContextType = {
   path: string
   permissions?: FieldPermissions
   readOnly: boolean
@@ -21,7 +21,7 @@ const FieldPropsContext = React.createContext<FieldPropsContextType>({
   siblingPermissions: {},
 })
 
-type Props = {
+export type Props = {
   children: React.ReactNode
   path: string
   permissions?: FieldPermissions

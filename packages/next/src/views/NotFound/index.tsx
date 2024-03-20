@@ -1,6 +1,6 @@
 import type { AdminViewComponent } from 'payload/types'
 
-import { DefaultTemplate } from '@payloadcms/ui'
+import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import React from 'react'
 
 import { NotFoundClient } from './index.client.js'

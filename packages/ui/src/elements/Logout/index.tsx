@@ -2,7 +2,7 @@
 import React, { Fragment } from 'react'
 
 import { LogOut } from '../../icons/LogOut/index.js'
-import { useComponentMap } from '../../index.js'
+import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
@@ -34,7 +34,7 @@ const DefaultLogout: React.FC<{
   )
 }
 
-const Logout: React.FC<{
+export const Logout: React.FC<{
   Link?: React.ComponentType
   tabIndex?: number
 }> = ({ Link, tabIndex = 0 }) => {
@@ -48,5 +48,3 @@ const Logout: React.FC<{
 
   return <DefaultLogout Link={Link} tabIndex={tabIndex} />
 }
-
-export default Logout

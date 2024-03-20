@@ -1,5 +1,5 @@
-import type { Option } from '@payloadcms/ui'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
+import type { OptionObject } from 'payload/types'
 import type { Document } from 'payload/types'
 
 export type CompareOption = {
@@ -13,7 +13,7 @@ export type DefaultVersionsViewProps = {
   doc: Document
   docPermissions: CollectionPermission | GlobalPermission
   initialComparisonDoc: Document
-  localeOptions: Option[]
+  localeOptions: OptionObject[]
   mostRecentDoc: Document
   publishedDoc: Document
   versionID?: string

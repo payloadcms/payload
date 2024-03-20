@@ -1,6 +1,7 @@
-import { mapFields } from '@payloadcms/ui/utilities'
+import type { RichTextAdapter } from 'payload/types'
+
+import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
 import { sanitizeFields } from 'payload/config'
-import { type RichTextAdapter } from 'payload/types'
 import React from 'react'
 
 import type { ResolvedServerFeatureMap } from './field/features/types.js'

@@ -1,14 +1,5 @@
 'use client'
 
-import {
-  Email,
-  Form,
-  FormLoadingOverlayToggle,
-  FormSubmit,
-  Password,
-  useConfig,
-  useTranslation,
-} from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
@@ -17,6 +8,13 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 import type { FormState } from 'payload/types'
 
+import { FormLoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
+import { Email } from '@payloadcms/ui/fields/Email'
+import { Password } from '@payloadcms/ui/fields/Password'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { FormSubmit } from '@payloadcms/ui/forms/Submit'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { useRouter } from 'next/navigation.js'
 
 import './index.scss'

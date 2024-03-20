@@ -1,11 +1,12 @@
 'use client'
+
+import type { SanitizedCollectionConfig } from 'payload/types'
+
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
-
-import type { Props } from './types.js'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -13,12 +14,18 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
-import * as PopupList from '../Popup/PopupButtonList/index.js'
+import { PopupList } from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'duplicate'
 
-const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
+export type Props = {
+  id: string
+  singularLabel: SanitizedCollectionConfig['labels']['singular']
+  slug: string
+}
+
+export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) => {
   const { Modal, useModal } = facelessUIImport
 
   const router = useRouter()
@@ -45,35 +52,50 @@ const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
         toggleModal(modalSlug)
         return
       }
-      await requests.post(`${serverURL}${api}/${slug}/${id}/duplicate`, {
-        body: JSON.stringify({}),
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/json',
-          'credentials': 'include',
-        },
-      }).then(async (res) => {
-        const { doc, message } = await res.json()
-        if (res.status < 400) {
-          toast.success(
-            message ||
-            t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
-            {
-              autoClose: 3000,
-            },
-          )
-          setModified(false)
-          router.push(`${admin}/collections/${slug}/${doc.id}`)
-        } else {
-          toast.error(
-            message ||
-            t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
-            { autoClose: 5000 },
-          )
-        }
-      })
+      await requests
+        .post(`${serverURL}${api}/${slug}/${id}/duplicate`, {
+          body: JSON.stringify({}),
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+            credentials: 'include',
+          },
+        })
+        .then(async (res) => {
+          const { doc, message } = await res.json()
+          if (res.status < 400) {
+            toast.success(
+              message ||
+                t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
+              {
+                autoClose: 3000,
+              },
+            )
+            setModified(false)
+            router.push(`${admin}/collections/${slug}/${doc.id}`)
+          } else {
+            toast.error(
+              message || t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
+              { autoClose: 5000 },
+            )
+          }
+        })
     },
-    [modified, serverURL, api, slug, id, i18n, toggleModal, modalSlug, t, singularLabel, setModified, router, admin],
+    [
+      modified,
+      serverURL,
+      api,
+      slug,
+      id,
+      i18n,
+      toggleModal,
+      modalSlug,
+      t,
+      singularLabel,
+      setModified,
+      router,
+      admin,
+    ],
   )
 
   const confirm = useCallback(async () => {
@@ -108,5 +130,3 @@ const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
     </React.Fragment>
   )
 }
-
-export default Duplicate

@@ -30,6 +30,7 @@ import { create } from './collections/create.js'
 import { deleteDoc } from './collections/delete.js'
 import { deleteByID } from './collections/deleteByID.js'
 import { docAccess } from './collections/docAccess.js'
+import { duplicate } from './collections/duplicate.js'
 import { find } from './collections/find.js'
 import { findByID } from './collections/findByID.js'
 import { findVersionByID } from './collections/findVersionByID.js'
@@ -44,7 +45,6 @@ import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionB
 import { findVersions as findVersionsGlobal } from './globals/findVersions.js'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion.js'
 import { update as updateGlobal } from './globals/update.js'
-import { duplicate } from './collections/duplicate.js'
 
 const endpoints = {
   collection: {

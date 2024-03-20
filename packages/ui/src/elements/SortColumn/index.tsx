@@ -5,7 +5,11 @@ import { usePathname, useRouter } from 'next/navigation.js'
 import queryString from 'qs'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types.js'
+export type SortColumnProps = {
+  disable?: boolean
+  label: Record<string, string> | string
+  name: string
+}
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
@@ -14,7 +18,7 @@ import './index.scss'
 
 const baseClass = 'sort-column'
 
-export const SortColumn: React.FC<Props> = (props) => {
+export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, disable = false, label } = props
   const { searchParams } = useSearchParams()
   const router = useRouter()
@@ -79,5 +83,3 @@ export const SortColumn: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default SortColumn

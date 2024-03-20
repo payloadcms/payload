@@ -24,7 +24,7 @@ const setProcessing: SetProcessing = () => undefined
 const setSubmitted: SetSubmitted = () => undefined
 const reset: Reset = () => undefined
 
-const initialContextState: Context = {
+export const initContextState: Context = {
   addFieldRow: async () => undefined,
   buildRowErrors: () => undefined,
   createFormData,
@@ -47,5 +47,3 @@ const initialContextState: Context = {
   submit,
   validateForm,
 }
-
-export default initialContextState

@@ -1,15 +1,13 @@
 import type { AdminViewProps } from 'payload/types'
 
-import {
-  Button,
-  ConfirmPassword,
-  Form,
-  FormSubmit,
-  HiddenInput,
-  MinimalTemplate,
-  Password,
-  Translation,
-} from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements/Button'
+import { Translation } from '@payloadcms/ui/elements/Translation'
+import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
+import { HiddenInput } from '@payloadcms/ui/fields/HiddenInput'
+import { Password } from '@payloadcms/ui/fields/Password'
+import { Form } from '@payloadcms/ui/forms/Form'
+import { FormSubmit } from '@payloadcms/ui/forms/Submit'
+import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
@@ -56,7 +54,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
           <p>
             <Translation
               elements={{
-                '0': ({ children }) => <Link children={children} href={`${admin}/account`} />,
+                '0': ({ children }) => <Link href={`${admin}/account`}>{children}</Link>,
               }}
               i18nKey="authentication:loggedInChangePassword"
               t={i18n.t}

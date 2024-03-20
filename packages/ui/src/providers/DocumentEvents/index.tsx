@@ -1,7 +1,11 @@
 'use client'
 import React, { createContext, useContext, useState } from 'react'
 
-import type { UpdatedDocument } from './types.js'
+export type UpdatedDocument = {
+  entitySlug: string
+  id?: number | string
+  updatedAt: string
+}
 
 const Context = createContext({
   mostRecentUpdate: null,

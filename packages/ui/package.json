@@ -1,14 +1,13 @@
 {
   "name": "@payloadcms/ui",
   "version": "3.0.0-alpha.48",
-  "main": "./src/index.ts",
-  "types": "./dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:webpack && rm dist/prod/index.js",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:webpack": "webpack --config webpack.config.js",
+    "build:remove-artifact": "rm dist/prod/index.js",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -16,19 +15,72 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "exports": {
-    ".": "./src/exports/index.ts",
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.dts"
+    "./assets": {
+      "import": "./src/assets/index.ts",
+      "require": "./src/assets/index.ts",
+      "default": "./src/assets/index.ts",
+      "types": "./src/assets/index.tx"
+    },
+    "./elements/*": {
+      "import": "./src/elements/*/index.tsx",
+      "require": "./src/elements/*/index.tsx",
+      "default": "./src/elements/*/index.tsx",
+      "types": "./src/elements/*/index.tsx"
+    },
+    "./fields/*": {
+      "import": "./src/fields/*/index.tsx",
+      "require": "./src/fields/*/index.tsx",
+      "default": "./src/fields/*/index.tsx",
+      "types": "./src/fields/*/index.tsx"
+    },
+    "./forms/*": {
+      "import": "./src/forms/*/index.tsx",
+      "require": "./src/forms/*/index.tsx",
+      "default": "./src/forms/*/index.tsx",
+      "types": "./src/forms/*/index.tsx"
+    },
+    "./graphics/*": {
+      "import": "./src/graphics/*/index.tsx",
+      "require": "./src/graphics/*/index.tsx",
+      "default": "./src/graphics/*/index.tsx",
+      "types": "./src/graphics/*/index.tsx"
+    },
+    "./hooks/*": {
+      "import": "./src/hooks/*.ts",
+      "require": "./src/hooks/*.ts",
+      "default": "./src/hooks/*.ts",
+      "types": "./src/hooks/*.ts"
+    },
+    "./icons/*": {
+      "import": "./src/icons/*/index.tsx",
+      "require": "./src/icons/*/index.tsx",
+      "default": "./src/icons/*/index.tsx",
+      "types": "./src/icons/*/index.tsx"
+    },
+    "./providers/*": {
+      "import": "./src/providers/*/index.tsx",
+      "require": "./src/providers/*/index.tsx",
+      "default": "./src/providers/*/index.tsx",
+      "types": "./src/providers/*/index.tsx"
+    },
+    "./templates/*": {
+      "import": "./src/templates/*/index.tsx",
+      "require": "./src/templates/*/index.tsx",
+      "default": "./src/templates/*/index.tsx",
+      "types": "./src/templates/*/index.tsx"
+    },
+    "./utilities/*": {
+      "import": "./src/utilities/*.ts",
+      "require": "./src/utilities/*.ts",
+      "default": "./src/utilities/*.ts",
+      "types": "./src/utilities/*.ts"
     },
     "./scss": {
       "import": "./src/scss.scss",
       "require": "./src/scss.scss",
       "default": "./src/scss.scss"
     },
-    "./scss/app.scss": "./src/scss/app.scss",
-    "./assets/*": "./src/assets/*"
+    "./scss/app.scss": "./src/scss/app.scss"
   },
   "publishConfig": {
     "exports": {

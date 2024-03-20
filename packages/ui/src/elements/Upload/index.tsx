@@ -1,23 +1,23 @@
 'use client'
+import type { FormState, SanitizedCollectionConfig } from 'payload/types'
+
 import { isImage } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Props } from './types.js'
-
-import Error from '../../forms/Error/index.js'
+import { fieldBaseClass } from '../../fields/shared/index.js'
+import { Error } from '../../forms/Error/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
-import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js'
-import { fieldBaseClass } from '../../forms/fields/shared.js'
 import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { reduceFieldsToValues } from '../../utilities/reduceFieldsToValues.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
-import FileDetails from '../FileDetails/index.js'
-import PreviewSizes from '../PreviewSizes/index.js'
-import Thumbnail from '../Thumbnail/index.js'
+import { FileDetails } from '../FileDetails/index.js'
+import { PreviewSizes } from '../PreviewSizes/index.js'
+import { Thumbnail } from '../Thumbnail/index.js'
 import './index.scss'
 
 const baseClass = 'file-field'
@@ -50,7 +50,15 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
   )
 }
 
-export const Upload: React.FC<Props> = (props) => {
+export type UploadProps = {
+  collectionSlug: string
+  initialState?: FormState
+  onChange?: (file?: File) => void
+  updatedAt?: string
+  uploadConfig: SanitizedCollectionConfig['upload']
+}
+
+export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, initialState, onChange, updatedAt, uploadConfig } = props
 
   const submitted = useFormSubmitted()
