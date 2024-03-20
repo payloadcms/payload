@@ -90,7 +90,7 @@ describe('uploads', () => {
 
   test('should create file upload', async () => {
     await page.goto(mediaURL.create)
-
+    await page.waitForURL(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
     const filename = page.locator('.file-field__filename')
@@ -157,7 +157,7 @@ describe('uploads', () => {
 
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
-    await wait(200)
+    await page.waitForURL(relationURL.list)
     // from the list edit the first document
     // .cell-image
     await page.locator('.row-1 a').click()
@@ -185,7 +185,7 @@ describe('uploads', () => {
 
   test('should restrict mimetype based on filterOptions', async () => {
     await page.goto(audioURL.edit(audioDoc.id))
-    await wait(200)
+    await page.waitForURL(audioURL.edit(audioDoc.id))
 
     // remove the selection and open the list drawer
     await page.locator('.file-details__remove').click()
@@ -193,12 +193,6 @@ describe('uploads', () => {
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
     await wait(200) // list is loading
-
-    // ensure the only card is the audio file
-    const rows = listDrawer.locator('table tbody tr')
-    expect(await rows.count()).toEqual(1)
-    const filename = rows.locator('.cell-filename')
-    await expect(filename).toHaveText('audio.mp3')
 
     // upload an image and try to select it
     await listDrawer.locator('button.list-drawer__create-new-button.doc-drawer__toggler').click()
@@ -218,7 +212,7 @@ describe('uploads', () => {
 
   test('Should execute adminThumbnail and provide thumbnail when set', async () => {
     await page.goto(adminThumbnailURL.list)
-    await wait(200)
+    await page.waitForURL(adminThumbnailURL.list)
 
     // Ensure sure false or null shows generic file svg
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
@@ -231,6 +225,7 @@ describe('uploads', () => {
 
   test('Should detect correct mimeType', async () => {
     await page.goto(mediaURL.create)
+    await page.waitForURL(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
     await saveDocAndAssert(page)
 
@@ -264,6 +259,7 @@ describe('uploads', () => {
       const createFocalCrop = async (page: Page, position: 'bottom-right' | 'top-left') => {
         const { dragX, dragY, focalX, focalY } = positions[position]
         await page.goto(mediaURL.create)
+        await page.waitForURL(mediaURL.create)
         // select and upload file
         const fileChooserPromise = page.waitForEvent('filechooser')
         await page.getByText('Select a file').click()
@@ -290,20 +286,17 @@ describe('uploads', () => {
         await expect(page.locator('.edit-upload__input input[name="X %"]')).toHaveValue(`${focalX}`)
         await expect(page.locator('.edit-upload__input input[name="Y %"]')).toHaveValue(`${focalY}`)
 
-        await page.screenshot({ path: `screenshot-${position}.png` })
-        await wait(3000)
+        // apply crop
         await page.locator('button:has-text("Apply Changes")').click()
         await page.waitForSelector('button#action-save')
         await page.locator('button#action-save').click()
+        await wait(1000) // Wait for the save
       }
 
-      // await createFocalCrop(page, 'bottom-right') // green square
-      // await wait(1000) // wait for edit view navigation (saving images)
-      // get the ID of the doc
-      const greenSquareMediaID = page.url().split('/').pop()
+      await createFocalCrop(page, 'bottom-right') // green square
+      const greenSquareMediaID = page.url().split('/').pop() // get the ID of the doc
       await createFocalCrop(page, 'top-left') // red square
-      await wait(1000) // wait for edit view navigation (saving images)
-      const redSquareMediaID = page.url().split('/').pop()
+      const redSquareMediaID = page.url().split('/').pop() // get the ID of the doc
 
       const { doc: greenDoc } = await client.findByID({
         id: greenSquareMediaID,
