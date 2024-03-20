@@ -1,4 +1,7 @@
 'use client'
+
+import type { CollectionComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
+
 import { getTranslation } from '@payloadcms/translations'
 import { Button } from '@payloadcms/ui/elements/Button'
 import { DeleteMany } from '@payloadcms/ui/elements/DeleteMany'
@@ -25,8 +28,6 @@ import LinkImport from 'next/link.js'
 import { formatFilesize } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
-import type { CollectionComponentMap } from '../../../../../ui/src/providers/ComponentMap/buildComponentMap/types.js'
-
 import { RelationshipProvider } from './RelationshipProvider/index.js'
 import './index.scss'
 
@@ -40,9 +41,6 @@ export const DefaultListView: React.FC = () => {
     data,
     handlePageChange,
     handlePerPageChange,
-    handleSearchChange,
-    handleSortChange,
-    handleWhereChange,
     hasCreatePermission,
     limit,
     modifySearchParams,
@@ -56,7 +54,8 @@ export const DefaultListView: React.FC = () => {
 
   const componentMap = getComponentMap({ collectionSlug }) as CollectionComponentMap
 
-  const { AfterList, AfterListTable, BeforeList, BeforeListTable, actionsMap } = componentMap || {}
+  const { AfterList, AfterListTable, BeforeList, BeforeListTable, actionsMap, fieldMap } =
+    componentMap || {}
 
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
@@ -124,11 +123,8 @@ export const DefaultListView: React.FC = () => {
           </header>
           <ListControls
             collectionConfig={collectionConfig}
-            // textFieldsToBeSearched={textFieldsToBeSearched}
-            // handleSearchChange={handleSearchChange}
-            // handleSortChange={handleSortChange}
-            // handleWhereChange={handleWhereChange}
-            // modifySearchQuery={modifySearchParams}
+            fieldMap={fieldMap}
+            modifySearchQuery={modifySearchParams}
             titleField={titleField}
           />
           {BeforeListTable}
@@ -199,7 +195,7 @@ export const DefaultListView: React.FC = () => {
                           label={getTranslation(collectionConfig.labels.plural, i18n)}
                         />
                         <div className={`${baseClass}__list-selection-actions`}>
-                          <EditMany collection={collectionConfig} />
+                          <EditMany collection={collectionConfig} fieldMap={fieldMap} />
                           <PublishMany collection={collectionConfig} />
                           <UnpublishMany collection={collectionConfig} />
                           <DeleteMany collection={collectionConfig} />

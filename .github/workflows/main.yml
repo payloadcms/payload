@@ -217,9 +217,9 @@ jobs:
         # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
           - _community
-          # - access-control
+          - access-control
           # - admin
-          - auth
+          # - auth
           # - field-error-states
           # - fields-relationship
           # - fields

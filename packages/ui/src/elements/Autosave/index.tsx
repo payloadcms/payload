@@ -1,6 +1,6 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -19,8 +19,8 @@ import './index.scss'
 const baseClass = 'autosave'
 
 export type Props = {
-  collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
+  collection?: ClientCollectionConfig
+  global?: ClientGlobalConfig
   id?: number | string
   publishedDocUpdatedAt: string
 }

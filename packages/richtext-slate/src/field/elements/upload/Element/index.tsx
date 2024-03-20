@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button } from '@payloadcms/ui/elements/Button'
@@ -55,7 +55,7 @@ const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = (
   } = useConfig()
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
-  const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() =>
+  const [relatedCollection, setRelatedCollection] = useState<ClientCollectionConfig>(() =>
     collections.find((coll) => coll.slug === relationTo),
   )
 

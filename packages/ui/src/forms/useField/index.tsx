@@ -25,7 +25,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
   const { path: pathFromContext, permissions, readOnly, schemaPath } = useFieldProps()
 
-  const path = options.path || pathFromContext
+  const path = pathFromContext || options.path
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()

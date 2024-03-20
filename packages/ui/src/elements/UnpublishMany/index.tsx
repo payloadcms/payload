@@ -19,10 +19,10 @@ import './index.scss'
 
 const baseClass = 'unpublish-many'
 
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 export type UnpublishManyProps = {
-  collection: SanitizedCollectionConfig
+  collection: ClientCollectionConfig
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {

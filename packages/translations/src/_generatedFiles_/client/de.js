@@ -189,7 +189,6 @@ export default {
     submissionSuccessful: 'Einrichung erfolgreich.',
     submit: 'Senden',
     successfullyCreated: '{{label}} erfolgreich erstellt.',
-    successfullyDuplicated: '{{label}} wurde erfolgreich dupliziert.',
     thisLanguage: 'Deutsch',
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
     unauthorized: 'Nicht autorisiert',

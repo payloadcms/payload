@@ -18,6 +18,7 @@ import type { JSONFieldProps } from '../../../fields/JSON/index.js'
 import type { NumberFieldProps } from '../../../fields/Number/index.js'
 import type { PointFieldProps } from '../../../fields/Point/index.js'
 import type { RelationshipFieldProps } from '../../../fields/Relationship/index.js'
+import type { RichTextFieldProps } from '../../../fields/RichText/index.js'
 import type { RowFieldProps } from '../../../fields/Row/types.js'
 import type { SelectFieldProps } from '../../../fields/Select/index.js'
 import type { TabsFieldProps } from '../../../fields/Tabs/index.js'
@@ -52,6 +53,7 @@ export type FieldComponentProps =
   | NumberFieldProps
   | PointFieldProps
   | RelationshipFieldProps
+  | RichTextFieldProps
   | RowFieldProps
   | SelectFieldProps
   | TabsFieldProps
@@ -63,6 +65,7 @@ export type MappedField = {
   Cell: React.ReactNode
   CustomField?: React.ReactNode
   Heading: React.ReactNode
+  disableBulkEdit?: boolean
   disabled?: boolean
   fieldComponentProps: FieldComponentProps
   fieldIsPresentational: boolean
@@ -72,6 +75,7 @@ export type MappedField = {
   localized: boolean
   name?: string
   type: keyof FieldTypes
+  unique?: boolean
 }
 
 export type FieldMap = MappedField[]

@@ -1,5 +1,7 @@
 import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
 import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
   Data,
   DocumentPermissions,
   DocumentPreferences,
@@ -34,7 +36,7 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfo = DocumentInfoProps & {
-  docConfig?: SanitizedCollectionConfig | SanitizedGlobalConfig
+  docConfig?: ClientCollectionConfig | ClientGlobalConfig
   preferencesKey?: string
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   slug?: string

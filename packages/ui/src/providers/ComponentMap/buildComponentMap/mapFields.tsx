@@ -4,6 +4,8 @@ import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import { isPlainObject } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
+import type { RadioFieldProps } from '../../..//fields/RadioGroup/index.js'
+import type { RichTextFieldProps } from '../../..//fields/RichText/index.js'
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
 import type { BlocksFieldProps } from '../../../fields/Blocks/index.js'
 import type { CheckboxFieldProps } from '../../../fields/Checkbox/index.js'
@@ -460,8 +462,24 @@ export const mapFields = (args: {
             fieldComponentProps = relationshipField
             break
           }
+          case 'radio': {
+            const radioField: RadioFieldProps = {
+              ...baseFieldProps,
+              name: field.name,
+              className: field.admin?.className,
+              disabled: field.admin?.disabled,
+              options: field.options,
+              readOnly: field.admin?.readOnly,
+              required: field.required,
+              style: field.admin?.style,
+              width: field.admin?.width,
+            }
+
+            fieldComponentProps = radioField
+            break
+          }
           case 'richText': {
-            const richTextField = {
+            const richTextField: RichTextFieldProps = {
               ...baseFieldProps,
               name: field.name,
               className: field.admin?.className,
@@ -472,15 +490,12 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = richTextField
-
             const RichTextFieldComponent = field.editor.FieldComponent
             const RichTextCellComponent = field.editor.CellComponent
 
             if (typeof field.editor.generateComponentMap === 'function') {
               const result = field.editor.generateComponentMap({ config, schemaPath: path })
-              // @ts-expect-error
-              fieldComponentProps.richTextComponentMap = result
+              richTextField.richTextComponentMap = result
               cellComponentProps.richTextComponentMap = result
             }
 
@@ -491,6 +506,8 @@ export const mapFields = (args: {
             if (RichTextCellComponent) {
               cellComponentProps.CellComponentOverride = <RichTextCellComponent />
             }
+
+            fieldComponentProps = richTextField
 
             break
           }
@@ -661,6 +678,8 @@ export const mapFields = (args: {
             <CustomFieldComponent {...fieldComponentProps} />
           ) : undefined,
           Heading,
+          disableBulkEdit:
+            'admin' in field && 'disableBulkEdit' in field.admin && field.admin.disableBulkEdit,
           fieldComponentProps,
           fieldIsPresentational,
           isFieldAffectingData,
@@ -668,6 +687,7 @@ export const mapFields = (args: {
           isSidebar:
             'admin' in field && 'position' in field.admin && field.admin.position === 'sidebar',
           localized: 'localized' in field ? field.localized : false,
+          unique: 'unique' in field ? field.unique : false,
         }
 
         acc.push(reducedField)

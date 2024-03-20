@@ -188,7 +188,6 @@ export default {
     submissionSuccessful: 'با موفقیت ثبت شد.',
     submit: 'فرستادن',
     successfullyCreated: '{{label}} با موفقیت ساخته شد.',
-    successfullyDuplicated: '{{label}} با موفقیت رونوشت شد.',
     thisLanguage: 'فارسی',
     titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
     unauthorized: 'غیرمجاز',

@@ -45,6 +45,7 @@ export const getGenerateComponentMap =
 
             for (const componentKey in components) {
               const Component = components[componentKey]
+
               if (Component) {
                 componentMap.set(
                   `feature.${featureKey}.components.${componentKey}`,

@@ -195,15 +195,6 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
-type BeforeDuplicateArgs<T> = {
-  /** The collection which this hook is being run on */
-  collection: SanitizedCollectionConfig
-  data: T
-  locale?: string
-}
-
-export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => Promise<T> | T
-
 export type CollectionAdminOptions = {
   /**
    * Custom admin components
@@ -275,12 +266,6 @@ export type CollectionAdminOptions = {
    * Hide the API URL within the Edit view
    */
   hideAPIURL?: boolean
-  hooks?: {
-    /**
-     * Function that allows you to modify a document's data before it is duplicated
-     */
-    beforeDuplicate?: BeforeDuplicate
-  }
   /**
    * Additional fields to be searched via the full text search
    */

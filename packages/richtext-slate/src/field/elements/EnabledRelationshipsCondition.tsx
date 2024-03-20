@@ -1,7 +1,7 @@
 'use client'
 
 import type { ClientUser } from 'payload/auth'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 import { useAuth } from '@payloadcms/ui/providers/Auth'
 import { useConfig } from '@payloadcms/ui/providers/Config'
@@ -13,9 +13,9 @@ type options = {
 }
 
 type FilteredCollectionsT = (
-  collections: SanitizedCollectionConfig[],
+  collections: ClientCollectionConfig[],
   options?: options,
-) => SanitizedCollectionConfig[]
+) => ClientCollectionConfig[]
 const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
   return collections.filter(({ admin: { enableRichTextRelationship, hidden }, upload }) => {
     if (hidden === true || (typeof hidden === 'function' && hidden({ user: options.user }))) {

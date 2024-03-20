@@ -1,6 +1,6 @@
 'use client'
 
-import type { FilterOptionsResult, SanitizedCollectionConfig, UploadField } from 'payload/types'
+import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -22,7 +22,7 @@ const baseClass = 'upload'
 
 export type UploadInputProps = Omit<UploadFieldProps, 'filterOptions'> & {
   api?: string
-  collection?: SanitizedCollectionConfig
+  collection?: ClientCollectionConfig
   filterOptions?: FilterOptionsResult
   onChange?: (e) => void
   relationTo?: UploadField['relationTo']

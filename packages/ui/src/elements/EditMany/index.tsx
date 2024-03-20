@@ -24,15 +24,18 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useTranslation } from '../../providers/Translation/index.js'
 import { getFormState } from '../../utilities/getFormState.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
-import { FieldSelect } from '../FieldSelect/index.js'
+import { FieldSelect } from '../FieldSelect/index.jsx'
 import './index.scss'
 
 const baseClass = 'edit-many'
 
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
+
+import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
 export type EditManyProps = {
-  collection: SanitizedCollectionConfig
+  collection: ClientCollectionConfig
+  fieldMap: FieldMap
 }
 
 const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
@@ -98,7 +101,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
 export const EditMany: React.FC<EditManyProps> = (props) => {
   const { useModal } = facelessUIImport
 
-  const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
+  const { collection: { slug, fields, labels: { plural } } = {}, collection, fieldMap } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()
@@ -224,7 +227,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                 onChange={[onChange]}
                 onSuccess={onSuccess}
               >
-                <FieldSelect fields={fields} setSelected={setSelected} />
+                <FieldSelect fieldMap={fieldMap} setSelected={setSelected} />
                 {reducedFieldMap.length === 0 ? null : (
                   <RenderFields
                     fieldMap={reducedFieldMap}

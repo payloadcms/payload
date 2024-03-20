@@ -3,6 +3,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 export type DefaultListViewProps = {
   collectionSlug: SanitizedCollectionConfig['slug']
+  listSearchableFields: SanitizedCollectionConfig['admin']['listSearchableFields']
 }
 
 export type ListIndexProps = {
@@ -12,5 +13,5 @@ export type ListIndexProps = {
 export type ListPreferences = {
   columns: ColumnPreferences
   limit: number
-  sort: number
+  sort: string
 }

@@ -10,6 +10,7 @@ type Args<T> = {
   context: RequestContext
   data: Record<string, unknown> | T
   doc?: Record<string, unknown> | T
+  duplicate?: boolean
   global: SanitizedGlobalConfig | null
   id?: number | string
   operation: 'create' | 'update'
@@ -23,6 +24,7 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
   context,
   data: incomingData,
   doc,
+  duplicate = false,
   global,
   operation,
   overrideAccess,
@@ -36,6 +38,7 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
     context,
     data,
     doc,
+    duplicate,
     fields: collection?.fields || global?.fields,
     global,
     operation,

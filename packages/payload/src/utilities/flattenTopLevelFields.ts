@@ -1,3 +1,4 @@
+import type { ClientFieldConfig } from '../fields/config/client.js'
 import type { Field, FieldAffectingData, FieldPresentationalOnly } from '../fields/config/types.js'
 
 import {
@@ -15,7 +16,7 @@ import {
  * @param keepPresentationalFields if true, will skip flattening fields that are presentational only
  */
 const flattenFields = (
-  fields: Field[],
+  fields: (ClientFieldConfig | Field)[],
   keepPresentationalFields?: boolean,
 ): (FieldAffectingData | FieldPresentationalOnly)[] => {
   return fields.reduce((fieldsToUse, field) => {
@@ -27,7 +28,7 @@ const flattenFields = (
       return [...fieldsToUse, ...flattenFields(field.fields, keepPresentationalFields)]
     }
 
-    if (field.type === 'tabs') {
+    if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...fieldsToUse,
         ...field.tabs.reduce((tabFields, tab) => {
@@ -40,6 +41,7 @@ const flattenFields = (
         }, []),
       ]
     }
+
     return fieldsToUse
   }, [])
 }

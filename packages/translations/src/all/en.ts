@@ -77,8 +77,6 @@ export default {
     invalidFileType: 'Invalid file type',
     invalidFileTypeValue: 'Invalid file type: {{value}}',
     loadingDocument: 'There was a problem loading the document with ID of {{id}}.',
-    localesNotSaved_one: 'The following locale could not be saved:',
-    localesNotSaved_other: 'The following locales could not be saved:',
     missingEmail: 'Missing email.',
     missingIDOfDocument: 'Missing ID of document to update.',
     missingIDOfVersion: 'Missing ID of version.',

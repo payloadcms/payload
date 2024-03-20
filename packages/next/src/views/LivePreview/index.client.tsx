@@ -2,12 +2,7 @@
 import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { LivePreviewConfig } from 'payload/config'
-import type {
-  ClientConfig,
-  Data,
-  SanitizedCollectionConfig,
-  SanitizedGlobalConfig,
-} from 'payload/types'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig, Data } from 'payload/types'
 
 import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
 import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'
@@ -35,10 +30,10 @@ const baseClass = 'live-preview'
 
 type Props = {
   apiRoute: string
-  collectionConfig?: SanitizedCollectionConfig
+  collectionConfig?: ClientCollectionConfig
   config: ClientConfig
   fieldMap: FieldMap
-  globalConfig?: SanitizedGlobalConfig
+  globalConfig?: ClientGlobalConfig
   schemaPath: string
   serverURL: string
 }

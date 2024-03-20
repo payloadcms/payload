@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
 const { useLexicalComposerContext } = lexicalComposerContextImport
@@ -59,7 +59,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
-  const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() =>
+  const [relatedCollection, setRelatedCollection] = useState<ClientCollectionConfig>(() =>
     collections.find((coll) => coll.slug === relationTo),
   )
 

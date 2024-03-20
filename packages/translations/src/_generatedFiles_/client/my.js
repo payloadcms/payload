@@ -190,7 +190,6 @@ export default {
     submissionSuccessful: 'သိမ်းဆည်းမှု အောင်မြင်ပါသည်။',
     submit: 'သိမ်းဆည်းမည်။',
     successfullyCreated: '{{label}} အောင်မြင်စွာဖန်တီးခဲ့သည်။',
-    successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',
     thisLanguage: 'မြန်မာစာ',
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
     unauthorized: 'အခွင့်မရှိပါ။',

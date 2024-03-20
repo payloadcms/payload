@@ -78,8 +78,6 @@ export default {
     invalidFileType: '無効なファイル形式',
     invalidFileTypeValue: '無効なファイル形式: {{value}}',
     loadingDocument: 'IDが {{id}} のデータを読み込む際に問題が発生しました。',
-    localesNotSaved_one: '次のロケールは保存できませんでした：',
-    localesNotSaved_other: '次のロケールは保存できませんでした：',
     missingEmail: 'メールアドレスが不足しています。',
     missingIDOfDocument: '更新するデータのIDが不足しています。',
     missingIDOfVersion: 'バージョンIDが不足しています。',

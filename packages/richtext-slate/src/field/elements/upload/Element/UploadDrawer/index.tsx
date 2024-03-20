@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -31,7 +31,7 @@ export const UploadDrawer: React.FC<{
     name: string
     richTextComponentMap: Map<string, React.ReactNode>
   }
-  relatedCollection: SanitizedCollectionConfig
+  relatedCollection: ClientCollectionConfig
   schemaPath: string
 }> = (props) => {
   const { useModal } = facelessUIImport

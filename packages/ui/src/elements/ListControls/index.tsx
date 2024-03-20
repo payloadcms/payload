@@ -1,5 +1,10 @@
 'use client'
-import type { FieldAffectingData, SanitizedCollectionConfig, Where } from 'payload/types'
+import type {
+  ClientCollectionConfig,
+  FieldAffectingData,
+  SanitizedCollectionConfig,
+  Where,
+} from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -9,6 +14,10 @@ import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
+
+import { useListInfo } from '@payloadcms/ui/providers/ListInfo'
+
+import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
@@ -27,9 +36,10 @@ import './index.scss'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
-  collectionConfig: SanitizedCollectionConfig
+  collectionConfig: ClientCollectionConfig
   enableColumns?: boolean
   enableSort?: boolean
+  fieldMap: FieldMap
   handleSearchChange?: (search: string) => void
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
@@ -48,15 +58,14 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     collectionConfig,
     enableColumns = true,
     enableSort = false,
-    handleSearchChange,
-    handleSortChange,
-    handleWhereChange,
+    fieldMap,
     modifySearchQuery = true,
     textFieldsToBeSearched,
     titleField,
   } = props
 
   const { useWindowInfo } = facelessUIImport
+  const { handleSearchChange, handleWhereChange } = useListInfo()
 
   const { searchParams } = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
@@ -79,13 +88,12 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
           handleChange={handleSearchChange}
           listSearchableFields={textFieldsToBeSearched}
-          modifySearchQuery={modifySearchQuery}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
             {!smallBreak && (
               <React.Fragment>
-                <EditMany collection={collectionConfig} />
+                <EditMany collection={collectionConfig} fieldMap={fieldMap} />
                 <PublishMany collection={collectionConfig} />
                 <UnpublishMany collection={collectionConfig} />
                 <DeleteMany collection={collectionConfig} />

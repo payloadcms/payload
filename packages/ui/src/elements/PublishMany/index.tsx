@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientCollectionConfig } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -22,7 +22,7 @@ import './index.scss'
 const baseClass = 'publish-many'
 
 export type PublishManyProps = {
-  collection: SanitizedCollectionConfig
+  collection: ClientCollectionConfig
 }
 
 export const PublishMany: React.FC<PublishManyProps> = (props) => {

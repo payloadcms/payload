@@ -4,7 +4,9 @@ import type { MappedField } from '../../providers/ComponentMap/buildComponentMap
 import type { FormFieldBase } from '../shared/index.js'
 
 export type RichTextFieldProps = FormFieldBase & {
+  name: string
   richTextComponentMap?: Map<string, MappedField[] | React.ReactNode>
+  width?: string
 }
 
 export const RichText: React.FC<RichTextFieldProps> = () => {

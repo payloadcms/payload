@@ -15,6 +15,8 @@ export type {
   TabsPreferences,
 } from '../preferences/types.js'
 
+export type { ClientCollectionConfig } from './../collections/config/client.js'
+
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
@@ -25,7 +27,6 @@ export type {
   AfterReadHook as CollectionAfterReadHook,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
-  BeforeDuplicate,
   BeforeLoginHook as CollectionBeforeLoginHook,
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeReadHook as CollectionBeforeReadHook,
@@ -37,14 +38,9 @@ export type {
   TypeWithTimestamps,
 } from './../collections/config/types.js'
 
-export type {
-  Access,
-  AccessArgs,
-  ClientConfig,
-  EditViewComponent,
-  SanitizedConfig,
-} from './../config/types.js'
-
+export type { ClientConfig } from './../config/client.js'
+export type { Access, AccessArgs, EditViewComponent, SanitizedConfig } from './../config/types.js'
+export type { ClientFieldConfig } from './../fields/config/client.js'
 export type {
   ArrayField,
   Block,
@@ -118,6 +114,8 @@ export {
   tabHasName,
   valueIsValueWithRelation,
 } from './../fields/config/types.js'
+
+export type { ClientGlobalConfig } from './../globals/config/client.js'
 
 export type {
   AfterChangeHook as GlobalAfterChangeHook,

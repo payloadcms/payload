@@ -98,6 +98,9 @@ const sanitizeCollection = (
   if (sanitized.upload) {
     if (sanitized.upload === true) sanitized.upload = {}
 
+    // disable duplicate for uploads by default
+    sanitized.admin.disableDuplicate = sanitized.admin.disableDuplicate || true
+
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
       sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id'
@@ -135,6 +138,9 @@ const sanitizeCollection = (
         authFields = authFields.concat(baseAccountLockFields)
       }
     }
+
+    // disable duplicate for auth enabled collections by default
+    sanitized.admin.disableDuplicate = sanitized.admin.disableDuplicate || true
 
     if (!sanitized.auth.strategies) {
       sanitized.auth.strategies = []
