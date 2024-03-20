@@ -10,6 +10,7 @@ import { toast } from 'react-toastify'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
@@ -31,6 +32,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
   const router = useRouter()
   const modified = useFormModified()
   const { toggleModal } = useModal()
+  const locale = useLocale()
   const { setModified } = useForm()
   const {
     routes: { api },
@@ -53,7 +55,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
         return
       }
       await requests
-        .post(`${serverURL}${api}/${slug}/${id}/duplicate`, {
+        .post(`${serverURL}${api}/${slug}/${id}/duplicate?locale=${locale.code}`, {
           body: JSON.stringify({}),
           headers: {
             'Accept-Language': i18n.language,
@@ -62,7 +64,7 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
           },
         })
         .then(async (res) => {
-          const { doc, message } = await res.json()
+          const { doc, errors, message } = await res.json()
           if (res.status < 400) {
             toast.success(
               message ||
@@ -72,16 +74,19 @@ export const DuplicateDocument: React.FC<Props> = ({ id, slug, singularLabel }) 
               },
             )
             setModified(false)
-            router.push(`${admin}/collections/${slug}/${doc.id}`)
+            router.push(`${admin}/collections/${slug}/${doc.id}?locale=${locale.code}`)
           } else {
             toast.error(
-              message || t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
+              errors?.[0].message ||
+                message ||
+                t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
               { autoClose: 5000 },
             )
           }
         })
     },
     [
+      locale,
       modified,
       serverURL,
       api,

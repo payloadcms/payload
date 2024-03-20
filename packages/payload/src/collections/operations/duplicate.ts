@@ -122,7 +122,15 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     let locales = [undefined]
 
     if (config.localization) {
-      locales = config.localization.locales.map(({ code }) => code)
+      // make sure the current request locale is the first locale to be handled to skip validation for other locales
+      locales = config.localization.locales.reduce(
+        (acc, { code }) => {
+          if (req.locale === code) return acc
+          acc.push(code)
+          return acc
+        },
+        [req.locale],
+      )
     }
 
     let result
@@ -221,7 +229,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
         global: null,
         operation,
         req,
-        skipValidation: shouldSaveDraft,
+        skipValidation: shouldSaveDraft || operation === 'update',
       })
     }, Promise.resolve())
 
