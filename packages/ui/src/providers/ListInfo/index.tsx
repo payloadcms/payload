@@ -2,7 +2,7 @@
 import type { Where } from 'payload/types.js'
 
 import { useRouter } from 'next/navigation.js'
-import { isNumber } from 'payload/utilities.js'
+import { isNumber } from 'payload/utilities'
 import QueryString from 'qs'
 import React, { createContext, useContext } from 'react'
 
