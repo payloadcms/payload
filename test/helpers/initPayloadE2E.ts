@@ -44,7 +44,7 @@ export async function initPayloadE2E({ config, dirname }: Args): Promise<Result>
     dev: true,
     hostname: 'localhost',
     port,
-    dir: path.resolve(dirname, '../'),
+    dir: path.resolve(dirname, '../../'),
   })
 
   const handle = app.getRequestHandler()

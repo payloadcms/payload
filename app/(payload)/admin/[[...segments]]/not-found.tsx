@@ -1,7 +1,7 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
 import config from '@payload-config'
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
-import { NotFoundView } from '@payloadcms/next/views'
+import { NotFoundView } from '@payloadcms/next/views/NotFound/index.js'
 
 type Args = {
   params: {

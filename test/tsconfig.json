@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "noEmit": true,
-    "rootDir": ".", /* Specify the root folder within your source files. */
+    "rootDir": ".",
     "declaration": true,
     "declarationMap": true,
     "target": "esnext",
@@ -33,11 +33,7 @@
         "name": "next"
       }
     ],
-    "paths": {
-      "@payload-config": [
-        "./_community/config.ts"
-      ]
-    }
+    "paths": {}
   },
   "exclude": [
     "dist",

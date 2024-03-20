@@ -24,7 +24,7 @@ process.env.PAYLOAD_DROP_DATABASE = 'true'
 const { afterTest, beforeTest } = await createTestHooks(testSuiteArg)
 await beforeTest()
 
-const rootDir = resolve(_dirname, './')
+const rootDir = resolve(_dirname, '../')
 
 // @ts-expect-error
 await nextDev({ port: process.env.PORT || 3000, dirname: rootDir }, 'default', rootDir)
