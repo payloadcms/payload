@@ -1,13 +1,15 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui/types'
+import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useEditDepth, useField, useTranslation } from '@payloadcms/ui'
-import { withCondition } from '@payloadcms/ui/forms'
+import { useField } from '@payloadcms/ui/forms/useField'
+import { withCondition } from '@payloadcms/ui/forms/withCondition'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import isHotkey from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'

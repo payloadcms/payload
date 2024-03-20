@@ -1,9 +1,10 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui/types'
 
-import { ShimmerEffect } from '@payloadcms/ui'
-import { useFieldPath } from '@payloadcms/ui/forms'
-import { useClientFunctions } from '@payloadcms/ui/providers'
+import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
+
+import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useClientFunctions } from '@payloadcms/ui/providers/ClientFunction'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 
 import type { RichTextPlugin } from '../types.js'
@@ -25,7 +26,7 @@ export const RichTextField: React.FC<
 > = (props) => {
   const { richTextComponentMap } = props
 
-  const { schemaPath } = useFieldPath()
+  const { schemaPath } = useFieldProps()
   const clientFunctions = useClientFunctions()
   const [hasLoadedPlugins, setHasLoadedPlugins] = useState(false)
 

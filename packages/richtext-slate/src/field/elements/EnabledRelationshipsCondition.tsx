@@ -3,7 +3,8 @@
 import type { ClientUser } from 'payload/auth'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { useAuth, useConfig } from '@payloadcms/ui/providers'
+import { useAuth } from '@payloadcms/ui/providers/Auth'
+import { useConfig } from '@payloadcms/ui/providers/Config'
 import * as React from 'react'
 
 type options = {

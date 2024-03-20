@@ -10,7 +10,12 @@ import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types.js'
+import type {
+  Context as FormContextType,
+  FormProps,
+  GetDataByPath,
+  SubmitOptions,
+} from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import useThrottledEffect from '../../hooks/useThrottledEffect.js'
@@ -41,7 +46,7 @@ import { mergeServerFormState } from './mergeServerFormState.js'
 
 const baseClass = 'form'
 
-export const Form: React.FC<Props> = (props) => {
+export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const {

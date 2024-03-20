@@ -1,6 +1,6 @@
 'use client'
 
-import type { Props as FormProps } from '@payloadcms/ui/forms/Form'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
 
 import { Form } from '@payloadcms/ui/forms/Form'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'

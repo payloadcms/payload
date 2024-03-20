@@ -1,5 +1,5 @@
 'use client'
-import type { Props as FormProps } from '@payloadcms/ui/forms/Form'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
 
 import { DocumentControls } from '@payloadcms/ui/elements/DocumentControls'
 import { DocumentFields } from '@payloadcms/ui/elements/DocumentFields'

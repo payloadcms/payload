@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 
-import type { Props as FormProps } from '../../forms/Form/index.js'
+import type { FormProps } from '../../forms/Form/index.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'

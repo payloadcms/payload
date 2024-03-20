@@ -1,4 +1,4 @@
-import type { Props as FormProps } from '@payloadcms/ui/forms/Form'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { FormState } from 'payload/types'
 
 import { Drawer } from '@payloadcms/ui/elements/Drawer'

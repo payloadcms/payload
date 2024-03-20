@@ -7,7 +7,7 @@ const { useLexicalComposerContext } = lexicalComposerContextImport
 import { getTranslation } from '@payloadcms/translations'
 import lexicalImport from 'lexical'
 const { $getNodeByKey } = lexicalImport
-import type { Props as FormProps } from '@payloadcms/ui/forms/Form'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
 
 import { Drawer } from '@payloadcms/ui/elements/Drawer'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
