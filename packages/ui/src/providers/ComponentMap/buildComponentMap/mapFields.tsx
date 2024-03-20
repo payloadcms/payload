@@ -42,7 +42,6 @@ import { FieldDescription as DefaultDescription } from '../../../forms/FieldDesc
 import { Label as DefaultLabel } from '../../../forms/Label/index.js'
 
 export const mapFields = (args: {
-  DefaultCell?: React.FC<any>
   config: SanitizedConfig
   /**
    * If mapFields is used outside of collections, you might not want it to add an id field
@@ -54,7 +53,6 @@ export const mapFields = (args: {
   readOnly?: boolean
 }): FieldMap => {
   const {
-    DefaultCell,
     config,
     disableAddingID,
     fieldSchema,
@@ -107,7 +105,6 @@ export const mapFields = (args: {
           field.fields &&
           Array.isArray(field.fields) &&
           mapFields({
-            DefaultCell,
             config,
             fieldSchema: field.fields,
             filter,
@@ -240,7 +237,6 @@ export const mapFields = (args: {
           case 'blocks': {
             const blocks = field.blocks.map((block) => {
               const blockFieldMap = mapFields({
-                DefaultCell,
                 config,
                 fieldSchema: block.fields,
                 filter,
@@ -530,7 +526,6 @@ export const mapFields = (args: {
             // `tabs` fields require a field map of each of its tab's nested fields
             const tabs = field.tabs.map((tab) => {
               const tabFieldMap = mapFields({
-                DefaultCell,
                 config,
                 fieldSchema: tab.fields,
                 filter,
@@ -645,14 +640,6 @@ export const mapFields = (args: {
           }
         }
 
-        const Cell = (
-          <RenderCustomComponent
-            CustomComponent={CustomCellComponent}
-            DefaultComponent={DefaultCell}
-            componentProps={cellComponentProps}
-          />
-        )
-
         const Heading = (
           <SortColumn
             disable={
@@ -674,11 +661,14 @@ export const mapFields = (args: {
         const reducedField: MappedField = {
           name: 'name' in field ? field.name : undefined,
           type: field.type,
-          Cell,
+          CustomCell: CustomCellComponent ? (
+            <CustomCellComponent {...cellComponentProps} />
+          ) : undefined,
           CustomField: CustomFieldComponent ? (
             <CustomFieldComponent {...fieldComponentProps} />
           ) : undefined,
           Heading,
+          cellComponentProps,
           disableBulkEdit:
             'admin' in field && 'disableBulkEdit' in field.admin && field.admin.disableBulkEdit,
           fieldComponentProps,
@@ -706,8 +696,10 @@ export const mapFields = (args: {
     result.push({
       name: 'id',
       type: 'text',
-      Cell: DefaultCell ? <DefaultCell name="id" /> : null,
       Heading: <SortColumn label="ID" name="id" />,
+      cellComponentProps: {
+        name: 'id',
+      },
       fieldComponentProps: {
         name: 'id',
         label: 'ID',

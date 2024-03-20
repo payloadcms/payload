@@ -8,7 +8,6 @@ import { mapActions } from './mapActions.js'
 import { mapFields } from './mapFields.js'
 
 export const buildComponentMap = (args: {
-  DefaultCell: React.FC<any>
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<EditViewProps>
   children: React.ReactNode
@@ -18,14 +17,7 @@ export const buildComponentMap = (args: {
   componentMap: ComponentMap
   wrappedChildren: React.ReactNode
 } => {
-  const {
-    DefaultCell,
-    DefaultEditView,
-    DefaultListView,
-    children,
-    config,
-    readOnly: readOnlyOverride,
-  } = args
+  const { DefaultEditView, DefaultListView, children, config, readOnly: readOnlyOverride } = args
 
   // Collections
   const collections = config.collections.reduce((acc, collectionConfig) => {
@@ -109,7 +101,6 @@ export const buildComponentMap = (args: {
         collectionConfig,
       }),
       fieldMap: mapFields({
-        DefaultCell,
         config,
         fieldSchema: fields,
         readOnly: readOnlyOverride,
@@ -147,7 +138,6 @@ export const buildComponentMap = (args: {
         globalConfig,
       }),
       fieldMap: mapFields({
-        DefaultCell,
         config,
         fieldSchema: fields,
         readOnly: readOnlyOverride,

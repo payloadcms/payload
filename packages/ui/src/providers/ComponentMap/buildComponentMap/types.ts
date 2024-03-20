@@ -1,6 +1,7 @@
 import type { FieldTypes } from 'payload/config'
 import type {
   BlockField,
+  CellProps,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TabsField,
@@ -62,9 +63,10 @@ export type FieldComponentProps =
   | UploadFieldProps
 
 export type MappedField = {
-  Cell: React.ReactNode
+  CustomCell?: React.ReactNode
   CustomField?: React.ReactNode
   Heading: React.ReactNode
+  cellComponentProps: CellProps
   disableBulkEdit?: boolean
   disabled?: boolean
   fieldComponentProps: FieldComponentProps

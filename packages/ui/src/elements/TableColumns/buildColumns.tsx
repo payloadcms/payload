@@ -8,6 +8,7 @@ import type { Column } from '../Table/index.js'
 
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
+import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 export const buildColumns = (args: {
   cellProps: Partial<CellProps>[]
@@ -61,6 +62,13 @@ export const buildColumns = (args: {
 
     const name = 'name' in field ? field.name : undefined
 
+    const Cell =
+      field.CustomCell !== undefined ? (
+        field.CustomCell
+      ) : (
+        <DefaultCell {...field.cellComponentProps} />
+      )
+
     if (field) {
       const column: Column = {
         name,
@@ -71,7 +79,7 @@ export const buildColumns = (args: {
           link: isFirstActiveColumn,
         },
         components: {
-          Cell: field.Cell,
+          Cell,
           Heading: field.Heading,
         },
         label: 'label' in field.fieldComponentProps ? field.fieldComponentProps.label : undefined,
