@@ -1,3 +1,5 @@
+import type { Where } from 'payload/types'
+
 import { getTranslation } from '@payloadcms/translations'
 import { flattenTopLevelFields } from 'payload/utilities'
 import React, { useReducer, useState } from 'react'
@@ -5,7 +7,7 @@ import React, { useReducer, useState } from 'react'
 import type { WhereBuilderProps } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
-// import useThrottledEffect from '../../hooks/useThrottledEffect'
+import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -59,7 +61,7 @@ export { WhereBuilderProps }
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
-  const { collectionPluralLabel, collectionSlug, handleChange, modifySearchQuery = true } = props
+  const { collectionPluralLabel, collectionSlug } = props
   const { i18n, t } = useTranslation()
 
   const config = useConfig()
@@ -67,15 +69,16 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
 
   const { searchParams } = useSearchParams()
+  const { handleWhereChange } = useListQuery()
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
   // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
   const [conditions, dispatchConditions] = useReducer(
-    reducer,
-    searchParams.where,
-    (whereFromSearch) => {
-      if (modifySearchQuery && whereFromSearch) {
+    reducer((state) => handleWhereChange({ or: state })),
+    searchParams.where as Where,
+    (whereFromSearch: Where) => {
+      if (whereFromSearch) {
         if (validateWhereQuery(whereFromSearch)) {
           return whereFromSearch.or
         }
@@ -87,65 +90,11 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           return transformedWhere.or
         }
 
-        console.warn('Invalid where query in URL. Ignoring.')
+        console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`)
       }
       return []
     },
   )
-
-  // This handles updating the search query (URL) when the where conditions change
-  // useThrottledEffect(
-  //   () => {
-  //     const currentParams = queryString.parse(history.location.search, {
-  //       depth: 10,
-  //       ignoreQueryPrefix: true,
-  //     }) as { where: Where }
-
-  //     const paramsToKeep =
-  //       typeof currentParams?.where === 'object' && 'or' in currentParams.where
-  //         ? currentParams.where.or.reduce((keptParams, param) => {
-  //             const newParam = { ...param }
-  //             if (param.and) {
-  //               delete newParam.and
-  //             }
-  //             return [...keptParams, newParam]
-  //           }, [])
-  //         : []
-
-  //     const hasNewWhereConditions = conditions.length > 0
-
-  //     const newWhereQuery = {
-  //       ...(typeof currentParams?.where === 'object' &&
-  //       (validateWhereQuery(currentParams?.where) || !hasNewWhereConditions)
-  //         ? currentParams.where
-  //         : {}),
-  //       or: [...conditions, ...paramsToKeep],
-  //     }
-
-  //     if (handleChange) handleChange(newWhereQuery as Where)
-
-  //     const hasExistingConditions =
-  //       typeof currentParams?.where === 'object' && 'or' in currentParams.where
-
-  //     if (
-  //       modifySearchQuery &&
-  //       ((hasExistingConditions && !hasNewWhereConditions) || hasNewWhereConditions)
-  //     ) {
-  //       history.replace({
-  //         search: queryString.stringify(
-  //           {
-  //             ...currentParams,
-  //             page: 1,
-  //             where: newWhereQuery,
-  //           },
-  //           { addQueryPrefix: true },
-  //         ),
-  //       })
-  //     }
-  //   },
-  //   500,
-  //   [conditions, modifySearchQuery, handleChange],
-  // )
 
   return (
     <div className={baseClass}>

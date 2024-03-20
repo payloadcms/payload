@@ -1,12 +1,9 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { usePathname, useRouter } from 'next/navigation.js'
 import { collectionDefaults } from 'payload/config'
-import qs from 'qs'
 import React from 'react'
 
 import { Chevron } from '../../icons/Chevron/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import './index.scss'
@@ -19,7 +16,6 @@ export type PerPageProps = {
   handleChange?: (limit: number) => void
   limit: number
   limits: number[]
-  modifySearchParams?: boolean
   resetPage?: boolean
 }
 
@@ -27,12 +23,7 @@ export const PerPage: React.FC<PerPageProps> = ({
   handleChange,
   limit,
   limits = defaultLimits,
-  modifySearchParams = true,
-  resetPage = false,
 }) => {
-  const { searchParams } = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
   const { t } = useTranslation()
 
   return (
@@ -60,18 +51,6 @@ export const PerPage: React.FC<PerPageProps> = ({
                 onClick={() => {
                   close()
                   if (handleChange) handleChange(limitNumber)
-                  if (modifySearchParams) {
-                    const search = qs.stringify(
-                      {
-                        ...searchParams,
-                        limit: limitNumber,
-                        page: resetPage ? 1 : searchParams.page,
-                      },
-                      { addQueryPrefix: true },
-                    )
-
-                    router.replace(`${pathname}${search}`)
-                  }
                 }}
               >
                 {limitNumber === Number(limit) && (
