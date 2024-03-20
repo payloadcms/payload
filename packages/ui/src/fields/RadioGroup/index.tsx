@@ -6,8 +6,8 @@ import type { FieldBase, Option } from 'payload/types'
 import { optionIsObject } from 'payload/types'
 import React, { useCallback } from 'react'
 
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -15,6 +15,9 @@ import { Radio } from './Radio/index.js'
 import './index.scss'
 
 const baseClass = 'radio-group'
+
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -34,11 +37,13 @@ export type OnChange<T = string> = (value: T) => void
 const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
   const {
     name,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
-    label,
+    descriptionProps,
+    errorProps,
+    labelProps,
     layout = 'horizontal',
     onChange: onChangeFromProps,
     options = [],
@@ -52,8 +57,6 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
   } = props
 
   const { uuid } = useForm()
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
@@ -92,8 +95,10 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>{Error}</div>
-      {Label}
+      <div className={`${baseClass}__error-wrap`}>
+        {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      </div>
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
       <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
         {options.map((option) => {
           let optionValue = ''
@@ -130,7 +135,11 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
           )
         })}
       </ul>
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

@@ -30,6 +30,7 @@ export const buildComponentMap = (args: {
     }
 
     const editViewFromConfig = collectionConfig?.admin?.components?.views?.Edit
+
     const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
 
     const CustomEditView =
@@ -52,6 +53,7 @@ export const buildComponentMap = (args: {
           : undefined
 
     const Edit = (CustomEditView as React.FC<EditViewProps>) || DefaultEditView
+
     const List = CustomListView || DefaultListView
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList

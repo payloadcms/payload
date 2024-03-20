@@ -2,6 +2,8 @@
 import type { FieldPermissions } from 'payload/auth'
 import type { FieldBase } from 'payload/types'
 
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React, { Fragment } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
@@ -10,7 +12,6 @@ import type { FormFieldBase } from '../shared/index.js'
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -36,18 +37,16 @@ export type GroupFieldProps = FormFieldBase & {
 
 const GroupField: React.FC<GroupFieldProps> = (props) => {
   const {
-    Description,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomLabel,
     className,
+    descriptionProps,
     fieldMap,
     hideGutter,
-    label,
-    required,
+    labelProps,
     style,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { path, permissions, readOnly, schemaPath } = useFieldProps()
   const { i18n } = useTranslation()
@@ -87,10 +86,14 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
         <GroupProvider>
           <div className={`${baseClass}__wrap`}>
             <div className={`${baseClass}__header`}>
-              {(Label || Description) && (
+              {(CustomLabel || CustomDescription) && (
                 <header>
-                  {Label}
-                  {Description}
+                  {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+                  {CustomDescription !== undefined ? (
+                    CustomDescription
+                  ) : (
+                    <FieldDescription {...(descriptionProps || {})} />
+                  )}
                 </header>
               )}
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}

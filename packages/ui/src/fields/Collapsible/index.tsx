@@ -7,7 +7,6 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -21,6 +20,9 @@ const baseClass = 'collapsible-field'
 
 import type { FieldPermissions } from 'payload/auth'
 import type { FieldBase } from 'payload/types'
+
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
@@ -36,17 +38,15 @@ export type CollapsibleFieldProps = FormFieldBase & {
 
 const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   const {
-    Description,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomLabel,
     className,
+    descriptionProps,
     fieldMap,
     initCollapsed = false,
-    label,
+    labelProps,
     path: pathFromProps,
-    required,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { path: pathFromContext, readOnly, schemaPath, siblingPermissions } = useFieldProps()
   const path = pathFromProps || pathFromContext
@@ -126,7 +126,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              {Label}
+              {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -143,7 +143,11 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
             schemaPath={schemaPath}
           />
         </CollapsibleElement>
-        {Description}
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
       </div>
     </Fragment>
   )

@@ -2,17 +2,17 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types.js'
+import type { FieldDescriptionProps } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useFieldProps } from '../FieldPropsProvider/index.js'
 import './index.scss'
 
-export { Props as FieldDescriptionProps }
+export { FieldDescriptionProps }
 
 const baseClass = 'field-description'
 
-export const FieldDescription: React.FC<Props> = (props) => {
+export const FieldDescription: React.FC<FieldDescriptionProps> = (props) => {
   const { className, description, marginPlacement } = props
 
   const { path } = useFieldProps()

@@ -1,3 +1,4 @@
+import type { HiddenInputFieldProps } from '@payloadcms/ui/fields/HiddenInput'
 import type { FieldTypes } from 'payload/config'
 import type {
   BlockField,
@@ -50,6 +51,7 @@ export type FieldComponentProps =
   | DateFieldProps
   | EmailFieldProps
   | GroupFieldProps
+  | HiddenInputFieldProps
   | JSONFieldProps
   | NumberFieldProps
   | PointFieldProps

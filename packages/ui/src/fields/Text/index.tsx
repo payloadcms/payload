@@ -7,7 +7,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { Option } from '../../elements/ReactSelect/types.js'
 import type { TextFieldProps, TextInputProps } from './types.js'
 
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -23,13 +22,15 @@ const TextField: React.FC<TextFieldProps> = (props) => {
     name,
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
+    descriptionProps,
+    errorProps,
     hasMany,
     inputRef,
-    label,
+    labelProps,
     localized,
     maxLength,
     maxRows,
@@ -43,8 +44,6 @@ const TextField: React.FC<TextFieldProps> = (props) => {
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const locale = useLocale()
 
@@ -115,12 +114,15 @@ const TextField: React.FC<TextFieldProps> = (props) => {
     <TextInput
       AfterInput={AfterInput}
       BeforeInput={BeforeInput}
-      Description={Description}
-      Error={Error}
-      Label={Label}
+      CustomDescription={CustomDescription}
+      CustomError={CustomError}
+      CustomLabel={CustomLabel}
       className={className}
+      descriptionProps={descriptionProps}
+      errorProps={errorProps}
       hasMany={hasMany}
       inputRef={inputRef}
+      labelProps={labelProps}
       maxRows={maxRows}
       minRows={minRows}
       onChange={

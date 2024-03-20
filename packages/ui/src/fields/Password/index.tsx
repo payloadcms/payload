@@ -1,11 +1,12 @@
 'use client'
 import type { ClientValidate, Description, Validate } from 'payload/types'
 
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -28,20 +29,19 @@ export type PasswordFieldProps = FormFieldBase & {
 export const PasswordField: React.FC<PasswordFieldProps> = (props) => {
   const {
     name,
-    Error,
-    Label: LabelFromProps,
+    CustomError,
+    CustomLabel,
     autoComplete,
     className,
     disabled,
-    label,
+    errorProps,
+    labelProps,
     path: pathFromProps,
     required,
     style,
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
@@ -67,8 +67,8 @@ export const PasswordField: React.FC<PasswordFieldProps> = (props) => {
         width,
       }}
     >
-      {Error}
-      {Label}
+      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
       <input
         autoComplete={autoComplete}
         disabled={formProcessing || disabled}

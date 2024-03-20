@@ -1,10 +1,12 @@
 'use client'
 import React, { useEffect } from 'react'
 
+import type { FormFieldBase } from '../index.js'
+
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 
-export type HiddenInputFieldProps = {
+export type HiddenInputFieldProps = FormFieldBase & {
   disableModifyingForm?: false
   name: string
   path?: string

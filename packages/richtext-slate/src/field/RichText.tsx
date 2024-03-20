@@ -6,6 +6,9 @@ import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
 import { getTranslation } from '@payloadcms/translations'
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useField } from '@payloadcms/ui/forms/useField'
 import { withCondition } from '@payloadcms/ui/forms/withCondition'
 import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
@@ -55,11 +58,14 @@ const RichTextField: React.FC<
 > = (props) => {
   const {
     name,
-    Description,
-    Error,
-    Label,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
+    descriptionProps,
     elements,
+    errorProps,
+    labelProps,
     leaves,
     path: pathFromProps,
     placeholder,
@@ -299,8 +305,8 @@ const RichTextField: React.FC<
       }}
     >
       <div className={`${baseClass}__wrap`}>
-        {Error}
-        {Label}
+        {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+        {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
         <Slate
           editor={editor}
           key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor
@@ -430,7 +436,11 @@ const RichTextField: React.FC<
             </div>
           </div>
         </Slate>
-        {Description}
+        {CustomDescription !== undefined ? (
+          CustomDescription
+        ) : (
+          <FieldDescription {...(descriptionProps || {})} />
+        )}
       </div>
     </div>
   )

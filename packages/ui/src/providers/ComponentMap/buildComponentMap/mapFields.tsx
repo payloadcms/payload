@@ -1,3 +1,4 @@
+import type { FieldDescriptionProps } from '@payloadcms/ui/forms/FieldDescription'
 import type { CellProps, Field, FieldWithPath, LabelProps, SanitizedConfig } from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
@@ -25,7 +26,6 @@ import type { TextFieldProps } from '../../../fields/Text/types.js'
 import type { TextareaFieldProps } from '../../../fields/Textarea/types.js'
 import type { UploadFieldProps } from '../../../fields/Upload/types.js'
 import type { FormFieldBase } from '../../../fields/shared/index.js'
-import type { Props as FieldDescription } from '../../../forms/FieldDescription/types.js'
 import type {
   FieldComponentProps,
   FieldMap,
@@ -34,11 +34,7 @@ import type {
   ReducedBlock,
 } from './types.js'
 
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
-import { Error as DefaultError } from '../../../forms/Error/index.js'
-import { FieldDescription as DefaultDescription } from '../../../forms/FieldDescription/index.js'
-import { Label as DefaultLabel } from '../../../forms/Label/index.js'
 
 export const mapFields = (args: {
   config: SanitizedConfig
@@ -89,7 +85,7 @@ export const mapFields = (args: {
           required: 'required' in field ? field.required : undefined,
         }
 
-        const descriptionProps: FieldDescription = {
+        const descriptionProps: FieldDescriptionProps = {
           description:
             field.admin &&
             'description' in field.admin &&
@@ -111,75 +107,83 @@ export const mapFields = (args: {
             readOnly: readOnlyOverride,
           })
 
-        const AfterInput = 'admin' in field &&
-          'components' in field.admin &&
-          'afterInput' in field.admin.components &&
-          Array.isArray(field.admin?.components?.afterInput) && (
-            <Fragment>
-              {field.admin.components.afterInput.map((Component, i) => (
-                <Component key={i} />
-              ))}
-            </Fragment>
-          )
+        const AfterInput =
+          ('admin' in field &&
+            'components' in field.admin &&
+            'afterInput' in field.admin.components &&
+            Array.isArray(field.admin?.components?.afterInput) && (
+              <Fragment>
+                {field.admin.components.afterInput.map((Component, i) => (
+                  <Component key={i} />
+                ))}
+              </Fragment>
+            )) ||
+          null
 
-        const BeforeInput = 'admin' in field &&
-          field.admin?.components &&
-          'beforeInput' in field.admin.components &&
-          Array.isArray(field.admin.components.beforeInput) && (
-            <Fragment>
-              {field.admin.components.beforeInput.map((Component, i) => (
-                <Component key={i} />
-              ))}
-            </Fragment>
-          )
+        const BeforeInput =
+          ('admin' in field &&
+            field.admin?.components &&
+            'beforeInput' in field.admin.components &&
+            Array.isArray(field.admin.components.beforeInput) && (
+              <Fragment>
+                {field.admin.components.beforeInput.map((Component, i) => (
+                  <Component key={i} />
+                ))}
+              </Fragment>
+            )) ||
+          null
 
-        const Description = (
-          <RenderCustomComponent
-            CustomComponent={
-              field.admin &&
-              'description' in field.admin &&
-              field.admin.description &&
-              typeof field.admin.description === 'function' &&
-              (field.admin.description as React.FC<any>)
-            }
-            DefaultComponent={DefaultDescription}
-            componentProps={descriptionProps}
-          />
-        )
+        const CustomDescriptionComponent =
+          (field.admin &&
+            'description' in field.admin &&
+            field.admin.description &&
+            typeof field.admin.description === 'function' &&
+            (field.admin.description as React.FC<any>)) ||
+          undefined
 
-        const Error = (
-          <RenderCustomComponent
-            CustomComponent={
-              'admin' in field &&
-              field.admin.components &&
-              'Error' in field.admin.components &&
-              field.admin?.components?.Error
-            }
-            DefaultComponent={DefaultError}
-            componentProps={{ path }}
-          />
-        )
+        const CustomDescription =
+          CustomDescriptionComponent !== undefined ? (
+            <CustomDescriptionComponent {...(descriptionProps || {})} />
+          ) : undefined
 
-        const Label = (
-          <RenderCustomComponent
-            CustomComponent={
-              'admin' in field &&
-              field.admin?.components &&
-              'Label' in field.admin.components &&
-              field.admin?.components?.Label
-            }
-            DefaultComponent={DefaultLabel}
-            componentProps={labelProps}
-          />
-        )
+        const CustomErrorComponent =
+          ('admin' in field &&
+            field.admin?.components &&
+            'Error' in field.admin.components &&
+            field.admin?.components?.Error) ||
+          undefined
+
+        const errorProps = {
+          path,
+        }
+
+        const CustomError =
+          CustomErrorComponent !== undefined ? (
+            <CustomErrorComponent {...(errorProps || {})} />
+          ) : undefined
+
+        const CustomLabelComponent =
+          ('admin' in field &&
+            field.admin?.components &&
+            'Label' in field.admin.components &&
+            field.admin?.components?.Label) ||
+          undefined
+
+        const CustomLabel =
+          CustomLabelComponent !== undefined ? (
+            <CustomLabelComponent {...(labelProps || {})} />
+          ) : undefined
 
         const baseFieldProps: FormFieldBase = {
           AfterInput,
           BeforeInput,
-          Description,
-          Error,
-          Label,
+          CustomDescription,
+          CustomError,
+          CustomLabel,
+          descriptionProps,
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
+          errorProps,
+          labelProps,
           path,
           required: 'required' in field ? field.required : undefined,
         }
@@ -324,7 +328,7 @@ export const mapFields = (args: {
 
             const collapsibleField: Omit<CollapsibleFieldProps, 'indexPath' | 'permissions'> = {
               ...baseFieldProps,
-              Label: CollapsibleLabel,
+              CustomLabel: CollapsibleLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: nestedFieldMap,

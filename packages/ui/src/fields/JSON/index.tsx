@@ -4,7 +4,7 @@ import type { ClientValidate } from 'payload/types'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -13,6 +13,9 @@ import './index.scss'
 const baseClass = 'json-field'
 
 import type { FieldBase, JSONField as JSONFieldType } from 'payload/types'
+
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -29,12 +32,14 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     name,
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
+    descriptionProps,
     editorOptions,
-    label,
+    errorProps,
+    labelProps,
     path: pathFromProps,
     readOnly,
     required,
@@ -42,8 +47,6 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
@@ -108,8 +111,8 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         width,
       }}
     >
-      {Error}
-      {Label}
+      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
       <div>
         {BeforeInput}
         <CodeEditor
@@ -121,7 +124,11 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         />
         {AfterInput}
       </div>
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

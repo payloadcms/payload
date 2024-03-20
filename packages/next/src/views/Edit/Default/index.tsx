@@ -145,7 +145,6 @@ export const DefaultEditView: React.FC = () => {
       entitySlug,
       user,
       collectionSlug,
-      userSlug,
       getVersions,
       getDocPermissions,
       isEditing,

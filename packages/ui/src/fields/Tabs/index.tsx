@@ -3,6 +3,7 @@ import type { FieldPermissions } from 'payload/auth'
 import type { DocumentPreferences } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { toKebabCase } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -39,8 +40,9 @@ export type TabsFieldProps = FormFieldBase & {
 const TabsField: React.FC<TabsFieldProps> = (props) => {
   const {
     name,
-    Description,
+    CustomDescription,
     className,
+    descriptionProps,
     forceRender = false,
     indexPath,
     path: pathFromProps,
@@ -143,7 +145,11 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
                   .filter(Boolean)
                   .join(' ')}
               >
-                {Description}
+                {CustomDescription ? (
+                  CustomDescription
+                ) : (
+                  <FieldDescription {...(descriptionProps || {})} />
+                )}
                 <RenderFields
                   fieldMap={activeTabConfig.fieldMap}
                   forceRender={forceRender}
