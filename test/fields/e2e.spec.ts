@@ -420,8 +420,10 @@ describe('fields', () => {
     test('should update point', async () => {
       await page.goto(url.edit(emptyGroupPoint.id))
       const longField = page.locator('#field-longitude-point')
+      // need to wait otherwise test runs through too fast to allow for new value to update pre-existing value
+      await wait(1000)
       await longField.fill('9')
-
+      await wait(1000)
       const latField = page.locator('#field-latitude-point')
       await latField.fill('-2')
 
@@ -449,11 +451,15 @@ describe('fields', () => {
 
     test('should be able to clear a value point', async () => {
       await page.goto(url.edit(filledGroupPoint.id))
+      // need to wait otherwise test runs through too fast to allow for new value to update pre-existing value
+      await wait(500)
 
       const groupLongitude = page.locator('#field-longitude-group__point')
+      await wait(500)
       await groupLongitude.fill('')
 
       const groupLatField = page.locator('#field-latitude-group__point')
+      await wait(500)
       await groupLatField.fill('')
 
       await saveDocAndAssert(page)

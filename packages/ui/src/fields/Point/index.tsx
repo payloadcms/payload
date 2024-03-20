@@ -84,6 +84,16 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     [setValue, value],
   )
 
+  const getLabelWithSuffix = (type: 'latitude' | 'longitude') => {
+    const suffix = type === 'longitude' ? 'Longitude' : 'Latitude'
+    const originalLabel = labelProps && labelProps.label ? labelProps.label : ''
+    const labelWithSuffix = `${originalLabel} - ${suffix}`
+    return {
+      ...labelProps,
+      label: labelWithSuffix,
+    }
+  }
+
   return (
     <div
       className={[
@@ -103,7 +113,11 @@ const PointField: React.FC<PointFieldProps> = (props) => {
       {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+          {CustomLabel !== undefined ? (
+            CustomLabel
+          ) : (
+            <FieldLabel {...getLabelWithSuffix('longitude')} />
+          )}
           <div className="input-wrapper">
             {BeforeInput}
             <input
@@ -120,7 +134,11 @@ const PointField: React.FC<PointFieldProps> = (props) => {
           </div>
         </li>
         <li>
-          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+          {CustomLabel !== undefined ? (
+            CustomLabel
+          ) : (
+            <FieldLabel {...getLabelWithSuffix('latitude')} />
+          )}
           <div className="input-wrapper">
             {BeforeInput}
             <input
