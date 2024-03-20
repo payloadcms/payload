@@ -4,6 +4,7 @@ import type { UploadInputProps } from '@payloadcms/ui/fields/Upload'
 import type { FieldType, Options } from '@payloadcms/ui/forms/useField'
 
 import { UploadInput } from '@payloadcms/ui/fields/Upload'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useAllFormFields } from '@payloadcms/ui/forms/Form'
 import { useField } from '@payloadcms/ui/forms/useField'
 import { useConfig } from '@payloadcms/ui/providers/Config'
@@ -22,7 +23,7 @@ type MetaImageProps = UploadInputProps & {
 }
 
 export const MetaImage: React.FC<MetaImageProps> = (props) => {
-  const { Label, hasGenerateImageFn, relationTo, required } = props || {}
+  const { CustomLabel, hasGenerateImageFn, labelProps, relationTo, required } = props || {}
 
   const field: FieldType<string> = useField(props as Options)
 
@@ -76,8 +77,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {Label}
-
+          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
           {required && (
             <span
               style={{
@@ -88,7 +88,6 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
               *
             </span>
           )}
-
           {hasGenerateImageFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -127,7 +126,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <UploadInput
-          Error={errorMessage} // TODO: Fix
+          CustomError={errorMessage}
           api={api}
           collection={collection}
           filterOptions={{}}

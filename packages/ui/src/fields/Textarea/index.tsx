@@ -7,7 +7,6 @@ import React, { useCallback } from 'react'
 
 import type { TextAreaInputProps, TextareaFieldProps } from './types.js'
 
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -23,11 +22,13 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
     name,
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
-    label,
+    descriptionProps,
+    errorProps,
+    labelProps,
     locale,
     localized,
     maxLength,
@@ -41,8 +42,6 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
 
@@ -72,10 +71,13 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
     <TextareaInput
       AfterInput={AfterInput}
       BeforeInput={BeforeInput}
-      Description={Description}
-      Error={Error}
-      Label={Label}
+      CustomDescription={CustomDescription}
+      CustomError={CustomError}
+      CustomLabel={CustomLabel}
       className={className}
+      descriptionProps={descriptionProps}
+      errorProps={errorProps}
+      labelProps={labelProps}
       onChange={(e) => {
         setValue(e.target.value)
       }}

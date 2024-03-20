@@ -10,7 +10,7 @@ import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 
 import { CodeCell } from './fields/Code/index.js'
-import cellComponents from './fields/index.js'
+import { cellComponents } from './fields/index.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 

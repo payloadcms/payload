@@ -3,6 +3,9 @@
 import type { FieldBase, NumberField as NumberFieldType } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { isNumber } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -10,7 +13,6 @@ import type { Option } from '../../elements/ReactSelect/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -36,12 +38,14 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     name,
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
+    descriptionProps,
+    errorProps,
     hasMany = false,
-    label,
+    labelProps,
     max = Infinity,
     maxRows = Infinity,
     min = -Infinity,
@@ -55,8 +59,6 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n, t } = useTranslation()
 
@@ -149,8 +151,8 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      {Error}
-      {Label}
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}
@@ -201,7 +203,11 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
           {AfterInput}
         </div>
       )}
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

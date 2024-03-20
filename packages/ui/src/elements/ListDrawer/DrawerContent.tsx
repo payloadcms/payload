@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { ListDrawerProps } from './types.js'
 
-import { Label } from '../../forms/Label/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { X } from '../../icons/X/index.js'
@@ -264,7 +264,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           )}
           {moreThanOneAvailableCollection && (
             <div className={`${baseClass}__select-collection-wrap`}>
-              <Label label={t('upload:selectCollectionToBrowse')} />
+              <FieldLabel label={t('upload:selectCollectionToBrowse')} />
               <ReactSelect
                 className={`${baseClass}__select-collection`}
                 onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect

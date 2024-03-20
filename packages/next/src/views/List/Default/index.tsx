@@ -16,6 +16,7 @@ import { PublishMany } from '@payloadcms/ui/elements/PublishMany'
 import { StaggeredShimmers } from '@payloadcms/ui/elements/ShimmerEffect'
 import { useStepNav } from '@payloadcms/ui/elements/StepNav'
 import { Table } from '@payloadcms/ui/elements/Table'
+import { RelationshipProvider } from '@payloadcms/ui/elements/Table/RelationshipProvider'
 import { UnpublishMany } from '@payloadcms/ui/elements/UnpublishMany'
 import { useWindowInfo } from '@payloadcms/ui/elements/WindowInfo'
 import { SetViewActions } from '@payloadcms/ui/providers/Actions'
@@ -30,7 +31,6 @@ import LinkImport from 'next/link.js'
 import { formatFilesize, isNumber } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
-import { RelationshipProvider } from './RelationshipProvider/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
@@ -134,6 +134,7 @@ export const DefaultListView: React.FC = () => {
                   uploadConfig: collectionConfig.upload,
                 }}
                 data={docs}
+                fieldMap={fieldMap}
               />
             </RelationshipProvider>
           )}

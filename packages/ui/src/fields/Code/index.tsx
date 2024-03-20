@@ -2,12 +2,14 @@
 'use client'
 import type { CodeField as CodeFieldType, FieldBase } from 'payload/types'
 
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -34,12 +36,14 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     name,
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
+    descriptionProps,
     editorOptions = {},
-    label,
+    errorProps,
+    labelProps,
     language = 'javascript',
     path: pathFromProps,
     readOnly,
@@ -48,8 +52,6 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -81,8 +83,8 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      {Error}
-      {Label}
+      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
       <div>
         {BeforeInput}
         <CodeEditor
@@ -94,7 +96,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         />
         {AfterInput}
       </div>
-      {Description}
+      {CustomDescription ? CustomDescription : <FieldDescription {...(descriptionProps || {})} />}
     </div>
   )
 }

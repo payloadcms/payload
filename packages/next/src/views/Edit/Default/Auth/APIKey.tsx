@@ -3,8 +3,8 @@ import type { PayloadRequest } from 'payload/types'
 
 import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
 import { GenerateConfirmation } from '@payloadcms/ui/elements/GenerateConfirmation'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFormFields } from '@payloadcms/ui/forms/Form'
-import { Label } from '@payloadcms/ui/forms/Label'
 import { useField } from '@payloadcms/ui/forms/useField'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
@@ -89,7 +89,7 @@ export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
   return (
     <React.Fragment>
       <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
-        <Label htmlFor={path} label={APIKeyLabel} />
+        <FieldLabel htmlFor={path} label={APIKeyLabel} />
         <input
           className={highlightedField ? 'highlight' : undefined}
           disabled

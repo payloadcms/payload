@@ -3,9 +3,9 @@ import type { FormField } from 'payload/types'
 
 import React, { useCallback } from 'react'
 
-import { Error } from '../../forms/Error/index.js'
+import { FieldError } from '../../forms/FieldError/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useFormFields } from '../../forms/Form/context.js'
-import { Label } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -50,8 +50,8 @@ export const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <Error path={path} />
-      <Label
+      <FieldError path={path} />
+      <FieldLabel
         htmlFor="field-confirm-password"
         label={t('authentication:confirmPassword')}
         required

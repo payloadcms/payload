@@ -1,12 +1,13 @@
 'use client'
 import type { ClientValidate } from 'payload/types'
 
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import React, { useCallback } from 'react'
 
 import type { CheckboxFieldProps } from './types.js'
 
 import { useForm } from '../../forms/Form/context.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
@@ -24,13 +25,15 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
     name,
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     checked: checkedFromProps,
     className,
+    descriptionProps,
     disableFormData,
-    label,
+    errorProps,
+    labelProps,
     onChange: onChangeFromProps,
     partialChecked,
     path: pathFromProps,
@@ -42,8 +45,6 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
   } = props
 
   const { uuid } = useForm()
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
@@ -88,21 +89,28 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>{Error}</div>
+      <div className={`${baseClass}__error-wrap`}>
+        {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      </div>
       <CheckboxInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}
-        Label={Label}
+        CustomLabel={CustomLabel}
         checked={checked}
         id={fieldID}
         inputRef={null}
+        labelProps={labelProps}
         name={path}
         onToggle={onToggle}
         partialChecked={partialChecked}
         readOnly={readOnly}
         required={required}
       />
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

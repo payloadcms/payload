@@ -3,11 +3,13 @@ import type { ClientValidate } from 'payload/types'
 import type { EmailField as EmailFieldType, FieldBase } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -28,12 +30,14 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
     name,
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     autoComplete,
     className,
-    label,
+    descriptionProps,
+    errorProps,
+    labelProps,
     path: pathFromProps,
     placeholder,
     readOnly,
@@ -42,8 +46,6 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
 
@@ -71,8 +73,8 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
         width,
       }}
     >
-      {Error}
-      {Label}
+      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
       <div>
         {BeforeInput}
         <input
@@ -87,7 +89,11 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
         />
         {AfterInput}
       </div>
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

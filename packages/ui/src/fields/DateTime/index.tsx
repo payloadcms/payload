@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
+import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -15,6 +15,9 @@ import './index.scss'
 const baseClass = 'date-time-field'
 
 import type { DateField, FieldBase } from 'payload/types'
+
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -34,12 +37,14 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
     name,
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
     date: datePickerProps,
-    label,
+    descriptionProps,
+    errorProps,
+    labelProps,
     path: pathFromProps,
     placeholder,
     readOnly,
@@ -48,8 +53,6 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
 
@@ -83,8 +86,10 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>{Error}</div>
-      {Label}
+      <div className={`${baseClass}__error-wrap`}>
+        {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      </div>
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
         {BeforeInput}
         <DatePickerField
@@ -98,7 +103,11 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
         />
         {AfterInput}
       </div>
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

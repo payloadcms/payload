@@ -1,5 +1,8 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'
@@ -12,10 +15,13 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
+    descriptionProps,
+    errorProps,
+    labelProps,
     onChange,
     path,
     placeholder,
@@ -46,8 +52,8 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      {Error}
-      {Label}
+      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
       {BeforeInput}
       <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
         <div className="textarea-inner">
@@ -66,7 +72,11 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         </div>
       </label>
       {AfterInput}
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

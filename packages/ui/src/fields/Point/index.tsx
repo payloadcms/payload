@@ -5,7 +5,6 @@ import type { ClientValidate, FieldBase } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -13,6 +12,10 @@ import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
 const baseClass = 'point'
+
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -30,11 +33,13 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     name,
     AfterInput,
     BeforeInput,
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     className,
-    label,
+    descriptionProps,
+    errorProps,
+    labelProps,
     path: pathFromProps,
     placeholder,
     readOnly,
@@ -44,8 +49,6 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     validate,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
 
@@ -97,10 +100,10 @@ const PointField: React.FC<PointFieldProps> = (props) => {
         width,
       }}
     >
-      {Error}
+      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {Label}
+          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
           <div className="input-wrapper">
             {BeforeInput}
             <input
@@ -117,7 +120,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
           </div>
         </li>
         <li>
-          {Label}
+          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
           <div className="input-wrapper">
             {BeforeInput}
             <input
@@ -134,7 +137,11 @@ const PointField: React.FC<PointFieldProps> = (props) => {
           </div>
         </li>
       </ul>
-      {Description}
+      {CustomDescription !== undefined ? (
+        CustomDescription
+      ) : (
+        <FieldDescription {...(descriptionProps || {})} />
+      )}
     </div>
   )
 }

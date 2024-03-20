@@ -3,6 +3,9 @@
 import type { ClientCollectionConfig, FilterOptionsResult, UploadField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
+import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
@@ -13,7 +16,6 @@ import { Button } from '../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { FileDetails } from '../../elements/FileDetails/index.js'
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
-import { Label as LabelComp } from '../../forms/Label/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
@@ -33,14 +35,17 @@ export type UploadInputProps = Omit<UploadFieldProps, 'filterOptions'> & {
 
 export const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {
-    Description,
-    Error,
-    Label: LabelFromProps,
+    CustomDescription,
+    CustomError,
+    CustomLabel,
     api = '/api',
     className,
     collection,
+    descriptionProps,
+    errorProps,
     filterOptions,
     label,
+    labelProps,
     onChange,
     readOnly,
     relationTo,
@@ -51,8 +56,6 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
     value,
     width,
   } = props
-
-  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n, t } = useTranslation()
 
@@ -130,8 +133,8 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
-        {Error}
-        {Label}
+        {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+        {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
         {collection?.upload && (
           <React.Fragment>
             {file && !missingFile && (
@@ -166,7 +169,11 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
                 </div>
               </div>
             )}
-            {Description}
+            {CustomDescription !== undefined ? (
+              CustomDescription
+            ) : (
+              <FieldDescription {...(descriptionProps || {})} />
+            )}
           </React.Fragment>
         )}
         {!readOnly && <DocumentDrawer onSave={onSave} />}
