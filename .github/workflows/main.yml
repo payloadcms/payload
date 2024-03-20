@@ -9,6 +9,10 @@ on:
 jobs:
   changes:
     runs-on: ubuntu-latest
+    # Cancels any in-progress runs with same ref
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     permissions:
       pull-requests: read
     outputs:
