@@ -16,7 +16,9 @@ import type { GroupFieldProps } from '../../forms/fields/Group/types.js'
 import type { JSONFieldProps } from '../../forms/fields/JSON/types.js'
 import type { NumberFieldProps } from '../../forms/fields/Number/types.js'
 import type { PointFieldProps } from '../../forms/fields/Point/types.js'
+import type { RadioFieldProps } from '../../forms/fields/RadioGroup/types.js'
 import type { RelationshipFieldProps } from '../../forms/fields/Relationship/types.js'
+import type { RichTextFieldProps } from '../../forms/fields/RichText/types.js'
 import type { RowFieldProps } from '../../forms/fields/Row/types.js'
 import type { SelectFieldProps } from '../../forms/fields/Select/types.js'
 import type { TabsFieldProps } from '../../forms/fields/Tabs/types.js'
@@ -460,8 +462,24 @@ export const mapFields = (args: {
             fieldComponentProps = relationshipField
             break
           }
+          case 'radio': {
+            const radioField: RadioFieldProps = {
+              ...baseFieldProps,
+              name: field.name,
+              className: field.admin?.className,
+              disabled: field.admin?.disabled,
+              options: field.options,
+              readOnly: field.admin?.readOnly,
+              required: field.required,
+              style: field.admin?.style,
+              width: field.admin?.width,
+            }
+
+            fieldComponentProps = radioField
+            break
+          }
           case 'richText': {
-            const richTextField = {
+            const richTextField: RichTextFieldProps = {
               ...baseFieldProps,
               name: field.name,
               className: field.admin?.className,
@@ -472,15 +490,12 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = richTextField
-
             const RichTextFieldComponent = field.editor.FieldComponent
             const RichTextCellComponent = field.editor.CellComponent
 
             if (typeof field.editor.generateComponentMap === 'function') {
               const result = field.editor.generateComponentMap({ config, schemaPath: path })
-              // @ts-expect-error-next-line // TODO: the `richTextComponentMap` is not found on the union type
-              fieldComponentProps.richTextComponentMap = result
+              richTextField.richTextComponentMap = result
               cellComponentProps.richTextComponentMap = result
             }
 
@@ -491,6 +506,8 @@ export const mapFields = (args: {
             if (RichTextCellComponent) {
               cellComponentProps.CellComponentOverride = <RichTextCellComponent />
             }
+
+            fieldComponentProps = richTextField
 
             break
           }
