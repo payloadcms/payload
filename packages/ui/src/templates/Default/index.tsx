@@ -1,18 +1,30 @@
+import type { Permissions, User } from 'payload/auth'
+import type { SanitizedConfig } from 'payload/types'
+
 import React from 'react'
 
-import type { Props } from './types.js'
-
-import { AppHeader } from '../../elements/Header/index.js'
+import { AppHeader } from '../../elements/AppHeader/index.js'
 import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { NavHamburger } from './NavHamburger/index.js'
+export { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
+export { Wrapper } from './Wrapper/index.js'
 import './index.scss'
 
 const baseClass = 'template-default'
 
-export const DefaultTemplate: React.FC<Props> = async ({
+export type DefaultTemplateProps = {
+  children?: React.ReactNode
+  className?: string
+  config: Promise<SanitizedConfig> | SanitizedConfig
+  i18n: any
+  permissions: Permissions
+  user: User
+}
+
+export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
   children,
   className,
   config: configPromise,

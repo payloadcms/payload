@@ -1,15 +1,25 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 
-import type { Props } from './types.js'
-
-import FileGraphic from '../../graphics/File/index.js'
-import useThumbnail from '../../hooks/useThumbnail.js'
+import { File } from '../../graphics/File/index.js'
+import { useThumbnail } from '../../hooks/useThumbnail.js'
 import './index.scss'
 
 const baseClass = 'thumbnail'
 
-const Thumbnail: React.FC<Props> = (props) => {
+import type { SanitizedCollectionConfig } from 'payload/types'
+
+export type ThumbnailProps = {
+  className?: string
+  collectionSlug?: string
+  doc?: Record<string, unknown>
+  fileSrc?: string
+  imageCacheTag?: string
+  size?: 'expand' | 'large' | 'medium' | 'small'
+  uploadConfig?: SanitizedCollectionConfig['upload']
+}
+
+export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
   const {
     className = '',
     collectionSlug,
@@ -35,8 +45,7 @@ const Thumbnail: React.FC<Props> = (props) => {
   return (
     <div className={classes}>
       {src && <img alt={filename as string} src={src} />}
-      {!src && <FileGraphic />}
+      {!src && <File />}
     </div>
   )
 }
-export default Thumbnail

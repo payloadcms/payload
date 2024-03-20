@@ -1,12 +1,19 @@
-import React from 'react'
+import type { I18n } from '@payloadcms/translations'
 
-import type { Props } from './types.js'
+import React from 'react'
 
 import './index.scss'
 
 const baseClass = 'error-pill'
 
-export const ErrorPill: React.FC<Props> = (props) => {
+export type ErrorPillProps = {
+  className?: string
+  count: number
+  i18n: I18n
+  withMessage?: boolean
+}
+
+export const ErrorPill: React.FC<ErrorPillProps> = (props) => {
   const { className, count, i18n, withMessage } = props
   const lessThan3Chars = !withMessage && count < 99
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import type { PaginatedDocs } from 'payload/database'
 
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
@@ -5,10 +6,10 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react'
 import type { Option } from '../../../ReactSelect/types.js'
 import type { GetResults, Props, ValueWithRelation } from './types.js'
 
-import useDebounce from '../../../../hooks/useDebounce.js'
+import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import ReactSelect from '../../../ReactSelect/index.js'
+import { ReactSelect } from '../../../ReactSelect/index.js'
 import './index.scss'
 import optionsReducer from './optionsReducer.js'
 
@@ -16,7 +17,7 @@ const baseClass = 'condition-value-relationship'
 
 const maxResultsPerRequest = 10
 
-const RelationshipField: React.FC<Props> = (props) => {
+export const RelationshipField: React.FC<Props> = (props) => {
   const { admin: { isSortable } = {}, disabled, hasMany, onChange, relationTo, value } = props
 
   const {
@@ -48,6 +49,7 @@ const RelationshipField: React.FC<Props> = (props) => {
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
       lastLoadedPage: lastLoadedPageArg,
       search: searchArg,
+      // eslint-disable-next-line @typescript-eslint/require-await
     }) => {
       let lastLoadedPageToUse = typeof lastLoadedPageArg !== 'undefined' ? lastLoadedPageArg : 1
       const lastFullyLoadedRelationToUse =
@@ -187,6 +189,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           const data = await response.json()
           addOptions({ docs: [data] }, relation)
         } else {
+          // eslint-disable-next-line no-console
           console.error(t('error:loadingDocument', { id }))
         }
       }
@@ -303,5 +306,3 @@ const RelationshipField: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default RelationshipField

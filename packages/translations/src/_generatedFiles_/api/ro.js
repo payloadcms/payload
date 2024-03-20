@@ -46,6 +46,8 @@ export default {
     deletedSuccessfully: 'Șters cu succes.',
     email: 'Email',
     notFound: 'Nu a fost găsit',
+    row: 'Rând',
+    rows: 'Rânduri',
     successfullyCreated: '{{label}} creat(ă) cu succes.',
     successfullyDuplicated: '{{label}} duplicat(ă) cu succes.',
     thisLanguage: 'Română',
@@ -77,6 +79,7 @@ export default {
       'Această valoare trebuie să fie mai mare decât lungimea minimă de {{minLength}} caractere.',
     notValidDate: '"{{value}}" nu este o dată valabilă.',
     required: 'Acest câmp este obligatoriu.',
+    requiresAtLeast: 'Acest domeniu necesită cel puțin {{count}} {{label}}.',
     requiresNoMoreThan: 'Acest câmp nu necesită mai mult de {{count}} {{label}}.',
     requiresTwoNumbers: 'Acest câmp necesită două numere.',
     shorterThanMax:

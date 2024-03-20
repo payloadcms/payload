@@ -1,7 +1,8 @@
 'use client'
+import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { SerializedEditorState } from 'lexical'
 
-import { type FormFieldBase, useField } from '@payloadcms/ui'
+import { useField } from '@payloadcms/ui/forms/useField'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 

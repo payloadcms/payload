@@ -1,8 +1,10 @@
 'use client'
+import type { CSSProperties } from 'react'
+
+export * as PopupList from './PopupButtonList/index.js'
+
 import * as facelessUIImport from '@faceless-ui/window-info'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-
-import type { Props } from './types.js'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
 import { PopupTrigger } from './PopupTrigger/index.js'
@@ -10,7 +12,27 @@ import './index.scss'
 
 const baseClass = 'popup'
 
-const Popup: React.FC<Props> = (props) => {
+export type PopupProps = {
+  backgroundColor?: CSSProperties['backgroundColor']
+  boundingRef?: React.MutableRefObject<HTMLElement>
+  button?: React.ReactNode
+  buttonClassName?: string
+  buttonType?: 'custom' | 'default' | 'none'
+  caret?: boolean
+  children?: React.ReactNode
+  className?: string
+  forceOpen?: boolean
+  horizontalAlign?: 'center' | 'left' | 'right'
+  initActive?: boolean
+  onToggleOpen?: (active: boolean) => void
+  render?: (any) => React.ReactNode
+  showOnHover?: boolean
+  showScrollbar?: boolean
+  size?: 'fit-content' | 'large' | 'medium' | 'small'
+  verticalAlign?: 'bottom' | 'top'
+}
+
+export const Popup: React.FC<PopupProps> = (props) => {
   const {
     boundingRef,
     button,
@@ -173,5 +195,3 @@ const Popup: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default Popup

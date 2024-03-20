@@ -8,9 +8,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { useFieldProps } from '../FieldPropsProvider/index.js'
 import './index.scss'
 
+export { Props as FieldDescriptionProps }
+
 const baseClass = 'field-description'
 
-const FieldDescription: React.FC<Props> = (props) => {
+export const FieldDescription: React.FC<Props> = (props) => {
   const { className, description, marginPlacement } = props
 
   const { path } = useFieldProps()
@@ -36,5 +38,3 @@ const FieldDescription: React.FC<Props> = (props) => {
 
   return null
 }
-
-export default FieldDescription

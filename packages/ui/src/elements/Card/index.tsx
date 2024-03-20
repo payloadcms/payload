@@ -1,9 +1,20 @@
-import React from 'react'
+import type { ElementType } from 'react'
 
-import type { Props } from './types.js'
+import React from 'react'
 
 import { Button } from '../Button/index.js'
 import './index.scss'
+
+export type Props = {
+  Link?: ElementType
+  actions?: React.ReactNode
+  buttonAriaLabel?: string
+  href?: string
+  id?: string
+  onClick?: () => void
+  title: string
+  titleAs?: ElementType
+}
 
 const baseClass = 'card'
 

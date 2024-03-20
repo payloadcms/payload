@@ -1,7 +1,7 @@
 import type { User } from 'payload/auth'
 import type { UIField } from 'payload/types'
 
-import { useAuth } from '@payloadcms/ui'
+import { useAuth } from '@payloadcms/ui/providers/Auth'
 import React, { useEffect, useState } from 'react'
 
 export const AuthDebug: React.FC<UIField> = () => {

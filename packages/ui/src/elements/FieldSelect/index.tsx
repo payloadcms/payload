@@ -2,18 +2,18 @@ import type { FieldWithPath } from 'payload/types'
 
 import React, { Fragment, useState } from 'react'
 
-import type { FieldMap, MappedField } from '../../index.js'
+import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
-import Label from '../../forms/Label/index.js'
+import { Label } from '../../forms/Label/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import ReactSelect from '../ReactSelect/index.js'
+import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
 
 const baseClass = 'field-select'
 
-type Props = {
+export type FieldSelectProps = {
   fieldMap: FieldMap
   setSelected: (fields: FieldWithPath[]) => void
 }
@@ -94,7 +94,7 @@ const reduceFields = (
   }, [])
 }
 
-export const FieldSelect: React.FC<Props> = ({ fieldMap, setSelected }) => {
+export const FieldSelect: React.FC<FieldSelectProps> = ({ fieldMap, setSelected }) => {
   const { t } = useTranslation()
   const [options] = useState(() => reduceFields(fieldMap))
 

@@ -2,7 +2,8 @@
 
 import type { FormField } from 'payload/types'
 
-import { useAllFormFields, useForm, useTranslation } from '@payloadcms/ui'
+import { useAllFormFields, useForm } from '@payloadcms/ui/forms/Form'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { defaults } from '../defaults.js'

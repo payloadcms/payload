@@ -6,7 +6,7 @@ import React from 'react'
 import type { Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import ReactSelect from '../../../ReactSelect/index.js'
+import { ReactSelect } from '../../../ReactSelect/index.js'
 
 const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {

@@ -1,8 +1,6 @@
 'use client'
 import React, { useRef, useState } from 'react'
 
-import type { Props } from './types.js'
-
 import { Copy } from '../../icons/Copy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Tooltip } from '../Tooltip/index.js'
@@ -10,7 +8,13 @@ import './index.scss'
 
 const baseClass = 'copy-to-clipboard'
 
-const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessage, value }) => {
+export type Props = {
+  defaultMessage?: string
+  successMessage?: string
+  value?: string
+}
+
+export const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessage, value }) => {
   const ref = useRef(null)
   const [copied, setCopied] = useState(false)
   const [hovered, setHovered] = useState(false)
@@ -50,5 +54,3 @@ const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessage, valu
 
   return null
 }
-
-export default CopyToClipboard

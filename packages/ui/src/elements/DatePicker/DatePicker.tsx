@@ -11,7 +11,7 @@ import type { Props } from './types.js'
 import { Calendar as CalendarIcon } from '../../icons/Calendar/index.js'
 import { X as XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { getDateLocale } from '../../utilities/formatDate/getDateLocale.js'
+import { getDateLocale } from '../../utilities/getDateLocale.js'
 import './index.scss'
 
 const baseClass = 'date-time-picker'
@@ -117,4 +117,5 @@ const DateTime: React.FC<Props> = (props) => {
   )
 }
 
+// eslint-disable-next-line no-restricted-exports
 export default DateTime

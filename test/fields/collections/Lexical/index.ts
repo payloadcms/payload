@@ -7,6 +7,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
   ConditionalLayoutBlock,

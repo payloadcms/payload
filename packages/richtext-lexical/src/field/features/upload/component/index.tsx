@@ -5,20 +5,18 @@ import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.
 const { useLexicalComposerContext } = lexicalComposerContextImport
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Button,
-  DrawerToggler,
-  FileGraphic,
-  useConfig,
-  useDocumentDrawer,
-  useDrawerSlug,
-  usePayloadAPI,
-  useThumbnail,
-  useTranslation,
-} from '@payloadcms/ui'
 import lexicalImport from 'lexical'
 const { $getNodeByKey } = lexicalImport
 
+import { Button } from '@payloadcms/ui/elements/Button'
+import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
+import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
+import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
+import { File } from '@payloadcms/ui/graphics/File'
+import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
+import { useThumbnail } from '@payloadcms/ui/hooks/useThumbnail'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useReducer, useState } from 'react'
 
 import type { ClientComponentProps } from '../../types.js'
@@ -112,7 +110,7 @@ const Component: React.FC<ElementProps> = (props) => {
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__topRow`}>
           <div className={`${baseClass}__thumbnail`}>
-            {thumbnailSRC ? <img alt={data?.filename} src={thumbnailSRC} /> : <FileGraphic />}
+            {thumbnailSRC ? <img alt={data?.filename} src={thumbnailSRC} /> : <File />}
           </div>
           <div className={`${baseClass}__topRowRightPanel`}>
             <div className={`${baseClass}__collectionLabel`}>

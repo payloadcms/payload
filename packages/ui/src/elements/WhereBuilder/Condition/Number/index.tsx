@@ -7,7 +7,7 @@ import './index.scss'
 
 const baseClass = 'condition-value-number'
 
-const NumberField: React.FC<Props> = ({ disabled, onChange, value }) => {
+export const NumberField: React.FC<Props> = ({ disabled, onChange, value }) => {
   const { t } = useTranslation()
   return (
     <input
@@ -20,5 +20,3 @@ const NumberField: React.FC<Props> = ({ disabled, onChange, value }) => {
     />
   )
 }
-
-export default NumberField

@@ -5,14 +5,42 @@ import LinkWithDefault from 'next/link.js'
 const Link = LinkWithDefault.default
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type { Props, RenderedTypeProps } from './types.js'
+import type { HTMLAttributes } from 'react'
+
+export type PillProps = {
+  alignIcon?: 'left' | 'right'
+  'aria-checked'?: boolean
+  'aria-controls'?: string
+  'aria-expanded'?: boolean
+  'aria-label'?: string
+  children?: React.ReactNode
+  className?: string
+  draggable?: boolean
+  elementProps?: HTMLAttributes<HTMLElement> & {
+    ref: React.RefCallback<HTMLElement>
+  }
+  icon?: React.ReactNode
+  id?: string
+  onClick?: () => void
+  pillStyle?: 'dark' | 'error' | 'light' | 'light-gray' | 'success' | 'warning' | 'white'
+  rounded?: boolean
+  to?: string
+}
+
+export type RenderedTypeProps = {
+  children: React.ReactNode
+  className?: string
+  onClick?: () => void
+  to: string
+  type?: 'button'
+}
 
 import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable/index.js'
 import './index.scss'
 
 const baseClass = 'pill'
 
-const DraggablePill: React.FC<Props> = (props) => {
+const DraggablePill: React.FC<PillProps> = (props) => {
   const { id, className } = props
 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
@@ -35,7 +63,7 @@ const DraggablePill: React.FC<Props> = (props) => {
   )
 }
 
-const StaticPill: React.FC<Props> = (props) => {
+const StaticPill: React.FC<PillProps> = (props) => {
   const {
     alignIcon = 'right',
     'aria-checked': ariaChecked,
@@ -91,11 +119,9 @@ const StaticPill: React.FC<Props> = (props) => {
   )
 }
 
-export const Pill: React.FC<Props> = (props) => {
+export const Pill: React.FC<PillProps> = (props) => {
   const { draggable } = props
 
   if (draggable) return <DraggablePill {...props} />
   return <StaticPill {...props} />
 }
-
-export default Pill

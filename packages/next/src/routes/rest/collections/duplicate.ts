@@ -19,7 +19,9 @@ export const duplicate: CollectionRouteHandlerWithID = async ({ id, collection, 
     req,
   })
 
-  const message = req.t('general:successfullyDuplicated', {label: getTranslation(collection.config.labels.singular, req.i18n)})
+  const message = req.t('general:successfullyDuplicated', {
+    label: getTranslation(collection.config.labels.singular, req.i18n),
+  })
 
   return Response.json(
     {

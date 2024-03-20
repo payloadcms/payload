@@ -1,15 +1,13 @@
 'use client'
-import {
-  Button,
-  Checkbox,
-  ConfirmPassword,
-  Email,
-  Password,
-  useConfig,
-  useFormFields,
-  useFormModified,
-  useTranslation,
-} from '@payloadcms/ui'
+
+import { Button } from '@payloadcms/ui/elements/Button'
+import { Checkbox } from '@payloadcms/ui/fields/Checkbox'
+import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'
+import { Email } from '@payloadcms/ui/fields/Email'
+import { Password } from '@payloadcms/ui/fields/Password'
+import { useFormFields, useFormModified } from '@payloadcms/ui/forms/Form'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 

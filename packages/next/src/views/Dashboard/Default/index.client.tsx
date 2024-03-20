@@ -1,18 +1,15 @@
 'use client'
-import type { EntityToGroup, Group } from '@payloadcms/ui'
+import type { EntityToGroup, Group } from '@payloadcms/ui/utilities/groupNavItems'
 import type { Permissions } from 'payload/auth'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Button,
-  Card,
-  EntityType,
-  SetViewActions,
-  groupNavItems,
-  useAuth,
-  useConfig,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements/Button'
+import { Card } from '@payloadcms/ui/elements/Card'
+import { SetViewActions } from '@payloadcms/ui/providers/Actions'
+import { useAuth } from '@payloadcms/ui/providers/Auth'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { EntityType, groupNavItems } from '@payloadcms/ui/utilities/groupNavItems'
 import React, { Fragment, useEffect, useState } from 'react'
 
 import './index.scss'

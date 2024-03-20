@@ -6,7 +6,7 @@ import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
-import type { DocumentInfo, DocumentInfoContext, DocumentInfoProps } from './types.js'
+import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
@@ -16,7 +16,7 @@ import { useTranslation } from '../Translation/index.js'
 
 const Context = createContext({} as DocumentInfoContext)
 
-export type { DocumentInfo, DocumentInfoContext, DocumentInfoProps }
+export type * from './types.js'
 
 export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 

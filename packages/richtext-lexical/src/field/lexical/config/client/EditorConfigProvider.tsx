@@ -1,5 +1,6 @@
 'use client'
-import type { FormFieldBase } from '@payloadcms/ui'
+
+import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 
 import * as React from 'react'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'

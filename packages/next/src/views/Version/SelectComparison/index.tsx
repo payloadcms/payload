@@ -2,8 +2,11 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { Where } from 'payload/types'
 
-import { useTranslation } from '@payloadcms/ui'
-import { ReactSelect, fieldBaseClass, formatDate, useConfig } from '@payloadcms/ui'
+import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
+import { fieldBaseClass } from '@payloadcms/ui/fields/shared'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 import qs from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 

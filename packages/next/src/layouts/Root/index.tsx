@@ -1,8 +1,9 @@
 import type { SanitizedConfig } from 'payload/types'
 
 import { translations } from '@payloadcms/translations/client'
-import { RootProvider, buildComponentMap } from '@payloadcms/ui'
+import { RootProvider } from '@payloadcms/ui/providers/Root'
 import '@payloadcms/ui/scss/app.scss'
+import { buildComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { parseCookies } from 'payload/auth'
 import { createClientConfig } from 'payload/config'

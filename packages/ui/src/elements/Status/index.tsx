@@ -15,7 +15,7 @@ import './index.scss'
 
 const baseClass = 'status'
 
-const Status: React.FC = () => {
+export const Status: React.FC = () => {
   const { Modal, useModal } = facelessUIImport
 
   const {
@@ -95,8 +95,10 @@ const Status: React.FC = () => {
           data = json.doc
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         resetForm(data)
         toast.success(json.message)
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         getVersions()
       } else {
         toast.error(t('error:unPublishingDocument'))
@@ -207,5 +209,3 @@ const Status: React.FC = () => {
 
   return null
 }
-
-export default Status

@@ -1,7 +1,8 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { EditViewComponent } from 'payload/types'
 
-import { Gutter, ListQueryProvider } from '@payloadcms/ui'
+import { Gutter } from '@payloadcms/ui/elements/Gutter'
+import { ListQueryProvider } from '@payloadcms/ui/providers/ListQuery'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/utilities'
 import React from 'react'

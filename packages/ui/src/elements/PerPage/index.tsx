@@ -5,22 +5,25 @@ import React from 'react'
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import * as PopupList from '../Popup/PopupButtonList/index.js'
-import Popup from '../Popup/index.js'
+import { Popup, PopupList } from '../Popup/index.js'
 import './index.scss'
 
 const baseClass = 'per-page'
 
 const defaultLimits = collectionDefaults.admin.pagination.limits
 
-export type Props = {
+export type PerPageProps = {
   handleChange?: (limit: number) => void
   limit: number
   limits: number[]
   resetPage?: boolean
 }
 
-export const PerPage: React.FC<Props> = ({ handleChange, limit, limits = defaultLimits }) => {
+export const PerPage: React.FC<PerPageProps> = ({
+  handleChange,
+  limit,
+  limits = defaultLimits,
+}) => {
   const { t } = useTranslation()
 
   return (

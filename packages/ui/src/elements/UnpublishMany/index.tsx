@@ -5,23 +5,27 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
-import type { Props } from './types.js'
-
-import { useRouteCache } from '../../index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
-import { SelectAllStatus, useSelection } from '../../providers/SelectionProvider/index.js'
+import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
-import Pill from '../Pill/index.js'
+import { Pill } from '../Pill/index.js'
 import './index.scss'
 
 const baseClass = 'unpublish-many'
 
-export const UnpublishMany: React.FC<Props> = (props) => {
+import type { ClientCollectionConfig } from 'payload/types'
+
+export type UnpublishManyProps = {
+  collection: ClientCollectionConfig
+}
+
+export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { collection: { slug, labels: { plural }, versions } = {} } = props
   const { Modal, useModal } = facelessUIImport
 

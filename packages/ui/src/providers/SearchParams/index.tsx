@@ -3,7 +3,12 @@ import { useSearchParams as useNextSearchParams } from 'next/navigation.js'
 import qs from 'qs'
 import React, { createContext, useContext } from 'react'
 
-import type { SearchParamsContext, State } from './types.js'
+export type SearchParamsContext = {
+  searchParams: qs.ParsedQs
+  stringifyParams: ({ params, replace }: { params: State; replace?: boolean }) => string
+}
+
+export type State = qs.ParsedQs
 
 const initialContext: SearchParamsContext = {
   searchParams: {},

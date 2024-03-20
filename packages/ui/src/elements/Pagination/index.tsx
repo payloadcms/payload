@@ -1,11 +1,9 @@
 'use client'
 import React from 'react'
 
-import type { Node, Props } from './types.js'
-
-import ClickableArrow from './ClickableArrow/index.js'
-import Page from './Page/index.js'
-import Separator from './Separator/index.js'
+import { ClickableArrow } from './ClickableArrow/index.js'
+import { Page } from './Page/index.js'
+import { Separator } from './Separator/index.js'
 import './index.scss'
 
 const nodeTypes = {
@@ -16,7 +14,33 @@ const nodeTypes = {
 
 const baseClass = 'paginator'
 
-export const Pagination: React.FC<Props> = (props) => {
+export type PaginationProps = {
+  hasNextPage?: boolean
+  hasPrevPage?: boolean
+  limit?: number
+  nextPage?: number
+  numberOfNeighbors?: number
+  onChange?: (page: number) => void
+  page?: number
+  prevPage?: number
+  totalPages?: number
+}
+
+export type Node =
+  | {
+      props?: {
+        direction?: 'left' | 'right'
+        isDisabled?: boolean
+        isFirstPage?: boolean
+        isLastPage?: boolean
+        page?: number
+        updatePage: (page?: number) => void
+      }
+      type: 'ClickableArrow' | 'Page' | 'Separator'
+    }
+  | number
+
+export const Pagination: React.FC<PaginationProps> = (props) => {
   const {
     hasNextPage = false,
     hasPrevPage = false,

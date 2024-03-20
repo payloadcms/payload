@@ -1,5 +1,4 @@
-import type {
-  CollectionConfig} from 'payload/types'
+import type { CollectionConfig } from 'payload/types'
 
 import { indexedFieldsSlug } from '../../slugs.js'
 

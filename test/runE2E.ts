@@ -69,7 +69,6 @@ function executePlaywright(suitePath: string, bail = false) {
   console.log(`Executing ${suitePath}...`)
   const playwrightCfg = path.resolve(
     dirname,
-    '..',
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 

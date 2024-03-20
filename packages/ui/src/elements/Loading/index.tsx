@@ -11,14 +11,14 @@ import './index.scss'
 
 const baseClass = 'loading-overlay'
 
-type Props = {
+type LoadingOverlayProps = {
   animationDuration?: string
   loadingText?: string
   overlayType?: string
   show?: boolean
 }
 
-export const LoadingOverlay: React.FC<Props> = ({
+export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   animationDuration,
   loadingText,
   overlayType,
@@ -52,13 +52,13 @@ export const LoadingOverlay: React.FC<Props> = ({
   )
 }
 
-type UseLoadingOverlayToggleT = {
+export type UseLoadingOverlayToggleProps = {
   loadingText?: string
   name: string
   show: boolean
   type?: LoadingOverlayTypes
 }
-export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({
+export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleProps> = ({
   name: key,
   type = 'fullscreen',
   loadingText,
@@ -86,14 +86,15 @@ export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({
   return null
 }
 
-type FormLoadingOverlayToggleT = {
+export type FormLoadingOverlayToggleProps = {
   action: 'create' | 'loading' | 'update'
   formIsLoading?: boolean
   loadingSuffix?: string
   name: string
   type?: LoadingOverlayTypes
 }
-export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({
+
+export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleProps> = ({
   name,
   type = 'fullscreen',
   action,

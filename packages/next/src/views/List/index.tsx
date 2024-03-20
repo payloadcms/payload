@@ -1,12 +1,10 @@
 import type { Where } from 'payload/types'
 
-import {
-  HydrateClientUser,
-  ListInfoProvider,
-  ListQueryProvider,
-  RenderCustomComponent,
-  TableColumnsProvider,
-} from '@payloadcms/ui'
+import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
+import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
+import { TableColumnsProvider } from '@payloadcms/ui/elements/TableColumns'
+import { ListInfoProvider } from '@payloadcms/ui/providers/ListInfo'
+import { ListQueryProvider } from '@payloadcms/ui/providers/ListQuery'
 import { notFound } from 'next/navigation.js'
 import { createClientCollectionConfig } from 'payload/config'
 import { type AdminViewProps } from 'payload/types'

@@ -1,6 +1,6 @@
-import { slateEditor } from '@payloadcms/richtext-slate'
-
 import type { CollectionConfig } from 'payload/types'
+
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { DemoUIFieldCell } from '../components/DemoUIField/Cell.js'
 import { DemoUIField } from '../components/DemoUIField/Field.js'

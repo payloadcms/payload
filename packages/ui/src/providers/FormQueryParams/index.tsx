@@ -6,7 +6,7 @@ import type { Action, FormQueryParamsContext, State } from './types.js'
 
 import { useLocale } from '../Locale/index.js'
 
-export type QueryParamTypes = State
+export type * from './types.js'
 
 export const FormQueryParams = createContext({} as FormQueryParamsContext)
 

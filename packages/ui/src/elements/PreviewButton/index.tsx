@@ -33,12 +33,15 @@ const DefaultPreviewButton: React.FC<DefaultPreviewButtonProps> = ({
   )
 }
 
-type Props = {
+export type PreviewButtonProps = {
   CustomComponent?: CustomPreviewButtonProps
   generatePreviewURL?: GeneratePreviewURL
 }
 
-const PreviewButton: React.FC<Props> = ({ CustomComponent, generatePreviewURL }) => {
+export const PreviewButton: React.FC<PreviewButtonProps> = ({
+  CustomComponent,
+  generatePreviewURL,
+}) => {
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const [isLoading, setIsLoading] = useState(false)
@@ -93,5 +96,3 @@ const PreviewButton: React.FC<Props> = ({ CustomComponent, generatePreviewURL })
     />
   )
 }
-
-export default PreviewButton

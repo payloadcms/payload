@@ -1,10 +1,17 @@
 'use client'
 import React, { useEffect } from 'react'
 
-import type { Props } from './types.js'
-
 import { useIntersect } from '../../hooks/useIntersect.js'
 import './index.scss'
+
+export type Props = {
+  alignCaret?: 'center' | 'left' | 'right'
+  boundingRef?: React.RefObject<HTMLElement>
+  children: React.ReactNode
+  className?: string
+  delay?: number
+  show?: boolean
+}
 
 export const Tooltip: React.FC<Props> = (props) => {
   const {

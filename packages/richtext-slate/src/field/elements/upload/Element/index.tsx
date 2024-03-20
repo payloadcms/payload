@@ -1,21 +1,18 @@
 'use client'
 
-import type { FormFieldBase } from '@payloadcms/ui/types'
+import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { ClientCollectionConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Button,
-  DrawerToggler,
-  FileGraphic,
-  useConfig,
-  useDocumentDrawer,
-  useDrawerSlug,
-  useListDrawer,
-  usePayloadAPI,
-  useThumbnail,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Button } from '@payloadcms/ui/elements/Button'
+import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
+import { DrawerToggler, useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
+import { useListDrawer } from '@payloadcms/ui/elements/ListDrawer'
+import { File } from '@payloadcms/ui/graphics/File'
+import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
+import { useThumbnail } from '@payloadcms/ui/hooks/useThumbnail'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
@@ -150,7 +147,7 @@ const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = (
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__topRow`}>
           <div className={`${baseClass}__thumbnail`}>
-            {thumbnailSRC ? <img alt={data?.filename} src={thumbnailSRC} /> : <FileGraphic />}
+            {thumbnailSRC ? <img alt={data?.filename} src={thumbnailSRC} /> : <File />}
           </div>
           <div className={`${baseClass}__topRowRightPanel`}>
             <div className={`${baseClass}__collectionLabel`}>

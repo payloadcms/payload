@@ -1,35 +1,31 @@
 'use client'
 
-import type { CollectionComponentMap } from '@payloadcms/ui'
+import type { CollectionComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  Button,
-  Gutter,
-  ListControls,
-  ListSelection,
-  Pagination,
-  PerPage,
-  Pill,
-  SelectionProvider,
-  StaggeredShimmers,
-  Table,
-  useComponentMap,
-  useConfig,
-  useListInfo,
-  useListQuery,
-  useSearchParams,
-  useStepNav,
-  useTranslation,
-  useWindowInfo,
-} from '@payloadcms/ui'
-import {
-  DeleteMany,
-  EditMany,
-  PublishMany,
-  SetViewActions,
-  UnpublishMany,
-} from '@payloadcms/ui/elements'
+import { Button } from '@payloadcms/ui/elements/Button'
+import { DeleteMany } from '@payloadcms/ui/elements/DeleteMany'
+import { EditMany } from '@payloadcms/ui/elements/EditMany'
+import { Gutter } from '@payloadcms/ui/elements/Gutter'
+import { ListControls } from '@payloadcms/ui/elements/ListControls'
+import { ListSelection } from '@payloadcms/ui/elements/ListSelection'
+import { Pagination } from '@payloadcms/ui/elements/Pagination'
+import { PerPage } from '@payloadcms/ui/elements/PerPage'
+import { Pill } from '@payloadcms/ui/elements/Pill'
+import { PublishMany } from '@payloadcms/ui/elements/PublishMany'
+import { StaggeredShimmers } from '@payloadcms/ui/elements/ShimmerEffect'
+import { useStepNav } from '@payloadcms/ui/elements/StepNav'
+import { Table } from '@payloadcms/ui/elements/Table'
+import { UnpublishMany } from '@payloadcms/ui/elements/UnpublishMany'
+import { useWindowInfo } from '@payloadcms/ui/elements/WindowInfo'
+import { SetViewActions } from '@payloadcms/ui/providers/Actions'
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useListInfo } from '@payloadcms/ui/providers/ListInfo'
+import { useListQuery } from '@payloadcms/ui/providers/ListQuery'
+import { useSearchParams } from '@payloadcms/ui/providers/SearchParams'
+import { SelectionProvider } from '@payloadcms/ui/providers/Selection'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import LinkImport from 'next/link.js'
 import { formatFilesize, isNumber } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'

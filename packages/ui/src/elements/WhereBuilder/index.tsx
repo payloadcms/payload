@@ -4,14 +4,14 @@ import { getTranslation } from '@payloadcms/translations'
 import { flattenTopLevelFields } from 'payload/utilities'
 import React, { useReducer, useState } from 'react'
 
-import type { Props } from './types.js'
+import type { WhereBuilderProps } from './types.js'
 
-import { useListQuery } from '../../index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import Condition from './Condition/index.js'
+import { Condition } from './Condition/index.js'
 import fieldTypes from './field-types.js'
 import './index.scss'
 import reducer from './reducer.js'
@@ -54,11 +54,13 @@ const reduceFields = (fields, i18n) =>
     return reduced
   }, [])
 
+export { WhereBuilderProps }
+
 /**
  * The WhereBuilder component is used to render the filter controls for a collection's list view.
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
-const WhereBuilder: React.FC<Props> = (props) => {
+export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, collectionSlug } = props
   const { i18n, t } = useTranslation()
 
@@ -162,5 +164,3 @@ const WhereBuilder: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default WhereBuilder

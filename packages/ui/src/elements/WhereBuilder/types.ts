@@ -1,6 +1,6 @@
 import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload/types'
 
-export type Props = {
+export type WhereBuilderProps = {
   collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
   collectionSlug: SanitizedCollectionConfig['slug']
 }
