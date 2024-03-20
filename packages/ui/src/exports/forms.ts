@@ -47,7 +47,9 @@ export { default as RadioGroupInput } from '../forms/fields/RadioGroup/index.js'
 export type { OnChange } from '../forms/fields/RadioGroup/types.js'
 export { default as Select } from '../forms/fields/Select/index.js'
 export { default as SelectInput } from '../forms/fields/Select/index.js'
+export type { SelectFieldProps } from '../forms/fields/Select/types.js'
 
+export type { TabsFieldProps } from '../forms/fields/Tabs/types.js'
 export { TextInput, type TextInputProps } from '../forms/fields/Text/Input.js'
 
 export { default as Text } from '../forms/fields/Text/index.js'

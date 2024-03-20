@@ -3,7 +3,6 @@ import type { JSONSchema4 } from 'json-schema'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, RichTextField, Validate } from '../fields/config/types.js'
 import type { PayloadRequest, RequestContext } from '../types/index.js'
-import type { CellComponentProps } from './elements/Cell.js'
 
 export type RichTextFieldProps<
   Value extends object,
