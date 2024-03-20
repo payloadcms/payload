@@ -82,6 +82,7 @@ const reducer =
     }
 
     if (callback) callback(newState)
+    return newState
   }
 
 export default reducer
