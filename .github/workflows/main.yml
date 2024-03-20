@@ -125,10 +125,10 @@ jobs:
       matrix:
         database:
           - mongodb
-        #  - postgres
-        #  - postgres-custom-schema
-        #  - postgres-uuid
-        #  - supabase
+          - postgres
+          - postgres-custom-schema
+          - postgres-uuid
+          - supabase
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
