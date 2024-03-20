@@ -31,6 +31,12 @@ export const buildComponentMap = (args: {
   const collections = config.collections.reduce((acc, collectionConfig) => {
     const { slug, fields } = collectionConfig
 
+    const internalCollections = ['payload-preferences', 'payload-migrations']
+
+    if (internalCollections.includes(slug)) {
+      return acc
+    }
+
     const editViewFromConfig = collectionConfig?.admin?.components?.views?.Edit
     const listViewFromConfig = collectionConfig?.admin?.components?.views?.List
 
