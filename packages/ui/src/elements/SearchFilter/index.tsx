@@ -20,7 +20,7 @@ import './index.scss'
 
 const baseClass = 'search-filter'
 
-const SearchFilter: React.FC<SearchFilterProps> = (props) => {
+export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
   const { fieldLabel = 'ID', fieldName = 'id', handleChange, listSearchableFields } = props
 
   const { searchParams } = useSearchParams()

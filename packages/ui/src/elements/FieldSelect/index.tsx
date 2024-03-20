@@ -2,10 +2,10 @@ import type { FieldWithPath } from 'payload/types'
 
 import React, { Fragment, useState } from 'react'
 
-import type { FieldMap, MappedField } from '../../index.js'
+import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useForm } from '../../forms/Form/context.js'
-import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath.js'
+import { createNestedClientFieldPath } from '../../forms/Form/createNestedFieldPath.js'
 import { Label } from '../../forms/Label/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'

@@ -2,7 +2,7 @@ import type { Field } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 
-import type { MappedField } from '../../index.js'
+import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 export const createNestedFieldPath = (parentPath: string, field: Field): string => {
   if (parentPath) {
