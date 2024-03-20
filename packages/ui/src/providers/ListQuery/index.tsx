@@ -7,7 +7,7 @@ import { isNumber } from 'payload/utilities'
 import qs from 'qs'
 import React, { createContext, useContext } from 'react'
 
-import type { Column } from '../../elements/Table/types.js'
+import type { Column } from '../../elements/Table/index.js'
 
 import { usePreferences } from '../Preferences/index.js'
 import { useSearchParams } from '../SearchParams/index.js'

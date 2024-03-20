@@ -119,7 +119,6 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
           collectionConfig={createClientCollectionConfig(collectionConfig)}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
-          listSearchableFields={collectionConfig.admin.listSearchableFields}
           newDocumentURL={`${admin}/collections/${collectionSlug}/create`}
         >
           <ListQueryProvider

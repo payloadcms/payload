@@ -1,7 +1,28 @@
 'use client'
+import type { ClientConfig, FieldAffectingData, SanitizedCollectionConfig } from 'payload/types'
+
 import React, { createContext, useContext } from 'react'
 
-import type { ListInfoContext, ListInfoProps } from './types.js'
+import type { Column } from '../../elements/Table/index.js'
+
+export type ColumnPreferences = Pick<Column, 'accessor' | 'active'>[]
+
+export type ListInfoProps = {
+  Header?: React.ReactNode
+  collectionConfig: ClientConfig['collections'][0]
+  collectionSlug: SanitizedCollectionConfig['slug']
+  hasCreatePermission: boolean
+  newDocumentURL: string
+  titleField?: FieldAffectingData
+}
+
+export type ListInfoContext = {
+  Header?: React.ReactNode
+  collectionSlug: string
+  hasCreatePermission: boolean
+  newDocumentURL: string
+  titleField?: FieldAffectingData
+}
 
 const Context = createContext({} as ListInfoContext)
 
@@ -11,20 +32,12 @@ export const ListInfoProvider: React.FC<
   ListInfoProps & {
     children: React.ReactNode
   }
-> = ({
-  children,
-  collectionSlug,
-  hasCreatePermission,
-  listSearchableFields,
-  newDocumentURL,
-  titleField,
-}) => {
+> = ({ children, collectionSlug, hasCreatePermission, newDocumentURL, titleField }) => {
   return (
     <Context.Provider
       value={{
         collectionSlug,
         hasCreatePermission,
-        listSearchableFields,
         newDocumentURL,
         titleField,
       }}

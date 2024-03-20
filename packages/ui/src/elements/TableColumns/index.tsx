@@ -4,7 +4,7 @@ import type { CellProps } from 'payload/types'
 
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListInfo/types.js'
+import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
 import type { Action } from './columnReducer.js'
 
