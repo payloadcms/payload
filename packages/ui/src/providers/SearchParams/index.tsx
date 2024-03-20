@@ -12,14 +12,18 @@ const initialContext: SearchParamsContext = {
 
 const Context = createContext(initialContext)
 
+function createParams(search: string) {
+  return qs.parse(search, {
+    depth: 10,
+    ignoreQueryPrefix: true,
+  })
+}
+
 // TODO: abstract the `next/navigation` dependency out from this provider so that it can be used in other contexts
 export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const nextSearchParams = useNextSearchParams()
   const searchString = nextSearchParams.toString()
-  const initialParams = qs.parse(searchString, {
-    depth: 10,
-    ignoreQueryPrefix: true,
-  })
+  const initialParams = createParams(searchString)
 
   const [searchParams, setSearchParams] = React.useState(initialParams)
 
@@ -37,11 +41,7 @@ export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({
   )
 
   React.useEffect(() => {
-    const newSearchParams = qs.parse(searchString, {
-      depth: 10,
-      ignoreQueryPrefix: true,
-    })
-    setSearchParams(newSearchParams)
+    setSearchParams(createParams(searchString))
   }, [searchString])
 
   return <Context.Provider value={{ searchParams, stringifyParams }}>{children}</Context.Provider>

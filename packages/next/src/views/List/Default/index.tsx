@@ -47,7 +47,6 @@ export const DefaultListView: React.FC = () => {
     handlePerPageChange,
     hasCreatePermission,
     limit,
-    modifySearchParams,
     newDocumentURL,
     titleField,
   } = useListInfo()
@@ -128,7 +127,6 @@ export const DefaultListView: React.FC = () => {
           <ListControls
             collectionConfig={collectionConfig}
             fieldMap={fieldMap}
-            modifySearchQuery={modifySearchParams}
             titleField={titleField}
           />
           {BeforeListTable}
@@ -165,7 +163,6 @@ export const DefaultListView: React.FC = () => {
           {data.docs && data.docs.length > 0 && (
             <div className={`${baseClass}__page-controls`}>
               <Pagination
-                disableHistoryChange={modifySearchParams === false}
                 hasNextPage={data.hasNextPage}
                 hasPrevPage={data.hasPrevPage}
                 limit={data.limit}
@@ -189,7 +186,6 @@ export const DefaultListView: React.FC = () => {
                     handleChange={handlePerPageChange}
                     limit={limit}
                     limits={collectionConfig?.admin?.pagination?.limits}
-                    modifySearchParams={modifySearchParams}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />
                   {smallBreak && (

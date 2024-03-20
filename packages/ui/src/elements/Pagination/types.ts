@@ -1,5 +1,4 @@
 export type Props = {
-  disableHistoryChange?: boolean
   hasNextPage?: boolean
   hasPrevPage?: boolean
   limit?: number

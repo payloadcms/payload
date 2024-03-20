@@ -3,7 +3,7 @@ import type { Where } from 'payload/types.js'
 
 import { useRouter } from 'next/navigation.js'
 import { isNumber } from 'payload/utilities'
-import QueryString from 'qs'
+import qs from 'qs'
 import React, { createContext, useContext } from 'react'
 
 import type { ListInfoContext, ListInfoProps } from './types.js'
@@ -51,9 +51,10 @@ export const ListInfoProvider: React.FC<
     async (query: RefineOverrides) => {
       if (!modifySearchParams) return
 
-      const currentQuery = QueryString.parse(window.location.search, {
+      const currentQuery = qs.parse(window.location.search, {
+        depth: 10,
         ignoreQueryPrefix: true,
-      }) as QueryString.ParsedQs & {
+      }) as qs.ParsedQs & {
         where: Where
       }
 
@@ -80,7 +81,7 @@ export const ListInfoProvider: React.FC<
         where: 'where' in query ? query.where : currentQuery?.where,
       }
 
-      router.replace(`?${QueryString.stringify(params)}`)
+      router.replace(`${qs.stringify(params, { addQueryPrefix: true })}`)
     },
     [collectionSlug, modifySearchParams, router, setPreference],
   )
@@ -133,7 +134,7 @@ export const ListInfoProvider: React.FC<
 
   React.useEffect(() => {
     if (!hasSetInitialParams.current) {
-      const currentQuery = QueryString.parse(window.location.search, {
+      const currentQuery = qs.parse(window.location.search, {
         ignoreQueryPrefix: true,
       })
       let shouldUpdateQueryString = false
@@ -147,7 +148,7 @@ export const ListInfoProvider: React.FC<
         shouldUpdateQueryString = true
       }
       if (shouldUpdateQueryString) {
-        router.replace(`?${QueryString.stringify(currentQuery)}`)
+        router.replace(`?${qs.stringify(currentQuery)}`)
       }
 
       hasSetInitialParams.current = true
@@ -167,7 +168,6 @@ export const ListInfoProvider: React.FC<
         hasCreatePermission,
         limit,
         listSearchableFields,
-        modifySearchParams,
         newDocumentURL,
         titleField,
       }}

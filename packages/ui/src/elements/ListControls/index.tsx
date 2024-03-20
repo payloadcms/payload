@@ -38,13 +38,12 @@ export const ListControls: React.FC<Props> = (props) => {
     enableColumns = true,
     enableSort = false,
     fieldMap,
-    modifySearchQuery = true,
     textFieldsToBeSearched,
     titleField,
   } = props
 
   const { useWindowInfo } = facelessUIImport
-  const { handleSearchChange, handleWhereChange } = useListInfo()
+  const { handleSearchChange } = useListInfo()
 
   const { searchParams } = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
@@ -138,8 +137,6 @@ export const ListControls: React.FC<Props> = (props) => {
         <WhereBuilder
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
-          handleChange={handleWhereChange}
-          modifySearchQuery={modifySearchQuery}
         />
       </AnimateHeight>
       {enableSort && (

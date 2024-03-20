@@ -24,7 +24,7 @@ export type ListInfoProps = {
   hasCreatePermission: boolean
   limit: SanitizedCollectionConfig['admin']['pagination']['defaultLimit']
   listSearchableFields?: SanitizedCollectionConfig['admin']['listSearchableFields']
-  modifySearchParams?: false
+  modifySearchParams?: boolean
   newDocumentURL: string
   page?: number
   setLimit?: (limit: number) => void
@@ -50,7 +50,6 @@ export type ListInfoContext = {
   hasCreatePermission: boolean
   limit: number
   listSearchableFields: SanitizedCollectionConfig['admin']['listSearchableFields']
-  modifySearchParams: boolean
   newDocumentURL: string
   titleField?: FieldAffectingData
 }
