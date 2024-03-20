@@ -73,7 +73,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
   // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
   const [conditions, dispatchConditions] = useReducer(
-    reducer,
+    reducer((state) => handleWhereChange({ or: state })),
     searchParams.where as Where,
     (whereFromSearch: Where) => {
       if (whereFromSearch) {
@@ -93,12 +93,6 @@ const WhereBuilder: React.FC<Props> = (props) => {
       return []
     },
   )
-
-  React.useEffect(() => {
-    handleWhereChange({
-      or: conditions,
-    })
-  }, [conditions, handleWhereChange])
 
   return (
     <div className={baseClass}>

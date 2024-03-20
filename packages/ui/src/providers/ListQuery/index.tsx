@@ -148,9 +148,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   React.useEffect(() => {
     if (!hasSetInitialParams.current) {
       if (modifySearchParams) {
-        const currentQuery = qs.parse(window.location.search, {
-          ignoreQueryPrefix: true,
-        })
         let shouldUpdateQueryString = false
 
         if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
@@ -168,7 +165,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       hasSetInitialParams.current = true
     }
-  }, [defaultSort, defaultLimit, router, modifySearchParams])
+  }, [defaultSort, defaultLimit, router, modifySearchParams, currentQuery])
 
   return (
     <Context.Provider

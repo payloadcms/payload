@@ -100,10 +100,11 @@ export const VersionsView: EditViewComponent = async (props) => {
   return (
     <React.Fragment>
       <SetStepNav
-        collectionSlug={collectionConfig?.slug}
+        collectionSlug={collectionConfig?.slug || globalConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
-        pluralLabel={collectionConfig?.labels?.plural}
+        pluralLabel={collectionConfig?.labels?.plural || globalConfig?.label}
+        useAsTitle={collectionConfig?.admin?.useAsTitle || globalConfig?.slug}
         view={i18n.t('version:versions')}
       />
       <main className={baseClass}>
