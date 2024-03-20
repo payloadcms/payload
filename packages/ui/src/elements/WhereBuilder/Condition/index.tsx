@@ -69,7 +69,8 @@ export const Condition: React.FC<Props> = (props) => {
     })
   }, [debouncedValue, dispatch, orIndex, andIndex])
 
-  const booleanSelect = ['exists'].includes(operatorValue) || activeField.props.type === 'checkbox'
+  const booleanSelect =
+    ['exists'].includes(operatorValue) || activeField?.props?.type === 'checkbox'
   const ValueComponent = booleanSelect
     ? Select
     : valueFields[activeField?.component] || valueFields.Text
@@ -113,9 +114,9 @@ export const Condition: React.FC<Props> = (props) => {
                 })
                 setInternalOperatorField(operator.value)
               }}
-              options={activeField.operators}
+              options={activeField?.operators}
               value={
-                activeField.operators.find(
+                activeField?.operators.find(
                   (operator) => internalOperatorField === operator.value,
                 ) || null
               }

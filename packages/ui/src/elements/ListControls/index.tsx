@@ -1,10 +1,5 @@
 'use client'
-import type {
-  ClientCollectionConfig,
-  FieldAffectingData,
-  SanitizedCollectionConfig,
-  Where,
-} from 'payload/types'
+import type { ClientCollectionConfig, FieldAffectingData, Where } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -15,11 +10,10 @@ import AnimateHeightImport from 'react-animate-height'
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
 
-import { useListInfo } from '@payloadcms/ui/providers/ListInfo'
-
 import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
+import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
@@ -43,7 +37,6 @@ export type ListControlsProps = {
   handleSearchChange?: (search: string) => void
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
-  modifySearchQuery?: boolean
   textFieldsToBeSearched?: FieldAffectingData[]
   titleField: FieldAffectingData
 }
@@ -59,13 +52,12 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableColumns = true,
     enableSort = false,
     fieldMap,
-    modifySearchQuery = true,
     textFieldsToBeSearched,
     titleField,
   } = props
 
   const { useWindowInfo } = facelessUIImport
-  const { handleSearchChange, handleWhereChange } = useListInfo()
+  const { handleSearchChange } = useListQuery()
 
   const { searchParams } = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
@@ -159,8 +151,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <WhereBuilder
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
-          handleChange={handleWhereChange}
-          modifySearchQuery={modifySearchQuery}
         />
       </AnimateHeight>
       {enableSort && (

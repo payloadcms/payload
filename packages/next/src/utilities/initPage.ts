@@ -79,7 +79,10 @@ export const initPage = async ({
       locale: locale.code,
       req: {
         i18n,
-        query: qs.parse(queryString, { ignoreQueryPrefix: true }),
+        query: qs.parse(queryString, {
+          depth: 10,
+          ignoreQueryPrefix: true,
+        }),
         url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
       } as PayloadRequest,
       user,

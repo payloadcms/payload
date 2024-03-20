@@ -3,7 +3,7 @@ import type { CellProps, SanitizedCollectionConfig } from 'payload/types'
 import React from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
-import type { ColumnPreferences } from '../../providers/ListInfo/types.js'
+import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
 
 import { SelectAll } from '../SelectAll/index.js'

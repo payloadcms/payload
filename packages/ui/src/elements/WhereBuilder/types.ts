@@ -3,8 +3,6 @@ import type { Field, Operator, SanitizedCollectionConfig, Where } from 'payload/
 export type WhereBuilderProps = {
   collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
   collectionSlug: SanitizedCollectionConfig['slug']
-  handleChange?: (where: Where) => void
-  modifySearchQuery?: boolean
 }
 
 export type FieldCondition = {
