@@ -7,7 +7,7 @@ import {
   TableColumnsProvider,
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
-import { createClientCollectionConfig } from 'packages/payload/src/collections/config/client.js'
+import { createClientCollectionConfig } from 'payload/config'
 import { type AdminViewProps } from 'payload/types'
 import { isEntityHidden, isNumber, mergeListSearchAndWhere } from 'payload/utilities'
 import React, { Fragment } from 'react'
