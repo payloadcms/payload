@@ -290,6 +290,7 @@ describe('uploads', () => {
         await page.locator('button:has-text("Apply Changes")').click()
         await page.waitForSelector('button#action-save')
         await page.locator('button#action-save').click()
+        await expect(page.locator('.Toastify')).toContainText('successfully')
         await wait(1000) // Wait for the save
       }
 
