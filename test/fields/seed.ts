@@ -53,8 +53,8 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: async (_payload) => {
-      const jpgPath = path.resolve(process.cwd(), './test/fields/collections/Upload/payload.jpg')
-      const pngPath = path.resolve(process.cwd(), './test/fields/uploads/payload.png')
+      const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
+      const pngPath = path.resolve(dirname, './uploads/payload.png')
 
       // Get both files in parallel
       const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])

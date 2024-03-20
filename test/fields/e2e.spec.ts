@@ -316,7 +316,7 @@ describe('fields', () => {
       await json.fill(input)
 
       await saveDocAndAssert(page, '.form-submit button')
-      await expect(page.locator('.json-field')).toContainText('"foo": "bar"')
+      await expect(page.locator('.json-field')).toContainText('"{\\"foo\\":\\"bar\\"}"')
     })
   })
 
