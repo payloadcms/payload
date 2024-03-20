@@ -3,6 +3,7 @@ import type { Where } from 'payload/types'
 import {
   HydrateClientUser,
   ListInfoProvider,
+  ListQueryProvider,
   RenderCustomComponent,
   TableColumnsProvider,
 } from '@payloadcms/ui'
@@ -39,6 +40,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
   }
 
   let listPreferences: ListPreferences
+  const preferenceKey = `${collectionSlug}-list`
 
   try {
     listPreferences = (await payload
@@ -49,7 +51,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
         user,
         where: {
           key: {
-            equals: `${collectionSlug}-list`,
+            equals: preferenceKey,
           },
         },
       })
@@ -118,25 +120,30 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
         <ListInfoProvider
           collectionConfig={createClientCollectionConfig(collectionConfig)}
           collectionSlug={collectionSlug}
-          data={data}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
-          limit={limit}
           listSearchableFields={collectionConfig.admin.listSearchableFields}
-          modifySearchParams
           newDocumentURL={`${admin}/collections/${collectionSlug}/create`}
-          page={page}
         >
-          <TableColumnsProvider
-            collectionSlug={collectionSlug}
-            enableRowSelections
-            listPreferences={listPreferences}
+          <ListQueryProvider
+            data={data}
+            defaultLimit={limit || collectionConfig?.admin?.pagination?.defaultLimit}
+            defaultSort={sort}
+            modifySearchParams
+            preferenceKey={preferenceKey}
           >
-            <RenderCustomComponent
-              CustomComponent={CustomListView}
-              DefaultComponent={DefaultListView}
-              componentProps={viewComponentProps}
-            />
-          </TableColumnsProvider>
+            <TableColumnsProvider
+              collectionSlug={collectionSlug}
+              enableRowSelections
+              listPreferences={listPreferences}
+              preferenceKey={preferenceKey}
+            >
+              <RenderCustomComponent
+                CustomComponent={CustomListView}
+                DefaultComponent={DefaultListView}
+                componentProps={viewComponentProps}
+              />
+            </TableColumnsProvider>
+          </ListQueryProvider>
         </ListInfoProvider>
       </Fragment>
     )

@@ -6,7 +6,7 @@ import React, { useReducer, useState } from 'react'
 
 import type { Props } from './types.js'
 
-import { useListInfo } from '../../index.js'
+import { useListQuery } from '../../index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -67,7 +67,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
   const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
 
   const { searchParams } = useSearchParams()
-  const { handleWhereChange } = useListInfo()
+  const { handleWhereChange } = useListQuery()
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.

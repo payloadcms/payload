@@ -21,10 +21,12 @@ export { useFormQueryParams } from '../providers/FormQueryParams/index.js'
 export { useListInfo } from '../providers/ListInfo/index.js'
 export { ListInfoProvider } from '../providers/ListInfo/index.js'
 export type { ColumnPreferences } from '../providers/ListInfo/types.js'
+export { ListQueryProvider, useListQuery } from '../providers/ListQuery/index.js'
 export { useLocale } from '../providers/Locale/index.js'
 export { OperationProvider } from '../providers/OperationProvider/index.js'
 export { RootProvider } from '../providers/Root/index.js'
 export { useRouteCache } from '../providers/RouteCache/index.js'
+export { useSearchParams } from '../providers/SearchParams/index.js'
 export {
   SelectAllStatus,
   SelectionProvider,

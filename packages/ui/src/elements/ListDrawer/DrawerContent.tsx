@@ -6,7 +6,6 @@ import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
-import type { ListPreferences } from '../TableColumns/index.js'
 import type { ListDrawerProps } from './types.js'
 
 import Label from '../../forms/Label/index.js'
@@ -17,6 +16,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useComponentMap } from '../../providers/ComponentMapProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListInfoProvider } from '../../providers/ListInfo/index.js'
+import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
@@ -55,7 +55,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
-  const { setPreference } = usePreferences()
+  const { getPreference, setPreference } = usePreferences()
   const { closeModal, isModalOpen } = useModal()
   const [limit, setLimit] = useState<number>()
   const [sort, setSort] = useState<string>(null)
@@ -280,41 +280,44 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       }
       collectionConfig={selectedCollectionConfig}
       collectionSlug={selectedCollectionConfig.slug}
-      data={data}
-      handlePageChange={setPage}
-      handlePerPageChange={setLimit}
-      handleSearchChange={setSearch}
-      handleSortChange={setSort}
-      handleWhereChange={setWhere}
       hasCreatePermission={hasCreatePermission}
-      limit={limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit}
-      modifySearchParams={false}
       newDocumentURL={null}
-      setLimit={setLimit}
-      setSort={setSort}
       titleField={titleField}
     >
-      <TableColumnsProvider
-        cellProps={[
-          {
-            className: `${baseClass}__first-cell`,
-            link: false,
-            onClick: ({ collectionSlug: rowColl, rowData }) => {
-              if (typeof onSelect === 'function') {
-                onSelect({
-                  collectionSlug: rowColl,
-                  docID: rowData.id as string,
-                })
-              }
-            },
-          },
-        ]}
-        collectionSlug={selectedCollectionConfig.slug}
-        listPreferences={{} as ListPreferences} // TODO: get list preferences
+      <ListQueryProvider
+        data={data}
+        defaultLimit={limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit}
+        defaultSort={sort}
+        handlePageChange={setPage}
+        handlePerPageChange={setLimit}
+        handleSearchChange={setSearch}
+        handleSortChange={setSort}
+        handleWhereChange={setWhere}
+        modifySearchParams={false}
+        preferenceKey={preferenceKey}
       >
-        {List}
-        <DocumentDrawer onSave={onCreateNew} />
-      </TableColumnsProvider>
+        <TableColumnsProvider
+          cellProps={[
+            {
+              className: `${baseClass}__first-cell`,
+              link: false,
+              onClick: ({ collectionSlug: rowColl, rowData }) => {
+                if (typeof onSelect === 'function') {
+                  onSelect({
+                    collectionSlug: rowColl,
+                    docID: rowData.id as string,
+                  })
+                }
+              },
+            },
+          ]}
+          collectionSlug={selectedCollectionConfig.slug}
+          preferenceKey={preferenceKey}
+        >
+          {List}
+          <DocumentDrawer onSave={onCreateNew} />
+        </TableColumnsProvider>
+      </ListQueryProvider>
     </ListInfoProvider>
   )
 }

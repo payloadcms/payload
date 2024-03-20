@@ -17,6 +17,8 @@ import {
   useComponentMap,
   useConfig,
   useListInfo,
+  useListQuery,
+  useSearchParams,
   useStepNav,
   useTranslation,
   useWindowInfo,
@@ -29,7 +31,7 @@ import {
   UnpublishMany,
 } from '@payloadcms/ui/elements'
 import LinkImport from 'next/link.js'
-import { formatFilesize } from 'payload/utilities'
+import { formatFilesize, isNumber } from 'payload/utilities'
 import React, { Fragment, useEffect } from 'react'
 
 import { RelationshipProvider } from './RelationshipProvider/index.js'
@@ -39,17 +41,9 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
-  const {
-    Header,
-    collectionSlug,
-    data,
-    handlePageChange,
-    handlePerPageChange,
-    hasCreatePermission,
-    limit,
-    newDocumentURL,
-    titleField,
-  } = useListInfo()
+  const { Header, collectionSlug, hasCreatePermission, newDocumentURL, titleField } = useListInfo()
+  const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
+  const { searchParams } = useSearchParams()
 
   const config = useConfig()
 
@@ -184,7 +178,9 @@ export const DefaultListView: React.FC = () => {
                   </div>
                   <PerPage
                     handleChange={handlePerPageChange}
-                    limit={limit}
+                    limit={
+                      isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
+                    }
                     limits={collectionConfig?.admin?.pagination?.limits}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />

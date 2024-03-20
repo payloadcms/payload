@@ -1,6 +1,5 @@
 'use client'
 import type { Column } from '@payloadcms/ui'
-import type { PaginatedDocs } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import {
@@ -11,23 +10,23 @@ import {
   Table,
   useComponentMap,
   useDocumentInfo,
-  usePayloadAPI,
+  useListQuery,
   useTranslation,
 } from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation.js'
-import React, { Fragment, useEffect, useRef } from 'react'
+import React from 'react'
 
 export const VersionsViewClient: React.FC<{
   baseClass: string
   columns: Column[]
   fetchURL: string
-  initialData: PaginatedDocs
   paginationLimits?: SanitizedCollectionConfig['admin']['pagination']['limits']
 }> = (props) => {
-  const { baseClass, columns, fetchURL, initialData, paginationLimits } = props
+  const { baseClass, columns, paginationLimits } = props
 
   const { getComponentMap } = useComponentMap()
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { collectionSlug, globalSlug } = useDocumentInfo()
+  const { data, handlePerPageChange } = useListQuery()
 
   const componentMap = getComponentMap({
     collectionSlug,
@@ -39,60 +38,12 @@ export const VersionsViewClient: React.FC<{
 
   const { i18n } = useTranslation()
 
-  const [{ data, isLoading }, { setParams }] = usePayloadAPI(fetchURL, {
-    initialData,
-    initialParams: {
-      depth: 1,
-      limit,
-      page: undefined,
-      sort: undefined,
-      where: {
-        parent: {
-          equals: id,
-        },
-      },
-    },
-  })
-
-  const hasInitialized = useRef(false)
-
-  useEffect(() => {
-    if (initialData && !hasInitialized.current) {
-      hasInitialized.current = true
-      return
-    }
-
-    const page = searchParams.get('page')
-    const sort = searchParams.get('sort')
-
-    const params = {
-      depth: 1,
-      limit,
-      page: undefined,
-      sort: undefined,
-      where: {},
-    }
-
-    if (page) params.page = page
-    if (sort) params.sort = sort
-
-    if (collectionSlug) {
-      params.where = {
-        parent: {
-          equals: id,
-        },
-      }
-    }
-
-    setParams(params)
-  }, [id, collectionSlug, searchParams, limit, initialData, setParams])
-
   const versionCount = data?.totalDocs || 0
 
   return (
-    <Fragment>
+    <React.Fragment>
       <SetViewActions actions={componentMap?.actionsMap?.Edit?.Versions} />
-      <LoadingOverlayToggle name="versions" show={isLoading} />
+      <LoadingOverlayToggle name="versions" show={!data} />
       {versionCount === 0 && (
         <div className={`${baseClass}__no-versions`}>
           {i18n.t('version:noFurtherVersionsFound')}
@@ -121,12 +72,16 @@ export const VersionsViewClient: React.FC<{
                     : data.totalDocs}{' '}
                   {i18n.t('general:of')} {data.totalDocs}
                 </div>
-                <PerPage limit={limit ? Number(limit) : 10} limits={paginationLimits} />
+                <PerPage
+                  handleChange={handlePerPageChange}
+                  limit={limit ? Number(limit) : 10}
+                  limits={paginationLimits}
+                />
               </React.Fragment>
             )}
           </div>
         </React.Fragment>
       )}
-    </Fragment>
+    </React.Fragment>
   )
 }

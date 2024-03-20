@@ -1,7 +1,9 @@
+import type { PaginatedDocs } from 'payload/database'
 import type { EditViewComponent } from 'payload/types'
 
-import { Gutter } from '@payloadcms/ui'
+import { Gutter, ListQueryProvider } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
+import { isNumber } from 'payload/utilities'
 import React from 'react'
 
 import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
@@ -35,14 +37,16 @@ export const VersionsView: EditViewComponent = async (props) => {
     serverURL,
   } = config
 
-  let versionsData
+  let versionsData: PaginatedDocs
+  let limitToUse = isNumber(limit) ? Number(limit) : undefined
 
   if (collectionSlug) {
+    limitToUse = limitToUse || collectionConfig.admin.pagination.defaultLimit
     try {
       versionsData = await payload.findVersions({
         collection: collectionSlug,
         depth: 0,
-        limit: limit ? parseInt(limit?.toString(), 10) : undefined,
+        limit: limitToUse,
         overrideAccess: false,
         page: page ? parseInt(page.toString(), 10) : undefined,
         sort: sort as string,
@@ -59,10 +63,12 @@ export const VersionsView: EditViewComponent = async (props) => {
   }
 
   if (globalSlug) {
+    limitToUse = limitToUse || 10
     try {
       versionsData = await payload.findGlobalVersions({
         slug: globalSlug,
         depth: 0,
+        limit: limitToUse,
         overrideAccess: false,
         page: page ? parseInt(page as string, 10) : undefined,
         sort: sort as string,
@@ -102,13 +108,19 @@ export const VersionsView: EditViewComponent = async (props) => {
       />
       <main className={baseClass}>
         <Gutter className={`${baseClass}__wrap`}>
-          <VersionsViewClient
-            baseClass={baseClass}
-            columns={columns}
-            fetchURL={fetchURL}
-            initialData={versionsData}
-            paginationLimits={collectionConfig?.admin?.pagination?.limits}
-          />
+          <ListQueryProvider
+            data={versionsData}
+            defaultLimit={limitToUse}
+            defaultSort={sort as string}
+            modifySearchParams
+          >
+            <VersionsViewClient
+              baseClass={baseClass}
+              columns={columns}
+              fetchURL={fetchURL}
+              paginationLimits={collectionConfig?.admin?.pagination?.limits}
+            />
+          </ListQueryProvider>
         </Gutter>
       </main>
     </React.Fragment>

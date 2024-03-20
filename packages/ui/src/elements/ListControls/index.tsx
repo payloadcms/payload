@@ -11,7 +11,7 @@ const AnimateHeight = (AnimateHeightImport.default ||
 import type { Props } from './types.js'
 
 import { Chevron } from '../../icons/Chevron/index.js'
-import { useListInfo } from '../../index.js'
+import { useListQuery } from '../../index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import ColumnSelector from '../ColumnSelector/index.js'
@@ -43,7 +43,7 @@ export const ListControls: React.FC<Props> = (props) => {
   } = props
 
   const { useWindowInfo } = facelessUIImport
-  const { handleSearchChange } = useListInfo()
+  const { handleSearchChange } = useListQuery()
 
   const { searchParams } = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)

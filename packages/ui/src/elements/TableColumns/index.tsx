@@ -30,13 +30,23 @@ export type ListPreferences = {
   columns: ColumnPreferences
 }
 
-export const TableColumnsProvider: React.FC<{
+type Props = {
   cellProps?: Partial<CellProps>[]
   children: React.ReactNode
   collectionSlug: string
   enableRowSelections?: boolean
-  listPreferences: ListPreferences
-}> = ({ cellProps, children, collectionSlug, enableRowSelections = false, listPreferences }) => {
+  listPreferences?: ListPreferences
+  preferenceKey: string
+}
+
+export const TableColumnsProvider: React.FC<Props> = ({
+  cellProps,
+  children,
+  collectionSlug,
+  enableRowSelections = false,
+  listPreferences,
+  preferenceKey,
+}) => {
   const config = useConfig()
 
   const { componentMap } = useComponentMap()
@@ -51,7 +61,6 @@ export const TableColumnsProvider: React.FC<{
     admin: { defaultColumns, useAsTitle },
   } = collectionConfig
 
-  const preferenceKey = `${collectionSlug}-list`
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()
@@ -75,13 +84,13 @@ export const TableColumnsProvider: React.FC<{
     const sync = async () => {
       const collectionHasChanged = prevCollection.current !== collectionSlug
 
-      if (collectionHasChanged) {
+      if (collectionHasChanged || !listPreferences) {
         const currentPreferences = await getPreference<{
           columns: ColumnPreferences
         }>(preferenceKey)
         prevCollection.current = collectionSlug
 
-        if (currentPreferences.columns) {
+        if (currentPreferences?.columns) {
           dispatchTableColumns({
             type: 'set',
             payload: {
@@ -108,6 +117,7 @@ export const TableColumnsProvider: React.FC<{
     cellProps,
     defaultColumns,
     useAsTitle,
+    listPreferences,
   ])
 
   // /////////////////////////////////////
