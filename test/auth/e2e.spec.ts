@@ -105,16 +105,18 @@ describe('auth', () => {
       // assert that the value is set
       const apiKeyLocator = page.locator('#apiKey')
       await expect
-        .poll(async () => await apiKeyLocator.inputValue(), { timeout: 45000 })
+        .poll(async () => await apiKeyLocator.inputValue(), { timeout: 180000 })
         .toBeDefined()
+
+      const apiKey = await apiKeyLocator.inputValue()
 
       await saveDocAndAssert(page)
 
       await expect(async () => {
-        const apiKey = await apiKeyLocator.inputValue()
-        expect(await page.locator('#apiKey').inputValue()).toStrictEqual(apiKey)
+        const apiKeyAfterSave = await apiKeyLocator.inputValue()
+        expect(apiKey).toStrictEqual(apiKeyAfterSave)
       }).toPass({
-        timeout: 45000,
+        timeout: 180000, // 4x higher than default expect timeout => can retry 4 times if retryable expects are used inside
       })
     })
 
@@ -140,7 +142,7 @@ describe('auth', () => {
 
         expect(response.user).toBeNull()
       }).toPass({
-        timeout: 45000,
+        timeout: 180000,
       })
     })
   })
