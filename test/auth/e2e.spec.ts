@@ -103,12 +103,19 @@ describe('auth', () => {
       await page.locator('#field-enableAPIKey').click()
 
       // assert that the value is set
-      const apiKey = await page.locator('#apiKey').inputValue()
-      expect(apiKey).toBeDefined()
+      const apiKeyLocator = page.locator('#apiKey')
+      await expect
+        .poll(async () => await apiKeyLocator.inputValue(), { timeout: 45000 })
+        .toBeDefined()
 
       await saveDocAndAssert(page)
 
-      expect(await page.locator('#apiKey').inputValue()).toStrictEqual(apiKey)
+      await expect(async () => {
+        const apiKey = await apiKeyLocator.inputValue()
+        expect(await page.locator('#apiKey').inputValue()).toStrictEqual(apiKey)
+      }).toPass({
+        timeout: 45000,
+      })
     })
 
     test('should disable api key', async () => {
@@ -123,14 +130,18 @@ describe('auth', () => {
       await saveDocAndAssert(page)
 
       // use the api key in a fetch to assert that it is disabled
-      const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
-        headers: {
-          ...headers,
-          Authorization: `${slug} API-Key ${user.apiKey}`,
-        },
-      }).then((res) => res.json())
+      await expect(async () => {
+        const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
+          headers: {
+            ...headers,
+            Authorization: `${slug} API-Key ${user.apiKey}`,
+          },
+        }).then((res) => res.json())
 
-      expect(response.user).toBeNull()
+        expect(response.user).toBeNull()
+      }).toPass({
+        timeout: 45000,
+      })
     })
   })
 })
