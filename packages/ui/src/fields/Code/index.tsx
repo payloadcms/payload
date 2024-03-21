@@ -83,8 +83,8 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
-      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+      <FieldError CustomError={CustomError} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
       <div>
         {BeforeInput}
         <CodeEditor

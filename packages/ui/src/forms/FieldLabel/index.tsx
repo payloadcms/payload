@@ -10,8 +10,9 @@ import { useFieldProps } from '../FieldPropsProvider/index.js'
 import { useForm } from '../Form/context.js'
 import './index.scss'
 
-export const FieldLabel: React.FC<LabelProps> = (props) => {
+const DefaultFieldLabel: React.FC<LabelProps> = (props) => {
   const { htmlFor: htmlForFromProps, label: labelFromProps, required = false } = props
+
   const { uuid } = useForm()
   const { path } = useFieldProps()
   const htmlFor = htmlForFromProps || generateFieldID(path, uuid)
@@ -28,4 +29,14 @@ export const FieldLabel: React.FC<LabelProps> = (props) => {
   }
 
   return null
+}
+
+export const FieldLabel: React.FC<LabelProps> = (props) => {
+  const { CustomLabel } = props
+
+  if (CustomLabel !== undefined) {
+    return CustomLabel
+  }
+
+  return <DefaultFieldLabel {...props} />
 }

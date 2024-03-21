@@ -87,9 +87,9 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+        <FieldError CustomError={CustomError} {...(errorProps || {})} />
       </div>
-      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
         {BeforeInput}
         <DatePickerField

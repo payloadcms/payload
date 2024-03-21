@@ -198,14 +198,14 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
     >
       {showError && (
         <div className={`${baseClass}__error-wrap`}>
-          {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+          <FieldError CustomError={CustomError} {...(errorProps || {})} />
         </div>
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
-              {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+              <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
@@ -234,11 +234,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

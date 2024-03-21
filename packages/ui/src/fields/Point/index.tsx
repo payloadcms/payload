@@ -100,10 +100,10 @@ const PointField: React.FC<PointFieldProps> = (props) => {
         width,
       }}
     >
-      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      <FieldError CustomError={CustomError} {...(errorProps || {})} />
       <ul className={`${baseClass}__wrap`}>
         <li>
-          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
           <div className="input-wrapper">
             {BeforeInput}
             <input
@@ -120,7 +120,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
           </div>
         </li>
         <li>
-          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
           <div className="input-wrapper">
             {BeforeInput}
             <input

@@ -11,7 +11,7 @@ import './index.scss'
 
 const baseClass = 'field-error'
 
-export const FieldError: React.FC<ErrorProps> = (props) => {
+const DefaultFieldError: React.FC<ErrorProps> = (props) => {
   const {
     alignCaret = 'right',
     message: messageFromProps,
@@ -39,4 +39,14 @@ export const FieldError: React.FC<ErrorProps> = (props) => {
   }
 
   return null
+}
+
+export const FieldError: React.FC<ErrorProps> = (props) => {
+  const { CustomError } = props
+
+  if (CustomError !== undefined) {
+    return CustomError
+  }
+
+  return <DefaultFieldError {...props} />
 }

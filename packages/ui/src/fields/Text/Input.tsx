@@ -58,8 +58,8 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
-      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+      <FieldError CustomError={CustomError} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}
