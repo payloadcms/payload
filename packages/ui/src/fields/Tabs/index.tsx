@@ -7,7 +7,7 @@ import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { toKebabCase } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { FieldMap, MappedTab } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { MappedTab } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
@@ -27,7 +27,6 @@ const baseClass = 'tabs-field'
 export { TabsProvider }
 
 export type TabsFieldProps = FormFieldBase & {
-  fieldMap: FieldMap
   forceRender?: boolean
   indexPath: string
   name?: string

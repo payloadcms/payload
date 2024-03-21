@@ -31,15 +31,11 @@ import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 
-import type {
-  FieldMap,
-  ReducedBlock,
-} from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
-  fieldMap: FieldMap
   forceRender?: boolean
   indexPath: string
   label?: FieldBase['label']
