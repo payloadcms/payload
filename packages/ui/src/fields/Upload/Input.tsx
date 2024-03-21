@@ -131,8 +131,8 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
           width,
         }}
       >
-        {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
-        {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+        <FieldError CustomError={CustomError} {...(errorProps || {})} />
+        <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
         {collection?.upload && (
           <React.Fragment>
             {file && !missingFile && (

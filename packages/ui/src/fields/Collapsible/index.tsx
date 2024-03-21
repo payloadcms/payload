@@ -124,7 +124,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
           collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
           header={
             <div className={`${baseClass}__row-label-wrap`}>
-              {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+              <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           }
@@ -141,11 +141,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
             schemaPath={schemaPath}
           />
         </CollapsibleElement>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </div>
     </Fragment>
   )

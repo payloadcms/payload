@@ -23,12 +23,14 @@ const Nested: React.FC<Props> = ({
 }) => {
   return (
     <div className={baseClass}>
-      {'label' in field.fieldComponentProps && field.fieldComponentProps.label && (
-        <Label>
-          {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {getTranslation(field.fieldComponentProps.label, i18n)}
-        </Label>
-      )}
+      {'label' in field.fieldComponentProps &&
+        field.fieldComponentProps.label &&
+        typeof field.fieldComponentProps.label !== 'function' && (
+          <Label>
+            {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
+            {getTranslation(field.fieldComponentProps.label, i18n)}
+          </Label>
+        )}
       <div
         className={[`${baseClass}__wrap`, !disableGutter && `${baseClass}__wrap--gutter`]
           .filter(Boolean)

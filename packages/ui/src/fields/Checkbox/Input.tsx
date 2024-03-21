@@ -74,7 +74,7 @@ export const CheckboxInput: React.FC<Props> = ({
         </span>
         {AfterInput}
       </div>
-      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
     </div>
   )
 }

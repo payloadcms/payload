@@ -440,8 +440,8 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
         width,
       }}
     >
-      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
-      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+      <FieldError CustomError={CustomError} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect

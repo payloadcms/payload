@@ -36,6 +36,7 @@ const Text: React.FC<Props> = ({
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
         {'label' in field.fieldComponentProps &&
+          typeof field.fieldComponentProps.label !== 'function' &&
           getTranslation(field.fieldComponentProps.label || '', i18n)}
       </Label>
       <DiffViewer
