@@ -32,7 +32,7 @@ import './index.scss'
 const baseClass = 'array-field'
 
 export type ArrayFieldProps = FormFieldBase & {
-  RowLabel?: React.ReactNode
+  CustomRowLabel?: React.ReactNode
   fieldMap: FieldMap
   forceRender?: boolean
   indexPath: string
@@ -51,7 +51,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
     CustomDescription,
     CustomError,
     CustomLabel,
-    RowLabel,
+    CustomRowLabel,
     className,
     descriptionProps,
     errorProps,
@@ -252,7 +252,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
               {(draggableSortableItemProps) => (
                 <ArrayRow
                   {...draggableSortableItemProps}
-                  CustomRowLabel={RowLabel}
+                  CustomRowLabel={CustomRowLabel}
                   addRow={addRow}
                   duplicateRow={duplicateRow}
                   fieldMap={fieldMap}
