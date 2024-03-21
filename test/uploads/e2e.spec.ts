@@ -76,7 +76,8 @@ describe('uploads', () => {
     await wait(110)
     const field = page.locator('.cell-image')
 
-    await expect(field).toContainText('<No Image>')
+    // WIP: this should be `image.png` which is the FileName
+    await expect(field).toContainText('image.png')
   })
 
   test('should show upload filename in upload collection list', async () => {
