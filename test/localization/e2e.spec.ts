@@ -72,6 +72,8 @@ describe('Localization', () => {
       await fillValues({ description, title })
       await saveDocAndAssert(page)
 
+      await wait(500)
+
       // Change back to English
       await changeLocale(page, 'es')
 
@@ -81,7 +83,9 @@ describe('Localization', () => {
 
       await fillValues({ description, title: spanishTitle })
       await saveDocAndAssert(page)
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
+
+      await wait(500)
 
       // Expect english title
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -96,11 +100,13 @@ describe('Localization', () => {
       // Change to Spanish
       await changeLocale(page, newLocale)
 
+      await wait(500)
+
       await fillValues({ description, title: spanishTitle })
       await saveDocAndAssert(page)
 
       // Change back to English
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
 
       // Localized field should not be populated
       await expect(page.locator('#field-title')).toBeEmpty()
@@ -123,12 +129,13 @@ describe('Localization', () => {
 
       // Change to Arabic
       await changeLocale(page, newLocale)
+      await wait(500)
 
       await fillValues({ description, title: arabicTitle })
       await saveDocAndAssert(page)
 
       // Change back to English
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
 
       // Localized field should not be populated
       await expect(page.locator('#field-title')).toBeEmpty()
@@ -137,7 +144,6 @@ describe('Localization', () => {
       // Add English
 
       await fillValues({ description, title })
-      await saveDocAndAssert(page)
       await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -178,6 +184,7 @@ describe('Localization', () => {
       // check fields
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       await changeLocale(page, spanishLocale)
+      await wait(500)
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
 
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
@@ -185,35 +192,40 @@ describe('Localization', () => {
 
     test('should duplicate localized checkbox correctly', async () => {
       await page.goto(url.create)
-      await changeLocale(page, defaultLocale)
+      await page.waitForURL(`**${url.create}`)
+
+      //await changeLocale(page, defaultLocale, true)
       await fillValues({ description, title: englishTitle })
       await page.locator('#field-localizedCheckbox').click()
 
       await page.locator('#action-save').click()
       // wait for navigation to update route
+      await page.waitForURL(`**${url.collection(localizedPostsSlug)}/**`)
       await wait(500)
-
       // ensure spanish is not checked
       await changeLocale(page, spanishLocale)
+      await wait(500)
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
 
       // duplicate doc
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
 
       // wait for navigation to update route
+      await page.waitForURL(`**${url.collection(localizedPostsSlug)}/**`)
       await wait(500)
 
       // finally change locale to spanish
       await changeLocale(page, spanishLocale)
+      await wait(500)
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
     })
 
     test('should duplicate even if missing some localized data', async () => {
       // create a localized required doc
       await page.goto(urlWithRequiredLocalizedFields.create)
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()

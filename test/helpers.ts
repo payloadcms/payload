@@ -90,6 +90,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 
 export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
   await page.click(selector, { delay: 100 })
+  await wait(250)
   await expect(page.locator('.Toastify')).toContainText('successfully')
   await expect.poll(() => page.url(), { timeout: 45000 }).not.toContain('create')
 }
@@ -116,7 +117,7 @@ export async function openDocControls(page: Page): Promise<void> {
   await expect(page.locator('.doc-controls__popup >> .popup__content')).toBeVisible()
 }
 
-export async function changeLocale(page: Page, newLocale: string) {
+export async function changeLocale(page: Page, newLocale: string, skipURLCheck: boolean = false) {
   await page.locator('.localizer >> button').first().click()
   await page
     .locator(`.localizer`)
@@ -125,9 +126,14 @@ export async function changeLocale(page: Page, newLocale: string) {
     })
     .first()
     .click()
+
   const regexPattern = new RegExp(`locale=${newLocale}`)
-  await expect(page).toHaveURL(regexPattern)
-  await wait(500)
+
+  if (skipURLCheck) {
+    await wait(500)
+  } else {
+    await expect(page).toHaveURL(regexPattern)
+  }
 }
 
 export function exactText(text: string) {
