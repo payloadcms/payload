@@ -5,6 +5,10 @@ module.exports = {
     project: ['./tsconfig.eslint.json'],
     tsconfigRootDir: __dirname,
   },
+  plugins: ['payload'],
+  rules: {
+    'payload/no-relative-monorepo-imports': 'error',
+  },
   overrides: [
     {
       extends: ['plugin:@typescript-eslint/disable-type-checked'],
@@ -26,6 +30,7 @@ module.exports = {
     {
       files: ['**/*.ts'],
       rules: {
+        'payload/no-relative-monorepo-imports': 'error',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
         // turn the @typescript-eslint/unbound-method rule off *only* for test files. See https://typescript-eslint.io/rules/unbound-method/#when-not-to-use-it
@@ -37,6 +42,7 @@ module.exports = {
     {
       files: ['**/*.int.spec.ts', '**/int.spec.ts'],
       rules: {
+         'payload/no-relative-monorepo-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
@@ -45,9 +51,9 @@ module.exports = {
     },
     {
       extends: ['plugin:playwright/recommended'],
-      plugins: ['payload'],
       files: ['**/*.e2e.spec.ts', '**/e2e.spec.ts', 'helpers.ts'],
       rules: {
+        'payload/no-relative-monorepo-imports': 'error',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
         'jest/consistent-test-it': 'off',
@@ -63,6 +69,7 @@ module.exports = {
     {
       files: ['*.e2e.ts'],
       rules: {
+        'payload/no-relative-monorepo-imports': 'error',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
         'jest/expect-expect': 'off',
