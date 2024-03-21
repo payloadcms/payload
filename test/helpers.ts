@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { wait } from 'payload/utilities'
@@ -14,6 +14,43 @@ type FirstRegisterArgs = {
 type LoginArgs = {
   page: Page
   serverURL: string
+}
+
+const networkConditions = {
+  'Slow 3G': {
+    download: ((500 * 1000) / 8) * 0.8,
+    upload: ((500 * 1000) / 8) * 0.8,
+    latency: 400 * 5,
+  },
+  'Fast 3G': {
+    download: ((1.6 * 1000 * 1000) / 8) * 0.9,
+    upload: ((750 * 1000) / 8) * 0.9,
+    latency: 150 * 3.75,
+  },
+  'Slow 4G': {
+    download: ((4 * 1000 * 1000) / 8) * 0.8,
+    upload: ((3 * 1000 * 1000) / 8) * 0.8,
+    latency: 20 * 3.75,
+  },
+}
+
+export async function delayNetwork({
+  context,
+  page,
+  delay,
+}: {
+  context: BrowserContext
+  delay: 'Fast 3G' | 'Slow 3G' | 'Slow 4G'
+  page: Page
+}): Promise<void> {
+  const cdpSession = await context.newCDPSession(page)
+
+  await cdpSession.send('Network.emulateNetworkConditions', {
+    downloadThroughput: networkConditions[delay].download,
+    uploadThroughput: networkConditions[delay].upload,
+    latency: networkConditions[delay].latency,
+    offline: false,
+  })
 }
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
@@ -115,7 +152,7 @@ export const checkBreadcrumb = async (page: Page, text: string) =>
 export const selectTableRow = async (page: Page, title: string): Promise<void> => {
   const selector = `tbody tr:has-text("${title}") .select-row__checkbox input[type=checkbox]`
   await page.locator(selector).check()
-  expect(await page.locator(selector).isChecked()).toBe(true)
+  await expect(page.locator(selector)).toBeChecked()
 }
 
 export const findTableCell = (page: Page, fieldName: string, rowTitle?: string): Locator => {
