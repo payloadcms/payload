@@ -18,7 +18,13 @@ export const RowLabel: React.FC<Props> = (props) => {
     )
   }
 
-  const label = typeof rowLabel === 'object' ? getTranslation(rowLabel, i18n) : rowLabel
+  const label = rowLabel
+    ? typeof rowLabel === 'object'
+      ? getTranslation(rowLabel, i18n)
+      : typeof rowLabel === 'string'
+        ? rowLabel
+        : ''
+    : ''
 
   return (
     <span

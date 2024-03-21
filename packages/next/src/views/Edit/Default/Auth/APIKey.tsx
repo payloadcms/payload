@@ -89,7 +89,7 @@ export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
   return (
     <React.Fragment>
       <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
-        <FieldLabel htmlFor={path} label={APIKeyLabel} />
+        <FieldLabel CustomLabel={APIKeyLabel} htmlFor={path} />
         <input
           className={highlightedField ? 'highlight' : undefined}
           disabled

@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { RowLabel, RowLabelComponent } from 'payload/types'
+import type { LabelProps, RowLabel, RowLabelComponent } from 'payload/types'
 
 import React from 'react'
 
@@ -8,7 +8,7 @@ export type Props = {
   className?: string
   i18n: I18n
   path: string
-  rowLabel?: Record<string, string> | string
+  rowLabel?: LabelProps['label']
   rowNumber?: number
 }
 
