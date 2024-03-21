@@ -251,10 +251,10 @@ export type Endpoint<U = User> = {
    */
   path: string
   /**
-   * @deprecated in 3.0
-   *
    * Please add "root" routes under the /api folder in the Payload Project.
    * https://nextjs.org/docs/app/api-reference/file-conventions/route
+   *
+   * @deprecated in 3.0
    */
   root?: never
 }
