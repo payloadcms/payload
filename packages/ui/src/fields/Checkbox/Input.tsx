@@ -1,5 +1,5 @@
 'use client'
-import type { LabelProps } from 'packages/payload/src/admin/types.js'
+import type { LabelProps } from 'payload/types'
 
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React from 'react'
