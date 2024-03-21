@@ -5,6 +5,7 @@ import type { CreateMigration } from '../types.js'
 
 import { migrationTemplate } from './migrationTemplate.js'
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export const createMigration: CreateMigration = async function createMigration({
   migrationName,
   payload,
@@ -21,7 +22,7 @@ export const createMigration: CreateMigration = async function createMigration({
   const timestamp = `${formattedDate}_${formattedTime}`
 
   const formattedName = migrationName.replace(/\W/g, '_')
-  const fileName = `${timestamp}_${formattedName}.ts`
+  const fileName = `${timestamp}_${formattedName}.mts`
   const filePath = `${dir}/${fileName}`
   fs.writeFileSync(filePath, migrationTemplate)
   payload.logger.info({ msg: `Migration created at ${filePath}` })

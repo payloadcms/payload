@@ -122,7 +122,7 @@ export const createMigration: CreateMigration = async function createMigration(
 
   // write migration
   fs.writeFileSync(
-    `${filePath}.ts`,
+    `${filePath}.mts`,
     migrationTemplate(
       sqlStatementsUp.length ? sqlStatementsUp?.join('\n') : undefined,
       sqlStatementsDown.length ? sqlStatementsDown?.join('\n') : undefined,
