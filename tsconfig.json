@@ -80,6 +80,12 @@
       ],
       "@payloadcms/next": [
         "./packages/next/src/exports/*"
+      ],
+      "@payloadcms/graphql": [
+        "./packages/graphql/src"
+      ],
+      "@payload-config": [
+        "./test/uploads/config.ts"
       ]
     }
   },
@@ -152,6 +158,8 @@
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
     "scripts/**/*.ts"
   ]
 }
