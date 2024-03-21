@@ -1,7 +1,7 @@
 {
-  "name": "@payloadcms/eslint-config",
-  "version": "1.1.1",
-  "description": "Payload styles for ESLint and Prettier",
+  "name": "eslint-plugin-payload",
+  "version": "1.0.0",
+  "description": "Payload plugins for ESLint",
   "license": "MIT",
   "author": {
     "email": "info@payloadcms.com",

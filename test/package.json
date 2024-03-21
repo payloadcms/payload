@@ -33,6 +33,8 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "create-payload-app": "workspace:*",
+    "eslint-plugin-playwright": "1.5.3",
+    "eslint-plugin-payload": "workspace:*",
     "payload": "workspace:*"
   }
 }
