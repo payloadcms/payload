@@ -1,9 +1,8 @@
 import type { EditViewProps } from 'payload/types'
 
+import { EditView as DefaultEditView } from '@payloadcms/next/views'
 import { useAuth } from '@payloadcms/ui/providers/Auth'
 import React, { useCallback } from 'react'
-
-import { EditView as DefaultEditView } from '../../packages/next/src/views/Edit/index.js'
 
 const GlobalView: React.FC<EditViewProps> = (props) => {
   const { onSave } = props
