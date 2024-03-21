@@ -51,7 +51,8 @@ module.exports = {
         ) {
           context.report({
             node: node.callee.property,
-            message: 'Non-retryable assertion used in Playwright test: "{{ assertion }}"',
+            message:
+              'Non-retryable, flaky assertion used in Playwright test: "{{ assertion }}". Those need to be wrapped in expect.poll or expect.toPass.',
             data: {
               assertion: node.callee.property.name,
             },

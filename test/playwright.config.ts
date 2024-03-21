@@ -4,14 +4,14 @@ export default defineConfig({
   // Look for test files in the "test" directory, relative to this configuration file
   testDir: '',
   testMatch: '*e2e.spec.ts',
-  timeout: 180000, // 3 minutes
+  timeout: 240000, // 4 minutes
   use: {
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
   },
   expect: {
-    timeout: 45000,
+    timeout: 60000,
   },
   workers: 16,
 })

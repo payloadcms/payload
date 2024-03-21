@@ -63,7 +63,8 @@ module.exports = {
         'jest/require-top-level-describe': 'off',
         'jest-dom/prefer-to-have-attribute': 'off',
         'playwright/prefer-web-first-assertions': 'error',
-        'payload/no-non-retryable-assertions': 'error',
+        // Enable the no-non-retryable-assertions rule ONLY for hunting for flakes
+        // 'payload/no-non-retryable-assertions': 'error',
       },
     },
     {

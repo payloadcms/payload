@@ -42,7 +42,7 @@ export async function delayNetwork({
   context: BrowserContext
   delay: 'Fast 3G' | 'Slow 3G' | 'Slow 4G'
   page: Page
-}): Promise<void> {
+}) {
   const cdpSession = await context.newCDPSession(page)
 
   await cdpSession.send('Network.emulateNetworkConditions', {
@@ -91,8 +91,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
   await page.click(selector, { delay: 100 })
   await expect(page.locator('.Toastify')).toContainText('successfully')
-  await wait(500)
-  expect(page.url()).not.toContain('create')
+  await expect.poll(() => page.url(), { timeout: 45000 }).not.toContain('create')
 }
 
 export async function openNav(page: Page): Promise<void> {
@@ -135,13 +134,24 @@ export function exactText(text: string) {
   return new RegExp(`^${text}$`)
 }
 
-export const checkPageTitle = async (page: Page, title: string) =>
-  expect(await page.locator('.doc-header__title.render-title')?.first()?.innerText()).toBe(title)
+export const checkPageTitle = async (page: Page, title: string) => {
+  await expect
+    .poll(async () => await page.locator('.doc-header__title.render-title')?.first()?.innerText(), {
+      timeout: 45000,
+    })
+    .toBe(title)
+}
 
-export const checkBreadcrumb = async (page: Page, text: string) =>
-  expect(await page.locator('.step-nav.app-header__step-nav .step-nav__last')?.innerText()).toBe(
-    text,
-  )
+export const checkBreadcrumb = async (page: Page, text: string) => {
+  await expect
+    .poll(
+      async () => await page.locator('.step-nav.app-header__step-nav .step-nav__last')?.innerText(),
+      {
+        timeout: 45000,
+      },
+    )
+    .toBe(text)
+}
 
 export const selectTableRow = async (page: Page, title: string): Promise<void> => {
   const selector = `tbody tr:has-text("${title}") .select-row__checkbox input[type=checkbox]`
