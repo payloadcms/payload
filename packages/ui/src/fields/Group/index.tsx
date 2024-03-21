@@ -2,8 +2,8 @@
 import type { FieldPermissions } from 'payload/auth'
 import type { FieldBase } from 'payload/types'
 
+import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React, { Fragment } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
@@ -86,9 +86,15 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
         <GroupProvider>
           <div className={`${baseClass}__wrap`}>
             <div className={`${baseClass}__header`}>
-              {(CustomLabel || CustomDescription) && (
+              {(CustomLabel || CustomDescription || labelProps?.label) && (
                 <header>
-                  {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+                  {CustomLabel !== undefined ? (
+                    CustomLabel
+                  ) : labelProps?.label ? (
+                    <h3 className={`${baseClass}__title`}>
+                      {getTranslation(labelProps.label, i18n)}
+                    </h3>
+                  ) : null}
                   {CustomDescription !== undefined ? (
                     CustomDescription
                   ) : (
@@ -100,6 +106,7 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
             </div>
             <RenderFields
               fieldMap={fieldMap}
+              margins="small"
               path={path}
               permissions={permissions?.fields}
               readOnly={readOnly}

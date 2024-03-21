@@ -79,7 +79,9 @@ export const buildColumns = (args: {
           undefined
         }
         label={
-          'label' in field.fieldComponentProps && field.fieldComponentProps.label
+          'label' in field.fieldComponentProps &&
+          field.fieldComponentProps.label &&
+          typeof field.fieldComponentProps.label !== 'function'
             ? field.fieldComponentProps.label
             : 'name' in field
               ? field.name
@@ -102,7 +104,11 @@ export const buildColumns = (args: {
           Cell,
           Heading,
         },
-        label: 'label' in field.fieldComponentProps ? field.fieldComponentProps.label : undefined,
+        label:
+          'label' in field.fieldComponentProps &&
+          typeof field.fieldComponentProps.label !== 'function'
+            ? field.fieldComponentProps.label
+            : undefined,
       }
 
       acc.push(column)

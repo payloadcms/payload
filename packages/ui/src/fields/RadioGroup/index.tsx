@@ -96,9 +96,9 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+        <FieldError CustomError={CustomError} {...(errorProps || {})} />
       </div>
-      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
       <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
         {options.map((option) => {
           let optionValue = ''
