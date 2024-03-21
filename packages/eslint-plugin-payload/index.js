@@ -3,5 +3,6 @@ module.exports = {
   rules: {
     'no-non-retryable-assertions': require('./customRules/no-non-retryable-assertions'),
     'no-relative-monorepo-imports': require('./customRules/no-relative-monorepo-imports'),
+    'no-jsx-extension-imports': require('./customRules/no-jsx-extension-imports'),
   },
 }
