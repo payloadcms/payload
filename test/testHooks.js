@@ -35,8 +35,8 @@ export const createTestHooks = async (testSuiteName = '_community') => {
      * Reset the changes made to tsconfig.json
      */
     afterTest: async () => {
-      // Revert the changes made to tsconfig.json
-      tsConfig.compilerOptions.paths['@payload-config'] = originalPayloadConfigTsValue
+      // Set original value of '@payload-config' back to default of _community
+      tsConfig.compilerOptions.paths['@payload-config'] = ['./test/_community/config.ts']
 
       await writeFile(tsConfigPath, JSON.stringify(tsConfig, null, 2) + '\n')
     },
