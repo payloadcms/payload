@@ -352,6 +352,7 @@ export const mapFields = (args: {
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
+              initCollapsed: field.admin?.initCollapsed,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
