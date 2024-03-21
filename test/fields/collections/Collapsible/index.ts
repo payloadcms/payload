@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import { collapsibleFieldsSlug } from '../../slugs.js'
 import { getCustomLabel } from './CustomLabel/getCustomLabel.js'
-import { CustomLabelComponent } from './CustomLabel/index.js'
+import { NestedCustomLabel } from './NestedCustomLabel/index.js'
 
 const CollapsibleFields: CollectionConfig = {
   slug: collapsibleFieldsSlug,
@@ -125,7 +125,7 @@ const CollapsibleFields: CollectionConfig = {
       type: 'array',
       fields: [
         {
-          label: CustomLabelComponent,
+          label: NestedCustomLabel,
           type: 'collapsible',
           fields: [
             {
