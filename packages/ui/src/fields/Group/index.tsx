@@ -2,8 +2,8 @@
 import type { FieldPermissions } from 'payload/auth'
 import type { FieldBase } from 'payload/types'
 
+import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
-import { getTranslation } from 'packages/translations/src/utilities/getTranslation.js'
 import React, { Fragment } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
