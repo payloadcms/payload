@@ -11,8 +11,8 @@
     "name": "Payload",
     "url": "https://payloadcms.com"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/types.ts",
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -53,8 +53,8 @@
     "types": "./dist/index.d.ts",
     "exports": {
       ".": {
-        "import": "./dist/index.ts",
-        "require": "./dist/index.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
       }
     }
