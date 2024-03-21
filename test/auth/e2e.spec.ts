@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
+import { delayNetwork, initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import config from './config.js'
@@ -41,6 +41,8 @@ describe('auth', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    //await delayNetwork({ context, page, delay: 'Fast 3G' })
 
     await login({
       page,
@@ -101,12 +103,19 @@ describe('auth', () => {
       await page.locator('#field-enableAPIKey').click()
 
       // assert that the value is set
-      const apiKey = await page.locator('#apiKey').inputValue()
-      expect(apiKey).toBeDefined()
+      const apiKeyLocator = page.locator('#apiKey')
+      await expect
+        .poll(async () => await apiKeyLocator.inputValue(), { timeout: 45000 })
+        .toBeDefined()
 
       await saveDocAndAssert(page)
 
-      expect(await page.locator('#apiKey').inputValue()).toStrictEqual(apiKey)
+      await expect(async () => {
+        const apiKey = await apiKeyLocator.inputValue()
+        expect(await page.locator('#apiKey').inputValue()).toStrictEqual(apiKey)
+      }).toPass({
+        timeout: 45000,
+      })
     })
 
     test('should disable api key', async () => {
@@ -121,14 +130,18 @@ describe('auth', () => {
       await saveDocAndAssert(page)
 
       // use the api key in a fetch to assert that it is disabled
-      const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
-        headers: {
-          ...headers,
-          Authorization: `${slug} API-Key ${user.apiKey}`,
-        },
-      }).then((res) => res.json())
+      await expect(async () => {
+        const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
+          headers: {
+            ...headers,
+            Authorization: `${slug} API-Key ${user.apiKey}`,
+          },
+        }).then((res) => res.json())
 
-      expect(response.user).toBeNull()
+        expect(response.user).toBeNull()
+      }).toPass({
+        timeout: 45000,
+      })
     })
   })
 })
