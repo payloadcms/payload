@@ -114,7 +114,8 @@ export const createPayloadRequest = async ({
 
   const req: PayloadRequest = Object.assign(request, customRequest)
 
-  if (data) req.json = () => Promise.resolve(data)
+  req.json = () => Promise.resolve(data)
+
   req.payloadDataLoader = getDataLoader(req)
 
   req.user = await getAuthenticatedUser({

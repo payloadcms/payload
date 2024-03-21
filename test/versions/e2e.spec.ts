@@ -62,6 +62,22 @@ const { beforeAll, beforeEach, describe } = test
 
 let payload: Payload
 
+const waitForAutoSaveToComplete = async (page: Page) => {
+  await expect(async () => {
+    await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
+  }).toPass({
+    timeout: 45000,
+  })
+
+  await expect(async () => {
+    await expect(
+      page.locator('.autosave:has-text("Last saved less than a minute ago")'),
+    ).toBeVisible()
+  }).toPass({
+    timeout: 45000,
+  })
+}
+
 describe('versions', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -290,68 +306,59 @@ describe('versions', () => {
     })
 
     test('global - should autosave', async () => {
+      const titleToMatch = 'global title'
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       // fill out global title and wait for autosave
       await page.goto(url.global(autoSaveGlobalSlug))
-      await wait(500)
       const titleField = page.locator('#field-title')
-      await expect(titleField).toBeVisible()
+      await titleField.fill(titleToMatch)
 
-      await titleField.fill('global title')
-      await wait(500)
-      await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
-      await expect(
-        page.locator('.autosave:has-text("Last saved less than a minute ago")'),
-      ).toBeVisible()
-      await expect(titleField).toHaveValue('global title')
+      await waitForAutoSaveToComplete(page)
 
       // refresh the page and ensure value autosaved
-      await page.goto(url.global(autoSaveGlobalSlug))
-      await expect(page.locator('#field-title')).toHaveValue('global title')
+      await page.reload()
+      await expect(page.locator('#field-title')).toHaveValue(titleToMatch)
     })
 
     test('should retain localized data during autosave', async () => {
       const en = 'en'
       const es = 'es'
-      const title = 'english title'
+      const englishTitle = 'english title'
       const spanishTitle = 'spanish title'
-      const description = 'description'
       const newDescription = 'new description'
 
       await page.goto(autosaveURL.create)
       await expect(page.locator('.id-label')).toBeVisible()
-      await wait(500)
-      const titleField = page.locator('#field-title')
+
+      // field locators
+      const localizedTitleField = page.locator('#field-title')
       const descriptionField = page.locator('#field-description')
 
       // fill out en doc
-      await titleField.fill(title)
-      await descriptionField.fill(description)
-      await wait(500)
+      await localizedTitleField.fill(englishTitle)
+      await descriptionField.fill('description')
+      await waitForAutoSaveToComplete(page)
 
       // change locale to spanish
       await changeLocale(page, es)
-      // set localized title field
-      await titleField.fill(spanishTitle)
-      await wait(500)
+      await localizedTitleField.fill(spanishTitle)
+      await waitForAutoSaveToComplete(page)
 
       // change locale back to en
       await changeLocale(page, en)
-      // verify en loads its own title
-      await expect(titleField).toHaveValue(title)
+      await expect(localizedTitleField).toHaveValue(englishTitle)
       // change non-localized description field
       await descriptionField.fill(newDescription)
-      await wait(500)
+      await waitForAutoSaveToComplete(page)
 
       // change locale to spanish
       await changeLocale(page, es)
-      await wait(500)
 
       // reload page in spanish
       // title should not be english title
       // description should be new description
       await page.reload()
-      await expect(titleField).toHaveValue(spanishTitle)
+      await expect(localizedTitleField).toHaveValue(spanishTitle)
       await expect(descriptionField).toHaveValue(newDescription)
     })
 
@@ -390,26 +397,29 @@ describe('versions', () => {
     test('collection - autosave should only update the current document', async () => {
       // create and save first doc
       await page.goto(autosaveURL.create)
-      await wait(500)
+      await page.waitForURL('**/create')
       await page.locator('#field-title').fill('first post title')
       await page.locator('#field-description').fill('first post description')
       await page.locator('#action-save').click()
+      await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain('create')
 
       // create and save second doc
       await page.goto(autosaveURL.create)
-      await wait(500)
+      await page.waitForURL('**/create')
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
       await page.locator('#action-save').click()
+      await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain('create')
 
       // update second doc and wait for autosave
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
-      await wait(500)
+      await waitForAutoSaveToComplete(page)
 
       // verify that the first doc is unchanged
       await page.goto(autosaveURL.list)
       await page.locator('tbody tr .cell-title a').nth(1).click()
+      await page.waitForURL(`${autosaveURL.list}/**`)
       await expect(page.locator('#field-title')).toHaveValue('first post title')
       await expect(page.locator('#field-description')).toHaveValue('first post description')
     })

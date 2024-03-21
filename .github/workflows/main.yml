@@ -2,7 +2,7 @@ name: build
 
 on:
   pull_request:
-    types: [ opened, reopened, synchronize ]
+    types: [opened, reopened, synchronize]
   push:
     branches: ['main', 'alpha']
 
@@ -124,7 +124,7 @@ jobs:
       fail-fast: false
       matrix:
         database:
-         - mongodb
+          - mongodb
         #  - postgres
         #  - postgres-custom-schema
         #  - postgres-uuid
@@ -162,7 +162,7 @@ jobs:
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: '14'  # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -229,7 +229,7 @@ jobs:
           # - plugin-seo
           # - refresh-permissions
           # - uploads
-          # - versions
+          - versions
 
     steps:
       - name: Use Node.js 18
@@ -344,7 +344,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        template: [ blank, website, ecommerce ]
+        template: [blank, website, ecommerce]
 
     steps:
       - uses: actions/checkout@v4
