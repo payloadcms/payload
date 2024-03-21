@@ -35,7 +35,7 @@
     "build:plugin-stripe": "turbo build --filter plugin-stripe",
     "build:richtext-lexical": "turbo build --filter richtext-lexical",
     "build:richtext-slate": "turbo build --filter richtext-slate",
-    "build:tests": "turbo build --filter test",
+    "build:tests": "pnpm --filter test run typecheck",
     "build:translations": "turbo build --filter translations",
     "build:ui": "turbo build --filter ui",
     "clean": "turbo clean",
