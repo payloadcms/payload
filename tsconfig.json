@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/auth/config.ts"
+        "./test/live-preview/config.ts"
       ],
       "@payloadcms/ui/assets": [
         "./packages/ui/src/assets/index.ts"
@@ -56,6 +56,12 @@
       ],
       "@payloadcms/ui/hooks/*": [
         "./packages/ui/src/hooks/*.ts"
+      ],
+      "@payloadcms/live-preview-react": [
+        "./packages/live-preview-react/src/index.ts"
+      ],
+      "@payloadcms/live-preview": [
+        "./packages/live-preview/src/index.ts"
       ],
       "@payloadcms/ui/icons/*": [
         "./packages/ui/src/icons/*/index.tsx"
