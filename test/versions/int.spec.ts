@@ -70,7 +70,7 @@ describe('Versions', () => {
         title: 'Here is an autosave post in EN',
       },
     })
-    collectionLocalPostID = autosavePost.id
+    collectionLocalPostID = autosavePost.id as string
 
     await payload.update({
       id: collectionLocalPostID,
@@ -334,7 +334,6 @@ describe('Versions', () => {
           draft: true,
         })
 
-        // @ts-expect-error
         let updatedPost = await payload.update({
           id: versionedPost.id,
           collection: draftCollectionSlug,
@@ -350,7 +349,7 @@ describe('Versions', () => {
           },
           draft: true,
         })
-        // @ts-expect-error
+
         updatedPost = await payload.update({
           id: versionedPost.id,
           collection: draftCollectionSlug,

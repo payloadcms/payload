@@ -116,7 +116,7 @@ describe('Hooks', () => {
     })
 
     it('should save data generated with afterRead hooks in nested field structures', async () => {
-      const document: NestedAfterReadHook = await payload.create({
+      const document = await payload.create({
         collection: nestedAfterReadHooksSlug,
         data: {
           group: {

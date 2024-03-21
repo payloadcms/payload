@@ -52,7 +52,7 @@ describe('SEO Plugin', () => {
         },
         title: 'Test Page',
       },
-    })) as unknown as Promise<PayloadPage>
+    })) as unknown as PayloadPage
     id = createdPage.id
   })
 

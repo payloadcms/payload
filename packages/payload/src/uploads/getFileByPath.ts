@@ -9,7 +9,7 @@ const mimeTypeEstimate = {
   svg: 'image/svg+xml',
 }
 
-const getFileByPath = async (filePath: string): Promise<CustomPayloadRequest['file']> => {
+export const getFileByPath = async (filePath: string): Promise<CustomPayloadRequest['file']> => {
   if (typeof filePath === 'string') {
     const data = fs.readFileSync(filePath)
     const mimetype = fromFile(filePath)
@@ -30,5 +30,3 @@ const getFileByPath = async (filePath: string): Promise<CustomPayloadRequest['fi
 
   return undefined
 }
-
-export default getFileByPath
