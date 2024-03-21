@@ -1,6 +1,5 @@
-/* eslint-disable react/destructuring-assignment */
 'use client'
-import type { DocumentPreferences } from 'payload/types'
+import type { DocumentPreferences, RowLabel } from 'payload/types'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -19,7 +18,6 @@ import './index.scss'
 const baseClass = 'collapsible-field'
 
 import type { FieldPermissions } from 'payload/auth'
-import type { FieldBase } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
@@ -31,7 +29,7 @@ export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   indexPath: string
   initCollapsed?: boolean
-  label?: FieldBase['label']
+  label?: RowLabel
   permissions: FieldPermissions
   width?: string
 }

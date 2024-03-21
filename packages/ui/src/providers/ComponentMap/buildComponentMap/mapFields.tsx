@@ -1,5 +1,12 @@
 import type { FieldDescriptionProps } from '@payloadcms/ui/forms/FieldDescription'
-import type { CellProps, Field, FieldWithPath, LabelProps, SanitizedConfig } from 'payload/types'
+import type {
+  CellProps,
+  Field,
+  FieldWithPath,
+  LabelProps,
+  RowLabelComponent,
+  SanitizedConfig,
+} from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import { isPlainObject } from 'payload/utilities'
@@ -80,8 +87,7 @@ export const mapFields = (args: {
         }`
 
         const labelProps: LabelProps = {
-          // @ts-expect-error-next-line
-          label: 'label' in field ? field.label : null,
+          label: 'label' in field && typeof field.label !== 'function' ? field.label : null,
           required: 'required' in field ? field.required : undefined,
         }
 
@@ -204,23 +210,26 @@ export const mapFields = (args: {
 
         switch (field.type) {
           case 'array': {
-            let RowLabel: React.ReactNode
+            let CustomRowLabel: React.ReactNode
 
             if (
               'admin' in field &&
               field.admin.components &&
               'RowLabel' in field.admin.components &&
               field.admin.components.RowLabel &&
-              !isPlainObject(field.admin.components.RowLabel)
+              (typeof field.admin.components.RowLabel === 'function' ||
+                // Do this to test for client components (`use client` directive) bc they import as empty objects
+                (typeof field.admin.components.RowLabel === 'object' &&
+                  !isPlainObject(field.admin.components.RowLabel)))
             ) {
-              const CustomRowLabel = field.admin.components.RowLabel as React.ComponentType
-              RowLabel = <CustomRowLabel />
+              const CustomRowLabelComponent = field.admin.components.RowLabel as RowLabelComponent
+              CustomRowLabel = <CustomRowLabelComponent />
             }
 
             const arrayFieldProps: Omit<ArrayFieldProps, 'indexPath' | 'permissions'> = {
               ...baseFieldProps,
               name: field.name,
-              RowLabel,
+              CustomRowLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: nestedFieldMap,
@@ -319,16 +328,20 @@ export const mapFields = (args: {
             break
           }
           case 'collapsible': {
-            let CollapsibleLabel: React.ReactNode
+            let CustomCollapsibleLabel: React.ReactNode
 
-            if (typeof field.label === 'object' && !isPlainObject(field.label)) {
-              const LabelToRender = field.label as unknown as React.ComponentType
-              CollapsibleLabel = <LabelToRender />
+            if (
+              typeof field.label === 'function' ||
+              // Do this to test for client components (`use client` directive) bc they import as empty objects
+              (typeof field.label === 'object' && !isPlainObject(field.label))
+            ) {
+              const CustomCollapsibleLabelComponent = field.label as RowLabelComponent
+              CustomCollapsibleLabel = <CustomCollapsibleLabelComponent />
             }
 
             const collapsibleField: Omit<CollapsibleFieldProps, 'indexPath' | 'permissions'> = {
               ...baseFieldProps,
-              CustomLabel: CollapsibleLabel,
+              CustomLabel: CustomCollapsibleLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: nestedFieldMap,
@@ -338,7 +351,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
-            fieldComponentProps = collapsibleField
+            fieldComponentProps = collapsibleField as CollapsibleFieldProps // TODO: dunno why this is needed
             break
           }
           case 'date': {
