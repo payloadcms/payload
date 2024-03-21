@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/_community/config.ts"
+        "./test/auth/config.ts"
       ],
       "@payloadcms/ui/assets": [
         "./packages/ui/src/assets/index.ts"
@@ -161,4 +161,3 @@
     "scripts/**/*.ts"
   ]
 }
-
