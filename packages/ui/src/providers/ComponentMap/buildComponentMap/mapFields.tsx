@@ -87,7 +87,12 @@ export const mapFields = (args: {
         }`
 
         const labelProps: LabelProps = {
-          label: 'label' in field && typeof field.label !== 'function' ? field.label : null,
+          label:
+            'label' in field &&
+            (typeof field.label !== 'function' ||
+              (typeof field.label === 'object' && isPlainObject(field.label)))
+              ? field.label
+              : undefined,
           required: 'required' in field ? field.required : undefined,
         }
 
