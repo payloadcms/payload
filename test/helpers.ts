@@ -25,12 +25,12 @@ const networkConditions = {
   'Fast 3G': {
     download: ((1.6 * 1000 * 1000) / 8) * 0.9,
     upload: ((750 * 1000) / 8) * 0.9,
-    latency: 150 * 3.75,
+    latency: 1000,
   },
   'Slow 4G': {
     download: ((4 * 1000 * 1000) / 8) * 0.8,
     upload: ((3 * 1000 * 1000) / 8) * 0.8,
-    latency: 20 * 3.75,
+    latency: 1000,
   },
 }
 
