@@ -1,10 +1,14 @@
 'use client'
 import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
-import type { TypeWithTimestamps } from 'payload/types'
+import type { FormState, TypeWithTimestamps } from 'payload/types'
 import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from 'payload/types'
 
+import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
+import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
+import { formatDocTitle } from '@payloadcms/ui/utilities/formatDocTitle'
+import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import qs from 'qs'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
@@ -24,12 +28,15 @@ export const DocumentInfoProvider: React.FC<
   DocumentInfoProps & {
     children: React.ReactNode
   }
-> = ({ children, ...props }) => {
+> = ({ children, initialState: initialStateFromProps, ...props }) => {
   const [documentTitle, setDocumentTitle] = useState(props.title)
+
+  const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
 
   const { id, collectionSlug, globalSlug } = props
 
   const {
+    admin: { dateFormat },
     collections,
     globals,
     routes: { api },
@@ -52,6 +59,58 @@ export const DocumentInfoProvider: React.FC<
 
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
+
+  const hasInitializedState = useRef(false)
+
+  // no need to an additional requests when creating new documents
+  const initialID = useRef(id)
+  const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
+    initialID.current ? `${serverURL}${api}/${collectionSlug}/${initialID.current}` : null,
+    { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
+  )
+
+  const isEditing = Boolean(id)
+
+  // const hasSavePermission =
+  //   (isEditing && docPermissions?.update?.permission) ||
+  //   (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
+
+  useEffect(() => {
+    if (!hasInitializedState.current && (!initialID.current || (initialID.current && data))) {
+      const getInitialState = async () => {
+        let docPreferences: DocumentPreferences = { fields: {} }
+
+        if (id) {
+          docPreferences = await getPreference(`collection-${collectionSlug}-${id}`)
+        }
+
+        const result = await getFormState({
+          apiRoute: api,
+          body: {
+            id,
+            collectionSlug,
+            data: data || {},
+            docPreferences,
+            operation: isEditing ? 'update' : 'create',
+            schemaPath: collectionSlug,
+          },
+          serverURL,
+        })
+
+        setInitialState(result)
+        hasInitializedState.current = true
+      }
+
+      void getInitialState()
+    }
+  }, [api, data, isEditing, collectionSlug, serverURL, id, getPreference])
+
+  const title = formatDocTitle({
+    collectionConfig,
+    data,
+    dateFormat,
+    i18n,
+  })
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -300,6 +359,7 @@ export const DocumentInfoProvider: React.FC<
     getDocPreferences,
     getVersions,
     hasSavePermission,
+    initialState,
     onSave: props.onSave,
     publishedDoc,
     setDocFieldPreferences,
@@ -307,6 +367,12 @@ export const DocumentInfoProvider: React.FC<
     title: documentTitle,
     unpublishedVersions,
     versions,
+  }
+
+  if (isError) return null
+
+  if (!initialState || isLoadingDocument) {
+    return <LoadingOverlay />
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>

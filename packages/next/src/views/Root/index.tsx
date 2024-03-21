@@ -77,6 +77,8 @@ export const RootPage = async ({
     }
   }
 
+  console.log('Root/index.tsx')
+
   const RenderedView = (
     <DefaultView initPageResult={initPageResult} params={params} searchParams={searchParams} />
   )

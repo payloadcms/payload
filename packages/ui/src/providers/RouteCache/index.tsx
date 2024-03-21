@@ -16,6 +16,7 @@ export const RouteCache: React.FC<{ children: React.ReactNode }> = ({ children }
   const router = useRouter()
 
   const clearRouteCache = useCallback(() => {
+    console.warn('clearing route cache')
     router.refresh()
   }, [router])
 

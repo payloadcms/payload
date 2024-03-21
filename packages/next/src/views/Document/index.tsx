@@ -67,10 +67,7 @@ export const Document: React.FC<AdminViewProps> = async ({
   let DefaultView: EditViewComponent
   let ErrorView: AdminViewComponent = NotFoundView
 
-  let data: DocumentType
   let docPermissions: DocumentPermissions
-  let preferencesKey: string
-  let fields: Field[]
   let hasSavePermission: boolean
   let apiURL: string
   let action: string
@@ -88,7 +85,6 @@ export const Document: React.FC<AdminViewProps> = async ({
       return <NotFoundClient />
     }
 
-    fields = collectionConfig.fields
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
 
     hasSavePermission =
@@ -119,32 +115,10 @@ export const Document: React.FC<AdminViewProps> = async ({
     if (!CustomView && !DefaultView && !ViewOverride) {
       return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
     }
-
-    if (id) {
-      try {
-        data = await payload.findByID({
-          id,
-          collection: collectionSlug,
-          depth: 0,
-          draft: true,
-          fallbackLocale: null,
-          locale: locale.code,
-          overrideAccess: false,
-          user,
-        })
-      } catch (error) {} // eslint-disable-line no-empty
-
-      if (!data) {
-        return <NotFoundClient />
-      }
-
-      preferencesKey = `collection-${collectionSlug}-${id}`
-    }
   }
 
   if (globalConfig) {
     docPermissions = permissions?.globals?.[globalSlug]
-    fields = globalConfig.fields
     hasSavePermission = isEditing && docPermissions?.update?.permission
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
 
@@ -171,46 +145,8 @@ export const Document: React.FC<AdminViewProps> = async ({
       if (!CustomView && !DefaultView && !ViewOverride) {
         return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
       }
-
-      try {
-        data = await payload.findGlobal({
-          slug: globalSlug,
-          depth: 0,
-          draft: true,
-          fallbackLocale: null,
-          locale: locale.code,
-          overrideAccess: false,
-          user,
-        })
-      } catch (error) {} // eslint-disable-line no-empty
-
-      if (!data) {
-        return <NotFoundClient />
-      }
-
-      preferencesKey = `global-${globalSlug}`
     }
   }
-
-  const { docs: [{ value: docPreferences } = { value: null }] = [] } = (await payload.find({
-    collection: 'payload-preferences',
-    depth: 0,
-    limit: 1,
-    where: {
-      key: {
-        equals: preferencesKey,
-      },
-    },
-  })) as any as { docs: { value: DocumentPreferences }[] } // eslint-disable-line @typescript-eslint/no-explicit-any
-
-  const initialState = await buildStateFromSchema({
-    id,
-    data: data || {},
-    fieldSchema: formatFields(fields, isEditing),
-    operation: isEditing ? 'update' : 'create',
-    preferences: docPreferences,
-    req,
-  })
 
   const viewComponentProps: ServerSideEditViewProps = {
     initPageResult,
@@ -228,17 +164,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       globalSlug={globalConfig?.slug}
       hasSavePermission={hasSavePermission}
       id={id}
-      initialData={data}
-      initialState={initialState}
       isEditing={isEditing}
-      title={formatDocTitle({
-        collectionConfig,
-        data,
-        dateFormat: config.admin.dateFormat,
-        fallback: id?.toString(),
-        globalConfig,
-        i18n,
-      })}
     >
       {!ViewOverride && (
         <DocumentHeader
