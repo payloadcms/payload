@@ -101,18 +101,6 @@ export const mapFields = (args: {
               : undefined,
         }
 
-        const nestedFieldMap =
-          'fields' in field &&
-          field.fields &&
-          Array.isArray(field.fields) &&
-          mapFields({
-            config,
-            fieldSchema: field.fields,
-            filter,
-            parentPath: path,
-            readOnly: readOnlyOverride,
-          })
-
         const AfterInput =
           ('admin' in field &&
             'components' in field.admin &&
@@ -232,7 +220,14 @@ export const mapFields = (args: {
               CustomRowLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: nestedFieldMap,
+              fieldMap: mapFields({
+                config,
+                disableAddingID: true,
+                fieldSchema: field.fields,
+                filter,
+                parentPath: path,
+                readOnly: readOnlyOverride,
+              }),
               label: field?.label || undefined,
               labels: field.labels,
               maxRows: field.maxRows,
@@ -250,6 +245,7 @@ export const mapFields = (args: {
             const blocks = field.blocks.map((block) => {
               const blockFieldMap = mapFields({
                 config,
+                disableAddingID: true,
                 fieldSchema: block.fields,
                 filter,
                 parentPath: `${path}.${block.slug}`,
@@ -273,7 +269,6 @@ export const mapFields = (args: {
               blocks,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: nestedFieldMap,
               label: field?.label || undefined,
               labels: field.labels,
               maxRows: field.maxRows,
@@ -344,7 +339,14 @@ export const mapFields = (args: {
               CustomLabel: CustomCollapsibleLabel,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: nestedFieldMap,
+              fieldMap: mapFields({
+                config,
+                disableAddingID: true,
+                fieldSchema: field.fields,
+                filter,
+                parentPath: path,
+                readOnly: readOnlyOverride,
+              }),
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -395,7 +397,14 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: nestedFieldMap,
+              fieldMap: mapFields({
+                config,
+                disableAddingID: true,
+                fieldSchema: field.fields,
+                filter,
+                parentPath: path,
+                readOnly: readOnlyOverride,
+              }),
               readOnly: field.admin?.readOnly,
               style: field.admin?.style,
               width: field.admin?.width,
@@ -528,7 +537,14 @@ export const mapFields = (args: {
               ...baseFieldProps,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: nestedFieldMap,
+              fieldMap: mapFields({
+                config,
+                disableAddingID: true,
+                fieldSchema: field.fields,
+                filter,
+                parentPath: path,
+                readOnly: readOnlyOverride,
+              }),
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -543,6 +559,7 @@ export const mapFields = (args: {
             const tabs = field.tabs.map((tab) => {
               const tabFieldMap = mapFields({
                 config,
+                disableAddingID: true,
                 fieldSchema: tab.fields,
                 filter,
                 parentPath: path,
@@ -563,7 +580,6 @@ export const mapFields = (args: {
               name: 'name' in field ? (field.name as string) : undefined,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              fieldMap: nestedFieldMap,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
