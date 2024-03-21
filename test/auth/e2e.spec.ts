@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
+import { delayNetwork, initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import config from './config.js'
@@ -41,6 +41,8 @@ describe('auth', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    //await delayNetwork({ context, page, delay: 'Fast 3G' })
 
     await login({
       page,

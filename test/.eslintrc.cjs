@@ -35,7 +35,7 @@ module.exports = {
       },
     },
     {
-      files: ['**/int.spec.ts'],
+      files: ['**/*.int.spec.ts', '**/int.spec.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -44,8 +44,9 @@ module.exports = {
       },
     },
     {
-      extends: ['plugin:playwright/playwright-test'],
-      files: ['**/e2e.spec.ts'],
+      extends: ['plugin:playwright/recommended'],
+      plugins: ['payload'],
+      files: ['**/*.e2e.spec.ts', '**/e2e.spec.ts', 'helpers.ts'],
       rules: {
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
@@ -55,6 +56,8 @@ module.exports = {
         'jest/prefer-strict-equal': 'off',
         'jest/require-top-level-describe': 'off',
         'jest-dom/prefer-to-have-attribute': 'off',
+        'playwright/prefer-web-first-assertions': 'error',
+        'payload/no-non-retryable-assertions': 'error',
       },
     },
     {
