@@ -28,8 +28,8 @@ export const DocumentInfoProvider: React.FC<
   DocumentInfoProps & {
     children: React.ReactNode
   }
-> = ({ children, initialState: initialStateFromProps, ...props }) => {
-  const [documentTitle, setDocumentTitle] = useState(props.title)
+> = ({ children, initialState: initialStateFromProps, title: titleFromProps, ...props }) => {
+  const [documentTitle, setDocumentTitle] = useState(titleFromProps)
 
   const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
 
@@ -60,58 +60,6 @@ export const DocumentInfoProvider: React.FC<
   const [unpublishedVersions, setUnpublishedVersions] =
     useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
-  const hasInitializedState = useRef(false)
-
-  // no need to an additional requests when creating new documents
-  const initialID = useRef(id)
-  const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
-    initialID.current ? `${serverURL}${api}/${collectionSlug}/${initialID.current}` : null,
-    { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
-  )
-
-  const isEditing = Boolean(id)
-
-  // const hasSavePermission =
-  //   (isEditing && docPermissions?.update?.permission) ||
-  //   (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
-
-  useEffect(() => {
-    if (!hasInitializedState.current && (!initialID.current || (initialID.current && data))) {
-      const getInitialState = async () => {
-        let docPreferences: DocumentPreferences = { fields: {} }
-
-        if (id) {
-          docPreferences = await getPreference(`collection-${collectionSlug}-${id}`)
-        }
-
-        const result = await getFormState({
-          apiRoute: api,
-          body: {
-            id,
-            collectionSlug,
-            data: data || {},
-            docPreferences,
-            operation: isEditing ? 'update' : 'create',
-            schemaPath: collectionSlug,
-          },
-          serverURL,
-        })
-
-        setInitialState(result)
-        hasInitializedState.current = true
-      }
-
-      void getInitialState()
-    }
-  }, [api, data, isEditing, collectionSlug, serverURL, id, getPreference])
-
-  const title = formatDocTitle({
-    collectionConfig,
-    data,
-    dateFormat,
-    i18n,
-  })
-
   const baseURL = `${serverURL}${api}`
   let slug: string
   let pluralType: 'collections' | 'globals'
@@ -131,6 +79,66 @@ export const DocumentInfoProvider: React.FC<
       preferencesKey = `collection-${slug}-${id}`
     }
   }
+
+  /**
+   *
+   *
+   * Fetching state from Server on the Client. Should be moved back to Document/index.tsx once next allows us to disable the router cache
+   *
+   *
+   */
+  const hasInitializedState = useRef(!!initialStateFromProps)
+
+  // no need to an additional requests when creating new documents
+  const isEditing = Boolean(id)
+
+  const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
+    !hasInitializedState.current
+      ? `${baseURL}/${globalSlug ? 'globals/' : ''}${slug}${collectionSlug ? `/${id}` : ''}`
+      : null,
+    { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
+  )
+
+  useEffect(() => {
+    if (!hasInitializedState.current && data) {
+      const getInitialState = async () => {
+        let docPreferences: DocumentPreferences = { fields: {} }
+
+        if (id) {
+          docPreferences = await getPreference(
+            `${id ? 'collection' : 'global'}-${collectionSlug}-${id}`,
+          )
+        }
+
+        const result = await getFormState({
+          apiRoute: api,
+          body: {
+            id,
+            collectionSlug,
+            data: data || {},
+            docPreferences,
+            globalSlug,
+            operation: isEditing ? 'update' : 'create',
+            schemaPath: collectionSlug || globalSlug,
+          },
+          serverURL,
+        })
+
+        setInitialState(result)
+        hasInitializedState.current = true
+      }
+
+      void getInitialState()
+    }
+  }, [api, data, isEditing, collectionSlug, serverURL, id, getPreference, globalSlug])
+
+  /**
+   *
+   *
+   * Fetching state from Server on the Client DONE
+   *
+   *
+   */
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
@@ -323,8 +331,21 @@ export const DocumentInfoProvider: React.FC<
   }, [getVersions])
 
   useEffect(() => {
-    setDocumentTitle(props.title)
-  }, [props.title])
+    if (titleFromProps) {
+      setDocumentTitle(titleFromProps)
+    } else {
+      setDocumentTitle(
+        formatDocTitle({
+          collectionConfig,
+          data,
+          dateFormat,
+          fallback: id?.toString(),
+          globalConfig,
+          i18n,
+        }),
+      )
+    }
+  }, [collectionConfig, data, dateFormat, i18n, titleFromProps, id, globalConfig])
 
   useEffect(() => {
     const loadDocPermissions = async () => {
@@ -351,6 +372,12 @@ export const DocumentInfoProvider: React.FC<
     globalSlug,
   ])
 
+  if (!initialState || isLoadingDocument) {
+    return <LoadingOverlay />
+  }
+
+  if (isError) return null
+
   const value: DocumentInfoContext = {
     ...props,
     docConfig,
@@ -367,12 +394,6 @@ export const DocumentInfoProvider: React.FC<
     title: documentTitle,
     unpublishedVersions,
     versions,
-  }
-
-  if (isError) return null
-
-  if (!initialState || isLoadingDocument) {
-    return <LoadingOverlay />
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>

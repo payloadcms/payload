@@ -68,10 +68,6 @@ export const Form: React.FC<FormProps> = (props) => {
     waitForAutocomplete,
   } = props
 
-  useEffect(() => {
-    console.warn('INITIALSTATE CHANGED', initialState)
-  }, [initialState])
-
   const method = 'method' in props ? props?.method : undefined
 
   const router = useRouter()
@@ -152,7 +148,6 @@ export const Form: React.FC<FormProps> = (props) => {
     await Promise.all(validationPromises)
 
     if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
-      console.log('REPLACE_STATE1')
       dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 
@@ -203,7 +198,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
         if (!isValid) {
           setProcessing(false)
-          console.log('REPLACE_STATE2')
           return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
         }
       }
@@ -417,7 +411,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      console.log('REPLACE_STATE3')
 
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
@@ -428,7 +421,6 @@ export const Form: React.FC<FormProps> = (props) => {
     (state: FormState) => {
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      console.log('REPLACE_STATE4')
 
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
@@ -515,11 +507,8 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [submittedFromProps])
 
   useEffect(() => {
-    console.log('REPLACE_STATE7RUNBE', contextRef?.current?.getFields())
-
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-      console.log('REPLACE_STATE7')
 
       dispatchFields({ type: 'REPLACE_STATE', state: initialState })
     }
@@ -555,8 +544,6 @@ export const Form: React.FC<FormProps> = (props) => {
           const { changed, newState } = mergeServerFormState(fields || {}, revalidatedFormState)
 
           if (changed) {
-            console.log('REPLACE_STATE8')
-
             dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: newState })
           }
         }
