@@ -209,6 +209,10 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'users',
         },
+        {
+          name: 'text',
+          type: 'text',
+        },
       ],
     },
   ],
