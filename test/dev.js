@@ -2,6 +2,7 @@ import minimist from 'minimist'
 import { nextDev } from 'next/dist/cli/next-dev.js'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
+import open, { openApp, apps } from 'open'
 
 import { createTestHooks } from './testHooks.js'
 
@@ -26,6 +27,10 @@ await beforeTest()
 
 const rootDir = resolve(_dirname, '../')
 
+// Open the admin if the -o flag is passed
+if (args.o) {
+  await open('http://localhost:3000/admin')
+}
 // @ts-expect-error
 await nextDev({ port: process.env.PORT || 3000, dirname: rootDir }, 'default', rootDir)
 
