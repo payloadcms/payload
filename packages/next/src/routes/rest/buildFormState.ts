@@ -29,9 +29,6 @@ export const getFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
 export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
   const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
 
-  // Wait for 3 seconds
-  //await new Promise((resolve) => setTimeout(resolve, 3000))
-
   const incomingUserSlug = req.user?.collection
   const adminUserSlug = req.payload.config.admin.user
 

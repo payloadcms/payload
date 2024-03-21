@@ -411,7 +411,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
     },
     [apiRoute, collectionSlug, dispatchFields, globalSlug, id, operation, serverURL],
@@ -421,7 +420,6 @@ export const Form: React.FC<FormProps> = (props) => {
     (state: FormState) => {
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
     [dispatchFields],
@@ -509,7 +507,6 @@ export const Form: React.FC<FormProps> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-
       dispatchFields({ type: 'REPLACE_STATE', state: initialState })
     }
   }, [initialState, dispatchFields])
@@ -549,7 +546,7 @@ export const Form: React.FC<FormProps> = (props) => {
         }
       }
 
-      if (modified) void executeOnChange() // eslint-disable-line @typescript-eslint/no-floating-promises
+      if (modified) void executeOnChange()
     },
     150,
     [fields, dispatchFields, onChange],
