@@ -546,7 +546,7 @@ export const Form: React.FC<FormProps> = (props) => {
         }
       }
 
-      void executeOnChange() // eslint-disable-line @typescript-eslint/no-floating-promises
+      if (modified) void executeOnChange() // eslint-disable-line @typescript-eslint/no-floating-promises
     },
     150,
     [fields, dispatchFields, onChange],
