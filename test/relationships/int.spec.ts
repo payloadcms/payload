@@ -64,14 +64,14 @@ describe('Relationships', () => {
       const nameToQuery = 'name'
 
       beforeEach(async () => {
-        relation = await payload.create<Relation>({
+        relation = await payload.create({
           collection: relationSlug,
           data: {
             name: nameToQuery,
           },
         })
 
-        filteredRelation = await payload.create<Relation>({
+        filteredRelation = await payload.create({
           collection: relationSlug,
           data: {
             name: nameToQuery,
@@ -79,21 +79,21 @@ describe('Relationships', () => {
           },
         })
 
-        defaultAccessRelation = await payload.create<Relation>({
+        defaultAccessRelation = await payload.create({
           collection: defaultAccessRelSlug,
           data: {
             name: 'default access',
           },
         })
 
-        chained3 = await payload.create<ChainedRelation>({
+        chained3 = await payload.create({
           collection: chainedRelSlug,
           data: {
             name: 'chain3',
           },
         })
 
-        chained2 = await payload.create<ChainedRelation>({
+        chained2 = await payload.create({
           collection: chainedRelSlug,
           data: {
             name: 'chain2',
@@ -101,7 +101,7 @@ describe('Relationships', () => {
           },
         })
 
-        chained = await payload.create<ChainedRelation>({
+        chained = await payload.create({
           collection: chainedRelSlug,
           data: {
             name: 'chain1',
@@ -109,7 +109,7 @@ describe('Relationships', () => {
           },
         })
 
-        chained3 = await payload.update<ChainedRelation>({
+        chained3 = await payload.update({
           id: chained3.id,
           collection: chainedRelSlug,
           data: {
@@ -119,7 +119,7 @@ describe('Relationships', () => {
         })
 
         generatedCustomId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
-        customIdRelation = await payload.create<CustomIdRelation>({
+        customIdRelation = await payload.create({
           collection: customIdSlug,
           data: {
             id: generatedCustomId,
@@ -128,7 +128,7 @@ describe('Relationships', () => {
         })
 
         generatedCustomIdNumber = Math.floor(Math.random() * 1_000_000) + 1
-        customIdNumberRelation = await payload.create<CustomIdNumberRelation>({
+        customIdNumberRelation = await payload.create({
           collection: customIdNumberSlug,
           data: {
             id: generatedCustomIdNumber,
@@ -431,7 +431,7 @@ describe('Relationships', () => {
           },
         })
 
-        thirdLevelID = thirdLevelDoc.id
+        thirdLevelID = thirdLevelDoc.id as string
 
         const secondLevelDoc = await payload.create({
           collection: 'chained',
@@ -441,7 +441,7 @@ describe('Relationships', () => {
           },
         })
 
-        secondLevelID = secondLevelDoc.id
+        secondLevelID = secondLevelDoc.id as string
 
         const firstLevelDoc = await payload.create({
           collection: 'chained',
@@ -451,7 +451,7 @@ describe('Relationships', () => {
           },
         })
 
-        firstLevelID = firstLevelDoc.id
+        firstLevelID = firstLevelDoc.id as string
       })
 
       it('should allow querying one level deep', async () => {
