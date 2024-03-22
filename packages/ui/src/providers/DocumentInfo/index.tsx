@@ -92,15 +92,17 @@ export const DocumentInfoProvider: React.FC<
   // no need to an additional requests when creating new documents
   const isEditing = Boolean(id)
 
+  const shouldLoadData = !hasInitializedState.current && !!(globalSlug || id)
+
   const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
-    !hasInitializedState.current
+    shouldLoadData
       ? `${baseURL}/${globalSlug ? 'globals/' : ''}${slug}${collectionSlug ? `/${id}` : ''}`
       : null,
     { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   )
 
   useEffect(() => {
-    if (!hasInitializedState.current && data) {
+    if (!hasInitializedState.current && (data || !shouldLoadData)) {
       const getInitialState = async () => {
         let docPreferences: DocumentPreferences = { fields: {} }
 
