@@ -43,40 +43,57 @@ module.exports = {
       'stringMatching',
     ]
 
+    function isNonRetryableAssertion(node) {
+      return (
+        node.type === 'MemberExpression' &&
+        node.property.type === 'Identifier' &&
+        nonRetryableAssertions.includes(node.property.name)
+      )
+    }
+
+    function isExpectPollOrToPass(node) {
+      if (
+        node.type === 'MemberExpression' &&
+        (node?.property?.name === 'poll' || node?.property?.name === 'toPass')
+      ) {
+        return true
+      }
+
+      return (
+        node.type === 'CallExpression' &&
+        node.callee.type === 'MemberExpression' &&
+        ((node.callee.object.type === 'CallExpression' &&
+          node.callee.object.callee.type === 'MemberExpression' &&
+          node.callee.object.callee.property.name === 'poll') ||
+          node.callee.property.name === 'toPass')
+      )
+    }
+
+    function hasExpectPollOrToPassInChain(node) {
+      let ancestor = node
+
+      while (ancestor) {
+        if (isExpectPollOrToPass(ancestor)) {
+          return true
+        }
+        ancestor = 'object' in ancestor ? ancestor.object : ancestor.callee
+      }
+
+      return false
+    }
+
     return {
       CallExpression(node) {
-        if (
-          node.callee.type === 'MemberExpression' &&
-          //node.callee.object.name === 'expect' &&
-          node.callee.property.type === 'Identifier' &&
-          nonRetryableAssertions.includes(node.callee.property.name)
-        ) {
-          let ancestor = node
-          let hasExpectPollOrToPass = false
-
-          while (ancestor) {
-            if (
-              ancestor.type === 'CallExpression' &&
-              ancestor.callee.type === 'MemberExpression' &&
-              ((ancestor.callee.object.type === 'CallExpression' &&
-                ancestor.callee.object.callee.type === 'MemberExpression' &&
-                ancestor.callee.object.callee.property.name === 'poll') ||
-                ancestor.callee.property.name === 'toPass')
-            ) {
-              hasExpectPollOrToPass = true
-              break
-            }
-            ancestor = ancestor.parent
-          }
-
-          if (hasExpectPollOrToPass) {
+        // node.callee is MemberExpressiom
+        if (isNonRetryableAssertion(node.callee)) {
+          if (hasExpectPollOrToPassInChain(node.callee)) {
             return
           }
 
           context.report({
             node: node.callee.property,
             message:
-              'Non-retryable, flaky assertion used in Playwright test: "{{ assertion }}". Those need to be wrapped in expect.poll() or expect().toPass.',
+              'Non-retryable, flaky assertion used in Playwright test: "{{ assertion }}". Those need to be wrapped in expect.poll() or expect().toPass().',
             data: {
               assertion: node.callee.property.name,
             },
