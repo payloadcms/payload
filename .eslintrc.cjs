@@ -4,6 +4,13 @@ module.exports = {
   ignorePatterns: ['README.md', 'packages/**/*.spec.ts'],
   overrides: [
     {
+      files: ['packages/**'],
+      plugins: ['payload'],
+      rules: {
+        'payload/no-jsx-import-statements': 'warn',
+      },
+    },
+    {
       files: ['scripts/**'],
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
