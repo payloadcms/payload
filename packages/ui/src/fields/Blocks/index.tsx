@@ -31,15 +31,11 @@ import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 
-import type {
-  FieldMap,
-  ReducedBlock,
-} from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
 
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
-  fieldMap: FieldMap
   forceRender?: boolean
   indexPath: string
   label?: FieldBase['label']
@@ -212,14 +208,14 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     >
       {showError && (
         <div className={`${baseClass}__error-wrap`}>
-          {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+          <FieldError CustomError={CustomError} {...(errorProps || {})} />
         </div>
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
-              {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+              <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
@@ -248,11 +244,7 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
             </ul>
           )}
         </div>
-        {CustomDescription !== undefined ? (
-          CustomDescription
-        ) : (
-          <FieldDescription {...(descriptionProps || {})} />
-        )}
+        <FieldDescription CustomDescription={CustomDescription} {...(descriptionProps || {})} />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

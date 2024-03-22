@@ -1,1 +1,1 @@
-export { default as getFileByPath } from '../uploads/getFileByPath.js'
+export { getFileByPath } from '../uploads/getFileByPath.js'

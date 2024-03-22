@@ -1,7 +1,8 @@
 import type { CollectionConfig } from 'payload/types'
 
 import { collapsibleFieldsSlug } from '../../slugs.js'
-import { CollapsibleLabelComponent } from './LabelComponent.js'
+import { getCustomLabel } from './CustomLabel/getCustomLabel.js'
+import { NestedCustomLabel } from './NestedCustomLabel/index.js'
 
 const CollapsibleFields: CollectionConfig = {
   slug: collapsibleFieldsSlug,
@@ -77,7 +78,12 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
     {
-      label: ({ data }) => data.functionTitleField || 'Custom Collapsible Label',
+      label: () =>
+        getCustomLabel({
+          path: 'functionTitleField',
+          fallback: 'Custom Collapsible Label',
+          style: {},
+        }),
       type: 'collapsible',
       admin: {
         description: 'Collapsible label rendered from a function.',
@@ -91,7 +97,7 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
     {
-      label: ({ data }) => data?.componentTitleField || 'Untitled',
+      label: () => getCustomLabel({ path: 'componentTitleField', style: {} }),
       type: 'collapsible',
       admin: {
         description: 'Collapsible label rendered as a react component.',
@@ -103,7 +109,8 @@ const CollapsibleFields: CollectionConfig = {
         },
         {
           type: 'collapsible',
-          label: ({ data }) => data?.nestedTitle || 'Nested Collapsible',
+          label: () =>
+            getCustomLabel({ path: 'nestedTitle', fallback: 'Nested Collapsible', style: {} }),
           fields: [
             {
               type: 'text',
@@ -118,7 +125,7 @@ const CollapsibleFields: CollectionConfig = {
       type: 'array',
       fields: [
         {
-          label: CollapsibleLabelComponent,
+          label: NestedCustomLabel,
           type: 'collapsible',
           fields: [
             {

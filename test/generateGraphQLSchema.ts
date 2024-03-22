@@ -1,29 +1,31 @@
-import fs from 'fs'
-import path from 'path'
+// import fs from 'fs'
+// import path from 'path'
 
-import { generateGraphQLSchema } from '../packages/payload/src/bin/generateGraphQLSchema.'
-import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
+// TODO: This should be ported to use configToSchema from @payloadcms/graphql
 
-const [testConfigDir] = process.argv.slice(2)
+// import { generateGraphQLSchema } from '../packages/payload/src/bin/generateGraphQLSchema.js'
+// import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
 
-import { fileURLToPath } from 'url'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+// const [testConfigDir] = process.argv.slice(2)
 
-let testDir
-if (testConfigDir) {
-  testDir = path.resolve(dirname, testConfigDir)
-  setTestEnvPaths(testDir)
-  generateGraphQLSchema()
-} else {
-  // Generate graphql schema for entire directory
-  testDir = dirname
+// import { fileURLToPath } from 'url'
+// const filename = fileURLToPath(import.meta.url)
+// const dirname = path.dirname(filename)
 
-  fs.readdirSync(dirname, { withFileTypes: true })
-    .filter((f) => f.isDirectory())
-    .forEach((dir) => {
-      const suiteDir = path.resolve(testDir, dir.name)
-      const configFound = setTestEnvPaths(suiteDir)
-      if (configFound) generateGraphQLSchema()
-    })
-}
+// let testDir
+// if (testConfigDir) {
+//   testDir = path.resolve(dirname, testConfigDir)
+//   setTestEnvPaths(testDir)
+//   generateGraphQLSchema()
+// } else {
+//   // Generate graphql schema for entire directory
+//   testDir = dirname
+
+//   fs.readdirSync(dirname, { withFileTypes: true })
+//     .filter((f) => f.isDirectory())
+//     .forEach((dir) => {
+//       const suiteDir = path.resolve(testDir, dir.name)
+//       const configFound = setTestEnvPaths(suiteDir)
+//       if (configFound) generateGraphQLSchema()
+//     })
+// }

@@ -6,7 +6,7 @@ import type { Document, PayloadRequest, RequestContext } from '../../../types/in
 import type { File } from '../../../uploads/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import getFileByPath from '../../../uploads/getFileByPath.js'
+import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 

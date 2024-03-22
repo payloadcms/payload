@@ -28,12 +28,14 @@ const Iterable: React.FC<Props> = ({
 
   return (
     <div className={baseClass}>
-      {'label' in field.fieldComponentProps && field.fieldComponentProps.label && (
-        <Label>
-          {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {getTranslation(field.fieldComponentProps.label, i18n)}
-        </Label>
-      )}
+      {'label' in field.fieldComponentProps &&
+        field.fieldComponentProps.label &&
+        typeof field.fieldComponentProps.label !== 'function' && (
+          <Label>
+            {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
+            {getTranslation(field.fieldComponentProps.label, i18n)}
+          </Label>
+        )}
       {maxRows > 0 && (
         <React.Fragment>
           {Array.from(Array(maxRows).keys()).map((row, i) => {

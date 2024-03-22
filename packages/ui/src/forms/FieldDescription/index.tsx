@@ -12,7 +12,7 @@ export { FieldDescriptionProps }
 
 const baseClass = 'field-description'
 
-export const FieldDescription: React.FC<FieldDescriptionProps> = (props) => {
+const DefaultFieldDescription: React.FC<FieldDescriptionProps> = (props) => {
   const { className, description, marginPlacement } = props
 
   const { path } = useFieldProps()
@@ -37,4 +37,14 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = (props) => {
   }
 
   return null
+}
+
+export const FieldDescription: React.FC<FieldDescriptionProps> = (props) => {
+  const { CustomDescription } = props
+
+  if (CustomDescription !== undefined) {
+    return CustomDescription
+  }
+
+  return <DefaultFieldDescription {...props} />
 }

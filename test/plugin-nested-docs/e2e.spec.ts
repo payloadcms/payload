@@ -22,27 +22,10 @@ let parentId: string
 let draftChildId: string
 let childId: string
 
-type Args = {
-  parent?: string
-  slug: string
-  status?: 'draft' | 'published'
-  title?: string
-}
-
-async function createPage({
-  slug,
-  title = 'Title page',
-  parent,
-  status = 'published',
-}: Args): Promise<PayloadPage> {
+async function createPage(data: Partial<PayloadPage>): Promise<PayloadPage> {
   return payload.create({
     collection: 'pages',
-    data: {
-      title,
-      slug,
-      _status: status,
-      parent,
-    },
+    data,
   }) as unknown as Promise<PayloadPage>
 }
 
@@ -65,14 +48,14 @@ describe('Nested Docs Plugin', () => {
     })
     childId = childPage.id
 
-    const draftParentPage = await createPage({ slug: 'parent-slug-draft', status: 'draft' })
+    const draftParentPage = await createPage({ slug: 'parent-slug-draft', _status: 'draft' })
     draftParentId = draftParentPage.id
 
     const draftChildPage = await createPage({
       slug: 'child-slug-draft',
       title: 'Child page',
       parent: draftParentId,
-      status: 'draft',
+      _status: 'draft',
     })
     draftChildId = draftChildPage.id
   })

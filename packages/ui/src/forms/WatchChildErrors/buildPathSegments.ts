@@ -1,32 +1,34 @@
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 export const buildPathSegments = (parentPath: string, fieldMap: FieldMap): string[] => {
-  const pathNames = fieldMap.reduce((acc, subField) => {
-    if ('fieldMap' in subField.fieldComponentProps) {
-      const fieldMap = subField.fieldComponentProps.fieldMap
+  const pathNames = fieldMap.reduce((acc, field) => {
+    const fieldMap =
+      'fieldMap' in field.fieldComponentProps ? field.fieldComponentProps.fieldMap : undefined
 
-      if (fieldMap && subField.isFieldAffectingData) {
+    if (fieldMap) {
+      if (field.isFieldAffectingData) {
         // group, block, array
-        const name = 'name' in subField ? subField.name : 'unnamed'
+        const name = 'name' in field ? field.name : 'unnamed'
         acc.push(parentPath ? `${parentPath}.${name}.` : `${name}.`)
-      } else if (fieldMap) {
+      } else {
         // rows, collapsibles, unnamed-tab
         acc.push(...buildPathSegments(parentPath, fieldMap))
-      } else if (subField.type === 'tabs') {
-        // tabs
-        'tabs' in subField.fieldComponentProps &&
-          subField.fieldComponentProps?.tabs?.forEach((tab) => {
-            let tabPath = parentPath
-            if ('name' in tab) {
-              tabPath = parentPath ? `${parentPath}.${tab.name}` : tab.name
-            }
-            acc.push(...buildPathSegments(tabPath, tab.fieldMap))
-          })
-      } else if (subField.isFieldAffectingData) {
-        // text, number, date, etc.
-        const name = 'name' in subField ? subField.name : 'unnamed'
-        acc.push(parentPath ? `${parentPath}.${name}` : name)
       }
+    } else if (field.type === 'tabs') {
+      // tabs
+      if ('tabs' in field.fieldComponentProps) {
+        field.fieldComponentProps.tabs?.forEach((tab) => {
+          let tabPath = parentPath
+          if ('name' in tab) {
+            tabPath = parentPath ? `${parentPath}.${tab.name}` : tab.name
+          }
+          acc.push(...buildPathSegments(tabPath, tab.fieldMap))
+        })
+      }
+    } else if (field.isFieldAffectingData) {
+      // text, number, date, etc.
+      const name = 'name' in field ? field.name : 'unnamed'
+      acc.push(parentPath ? `${parentPath}.${name}` : name)
     }
 
     return acc

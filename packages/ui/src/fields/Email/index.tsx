@@ -73,8 +73,8 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
         width,
       }}
     >
-      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
-      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+      <FieldError CustomError={CustomError} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
       <div>
         {BeforeInput}
         <input
