@@ -588,8 +588,6 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 }
 
-export * from './types.js'
-
 export {
   FormContext,
   FormFieldsContext,
@@ -605,3 +603,5 @@ export {
   useFormSubmitted,
   useWatchForm,
 } from './context.js'
+
+export { FormProps }
