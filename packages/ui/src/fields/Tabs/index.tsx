@@ -28,7 +28,6 @@ export { TabsProvider }
 
 export type TabsFieldProps = FormFieldBase & {
   forceRender?: boolean
-  indexPath: string
   name?: string
   path?: string
   permissions: FieldPermissions
@@ -43,13 +42,12 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
     className,
     descriptionProps,
     forceRender = false,
-    indexPath,
     path: pathFromProps,
     readOnly,
     tabs = [],
   } = props
 
-  const { path: pathFromContext, permissions, schemaPath } = useFieldProps()
+  const { indexPath, path: pathFromContext, permissions, schemaPath } = useFieldProps()
   const path = pathFromContext || pathFromProps || name
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()

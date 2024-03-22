@@ -72,6 +72,9 @@ export const RenderFields: React.FC<Props> = (props) => {
                 CustomField={CustomField}
                 disabled={disabled}
                 fieldComponentProps={fieldComponentProps}
+                indexPath={
+                  'indexPath' in props ? `${props?.indexPath}.${fieldIndex}` : `${fieldIndex}`
+                }
                 isHidden={isHidden}
                 key={fieldIndex}
                 name={name}

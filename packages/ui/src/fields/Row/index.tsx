@@ -17,7 +17,7 @@ const baseClass = 'row'
 const RowField: React.FC<RowFieldProps> = (props) => {
   const { className, fieldMap, forceRender = false } = props
 
-  const { path, readOnly, schemaPath, siblingPermissions } = useFieldProps()
+  const { indexPath, path, readOnly, schemaPath, siblingPermissions } = useFieldProps()
 
   return (
     <RowProvider>
@@ -27,6 +27,7 @@ const RowField: React.FC<RowFieldProps> = (props) => {
           className={`${baseClass}__fields`}
           fieldMap={fieldMap}
           forceRender={forceRender}
+          indexPath={indexPath}
           margins={false}
           permissions={siblingPermissions}
         />

@@ -7,6 +7,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
@@ -35,7 +36,6 @@ export type ArrayFieldProps = FormFieldBase & {
   CustomRowLabel?: React.ReactNode
   fieldMap: FieldMap
   forceRender?: boolean
-  indexPath: string
   label?: FieldBase['label']
   labels?: ArrayFieldType['labels']
   maxRows?: ArrayFieldType['maxRows']
@@ -57,7 +57,6 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
     errorProps,
     fieldMap,
     forceRender = false,
-    indexPath,
     labelProps,
     localized,
     maxRows,
@@ -68,6 +67,8 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
     required,
     validate,
   } = props
+
+  const { indexPath } = useFieldProps()
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()

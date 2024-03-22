@@ -27,7 +27,6 @@ import type { FormFieldBase } from '../shared/index.js'
 
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
-  indexPath: string
   initCollapsed?: boolean
   permissions: FieldPermissions
   width?: string
@@ -45,14 +44,20 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     path: pathFromProps,
   } = props
 
-  const { path: pathFromContext, readOnly, schemaPath, siblingPermissions } = useFieldProps()
+  const {
+    indexPath,
+    path: pathFromContext,
+    readOnly,
+    schemaPath,
+    siblingPermissions,
+  } = useFieldProps()
   const path = pathFromProps || pathFromContext
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
-  const fieldPreferencesKey = `collapsible-${path.replace(/\./g, '__')}`
+  const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 
@@ -138,6 +143,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
           <RenderFields
             fieldMap={fieldMap}
             forceRender
+            indexPath={indexPath}
             margins="small"
             path={path}
             permissions={siblingPermissions}

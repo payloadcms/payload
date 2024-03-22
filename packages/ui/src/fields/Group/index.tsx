@@ -28,7 +28,6 @@ export type GroupFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   forceRender?: boolean
   hideGutter?: boolean
-  indexPath: string
   label?: FieldBase['label']
   name?: string
   permissions: FieldPermissions

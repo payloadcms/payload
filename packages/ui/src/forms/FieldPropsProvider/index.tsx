@@ -4,6 +4,7 @@ import type { FieldPermissions } from 'payload/types'
 import React from 'react'
 
 export type FieldPropsContextType = {
+  indexPath?: string
   path: string
   permissions?: FieldPermissions
   readOnly: boolean
@@ -14,6 +15,7 @@ export type FieldPropsContextType = {
 }
 
 const FieldPropsContext = React.createContext<FieldPropsContextType>({
+  indexPath: '',
   path: '',
   permissions: {} as FieldPermissions,
   readOnly: false,
@@ -23,6 +25,7 @@ const FieldPropsContext = React.createContext<FieldPropsContextType>({
 
 export type Props = {
   children: React.ReactNode
+  indexPath?: string
   path: string
   permissions?: FieldPermissions
   readOnly: boolean
@@ -34,6 +37,7 @@ export type Props = {
 
 export const FieldPropsProvider: React.FC<Props> = ({
   children,
+  indexPath,
   path,
   permissions,
   readOnly,
@@ -43,6 +47,7 @@ export const FieldPropsProvider: React.FC<Props> = ({
   return (
     <FieldPropsContext.Provider
       value={{
+        indexPath,
         path,
         permissions,
         readOnly,

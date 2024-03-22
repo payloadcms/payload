@@ -19,6 +19,7 @@ type Props = {
   CustomField: MappedField['CustomField']
   disabled: boolean
   fieldComponentProps?: FieldComponentProps
+  indexPath?: string
   isHidden?: boolean
   name?: string
   path: string
@@ -37,6 +38,7 @@ export const RenderField: React.FC<Props> = ({
   CustomField,
   disabled,
   fieldComponentProps,
+  indexPath,
   isHidden,
   path: pathFromProps,
   permissions,
@@ -76,6 +78,7 @@ export const RenderField: React.FC<Props> = ({
 
   return (
     <FieldPropsProvider
+      indexPath={indexPath}
       path={path}
       permissions={permissions}
       readOnly={readOnly}
