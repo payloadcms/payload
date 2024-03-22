@@ -33,7 +33,6 @@ export const RenderFields: React.FC<Props> = (props) => {
     }
   }, [shouldRender, hasRendered])
 
-  console.log('RenderFields', { fieldMap }) // eslint-disable-line no-console
   if (!fieldMap || (Array.isArray(fieldMap) && fieldMap.length === 0)) {
     return null
   }
