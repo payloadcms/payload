@@ -75,6 +75,7 @@
     "@next/bundle-analyzer": "^14.1.0",
     "@octokit/core": "^5.1.0",
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/live-preview-react": "workspace:*",
     "@playwright/test": "^1.42.1",
     "@swc/cli": "^0.1.62",
     "@swc/jest": "0.2.36",
