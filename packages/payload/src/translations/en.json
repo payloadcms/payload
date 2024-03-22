@@ -92,7 +92,8 @@
     "unspecific": "An error has occurred.",
     "userLocked": "This user is locked due to having too many failed login attempts.",
     "valueMustBeUnique": "Value must be unique",
-    "verificationTokenInvalid": "Verification token is invalid."
+    "verificationTokenInvalid": "Verification token is invalid.",
+    "userWithEmailAlreadyExists": "A user with the given email is already registered."
   },
   "fields": {
     "addLabel": "Add {{label}}",

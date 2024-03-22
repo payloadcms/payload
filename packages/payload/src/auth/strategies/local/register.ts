@@ -20,34 +20,49 @@ export const registerLocalStrategy = async ({
   payload,
   req,
 }: Args): Promise<Record<string, unknown>> => {
-  const existingUser = await payload.find({
-    collection: collection.slug,
-    depth: 0,
-    where: {
-      email: {
-        equals: doc.email,
-      },
-    },
-  })
-
-  if (existingUser.docs.length > 0) {
-    throw new ValidationError([
-      { field: 'email', message: 'A user with the given email is already registered' },
-    ])
-  }
-
   const { hash, salt } = await generatePasswordSaltHash({ password })
 
   const sanitizedDoc = { ...doc }
   if (sanitizedDoc.password) delete sanitizedDoc.password
 
-  return payload.db.create({
-    collection: collection.slug,
-    data: {
-      ...sanitizedDoc,
-      hash,
-      salt,
-    },
-    req,
-  })
+  try {
+    return await payload.db.create({
+      collection: collection.slug,
+      data: {
+        ...sanitizedDoc,
+        hash,
+        salt,
+      },
+      req,
+    })
+  } catch (error) {
+    // Handle uniqueness error from MongoDB
+    if (error.code === 11000 && error.keyValue) {
+      error = new ValidationError(
+        [
+          {
+            field: Object.keys(error.keyValue)[0],
+            message: req.t('error:valueMustBeUnique'),
+          },
+        ],
+        req.t,
+      )
+    }
+
+    if (
+      error instanceof ValidationError &&
+      error.data[0].field === 'email' &&
+      error.data[0].message === req.t('error:valueMustBeUnique')
+    ) {
+      error = new ValidationError(
+        [
+          { field: 'email', message: req.t('error:userWithEmailAlreadyExists') },
+          ...error.data.slice(1),
+        ],
+        req.t,
+      )
+    }
+
+    throw error
+  }
 }

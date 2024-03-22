@@ -339,6 +339,9 @@
         },
         "verificationTokenInvalid": {
           "type": "string"
+        },
+        "userWithEmailAlreadyExists": {
+          "type": "string"
         }
       },
       "required": [
