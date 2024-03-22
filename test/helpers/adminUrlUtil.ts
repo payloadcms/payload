@@ -10,7 +10,7 @@ export class AdminUrlUtil {
   constructor(serverURL: string, slug: string) {
     this.account = `${serverURL}/admin/account`
     this.admin = `${serverURL}/admin`
-    this.list = `${this.admin}/collections/${slug}`
+    this.list = `${this.admin}/collections/${slug}?limit=10`
     this.create = `${this.list}/create`
   }
 
