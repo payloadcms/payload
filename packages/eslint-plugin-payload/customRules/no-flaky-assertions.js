@@ -82,11 +82,28 @@ module.exports = {
       return false
     }
 
+    function hasExpectPollOrToPassInParentChain(node) {
+      let ancestor = node
+
+      while (ancestor) {
+        if (isExpectPollOrToPass(ancestor)) {
+          return true
+        }
+        ancestor = ancestor.parent
+      }
+
+      return false
+    }
+
     return {
       CallExpression(node) {
         // node.callee is MemberExpressiom
         if (isNonRetryableAssertion(node.callee)) {
           if (hasExpectPollOrToPassInChain(node.callee)) {
+            return
+          }
+
+          if (hasExpectPollOrToPassInParentChain(node)) {
             return
           }
 
