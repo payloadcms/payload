@@ -17,13 +17,14 @@ export async function initTransaction(req: PayloadRequest): Promise<boolean> {
   }
   if (typeof payload.db.beginTransaction === 'function') {
     // create a new transaction
-    req.transactionIDPromise = payload.db.beginTransaction().then((transactionID) => {
-      if (transactionID) {
+    req.transactionIDPromise = payload.db.beginTransaction().then((newTransactionID) => {
+      if (newTransactionID && !req.transactionID && !req.transactionIDPromise) {
         req.transactionID = transactionID
       }
       delete req.transactionIDPromise
     })
     await req.transactionIDPromise
+
     return !!req.transactionID
   }
   return false
