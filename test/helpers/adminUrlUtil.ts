@@ -18,7 +18,7 @@ export class AdminUrlUtil {
     return `${this.admin}/collections/${slug}`
   }
 
-  edit(id: string): string {
+  edit(id: number | string): string {
     return `${this.list}/${id}`
   }
 
