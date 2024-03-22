@@ -148,6 +148,9 @@ importers:
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
+      eslint-plugin-payload:
+        specifier: workspace:*
+        version: link:packages/eslint-plugin-payload
       execa:
         specifier: 5.1.1
         version: 5.1.1
