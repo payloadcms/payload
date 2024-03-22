@@ -5,7 +5,7 @@ import {
   draftCollectionSlug,
   postCollectionSlug,
   versionCollectionSlug,
-} from '../slugs'
+} from '../slugs.js'
 
 const Posts: CollectionConfig = {
   slug: postCollectionSlug,

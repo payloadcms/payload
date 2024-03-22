@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "3.0.0-alpha.48",
+  "version": "3.0.0-alpha.49",
   "description": "The officially supported MongoDB database adapter for Payload - Update 2",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -11,8 +11,8 @@
     "name": "Payload",
     "url": "https://payloadcms.com"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/types.ts",
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -53,8 +53,8 @@
     "types": "./dist/index.d.ts",
     "exports": {
       ".": {
-        "import": "./dist/index.ts",
-        "require": "./dist/index.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
       }
     }

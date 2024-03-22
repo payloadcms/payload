@@ -99,7 +99,9 @@ const Relationship: React.FC<Props> = ({ comparison, field, i18n, locale, versio
   }
 
   const label =
-    'label' in field.fieldComponentProps && typeof field.fieldComponentProps.label !== 'boolean'
+    'label' in field.fieldComponentProps &&
+    typeof field.fieldComponentProps.label !== 'boolean' &&
+    typeof field.fieldComponentProps.label !== 'function'
       ? field.fieldComponentProps.label
       : ''
 

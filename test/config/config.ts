@@ -80,7 +80,6 @@ export default buildConfigWithDefaults({
     {
       path: '/config',
       method: 'get',
-      root: true,
       handler: (req) => {
         return Response.json(req.payload.config)
       },

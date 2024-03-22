@@ -8,8 +8,9 @@ import webpack from 'webpack'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+/** @type {import('webpack').Configuration} */
 const componentWebpackConfig = {
-  entry: path.resolve(dirname, './src/index.js'),
+  entry: path.resolve(dirname, './src/webpackEntry.ts'),
   externals: [
     'react',
     'react-dom',

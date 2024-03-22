@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { wait } from 'payload/utilities'
@@ -14,6 +14,43 @@ type FirstRegisterArgs = {
 type LoginArgs = {
   page: Page
   serverURL: string
+}
+
+const networkConditions = {
+  'Slow 3G': {
+    download: ((500 * 1000) / 8) * 0.8,
+    upload: ((500 * 1000) / 8) * 0.8,
+    latency: 400 * 5,
+  },
+  'Fast 3G': {
+    download: ((1.6 * 1000 * 1000) / 8) * 0.9,
+    upload: ((750 * 1000) / 8) * 0.9,
+    latency: 1000,
+  },
+  'Slow 4G': {
+    download: ((4 * 1000 * 1000) / 8) * 0.8,
+    upload: ((3 * 1000 * 1000) / 8) * 0.8,
+    latency: 1000,
+  },
+}
+
+export async function delayNetwork({
+  context,
+  page,
+  delay,
+}: {
+  context: BrowserContext
+  delay: 'Fast 3G' | 'Slow 3G' | 'Slow 4G'
+  page: Page
+}) {
+  const cdpSession = await context.newCDPSession(page)
+
+  await cdpSession.send('Network.emulateNetworkConditions', {
+    downloadThroughput: networkConditions[delay].download,
+    uploadThroughput: networkConditions[delay].upload,
+    latency: networkConditions[delay].latency,
+    offline: false,
+  })
 }
 
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
@@ -54,8 +91,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
   await page.click(selector, { delay: 100 })
   await expect(page.locator('.Toastify')).toContainText('successfully')
-  await wait(500)
-  expect(page.url()).not.toContain('create')
+  await expect.poll(() => page.url(), { timeout: 45000 }).not.toContain('create')
 }
 
 export async function openNav(page: Page): Promise<void> {
@@ -98,18 +134,29 @@ export function exactText(text: string) {
   return new RegExp(`^${text}$`)
 }
 
-export const checkPageTitle = async (page: Page, title: string) =>
-  expect(await page.locator('.doc-header__title.render-title')?.first()?.innerText()).toBe(title)
+export const checkPageTitle = async (page: Page, title: string) => {
+  await expect
+    .poll(async () => await page.locator('.doc-header__title.render-title')?.first()?.innerText(), {
+      timeout: 45000,
+    })
+    .toBe(title)
+}
 
-export const checkBreadcrumb = async (page: Page, text: string) =>
-  expect(await page.locator('.step-nav.app-header__step-nav .step-nav__last')?.innerText()).toBe(
-    text,
-  )
+export const checkBreadcrumb = async (page: Page, text: string) => {
+  await expect
+    .poll(
+      async () => await page.locator('.step-nav.app-header__step-nav .step-nav__last')?.innerText(),
+      {
+        timeout: 45000,
+      },
+    )
+    .toBe(text)
+}
 
 export const selectTableRow = async (page: Page, title: string): Promise<void> => {
   const selector = `tbody tr:has-text("${title}") .select-row__checkbox input[type=checkbox]`
   await page.locator(selector).check()
-  expect(await page.locator(selector).isChecked()).toBe(true)
+  await expect(page.locator(selector)).toBeChecked()
 }
 
 export const findTableCell = (page: Page, fieldName: string, rowTitle?: string): Locator => {

@@ -151,8 +151,8 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
-      {CustomError !== undefined ? CustomError : <FieldError {...(errorProps || {})} />}
+      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldError CustomError={CustomError} {...(errorProps || {})} />
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}

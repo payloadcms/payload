@@ -546,7 +546,7 @@ export const Form: React.FC<FormProps> = (props) => {
         }
       }
 
-      void executeOnChange() // eslint-disable-line @typescript-eslint/no-floating-promises
+      if (modified) void executeOnChange()
     },
     150,
     [fields, dispatchFields, onChange],
@@ -588,8 +588,6 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 }
 
-export * from './types.js'
-
 export {
   FormContext,
   FormFieldsContext,
@@ -605,3 +603,5 @@ export {
   useFormSubmitted,
   useWatchForm,
 } from './context.js'
+
+export { FormProps }
