@@ -5,6 +5,7 @@ import { wait } from 'payload/utilities'
 import shelljs from 'shelljs'
 
 import { devUser } from './credentials.js'
+import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
 type FirstRegisterArgs = {
   page: Page
@@ -91,7 +92,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
   await page.click(selector, { delay: 100 })
   await expect(page.locator('.Toastify')).toContainText('successfully')
-  await expect.poll(() => page.url(), { timeout: 45000 }).not.toContain('create')
+  await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
 }
 
 export async function openNav(page: Page): Promise<void> {
@@ -137,7 +138,7 @@ export function exactText(text: string) {
 export const checkPageTitle = async (page: Page, title: string) => {
   await expect
     .poll(async () => await page.locator('.doc-header__title.render-title')?.first()?.innerText(), {
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
     .toBe(title)
 }
@@ -147,7 +148,7 @@ export const checkBreadcrumb = async (page: Page, text: string) => {
     .poll(
       async () => await page.locator('.step-nav.app-header__step-nav .step-nav__last')?.innerText(),
       {
-        timeout: 45000,
+        timeout: POLL_TOPASS_TIMEOUT,
       },
     )
     .toBe(text)
