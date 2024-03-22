@@ -200,6 +200,10 @@ async function main() {
 
   const otp = dryRun ? undefined : await question('Enter your 2FA code')
 
+  if (!dryRun && !otp) {
+    abort('2FA code is required')
+  }
+
   // Publish
   const results: { name: string; success: boolean; details?: string }[] = await Promise.all(
     packageDetails.map(async (pkg) => {
@@ -232,6 +236,9 @@ async function main() {
   )
 
   console.log(chalk.bold.green(`\n\nResults:\n\n`))
+  console.log(results.map(({ name, success }) => `  ${success ? '✅' : '❌'} ${name}`).join('\n'))
+
+  // New results format
   console.log(
     results
       .map(({ name, success, details }) => {
@@ -239,6 +246,7 @@ async function main() {
         if (details) {
           summary += `\n    ${details}\n`
         }
+        return summary
       })
       .join('\n'),
   )
