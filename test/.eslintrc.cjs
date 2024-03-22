@@ -42,7 +42,7 @@ module.exports = {
     {
       files: ['**/*.int.spec.ts', '**/int.spec.ts'],
       rules: {
-         'payload/no-relative-monorepo-imports': 'error',
+        'payload/no-relative-monorepo-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
@@ -63,6 +63,8 @@ module.exports = {
         'jest/require-top-level-describe': 'off',
         'jest-dom/prefer-to-have-attribute': 'off',
         'playwright/prefer-web-first-assertions': 'error',
+        'payload/no-flaky-assertions': 'warn',
+        'payload/no-wait-function': 'warn',
         // Enable the no-non-retryable-assertions rule ONLY for hunting for flakes
         // 'payload/no-non-retryable-assertions': 'error',
       },

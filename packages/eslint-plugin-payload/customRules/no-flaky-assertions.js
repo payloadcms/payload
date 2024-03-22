@@ -3,7 +3,8 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow non-retryable assertions in Playwright E2E tests',
+      description:
+        'Disallow non-retryable assertions in Playwright E2E tests unless they are wrapped in an expect.poll() or expect().toPass()',
       category: 'Best Practices',
       recommended: true,
     },
@@ -50,10 +51,32 @@ module.exports = {
           node.callee.property.type === 'Identifier' &&
           nonRetryableAssertions.includes(node.callee.property.name)
         ) {
+          let ancestor = node
+          let hasExpectPollOrToPass = false
+
+          while (ancestor) {
+            if (
+              ancestor.type === 'CallExpression' &&
+              ancestor.callee.type === 'MemberExpression' &&
+              ((ancestor.callee.object.type === 'CallExpression' &&
+                ancestor.callee.object.callee.type === 'MemberExpression' &&
+                ancestor.callee.object.callee.property.name === 'poll') ||
+                ancestor.callee.property.name === 'toPass')
+            ) {
+              hasExpectPollOrToPass = true
+              break
+            }
+            ancestor = ancestor.parent
+          }
+
+          if (hasExpectPollOrToPass) {
+            return
+          }
+
           context.report({
             node: node.callee.property,
             message:
-              'Non-retryable, flaky assertion used in Playwright test: "{{ assertion }}". Those need to be wrapped in expect.poll or expect.toPass.',
+              'Non-retryable, flaky assertion used in Playwright test: "{{ assertion }}". Those need to be wrapped in expect.poll() or expect().toPass.',
             data: {
               assertion: node.callee.property.name,
             },

@@ -87,7 +87,12 @@ export const mapFields = (args: {
         }`
 
         const labelProps: LabelProps = {
-          label: 'label' in field && typeof field.label !== 'function' ? field.label : null,
+          label:
+            'label' in field &&
+            (typeof field.label !== 'function' ||
+              (typeof field.label === 'object' && isPlainObject(field.label)))
+              ? field.label
+              : undefined,
           required: 'required' in field ? field.required : undefined,
         }
 
@@ -347,6 +352,7 @@ export const mapFields = (args: {
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
+              initCollapsed: field.admin?.initCollapsed,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,

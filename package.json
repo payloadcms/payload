@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.48",
+  "version": "3.0.0-alpha.49",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -58,6 +58,7 @@
     "pretest": "pnpm build",
     "reinstall": "pnpm clean:all && pnpm install",
     "script:list-packages": "tsx ./scripts/list-packages.ts",
+    "script:pack": "tsx scripts/pack-all-to-dest.ts",
     "release:alpha": "tsx ./scripts/release.ts --bump prerelease --tag alpha",
     "release:beta": "tsx ./scripts/release.ts --bump prerelease --tag beta",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
@@ -74,6 +75,7 @@
     "@next/bundle-analyzer": "^14.1.0",
     "@octokit/core": "^5.1.0",
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/live-preview-react": "workspace:*",
     "@playwright/test": "^1.42.1",
     "@swc/cli": "^0.1.62",
     "@swc/jest": "0.2.36",
@@ -107,6 +109,7 @@
     "dotenv": "8.6.0",
     "drizzle-kit": "0.20.14-1f2c838",
     "drizzle-orm": "0.29.4",
+    "eslint-plugin-payload": "workspace:*",
     "escape-html": "^1.0.3",
     "execa": "5.1.1",
     "form-data": "3.0.1",

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-alpha.48",
+  "version": "3.0.0-alpha.49",
   "type": "module",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
@@ -19,7 +19,7 @@
       "import": "./src/assets/index.ts",
       "require": "./src/assets/index.ts",
       "default": "./src/assets/index.ts",
-      "types": "./src/assets/index.tx"
+      "types": "./src/assets/index.tsx"
     },
     "./elements/*": {
       "import": "./src/elements/*/index.tsx",
@@ -85,10 +85,71 @@
   "publishConfig": {
     "exports": {
       ".": "./dist/exports/index.js",
+      "./assets/*": "./dist/assets/*",
       "./*": {
         "import": "./dist/exports/*.js",
         "require": "./dist/exports/*.js",
         "types": "./dist/exports/*.d.ts"
+      },
+      "./assets": {
+        "import": "./dist/assets/index.js",
+        "require": "./dist/assets/index.js",
+        "default": "./dist/assets/index.js",
+        "types": "./dist/assets/index.d.ts"
+      },
+      "./elements/*": {
+        "import": "./dist/elements/*/index.js",
+        "require": "./dist/elements/*/index.js",
+        "default": "./dist/elements/*/index.js",
+        "types": "./dist/elements/*/index.d.ts"
+      },
+      "./fields/*": {
+        "import": "./dist/fields/*/index.js",
+        "require": "./dist/fields/*/index.js",
+        "default": "./dist/fields/*/index.js",
+        "types": "./dist/fields/*/index.d.ts"
+      },
+      "./forms/*": {
+        "import": "./dist/forms/*/index.js",
+        "require": "./dist/forms/*/index.js",
+        "default": "./dist/forms/*/index.js",
+        "types": "./dist/forms/*/index.d.ts"
+      },
+      "./graphics/*": {
+        "import": "./dist/graphics/*/index.js",
+        "require": "./dist/graphics/*/index.js",
+        "default": "./dist/graphics/*/index.js",
+        "types": "./dist/graphics/*/index.d.ts"
+      },
+      "./hooks/*": {
+        "import": "./dist/hooks/*.js",
+        "require": "./dist/hooks/*.js",
+        "default": "./dist/hooks/*.js",
+        "types": "./dist/hooks/*.d.ts"
+      },
+      "./icons/*": {
+        "import": "./dist/icons/*/index.js",
+        "require": "./dist/icons/*/index.js",
+        "default": "./dist/icons/*/index.js",
+        "types": "./dist/icons/*/index.d.ts"
+      },
+      "./providers/*": {
+        "import": "./dist/providers/*/index.js",
+        "require": "./dist/providers/*/index.js",
+        "default": "./dist/providers/*/index.js",
+        "types": "./dist/providers/*/index.d.ts"
+      },
+      "./templates/*": {
+        "import": "./dist/templates/*/index.js",
+        "require": "./dist/templates/*/index.js",
+        "default": "./dist/templates/*/index.js",
+        "types": "./dist/templates/*/index.d.ts"
+      },
+      "./utilities/*": {
+        "import": "./dist/utilities/*.js",
+        "require": "./dist/utilities/*.js",
+        "default": "./dist/utilities/*.js",
+        "types": "./dist/utilities/*.d.ts"
       },
       "./css": {
         "import": "./dist/prod/styles.css",
@@ -100,8 +161,7 @@
         "require": "./dist/scss.scss",
         "default": "./dist/scss.scss"
       },
-      "./scss/app.scss": "./dist/scss/app.scss",
-      "./assets/*": "./dist/assets/*"
+      "./scss/app.scss": "./dist/scss/app.scss"
     }
   },
   "devDependencies": {

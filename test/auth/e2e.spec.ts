@@ -42,7 +42,7 @@ describe('auth', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    //await delayNetwork({ context, page, delay: 'Fast 3G' })
+    //await delayNetwork({ context, page, delay: 'Slow 4G' })
 
     await login({
       page,
