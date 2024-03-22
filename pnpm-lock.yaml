@@ -46,6 +46,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:packages/eslint-config-payload
+      '@payloadcms/live-preview-react':
+        specifier: workspace:*
+        version: link:packages/live-preview-react
       '@playwright/test':
         specifier: ^1.42.1
         version: 1.42.1
