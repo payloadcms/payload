@@ -1,8 +1,6 @@
-import type { Where } from 'payload/types'
-
 import { getTranslation } from '@payloadcms/translations'
 import { flattenTopLevelFields } from 'payload/utilities'
-import React, { useReducer, useState } from 'react'
+import React, { useState } from 'react'
 
 import type { WhereBuilderProps } from './types.js'
 
@@ -14,7 +12,6 @@ import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
 import fieldTypes from './field-types.js'
 import './index.scss'
-import reducer from './reducer.js'
 import { transformWhereQuery } from './transformWhereQuery.js'
 import validateWhereQuery from './validateWhereQuery.js'
 
@@ -70,31 +67,123 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
   const { searchParams } = useSearchParams()
   const { handleWhereChange } = useListQuery()
+  const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
   // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
-  const [conditions, dispatchConditions] = useReducer(
-    reducer((state) => handleWhereChange({ or: state })),
-    searchParams.where as Where,
-    (whereFromSearch: Where) => {
-      if (whereFromSearch) {
-        if (validateWhereQuery(whereFromSearch)) {
-          return whereFromSearch.or
-        }
+  /*
+    stored conditions look like this:
+    [
+      _or_ & _and_ queries have the same shape:
+      {
+        and: [{
+          category: {
+            equals: 'category-a'
+          }
+        }]
+      },
 
-        // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
-        const transformedWhere = transformWhereQuery(whereFromSearch)
-
-        if (validateWhereQuery(transformedWhere)) {
-          return transformedWhere.or
-        }
-
-        console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`)
+      {
+        and:[{
+          category: {
+            equals: 'category-b'
+          },
+          text: {
+            not_equals: 'oranges'
+          },
+        }]
       }
-      return []
+    ]
+  */
+  const [conditions, setConditions] = React.useState(() => {
+    const whereFromSearch = searchParams.where
+    if (whereFromSearch) {
+      if (validateWhereQuery(whereFromSearch)) {
+        return whereFromSearch.or
+      }
+
+      // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
+      const transformedWhere = transformWhereQuery(whereFromSearch)
+
+      if (validateWhereQuery(transformedWhere)) {
+        return transformedWhere.or
+      }
+
+      console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`)
+    }
+
+    return []
+  })
+
+  const addCondition = React.useCallback(({ andIndex, fieldName, orIndex, relation }) => {
+    setConditions((prevConditions) => {
+      const newConditions = [...prevConditions]
+      if (relation === 'and') {
+        newConditions[orIndex].and.splice(andIndex, 0, { [fieldName]: {} })
+      } else {
+        newConditions.push({
+          and: [
+            {
+              [fieldName]: {},
+            },
+          ],
+        })
+      }
+
+      return newConditions
+    })
+  }, [])
+
+  const updateCondition = React.useCallback(
+    ({ andIndex, fieldName: fieldNameArg, operator: operatorArg, orIndex, value: valueArg }) => {
+      setConditions((prevConditions) => {
+        const newConditions = [...prevConditions]
+        if (typeof newConditions[orIndex].and[andIndex] === 'object') {
+          const [existingFieldName, existingCondition] = Object.entries(
+            newConditions[orIndex].and[andIndex],
+          )?.[0] || [fieldNameArg, operatorArg]
+          const fieldName = existingFieldName || fieldNameArg
+          const operator = operatorArg || Object.keys(existingCondition)?.[0] || undefined
+          const value = valueArg ?? (operator ? newConditions[orIndex].and[andIndex][operator] : '')
+
+          if (fieldName) {
+            newConditions[orIndex].and[andIndex] = {
+              [fieldName]: operator ? { [operator]: value } : {},
+            }
+          }
+
+          if (fieldName && operator && ![null, undefined].includes(value)) {
+            setShouldUpdateQuery(true)
+          }
+        }
+
+        return newConditions
+      })
     },
+    [],
   )
+
+  const removeCondition = React.useCallback(({ andIndex, orIndex }) => {
+    setConditions((prevConditions) => {
+      const newConditions = [...prevConditions]
+      newConditions[orIndex].and.splice(andIndex, 1)
+
+      if (newConditions[orIndex].and.length === 0) {
+        newConditions.splice(orIndex, 1)
+      }
+
+      return newConditions
+    })
+    setShouldUpdateQuery(true)
+  }, [])
+
+  React.useEffect(() => {
+    if (shouldUpdateQuery) {
+      handleWhereChange({ or: conditions })
+      setShouldUpdateQuery(false)
+    }
+  }, [conditions, handleWhereChange, shouldUpdateQuery])
 
   return (
     <div className={baseClass}>
@@ -109,21 +198,34 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                 {orIndex !== 0 && <div className={`${baseClass}__label`}>{t('general:or')}</div>}
                 <ul className={`${baseClass}__and-filters`}>
                   {Array.isArray(or?.and) &&
-                    or.and.map((_, andIndex) => (
-                      <li key={andIndex}>
-                        {andIndex !== 0 && (
-                          <div className={`${baseClass}__label`}>{t('general:and')}</div>
-                        )}
-                        <Condition
-                          andIndex={andIndex}
-                          dispatch={dispatchConditions}
-                          fields={reducedFields}
-                          key={andIndex}
-                          orIndex={orIndex}
-                          value={conditions[orIndex].and[andIndex]}
-                        />
-                      </li>
-                    ))}
+                    or.and.map((_, andIndex) => {
+                      const fieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
+                      const operator =
+                        Object.keys(conditions[orIndex].and[andIndex]?.[fieldName] || {})?.[0] ||
+                        undefined
+                      const initialValue =
+                        conditions[orIndex].and[andIndex]?.[fieldName]?.[operator] || ''
+
+                      return (
+                        <li key={andIndex}>
+                          {andIndex !== 0 && (
+                            <div className={`${baseClass}__label`}>{t('general:and')}</div>
+                          )}
+                          <Condition
+                            addCondition={addCondition}
+                            andIndex={andIndex}
+                            fieldName={fieldName}
+                            fields={reducedFields}
+                            initialValue={initialValue}
+                            key={andIndex}
+                            operator={operator}
+                            orIndex={orIndex}
+                            removeCondition={removeCondition}
+                            updateCondition={updateCondition}
+                          />
+                        </li>
+                      )
+                    })}
                 </ul>
               </li>
             ))}
@@ -135,8 +237,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             iconPosition="left"
             iconStyle="with-border"
             onClick={() => {
-              if (reducedFields.length > 0)
-                dispatchConditions({ type: 'add', field: reducedFields[0].value })
+              addCondition({
+                andIndex: 0,
+                fieldName: reducedFields[0].value,
+                orIndex: conditions.length,
+                relation: 'or',
+              })
             }}
           >
             {t('general:or')}
@@ -153,8 +259,14 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             iconPosition="left"
             iconStyle="with-border"
             onClick={() => {
-              if (reducedFields.length > 0)
-                dispatchConditions({ type: 'add', field: reducedFields[0].value })
+              if (reducedFields.length > 0) {
+                addCondition({
+                  andIndex: 0,
+                  fieldName: reducedFields[0].value,
+                  orIndex: conditions.length,
+                  relation: 'or',
+                })
+              }
             }}
           >
             {t('general:addFilter')}
