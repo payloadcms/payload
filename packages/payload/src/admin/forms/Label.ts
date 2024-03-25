@@ -3,4 +3,5 @@ export type LabelProps = {
   htmlFor?: string
   label?: Record<string, string> | false | string
   required?: boolean
+  unstyled?: boolean
 }

@@ -21,7 +21,7 @@ export type Column = {
     Cell: React.ReactNode
     Heading: React.ReactNode
   }
-  label: FieldBase['label']
+  label: React.ReactNode
   name: FieldBase['name']
 }
 
