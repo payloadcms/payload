@@ -5,6 +5,7 @@ import type { Where } from 'payload/types'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { wordBoundariesRegex } from 'payload/utilities'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
@@ -90,11 +91,12 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     },
     [validate, required],
   )
+  const { path: pathFromContext } = useFieldProps()
 
   const { filterOptions, initialValue, path, setValue, showError, value } = useField<
     Value | Value[]
   >({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 

@@ -3,6 +3,7 @@
 import type { ClientValidate } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { TextAreaInputProps, TextareaFieldProps } from './types.js'
@@ -62,8 +63,10 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
     [validate, required, maxLength, minLength],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const { path, readOnly, setValue, showError, value } = useField<string>({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 

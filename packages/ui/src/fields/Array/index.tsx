@@ -7,6 +7,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
@@ -107,6 +108,8 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const {
     path,
     rows = [],
@@ -116,7 +119,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 

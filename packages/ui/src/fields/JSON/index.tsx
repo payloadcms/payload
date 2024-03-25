@@ -16,6 +16,7 @@ import type { FieldBase, JSONField as JSONFieldType } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -60,6 +61,8 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     [validate, required, jsonError],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const {
     initialValue,
     // path,
@@ -67,7 +70,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     showError,
     value,
   } = useField<string>({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
