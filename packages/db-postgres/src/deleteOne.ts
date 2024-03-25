@@ -31,6 +31,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   const selectDistinctResult = selectDistinct({
     adapter: this,
     chainedMethods: [{ args: [1], method: 'limit' }],
+    db,
     joinAliases,
     joins,
     selectFields,

@@ -73,8 +73,9 @@ export const findMany = async function find({
   selectDistinctMethods.push({ args: [limit === 0 ? undefined : limit], method: 'limit' })
 
   const selectDistinctResult = await selectDistinct({
-    adapter: this,
+    adapter,
     chainedMethods: selectDistinctMethods,
+    db,
     joinAliases,
     joins,
     selectFields,

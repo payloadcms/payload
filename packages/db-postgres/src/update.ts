@@ -29,6 +29,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const selectDistinctResult = selectDistinct({
     adapter: this,
     chainedMethods: [{ args: [1], method: 'limit' }],
+    db,
     joinAliases,
     joins,
     selectFields,
