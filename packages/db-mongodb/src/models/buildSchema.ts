@@ -58,7 +58,7 @@ type FieldSchemaGenerator = (
 const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSchemaOptions) => {
   const { disableUnique, draftsEnabled, indexSortableFields } = buildSchemaOptions
   const schema: SchemaTypeOptions<unknown> = {
-    index: field.index || (!disableUnique && field.unique) || indexSortableFields || false,
+    index: field.index !== undefined ? field.index : (!disableUnique && field.unique) || indexSortableFields || false,
     required: false,
     unique: (!disableUnique && field.unique) || false,
   }
