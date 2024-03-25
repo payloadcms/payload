@@ -8,8 +8,14 @@ interface Args {
   endpoint: string
 }
 
+type GenericUpload = {
+  id: string
+  sizes?: Record<string, { url?: string }>
+  url?: string
+}
+
 export const getCacheUploadsAfterChangeHook =
-  ({ endpoint }: Args): CollectionAfterChangeHook =>
+  ({ endpoint }: Args): CollectionAfterChangeHook<GenericUpload> =>
   async ({ doc, operation, req }) => {
     if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
 
@@ -37,7 +43,7 @@ export const getCacheUploadsAfterDeleteHook =
   }
 
 type PurgeRequest = {
-  doc: any
+  doc: GenericUpload
   endpoint: string
   operation: string
   req: PayloadRequest
@@ -56,21 +62,30 @@ async function purge({ doc, endpoint, operation, req }: PurgeRequest) {
     return
   }
 
-  const body = {
-    cacheKey: process.env.PAYLOAD_CLOUD_CACHE_KEY,
-    filepath: doc.url,
-    projectID: process.env.PAYLOAD_CLOUD_PROJECT_ID,
-  }
-  req.payload.logger.debug({
-    filepath: doc.url,
-    msg: 'Attempting to purge cache',
-    operation,
-    project: {
-      id: process.env.PAYLOAD_CLOUD_PROJECT_ID,
-    },
-  })
-
+  const filepaths = [filePath]
   try {
+    if (doc.sizes && Object.keys(doc.sizes).length) {
+      const urls = Object.values(doc.sizes)
+        .map((size) => size?.url)
+        .filter(Boolean)
+      filepaths.push(...urls)
+    }
+
+    const body = {
+      cacheKey: process.env.PAYLOAD_CLOUD_CACHE_KEY,
+      filepaths,
+      projectID: process.env.PAYLOAD_CLOUD_PROJECT_ID,
+    }
+
+    req.payload.logger.debug({
+      filepaths,
+      msg: 'Purging cache for filepaths',
+      operation,
+      project: {
+        id: process.env.PAYLOAD_CLOUD_PROJECT_ID,
+      },
+    })
+
     const purgeRes = await fetch(`${endpoint}/api/purge-cache`, {
       body: JSON.stringify({
         ...body,
@@ -87,6 +102,10 @@ async function purge({ doc, endpoint, operation, req }: PurgeRequest) {
       statusCode: purgeRes.status,
     })
   } catch (err: unknown) {
-    req.payload.logger.error({ body, err, msg: '/purge-cache call failed' })
+    req.payload.logger.error({
+      data: { id: doc.id, filepaths },
+      err,
+      msg: '/purge-cache call failed',
+    })
   }
 }
