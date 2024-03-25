@@ -50,7 +50,7 @@ export const RenderField: React.FC<Props> = ({
   const { readOnly: readOnlyFromContext } = useFieldProps()
   const fieldComponents = useFieldComponents()
 
-  const path = `${pathFromProps ? `${pathFromProps}` : ''}${pathFromProps && name ? '.' : ''}${name ? `${name}` : ''}`
+  const path = [pathFromProps, name].filter(Boolean).join('.')
 
   const schemaPath = `${schemaPathFromProps ? `${schemaPathFromProps}` : ''}${name ? `.${name}` : ''}`
 
