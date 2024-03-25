@@ -30,6 +30,7 @@ module.exports = {
     {
       files: ['**/*.ts'],
       rules: {
+        'payload/no-jsx-import-statements': 'warn',
         'payload/no-relative-monorepo-imports': 'error',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
