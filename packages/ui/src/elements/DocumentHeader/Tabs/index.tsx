@@ -5,7 +5,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import { isPlainObject } from 'packages/payload/src/utilities/isPlainObject.js'
+import { isPlainObject } from 'payload/utilities'
 import React from 'react'
 
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'

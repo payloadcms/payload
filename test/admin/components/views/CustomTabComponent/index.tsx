@@ -4,9 +4,9 @@ import React, { Fragment } from 'react'
 
 import type { ServerSideEditViewProps } from '../../../../../packages/payload/types.js'
 
-import { customTabViewTitle } from '../../../shared.js'
+import { customTabViewComponentTitle } from '../../../shared.js'
 
-export const CustomTabView: React.FC<ServerSideEditViewProps> = ({ initPageResult }) => {
+export const CustomTabComponentView: React.FC<ServerSideEditViewProps> = ({ initPageResult }) => {
   if (!initPageResult) {
     notFound()
   }
@@ -16,7 +16,7 @@ export const CustomTabView: React.FC<ServerSideEditViewProps> = ({ initPageResul
       <SetStepNav
         nav={[
           {
-            label: 'Custom Tab View',
+            label: 'Custom Tab View 2',
           },
         ]}
       />
@@ -27,7 +27,7 @@ export const CustomTabView: React.FC<ServerSideEditViewProps> = ({ initPageResul
           paddingRight: 'var(--gutter-h)',
         }}
       >
-        <h1 id="custom-view-title">{customTabViewTitle}</h1>
+        <h1 id="custom-view-title">{customTabViewComponentTitle}</h1>
         <p>This custom view was added through the Payload config:</p>
         <ul>
           <li>
