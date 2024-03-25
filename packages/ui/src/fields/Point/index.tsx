@@ -51,7 +51,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     width,
   } = props
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
@@ -88,7 +88,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
   )
 
   const getLabelWithSuffix = (type: 'latitude' | 'longitude') => {
-    const suffix = type === 'longitude' ? 'Longitude' : 'Latitude'
+    const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
     const originalLabel = labelProps && labelProps.label ? labelProps.label : ''
     const labelWithSuffix = `${originalLabel} - ${suffix}`
     return {
