@@ -190,6 +190,11 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       blockItem.fields.forEach((blockField) => {
         const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type]
         if (addFieldSchema) {
+          // If user has explicitly configured index, drill it down to the block field
+          if(field.index !== undefined) {
+              blockField.index = field.index
+          }
+
           addFieldSchema(blockField, blockSchema, config, buildSchemaOptions)
         }
       })
