@@ -24,13 +24,13 @@ export const buildColumns = (args: {
 }): Column[] => {
   const { cellProps, columnPreferences, defaultColumns, enableRowSelections, fieldMap } = args
 
-  let sortedFieldMap = fieldMap
+  let sortedFieldMap = flattenFieldMap(fieldMap)
 
   const sortTo = defaultColumns || columnPreferences
 
   if (sortTo) {
     // sort the fields to the order of `defaultColumns` or `columnPreferences`
-    sortedFieldMap = flattenFieldMap(fieldMap).sort((a, b) => {
+    sortedFieldMap = sortedFieldMap.sort((a, b) => {
       const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === a.name)
       const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === b.name)
       if (aIndex === -1 && bIndex === -1) return 0
