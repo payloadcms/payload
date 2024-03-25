@@ -1360,9 +1360,7 @@ describe('fields', () => {
     test('should display formatted date in useAsTitle', async () => {
       await page.goto(url.list)
       await page.locator('.row-1 .cell-default a').click()
-      await expect(page.locator('.collection-edit .doc-header__title.render-title')).toContainText(
-        'August',
-      )
+      await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
     })
 
     test('should clear date', async () => {
@@ -1371,7 +1369,7 @@ describe('fields', () => {
       await expect(dateField).toBeVisible()
       await dateField.fill('02/07/2023')
       await expect(dateField).toHaveValue('02/07/2023')
-      await wait(1000)
+      await page.locator('#action-save').click()
       const clearButton = page.locator('#field-default .date-time-picker__clear-button')
       await expect(clearButton).toBeVisible()
       await clearButton.click()
@@ -1389,6 +1387,7 @@ describe('fields', () => {
         })
         test('create EST day only date', async () => {
           await page.goto(url.create)
+          await wait(500)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1420,6 +1419,7 @@ describe('fields', () => {
 
         test('create PDT day only date', async () => {
           await page.goto(url.create)
+          await wait(500)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1451,6 +1451,7 @@ describe('fields', () => {
 
         test('create ST day only date', async () => {
           await page.goto(url.create)
+          await wait(500)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
