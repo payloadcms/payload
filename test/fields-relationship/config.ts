@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload/types'
 import type { FilterOptionsProps } from 'payload/types'
 
+import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import { mapAsync } from 'payload/utilities'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -229,7 +230,13 @@ export default buildConfigWithDefaults({
               name: 'prePopulate',
               admin: {
                 components: {
-                  Field: () => PrePopulateFieldUI({ hasMany: false, path: 'relationPrePopulate' }),
+                  Field: withMergedProps({
+                    Component: PrePopulateFieldUI,
+                    toMergeIntoProps: {
+                      hasMultipleRelations: false,
+                      path: 'relationPrePopulate',
+                    },
+                  }),
                 },
                 width: '25%',
               },
@@ -253,8 +260,13 @@ export default buildConfigWithDefaults({
               name: 'prePopulateRelationHasMany',
               admin: {
                 components: {
-                  Field: () =>
-                    PrePopulateFieldUI({ hasMultipleRelations: false, path: 'relationHasMany' }),
+                  Field: withMergedProps({
+                    Component: PrePopulateFieldUI,
+                    toMergeIntoProps: {
+                      hasMultipleRelations: false,
+                      path: 'relationHasMany',
+                    },
+                  }),
                 },
                 width: '25%',
               },
@@ -278,11 +290,13 @@ export default buildConfigWithDefaults({
               name: 'prePopulateToMany',
               admin: {
                 components: {
-                  Field: () =>
-                    PrePopulateFieldUI({
+                  Field: withMergedProps({
+                    Component: PrePopulateFieldUI,
+                    toMergeIntoProps: {
                       hasMultipleRelations: true,
                       path: 'relationToManyHasMany',
-                    }),
+                    },
+                  }),
                 },
                 width: '25%',
               },
