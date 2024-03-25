@@ -132,6 +132,7 @@ You can import the existing Select component directly from Payload, then extend 
 import * as React from 'react';
 import { SelectInput, useField } from 'payload/components/forms';
 import { useAuth } from 'payload/components/utilities';
+import type { OptionObject } from "payload/types";
 
 type CustomSelectProps = {
   path: string;
@@ -145,7 +146,7 @@ export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, optio
   const { value, setValue } = useField<string>({ path })
   const { user } = useAuth()
 
-  const adjustedOptions = options.filter((option) => {
+  const adjustedOptions: OptionObject[] = options.filter((option) => {
     /*
       A common use case for a custom select
       is to show different options based on
@@ -155,7 +156,7 @@ export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, optio
   });
 
   return (
-    <div>
+    <div className="field-type select">
       <label className="field-label">
         Custom Select
       </label>
@@ -164,7 +165,7 @@ export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, optio
         name={path}
         options={adjustedOptions}
         value={value}
-        onChange={(e) => setValue(e.value)}
+        onChange={(e) => setValue(e === null ? null : e.value)}
       />
     </div>
   )
