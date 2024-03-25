@@ -18,6 +18,12 @@
     }
   }
 
+  &__field {
+    .field-label {
+      padding-bottom: 0;
+    }
+  }
+
   &__actions {
     flex-shrink: 0;
     display: flex;
