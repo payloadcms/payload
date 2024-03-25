@@ -756,8 +756,8 @@ importers:
         specifier: 0.38.0
         version: 0.38.0
       nodemailer:
-        specifier: 6.9.8
-        version: 6.9.8
+        specifier: 6.9.9
+        version: 6.9.9
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -1075,8 +1075,8 @@ importers:
         specifier: ^6.1.2
         version: 6.3.6
       nodemailer:
-        specifier: 6.9.8
-        version: 6.9.8
+        specifier: 6.9.9
+        version: 6.9.9
     devDependencies:
       '@types/express':
         specifier: ^4.17.9
@@ -13800,8 +13800,8 @@ packages:
   /node-releases@2.0.13:
     resolution: {integrity: sha512-uYr7J37ae/ORWdZeQ1xxMJe3NtdmqMC/JZK+geofDrkLUApKRHPd18/TxtBOJ4A0/+uUIliorNrfYV6s1b02eQ==}
 
-  /nodemailer@6.9.8:
-    resolution: {integrity: sha512-cfrYUk16e67Ks051i4CntM9kshRYei1/o/Gi8K1d+R34OIs21xdFnW7Pt7EucmVKA0LKtqUGNcjMZ7ehjl49mQ==}
+  /nodemailer@6.9.9:
+    resolution: {integrity: sha512-dexTll8zqQoVJEZPwQAKzxxtFn0qTnjdQTchoU6Re9BUUGBJiOy3YMn/0ShTW6J5M0dfQ1NeDeRTTl4oIWgQMA==}
     engines: {node: '>=6.0.0'}
     dev: false
 
@@ -15857,7 +15857,7 @@ packages:
     resolution: {integrity: sha512-UcZnoo+AEM+ipqwOQ4JLxkIDYyWvOT3hvcal/fSL3VFFUKeHoHgC89gltJtekAejj+ji7dTe0TVb5mpj8/kt0g==}
     dependencies:
       process: 0.5.2
-      readable-stream: github.com/Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f
+      readable-stream: git@github.com+Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f
     dev: true
 
   /readable-stream@1.0.34:
@@ -18444,8 +18444,8 @@ packages:
     resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
     dev: false
 
-  github.com/Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
-    resolution: {tarball: https://codeload.github.com/Raynos/readable-stream/tar.gz/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f}
+  git@github.com+Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
+    resolution: {commit: b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f, repo: git@github.com:Raynos/readable-stream.git, type: git}
     name: readable-stream
     version: 0.3.1
     dev: true
