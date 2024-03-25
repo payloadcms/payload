@@ -7,7 +7,13 @@ import { fileURLToPath } from 'url'
 
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
-import { exactText, initPageConsoleErrorCatch, openDocControls, openNav } from '../helpers.js'
+import {
+  closeNav,
+  exactText,
+  initPageConsoleErrorCatch,
+  openDocControls,
+  openNav,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import config from './config.js'
@@ -250,6 +256,30 @@ describe('access control', () => {
     })
   })
 
+  test('should show test global immediately after allowing access', async () => {
+    await page.goto(`${serverURL}/admin/globals/settings`)
+
+    await openNav(page)
+
+    // Ensure that we have loaded accesses by checking that settings collection
+    // at least is visible in the menu.
+    await expect(page.locator('#nav-global-settings')).toBeVisible()
+
+    // Test collection should be hidden at first.
+    await expect(page.locator('#nav-global-test')).toBeHidden()
+
+    await closeNav(page)
+
+    // Allow access to test global.
+    await page.locator('.checkbox-input:has(#field-test) input').check()
+    await page.locator('#action-save').click()
+
+    await openNav(page)
+
+    // Now test collection should appear in the menu.
+    await expect(page.locator('#nav-global-test')).toBeVisible()
+  })
+
   test('maintain access control in document drawer', async () => {
     const unrestrictedDoc = await payload.create({
       collection: unrestrictedSlug,
@@ -260,7 +290,7 @@ describe('access control', () => {
 
     // navigate to the `unrestricted` document and open the drawers to test access
     const unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug)
-    await page.goto(unrestrictedURL.edit(unrestrictedDoc.id))
+    await page.goto(unrestrictedURL.edit(unrestrictedDoc.id.toString()))
 
     const addDocButton = page.locator(
       '#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler',
@@ -289,6 +319,7 @@ describe('access control', () => {
   })
 })
 
+// eslint-disable-next-line @typescript-eslint/require-await
 async function createDoc(data: any): Promise<TypeWithID & Record<string, unknown>> {
   return payload.create({
     collection: slug,
