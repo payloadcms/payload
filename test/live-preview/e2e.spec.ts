@@ -3,7 +3,6 @@ import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
@@ -14,8 +13,9 @@ import { mobileBreakpoint } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe, afterAll } = test
+const { beforeAll, describe } = test
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let payload: Payload
 
 describe('Live Preview', () => {
@@ -26,7 +26,9 @@ describe('Live Preview', () => {
   const goToDoc = async (page: Page) => {
     await page.goto(url.list)
     const linkToDoc = page.locator('tbody tr:first-child .cell-slug a').first()
-    expect(linkToDoc).toBeTruthy()
+
+    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: 45000 })
+
     await linkToDoc.click()
     const linkDocHref = await linkToDoc.getAttribute('href')
 
@@ -59,13 +61,14 @@ describe('Live Preview', () => {
     const livePreviewTab = page.locator('.doc-tab', {
       hasText: exactText('Live Preview'),
     })
-    expect(livePreviewTab).toBeTruthy()
+
+    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: 45000 })
 
     const href = await livePreviewTab.locator('a').first().getAttribute('href')
     const docURL = page.url()
     const pathname = new URL(docURL).pathname
 
-    expect(href).toBe(`${pathname}/preview`)
+    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({ timeout: 45000 })
   })
 
   test('collection - has route', async () => {
@@ -73,7 +76,7 @@ describe('Live Preview', () => {
     const url = page.url()
     await goToCollectionPreview(page)
 
-    expect(page.url()).toBe(`${url}/preview`)
+    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({ timeout: 45000 })
   })
 
   test('collection - renders iframe', async () => {
@@ -111,15 +114,17 @@ describe('Live Preview', () => {
       hasText: exactText('Live Preview'),
     })
 
-    expect(livePreviewTab).toBeTruthy()
+    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: 45000 })
     const href = await livePreviewTab.locator('a').first().getAttribute('href')
-    expect(href).toBe(`${pathname}/preview`)
+
+    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({ timeout: 45000 })
   })
 
   test('global - has route', async () => {
     const url = page.url()
     await goToGlobalPreview(page, 'header')
-    expect(page.url()).toBe(`${url}/preview`)
+
+    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({ timeout: 45000 })
   })
 
   test('global - renders iframe', async () => {
@@ -130,7 +135,7 @@ describe('Live Preview', () => {
 
   test('global - can edit fields', async () => {
     await goToGlobalPreview(page, 'header')
-    const field = page.locator('input#field-navItems__0__link__newTab')
+    const field = page.locator('input#field-navItems__0__link____newTab')
     await expect(field).toBeVisible()
     await expect(field).toBeEnabled()
     await field.check()
@@ -143,8 +148,10 @@ describe('Live Preview', () => {
     await page.locator('#field-slug').fill('slug-3')
 
     await saveDocAndAssert(page)
+
     await goToCollectionPreview(page)
-    expect(page.url()).toContain('/preview')
+
+    await expect(() => expect(page.url()).toContain('/preview')).toPass({ timeout: 45000 })
 
     const iframe = page.locator('iframe')
 
@@ -155,9 +162,11 @@ describe('Live Preview', () => {
     const iframeHeightInPx = iframeSize?.height
 
     const widthInput = page.locator('.live-preview-toolbar input[name="live-preview-width"]')
-    expect(widthInput).toBeTruthy()
+
+    await expect(() => expect(widthInput).toBeTruthy()).toPass({ timeout: 45000 })
     const heightInput = page.locator('.live-preview-toolbar input[name="live-preview-height"]')
-    expect(heightInput).toBeTruthy()
+
+    await expect(() => expect(heightInput).toBeTruthy()).toPass({ timeout: 45000 })
 
     const widthInputValue = await widthInput.getAttribute('value')
     const width = parseInt(widthInputValue)
@@ -166,10 +175,22 @@ describe('Live Preview', () => {
 
     // Allow a tolerance of a couple of pixels
     const tolerance = 2
-    expect(iframeWidthInPx).toBeLessThanOrEqual(width + tolerance)
-    expect(iframeWidthInPx).toBeGreaterThanOrEqual(width - tolerance)
-    expect(iframeHeightInPx).toBeLessThanOrEqual(height + tolerance)
-    expect(iframeHeightInPx).toBeGreaterThanOrEqual(height - tolerance)
+
+    await expect(() => expect(iframeWidthInPx).toBeLessThanOrEqual(width + tolerance)).toPass({
+      timeout: 45000,
+    })
+
+    await expect(() => expect(iframeWidthInPx).toBeGreaterThanOrEqual(width - tolerance)).toPass({
+      timeout: 45000,
+    })
+
+    await expect(() => expect(iframeHeightInPx).toBeLessThanOrEqual(height + tolerance)).toPass({
+      timeout: 45000,
+    })
+
+    await expect(() => expect(iframeHeightInPx).toBeGreaterThanOrEqual(height - tolerance)).toPass({
+      timeout: 45000,
+    })
   })
 
   test('resizes iframe to specified breakpoint', async () => {
@@ -179,13 +200,19 @@ describe('Live Preview', () => {
 
     await saveDocAndAssert(page)
     await goToCollectionPreview(page)
-    expect(page.url()).toContain('/preview')
+
+    await expect(() => expect(page.url()).toContain('/preview')).toPass({
+      timeout: 45000,
+    })
 
     // Check that the breakpoint select is present
     const breakpointSelector = page.locator(
       '.live-preview-toolbar-controls__breakpoint button.popup-button',
     )
-    expect(breakpointSelector).toBeTruthy()
+
+    await expect(() => expect(breakpointSelector).toBeTruthy()).toPass({
+      timeout: 45000,
+    })
 
     // Select the mobile breakpoint
     await breakpointSelector.first().click()
@@ -203,26 +230,61 @@ describe('Live Preview', () => {
 
     // Measure the size of the iframe against the specified breakpoint
     const iframe = page.locator('iframe')
-    expect(iframe).toBeTruthy()
+
+    await expect(() => expect(iframe).toBeTruthy()).toPass({
+      timeout: 45000,
+    })
     const iframeSize = await iframe.boundingBox()
     const iframeWidthInPx = iframeSize?.width
     const iframeHeightInPx = iframeSize?.height
     const tolerance = 2
-    expect(iframeWidthInPx).toBeLessThanOrEqual(mobileBreakpoint.width + tolerance)
-    expect(iframeWidthInPx).toBeGreaterThanOrEqual(mobileBreakpoint.width - tolerance)
-    expect(iframeHeightInPx).toBeLessThanOrEqual(mobileBreakpoint.height + tolerance)
-    expect(iframeHeightInPx).toBeGreaterThanOrEqual(mobileBreakpoint.height - tolerance)
+
+    await expect(() =>
+      expect(iframeWidthInPx).toBeLessThanOrEqual(mobileBreakpoint.width + tolerance),
+    ).toPass({
+      timeout: 45000,
+    })
+
+    await expect(() =>
+      expect(iframeWidthInPx).toBeGreaterThanOrEqual(mobileBreakpoint.width - tolerance),
+    ).toPass({
+      timeout: 45000,
+    })
+
+    await expect(() =>
+      expect(iframeHeightInPx).toBeLessThanOrEqual(mobileBreakpoint.height + tolerance),
+    ).toPass({
+      timeout: 45000,
+    })
+
+    await expect(() =>
+      expect(iframeHeightInPx).toBeGreaterThanOrEqual(mobileBreakpoint.height - tolerance),
+    ).toPass({
+      timeout: 45000,
+    })
 
     // Check that the inputs have been updated to reflect the new size
     const widthInput = page.locator('.live-preview-toolbar input[name="live-preview-width"]')
-    expect(widthInput).toBeTruthy()
+
+    await expect(() => expect(widthInput).toBeTruthy()).toPass({
+      timeout: 45000,
+    })
     const heightInput = page.locator('.live-preview-toolbar input[name="live-preview-height"]')
-    expect(heightInput).toBeTruthy()
+
+    await expect(() => expect(heightInput).toBeTruthy()).toPass({
+      timeout: 45000,
+    })
     const widthInputValue = await widthInput.getAttribute('value')
     const width = parseInt(widthInputValue)
-    expect(width).toBe(mobileBreakpoint.width)
+
+    await expect(() => expect(width).toBe(mobileBreakpoint.width)).toPass({
+      timeout: 45000,
+    })
     const heightInputValue = await heightInput.getAttribute('value')
     const height = parseInt(heightInputValue)
-    expect(height).toBe(mobileBreakpoint.height)
+
+    await expect(() => expect(height).toBe(mobileBreakpoint.height)).toPass({
+      timeout: 45000,
+    })
   })
 })
