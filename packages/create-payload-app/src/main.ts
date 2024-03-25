@@ -13,6 +13,7 @@ import { getValidTemplates, validateTemplate } from './lib/templates'
 import { writeEnvFile } from './lib/write-env-file'
 import { success } from './utils/log'
 import { helpMessage, successMessage, welcomeMessage } from './utils/messages'
+import { checkAppName } from './utils/checkAppName'
 
 export class Main {
   args: CliArgs
@@ -64,6 +65,9 @@ export class Main {
 
       console.log(welcomeMessage)
       const projectName = await parseProjectName(this.args)
+
+      checkAppName(projectName)
+
       const validTemplates = getValidTemplates()
       const template = await parseTemplate(this.args, validTemplates)
 
