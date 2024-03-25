@@ -42,7 +42,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const config = useConfig()
   const submitted = useFormSubmitted()
   const { id } = useDocumentInfo()
-  const { schemaPath } = useFieldProps()
+  const { path, schemaPath } = useFieldProps()
   const { editorConfig, field: parentLexicalRichTextField } = useEditorConfigContext()
 
   const [initialState, setInitialState] = useState<FormState | false>(false)
@@ -137,7 +137,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
             formData={formData}
             formSchema={Array.isArray(fieldMap) ? fieldMap : []}
             nodeKey={nodeKey}
+            path={`${path}.feature.blocks.${formData.blockType}`}
             reducedBlock={reducedBlock}
+            schemaPath={schemaFieldsPath}
           />
         </Form>
       )

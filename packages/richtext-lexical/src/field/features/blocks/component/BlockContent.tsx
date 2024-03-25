@@ -37,7 +37,9 @@ type Props = {
   formData: BlockFields
   formSchema: FieldMap
   nodeKey: string
+  path: string
   reducedBlock: ReducedBlock
+  schemaPath: string
 }
 
 /**
@@ -52,7 +54,9 @@ export const BlockContent: React.FC<Props> = (props) => {
     formData,
     formSchema,
     nodeKey,
+    path,
     reducedBlock: { labels },
+    schemaPath,
   } = props
 
   const { i18n } = useTranslation()
@@ -236,9 +240,9 @@ export const BlockContent: React.FC<Props> = (props) => {
           fieldMap={Array.isArray(formSchema) ? formSchema : []}
           forceRender
           margins="small"
-          path=""
+          path={path}
           readOnly={false}
-          schemaPath=""
+          schemaPath={schemaPath}
         />
       </Collapsible>
 
