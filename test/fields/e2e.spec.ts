@@ -419,6 +419,7 @@ describe('fields', () => {
 
     test('should update point', async () => {
       await page.goto(url.edit(emptyGroupPoint.id))
+      await page.waitForURL(`**/${emptyGroupPoint.id}`)
       const longField = page.locator('#field-longitude-point')
       await longField.fill('9')
 
@@ -449,6 +450,7 @@ describe('fields', () => {
 
     test('should be able to clear a value point', async () => {
       await page.goto(url.edit(filledGroupPoint.id))
+      await page.waitForURL(`**/${filledGroupPoint.id}`)
 
       const groupLongitude = page.locator('#field-longitude-group__point')
       await groupLongitude.fill('')
@@ -1402,7 +1404,7 @@ describe('fields', () => {
         })
         test('create EST day only date', async () => {
           await page.goto(url.create)
-          await wait(500)
+          await page.waitForURL(`**/${url.create}`)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1410,7 +1412,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1434,7 +1436,7 @@ describe('fields', () => {
 
         test('create PDT day only date', async () => {
           await page.goto(url.create)
-          await wait(500)
+          await page.waitForURL(`**/${url.create}`)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1442,7 +1444,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1466,7 +1468,7 @@ describe('fields', () => {
 
         test('create ST day only date', async () => {
           await page.goto(url.create)
-          await wait(500)
+          await page.waitForURL(`**/${url.create}`)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1474,7 +1476,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
