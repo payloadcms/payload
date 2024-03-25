@@ -1412,7 +1412,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1444,7 +1444,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1476,7 +1476,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
