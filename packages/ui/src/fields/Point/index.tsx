@@ -87,13 +87,12 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     [setValue, value],
   )
 
-  const getLabelWithSuffix = (type: 'latitude' | 'longitude') => {
+  const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
     const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
-    const originalLabel = labelProps && labelProps.label ? labelProps.label : ''
-    const labelWithSuffix = `${originalLabel} - ${suffix}`
+    const fieldLabel = labelProps && labelProps.label ? labelProps.label : ''
     return {
       ...labelProps,
-      label: labelWithSuffix,
+      label: `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`,
     }
   }
 
@@ -119,7 +118,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
           {CustomLabel !== undefined ? (
             CustomLabel
           ) : (
-            <FieldLabel {...getLabelWithSuffix('longitude')} />
+            <FieldLabel {...getCoordinateFieldLabel('longitude')} />
           )}
           <div className="input-wrapper">
             {BeforeInput}
@@ -140,7 +139,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
           {CustomLabel !== undefined ? (
             CustomLabel
           ) : (
-            <FieldLabel {...getLabelWithSuffix('latitude')} />
+            <FieldLabel {...getCoordinateFieldLabel('latitude')} />
           )}
           <div className="input-wrapper">
             {BeforeInput}
