@@ -50,7 +50,8 @@ export const RenderField: React.FC<Props> = ({
   const { readOnly: readOnlyFromContext } = useFieldProps()
   const fieldComponents = useFieldComponents()
 
-  const path = `${pathFromProps ? `${pathFromProps}.` : ''}${name ? `${name}` : ''}`
+  const path = `${pathFromProps ? `${pathFromProps}` : ''}${pathFromProps && name ? '.' : ''}${name ? `${name}` : ''}`
+
   const schemaPath = `${schemaPathFromProps ? `${schemaPathFromProps}` : ''}${name ? `.${name}` : ''}`
 
   // if the user cannot read the field, then filter it out
