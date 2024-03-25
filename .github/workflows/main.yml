@@ -223,7 +223,7 @@ jobs:
           # - field-error-states
           # - fields-relationship
           # - fields
-          # - live-preview
+          - live-preview
           # - localization
           - plugin-nested-docs
           - plugin-seo
