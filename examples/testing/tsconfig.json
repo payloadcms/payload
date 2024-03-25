@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "outDir": "./dist",
     "skipLibCheck": true,
     "strict": false,
@@ -18,9 +14,7 @@
     "jsx": "preserve",
     "sourceMap": true
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "ts-node": {
     "transpileOnly": true
   }
