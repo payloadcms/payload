@@ -1,3 +1,4 @@
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { type CellProps, type SanitizedCollectionConfig } from 'payload/types'
 import React from 'react'
 
@@ -5,6 +6,7 @@ import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildCo
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
 
+import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { SelectAll } from '../SelectAll/index.js'
 import { SelectRow } from '../SelectRow/index.js'
 import { SortColumn } from '../SortColumn/index.js'
@@ -28,8 +30,7 @@ export const buildColumns = (args: {
 
   if (sortTo) {
     // sort the fields to the order of `defaultColumns` or `columnPreferences`
-    // TODO: flatten top level field, i.e. `flattenTopLevelField()` from `payload` but that is typed for `Field`, not `fieldMap`
-    sortedFieldMap = fieldMap.sort((a, b) => {
+    sortedFieldMap = flattenFieldMap(fieldMap).sort((a, b) => {
       const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === a.name)
       const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === b.name)
       if (aIndex === -1 && bIndex === -1) return 0
@@ -79,13 +80,11 @@ export const buildColumns = (args: {
           undefined
         }
         label={
-          'label' in field.fieldComponentProps &&
-          field.fieldComponentProps.label &&
-          typeof field.fieldComponentProps.label !== 'function'
-            ? field.fieldComponentProps.label
-            : 'name' in field
-              ? field.name
-              : undefined
+          <FieldLabel
+            CustomLabel={field.fieldComponentProps.CustomLabel}
+            {...field.fieldComponentProps.labelProps}
+            unstyled
+          />
         }
         name={'name' in field ? field.name : undefined}
       />
@@ -104,11 +103,13 @@ export const buildColumns = (args: {
           Cell,
           Heading,
         },
-        label:
-          'label' in field.fieldComponentProps &&
-          typeof field.fieldComponentProps.label !== 'function'
-            ? field.fieldComponentProps.label
-            : undefined,
+        label: (
+          <FieldLabel
+            CustomLabel={field.fieldComponentProps.CustomLabel}
+            {...field.fieldComponentProps.labelProps}
+            unstyled
+          />
+        ),
       }
 
       acc.push(column)

@@ -1,13 +1,11 @@
 'use client'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { getTranslation } from '@payloadcms/translations'
 import React, { useId } from 'react'
 
 import { Plus } from '../../icons/Plus/index.js'
 import { X } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { Pill } from '../Pill/index.js'
 import { useTableColumns } from '../TableColumns/index.js'
@@ -22,7 +20,6 @@ export type Props = {
 export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
-  const { i18n } = useTranslation()
   const uuid = useId()
   const editDepth = useEditDepth()
 
@@ -63,7 +60,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
               toggleColumn(accessor)
             }}
           >
-            {getTranslation(label || name, i18n)}
+            {label}
           </Pill>
         )
       })}
