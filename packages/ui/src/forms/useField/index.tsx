@@ -25,7 +25,8 @@ export const useField = <T,>(options: Options): FieldType<T> => {
 
   const { path: pathFromContext, permissions, readOnly, schemaPath } = useFieldProps()
 
-  const path = pathFromContext || options.path
+  // Prioritize passed in path over context path. If the context path should be prioritized (which is the case for top-level useField calls in fields), it should be passed in as the options path.
+  const path = options.path || pathFromContext
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()

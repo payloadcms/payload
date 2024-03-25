@@ -9,6 +9,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useField } from '@payloadcms/ui/forms/useField'
 import { withCondition } from '@payloadcms/ui/forms/withCondition'
 import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
@@ -93,8 +94,10 @@ const RichTextField: React.FC<
     [validate, required],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const { initialValue, path, schemaPath, setValue, showError, value } = useField({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 

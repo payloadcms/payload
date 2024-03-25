@@ -16,6 +16,7 @@ const baseClass = 'point'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -61,13 +62,15 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     [validate, required],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const {
     path,
     setValue,
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 

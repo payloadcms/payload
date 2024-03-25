@@ -427,6 +427,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const getFieldStateBySchemaPath = useCallback(
     async ({ data, schemaPath }) => {
+      console.log('AddRow > getting field state by schema path', schemaPath)
       const fieldSchema = await getFormState({
         apiRoute,
         body: {
