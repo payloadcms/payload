@@ -475,6 +475,9 @@ importers:
       eslint-plugin-node:
         specifier: 11.1.0
         version: 11.1.0(eslint@8.57.0)
+      eslint-plugin-payload:
+        specifier: workspace:*
+        version: link:../eslint-plugin-payload
       eslint-plugin-perfectionist:
         specifier: 2.7.0
         version: 2.7.0(eslint@8.57.0)(typescript@5.4.2)
