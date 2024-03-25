@@ -469,28 +469,43 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug)
     })
 
+    test('should render collapsible as collapsed if initCollapsed is true', async () => {
+      await page.goto(url.create)
+      const collapsedCollapsible = page.locator(
+        '#field-collapsible-1 .collapsible__toggle--collapsed',
+      )
+      await expect(collapsedCollapsible).toBeVisible()
+    })
+
     test('should render CollapsibleLabel using a function', async () => {
       const label = 'custom row label'
       await page.goto(url.create)
-      await page.locator('#field-collapsible-3__1 >> #field-nestedTitle').fill(label)
+      await page.locator('#field-collapsible-3__1 #field-nestedTitle').fill(label)
       await wait(100)
-      const customCollapsibleLabel = page.locator('#field-collapsible-3__1 >> .row-label')
+      const customCollapsibleLabel = page.locator(
+        `#field-collapsible-3__1 .collapsible-field__row-label-wrap :text("${label}")`,
+      )
       await expect(customCollapsibleLabel).toContainText(label)
     })
 
     test('should render CollapsibleLabel using a component', async () => {
       const label = 'custom row label as component'
       await page.goto(url.create)
+      await page.locator('#field-arrayWithCollapsibles').scrollIntoViewIfNeeded()
+
+      const arrayWithCollapsibles = page.locator('#field-arrayWithCollapsibles')
+      await expect(arrayWithCollapsibles).toBeVisible()
+
       await page.locator('#field-arrayWithCollapsibles >> .array-field__add-row').click()
 
       await page
         .locator(
-          '#field-collapsible-4__0-arrayWithCollapsibles__0 >> #field-arrayWithCollapsibles__0__innerCollapsible',
+          '#arrayWithCollapsibles-row-0 #field-collapsible-4__0-arrayWithCollapsibles__0 #field-arrayWithCollapsibles__0__innerCollapsible',
         )
         .fill(label)
       await wait(100)
       const customCollapsibleLabel = page.locator(
-        `#field-collapsible-4__0-arrayWithCollapsibles__0 >> .row-label :text("${label}")`,
+        `#field-arrayWithCollapsibles >> #arrayWithCollapsibles-row-0 >> .collapsible-field__row-label-wrap :text("${label}")`,
       )
       await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
     })

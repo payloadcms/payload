@@ -38,7 +38,6 @@ import type { FormFieldBase } from '../shared/index.js'
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
   forceRender?: boolean
-  indexPath: string
   label?: FieldBase['label']
   labels?: BlockField['labels']
   maxRows?: number
@@ -62,7 +61,6 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     descriptionProps,
     errorProps,
     forceRender = false,
-    indexPath,
     labelProps,
     labels: labelsFromProps,
     localized,
@@ -73,6 +71,8 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     required,
     validate,
   } = props
+
+  const { indexPath } = useFieldProps()
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()

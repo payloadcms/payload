@@ -135,7 +135,7 @@ describe('Live Preview', () => {
 
   test('global - can edit fields', async () => {
     await goToGlobalPreview(page, 'header')
-    const field = page.locator('input#field-navItems__0__link____newTab')
+    const field = page.locator('input#field-navItems__0__link__newTab')
     await expect(field).toBeVisible()
     await expect(field).toBeEnabled()
     await field.check()
