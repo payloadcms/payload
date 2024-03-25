@@ -38,7 +38,7 @@ export const useThumbnail = (
     return `${serverURL}/${thumbnailURL}`
   }
 
-  if (isImage(mimeType as string)) {
+  if (adminThumbnail || isImage(mimeType as string)) {
     if (typeof adminThumbnail === 'undefined' && url) {
       return url as string
     }
