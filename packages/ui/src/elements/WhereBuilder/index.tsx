@@ -1,10 +1,14 @@
 import { getTranslation } from '@payloadcms/translations'
-import { flattenTopLevelFields } from 'payload/utilities'
+import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import React, { useState } from 'react'
 
+import type {
+  CollectionComponentMap,
+  FieldMap,
+} from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { WhereBuilderProps } from './types.js'
 
-import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -17,8 +21,8 @@ import validateWhereQuery from './validateWhereQuery.js'
 
 const baseClass = 'where-builder'
 
-const reduceFields = (fields, i18n) =>
-  flattenTopLevelFields(fields).reduce((reduced, field) => {
+const reduceFields = (fieldMap: FieldMap, i18n) =>
+  fieldMap.reduce((reduced, field) => {
     if (typeof fieldTypes[field.type] === 'object') {
       const operatorKeys = new Set()
       const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
@@ -36,7 +40,12 @@ const reduceFields = (fields, i18n) =>
       }, [])
 
       const formattedField = {
-        label: getTranslation(field.label || field.name, i18n),
+        label: (
+          <FieldLabel
+            CustomLabel={field.fieldComponentProps.CustomLabel}
+            {...field.fieldComponentProps.labelProps}
+          />
+        ),
         value: field.name,
         ...fieldTypes[field.type],
         operators,
@@ -60,10 +69,10 @@ export { WhereBuilderProps }
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, collectionSlug } = props
   const { i18n, t } = useTranslation()
+  const { getComponentMap } = useComponentMap()
 
-  const config = useConfig()
-  const collection = config.collections.find((c) => c.slug === collectionSlug)
-  const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
+  const { fieldMap } = getComponentMap({ collectionSlug }) as CollectionComponentMap
+  const [reducedFields] = useState(() => reduceFields(fieldMap, i18n))
 
   const { searchParams } = useSearchParams()
   const { handleWhereChange } = useListQuery()
