@@ -55,13 +55,43 @@ export const BlocksFeature: FeatureProviderProviderServer<
       return {
         ClientComponent: BlocksFeatureClientComponent,
         clientFeatureProps: clientProps,
-        generateSchemaMap: ({ props }) => {
+        generateSchemaMap: ({ config, props, schemaMap: schemaMapFromProps, schemaPath }) => {
           const schemaMap: {
             [key: string]: Field[]
           } = {}
 
+          /**
+           * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block and it runs addRow, it will request these
+           * sub-fields from the component map. Thus we need to put them in the component map here.
+           */
+          const handleFields = (parentPath: string, fields: Field[]) => {
+            for (const field of fields) {
+              if ('name' in field && 'fields' in field) {
+                schemaMap[parentPath + '.' + field.name] = field.fields
+                handleFields(parentPath + '.' + field.name, field.fields)
+              }
+              if ('blocks' in field) {
+                for (const block of field.blocks) {
+                  schemaMap[parentPath + '.' + field.name + '.' + block.slug] = block.fields || []
+                  handleFields(parentPath + '.' + field.name + '.' + block.slug, block.fields)
+                }
+              }
+              if ('tabs' in field) {
+                for (const tab of field.tabs) {
+                  if ('name' in tab) {
+                    schemaMap[parentPath + '.' + tab.name] = tab.fields || []
+                    handleFields(parentPath + '.' + tab.name, tab.fields)
+                  } else {
+                    handleFields(parentPath, tab.fields)
+                  }
+                }
+              }
+            }
+          }
+
           for (const block of props.blocks) {
             schemaMap[block.slug] = block.fields || []
+            handleFields(block.slug, block.fields)
           }
 
           return schemaMap

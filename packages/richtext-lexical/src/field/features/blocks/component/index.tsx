@@ -76,7 +76,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       if (state) {
         setInitialState({
           ...state,
-          blockName2: {
+          blockName: {
             initialValue: '',
             passesCondition: true,
             valid: true,
@@ -106,7 +106,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
       return {
         ...formState,
-        blockName2: {
+        blockName: {
           initialValue: '',
           passesCondition: true,
           valid: true,
