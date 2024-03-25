@@ -6,6 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback, useState } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
@@ -79,8 +80,10 @@ export const SelectField: React.FC<SelectFieldProps> = (props) => {
     [validate, required, hasMany, options],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const { path, setValue, showError, value } = useField({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 

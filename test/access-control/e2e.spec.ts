@@ -1,9 +1,8 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload/types'
+import type { Payload, TypeWithID } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
@@ -134,7 +133,6 @@ describe('access control', () => {
   describe('restricted fields', () => {
     test('should not show field without permission', async () => {
       await page.goto(url.account)
-      await wait(500)
       await expect(page.locator('#field-roles')).toBeHidden()
     })
   })
@@ -163,7 +161,7 @@ describe('access control', () => {
 
     test('should have collection url', async () => {
       await page.goto(readOnlyUrl.list)
-      await expect(page).toHaveURL(readOnlyUrl.list) // no redirect
+      await expect(page).toHaveURL(new RegExp(`${readOnlyUrl.list}.*`)) // will redirect to ?limit=10 at the end, so we have to use a wildcard at the end
     })
 
     test('should not have "Create New" button', async () => {
@@ -188,7 +186,6 @@ describe('access control', () => {
 
     test('should not render dot menu popup when `create` and `delete` access control is set to false', async () => {
       await page.goto(readOnlyUrl.edit(existingDoc.id))
-      await wait(1000)
       await expect(page.locator('.collection-edit .doc-controls .doc-controls__popup')).toBeHidden()
     })
   })
@@ -213,7 +210,7 @@ describe('access control', () => {
 
   describe('doc level access', () => {
     let existingDoc: ReadOnlyCollection
-    let docLevelAccessURL
+    let docLevelAccessURL: AdminUrlUtil
 
     beforeAll(async () => {
       docLevelAccessURL = new AdminUrlUtil(serverURL, docLevelAccessSlug)
@@ -265,28 +262,26 @@ describe('access control', () => {
     const unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug)
     await page.goto(unrestrictedURL.edit(unrestrictedDoc.id))
 
-    const button = page.locator(
+    const addDocButton = page.locator(
       '#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler',
     )
-    await button.click()
+    await addDocButton.click()
     const documentDrawer = page.locator('[id^=doc-drawer_user-restricted_1_]')
     await expect(documentDrawer).toBeVisible()
     await documentDrawer.locator('#field-name').fill('anonymous@email.com')
     await documentDrawer.locator('#action-save').click()
-    await wait(200)
     await expect(page.locator('.Toastify')).toContainText('successfully')
 
     // ensure user is not allowed to edit this document
     await expect(documentDrawer.locator('#field-name')).toBeDisabled()
     await documentDrawer.locator('button.doc-drawer__header-close').click()
-    await wait(200)
+    await expect(documentDrawer).toBeHidden()
 
-    await button.click()
+    await addDocButton.click()
     const documentDrawer2 = page.locator('[id^=doc-drawer_user-restricted_1_]')
     await expect(documentDrawer2).toBeVisible()
     await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
     await documentDrawer2.locator('#action-save').click()
-    await wait(200)
     await expect(page.locator('.Toastify')).toContainText('successfully')
 
     // ensure user is allowed to edit this document
@@ -294,7 +289,7 @@ describe('access control', () => {
   })
 })
 
-async function createDoc(data: any): Promise<{ id: string }> {
+async function createDoc(data: any): Promise<TypeWithID & Record<string, unknown>> {
   return payload.create({
     collection: slug,
     data,

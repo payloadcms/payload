@@ -13,7 +13,8 @@ const baseClass = 'render-fields'
 export { Props }
 
 export const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldMap, forceRender, margins, path, permissions, schemaPath } = props
+  const { className, fieldMap, forceRender, indexPath, margins, path, permissions, schemaPath } =
+    props
 
   const { i18n } = useTranslation()
   const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
@@ -34,7 +35,7 @@ export const RenderFields: React.FC<Props> = (props) => {
   }, [shouldRender, hasRendered])
 
   if (!fieldMap || (Array.isArray(fieldMap) && fieldMap.length === 0)) {
-    console.error('No fieldMap provided when calling RenderFields') // eslint-disable-line no-console
+    return null
   }
 
   if (!i18n) {
@@ -72,6 +73,7 @@ export const RenderFields: React.FC<Props> = (props) => {
                 CustomField={CustomField}
                 disabled={disabled}
                 fieldComponentProps={fieldComponentProps}
+                indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}
                 isHidden={isHidden}
                 key={fieldIndex}
                 name={name}

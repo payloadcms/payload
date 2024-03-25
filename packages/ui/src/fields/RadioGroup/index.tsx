@@ -18,6 +18,7 @@ const baseClass = 'radio-group'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -66,13 +67,15 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     [validate, options, required],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const {
     path,
     setValue,
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 

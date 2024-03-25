@@ -12,20 +12,12 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": false,
-    "types": [
-      "jest",
-      "node",
-      "@types/jest"
-    ],
+    "types": ["jest", "node", "@types/jest"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -34,55 +26,21 @@
       }
     ],
     "paths": {
-      "@payloadcms/ui/assets": [
-        "./packages/ui/src/assets/index.ts"
-      ],
-      "@payloadcms/ui/elements/*": [
-        "./packages/ui/src/elements/*/index.tsx"
-      ],
-      "@payloadcms/ui/fields/*": [
-        "./packages/ui/src/fields/*/index.tsx"
-      ],
-      "@payloadcms/ui/forms/*": [
-        "./packages/ui/src/forms/*/index.tsx"
-      ],
-      "@payloadcms/ui/graphics/*": [
-        "./packages/ui/src/graphics/*/index.tsx"
-      ],
-      "@payloadcms/ui/hooks/*": [
-        "./packages/ui/src/hooks/*.ts"
-      ],
-      "@payloadcms/ui/icons/*": [
-        "./packages/ui/src/icons/*/index.tsx"
-      ],
-      "@payloadcms/ui/providers/*": [
-        "./packages/ui/src/providers/*/index.tsx"
-      ],
-      "@payloadcms/ui/templates/*": [
-        "./packages/ui/src/templates/*/index.tsx"
-      ],
-      "@payloadcms/ui/utilities/*": [
-        "./packages/ui/src/utilities/*.ts"
-      ],
-      "@payloadcms/ui/scss": [
-        "./packages/ui/src/scss.scss"
-      ],
-      "@payloadcms/ui/scss/app.scss": [
-        "./packages/ui/src/scss/app.scss"
-      ]
+      "@payloadcms/ui/assets": ["./packages/ui/src/assets/index.ts"],
+      "@payloadcms/ui/elements/*": ["./packages/ui/src/elements/*/index.tsx"],
+      "@payloadcms/ui/fields/*": ["./packages/ui/src/fields/*/index.tsx"],
+      "@payloadcms/ui/forms/*": ["./packages/ui/src/forms/*/index.tsx"],
+      "@payloadcms/ui/graphics/*": ["./packages/ui/src/graphics/*/index.tsx"],
+      "@payloadcms/ui/hooks/*": ["./packages/ui/src/hooks/*.ts"],
+      "@payloadcms/ui/icons/*": ["./packages/ui/src/icons/*/index.tsx"],
+      "@payloadcms/ui/providers/*": ["./packages/ui/src/providers/*/index.tsx"],
+      "@payloadcms/ui/templates/*": ["./packages/ui/src/templates/*/index.tsx"],
+      "@payloadcms/ui/utilities/*": ["./packages/ui/src/utilities/*.ts"],
+      "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
+      "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"]
     }
   },
-  "exclude": [
-    "dist",
-    "build",
-    "node_modules",
-    ".eslintrc.js",
-    "dist/**/*.js",
-    "**/dist/**/*.js"
-  ],
-  "include": [
-    "./**/*.ts",
-    ".next/types/**/*.ts"
-  ],
+  "exclude": ["dist", "build", "node_modules", ".eslintrc.js", "dist/**/*.js", "**/dist/**/*.js"],
+  "include": ["./**/*.ts", ".next/types/**/*.ts"],
   "references": []
 }

@@ -2,6 +2,7 @@
 import type { ClientValidate } from 'payload/types'
 import type {} from 'payload/types'
 
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
@@ -57,8 +58,10 @@ const TextField: React.FC<TextFieldProps> = (props) => {
     [validate, minLength, maxLength, required],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const { path, readOnly, setValue, showError, value } = useField({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 

@@ -86,7 +86,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
             required
           />
           <ConfirmPassword />
-          <HiddenInput name="token" value={token} />
+          <HiddenInput forceUsePathFromProps name="token" value={token} />
           <FormSubmit>{i18n.t('authentication:resetPassword')}</FormSubmit>
         </Form>
       </div>

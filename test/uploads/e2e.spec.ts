@@ -15,6 +15,7 @@ import { RESTClient } from '../helpers/rest.js'
 import { adminThumbnailSrc } from './collections/admin-thumbnail/RegisterThumbnailFn.js'
 import config from './config.js'
 import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -153,6 +154,17 @@ describe('uploads', () => {
       .nth(8)
       .locator('.file-meta__size-type')
     await expect(iconMeta).toContainText('16x16')
+  })
+
+  test('should resize and show tiff images', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.tiff'))
+
+    await expect(page.locator('.file-field__upload .thumbnail svg')).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-details img')).toBeVisible()
   })
 
   test('should show draft uploads in the relation list', async () => {

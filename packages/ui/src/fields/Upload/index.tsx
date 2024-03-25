@@ -1,4 +1,5 @@
 'use client'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { UploadInputProps } from './Input.js'
@@ -48,8 +49,10 @@ export const Upload: React.FC<UploadFieldProps> = (props) => {
     [validate, required],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const { filterOptions, path, setValue, showError, value } = useField<string>({
-    path: pathFromProps,
+    path: pathFromContext || pathFromProps,
     validate: memoizedValidate,
   })
 

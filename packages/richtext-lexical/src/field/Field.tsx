@@ -5,6 +5,7 @@ import type { SerializedEditorState } from 'lexical'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useField } from '@payloadcms/ui/forms/useField'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -53,9 +54,10 @@ export const RichText: React.FC<
     // Removing props from the dependencies array fixed this issue: https://github.com/payloadcms/payload/issues/3709
     [validate, required],
   )
+  const { path: pathFromContext } = useFieldProps()
 
   const fieldType = useField<SerializedEditorState>({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 

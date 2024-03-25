@@ -13,6 +13,7 @@ import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import config from './config.js'
 import { clearAndSeedEverything } from './seed.js'
@@ -27,12 +28,6 @@ let client: RESTClient
 let page: Page
 let serverURL: string
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function navigateToRichTextFields() {
-  const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
-  await page.goto(url.list)
-  await page.locator('.row-1 .cell-title a').click()
-}
 async function navigateToLexicalFields() {
   const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
   await page.goto(url.list)
@@ -70,7 +65,7 @@ describe('lexical', () => {
     await page.locator('.app-header__step-nav').first().locator('a').first().click()
 
     // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
-    await expect(page.locator('.leave-without-saving__content').first()).not.toBeVisible()
+    await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
   })
 
   test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page after making a change and saving', async () => {
@@ -105,7 +100,7 @@ describe('lexical', () => {
     await page.locator('.app-header__step-nav').first().locator('a').first().click()
 
     // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
-    await expect(page.locator('.leave-without-saving__content').first()).not.toBeVisible()
+    await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
   })
 
   test('should type and save typed text', async () => {
@@ -128,24 +123,28 @@ describe('lexical', () => {
 
     await saveDocAndAssert(page)
 
-    const lexicalDoc: LexicalField = (
-      await payload.find({
-        collection: lexicalFieldsSlug,
-        depth: 0,
-        where: {
-          title: {
-            equals: lexicalDocData.title,
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
           },
-        },
-      })
-    ).docs[0] as never
+        })
+      ).docs[0] as never
 
-    const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-    const firstParagraphTextNode: SerializedTextNode = (
-      lexicalField.root.children[0] as SerializedParagraphNode
-    ).children[0] as SerializedTextNode
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const firstParagraphTextNode: SerializedTextNode = (
+        lexicalField.root.children[0] as SerializedParagraphNode
+      ).children[0] as SerializedTextNode
 
-    expect(firstParagraphTextNode.text).toBe('Upload Node:moretext')
+      expect(firstParagraphTextNode.text).toBe('Upload Node:moretext')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
   test('should be able to bold text using floating select toolbar', async () => {
     await navigateToLexicalFields()
@@ -193,35 +192,39 @@ describe('lexical', () => {
 
     await saveDocAndAssert(page)
 
-    const lexicalDoc: LexicalField = (
-      await payload.find({
-        collection: lexicalFieldsSlug,
-        depth: 0,
-        where: {
-          title: {
-            equals: lexicalDocData.title,
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
           },
-        },
-      })
-    ).docs[0] as never
+        })
+      ).docs[0] as never
 
-    const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-    const firstParagraph: SerializedParagraphNode = lexicalField.root
-      .children[0] as SerializedParagraphNode
-    expect(firstParagraph.children).toHaveLength(3)
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const firstParagraph: SerializedParagraphNode = lexicalField.root
+        .children[0] as SerializedParagraphNode
+      expect(firstParagraph.children).toHaveLength(3)
 
-    const textNode1: SerializedTextNode = firstParagraph.children[0] as SerializedTextNode
-    const boldNode: SerializedTextNode = firstParagraph.children[1] as SerializedTextNode
-    const textNode2: SerializedTextNode = firstParagraph.children[2] as SerializedTextNode
+      const textNode1: SerializedTextNode = firstParagraph.children[0] as SerializedTextNode
+      const boldNode: SerializedTextNode = firstParagraph.children[1] as SerializedTextNode
+      const textNode2: SerializedTextNode = firstParagraph.children[2] as SerializedTextNode
 
-    expect(textNode1.text).toBe('Upload ')
-    expect(textNode1.format).toBe(0)
+      expect(textNode1.text).toBe('Upload ')
+      expect(textNode1.format).toBe(0)
 
-    expect(boldNode.text).toBe('Node')
-    expect(boldNode.format).toBe(1)
+      expect(boldNode.text).toBe('Node')
+      expect(boldNode.format).toBe(1)
 
-    expect(textNode2.text).toBe(':')
-    expect(textNode2.format).toBe(0)
+      expect(textNode2.text).toBe(':')
+      expect(textNode2.format).toBe(0)
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 
   test('Make sure highly specific issue does not occur when two richText fields share the same editor prop', async () => {
@@ -239,10 +242,13 @@ describe('lexical', () => {
     await expect(richTextField).toBeVisible()
 
     const contentEditable = richTextField.locator('.ContentEditable__root').first()
-    const textContent = await contentEditable.textContent()
 
-    expect(textContent).not.toBe('some text')
-    expect(textContent).toBe('')
+    await expect
+      .poll(async () => await contentEditable.textContent(), { timeout: POLL_TOPASS_TIMEOUT })
+      .not.toBe('some text')
+    await expect
+      .poll(async () => await contentEditable.textContent(), { timeout: POLL_TOPASS_TIMEOUT })
+      .toBe('')
   })
 
   test('ensure blocks content is not hidden behind components outside of the editor', async () => {
@@ -283,23 +289,27 @@ describe('lexical', () => {
     const popover = page.locator('.rs__menu').first()
     const popoverOption3 = popover.locator('.rs__option').nth(2)
 
-    const popoverOption3BoundingBox = await popoverOption3.boundingBox()
-    expect(popoverOption3BoundingBox).not.toBeNull()
-    expect(popoverOption3BoundingBox).not.toBeUndefined()
-    expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
-    expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
+    await expect(async () => {
+      const popoverOption3BoundingBox = await popoverOption3.boundingBox()
+      expect(popoverOption3BoundingBox).not.toBeNull()
+      expect(popoverOption3BoundingBox).not.toBeUndefined()
+      expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
+      expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
 
-    // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
-    // by using page.mouse and the correct coordinates
-    // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
-    // see: https://github.com/microsoft/playwright/issues/9923
-    // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
-    // and usually the only method which works.
+      // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
+      // by using page.mouse and the correct coordinates
+      // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
+      // see: https://github.com/microsoft/playwright/issues/9923
+      // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
+      // and usually the only method which works.
 
-    const x = popoverOption3BoundingBox.x
-    const y = popoverOption3BoundingBox.y
+      const x = popoverOption3BoundingBox.x
+      const y = popoverOption3BoundingBox.y
 
-    await page.mouse.click(x, y, { button: 'left' })
+      await page.mouse.click(x, y, { button: 'left' })
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
 
     await expect(reactSelect.locator('.rs__value-container').first()).toHaveText('Option 3')
   })
@@ -332,25 +342,29 @@ describe('lexical', () => {
       await expect(spanInSubEditor).toHaveText('Some text below relationship node 1 inserted text')
       await saveDocAndAssert(page)
 
-      const lexicalDoc: LexicalField = (
-        await payload.find({
-          collection: lexicalFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalDocData.title,
+      await expect(async () => {
+        const lexicalDoc: LexicalField = (
+          await payload.find({
+            collection: lexicalFieldsSlug,
+            depth: 0,
+            where: {
+              title: {
+                equals: lexicalDocData.title,
+              },
             },
-          },
-        })
-      ).docs[0] as never
+          })
+        ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
-      const textNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1].children[0]
+        const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+        const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
+        const textNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1].children[0]
 
-      expect(textNodeInBlockNodeRichText.text).toBe(
-        'Some text below relationship node 1 inserted text',
-      )
+        expect(textNodeInBlockNodeRichText.text).toBe(
+          'Some text below relationship node 1 inserted text',
+        )
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
     test('should be able to bold text using floating select toolbar', async () => {
       // Reproduces https://github.com/payloadcms/payload/issues/4025
@@ -405,32 +419,36 @@ describe('lexical', () => {
 
       await saveDocAndAssert(page)
 
-      const lexicalDoc: LexicalField = (
-        await payload.find({
-          collection: lexicalFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalDocData.title,
+      await expect(async () => {
+        const lexicalDoc: LexicalField = (
+          await payload.find({
+            collection: lexicalFieldsSlug,
+            depth: 0,
+            where: {
+              title: {
+                equals: lexicalDocData.title,
+              },
             },
-          },
-        })
-      ).docs[0] as never
+          })
+        ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
-      const paragraphNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1]
+        const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+        const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
+        const paragraphNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1]
 
-      expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
+        expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
 
-      const textNode1: SerializedTextNode = paragraphNodeInBlockNodeRichText.children[0]
-      const boldNode: SerializedTextNode = paragraphNodeInBlockNodeRichText.children[1]
+        const textNode1: SerializedTextNode = paragraphNodeInBlockNodeRichText.children[0]
+        const boldNode: SerializedTextNode = paragraphNodeInBlockNodeRichText.children[1]
 
-      expect(textNode1.text).toBe('Some text below r')
-      expect(textNode1.format).toBe(0)
+        expect(textNode1.text).toBe('Some text below r')
+        expect(textNode1.format).toBe(0)
 
-      expect(boldNode.text).toBe('elationship node 1')
-      expect(boldNode.format).toBe(1)
+        expect(boldNode.text).toBe('elationship node 1')
+        expect(boldNode.format).toBe(1)
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
     test('ensure slash menu is not hidden behind other blocks', async () => {
       // This test makes sure there are no z-index issues here
@@ -476,31 +494,35 @@ describe('lexical', () => {
         .first()
       await expect(popoverHeading2Button).toBeVisible()
 
-      // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
-      const popoverHeading2ButtonBoundingBox = await popoverHeading2Button.boundingBox()
-      expect(popoverHeading2ButtonBoundingBox).not.toBeNull()
-      expect(popoverHeading2ButtonBoundingBox).not.toBeUndefined()
-      expect(popoverHeading2ButtonBoundingBox.height).toBeGreaterThan(0)
-      expect(popoverHeading2ButtonBoundingBox.width).toBeGreaterThan(0)
+      await expect(async () => {
+        // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
+        const popoverHeading2ButtonBoundingBox = await popoverHeading2Button.boundingBox()
+        expect(popoverHeading2ButtonBoundingBox).not.toBeNull()
+        expect(popoverHeading2ButtonBoundingBox).not.toBeUndefined()
+        expect(popoverHeading2ButtonBoundingBox.height).toBeGreaterThan(0)
+        expect(popoverHeading2ButtonBoundingBox.width).toBeGreaterThan(0)
 
-      // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
-      // by using page.mouse and the correct coordinates
-      // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
-      // see: https://github.com/microsoft/playwright/issues/9923
-      // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
-      // and usually the only method which works.
+        // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
+        // by using page.mouse and the correct coordinates
+        // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
+        // see: https://github.com/microsoft/playwright/issues/9923
+        // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
+        // and usually the only method which works.
 
-      const x = popoverHeading2ButtonBoundingBox.x
-      const y = popoverHeading2ButtonBoundingBox.y
+        const x = popoverHeading2ButtonBoundingBox.x
+        const y = popoverHeading2ButtonBoundingBox.y
 
-      await page.mouse.click(x, y, { button: 'left' })
+        await page.mouse.click(x, y, { button: 'left' })
 
-      await page.keyboard.type('A Heading')
+        await page.keyboard.type('A Heading')
 
-      const newHeadingInSubEditor = lexicalBlock.locator('p ~ h2').getByText('A Heading').first()
+        const newHeadingInSubEditor = lexicalBlock.locator('p ~ h2').getByText('A Heading').first()
 
-      await expect(newHeadingInSubEditor).toBeVisible()
-      await expect(newHeadingInSubEditor).toHaveText('A Heading')
+        await expect(newHeadingInSubEditor).toBeVisible()
+        await expect(newHeadingInSubEditor).toHaveText('A Heading')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
     test('should allow adding new blocks to a sub-blocks field, part of a parent lexical blocks field', async () => {
       await navigateToLexicalFields()
@@ -543,32 +565,36 @@ describe('lexical', () => {
 
       await saveDocAndAssert(page)
 
-      /**
-       * Using the local API, check if the data was saved correctly and
-       * can be retrieved correctly
-       */
+      await expect(async () => {
+        /**
+         * Using the local API, check if the data was saved correctly and
+         * can be retrieved correctly
+         */
 
-      const lexicalDoc: LexicalField = (
-        await payload.find({
-          collection: lexicalFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalDocData.title,
+        const lexicalDoc: LexicalField = (
+          await payload.find({
+            collection: lexicalFieldsSlug,
+            depth: 0,
+            where: {
+              title: {
+                equals: lexicalDocData.title,
+              },
             },
-          },
-        })
-      ).docs[0] as never
+          })
+        ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[5] as SerializedBlockNode
-      const subBlocks = blockNode.fields.subBlocks
+        const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+        const blockNode: SerializedBlockNode = lexicalField.root.children[5] as SerializedBlockNode
+        const subBlocks = blockNode.fields.subBlocks
 
-      expect(subBlocks).toHaveLength(2)
+        expect(subBlocks).toHaveLength(2)
 
-      const createdTextAreaBlock = subBlocks[1]
+        const createdTextAreaBlock = subBlocks[1]
 
-      expect(createdTextAreaBlock.content).toBe('text123')
+        expect(createdTextAreaBlock.content).toBe('text123')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
 
     test('should allow changing values of two different radio button blocks independently', async () => {
@@ -614,24 +640,28 @@ describe('lexical', () => {
 
       await saveDocAndAssert(page)
 
-      const lexicalDoc: LexicalField = (
-        await payload.find({
-          collection: lexicalFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalDocData.title,
+      await expect(async () => {
+        const lexicalDoc: LexicalField = (
+          await payload.find({
+            collection: lexicalFieldsSlug,
+            depth: 0,
+            where: {
+              title: {
+                equals: lexicalDocData.title,
+              },
             },
-          },
-        })
-      ).docs[0] as never
+          })
+        ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const radio1: SerializedBlockNode = lexicalField.root.children[8] as SerializedBlockNode
-      const radio2: SerializedBlockNode = lexicalField.root.children[9] as SerializedBlockNode
+        const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+        const radio1: SerializedBlockNode = lexicalField.root.children[8] as SerializedBlockNode
+        const radio2: SerializedBlockNode = lexicalField.root.children[9] as SerializedBlockNode
 
-      expect(radio1.fields.radioButtons).toBe('option2')
-      expect(radio2.fields.radioButtons).toBe('option3')
+        expect(radio1.fields.radioButtons).toBe('option2')
+        expect(radio2.fields.radioButtons).toBe('option3')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
 
     test('should not lose focus when writing in nested editor', async () => {

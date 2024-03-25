@@ -475,28 +475,43 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug)
     })
 
+    test('should render collapsible as collapsed if initCollapsed is true', async () => {
+      await page.goto(url.create)
+      const collapsedCollapsible = page.locator(
+        '#field-collapsible-1 .collapsible__toggle--collapsed',
+      )
+      await expect(collapsedCollapsible).toBeVisible()
+    })
+
     test('should render CollapsibleLabel using a function', async () => {
       const label = 'custom row label'
       await page.goto(url.create)
-      await page.locator('#field-collapsible-3__1 >> #field-nestedTitle').fill(label)
+      await page.locator('#field-collapsible-3__1 #field-nestedTitle').fill(label)
       await wait(100)
-      const customCollapsibleLabel = page.locator('#field-collapsible-3__1 >> .row-label')
+      const customCollapsibleLabel = page.locator(
+        `#field-collapsible-3__1 .collapsible-field__row-label-wrap :text("${label}")`,
+      )
       await expect(customCollapsibleLabel).toContainText(label)
     })
 
     test('should render CollapsibleLabel using a component', async () => {
       const label = 'custom row label as component'
       await page.goto(url.create)
+      await page.locator('#field-arrayWithCollapsibles').scrollIntoViewIfNeeded()
+
+      const arrayWithCollapsibles = page.locator('#field-arrayWithCollapsibles')
+      await expect(arrayWithCollapsibles).toBeVisible()
+
       await page.locator('#field-arrayWithCollapsibles >> .array-field__add-row').click()
 
       await page
         .locator(
-          '#field-collapsible-4__0-arrayWithCollapsibles__0 >> #field-arrayWithCollapsibles__0__innerCollapsible',
+          '#arrayWithCollapsibles-row-0 #field-collapsible-4__0-arrayWithCollapsibles__0 #field-arrayWithCollapsibles__0__innerCollapsible',
         )
         .fill(label)
       await wait(100)
       const customCollapsibleLabel = page.locator(
-        `#field-collapsible-4__0-arrayWithCollapsibles__0 >> .row-label :text("${label}")`,
+        `#field-arrayWithCollapsibles >> #arrayWithCollapsibles-row-0 >> .collapsible-field__row-label-wrap :text("${label}")`,
       )
       await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
     })
@@ -1366,9 +1381,7 @@ describe('fields', () => {
     test('should display formatted date in useAsTitle', async () => {
       await page.goto(url.list)
       await page.locator('.row-1 .cell-default a').click()
-      await expect(page.locator('.collection-edit .doc-header__title.render-title')).toContainText(
-        'August',
-      )
+      await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
     })
 
     test('should clear date', async () => {
@@ -1377,7 +1390,7 @@ describe('fields', () => {
       await expect(dateField).toBeVisible()
       await dateField.fill('02/07/2023')
       await expect(dateField).toHaveValue('02/07/2023')
-      await wait(1000)
+      await page.locator('#action-save').click()
       const clearButton = page.locator('#field-default .date-time-picker__clear-button')
       await expect(clearButton).toBeVisible()
       await clearButton.click()
@@ -1395,6 +1408,7 @@ describe('fields', () => {
         })
         test('create EST day only date', async () => {
           await page.goto(url.create)
+          await wait(500)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1426,6 +1440,7 @@ describe('fields', () => {
 
         test('create PDT day only date', async () => {
           await page.goto(url.create)
+          await wait(500)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1457,6 +1472,7 @@ describe('fields', () => {
 
         test('create ST day only date', async () => {
           await page.goto(url.create)
+          await wait(500)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field

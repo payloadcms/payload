@@ -6,6 +6,7 @@ export type Props = {
   className?: string
   fieldMap: FieldMap
   forceRender?: boolean
+  indexPath?: string
   margins?: 'small' | false
   operation?: Operation
   path: string

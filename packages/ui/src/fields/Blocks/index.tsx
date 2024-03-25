@@ -30,6 +30,7 @@ import type { BlockField, FieldBase } from 'payload/types'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 
 import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
@@ -37,7 +38,6 @@ import type { FormFieldBase } from '../shared/index.js'
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
   forceRender?: boolean
-  indexPath: string
   label?: FieldBase['label']
   labels?: BlockField['labels']
   maxRows?: number
@@ -61,7 +61,6 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     descriptionProps,
     errorProps,
     forceRender = false,
-    indexPath,
     labelProps,
     labels: labelsFromProps,
     localized,
@@ -72,6 +71,8 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     required,
     validate,
   } = props
+
+  const { indexPath } = useFieldProps()
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -108,6 +109,8 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const {
     path,
     permissions,
@@ -118,7 +121,7 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
