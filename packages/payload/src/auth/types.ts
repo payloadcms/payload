@@ -83,7 +83,7 @@ type GenerateVerifyEmailSubject = (args: {
 type GenerateForgotPasswordEmailHTML = (args: {
   req: PayloadRequest
   token: string
-  user: unknown
+  user: any
 }) => Promise<string> | string
 type GenerateForgotPasswordEmailSubject = (args: {
   req: PayloadRequest
