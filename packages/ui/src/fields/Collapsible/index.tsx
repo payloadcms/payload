@@ -51,7 +51,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     schemaPath,
     siblingPermissions,
   } = useFieldProps()
-  const path = pathFromProps || pathFromContext
+  const path = pathFromContext || pathFromProps
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()

@@ -46,6 +46,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   fieldMap,
   forceRender = false,
   hasMaxRows,
+  indexPath,
   labels,
   listeners,
   moveRow,
@@ -128,6 +129,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           className={`${baseClass}__fields`}
           fieldMap={fieldMap}
           forceRender={forceRender}
+          indexPath={indexPath}
           margins="small"
           path={path}
           permissions={permissions?.fields}
