@@ -1,6 +1,6 @@
 @import '../../scss/styles.scss';
 
-label.field-label {
+label.field-label:not(.unstyled) {
   @extend %body;
   display: flex;
   padding-bottom: base(0.25);

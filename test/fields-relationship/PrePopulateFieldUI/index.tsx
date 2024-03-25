@@ -1,3 +1,4 @@
+'use client'
 import { useField } from '@payloadcms/ui/forms/useField'
 import * as React from 'react'
 
