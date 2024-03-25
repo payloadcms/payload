@@ -1367,8 +1367,8 @@ describe('fields', () => {
       await page.goto(url.create)
       const dateField = page.locator('#field-default input')
       await expect(dateField).toBeVisible()
-      await dateField.fill('02/07/2024')
-      await expect(dateField).toHaveValue('02/07/2024')
+      await dateField.fill('02/07/2023')
+      await expect(dateField).toHaveValue('02/07/2023')
       await page.locator('#action-save').click()
       const clearButton = page.locator('#field-default .date-time-picker__clear-button')
       await expect(clearButton).toBeVisible()
@@ -1391,7 +1391,7 @@ describe('fields', () => {
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
-          await dateField.fill('02/07/2024')
+          await dateField.fill('02/07/2023')
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
@@ -1404,7 +1404,7 @@ describe('fields', () => {
           // fetch the doc (need the date string from the DB)
           const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
 
-          expect(doc.default).toEqual('2024-02-07T12:00:00.000Z')
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
         })
       })
 
@@ -1423,7 +1423,7 @@ describe('fields', () => {
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
-          await dateField.fill('02/07/2024')
+          await dateField.fill('02/07/2023')
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
@@ -1436,7 +1436,7 @@ describe('fields', () => {
           // fetch the doc (need the date string from the DB)
           const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
 
-          expect(doc.default).toEqual('2024-02-07T12:00:00.000Z')
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
         })
       })
 
@@ -1455,7 +1455,7 @@ describe('fields', () => {
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
-          await dateField.fill('02/07/2024')
+          await dateField.fill('02/07/2023')
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
@@ -1468,7 +1468,7 @@ describe('fields', () => {
           // fetch the doc (need the date string from the DB)
           const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
 
-          expect(doc.default).toEqual('2024-02-07T12:00:00.000Z')
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
         })
       })
     })
