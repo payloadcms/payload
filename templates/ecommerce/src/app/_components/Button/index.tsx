@@ -16,6 +16,7 @@ export type Props = {
   type?: 'submit' | 'button'
   disabled?: boolean
   invert?: boolean
+  form?: string
 }
 
 export const Button: React.FC<Props> = ({
