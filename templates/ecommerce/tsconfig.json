@@ -2,11 +2,7 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -24,17 +20,11 @@
       }
     ],
     "paths": {
-      "react": ["./node_modules/@types/react"],
+      "react": ["./node_modules/@types/react"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"],
   "ts-node": {
     "transpileOnly": true,
     "swc": true
