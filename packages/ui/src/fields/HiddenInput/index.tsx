@@ -1,4 +1,5 @@
 'use client'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useEffect } from 'react'
 
 import type { FormFieldBase } from '../index.js'
@@ -8,6 +9,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 
 export type HiddenInputFieldProps = FormFieldBase & {
   disableModifyingForm?: false
+  forceUsePathFromProps?: boolean
   name: string
   path?: string
   value?: unknown
@@ -18,10 +20,18 @@ export type HiddenInputFieldProps = FormFieldBase & {
  * For example, this sets the `ìd` property of a block in the Blocks field.
  */
 const HiddenInputField: React.FC<HiddenInputFieldProps> = (props) => {
-  const { name, disableModifyingForm = true, path: pathFromProps, value: valueFromProps } = props
+  const {
+    name,
+    disableModifyingForm = true,
+    forceUsePathFromProps,
+    path: pathFromProps,
+    value: valueFromProps,
+  } = props
+
+  const { path: pathFromContext } = useFieldProps()
 
   const { path, setValue, value } = useField({
-    path: pathFromProps || name,
+    path: (!forceUsePathFromProps ? pathFromContext : null) || pathFromProps || name,
   })
 
   useEffect(() => {
