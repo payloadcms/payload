@@ -51,8 +51,7 @@ export const RenderField: React.FC<Props> = ({
   const fieldComponents = useFieldComponents()
 
   const path = [pathFromProps, name].filter(Boolean).join('.')
-
-  const schemaPath = `${schemaPathFromProps ? `${schemaPathFromProps}` : ''}${name ? `.${name}` : ''}`
+  const schemaPath = [schemaPathFromProps, name].filter(Boolean).join('.')
 
   // if the user cannot read the field, then filter it out
   // this is different from `admin.readOnly` which is executed based on `operation`
