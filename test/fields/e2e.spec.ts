@@ -496,15 +496,11 @@ describe('fields', () => {
       const arrayWithCollapsibles = page.locator('#field-arrayWithCollapsibles')
       await expect(arrayWithCollapsibles).toBeVisible()
 
-      await wait(1000)
-
       await page.locator('#field-arrayWithCollapsibles >> .array-field__add-row').click()
-
-      await wait(1000)
 
       await page
         .locator(
-          '#field-arrayWithCollapsibles #arrayWithCollapsibles-row-0 #field-arrayWithCollapsibles____innerCollapsible',
+          '#arrayWithCollapsibles-row-0 #field-collapsible-4__0-arrayWithCollapsibles__0 #field-arrayWithCollapsibles__0__innerCollapsible',
         )
         .fill(label)
       await wait(100)
