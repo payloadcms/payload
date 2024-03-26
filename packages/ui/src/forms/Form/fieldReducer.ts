@@ -16,6 +16,61 @@ const ObjectId = (ObjectIdImport.default ||
  */
 export function fieldReducer(state: FormState, action: FieldAction): FormState {
   switch (action.type) {
+    case 'REPLACE_STATE_NO_VALUES': {
+      Object.entries(state).forEach(([path, field]) => {
+        if (action.state[path]) {
+          if (
+            action.state[path].errorPaths === null ||
+            action.state[path].errorPaths === undefined
+          ) {
+            delete field.errorPaths
+          } else {
+            field.errorPaths = action.state[path].errorPaths
+          }
+          if (
+            action.state[path].errorMessage === null ||
+            action.state[path].errorMessage === undefined
+          ) {
+            delete field.errorMessage
+          } else {
+            field.errorMessage = action.state[path].errorMessage
+          }
+
+          if (action.state[path].valid === null || action.state[path].valid === undefined) {
+            delete field.valid
+          } else {
+            field.valid = action.state[path].valid
+          }
+
+          if (action.state[path].validate === null || action.state[path].validate === undefined) {
+            delete field.validate
+          } else {
+            field.validate = action.state[path].validate
+          }
+
+          if (
+            action.state[path].disableFormData === null ||
+            action.state[path].disableFormData === undefined
+          ) {
+            delete field.disableFormData
+          } else {
+            field.disableFormData = action.state[path].disableFormData
+          }
+
+          if (
+            action.state[path].passesCondition === null ||
+            action.state[path].passesCondition === undefined
+          ) {
+            delete field.passesCondition
+          } else {
+            field.passesCondition = action.state[path].passesCondition
+          }
+        }
+      })
+
+      return deepCopyObject(state)
+    }
+
     case 'REPLACE_STATE': {
       const newState = {}
 

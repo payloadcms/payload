@@ -72,6 +72,12 @@ export type REPLACE_STATE = {
   type: 'REPLACE_STATE'
 }
 
+export type REPLACE_STATE_NO_VALUES = {
+  optimize?: boolean
+  state: FormState
+  type: 'REPLACE_STATE_NO_VALUES'
+}
+
 export type REMOVE = {
   path: string
   type: 'REMOVE'
@@ -148,6 +154,7 @@ export type FieldAction =
   | REMOVE_ROW
   | REPLACE_ROW
   | REPLACE_STATE
+  | REPLACE_STATE_NO_VALUES
   | SET_ALL_ROWS_COLLAPSED
   | SET_ROW_COLLAPSED
   | UPDATE

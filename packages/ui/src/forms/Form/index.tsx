@@ -541,7 +541,7 @@ export const Form: React.FC<FormProps> = (props) => {
           const { changed, newState } = mergeServerFormState(fields || {}, revalidatedFormState)
 
           if (changed) {
-            dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: newState })
+            dispatchFields({ type: 'REPLACE_STATE_NO_VALUES', state: newState })
           }
         }
       }
