@@ -276,6 +276,7 @@ export default {
     selectLocales: 'Görüntülenecek yerel ayarları seçin',
     selectVersionToCompare: 'Karşılaştırılacak bir sürüm seçin',
     showLocales: 'Yerel ayarları göster:',
+    status: 'Durum',
     type: 'Tür',
     unpublish: 'Yayından Kaldır',
     unpublishing: 'Yayından kaldırılıyor...',

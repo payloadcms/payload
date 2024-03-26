@@ -279,6 +279,7 @@ export default {
     selectLocales: 'Selecteer locales om weer te geven',
     selectVersionToCompare: 'Selecteer een versie om te vergelijken',
     showLocales: 'Toon locales:',
+    status: 'Status',
     type: 'Type',
     unpublish: 'Publicatie ongedaan maken',
     unpublishing: 'Publicatie ongedaan maken...',

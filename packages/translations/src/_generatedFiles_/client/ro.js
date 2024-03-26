@@ -276,6 +276,7 @@ export default {
     selectLocales: 'Selectați localitățile de afișat',
     selectVersionToCompare: 'Selectați o versiune pentru a compara',
     showLocales: 'Afișați localitățile:',
+    status: 'Status',
     type: 'Tip',
     unpublish: 'Dezpublicare',
     unpublishing: 'Dezpublicare...',

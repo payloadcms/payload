@@ -271,6 +271,7 @@ export default {
     selectLocales: 'เลือกภาษาที่ต้องการแสดง',
     selectVersionToCompare: 'เลือกเวอร์ชันที่ต้องการเปรียบเทียบ',
     showLocales: 'แสดงภาษา:',
+    status: 'สถานะ',
     type: 'ประเภท',
     unpublish: 'หยุดเผยแพร่',
     unpublishing: 'กำลังหยุดการเผยแพร่...',

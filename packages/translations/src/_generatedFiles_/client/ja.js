@@ -274,6 +274,7 @@ export default {
     selectLocales: '表示するロケールを選択',
     selectVersionToCompare: '比較するバージョンを選択',
     showLocales: 'ロケールを表示:',
+    status: 'ステータス',
     type: 'タイプ',
     unpublish: '非公開',
     unpublishing: '非公開中...',

@@ -273,6 +273,7 @@ export default {
     selectLocales: 'Odaberite jezike',
     selectVersionToCompare: 'Odaberite verziju za usporedbu',
     showLocales: 'Prikaži jezike:',
+    status: 'Status',
     type: 'Tip',
     unpublish: 'Poništi objavu',
     unpublishing: 'Poništavanje objave...',

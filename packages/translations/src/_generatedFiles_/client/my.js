@@ -280,6 +280,7 @@ export default {
     selectLocales: 'ပြသရန် ဒေသန္တရများကို ရွေးပါ။',
     selectVersionToCompare: 'နှိုင်းယှဉ်ရန် ဗားရှင်းကို ရွေးပါ။',
     showLocales: 'ဒေသန္တရများကိုပြပါ။:',
+    status: 'အခြေအနေ',
     type: 'အမျိုးအစား',
     unpublish: 'ပြန်ဖြုတ်မည်။',
     unpublishing: 'ပြန်ဖြုတ်နေဆဲ ...',

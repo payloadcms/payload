@@ -274,6 +274,7 @@ export default {
     selectLocales: 'Vyberte místní verze pro zobrazení',
     selectVersionToCompare: 'Vyberte verzi pro porovnání',
     showLocales: 'Zobrazit místní verze:',
+    status: 'Stav',
     type: 'Typ',
     unpublish: 'Zrušit publikování',
     unpublishing: 'Zrušuji publikování...',

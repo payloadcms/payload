@@ -277,6 +277,7 @@ export default {
     selectLocales: 'Selecciona idiomas a mostrar',
     selectVersionToCompare: 'Selecciona versión a comparar',
     showLocales: 'Mostrar idiomas:',
+    status: 'Estado',
     type: 'Tipo',
     unpublish: 'Despublicar',
     unpublishing: 'Despublicando...',
