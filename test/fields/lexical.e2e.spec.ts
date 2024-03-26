@@ -735,11 +735,28 @@ describe('lexical', () => {
       const selectFieldMenu = selectField.locator('.rs__menu').first()
       await selectFieldMenu.locator('.rs__option').nth(1).click() // Select "2" (2 columns / array fields)
 
+      // Make sure the OTHER arrays aren't visible, as their conditions are not fulfilled. Catches a bug where they might not be hidden fully
+      await expect(
+        conditionalArrayBlock.locator('.btn__label:has-text("Add Columns1")'),
+      ).toBeHidden()
+      await expect(conditionalArrayBlock.locator('.row-label:has-text("Column 01")')).toBeHidden()
+      await expect(
+        conditionalArrayBlock.locator('.btn__label:has-text("Add Columns3")'),
+      ).toBeHidden()
+      await expect(conditionalArrayBlock.locator('.row-label:has-text("Column 03")')).toBeHidden()
+
       await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
+      await expect(
+        conditionalArrayBlock.locator('.array-field__draggable-rows #columns2-row-0'),
+      ).toBeVisible()
+
       await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
+      await expect(
+        conditionalArrayBlock.locator('.array-field__draggable-rows #columns2-row-1'),
+      ).toBeVisible()
 
       await conditionalArrayBlock
-        .locator('.array-field__draggable-rows > div:nth-child(2) .input-wrapper input')
+        .locator('.array-field__draggable-rows > div:nth-child(2) .field-type.text input')
         .fill('second input')
 
       await saveDocAndAssert(page)

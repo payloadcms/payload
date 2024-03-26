@@ -31,6 +31,7 @@ import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { withCondition } from '@payloadcms/ui/forms/withCondition'
 
 import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
@@ -48,7 +49,7 @@ export type BlocksFieldProps = FormFieldBase & {
   width?: string
 }
 
-export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
+const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -341,3 +342,5 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     </div>
   )
 }
+
+export const BlocksField = withCondition(_BlocksField)
