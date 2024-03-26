@@ -21,6 +21,13 @@ export default someFunc(
 )
 `
 
+const nextConfigExportNamedDefault = `const nextConfig = {
+  // Your Next.js config here
+}
+const wrapped = someFunc(asdf)
+export { wrapped as default }
+`
+
 describe('parseAndInsertWithPayload', () => {
   it('should parse the default next config', () => {
     const modifiedConfig = parseAndInsertWithPayload(defaultNextConfig)
@@ -34,5 +41,11 @@ describe('parseAndInsertWithPayload', () => {
   it('should parse the config with a function on a new line', () => {
     const modifiedConfig = parseAndInsertWithPayload(nextConfigWithFuncMultiline)
     expect(modifiedConfig).toMatch(/withPayload\(someFunc\(\n  nextConfig\n\)\)/)
+  })
+
+  // Unsupported: export { wrapped as default }
+  it('should give warning with a named export as default', () => {
+    const modifiedConfig = parseAndInsertWithPayload(nextConfigExportNamedDefault)
+    expect(modifiedConfig).toHaveProperty('error')
   })
 })

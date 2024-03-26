@@ -7,31 +7,80 @@ export const wrapNextConfig = async (args: { projectDir: string }): Promise<void
   const foundConfig = (await globby('next.config.*js', { cwd: args.projectDir }))?.[0]
 
   if (!foundConfig) {
-    throw new Error(`No next.config.js found at ${args.projectDir}`)
+    throw new Error(`No Next config found at ${args.projectDir}`)
   }
   const configPath = path.resolve(args.projectDir, foundConfig)
   const configContent = fs.readFileSync(configPath, 'utf8')
   const newConfig = parseAndInsertWithPayload(configContent)
+  if (typeof newConfig === 'object') {
+    throw new Error(newConfig.error)
+  }
   fs.writeFileSync(configPath, newConfig)
 }
 
-export function parseAndInsertWithPayload(content: string) {
+export function parseAndInsertWithPayload(content: string): { error: string } | string {
   const ast = parseModule(content, { loc: true })
-  const statement = ast.body.find((p) => p.type === 'ExportDefaultDeclaration') as
+  const exportDefaultDeclaration = ast.body.find((p) => p.type === 'ExportDefaultDeclaration') as
     | Directive
     | undefined
 
-  if (!statement) {
+  const exportNamedDeclaration = ast.body.find((p) => p.type === 'ExportNamedDeclaration') as
+    | ExportNamedDeclaration
+    | undefined
+
+  if (!exportDefaultDeclaration && !exportNamedDeclaration) {
     throw new Error('Could not find ExportDefaultDeclaration in next.config.js')
   }
 
-  return insertBeforeAndAfter(content, statement.declaration?.loc)
+  if (exportDefaultDeclaration) {
+    return insertBeforeAndAfter(content, exportDefaultDeclaration.declaration?.loc)
+  } else if (exportNamedDeclaration) {
+    const exportSpecifier = exportNamedDeclaration.specifiers.find(
+      (s) =>
+        s.type === 'ExportSpecifier' &&
+        s.exported?.name === 'default' &&
+        s.local?.type === 'Identifier' &&
+        s.local?.name,
+    )
+
+    if (exportSpecifier) {
+      // TODO: Improve with this example and/or link to docs
+      return {
+        error: `Automatic wrapping of named exports as default not supported yet.
+  Please manually wrap your Next config with the withPayload function`,
+      }
+    }
+  } else {
+    throw new Error('Could not automatically wrap next.config.js with withPayload')
+  }
+
+  return insertBeforeAndAfter(content, exportDefaultDeclaration.declaration?.loc)
 }
 
 type Directive = {
   declaration?: {
     loc: Loc
   }
+}
+
+type ExportNamedDeclaration = {
+  declaration: null
+  loc: Loc
+  specifiers: {
+    exported: {
+      loc: Loc
+      name: string
+      type: string
+    }
+    loc: Loc
+    local: {
+      loc: Loc
+      name: string
+      type: string
+    }
+    type: string
+  }[]
+  type: string
 }
 
 type Loc = {
