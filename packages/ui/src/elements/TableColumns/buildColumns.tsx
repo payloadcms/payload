@@ -22,9 +22,26 @@ export const buildColumns = (args: {
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }): Column[] => {
-  const { cellProps, columnPreferences, defaultColumns, enableRowSelections, fieldMap } = args
+  const {
+    cellProps,
+    columnPreferences,
+    defaultColumns,
+    enableRowSelections,
+    fieldMap,
+    useAsTitle,
+  } = args
 
+  // swap useAsTitle field to first slot
   let sortedFieldMap = flattenFieldMap(fieldMap)
+  const useAsTitleFieldIndex = sortedFieldMap.findIndex((field) => field.name === useAsTitle)
+  if (useAsTitleFieldIndex !== -1) {
+    const useAsTitleField = sortedFieldMap[useAsTitleFieldIndex]
+    sortedFieldMap = [
+      useAsTitleField,
+      ...sortedFieldMap.slice(0, useAsTitleFieldIndex),
+      ...sortedFieldMap.slice(useAsTitleFieldIndex + 1),
+    ]
+  }
 
   const sortTo = defaultColumns || columnPreferences
 
