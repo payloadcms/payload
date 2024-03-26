@@ -92,46 +92,40 @@ export const DocumentInfoProvider: React.FC<
   // no need to an additional requests when creating new documents
   const isEditing = Boolean(id)
 
-  const shouldLoadData = !hasInitializedState.current && !!(globalSlug || id)
-
   const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
-    shouldLoadData
-      ? `${baseURL}/${globalSlug ? 'globals/' : ''}${slug}${collectionSlug ? `/${id}` : ''}`
-      : null,
+    `${baseURL}/${globalSlug ? 'globals/' : ''}${slug}${collectionSlug ? `/${id}` : ''}`,
     { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   )
 
   useEffect(() => {
-    if (!hasInitializedState.current && (data || !shouldLoadData)) {
-      const getInitialState = async () => {
-        let docPreferences: DocumentPreferences = { fields: {} }
+    const getInitialState = async () => {
+      let docPreferences: DocumentPreferences = { fields: {} }
 
-        if (id) {
-          docPreferences = await getPreference(
-            `${id ? 'collection' : 'global'}-${collectionSlug}-${id}`,
-          )
-        }
-
-        const result = await getFormState({
-          apiRoute: api,
-          body: {
-            id,
-            collectionSlug,
-            data: data || {},
-            docPreferences,
-            globalSlug,
-            operation: isEditing ? 'update' : 'create',
-            schemaPath: collectionSlug || globalSlug,
-          },
-          serverURL,
-        })
-
-        setInitialState(result)
-        hasInitializedState.current = true
+      if (id) {
+        docPreferences = await getPreference(
+          `${id ? 'collection' : 'global'}-${collectionSlug}-${id}`,
+        )
       }
 
-      void getInitialState()
+      const result = await getFormState({
+        apiRoute: api,
+        body: {
+          id,
+          collectionSlug,
+          data: data || {},
+          docPreferences,
+          globalSlug,
+          operation: isEditing ? 'update' : 'create',
+          schemaPath: collectionSlug || globalSlug,
+        },
+        serverURL,
+      })
+
+      setInitialState(result)
+      hasInitializedState.current = true
     }
+
+    void getInitialState()
   }, [api, data, isEditing, collectionSlug, serverURL, id, getPreference, globalSlug])
 
   /**
