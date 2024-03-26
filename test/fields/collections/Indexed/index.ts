@@ -24,6 +24,14 @@ const IndexedFields: CollectionConfig = {
       unique: true,
     },
     {
+      name: 'localizedUniqueRequiredText',
+      type: 'text',
+      defaultValue: 'localizedUniqueRequired',
+      localized: true,
+      required: true,
+      unique: true,
+    },
+    {
       name: 'point',
       type: 'point',
     },
