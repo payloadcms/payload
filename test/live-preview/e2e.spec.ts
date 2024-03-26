@@ -28,9 +28,9 @@ describe('Live Preview', () => {
     const linkToDoc = page.locator('tbody tr:first-child .cell-slug a').first()
 
     await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: 45000 })
+    const linkDocHref = await linkToDoc.getAttribute('href')
 
     await linkToDoc.click()
-    const linkDocHref = await linkToDoc.getAttribute('href')
 
     await page.waitForURL(`**${linkDocHref}`)
   }

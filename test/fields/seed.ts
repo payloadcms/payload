@@ -185,135 +185,137 @@ export async function clearAndSeedEverything(_payload: Payload, parallel: boolea
           .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
       )
 
-      await executePromises([
-        () =>
-          _payload.create({
-            collection: usersSlug,
-            depth: 0,
-            data: {
-              email: devUser.email,
-              password: devUser.password,
-            },
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: collapsibleFieldsSlug,
-            data: collapsibleDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: conditionalLogicSlug,
-            data: conditionalLogicDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: groupFieldsSlug,
-            data: groupDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: selectFieldsSlug,
-            data: selectsDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: radioFieldsSlug,
-            data: radiosDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: tabsFieldsSlug,
-            data: tabsDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: pointFieldsSlug,
-            data: pointDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: dateFieldsSlug,
-            data: dateDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: codeFieldsSlug,
-            data: codeDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: jsonFieldsSlug,
-            data: jsonDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
+      await executePromises(
+        [
+          () =>
+            _payload.create({
+              collection: usersSlug,
+              depth: 0,
+              data: {
+                email: devUser.email,
+                password: devUser.password,
+              },
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: collapsibleFieldsSlug,
+              data: collapsibleDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: conditionalLogicSlug,
+              data: conditionalLogicDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: groupFieldsSlug,
+              data: groupDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: selectFieldsSlug,
+              data: selectsDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: radioFieldsSlug,
+              data: radiosDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: tabsFieldsSlug,
+              data: tabsDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: pointFieldsSlug,
+              data: pointDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: dateFieldsSlug,
+              data: dateDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: codeFieldsSlug,
+              data: codeDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: jsonFieldsSlug,
+              data: jsonDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
 
-        () =>
-          _payload.create({
-            collection: blockFieldsSlug,
-            data: blocksDocWithRichText,
-            depth: 0,
-            overrideAccess: true,
-          }),
+          () =>
+            _payload.create({
+              collection: blockFieldsSlug,
+              data: blocksDocWithRichText,
+              depth: 0,
+              overrideAccess: true,
+            }),
 
-        () =>
-          _payload.create({
-            collection: lexicalFieldsSlug,
-            data: lexicalDocWithRelId,
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: lexicalMigrateFieldsSlug,
-            data: lexicalMigrateDocWithRelId,
-            depth: 0,
-            overrideAccess: true,
-          }),
+          () =>
+            _payload.create({
+              collection: lexicalFieldsSlug,
+              data: lexicalDocWithRelId,
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: lexicalMigrateFieldsSlug,
+              data: lexicalMigrateDocWithRelId,
+              depth: 0,
+              overrideAccess: true,
+            }),
 
-        () =>
-          _payload.create({
-            collection: numberFieldsSlug,
-            data: { number: 2 },
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: numberFieldsSlug,
-            data: { number: 3 },
-            depth: 0,
-            overrideAccess: true,
-          }),
-        () =>
-          _payload.create({
-            collection: numberFieldsSlug,
-            data: numberDoc,
-            depth: 0,
-            overrideAccess: true,
-          }),
-      ])
+          () =>
+            _payload.create({
+              collection: numberFieldsSlug,
+              data: { number: 2 },
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: numberFieldsSlug,
+              data: { number: 3 },
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: numberFieldsSlug,
+              data: numberDoc,
+              depth: 0,
+              overrideAccess: true,
+            }),
+        ],
+        parallel,
+      )
     },
-    shouldResetDB: true,
     snapshotKey: 'fieldsTest',
     uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
   })
