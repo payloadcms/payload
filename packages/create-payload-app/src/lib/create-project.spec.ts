@@ -27,32 +27,10 @@ describe('createProject', () => {
     const args = {
       _: ['project-name'],
       '--db': 'mongodb',
+      '--local-template': 'blank',
       '--no-deps': true,
     } as CliArgs
     const packageManager = 'yarn'
-
-    it('creates starter project', async () => {
-      const projectName = 'starter-project'
-      const template: ProjectTemplate = {
-        name: 'blank',
-        type: 'starter',
-        url: 'https://github.com/payloadcms/payload/templates/blank',
-        description: 'Blank Template',
-      }
-      await createProject({
-        cliArgs: args,
-        projectName,
-        projectDir,
-        template,
-        packageManager,
-      })
-
-      const packageJsonPath = path.resolve(projectDir, 'package.json')
-      const packageJson = fse.readJsonSync(packageJsonPath)
-
-      // Check package name and description
-      expect(packageJson.name).toEqual(projectName)
-    })
 
     it('creates plugin template', async () => {
       const projectName = 'plugin'
@@ -77,7 +55,7 @@ describe('createProject', () => {
       expect(packageJson.name).toEqual(projectName)
     })
 
-    describe('db adapters', () => {
+    describe('creates project from template', () => {
       const templates = getValidTemplates()
 
       it.each([
