@@ -26,7 +26,7 @@ export const updateOne: UpdateOne = async function updateOne(
     where: whereToUse,
   })
 
-  const selectDistinctResult = selectDistinct({
+  const selectDistinctResult = await selectDistinct({
     adapter: this,
     chainedMethods: [{ args: [1], method: 'limit' }],
     db,
