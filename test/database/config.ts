@@ -4,14 +4,16 @@ import { devUser } from '../credentials'
 export default buildConfigWithDefaults({
   collections: [
     {
+      slug: 'posts',
       fields: [
         {
           name: 'title',
-          required: true,
           type: 'text',
+          required: true,
         },
         {
           name: 'throwAfterChange',
+          type: 'checkbox',
           defaultValue: false,
           hooks: {
             afterChange: [
@@ -22,17 +24,16 @@ export default buildConfigWithDefaults({
               },
             ],
           },
-          type: 'checkbox',
         },
       ],
-      slug: 'posts',
     },
     {
+      slug: 'relation-a',
       fields: [
         {
           name: 'relationship',
-          relationTo: 'relation-b',
           type: 'relationship',
+          relationTo: 'relation-b',
         },
         {
           name: 'richText',
@@ -43,14 +44,14 @@ export default buildConfigWithDefaults({
         plural: 'Relation As',
         singular: 'Relation A',
       },
-      slug: 'relation-a',
     },
     {
+      slug: 'relation-b',
       fields: [
         {
           name: 'relationship',
-          relationTo: 'relation-a',
           type: 'relationship',
+          relationTo: 'relation-a',
         },
         {
           name: 'richText',
@@ -61,7 +62,6 @@ export default buildConfigWithDefaults({
         plural: 'Relation Bs',
         singular: 'Relation B',
       },
-      slug: 'relation-b',
     },
   ],
   onInit: async (payload) => {

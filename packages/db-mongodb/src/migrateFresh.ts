@@ -11,25 +11,30 @@ import type { MongooseAdapter } from '.'
 /**
  * Drop the current database and run all migrate up functions
  */
-export async function migrateFresh(this: MongooseAdapter): Promise<void> {
+export async function migrateFresh(
+  this: MongooseAdapter,
+  { forceAcceptWarning = false }: { forceAcceptWarning?: boolean },
+): Promise<void> {
   const { payload } = this
 
-  const { confirm: acceptWarning } = await prompts(
-    {
-      name: 'confirm',
-      type: 'confirm',
-      initial: false,
-      message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
-    },
-    {
-      onCancel: () => {
-        process.exit(0)
+  if (!forceAcceptWarning) {
+    const { confirm: acceptWarning } = await prompts(
+      {
+        name: 'confirm',
+        type: 'confirm',
+        initial: false,
+        message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
       },
-    },
-  )
+      {
+        onCancel: () => {
+          process.exit(0)
+        },
+      },
+    )
 
-  if (!acceptWarning) {
-    process.exit(0)
+    if (!acceptWarning) {
+      process.exit(0)
+    }
   }
 
   payload.logger.info({

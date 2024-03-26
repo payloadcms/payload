@@ -8,6 +8,7 @@ import {
   defaultLocale,
   englishTitle,
   localizedPostsSlug,
+  localizedSortSlug,
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
@@ -48,6 +49,7 @@ export default buildConfigWithDefaults({
       slug: 'users',
     },
     {
+      slug: localizedPostsSlug,
       access: openAccess,
       admin: {
         useAsTitle: 'title',
@@ -85,7 +87,6 @@ export default buildConfigWithDefaults({
           type: 'group',
         },
       ],
-      slug: localizedPostsSlug,
     },
     ArrayCollection,
     {
@@ -213,6 +214,23 @@ export default buildConfigWithDefaults({
       slug: 'dummy',
     },
     NestedToArrayAndBlock,
+    {
+      slug: localizedSortSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          index: true,
+          localized: true,
+          type: 'text',
+        },
+        {
+          name: 'date',
+          type: 'date',
+          localized: true,
+        },
+      ],
+    },
   ],
   globals: [
     {

@@ -74,21 +74,22 @@ const DefaultCell: React.FC<Props> = (props) => {
     if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
       CellComponent = cellComponents.File
     } else {
-      return (
-        <WrapElement {...wrapElementProps}>
-          {(cellData === '' || typeof cellData === 'undefined') &&
-            'label' in field &&
-            t('noLabel', {
+      if (!cellData && 'label' in field) {
+        return (
+          <WrapElement {...wrapElementProps}>
+            {t('noLabel', {
               label: getTranslation(
                 typeof field.label === 'function' ? 'data' : field.label || 'data',
                 i18n,
               ),
             })}
-          {typeof cellData === 'string' && cellData}
-          {typeof cellData === 'number' && cellData}
-          {typeof cellData === 'object' && JSON.stringify(cellData)}
-        </WrapElement>
-      )
+          </WrapElement>
+        )
+      } else if (typeof cellData === 'string' || typeof cellData === 'number') {
+        return <WrapElement {...wrapElementProps}>{cellData}</WrapElement>
+      } else if (typeof cellData === 'object') {
+        return <WrapElement {...wrapElementProps}>{JSON.stringify(cellData)}</WrapElement>
+      }
     }
   }
 

@@ -9,4 +9,6 @@ module.exports = () => {
   } else {
     console.log('\n\nNo database specified, using default')
   }
+
+  process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER = 's3'
 }

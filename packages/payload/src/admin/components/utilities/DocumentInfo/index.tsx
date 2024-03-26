@@ -40,7 +40,6 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null)
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null)
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -61,6 +60,10 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       preferencesKey = `collection-${slug}-${id}`
     }
   }
+
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(
+    permissions[pluralType][slug],
+  )
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
@@ -215,14 +218,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           'Accept-Language': i18n.language,
         },
       })
-      const json = await res.json()
-      setDocPermissions(json)
-    } else {
-      // fallback to permissions from the entity type
-      // (i.e. create has no id)
-      setDocPermissions(permissions[pluralType][slug])
+      try {
+        const json = await res.json()
+        setDocPermissions(json)
+      } catch (e) {
+        console.error('Unable to fetch document permissions', e)
+      }
     }
-  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, code])
+  }, [serverURL, api, pluralType, slug, id, i18n.language, code])
 
   const getDocPreferences = useCallback(async () => {
     return getPreference<DocumentPreferences>(preferencesKey)
@@ -262,6 +265,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
   const value: ContextType = {
     id,
+    slug,
     collection,
     docPermissions,
     getDocPermissions,
@@ -271,7 +275,6 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     preferencesKey,
     publishedDoc,
     setDocFieldPreferences,
-    slug,
     unpublishedVersions,
     versions,
   }

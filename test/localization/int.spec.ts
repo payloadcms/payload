@@ -13,7 +13,7 @@ import { RESTClient } from '../helpers/rest'
 import { arrayCollectionSlug } from './collections/Array'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock'
 import configPromise from './config'
-import { defaultLocale } from './shared'
+import { defaultLocale, localizedSortSlug } from './shared'
 import {
   englishTitle,
   localizedPostsSlug,
@@ -291,6 +291,60 @@ describe('Localization', () => {
 
         expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
       })
+    })
+  })
+
+  describe('Localized Sort Count', () => {
+    const expectedTotalDocs = 5
+    beforeAll(async () => {
+      for (let i = 1; i <= expectedTotalDocs; i++) {
+        const post = await payload.create({
+          collection: localizedSortSlug,
+          data: {
+            title: `EN ${i}`,
+            date: new Date(),
+          },
+          locale: englishLocale,
+        })
+
+        await payload.update({
+          id: post.id,
+          collection: localizedSortSlug,
+          data: {
+            title: `ES ${i}`,
+            date: new Date(),
+          },
+          locale: spanishLocale,
+        })
+      }
+    })
+
+    it('should have correct totalDocs when unsorted', async () => {
+      const simpleQuery = await payload.find({
+        collection: localizedSortSlug,
+      })
+      const sortByIdQuery = await payload.find({
+        collection: localizedSortSlug,
+        sort: 'id',
+      })
+
+      expect(simpleQuery.totalDocs).toEqual(expectedTotalDocs)
+      expect(sortByIdQuery.totalDocs).toEqual(expectedTotalDocs)
+    })
+
+    // https://github.com/payloadcms/payload/issues/4889
+    it('should have correct totalDocs when sorted by localized fields', async () => {
+      const sortByTitleQuery = await payload.find({
+        collection: localizedSortSlug,
+        sort: 'title',
+      })
+      const sortByDateQuery = await payload.find({
+        collection: localizedSortSlug,
+        sort: 'date',
+      })
+
+      expect(sortByTitleQuery.totalDocs).toEqual(expectedTotalDocs)
+      expect(sortByDateQuery.totalDocs).toEqual(expectedTotalDocs)
     })
   })
 
@@ -848,7 +902,7 @@ describe('Localization', () => {
 
       // should return the value of the fallback locale
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(updatedSpanishDoc.items[0].text).toStrictEqual(englishTitle)
     })
   })

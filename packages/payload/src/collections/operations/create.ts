@@ -17,7 +17,6 @@ import type {
 import executeAccess from '../../auth/executeAccess'
 import sendVerificationEmail from '../../auth/sendVerificationEmail'
 import { registerLocalStrategy } from '../../auth/strategies/local/register'
-import { fieldAffectsData } from '../../fields/config/types'
 import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
@@ -26,12 +25,12 @@ import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
 import { commitTransaction } from '../../utilities/commitTransaction'
+import flattenFields from '../../utilities/flattenTopLevelFields'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
 import { saveVersion } from '../../versions/saveVersion'
 import { buildAfterOperation } from './utils'
-import flattenFields from '../../utilities/flattenTopLevelFields'
 
 const unlinkFile = promisify(fs.unlink)
 
@@ -55,44 +54,47 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'create',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    autosave = false,
-    collection: { config: collectionConfig },
-    collection,
-    depth,
-    disableVerificationEmail,
-    draft = false,
-    overrideAccess,
-    overwriteExistingFiles = false,
-    req: {
-      payload,
-      payload: { config, emailOptions },
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
+
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'create',
+            req: args.req,
+          })) || args
+      },
+      Promise.resolve(),
+    )
+
+    const {
+      autosave = false,
+      collection: { config: collectionConfig },
+      collection,
+      depth,
+      disableVerificationEmail,
+      draft = false,
+      overrideAccess,
+      overwriteExistingFiles = false,
+      req: {
+        fallbackLocale,
+        locale,
+        payload,
+        payload: { config, emailOptions },
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     let { data } = args
 
@@ -288,7 +290,9 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: result,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -367,7 +371,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

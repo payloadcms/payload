@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { SQL } from 'drizzle-orm'
-import type { Field, FieldAffectingData, TabAsField } from 'payload/types'
+import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
+import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload/types'
 
 import { and, eq, like, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
@@ -15,7 +16,7 @@ import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 type Constraint = {
   columnName: string
-  table: GenericTable
+  table: GenericTable | PgTableWithColumns<any>
   value: unknown
 }
 
@@ -26,12 +27,12 @@ type TableColumn = {
   getNotNullColumnByValue?: (val: unknown) => string
   pathSegments?: string[]
   rawColumn?: SQL
-  table: GenericTable
+  table: GenericTable | PgTableWithColumns<any>
 }
 
 type Args = {
   adapter: PostgresAdapter
-  aliasTable?: GenericTable
+  aliasTable?: GenericTable | PgTableWithColumns<any>
   collectionPath: string
   columnPrefix?: string
   constraintPath?: string
@@ -44,6 +45,14 @@ type Args = {
   rootTableName?: string
   selectFields: Record<string, GenericColumn>
   tableName: string
+  /**
+   * If creating a new table name for arrays and blocks, this suffix should be appended to the table name
+   */
+  tableNameSuffix?: string
+  /**
+   * The raw value of the query before sanitization
+   */
+  value: unknown
 }
 /**
  * Transforms path to table and column name
@@ -65,6 +74,8 @@ export const getTableColumnFromPath = ({
   rootTableName: incomingRootTableName,
   selectFields,
   tableName,
+  tableNameSuffix = '',
+  value,
 }: Args): TableColumn => {
   const fieldPath = incomingSegments[0]
   let locale = incomingLocale
@@ -83,8 +94,8 @@ export const getTableColumnFromPath = ({
       constraints,
       field: {
         name: 'id',
-        type: 'number',
-      },
+        type: adapter.idType === 'uuid' ? 'text' : 'number',
+      } as TextField | NumberField,
       table: adapter.tables[newTableName],
     }
   }
@@ -125,6 +136,8 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          tableNameSuffix,
+          value,
         })
       }
       case 'tab': {
@@ -134,7 +147,7 @@ export const getTableColumnFromPath = ({
             aliasTable,
             collectionPath,
             columnPrefix: `${columnPrefix}${field.name}_`,
-            constraintPath,
+            constraintPath: `${constraintPath}${field.name}.`,
             constraints,
             fields: field.fields,
             joinAliases,
@@ -144,6 +157,8 @@ export const getTableColumnFromPath = ({
             rootTableName,
             selectFields,
             tableName: newTableName,
+            tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
+            value,
           })
         }
         return getTableColumnFromPath({
@@ -161,6 +176,8 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          tableNameSuffix,
+          value,
         })
       }
 
@@ -185,7 +202,7 @@ export const getTableColumnFromPath = ({
           aliasTable,
           collectionPath,
           columnPrefix: `${columnPrefix}${field.name}_`,
-          constraintPath,
+          constraintPath: `${constraintPath}${field.name}.`,
           constraints,
           fields: field.fields,
           joinAliases,
@@ -195,11 +212,13 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
+          value,
         })
       }
 
       case 'array': {
-        newTableName = `${tableName}_${toSnakeCase(field.name)}`
+        newTableName = `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
@@ -232,12 +251,39 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          value,
         })
       }
 
       case 'blocks': {
         let blockTableColumn: TableColumn
         let newTableName: string
+
+        // handle blockType queries
+        if (pathSegments[1] === 'blockType') {
+          // find the block config using the value
+          const blockTypes = Array.isArray(value) ? value : [value]
+          blockTypes.forEach((blockType) => {
+            const block = field.blocks.find((block) => block.slug === blockType)
+            newTableName = `${tableName}_blocks_${toSnakeCase(block.slug)}`
+            joins[newTableName] = eq(
+              adapter.tables[tableName].id,
+              adapter.tables[newTableName]._parentID,
+            )
+            constraints.push({
+              columnName: '_path',
+              table: adapter.tables[newTableName],
+              value: pathSegments[0],
+            })
+          })
+          return {
+            constraints,
+            field,
+            getNotNullColumnByValue: () => 'id',
+            table: adapter.tables[tableName],
+          }
+        }
+
         const hasBlockField = field.blocks.some((block) => {
           newTableName = `${tableName}_blocks_${toSnakeCase(block.slug)}`
           constraintPath = `${constraintPath}${field.name}.%.`
@@ -258,6 +304,7 @@ export const getTableColumnFromPath = ({
               rootTableName,
               selectFields: blockSelectFields,
               tableName: newTableName,
+              value,
             })
           } catch (error) {
             // this is fine, not every block will have the field
@@ -298,9 +345,6 @@ export const getTableColumnFromPath = ({
             table: blockTableColumn.table,
           }
         }
-        if (pathSegments[1] === 'blockType') {
-          throw new APIError('Querying on blockType is not supported')
-        }
         break
       }
 
@@ -340,7 +384,7 @@ export const getTableColumnFromPath = ({
             table: newAliasTable,
           })
 
-          if (newCollectionPath === '') {
+          if (newCollectionPath === '' || newCollectionPath === 'id') {
             return {
               columnName: `${field.relationTo}ID`,
               constraints,
@@ -388,6 +432,7 @@ export const getTableColumnFromPath = ({
           rootTableName: newTableName,
           selectFields,
           tableName: newTableName,
+          value,
         })
       }
 

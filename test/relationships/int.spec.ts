@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto'
 
-import type { PayloadRequest } from '../../packages/payload/src/express/types'
+import type { PayloadRequest } from '../../packages/payload/types'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -11,7 +11,6 @@ import type {
 } from './payload-types'
 
 import payload from '../../packages/payload/src'
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -272,6 +271,74 @@ describe('Relationships', () => {
           },
         })
         expect(query.totalDocs).toEqual(2)
+      })
+
+      // https://github.com/payloadcms/payload/issues/4240
+      it('should allow querying by relationship id field', async () => {
+        /**
+         * This test shows something which breaks on postgres but not on mongodb.
+         */
+        const someDirector = await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Pulp Fiction',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Pulp Fiction',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Harry Potter',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Lord of the Rings is boring',
+            director: someDirector.id,
+          },
+        })
+
+        // This causes the following error:
+        // "Your "id" field references a column "directors"."id", but the table "directors" is not part of the query! Did you forget to join it?"
+        // This only happens on postgres, not on mongodb
+        const query = await payload.find({
+          collection: 'movies',
+          depth: 5,
+          limit: 1,
+          where: {
+            or: [
+              {
+                name: {
+                  equals: 'Pulp Fiction',
+                },
+              },
+              {
+                'director.id': {
+                  equals: someDirector.id,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(query.totalDocs).toEqual(3)
+        expect(query.docs).toHaveLength(1) // Due to limit: 1
       })
 
       it('should query using "contains" by hasMany relationship field', async () => {
@@ -586,8 +653,8 @@ describe('Relationships', () => {
 
       beforeAll(async () => {
         await Promise.all(
-          movieList.map((movie) => {
-            return payload.create({
+          movieList.map(async (movie) => {
+            return await payload.create({
               collection: 'movies',
               data: {
                 name: movie,
@@ -809,9 +876,8 @@ async function createPost(overrides?: Partial<Post>) {
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find({ collection: slug, limit: 100 })
-  const ids = allDocs.docs.map((doc) => doc.id)
-  await mapAsync(ids, async (id) => {
-    await payload.delete({ id, collection: slug })
+  await payload.delete({
+    collection: slug,
+    where: { id: { exists: true } },
   })
 }

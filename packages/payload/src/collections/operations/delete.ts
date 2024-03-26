@@ -39,42 +39,43 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 }> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'delete',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    collection: { config: collectionConfig },
-    depth,
-    overrideAccess,
-    req: {
-      locale,
-      payload: { config },
-      payload,
-      t,
-    },
-    req,
-    showHiddenFields,
-    where,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
+
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'delete',
+            req: args.req,
+          })) || args
+      },
+      Promise.resolve(),
+    )
+
+    const {
+      collection: { config: collectionConfig },
+      depth,
+      overrideAccess,
+      req: {
+        fallbackLocale,
+        locale,
+        payload: { config },
+        payload,
+        t,
+      },
+      req,
+      showHiddenFields,
+      where,
+    } = args
 
     if (!where) {
       throw new APIError("Missing 'where' query of documents to delete.", httpStatus.BAD_REQUEST)
@@ -149,9 +150,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         if (collectionConfig.versions) {
           await deleteCollectionVersions({
             id,
+            slug: collectionConfig.slug,
             payload,
             req,
-            slug: collectionConfig.slug,
           })
         }
 
@@ -178,7 +179,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           context: req.context,
           depth,
           doc: result || doc,
+          fallbackLocale,
           global: null,
+          locale,
           overrideAccess,
           req,
           showHiddenFields,
@@ -264,7 +267,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }
