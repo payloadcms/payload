@@ -36,6 +36,7 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfo = DocumentInfoProps & {
+  data: Data
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   preferencesKey?: string
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
