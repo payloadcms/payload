@@ -51,7 +51,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     width,
   } = props
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
@@ -87,6 +87,15 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     [setValue, value],
   )
 
+  const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
+    const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
+    const fieldLabel = labelProps && labelProps.label ? labelProps.label : ''
+    return {
+      ...labelProps,
+      label: `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`,
+    }
+  }
+
   return (
     <div
       className={[
@@ -106,7 +115,11 @@ const PointField: React.FC<PointFieldProps> = (props) => {
       <FieldError CustomError={CustomError} {...(errorProps || {})} />
       <ul className={`${baseClass}__wrap`}>
         <li>
-          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+          {CustomLabel !== undefined ? (
+            CustomLabel
+          ) : (
+            <FieldLabel {...getCoordinateFieldLabel('longitude')} />
+          )}
           <div className="input-wrapper">
             {BeforeInput}
             <input
@@ -123,7 +136,11 @@ const PointField: React.FC<PointFieldProps> = (props) => {
           </div>
         </li>
         <li>
-          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+          {CustomLabel !== undefined ? (
+            CustomLabel
+          ) : (
+            <FieldLabel {...getCoordinateFieldLabel('latitude')} />
+          )}
           <div className="input-wrapper">
             {BeforeInput}
             <input

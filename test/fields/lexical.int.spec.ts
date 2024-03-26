@@ -44,13 +44,14 @@ let createdRichTextDocID: number | string = null
 
 describe('Lexical', () => {
   beforeAll(async () => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
   })
 
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
+    restClient = new NextRESTClient(payload.config)
     await restClient.login({
       slug: 'users',
       credentials: devUser,

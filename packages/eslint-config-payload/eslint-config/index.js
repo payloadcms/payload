@@ -22,6 +22,7 @@ const baseRules = {
       },
     },
   ],
+  'payload/no-jsx-import-statements': 'error',
 }
 
 const reactRules = {
@@ -112,7 +113,7 @@ module.exports = {
   overrides: [
     {
       files: ['**/*.ts'],
-      plugins: ['@typescript-eslint'],
+      plugins: ['@typescript-eslint', 'payload'],
       extends: [
         ...baseExtends,
         'plugin:@typescript-eslint/recommended-type-checked',
@@ -126,7 +127,7 @@ module.exports = {
     },
     {
       files: ['**/*.tsx'],
-      plugins: ['@typescript-eslint'],
+      plugins: ['@typescript-eslint', 'payload'],
       extends: [
         ...baseExtends,
         'plugin:@typescript-eslint/recommended-type-checked',
@@ -144,7 +145,7 @@ module.exports = {
     },
     {
       files: ['**/*.spec.ts'],
-      plugins: ['@typescript-eslint'],
+      plugins: ['@typescript-eslint', 'payload'],
       extends: [
         ...baseExtends,
         'plugin:@typescript-eslint/recommended-type-checked',
@@ -159,6 +160,7 @@ module.exports = {
       },
     },
     {
+      plugins: ['payload'],
       files: ['*.config.ts'],
       rules: {
         ...baseRules,
@@ -167,6 +169,7 @@ module.exports = {
       },
     },
     {
+      plugins: ['payload'],
       files: ['config.ts'],
       rules: {
         ...baseRules,

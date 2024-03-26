@@ -349,6 +349,7 @@ const clientTranslationKeys = [
   'version:selectLocales',
   'version:selectVersionToCompare',
   'version:showLocales',
+  'version:status',
   'version:type',
   'version:unpublish',
   'version:unpublishing',

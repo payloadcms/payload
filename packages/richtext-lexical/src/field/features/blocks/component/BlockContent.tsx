@@ -106,7 +106,6 @@ export const BlockContent: React.FC<Props> = (props) => {
       newFormData = {
         ...newFormData,
         id: formData.id,
-        blockName: newFormData.blockName2, // TODO: Find a better solution for this. We have to wrap it in blockName2 when using it here, as blockName does not accept or provide any updated values for some reason.
         blockType: formData.blockType,
       }
 
@@ -210,7 +209,7 @@ export const BlockContent: React.FC<Props> = (props) => {
                   ? getTranslation(labels.singular, i18n)
                   : '[Singular Label]'}
               </Pill>
-              <SectionTitle path="blockName2" readOnly={field?.readOnly} />
+              <SectionTitle path="blockName" readOnly={field?.readOnly} />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
             {editor.isEditable() && (
@@ -240,9 +239,9 @@ export const BlockContent: React.FC<Props> = (props) => {
           fieldMap={Array.isArray(formSchema) ? formSchema : []}
           forceRender
           margins="small"
-          path={path}
+          path="" // Leaving path empty makes it so field values are not prefixed / scoped by the entire schemaPath. e.g. we can access "myField" instead of "someLexicalField.feature.blocks.someArrayB" // TODO: Could there be any implications leaving path different than schemaPath?
           readOnly={false}
-          schemaPath={schemaPath}
+          schemaPath={schemaPath} // Having the correct schemaPath here allows sub-fields (like array > addRow) to run correct form-state calls and retrieve their needed form state from the server
         />
       </Collapsible>
 

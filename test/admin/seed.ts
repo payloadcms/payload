@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
+import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import {
   collectionSlugs,
@@ -13,73 +14,102 @@ import {
   usersCollectionSlug,
 } from './slugs.js'
 
-export async function clearAndSeedEverything(_payload: Payload) {
+export async function clearAndSeedEverything(_payload: Payload, parallel: boolean = false) {
   return await seedDB({
     snapshotKey: 'adminTest',
-    shouldResetDB: true,
     collectionSlugs,
     _payload,
     seedFunction: async (_payload) => {
-      await Promise.all([
-        _payload.create({
-          collection: usersCollectionSlug,
-          data: {
-            email: devUser.email,
-            password: devUser.password,
-          },
-        }),
-        ...[...Array(11)].map(() => {
-          void _payload.create({
-            collection: postsCollectionSlug,
-            data: {
-              title: 'Title',
-              description: 'Description',
-            },
-          })
-        }),
-        _payload.create({
-          collection: customViews1CollectionSlug,
-          data: {
-            title: 'Custom View',
-          },
-        }),
-        _payload.create({
-          collection: customViews2CollectionSlug,
-          data: {
-            title: 'Custom View',
-          },
-        }),
-        _payload.create({
-          collection: geoCollectionSlug,
-          data: {
-            point: [7, -7],
-          },
-        }),
-        _payload.create({
-          collection: geoCollectionSlug,
-          data: {
-            point: [5, -5],
-          },
-        }),
-        _payload.create({
-          collection: noApiViewCollectionSlug,
-          data: {},
-        }),
-        _payload.create({
-          collection: 'customIdTab',
-          data: {
-            id: customIdCollectionId,
-            title: 'Hello world title',
-          },
-        }),
-        _payload.create({
-          collection: 'customIdRow',
-          data: {
-            id: customIdCollectionId,
-            title: 'Hello world title',
-          },
-        }),
-      ])
+      await executePromises(
+        [
+          () =>
+            _payload.create({
+              collection: usersCollectionSlug,
+              data: {
+                email: devUser.email,
+                password: devUser.password,
+              },
+              depth: 0,
+              overrideAccess: true,
+            }),
+          ...[...Array(11)].map(
+            () => () =>
+              _payload.create({
+                collection: postsCollectionSlug,
+                data: {
+                  title: 'Title',
+                  description: 'Description',
+                },
+                depth: 0,
+                overrideAccess: true,
+              }),
+          ),
+          () =>
+            _payload.create({
+              collection: customViews1CollectionSlug,
+              data: {
+                title: 'Custom View',
+              },
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: customViews2CollectionSlug,
+              data: {
+                title: 'Custom View',
+              },
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: geoCollectionSlug,
+              data: {
+                point: [7, -7],
+              },
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: geoCollectionSlug,
+              data: {
+                point: [5, -5],
+              },
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: noApiViewCollectionSlug,
+              data: {},
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: 'customIdTab',
+              data: {
+                id: customIdCollectionId,
+                title: 'Hello world title',
+              },
+              depth: 0,
+              overrideAccess: true,
+            }),
+          () =>
+            _payload.create({
+              collection: 'customIdRow',
+              data: {
+                id: customIdCollectionId,
+                title: 'Hello world title',
+              },
+              depth: 0,
+              overrideAccess: true,
+            }),
+        ],
+        parallel,
+      )
     },
   })
 }

@@ -17,7 +17,11 @@ import { Settings } from './Settings/index.js'
 
 export { generateAccountMetadata } from './meta.js'
 
-export const Account: React.FC<AdminViewProps> = async ({ initPageResult, searchParams }) => {
+export const Account: React.FC<AdminViewProps> = async ({
+  initPageResult,
+  params,
+  searchParams,
+}) => {
   const {
     locale,
     permissions,
@@ -87,6 +91,7 @@ export const Account: React.FC<AdminViewProps> = async ({ initPageResult, search
 
     const viewComponentProps: ServerSideEditViewProps = {
       initPageResult,
+      params,
       routeSegments: [],
       searchParams,
     }

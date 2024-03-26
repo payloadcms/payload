@@ -42,10 +42,8 @@ let serverURL: string
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
-
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
-    await client.login()
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -53,7 +51,9 @@ describe('fields', () => {
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
-    await client.logout()
+    if (client) {
+      await client.logout()
+    }
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
   })
@@ -419,6 +419,7 @@ describe('fields', () => {
 
     test('should update point', async () => {
       await page.goto(url.edit(emptyGroupPoint.id))
+      await page.waitForURL(`**/${emptyGroupPoint.id}`)
       const longField = page.locator('#field-longitude-point')
       await longField.fill('9')
 
@@ -449,6 +450,7 @@ describe('fields', () => {
 
     test('should be able to clear a value point', async () => {
       await page.goto(url.edit(filledGroupPoint.id))
+      await page.waitForURL(`**/${filledGroupPoint.id}`)
 
       const groupLongitude = page.locator('#field-longitude-group__point')
       await groupLongitude.fill('')
@@ -1402,7 +1404,7 @@ describe('fields', () => {
         })
         test('create EST day only date', async () => {
           await page.goto(url.create)
-          await wait(500)
+          await page.waitForURL(`**/${url.create}`)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1410,7 +1412,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1434,7 +1436,7 @@ describe('fields', () => {
 
         test('create PDT day only date', async () => {
           await page.goto(url.create)
-          await wait(500)
+          await page.waitForURL(`**/${url.create}`)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1442,7 +1444,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1466,7 +1468,7 @@ describe('fields', () => {
 
         test('create ST day only date', async () => {
           await page.goto(url.create)
-          await wait(500)
+          await page.waitForURL(`**/${url.create}`)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1474,7 +1476,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1880,7 +1882,7 @@ describe('fields', () => {
       await uploadImage()
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
-        '/uploads/payload-1.jpg',
+        '/api/uploads/file/payload-1.jpg',
       )
     })
 
@@ -1898,13 +1900,13 @@ describe('fields', () => {
       // Assert that the media field has the png upload
       await expect(
         page.locator('.field-type.upload .file-details .file-meta__url a'),
-      ).toHaveAttribute('href', '/uploads/payload-1.png')
+      ).toHaveAttribute('href', '/api/uploads/file/payload-1.png')
       await expect(
         page.locator('.field-type.upload .file-details .file-meta__url a'),
       ).toContainText('payload-1.png')
       await expect(page.locator('.field-type.upload .file-details img')).toHaveAttribute(
         'src',
-        '/uploads/payload-1.png',
+        '/api/uploads/file/payload-1.png',
       )
       await page.locator('#action-save').click()
       await wait(200)

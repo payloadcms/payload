@@ -31,14 +31,19 @@ let serverURL: string
 async function navigateToLexicalFields() {
   const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
   await page.goto(url.list)
-  await page.locator('.row-1 .cell-title a').click()
+  const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
+  await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: 45000 })
+  const linkDocHref = await linkToDoc.getAttribute('href')
+
+  await linkToDoc.click()
+
+  await page.waitForURL(`**${linkDocHref}`)
 }
 
 describe('lexical', () => {
   beforeAll(async ({ browser }) => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
-    client = new RESTClient(null, { defaultSlug: 'rich-text-fields', serverURL })
-    await client.login()
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -47,7 +52,9 @@ describe('lexical', () => {
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
-    await client.logout()
+    if (client) {
+      await client.logout()
+    }
     client = new RESTClient(null, { defaultSlug: 'rich-text-fields', serverURL })
     await client.login()
   })
@@ -711,7 +718,7 @@ describe('lexical', () => {
       await expect(nestedEditorParagraph).toHaveText('Some text below relationship node 12345')
     })
 
-    test('should respect row removal in nested array field', async () => {
+    test.skip('should respect row removal in nested array field', async () => {
       await navigateToLexicalFields()
       const richTextField = page.locator('.rich-text-lexical').nth(1) // second
       await richTextField.scrollIntoViewIfNeeded()

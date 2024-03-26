@@ -271,6 +271,7 @@ export default {
     selectLocales: '표시할 locale 선택',
     selectVersionToCompare: '비교할 버전 선택',
     showLocales: 'locale 표시:',
+    status: '상태',
     type: '유형',
     unpublish: '게시 해제',
     unpublishing: '게시 해제 중...',

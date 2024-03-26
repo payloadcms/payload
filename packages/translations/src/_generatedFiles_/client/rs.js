@@ -272,6 +272,7 @@ export default {
     selectLocales: 'Одаберите језике',
     selectVersionToCompare: 'Одаберите верзију за упоређивање',
     showLocales: 'Прикажи језике:',
+    status: 'Статус',
     type: 'Тип',
     unpublish: 'Поништи објаву',
     unpublishing: 'Поништавање објаве...',

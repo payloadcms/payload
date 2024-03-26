@@ -1,5 +1,3 @@
-import type { MongooseAdapter } from '@payloadcms/db-mongodb'
-
 import fs from 'fs'
 import path from 'path'
 import { type Payload } from 'payload'
@@ -14,14 +12,12 @@ export async function seedDB({
   _payload,
   collectionSlugs,
   seedFunction,
-  shouldResetDB,
   snapshotKey,
   uploadsDir,
 }: {
   _payload: Payload
   collectionSlugs: string[]
   seedFunction: SeedFunction
-  shouldResetDB: boolean
   /**
    * Key to uniquely identify the kind of snapshot. Each test suite should pass in a unique key
    */
@@ -29,30 +25,9 @@ export async function seedDB({
   uploadsDir?: string
 }) {
   /**
-   * Reset database and delete uploads directory
+   * Reset database
    */
-  if (shouldResetDB) {
-    let clearUploadsDirPromise: any = Promise.resolve()
-    if (uploadsDir) {
-      clearUploadsDirPromise = fs.promises
-        .access(uploadsDir)
-        .then(() => fs.promises.readdir(uploadsDir))
-        .then((files) =>
-          Promise.all(files.map((file) => fs.promises.rm(path.join(uploadsDir, file)))),
-        )
-        .catch((error) => {
-          if (error.code !== 'ENOENT') {
-            // If the error is not because the directory doesn't exist
-            console.error('Error clearing the uploads directory:', error)
-            throw error
-          }
-          // If the directory does not exist, resolve the promise (nothing to clear)
-          return
-        })
-    }
-
-    await Promise.all([resetDB(_payload, collectionSlugs), clearUploadsDirPromise])
-  }
+  await resetDB(_payload, collectionSlugs)
 
   /**
    * Mongoose & Postgres: Restore snapshot of old data if available
@@ -71,14 +46,12 @@ export async function seedDB({
    *  Postgres: No need for any action here, since we only delete the table data and no schemas
    */
   // Dropping the db breaks indexes (on mongoose - did not test extensively on postgres yet), so we recreate them here
-  if (shouldResetDB) {
-    if (isMongoose(_payload)) {
-      await Promise.all([
-        ...collectionSlugs.map(async (collectionSlug) => {
-          await _payload.db.collections[collectionSlug].createIndexes()
-        }),
-      ])
-    }
+  if (isMongoose(_payload)) {
+    await Promise.all([
+      ...collectionSlugs.map(async (collectionSlug) => {
+        await _payload.db.collections[collectionSlug].createIndexes()
+      }),
+    ])
   }
 
   /**
@@ -86,6 +59,29 @@ export async function seedDB({
    */
   if (restored) {
     return
+  }
+
+  /**
+   * Delete uploads directory only if no snapshot was restored.
+   * The snapshot restoration only restores the database state, not the uploads directory.
+   * If we ran it after or before restoring the snapshot, we would have NO upload files anymore, as they are not restored from the snapshot. And after snapshot
+   * restoration the seed process is not run again
+   */
+  if (uploadsDir) {
+    try {
+      // Attempt to clear the uploads directory if it exists
+      await fs.promises.access(uploadsDir)
+      const files = await fs.promises.readdir(uploadsDir)
+      for (const file of files) {
+        await fs.promises.rm(path.join(uploadsDir, file))
+      }
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        // If the error is not because the directory doesn't exist
+        console.error('Error in operation:', error)
+        throw error
+      }
+    }
   }
 
   /**

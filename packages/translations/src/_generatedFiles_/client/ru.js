@@ -277,6 +277,7 @@ export default {
     selectLocales: 'Выберите локали для отображения',
     selectVersionToCompare: 'Выбрать версию для сравнения',
     showLocales: 'Показать локали:',
+    status: 'Статус',
     type: 'Тип',
     unpublish: 'Отменить публикацию',
     unpublishing: 'Отмена публикации...',

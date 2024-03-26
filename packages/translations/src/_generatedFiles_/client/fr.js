@@ -281,6 +281,7 @@ export default {
     selectLocales: 'Sélectionnez les paramètres régionaux à afficher',
     selectVersionToCompare: 'Sélectionnez une version à comparer',
     showLocales: 'Afficher les paramètres régionaux :',
+    status: 'Statut',
     type: 'Type',
     unpublish: 'Annuler la publication',
     unpublishing: 'Annulation en cours...',

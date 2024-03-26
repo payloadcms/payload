@@ -277,6 +277,7 @@ export default {
     selectLocales: 'Megjelenítendő nyelvek kiválasztása',
     selectVersionToCompare: 'Válassza ki az összehasonlítani kívánt verziót',
     showLocales: 'Nyelvek megjelenítése:',
+    status: 'Állapot',
     type: 'Típus',
     unpublish: 'Közzététel visszavonása',
     unpublishing: 'Közzététel visszavonása...',

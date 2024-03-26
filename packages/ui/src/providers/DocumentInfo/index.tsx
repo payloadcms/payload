@@ -382,6 +382,7 @@ export const DocumentInfoProvider: React.FC<
 
   const value: DocumentInfoContext = {
     ...props,
+    data,
     docConfig,
     docPermissions,
     getDocPermissions,

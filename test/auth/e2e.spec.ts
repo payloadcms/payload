@@ -109,11 +109,13 @@ describe('auth', () => {
         .poll(async () => await apiKeyLocator.inputValue(), { timeout: POLL_TOPASS_TIMEOUT })
         .toBeDefined()
 
+      const apiKey = await apiKeyLocator.inputValue()
+
       await saveDocAndAssert(page)
 
       await expect(async () => {
-        const apiKey = await apiKeyLocator.inputValue()
-        expect(await page.locator('#apiKey').inputValue()).toStrictEqual(apiKey)
+        const apiKeyAfterSave = await apiKeyLocator.inputValue()
+        expect(apiKey).toStrictEqual(apiKeyAfterSave)
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })

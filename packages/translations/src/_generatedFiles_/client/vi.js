@@ -271,6 +271,7 @@ export default {
     selectLocales: 'Chọn mã khu vực để hiện thị',
     selectVersionToCompare: 'Chọn phiên bản để so sánh',
     showLocales: 'Hiển thị mã khu vực:',
+    status: 'Trạng thái',
     type: 'Loại',
     unpublish: 'Ẩn tài liệu',
     unpublishing: 'Đang ẩn tài liệu...',

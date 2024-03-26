@@ -274,6 +274,7 @@ export default {
     selectLocales: 'Избери локализации за показване',
     selectVersionToCompare: 'Избери версия за сравняване',
     showLocales: 'Покажи преводи:',
+    status: 'Статус',
     type: 'Тип',
     unpublish: 'Скрий',
     unpublishing: 'Скриване...',

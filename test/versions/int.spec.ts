@@ -35,7 +35,18 @@ const formatGraphQLID = (id: number | string) =>
 
 describe('Versions', () => {
   beforeAll(async () => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(configPromise))
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
 
     const login = `
       mutation {
@@ -51,16 +62,6 @@ describe('Versions', () => {
       .then((res) => res.json())
 
     token = data.loginUser.token
-  })
-
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-
-  beforeEach(async () => {
-    await clearAndSeedEverything(payload)
 
     // now: initialize
     const autosavePost = await payload.create({
