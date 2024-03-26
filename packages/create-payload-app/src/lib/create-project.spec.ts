@@ -77,23 +77,31 @@ describe('createProject', () => {
       expect(packageJson.name).toEqual(projectName)
     })
 
-    describe('db adapters and bundlers', () => {
+    describe('db adapters', () => {
       const templates = getValidTemplates()
 
       it.each([
-        ['blank', 'mongodb', 'webpack'],
-        ['blank', 'postgres', 'webpack'],
-        ['website', 'mongodb', 'webpack'],
-        ['website', 'postgres', 'webpack'],
-        ['ecommerce', 'mongodb', 'webpack'],
-        ['ecommerce', 'postgres', 'webpack'],
-      ])('update config and deps: %s, %s, %s', async (templateName, db, bundler) => {
+        ['blank-3.0', 'mongodb'],
+        ['blank-3.0', 'postgres'],
+
+        // TODO: Re-enable these once 3.0 is stable and templates updated
+        // ['website', 'mongodb'],
+        // ['website', 'postgres'],
+        // ['ecommerce', 'mongodb'],
+        // ['ecommerce', 'postgres'],
+      ])('update config and deps: %s, %s', async (templateName, db) => {
         const projectName = 'starter-project'
 
         const template = templates.find((t) => t.name === templateName)
 
+        const cliArgs = {
+          ...args,
+          '--db': db,
+          '--local-template': templateName,
+        } as CliArgs
+
         await createProject({
-          cliArgs: args,
+          cliArgs,
           projectName,
           projectDir,
           template: template as ProjectTemplate,
@@ -114,7 +122,7 @@ describe('createProject', () => {
           Object.keys(packageJson.dependencies).filter((n) => n.startsWith('@payloadcms/db-')),
         ).toHaveLength(1)
 
-        let payloadConfigPath = path.resolve(projectDir, 'src/payload.config.ts')
+        let payloadConfigPath = path.resolve(projectDir, 'payload.config.ts')
 
         // Website and ecommerce templates have payload.config.ts in src/payload
         if (!fse.existsSync(payloadConfigPath)) {

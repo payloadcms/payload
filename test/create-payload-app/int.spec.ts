@@ -78,6 +78,7 @@ describe('create-payload-app', () => {
         '--debug': true,
         projectDir,
         useDistFiles: true, // create-payload-app/dist/app/(payload)
+        packageManager: 'pnpm',
       })
 
       expect(result.success).toBe(true)
