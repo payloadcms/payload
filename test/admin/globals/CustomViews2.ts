@@ -2,7 +2,8 @@ import type { GlobalConfig } from 'payload/types'
 
 import { CustomTabComponent } from '../components/CustomTabComponent/index.js'
 import { CustomDefaultEditView } from '../components/views/CustomEditDefault/index.js'
-import { CustomTabView } from '../components/views/CustomTab/index.js'
+import { CustomTabComponentView } from '../components/views/CustomTabComponent/index.js'
+import { CustomTabLabelView } from '../components/views/CustomTabLabel/index.js'
 import { CustomVersionsView } from '../components/views/CustomVersions/index.js'
 import { customGlobalViews2GlobalSlug } from '../slugs.js'
 
@@ -14,7 +15,7 @@ export const CustomGlobalViews2: GlobalConfig = {
         Edit: {
           Default: CustomDefaultEditView,
           MyCustomView: {
-            Component: CustomTabView,
+            Component: CustomTabLabelView,
             Tab: {
               href: '/custom-tab-view',
               label: 'Custom',
@@ -22,7 +23,7 @@ export const CustomGlobalViews2: GlobalConfig = {
             path: '/custom-tab-view',
           },
           MyCustomViewWithCustomTab: {
-            Component: CustomTabView,
+            Component: CustomTabComponentView,
             Tab: CustomTabComponent,
             path: '/custom-tab-component',
           },

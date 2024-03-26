@@ -267,6 +267,7 @@ export default {
     selectLocales: '选择要显示的语言',
     selectVersionToCompare: '选择要比较的版本',
     showLocales: '显示语言：',
+    status: '状态',
     type: '类型',
     unpublish: '取消发布',
     unpublishing: '取消发布中...',

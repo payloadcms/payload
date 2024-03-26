@@ -277,6 +277,7 @@ export default {
     selectLocales: 'Velg språk å vise',
     selectVersionToCompare: 'Velg en versjon å sammenligne',
     showLocales: 'Vis språk:',
+    status: 'Status',
     type: 'Type',
     unpublish: 'Avpubliser',
     unpublishing: 'Avpubliserer...',

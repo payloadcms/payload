@@ -1,23 +1,14 @@
 import type { EditViewComponent } from 'payload/config'
-import type {
-  AdminViewComponent,
-  DocumentPreferences,
-  Document as DocumentType,
-  Field,
-  ServerSideEditViewProps,
-} from 'payload/types'
+import type { AdminViewComponent, ServerSideEditViewProps } from 'payload/types'
 import type { DocumentPermissions } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
 import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
 import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
-import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
 import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
 import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
-import { formatDocTitle } from '@payloadcms/ui/utilities/formatDocTitle'
-import { formatFields } from '@payloadcms/ui/utilities/formatFields'
 import { docAccessOperation } from 'payload/operations'
 import React from 'react'
 
@@ -222,6 +213,7 @@ export const Document: React.FC<AdminViewProps> = async ({
 
   const viewComponentProps: ServerSideEditViewProps = {
     initPageResult,
+    params,
     routeSegments: segments,
     searchParams,
   }

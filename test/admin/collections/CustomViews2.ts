@@ -1,11 +1,14 @@
 import type { CollectionConfig } from 'payload/types'
 
 import { CustomTabComponent } from '../components/CustomTabComponent/index.js'
-import { CustomTabView } from '../components/views/CustomTab/index.js'
-import { CustomTabView2 } from '../components/views/CustomTab2/index.js'
+import { CustomTabComponentView } from '../components/views/CustomTabComponent/index.js'
+import { CustomTabLabelView } from '../components/views/CustomTabLabel/index.js'
 import { CustomNestedTabView } from '../components/views/CustomTabNested/index.js'
+import { CustomTabWithParamView } from '../components/views/CustomTabWithParam/index.js'
 import { CustomVersionsView } from '../components/views/CustomVersions/index.js'
 import {
+  customCollectionParamViewPath,
+  customCollectionParamViewPathBase,
   customEditLabel,
   customNestedTabViewPath,
   customTabLabel,
@@ -26,7 +29,7 @@ export const CustomViews2: CollectionConfig = {
             },
           },
           MyCustomView: {
-            Component: CustomTabView,
+            Component: CustomTabLabelView,
             Tab: {
               href: '/custom-tab-view',
               label: customTabLabel,
@@ -34,15 +37,27 @@ export const CustomViews2: CollectionConfig = {
             path: '/custom-tab-view',
           },
           MyCustomViewWithCustomTab: {
-            Component: CustomTabView2,
+            Component: CustomTabComponentView,
             Tab: CustomTabComponent,
             path: customTabViewPath,
           },
           MyCustomViewWithNestedPath: {
             Component: CustomNestedTabView,
             path: customNestedTabViewPath,
+            tab: {
+              label: 'Custom Nested Tab View',
+              href: customNestedTabViewPath,
+            },
           },
           Versions: CustomVersionsView,
+          CustomViewWithParam: {
+            Component: CustomTabWithParamView,
+            path: customCollectionParamViewPath,
+            Tab: {
+              label: 'Custom Param View',
+              href: `${customCollectionParamViewPathBase}/123`,
+            },
+          },
         },
       },
     },

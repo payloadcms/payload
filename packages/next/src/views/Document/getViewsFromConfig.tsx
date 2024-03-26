@@ -8,15 +8,17 @@ import type {
 } from 'payload/types'
 
 import { isEntityHidden } from 'payload/utilities'
+import React from 'react'
 
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
+import { NotFoundClient } from '../NotFound/index.client.js'
 import { Unauthorized } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
-import { getCustomViewByPath } from './getCustomViewByPath.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 export const getViewsFromConfig = ({
   collectionConfig,
@@ -46,6 +48,10 @@ export const getViewsFromConfig = ({
   let CustomView: EditViewComponent = null
   let ErrorView: AdminViewComponent = null
 
+  const {
+    routes: { admin: adminRoute },
+  } = config
+
   const views =
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
     (globalConfig && globalConfig?.admin?.components?.views)
@@ -65,8 +71,7 @@ export const getViewsFromConfig = ({
     }
 
     if (!EditOverride) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [collectionEntity, collectionSlug, createOrID, nestedViewSlug, segmentFive] =
+      const [collectionEntity, collectionSlug, segment3, segment4, segment5, ...remainingSegments] =
         routeSegments
 
       const {
@@ -78,74 +83,110 @@ export const getViewsFromConfig = ({
       }
 
       // `../:id`, or `../create`
-      if (routeSegments.length === 3) {
-        switch (createOrID) {
-          case 'create': {
-            if ('create' in docPermissions && docPermissions?.create?.permission) {
-              CustomView = getCustomViewByKey(views, 'Default')
-              DefaultView = DefaultEditView
-            } else {
-              ErrorView = Unauthorized
+      switch (routeSegments.length) {
+        case 3: {
+          switch (segment3) {
+            case 'create': {
+              if ('create' in docPermissions && docPermissions?.create?.permission) {
+                CustomView = getCustomViewByKey(views, 'Default')
+                DefaultView = DefaultEditView
+              } else {
+                ErrorView = Unauthorized
+              }
+              break
             }
-            break
-          }
 
-          default: {
-            if (docPermissions?.read?.permission) {
-              CustomView = getCustomViewByKey(views, 'Default')
-              DefaultView = DefaultEditView
-            } else {
-              ErrorView = Unauthorized
+            default: {
+              if (docPermissions?.read?.permission) {
+                CustomView = getCustomViewByKey(views, 'Default')
+                DefaultView = DefaultEditView
+              } else {
+                ErrorView = Unauthorized
+              }
+              break
             }
           }
+          break
         }
-      }
 
-      // `../:id/api`, `../:id/preview`, `../:id/versions`, etc
-      if (routeSegments?.length === 4) {
-        switch (nestedViewSlug) {
-          case 'api': {
-            if (collectionConfig?.admin?.hideAPIURL !== true) {
-              CustomView = getCustomViewByKey(views, 'API')
-              DefaultView = DefaultAPIView
+        // `../:id/api`, `../:id/preview`, `../:id/versions`, etc
+        case 4: {
+          switch (segment4) {
+            case 'api': {
+              if (collectionConfig?.admin?.hideAPIURL !== true) {
+                CustomView = getCustomViewByKey(views, 'API')
+                DefaultView = DefaultAPIView
+              }
+              break
             }
-            break
-          }
 
-          case 'preview': {
-            if (livePreviewEnabled) {
-              DefaultView = DefaultLivePreviewView
+            case 'preview': {
+              if (livePreviewEnabled) {
+                DefaultView = DefaultLivePreviewView
+              }
+              break
             }
-            break
-          }
 
-          case 'versions': {
+            case 'versions': {
+              if (docPermissions?.readVersions?.permission) {
+                CustomView = getCustomViewByKey(views, 'Versions')
+                DefaultView = DefaultVersionsView
+              } else {
+                ErrorView = Unauthorized
+              }
+              break
+            }
+
+            default: {
+              const baseRoute = [adminRoute, 'collections', collectionSlug, segment3]
+                .filter(Boolean)
+                .join('/')
+
+              const currentRoute = [baseRoute, segment4, segment5, ...remainingSegments]
+                .filter(Boolean)
+                .join('/')
+
+              CustomView = getCustomViewByRoute({
+                baseRoute,
+                currentRoute,
+                views,
+              })
+
+              if (!CustomView) ErrorView = () => <NotFoundClient />
+
+              break
+            }
+          }
+          break
+        }
+
+        // `../:id/versions/:version`, etc
+        default: {
+          if (segment4 === 'versions') {
             if (docPermissions?.readVersions?.permission) {
-              CustomView = getCustomViewByKey(views, 'Versions')
-              DefaultView = DefaultVersionsView
+              CustomView = getCustomViewByKey(views, 'Version')
+              DefaultView = DefaultVersionView
             } else {
               ErrorView = Unauthorized
             }
-            break
-          }
-
-          default: {
-            const path = `/${nestedViewSlug}`
-            CustomView = getCustomViewByPath(views, path)
-            break
-          }
-        }
-      }
-
-      // `../:id/versions/:version`, etc
-      if (routeSegments.length === 5) {
-        if (nestedViewSlug === 'versions') {
-          if (docPermissions?.readVersions?.permission) {
-            CustomView = getCustomViewByKey(views, 'Version')
-            DefaultView = DefaultVersionView
           } else {
-            ErrorView = Unauthorized
+            const baseRoute = [adminRoute, collectionEntity, collectionSlug, segment3]
+              .filter(Boolean)
+              .join('/')
+
+            const currentRoute = [baseRoute, segment4, segment5, ...remainingSegments]
+              .filter(Boolean)
+              .join('/')
+
+            CustomView = getCustomViewByRoute({
+              baseRoute,
+              currentRoute,
+              views,
+            })
+
+            if (!CustomView) ErrorView = () => <NotFoundClient />
           }
+          break
         }
       }
     }
@@ -161,7 +202,7 @@ export const getViewsFromConfig = ({
 
     if (!EditOverride) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [globalEntity, globalSlug, nestedViewSlug] = routeSegments
+      const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
 
       const {
         admin: { hidden },
@@ -171,64 +212,83 @@ export const getViewsFromConfig = ({
         return null
       }
 
-      if (routeSegments?.length === 2) {
-        if (docPermissions?.read?.permission) {
-          CustomView = getCustomViewByKey(views, 'Default')
-          DefaultView = DefaultEditView
-        } else {
-          ErrorView = Unauthorized
-        }
-      }
-
-      if (routeSegments?.length === 3) {
-        // `../:slug/api`, `../:slug/preview`, `../:slug/versions`, etc
-        switch (nestedViewSlug) {
-          case 'api': {
-            if (globalConfig?.admin?.hideAPIURL !== true) {
-              CustomView = getCustomViewByKey(views, 'API')
-              DefaultView = DefaultAPIView
-            }
-            break
-          }
-
-          case 'preview': {
-            if (livePreviewEnabled) {
-              DefaultView = DefaultLivePreviewView
-            }
-            break
-          }
-
-          case 'versions': {
-            if (docPermissions?.readVersions?.permission) {
-              CustomView = getCustomViewByKey(views, 'Versions')
-              DefaultView = DefaultVersionsView
-            } else {
-              ErrorView = Unauthorized
-            }
-            break
-          }
-
-          default: {
-            if (docPermissions?.read?.permission) {
-              CustomView = getCustomViewByKey(views, 'Default')
-              DefaultView = DefaultEditView
-            } else {
-              ErrorView = Unauthorized
-            }
-            break
-          }
-        }
-      }
-
-      if (routeSegments?.length === 4) {
-        // `../:slug/versions/:version`, etc
-        if (nestedViewSlug === 'versions') {
-          if (docPermissions?.readVersions?.permission) {
-            CustomView = getCustomViewByKey(views, 'Version')
-            DefaultView = DefaultVersionView
+      switch (routeSegments.length) {
+        case 2: {
+          if (docPermissions?.read?.permission) {
+            CustomView = getCustomViewByKey(views, 'Default')
+            DefaultView = DefaultEditView
           } else {
             ErrorView = Unauthorized
           }
+          break
+        }
+
+        case 3: {
+          // `../:slug/api`, `../:slug/preview`, `../:slug/versions`, etc
+          switch (segment3) {
+            case 'api': {
+              if (globalConfig?.admin?.hideAPIURL !== true) {
+                CustomView = getCustomViewByKey(views, 'API')
+                DefaultView = DefaultAPIView
+              }
+              break
+            }
+
+            case 'preview': {
+              if (livePreviewEnabled) {
+                DefaultView = DefaultLivePreviewView
+              }
+              break
+            }
+
+            case 'versions': {
+              if (docPermissions?.readVersions?.permission) {
+                CustomView = getCustomViewByKey(views, 'Versions')
+                DefaultView = DefaultVersionsView
+              } else {
+                ErrorView = Unauthorized
+              }
+              break
+            }
+
+            default: {
+              if (docPermissions?.read?.permission) {
+                CustomView = getCustomViewByKey(views, 'Default')
+                DefaultView = DefaultEditView
+              } else {
+                ErrorView = Unauthorized
+              }
+              break
+            }
+          }
+          break
+        }
+
+        default: {
+          // `../:slug/versions/:version`, etc
+          if (segment3 === 'versions') {
+            if (docPermissions?.readVersions?.permission) {
+              CustomView = getCustomViewByKey(views, 'Version')
+              DefaultView = DefaultVersionView
+            } else {
+              ErrorView = Unauthorized
+            }
+          } else {
+            const baseRoute = [adminRoute, 'globals', globalSlug].filter(Boolean).join('/')
+
+            const currentRoute = [baseRoute, segment3, ...remainingSegments]
+              .filter(Boolean)
+              .join('/')
+
+            CustomView = getCustomViewByRoute({
+              baseRoute,
+              currentRoute,
+              views,
+            })
+
+            if (!CustomView) ErrorView = () => <NotFoundClient />
+          }
+          break
         }
       }
     }

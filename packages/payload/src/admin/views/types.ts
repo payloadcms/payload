@@ -42,6 +42,7 @@ export type InitPageResult = {
 
 export type ServerSideEditViewProps = {
   initPageResult: InitPageResult
+  params: { [key: string]: string | string[] | undefined }
   routeSegments: string[]
   searchParams: { [key: string]: string | string[] | undefined }
 }

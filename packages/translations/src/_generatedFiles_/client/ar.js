@@ -271,6 +271,7 @@ export default {
     selectLocales: 'حدّد اللّغات المراد عرضها',
     selectVersionToCompare: 'حدّد نسخة للمقارنة',
     showLocales: 'اظهر اللّغات:',
+    status: 'الحالة',
     type: 'النّوع',
     unpublish: 'الغاء النّشر',
     unpublishing: 'يتمّ الغاء النّشر...',

@@ -274,6 +274,7 @@ export default {
     selectLocales: 'زبان‌ها را برای نمایش انتخاب کنید',
     selectVersionToCompare: 'نگارشی را برای مقایسه انتخاب کنید',
     showLocales: 'نمایش زبان‌ها:',
+    status: 'وضعیت',
     type: 'تایپ کنید',
     unpublish: 'لغو انتشار',
     unpublishing: 'در حال لغو انتشار...',

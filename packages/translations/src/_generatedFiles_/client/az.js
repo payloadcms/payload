@@ -277,6 +277,7 @@ export default {
     selectLocales: 'Göstərmək üçün lokalları seçin',
     selectVersionToCompare: 'Müqayisə üçün bir versiya seçin',
     showLocales: 'Lokalları göstər:',
+    status: 'Status',
     type: 'Növ',
     unpublish: 'Dərcdən çıxart',
     unpublishing: 'Dərcdən çıxarılır...',

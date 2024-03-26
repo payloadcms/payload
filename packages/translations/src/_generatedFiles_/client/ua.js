@@ -275,6 +275,7 @@ export default {
     selectLocales: 'Виберіть переклад для відображення',
     selectVersionToCompare: 'Виберіть версію для порівняння',
     showLocales: 'Показати переклади:',
+    status: 'Статус',
     type: 'Тип',
     unpublish: 'Відмінити публікацію',
     unpublishing: 'Відміна публікації...',
