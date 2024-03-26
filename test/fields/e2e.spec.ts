@@ -1882,7 +1882,7 @@ describe('fields', () => {
       await uploadImage()
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
-        '/uploads/payload-1.jpg',
+        '/api/uploads/file/payload-1.jpg',
       )
     })
 
@@ -1900,13 +1900,13 @@ describe('fields', () => {
       // Assert that the media field has the png upload
       await expect(
         page.locator('.field-type.upload .file-details .file-meta__url a'),
-      ).toHaveAttribute('href', '/uploads/payload-1.png')
+      ).toHaveAttribute('href', '/api/uploads/file/payload-1.png')
       await expect(
         page.locator('.field-type.upload .file-details .file-meta__url a'),
       ).toContainText('payload-1.png')
       await expect(page.locator('.field-type.upload .file-details img')).toHaveAttribute(
         'src',
-        '/uploads/payload-1.png',
+        '/api/uploads/file/payload-1.png',
       )
       await page.locator('#action-save').click()
       await wait(200)
