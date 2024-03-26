@@ -164,7 +164,7 @@ async function installDeps(projectDir: string) {
     'payload',
     '@payloadcms/db-mongodb',
     '@payloadcms/next',
-    '@payloadcms/richtext-slate',
+    '@payloadcms/richtext-lexical',
   ].map((pkg) => `${pkg}@alpha`)
 
   let exitCode = 0
@@ -206,7 +206,7 @@ function findOrCreatePayloadConfig(projectDir: string) {
     const defaultConfig = `import path from "path";
 
 import { mongooseAdapter } from "@payloadcms/db-mongodb"; // database-adapter-import
-import { slateEditor } from "@payloadcms/richtext-slate"; // editor-import
+import { lexicalEditor } from "@payloadcms/richtext-lexical"; // editor-import
 import { buildConfig } from "payload/config";
 
 export default buildConfig({
