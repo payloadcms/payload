@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
-import commandExists from 'command-exists'
+import { detect } from 'detect-package-manager'
+import path from 'path'
 
 import type { CliArgs, PackageManager } from './types.js'
 
@@ -84,8 +85,9 @@ export class Main {
       const validTemplates = getValidTemplates()
       const template = await parseTemplate(this.args, validTemplates)
 
-      const projectDir = projectName === '.' ? process.cwd() : `./${slugify(projectName)}`
-      const packageManager = await getPackageManager(this.args)
+      const projectDir =
+        projectName === '.' ? path.basename(process.cwd()) : `./${slugify(projectName)}`
+      const packageManager = await getPackageManager(this.args, projectDir)
 
       if (template.type !== 'plugin') {
         const dbDetails = await selectDb(this.args, projectName)
@@ -126,7 +128,7 @@ export class Main {
   }
 }
 
-async function getPackageManager(args: CliArgs): Promise<PackageManager> {
+async function getPackageManager(args: CliArgs, projectDir: string): Promise<PackageManager> {
   let packageManager: PackageManager = 'npm'
 
   if (args['--use-npm']) {
@@ -136,15 +138,8 @@ async function getPackageManager(args: CliArgs): Promise<PackageManager> {
   } else if (args['--use-pnpm']) {
     packageManager = 'pnpm'
   } else {
-    try {
-      if (await commandExists('yarn')) {
-        packageManager = 'yarn'
-      } else if (await commandExists('pnpm')) {
-        packageManager = 'pnpm'
-      }
-    } catch (error: unknown) {
-      packageManager = 'npm'
-    }
+    const detected = await detect({ cwd: projectDir })
+    packageManager = detected || 'npm'
   }
   return packageManager
 }
