@@ -2,6 +2,7 @@ import type { FieldAccess } from 'payload/types'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { TestButton } from './TestButton.js'
 import {
   docLevelAccessSlug,
   firstArrayText,
@@ -41,6 +42,35 @@ export default buildConfigWithDefaults({
   admin: {
     user: 'users',
   },
+  globals: [
+    {
+      slug: 'settings',
+      fields: [
+        {
+          type: 'checkbox',
+          name: 'test',
+          label: 'Allow access to test global',
+        },
+      ],
+      admin: {
+        components: {
+          elements: {
+            SaveButton: TestButton,
+          },
+        },
+      },
+    },
+    {
+      slug: 'test',
+      fields: [],
+      access: {
+        read: async ({ req: { payload } }) => {
+          const access = await payload.findGlobal({ slug: 'settings' })
+          return Boolean(access.test)
+        },
+      },
+    },
+  ],
   collections: [
     {
       slug: 'users',
