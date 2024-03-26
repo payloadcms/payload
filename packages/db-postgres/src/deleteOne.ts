@@ -28,7 +28,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     where: whereArg,
   })
 
-  const selectDistinctResult = selectDistinct({
+  const selectDistinctResult = await selectDistinct({
     adapter: this,
     chainedMethods: [{ args: [1], method: 'limit' }],
     db,
