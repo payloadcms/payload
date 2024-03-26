@@ -3,7 +3,6 @@ import path from 'path'
 import type { BundlerType, CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { createProject } from './create-project.js'
 import { bundlerPackages, dbPackages, editorPackages } from './packages.js'
-import exp from 'constants'
 import { getValidTemplates } from './templates.js'
 
 const projectDir = path.resolve(__dirname, './tmp')
@@ -97,7 +96,7 @@ describe('createProject', () => {
           cliArgs: args,
           projectName,
           projectDir,
-          template,
+          template: template as ProjectTemplate,
           packageManager,
           dbDetails: {
             dbUri: `${db}://localhost:27017/create-project-test`,

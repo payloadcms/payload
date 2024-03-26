@@ -48,19 +48,32 @@ async function installDeps(args: {
 export async function createProject(args: {
   cliArgs: CliArgs
   dbDetails?: DbDetails
+  overrides?: {
+    gitBranch?: string
+  }
   packageManager: PackageManager
   projectDir: string
   projectName: string
   template: ProjectTemplate
 }): Promise<void> {
-  const { cliArgs, dbDetails, packageManager, projectDir, projectName, template } = args
+  const { cliArgs, dbDetails, overrides, packageManager, projectDir, projectName, template } = args
+
+  if (cliArgs['--dry-run']) {
+    console.log(`\n  Dry run: Creating project in ${chalk.green(path.resolve(projectDir))}\n`)
+    return
+  }
 
   await createOrFindProjectDir(projectDir)
 
   console.log(`\n  Creating project in ${chalk.green(path.resolve(projectDir))}\n`)
 
   if ('url' in template) {
-    const emitter = degit(template.url)
+    let templateUrl = template.url
+    if (args.overrides?.gitBranch) {
+      templateUrl = `${template.url}#${overrides?.gitBranch}`
+      debug(`Using template url: ${templateUrl}`)
+    }
+    const emitter = degit(templateUrl)
     await emitter.clone(projectDir)
   }
 

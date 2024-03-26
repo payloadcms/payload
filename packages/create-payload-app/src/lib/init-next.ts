@@ -17,12 +17,13 @@ const dirname = path.dirname(filename)
 
 import { fileURLToPath } from 'node:url'
 
-import type { CliArgs } from '../types.js'
+import type { CliArgs, PackageManager } from '../types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { error, info, debug as origDebug, success, warning } from '../utils/log.js'
 
 type InitNextArgs = Pick<CliArgs, '--debug'> & {
+  packageManager: PackageManager
   projectDir?: string
   useDistFiles?: boolean
 }
@@ -30,11 +31,11 @@ type InitNextResult = { reason?: string; success: boolean; userAppDir?: string }
 
 export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   args.projectDir = args.projectDir || process.cwd()
-  const { projectDir } = args
+  const { packageManager, projectDir } = args
   const templateResult = await applyPayloadTemplateFiles(args)
   if (!templateResult.success) return templateResult
 
-  const { success: installSuccess } = await installDeps(projectDir)
+  const { success: installSuccess } = await installDeps(projectDir, packageManager)
   if (!installSuccess) {
     return { ...templateResult, reason: 'Failed to install dependencies', success: false }
   }
@@ -153,12 +154,7 @@ async function applyPayloadTemplateFiles(args: InitNextArgs): Promise<InitNextRe
   return { success: true, userAppDir }
 }
 
-async function installDeps(projectDir: string) {
-  const packageManager = await detect({ cwd: projectDir })
-  if (!packageManager) {
-    throw new Error('Could not detect package manager')
-  }
-
+async function installDeps(projectDir: string, packageManager: PackageManager) {
   info(`Installing dependencies with ${packageManager}`, 1)
   const packagesToInstall = [
     'payload',

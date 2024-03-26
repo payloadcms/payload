@@ -24,7 +24,7 @@ export async function configurePayloadConfig(args: {
 
     const dbPackage = dbPackages[args.dbDetails.type]
     const bundlerPackage = bundlerPackages['webpack']
-    const editorPackage = editorPackages['slate']
+    const editorPackage = editorPackages['lexical']
 
     // Delete all other db adapters
     Object.values(dbPackages).forEach((p) => {
@@ -39,7 +39,8 @@ export async function configurePayloadConfig(args: {
 
     await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
   } catch (err: unknown) {
-    warning('Unable to update name in package.json')
+    warning(`Unable to configure Payload in package.json`)
+    warning(err instanceof Error ? err.message : '')
   }
 
   try {

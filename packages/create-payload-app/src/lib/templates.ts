@@ -15,6 +15,12 @@ export function validateTemplate(templateName: string): boolean {
 export function getValidTemplates(): ProjectTemplate[] {
   return [
     {
+      name: 'blank-3.0',
+      type: 'local',
+      description: 'Local 3.0 Blank Template',
+      url: 'https://github.com/payloadcms/payload/templates/blank-3.0',
+    },
+    {
       name: 'blank',
       type: 'starter',
       description: 'Blank Template',
