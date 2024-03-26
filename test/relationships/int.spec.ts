@@ -342,6 +342,106 @@ describe('Relationships', () => {
           expect(customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber })
         })
 
+        it('should query using "contains" by hasMany relationship field', async () => {
+          const movie1 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+          const movie2 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id, movie1.id],
+            },
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id],
+            },
+          })
+
+          const query1 = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: {
+                contains: movie1.id,
+              },
+            },
+          })
+          const query2 = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: {
+                contains: movie2.id,
+              },
+            },
+          })
+
+          expect(query1.totalDocs).toStrictEqual(1)
+          expect(query2.totalDocs).toStrictEqual(2)
+        })
+
+        it('should query using "in" by hasMany relationship field', async () => {
+          const tree1 = await payload.create({
+            collection: treeSlug,
+            data: {
+              text: 'Tree 1',
+            },
+          })
+
+          const tree2 = await payload.create({
+            collection: treeSlug,
+            data: {
+              parent: tree1.id,
+              text: 'Tree 2',
+            },
+          })
+
+          const tree3 = await payload.create({
+            collection: treeSlug,
+            data: {
+              parent: tree2.id,
+              text: 'Tree 3',
+            },
+          })
+
+          const tree4 = await payload.create({
+            collection: treeSlug,
+            data: {
+              parent: tree3.id,
+              text: 'Tree 4',
+            },
+          })
+
+          const validParents = [tree2.id, tree3.id]
+
+          const query = await payload.find({
+            collection: treeSlug,
+            depth: 0,
+            sort: 'createdAt',
+            where: {
+              parent: {
+                in: validParents,
+              },
+            },
+          })
+          // should only return tree3 and tree4
+
+          expect(query.totalDocs).toEqual(2)
+          expect(query.docs[0].text).toEqual('Tree 3')
+          expect(query.docs[1].text).toEqual('Tree 4')
+        })
+
         it('should validate the format of text id relationships', async () => {
           await expect(async () =>
             createPost({
@@ -632,6 +732,28 @@ describe('Relationships', () => {
     })
 
     describe('Hierarchy', () => {
+      beforeAll(async () => {
+        await payload.delete({
+          collection: treeSlug,
+          where: { id: { exists: true } },
+        })
+
+        const root = await payload.create({
+          collection: 'tree',
+          data: {
+            text: 'root',
+          },
+        })
+
+        await payload.create({
+          collection: 'tree',
+          data: {
+            parent: root.id,
+            text: 'sub',
+          },
+        })
+      })
+
       it('finds 1 root item with equals', async () => {
         const {
           docs: [item],
