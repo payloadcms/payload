@@ -1,5 +1,3 @@
-import type { MongooseAdapter } from '@payloadcms/db-mongodb'
-
 import fs from 'fs'
 import path from 'path'
 import { type Payload } from 'payload'
