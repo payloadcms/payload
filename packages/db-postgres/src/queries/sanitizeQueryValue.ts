@@ -85,6 +85,10 @@ export const sanitizeQueryValue = ({
     }
   }
 
+  if ('hasMany' in field && field.hasMany && operator === 'contains') {
+    operator = 'equals'
+  }
+
   if (operator === 'near' || operator === 'within' || operator === 'intersects') {
     throw new APIError(
       `Querying with '${operator}' is not supported with the postgres database adapter.`,

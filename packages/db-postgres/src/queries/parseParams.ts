@@ -71,7 +71,7 @@ export async function parseParams({
           // So we need to loop on keys again here to handle each operator independently
           const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
-            for (let operator of Object.keys(pathOperators)) {
+            for (const operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
                 const val = where[relationOrPath][operator]
                 const {
@@ -162,10 +162,6 @@ export async function parseParams({
                     and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
                   )
                   break
-                }
-
-                if (field.type === 'relationship' && operator === 'contains') {
-                  operator = 'equals'
                 }
 
                 const sanitizedQueryValue = sanitizeQueryValue({
