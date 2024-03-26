@@ -3,7 +3,7 @@ import fs from 'fs'
 import globby from 'globby'
 import path from 'path'
 
-export const withPayloadImportStatement = `import { withPayload } from '@payloadcms/next/withPayload'\n`
+export const withPayloadImportStatement = `import { withPayload } from '@payloadcms/next'\n`
 
 export const wrapNextConfig = async (args: { projectDir: string }): Promise<void> => {
   const foundConfig = (await globby('next.config.*js', { cwd: args.projectDir }))?.[0]

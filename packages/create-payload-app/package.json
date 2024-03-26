@@ -7,7 +7,8 @@
     "create-payload-app": "bin/cli.js"
   },
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc",
+    "build": "pnpm copyfiles && pnpm typecheck && pnpm build:swc",
+    "typecheck": "tsc",
     "copyfiles": "copyfiles -u 2 \"../../app/(payload)/**\" \"dist\"",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "clean": "rimraf {dist,*.tsbuildinfo}",

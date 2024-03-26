@@ -3,10 +3,13 @@ import type arg from 'arg'
 export interface Args extends arg.Spec {
   '--beta': BooleanConstructor
   '--db': StringConstructor
+  '--db-accept-recommended': BooleanConstructor
+  '--db-connection-string': StringConstructor
   '--debug': BooleanConstructor
   '--dry-run': BooleanConstructor
   '--help': BooleanConstructor
   '--init-next': BooleanConstructor
+  '--local-template': StringConstructor
   '--name': StringConstructor
   '--no-deps': BooleanConstructor
   '--secret': StringConstructor
@@ -60,5 +63,4 @@ export type DbDetails = {
   type: DbType
 }
 
-export type BundlerType = 'vite' | 'webpack'
 export type EditorType = 'lexical' | 'slate'

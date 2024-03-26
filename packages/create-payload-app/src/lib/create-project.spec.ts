@@ -1,8 +1,8 @@
 import fse from 'fs-extra'
 import path from 'path'
-import type { BundlerType, CliArgs, DbType, ProjectTemplate } from '../types.js'
+import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { createProject } from './create-project.js'
-import { bundlerPackages, dbPackages, editorPackages } from './packages.js'
+import { dbReplacements } from './packages.js'
 import { getValidTemplates } from './templates.js'
 
 const projectDir = path.resolve(__dirname, './tmp')
@@ -104,28 +104,15 @@ describe('createProject', () => {
           },
         })
 
-        const dbReplacement = dbPackages[db as DbType]
-        const bundlerReplacement = bundlerPackages[bundler as BundlerType]
-        const editorReplacement = editorPackages['slate']
+        const dbReplacement = dbReplacements[db as DbType]
 
         const packageJsonPath = path.resolve(projectDir, 'package.json')
         const packageJson = fse.readJsonSync(packageJsonPath)
-
-        // Check deps
-        expect(packageJson.dependencies['payload']).toEqual('^2.0.0')
-        expect(packageJson.dependencies[dbReplacement.packageName]).toEqual(dbReplacement.version)
 
         // Should only have one db adapter
         expect(
           Object.keys(packageJson.dependencies).filter((n) => n.startsWith('@payloadcms/db-')),
         ).toHaveLength(1)
-
-        expect(packageJson.dependencies[bundlerReplacement.packageName]).toEqual(
-          bundlerReplacement.version,
-        )
-        expect(packageJson.dependencies[editorReplacement.packageName]).toEqual(
-          editorReplacement.version,
-        )
 
         let payloadConfigPath = path.resolve(projectDir, 'src/payload.config.ts')
 
@@ -142,12 +129,6 @@ describe('createProject', () => {
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
         expect(content).toContain(dbReplacement.configReplacement.join('\n'))
-
-        expect(content).not.toContain('// bundler-config-import')
-        expect(content).toContain(bundlerReplacement.importReplacement)
-
-        expect(content).not.toContain('// bundler-config')
-        expect(content).toContain(bundlerReplacement.configReplacement)
       })
     })
   })

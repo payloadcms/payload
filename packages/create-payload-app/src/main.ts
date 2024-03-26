@@ -25,7 +25,10 @@ export class Main {
     this.args = arg(
       {
         '--db': String,
+        '--db-accept-recommended': Boolean,
+        '--db-connection-string': String,
         '--help': Boolean,
+        '--local-template': String,
         '--name': String,
         '--secret': String,
         '--template': String,
@@ -63,10 +66,11 @@ export class Main {
       }
 
       const projectName = await parseProjectName(this.args)
-      const projectDir =
+      const projectDir = path.resolve(
         projectName === '.' || this.args['--init-next']
           ? path.basename(process.cwd())
-          : `./${slugify(projectName)}`
+          : `./${slugify(projectName)}`,
+      )
 
       console.log(welcomeMessage)
       const packageManager = await getPackageManager(this.args, projectDir)
@@ -95,7 +99,6 @@ export class Main {
       const template = await parseTemplate(this.args, validTemplates)
 
       switch (template.type) {
-        case 'local':
         case 'starter': {
           const dbDetails = await selectDb(this.args, projectName)
           const payloadSecret = generateSecret()

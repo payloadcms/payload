@@ -1,4 +1,4 @@
-import { parseAndInsertWithPayload, withPayloadImportStatement } from './wrap-next-config'
+import { parseAndInsertWithPayload, withPayloadImportStatement } from './wrap-next-config.js'
 
 const defaultNextConfig = `/** @type {import('next').NextConfig} */
 const nextConfig = {};

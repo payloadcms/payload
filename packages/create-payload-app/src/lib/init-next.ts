@@ -2,7 +2,6 @@ import type { CompilerOptions } from 'typescript'
 
 import chalk from 'chalk'
 import { parse, stringify } from 'comment-json'
-import { detect } from 'detect-package-manager'
 import execa from 'execa'
 import fs from 'fs'
 import fse from 'fs-extra'
@@ -30,7 +29,6 @@ type InitNextArgs = Pick<CliArgs, '--debug'> & {
 type InitNextResult = { reason?: string; success: boolean; userAppDir?: string }
 
 export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
-  args.projectDir = args.projectDir || process.cwd()
   const { packageManager, projectDir } = args
   const templateResult = await applyPayloadTemplateFiles(args)
   if (!templateResult.success) return templateResult
@@ -104,7 +102,7 @@ async function applyPayloadTemplateFiles(args: InitNextArgs): Promise<InitNextRe
   }
 
   // Next.js configs can be next.config.js, next.config.mjs, etc.
-  const foundConfig = (await globby('next.config.*js', { cwd: projectDir }))?.[0]
+  const foundConfig = (await globby('next.config.*js', { absolute: true, cwd: projectDir }))?.[0]
 
   if (!foundConfig) {
     throw new Error(`No next.config.js found at ${projectDir}`)
@@ -137,11 +135,14 @@ async function applyPayloadTemplateFiles(args: InitNextArgs): Promise<InitNextRe
   }
 
   // src/app or app
-  const userAppDirGlob = await globby(['**/app'], {
-    cwd: projectDir,
-    onlyDirectories: true,
-  })
-  const userAppDir = path.resolve(projectDir, userAppDirGlob?.[0])
+  const userAppDir = (
+    await globby(['**/app'], {
+      absolute: true,
+      cwd: projectDir,
+      onlyDirectories: true,
+    })
+  )?.[0]
+
   if (!fs.existsSync(userAppDir)) {
     return { reason: `Could not find user app directory inside ${projectDir}`, success: false }
   } else {
