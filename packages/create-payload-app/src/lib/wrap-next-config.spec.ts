@@ -1,4 +1,4 @@
-import { parseAndInsertWithPayload } from './wrap-next-config'
+import { parseAndInsertWithPayload, withPayloadImportStatement } from './wrap-next-config'
 
 const defaultNextConfig = `/** @type {import('next').NextConfig} */
 const nextConfig = {};
@@ -30,22 +30,25 @@ export { wrapped as default }
 
 describe('parseAndInsertWithPayload', () => {
   it('should parse the default next config', () => {
-    const modifiedConfig = parseAndInsertWithPayload(defaultNextConfig)
-    expect(modifiedConfig).toMatch(/withPayload\(nextConfig\)/)
+    const { modifiedConfigContent } = parseAndInsertWithPayload(defaultNextConfig)
+    expect(modifiedConfigContent).toContain(withPayloadImportStatement)
+    expect(modifiedConfigContent).toContain('withPayload(nextConfig)')
   })
   it('should parse the config with a function', () => {
-    const modifiedConfig = parseAndInsertWithPayload(nextConfigWithFunc)
-    expect(modifiedConfig).toMatch(/withPayload\(someFunc\(nextConfig\)\)/)
+    const { modifiedConfigContent } = parseAndInsertWithPayload(nextConfigWithFunc)
+    expect(modifiedConfigContent).toContain('withPayload(someFunc(nextConfig))')
   })
 
   it('should parse the config with a function on a new line', () => {
-    const modifiedConfig = parseAndInsertWithPayload(nextConfigWithFuncMultiline)
-    expect(modifiedConfig).toMatch(/withPayload\(someFunc\(\n  nextConfig\n\)\)/)
+    const { modifiedConfigContent } = parseAndInsertWithPayload(nextConfigWithFuncMultiline)
+    expect(modifiedConfigContent).toContain(withPayloadImportStatement)
+    expect(modifiedConfigContent).toMatch(/withPayload\(someFunc\(\n  nextConfig\n\)\)/)
   })
 
   // Unsupported: export { wrapped as default }
   it('should give warning with a named export as default', () => {
-    const modifiedConfig = parseAndInsertWithPayload(nextConfigExportNamedDefault)
-    expect(modifiedConfig).toHaveProperty('error')
+    const { modifiedConfigContent, error } = parseAndInsertWithPayload(nextConfigExportNamedDefault)
+    expect(modifiedConfigContent).toContain(withPayloadImportStatement)
+    expect(error).toBeTruthy()
   })
 })

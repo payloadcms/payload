@@ -3,6 +3,8 @@ import fs from 'fs'
 import globby from 'globby'
 import path from 'path'
 
+export const withPayloadImportStatement = `import { withPayload } from '@payloadcms/next/withPayload'\n`
+
 export const wrapNextConfig = async (args: { projectDir: string }): Promise<void> => {
   const foundConfig = (await globby('next.config.*js', { cwd: args.projectDir }))?.[0]
 
@@ -11,14 +13,18 @@ export const wrapNextConfig = async (args: { projectDir: string }): Promise<void
   }
   const configPath = path.resolve(args.projectDir, foundConfig)
   const configContent = fs.readFileSync(configPath, 'utf8')
-  const newConfig = parseAndInsertWithPayload(configContent)
-  if (typeof newConfig === 'object') {
-    throw new Error(newConfig.error)
+  const { error, modifiedConfigContent: newConfig } = parseAndInsertWithPayload(configContent)
+  if (error) {
+    console.warn(error)
   }
   fs.writeFileSync(configPath, newConfig)
 }
 
-export function parseAndInsertWithPayload(content: string): { error: string } | string {
+export function parseAndInsertWithPayload(content: string): {
+  error?: string
+  modifiedConfigContent: string
+} {
+  content = withPayloadImportStatement + content
   const ast = parseModule(content, { loc: true })
   const exportDefaultDeclaration = ast.body.find((p) => p.type === 'ExportDefaultDeclaration') as
     | Directive
@@ -33,7 +39,11 @@ export function parseAndInsertWithPayload(content: string): { error: string } | 
   }
 
   if (exportDefaultDeclaration) {
-    return insertBeforeAndAfter(content, exportDefaultDeclaration.declaration?.loc)
+    const modifiedConfigContent = insertBeforeAndAfter(
+      content,
+      exportDefaultDeclaration.declaration?.loc,
+    )
+    return { modifiedConfigContent }
   } else if (exportNamedDeclaration) {
     const exportSpecifier = exportNamedDeclaration.specifiers.find(
       (s) =>
@@ -48,13 +58,12 @@ export function parseAndInsertWithPayload(content: string): { error: string } | 
       return {
         error: `Automatic wrapping of named exports as default not supported yet.
   Please manually wrap your Next config with the withPayload function`,
+        modifiedConfigContent: content,
       }
     }
   } else {
     throw new Error('Could not automatically wrap next.config.js with withPayload')
   }
-
-  return insertBeforeAndAfter(content, exportDefaultDeclaration.declaration?.loc)
 }
 
 type Directive = {
