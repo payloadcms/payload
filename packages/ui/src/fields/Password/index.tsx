@@ -26,7 +26,7 @@ export type PasswordFieldProps = FormFieldBase & {
   width?: string
 }
 
-export const PasswordField: React.FC<PasswordFieldProps> = (props) => {
+const PasswordField: React.FC<PasswordFieldProps> = (props) => {
   const {
     name,
     CustomError,
