@@ -314,12 +314,12 @@ const validateFilterOptions: Validate = async (
               falseCollections.push(optionFilter)
             }
 
-            // `req` omitted to prevent transaction errors from aborting the entire transaction
             const result = await payload.find({
               collection,
               depth: 0,
               limit: 0,
               pagination: false,
+              req,
               where: findWhere,
             })
 
