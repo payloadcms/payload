@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
 import commandExists from 'command-exists'
