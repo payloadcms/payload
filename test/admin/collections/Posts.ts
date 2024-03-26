@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
+import { CustomCell } from '../components/CustomCell/index.js'
 import { DemoUIFieldCell } from '../components/DemoUIField/Cell.js'
 import { DemoUIField } from '../components/DemoUIField/Field.js'
 import {
@@ -81,6 +82,15 @@ export const Posts: CollectionConfig = {
         position: 'sidebar',
       },
       relationTo: 'posts',
+    },
+    {
+      name: 'customCell',
+      type: 'text',
+      admin: {
+        components: {
+          Cell: CustomCell,
+        },
+      },
     },
     {
       name: 'sidebarField',

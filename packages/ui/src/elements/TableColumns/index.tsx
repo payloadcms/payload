@@ -1,6 +1,6 @@
 'use client'
 import type { SanitizedCollectionConfig } from 'payload/types'
-import type { CellProps } from 'payload/types'
+import type { CellComponentProps } from 'payload/types'
 
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
@@ -31,7 +31,7 @@ export type ListPreferences = {
 }
 
 type Props = {
-  cellProps?: Partial<CellProps>[]
+  cellProps?: Partial<CellComponentProps>[]
   children: React.ReactNode
   collectionSlug: string
   enableRowSelections?: boolean

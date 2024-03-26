@@ -1,5 +1,5 @@
 'use client'
-import type { CellProps, FieldBase } from 'payload/types'
+import type { CellComponentProps, FieldBase } from 'payload/types'
 
 import React from 'react'
 
@@ -11,12 +11,14 @@ import { useTableColumns } from '../TableColumns/index.js'
 import { TableCellProvider } from './TableCellProvider/index.js'
 import './index.scss'
 
+export { TableCellProvider }
+
 const baseClass = 'table'
 
 export type Column = {
   accessor: string
   active: boolean
-  cellProps?: Partial<CellProps>
+  cellProps?: Partial<CellComponentProps>
   components: {
     Cell: React.ReactNode
     Heading: React.ReactNode
@@ -28,7 +30,7 @@ export type Column = {
 export type Props = {
   columns?: Column[]
   customCellContext?: Record<string, unknown>
-  data: unknown[]
+  data: Record<string, unknown>[]
   fieldMap: FieldMap
 }
 
