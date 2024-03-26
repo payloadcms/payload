@@ -5,9 +5,9 @@ import { devUser } from '../credentials'
 
 const openAccess = {
   create: () => true,
+  delete: () => true,
   read: () => true,
   update: () => true,
-  delete: () => true,
 }
 
 const defaultAccess = ({ req: { user } }) => Boolean(user)
@@ -27,10 +27,10 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
       {
         name: 'disableRelation', // used filteredRelation
         type: 'checkbox',
-        required: true,
         admin: {
           position: 'sidebar',
         },
+        required: true,
       },
     ],
   }
@@ -82,8 +82,8 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'maxDepthRelation',
-          maxDepth: 0,
           type: 'relationship',
+          maxDepth: 0,
           relationTo: relationSlug,
         },
         {
@@ -99,12 +99,12 @@ export default buildConfigWithDefaults({
         {
           name: 'filteredRelation',
           type: 'relationship',
-          relationTo: relationSlug,
           filterOptions: {
             disableRelation: {
               not_equals: true,
             },
           },
+          relationTo: relationSlug,
         },
       ],
     },
@@ -113,9 +113,9 @@ export default buildConfigWithDefaults({
       ...collectionWithName(defaultAccessRelSlug),
       access: {
         create: defaultAccess,
+        delete: defaultAccess,
         read: defaultAccess,
         update: defaultAccess,
-        delete: defaultAccess,
       },
     },
     {
@@ -197,27 +197,30 @@ export default buildConfigWithDefaults({
         {
           name: 'movies',
           type: 'relationship',
-          relationTo: 'movies',
           hasMany: true,
+          relationTo: 'movies',
         },
       ],
     },
     {
+      slug: 'movieReviews',
+
       fields: [
         {
           name: 'movieReviewer',
+          type: 'relationship',
           relationTo: 'users',
           required: true,
-          type: 'relationship',
         },
         {
           name: 'likes',
+          type: 'relationship',
           hasMany: true,
           relationTo: 'users',
-          type: 'relationship',
         },
         {
           name: 'visibility',
+          type: 'radio',
           options: [
             {
               label: 'followers',
@@ -229,18 +232,15 @@ export default buildConfigWithDefaults({
             },
           ],
           required: true,
-          type: 'radio',
         },
       ],
-
-      slug: 'movieReviews',
     },
     {
       slug: polymorphicRelationshipsSlug,
       fields: [
         {
-          type: 'relationship',
           name: 'polymorphic',
+          type: 'relationship',
           relationTo: ['movies'],
         },
       ],
@@ -314,8 +314,8 @@ export default buildConfigWithDefaults({
     })
 
     await payload.update({
-      collection: chainedRelSlug,
       id: chained3.id,
+      collection: chainedRelSlug,
       data: {
         name: 'chain3',
         relation: chained.id,
@@ -342,14 +342,14 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: slug,
       data: {
-        title: 'with relationship',
-        relationField: rel1.id,
-        defaultAccessRelation: defaultAccessRelation.id,
         chainedRelation: chained.id,
-        maxDepthRelation: rel1.id,
-        customIdRelation: customIdRelation.id,
         customIdNumberRelation: customIdNumberRelation.id,
+        customIdRelation: customIdRelation.id,
+        defaultAccessRelation: defaultAccessRelation.id,
         filteredRelation: filteredRelation.id,
+        maxDepthRelation: rel1.id,
+        relationField: rel1.id,
+        title: 'with relationship',
       },
     })
 
@@ -363,8 +363,8 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: 'tree',
       data: {
-        text: 'sub',
         parent: root.id,
+        text: 'sub',
       },
     })
   },

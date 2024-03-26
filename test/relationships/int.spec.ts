@@ -724,6 +724,28 @@ describe('Relationships', () => {
     })
 
     describe('Hierarchy', () => {
+      beforeAll(async () => {
+        await payload.delete({
+          collection: treeSlug,
+          where: { id: { exists: true } },
+        })
+
+        const root = await payload.create({
+          collection: 'tree',
+          data: {
+            text: 'root',
+          },
+        })
+
+        await payload.create({
+          collection: 'tree',
+          data: {
+            parent: root.id,
+            text: 'sub',
+          },
+        })
+      })
+
       it('finds 1 root item with equals', async () => {
         const {
           docs: [item],
