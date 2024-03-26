@@ -92,6 +92,10 @@ p {
   }
 }
 
+#page-title {
+  @extend %h6;
+}
+
 ul,
 ol {
   padding-left: var(--base);

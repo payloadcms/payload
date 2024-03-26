@@ -85,11 +85,25 @@ describe('Live Preview', () => {
     await expect(iframe).toBeVisible()
   })
 
-  test('collection - can edit fields', async () => {
+  test('collection - can edit fields and can preview updated value', async () => {
     await goToCollectionPreview(page)
+    const titleValue = 'Title 1'
     const field = page.locator('#field-title')
+    const frame = page.frameLocator('iframe.live-preview-iframe').first()
+
     await expect(field).toBeVisible()
-    await field.fill('Title 1')
+
+    // Forces the test to wait for the nextjs route to render before we try editing a field
+    await expect(() => expect(frame.locator('#page-title')).toBeVisible()).toPass({
+      timeout: 45000,
+    })
+
+    await field.fill(titleValue)
+
+    await expect(() => expect(frame.locator('#page-title')).toHaveText(titleValue)).toPass({
+      timeout: 45000,
+    })
+
     await saveDocAndAssert(page)
   })
 
