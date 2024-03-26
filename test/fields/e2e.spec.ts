@@ -42,10 +42,8 @@ let serverURL: string
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
-
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
-    await client.login()
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -53,7 +51,9 @@ describe('fields', () => {
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
-    await client.logout()
+    if (client) {
+      await client.logout()
+    }
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
   })
