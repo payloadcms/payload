@@ -594,6 +594,21 @@ describe('Auth', () => {
       expect(result).toBeTruthy()
     })
 
+    it('should not throw server error on reset password', async () => {
+      const response = await fetch(`${apiUrl}/${slug}/reset-password`, {
+        body: JSON.stringify({
+          token: 'INVALID',
+          password: 'test',
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'post',
+      })
+
+      expect(response.status).toBe(400)
+    })
+
     it('should enforce access control on the me route', async () => {
       const user = await payload.create({
         collection: slug,
