@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps, CellProps } from 'payload/types'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useIntersect } from '@payloadcms/ui/hooks/useIntersect'
@@ -16,9 +16,9 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-export interface RelationshipCellProps extends CellComponentProps<any> {
-  label: CellProps['label']
-  relationTo: CellProps['relationTo']
+export interface RelationshipCellProps extends DefaultCellComponentProps<any> {
+  label: CellComponentProps['label']
+  relationTo: CellComponentProps['relationTo']
 }
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({

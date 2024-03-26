@@ -1,6 +1,6 @@
 import type { FieldDescriptionProps } from '@payloadcms/ui/forms/FieldDescription'
 import type {
-  CellProps,
+  CellComponentProps,
   Field,
   FieldWithPath,
   LabelProps,
@@ -189,7 +189,7 @@ export const mapFields = (args: {
 
         let fieldComponentProps: FieldComponentProps
 
-        const cellComponentProps: CellProps = {
+        const cellComponentProps: CellComponentProps = {
           name: 'name' in field ? field.name : undefined,
           fieldType: field.type,
           isFieldAffectingData,

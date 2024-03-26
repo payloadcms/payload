@@ -2,7 +2,7 @@ import type { HiddenInputFieldProps } from '@payloadcms/ui/fields/HiddenInput'
 import type { FieldTypes } from 'payload/config'
 import type {
   BlockField,
-  CellProps,
+  CellComponentProps,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TabsField,
@@ -67,7 +67,7 @@ export type FieldComponentProps =
 export type MappedField = {
   CustomCell?: React.ReactNode
   CustomField?: React.ReactNode
-  cellComponentProps: CellProps
+  cellComponentProps: CellComponentProps
   disableBulkEdit?: boolean
   disabled?: boolean
   fieldComponentProps: FieldComponentProps

@@ -1,11 +1,11 @@
 'use client'
-import type { CellComponentProps } from 'payload/types'
+import type { DefaultCellComponentProps } from 'payload/types'
 
 import React from 'react'
 
 import './index.scss'
 
-export const JSONCell: React.FC<CellComponentProps<string>> = ({ cellData }) => {
+export const JSONCell: React.FC<DefaultCellComponentProps<string>> = ({ cellData }) => {
   const textToShow = cellData.length > 100 ? `${cellData.substring(0, 100)}\u2026` : cellData
 
   return (

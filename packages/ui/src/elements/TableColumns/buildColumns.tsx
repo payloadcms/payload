@@ -1,5 +1,5 @@
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import { type CellProps, type SanitizedCollectionConfig } from 'payload/types'
+import { type CellComponentProps, type SanitizedCollectionConfig } from 'payload/types'
 import React from 'react'
 
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
@@ -15,7 +15,7 @@ import { DefaultCell } from '../Table/DefaultCell/index.js'
 const fieldIsPresentationalOnly = (field: MappedField): boolean => field.type === 'ui'
 
 export const buildColumns = (args: {
-  cellProps: Partial<CellProps>[]
+  cellProps: Partial<CellComponentProps>[]
   columnPreferences: ColumnPreferences
   defaultColumns?: string[]
   enableRowSelections: boolean
