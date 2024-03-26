@@ -12,7 +12,7 @@ import type {
 } from './types.js'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
-import { RouteError } from './RouteError.js'
+import { routeError } from './routeError.js'
 import { access } from './auth/access.js'
 import { forgotPassword } from './auth/forgotPassword.js'
 import { init } from './auth/init.js'
@@ -281,7 +281,7 @@ export const GET =
 
       return RouteNotFoundResponse(slug)
     } catch (error) {
-      return RouteError({
+      return routeError({
         collection,
         err: error,
         req,
@@ -423,7 +423,7 @@ export const POST =
 
       return RouteNotFoundResponse(slug)
     } catch (error) {
-      return RouteError({
+      return routeError({
         collection,
         err: error,
         req,
@@ -492,7 +492,7 @@ export const DELETE =
 
       return RouteNotFoundResponse(slug)
     } catch (error) {
-      return RouteError({
+      return routeError({
         collection,
         err: error,
         req,
@@ -561,7 +561,7 @@ export const PATCH =
 
       return RouteNotFoundResponse(slug)
     } catch (error) {
-      return RouteError({
+      return routeError({
         collection,
         err: error,
         req,

@@ -6,7 +6,7 @@ import path from 'path'
 import { APIError } from 'payload/errors'
 
 import { streamFile } from '../../../next-stream-file/index.js'
-import { RouteError } from '../RouteError.js'
+import { routeError } from '../routeError.js'
 import { checkFileAccess } from './checkFileAccess.js'
 
 // /:collectionSlug/file/:filename
@@ -64,7 +64,7 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
       status: httpStatus.OK,
     })
   } catch (error) {
-    return RouteError({
+    return routeError({
       collection,
       err: error,
       req,
