@@ -58,26 +58,36 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
 
   const dbChoice = dbChoiceRecord[dbType]
 
-  const dbUriRes = await prompts(
-    {
-      name: 'value',
-      type: 'text',
-      initial: `${dbChoice.dbConnectionPrefix}${
-        projectName === '.' ? `payload-${getRandomDigitSuffix()}` : slugify(projectName)
-      }`,
-      message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
-      validate: (value: string) => !!value.length,
-    },
-    {
-      onCancel: () => {
-        process.exit(0)
+  let dbUri: string | undefined = undefined
+  const initialDbUri = `${dbChoice.dbConnectionPrefix}${
+    projectName === '.' ? `payload-${getRandomDigitSuffix()}` : slugify(projectName)
+  }`
+
+  if (args['--db-accept-recommended']) {
+    dbUri = initialDbUri
+  } else if (args['--db-connection-string']) {
+    dbUri = args['--db-connection-string']
+  } else {
+    const dbUriRes = await prompts(
+      {
+        name: 'value',
+        type: 'text',
+        initial: initialDbUri,
+        message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
+        validate: (value: string) => !!value.length,
       },
-    },
-  )
+      {
+        onCancel: () => {
+          process.exit(0)
+        },
+      },
+    )
+    dbUri = dbUriRes.value
+  }
 
   return {
     type: dbChoice.value,
-    dbUri: dbUriRes.value,
+    dbUri,
   }
 }
 

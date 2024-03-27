@@ -41,7 +41,7 @@ export const createTestHooks = async (testSuiteName = '_community') => {
 
       await writeFile(tsConfigPath, JSON.stringify(tsConfig, null, 2) + '\n')
 
-      execSync(`prettier --write ${tsConfigPath}`, { cwd: path.resolve(dirname, '../') })
+      execSync(`pnpm prettier --write ${tsConfigPath}`, { cwd: path.resolve(dirname, '../') })
     },
   }
 }
