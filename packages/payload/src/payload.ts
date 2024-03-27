@@ -323,15 +323,23 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     if (options.config) {
       this.config = await options.config
-      const configPath = findConfig()
 
-      this.config = {
-        ...this.config,
-        paths: {
-          config: configPath,
-          configDir: path.dirname(configPath),
-          rawConfig: configPath,
-        },
+      try {
+        const configPath = findConfig()
+
+        this.config = {
+          ...this.config,
+          paths: {
+            config: configPath,
+            configDir: path.dirname(configPath),
+            rawConfig: configPath,
+          },
+        }
+      } catch (error) {
+        // only throw the config not found error when the config was not passed
+        if (!this.config) {
+          throw error;
+        }
       }
     } else {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
