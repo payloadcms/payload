@@ -2,10 +2,14 @@ import fse from 'fs-extra'
 import path from 'path'
 import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { createProject } from './create-project.js'
+import { fileURLToPath } from 'node:url'
 import { dbReplacements } from './packages.js'
 import { getValidTemplates } from './templates.js'
 
-const projectDir = path.resolve(__dirname, './tmp')
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+const projectDir = path.resolve(dirname, './tmp')
 describe('createProject', () => {
   beforeAll(() => {
     console.log = jest.fn()
