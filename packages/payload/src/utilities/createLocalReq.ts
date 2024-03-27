@@ -68,7 +68,7 @@ export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, user },
   payload,
 ) => {
-  const i18n = req?.i18n || (await getLocalI18n({ config: payload.config }))
+  const i18n = req?.i18n || getLocalI18n({ config: payload.config })
 
   if (payload.config?.localization) {
     const locale = localeArg === '*' ? 'all' : localeArg

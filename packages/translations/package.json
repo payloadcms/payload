@@ -1,8 +1,8 @@
 {
   "name": "@payloadcms/translations",
   "version": "3.0.0-alpha.49",
-  "main": "./dist/exports/index.ts",
-  "types": "./dist/types.d.ts",
+  "main": "./src/exports/index.ts",
+  "types": "./src/types.ts",
   "type": "module",
   "scripts": {
     "build:types": "tsc --outDir dist",

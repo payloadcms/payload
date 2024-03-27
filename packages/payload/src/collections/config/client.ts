@@ -1,5 +1,4 @@
 import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../config/types.js'
-import type { SanitizedCollectionConfig } from '../../exports/types.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
@@ -25,6 +24,7 @@ export type ClientCollectionConfig = Omit<
 }
 
 import type { ClientFieldConfig } from '../../fields/config/client.js'
+import type { SanitizedCollectionConfig } from './types.js'
 
 import { createClientFieldConfigs } from '../../fields/config/client.js'
 

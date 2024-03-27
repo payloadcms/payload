@@ -1,6 +1,6 @@
 import type { ParsedArgs } from 'minimist'
 
-import type { SanitizedConfig } from '../exports/types.js'
+import type { SanitizedConfig } from '../config/types.js'
 
 import payload from '../index.js'
 import { prettySyncLoggerDestination } from '../utilities/logger.js'
