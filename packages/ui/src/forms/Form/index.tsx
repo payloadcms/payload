@@ -5,7 +5,7 @@ import type { FormState } from 'payload/types'
 import isDeepEqual from 'deep-equal'
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { wait } from 'payload/utilities'
+import { deepCopyObject, wait } from 'payload/utilities'
 import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -544,7 +544,11 @@ export const Form: React.FC<FormProps> = (props) => {
           )
 
           if (changed) {
-            dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: newState })
+            dispatchFields({
+              type: 'REPLACE_STATE',
+              optimize: false,
+              state: newState,
+            })
           }
         }
       }

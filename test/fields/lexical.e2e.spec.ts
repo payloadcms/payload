@@ -32,7 +32,7 @@ async function navigateToLexicalFields() {
   const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
   await page.goto(url.list)
   const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
-  await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: 45000 })
+  await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
   const linkDocHref = await linkToDoc.getAttribute('href')
 
   await linkToDoc.click()

@@ -9,7 +9,6 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
 import {
   closeNav,
-  delayNetwork,
   exactText,
   initPageConsoleErrorCatch,
   openDocControls,
@@ -60,7 +59,6 @@ describe('access control', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await delayNetwork({ context, page, delay: 'Slow 4G' })
   })
 
   test('field without read access should not show', async () => {

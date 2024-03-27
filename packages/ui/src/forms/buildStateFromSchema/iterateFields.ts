@@ -12,7 +12,7 @@ type Args = {
    */
   anyParentLocalized?: boolean
   data: Data
-  errorPaths: Set<string>
+  errorPaths: string[]
   fields: FieldSchema[]
   filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
