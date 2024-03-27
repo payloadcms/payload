@@ -33,7 +33,7 @@ export const DocumentInfoProvider: React.FC<
 
   const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
 
-  const { id, collectionSlug, globalSlug } = props
+  const { id, collectionSlug, globalSlug, initialData: initialDataFromProps } = props
 
   const {
     admin: { dateFormat },
@@ -98,7 +98,10 @@ export const DocumentInfoProvider: React.FC<
     shouldLoadData
       ? `${baseURL}/${globalSlug ? 'globals/' : ''}${slug}${collectionSlug ? `/${id}` : ''}`
       : null,
-    { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
+    {
+      initialData: initialDataFromProps,
+      initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' },
+    },
   )
 
   useEffect(() => {
