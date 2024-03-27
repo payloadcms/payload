@@ -718,7 +718,7 @@ describe('lexical', () => {
       await expect(nestedEditorParagraph).toHaveText('Some text below relationship node 12345')
     })
 
-    test.skip('should respect row removal in nested array field', async () => {
+    test('should respect row removal in nested array field', async () => {
       await navigateToLexicalFields()
       const richTextField = page.locator('.rich-text-lexical').nth(1) // second
       await richTextField.scrollIntoViewIfNeeded()
