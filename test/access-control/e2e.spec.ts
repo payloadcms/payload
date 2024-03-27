@@ -9,10 +9,12 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
 import {
   closeNav,
+  delayNetwork,
   exactText,
   initPageConsoleErrorCatch,
   openDocControls,
   openNav,
+  saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
@@ -58,6 +60,7 @@ describe('access control', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await delayNetwork({ context, page, delay: 'Slow 4G' })
   })
 
   test('field without read access should not show', async () => {
@@ -248,7 +251,7 @@ describe('access control', () => {
       await expect(deleteAction).toBeHidden()
 
       await page.locator('#field-approvedForRemoval').check()
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       await openDocControls(page)
       const deleteAction2 = page.locator('#action-delete')
@@ -272,7 +275,7 @@ describe('access control', () => {
 
     // Allow access to test global.
     await page.locator('.checkbox-input:has(#field-test) input').check()
-    await page.locator('#action-save').click()
+    await saveDocAndAssert(page)
 
     await openNav(page)
 
@@ -299,8 +302,7 @@ describe('access control', () => {
     const documentDrawer = page.locator('[id^=doc-drawer_user-restricted_1_]')
     await expect(documentDrawer).toBeVisible()
     await documentDrawer.locator('#field-name').fill('anonymous@email.com')
-    await documentDrawer.locator('#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await saveDocAndAssert(page)
 
     // ensure user is not allowed to edit this document
     await expect(documentDrawer.locator('#field-name')).toBeDisabled()
@@ -311,8 +313,7 @@ describe('access control', () => {
     const documentDrawer2 = page.locator('[id^=doc-drawer_user-restricted_1_]')
     await expect(documentDrawer2).toBeVisible()
     await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
-    await documentDrawer2.locator('#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await saveDocAndAssert(page)
 
     // ensure user is allowed to edit this document
     await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
