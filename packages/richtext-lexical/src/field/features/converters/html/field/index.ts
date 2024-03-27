@@ -1,8 +1,8 @@
 import type { SerializedEditorState } from 'lexical'
 import type { Field, RichTextField, TextField } from 'payload/types'
 
-import type { LexicalRichTextAdapter, SanitizedServerEditorConfig } from '../../../../../index.js'
-import type { AdapterProps } from '../../../../../types.js'
+import type { AdapterProps, LexicalRichTextAdapter } from '../../../../../types.js'
+import type { SanitizedServerEditorConfig } from '../../../../lexical/config/types.js'
 import type { HTMLConverter } from '../converter/types.js'
 import type { HTMLConverterFeatureProps } from '../feature.server.js'
 

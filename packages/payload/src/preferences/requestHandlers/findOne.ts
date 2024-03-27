@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 
-import type { PayloadHandler } from '../../exports/config.js'
+import type { PayloadHandler } from '../../config/types.js'
 
 import findOne from '../operations/findOne.js'
 
