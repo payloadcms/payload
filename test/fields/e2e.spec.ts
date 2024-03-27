@@ -1499,14 +1499,6 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields')
     })
 
-    afterEach(async () => {
-      // delete all existing relationship documents
-      await payload.delete({
-        collection: relationshipFieldsSlug,
-        where: { id: { exists: true } },
-      })
-    })
-
     test('should create inline relationship within field with many relations', async () => {
       await page.goto(url.create)
 
@@ -1535,7 +1527,7 @@ describe('fields', () => {
 
     test('should create nested inline relationships', async () => {
       await page.goto(url.create)
-
+      await page.waitForURL(`**/${url.create}`)
       // Open first modal
       await page.locator('#relationToSelf-add-new .relationship-add-new__add-button').click()
 
@@ -1562,7 +1554,7 @@ describe('fields', () => {
 
       // Save then close the second modal
       await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click()
-      await wait(200)
+      await expect.poll(() => page.url(), { timeout: 200 }).toContain('create')
       await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_2_]').click()
 
       // Assert that the first modal is still open and the value matches
@@ -1575,7 +1567,7 @@ describe('fields', () => {
 
       // Save then close the first modal
       await page.locator('[id^=doc-drawer_relationship-fields_1_] #action-save').click()
-      await wait(200)
+      await expect.poll(() => page.url(), { timeout: 200 }).toContain('create')
       await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_1_]').click()
 
       // Expect the original field to have a value filled
@@ -1586,7 +1578,7 @@ describe('fields', () => {
       // Fill the required field
       await page.locator('#field-relationship').click()
       await page.locator('.rs__option:has-text("Seeded text document")').click()
-
+      await expect.poll(() => page.url(), { timeout: 200 }).toContain('create')
       await page.locator('#action-save').click()
 
       await expect(page.locator('.Toastify')).toContainText('successfully')
@@ -1667,7 +1659,7 @@ describe('fields', () => {
     // Related issue: https://github.com/payloadcms/payload/issues/2815
     test('should modify fields in relationship drawer', async () => {
       await page.goto(url.create)
-
+      await page.waitForURL(`**/${url.create}`)
       // First fill out the relationship field, as it's required
       await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
       await page
@@ -1683,12 +1675,10 @@ describe('fields', () => {
       await expect(page.locator('.Toastify')).toContainText('successfully')
 
       // Create a new doc for the `relationshipHasMany` field
-      await page
-        .locator('#field-relationshipHasMany button.relationship-add-new__add-button')
-        .click()
-      const textField2 = page.locator('[id^=doc-drawer_text-fields_1_] #field-text')
+      await expect.poll(() => page.url(), { timeout: 500 }).not.toContain('create')
+      await page.locator('#field-relationshipHasMany .relationship-add-new__add-button').click()
       const value = 'Hello, world!'
-      await textField2.fill(value)
+      await page.locator('.drawer__content #field-text').fill(value)
 
       // Save and close the drawer
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
@@ -1736,12 +1726,13 @@ describe('fields', () => {
     // opened through the edit button can be saved using the hotkey.
     test('should save using hotkey in edit document drawer', async () => {
       await page.goto(url.create)
-
       // First fill out the relationship field, as it's required
       await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
       await page.locator('#field-relationship .value-container').click()
       // Select "Seeded text document" relationship
       await page.getByText('Seeded text document', { exact: true }).click()
+
+      await wait(200)
 
       // Click edit button which opens drawer
       await page.getByRole('button', { name: 'Edit Seeded text document' }).click()
@@ -1783,11 +1774,13 @@ describe('fields', () => {
 
     test('should fail min rows validation when rows are present', async () => {
       await page.goto(url.create)
-
+      await page.waitForURL(`**/${url.create}`)
       // First fill out the relationship field, as it's required
       await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
       await page.locator('#field-relationship .value-container').click()
       await page.getByText('Seeded text document', { exact: true }).click()
+
+      await expect.poll(() => page.url(), { timeout: 200 }).toContain('create')
 
       await page.locator('#field-relationshipWithMinRows .value-container').click()
       await page
@@ -1795,7 +1788,9 @@ describe('fields', () => {
         .click()
 
       await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: relationshipWithMinRows',
+      )
     })
 
     test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {

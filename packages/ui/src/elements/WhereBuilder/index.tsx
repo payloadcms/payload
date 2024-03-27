@@ -105,6 +105,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       }
     ]
   */
+
   const [conditions, setConditions] = React.useState(() => {
     const whereFromSearch = searchParams.where
     if (whereFromSearch) {
@@ -149,20 +150,14 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       setConditions((prevConditions) => {
         const newConditions = [...prevConditions]
         if (typeof newConditions[orIndex].and[andIndex] === 'object') {
-          const [existingFieldName, existingCondition] = Object.entries(
-            newConditions[orIndex].and[andIndex],
-          )?.[0] || [fieldNameArg, operatorArg]
-          const fieldName = existingFieldName || fieldNameArg
-          const operator = operatorArg || Object.keys(existingCondition)?.[0] || undefined
+          const fieldName = fieldNameArg
+          const operator = operatorArg
           const value = valueArg ?? (operator ? newConditions[orIndex].and[andIndex][operator] : '')
 
-          if (fieldName) {
+          if (fieldName && operator && ![null, undefined].includes(value)) {
             newConditions[orIndex].and[andIndex] = {
               [fieldName]: operator ? { [operator]: value } : {},
             }
-          }
-
-          if (fieldName && operator && ![null, undefined].includes(value)) {
             setShouldUpdateQuery(true)
           }
         }
@@ -208,12 +203,14 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                 <ul className={`${baseClass}__and-filters`}>
                   {Array.isArray(or?.and) &&
                     or.and.map((_, andIndex) => {
-                      const fieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
-                      const operator =
-                        Object.keys(conditions[orIndex].and[andIndex]?.[fieldName] || {})?.[0] ||
-                        undefined
+                      const initialFieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
+                      const initialOperator =
+                        Object.keys(
+                          conditions[orIndex].and[andIndex]?.[initialFieldName] || {},
+                        )?.[0] || undefined
                       const initialValue =
-                        conditions[orIndex].and[andIndex]?.[fieldName]?.[operator] || ''
+                        conditions[orIndex].and[andIndex]?.[initialFieldName]?.[initialOperator] ||
+                        ''
 
                       return (
                         <li key={andIndex}>
@@ -223,11 +220,11 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                           <Condition
                             addCondition={addCondition}
                             andIndex={andIndex}
-                            fieldName={fieldName}
+                            fieldName={initialFieldName}
                             fields={reducedFields}
                             initialValue={initialValue}
                             key={andIndex}
-                            operator={operator}
+                            operator={initialOperator}
                             orIndex={orIndex}
                             removeCondition={removeCondition}
                             updateCondition={updateCondition}
