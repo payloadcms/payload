@@ -530,7 +530,7 @@ export const Form: React.FC<FormProps> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState = fields
+          let revalidatedFormState: FormState = contextRef.current.fields
 
           for (const onChangeFn of onChange) {
             revalidatedFormState = await onChangeFn({
@@ -538,7 +538,10 @@ export const Form: React.FC<FormProps> = (props) => {
             })
           }
 
-          const { changed, newState } = mergeServerFormState(fields || {}, revalidatedFormState)
+          const { changed, newState } = mergeServerFormState(
+            contextRef.current.fields || {},
+            revalidatedFormState,
+          )
 
           if (changed) {
             dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: newState })
@@ -549,7 +552,7 @@ export const Form: React.FC<FormProps> = (props) => {
       if (modified) void executeOnChange()
     },
     150,
-    [fields, dispatchFields, onChange],
+    [contextRef.current.fields, dispatchFields, onChange],
   )
 
   const actionString =

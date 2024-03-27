@@ -174,7 +174,7 @@ export type Context = {
   disabled: boolean
   dispatchFields: Dispatch<FieldAction>
   /**
-   * @deprecated Form context fields may be outdated and should not be relied on. Instead, prefer `useFormFields`.
+   * Form context fields may be outdated and should not be relied on. Instead, prefer `useFormFields`.
    */
   fields: FormState
   formRef: React.MutableRefObject<HTMLFormElement>
