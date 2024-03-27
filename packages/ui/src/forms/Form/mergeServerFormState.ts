@@ -17,6 +17,8 @@ export const mergeServerFormState = (
 ): { changed: boolean; newState: FormState } => {
   let changed = false
 
+  const newState = {}
+
   if (existingState) {
     Object.entries(existingState).forEach(([path, newFieldState]) => {
       if (!incomingState[path]) return
@@ -73,9 +75,11 @@ export const mergeServerFormState = (
           i++
         }
       }
+
+      // Conditions don't work if we don't memcopy the new state, as the object references would otherwise be the same
+      newState[path] = { ...newFieldState }
     })
   }
 
-  // Conditions don't work if we don't memcopy the new state, as the object references would otherwise be the same
-  return { changed, newState: { ...existingState } }
+  return { changed, newState }
 }
