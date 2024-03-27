@@ -7,11 +7,6 @@ export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
 
 const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResponse => {
   if (incoming) {
-    console.log(
-      incoming instanceof APIError,
-      incoming instanceof Error,
-      incoming instanceof ValidationError,
-    )
     // Cannot use `instanceof` to check error type: https://github.com/microsoft/TypeScript/issues/13965
     // Instead, get the prototype of the incoming error and check its constructor name
     const proto = Object.getPrototypeOf(incoming)
