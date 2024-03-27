@@ -64,17 +64,17 @@ export const buildComponentMap = (args: {
 
     const afterListTable = collectionConfig?.admin?.components?.AfterListTable
 
-    const SaveButton = collectionConfig?.admin?.components?.edit?.SaveButton
-    const SaveButtonComponent = SaveButton ? <SaveButton /> : undefined
+    const SaveButtonComponent = collectionConfig?.admin?.components?.edit?.SaveButton
+    const SaveButton = SaveButtonComponent ? <SaveButtonComponent /> : undefined
 
-    const SaveDraftButton = collectionConfig?.admin?.components?.edit?.SaveDraftButton
-    const SaveDraftButtonComponent = SaveDraftButton ? <SaveDraftButton /> : undefined
+    const SaveDraftButtonComponent = collectionConfig?.admin?.components?.edit?.SaveDraftButton
+    const SaveDraftButton = SaveDraftButtonComponent ? <SaveDraftButtonComponent /> : undefined
 
-    /* const PreviewButton = collectionConfig?.admin?.components?.edit?.PreviewButton
-    const PreviewButtonComponent = PreviewButton ? <PreviewButton /> : undefined */
+    /* const PreviewButtonComponent = collectionConfig?.admin?.components?.edit?.PreviewButton
+    const PreviewButton = PreviewButtonComponent ? <PreviewButtonComponent /> : undefined */
 
-    const PublishButton = collectionConfig?.admin?.components?.edit?.PublishButton
-    const PublishButtonComponent = PublishButton ? <PublishButton /> : undefined
+    const PublishButtonComponent = collectionConfig?.admin?.components?.edit?.PublishButton
+    const PublishButton = PublishButtonComponent ? <PublishButtonComponent /> : undefined
 
     const BeforeList =
       (beforeList && Array.isArray(beforeList) && beforeList?.map((Component) => <Component />)) ||
@@ -111,10 +111,10 @@ export const buildComponentMap = (args: {
       BeforeListTable,
       Edit: <Edit collectionSlug={collectionConfig.slug} />,
       List: <List collectionSlug={collectionConfig.slug} />,
-      /* PreviewButton: PreviewButtonComponent, */
-      PublishButton: PublishButtonComponent,
-      SaveButton: SaveButtonComponent,
-      SaveDraftButton: SaveDraftButtonComponent,
+      /* PreviewButton, */
+      PublishButton,
+      SaveButton,
+      SaveDraftButton,
       actionsMap: mapActions({
         collectionConfig,
       }),

@@ -16,6 +16,7 @@ const DefaultPublishButton: React.FC = () => {
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
   const { getData, submit } = useForm()
   const modified = useFormModified()
+
   const {
     routes: { api },
     serverURL,
@@ -78,7 +79,7 @@ const DefaultPublishButton: React.FC = () => {
 
   return (
     <FormSubmit
-      buttonId={id.toString()}
+      buttonId="action-save"
       disabled={!canPublish}
       onClick={publish}
       size="small"
