@@ -192,7 +192,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
 
   const hasMaxRows = maxRows && rows.length >= maxRows
 
-  const fieldErrorCount = rows.reduce((total, row) => total + (row?.errorPaths?.size || 0), 0)
+  const fieldErrorCount = rows.reduce((total, row) => total + (row?.errorPaths?.length || 0), 0)
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)

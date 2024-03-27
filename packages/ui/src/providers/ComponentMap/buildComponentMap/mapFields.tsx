@@ -228,7 +228,6 @@ export const mapFields = (args: {
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
                 config,
-                disableAddingID: true,
                 fieldSchema: field.fields,
                 filter,
                 parentPath: path,
@@ -251,7 +250,6 @@ export const mapFields = (args: {
             const blocks = field.blocks.map((block) => {
               const blockFieldMap = mapFields({
                 config,
-                disableAddingID: true,
                 fieldSchema: block.fields,
                 filter,
                 parentPath: `${path}.${block.slug}`,

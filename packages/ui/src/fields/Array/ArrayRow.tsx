@@ -70,7 +70,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
     '0',
   )}`
 
-  const errorCount = row.errorPaths?.size
+  const errorCount = row.errorPaths?.length
   const fieldHasErrors = errorCount > 0 && hasSubmitted
 
   const classNames = [

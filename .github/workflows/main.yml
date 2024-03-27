@@ -254,12 +254,7 @@ jobs:
         run: pnpm exec playwright install
 
       - name: E2E Tests
-        uses: nick-fields/retry@v3
-        with:
-          retry_on: error
-          max_attempts: 2
-          timeout_minutes: 15
-          command: pnpm test:e2e ${{ matrix.suite }}
+        run: pnpm test:e2e ${{ matrix.suite }}
 
       - uses: actions/upload-artifact@v4
         if: always()

@@ -67,7 +67,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
-  const errorCount = row.errorPaths?.size
+  const errorCount = row.errorPaths?.length
   const fieldHasErrors = errorCount > 0 && hasSubmitted
 
   const classNames = [
