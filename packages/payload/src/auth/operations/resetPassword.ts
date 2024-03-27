@@ -67,7 +67,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
       },
     })
 
-    if (!user) throw new APIError('Token is either invalid or has expired.')
+    if (!user) throw new APIError('Token is either invalid or has expired.', 400)
 
     // TODO: replace this method
     const { hash, salt } = await generatePasswordSaltHash({ password: data.password })
