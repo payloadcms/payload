@@ -17,6 +17,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { textDoc } from './collections/Text/shared.js'
@@ -32,7 +33,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { afterEach, beforeAll, beforeEach, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 let payload: Payload
 let client: RESTClient
@@ -1549,7 +1550,7 @@ describe('fields', () => {
 
       // Save then close the second modal
       await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click()
-      await expect.poll(() => page.url(), { timeout: 200 }).toContain('create')
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
       await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_2_]').click()
 
       // Assert that the first modal is still open and the value matches
@@ -1562,7 +1563,7 @@ describe('fields', () => {
 
       // Save then close the first modal
       await page.locator('[id^=doc-drawer_relationship-fields_1_] #action-save').click()
-      await expect.poll(() => page.url(), { timeout: 200 }).toContain('create')
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
       await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_1_]').click()
 
       // Expect the original field to have a value filled
@@ -1573,7 +1574,7 @@ describe('fields', () => {
       // Fill the required field
       await page.locator('#field-relationship').click()
       await page.locator('.rs__option:has-text("Seeded text document")').click()
-      await expect.poll(() => page.url(), { timeout: 200 }).toContain('create')
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
       await page.locator('#action-save').click()
 
       await expect(page.locator('.Toastify')).toContainText('successfully')
@@ -1670,7 +1671,7 @@ describe('fields', () => {
       await expect(page.locator('.Toastify')).toContainText('successfully')
 
       // Create a new doc for the `relationshipHasMany` field
-      await expect.poll(() => page.url(), { timeout: 500 }).not.toContain('create')
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
       await page.locator('#field-relationshipHasMany .relationship-add-new__add-button').click()
       const value = 'Hello, world!'
       await page.locator('.drawer__content #field-text').fill(value)
@@ -1769,15 +1770,15 @@ describe('fields', () => {
 
     test('should fail min rows validation when rows are present', async () => {
       await page.goto(url.create)
-      await page.waitForURL(`**/${url.create}`)
       // First fill out the relationship field, as it's required
       await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
       await page.locator('#field-relationship .value-container').click()
       await page.getByText('Seeded text document', { exact: true }).click()
 
-      await expect.poll(() => page.url(), { timeout: 200 }).toContain('create')
+      await wait(200)
 
       await page.locator('#field-relationshipWithMinRows .value-container').click()
+
       await page
         .locator('#field-relationshipWithMinRows .rs__option:has-text("Seeded text document")')
         .click()
