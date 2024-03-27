@@ -1,13 +1,21 @@
 import type { Collection, PayloadRequest } from 'payload/types'
 
 import httpStatus from 'http-status'
-import { APIError } from 'payload/errors'
+import { APIError, ValidationError } from 'payload/errors'
 
 export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
 
-const formatErrors = (incoming: { [key: string]: unknown } | APIError | Error): ErrorResponse => {
+const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResponse => {
   if (incoming) {
-    if (incoming instanceof APIError && incoming.data) {
+    // Cannot use `instanceof` to check error type: https://github.com/microsoft/TypeScript/issues/13965
+    // Instead, get the prototype of the incoming error and check its constructor name
+    const proto = Object.getPrototypeOf(incoming)
+
+    // Payload 'ValidationError' and 'APIError'
+    if (
+      (proto.constructor.name === 'ValidationError' || proto.constructor.name === 'APIError') &&
+      incoming.data
+    ) {
       return {
         errors: [
           {
@@ -19,8 +27,8 @@ const formatErrors = (incoming: { [key: string]: unknown } | APIError | Error): 
       }
     }
 
-    // mongoose
-    if (!(incoming instanceof APIError || incoming instanceof Error) && incoming.errors) {
+    // Mongoose 'ValidationError': https://mongoosejs.com/docs/api/error.html#Error.ValidationError
+    if (proto.constructor.name === 'ValidationError' && 'errors' in incoming && incoming.errors) {
       return {
         errors: Object.keys(incoming.errors).reduce((acc, key) => {
           acc.push({
@@ -58,7 +66,7 @@ const formatErrors = (incoming: { [key: string]: unknown } | APIError | Error): 
   }
 }
 
-export const RouteError = async ({
+export const routeError = async ({
   collection,
   err,
   req,
@@ -78,7 +86,9 @@ export const RouteError = async ({
   }
 
   const { config, logger } = req.payload
+
   let response = formatErrors(err)
+
   let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
 
   logger.error(err.stack)

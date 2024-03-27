@@ -26,6 +26,7 @@ export const updateOne: UpdateOne = async function updateOne(
   })
 
   let result
+
   try {
     result = await Model.findOneAndUpdate(query, data, options)
   } catch (error) {

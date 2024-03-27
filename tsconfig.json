@@ -11,7 +11,11 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "noEmit": true,
     "outDir": "./dist",
     "resolveJsonModule": true,
@@ -19,7 +23,11 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": false,
-    "types": ["jest", "node", "@types/jest"],
+    "types": [
+      "jest",
+      "node",
+      "@types/jest"
+    ],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -28,26 +36,65 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./test/admin/config.ts"],
-      "@payloadcms/live-preview": ["./packages/live-preview/src"],
-      "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
-      "@payloadcms/ui/assets": ["./packages/ui/src/assets/index.ts"],
-      "@payloadcms/ui/elements/*": ["./packages/ui/src/elements/*/index.tsx"],
-      "@payloadcms/ui/fields/*": ["./packages/ui/src/fields/*/index.tsx"],
-      "@payloadcms/ui/forms/*": ["./packages/ui/src/forms/*/index.tsx"],
-      "@payloadcms/ui/graphics/*": ["./packages/ui/src/graphics/*/index.tsx"],
-      "@payloadcms/ui/hooks/*": ["./packages/ui/src/hooks/*.ts"],
-      "@payloadcms/ui/icons/*": ["./packages/ui/src/icons/*/index.tsx"],
-      "@payloadcms/ui/providers/*": ["./packages/ui/src/providers/*/index.tsx"],
-      "@payloadcms/ui/templates/*": ["./packages/ui/src/templates/*/index.tsx"],
-      "@payloadcms/ui/utilities/*": ["./packages/ui/src/utilities/*.ts"],
-      "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
-      "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
-      "@payloadcms/next/*": ["./packages/next/src/*"],
-      "@payloadcms/next": ["./packages/next/src/exports/*"]
+      "@payload-config": [
+        "./test/fields/config.ts"
+      ],
+      "@payloadcms/live-preview": [
+        "./packages/live-preview/src"
+      ],
+      "@payloadcms/live-preview-react": [
+        "./packages/live-preview-react/src/index.ts"
+      ],
+      "@payloadcms/ui/assets": [
+        "./packages/ui/src/assets/index.ts"
+      ],
+      "@payloadcms/ui/elements/*": [
+        "./packages/ui/src/elements/*/index.tsx"
+      ],
+      "@payloadcms/ui/fields/*": [
+        "./packages/ui/src/fields/*/index.tsx"
+      ],
+      "@payloadcms/ui/forms/*": [
+        "./packages/ui/src/forms/*/index.tsx"
+      ],
+      "@payloadcms/ui/graphics/*": [
+        "./packages/ui/src/graphics/*/index.tsx"
+      ],
+      "@payloadcms/ui/hooks/*": [
+        "./packages/ui/src/hooks/*.ts"
+      ],
+      "@payloadcms/ui/icons/*": [
+        "./packages/ui/src/icons/*/index.tsx"
+      ],
+      "@payloadcms/ui/providers/*": [
+        "./packages/ui/src/providers/*/index.tsx"
+      ],
+      "@payloadcms/ui/templates/*": [
+        "./packages/ui/src/templates/*/index.tsx"
+      ],
+      "@payloadcms/ui/utilities/*": [
+        "./packages/ui/src/utilities/*.ts"
+      ],
+      "@payloadcms/ui/scss": [
+        "./packages/ui/src/scss.scss"
+      ],
+      "@payloadcms/ui/scss/app.scss": [
+        "./packages/ui/src/scss/app.scss"
+      ],
+      "@payloadcms/next/*": [
+        "./packages/next/src/*"
+      ],
+      "@payloadcms/next": [
+        "./packages/next/src/exports/*"
+      ]
     }
   },
-  "exclude": ["dist", "build", "temp", "node_modules"],
+  "exclude": [
+    "dist",
+    "build",
+    "temp",
+    "node_modules"
+  ],
   "composite": true,
   "references": [
     {
@@ -108,5 +155,9 @@
       "path": "./packages/ui"
     }
   ],
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "scripts/**/*.ts"]
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "scripts/**/*.ts"
+  ]
 }
