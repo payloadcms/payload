@@ -36,25 +36,25 @@ const databaseAdapters = {
   }),
   postgres: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || 'postgres://127.0.0.1:5432/payloadtests',
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   }),
   'postgres-custom-schema': postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || 'postgres://127.0.0.1:5432/payloadtests',
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
     schemaName: 'custom',
   }),
   'postgres-uuid': postgresAdapter({
     idType: 'uuid',
     pool: {
-      connectionString: process.env.DATABASE_URI || 'postgres://127.0.0.1:5432/payloadtests',
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   }),
   supabase: postgresAdapter({
     pool: {
       connectionString:
-        process.env.DATABASE_URI || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
+        process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
     },
   }),
 }
