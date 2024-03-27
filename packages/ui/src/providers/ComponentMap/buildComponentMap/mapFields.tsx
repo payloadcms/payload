@@ -718,6 +718,7 @@ export const mapFields = (args: {
       cellComponentProps: {
         name: 'id',
       },
+      disableBulkEdit: true,
       fieldComponentProps: {
         name: 'id',
         label: 'ID',
