@@ -17,10 +17,10 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
+      slug,
       admin: {
         useAsTitle: 'custom',
       },
-      slug,
       auth: {
         cookies: {
           domain: undefined,
