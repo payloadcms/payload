@@ -2,7 +2,15 @@
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { CellComponentProps } from 'payload/types'
 
-import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react'
 
 import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 import type { Column } from '../Table/index.js'
@@ -11,8 +19,10 @@ import type { Action } from './columnReducer.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import { buildColumns } from './buildColumns.js'
+import { buildColumnState } from './buildColumnState.js'
 import { columnReducer } from './columnReducer.js'
+import { filterFields } from './filterFields.js'
+import { getInitialColumns } from './getInitialColumns.js'
 
 export interface ITableColumns {
   columns: Column[]
@@ -64,12 +74,15 @@ export const TableColumnsProvider: React.FC<Props> = ({
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()
+  const [initialColumns] = useState<string[]>(() =>
+    getInitialColumns(filterFields(fieldMap), useAsTitle, defaultColumns),
+  )
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
-    return buildColumns({
+    return buildColumnState({
       cellProps,
       columnPreferences: listPreferences?.columns,
-      defaultColumns,
+      columns: initialColumns,
       enableRowSelections,
       fieldMap,
       useAsTitle,
@@ -94,10 +107,10 @@ export const TableColumnsProvider: React.FC<Props> = ({
           dispatchTableColumns({
             type: 'set',
             payload: {
-              columns: buildColumns({
+              columns: buildColumnState({
                 cellProps,
                 columnPreferences: currentPreferences?.columns,
-                defaultColumns,
+                columns: initialColumns,
                 enableRowSelections: true,
                 fieldMap,
                 useAsTitle,

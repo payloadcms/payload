@@ -14,19 +14,19 @@ import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 const fieldIsPresentationalOnly = (field: MappedField): boolean => field.type === 'ui'
 
-export const buildColumns = (args: {
+export const buildColumnState = (args: {
   cellProps: Partial<CellComponentProps>[]
   columnPreferences: ColumnPreferences
-  defaultColumns?: string[]
+  columns?: string[]
   enableRowSelections: boolean
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
 }): Column[] => {
-  const { cellProps, columnPreferences, defaultColumns, enableRowSelections, fieldMap } = args
+  const { cellProps, columnPreferences, columns, enableRowSelections, fieldMap } = args
 
   let sortedFieldMap = fieldMap
 
-  const sortTo = defaultColumns || columnPreferences
+  const sortTo = columnPreferences || columns
 
   if (sortTo) {
     // sort the fields to the order of `defaultColumns` or `columnPreferences`
@@ -51,8 +51,8 @@ export const buildColumns = (args: {
 
     if (columnPreference) {
       active = columnPreference.active
-    } else if (defaultColumns && Array.isArray(defaultColumns) && defaultColumns.length > 0) {
-      active = 'name' in field && defaultColumns.includes(field.name)
+    } else if (columns && Array.isArray(columns) && columns.length > 0) {
+      active = 'name' in field && columns.includes(field.name)
     } else if (activeColumnsIndices.length < 4) {
       active = true
     }
