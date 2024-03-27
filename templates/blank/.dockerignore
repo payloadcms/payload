@@ -1,0 +1,5 @@
+.vscode
+node_modules
+.env.example
+build
+dist
