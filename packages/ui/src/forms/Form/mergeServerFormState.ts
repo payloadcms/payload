@@ -1,5 +1,7 @@
 import type { FormState } from 'payload/types'
 
+import isDeepEqual from 'deep-equal'
+
 import { arraysHaveSameStrings } from '../../utilities/arraysHaveSameStrings.js'
 
 const propsToCheck = ['passesCondition', 'valid', 'errorMessage']
@@ -48,6 +50,13 @@ export const mergeServerFormState = (
           changed = true
         }
       })
+
+      if (
+        Array.isArray(newFieldState.rows) &&
+        !isDeepEqual(newFieldState.rows, oldState[path].rows)
+      ) {
+        changed = true
+      }
     })
   }
 
