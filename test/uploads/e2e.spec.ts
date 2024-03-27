@@ -76,8 +76,16 @@ describe('uploads', () => {
     await wait(110)
     const field = page.locator('.cell-image')
 
-    // WIP: this should be `image.png` which is the FileName
     await expect(field).toContainText('image.png')
+  })
+
+  test('should see upload versioned filename in relation list', async () => {
+    await page.goto(relationURL.list)
+
+    await wait(110)
+    const field = page.locator('.cell-versionedImage')
+
+    await expect(field).toContainText('image')
   })
 
   test('should show upload filename in upload collection list', async () => {
