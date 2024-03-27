@@ -2,8 +2,10 @@
 import type { SanitizedConfig } from 'payload/types'
 
 import LinkImport from 'next/link.js'
-import { useParams, usePathname, useSearchParams } from 'next/navigation.js'
+import { useParams, usePathname } from 'next/navigation.js'
 import React from 'react'
+
+import { useSearchParams } from '../../../../providers/SearchParams/index.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
@@ -26,8 +28,12 @@ export const DocumentTabLink: React.FC<{
   const pathname = usePathname()
   const params = useParams()
 
-  const searchParams = useSearchParams()
-  const locale = searchParams.get('locale')
+  const { searchParams } = useSearchParams()
+
+  const locale =
+    'locale' in searchParams && typeof searchParams.locale === 'string'
+      ? searchParams.locale
+      : undefined
 
   const [entityType, entitySlug, segmentThree, segmentFour, ...rest] = params.segments || []
   const isCollection = entityType === 'collections'
