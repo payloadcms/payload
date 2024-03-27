@@ -300,7 +300,8 @@ describe('access control', () => {
     const documentDrawer = page.locator('[id^=doc-drawer_user-restricted_1_]')
     await expect(documentDrawer).toBeVisible()
     await documentDrawer.locator('#field-name').fill('anonymous@email.com')
-    await saveDocAndAssert(page)
+    await documentDrawer.locator('#action-save').click()
+    await expect(page.locator('.Toastify')).toContainText('successfully')
 
     // ensure user is not allowed to edit this document
     await expect(documentDrawer.locator('#field-name')).toBeDisabled()
@@ -311,7 +312,8 @@ describe('access control', () => {
     const documentDrawer2 = page.locator('[id^=doc-drawer_user-restricted_1_]')
     await expect(documentDrawer2).toBeVisible()
     await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
-    await saveDocAndAssert(page)
+    await documentDrawer2.locator('#action-save').click()
+    await expect(page.locator('.Toastify')).toContainText('successfully')
 
     // ensure user is allowed to edit this document
     await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
