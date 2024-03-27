@@ -41,7 +41,15 @@ const Search =
                     })
                   },
                 ],
-                afterDelete: [...(existingHooks?.afterDelete || []), deleteFromSearch],
+                afterDelete: [
+                  ...(existingHooks?.afterDelete || []), 
+                  async (args: any) => {
+                    deleteFromSearch({
+                      ...args,
+                      searchConfig,
+                    })
+                  },
+                ],
               },
             }
           }

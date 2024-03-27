@@ -15,6 +15,8 @@ const syncWithSearch: SyncWithSearch = async (args) => {
 
   const { beforeSync, defaultPriorities, deleteDrafts, syncDrafts } = searchConfig as SearchConfig // todo fix SyncWithSearch type, see note in ./types.ts
 
+  const searchCollectionSlug = searchConfig.searchOverrides?.slug || 'search';
+
   let dataToSave: DocToSync = {
     doc: {
       relationTo: collection,
@@ -56,7 +58,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     if (operation === 'create') {
       if (doSync) {
         await payload.create({
-          collection: 'search',
+          collection: searchCollectionSlug,
           data: {
             ...dataToSave,
             priority: defaultPriority,
@@ -70,7 +72,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
       try {
         // find the correct doc to sync with
         const searchDocQuery = await payload.find({
-          collection: 'search',
+          collection: searchCollectionSlug,
           depth: 0,
           req,
           where: {
@@ -93,7 +95,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           try {
             const duplicativeDocIDs = duplicativeDocs.map(({ id }) => id)
             await payload.delete({
-              collection: 'search',
+              collection: searchCollectionSlug,
               req,
               where: { id: { in: duplicativeDocIDs } },
             })
@@ -110,7 +112,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
             try {
               await payload.update({
                 id: searchDocID,
-                collection: 'search',
+                collection: searchCollectionSlug,
                 data: {
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
@@ -126,7 +128,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
             try {
               await payload.delete({
                 id: searchDocID,
-                collection: 'search',
+                collection: searchCollectionSlug,
                 req,
               })
             } catch (err: unknown) {
@@ -136,7 +138,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
         } else if (doSync) {
           try {
             await payload.create({
-              collection: 'search',
+              collection: searchCollectionSlug,
               data: {
                 ...dataToSave,
                 priority: defaultPriority,
