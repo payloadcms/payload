@@ -13,6 +13,7 @@ import {
   initPageConsoleErrorCatch,
   openDocControls,
   openNav,
+  saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
@@ -248,7 +249,7 @@ describe('access control', () => {
       await expect(deleteAction).toBeHidden()
 
       await page.locator('#field-approvedForRemoval').check()
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       await openDocControls(page)
       const deleteAction2 = page.locator('#action-delete')
@@ -272,7 +273,7 @@ describe('access control', () => {
 
     // Allow access to test global.
     await page.locator('.checkbox-input:has(#field-test) input').check()
-    await page.locator('#action-save').click()
+    await saveDocAndAssert(page)
 
     await openNav(page)
 

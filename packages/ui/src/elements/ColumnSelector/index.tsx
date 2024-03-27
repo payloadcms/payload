@@ -41,7 +41,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       {columns.map((col, i) => {
         if (!col) return null
 
-        const { name, accessor, active, label } = col
+        const { Label, accessor, active } = col
 
         if (col.accessor === '_select') return null
 
@@ -60,7 +60,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
               toggleColumn(accessor)
             }}
           >
-            {label}
+            {Label}
           </Pill>
         )
       })}

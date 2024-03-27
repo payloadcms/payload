@@ -16,13 +16,13 @@
     "node": ">=18.19.0"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "3.0.0-alpha.48",
-    "@payloadcms/next": "3.0.0-alpha.48",
-    "@payloadcms/plugin-cloud": "3.0.0-alpha.48",
-    "@payloadcms/richtext-slate": "3.0.0-alpha.48",
+    "@payloadcms/db-mongodb": "alpha",
+    "@payloadcms/next": "alpha",
+    "@payloadcms/plugin-cloud": "alpha",
+    "@payloadcms/richtext-lexical": "alpha",
     "cross-env": "^7.0.3",
-    "next": "14.2.0-canary.7",
-    "payload": "3.0.0-alpha.48",
+    "next": "14.2.0-canary.23",
+    "payload": "alpha",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sharp": "0.32.6"

@@ -3,14 +3,18 @@ import type arg from 'arg'
 export interface Args extends arg.Spec {
   '--beta': BooleanConstructor
   '--db': StringConstructor
+  '--db-accept-recommended': BooleanConstructor
+  '--db-connection-string': StringConstructor
   '--debug': BooleanConstructor
   '--dry-run': BooleanConstructor
   '--help': BooleanConstructor
   '--init-next': BooleanConstructor
+  '--local-template': StringConstructor
   '--name': StringConstructor
   '--no-deps': BooleanConstructor
   '--secret': StringConstructor
   '--template': StringConstructor
+  '--template-branch': StringConstructor
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
   '--use-yarn': BooleanConstructor
@@ -50,7 +54,7 @@ interface Template {
   type: ProjectTemplate['type']
 }
 
-export type PackageManager = 'npm' | 'pnpm' | 'yarn'
+export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
 export type DbType = 'mongodb' | 'postgres'
 
@@ -59,5 +63,4 @@ export type DbDetails = {
   type: DbType
 }
 
-export type BundlerType = 'vite' | 'webpack'
 export type EditorType = 'lexical' | 'slate'

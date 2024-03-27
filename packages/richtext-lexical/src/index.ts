@@ -1,14 +1,12 @@
 import type { JSONSchema4 } from 'json-schema'
-import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
-import type { RichTextAdapter } from 'payload/types'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'
 import type { SanitizedServerEditorConfig } from './field/lexical/config/types.js'
-import type { AdapterProps } from './types.js'
+import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapter } from './types.js'
 
 import { RichTextCell } from './cell/index.js'
 import { RichTextField } from './field/index.js'
@@ -24,22 +22,6 @@ import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise.js'
 import { richTextValidateHOC } from './validate/index.js'
-
-export type LexicalEditorProps = {
-  features?:
-    | (({
-        defaultFeatures,
-      }: {
-        defaultFeatures: FeatureProviderServer<unknown, unknown>[]
-      }) => FeatureProviderServer<unknown, unknown>[])
-    | FeatureProviderServer<unknown, unknown>[]
-  lexical?: LexicalEditorConfig
-}
-
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps, any> & {
-  editorConfig: SanitizedServerEditorConfig
-}
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapter {
   let resolvedFeatureMap: ResolvedServerFeatureMap = null
@@ -254,8 +236,10 @@ export {
   HTMLConverterFeature,
   type HTMLConverterFeatureProps,
 } from './field/features/converters/html/feature.server.js'
-export { consolidateHTMLConverters } from './field/features/converters/html/field/index.js'
-export { lexicalHTML } from './field/features/converters/html/field/index.js'
+export {
+  consolidateHTMLConverters,
+  lexicalHTML,
+} from './field/features/converters/html/field/index.js'
 export { createClientComponent } from './field/features/createClientComponent.js'
 export { TestRecorderFeature } from './field/features/debug/testrecorder/feature.server.js'
 export { TreeViewFeature } from './field/features/debug/treeview/feature.server.js'
@@ -431,3 +415,5 @@ export {
 } from './field/lexical/utils/swipe.js'
 export { sanitizeUrl, validateUrl } from './field/lexical/utils/url.js'
 export { defaultRichTextValue } from './populate/defaultValue.js'
+
+export type { LexicalEditorProps, LexicalRichTextAdapter } from './types.js'

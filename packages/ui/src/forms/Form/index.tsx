@@ -5,7 +5,7 @@ import type { FormState } from 'payload/types'
 import isDeepEqual from 'deep-equal'
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { wait } from 'payload/utilities'
+import { deepCopyObject, wait } from 'payload/utilities'
 import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -530,7 +530,7 @@ export const Form: React.FC<FormProps> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState = fields
+          let revalidatedFormState: FormState = contextRef.current.fields
 
           for (const onChangeFn of onChange) {
             revalidatedFormState = await onChangeFn({
@@ -538,10 +538,17 @@ export const Form: React.FC<FormProps> = (props) => {
             })
           }
 
-          const { changed, newState } = mergeServerFormState(fields || {}, revalidatedFormState)
+          const { changed, newState } = mergeServerFormState(
+            contextRef.current.fields || {},
+            revalidatedFormState,
+          )
 
           if (changed) {
-            dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: newState })
+            dispatchFields({
+              type: 'REPLACE_STATE',
+              optimize: false,
+              state: newState,
+            })
           }
         }
       }
@@ -549,7 +556,9 @@ export const Form: React.FC<FormProps> = (props) => {
       if (modified) void executeOnChange()
     },
     150,
-    [fields, dispatchFields, onChange],
+    // Make sure we trigger this whenever modified changes (not just when `fields` changes), otherwise we will miss merging server form state for the first form update/onChange. Here's why:
+    // `fields` updates before `modified`, because setModified is in a setTimeout. So on the first change, modified is false, so we don't trigger the effect even though we should.
+    [contextRef.current.fields, dispatchFields, onChange, modified],
   )
 
   const actionString =

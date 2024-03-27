@@ -17,14 +17,13 @@ const ObjectId = (ObjectIdImport.default ||
 export function fieldReducer(state: FormState, action: FieldAction): FormState {
   switch (action.type) {
     case 'REPLACE_STATE': {
-      const newState = {}
-
       if (action.optimize !== false) {
         // Only update fields that have changed
         // by comparing old value / initialValue to new
         // ..
         // This is a performance enhancement for saving
         // large documents with hundreds of fields
+        const newState = {}
 
         Object.entries(action.state).forEach(([path, field]) => {
           const oldField = state[path]
@@ -36,12 +35,10 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             newState[path] = oldField
           }
         })
-      } else {
-        // If we're not optimizing, just set the state to the new state
-        return action.state
+        return newState
       }
-
-      return newState
+      // If we're not optimizing, just set the state to the new state
+      return action.state
     }
 
     case 'REMOVE': {
@@ -114,7 +111,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const withNewRow = [...(state[path]?.rows || [])]
 
       const newRow: Row = {
-        id: new ObjectId().toHexString(),
+        id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
       }

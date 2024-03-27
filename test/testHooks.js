@@ -2,7 +2,6 @@ import { existsSync, promises } from 'fs'
 import json5 from 'json5'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { execSync } from 'child_process'
 
 const { readFile, writeFile, rm } = promises
 const filename = fileURLToPath(import.meta.url)
@@ -40,8 +39,6 @@ export const createTestHooks = async (testSuiteName = '_community') => {
       tsConfig.compilerOptions.paths['@payload-config'] = ['./test/_community/config.ts']
 
       await writeFile(tsConfigPath, JSON.stringify(tsConfig, null, 2) + '\n')
-
-      execSync(`prettier --write ${tsConfigPath}`, { cwd: path.resolve(dirname, '../') })
     },
   }
 }

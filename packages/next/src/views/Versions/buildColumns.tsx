@@ -29,6 +29,7 @@ export const buildVersionColumns = ({
 }): Column[] => [
   {
     name: '',
+    Label: '',
     accessor: 'updatedAt',
     active: true,
     components: {
@@ -39,28 +40,27 @@ export const buildVersionColumns = ({
           globalSlug={globalConfig?.slug}
         />
       ),
-      Heading: <SortColumn label={t('general:updatedAt')} name="updatedAt" />,
+      Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
     },
-    label: '',
   },
   {
     name: '',
+    Label: '',
     accessor: 'id',
     active: true,
     components: {
       Cell: <IDCell />,
-      Heading: <SortColumn disable label={t('version:versionID')} name="id" />,
+      Heading: <SortColumn Label={t('version:versionID')} disable name="id" />,
     },
-    label: '',
   },
   {
     name: '',
+    Label: '',
     accessor: 'autosave',
     active: true,
     components: {
       Cell: <AutosaveCell />,
-      Heading: <SortColumn disable label={t('version:type')} name="autosave" />,
+      Heading: <SortColumn Label={t('version:type')} disable name="autosave" />,
     },
-    label: '',
   },
 ]

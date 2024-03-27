@@ -181,7 +181,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount =
-    rows.reduce((total, row) => total + (row?.errorPaths?.size || 0), 0) + (valid ? 0 : 1)
+    rows.reduce((total, row) => total + (row?.errorPaths?.length || 0), 0) + (valid ? 0 : 1)
 
   const fieldHasErrors = submitted && fieldErrorCount > 0
 

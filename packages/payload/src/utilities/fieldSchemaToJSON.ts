@@ -1,4 +1,4 @@
-import type { FieldTypes } from '../exports/config.js'
+import type { FieldTypes } from '../admin/forms/FieldTypes.js'
 import type { ClientFieldConfig } from '../fields/config/client.js'
 
 export type FieldSchemaJSON = {

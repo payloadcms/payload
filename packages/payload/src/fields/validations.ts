@@ -1,4 +1,5 @@
-import type { RichTextAdapter, Where } from '../exports/types.js'
+import type { RichTextAdapter } from '../admin/types.js'
+import type { Where } from '../types/index.js'
 import type {
   ArrayField,
   BlockField,

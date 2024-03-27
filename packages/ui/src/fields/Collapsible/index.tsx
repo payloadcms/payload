@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, RowLabel as RowLabelType } from 'payload/types'
+import type { DocumentPreferences, FieldBase, RowLabel as RowLabelType } from 'payload/types'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -28,6 +28,7 @@ import type { FormFieldBase } from '../shared/index.js'
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
   initCollapsed?: boolean
+  label?: FieldBase['label']
   permissions: FieldPermissions
   width?: string
 }

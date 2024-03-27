@@ -117,7 +117,7 @@ export const DefaultCell: React.FC<CellComponentProps> = (props) => {
       return (
         <WrapElement {...wrapElementProps}>
           {(cellData === '' || typeof cellData === 'undefined') &&
-            label &&
+            'label' in props &&
             i18n.t('general:noLabel', {
               label: getTranslation(label || 'data', i18n),
             })}

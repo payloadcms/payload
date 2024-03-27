@@ -32,7 +32,7 @@ async function navigateToLexicalFields() {
   const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
   await page.goto(url.list)
   const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
-  await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: 45000 })
+  await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
   const linkDocHref = await linkToDoc.getAttribute('href')
 
   await linkToDoc.click()
@@ -718,7 +718,7 @@ describe('lexical', () => {
       await expect(nestedEditorParagraph).toHaveText('Some text below relationship node 12345')
     })
 
-    test.skip('should respect row removal in nested array field', async () => {
+    test('should respect row removal in nested array field', async () => {
       await navigateToLexicalFields()
       const richTextField = page.locator('.rich-text-lexical').nth(1) // second
       await richTextField.scrollIntoViewIfNeeded()
