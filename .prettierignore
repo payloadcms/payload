@@ -9,4 +9,4 @@
 **/node_modules
 **/temp
 **/docs/**
-./tsconfig.json
+tsconfig.json
