@@ -111,7 +111,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const withNewRow = [...(state[path]?.rows || [])]
 
       const newRow: Row = {
-        id: (subFieldState?.id.value as string) || new ObjectId().toHexString(),
+        id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
       }
