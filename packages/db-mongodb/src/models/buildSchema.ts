@@ -58,7 +58,10 @@ type FieldSchemaGenerator = (
 const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSchemaOptions) => {
   const { disableUnique, draftsEnabled, indexSortableFields } = buildSchemaOptions
   const schema: SchemaTypeOptions<unknown> = {
-    index: field.index || (!disableUnique && field.unique) || indexSortableFields || false,
+    index:
+      field.index !== undefined
+        ? field.index
+        : (!disableUnique && field.unique) || indexSortableFields || false,
     required: false,
     unique: (!disableUnique && field.unique) || false,
   }
@@ -190,6 +193,13 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       blockItem.fields.forEach((blockField) => {
         const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type]
         if (addFieldSchema) {
+          // If user has explicitly configured index, drill it down to the block field
+          if (field.index !== undefined) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error UIField does not have index property, but it works as it will never reach here (no ui in fieldToSchemaMap)
+            blockField.index = field.index
+          }
+
           addFieldSchema(blockField, blockSchema, config, buildSchemaOptions)
         }
       })
@@ -486,6 +496,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[subField.type]
 
       if (addFieldSchema) {
+        // If user has explicitly configured index, drill it down to the row field
+        if (field.index !== undefined) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error UIField does not have index property, but it works as it will never reach here (no ui in fieldToSchemaMap) (same as in blocks)
+          subField.index = field.index
+        }
         addFieldSchema(subField, schema, config, buildSchemaOptions)
       }
     })
