@@ -262,6 +262,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
         if (res.status < 400) {
           setSubmitted(false)
+          console.log(json)
 
           if (typeof onSuccess === 'function') onSuccess(json)
 
