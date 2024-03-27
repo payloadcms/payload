@@ -7,10 +7,13 @@ export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
 
 const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResponse => {
   if (incoming) {
+    // Cannot use `instanceof` to check error type: https://github.com/microsoft/TypeScript/issues/13965
+    // Instead, get the prototype of the incoming error and check its constructor name
     const proto = Object.getPrototypeOf(incoming)
 
+    // Payload 'ValidationError' and 'APIError'
     if (
-      (proto.constructor.name === 'APIError' || proto.constructor.name === 'ValidationError') &&
+      (proto.constructor.name === 'ValidationError' || proto.constructor.name === 'APIError') &&
       incoming.data
     ) {
       return {
@@ -24,13 +27,8 @@ const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorRes
       }
     }
 
-    // mongoose
-    if (
-      proto.constructor.name !== 'APIError' &&
-      proto.constructor.name !== 'ValidationError' &&
-      'errors' in incoming &&
-      incoming.errors
-    ) {
+    // Mongoose 'ValidationError': https://mongoosejs.com/docs/api/error.html#Error.ValidationError
+    if (proto.constructor.name === 'ValidationError' && 'errors' in incoming && incoming.errors) {
       return {
         errors: Object.keys(incoming.errors).reduce((acc, key) => {
           acc.push({
