@@ -16,6 +16,7 @@ export { TableCellProvider }
 const baseClass = 'table'
 
 export type Column = {
+  Label: React.ReactNode
   accessor: string
   active: boolean
   cellProps?: Partial<CellComponentProps>
@@ -23,7 +24,6 @@ export type Column = {
     Cell: React.ReactNode
     Heading: React.ReactNode
   }
-  label: React.ReactNode
   name: FieldBase['name']
 }
 

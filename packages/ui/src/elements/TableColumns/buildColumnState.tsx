@@ -72,20 +72,24 @@ export const buildColumnState = (args: {
         <DefaultCell {...field.cellComponentProps} />
       )
 
+    const Label = (
+      <FieldLabel
+        CustomLabel={field.fieldComponentProps.CustomLabel}
+        {...field.fieldComponentProps.labelProps}
+        unstyled
+      />
+    )
+
     const Heading = (
       <SortColumn
+        Label={Label}
         disable={
           ('disableSort' in field && Boolean(field.disableSort)) ||
           fieldIsPresentationalOnly(field) ||
           undefined
         }
-        label={
-          <FieldLabel
-            CustomLabel={field.fieldComponentProps.CustomLabel}
-            {...field.fieldComponentProps.labelProps}
-            unstyled
-          />
-        }
+        // eslint-disable-next-line react/jsx-no-duplicate-props
+        label={'label' in field.fieldComponentProps ? field.fieldComponentProps.label : undefined}
         name={'name' in field ? field.name : undefined}
       />
     )
@@ -93,6 +97,7 @@ export const buildColumnState = (args: {
     if (field) {
       const column: Column = {
         name,
+        Label,
         accessor: name,
         active,
         cellProps: {
@@ -103,13 +108,6 @@ export const buildColumnState = (args: {
           Cell,
           Heading,
         },
-        label: (
-          <FieldLabel
-            CustomLabel={field.fieldComponentProps.CustomLabel}
-            {...field.fieldComponentProps.labelProps}
-            unstyled
-          />
-        ),
       }
 
       acc.push(column)
