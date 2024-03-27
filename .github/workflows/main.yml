@@ -228,7 +228,7 @@ jobs:
           # - plugin-nested-docs
           # - plugin-seo
           # - refresh-permissions
-          # - uploads
+          - uploads
           # - versions
 
     steps:
