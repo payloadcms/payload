@@ -18,11 +18,14 @@ const totalToShow = 3
 
 export interface RelationshipCellProps extends DefaultCellComponentProps<any> {
   label: CellComponentProps['label']
+  name: CellComponentProps['name']
   relationTo: CellComponentProps['relationTo']
 }
 
 export const RelationshipCell: React.FC<RelationshipCellProps> = ({
+  name: fieldName,
   cellData,
+  customCellContext: { collectionSlug = '' },
   label,
   relationTo,
 }) => {
@@ -33,20 +36,35 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
   const { documents, getRelationships } = useListRelationships()
   const [hasRequested, setHasRequested] = useState(false)
   const { i18n, t } = useTranslation()
-
   const isAboveViewport = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
 
   useEffect(() => {
     if (cellData && isAboveViewport && !hasRequested) {
       const formattedValues: Value[] = []
-
       const arrayCellData = Array.isArray(cellData) ? cellData : [cellData]
       arrayCellData
         .slice(0, arrayCellData.length < totalToShow ? arrayCellData.length : totalToShow)
         .forEach((cell) => {
-          if (typeof cell === 'object' && 'relationTo' in cell && 'value' in cell) {
+          const cellHasRelationTo =
+            typeof cell === 'object' && 'relationTo' in cell && 'value' in cell
+
+          if (!cellHasRelationTo) {
+            const currentCollection = collections.find(({ slug }) => slug === collectionSlug) as any
+            const currentField = currentCollection.fields.find(({ name }) => name === fieldName)
+            const currentFieldRelationTo = currentField?.relationTo
+
+            if (currentFieldRelationTo) {
+              formattedValues.push({
+                relationTo: currentFieldRelationTo,
+                value: cell,
+              })
+            }
+          }
+
+          if (cellHasRelationTo) {
             formattedValues.push(cell)
           }
+
           if (
             (typeof cell === 'number' || typeof cell === 'string') &&
             typeof relationTo === 'string'
@@ -63,6 +81,8 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
     }
   }, [
     cellData,
+    collectionSlug,
+    fieldName,
     relationTo,
     collections,
     isAboveViewport,
