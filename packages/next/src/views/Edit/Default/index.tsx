@@ -41,7 +41,6 @@ export const DefaultEditView: React.FC = () => {
     action,
     apiURL,
     collectionSlug,
-    data,
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
@@ -50,6 +49,7 @@ export const DefaultEditView: React.FC = () => {
     getVersions,
     globalSlug,
     hasSavePermission,
+    initialData: data,
     initialState,
     isEditing,
     onSave: onSaveFromContext,
@@ -122,19 +122,19 @@ export const DefaultEditView: React.FC = () => {
           ...json,
           operation: id ? 'update' : 'create',
         })
+      }
+
+      if (!isEditing) {
+        // Redirect to the same locale if it's been set
+        const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
+        router.push(redirectRoute)
       } else {
-        if (!isEditing) {
-          // Redirect to the same locale if it's been set
-          const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
-          router.push(redirectRoute)
-        } else {
-          dispatchFormQueryParams({
-            type: 'SET',
-            params: {
-              uploadEdits: null,
-            },
-          })
-        }
+        dispatchFormQueryParams({
+          type: 'SET',
+          params: {
+            uploadEdits: null,
+          },
+        })
       }
     },
     [
