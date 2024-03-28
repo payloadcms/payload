@@ -52,30 +52,6 @@ export const mergeServerFormState = (
         }
       })
 
-      /**
-       * Handle rows
-       */
-      if (Array.isArray(newFieldState.rows) && newFieldState?.rows.length) {
-        let i = 0
-        for (const row of newFieldState.rows) {
-          const incomingRow = incomingState[path]?.rows?.[i]
-          if (incomingRow) {
-            const errorPathsRowResult = mergeErrorPaths(
-              row.errorPaths,
-              incomingRow.errorPaths as unknown as string[],
-            )
-            if (errorPathsRowResult.result) {
-              if (errorPathsResult.changed) {
-                changed = true
-              }
-              incomingRow.errorPaths = errorPathsRowResult.result
-            }
-          }
-
-          i++
-        }
-      }
-
       // Conditions don't work if we don't memcopy the new state, as the object references would otherwise be the same
       newState[path] = { ...newFieldState }
     })
