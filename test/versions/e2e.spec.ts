@@ -330,6 +330,7 @@ describe('versions', () => {
 
       await page.goto(autosaveURL.create)
       await page.waitForURL(`**/${autosaveURL.create}`)
+      await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain(autosaveURL.create)
       const titleField = page.locator('#field-title')
       const descriptionField = page.locator('#field-description')
 
@@ -354,7 +355,6 @@ describe('versions', () => {
 
       // change locale to spanish
       await changeLocale(page, es)
-      await waitForAutoSaveToComplete(page)
 
       // reload page in spanish
       // title should not be english title
