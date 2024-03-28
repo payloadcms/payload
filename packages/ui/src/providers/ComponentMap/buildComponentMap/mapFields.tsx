@@ -199,8 +199,6 @@ export const mapFields = (args: {
               ? field.label
               : undefined,
           labels: 'labels' in field ? field.labels : undefined,
-          options: 'options' in field ? field.options : undefined,
-          relationTo: 'relationTo' in field ? field.relationTo : undefined,
         }
 
         switch (field.type) {
@@ -493,6 +491,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
+            cellComponentProps.relationTo = field.relationTo
             fieldComponentProps = relationshipField
             break
           }
@@ -510,6 +509,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
+            cellComponentProps.options = field.options
             fieldComponentProps = radioField
             break
           }
@@ -664,6 +664,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
+            cellComponentProps.relationTo = field.relationTo
             fieldComponentProps = uploadField
             break
           }
@@ -683,6 +684,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
+            cellComponentProps.options = field.options
             fieldComponentProps = selectField
             break
           }
