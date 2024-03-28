@@ -27,6 +27,7 @@ export type BuildFormStateArgs = {
   formState?: FormState
   globalSlug?: string
   id?: number | string
+  locale?: string
   operation?: 'create' | 'update'
   schemaPath: string
 }
