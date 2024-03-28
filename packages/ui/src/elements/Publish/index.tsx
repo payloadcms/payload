@@ -1,10 +1,8 @@
 'use client'
-import type { CustomPublishButtonProps, DefaultPublishButtonProps } from 'payload/types'
 
 import qs from 'qs'
 import React, { useCallback } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -12,40 +10,22 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
-const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
-  id,
-  canPublish,
-  disabled,
-  label,
-  publish,
-}) => {
-  if (!canPublish) return null
-
-  return (
-    <FormSubmit buttonId={id} disabled={disabled} onClick={publish} size="small" type="button">
-      {label}
-    </FormSubmit>
-  )
-}
-
-type Props = {
-  CustomComponent?: CustomPublishButtonProps
-}
-
-export const Publish: React.FC<Props> = ({ CustomComponent }) => {
+const DefaultPublishButton: React.FC = () => {
   const { code } = useLocale()
   const { id, collectionSlug, globalSlug, publishedDoc, unpublishedVersions } = useDocumentInfo()
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
   const { getData, submit } = useForm()
   const modified = useFormModified()
+
   const {
     routes: { api },
     serverURL,
   } = useConfig()
   const { t } = useTranslation()
+  const label = t('version:publishChanges')
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0
-  const canPublish = modified || hasNewerVersions || !publishedDoc
+  const canPublish = hasPublishPermission && (modified || hasNewerVersions || !publishedDoc)
 
   const publish = useCallback(() => {
     void submit({
@@ -95,18 +75,27 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
     void fetchPublishAccess()
   }, [api, code, collectionSlug, getData, globalSlug, id, serverURL])
 
+  if (!canPublish) return null
+
   return (
-    <RenderCustomComponent
-      CustomComponent={CustomComponent}
-      DefaultComponent={DefaultPublishButton}
-      componentProps={{
-        id: 'action-save',
-        DefaultButton: DefaultPublishButton,
-        canPublish: hasPublishPermission,
-        disabled: !canPublish,
-        label: t('version:publishChanges'),
-        publish,
-      }}
-    />
+    <FormSubmit
+      buttonId="action-save"
+      disabled={!canPublish}
+      onClick={publish}
+      size="small"
+      type="button"
+    >
+      {label}
+    </FormSubmit>
   )
+}
+
+type Props = {
+  CustomComponent?: React.ReactNode
+}
+
+export const Publish: React.FC<Props> = ({ CustomComponent }) => {
+  if (CustomComponent) return CustomComponent
+
+  return <DefaultPublishButton />
 }

@@ -7,6 +7,7 @@ import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useField } from '@payloadcms/ui/forms/useField'
+import { withCondition } from '@payloadcms/ui/forms/withCondition'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -17,7 +18,7 @@ import { LexicalProvider } from './lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'
 
-export const RichText: React.FC<
+const _RichText: React.FC<
   FormFieldBase & {
     editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
     name: string
@@ -127,3 +128,5 @@ function fallbackRender({ error }): React.ReactElement {
     </div>
   )
 }
+
+export const RichText = withCondition(_RichText)

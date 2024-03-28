@@ -4,5 +4,5 @@ import React, { Fragment } from 'react'
 
 export const IDCell: React.FC = () => {
   const { cellData } = useTableCell()
-  return <Fragment>{cellData}</Fragment>
+  return <Fragment>{cellData as number | string}</Fragment>
 }

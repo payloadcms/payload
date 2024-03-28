@@ -1,18 +1,26 @@
+import chalk from 'chalk'
 import fs from 'fs-extra'
 import path from 'path'
 
-import type { ProjectTemplate } from '../types.js'
+import type { CliArgs, ProjectTemplate } from '../types.js'
 
 import { error, success } from '../utils/log.js'
 
 /** Parse and swap .env.example values and write .env */
 export async function writeEnvFile(args: {
+  cliArgs: CliArgs
   databaseUri: string
   payloadSecret: string
   projectDir: string
   template: ProjectTemplate
 }): Promise<void> {
-  const { databaseUri, payloadSecret, projectDir, template } = args
+  const { cliArgs, databaseUri, payloadSecret, projectDir, template } = args
+
+  if (cliArgs['--dry-run']) {
+    success(`DRY RUN: .env file created`)
+    return
+  }
+
   try {
     if (template.type === 'starter' && fs.existsSync(path.join(projectDir, '.env.example'))) {
       // Parse .env file into key/value pairs

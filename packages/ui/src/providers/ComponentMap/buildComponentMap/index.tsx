@@ -64,6 +64,18 @@ export const buildComponentMap = (args: {
 
     const afterListTable = collectionConfig?.admin?.components?.AfterListTable
 
+    const SaveButtonComponent = collectionConfig?.admin?.components?.edit?.SaveButton
+    const SaveButton = SaveButtonComponent ? <SaveButtonComponent /> : undefined
+
+    const SaveDraftButtonComponent = collectionConfig?.admin?.components?.edit?.SaveDraftButton
+    const SaveDraftButton = SaveDraftButtonComponent ? <SaveDraftButtonComponent /> : undefined
+
+    /* const PreviewButtonComponent = collectionConfig?.admin?.components?.edit?.PreviewButton
+    const PreviewButton = PreviewButtonComponent ? <PreviewButtonComponent /> : undefined */
+
+    const PublishButtonComponent = collectionConfig?.admin?.components?.edit?.PublishButton
+    const PublishButton = PublishButtonComponent ? <PublishButtonComponent /> : undefined
+
     const BeforeList =
       (beforeList && Array.isArray(beforeList) && beforeList?.map((Component) => <Component />)) ||
       null
@@ -99,6 +111,10 @@ export const buildComponentMap = (args: {
       BeforeListTable,
       Edit: <Edit collectionSlug={collectionConfig.slug} />,
       List: <List collectionSlug={collectionConfig.slug} />,
+      /* PreviewButton, */
+      PublishButton,
+      SaveButton,
+      SaveDraftButton,
       actionsMap: mapActions({
         collectionConfig,
       }),
@@ -121,6 +137,18 @@ export const buildComponentMap = (args: {
 
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
+    const SaveButton = globalConfig?.admin?.components?.elements?.SaveButton
+    const SaveButtonComponent = SaveButton ? <SaveButton /> : undefined
+
+    const SaveDraftButton = globalConfig?.admin?.components?.elements?.SaveDraftButton
+    const SaveDraftButtonComponent = SaveDraftButton ? <SaveDraftButton /> : undefined
+
+    /* const PreviewButton = globalConfig?.admin?.components?.elements?.PreviewButton
+    const PreviewButtonComponent = PreviewButton ? <PreviewButton /> : undefined */
+
+    const PublishButton = globalConfig?.admin?.components?.elements?.PublishButton
+    const PublishButtonComponent = PublishButton ? <PublishButton /> : undefined
+
     const CustomEditView =
       typeof editViewFromConfig === 'function'
         ? editViewFromConfig
@@ -136,6 +164,10 @@ export const buildComponentMap = (args: {
 
     const componentMap: GlobalComponentMap = {
       Edit: <Edit globalSlug={globalConfig.slug} />,
+      /* PreviewButton: PreviewButtonComponent, */
+      PublishButton: PublishButtonComponent,
+      SaveButton: SaveButtonComponent,
+      SaveDraftButton: SaveDraftButtonComponent,
       actionsMap: mapActions({
         globalConfig,
       }),

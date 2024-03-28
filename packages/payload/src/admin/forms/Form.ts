@@ -8,7 +8,7 @@ export type Data = {
 export type Row = {
   blockType?: string
   collapsed?: boolean
-  errorPaths?: Set<string>
+  errorPaths?: string[]
   id: string
 }
 
@@ -19,7 +19,7 @@ export type FilterOptionsResult = {
 export type FormField = {
   disableFormData?: boolean
   errorMessage?: string
-  errorPaths?: Set<string>
+  errorPaths?: string[]
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
   initialValue: unknown

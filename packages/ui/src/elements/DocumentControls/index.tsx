@@ -2,6 +2,7 @@
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
+import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import React, { Fragment } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -47,9 +48,15 @@ export const DocumentControls: React.FC<{
   const { i18n } = useTranslation()
 
   const config = useConfig()
+  const { getComponentMap } = useComponentMap()
 
   const collectionConfig = config.collections.find((coll) => coll.slug === slug)
   const globalConfig = config.globals.find((global) => global.slug === slug)
+
+  const componentMap = getComponentMap({
+    collectionSlug: collectionConfig?.slug,
+    globalSlug: globalConfig?.slug,
+  })
 
   const {
     admin: { dateFormat },
@@ -164,27 +171,12 @@ export const DocumentControls: React.FC<{
                       !collectionConfig?.versions?.drafts?.autosave) ||
                       (globalConfig?.versions?.drafts &&
                         !globalConfig?.versions?.drafts?.autosave)) && (
-                      <SaveDraft
-                        CustomComponent={
-                          collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
-                          globalConfig?.admin?.components?.elements?.SaveDraftButton
-                        }
-                      />
+                      <SaveDraft CustomComponent={componentMap.SaveDraftButton} />
                     )}
-                    <Publish
-                      CustomComponent={
-                        collectionConfig?.admin?.components?.edit?.PublishButton ||
-                        globalConfig?.admin?.components?.elements?.PublishButton
-                      }
-                    />
+                    <Publish CustomComponent={componentMap.PublishButton} />
                   </React.Fragment>
                 ) : (
-                  <Save
-                    CustomComponent={
-                      collectionConfig?.admin?.components?.edit?.SaveButton ||
-                      globalConfig?.admin?.components?.elements?.SaveButton
-                    }
-                  />
+                  <Save CustomComponent={componentMap.SaveButton} />
                 )}
               </React.Fragment>
             )}

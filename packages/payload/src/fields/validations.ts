@@ -1,4 +1,5 @@
-import type { RichTextAdapter, Where } from '../exports/types.js'
+import type { RichTextAdapter } from '../admin/types.js'
+import type { Where } from '../types/index.js'
 import type {
   ArrayField,
   BlockField,
@@ -354,12 +355,12 @@ const validateFilterOptions: Validate<
               falseCollections.push(collection)
             }
 
-            // `req` omitted to prevent transaction errors from aborting the entire transaction
             const result = await payload.find({
               collection,
               depth: 0,
               limit: 0,
               pagination: false,
+              req,
               where: findWhere,
             })
 

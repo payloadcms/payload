@@ -1,13 +1,13 @@
 'use client'
-import type { CellComponentProps, CellProps } from 'payload/types'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
-export interface BlocksCellProps extends CellComponentProps<any> {
-  blocks: CellProps['blocks']
-  labels: CellProps['labels']
+export interface BlocksCellProps extends DefaultCellComponentProps<any> {
+  blocks: CellComponentProps['blocks']
+  labels: CellComponentProps['labels']
 }
 
 export const BlocksCell: React.FC<BlocksCellProps> = ({ blocks, cellData, labels }) => {

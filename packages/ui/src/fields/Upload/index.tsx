@@ -1,5 +1,6 @@
 'use client'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { withCondition } from '@payloadcms/ui/forms/withCondition'
 import React, { useCallback } from 'react'
 
 import type { UploadInputProps } from './Input.js'
@@ -13,7 +14,7 @@ import './index.scss'
 export { UploadFieldProps, UploadInput }
 export type { UploadInputProps }
 
-export const Upload: React.FC<UploadFieldProps> = (props) => {
+const _Upload: React.FC<UploadFieldProps> = (props) => {
   const {
     CustomDescription,
     CustomError,
@@ -93,3 +94,5 @@ export const Upload: React.FC<UploadFieldProps> = (props) => {
 
   return null
 }
+
+export const Upload = withCondition(_Upload)

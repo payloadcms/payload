@@ -36,5 +36,9 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
 
   if (globalSlug) to = `${admin}/globals/${globalSlug}/versions/${versionID}`
 
-  return <Link href={to}>{cellData && formatDate(cellData, dateFormat, i18n.language)}</Link>
+  return (
+    <Link href={to}>
+      {cellData && formatDate(cellData as Date | number | string, dateFormat, i18n.language)}
+    </Link>
+  )
 }

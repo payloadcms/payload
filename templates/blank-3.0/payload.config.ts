@@ -1,12 +1,12 @@
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 import { payloadCloud } from '@payloadcms/plugin-cloud'
-import path from 'path' // database-adapter-import
-import { slateEditor } from '@payloadcms/richtext-slate' // editor-import
+import { lexicalEditor } from '@payloadcms/richtext-lexical' // editor-import
+import path from 'path'
 import { buildConfig } from 'payload/config'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
-import Users from './src/collections/Users'
+import { Users } from './src/collections/Users'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -16,7 +16,7 @@ export default buildConfig({
     user: Users.slug,
   },
   collections: [Users],
-  editor: slateEditor({}), // editor-config
+  editor: lexicalEditor({}),
   plugins: [payloadCloud()],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

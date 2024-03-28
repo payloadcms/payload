@@ -15,7 +15,6 @@ import { Form } from '@payloadcms/ui/forms/Form'
 import { FormSubmit } from '@payloadcms/ui/forms/Submit'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import { useRouter } from 'next/navigation.js'
 
 import './index.scss'
 
@@ -29,7 +28,6 @@ export const LoginForm: React.FC<{
     routes: { admin, api },
   } = config
 
-  const router = useRouter()
   const { t } = useTranslation()
 
   const prefillForm = autoLogin && autoLogin.prefillOnly
@@ -54,10 +52,7 @@ export const LoginForm: React.FC<{
       disableSuccessStatus
       initialState={initialState}
       method="POST"
-      onSuccess={() => {
-        router.push(admin)
-      }}
-      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : ''}
+      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : admin}
       waitForAutocomplete
     >
       <FormLoadingOverlayToggle action="loading" name="login-form" />

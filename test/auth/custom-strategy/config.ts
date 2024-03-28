@@ -68,7 +68,7 @@ export default buildConfigWithDefaults({
         {
           name: 'roles',
           type: 'select',
-          defaultValue: 'user',
+          defaultValue: ['user'],
           hasMany: true,
           label: 'Role',
           options: ['admin', 'editor', 'moderator', 'user', 'viewer'],

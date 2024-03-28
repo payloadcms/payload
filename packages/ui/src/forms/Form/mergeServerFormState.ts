@@ -1,8 +1,8 @@
 import type { FormState } from 'payload/types'
 
-import { arraysHaveSameStrings } from '../../utilities/arraysHaveSameStrings.js'
+import { mergeErrorPaths } from './mergeErrorPaths.js'
 
-const propsToCheck = ['passesCondition', 'valid', 'errorMessage']
+const serverPropsToAccept = ['passesCondition', 'valid', 'errorMessage']
 
 /**
  * Merges certain properties from the server state into the client state. These do not include values,
@@ -12,42 +12,72 @@ const propsToCheck = ['passesCondition', 'valid', 'errorMessage']
  * is the thing we want to keep in sync with the server (where it's calculated) on the client.
  */
 export const mergeServerFormState = (
-  oldState: FormState,
-  newState: FormState,
+  existingState: FormState,
+  incomingState: FormState,
 ): { changed: boolean; newState: FormState } => {
   let changed = false
 
-  if (oldState) {
-    Object.entries(newState).forEach(([path, newFieldState]) => {
-      if (!oldState[path]) return
+  const newState = {}
 
-      newFieldState.initialValue = oldState[path].initialValue
-      newFieldState.value = oldState[path].value
+  if (existingState) {
+    Object.entries(existingState).forEach(([path, newFieldState]) => {
+      if (!incomingState[path]) return
 
-      const oldErrorPaths: string[] = []
-      const newErrorPaths: string[] = []
+      /**
+       * Handle error paths
+       */
 
-      if (oldState[path].errorPaths instanceof Set) {
-        oldState[path].errorPaths.forEach((path) => oldErrorPaths.push(path))
+      const errorPathsResult = mergeErrorPaths(
+        newFieldState.errorPaths,
+        incomingState[path].errorPaths as unknown as string[],
+      )
+      if (errorPathsResult.result) {
+        if (errorPathsResult.changed) {
+          changed = errorPathsResult.changed
+        }
+        newFieldState.errorPaths = errorPathsResult.result
       }
 
-      if (
-        newFieldState.errorPaths &&
-        !Array.isArray(newFieldState.errorPaths) &&
-        typeof newFieldState.errorPaths
-      ) {
-        Object.values(newFieldState.errorPaths).forEach((path) => newErrorPaths.push(path))
-      }
-
-      if (!arraysHaveSameStrings(oldErrorPaths, newErrorPaths)) {
-        changed = true
-      }
-
-      propsToCheck.forEach((prop) => {
-        if (newFieldState[prop] != oldState[path][prop]) {
+      /**
+       * Handle the rest which is in serverPropsToAccept
+       */
+      serverPropsToAccept.forEach((prop) => {
+        if (incomingState[path]?.[prop] !== newFieldState[prop]) {
           changed = true
+          if (!(prop in incomingState[path])) {
+            delete newFieldState[prop]
+          } else {
+            newFieldState[prop] = incomingState[path][prop]
+          }
         }
       })
+
+      /**
+       * Handle rows
+       */
+      if (Array.isArray(newFieldState.rows) && newFieldState?.rows.length) {
+        let i = 0
+        for (const row of newFieldState.rows) {
+          const incomingRow = incomingState[path]?.rows?.[i]
+          if (incomingRow) {
+            const errorPathsRowResult = mergeErrorPaths(
+              row.errorPaths,
+              incomingRow.errorPaths as unknown as string[],
+            )
+            if (errorPathsRowResult.result) {
+              if (errorPathsResult.changed) {
+                changed = true
+              }
+              incomingRow.errorPaths = errorPathsRowResult.result
+            }
+          }
+
+          i++
+        }
+      }
+
+      // Conditions don't work if we don't memcopy the new state, as the object references would otherwise be the same
+      newState[path] = { ...newFieldState }
     })
   }
 

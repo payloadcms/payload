@@ -1,7 +1,7 @@
 import type { forgotPasswordOperation } from '../../auth/operations/forgotPassword.js'
 import type { loginOperation } from '../../auth/operations/login.js'
 import type { refreshOperation } from '../../auth/operations/refresh.js'
-import type { PayloadRequest } from '../../exports/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { AfterOperationHook, SanitizedCollectionConfig, TypeWithID } from '../config/types.js'
 import type { createOperation } from './create.js'
 import type { deleteOperation } from './delete.js'

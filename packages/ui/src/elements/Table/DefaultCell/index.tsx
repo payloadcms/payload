@@ -2,7 +2,7 @@
 import LinkImport from 'next/link.js'
 import React from 'react' // TODO: abstract this out to support all routers
 
-import type { CellProps } from 'payload/types'
+import type { CellComponentProps, DefaultCellComponentProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { TableCellProvider, useTableCell } from '@payloadcms/ui/elements/Table'
@@ -14,7 +14,7 @@ import { cellComponents } from './fields/index.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const DefaultCell: React.FC<CellProps> = (props) => {
+export const DefaultCell: React.FC<CellComponentProps> = (props) => {
   const {
     name,
     CellComponentOverride,
@@ -77,12 +77,12 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
   if (name === 'id') {
     return (
       <WrapElement {...wrapElementProps}>
-        <CodeCell cellData={`ID: ${cellData}`} nowrap />
+        <CodeCell cellData={`ID: ${cellData}`} name={name} nowrap rowData={rowData} />
       </WrapElement>
     )
   }
 
-  const DefaultCellComponent = cellComponents[fieldType]
+  const DefaultCellComponent: React.FC<DefaultCellComponentProps> = cellComponents[fieldType]
 
   let CellComponent: React.ReactNode =
     cellData &&
@@ -117,7 +117,7 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
       return (
         <WrapElement {...wrapElementProps}>
           {(cellData === '' || typeof cellData === 'undefined') &&
-            label &&
+            'label' in props &&
             i18n.t('general:noLabel', {
               label: getTranslation(label || 'data', i18n),
             })}

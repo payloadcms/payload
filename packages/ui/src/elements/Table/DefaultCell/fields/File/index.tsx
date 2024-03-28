@@ -1,5 +1,5 @@
 'use client'
-import type { CellComponentProps } from 'payload/types'
+import type { DefaultCellComponentProps } from 'payload/types'
 
 import { Thumbnail } from '@payloadcms/ui/elements/Thumbnail'
 import React from 'react'
@@ -8,7 +8,7 @@ import './index.scss'
 
 const baseClass = 'file'
 
-export interface FileCellProps extends CellComponentProps<any> {}
+export interface FileCellProps extends DefaultCellComponentProps<any> {}
 
 export const FileCell: React.FC<FileCellProps> = ({ cellData, customCellContext, rowData }) => {
   const { collectionSlug, uploadConfig } = customCellContext

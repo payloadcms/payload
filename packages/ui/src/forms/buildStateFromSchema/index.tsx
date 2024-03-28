@@ -40,7 +40,7 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
     await iterateFields({
       id,
       data: fullData,
-      errorPaths: new Set(),
+      errorPaths: [],
       fields: fieldSchema,
       fullData,
       operation,

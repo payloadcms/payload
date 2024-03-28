@@ -23,7 +23,7 @@ export type AddFieldStatePromiseArgs = {
    */
   anyParentLocalized?: boolean
   data: Data
-  errorPaths: Set<string>
+  errorPaths: string[]
   field: NonPresentationalField
   /**
    * You can use this to filter down to only `localized` fields that require translation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
@@ -74,7 +74,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     anyParentLocalized = false,
     data,
-    errorPaths: parentErrorPaths,
+    errorPaths: parentErrorPaths = [],
     field,
     filter,
     forceFullValue = false,
@@ -95,7 +95,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const validate = operation === 'update' ? field.validate : undefined
 
     const fieldState: FormField = {
-      errorPaths: new Set(),
+      errorPaths: [],
       fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       passesCondition,
@@ -144,7 +144,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldState.valid = false
       // TODO: this is unpredictable, need to figure out why
       // It will sometimes lead to inconsistencies across re-renders
-      parentErrorPaths.add(`${path}${field.name}`)
+      if (!parentErrorPaths.includes(`${path}${field.name}`)) {
+        parentErrorPaths.push(`${path}${field.name}`)
+      }
     } else {
       fieldState.valid = true
     }

@@ -316,6 +316,9 @@ importers:
       detect-package-manager:
         specifier: ^3.0.1
         version: 3.0.1
+      esprima:
+        specifier: ^4.0.1
+        version: 4.0.1
       execa:
         specifier: ^5.0.0
         version: 5.1.1
@@ -347,6 +350,9 @@ importers:
       '@types/degit':
         specifier: ^2.8.3
         version: 2.8.6
+      '@types/esprima':
+        specifier: ^4.0.6
+        version: 4.0.6
       '@types/fs-extra':
         specifier: ^9.0.12
         version: 9.0.13
@@ -1556,6 +1562,9 @@ importers:
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../packages/ui
+      comment-json:
+        specifier: ^4.2.3
+        version: 4.2.3
       create-payload-app:
         specifier: workspace:*
         version: link:../packages/create-payload-app
@@ -1565,9 +1574,18 @@ importers:
       eslint-plugin-playwright:
         specifier: 1.5.3
         version: 1.5.3(eslint@8.57.0)
+      execa:
+        specifier: 5.1.1
+        version: 5.1.1
       payload:
         specifier: workspace:*
         version: link:../packages/payload
+      tempy:
+        specifier: ^1.0.1
+        version: 1.0.1
+      typescript:
+        specifier: 5.4.2
+        version: 5.4.2
 
 packages:
 
@@ -5949,6 +5967,12 @@ packages:
     dependencies:
       '@types/estree': 1.0.5
       '@types/json-schema': 7.0.15
+
+  /@types/esprima@4.0.6:
+    resolution: {integrity: sha512-lIk+kSt9lGv5hxK6aZNjiUEGZqKmOTpmg0tKiJQI+Ow98fLillxsiZNik5+RcP7mXL929KiTH/D9jGtpDlMbVw==}
+    dependencies:
+      '@types/estree': 1.0.5
+    dev: true
 
   /@types/estree@1.0.5:
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}

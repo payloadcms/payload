@@ -5,10 +5,13 @@ import queryString from 'qs'
 import React, { useCallback } from 'react'
 
 export type SortColumnProps = {
+  Label: React.ReactNode
   disable?: boolean
-  label: React.ReactNode
+  label?: FieldBase['label']
   name: string
 }
+
+import type { FieldBase } from 'payload/types'
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
@@ -18,7 +21,7 @@ import './index.scss'
 const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
-  const { name, disable = false, label } = props
+  const { name, Label, disable = false, label } = props
   const { searchParams } = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -52,7 +55,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
 
   return (
     <div className={baseClass}>
-      <span className={`${baseClass}__label`}>{label}</span>
+      <span className={`${baseClass}__label`}>{Label}</span>
       {!disable && (
         <div className={`${baseClass}__buttons`}>
           <button

@@ -28,7 +28,7 @@ const DefaultFieldError: React.FC<ErrorProps> = (props) => {
   const { errorMessage, valid } = field || {}
 
   const message = messageFromProps || errorMessage
-  const showMessage = showErrorFromProps || (hasSubmitted && !valid)
+  const showMessage = showErrorFromProps || (hasSubmitted && valid === false)
 
   if (showMessage) {
     return (

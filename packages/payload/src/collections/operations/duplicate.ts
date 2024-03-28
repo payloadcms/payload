@@ -239,7 +239,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
 
     const versionDoc = await payload.db.create({
       collection: collectionConfig.slug,
-      data: docWithLocales,
+      data: result,
       req,
     })
 
@@ -253,7 +253,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
         collection: collectionConfig,
         docWithLocales: {
           ...versionDoc,
-          createdAt: docWithLocales.createdAt,
+          createdAt: result.createdAt,
         },
         draft: shouldSaveDraft,
         payload,

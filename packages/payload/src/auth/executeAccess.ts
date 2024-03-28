@@ -1,5 +1,5 @@
 import type { Access, AccessResult } from '../config/types.js'
-import type { PayloadRequest } from '../exports/types.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { Forbidden } from '../errors/index.js'
 

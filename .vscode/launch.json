@@ -10,7 +10,7 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "command": "pnpm run dev _community -- --no-turbo",
+      "command": "node --no-deprecation test/dev.js fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Community",
       "request": "launch",

@@ -8,6 +8,7 @@ import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { withCondition } from '@payloadcms/ui/forms/withCondition'
 import React, { useCallback } from 'react'
 
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
@@ -45,7 +46,7 @@ export type ArrayFieldProps = FormFieldBase & {
   width?: string
 }
 
-export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
+export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const {
     name,
     CustomDescription,
@@ -180,7 +181,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount =
-    rows.reduce((total, row) => total + (row?.errorPaths?.size || 0), 0) + (valid ? 0 : 1)
+    rows.reduce((total, row) => total + (row?.errorPaths?.length || 0), 0) + (valid ? 0 : 1)
 
   const fieldHasErrors = submitted && fieldErrorCount > 0
 
@@ -308,3 +309,5 @@ export const ArrayField: React.FC<ArrayFieldProps> = (props) => {
     </div>
   )
 }
+
+export const ArrayField = withCondition(_ArrayField)

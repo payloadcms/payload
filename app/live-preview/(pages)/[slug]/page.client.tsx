@@ -7,6 +7,7 @@ import type { Page as PageType } from '../../../../test/live-preview/payload-typ
 
 import { PAYLOAD_SERVER_URL } from '../../_api/serverURL.js'
 import { Blocks } from '../../_components/Blocks/index.js'
+import { Gutter } from '../../_components/Gutter/index.js'
 import { Hero } from '../../_components/Hero/index.js'
 
 export const PageClient: React.FC<{
@@ -20,6 +21,9 @@ export const PageClient: React.FC<{
 
   return (
     <React.Fragment>
+      <Gutter>
+        <h1 id="page-title">{data.title}</h1>
+      </Gutter>
       <Hero {...data?.hero} />
       <Blocks
         blocks={[

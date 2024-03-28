@@ -31,6 +31,7 @@ import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { withCondition } from '@payloadcms/ui/forms/withCondition'
 
 import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
@@ -48,7 +49,7 @@ export type BlocksFieldProps = FormFieldBase & {
   width?: string
 }
 
-export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
+const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -191,7 +192,7 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
 
   const hasMaxRows = maxRows && rows.length >= maxRows
 
-  const fieldErrorCount = rows.reduce((total, row) => total + (row?.errorPaths?.size || 0), 0)
+  const fieldErrorCount = rows.reduce((total, row) => total + (row?.errorPaths?.length || 0), 0)
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
@@ -341,3 +342,5 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     </div>
   )
 }
+
+export const BlocksField = withCondition(_BlocksField)

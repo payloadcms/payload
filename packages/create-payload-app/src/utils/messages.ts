@@ -3,9 +3,9 @@ import figures from 'figures'
 import path from 'path'
 import terminalLink from 'terminal-link'
 
-import type { ProjectTemplate } from '../types'
+import type { ProjectTemplate } from '../types.js'
 
-import { getValidTemplates } from '../lib/templates'
+import { getValidTemplates } from '../lib/templates.js'
 
 const header = (message: string): string => `${chalk.yellow(figures.star)} ${chalk.bold(message)}`
 
