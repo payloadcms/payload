@@ -44,6 +44,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     descriptionProps,
     editorOptions = {},
     errorProps,
+    label,
     labelProps,
     language = 'javascript',
     path: pathFromProps,
@@ -65,7 +66,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
 
   const { path: pathFromContext } = useFieldProps()
 
-  const { setValue, showError, value } = useField({
+  const { path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
@@ -86,8 +87,8 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
       <div>
         {BeforeInput}
         <CodeEditor

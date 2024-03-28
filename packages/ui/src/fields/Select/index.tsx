@@ -57,6 +57,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
     hasMany = false,
     isClearable = true,
     isSortable = true,
+    label,
     labelProps,
     onChange: onChangeFromProps,
     options: optionsFromProps = [],
@@ -148,8 +149,8 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
       <div>
         {BeforeInput}
         <ReactSelect

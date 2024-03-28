@@ -49,6 +49,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     errorProps,
     hasMany,
     isSortable = true,
+    label,
     labelProps,
     path: pathFromProps,
     readOnly,
@@ -442,8 +443,8 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect

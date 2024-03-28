@@ -35,6 +35,7 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
     className,
     disabled,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     required,
@@ -67,8 +68,8 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || { path })} />
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || { path })} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
       <input
         autoComplete={autoComplete}
         disabled={formProcessing || disabled}

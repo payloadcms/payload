@@ -24,6 +24,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     errorProps,
     hasMany,
     inputRef,
+    label,
     labelProps,
     maxRows,
     onChange,
@@ -58,8 +59,8 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}

@@ -44,6 +44,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     layout = 'horizontal',
     onChange: onChangeFromProps,
@@ -99,9 +100,9 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <FieldError CustomError={CustomError} {...(errorProps || {})} />
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       </div>
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
       <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
         {options.map((option) => {
           let optionValue = ''

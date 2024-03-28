@@ -46,6 +46,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     descriptionProps,
     errorProps,
     hasMany = false,
+    label,
     labelProps,
     max = Infinity,
     maxRows = Infinity,
@@ -154,8 +155,8 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}

@@ -38,6 +38,7 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     placeholder,
@@ -76,8 +77,8 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || { path })} />
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || { path })} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
       <div>
         {BeforeInput}
         <input
