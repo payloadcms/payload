@@ -22,6 +22,7 @@ type ArrayRowProps = UseDraggableSortableReturn & {
   CustomRowLabel?: React.ReactNode
   addRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
+  errorCount: number
   fieldMap: FieldMap
   forceRender?: boolean
   hasMaxRows?: boolean
@@ -35,6 +36,7 @@ type ArrayRowProps = UseDraggableSortableReturn & {
   row: Row
   rowCount: number
   rowIndex: number
+  schemaPath: string
   setCollapse: (rowID: string, collapsed: boolean) => void
 }
 
@@ -43,6 +45,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   addRow,
   attributes,
   duplicateRow,
+  errorCount,
   fieldMap,
   forceRender = false,
   hasMaxRows,
@@ -57,6 +60,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   row,
   rowCount,
   rowIndex,
+  schemaPath,
   setCollapse,
   setNodeRef,
   transform,
@@ -70,7 +74,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
     '0',
   )}`
 
-  const errorCount = row.errorPaths?.length
   const fieldHasErrors = errorCount > 0 && hasSubmitted
 
   const classNames = [
@@ -134,7 +137,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           path={path}
           permissions={permissions?.fields}
           readOnly={readOnly}
-          schemaPath={parentPath}
+          schemaPath={schemaPath}
         />
       </Collapsible>
     </div>

@@ -220,7 +220,7 @@ jobs:
           - access-control
           # - admin
           - auth
-          # - field-error-states
+          - field-error-states
           # - fields-relationship
           # - fields
           - fields/lexical
