@@ -763,5 +763,29 @@ describe('lexical', () => {
 
       await expect(page.locator('.Toastify')).not.toContainText('Please correct invalid fields.')
     })
+
+    test.skip('should respect required error state in deeply nested text field', async () => {
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
+
+      await conditionalArrayBlock.scrollIntoViewIfNeeded()
+      await expect(conditionalArrayBlock).toBeVisible()
+
+      await conditionalArrayBlock.locator('.btn__label:has-text("Add Sub Array")').first().click()
+
+      await page.click('#action-save', { delay: 100 })
+      await expect(page.locator('.Toastify')).toContainText('The following field is invalid')
+
+      // Check if error is shown next to field
+      await expect(
+        conditionalArrayBlock
+          .locator('.tooltip-content:has-text("This field is required.")')
+          .first(),
+      ).toBeVisible()
+    })
   })
 })

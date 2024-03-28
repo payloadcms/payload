@@ -56,13 +56,13 @@ const PreviewView: React.FC<Props> = ({
     action,
     apiURL,
     collectionSlug,
-    data,
     disableActions,
     disableLeaveWithoutSaving,
     docPermissions,
     getDocPreferences,
     globalSlug,
     hasSavePermission,
+    initialData,
     initialState,
     onSave: onSaveFromProps,
   } = useDocumentInfo()
@@ -157,7 +157,7 @@ const PreviewView: React.FC<Props> = ({
           />
           <DocumentControls
             apiURL={apiURL}
-            data={data}
+            data={initialData}
             disableActions={disableActions}
             hasSavePermission={hasSavePermission}
             id={id}

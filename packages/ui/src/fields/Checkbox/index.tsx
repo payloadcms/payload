@@ -34,6 +34,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
     descriptionProps,
     disableFormData,
     errorProps,
+    label,
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
@@ -93,7 +94,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <FieldError CustomError={CustomError} {...(errorProps || {})} />
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       </div>
       <CheckboxInput
         AfterInput={AfterInput}
@@ -102,6 +103,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         checked={checked}
         id={fieldID}
         inputRef={null}
+        label={label}
         labelProps={labelProps}
         name={path}
         onToggle={onToggle}

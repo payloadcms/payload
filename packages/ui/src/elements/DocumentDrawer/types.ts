@@ -1,4 +1,3 @@
-import type { TypeWithID } from 'payload/types'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
@@ -9,7 +8,6 @@ export type DocumentDrawerProps = Pick<DrawerProps, 'Header'> & {
   collectionSlug: string
   drawerSlug?: string
   id?: null | number | string
-  initialData?: TypeWithID
   onSave?: DocumentInfoContext['onSave']
 }
 
