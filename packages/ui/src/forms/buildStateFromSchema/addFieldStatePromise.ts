@@ -223,7 +223,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.value = forceFullValue ? arrayValue : arrayValue.length
           fieldState.initialValue = forceFullValue ? arrayValue : arrayValue.length
 
-          if (arrayValue.length >= 0) {
+          if (arrayValue.length > 0) {
             fieldState.disableFormData = true
           }
         }
