@@ -113,7 +113,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       value: data?.[field.name],
     })
 
-    if (data) {
+    if (data?.[field.name]) {
       data[field.name] = valueWithDefault
     }
 
