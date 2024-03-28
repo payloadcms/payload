@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} e mais {{count}}',
     labelRelationship: 'Relacionado a {{label}}',
     latitude: 'Latitude',
+    linkedTo: 'Ligado a <0>{{label}}</0>',
     longitude: 'Longitude',
     passwordsDoNotMatch: 'Senhas não coincidem.',
     removeRelationship: 'Remover Relacionamento',

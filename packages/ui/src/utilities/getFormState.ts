@@ -26,7 +26,9 @@ export const getFormState = async (args: {
   if (res.ok) {
     return json
   } else {
-    void onError(json)
+    if (typeof onError === 'function') {
+      void onError(json)
+    }
   }
 
   return body?.formState

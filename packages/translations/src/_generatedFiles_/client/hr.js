@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} i {{count}} više',
     labelRelationship: '{{label}} veza',
     latitude: 'Zemljopisna širina',
+    linkedTo: 'Povezabi sa <0>{{label}}</0>',
     longitude: 'Zemljopisna dužina',
     passwordsDoNotMatch: 'Lozinke nisu iste.',
     removeRelationship: 'Ukloni vezu',

@@ -162,6 +162,7 @@ const clientTranslationKeys = [
   'fields:itemsAndMore',
   'fields:labelRelationship',
   'fields:latitude',
+  'fields:linkedTo',
   'fields:longitude',
   'fields:passwordsDoNotMatch',
   'fields:removeRelationship',

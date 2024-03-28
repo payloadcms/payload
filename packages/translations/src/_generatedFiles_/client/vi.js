@@ -72,6 +72,7 @@ export default {
     itemsAndMore: '{{items}} và {{count}} món nữa',
     labelRelationship: 'Mối quan hệ của {{label}} (Relationship)',
     latitude: 'Vĩ độ',
+    linkedTo: 'Được nối với <0>{{label}}</0>',
     longitude: 'Kinh độ',
     passwordsDoNotMatch: 'Mật khẩu không trùng.',
     removeRelationship: 'Xóa Mối quan hệ',
