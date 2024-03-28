@@ -86,6 +86,13 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     const { email: unsanitizedEmail, password } = data
 
+    if (typeof unsanitizedEmail !== 'string' || unsanitizedEmail.trim() === '') {
+      throw new Error('The following field is invalid: email')
+    }
+    if (typeof password !== 'string' || password.trim() === '') {
+      throw new Error('The following field is invalid: password')
+    }
+
     const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null
 
     let user = await payload.db.findOne<any>({
