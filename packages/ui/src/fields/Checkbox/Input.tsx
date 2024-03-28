@@ -76,7 +76,12 @@ export const CheckboxInput: React.FC<Props> = ({
         </span>
         {AfterInput}
       </div>
-      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
     </div>
   )
 }

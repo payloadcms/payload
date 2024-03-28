@@ -220,7 +220,12 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
-              <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
+              <FieldLabel
+                CustomLabel={CustomLabel}
+                label={label}
+                required={required}
+                {...(labelProps || {})}
+              />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />

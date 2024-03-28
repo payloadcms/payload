@@ -32,6 +32,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     path,
     placeholder,
     readOnly,
+    required,
     rtl,
     showError,
     style,
@@ -60,7 +61,12 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}

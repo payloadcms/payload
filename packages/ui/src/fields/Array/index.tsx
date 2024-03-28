@@ -210,7 +210,12 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
-              <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
+              <FieldLabel
+                CustomLabel={CustomLabel}
+                label={label}
+                required={required}
+                {...(labelProps || {})}
+              />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />

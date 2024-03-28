@@ -69,7 +69,12 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
       }}
     >
       <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} label={label} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <input
         autoComplete={autoComplete}
         disabled={formProcessing || disabled}
