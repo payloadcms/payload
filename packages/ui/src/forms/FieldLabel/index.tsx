@@ -12,6 +12,7 @@ import './index.scss'
 
 const DefaultFieldLabel: React.FC<LabelProps> = (props) => {
   const {
+    as: Element = 'label',
     htmlFor: htmlForFromProps,
     label: labelFromProps,
     required = false,
@@ -26,10 +27,10 @@ const DefaultFieldLabel: React.FC<LabelProps> = (props) => {
 
   if (labelFromProps) {
     return (
-      <label className={`field-label ${unstyled ? 'unstyled' : ''}`} htmlFor={htmlFor}>
+      <Element className={`field-label ${unstyled ? 'unstyled' : ''}`} htmlFor={htmlFor}>
         {getTranslation(labelFromProps, i18n)}
         {required && !unstyled && <span className="required">*</span>}
-      </label>
+      </Element>
     )
   }
 

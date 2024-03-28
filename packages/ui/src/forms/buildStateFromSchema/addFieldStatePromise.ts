@@ -18,6 +18,7 @@ const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 export type AddFieldStatePromiseArgs = {
+  addErrorPathToParent: (path: string) => void
   /**
    * if all parents are localized, then the field is localized
    */
@@ -25,6 +26,7 @@ export type AddFieldStatePromiseArgs = {
   data: Data
   errorPaths: string[]
   field: NonPresentationalField
+  fieldIndex: number
   /**
    * You can use this to filter down to only `localized` fields that require translation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
    */
@@ -72,6 +74,7 @@ export type AddFieldStatePromiseArgs = {
 export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Promise<void> => {
   const {
     id,
+    addErrorPathToParent,
     anyParentLocalized = false,
     data,
     errorPaths: parentErrorPaths = [],
@@ -92,16 +95,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   } = args
 
   if (fieldAffectsData(field)) {
-    const validate = operation === 'update' ? field.validate : undefined
+    const validate = field.validate
 
-    const fieldState: FormField = {
-      errorPaths: [],
-      fieldSchema: includeSchema ? field : undefined,
-      initialValue: undefined,
-      passesCondition,
-      valid: true,
-      value: undefined,
-    }
+    const fieldState: FormField = state[`${path}${field.name}`]
 
     const valueWithDefault = await getDefaultValue({
       defaultValue: field.defaultValue,
@@ -110,7 +106,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       value: data?.[field.name],
     })
 
-    if (data?.[field.name]) {
+    if (data) {
       data[field.name] = valueWithDefault
     }
 
@@ -144,9 +140,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldState.valid = false
       // TODO: this is unpredictable, need to figure out why
       // It will sometimes lead to inconsistencies across re-renders
-      if (!parentErrorPaths.includes(`${path}${field.name}`)) {
-        parentErrorPaths.push(`${path}${field.name}`)
-      }
+      addErrorPathToParent(`${path}${field.name}`)
     } else {
       fieldState.valid = true
     }
@@ -174,6 +168,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             acc.promises.push(
               iterateFields({
                 id,
+                addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
                 data: row,
                 errorPaths: fieldState.errorPaths,
@@ -230,9 +225,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         fieldState.rows = rowMetadata
 
-        // Add field to state
-        if (!omitParents && (!filter || filter(args))) {
-          state[`${path}${field.name}`] = fieldState
+        // Remove field from state
+        if (omitParents || (filter && filter(args))) {
+          delete state[`${path}${field.name}`]
         }
 
         break
@@ -249,7 +244,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
 
-              if (!omitParents && (!filter || filter(args))) {
+              if (omitParents || (filter && filter(args))) {
                 state[`${rowPath}id`] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
@@ -287,6 +282,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.promises.push(
                 iterateFields({
                   id,
+                  addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
                   data: row,
                   errorPaths: fieldState.errorPaths,
@@ -345,9 +341,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         fieldState.rows = rowMetadata
 
-        // Add field to state
-        if (!omitParents && (!filter || filter(args))) {
-          state[`${path}${field.name}`] = fieldState
+        // Remove field from state
+        if (omitParents || (filter && filter(args))) {
+          delete state[`${path}${field.name}`]
         }
 
         break
@@ -356,6 +352,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'group': {
         await iterateFields({
           id,
+          addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
           data: data?.[field.name] || {},
           errorPaths: parentErrorPaths,
@@ -441,8 +438,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.initialValue = relationshipValue
         }
 
-        if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
+        if (filter && filter(args)) {
+          delete state[`${path}${field.name}`]
         }
 
         break
@@ -468,8 +465,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.value = relationshipValue
         fieldState.initialValue = relationshipValue
 
-        if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
+        if (filter && filter(args)) {
+          delete state[`${path}${field.name}`]
         }
 
         break
@@ -479,9 +476,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.value = valueWithDefault
         fieldState.initialValue = valueWithDefault
 
-        // Add field to state
-        if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
+        // Remove field from state
+        if (filter && filter(args)) {
+          delete state[`${path}${field.name}`]
         }
 
         break
@@ -491,6 +488,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Handle field types that do not use names (row, etc)
     await iterateFields({
       id,
+      addErrorPathToParent,
       anyParentLocalized: field.localized || anyParentLocalized,
       data,
       errorPaths: parentErrorPaths,
@@ -510,9 +508,30 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
     })
   } else if (field.type === 'tabs') {
-    const promises = field.tabs.map((tab) =>
+    const promises = field.tabs.map((tab, tabIndex) =>
       iterateFields({
         id,
+        addErrorPathToParent: (errorPath: string) => {
+          addErrorPathToParent(errorPath)
+
+          /*
+           * This would be nice, but it would pollute form state on the front end.
+           * keeping it for future use.
+           *
+           * It would allow us to compute the errorPaths for unnamed tabs
+           */
+          // const uniqueIdentifier = tabHasName(tab) ? `${path}${tab.name}` : `${path}${tabIndex}`
+          // if (!state?.[uniqueIdentifier]) {
+          //   state[uniqueIdentifier] = {
+          //     errorPaths: [],
+          //     valid: true,
+          //   } as FormField
+          // }
+          // if (state?.[uniqueIdentifier]?.errorPaths) {
+          //   state[uniqueIdentifier].errorPaths.push(errorPath)
+          //   state[uniqueIdentifier].valid = false
+          // }
+        },
         anyParentLocalized: tab.localized || anyParentLocalized,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         errorPaths: parentErrorPaths,
