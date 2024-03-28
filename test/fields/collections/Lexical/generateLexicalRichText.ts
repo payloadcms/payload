@@ -270,8 +270,6 @@ export function generateLexicalRichText() {
                 text: 'text in conditionalLayout block',
               },
             ],
-            columns2: null,
-            columns3: null,
           },
         }, // Do not remove this blocks node. It ensures that validation passes when it's created
         {
