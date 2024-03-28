@@ -202,7 +202,7 @@ jobs:
         if: matrix.database == 'supabase'
 
       - name: Integration Tests
-        run: pnpm test:int --testPathIgnorePatterns=test/fields # Ignore fields tests until reworked
+        run: pnpm test:int
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
