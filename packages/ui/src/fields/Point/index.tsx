@@ -112,7 +112,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       <ul className={`${baseClass}__wrap`}>
         <li>
           {CustomLabel !== undefined ? (

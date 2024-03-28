@@ -40,6 +40,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     descriptionProps,
     editorOptions,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     readOnly,
@@ -63,13 +64,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const { path: pathFromContext } = useFieldProps()
 
-  const {
-    initialValue,
-    // path,
-    setValue,
-    showError,
-    value,
-  } = useField<string>({
+  const { initialValue, path, setValue, showError, value } = useField<string>({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
@@ -114,8 +109,13 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div>
         {BeforeInput}
         <CodeEditor

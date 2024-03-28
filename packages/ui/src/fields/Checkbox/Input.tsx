@@ -1,5 +1,5 @@
 'use client'
-import type { LabelProps } from 'payload/types'
+import type { FieldBase, LabelProps } from 'payload/types'
 
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import React from 'react'
@@ -15,6 +15,7 @@ type Props = {
   className?: string
   id?: string
   inputRef?: React.RefObject<HTMLInputElement>
+  label?: FieldBase['label']
   labelProps?: LabelProps
   name?: string
   onToggle: (event: React.ChangeEvent<HTMLInputElement>) => void
@@ -34,6 +35,7 @@ export const CheckboxInput: React.FC<Props> = ({
   checked,
   className,
   inputRef,
+  label,
   labelProps,
   onToggle,
   partialChecked,
@@ -74,7 +76,12 @@ export const CheckboxInput: React.FC<Props> = ({
         </span>
         {AfterInput}
       </div>
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
     </div>
   )
 }

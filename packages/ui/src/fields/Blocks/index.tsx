@@ -62,6 +62,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     descriptionProps,
     errorProps,
     forceRender = false,
+    label,
     labelProps,
     labels: labelsFromProps,
     localized,
@@ -213,14 +214,21 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     >
       {showError && (
         <div className={`${baseClass}__error-wrap`}>
-          <FieldError CustomError={CustomError} {...(errorProps || {})} />
+          <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         </div>
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
-              <FieldLabel CustomLabel={CustomLabel} as="span" unstyled {...(labelProps || {})} />
+              <FieldLabel
+                CustomLabel={CustomLabel}
+                as="span"
+                label={label}
+                required={required}
+                unstyled
+                {...(labelProps || {})}
+              />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />

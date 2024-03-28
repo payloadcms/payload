@@ -58,6 +58,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     errorProps,
     fieldMap,
     forceRender = false,
+    label,
     labelProps,
     localized,
     maxRows,
@@ -201,14 +202,21 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     >
       {showError && (
         <div className={`${baseClass}__error-wrap`}>
-          <FieldError CustomError={CustomError} {...(errorProps || {})} />
+          <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         </div>
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
             <h3 className={`${baseClass}__title`}>
-              <FieldLabel CustomLabel={CustomLabel} as="span" unstyled {...(labelProps || {})} />
+              <FieldLabel
+                CustomLabel={CustomLabel}
+                as="span"
+                label={label}
+                required={required}
+                unstyled
+                {...(labelProps || {})}
+              />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
