@@ -132,34 +132,48 @@ const seo =
                 (collection.auth ||
                   !(typeof collection.auth === 'object' && collection.auth.disableLocalStrategy)) &&
                 collection.fields?.find((field) => 'name' in field && field.name === 'email')
+              const hasOnlyEmailField = collection.fields?.length === 1 && emailField
 
-              const seoTabs: TabsField[] = [
-                {
-                  type: 'tabs',
-                  tabs: [
-                    // append a new tab onto the end of the tabs array, if there is one at the first index
-                    // if needed, create a new `Content` tab in the first index for this collection's base fields
-                    ...(collection?.fields?.[0]?.type === 'tabs' && collection?.fields?.[0]?.tabs
-                      ? collection.fields[0].tabs
-                      : [
-                          {
-                            fields: [
-                              ...((emailField
-                                ? collection.fields.filter(
-                                    (field) => 'name' in field && field.name !== 'email',
-                                  )
-                                : collection.fields) || []),
-                            ],
-                            label: collection?.labels?.singular || 'Content',
-                          },
-                        ]),
+              const seoTabs: TabsField[] = hasOnlyEmailField
+                ? [
                     {
-                      fields: seoFields,
-                      label: 'SEO',
+                      type: 'tabs',
+                      tabs: [
+                        {
+                          fields: seoFields,
+                          label: 'SEO',
+                        },
+                      ],
                     },
-                  ],
-                },
-              ]
+                  ]
+                : [
+                    {
+                      type: 'tabs',
+                      tabs: [
+                        // append a new tab onto the end of the tabs array, if there is one at the first index
+                        // if needed, create a new `Content` tab in the first index for this collection's base fields
+                        ...(collection?.fields?.[0]?.type === 'tabs' &&
+                        collection?.fields?.[0]?.tabs
+                          ? collection.fields[0].tabs
+                          : [
+                              {
+                                fields: [
+                                  ...(emailField
+                                    ? collection.fields.filter(
+                                        (field) => 'name' in field && field.name !== 'email',
+                                      )
+                                    : collection.fields),
+                                ],
+                                label: collection?.labels?.singular || 'Content',
+                              },
+                            ]),
+                        {
+                          fields: seoFields,
+                          label: 'SEO',
+                        },
+                      ],
+                    },
+                  ]
 
               return {
                 ...collection,
