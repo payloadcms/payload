@@ -66,7 +66,7 @@ const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorRes
   }
 }
 
-export const routeError = async ({
+export const routeError = ({
   collection,
   err,
   req,
@@ -104,21 +104,21 @@ export const routeError = async ({
   }
 
   if (collection && typeof collection.config.hooks.afterError === 'function') {
-    ;({ response, status } = (await collection.config.hooks.afterError(
+    ;({ response, status } = collection.config.hooks.afterError(
       err,
       response,
       req.context,
       collection.config,
-    )) || { response, status })
+    ) || { response, status })
   }
 
   if (typeof config.hooks.afterError === 'function') {
-    ;({ response, status } = (await config.hooks.afterError(
+    ;({ response, status } = config.hooks.afterError(
       err,
       response,
       req.context,
       collection?.config,
-    )) || {
+    ) || {
       response,
       status,
     })
