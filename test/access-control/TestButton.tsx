@@ -16,8 +16,9 @@ export const TestButton: React.FC = () => {
       onClick={(e) => {
         e.preventDefault()
 
-        void refreshPermissions()
-        void submit()
+        void refreshPermissions().then(() => {
+          void submit()
+        })
       }}
       type="submit"
     >
