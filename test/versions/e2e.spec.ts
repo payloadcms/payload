@@ -374,7 +374,7 @@ describe('versions', () => {
 
       // fill out doc in spanish
       await page.locator('#field-title').fill(spanishTitle)
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
 
       // fill out draft content in spanish
       await page.locator('#field-title').fill(`${spanishTitle}--draft`)
