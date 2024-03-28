@@ -74,7 +74,7 @@ export type AddFieldStatePromiseArgs = {
 export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Promise<void> => {
   const {
     id,
-    addErrorPathToParent,
+    addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
     data,
     errorPaths: parentErrorPaths = [],
@@ -97,7 +97,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   if (fieldAffectsData(field)) {
     const validate = field.validate
 
-    const fieldState: FormField = state[`${path}${field.name}`]
+    const fieldState: FormField = {
+      errorPaths: [],
+      fieldSchema: includeSchema ? field : undefined,
+      initialValue: undefined,
+      passesCondition,
+      valid: true,
+      value: undefined,
+    }
 
     const valueWithDefault = await getDefaultValue({
       defaultValue: field.defaultValue,
@@ -135,11 +142,20 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       })
     }
 
+    const addErrorPathToParent = (errorPath: string) => {
+      if (typeof addErrorPathToParentArg === 'function') {
+        addErrorPathToParentArg(errorPath)
+      }
+
+      if (!fieldState.errorPaths.includes(errorPath)) {
+        fieldState.errorPaths.push(errorPath)
+        fieldState.valid = false
+      }
+    }
+
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult
       fieldState.valid = false
-      // TODO: this is unpredictable, need to figure out why
-      // It will sometimes lead to inconsistencies across re-renders
       addErrorPathToParent(`${path}${field.name}`)
     } else {
       fieldState.valid = true
@@ -225,9 +241,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         fieldState.rows = rowMetadata
 
-        // Remove field from state
-        if (omitParents || (filter && filter(args))) {
-          delete state[`${path}${field.name}`]
+        // Add field to state
+        if (!omitParents && (!filter || filter(args))) {
+          state[`${path}${field.name}`] = fieldState
         }
 
         break
@@ -244,7 +260,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
 
-              if (omitParents || (filter && filter(args))) {
+              if (!omitParents && (!filter || filter(args))) {
                 state[`${rowPath}id`] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
@@ -341,9 +357,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         fieldState.rows = rowMetadata
 
-        // Remove field from state
-        if (omitParents || (filter && filter(args))) {
-          delete state[`${path}${field.name}`]
+        // Add field to state
+        if (!omitParents && (!filter || filter(args))) {
+          state[`${path}${field.name}`] = fieldState
         }
 
         break
@@ -438,8 +454,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.initialValue = relationshipValue
         }
 
-        if (filter && filter(args)) {
-          delete state[`${path}${field.name}`]
+        if (!filter || filter(args)) {
+          state[`${path}${field.name}`] = fieldState
         }
 
         break
@@ -465,8 +481,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.value = relationshipValue
         fieldState.initialValue = relationshipValue
 
-        if (filter && filter(args)) {
-          delete state[`${path}${field.name}`]
+        if (!filter || filter(args)) {
+          state[`${path}${field.name}`] = fieldState
         }
 
         break
@@ -476,9 +492,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.value = valueWithDefault
         fieldState.initialValue = valueWithDefault
 
-        // Remove field from state
-        if (filter && filter(args)) {
-          delete state[`${path}${field.name}`]
+        // Add field to state
+        if (!filter || filter(args)) {
+          state[`${path}${field.name}`] = fieldState
         }
 
         break
@@ -488,7 +504,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Handle field types that do not use names (row, etc)
     await iterateFields({
       id,
-      addErrorPathToParent,
+      // passthrough parent functionality
+      addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: field.localized || anyParentLocalized,
       data,
       errorPaths: parentErrorPaths,
@@ -508,30 +525,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
     })
   } else if (field.type === 'tabs') {
-    const promises = field.tabs.map((tab, tabIndex) =>
+    const promises = field.tabs.map((tab) =>
       iterateFields({
         id,
-        addErrorPathToParent: (errorPath: string) => {
-          addErrorPathToParent(errorPath)
-
-          /*
-           * This would be nice, but it would pollute form state on the front end.
-           * keeping it for future use.
-           *
-           * It would allow us to compute the errorPaths for unnamed tabs
-           */
-          // const uniqueIdentifier = tabHasName(tab) ? `${path}${tab.name}` : `${path}${tabIndex}`
-          // if (!state?.[uniqueIdentifier]) {
-          //   state[uniqueIdentifier] = {
-          //     errorPaths: [],
-          //     valid: true,
-          //   } as FormField
-          // }
-          // if (state?.[uniqueIdentifier]?.errorPaths) {
-          //   state[uniqueIdentifier].errorPaths.push(errorPath)
-          //   state[uniqueIdentifier].valid = false
-          // }
-        },
+        // passthrough parent functionality
+        addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         errorPaths: parentErrorPaths,

@@ -1,10 +1,4 @@
-import type {
-  Data,
-  Field as FieldSchema,
-  FormField,
-  FormState,
-  PayloadRequest,
-} from 'payload/types'
+import type { Data, Field as FieldSchema, FormState, PayloadRequest } from 'payload/types'
 
 import { fieldIsPresentationalOnly } from 'payload/types'
 
@@ -86,17 +80,6 @@ export const iterateFields = async ({
 }: Args): Promise<void> => {
   const promises = []
 
-  const addErrorPathToParent = (fieldPath: string) => (errorPath: string) => {
-    if (typeof addErrorPathToParentArg === 'function') {
-      addErrorPathToParentArg(errorPath)
-    }
-
-    if (state?.[fieldPath]?.errorPaths && !state[fieldPath].errorPaths.includes(errorPath)) {
-      state[fieldPath].errorPaths.push(errorPath)
-      state[fieldPath].valid = false
-    }
-  }
-
   fields.forEach((field, fieldIndex) => {
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
       let passesCondition = true
@@ -108,23 +91,10 @@ export const iterateFields = async ({
         )
       }
 
-      const fieldState: FormField = {
-        errorPaths: [],
-        fieldSchema: includeSchema ? field : undefined,
-        initialValue: undefined,
-        passesCondition,
-        valid: true,
-        value: undefined,
-      }
-
-      const fieldName = 'name' in field ? field.name : ''
-      const fieldPath = path ? `${path}${fieldName || ''}` : fieldName
-      if (fieldName) state[fieldPath] = state?.[fieldPath] || fieldState
-
       promises.push(
         addFieldStatePromise({
           id,
-          addErrorPathToParent: addErrorPathToParent(fieldPath),
+          addErrorPathToParent: addErrorPathToParentArg,
           anyParentLocalized,
           data,
           errorPaths,
