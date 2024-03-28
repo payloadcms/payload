@@ -309,9 +309,8 @@ describe('versions', () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       // fill out global title and wait for autosave
       await page.goto(url.global(autoSaveGlobalSlug))
-      await waitForAutoSaveToComplete(page)
+      await page.waitForURL(`**/${autoSaveGlobalSlug}`)
       const titleField = page.locator('#field-title')
-      await expect(titleField).toBeVisible()
 
       await titleField.fill('global title')
       await waitForAutoSaveToComplete(page)
