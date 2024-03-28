@@ -663,7 +663,9 @@ describe('fields', () => {
       await expect(firstRow).toHaveValue('first row')
 
       await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: blocksWithMinRows',
+      )
     })
 
     describe('row manipulation', () => {
