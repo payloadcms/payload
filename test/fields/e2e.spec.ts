@@ -917,7 +917,7 @@ describe('fields', () => {
       await addRowButton.click()
       await wait(200)
 
-      const targetInput = page.locator('#field-items__2__text')
+      const targetInput = page.locator('#field-items__0__text')
 
       await expect(targetInput).toBeVisible()
 
