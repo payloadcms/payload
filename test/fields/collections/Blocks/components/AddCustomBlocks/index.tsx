@@ -4,13 +4,16 @@ import { useForm } from '@payloadcms/ui/forms/Form'
 import { useField } from '@payloadcms/ui/forms/useField'
 import * as React from 'react'
 
+import { blockFieldsSlug } from '../../../../slugs.js'
 import './index.scss'
 
 const baseClass = 'custom-blocks-field-management'
 
+const blocksPath = 'customBlocks'
+
 export const AddCustomBlocks: React.FC = () => {
   const { addFieldRow, replaceFieldRow } = useForm()
-  const { value } = useField<number>({ path: 'customBlocks' })
+  const { value } = useField<number>({ path: blocksPath })
 
   return (
     <div className={baseClass}>
@@ -20,7 +23,8 @@ export const AddCustomBlocks: React.FC = () => {
           onClick={() =>
             addFieldRow({
               data: { block1Title: 'Block 1: Prefilled Title', blockType: 'block-1' },
-              path: 'customBlocks',
+              path: blocksPath,
+              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-1`,
             })
           }
           type="button"
@@ -33,7 +37,8 @@ export const AddCustomBlocks: React.FC = () => {
           onClick={() =>
             addFieldRow({
               data: { block2Title: 'Block 2: Prefilled Title', blockType: 'block-2' },
-              path: 'customBlocks',
+              path: blocksPath,
+              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-2`,
             })
           }
           type="button"
@@ -48,8 +53,9 @@ export const AddCustomBlocks: React.FC = () => {
           onClick={() =>
             replaceFieldRow({
               data: { block1Title: 'REPLACED BLOCK', blockType: 'block-1' },
-              path: 'customBlocks',
+              path: blocksPath,
               rowIndex: value - 1,
+              schemaPath: `${blockFieldsSlug}.${blocksPath}.block-1`,
             })
           }
           type="button"
