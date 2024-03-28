@@ -1,5 +1,6 @@
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
+import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -16,6 +17,8 @@ import {
   unstoredMediaSlug,
   versionSlug,
 } from './shared.js'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   serverURL: undefined,
@@ -54,7 +57,7 @@ export default buildConfigWithDefaults({
       slug: 'gif-resize',
       fields: [],
       upload: {
-        staticDir: path.resolve(process.cwd(), 'test/uploads/media-gif'),
+        staticDir: path.resolve(dirname, './media-gif'),
         mimeTypes: ['image/gif'],
         resizeOptions: {
           position: 'center',
@@ -84,7 +87,7 @@ export default buildConfigWithDefaults({
       slug: 'no-image-sizes',
       fields: [],
       upload: {
-        staticDir: path.resolve(process.cwd(), 'test/uploads/no-image-sizes'),
+        staticDir: path.resolve(dirname, './no-image-sizes'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         resizeOptions: {
           height: 200,
@@ -97,7 +100,7 @@ export default buildConfigWithDefaults({
       slug: 'object-fit',
       fields: [],
       upload: {
-        staticDir: path.resolve(process.cwd(), 'test/uploads/object-fit'),
+        staticDir: path.resolve(dirname, './object-fit'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
@@ -132,7 +135,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         focalPoint: false,
-        staticDir: path.resolve(process.cwd(), 'test/uploads/crop-only'),
+        staticDir: path.resolve(dirname, './crop-only'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
@@ -158,7 +161,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         crop: false,
-        staticDir: path.resolve(process.cwd(), 'test/uploads/focal-only'),
+        staticDir: path.resolve(dirname, './focal-only'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
@@ -183,7 +186,7 @@ export default buildConfigWithDefaults({
       slug: mediaSlug,
       fields: [],
       upload: {
-        staticDir: path.resolve(process.cwd(), 'test/uploads/media'),
+        staticDir: path.resolve(dirname, './media'),
         // crop: false,
         // focalPoint: false,
         formatOptions: {
@@ -280,14 +283,13 @@ export default buildConfigWithDefaults({
       slug: enlargeSlug,
       fields: [],
       upload: {
-        staticDir: path.resolve(process.cwd(), 'test/uploads/media/enlarge'),
+        staticDir: path.resolve(dirname, './media/enlarge'),
         mimeTypes: [
           'image/png',
           'image/jpg',
           'image/jpeg',
           'image/gif',
           'image/svg+xml',
-          'image/tiff',
           'audio/mpeg',
         ],
         imageSizes: [
@@ -328,7 +330,7 @@ export default buildConfigWithDefaults({
       slug: reduceSlug,
       fields: [],
       upload: {
-        staticDir: path.resolve(process.cwd(), 'test/uploads/media/reduce'),
+        staticDir: path.resolve(dirname, './media/reduce'),
         imageSizes: [
           {
             name: 'accidentalSameSize',
@@ -369,7 +371,7 @@ export default buildConfigWithDefaults({
       slug: 'media-trim',
       fields: [],
       upload: {
-        staticDir: path.resolve(process.cwd(), 'test/uploads/media-trim'),
+        staticDir: path.resolve(dirname, './media-trim'),
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         trimOptions: 0,
         imageSizes: [
@@ -409,7 +411,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://localhost:3000/media)
-        staticDir: path.resolve(process.cwd(), 'test/uploads/media'),
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     Uploads1,
@@ -420,14 +422,14 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         filesRequiredOnCreate: false,
-        staticDir: path.resolve(process.cwd(), 'test/uploads/optional'),
+        staticDir: path.resolve(dirname, './optional'),
       },
     },
     {
       slug: 'required-file',
       fields: [],
       upload: {
-        staticDir: path.resolve(process.cwd(), 'test/uploads/required'),
+        staticDir: path.resolve(dirname, './required'),
         filesRequiredOnCreate: true,
       },
     },
@@ -446,7 +448,7 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    const uploadsDir = path.resolve(process.cwd(), 'test/uploads/media')
+    const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
 
     await payload.create({
@@ -458,7 +460,7 @@ export default buildConfigWithDefaults({
     })
 
     // Create image
-    const imageFilePath = path.resolve(process.cwd(), 'test/uploads/image.png')
+    const imageFilePath = path.resolve(dirname, './image.png')
     const imageFile = await getFileByPath(imageFilePath)
 
     const { id: uploadedImage } = await payload.create({
@@ -485,7 +487,7 @@ export default buildConfigWithDefaults({
     })
 
     // Create audio
-    const audioFilePath = path.resolve(process.cwd(), 'test/uploads/audio.mp3')
+    const audioFilePath = path.resolve(dirname, './audio.mp3')
     const audioFile = await getFileByPath(audioFilePath)
 
     const file = await payload.create({
