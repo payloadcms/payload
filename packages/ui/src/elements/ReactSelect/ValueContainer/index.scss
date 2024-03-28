@@ -14,6 +14,10 @@
       padding-top: 0;
       padding-bottom: 0;
       color: currentColor;
+
+      .field-label {
+        padding-bottom: 0;
+      }
     }
 
     &--is-multi {

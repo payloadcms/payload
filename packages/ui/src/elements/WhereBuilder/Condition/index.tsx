@@ -36,6 +36,8 @@ export type Props = {
   }) => void
 }
 
+import type { RelationshipFieldProps } from '@payloadcms/ui/fields/Relationship'
+
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { Button } from '../../Button/index.js'
@@ -82,7 +84,7 @@ export const Condition: React.FC<Props> = (props) => {
   useEffect(() => {
     updateCondition({
       andIndex,
-      fieldName,
+      fieldName: activeField.value,
       operator: internalOperatorOption,
       orIndex,
       value: debouncedValue,
@@ -90,7 +92,7 @@ export const Condition: React.FC<Props> = (props) => {
   }, [
     debouncedValue,
     andIndex,
-    fieldName,
+    activeField?.value,
     internalOperatorOption,
     orIndex,
     updateCondition,
@@ -128,18 +130,18 @@ export const Condition: React.FC<Props> = (props) => {
                 })
               }}
               options={fields}
-              value={fields.find((field) => fieldName === field.value) || fields[0]}
+              value={fields.find((field) => activeField.value === field.value) || fields[0]}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!fieldName}
+              disabled={!activeField.value}
               isClearable={false}
               onChange={(operator) => {
                 setInternalOperatorOption(operator.value)
                 updateCondition({
                   andIndex,
-                  fieldName,
+                  fieldName: activeField.value,
                   operator: operator.value,
                   orIndex,
                   value: internalQueryValue,
@@ -163,6 +165,12 @@ export const Condition: React.FC<Props> = (props) => {
                 onChange: setInternalQueryValue,
                 operator: internalOperatorOption,
                 options: valueOptions,
+                relationTo:
+                  activeField?.props?.type === 'relationship' &&
+                  'fieldComponentProps' in activeField.props
+                    ? (activeField?.props?.fieldComponentProps as RelationshipFieldProps)
+                        ?.relationTo
+                    : undefined,
                 value: internalQueryValue ?? '',
               }}
             />
