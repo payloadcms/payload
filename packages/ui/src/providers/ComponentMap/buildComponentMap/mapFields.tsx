@@ -199,6 +199,8 @@ export const mapFields = (args: {
               ? field.label
               : undefined,
           labels: 'labels' in field ? field.labels : undefined,
+          options: 'options' in field ? field.options : undefined,
+          relationTo: 'relationTo' in field ? field.relationTo : undefined,
         }
 
         switch (field.type) {
