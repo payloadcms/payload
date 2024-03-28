@@ -24,6 +24,7 @@ import type { BlocksFeatureClientProps } from '../feature.client.js'
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
 import { BlockContent } from './BlockContent.js'
 import './index.scss'
+import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
   blockFieldWrapperName: string
@@ -75,7 +76,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
       if (state) {
         setInitialState({
-          ...state,
+          ...removeEmptyArrayValues({ fields: state }),
           blockName: {
             initialValue: '',
             passesCondition: true,
