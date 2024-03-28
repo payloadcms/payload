@@ -13,10 +13,10 @@ export const TestButton: React.FC = () => {
   return (
     <button
       id="action-save"
-      onClick={(e) => {
+      onClick={async (e) => {
         e.preventDefault()
 
-        void refreshPermissions().then(() => {
+        await refreshPermissions().then(() => {
           void submit()
         })
       }}

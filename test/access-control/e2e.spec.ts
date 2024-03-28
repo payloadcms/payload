@@ -258,7 +258,7 @@ describe('access control', () => {
   })
 
   // TODO: Test flakes. In CI, test global does not appear in nav. Perhaps the checkbox setValue is not triggered BEFORE the document is saved, as the custom save button can be clicked even if the form has not been set to modified.
-  test.skip('should show test global immediately after allowing access', async () => {
+  test('should show test global immediately after allowing access', async () => {
     await page.goto(`${serverURL}/admin/globals/settings`)
 
     await openNav(page)
