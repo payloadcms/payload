@@ -145,8 +145,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'REPLACE_ROW': {
-      const { blockType, path, rowIndex: rowIndexArg } = action
-      const subFieldState: FormState = {}
+      const { blockType, path, rowIndex: rowIndexArg, subFieldState = {} } = action
 
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
       const rowIndex = Math.max(0, Math.min(rowIndexArg, siblingRows?.length - 1 || 0))
