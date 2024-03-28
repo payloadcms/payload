@@ -230,7 +230,7 @@ jobs:
           # - plugin-seo
           # - refresh-permissions
           # - uploads
-          # - versions
+          - versions
 
     steps:
       - name: Use Node.js 18

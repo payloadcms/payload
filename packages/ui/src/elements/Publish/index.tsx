@@ -10,7 +10,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
-const DefaultPublishButton: React.FC = () => {
+export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const { code } = useLocale()
   const { id, collectionSlug, globalSlug, publishedDoc, unpublishedVersions } = useDocumentInfo()
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
@@ -22,7 +22,7 @@ const DefaultPublishButton: React.FC = () => {
     serverURL,
   } = useConfig()
   const { t } = useTranslation()
-  const label = t('version:publishChanges')
+  const label = labelProp || t('version:publishChanges')
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0
   const canPublish = hasPublishPermission && (modified || hasNewerVersions || !publishedDoc)

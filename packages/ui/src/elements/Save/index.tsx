@@ -8,10 +8,10 @@ import { useHotkey } from '../../hooks/useHotkey.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
-const DefaultSaveButton: React.FC = () => {
+export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
   const { t } = useTranslation()
   const { submit } = useForm()
-  const label = t('general:save')
+  const label = labelProp || t('general:save')
   const ref = useRef<HTMLButtonElement>(null)
   const editDepth = useEditDepth()
 
