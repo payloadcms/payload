@@ -45,6 +45,7 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
     date: datePickerProps,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     placeholder,
