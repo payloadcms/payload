@@ -113,6 +113,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const { path: pathFromContext } = useFieldProps()
 
   const {
+    errorPaths,
     path,
     permissions,
     rows = [],
@@ -192,7 +193,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
 
   const hasMaxRows = maxRows && rows.length >= maxRows
 
-  const fieldErrorCount = rows.reduce((total, row) => total + (row?.errorPaths?.length || 0), 0)
+  const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
@@ -219,7 +220,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
-              <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+              <FieldLabel CustomLabel={CustomLabel} as="span" unstyled {...(labelProps || {})} />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
@@ -262,6 +263,9 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
             const blockToRender = blocks.find((block) => block.slug === blockType)
 
             if (blockToRender) {
+              const rowErrorCount = errorPaths.filter((errorPath) =>
+                errorPath.startsWith(`${path}.${i}`),
+              ).length
               return (
                 <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
@@ -271,6 +275,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                       block={blockToRender}
                       blocks={blocks}
                       duplicateRow={duplicateRow}
+                      errorCount={rowErrorCount}
                       forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       indexPath={indexPath}

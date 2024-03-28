@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, FieldBase, RowLabel as RowLabelType } from 'payload/types'
+import type { DocumentPreferences, FieldBase } from 'payload/types'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
