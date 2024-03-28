@@ -145,6 +145,8 @@ const PreviewView: React.FC<Props> = ({
             globalLabel={globalConfig?.label}
             globalSlug={globalSlug}
             id={id}
+            pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
+            useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
             view={t('general:livePreview')}
           />
           <SetDocumentTitle
