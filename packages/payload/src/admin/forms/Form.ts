@@ -8,7 +8,6 @@ export type Data = {
 export type Row = {
   blockType?: string
   collapsed?: boolean
-  errorPaths?: string[]
   id: string
 }
 

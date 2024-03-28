@@ -24,7 +24,6 @@ export type AddFieldStatePromiseArgs = {
    */
   anyParentLocalized?: boolean
   data: Data
-  errorPaths: string[]
   field: NonPresentationalField
   fieldIndex: number
   /**
@@ -77,7 +76,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
     data,
-    errorPaths: parentErrorPaths = [],
     field,
     filter,
     forceFullValue = false,
@@ -187,7 +185,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
                 data: row,
-                errorPaths: fieldState.errorPaths,
                 fields: field.fields,
                 filter,
                 forceFullValue,
@@ -213,7 +210,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 collapsedRowIDs === undefined
                   ? field.admin.initCollapsed
                   : collapsedRowIDs.includes(row.id),
-              errorPaths: fieldState.errorPaths,
             })
 
             return acc
@@ -301,7 +297,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
                   data: row,
-                  errorPaths: fieldState.errorPaths,
                   fields: block.fields,
                   filter,
                   forceFullValue,
@@ -328,7 +323,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   collapsedRowIDs === undefined
                     ? field.admin.initCollapsed
                     : collapsedRowIDs.includes(row.id),
-                errorPaths: fieldState.errorPaths,
               })
             }
 
@@ -371,7 +365,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
           data: data?.[field.name] || {},
-          errorPaths: parentErrorPaths,
           fields: field.fields,
           filter,
           forceFullValue,
@@ -508,7 +501,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: field.localized || anyParentLocalized,
       data,
-      errorPaths: parentErrorPaths,
       fields: field.fields,
       filter,
       forceFullValue,
@@ -532,7 +524,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
         data: tabHasName(tab) ? data?.[tab.name] : data,
-        errorPaths: parentErrorPaths,
         fields: tab.fields,
         filter,
         forceFullValue,

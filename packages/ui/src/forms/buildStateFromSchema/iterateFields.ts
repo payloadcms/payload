@@ -13,7 +13,6 @@ type Args = {
    */
   anyParentLocalized?: boolean
   data: Data
-  errorPaths: string[]
   fields: FieldSchema[]
   filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
@@ -62,7 +61,6 @@ export const iterateFields = async ({
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
   data,
-  errorPaths,
   fields,
   filter,
   forceFullValue = false,
@@ -97,7 +95,6 @@ export const iterateFields = async ({
           addErrorPathToParent: addErrorPathToParentArg,
           anyParentLocalized,
           data,
-          errorPaths,
           field,
           fieldIndex,
           filter,
