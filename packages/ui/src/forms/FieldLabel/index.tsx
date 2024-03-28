@@ -1,4 +1,5 @@
 'use client'
+
 import type { LabelProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
