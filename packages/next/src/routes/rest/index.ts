@@ -12,7 +12,6 @@ import type {
 } from './types.js'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
-import { routeError } from './routeError.js'
 import { access } from './auth/access.js'
 import { forgotPassword } from './auth/forgotPassword.js'
 import { init } from './auth/init.js'
@@ -45,6 +44,7 @@ import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionB
 import { findVersions as findVersionsGlobal } from './globals/findVersions.js'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion.js'
 import { update as updateGlobal } from './globals/update.js'
+import { routeError } from './routeError.js'
 
 const endpoints = {
   collection: {

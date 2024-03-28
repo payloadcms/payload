@@ -12,6 +12,7 @@ export type Options = {
 
 export type FieldType<T> = {
   errorMessage?: string
+  errorPaths?: string[]
   filterOptions?: FilterOptionsResult
   formProcessing: boolean
   formSubmitted: boolean

@@ -113,6 +113,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const { path: pathFromContext } = useFieldProps()
 
   const {
+    errorPaths,
     path,
     rows = [],
     schemaPath,
@@ -181,10 +182,8 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
 
   const hasMaxRows = maxRows && rows.length >= maxRows
 
-  const fieldErrorCount =
-    rows.reduce((total, row) => total + (row?.errorPaths?.length || 0), 0) + (valid ? 0 : 1)
-
-  const fieldHasErrors = submitted && fieldErrorCount > 0
+  const fieldErrorCount = errorPaths.length
+  const fieldHasErrors = submitted && errorPaths.length > 0
 
   const showRequired = readOnly && rows.length === 0
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
@@ -212,8 +211,10 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
             <h3 className={`${baseClass}__title`}>
               <FieldLabel
                 CustomLabel={CustomLabel}
+                as="span"
                 label={label}
                 required={required}
+                unstyled
                 {...(labelProps || {})}
               />
             </h3>
@@ -253,32 +254,39 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
-          {rows.map((row, i) => (
-            <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
-              {(draggableSortableItemProps) => (
-                <ArrayRow
-                  {...draggableSortableItemProps}
-                  CustomRowLabel={CustomRowLabel}
-                  addRow={addRow}
-                  duplicateRow={duplicateRow}
-                  fieldMap={fieldMap}
-                  forceRender={forceRender}
-                  hasMaxRows={hasMaxRows}
-                  indexPath={indexPath}
-                  labels={labels}
-                  moveRow={moveRow}
-                  path={path}
-                  permissions={permissions}
-                  readOnly={readOnly}
-                  removeRow={removeRow}
-                  row={row}
-                  rowCount={rows.length}
-                  rowIndex={i}
-                  setCollapse={setCollapse}
-                />
-              )}
-            </DraggableSortableItem>
-          ))}
+          {rows.map((row, i) => {
+            const rowErrorCount = errorPaths?.filter((errorPath) =>
+              errorPath.startsWith(`${path}.${i}.`),
+            ).length
+            return (
+              <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
+                {(draggableSortableItemProps) => (
+                  <ArrayRow
+                    {...draggableSortableItemProps}
+                    CustomRowLabel={CustomRowLabel}
+                    addRow={addRow}
+                    duplicateRow={duplicateRow}
+                    errorCount={rowErrorCount}
+                    fieldMap={fieldMap}
+                    forceRender={forceRender}
+                    hasMaxRows={hasMaxRows}
+                    indexPath={indexPath}
+                    labels={labels}
+                    moveRow={moveRow}
+                    path={path}
+                    permissions={permissions}
+                    readOnly={readOnly}
+                    removeRow={removeRow}
+                    row={row}
+                    rowCount={rows.length}
+                    rowIndex={i}
+                    schemaPath={schemaPath}
+                    setCollapse={setCollapse}
+                  />
+                )}
+              </DraggableSortableItem>
+            )
+          })}
           {!valid && (
             <React.Fragment>
               {showRequired && (

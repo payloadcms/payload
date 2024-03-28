@@ -63,8 +63,8 @@ type CreateLocalReq = (
     user?: User
   },
   payload: Payload,
-) => Promise<PayloadRequest>
-export const createLocalReq: CreateLocalReq = async (
+) => PayloadRequest
+export const createLocalReq: CreateLocalReq = (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, user },
   payload,
 ) => {

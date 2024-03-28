@@ -12,8 +12,9 @@ import type { FormFieldBase } from '../shared/index.js'
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { useFieldProps } from '../../forms/FieldPropsProvider/index.js'
+import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
-import { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
+import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useRow } from '../Row/provider.js'
@@ -53,14 +54,15 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
-  const [errorCount, setErrorCount] = React.useState(undefined)
-  const fieldHasErrors = errorCount > 0
+  const { errorPaths } = useField({ path })
+  const submitted = useFormSubmitted()
+  const errorCount = errorPaths.length
+  const fieldHasErrors = submitted && errorCount > 0
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
   return (
     <Fragment>
-      <WatchChildErrors fieldMap={fieldMap} path={path} setErrorCount={setErrorCount} />
       <div
         className={[
           fieldBaseClass,
