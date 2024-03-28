@@ -168,7 +168,13 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   }
 
   config.admin = {
-    autoLogin: process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' ? false : false,
+    autoLogin:
+      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
+        ? false
+        : {
+            email: 'dev@payloadcms.com',
+            password: 'test',
+          },
     ...(config.admin || {}),
   }
 
