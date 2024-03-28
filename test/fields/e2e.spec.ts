@@ -1728,6 +1728,8 @@ describe('fields', () => {
       // Select "Seeded text document" relationship
       await page.getByText('Seeded text document', { exact: true }).click()
 
+      // Need to wait to properly open drawer - without this the drawer state is flakey and closes before
+      // the text below can be filled before the save on the drawer
       await wait(200)
 
       // Click edit button which opens drawer
@@ -1775,6 +1777,7 @@ describe('fields', () => {
       await page.locator('#field-relationship .value-container').click()
       await page.getByText('Seeded text document', { exact: true }).click()
 
+      // Need to wait to allow for field to retrieve documents before the save occurs
       await wait(200)
 
       await page.locator('#field-relationshipWithMinRows .value-container').click()
