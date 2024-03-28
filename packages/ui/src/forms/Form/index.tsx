@@ -5,7 +5,7 @@ import type { FormState } from 'payload/types'
 import isDeepEqual from 'deep-equal'
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { deepCopyObject, wait } from 'payload/utilities'
+import { wait } from 'payload/utilities'
 import QueryString from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -250,8 +250,6 @@ export const Form: React.FC<FormProps> = (props) => {
           return
         }
 
-        setProcessing(false)
-
         const contentType = res.headers.get('content-type')
         const isJSON = contentType && contentType.indexOf('application/json') !== -1
 
@@ -261,9 +259,8 @@ export const Form: React.FC<FormProps> = (props) => {
         if (isJSON) json = await res.json()
 
         if (res.status < 400) {
+          if (typeof onSuccess === 'function') await onSuccess(json)
           setSubmitted(false)
-
-          if (typeof onSuccess === 'function') onSuccess(json)
 
           if (redirect) {
             router.push(redirect)
@@ -327,6 +324,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
           toast.error(message)
         }
+
+        setProcessing(false)
       } catch (err) {
         setProcessing(false)
 
