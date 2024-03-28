@@ -229,7 +229,7 @@ const validateArrayLength = (
 ) => {
   const { maxRows, minRows, required, t } = options
 
-  const arrayLength = Array.isArray(value) ? value.length : 0
+  const arrayLength = Array.isArray(value) ? value.length : value || 0
 
   if (!required && arrayLength === 0) return true
 

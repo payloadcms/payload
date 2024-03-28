@@ -105,6 +105,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
   const result: FieldType<T> = useMemo(
     () => ({
       errorMessage: field?.errorMessage,
+      errorPaths: field?.errorPaths || [],
       filterOptions,
       formProcessing: processing,
       formSubmitted: submitted,
@@ -123,6 +124,7 @@ export const useField = <T,>(options: Options): FieldType<T> => {
       field?.errorMessage,
       field?.rows,
       field?.valid,
+      field?.errorPaths,
       processing,
       setValue,
       showError,
