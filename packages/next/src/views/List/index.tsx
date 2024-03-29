@@ -8,7 +8,7 @@ import { ListQueryProvider } from '@payloadcms/ui/providers/ListQuery'
 import { notFound } from 'next/navigation.js'
 import { createClientCollectionConfig } from 'payload/config'
 import { type AdminViewProps } from 'payload/types'
-import { isEntityHidden, isNumber, mergeListSearchAndWhere } from 'payload/utilities'
+import { isNumber, mergeListSearchAndWhere } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps, ListPreferences } from './Default/types.js'
@@ -29,6 +29,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       query,
       user,
     },
+    visibleEntities,
   } = initPageResult
 
   const collectionSlug = collectionConfig?.slug
@@ -62,10 +63,10 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
 
   if (collectionConfig) {
     const {
-      admin: { components: { views: { List: CustomList } = {} } = {}, hidden },
+      admin: { components: { views: { List: CustomList } = {} } = {} },
     } = collectionConfig
 
-    if (isEntityHidden({ hidden, user })) {
+    if (!visibleEntities.collections.includes(collectionSlug)) {
       return notFound()
     }
 

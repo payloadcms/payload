@@ -45,6 +45,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       },
       user,
     },
+    visibleEntities,
   } = initPageResult
 
   const segments = Array.isArray(params?.segments) ? params.segments : []
@@ -64,6 +65,10 @@ export const Document: React.FC<AdminViewProps> = async ({
   let action: string
 
   if (collectionConfig) {
+    if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
+      return <NotFoundClient />
+    }
+
     try {
       docPermissions = await docAccessOperation({
         id,
@@ -95,7 +100,6 @@ export const Document: React.FC<AdminViewProps> = async ({
         config,
         docPermissions,
         routeSegments: segments,
-        user,
       })
 
       CustomView = collectionViews?.CustomView
@@ -109,6 +113,10 @@ export const Document: React.FC<AdminViewProps> = async ({
   }
 
   if (globalConfig) {
+    if (!visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)) {
+      return <NotFoundClient />
+    }
+
     docPermissions = permissions?.globals?.[globalSlug]
     hasSavePermission = isEditing && docPermissions?.update?.permission
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
@@ -126,7 +134,6 @@ export const Document: React.FC<AdminViewProps> = async ({
         docPermissions,
         globalConfig,
         routeSegments: segments,
-        user,
       })
 
       CustomView = globalViews?.CustomView
