@@ -12,16 +12,22 @@ const RecursiveTranslation: React.FC<{
   return (
     <span>
       {sections.map((section, index) => {
-        const Element = elements?.[index.toString()]
-        if (Element) {
-          const regex = new RegExp(`<${index}>(.*?)<\/${index}>`, 'g')
-          const children = section.replace(regex, (_, group) => group)
-          return (
-            <Element key={index}>
-              <RecursiveTranslation translationString={children} />
-            </Element>
-          )
+        if (elements && section.startsWith('<') && section.endsWith('>')) {
+          const elementKey = section[1]
+          const Element = elements[elementKey]
+
+          if (Element) {
+            const regex = new RegExp(`<${elementKey}>(.*?)<\/${elementKey}>`, 'g')
+            const children = section.replace(regex, (_, group) => group)
+
+            return (
+              <Element key={index}>
+                <RecursiveTranslation translationString={children} />
+              </Element>
+            )
+          }
         }
+
         return section
       })}
     </span>

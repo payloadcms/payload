@@ -20,6 +20,7 @@ const serverTranslationKeys = [
   'authentication:resetYourPassword',
   'authentication:verifyYourEmail',
   'authentication:youAreReceivingResetPassword',
+  'authentication:loggedInChangePassword',
   'authentication:youDidNotRequestPassword',
   'authentication:verified',
 
