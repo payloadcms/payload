@@ -6,6 +6,7 @@ import { sql } from 'drizzle-orm'
 
 import { isMongoose } from './isMongoose.js'
 
+export const uploadsDirCacheFolder: null | string = ''
 export const dbSnapshot = {}
 
 async function createMongooseSnapshot(collectionsObj, snapshotKey: string) {

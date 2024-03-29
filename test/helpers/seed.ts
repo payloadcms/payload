@@ -4,7 +4,12 @@ import { type Payload } from 'payload'
 
 import { isMongoose } from './isMongoose.js'
 import { resetDB } from './reset.js'
-import { createSnapshot, dbSnapshot, restoreFromSnapshot } from './snapshot.js'
+import {
+  createSnapshot,
+  dbSnapshot,
+  restoreFromSnapshot,
+  uploadsDirCacheFolder,
+} from './snapshot.js'
 
 type SeedFunction = (_payload: Payload) => Promise<void>
 
@@ -28,6 +33,25 @@ export async function seedDB({
    * Reset database
    */
   await resetDB(_payload, collectionSlugs)
+  /**
+   * Delete uploads directory if it exists
+   */
+  if (uploadsDir) {
+    try {
+      // Attempt to clear the uploads directory if it exists
+      await fs.promises.access(uploadsDir)
+      const files = await fs.promises.readdir(uploadsDir)
+      for (const file of files) {
+        await fs.promises.rm(path.join(uploadsDir, file))
+      }
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        // If the error is not because the directory doesn't exist
+        console.error('Error in operation (deleting uploads dir):', error)
+        throw error
+      }
+    }
+  }
 
   /**
    * Mongoose & Postgres: Restore snapshot of old data if available
@@ -38,6 +62,38 @@ export async function seedDB({
   let restored = false
   if (dbSnapshot[snapshotKey] && Object.keys(dbSnapshot[snapshotKey]).length) {
     await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
+
+    /**
+     * Restore uploads dir if it exists
+     */
+    if (uploadsDir && fs.existsSync(uploadsDirCacheFolder)) {
+      // move all files from inside uploadsDirCacheFolder to uploadsDir
+      await fs.promises
+        .readdir(uploadsDirCacheFolder, { withFileTypes: true })
+        .then(async (files) => {
+          for (const file of files) {
+            if (file.isDirectory()) {
+              await fs.promises.mkdir(path.join(uploadsDir, file.name), {
+                recursive: true,
+              })
+              await fs.promises.copyFile(
+                path.join(uploadsDirCacheFolder, file.name),
+                path.join(uploadsDir, file.name),
+              )
+            } else {
+              await fs.promises.copyFile(
+                path.join(uploadsDirCacheFolder, file.name),
+                path.join(uploadsDir, file.name),
+              )
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Error in operation (restoring uploads dir):', err)
+          throw err
+        })
+    }
+
     restored = true
   }
 
@@ -49,6 +105,7 @@ export async function seedDB({
   if (isMongoose(_payload)) {
     await Promise.all([
       ...collectionSlugs.map(async (collectionSlug) => {
+        // @ts-expect-error TODO: Type this better
         await _payload.db.collections[collectionSlug].createIndexes()
       }),
     ])
@@ -90,4 +147,40 @@ export async function seedDB({
   await seedFunction(_payload)
 
   await createSnapshot(_payload, snapshotKey, collectionSlugs)
+
+  /**
+   * Cache uploads dir to a cache folder if uploadsDir exists
+   */
+  if (uploadsDir && fs.existsSync(uploadsDir)) {
+    // delete the cache folder if it exists
+    if (fs.existsSync(uploadsDirCacheFolder)) {
+      await fs.promises.rm(uploadsDirCacheFolder, { recursive: true })
+    }
+    await fs.promises.mkdir(uploadsDirCacheFolder, { recursive: true })
+    // recursively move all files and directories from uploadsDir to uploadsDirCacheFolder
+    await fs.promises
+      .readdir(uploadsDir, { withFileTypes: true })
+      .then(async (files) => {
+        for (const file of files) {
+          if (file.isDirectory()) {
+            await fs.promises.mkdir(path.join(uploadsDirCacheFolder, file.name), {
+              recursive: true,
+            })
+            await fs.promises.copyFile(
+              path.join(uploadsDir, file.name),
+              path.join(uploadsDirCacheFolder, file.name),
+            )
+          } else {
+            await fs.promises.copyFile(
+              path.join(uploadsDir, file.name),
+              path.join(uploadsDirCacheFolder, file.name),
+            )
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Error in operation (creating snapshot of uploads dir):', err)
+        throw err
+      })
+  }
 }
