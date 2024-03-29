@@ -237,6 +237,7 @@ export const DefaultEditView: React.FC = () => {
                     <Auth
                       className={`${baseClass}__auth`}
                       collectionSlug={collectionConfig.slug}
+                      disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
                       email={data?.email}
                       operation={operation}
                       readOnly={!hasSavePermission}

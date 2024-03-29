@@ -139,7 +139,7 @@ export const Form: React.FC<FormProps> = (props) => {
             }
           }
 
-          if (!validatedField.valid) {
+          if (validatedField.valid === false) {
             isValid = false
           }
         }
