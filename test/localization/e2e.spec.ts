@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { LocalizedPost } from './payload-types.js'
@@ -74,8 +75,6 @@ describe('Localization', () => {
 
       // Change back to English
       await changeLocale(page, 'es')
-
-      console.log('url', page.url())
 
       // Localized field should not be populated
       await expect
@@ -232,6 +231,9 @@ describe('Localization', () => {
       await page.locator('#field-layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()
       await page.fill('#field-layout__0__text', 'test')
+      await expect(page.locator('#field-layout__0__text')).toHaveValue('test')
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
       await saveDocAndAssert(page)
 
       const originalID = await page.locator('.id-label').innerText()
