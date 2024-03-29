@@ -221,7 +221,7 @@ jobs:
           # - admin
           - auth
           - field-error-states
-          # - fields-relationship
+          - fields-relationship
           # - fields
           - fields/lexical
           - live-preview
