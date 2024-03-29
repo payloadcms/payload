@@ -90,7 +90,7 @@ export async function createProject(args: {
   const spinner = ora('Checking latest Payload version...').start()
 
   await updatePackageJSON({ projectDir, projectName })
-  await configurePayloadConfig({ dbDetails, projectDir })
+  await configurePayloadConfig({ dbDetails, projectDirOrConfigPath: { projectDir } })
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
   const lockPath = path.resolve(projectDir, 'yarn.lock')
@@ -125,6 +125,6 @@ export async function updatePackageJSON(args: {
     packageObj.name = projectName
     await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
   } catch (err: unknown) {
-    warning('Unable to update name in package.json')
+    warning(`Unable to update name in package.json. ${err instanceof Error ? err.message : ''}`)
   }
 }

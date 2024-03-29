@@ -6,6 +6,7 @@ import path from 'path'
 
 import type { CliArgs, PackageManager } from './types.js'
 
+import { configurePayloadConfig } from './lib/configure-payload-config.js'
 import { createProject } from './lib/create-project.js'
 import { generateSecret } from './lib/generate-secret.js'
 import { initNext } from './lib/init-next.js'
@@ -14,8 +15,13 @@ import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { writeEnvFile } from './lib/write-env-file.js'
-import { debug, error, log, success } from './utils/log.js'
-import { helpMessage, successMessage, welcomeMessage } from './utils/messages.js'
+import { error, log, success } from './utils/log.js'
+import {
+  helpMessage,
+  successMessage,
+  successfulNextInit,
+  welcomeMessage,
+} from './utils/messages.js'
 
 export class Main {
   args: CliArgs
@@ -59,7 +65,9 @@ export class Main {
   }
 
   async init(): Promise<void> {
-    const initContext = {
+    const initContext: {
+      nextConfigPath: string | undefined
+    } = {
       nextConfigPath: undefined,
     }
 
@@ -71,10 +79,10 @@ export class Main {
       log(welcomeMessage)
 
       // Detect if inside Next.js project
-      const foundConfig = (
+      const nextConfigPath = (
         await globby('next.config.*js', { absolute: true, cwd: process.cwd() })
       )?.[0]
-      initContext.nextConfigPath = foundConfig
+      initContext.nextConfigPath = nextConfigPath
 
       success('Next.js app detected.')
 
@@ -85,22 +93,38 @@ export class Main {
       }
 
       const projectName = await parseProjectName(this.args)
-      const projectDir = foundConfig
-        ? path.dirname(foundConfig)
+      const projectDir = nextConfigPath
+        ? path.dirname(nextConfigPath)
         : path.resolve(process.cwd(), slugify(projectName))
 
       const packageManager = await getPackageManager(this.args, projectDir)
-      debug(`Using package manager: ${packageManager}`)
 
-      if (foundConfig) {
-        const result = await initNext({ ...this.args, packageManager, projectDir })
-        if (!result.success) {
-          error(result.reason || 'Failed to initialize Payload app in Next.js project')
+      if (nextConfigPath) {
+        const result = await initNext({
+          ...this.args,
+          nextConfigPath,
+          packageManager,
+          projectDir,
+        })
+        if (result.success === false) {
+          error(result.reason)
+          process.exit(1)
         } else {
           success('Payload app successfully initialized in Next.js project')
         }
-        process.exit(result.success ? 0 : 1)
+
+        const dbDetails = await selectDb(this.args, projectName)
+        await configurePayloadConfig({
+          dbDetails,
+          projectDirOrConfigPath: {
+            payloadConfigPath: result.payloadConfigPath,
+          },
+        })
+
         // TODO: This should continue the normal prompt flow
+        success('Payload project successfully created')
+        log(successfulNextInit())
+        return
       }
 
       const templateArg = this.args['--template']

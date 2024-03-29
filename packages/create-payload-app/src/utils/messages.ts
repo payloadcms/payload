@@ -68,6 +68,20 @@ export function successMessage(projectDir: string, packageManager: string): stri
 `
 }
 
+export function successfulNextInit(): string {
+  return `
+  ${header('Successful Payload Installation!')}
+
+  ${header('Documentation:')}
+
+    - ${createTerminalLink(
+      'Getting Started',
+      'https://payloadcms.com/docs/getting-started/what-is-payload',
+    )}
+    - ${createTerminalLink('Configuration', 'https://payloadcms.com/docs/configuration/overview')}
+`
+}
+
 export function moveMessage(args: { nextAppDir: string; projectDir: string }): string {
   return `
   ${header('Next Steps:')}
@@ -77,7 +91,7 @@ export function moveMessage(args: { nextAppDir: string; projectDir: string }): s
   ${chalk.bold('To continue:')}
 
     - Move all files from ${args.nextAppDir} to a top-level directory named ${chalk.bold(
-      '(name)',
+      '(app)',
     )} or similar.
 
     Once moved, rerun the create-payload-app command again.

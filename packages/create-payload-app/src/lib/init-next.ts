@@ -24,16 +24,23 @@ import { moveMessage } from '../utils/messages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
 
 type InitNextArgs = Pick<CliArgs, '--debug'> & {
+  nextConfigPath: string
   packageManager: PackageManager
   projectDir: string
   useDistFiles?: boolean
 }
-type InitNextResult = { nextAppDir?: string; reason?: string; success: boolean }
+type InitNextResult =
+  | {
+      nextAppDir: string
+      payloadConfigPath: string
+      success: true
+    }
+  | { reason: string; success: false }
 
 export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   const { packageManager, projectDir } = args
 
-  // Get app directory
+  // Get app directory. Could be top-level or src/app
   const nextAppDir = (
     await globby(['**/app'], {
       absolute: true,
@@ -49,27 +56,28 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   // Check for top-level layout.tsx
   const layoutPath = path.resolve(nextAppDir, 'layout.tsx')
   if (fs.existsSync(layoutPath)) {
-    // Output directions for user to move all files from app to top-level directory named `(name)`
+    // Output directions for user to move all files from app to top-level directory named `(app)`
     log(moveMessage({ nextAppDir, projectDir }))
     return { reason: 'Found existing layout.tsx in app directory', success: false }
   }
 
-  const templateResult = await installAndConfigurePayload({
+  const configurationResult = installAndConfigurePayload({
     ...args,
     nextAppDir,
     useDistFiles: true, // Requires running 'pnpm pack-template-files' in cpa
   })
-  if (!templateResult.success) return templateResult
+
+  if (!configurationResult.success) return configurationResult
 
   const { success: installSuccess } = await installDeps(projectDir, packageManager)
   if (!installSuccess) {
-    return { ...templateResult, reason: 'Failed to install dependencies', success: false }
+    return { ...configurationResult, reason: 'Failed to install dependencies', success: false }
   }
 
   // Add `@payload-config` to tsconfig.json `paths`
   await addPayloadConfigToTsConfig(projectDir)
 
-  return templateResult
+  return configurationResult
 }
 
 async function addPayloadConfigToTsConfig(projectDir: string) {
@@ -93,10 +101,8 @@ async function addPayloadConfigToTsConfig(projectDir: string) {
   }
 }
 
-async function installAndConfigurePayload(
-  args: InitNextArgs & { nextAppDir: string },
-): Promise<InitNextResult> {
-  const { '--debug': debug, nextAppDir, projectDir, useDistFiles } = args
+function installAndConfigurePayload(args: InitNextArgs & { nextAppDir: string }): InitNextResult {
+  const { '--debug': debug, nextAppDir, nextConfigPath, projectDir, useDistFiles } = args
 
   info('Initializing Payload app in Next.js project', 1)
 
@@ -108,32 +114,12 @@ async function installAndConfigurePayload(
     return { reason: `Could not find specified project directory at ${projectDir}`, success: false }
   }
 
-  // Next.js configs can be next.config.js, next.config.mjs, etc.
-  const foundConfig = (await globby('next.config.*js', { absolute: true, cwd: projectDir }))?.[0]
-
-  if (!foundConfig) {
-    throw new Error(`No next.config.js found at ${projectDir}`)
-  }
-
-  const nextConfigPath = path.resolve(projectDir, foundConfig)
-  if (!fs.existsSync(nextConfigPath)) {
-    return {
-      reason: `No next.config.js found at ${nextConfigPath}. Ensure you are in a Next.js project directory.`,
-      success: false,
-    }
-  } else {
-    if (debug) logDebug(`Found Next config at ${nextConfigPath}`)
-  }
-
   const templateFilesPath =
-    // dirname.endsWith('dist') || useDistFiles
-    //   ? path.resolve(dirname, '../..', 'dist/template')
-    //   : path.resolve(dirname, '../../../../templates/blank-3.0')
     dirname.endsWith('dist') || useDistFiles
       ? path.resolve(dirname, '../..', 'dist/template')
       : path.resolve(dirname, '../../../../templates/blank-3.0')
 
-  if (debug) logDebug(`Using template files from: ${templateFilesPath}`)
+  logDebug(`Using template files from: ${templateFilesPath}`)
 
   if (!fs.existsSync(templateFilesPath)) {
     return {
@@ -141,13 +127,7 @@ async function installAndConfigurePayload(
       success: false,
     }
   } else {
-    if (debug) logDebug('Found template source files')
-  }
-
-  if (!fs.existsSync(nextAppDir)) {
-    return { reason: `Could not find user app directory inside ${projectDir}`, success: false }
-  } else {
-    logDebug(`Found user app directory: ${nextAppDir}`)
+    logDebug('Found template source files')
   }
 
   logDebug(`Copying template files from ${templateFilesPath} to ${nextAppDir}`)
@@ -162,7 +142,11 @@ async function installAndConfigurePayload(
   wrapNextConfig({ nextConfigPath })
 
   success('Successfully initialized.')
-  return { nextAppDir, success: true }
+  return {
+    nextAppDir,
+    payloadConfigPath: path.resolve(nextAppDir, '../payload.config.ts'),
+    success: true,
+  }
 }
 
 async function installDeps(projectDir: string, packageManager: PackageManager) {
