@@ -108,13 +108,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
     const validationPromises = Object.entries(contextRef.current.fields).map(
       async ([path, field]) => {
-        const validatedField = {
-          ...field,
-          valid: true,
-        }
+        const validatedField = field
 
         if (field.passesCondition !== false) {
-          let validationResult: boolean | string = true
+          let validationResult: boolean | string = validatedField.valid
 
           if (typeof field.validate === 'function') {
             let valueToValidate = field.value
@@ -132,11 +129,17 @@ export const Form: React.FC<FormProps> = (props) => {
               t,
               user,
             })
+
+            if (typeof validationResult === 'string') {
+              validatedField.errorMessage = validationResult
+              validatedField.valid = false
+            } else {
+              validatedField.valid = true
+              validatedField.errorMessage = undefined
+            }
           }
 
-          if (typeof validationResult === 'string') {
-            validatedField.errorMessage = validationResult
-            validatedField.valid = false
+          if (!validatedField.valid) {
             isValid = false
           }
         }
