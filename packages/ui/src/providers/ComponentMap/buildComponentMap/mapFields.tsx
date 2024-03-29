@@ -734,6 +734,9 @@ export const mapFields = (args: {
       fieldComponentProps: {
         name: 'id',
         label: 'ID',
+        labelProps: {
+          label: 'ID',
+        },
       },
       fieldIsPresentational: false,
       isFieldAffectingData: true,
