@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} and {{count}} more',
     labelRelationship: '{{label}} Relationship',
     latitude: 'Enlem',
+    linkedTo: '<0>label</0> için bağlantı verildi',
     longitude: 'Boylam',
     passwordsDoNotMatch: 'Parolalar eşleşmiyor.',
     removeRelationship: 'İlişkiyi Kaldır',

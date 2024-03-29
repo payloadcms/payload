@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} en {{count}} meer',
     labelRelationship: '{{label}} relatie',
     latitude: 'Breedtegraad',
+    linkedTo: 'Gekoppeld aan aan <0>{{label}}</0>',
     longitude: 'Lengtegraad',
     passwordsDoNotMatch: 'Wachtwoorden komen niet overeen.',
     removeRelationship: 'Relatie Verwijderen',

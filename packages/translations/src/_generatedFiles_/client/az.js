@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} və daha {{count}} nəfər',
     labelRelationship: '{{label}} Relationship',
     latitude: 'Enlik',
+    linkedTo: '<0>{{label}}</0> ilə əlaqəli',
     longitude: 'Uzunluq',
     passwordsDoNotMatch: 'Şifrələr uyğun gəlmir.',
     removeRelationship: 'Relationship sil',

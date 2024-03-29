@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} şi {{count}} mai multe',
     labelRelationship: 'Relația cu {{label}}',
     latitude: 'Latitudine',
+    linkedTo: 'Legat de <0>{{label}}</0>',
     longitude: 'Longitudine',
     passwordsDoNotMatch: 'Parolele nu corespund.',
     removeRelationship: 'Eliminați relația',

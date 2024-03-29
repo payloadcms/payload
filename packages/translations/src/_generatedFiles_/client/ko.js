@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} 및 {{count}}개 더',
     labelRelationship: '{{label}} 관계',
     latitude: '위도',
+    linkedTo: '<0>{{label}}</0>에 연결됨',
     longitude: '경도',
     passwordsDoNotMatch: '비밀번호가 일치하지 않습니다.',
     removeRelationship: '관계 제거',

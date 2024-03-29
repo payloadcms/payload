@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} és további {{count}}',
     labelRelationship: '{{label}} Kapcsolat',
     latitude: 'Szélesség',
+    linkedTo: 'Kapcsolódik a <0>{{label}}</0>',
     longitude: 'Hosszúság',
     passwordsDoNotMatch: 'A jelszavak nem egyeznek.',
     removeRelationship: 'Kapcsolat eltávolítása',
