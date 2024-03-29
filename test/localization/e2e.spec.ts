@@ -233,7 +233,7 @@ describe('Localization', () => {
       await page.fill('#field-layout__0__text', 'test')
       await expect(page.locator('#field-layout__0__text')).toHaveValue('test')
 
-      await wait(500)
+      await wait(5000)
       await saveDocAndAssert(page)
 
       const originalID = await page.locator('.id-label').innerText()
