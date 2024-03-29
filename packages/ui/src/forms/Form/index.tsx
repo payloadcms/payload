@@ -261,6 +261,7 @@ export const Form: React.FC<FormProps> = (props) => {
         if (res.status < 400) {
           if (typeof onSuccess === 'function') await onSuccess(json)
           setSubmitted(false)
+          setProcessing(false)
 
           if (redirect) {
             router.push(redirect)
@@ -268,6 +269,8 @@ export const Form: React.FC<FormProps> = (props) => {
             toast.success(json.message || t('general:submissionSuccessful'), { autoClose: 3000 })
           }
         } else {
+          setProcessing(false)
+
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
             toast.error(json.message)
@@ -324,8 +327,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
           toast.error(message)
         }
-
-        setProcessing(false)
       } catch (err) {
         setProcessing(false)
 

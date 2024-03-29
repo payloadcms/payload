@@ -1,5 +1,5 @@
 import type { Permissions } from 'payload/auth'
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig, VisibleEntities } from 'payload/types'
 
 import { Gutter } from '@payloadcms/ui/elements/Gutter'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
@@ -15,8 +15,7 @@ export type DashboardProps = {
   Link: React.ComponentType<any>
   config: SanitizedConfig
   permissions: Permissions
-  visibleCollections: string[]
-  visibleGlobals: string[]
+  visibleEntities: VisibleEntities
 }
 
 export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
@@ -28,8 +27,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
       },
     },
     permissions,
-    visibleCollections,
-    visibleGlobals,
+    visibleEntities,
   } = props
 
   return (
@@ -42,8 +40,7 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
         <DefaultDashboardClient
           Link={Link}
           permissions={permissions}
-          visibleCollections={visibleCollections}
-          visibleGlobals={visibleGlobals}
+          visibleEntities={visibleEntities}
         />
         {Array.isArray(afterDashboard) &&
           afterDashboard.map((Component, i) => <Component key={i} />)}

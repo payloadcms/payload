@@ -1,7 +1,8 @@
 'use client'
+
 import { getTranslation } from '@payloadcms/translations'
+import { useEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
 import LinkWithDefault from 'next/link.js'
-import { isEntityHidden } from 'payload/utilities'
 import React from 'react'
 
 import type { EntityToGroup } from '../../utilities/groupNavItems.js'
@@ -17,7 +18,9 @@ import { useNav } from './context.js'
 const baseClass = 'nav'
 
 export const DefaultNavClient: React.FC = () => {
-  const { permissions, user } = useAuth()
+  const { permissions } = useAuth()
+  const { isEntityVisible } = useEntityVisibility()
+
   const {
     collections,
     globals,
@@ -30,8 +33,7 @@ export const DefaultNavClient: React.FC = () => {
   const groups = groupNavItems(
     [
       ...collections
-        // @ts-expect-error todo: fix type error here
-        .filter(({ admin: { hidden } }) => !isEntityHidden({ hidden, user }))
+        .filter(({ slug }) => isEntityVisible({ collectionSlug: slug }))
         .map((collection) => {
           const entityToGroup: EntityToGroup = {
             type: EntityType.collection,
@@ -41,8 +43,7 @@ export const DefaultNavClient: React.FC = () => {
           return entityToGroup
         }),
       ...globals
-        // @ts-expect-error todo: fix type error here
-        .filter(({ admin: { hidden } }) => !isEntityHidden({ hidden, user }))
+        .filter(({ slug }) => isEntityVisible({ globalSlug: slug }))
         .map((global) => {
           const entityToGroup: EntityToGroup = {
             type: EntityType.global,
@@ -85,7 +86,6 @@ export const DefaultNavClient: React.FC = () => {
 
               return (
                 <LinkElement
-                  // activeClassName="active"
                   className={`${baseClass}__link`}
                   href={href}
                   id={id}

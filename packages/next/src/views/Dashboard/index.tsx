@@ -3,7 +3,6 @@ import type { AdminViewProps } from 'payload/types'
 import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
 import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomComponent'
 import LinkImport from 'next/link.js'
-import { isEntityHidden } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { DashboardProps } from './Default/index.js'
@@ -14,40 +13,23 @@ export { generateDashboardMetadata } from './meta.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export const Dashboard: React.FC<AdminViewProps> = ({
-  initPageResult,
-  // searchParams,
-}) => {
+export const Dashboard: React.FC<AdminViewProps> = ({ initPageResult }) => {
   const {
     permissions,
     req: {
       payload: { config },
       user,
     },
+    visibleEntities,
   } = initPageResult
 
   const CustomDashboardComponent = config.admin.components?.views?.Dashboard
-
-  const visibleCollections: string[] = config.collections.reduce((acc, collection) => {
-    if (!isEntityHidden({ hidden: collection.admin.hidden, user })) {
-      acc.push(collection.slug)
-    }
-    return acc
-  }, [])
-
-  const visibleGlobals: string[] = config.globals.reduce((acc, global) => {
-    if (!isEntityHidden({ hidden: global.admin.hidden, user })) {
-      acc.push(global.slug)
-    }
-    return acc
-  }, [])
 
   const viewComponentProps: DashboardProps = {
     Link,
     config,
     permissions,
-    visibleCollections,
-    visibleGlobals,
+    visibleEntities,
   }
 
   return (
