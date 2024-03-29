@@ -1,6 +1,7 @@
 'use client'
+import type { VisibleEntities } from 'payload/types'
+
 import { getTranslation } from '@payloadcms/translations'
-import { useEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
 import LinkWithDefault from 'next/link.js'
 import React from 'react'
 
@@ -16,10 +17,10 @@ import { useNav } from './context.js'
 
 const baseClass = 'nav'
 
-export const DefaultNavClient: React.FC = () => {
+export const DefaultNavClient: React.FC<{
+  visibleEntities?: VisibleEntities
+}> = ({ visibleEntities }) => {
   const { permissions } = useAuth()
-
-  const { isEntityVisible } = useEntityVisibility()
 
   const {
     collections,
@@ -33,7 +34,7 @@ export const DefaultNavClient: React.FC = () => {
   const groups = groupNavItems(
     [
       ...collections
-        .filter(({ slug }) => isEntityVisible({ collectionSlug: slug }))
+        .filter(({ slug }) => visibleEntities?.collections.includes(slug))
         .map((collection) => {
           const entityToGroup: EntityToGroup = {
             type: EntityType.collection,
@@ -43,7 +44,7 @@ export const DefaultNavClient: React.FC = () => {
           return entityToGroup
         }),
       ...globals
-        .filter(({ slug }) => isEntityVisible({ globalSlug: slug }))
+        .filter(({ slug }) => visibleEntities?.globals.includes(slug))
         .map((global) => {
           const entityToGroup: EntityToGroup = {
             type: EntityType.global,

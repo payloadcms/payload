@@ -1,8 +1,8 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig, VisibleEntities } from 'payload/types'
 
 import React from 'react'
 
-import type { NavProps } from '../../elements/Nav/index.js';
+import type { NavProps } from '../../elements/Nav/index.js'
 
 import { AppHeader } from '../../elements/AppHeader/index.js'
 import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
@@ -18,12 +18,14 @@ export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
+  visibleEntities?: VisibleEntities
 }
 
 export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
   children,
   className,
   config: configPromise,
+  visibleEntities,
 }) => {
   const config = await configPromise
 
@@ -37,6 +39,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
 
   const navProps: NavProps = {
     config,
+    visibleEntities,
   }
 
   return (
