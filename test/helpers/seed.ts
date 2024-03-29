@@ -15,8 +15,13 @@ export async function seedDB({
   seedFunction,
   snapshotKey,
   uploadsDir,
+  /**
+   * Always seeds, instead of restoring from snapshot for consecutive test runs
+   */
+  alwaysSeed = false,
 }: {
   _payload: Payload
+  alwaysSeed?: boolean
   collectionSlugs: string[]
   seedFunction: SeedFunction
   /**
@@ -56,16 +61,16 @@ export async function seedDB({
    * This does not work if I run payload.db.init or payload.db.connect anywhere. Thus, when resetting the database, we are not dropping the schema, but are instead only deleting the table values
    */
   let restored = false
-  if (dbSnapshot[snapshotKey] && Object.keys(dbSnapshot[snapshotKey]).length) {
+  if (!alwaysSeed && dbSnapshot[snapshotKey] && Object.keys(dbSnapshot[snapshotKey]).length) {
     await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
 
     /**
      * Restore uploads dir if it exists
      */
-    if (uploadsDir && fs.existsSync(uploadsDirCacheFolder)) {
+    if (uploadsDir && fs.existsSync(uploadsDirCache.path)) {
       // move all files from inside uploadsDirCacheFolder to uploadsDir
       await fs.promises
-        .readdir(uploadsDirCacheFolder, { withFileTypes: true })
+        .readdir(uploadsDirCache.path, { withFileTypes: true })
         .then(async (files) => {
           for (const file of files) {
             if (file.isDirectory()) {
@@ -73,12 +78,12 @@ export async function seedDB({
                 recursive: true,
               })
               await fs.promises.copyFile(
-                path.join(uploadsDirCacheFolder, file.name),
+                path.join(uploadsDirCache.path, file.name),
                 path.join(uploadsDir, file.name),
               )
             } else {
               await fs.promises.copyFile(
-                path.join(uploadsDirCacheFolder, file.name),
+                path.join(uploadsDirCache.path, file.name),
                 path.join(uploadsDir, file.name),
               )
             }
@@ -115,39 +120,18 @@ export async function seedDB({
   }
 
   /**
-   * Delete uploads directory only if no snapshot was restored.
-   * The snapshot restoration only restores the database state, not the uploads directory.
-   * If we ran it after or before restoring the snapshot, we would have NO upload files anymore, as they are not restored from the snapshot. And after snapshot
-   * restoration the seed process is not run again
-   */
-  if (uploadsDir) {
-    try {
-      // Attempt to clear the uploads directory if it exists
-      await fs.promises.access(uploadsDir)
-      const files = await fs.promises.readdir(uploadsDir)
-      for (const file of files) {
-        await fs.promises.rm(path.join(uploadsDir, file))
-      }
-    } catch (error) {
-      if (error.code !== 'ENOENT') {
-        // If the error is not because the directory doesn't exist
-        console.error('Error in operation:', error)
-        throw error
-      }
-    }
-  }
-
-  /**
    * Seed the database with data and save it to a snapshot
    **/
   await seedFunction(_payload)
 
-  await createSnapshot(_payload, snapshotKey, collectionSlugs)
+  if (!alwaysSeed) {
+    await createSnapshot(_payload, snapshotKey, collectionSlugs)
+  }
 
   /**
    * Cache uploads dir to a cache folder if uploadsDir exists
    */
-  if (uploadsDir && fs.existsSync(uploadsDir)) {
+  if (!alwaysSeed && uploadsDir && fs.existsSync(uploadsDir)) {
     if (!uploadsDirCache.path) {
       // Define new cache folder path to the OS temp directory (well a random folder inside it)
       uploadsDirCache.path = path.join(os.tmpdir(), `payload-e2e-tests-uploads-cache`)
