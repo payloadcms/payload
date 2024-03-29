@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} و {{count}} أخرى',
     labelRelationship: '{{label}} علاقة',
     latitude: 'خطّ العرض',
+    linkedTo: 'تمّ الرّبط ل <0>{{label}}</0>',
     longitude: 'خطّ الطّول',
     passwordsDoNotMatch: 'كلمة المرور غير مطابقة.',
     removeRelationship: 'حذف العلاقة',

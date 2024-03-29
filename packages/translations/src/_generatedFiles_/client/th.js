@@ -72,6 +72,7 @@ export default {
     itemsAndMore: '{{items}} และเพิ่มเติมอีก {{count}}',
     labelRelationship: 'ความสัมพันธ์กับ {{label}}',
     latitude: 'ละติจูด',
+    linkedTo: 'เชื่อมกับ <0>{{label}}</0> สำเร็จ',
     longitude: 'ลองติจูด',
     passwordsDoNotMatch: 'รหัสผ่านไม่ตรงกัน',
     removeRelationship: 'ลบความสัมพันธ์',

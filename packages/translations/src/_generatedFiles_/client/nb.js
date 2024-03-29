@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} og {{count}} flere',
     labelRelationship: '{{label}}-relasjon',
     latitude: 'Breddegrad',
+    linkedTo: 'Lenket til <0>{{label}}</0>',
     longitude: 'Lengdegrad',
     passwordsDoNotMatch: 'Passordene er ikke like.',
     removeRelationship: 'Fjern Forhold',

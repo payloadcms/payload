@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} и ещё {{count}}',
     labelRelationship: '{{label}} Отношения',
     latitude: 'Широта',
+    linkedTo: 'Связано с <0>{{label}}</0>',
     longitude: 'Долгота',
     passwordsDoNotMatch: 'Пароли не совпадают.',
     removeRelationship: 'Удалить связь',

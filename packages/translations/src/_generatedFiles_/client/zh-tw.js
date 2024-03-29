@@ -72,6 +72,7 @@ export default {
     itemsAndMore: '{{items}} 個，還有 {{count}} 個',
     labelRelationship: '{{label}}關聯',
     latitude: '緯度',
+    linkedTo: '連結到<0>{{label}}</0>',
     longitude: '經度',
     passwordsDoNotMatch: '密碼不匹配。',
     removeRelationship: '移除關聯',
