@@ -83,7 +83,7 @@ export const traverseFields = ({
             adapter,
             config: field,
             parentTableName: currentTableName,
-            prefix: `${currentTableName}_`,
+            prefix: `${currentTableName}_${path}`,
           })
 
           const arrayTableNameWithLocales = getTableName({

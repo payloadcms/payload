@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-nested-docs",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "The official Nested Docs plugin for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -19,6 +19,9 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "^0.18.5 || ^1.0.0 || ^2.0.0"
   },
   "exports": {
     ".": {

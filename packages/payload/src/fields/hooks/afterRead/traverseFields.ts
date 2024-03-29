@@ -11,11 +11,13 @@ type Args = {
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
+  fallbackLocale: null | string
   fieldPromises: Promise<void>[]
   fields: (Field | TabAsField)[]
   findMany: boolean
   flattenLocales: boolean
   global: SanitizedGlobalConfig | null
+  locale: null | string
   overrideAccess: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
@@ -31,11 +33,13 @@ export const traverseFields = ({
   currentDepth,
   depth,
   doc,
+  fallbackLocale,
   fieldPromises,
   fields,
   findMany,
   flattenLocales,
   global,
+  locale,
   overrideAccess,
   populationPromises,
   req,
@@ -52,11 +56,13 @@ export const traverseFields = ({
         currentDepth,
         depth,
         doc,
+        fallbackLocale,
         field,
         fieldPromises,
         findMany,
         flattenLocales,
         global,
+        locale,
         overrideAccess,
         populationPromises,
         req,

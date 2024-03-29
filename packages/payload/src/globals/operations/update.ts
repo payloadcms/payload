@@ -32,15 +32,15 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   args: Args<GeneratedTypes['globals'][TSlug]>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
+    slug,
     autosave,
     depth,
     draft: draftArg,
     globalConfig,
     overrideAccess,
-    req: { locale, payload },
+    req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
-    slug,
   } = args
 
   try {
@@ -74,11 +74,11 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // 2. Retrieve document
     // /////////////////////////////////////
     const { global, globalExists } = await getLatestGlobalVersion({
+      slug,
       config: globalConfig,
       locale,
       payload,
       req,
-      slug,
       where: query,
     })
 
@@ -97,7 +97,9 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       context: req.context,
       depth: 0,
       doc: globalJSON,
+      fallbackLocale,
       global: globalConfig,
+      locale,
       overrideAccess: true,
       req,
       showHiddenFields,
@@ -175,15 +177,15 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     if (!shouldSaveDraft) {
       if (globalExists) {
         result = await payload.db.updateGlobal({
+          slug,
           data: result,
           req,
-          slug,
         })
       } else {
         result = await payload.db.createGlobal({
+          slug,
           data: result,
           req,
-          slug,
         })
       }
     }
@@ -218,7 +220,9 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       context: req.context,
       depth,
       doc: result,
+      fallbackLocale: null,
       global: globalConfig,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,

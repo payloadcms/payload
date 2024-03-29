@@ -291,6 +291,7 @@ export default buildConfigWithDefaults({
           'image/jpeg',
           'image/gif',
           'image/svg+xml',
+          'image/tiff',
           'audio/mpeg',
         ],
       },

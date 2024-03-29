@@ -1,4 +1,5 @@
 import type { SQL } from 'drizzle-orm'
+import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { Field, Where } from 'payload/types'
 
 import { asc, desc } from 'drizzle-orm'
@@ -12,7 +13,7 @@ export type BuildQueryJoins = Record<string, SQL>
 
 export type BuildQueryJoinAliases = {
   condition: SQL
-  table: GenericTable
+  table: GenericTable | PgTableWithColumns<any>
 }[]
 
 type BuildQueryArgs = {

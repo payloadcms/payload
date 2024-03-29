@@ -3,7 +3,7 @@ import type { Connect } from 'payload/database'
 
 import { eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { numeric, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core'
+import { numeric, timestamp, varchar } from 'drizzle-orm/pg-core'
 import { Pool } from 'pg'
 import prompts from 'prompts'
 
@@ -61,9 +61,13 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
 
     this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.payload.logger.info('---- DROPPING TABLES ----')
-      await this.drizzle.execute(sql`drop schema public cascade;
-      create schema public;`)
+      this.payload.logger.info(`---- DROPPING TABLES SCHEMA(${this.schemaName || 'public'}) ----`)
+      await this.drizzle.execute(
+        sql.raw(`
+        drop schema if exists ${this.schemaName || 'public'} cascade;
+        create schema ${this.schemaName || 'public'};
+      `),
+      )
       this.payload.logger.info('---- DROPPED TABLES ----')
     }
   } catch (err) {
@@ -120,7 +124,7 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   await apply()
 
   // Migration table def in order to use query using drizzle
-  const migrationsSchema = pgTable('payload_migrations', {
+  const migrationsSchema = this.pgSchema.table('payload_migrations', {
     name: varchar('name'),
     batch: numeric('batch'),
     created_at: timestamp('created_at'),

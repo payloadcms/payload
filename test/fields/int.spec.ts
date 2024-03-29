@@ -424,7 +424,7 @@ describe('Fields', () => {
       const definitions: Record<string, IndexDirection> = {}
       const options: Record<string, IndexOptions> = {}
 
-      beforeEach(() => {
+      beforeAll(() => {
         indexes = (payload.db as MongooseAdapter).collections[
           'indexed-fields'
         ].schema.indexes() as [Record<string, IndexDirection>, IndexOptions]
@@ -441,8 +441,13 @@ describe('Fields', () => {
         expect(definitions.text).toEqual(1)
       })
 
-      it('should have unique indexes', () => {
+      it('should have unique sparse indexes when field is not required', () => {
         expect(definitions.uniqueText).toEqual(1)
+        expect(options.uniqueText).toMatchObject({ sparse: true, unique: true })
+      })
+
+      it('should have unique indexes that are not sparse when field is required', () => {
+        expect(definitions.uniqueRequiredText).toEqual(1)
         expect(options.uniqueText).toMatchObject({ unique: true })
       })
 
@@ -594,6 +599,25 @@ describe('Fields', () => {
         return result.error
       }).toBeDefined()
     })
+
+    it('should not throw validation error saving multiple null values for unique fields', async () => {
+      const data = {
+        text: 'a',
+        uniqueRequiredText: 'a',
+        // uniqueText omitted on purpose
+      }
+      await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+      data.uniqueRequiredText = 'b'
+      const result = await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+
+      expect(result.id).toBeDefined()
+    })
   })
 
   describe('array', () => {
@@ -618,6 +642,51 @@ describe('Fields', () => {
     it('should create with defaultValue', async () => {
       expect(doc.items).toMatchObject(arrayDefaultValue)
       expect(doc.localized).toMatchObject(arrayDefaultValue)
+    })
+
+    it('should create and update localized subfields with versions', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              localizedText: 'test',
+              text: 'required',
+            },
+          ],
+          localized: [
+            {
+              text: 'english',
+            },
+          ],
+        },
+      })
+
+      const spanish = await payload.update({
+        id: doc.id,
+        collection,
+        data: {
+          items: [
+            {
+              id: doc.items[0].id,
+              localizedText: 'spanish',
+              text: 'required',
+            },
+          ],
+        },
+        locale: 'es',
+      })
+
+      const result = await payload.findByID({
+        id: doc.id,
+        collection,
+        locale: 'all',
+      })
+
+      expect(doc.items[0].localizedText).toStrictEqual('test')
+      expect(spanish.items[0].localizedText).toStrictEqual('spanish')
+      expect(result.items[0].localizedText.en).toStrictEqual('test')
+      expect(result.items[0].localizedText.es).toStrictEqual('spanish')
     })
 
     it('should create with nested array', async () => {

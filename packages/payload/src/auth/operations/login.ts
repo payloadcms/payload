@@ -72,6 +72,8 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       overrideAccess,
       req,
       req: {
+        fallbackLocale,
+        locale,
         payload,
         payload: { config, secret },
       },
@@ -196,7 +198,9 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: user,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,

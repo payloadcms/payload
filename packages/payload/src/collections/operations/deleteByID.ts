@@ -59,6 +59,8 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
       depth,
       overrideAccess,
       req: {
+        fallbackLocale,
+        locale,
         payload: { config },
         payload,
         t,
@@ -120,9 +122,9 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     if (collectionConfig.versions) {
       await deleteCollectionVersions({
         id,
+        slug: collectionConfig.slug,
         payload,
         req,
-        slug: collectionConfig.slug,
       })
     }
 
@@ -156,7 +158,9 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: result,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
