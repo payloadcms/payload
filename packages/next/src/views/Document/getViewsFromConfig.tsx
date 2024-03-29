@@ -7,12 +7,9 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import React from 'react'
-
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
-import { NotFoundClient } from '../NotFound/index.client.js'
 import { Unauthorized } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
@@ -140,9 +137,6 @@ export const getViewsFromConfig = ({
                 currentRoute,
                 views,
               })
-
-              if (!CustomView) ErrorView = () => <NotFoundClient />
-
               break
             }
           }
@@ -172,8 +166,6 @@ export const getViewsFromConfig = ({
               currentRoute,
               views,
             })
-
-            if (!CustomView) ErrorView = () => <NotFoundClient />
           }
           break
         }
@@ -266,8 +258,6 @@ export const getViewsFromConfig = ({
               currentRoute,
               views,
             })
-
-            if (!CustomView) ErrorView = () => <NotFoundClient />
           }
           break
         }
