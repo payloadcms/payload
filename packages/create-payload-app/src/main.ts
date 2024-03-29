@@ -2,6 +2,7 @@
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
 import { detect } from 'detect-package-manager'
+import globby from 'globby'
 import path from 'path'
 
 import type { CliArgs, PackageManager } from './types.js'
@@ -14,7 +15,7 @@ import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { writeEnvFile } from './lib/write-env-file.js'
-import { error, success } from './utils/log.js'
+import { debug, error, success } from './utils/log.js'
 import { helpMessage, successMessage, welcomeMessage } from './utils/messages.js'
 
 export class Main {
@@ -35,7 +36,7 @@ export class Main {
         '--template-branch': String,
 
         // Next.js
-        '--init-next': Boolean,
+        '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?
 
         // Package manager
         '--no-deps': Boolean,
@@ -59,24 +60,41 @@ export class Main {
   }
 
   async init(): Promise<void> {
+    const initContext = {
+      nextConfigPath: undefined,
+    }
+
     try {
       if (this.args['--help']) {
         console.log(helpMessage())
         process.exit(0)
       }
+      console.log(welcomeMessage)
+
+      // Detect if inside Next.js project
+      const foundConfig = (
+        await globby('next.config.*js', { absolute: true, cwd: process.cwd() })
+      )?.[0]
+      initContext.nextConfigPath = foundConfig
+
+      success('Next.js app detected.')
+
+      // TODO: Prompt to continue
+
+      if (initContext.nextConfigPath) {
+        this.args['--name'] = slugify(path.basename(path.dirname(initContext.nextConfigPath)))
+      }
 
       const projectName = await parseProjectName(this.args)
-      const projectDir = path.resolve(
-        projectName === '.' || this.args['--init-next']
-          ? path.basename(process.cwd())
-          : `./${slugify(projectName)}`,
-      )
+      const projectDir = foundConfig
+        ? path.dirname(foundConfig)
+        : path.resolve(process.cwd(), slugify(projectName))
 
-      console.log(welcomeMessage)
       const packageManager = await getPackageManager(this.args, projectDir)
+      debug(`Using package manager: ${packageManager}`)
 
-      if (this.args['--init-next']) {
-        const result = await initNext({ ...this.args, packageManager })
+      if (foundConfig) {
+        const result = await initNext({ ...this.args, packageManager, projectDir })
         if (!result.success) {
           error(result.reason || 'Failed to initialize Payload app in Next.js project')
         } else {

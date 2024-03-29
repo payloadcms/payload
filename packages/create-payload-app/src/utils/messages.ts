@@ -68,6 +68,22 @@ export function successMessage(projectDir: string, packageManager: string): stri
 `
 }
 
+export function moveMessage(args: { nextAppDir: string; projectDir: string }): string {
+  return `
+  ${header('Next Steps:')}
+
+  Payload does not support a top-level layout.tsx file in your Next.js app directory.
+
+  ${chalk.bold('To continue:')}
+
+    - Move all files from ${args.nextAppDir} to a top-level directory named ${chalk.bold(
+      '(name)',
+    )} or similar.
+
+    Once moved, rerun the create-payload-app command again.
+`
+}
+
 // Create terminalLink with fallback for unsupported terminals
 function createTerminalLink(text: string, url: string) {
   return terminalLink(text, url, {
