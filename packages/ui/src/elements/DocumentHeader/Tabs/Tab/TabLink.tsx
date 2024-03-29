@@ -11,6 +11,7 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 export const DocumentTabLink: React.FC<{
   adminRoute: SanitizedConfig['routes']['admin']
+  ariaLabel?: string
   baseClass: string
   children?: React.ReactNode
   href: string
@@ -19,6 +20,7 @@ export const DocumentTabLink: React.FC<{
   newTab?: boolean
 }> = ({
   adminRoute,
+  ariaLabel,
   baseClass,
   children,
   href: hrefFromProps,
@@ -53,7 +55,10 @@ export const DocumentTabLink: React.FC<{
     isActiveFromProps
 
   return (
-    <li className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}>
+    <li
+      aria-label={ariaLabel}
+      className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}
+    >
       <Link
         className={`${baseClass}__link`}
         href={!isActive || href !== pathname ? hrefWithLocale : ''}

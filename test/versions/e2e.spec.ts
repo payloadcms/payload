@@ -41,6 +41,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import config from './config.js'
 import { clearAndSeedEverything } from './seed.js'
 import { titleToDelete } from './shared.js'
@@ -330,7 +331,7 @@ describe('versions', () => {
 
       await page.goto(autosaveURL.create)
       await page.waitForURL(`**/${autosaveURL.create}`)
-      await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain(autosaveURL.create)
+      await page.waitForURL(/\/(?!create$)[\w-]+$/)
       const titleField = page.locator('#field-title')
       const descriptionField = page.locator('#field-description')
 
@@ -382,7 +383,16 @@ describe('versions', () => {
 
       // fill out doc in spanish
       await page.locator('#field-title').fill(spanishTitle)
-      await saveDocAndAssert(page, '#action-save-draft')
+      await saveDocAndAssert(page)
+
+      // wait for the page to load with the new version
+      await expect
+        .poll(
+          async () =>
+            await page.locator('.doc-tab[aria-label="Versions"] .doc-tab__count').textContent(),
+          { timeout: POLL_TOPASS_TIMEOUT },
+        )
+        .toEqual('2')
 
       // fill out draft content in spanish
       await page.locator('#field-title').fill(`${spanishTitle}--draft`)
@@ -399,14 +409,16 @@ describe('versions', () => {
     test('collection - autosave should only update the current document', async () => {
       // create and save first doc
       await page.goto(autosaveURL.create)
-      await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain('create')
+      await page.waitForURL(`**/${autosaveURL.create}`)
+      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+
       await page.locator('#field-title').fill('first post title')
       await page.locator('#field-description').fill('first post description')
       await page.locator('#action-save').click()
 
       // create and save second doc
       await page.goto(autosaveURL.create)
-      await expect.poll(() => page.url(), { timeout: 5000 }).not.toContain('create')
+      await page.waitForURL(/\/(?!create$)[\w-]+$/)
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
       // publish changes
