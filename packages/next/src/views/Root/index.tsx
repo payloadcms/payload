@@ -2,10 +2,11 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
+import { SetEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { notFound, redirect } from 'next/navigation.js'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import { initPage } from '../../utilities/initPage.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
@@ -81,22 +82,15 @@ export const RootPage = async ({
     <DefaultView initPageResult={initPageResult} params={params} searchParams={searchParams} />
   )
 
-  if (templateType === 'minimal') {
-    return <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
-  }
-
-  if (templateType === 'default') {
-    return (
-      <DefaultTemplate
-        config={config}
-        i18n={initPageResult.req.i18n}
-        permissions={initPageResult.permissions}
-        user={initPageResult.req.user}
-      >
-        {RenderedView}
-      </DefaultTemplate>
-    )
-  }
-
-  return RenderedView
+  return (
+    <Fragment>
+      <SetEntityVisibility visibleEntities={initPageResult.visibleEntities} />
+      {templateType === 'minimal' && (
+        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
+      )}
+      {templateType === 'default' && (
+        <DefaultTemplate config={config}>{RenderedView}</DefaultTemplate>
+      )}
+    </Fragment>
+  )
 }

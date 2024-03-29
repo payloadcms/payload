@@ -20,6 +20,7 @@ import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ComponentMapProvider } from '../ComponentMap/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
+import { EntityVisibilityProvider } from '../EntityVisibility/index.js'
 import { FieldComponentsProvider } from '../FieldComponents/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
@@ -83,23 +84,25 @@ export const RootProvider: React.FC<Props> = ({
                       <SearchParamsProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
                           <AuthProvider>
-                            <PreferencesProvider>
-                              <ThemeProvider>
-                                <ParamsProvider>
-                                  <LocaleProvider>
-                                    <StepNavProvider>
-                                      <LoadingOverlayProvider>
-                                        <DocumentEventsProvider>
-                                          <ActionsProvider>
-                                            <NavProvider>{children}</NavProvider>
-                                          </ActionsProvider>
-                                        </DocumentEventsProvider>
-                                      </LoadingOverlayProvider>
-                                    </StepNavProvider>
-                                  </LocaleProvider>
-                                </ParamsProvider>
-                              </ThemeProvider>
-                            </PreferencesProvider>
+                            <EntityVisibilityProvider>
+                              <PreferencesProvider>
+                                <ThemeProvider>
+                                  <ParamsProvider>
+                                    <LocaleProvider>
+                                      <StepNavProvider>
+                                        <LoadingOverlayProvider>
+                                          <DocumentEventsProvider>
+                                            <ActionsProvider>
+                                              <NavProvider>{children}</NavProvider>
+                                            </ActionsProvider>
+                                          </DocumentEventsProvider>
+                                        </LoadingOverlayProvider>
+                                      </StepNavProvider>
+                                    </LocaleProvider>
+                                  </ParamsProvider>
+                                </ThemeProvider>
+                              </PreferencesProvider>
+                            </EntityVisibilityProvider>
                             <ModalContainer />
                           </AuthProvider>
                         </ModalProvider>

@@ -4,6 +4,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  VisibleEntities,
 } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
@@ -11,7 +12,7 @@ import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui/utilities/findLocaleFromCode'
 import { headers as getHeaders } from 'next/headers.js'
 import { notFound, redirect } from 'next/navigation.js'
-import { createLocalReq } from 'payload/utilities'
+import { createLocalReq, isEntityHidden } from 'payload/utilities'
 import qs from 'qs'
 
 import { getPayloadHMR } from '../utilities/getPayloadHMR.js'
@@ -39,6 +40,15 @@ export const initPage = async ({
     headers,
     payload,
   })
+
+  const visibleEntities: VisibleEntities = {
+    collections: payload.config.collections
+      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
+      .filter(Boolean),
+    globals: payload.config.globals
+      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
+      .filter(Boolean),
+  }
 
   const routeSegments = route.replace(payload.config.routes.admin, '').split('/').filter(Boolean)
   const [entityType, entitySlug, createOrID] = routeSegments
@@ -73,7 +83,7 @@ export const initPage = async ({
 
   const queryString = `${qs.stringify(searchParams, { addQueryPrefix: true })}`
 
-  const req = await createLocalReq(
+  const req = createLocalReq(
     {
       fallbackLocale: null,
       locale: locale.code,
@@ -118,5 +128,6 @@ export const initPage = async ({
     permissions,
     req,
     translations: i18n.translations,
+    visibleEntities,
   }
 }

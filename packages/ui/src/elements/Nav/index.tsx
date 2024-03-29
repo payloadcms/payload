@@ -11,9 +11,11 @@ const baseClass = 'nav'
 
 import { DefaultNavClient } from './index.client.js'
 
-export const DefaultNav: React.FC<{
+export type NavProps = {
   config: SanitizedConfig
-}> = (props) => {
+}
+
+export const DefaultNav: React.FC<NavProps> = (props) => {
   const { config } = props
 
   if (!config) {
