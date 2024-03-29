@@ -1,4 +1,4 @@
-import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
+import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { EditViewComponent } from 'payload/config'
 import type {
   AdminViewComponent,
@@ -7,13 +7,9 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 
-import { isEntityHidden } from 'payload/utilities'
-import React from 'react'
-
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
-import { NotFoundClient } from '../NotFound/index.client.js'
 import { Unauthorized } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
@@ -26,7 +22,6 @@ export const getViewsFromConfig = ({
   docPermissions,
   globalConfig,
   routeSegments,
-  user,
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
@@ -34,7 +29,6 @@ export const getViewsFromConfig = ({
   docPermissions: CollectionPermission | GlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
-  user: User
 }): {
   CustomView: EditViewComponent
   DefaultView: EditViewComponent
@@ -73,14 +67,6 @@ export const getViewsFromConfig = ({
     if (!EditOverride) {
       const [collectionEntity, collectionSlug, segment3, segment4, segment5, ...remainingSegments] =
         routeSegments
-
-      const {
-        admin: { hidden },
-      } = collectionConfig
-
-      if (isEntityHidden({ hidden, user })) {
-        return null
-      }
 
       // `../:id`, or `../create`
       switch (routeSegments.length) {
@@ -151,9 +137,6 @@ export const getViewsFromConfig = ({
                 currentRoute,
                 views,
               })
-
-              if (!CustomView) ErrorView = () => <NotFoundClient />
-
               break
             }
           }
@@ -183,8 +166,6 @@ export const getViewsFromConfig = ({
               currentRoute,
               views,
             })
-
-            if (!CustomView) ErrorView = () => <NotFoundClient />
           }
           break
         }
@@ -203,14 +184,6 @@ export const getViewsFromConfig = ({
     if (!EditOverride) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [globalEntity, globalSlug, segment3, ...remainingSegments] = routeSegments
-
-      const {
-        admin: { hidden },
-      } = globalConfig
-
-      if (isEntityHidden({ hidden, user })) {
-        return null
-      }
 
       switch (routeSegments.length) {
         case 2: {
@@ -285,8 +258,6 @@ export const getViewsFromConfig = ({
               currentRoute,
               views,
             })
-
-            if (!CustomView) ErrorView = () => <NotFoundClient />
           }
           break
         }

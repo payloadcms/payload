@@ -9,13 +9,12 @@ import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomCompo
 import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
 import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
 import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
+import { notFound } from 'next/navigation.js'
 import { docAccessOperation } from 'payload/operations'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
-import { NotFoundClient } from '../NotFound/index.client.js'
-import { NotFoundView } from '../NotFound/index.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getViewsFromConfig } from './getViewsFromConfig.js'
 
@@ -45,6 +44,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       },
       user,
     },
+    visibleEntities,
   } = initPageResult
 
   const segments = Array.isArray(params?.segments) ? params.segments : []
@@ -56,7 +56,7 @@ export const Document: React.FC<AdminViewProps> = async ({
   let ViewOverride: EditViewComponent
   let CustomView: EditViewComponent
   let DefaultView: EditViewComponent
-  let ErrorView: AdminViewComponent = NotFoundView
+  let ErrorView: AdminViewComponent
 
   let docPermissions: DocumentPermissions
   let hasSavePermission: boolean
@@ -64,6 +64,10 @@ export const Document: React.FC<AdminViewProps> = async ({
   let action: string
 
   if (collectionConfig) {
+    if (!visibleEntities?.collections?.find((visibleSlug) => visibleSlug === collectionSlug)) {
+      notFound()
+    }
+
     try {
       docPermissions = await docAccessOperation({
         id,
@@ -73,7 +77,7 @@ export const Document: React.FC<AdminViewProps> = async ({
         req,
       })
     } catch (error) {
-      return <NotFoundClient />
+      notFound()
     }
 
     action = `${serverURL}${apiRoute}/${collectionSlug}${isEditing ? `/${id}` : ''}`
@@ -95,7 +99,6 @@ export const Document: React.FC<AdminViewProps> = async ({
         config,
         docPermissions,
         routeSegments: segments,
-        user,
       })
 
       CustomView = collectionViews?.CustomView
@@ -104,11 +107,19 @@ export const Document: React.FC<AdminViewProps> = async ({
     }
 
     if (!CustomView && !DefaultView && !ViewOverride) {
-      return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
+      if (ErrorView) {
+        return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
+      }
+
+      notFound()
     }
   }
 
   if (globalConfig) {
+    if (!visibleEntities?.globals?.find((visibleSlug) => visibleSlug === globalSlug)) {
+      notFound()
+    }
+
     docPermissions = permissions?.globals?.[globalSlug]
     hasSavePermission = isEditing && docPermissions?.update?.permission
     action = `${serverURL}${apiRoute}/globals/${globalSlug}`
@@ -126,7 +137,6 @@ export const Document: React.FC<AdminViewProps> = async ({
         docPermissions,
         globalConfig,
         routeSegments: segments,
-        user,
       })
 
       CustomView = globalViews?.CustomView
@@ -134,7 +144,11 @@ export const Document: React.FC<AdminViewProps> = async ({
       ErrorView = globalViews?.ErrorView
 
       if (!CustomView && !DefaultView && !ViewOverride) {
-        return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
+        if (ErrorView) {
+          return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
+        }
+
+        notFound()
       }
     }
   }

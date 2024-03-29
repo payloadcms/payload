@@ -22,8 +22,8 @@ import { getRequestLanguage } from './getRequestLanguage.js'
 type Args = {
   config: Promise<SanitizedConfig> | SanitizedConfig
   redirectUnauthenticatedUser?: boolean
-  route?: string
-  searchParams?: { [key: string]: string | string[] | undefined }
+  route: string
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 export const initPage = async ({
@@ -59,7 +59,7 @@ export const initPage = async ({
   const { collections, globals, localization, routes } = payload.config
 
   if (redirectUnauthenticatedUser && !user && route !== '/login') {
-    if ('redirect' in searchParams) delete searchParams.redirect
+    if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
 
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
       ? `?${qs.stringify(searchParams)}`
@@ -81,7 +81,7 @@ export const initPage = async ({
     translations,
   })
 
-  const queryString = `${qs.stringify(searchParams, { addQueryPrefix: true })}`
+  const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
 
   const req = createLocalReq(
     {

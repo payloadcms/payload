@@ -3,7 +3,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import { useEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
 import LinkWithDefault from 'next/link.js'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import type { EntityToGroup } from '../../utilities/groupNavItems.js'
 
@@ -58,7 +58,7 @@ export const DefaultNavClient: React.FC = () => {
   )
 
   return (
-    <div>
+    <Fragment>
       {groups.map(({ entities, label }, key) => {
         return (
           <NavGroup key={key} label={label}>
@@ -102,6 +102,6 @@ export const DefaultNavClient: React.FC = () => {
           </NavGroup>
         )
       })}
-    </div>
+    </Fragment>
   )
 }
