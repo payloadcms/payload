@@ -5,9 +5,7 @@ import type {
   VisibleEntities,
 } from 'packages/payload/src/exports/types.js'
 
-import React, { createContext, useCallback, useContext, useState } from 'react'
-
-export { SetEntityVisibility } from './SetEntityVisibility.js'
+import React, { createContext, useCallback, useContext } from 'react'
 
 export type VisibleEntitiesContextType = {
   isEntityVisible: ({
@@ -17,7 +15,6 @@ export type VisibleEntitiesContextType = {
     collectionSlug?: SanitizedCollectionConfig['slug']
     globalSlug?: SanitizedGlobalConfig['slug']
   }) => boolean
-  setVisibleEntities: React.Dispatch<React.SetStateAction<VisibleEntities>>
   visibleEntities: VisibleEntities
 }
 
@@ -25,12 +22,8 @@ export const EntityVisibilityContext = createContext({} as VisibleEntitiesContex
 
 export const EntityVisibilityProvider: React.FC<{
   children: React.ReactNode
-}> = ({ children }) => {
-  const [visibleEntities, setVisibleEntities] = useState<VisibleEntities>({
-    collections: [],
-    globals: [],
-  })
-
+  visibleEntities?: VisibleEntities
+}> = ({ children, visibleEntities }) => {
   const isEntityVisible = useCallback(
     ({
       collectionSlug,
@@ -53,9 +46,7 @@ export const EntityVisibilityProvider: React.FC<{
   )
 
   return (
-    <EntityVisibilityContext.Provider
-      value={{ isEntityVisible, setVisibleEntities, visibleEntities }}
-    >
+    <EntityVisibilityContext.Provider value={{ isEntityVisible, visibleEntities }}>
       {children}
     </EntityVisibilityContext.Provider>
   )

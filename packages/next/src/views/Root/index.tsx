@@ -2,11 +2,11 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { SetEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
+import { EntityVisibilityProvider } from '@payloadcms/ui/providers/EntityVisibility'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { notFound, redirect } from 'next/navigation.js'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import { initPage } from '../../utilities/initPage.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
@@ -83,8 +83,7 @@ export const RootPage = async ({
   )
 
   return (
-    <Fragment>
-      <SetEntityVisibility visibleEntities={initPageResult.visibleEntities} />
+    <EntityVisibilityProvider visibleEntities={initPageResult.visibleEntities}>
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}
@@ -93,6 +92,6 @@ export const RootPage = async ({
           {RenderedView}
         </DefaultTemplate>
       )}
-    </Fragment>
+    </EntityVisibilityProvider>
   )
 }
