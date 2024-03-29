@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} a {{count}} dalších',
     labelRelationship: 'Vztah {{label}}',
     latitude: 'Zeměpisná šířka',
+    linkedTo: 'Odkaz na <0>{{label}}</0>',
     longitude: 'Zeměpisná délka',
     passwordsDoNotMatch: 'Hesla se neshodují.',
     removeRelationship: 'Odstranit vztah',

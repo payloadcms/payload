@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} နှင့် နောက်ထပ် {{count}} ခု',
     labelRelationship: '{{label}} Relationship',
     latitude: 'vĩ độ',
+    linkedTo: '<0>{{label}}</0> ချိတ်ဆက်ထားသည်။',
     longitude: 'လောင်ဂျီကျု',
     passwordsDoNotMatch: 'စကားဝှက်များနှင့် မကိုက်ညီပါ။',
     removeRelationship: 'ဆက်ဆံရေးကို ဖယ်ရှားပါ။',

@@ -73,6 +73,7 @@ export default {
     itemsAndMore: '{{items}} 他{{count}}件',
     labelRelationship: '{{label}} リレーションシップ',
     latitude: '緯度',
+    linkedTo: '<0>{{label}}</0> にリンク',
     longitude: '経度',
     passwordsDoNotMatch: 'パスワードが一致しません',
     removeRelationship: '関係を削除',

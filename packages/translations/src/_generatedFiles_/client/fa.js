@@ -72,6 +72,7 @@ export default {
     itemsAndMore: '{{items}} و {{count}} بیش‌تر',
     labelRelationship: '{{label}} پیوستگی',
     latitude: 'عرض جغرافیایی',
+    linkedTo: 'مرتبط با <0>{{label}}</0>',
     longitude: 'طول جغرافیایی',
     passwordsDoNotMatch: 'گذرواژه‌های وارد شده مطابقت ندارند.',
     removeRelationship: 'حذف پیوستگی',
