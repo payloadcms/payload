@@ -39,6 +39,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { closeModal, modalState, toggleModal } = useModal()
   const locale = useLocale()
   const { t } = useTranslation()
+  const [createdID, setCreatedID] = useState()
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const { formQueryParams } = useFormQueryParams()
@@ -69,6 +70,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
+      setCreatedID(args.doc.id)
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
           ...args,
@@ -113,7 +115,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       // Same reason as above. We need to fully-fetch the docPreferences from the server. This is done in DocumentInfoProvider if we set it to null here.
       hasSavePermission={null}
       // isLoading,
-      id={id}
+      id={id || createdID}
       isEditing={isEditing}
       onLoadError={onLoadError}
       onSave={onSave}
