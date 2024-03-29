@@ -225,7 +225,7 @@ jobs:
           # - fields
           - fields/lexical
           - live-preview
-          # - localization
+          - localization
           # - plugin-nested-docs
           # - plugin-seo
           # - refresh-permissions
