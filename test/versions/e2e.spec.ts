@@ -418,6 +418,7 @@ describe('versions', () => {
 
       // create and save second doc
       await page.goto(autosaveURL.create)
+      await page.waitForURL(`**/${autosaveURL.create}`)
       await page.waitForURL(/\/(?!create$)[\w-]+$/)
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
@@ -430,7 +431,10 @@ describe('versions', () => {
 
       // verify that the first doc is unchanged
       await page.goto(autosaveURL.list)
-      await page.locator('tbody tr .cell-title a').nth(1).click()
+      const secondRowLink = page.locator('tbody tr:nth-child(2) .cell-title a')
+      const docURL = await secondRowLink.getAttribute('href')
+      await secondRowLink.click()
+      await page.waitForURL(`**${docURL}`)
       await expect(page.locator('#field-title')).toHaveValue('first post title')
       await expect(page.locator('#field-description')).toHaveValue('first post description')
     })
