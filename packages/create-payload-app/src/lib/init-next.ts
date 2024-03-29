@@ -29,16 +29,20 @@ type InitNextArgs = Pick<CliArgs, '--debug'> & {
   projectDir: string
   useDistFiles?: boolean
 }
+
 type InitNextResult =
   | {
+      isSrcDir: boolean
       nextAppDir: string
       payloadConfigPath: string
       success: true
     }
-  | { reason: string; success: false }
+  | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
 
 export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   const { packageManager, projectDir } = args
+
+  const isSrcDir = fs.existsSync(path.resolve(projectDir, 'src'))
 
   // Get app directory. Could be top-level or src/app
   const nextAppDir = (
@@ -50,7 +54,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   )?.[0]
 
   if (!nextAppDir) {
-    return { reason: `Could not find app directory in ${projectDir}`, success: false }
+    return { isSrcDir, reason: `Could not find app directory in ${projectDir}`, success: false }
   }
 
   // Check for top-level layout.tsx
@@ -58,29 +62,42 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   if (fs.existsSync(layoutPath)) {
     // Output directions for user to move all files from app to top-level directory named `(app)`
     log(moveMessage({ nextAppDir, projectDir }))
-    return { reason: 'Found existing layout.tsx in app directory', success: false }
+    return {
+      isSrcDir,
+      nextAppDir,
+      reason: 'Found existing layout.tsx in app directory',
+      success: false,
+    }
   }
 
   const configurationResult = installAndConfigurePayload({
     ...args,
+    isSrcDir,
     nextAppDir,
     useDistFiles: true, // Requires running 'pnpm pack-template-files' in cpa
   })
 
-  if (!configurationResult.success) return configurationResult
+  if (configurationResult.success === false) {
+    return { ...configurationResult, isSrcDir, success: false }
+  }
 
   const { success: installSuccess } = await installDeps(projectDir, packageManager)
   if (!installSuccess) {
-    return { ...configurationResult, reason: 'Failed to install dependencies', success: false }
+    return {
+      ...configurationResult,
+      isSrcDir,
+      reason: 'Failed to install dependencies',
+      success: false,
+    }
   }
 
   // Add `@payload-config` to tsconfig.json `paths`
-  await addPayloadConfigToTsConfig(projectDir)
+  await addPayloadConfigToTsConfig(projectDir, isSrcDir)
 
-  return configurationResult
+  return { ...configurationResult, isSrcDir, nextAppDir, success: true }
 }
 
-async function addPayloadConfigToTsConfig(projectDir: string) {
+async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean) {
   const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
   const userTsConfigContent = await readFile(tsConfigPath, {
     encoding: 'utf8',
@@ -95,14 +112,18 @@ async function addPayloadConfigToTsConfig(projectDir: string) {
   if (!userTsConfig.compilerOptions.paths?.['@payload-config']) {
     userTsConfig.compilerOptions.paths = {
       ...(userTsConfig.compilerOptions.paths || {}),
-      '@payload-config': ['./src/payload.config.ts'], // TODO: Account for srcDir
+      '@payload-config': [`./${isSrcDir ? 'src/' : ''}payload.config.ts`],
     }
     await writeFile(tsConfigPath, stringify(userTsConfig, null, 2), { encoding: 'utf8' })
   }
 }
 
-function installAndConfigurePayload(args: InitNextArgs & { nextAppDir: string }): InitNextResult {
-  const { '--debug': debug, nextAppDir, nextConfigPath, projectDir, useDistFiles } = args
+function installAndConfigurePayload(
+  args: InitNextArgs & { isSrcDir: boolean; nextAppDir: string },
+):
+  | { payloadConfigPath: string; success: true }
+  | { payloadConfigPath?: string; reason: string; success: false } {
+  const { '--debug': debug, isSrcDir, nextAppDir, nextConfigPath, projectDir, useDistFiles } = args
 
   info('Initializing Payload app in Next.js project', 1)
 
@@ -111,7 +132,10 @@ function installAndConfigurePayload(args: InitNextArgs & { nextAppDir: string })
   }
 
   if (!fs.existsSync(projectDir)) {
-    return { reason: `Could not find specified project directory at ${projectDir}`, success: false }
+    return {
+      reason: `Could not find specified project directory at ${projectDir}`,
+      success: false,
+    }
   }
 
   const templateFilesPath =
@@ -132,18 +156,26 @@ function installAndConfigurePayload(args: InitNextArgs & { nextAppDir: string })
 
   logDebug(`Copying template files from ${templateFilesPath} to ${nextAppDir}`)
 
-  // TODO: Account for isSrcDir or not. Assuming src exists right now.
-  const templateSrcDir = path.resolve(templateFilesPath, 'src')
+  const templateSrcDir = path.resolve(templateFilesPath, isSrcDir ? '' : 'src')
+  // const templateSrcDir = path.resolve(templateFilesPath)
+
+  logDebug(`templateSrcDir: ${templateSrcDir}`)
+  logDebug(`nextAppDir: ${nextAppDir}`)
+  logDebug(`projectDir: ${projectDir}`)
+  logDebug(`nextConfigPath: ${nextConfigPath}`)
+
+  logDebug(
+    `isSrcDir: ${isSrcDir}. source: ${templateSrcDir}. dest: ${path.dirname(nextConfigPath)}`,
+  )
 
   // This is a little clunky and needs to account for isSrcDir
-  copyRecursiveSync(templateSrcDir, path.dirname(nextAppDir), debug)
+  copyRecursiveSync(templateSrcDir, path.dirname(nextConfigPath), debug)
 
   // Wrap next.config.js with withPayload
   wrapNextConfig({ nextConfigPath })
 
   success('Successfully initialized.')
   return {
-    nextAppDir,
     payloadConfigPath: path.resolve(nextAppDir, '../payload.config.ts'),
     success: true,
   }

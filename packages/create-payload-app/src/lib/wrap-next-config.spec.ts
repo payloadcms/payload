@@ -47,10 +47,16 @@ describe('parseAndInsertWithPayload', () => {
 
   // Unsupported: export { wrapped as default }
   it('should give warning with a named export as default', () => {
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+
     const { modifiedConfigContent, success } = parseAndModifyConfigContent(
       nextConfigExportNamedDefault,
     )
     expect(modifiedConfigContent).toContain(withPayloadImportStatement)
     expect(success).toBe(false)
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Could not automatically wrap'),
+    )
   })
 })
