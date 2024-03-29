@@ -232,7 +232,7 @@ describe('Localization', () => {
       await page.locator('button[title="Text"]').click()
       await page.fill('#field-layout__0__text', 'test')
       await expect(page.locator('#field-layout__0__text')).toHaveValue('test')
-      // eslint-disable-next-line payload/no-wait-function
+
       await wait(500)
       await saveDocAndAssert(page)
 
