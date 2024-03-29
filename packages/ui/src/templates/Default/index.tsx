@@ -1,4 +1,4 @@
-import type { SanitizedConfig, VisibleEntities } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import React from 'react'
 
@@ -18,14 +18,12 @@ export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
-  visibleEntities?: VisibleEntities
 }
 
 export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
   children,
   className,
   config: configPromise,
-  visibleEntities,
 }) => {
   const config = await configPromise
 
@@ -39,7 +37,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
 
   const navProps: NavProps = {
     config,
-    visibleEntities,
   }
 
   return (
