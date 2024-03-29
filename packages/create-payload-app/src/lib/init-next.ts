@@ -1,13 +1,13 @@
 import type { CompilerOptions } from 'typescript'
 
-import chalk from 'chalk'
 import { parse, stringify } from 'comment-json'
 import execa from 'execa'
 import fs from 'fs'
-import fse from 'fs-extra'
 import globby from 'globby'
 import path from 'path'
 import { promisify } from 'util'
+
+import { log } from '../utils/log.js'
 const readFile = promisify(fs.readFile)
 const writeFile = promisify(fs.writeFile)
 
@@ -50,7 +50,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   const layoutPath = path.resolve(nextAppDir, 'layout.tsx')
   if (fs.existsSync(layoutPath)) {
     // Output directions for user to move all files from app to top-level directory named `(name)`
-    console.log(moveMessage({ nextAppDir, projectDir }))
+    log(moveMessage({ nextAppDir, projectDir }))
     return { reason: 'Found existing layout.tsx in app directory', success: false }
   }
 

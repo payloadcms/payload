@@ -3,6 +3,7 @@ import { parseModule } from 'esprima'
 import fs from 'fs'
 
 import { warning } from '../utils/log.js'
+import { log } from '../utils/log.js'
 
 export const withPayloadImportStatement = `import { withPayload } from '@payloadcms/next'\n`
 
@@ -90,7 +91,7 @@ function warnUserWrapNotSuccessful() {
 
 `
 
-  console.log(withPayloadMessage)
+  log(withPayloadMessage)
 }
 
 type Directive = {

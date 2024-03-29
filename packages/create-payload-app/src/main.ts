@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
 import { detect } from 'detect-package-manager'
@@ -15,7 +14,7 @@ import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { writeEnvFile } from './lib/write-env-file.js'
-import { debug, error, success } from './utils/log.js'
+import { debug, error, log, success } from './utils/log.js'
 import { helpMessage, successMessage, welcomeMessage } from './utils/messages.js'
 
 export class Main {
@@ -66,10 +65,10 @@ export class Main {
 
     try {
       if (this.args['--help']) {
-        console.log(helpMessage())
+        log(helpMessage())
         process.exit(0)
       }
-      console.log(welcomeMessage)
+      log(welcomeMessage)
 
       // Detect if inside Next.js project
       const foundConfig = (
@@ -108,7 +107,7 @@ export class Main {
       if (templateArg) {
         const valid = validateTemplate(templateArg)
         if (!valid) {
-          console.log(helpMessage())
+          log(helpMessage())
           process.exit(1)
         }
       }
@@ -150,9 +149,9 @@ export class Main {
       }
 
       success('Payload project successfully created')
-      console.log(successMessage(projectDir, packageManager))
-    } catch (error: unknown) {
-      console.log(error)
+      log(successMessage(projectDir, packageManager))
+    } catch (err: unknown) {
+      error(err instanceof Error ? err.message : 'An error occurred')
     }
   }
 }

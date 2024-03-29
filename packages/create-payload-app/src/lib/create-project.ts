@@ -8,6 +8,7 @@ import path from 'path'
 
 import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../types.js'
 
+import { log } from '../utils/log.js'
 import { debug, error, success, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 
@@ -60,13 +61,13 @@ export async function createProject(args: {
   const { cliArgs, dbDetails, packageManager, projectDir, projectName, template } = args
 
   if (cliArgs['--dry-run']) {
-    console.log(`\n  Dry run: Creating project in ${chalk.green(projectDir)}\n`)
+    log(`\n  Dry run: Creating project in ${chalk.green(projectDir)}\n`)
     return
   }
 
   await createOrFindProjectDir(projectDir)
 
-  console.log(`\n  Creating project in ${chalk.green(projectDir)}\n`)
+  log(`\n  Creating project in ${chalk.green(projectDir)}\n`)
 
   if (cliArgs['--local-template']) {
     // Copy template from local path. For development purposes.

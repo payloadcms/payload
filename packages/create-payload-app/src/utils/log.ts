@@ -25,3 +25,10 @@ export const debug = (message: string): void => {
     `${chalk.gray(figures.pointerSmall)} ${chalk.bgGray('[DEBUG]')} ${chalk.gray(message)}`,
   )
 }
+
+/**
+ * console.log passthrough
+ */
+export const log = (message: string): void => {
+  console.log(message)
+}
