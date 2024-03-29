@@ -32,17 +32,6 @@ export const ListInfoProvider: React.FC<
   ListInfoProps & {
     children: React.ReactNode
   }
-> = ({ children, collectionSlug, hasCreatePermission, newDocumentURL, titleField }) => {
-  return (
-    <Context.Provider
-      value={{
-        collectionSlug,
-        hasCreatePermission,
-        newDocumentURL,
-        titleField,
-      }}
-    >
-      {children}
-    </Context.Provider>
-  )
+> = ({ children, ...props }) => {
+  return <Context.Provider value={props}>{children}</Context.Provider>
 }
