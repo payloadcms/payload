@@ -423,11 +423,12 @@ describe('versions', () => {
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
       // publish changes
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       // update second doc and wait for autosave
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
+      await waitForAutoSaveToComplete(page)
 
       // verify that the first doc is unchanged
       await page.goto(autosaveURL.list)
