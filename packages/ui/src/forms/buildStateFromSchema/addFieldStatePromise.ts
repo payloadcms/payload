@@ -111,7 +111,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       value: data?.[field.name],
     })
 
-    if (data?.[field.name]) {
+    if (typeof data?.[field.name] === 'undefined') {
       data[field.name] = valueWithDefault
     }
 
