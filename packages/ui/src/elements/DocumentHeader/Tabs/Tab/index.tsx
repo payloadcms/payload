@@ -56,6 +56,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     return (
       <DocumentTabLink
         adminRoute={routes.admin}
+        ariaLabel={labelToRender}
         baseClass={baseClass}
         href={href}
         isActive={isActive}

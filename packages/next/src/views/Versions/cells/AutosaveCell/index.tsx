@@ -8,15 +8,11 @@ export const AutosaveCell: React.FC = () => {
   const { t } = useTranslation()
 
   const { rowData } = useTableCell()
-
   return (
     <Fragment>
       {rowData?.autosave && (
         <React.Fragment>
-          <Pill>
-            Autosave
-            {t('version:autosave')}
-          </Pill>
+          <Pill>{t('version:autosave')}</Pill>
           &nbsp;&nbsp;
         </React.Fragment>
       )}

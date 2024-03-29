@@ -5,6 +5,7 @@ import type { Where } from 'payload/types'
 import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
 import { fieldBaseClass } from '@payloadcms/ui/fields/shared'
 import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { formatDate } from '@payloadcms/ui/utilities/formatDate'
 import qs from 'qs'
@@ -28,6 +29,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
     admin: { dateFormat },
   } = useConfig()
 
+  const { docConfig } = useDocumentInfo()
   const [options, setOptions] = useState(baseOptions)
   const [lastLoadedPage, setLastLoadedPage] = useState(1)
   const [errorLoading, setErrorLoading] = useState('')
@@ -51,13 +53,16 @@ export const SelectComparison: React.FC<Props> = (props) => {
                 not_equals: versionID,
               },
             },
-            {
-              latest: {
-                not_equals: true,
-              },
-            },
           ],
         },
+      }
+
+      if (docConfig.versions?.drafts) {
+        query.where.and.push({
+          latest: {
+            not_equals: true,
+          },
+        })
       }
 
       if (parentID) {
@@ -79,7 +84,6 @@ export const SelectComparison: React.FC<Props> = (props) => {
 
       if (response.ok) {
         const data: PaginatedDocs = await response.json()
-
         if (data.docs.length > 0) {
           setOptions((existingOptions) => [
             ...existingOptions,
@@ -98,7 +102,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
         setErrorLoading(t('error:unspecific'))
       }
     },
-    [dateFormat, baseURL, parentID, versionID, t, i18n],
+    [dateFormat, baseURL, parentID, versionID, t, i18n, docConfig.versions?.drafts],
   )
 
   useEffect(() => {
