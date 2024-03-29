@@ -52,6 +52,7 @@ const RelationshipElement: React.FC<Props> = () => {
   const [relatedCollection, setRelatedCollection] = useState(() =>
     collections.find((coll) => coll.slug === relationTo),
   )
+
   const selected = useSelected()
   const focused = useFocused()
   const { i18n, t } = useTranslation()

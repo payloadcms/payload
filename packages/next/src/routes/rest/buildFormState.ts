@@ -14,7 +14,6 @@ import httpStatus from 'http-status'
 import type { FieldSchemaMap } from '../../utilities/buildFieldSchemaMap/types.js'
 
 import { buildFieldSchemaMap } from '../../utilities/buildFieldSchemaMap/index.js'
-import { routeError } from './routeError.js'
 
 let cached = global._payload_fieldSchemaMap
 
