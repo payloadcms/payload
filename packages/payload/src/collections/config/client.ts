@@ -16,7 +16,7 @@ export type ClientCollectionConfig = Omit<
 > & {
   admin: Omit<
     SanitizedCollectionConfig['admin'],
-    ServerOnlyCollectionAdminProperties & 'fields' & 'livePreview'
+    'fields' | 'livePreview' | ServerOnlyCollectionAdminProperties
   > & {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   }
