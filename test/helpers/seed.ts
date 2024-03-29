@@ -1,15 +1,11 @@
 import fs from 'fs'
+import * as os from 'node:os'
 import path from 'path'
 import { type Payload } from 'payload'
 
 import { isMongoose } from './isMongoose.js'
 import { resetDB } from './reset.js'
-import {
-  createSnapshot,
-  dbSnapshot,
-  restoreFromSnapshot,
-  uploadsDirCacheFolder,
-} from './snapshot.js'
+import { createSnapshot, dbSnapshot, restoreFromSnapshot, uploadsDirCache } from './snapshot.js'
 
 type SeedFunction = (_payload: Payload) => Promise<void>
 
@@ -152,28 +148,33 @@ export async function seedDB({
    * Cache uploads dir to a cache folder if uploadsDir exists
    */
   if (uploadsDir && fs.existsSync(uploadsDir)) {
-    // delete the cache folder if it exists
-    if (fs.existsSync(uploadsDirCacheFolder)) {
-      await fs.promises.rm(uploadsDirCacheFolder, { recursive: true })
+    if (!uploadsDirCache.path) {
+      // Define new cache folder path to the OS temp directory (well a random folder inside it)
+      uploadsDirCache.path = path.join(os.tmpdir(), `payload-e2e-tests-uploads-cache`)
     }
-    await fs.promises.mkdir(uploadsDirCacheFolder, { recursive: true })
+
+    // delete the cache folder if it exists
+    if (fs.existsSync(uploadsDirCache.path)) {
+      await fs.promises.rm(uploadsDirCache.path, { recursive: true })
+    }
+    await fs.promises.mkdir(uploadsDirCache.path, { recursive: true })
     // recursively move all files and directories from uploadsDir to uploadsDirCacheFolder
     await fs.promises
       .readdir(uploadsDir, { withFileTypes: true })
       .then(async (files) => {
         for (const file of files) {
           if (file.isDirectory()) {
-            await fs.promises.mkdir(path.join(uploadsDirCacheFolder, file.name), {
+            await fs.promises.mkdir(path.join(uploadsDirCache.path, file.name), {
               recursive: true,
             })
             await fs.promises.copyFile(
               path.join(uploadsDir, file.name),
-              path.join(uploadsDirCacheFolder, file.name),
+              path.join(uploadsDirCache.path, file.name),
             )
           } else {
             await fs.promises.copyFile(
               path.join(uploadsDir, file.name),
-              path.join(uploadsDirCacheFolder, file.name),
+              path.join(uploadsDirCache.path, file.name),
             )
           }
         }
