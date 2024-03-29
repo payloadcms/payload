@@ -29,6 +29,11 @@ export type EditViewProps = {
   globalSlug?: string
 }
 
+export type VisibleEntities = {
+  collections: SanitizedCollectionConfig['slug'][]
+  globals: SanitizedGlobalConfig['slug'][]
+}
+
 export type InitPageResult = {
   collectionConfig?: SanitizedCollectionConfig
   cookies: Map<string, string>
@@ -38,6 +43,7 @@ export type InitPageResult = {
   permissions: Permissions
   req: PayloadRequest
   translations: Translations
+  visibleEntities: VisibleEntities
 }
 
 export type ServerSideEditViewProps = {

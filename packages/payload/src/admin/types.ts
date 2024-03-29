@@ -30,4 +30,5 @@ export type {
   EditViewProps,
   InitPageResult,
   ServerSideEditViewProps,
+  VisibleEntities,
 } from './views/types.js'

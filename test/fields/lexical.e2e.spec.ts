@@ -28,9 +28,15 @@ let client: RESTClient
 let page: Page
 let serverURL: string
 
-async function navigateToLexicalFields() {
-  const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
-  await page.goto(url.list)
+/**
+ * Client-side navigation to the lexical editor from list view
+ */
+async function navigateToLexicalFields(navigateToListView: boolean = true) {
+  if (navigateToListView) {
+    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
+    await page.goto(url.list)
+  }
+
   const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
   await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
   const linkDocHref = await linkToDoc.getAttribute('href')
@@ -718,8 +724,7 @@ describe('lexical', () => {
       await expect(nestedEditorParagraph).toHaveText('Some text below relationship node 12345')
     })
 
-    test('should respect row removal in nested array field', async () => {
-      await navigateToLexicalFields()
+    const shouldRespectRowRemovalTest = async () => {
       const richTextField = page.locator('.rich-text-lexical').nth(1) // second
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
@@ -762,6 +767,36 @@ describe('lexical', () => {
       await saveDocAndAssert(page)
 
       await expect(page.locator('.Toastify')).not.toContainText('Please correct invalid fields.')
+    }
+
+    // eslint-disable-next-line playwright/expect-expect
+    test('should respect row removal in nested array field', async () => {
+      await navigateToLexicalFields()
+      await shouldRespectRowRemovalTest()
+    })
+
+    test('should respect row removal in nested array field after navigating away from lexical document, then navigating back', async () => {
+      // This test verifies an issue where a lexical editor with blocks disappears when navigating away from the lexical document, then navigating back, without a hard refresh
+      await navigateToLexicalFields()
+
+      // Wait for lexical to be loaded up fully
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
+
+      await conditionalArrayBlock.scrollIntoViewIfNeeded()
+      await expect(conditionalArrayBlock).toBeVisible()
+
+      // navigate to list view
+      await page.locator('.step-nav a').nth(1).click()
+      await page.waitForURL('**/lexical-fields?limit=10')
+
+      // Click on lexical document in list view (navigateToLexicalFields is client-side navigation which is what we need to reproduce the issue here)
+      await navigateToLexicalFields(false)
+
+      await shouldRespectRowRemovalTest()
     })
 
     test.skip('should respect required error state in deeply nested text field', async () => {

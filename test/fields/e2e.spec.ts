@@ -263,17 +263,21 @@ describe('fields', () => {
       })
 
       await page.goto(url.create)
+      await page.waitForURL(`**/${url.create}`)
 
       await page.locator('#field-text').fill('test')
       await page.locator('#field-uniqueText').fill(uniqueText)
+      await page.locator('#field-localizedUniqueRequiredText').fill('localizedUniqueRequired2')
 
       // attempt to save
-      await page.click('#action-save', { delay: 100 })
+      await page.click('#action-save', { delay: 200 })
 
       // toast error
       await expect(page.locator('.Toastify')).toContainText(
         'The following field is invalid: uniqueText',
       )
+
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
 
       // field specific error
       await expect(page.locator('.field-type.text.error #field-uniqueText')).toBeVisible()
@@ -291,6 +295,8 @@ describe('fields', () => {
       await expect(page.locator('.Toastify')).toContainText(
         'The following field is invalid: group.unique',
       )
+
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
 
       // field specific error inside group
       await expect(page.locator('.field-type.text.error #field-group__unique')).toBeVisible()
@@ -919,7 +925,7 @@ describe('fields', () => {
       await addRowButton.click()
       await wait(200)
 
-      const targetInput = page.locator('#field-items__2__text')
+      const targetInput = page.locator('#field-items__0__text')
 
       await expect(targetInput).toBeVisible()
 

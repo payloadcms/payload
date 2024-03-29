@@ -17,6 +17,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import config from './config.js'
 import {
   docLevelAccessSlug,
@@ -258,8 +259,11 @@ describe('access control', () => {
   })
 
   // TODO: Test flakes. In CI, test global does not appear in nav. Perhaps the checkbox setValue is not triggered BEFORE the document is saved, as the custom save button can be clicked even if the form has not been set to modified.
-  test.skip('should show test global immediately after allowing access', async () => {
-    await page.goto(`${serverURL}/admin/globals/settings`)
+  test('should show test global immediately after allowing access', async () => {
+    const url = `${serverURL}/admin/globals/settings`
+    await page.goto(url)
+
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(url)
 
     await openNav(page)
 
@@ -278,8 +282,11 @@ describe('access control', () => {
 
     await openNav(page)
 
-    // Now test collection should appear in the menu.
-    await expect(page.locator('#nav-global-test')).toBeVisible()
+    const globalTest = page.locator('#nav-global-test')
+
+    await expect(async () => await globalTest.isVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 
   test('maintain access control in document drawer', async () => {
