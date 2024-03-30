@@ -8,7 +8,7 @@ import { withSession } from './withSession'
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: MongooseAdapter,
-  { data, req = {} as PayloadRequest, slug },
+  { slug, data, req = {} as PayloadRequest },
 ) {
   const Model = this.globals
   const global = {

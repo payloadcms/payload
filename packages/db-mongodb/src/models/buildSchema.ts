@@ -29,10 +29,8 @@ import type {
   TabsField,
   TextField,
   TextareaField,
-  UnnamedTab,
   UploadField,
 } from 'payload/types'
-import type { FieldAffectingData, NonPresentationalField, Tab, UnnamedTab } from 'payload/types'
 
 import { Schema } from 'mongoose'
 import {
@@ -363,7 +361,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       }
       if (field.localized && config.localization) {
         config.localization.locales.forEach((locale) => {
-          schema.index({ [`${field.name}.${locale}`]: '2dsphere' }, indexOptions)
+          schema.index({ [`${field.name}.${locale.code}`]: '2dsphere' }, indexOptions)
         })
       } else {
         schema.index({ [field.name]: '2dsphere' }, indexOptions)

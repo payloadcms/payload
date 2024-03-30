@@ -2,7 +2,6 @@ import type { DeleteOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
 import { eq } from 'drizzle-orm'
-import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
 
@@ -17,7 +16,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   { collection: collectionSlug, req = {} as PayloadRequest, where: whereArg },
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
-  const collection = this.payload.collections[collection].config
+  const collection = this.payload.collections[collectionSlug].config
   const tableName = getTableName({
     adapter: this,
     config: collection,
