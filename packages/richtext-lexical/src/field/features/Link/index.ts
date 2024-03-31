@@ -48,6 +48,18 @@ export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
   fields?:
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
     | Field[]
+  /**
+   * Limits the absolute maximum depth for which internal link relationships can be resolved.
+   * E.g. if the maxDepth is set to 4, but the document depth is 11, and this richText field was resolved under depth 2,
+   * then the document depth would be set to 4 (= maxDepth) for all fields resolved from this link node.
+   */
+  maxDepth?: number
+  /**
+   * Limits the maximum depth for which internal link relationships can be resolved, starting FROM the current depth.
+   * E.g. if the maxDepthRelative is set to 4, but the document depth is 11, and this richText field was resolved under depth 2,
+   * then the document depth would be set to 6 (2 + 4) for all fields resolved from this link node.
+   */
+  maxDepthRelative?: number
 }
 
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
@@ -99,6 +111,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         },
         nodes: [
           {
+            type: LinkNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -125,10 +138,10 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             },
             node: LinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-            type: LinkNode.getType(),
             // TODO: Add validation similar to upload for internal links and fields
           },
           {
+            type: AutoLinkNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -158,7 +171,6 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             },
             node: AutoLinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-            type: AutoLinkNode.getType(),
           },
         ],
         plugins: [

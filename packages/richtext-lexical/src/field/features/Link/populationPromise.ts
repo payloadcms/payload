@@ -25,6 +25,12 @@ export const linkPopulationPromiseHOC = (
   }) => {
     const promises: Promise<void>[] = []
 
+    const totalDepth = props?.maxDepth && props?.maxDepth > depth ? props.maxDepth : depth
+    const finalDepth =
+      props?.maxDepthRelative && props?.maxDepthRelative + currentDepth - 1 < totalDepth
+        ? props?.maxDepthRelative + currentDepth - 1
+        : totalDepth
+
     if (node?.fields?.doc?.value && node?.fields?.doc?.relationTo) {
       const collection = req.payload.collections[node?.fields?.doc?.relationTo]
 
@@ -38,7 +44,7 @@ export const linkPopulationPromiseHOC = (
             collection,
             currentDepth,
             data: node?.fields?.doc,
-            depth,
+            depth: finalDepth,
             field,
             key: 'value',
             overrideAccess,
@@ -53,7 +59,7 @@ export const linkPopulationPromiseHOC = (
         context,
         currentDepth,
         data: node.fields || {},
-        depth,
+        depth: finalDepth,
         editorPopulationPromises,
         fields: props.fields,
         findMany,
