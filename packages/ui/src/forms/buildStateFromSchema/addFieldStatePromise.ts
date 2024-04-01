@@ -9,7 +9,6 @@ import type {
 
 import ObjectIdImport from 'bson-objectid'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
-import { getDefaultValue } from 'payload/utilities'
 
 import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
 import { iterateFields } from './iterateFields.js'
@@ -104,20 +103,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       value: undefined,
     }
 
-    const valueWithDefault = await getDefaultValue({
-      defaultValue: field.defaultValue,
-      locale: req.locale,
-      user: req.user,
-      value: data?.[field.name],
-    })
-
-    if (typeof data?.[field.name] === 'undefined') {
-      data[field.name] = valueWithDefault
-    }
-
     let validationResult: string | true = true
 
-    if (typeof validate === 'function' && !skipValidation) {
+    if (typeof validate === 'function' && !skipValidation && passesCondition) {
       let jsonError
 
       if (field.type === 'json' && typeof data[field.name] === 'string') {
@@ -161,7 +149,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     switch (field.type) {
       case 'array': {
-        const arrayValue = Array.isArray(valueWithDefault) ? valueWithDefault : []
+        const arrayValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
         const { promises, rowMetadata } = arrayValue.reduce(
           (acc, row, i) => {
@@ -223,7 +211,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         await Promise.all(promises)
 
         // Add values to field state
-        if (valueWithDefault === null) {
+        if (data[field.name] === null) {
           fieldState.value = null
           fieldState.initialValue = null
         } else {
@@ -246,7 +234,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       case 'blocks': {
-        const blocksValue = Array.isArray(valueWithDefault) ? valueWithDefault : []
+        const blocksValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i) => {
@@ -337,7 +325,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         await Promise.all(promises)
 
         // Add values to field state
-        if (valueWithDefault === null) {
+        if (data[field.name] === null) {
           fieldState.value = null
           fieldState.initialValue = null
         } else {
@@ -398,8 +386,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
 
         if (field.hasMany) {
-          const relationshipValue = Array.isArray(valueWithDefault)
-            ? valueWithDefault.map((relationship) => {
+          const relationshipValue = Array.isArray(data[field.name])
+            ? data[field.name].map((relationship) => {
                 if (Array.isArray(field.relationTo)) {
                   return {
                     relationTo: relationship.relationTo,
@@ -420,19 +408,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.initialValue = relationshipValue
         } else if (Array.isArray(field.relationTo)) {
           if (
-            valueWithDefault &&
-            typeof valueWithDefault === 'object' &&
-            'relationTo' in valueWithDefault &&
-            'value' in valueWithDefault
+            data[field.name] &&
+            typeof data[field.name] === 'object' &&
+            'relationTo' in data[field.name] &&
+            'value' in data[field.name]
           ) {
             const value =
-              typeof valueWithDefault?.value === 'object' &&
-              valueWithDefault?.value &&
-              'id' in valueWithDefault.value
-                ? valueWithDefault.value.id
-                : valueWithDefault.value
+              typeof data[field.name]?.value === 'object' &&
+              data[field.name]?.value &&
+              'id' in data[field.name].value
+                ? data[field.name].value.id
+                : data[field.name].value
             const relationshipValue = {
-              relationTo: valueWithDefault?.relationTo,
+              relationTo: data[field.name]?.relationTo,
               value,
             }
             fieldState.value = relationshipValue
@@ -440,9 +428,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           }
         } else {
           const relationshipValue =
-            valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault
-              ? valueWithDefault.id
-              : valueWithDefault
+            data[field.name] && typeof data[field.name] === 'object' && 'id' in data[field.name]
+              ? data[field.name].id
+              : data[field.name]
           fieldState.value = relationshipValue
           fieldState.initialValue = relationshipValue
         }
@@ -468,9 +456,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         }
 
         const relationshipValue =
-          valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault
-            ? valueWithDefault.id
-            : valueWithDefault
+          data[field.name] && typeof data[field.name] === 'object' && 'id' in data[field.name]
+            ? data[field.name].id
+            : data[field.name]
         fieldState.value = relationshipValue
         fieldState.initialValue = relationshipValue
 
@@ -482,8 +470,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       default: {
-        fieldState.value = valueWithDefault
-        fieldState.initialValue = valueWithDefault
+        fieldState.value = data[field.name]
+        fieldState.initialValue = data[field.name]
 
         // Add field to state
         if (!filter || filter(args)) {
