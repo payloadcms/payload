@@ -1,16 +1,42 @@
-import type { Where } from 'payload/types'
-
 import React, { useEffect, useState } from 'react'
 
-import type { Action, FieldCondition } from '../types.js'
+import type { FieldCondition } from '../types.js'
 
 export type Props = {
+  addCondition: ({
+    andIndex,
+    fieldName,
+    orIndex,
+    relation,
+  }: {
+    andIndex: number
+    fieldName: string
+    orIndex: number
+    relation: 'and' | 'or'
+  }) => void
   andIndex: number
-  dispatch: (action: Action) => void
+  fieldName: string
   fields: FieldCondition[]
+  initialValue: string
+  operator: string
   orIndex: number
-  value: Where
+  removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
+  updateCondition: ({
+    andIndex,
+    fieldName,
+    operator,
+    orIndex,
+    value,
+  }: {
+    andIndex: number
+    fieldName: string
+    operator: string
+    orIndex: number
+    value: string
+  }) => void
 }
+
+import type { RelationshipFieldProps } from '@payloadcms/ui/fields/Relationship'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -35,42 +61,46 @@ const valueFields: Record<ComponentType, React.FC> = {
 const baseClass = 'condition'
 
 export const Condition: React.FC<Props> = (props) => {
-  const { andIndex, dispatch, fields, orIndex, value } = props
-  const fieldName = Object.keys(value)[0]
+  const {
+    addCondition,
+    andIndex,
+    fieldName,
+    fields,
+    initialValue,
+    operator,
+    orIndex,
+    removeCondition,
+    updateCondition,
+  } = props
   const [activeField, setActiveField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
 
-  const operatorAndValue = value?.[fieldName] ? Object.entries(value[fieldName])[0] : undefined
-  const queryValue = operatorAndValue?.[1]
-  const operatorValue = operatorAndValue?.[0]
+  const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
+  const [internalOperatorOption, setInternalOperatorOption] = useState(operator)
 
-  const [internalValue, setInternalValue] = useState(queryValue)
-  const [internalOperatorField, setInternalOperatorField] = useState(operatorValue)
-
-  const debouncedValue = useDebounce(internalValue, 300)
+  const debouncedValue = useDebounce(internalQueryValue, 300)
 
   useEffect(() => {
-    const newActiveField = fields.find(({ value: name }) => name === fieldName)
-
-    if (newActiveField && newActiveField !== activeField) {
-      setActiveField(newActiveField)
-      setInternalOperatorField(null)
-      setInternalValue('')
-    }
-  }, [fieldName, fields, activeField])
-
-  useEffect(() => {
-    dispatch({
-      type: 'update',
+    updateCondition({
       andIndex,
+      fieldName: activeField.value,
+      operator: internalOperatorOption,
       orIndex,
-      value: debouncedValue || '',
+      value: debouncedValue,
     })
-  }, [debouncedValue, dispatch, orIndex, andIndex])
+  }, [
+    debouncedValue,
+    andIndex,
+    activeField?.value,
+    internalOperatorOption,
+    orIndex,
+    updateCondition,
+    operator,
+  ])
 
   const booleanSelect =
-    ['exists'].includes(operatorValue) || activeField?.props?.type === 'checkbox'
+    ['exists'].includes(internalOperatorOption) || activeField?.props?.type === 'checkbox'
   const ValueComponent = booleanSelect
     ? Select
     : valueFields[activeField?.component] || valueFields.Text
@@ -90,34 +120,37 @@ export const Condition: React.FC<Props> = (props) => {
             <ReactSelect
               isClearable={false}
               onChange={(field) => {
-                dispatch({
-                  type: 'update',
+                setActiveField(fields.find((f) => f.value === field.value))
+                updateCondition({
                   andIndex,
-                  field: field?.value,
+                  fieldName: field.value,
+                  operator,
                   orIndex,
+                  value: internalQueryValue,
                 })
               }}
               options={fields}
-              value={fields.find((field) => fieldName === field.value)}
+              value={fields.find((field) => activeField.value === field.value) || fields[0]}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!fieldName}
+              disabled={!activeField.value}
               isClearable={false}
               onChange={(operator) => {
-                dispatch({
-                  type: 'update',
+                setInternalOperatorOption(operator.value)
+                updateCondition({
                   andIndex,
+                  fieldName: activeField.value,
                   operator: operator.value,
                   orIndex,
+                  value: internalQueryValue,
                 })
-                setInternalOperatorField(operator.value)
               }}
               options={activeField?.operators}
               value={
                 activeField?.operators.find(
-                  (operator) => internalOperatorField === operator.value,
+                  (operator) => internalOperatorOption === operator.value,
                 ) || null
               }
             />
@@ -128,11 +161,17 @@ export const Condition: React.FC<Props> = (props) => {
               DefaultComponent={ValueComponent}
               componentProps={{
                 ...activeField?.props,
-                disabled: !operatorValue,
-                onChange: setInternalValue,
-                operator: operatorValue,
+                disabled: !internalOperatorOption,
+                onChange: setInternalQueryValue,
+                operator: internalOperatorOption,
                 options: valueOptions,
-                value: internalValue,
+                relationTo:
+                  activeField?.props?.type === 'relationship' &&
+                  'fieldComponentProps' in activeField.props
+                    ? (activeField?.props?.fieldComponentProps as RelationshipFieldProps)
+                        ?.relationTo
+                    : undefined,
+                value: internalQueryValue ?? '',
               }}
             />
           </div>
@@ -144,8 +183,7 @@ export const Condition: React.FC<Props> = (props) => {
             icon="x"
             iconStyle="with-border"
             onClick={() =>
-              dispatch({
-                type: 'remove',
+              removeCondition({
                 andIndex,
                 orIndex,
               })
@@ -158,10 +196,9 @@ export const Condition: React.FC<Props> = (props) => {
             icon="plus"
             iconStyle="with-border"
             onClick={() =>
-              dispatch({
-                type: 'add',
-                andIndex: andIndex + 1,
-                field: fields[0].value,
+              addCondition({
+                andIndex,
+                fieldName,
                 orIndex,
                 relation: 'and',
               })

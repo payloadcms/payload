@@ -1,9 +1,7 @@
 'use client'
-import type { CustomSaveDraftButtonProps, DefaultSaveDraftButtonProps } from 'payload/types'
 
 import React, { useCallback, useRef } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
@@ -15,57 +13,19 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
 
-const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({
-  disabled,
-  label,
-  saveDraft,
-}) => {
-  const ref = useRef<HTMLButtonElement>(null)
-  const editDepth = useEditDepth()
-
-  useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
-    if (disabled) {
-      return
-    }
-
-    e.preventDefault()
-    e.stopPropagation()
-    if (ref?.current) {
-      ref.current.click()
-    }
-  })
-
-  return (
-    <FormSubmit
-      buttonId="action-save-draft"
-      buttonStyle="secondary"
-      className={baseClass}
-      disabled={disabled}
-      onClick={saveDraft}
-      ref={ref}
-      size="small"
-      type="button"
-    >
-      {label}
-    </FormSubmit>
-  )
-}
-
-type Props = {
-  CustomComponent?: CustomSaveDraftButtonProps
-}
-export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
+const DefaultSaveDraftButton: React.FC = () => {
   const {
     routes: { api },
     serverURL,
   } = useConfig()
-  const { submit } = useForm()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const modified = useFormModified()
   const { code: locale } = useLocale()
+  const ref = useRef<HTMLButtonElement>(null)
+  const editDepth = useEditDepth()
   const { t } = useTranslation()
-
-  const canSaveDraft = modified
+  const { submit } = useForm()
+  const label = t('general:save')
 
   const saveDraft = useCallback(async () => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
@@ -91,16 +51,40 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
     })
   }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id])
 
+  useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
+    if (!modified) {
+      return
+    }
+
+    e.preventDefault()
+    e.stopPropagation()
+    if (ref?.current) {
+      ref.current.click()
+    }
+  })
+
   return (
-    <RenderCustomComponent
-      CustomComponent={CustomComponent}
-      DefaultComponent={DefaultSaveDraftButton}
-      componentProps={{
-        DefaultButton: DefaultSaveDraftButton,
-        disabled: !canSaveDraft,
-        label: t('version:saveDraft'),
-        saveDraft,
-      }}
-    />
+    <FormSubmit
+      buttonId="action-save-draft"
+      buttonStyle="secondary"
+      className={baseClass}
+      disabled={!modified}
+      onClick={saveDraft}
+      ref={ref}
+      size="small"
+      type="button"
+    >
+      {label}
+    </FormSubmit>
   )
+}
+
+type Props = {
+  CustomComponent?: React.ReactNode
+}
+
+export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
+  if (CustomComponent) return CustomComponent
+
+  return <DefaultSaveDraftButton />
 }

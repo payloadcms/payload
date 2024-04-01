@@ -122,19 +122,19 @@ export const DefaultEditView: React.FC = () => {
           ...json,
           operation: id ? 'update' : 'create',
         })
+      }
+
+      if (!isEditing && depth < 2) {
+        // Redirect to the same locale if it's been set
+        const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
+        router.push(redirectRoute)
       } else {
-        if (!isEditing) {
-          // Redirect to the same locale if it's been set
-          const redirectRoute = `${adminRoute}/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`
-          router.push(redirectRoute)
-        } else {
-          dispatchFormQueryParams({
-            type: 'SET',
-            params: {
-              uploadEdits: null,
-            },
-          })
-        }
+        dispatchFormQueryParams({
+          type: 'SET',
+          params: {
+            uploadEdits: null,
+          },
+        })
       }
     },
     [
@@ -144,6 +144,7 @@ export const DefaultEditView: React.FC = () => {
       id,
       entitySlug,
       user,
+      depth,
       collectionSlug,
       getVersions,
       getDocPermissions,
@@ -236,6 +237,7 @@ export const DefaultEditView: React.FC = () => {
                     <Auth
                       className={`${baseClass}__auth`}
                       collectionSlug={collectionConfig.slug}
+                      disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
                       email={data?.email}
                       operation={operation}
                       readOnly={!hasSavePermission}

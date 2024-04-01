@@ -1,16 +1,23 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload/types'
+import type { Payload, TypeWithID } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
-import { exactText, initPageConsoleErrorCatch, openDocControls, openNav } from '../helpers.js'
+import {
+  closeNav,
+  exactText,
+  initPageConsoleErrorCatch,
+  openDocControls,
+  openNav,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import config from './config.js'
 import {
   docLevelAccessSlug,
@@ -134,7 +141,6 @@ describe('access control', () => {
   describe('restricted fields', () => {
     test('should not show field without permission', async () => {
       await page.goto(url.account)
-      await wait(500)
       await expect(page.locator('#field-roles')).toBeHidden()
     })
   })
@@ -163,7 +169,7 @@ describe('access control', () => {
 
     test('should have collection url', async () => {
       await page.goto(readOnlyUrl.list)
-      await expect(page).toHaveURL(readOnlyUrl.list) // no redirect
+      await expect(page).toHaveURL(new RegExp(`${readOnlyUrl.list}.*`)) // will redirect to ?limit=10 at the end, so we have to use a wildcard at the end
     })
 
     test('should not have "Create New" button', async () => {
@@ -188,7 +194,6 @@ describe('access control', () => {
 
     test('should not render dot menu popup when `create` and `delete` access control is set to false', async () => {
       await page.goto(readOnlyUrl.edit(existingDoc.id))
-      await wait(1000)
       await expect(page.locator('.collection-edit .doc-controls .doc-controls__popup')).toBeHidden()
     })
   })
@@ -213,7 +218,7 @@ describe('access control', () => {
 
   describe('doc level access', () => {
     let existingDoc: ReadOnlyCollection
-    let docLevelAccessURL
+    let docLevelAccessURL: AdminUrlUtil
 
     beforeAll(async () => {
       docLevelAccessURL = new AdminUrlUtil(serverURL, docLevelAccessSlug)
@@ -245,11 +250,42 @@ describe('access control', () => {
       await expect(deleteAction).toBeHidden()
 
       await page.locator('#field-approvedForRemoval').check()
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       await openDocControls(page)
       const deleteAction2 = page.locator('#action-delete')
       await expect(deleteAction2).toBeVisible()
+    })
+  })
+
+  // TODO: Test flakes. In CI, test global does not appear in nav. Perhaps the checkbox setValue is not triggered BEFORE the document is saved, as the custom save button can be clicked even if the form has not been set to modified.
+  test('should show test global immediately after allowing access', async () => {
+    const url = `${serverURL}/admin/globals/settings`
+    await page.goto(url)
+
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(url)
+
+    await openNav(page)
+
+    // Ensure that we have loaded accesses by checking that settings collection
+    // at least is visible in the menu.
+    await expect(page.locator('#nav-global-settings')).toBeVisible()
+
+    // Test collection should be hidden at first.
+    await expect(page.locator('#nav-global-test')).toBeHidden()
+
+    await closeNav(page)
+
+    // Allow access to test global.
+    await page.locator('.checkbox-input:has(#field-test) input').check()
+    await saveDocAndAssert(page)
+
+    await openNav(page)
+
+    const globalTest = page.locator('#nav-global-test')
+
+    await expect(async () => await globalTest.isVisible()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
     })
   })
 
@@ -263,30 +299,28 @@ describe('access control', () => {
 
     // navigate to the `unrestricted` document and open the drawers to test access
     const unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug)
-    await page.goto(unrestrictedURL.edit(unrestrictedDoc.id))
+    await page.goto(unrestrictedURL.edit(unrestrictedDoc.id.toString()))
 
-    const button = page.locator(
+    const addDocButton = page.locator(
       '#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler',
     )
-    await button.click()
+    await addDocButton.click()
     const documentDrawer = page.locator('[id^=doc-drawer_user-restricted_1_]')
     await expect(documentDrawer).toBeVisible()
     await documentDrawer.locator('#field-name').fill('anonymous@email.com')
     await documentDrawer.locator('#action-save').click()
-    await wait(200)
     await expect(page.locator('.Toastify')).toContainText('successfully')
 
     // ensure user is not allowed to edit this document
     await expect(documentDrawer.locator('#field-name')).toBeDisabled()
     await documentDrawer.locator('button.doc-drawer__header-close').click()
-    await wait(200)
+    await expect(documentDrawer).toBeHidden()
 
-    await button.click()
+    await addDocButton.click()
     const documentDrawer2 = page.locator('[id^=doc-drawer_user-restricted_1_]')
     await expect(documentDrawer2).toBeVisible()
     await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com')
     await documentDrawer2.locator('#action-save').click()
-    await wait(200)
     await expect(page.locator('.Toastify')).toContainText('successfully')
 
     // ensure user is allowed to edit this document
@@ -294,7 +328,8 @@ describe('access control', () => {
   })
 })
 
-async function createDoc(data: any): Promise<{ id: string }> {
+// eslint-disable-next-line @typescript-eslint/require-await
+async function createDoc(data: any): Promise<TypeWithID & Record<string, unknown>> {
   return payload.create({
     collection: slug,
     data,

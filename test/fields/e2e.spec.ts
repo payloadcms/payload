@@ -17,6 +17,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { textDoc } from './collections/Text/shared.js'
@@ -32,7 +33,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { afterEach, beforeAll, beforeEach, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 let payload: Payload
 let client: RESTClient
@@ -42,10 +43,8 @@ let serverURL: string
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
-
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
-    await client.login()
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -53,7 +52,9 @@ describe('fields', () => {
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
-    await client.logout()
+    if (client) {
+      await client.logout()
+    }
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
   })
@@ -262,17 +263,21 @@ describe('fields', () => {
       })
 
       await page.goto(url.create)
+      await page.waitForURL(`**/${url.create}`)
 
       await page.locator('#field-text').fill('test')
       await page.locator('#field-uniqueText').fill(uniqueText)
+      await page.locator('#field-localizedUniqueRequiredText').fill('localizedUniqueRequired2')
 
       // attempt to save
-      await page.click('#action-save', { delay: 100 })
+      await page.click('#action-save', { delay: 200 })
 
       // toast error
       await expect(page.locator('.Toastify')).toContainText(
         'The following field is invalid: uniqueText',
       )
+
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
 
       // field specific error
       await expect(page.locator('.field-type.text.error #field-uniqueText')).toBeVisible()
@@ -290,6 +295,8 @@ describe('fields', () => {
       await expect(page.locator('.Toastify')).toContainText(
         'The following field is invalid: group.unique',
       )
+
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
 
       // field specific error inside group
       await expect(page.locator('.field-type.text.error #field-group__unique')).toBeVisible()
@@ -419,6 +426,7 @@ describe('fields', () => {
 
     test('should update point', async () => {
       await page.goto(url.edit(emptyGroupPoint.id))
+      await page.waitForURL(`**/${emptyGroupPoint.id}`)
       const longField = page.locator('#field-longitude-point')
       await longField.fill('9')
 
@@ -449,6 +457,7 @@ describe('fields', () => {
 
     test('should be able to clear a value point', async () => {
       await page.goto(url.edit(filledGroupPoint.id))
+      await page.waitForURL(`**/${filledGroupPoint.id}`)
 
       const groupLongitude = page.locator('#field-longitude-group__point')
       await groupLongitude.fill('')
@@ -469,28 +478,43 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug)
     })
 
+    test('should render collapsible as collapsed if initCollapsed is true', async () => {
+      await page.goto(url.create)
+      const collapsedCollapsible = page.locator(
+        '#field-collapsible-1 .collapsible__toggle--collapsed',
+      )
+      await expect(collapsedCollapsible).toBeVisible()
+    })
+
     test('should render CollapsibleLabel using a function', async () => {
       const label = 'custom row label'
       await page.goto(url.create)
-      await page.locator('#field-collapsible-3__1 >> #field-nestedTitle').fill(label)
+      await page.locator('#field-collapsible-3__1 #field-nestedTitle').fill(label)
       await wait(100)
-      const customCollapsibleLabel = page.locator('#field-collapsible-3__1 >> .row-label')
+      const customCollapsibleLabel = page.locator(
+        `#field-collapsible-3__1 .collapsible-field__row-label-wrap :text("${label}")`,
+      )
       await expect(customCollapsibleLabel).toContainText(label)
     })
 
     test('should render CollapsibleLabel using a component', async () => {
       const label = 'custom row label as component'
       await page.goto(url.create)
+      await page.locator('#field-arrayWithCollapsibles').scrollIntoViewIfNeeded()
+
+      const arrayWithCollapsibles = page.locator('#field-arrayWithCollapsibles')
+      await expect(arrayWithCollapsibles).toBeVisible()
+
       await page.locator('#field-arrayWithCollapsibles >> .array-field__add-row').click()
 
       await page
         .locator(
-          '#field-collapsible-4__0-arrayWithCollapsibles__0 >> #field-arrayWithCollapsibles__0__innerCollapsible',
+          '#arrayWithCollapsibles-row-0 #field-collapsible-4__0-arrayWithCollapsibles__0 #field-arrayWithCollapsibles__0__innerCollapsible',
         )
         .fill(label)
       await wait(100)
       const customCollapsibleLabel = page.locator(
-        `#field-collapsible-4__0-arrayWithCollapsibles__0 >> .row-label :text("${label}")`,
+        `#field-arrayWithCollapsibles >> #arrayWithCollapsibles-row-0 >> .collapsible-field__row-label-wrap :text("${label}")`,
       )
       await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
     })
@@ -646,7 +670,9 @@ describe('fields', () => {
       await expect(firstRow).toHaveValue('first row')
 
       await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: blocksWithMinRows',
+      )
     })
 
     describe('row manipulation', () => {
@@ -899,7 +925,7 @@ describe('fields', () => {
       await addRowButton.click()
       await wait(200)
 
-      const targetInput = page.locator('#field-items__2__text')
+      const targetInput = page.locator('#field-items__0__text')
 
       await expect(targetInput).toBeVisible()
 
@@ -1360,9 +1386,7 @@ describe('fields', () => {
     test('should display formatted date in useAsTitle', async () => {
       await page.goto(url.list)
       await page.locator('.row-1 .cell-default a').click()
-      await expect(page.locator('.collection-edit .doc-header__title.render-title')).toContainText(
-        'August',
-      )
+      await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
     })
 
     test('should clear date', async () => {
@@ -1371,7 +1395,8 @@ describe('fields', () => {
       await expect(dateField).toBeVisible()
       await dateField.fill('02/07/2023')
       await expect(dateField).toHaveValue('02/07/2023')
-      await wait(1000)
+      await saveDocAndAssert(page)
+
       const clearButton = page.locator('#field-default .date-time-picker__clear-button')
       await expect(clearButton).toBeVisible()
       await clearButton.click()
@@ -1389,14 +1414,12 @@ describe('fields', () => {
         })
         test('create EST day only date', async () => {
           await page.goto(url.create)
+          await page.waitForURL(`**/${url.create}`)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
           await dateField.fill('02/07/2023')
-          await page.locator('#action-save').click()
-
-          // wait for navigation to update route
-          await wait(500)
+          await saveDocAndAssert(page)
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1420,6 +1443,7 @@ describe('fields', () => {
 
         test('create PDT day only date', async () => {
           await page.goto(url.create)
+          await page.waitForURL(`**/${url.create}`)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
@@ -1427,7 +1451,7 @@ describe('fields', () => {
           await page.locator('#action-save').click()
 
           // wait for navigation to update route
-          await wait(500)
+          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1451,14 +1475,12 @@ describe('fields', () => {
 
         test('create ST day only date', async () => {
           await page.goto(url.create)
+          await page.waitForURL(`**/${url.create}`)
           const dateField = page.locator('#field-default input')
 
           // enter date in default date field
           await dateField.fill('02/07/2023')
-          await page.locator('#action-save').click()
-
-          // wait for navigation to update route
-          await wait(500)
+          await saveDocAndAssert(page)
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1479,14 +1501,6 @@ describe('fields', () => {
 
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields')
-    })
-
-    afterEach(async () => {
-      // delete all existing relationship documents
-      await payload.delete({
-        collection: relationshipFieldsSlug,
-        where: { id: { exists: true } },
-      })
     })
 
     test('should create inline relationship within field with many relations', async () => {
@@ -1517,7 +1531,7 @@ describe('fields', () => {
 
     test('should create nested inline relationships', async () => {
       await page.goto(url.create)
-
+      await page.waitForURL(`**/${url.create}`)
       // Open first modal
       await page.locator('#relationToSelf-add-new .relationship-add-new__add-button').click()
 
@@ -1544,7 +1558,7 @@ describe('fields', () => {
 
       // Save then close the second modal
       await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click()
-      await wait(200)
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
       await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_2_]').click()
 
       // Assert that the first modal is still open and the value matches
@@ -1557,7 +1571,7 @@ describe('fields', () => {
 
       // Save then close the first modal
       await page.locator('[id^=doc-drawer_relationship-fields_1_] #action-save').click()
-      await wait(200)
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
       await page.locator('[id^=close-drawer__doc-drawer_relationship-fields_1_]').click()
 
       // Expect the original field to have a value filled
@@ -1568,7 +1582,7 @@ describe('fields', () => {
       // Fill the required field
       await page.locator('#field-relationship').click()
       await page.locator('.rs__option:has-text("Seeded text document")').click()
-
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
       await page.locator('#action-save').click()
 
       await expect(page.locator('.Toastify')).toContainText('successfully')
@@ -1649,7 +1663,7 @@ describe('fields', () => {
     // Related issue: https://github.com/payloadcms/payload/issues/2815
     test('should modify fields in relationship drawer', async () => {
       await page.goto(url.create)
-
+      await page.waitForURL(`**/${url.create}`)
       // First fill out the relationship field, as it's required
       await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
       await page
@@ -1665,12 +1679,10 @@ describe('fields', () => {
       await expect(page.locator('.Toastify')).toContainText('successfully')
 
       // Create a new doc for the `relationshipHasMany` field
-      await page
-        .locator('#field-relationshipHasMany button.relationship-add-new__add-button')
-        .click()
-      const textField2 = page.locator('[id^=doc-drawer_text-fields_1_] #field-text')
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+      await page.locator('#field-relationshipHasMany .relationship-add-new__add-button').click()
       const value = 'Hello, world!'
-      await textField2.fill(value)
+      await page.locator('.drawer__content #field-text').fill(value)
 
       // Save and close the drawer
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
@@ -1718,12 +1730,15 @@ describe('fields', () => {
     // opened through the edit button can be saved using the hotkey.
     test('should save using hotkey in edit document drawer', async () => {
       await page.goto(url.create)
-
       // First fill out the relationship field, as it's required
       await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
       await page.locator('#field-relationship .value-container').click()
       // Select "Seeded text document" relationship
       await page.getByText('Seeded text document', { exact: true }).click()
+
+      // Need to wait to properly open drawer - without this the drawer state is flakey and closes before
+      // the text below can be filled before the save on the drawer
+      await wait(200)
 
       // Click edit button which opens drawer
       await page.getByRole('button', { name: 'Edit Seeded text document' }).click()
@@ -1765,19 +1780,24 @@ describe('fields', () => {
 
     test('should fail min rows validation when rows are present', async () => {
       await page.goto(url.create)
-
       // First fill out the relationship field, as it's required
       await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
       await page.locator('#field-relationship .value-container').click()
       await page.getByText('Seeded text document', { exact: true }).click()
 
+      // Need to wait to allow for field to retrieve documents before the save occurs
+      await wait(200)
+
       await page.locator('#field-relationshipWithMinRows .value-container').click()
+
       await page
         .locator('#field-relationshipWithMinRows .rs__option:has-text("Seeded text document")')
         .click()
 
       await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: relationshipWithMinRows',
+      )
     })
 
     test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
@@ -1864,7 +1884,7 @@ describe('fields', () => {
       await uploadImage()
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
-        '/uploads/payload-1.jpg',
+        '/api/uploads/file/payload-1.jpg',
       )
     })
 
@@ -1882,13 +1902,13 @@ describe('fields', () => {
       // Assert that the media field has the png upload
       await expect(
         page.locator('.field-type.upload .file-details .file-meta__url a'),
-      ).toHaveAttribute('href', '/uploads/payload-1.png')
+      ).toHaveAttribute('href', '/api/uploads/file/payload-1.png')
       await expect(
         page.locator('.field-type.upload .file-details .file-meta__url a'),
       ).toContainText('payload-1.png')
       await expect(page.locator('.field-type.upload .file-details img')).toHaveAttribute(
         'src',
-        '/uploads/payload-1.png',
+        '/api/uploads/file/payload-1.png',
       )
       await page.locator('#action-save').click()
       await wait(200)

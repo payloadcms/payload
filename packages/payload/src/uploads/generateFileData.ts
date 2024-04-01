@@ -53,7 +53,7 @@ export const generateFileData = async <T>({
 
   let file = req.file
 
-  const uploadEdits = req.query['upload.js'] || {}
+  const uploadEdits = req.query['uploadEdits'] || {}
 
   const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
     collectionConfig.upload
@@ -132,7 +132,7 @@ export const generateFileData = async <T>({
       }
     }
 
-    if (isImage(file.mimetype)) {
+    if (fileSupportsResize || isImage(file.mimetype)) {
       dimensions = getImageSize(file)
       fileData.width = dimensions.width
       fileData.height = dimensions.height

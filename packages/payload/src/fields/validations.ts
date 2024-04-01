@@ -1,4 +1,5 @@
-import type { RichTextAdapter, Where } from '../exports/types.js'
+import type { RichTextAdapter } from '../admin/types.js'
+import type { Where } from '../types/index.js'
 import type {
   ArrayField,
   BlockField,
@@ -228,7 +229,7 @@ const validateArrayLength = (
 ) => {
   const { maxRows, minRows, required, t } = options
 
-  const arrayLength = Array.isArray(value) ? value.length : 0
+  const arrayLength = Array.isArray(value) ? value.length : value || 0
 
   if (!required && arrayLength === 0) return true
 
@@ -354,12 +355,12 @@ const validateFilterOptions: Validate<
               falseCollections.push(collection)
             }
 
-            // `req` omitted to prevent transaction errors from aborting the entire transaction
             const result = await payload.find({
               collection,
               depth: 0,
               limit: 0,
               pagination: false,
+              req,
               where: findWhere,
             })
 
@@ -397,6 +398,8 @@ const validateFilterOptions: Validate<
       if (falseCollections.find((slug) => relationTo === slug)) {
         return true
       }
+
+      if (!options[collection]) return true
 
       return options[collection].indexOf(requestedID) === -1
     })

@@ -3,6 +3,8 @@ export default {
     account: 'Conta',
     apiKey: 'Chave da API',
     enableAPIKey: 'Habilitar Chave API',
+    loggedInChangePassword:
+      'Para mudar a sua senha, acesse a sua <0>conta</0> e edite sua senha lá.',
     newAccountCreated:
       'Uma nova conta acaba de ser criada para que você possa acessar <a href="{{serverURL}}">{{serverURL}}</a> Por favor, clique no link a seguir ou cole a URL abaixo no seu navegador para verificar seu email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Após a verificação de email, você será capaz de fazer o login.',
     resetYourPassword: 'Redefinir Sua Senha',

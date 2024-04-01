@@ -30,6 +30,8 @@ import type { BlockField, FieldBase } from 'payload/types'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { withCondition } from '@payloadcms/ui/forms/withCondition'
 
 import type { ReducedBlock } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { FormFieldBase } from '../shared/index.js'
@@ -37,7 +39,6 @@ import type { FormFieldBase } from '../shared/index.js'
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
   forceRender?: boolean
-  indexPath: string
   label?: FieldBase['label']
   labels?: BlockField['labels']
   maxRows?: number
@@ -48,7 +49,7 @@ export type BlocksFieldProps = FormFieldBase & {
   width?: string
 }
 
-export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
+const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
@@ -61,7 +62,7 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     descriptionProps,
     errorProps,
     forceRender = false,
-    indexPath,
+    label,
     labelProps,
     labels: labelsFromProps,
     localized,
@@ -72,6 +73,8 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     required,
     validate,
   } = props
+
+  const { indexPath } = useFieldProps()
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -108,7 +111,10 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const {
+    errorPaths,
     path,
     permissions,
     rows = [],
@@ -118,7 +124,7 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     value,
   } = useField<number>({
     hasRows: true,
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
@@ -188,7 +194,7 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
 
   const hasMaxRows = maxRows && rows.length >= maxRows
 
-  const fieldErrorCount = rows.reduce((total, row) => total + (row?.errorPaths?.size || 0), 0)
+  const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
@@ -208,14 +214,21 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     >
       {showError && (
         <div className={`${baseClass}__error-wrap`}>
-          <FieldError CustomError={CustomError} {...(errorProps || {})} />
+          <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
         </div>
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
             <h3>
-              <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+              <FieldLabel
+                CustomLabel={CustomLabel}
+                as="span"
+                label={label}
+                required={required}
+                unstyled
+                {...(labelProps || {})}
+              />
             </h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
@@ -258,6 +271,9 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
             const blockToRender = blocks.find((block) => block.slug === blockType)
 
             if (blockToRender) {
+              const rowErrorCount = errorPaths.filter((errorPath) =>
+                errorPath.startsWith(`${path}.${i}`),
+              ).length
               return (
                 <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
@@ -267,6 +283,7 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
                       block={blockToRender}
                       blocks={blocks}
                       duplicateRow={duplicateRow}
+                      errorCount={rowErrorCount}
                       forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       indexPath={indexPath}
@@ -338,3 +355,5 @@ export const BlocksField: React.FC<BlocksFieldProps> = (props) => {
     </div>
   )
 }
+
+export const BlocksField = withCondition(_BlocksField)

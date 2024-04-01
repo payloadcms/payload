@@ -31,15 +31,14 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
     ],
   }
 
-  const result = await payload.delete({
+  const result = await payload.db.deleteOne({
     collection: 'payload-preferences',
-    depth: 0,
-    user,
+    req,
     where,
   })
 
-  if (result.docs.length === 1) {
-    return result.docs[0]
+  if (result) {
+    return result
   }
   throw new NotFound(req.t)
 }

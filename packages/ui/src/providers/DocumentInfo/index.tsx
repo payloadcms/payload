@@ -1,14 +1,15 @@
 'use client'
 import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
-import type { FormState, TypeWithTimestamps } from 'payload/types'
+import type { Data, FormState, TypeWithTimestamps } from 'payload/types'
 import type { DocumentPermissions, DocumentPreferences, TypeWithID, Where } from 'payload/types'
 
 import { LoadingOverlay } from '@payloadcms/ui/elements/Loading'
-import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
 import { formatDocTitle } from '@payloadcms/ui/utilities/formatDocTitle'
 import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
+import { notFound } from 'next/navigation.js'
 import qs from 'qs'
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
@@ -28,12 +29,24 @@ export const DocumentInfoProvider: React.FC<
   DocumentInfoProps & {
     children: React.ReactNode
   }
-> = ({ children, initialState: initialStateFromProps, title: titleFromProps, ...props }) => {
-  const [documentTitle, setDocumentTitle] = useState(titleFromProps)
+> = ({ children, ...props }) => {
+  const { id, collectionSlug, globalSlug, onLoadError, onSave: onSaveFromProps } = props
+  const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState(false)
+  const [documentTitle, setDocumentTitle] = useState('')
+  const [initialData, setInitialData] = useState<Data>()
+  const [initialState, setInitialState] = useState<FormState>()
+  const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
+  const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
+  const [hasSavePermission, setHasSavePermission] = useState<boolean>(null)
+  const [unpublishedVersions, setUnpublishedVersions] =
+    useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
-  const [initialState, setInitialState] = useState<FormState>(initialStateFromProps)
-
-  const { id, collectionSlug, globalSlug } = props
+  const { getPreference, setPreference } = usePreferences()
+  const { i18n } = useTranslation()
+  const { permissions } = useAuth()
+  const { code: locale } = useLocale()
 
   const {
     admin: { dateFormat },
@@ -47,18 +60,6 @@ export const DocumentInfoProvider: React.FC<
   const globalConfig = globals.find((g) => g.slug === globalSlug)
   const docConfig = collectionConfig || globalConfig
   const versionsConfig = docConfig?.versions
-
-  const { getPreference, setPreference } = usePreferences()
-  const { i18n } = useTranslation()
-  const { permissions } = useAuth()
-  const { code } = useLocale()
-  const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
-  const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
-  const [hasSavePermission, setHasSavePermission] = useState<boolean>(null)
-
-  const [unpublishedVersions, setUnpublishedVersions] =
-    useState<PaginatedDocs<TypeWithVersion<any>>>(null)
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -80,67 +81,7 @@ export const DocumentInfoProvider: React.FC<
     }
   }
 
-  /**
-   *
-   *
-   * Fetching state from Server on the Client. Should be moved back to Document/index.tsx once next allows us to disable the router cache
-   *
-   *
-   */
-  const hasInitializedState = useRef(!!initialStateFromProps)
-
-  // no need to an additional requests when creating new documents
   const isEditing = Boolean(id)
-
-  const shouldLoadData = !hasInitializedState.current && !!(globalSlug || id)
-
-  const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
-    shouldLoadData
-      ? `${baseURL}/${globalSlug ? 'globals/' : ''}${slug}${collectionSlug ? `/${id}` : ''}`
-      : null,
-    { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
-  )
-
-  useEffect(() => {
-    if (!hasInitializedState.current && (data || !shouldLoadData)) {
-      const getInitialState = async () => {
-        let docPreferences: DocumentPreferences = { fields: {} }
-
-        if (id) {
-          docPreferences = await getPreference(
-            `${id ? 'collection' : 'global'}-${collectionSlug}-${id}`,
-          )
-        }
-
-        const result = await getFormState({
-          apiRoute: api,
-          body: {
-            id,
-            collectionSlug,
-            data: data || {},
-            docPreferences,
-            globalSlug,
-            operation: isEditing ? 'update' : 'create',
-            schemaPath: collectionSlug || globalSlug,
-          },
-          serverURL,
-        })
-
-        setInitialState(result)
-        hasInitializedState.current = true
-      }
-
-      void getInitialState()
-    }
-  }, [api, data, isEditing, collectionSlug, serverURL, id, getPreference, globalSlug])
-
-  /**
-   *
-   *
-   * Fetching state from Server on the Client DONE
-   *
-   *
-   */
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
@@ -159,7 +100,7 @@ export const DocumentInfoProvider: React.FC<
 
     const publishedVersionParams: { depth: number; locale: string; where: Where } = {
       depth: 0,
-      locale: code || undefined,
+      locale: locale || undefined,
       where: {
         and: [
           {
@@ -268,12 +209,12 @@ export const DocumentInfoProvider: React.FC<
       setVersions(versionJSON)
       setUnpublishedVersions(unpublishedVersionJSON)
     }
-  }, [i18n, globalSlug, collectionSlug, id, baseURL, code, versionsConfig])
+  }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig])
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string
     const params = {
-      locale: code || undefined,
+      locale: locale || undefined,
     }
     if (pluralType === 'globals') {
       docAccessURL = `/globals/${slug}/access`
@@ -298,7 +239,7 @@ export const DocumentInfoProvider: React.FC<
       setDocPermissions(permissions?.[pluralType]?.[slug])
       setHasSavePermission(permissions?.[pluralType]?.[slug]?.update?.permission)
     }
-  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, code])
+  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, locale])
 
   const getDocPreferences = useCallback(() => {
     return getPreference<DocumentPreferences>(preferencesKey)
@@ -328,26 +269,116 @@ export const DocumentInfoProvider: React.FC<
     [setPreference, preferencesKey, getDocPreferences],
   )
 
+  const onSave = React.useCallback<DocumentInfoContext['onSave']>(
+    async (json) => {
+      if (typeof onSaveFromProps === 'function') {
+        void onSaveFromProps(json)
+      }
+
+      const docPreferences = await getDocPreferences()
+
+      const newState = await getFormState({
+        apiRoute: api,
+        body: {
+          id,
+          collectionSlug,
+          data: json.doc,
+          docPreferences,
+          globalSlug,
+          locale,
+          operation: isEditing ? 'update' : 'create',
+          schemaPath: collectionSlug || globalSlug,
+        },
+        serverURL,
+      })
+
+      setInitialState(newState)
+      setInitialData(json.doc)
+    },
+    [
+      api,
+      collectionSlug,
+      getDocPreferences,
+      globalSlug,
+      id,
+      isEditing,
+      locale,
+      onSaveFromProps,
+      serverURL,
+    ],
+  )
+
+  useEffect(() => {
+    const abortController = new AbortController()
+
+    const getInitialState = async () => {
+      setIsError(false)
+      setIsLoading(true)
+
+      try {
+        const result = await getFormState({
+          apiRoute: api,
+          body: {
+            id,
+            collectionSlug,
+            globalSlug,
+            locale,
+            operation: isEditing ? 'update' : 'create',
+            schemaPath: collectionSlug || globalSlug,
+          },
+          onError: onLoadError,
+          serverURL,
+          signal: abortController.signal,
+        })
+
+        setInitialData(reduceFieldsToValues(result, true))
+        setInitialState(result)
+      } catch (err) {
+        if (!abortController.signal.aborted) {
+          if (typeof onLoadError === 'function') {
+            void onLoadError()
+          }
+          setIsError(true)
+          setIsLoading(false)
+        }
+      }
+
+      setIsLoading(false)
+    }
+
+    void getInitialState()
+
+    return () => {
+      abortController.abort()
+    }
+  }, [
+    api,
+    isEditing,
+    collectionSlug,
+    serverURL,
+    id,
+    getPreference,
+    globalSlug,
+    locale,
+    onLoadError,
+  ])
+
   useEffect(() => {
     void getVersions()
   }, [getVersions])
 
   useEffect(() => {
-    if (titleFromProps) {
-      setDocumentTitle(titleFromProps)
-    } else {
-      setDocumentTitle(
-        formatDocTitle({
-          collectionConfig,
-          data,
-          dateFormat,
-          fallback: id?.toString(),
-          globalConfig,
-          i18n,
-        }),
-      )
-    }
-  }, [collectionConfig, data, dateFormat, i18n, titleFromProps, id, globalConfig])
+    setDocumentTitle(
+      formatDocTitle({
+        collectionConfig,
+        data: { ...initialData, id },
+        dateFormat,
+        fallback: id?.toString(),
+        globalConfig,
+        i18n,
+      }),
+    )
+  }, [collectionConfig, initialData, dateFormat, i18n, id, globalConfig])
 
   useEffect(() => {
     const loadDocPermissions = async () => {
@@ -374,11 +405,11 @@ export const DocumentInfoProvider: React.FC<
     globalSlug,
   ])
 
-  if (!initialState || isLoadingDocument) {
+  if (isError) notFound()
+
+  if (!initialState || isLoading) {
     return <LoadingOverlay />
   }
-
-  if (isError) return null
 
   const value: DocumentInfoContext = {
     ...props,
@@ -388,8 +419,9 @@ export const DocumentInfoProvider: React.FC<
     getDocPreferences,
     getVersions,
     hasSavePermission,
+    initialData,
     initialState,
-    onSave: props.onSave,
+    onSave,
     publishedDoc,
     setDocFieldPreferences,
     setDocumentTitle,

@@ -6,6 +6,8 @@ import { useAllFormFields } from '@payloadcms/ui/forms/Form'
 import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 import { useEffect } from 'react'
 
+import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
+
 type Props = {
   onChange?: ({
     fullFieldsWithValues,
@@ -19,7 +21,9 @@ type Props = {
 export const FormSavePlugin: React.FC<Props> = (props) => {
   const { onChange } = props
 
-  const [fields, dispatchFields] = useAllFormFields()
+  const [_fields] = useAllFormFields()
+
+  const fields = removeEmptyArrayValues({ fields: _fields })
 
   // Pass in fields, and indicate if you'd like to "unflatten" field data.
   // The result below will reflect the data stored in the form at the given time

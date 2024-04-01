@@ -1,15 +1,17 @@
 'use client'
-import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { usePathname, useRouter } from 'next/navigation.js'
 import queryString from 'qs'
 import React, { useCallback } from 'react'
 
 export type SortColumnProps = {
+  Label: React.ReactNode
   disable?: boolean
-  label: Record<string, string> | string
+  label?: FieldBase['label']
   name: string
 }
+
+import type { FieldBase } from 'payload/types'
 
 import { Chevron } from '../../icons/Chevron/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
@@ -19,11 +21,11 @@ import './index.scss'
 const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
-  const { name, disable = false, label } = props
+  const { name, Label, disable = false, label } = props
   const { searchParams } = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
 
   const { sort } = searchParams
 
@@ -53,13 +55,13 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
 
   return (
     <div className={baseClass}>
-      <span className={`${baseClass}__label`}>{getTranslation(label, i18n)}</span>
+      <span className={`${baseClass}__label`}>{Label}</span>
       {!disable && (
         <div className={`${baseClass}__buttons`}>
           <button
             aria-label={t('general:sortByLabelDirection', {
               direction: t('general:ascending'),
-              label: getTranslation(label, i18n),
+              label,
             })}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => setSort(asc)}
@@ -70,7 +72,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
           <button
             aria-label={t('general:sortByLabelDirection', {
               direction: t('general:descending'),
-              label: getTranslation(label, i18n),
+              label,
             })}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => setSort(desc)}

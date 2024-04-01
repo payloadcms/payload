@@ -27,6 +27,7 @@ export type BuildFormStateArgs = {
   formState?: FormState
   globalSlug?: string
   id?: number | string
+  locale?: string
   operation?: 'create' | 'update'
   schemaPath: string
 }
@@ -39,8 +40,8 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
 
     await iterateFields({
       id,
+      addErrorPathToParent: null,
       data: fullData,
-      errorPaths: new Set(),
       fields: fieldSchema,
       fullData,
       operation,

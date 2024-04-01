@@ -33,7 +33,7 @@ export type FormProps = (
   log?: boolean
   onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
-  onSuccess?: (json: unknown) => void
+  onSuccess?: (json: unknown) => Promise<void> | void
   redirect?: string
   submitted?: boolean
   uuid?: string
@@ -174,7 +174,7 @@ export type Context = {
   disabled: boolean
   dispatchFields: Dispatch<FieldAction>
   /**
-   * @deprecated Form context fields may be outdated and should not be relied on. Instead, prefer `useFormFields`.
+   * Form context fields may be outdated and should not be relied on. Instead, prefer `useFormFields`.
    */
   fields: FormState
   formRef: React.MutableRefObject<HTMLFormElement>

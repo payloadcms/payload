@@ -20,6 +20,7 @@ const serverTranslationKeys = [
   'authentication:resetYourPassword',
   'authentication:verifyYourEmail',
   'authentication:youAreReceivingResetPassword',
+  'authentication:loggedInChangePassword',
   'authentication:youDidNotRequestPassword',
   'authentication:verified',
 
@@ -162,6 +163,7 @@ const clientTranslationKeys = [
   'fields:itemsAndMore',
   'fields:labelRelationship',
   'fields:latitude',
+  'fields:linkedTo',
   'fields:longitude',
   'fields:passwordsDoNotMatch',
   'fields:removeRelationship',
@@ -349,6 +351,7 @@ const clientTranslationKeys = [
   'version:selectLocales',
   'version:selectVersionToCompare',
   'version:showLocales',
+  'version:status',
   'version:type',
   'version:unpublish',
   'version:unpublishing',

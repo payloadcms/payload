@@ -126,6 +126,8 @@ export default buildConfigWithDefaults({
     ],
   },
   onInit: async (payload) => {
-    await clearAndSeedEverything(payload)
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await clearAndSeedEverything(payload)
+    }
   },
 })

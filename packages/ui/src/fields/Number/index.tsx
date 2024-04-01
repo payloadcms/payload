@@ -6,6 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { isNumber } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -45,6 +46,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     descriptionProps,
     errorProps,
     hasMany = false,
+    label,
     labelProps,
     max = Infinity,
     maxRows = Infinity,
@@ -71,8 +73,10 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     [validate, min, max, required],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const { path, setValue, showError, value } = useField<number | number[]>({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
@@ -151,8 +155,13 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}

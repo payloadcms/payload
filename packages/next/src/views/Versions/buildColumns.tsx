@@ -15,52 +15,62 @@ import { IDCell } from './cells/ID/index.js'
 
 export const buildVersionColumns = ({
   collectionConfig,
-  config,
   docID,
   globalConfig,
   i18n: { t },
-  i18n,
 }: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
   docID?: number | string
   globalConfig?: SanitizedGlobalConfig
   i18n: I18n
-}): Column[] => [
-  {
-    name: '',
-    accessor: 'updatedAt',
-    active: true,
-    components: {
-      Cell: (
-        <CreatedAtCell
-          collectionSlug={collectionConfig?.slug}
-          docID={docID}
-          globalSlug={globalConfig?.slug}
-        />
-      ),
-      Heading: <SortColumn label={t('general:updatedAt')} name="updatedAt" />,
+}): Column[] => {
+  const entityConfig = collectionConfig || globalConfig
+
+  const columns = [
+    {
+      name: '',
+      Label: '',
+      accessor: 'updatedAt',
+      active: true,
+      components: {
+        Cell: (
+          <CreatedAtCell
+            collectionSlug={collectionConfig?.slug}
+            docID={docID}
+            globalSlug={globalConfig?.slug}
+          />
+        ),
+        Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
+      },
     },
-    label: '',
-  },
-  {
-    name: '',
-    accessor: 'id',
-    active: true,
-    components: {
-      Cell: <IDCell />,
-      Heading: <SortColumn disable label={t('version:versionID')} name="id" />,
+    {
+      name: '',
+      Label: '',
+      accessor: 'id',
+      active: true,
+      components: {
+        Cell: <IDCell />,
+        Heading: <SortColumn Label={t('version:versionID')} disable name="id" />,
+      },
     },
-    label: '',
-  },
-  {
-    name: '',
-    accessor: 'autosave',
-    active: true,
-    components: {
-      Cell: <AutosaveCell />,
-      Heading: <SortColumn disable label={t('version:type')} name="autosave" />,
-    },
-    label: '',
-  },
-]
+  ]
+
+  if (
+    entityConfig?.versions?.drafts ||
+    (entityConfig?.versions?.drafts && entityConfig.versions.drafts?.autosave)
+  ) {
+    columns.push({
+      name: '',
+      Label: '',
+      accessor: '_status',
+      active: true,
+      components: {
+        Cell: <AutosaveCell />,
+        Heading: <SortColumn Label={t('version:type')} disable name="autosave" />,
+      },
+    })
+  }
+
+  return columns
+}

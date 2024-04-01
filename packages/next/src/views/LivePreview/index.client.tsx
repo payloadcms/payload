@@ -62,7 +62,7 @@ const PreviewView: React.FC<Props> = ({
     getDocPreferences,
     globalSlug,
     hasSavePermission,
-    initialData: data,
+    initialData,
     initialState,
     onSave: onSaveFromProps,
   } = useDocumentInfo()
@@ -145,6 +145,8 @@ const PreviewView: React.FC<Props> = ({
             globalLabel={globalConfig?.label}
             globalSlug={globalSlug}
             id={id}
+            pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
+            useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
             view={t('general:livePreview')}
           />
           <SetDocumentTitle
@@ -155,7 +157,7 @@ const PreviewView: React.FC<Props> = ({
           />
           <DocumentControls
             apiURL={apiURL}
-            data={data}
+            data={initialData}
             disableActions={disableActions}
             hasSavePermission={hasSavePermission}
             id={id}

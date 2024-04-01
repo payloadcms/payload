@@ -28,30 +28,28 @@ export type DocumentInfoProps = {
   globalSlug?: SanitizedGlobalConfig['slug']
   hasSavePermission?: boolean
   id: null | number | string
-  initialData?: Data
-  initialState?: FormState
   isEditing?: boolean
+  onLoadError?: (data?: any) => Promise<void> | void
   onSave?: (data: Data) => Promise<void> | void
-  title?: string
 }
 
-export type DocumentInfo = DocumentInfoProps & {
+export type DocumentInfoContext = DocumentInfoProps & {
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
-  preferencesKey?: string
-  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
-  slug?: string
-  unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
-  versions?: PaginatedDocs<TypeWithVersion<any>>
-  versionsCount?: PaginatedDocs<TypeWithVersion<any>>
-}
-
-export type DocumentInfoContext = DocumentInfo & {
   getDocPermissions: () => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
   getVersions: () => Promise<void>
+  initialData: Data
+  initialState?: FormState
+  preferencesKey?: string
+  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   setDocFieldPreferences: (
     field: string,
     fieldPreferences: Partial<InsideFieldsPreferences> & { [key: string]: unknown },
   ) => void
   setDocumentTitle: (title: string) => void
+  slug?: string
+  title: string
+  unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
+  versions?: PaginatedDocs<TypeWithVersion<any>>
+  versionsCount?: PaginatedDocs<TypeWithVersion<any>>
 }

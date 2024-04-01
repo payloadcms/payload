@@ -1,6 +1,7 @@
 import type { ClientCollectionConfig } from '../collections/config/client.js'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../exports/types.js'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { ClientGlobalConfig } from '../globals/config/client.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,

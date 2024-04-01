@@ -4,6 +4,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  VisibleEntities,
 } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
@@ -11,7 +12,7 @@ import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui/utilities/findLocaleFromCode'
 import { headers as getHeaders } from 'next/headers.js'
 import { notFound, redirect } from 'next/navigation.js'
-import { createLocalReq } from 'payload/utilities'
+import { createLocalReq, isEntityHidden } from 'payload/utilities'
 import qs from 'qs'
 
 import { getPayloadHMR } from '../utilities/getPayloadHMR.js'
@@ -21,8 +22,8 @@ import { getRequestLanguage } from './getRequestLanguage.js'
 type Args = {
   config: Promise<SanitizedConfig> | SanitizedConfig
   redirectUnauthenticatedUser?: boolean
-  route?: string
-  searchParams?: { [key: string]: string | string[] | undefined }
+  route: string
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 export const initPage = async ({
@@ -40,6 +41,15 @@ export const initPage = async ({
     payload,
   })
 
+  const visibleEntities: VisibleEntities = {
+    collections: payload.config.collections
+      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
+      .filter(Boolean),
+    globals: payload.config.globals
+      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
+      .filter(Boolean),
+  }
+
   const routeSegments = route.replace(payload.config.routes.admin, '').split('/').filter(Boolean)
   const [entityType, entitySlug, createOrID] = routeSegments
   const collectionSlug = entityType === 'collections' ? entitySlug : undefined
@@ -49,7 +59,7 @@ export const initPage = async ({
   const { collections, globals, localization, routes } = payload.config
 
   if (redirectUnauthenticatedUser && !user && route !== '/login') {
-    if ('redirect' in searchParams) delete searchParams.redirect
+    if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
 
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
       ? `?${qs.stringify(searchParams)}`
@@ -71,9 +81,9 @@ export const initPage = async ({
     translations,
   })
 
-  const queryString = `${qs.stringify(searchParams, { addQueryPrefix: true })}`
+  const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
 
-  const req = await createLocalReq(
+  const req = createLocalReq(
     {
       fallbackLocale: null,
       locale: locale.code,
@@ -118,5 +128,6 @@ export const initPage = async ({
     permissions,
     req,
     translations: i18n.translations,
+    visibleEntities,
   }
 }

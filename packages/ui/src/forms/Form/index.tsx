@@ -108,13 +108,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
     const validationPromises = Object.entries(contextRef.current.fields).map(
       async ([path, field]) => {
-        const validatedField = {
-          ...field,
-          valid: true,
-        }
+        const validatedField = field
 
         if (field.passesCondition !== false) {
-          let validationResult: boolean | string = true
+          let validationResult: boolean | string = validatedField.valid
 
           if (typeof field.validate === 'function') {
             let valueToValidate = field.value
@@ -132,11 +129,17 @@ export const Form: React.FC<FormProps> = (props) => {
               t,
               user,
             })
+
+            if (typeof validationResult === 'string') {
+              validatedField.errorMessage = validationResult
+              validatedField.valid = false
+            } else {
+              validatedField.valid = true
+              validatedField.errorMessage = undefined
+            }
           }
 
-          if (typeof validationResult === 'string') {
-            validatedField.errorMessage = validationResult
-            validatedField.valid = false
+          if (validatedField.valid === false) {
             isValid = false
           }
         }
@@ -250,8 +253,6 @@ export const Form: React.FC<FormProps> = (props) => {
           return
         }
 
-        setProcessing(false)
-
         const contentType = res.headers.get('content-type')
         const isJSON = contentType && contentType.indexOf('application/json') !== -1
 
@@ -261,9 +262,9 @@ export const Form: React.FC<FormProps> = (props) => {
         if (isJSON) json = await res.json()
 
         if (res.status < 400) {
+          if (typeof onSuccess === 'function') await onSuccess(json)
           setSubmitted(false)
-
-          if (typeof onSuccess === 'function') onSuccess(json)
+          setProcessing(false)
 
           if (redirect) {
             router.push(redirect)
@@ -271,6 +272,8 @@ export const Form: React.FC<FormProps> = (props) => {
             toast.success(json.message || t('general:submissionSuccessful'), { autoClose: 3000 })
           }
         } else {
+          setProcessing(false)
+
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
             toast.error(json.message)
@@ -530,7 +533,7 @@ export const Form: React.FC<FormProps> = (props) => {
     () => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState = fields
+          let revalidatedFormState: FormState = contextRef.current.fields
 
           for (const onChangeFn of onChange) {
             revalidatedFormState = await onChangeFn({
@@ -538,10 +541,17 @@ export const Form: React.FC<FormProps> = (props) => {
             })
           }
 
-          const { changed, newState } = mergeServerFormState(fields || {}, revalidatedFormState)
+          const { changed, newState } = mergeServerFormState(
+            contextRef.current.fields || {},
+            revalidatedFormState,
+          )
 
           if (changed) {
-            dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: newState })
+            dispatchFields({
+              type: 'REPLACE_STATE',
+              optimize: false,
+              state: newState,
+            })
           }
         }
       }
@@ -549,7 +559,9 @@ export const Form: React.FC<FormProps> = (props) => {
       if (modified) void executeOnChange()
     },
     150,
-    [fields, dispatchFields, onChange],
+    // Make sure we trigger this whenever modified changes (not just when `fields` changes), otherwise we will miss merging server form state for the first form update/onChange. Here's why:
+    // `fields` updates before `modified`, because setModified is in a setTimeout. So on the first change, modified is false, so we don't trigger the effect even though we should.
+    [contextRef.current.fields, dispatchFields, onChange, modified],
   )
 
   const actionString =

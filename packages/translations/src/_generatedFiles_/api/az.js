@@ -3,6 +3,8 @@ export default {
     account: 'Hesab',
     apiKey: 'API Açarı',
     enableAPIKey: 'API açarını aktivləşdir',
+    loggedInChangePassword:
+      'Parolu dəyişdirmək üçün hesabınıza get və orada şifrənizi redaktə edin.',
     newAccountCreated:
       'Sizin üçün yeni hesab yaradıldı. Zəhmət olmasa, e-poçtunuzu doğrulamaq üçün aşağıdakı linke klikləyin: <a href="{{verificationURL}}">{{verificationURL}}</a>. E-poçtunuzu doğruladıqdan sonra uğurla daxil ola bilərsiniz.',
     resetYourPassword: 'Şifrənizi sıfırlayın',

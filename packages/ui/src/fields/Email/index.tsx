@@ -6,6 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
@@ -37,6 +38,7 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
     className,
     descriptionProps,
     errorProps,
+    label,
     labelProps,
     path: pathFromProps,
     placeholder,
@@ -58,8 +60,10 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
     [validate, required],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const { path, setValue, showError, value } = useField({
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
@@ -73,8 +77,13 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div>
         {BeforeInput}
         <input

@@ -7,7 +7,8 @@
     "create-payload-app": "bin/cli.js"
   },
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc",
+    "build": "pnpm copyfiles && pnpm typecheck && pnpm build:swc",
+    "typecheck": "tsc",
     "copyfiles": "copyfiles -u 2 \"../../app/(payload)/**\" \"dist\"",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
@@ -27,6 +28,7 @@
     "comment-json": "^4.2.3",
     "degit": "^2.8.4",
     "detect-package-manager": "^3.0.1",
+    "esprima": "^4.0.1",
     "execa": "^5.0.0",
     "figures": "^3.2.0",
     "fs-extra": "^9.0.1",
@@ -39,9 +41,17 @@
   "devDependencies": {
     "@types/command-exists": "^1.2.0",
     "@types/degit": "^2.8.3",
+    "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.6.2",
     "@types/prompts": "^2.4.1"
+  },
+  "exports": {
+    "./commands": {
+      "import": "./src/lib/init-next.ts",
+      "require": "./src/lib/init-next.ts",
+      "types": "./src/lib/init-next.ts"
+    }
   }
 }

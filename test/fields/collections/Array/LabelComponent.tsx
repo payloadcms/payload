@@ -2,9 +2,8 @@
 
 import type { RowLabelComponent } from 'payload/types'
 
+import { useRowLabel } from '@payloadcms/ui/forms/RowLabel/Context'
 import React from 'react'
-
-import { useRowLabel } from '../../../../packages/ui/src/forms/RowLabel/Context/index.js'
 
 export const ArrayRowLabel: RowLabelComponent = () => {
   const { data } = useRowLabel<{ title: string }>()

@@ -3,6 +3,8 @@ export default {
     account: 'نمایه',
     apiKey: 'کلید اِی‌پی‌آی',
     enableAPIKey: 'فعال‌سازی کلید اِی‌پی‌آی',
+    loggedInChangePassword:
+      'برای تغییر گذرواژه، به <0>نمایه</0> بروید تا گذرواژه خود را ویرایش کنید.',
     newAccountCreated:
       'یک نمایه کاربری تازه برای دسترسی شما ساخته شده است <a href="{{serverURL}}">{{serverURL}}</a> لطفاً روی پیوند زیر کلیک کنید یا آدرس زیر را در مرورگر خود قرار دهید تا رایانامه خود را تأیید کنید: <a href="{{verificationURL}}">{{verificationURL}}</a><br> پس از تایید رایانامه خود، می توانید وارد سیستم شوید.',
     resetYourPassword: 'گذرواژه خود را بازنشانی کنید',

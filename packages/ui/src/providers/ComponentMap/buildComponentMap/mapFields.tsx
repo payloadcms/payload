@@ -1,7 +1,8 @@
 import type { FieldDescriptionProps } from '@payloadcms/ui/forms/FieldDescription'
 import type {
-  CellProps,
+  CellComponentProps,
   Field,
+  FieldBase,
   FieldWithPath,
   LabelProps,
   RowLabelComponent,
@@ -189,7 +190,7 @@ export const mapFields = (args: {
 
         let fieldComponentProps: FieldComponentProps
 
-        const cellComponentProps: CellProps = {
+        const cellComponentProps: CellComponentProps = {
           name: 'name' in field ? field.name : undefined,
           fieldType: field.type,
           isFieldAffectingData,
@@ -198,7 +199,6 @@ export const mapFields = (args: {
               ? field.label
               : undefined,
           labels: 'labels' in field ? field.labels : undefined,
-          options: 'options' in field ? field.options : undefined,
         }
 
         switch (field.type) {
@@ -227,7 +227,6 @@ export const mapFields = (args: {
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
                 config,
-                disableAddingID: true,
                 fieldSchema: field.fields,
                 filter,
                 parentPath: path,
@@ -250,7 +249,6 @@ export const mapFields = (args: {
             const blocks = field.blocks.map((block) => {
               const blockFieldMap = mapFields({
                 config,
-                disableAddingID: true,
                 fieldSchema: block.fields,
                 filter,
                 parentPath: `${path}.${block.slug}`,
@@ -353,6 +351,7 @@ export const mapFields = (args: {
                 readOnly: readOnlyOverride,
               }),
               initCollapsed: field.admin?.initCollapsed,
+              label: !CustomCollapsibleLabel ? (field.label as FieldBase['label']) : undefined,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -387,6 +386,7 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
+              label: field.label,
               placeholder: field.admin?.placeholder,
               readOnly: field.admin?.readOnly,
               required: field.required,
@@ -411,6 +411,7 @@ export const mapFields = (args: {
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
+              label: field.label,
               readOnly: field.admin?.readOnly,
               style: field.admin?.style,
               width: field.admin?.width,
@@ -426,6 +427,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               editorOptions: field.admin?.editorOptions,
+              label: field.label,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -442,6 +444,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
+              label: field.label,
               max: field.max,
               maxRows: field.maxRows,
               min: field.min,
@@ -461,6 +464,7 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
+              label: field.label,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -478,6 +482,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
+              label: field.label,
               readOnly: field.admin?.readOnly,
               relationTo: field.relationTo,
               required: field.required,
@@ -486,6 +491,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
+            cellComponentProps.relationTo = field.relationTo
             fieldComponentProps = relationshipField
             break
           }
@@ -495,6 +501,7 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
+              label: field.label,
               options: field.options,
               readOnly: field.admin?.readOnly,
               required: field.required,
@@ -502,6 +509,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
+            cellComponentProps.options = field.options
             fieldComponentProps = radioField
             break
           }
@@ -511,6 +519,7 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
+              label: field.label,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
@@ -603,6 +612,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
+              label: field.label,
               maxLength: field.maxLength,
               minLength: field.minLength,
               placeholder: field.admin?.placeholder,
@@ -621,6 +631,7 @@ export const mapFields = (args: {
               name: field.name,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
+              label: field.label,
               maxLength: field.maxLength,
               minLength: field.minLength,
               placeholder: field.admin?.placeholder,
@@ -645,6 +656,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               filterOptions: field.filterOptions,
+              label: field.label,
               readOnly: field.admin?.readOnly,
               relationTo: field.relationTo,
               required: field.required,
@@ -652,6 +664,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
+            cellComponentProps.relationTo = field.relationTo
             fieldComponentProps = uploadField
             break
           }
@@ -663,6 +676,7 @@ export const mapFields = (args: {
               disabled: field.admin?.disabled,
               hasMany: field.hasMany,
               isClearable: field.admin?.isClearable,
+              label: field.label,
               options: field.options,
               readOnly: field.admin?.readOnly,
               required: field.required,
@@ -670,6 +684,7 @@ export const mapFields = (args: {
               width: field.admin?.width,
             }
 
+            cellComponentProps.options = field.options
             fieldComponentProps = selectField
             break
           }
@@ -712,15 +727,19 @@ export const mapFields = (args: {
 
   if (!disableAddingID && !hasID) {
     // TODO: For all fields (not just this one) we need to add the name to both .fieldComponentProps.name AND .name. This can probably be improved
-    result.push({
+    result.unshift({
       name: 'id',
       type: 'text',
       cellComponentProps: {
         name: 'id',
       },
+      disableBulkEdit: true,
       fieldComponentProps: {
         name: 'id',
         label: 'ID',
+        labelProps: {
+          label: 'ID',
+        },
       },
       fieldIsPresentational: false,
       isFieldAffectingData: true,

@@ -7,6 +7,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { GroupField, RichTextField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
@@ -37,24 +38,11 @@ import {
 let restClient: NextRESTClient
 let user: any
 let payload: Payload
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
 describe('Fields', () => {
   beforeAll(async () => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(configPromise))
-
-    await restClient.login({
-      slug: 'users',
-      credentials: devUser,
-    })
-
-    user = await payload.login({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
   })
 
   afterAll(async () => {
@@ -68,6 +56,14 @@ describe('Fields', () => {
     await restClient.login({
       slug: 'users',
       credentials: devUser,
+    })
+
+    user = await payload.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
     })
   })
 
@@ -603,6 +599,7 @@ describe('Fields', () => {
 
     it('should not throw validation error saving multiple null values for unique fields', async () => {
       const data = {
+        localizedUniqueRequiredText: 'en1',
         text: 'a',
         uniqueRequiredText: 'a',
         // uniqueText omitted on purpose
@@ -614,7 +611,7 @@ describe('Fields', () => {
       data.uniqueRequiredText = 'b'
       const result = await payload.create({
         collection: 'indexed-fields',
-        data,
+        data: { ...data, localizedUniqueRequiredText: 'en2' },
       })
 
       expect(result.id).toBeDefined()
@@ -629,8 +626,8 @@ describe('Fields', () => {
         data,
       })
       const result = await payload.duplicate({
-        collection: 'indexed-fields',
         id: doc.id,
+        collection: 'indexed-fields',
       })
 
       expect(result.id).not.toEqual(doc.id)

@@ -1,4 +1,5 @@
 'use client'
+
 import type { LabelProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -11,7 +12,13 @@ import { useForm } from '../Form/context.js'
 import './index.scss'
 
 const DefaultFieldLabel: React.FC<LabelProps> = (props) => {
-  const { htmlFor: htmlForFromProps, label: labelFromProps, required = false } = props
+  const {
+    as: Element = 'label',
+    htmlFor: htmlForFromProps,
+    label: labelFromProps,
+    required = false,
+    unstyled = false,
+  } = props
 
   const { uuid } = useForm()
   const { path } = useFieldProps()
@@ -21,10 +28,10 @@ const DefaultFieldLabel: React.FC<LabelProps> = (props) => {
 
   if (labelFromProps) {
     return (
-      <label className="field-label" htmlFor={htmlFor}>
+      <Element className={`field-label ${unstyled ? 'unstyled' : ''}`} htmlFor={htmlFor}>
         {getTranslation(labelFromProps, i18n)}
-        {required && <span className="required">*</span>}
-      </label>
+        {required && !unstyled && <span className="required">*</span>}
+      </Element>
     )
   }
 

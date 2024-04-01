@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import { delayNetwork, initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import config from './config.js'
 import { apiKeysSlug, slug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
@@ -105,16 +106,18 @@ describe('auth', () => {
       // assert that the value is set
       const apiKeyLocator = page.locator('#apiKey')
       await expect
-        .poll(async () => await apiKeyLocator.inputValue(), { timeout: 45000 })
+        .poll(async () => await apiKeyLocator.inputValue(), { timeout: POLL_TOPASS_TIMEOUT })
         .toBeDefined()
+
+      const apiKey = await apiKeyLocator.inputValue()
 
       await saveDocAndAssert(page)
 
       await expect(async () => {
-        const apiKey = await apiKeyLocator.inputValue()
-        expect(await page.locator('#apiKey').inputValue()).toStrictEqual(apiKey)
+        const apiKeyAfterSave = await apiKeyLocator.inputValue()
+        expect(apiKey).toStrictEqual(apiKeyAfterSave)
       }).toPass({
-        timeout: 45000,
+        timeout: POLL_TOPASS_TIMEOUT,
       })
     })
 
@@ -140,7 +143,7 @@ describe('auth', () => {
 
         expect(response.user).toBeNull()
       }).toPass({
-        timeout: 45000,
+        timeout: POLL_TOPASS_TIMEOUT,
       })
     })
   })

@@ -32,7 +32,7 @@ import sharp from 'sharp'
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
-    url: 'mongodb://127.0.0.1/payloadtests',
+    url: process.env.DATABASE_URI || 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
     pool: {

@@ -3,6 +3,8 @@ export default {
     account: 'الحساب',
     apiKey: 'مفتاح API',
     enableAPIKey: 'تفعيل مفتاح API',
+    loggedInChangePassword:
+      'لتغيير كلمة المرور الخاصّة بك ، انتقل إلى <0>حسابك</0> وقم بتعديل كلمة المرور هناك.',
     newAccountCreated:
       'تمّ إنشاء حساب جديد لتتمكّن من الوصول إلى <a href="{{serverURL}}"> {{serverURL}} </a> الرّجاء النّقر فوق الرّابط التّالي أو لصق عنوان URL أدناه في متصفّحّك لتأكيد بريدك الإلكتروني : <a href="{{verificationURL}}"> {{verificationURL}} </a> <br> بعد التّحقّق من بريدك الإلكتروني ، ستتمكّن من تسجيل الدّخول بنجاح.',
     resetYourPassword: 'إعادة تعيين كلمة المرور الخاصّة بك',

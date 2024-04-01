@@ -24,6 +24,7 @@ type BlockFieldProps = UseDraggableSortableReturn & {
   block: ReducedBlock
   blocks: ReducedBlock[]
   duplicateRow: (rowIndex: number) => void
+  errorCount: number
   forceRender?: boolean
   hasMaxRows?: boolean
   indexPath: string
@@ -46,6 +47,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   block,
   blocks,
   duplicateRow,
+  errorCount,
   forceRender,
   hasMaxRows,
   labels,
@@ -67,8 +69,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
-  const errorCount = row.errorPaths?.size
-  const fieldHasErrors = errorCount > 0 && hasSubmitted
+  const fieldHasErrors = hasSubmitted && errorCount > 0
 
   const classNames = [
     `${baseClass}__row`,

@@ -3,6 +3,7 @@ import type { ClientValidate } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { CheckboxFieldProps } from './types.js'
@@ -33,6 +34,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
     descriptionProps,
     disableFormData,
     errorProps,
+    label,
     labelProps,
     onChange: onChangeFromProps,
     partialChecked,
@@ -55,9 +57,11 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
     [validate, required],
   )
 
+  const { path: pathFromContext } = useFieldProps()
+
   const { path, setValue, showError, value } = useField({
     disableFormData,
-    path: pathFromProps || name,
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
@@ -90,7 +94,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <FieldError CustomError={CustomError} {...(errorProps || {})} />
+        <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
       </div>
       <CheckboxInput
         AfterInput={AfterInput}
@@ -99,6 +103,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
         checked={checked}
         id={fieldID}
         inputRef={null}
+        label={label}
         labelProps={labelProps}
         name={path}
         onToggle={onToggle}

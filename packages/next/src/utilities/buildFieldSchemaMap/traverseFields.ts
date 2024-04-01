@@ -1,6 +1,5 @@
 import type { Field, SanitizedConfig } from 'payload/types'
 
-import { sanitizeFields } from 'payload/config'
 import { tabHasName } from 'payload/types'
 
 import type { FieldSchemaMap } from './types.js'
@@ -21,16 +20,10 @@ export const traverseFields = ({
   validRelationships,
 }: Args) => {
   fields.map((field) => {
-    let fieldsToSet
     switch (field.type) {
       case 'group':
       case 'array':
-        fieldsToSet = sanitizeFields({
-          config,
-          fields: field.fields,
-          validRelationships,
-        })
-        schemaMap.set(`${schemaPath}.${field.name}`, fieldsToSet)
+        schemaMap.set(`${schemaPath}.${field.name}`, field.fields)
 
         traverseFields({
           config,
@@ -55,12 +48,8 @@ export const traverseFields = ({
       case 'blocks':
         field.blocks.map((block) => {
           const blockSchemaPath = `${schemaPath}.${field.name}.${block.slug}`
-          fieldsToSet = sanitizeFields({
-            config,
-            fields: [...block.fields, { name: 'blockName', type: 'text' }],
-            validRelationships,
-          })
-          schemaMap.set(blockSchemaPath, fieldsToSet)
+
+          schemaMap.set(blockSchemaPath, block.fields)
 
           traverseFields({
             config,
@@ -88,12 +77,7 @@ export const traverseFields = ({
           const tabSchemaPath = tabHasName(tab) ? `${schemaPath}.${tab.name}` : schemaPath
 
           if (tabHasName(tab)) {
-            fieldsToSet = sanitizeFields({
-              config,
-              fields: tab.fields,
-              validRelationships,
-            })
-            schemaMap.set(tabSchemaPath, fieldsToSet)
+            schemaMap.set(tabSchemaPath, tab.fields)
           }
 
           traverseFields({

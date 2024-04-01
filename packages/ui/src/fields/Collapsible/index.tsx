@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentPreferences, RowLabel as RowLabelType } from 'payload/types'
+import type { DocumentPreferences, FieldBase } from 'payload/types'
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
@@ -27,8 +27,8 @@ import type { FormFieldBase } from '../shared/index.js'
 
 export type CollapsibleFieldProps = FormFieldBase & {
   fieldMap: FieldMap
-  indexPath: string
   initCollapsed?: boolean
+  label?: FieldBase['label']
   permissions: FieldPermissions
   width?: string
 }
@@ -45,14 +45,20 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     path: pathFromProps,
   } = props
 
-  const { path: pathFromContext, readOnly, schemaPath, siblingPermissions } = useFieldProps()
-  const path = pathFromProps || pathFromContext
+  const {
+    indexPath,
+    path: pathFromContext,
+    readOnly,
+    schemaPath,
+    siblingPermissions,
+  } = useFieldProps()
+  const path = pathFromContext || pathFromProps
 
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
-  const fieldPreferencesKey = `collapsible-${path.replace(/\./g, '__')}`
+  const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 
@@ -138,6 +144,7 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
           <RenderFields
             fieldMap={fieldMap}
             forceRender
+            indexPath={indexPath}
             margins="small"
             path={path}
             permissions={siblingPermissions}

@@ -1,6 +1,6 @@
 import type { AdminViewComponent, SanitizedConfig } from 'payload/types'
 
-import { pathToRegexp } from 'path-to-regexp'
+import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 export const getCustomViewByRoute = ({
   config,
@@ -23,22 +23,13 @@ export const getCustomViewByRoute = ({
     typeof views === 'object' &&
     Object.entries(views).find(([, view]) => {
       if (typeof view === 'object') {
-        const { exact, path: viewPath, sensitive, strict } = view
-
-        const keys = []
-
-        // run the view path through `pathToRegexp` to resolve any dynamic segments
-        // i.e. `/admin/custom-view/:id` -> `/admin/custom-view/123`
-        const regex = pathToRegexp(viewPath, keys, {
-          sensitive,
-          strict,
+        return isPathMatchingRoute({
+          currentRoute,
+          exact: view.exact,
+          path: view.path,
+          sensitive: view.sensitive,
+          strict: view.strict,
         })
-
-        const match = regex.exec(currentRoute)
-        const viewRoute = match?.[0] || viewPath
-
-        if (exact) return currentRoute === viewRoute
-        if (!exact) return viewRoute.startsWith(currentRoute)
       }
     })?.[1]
 

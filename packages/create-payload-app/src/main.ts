@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
-import commandExists from 'command-exists'
+import { detect } from 'detect-package-manager'
+import path from 'path'
 
 import type { CliArgs, PackageManager } from './types.js'
 
@@ -23,10 +25,14 @@ export class Main {
     this.args = arg(
       {
         '--db': String,
+        '--db-accept-recommended': Boolean,
+        '--db-connection-string': String,
         '--help': Boolean,
+        '--local-template': String,
         '--name': String,
         '--secret': String,
         '--template': String,
+        '--template-branch': String,
 
         // Next.js
         '--init-next': Boolean,
@@ -59,14 +65,25 @@ export class Main {
         process.exit(0)
       }
 
+      const projectName = await parseProjectName(this.args)
+      const projectDir = path.resolve(
+        projectName === '.' || this.args['--init-next']
+          ? path.basename(process.cwd())
+          : `./${slugify(projectName)}`,
+      )
+
+      console.log(welcomeMessage)
+      const packageManager = await getPackageManager(this.args, projectDir)
+
       if (this.args['--init-next']) {
-        const result = await initNext(this.args)
+        const result = await initNext({ ...this.args, packageManager })
         if (!result.success) {
           error(result.reason || 'Failed to initialize Payload app in Next.js project')
         } else {
           success('Payload app successfully initialized in Next.js project')
         }
         process.exit(result.success ? 0 : 1)
+        // TODO: This should continue the normal prompt flow
       }
 
       const templateArg = this.args['--template']
@@ -78,18 +95,13 @@ export class Main {
         }
       }
 
-      console.log(welcomeMessage)
-      const projectName = await parseProjectName(this.args)
       const validTemplates = getValidTemplates()
       const template = await parseTemplate(this.args, validTemplates)
 
-      const projectDir = projectName === '.' ? process.cwd() : `./${slugify(projectName)}`
-      const packageManager = await getPackageManager(this.args)
-
-      if (template.type !== 'plugin') {
-        const dbDetails = await selectDb(this.args, projectName)
-        const payloadSecret = generateSecret()
-        if (!this.args['--dry-run']) {
+      switch (template.type) {
+        case 'starter': {
+          const dbDetails = await selectDb(this.args, projectName)
+          const payloadSecret = generateSecret()
           await createProject({
             cliArgs: this.args,
             dbDetails,
@@ -99,14 +111,15 @@ export class Main {
             template,
           })
           await writeEnvFile({
+            cliArgs: this.args,
             databaseUri: dbDetails.dbUri,
             payloadSecret,
             projectDir,
             template,
           })
+          break
         }
-      } else {
-        if (!this.args['--dry-run']) {
+        case 'plugin': {
           await createProject({
             cliArgs: this.args,
             packageManager,
@@ -114,6 +127,7 @@ export class Main {
             projectName,
             template,
           })
+          break
         }
       }
 
@@ -125,7 +139,7 @@ export class Main {
   }
 }
 
-async function getPackageManager(args: CliArgs): Promise<PackageManager> {
+async function getPackageManager(args: CliArgs, projectDir: string): Promise<PackageManager> {
   let packageManager: PackageManager = 'npm'
 
   if (args['--use-npm']) {
@@ -135,15 +149,8 @@ async function getPackageManager(args: CliArgs): Promise<PackageManager> {
   } else if (args['--use-pnpm']) {
     packageManager = 'pnpm'
   } else {
-    try {
-      if (await commandExists('yarn')) {
-        packageManager = 'yarn'
-      } else if (await commandExists('pnpm')) {
-        packageManager = 'pnpm'
-      }
-    } catch (error: unknown) {
-      packageManager = 'npm'
-    }
+    const detected = await detect({ cwd: projectDir })
+    packageManager = detected || 'npm'
   }
   return packageManager
 }

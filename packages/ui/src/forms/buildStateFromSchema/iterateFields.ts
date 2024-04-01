@@ -7,12 +7,12 @@ import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 import { addFieldStatePromise } from './addFieldStatePromise.js'
 
 type Args = {
+  addErrorPathToParent: (path: string) => void
   /**
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
   data: Data
-  errorPaths: Set<string>
   fields: FieldSchema[]
   filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
@@ -58,9 +58,9 @@ type Args = {
  */
 export const iterateFields = async ({
   id,
+  addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
   data,
-  errorPaths,
   fields,
   filter,
   forceFullValue = false,
@@ -78,7 +78,7 @@ export const iterateFields = async ({
 }: Args): Promise<void> => {
   const promises = []
 
-  fields.forEach((field) => {
+  fields.forEach((field, fieldIndex) => {
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
       let passesCondition = true
       if (!skipConditionChecks) {
@@ -92,10 +92,11 @@ export const iterateFields = async ({
       promises.push(
         addFieldStatePromise({
           id,
+          addErrorPathToParent: addErrorPathToParentArg,
           anyParentLocalized,
           data,
-          errorPaths,
           field,
+          fieldIndex,
           filter,
           forceFullValue,
           fullData,

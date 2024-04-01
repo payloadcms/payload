@@ -1,10 +1,10 @@
-import type { CellComponentProps } from 'payload/types'
+import type { DefaultCellComponentProps } from 'payload/types'
 
 import React from 'react'
 
 import './index.scss'
 
-export interface CodeCellProps extends CellComponentProps<string> {
+export interface CodeCellProps extends DefaultCellComponentProps<string> {
   nowrap?: boolean
 }
 

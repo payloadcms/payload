@@ -9,7 +9,9 @@ import type {
   SelectField,
 } from '../../fields/config/types.js'
 
-export type CellProps = {
+export type RowData = Record<string, any>
+
+export type CellComponentProps = {
   /**
    * A custom component to override the default cell component. If this is not set, the React component will be
    * taken from cellComponents based on the field type.
@@ -32,19 +34,18 @@ export type CellProps = {
   onClick?: (args: {
     cellData: unknown
     collectionSlug: SanitizedCollectionConfig['slug']
-    rowData: Record<string, unknown>
+    rowData: RowData
   }) => void
   options?: SelectField['options']
   relationTo?: RelationshipField['relationTo']
   richTextComponentMap?: Map<string, React.ReactNode> // any should be MappedField
 }
 
-export type CellComponentProps<Data = unknown> = {
-  cellData: Data
+export type DefaultCellComponentProps<T = any> = CellComponentProps & {
+  cellData: T
   customCellContext?: {
     collectionSlug?: SanitizedCollectionConfig['slug']
     uploadConfig?: SanitizedCollectionConfig['upload']
   }
-  richTextComponentMap?: Map<string, React.ReactNode>
-  rowData?: Record<string, unknown>
+  rowData: RowData
 }

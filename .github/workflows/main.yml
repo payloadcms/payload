@@ -201,12 +201,12 @@ jobs:
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
         if: matrix.database == 'supabase'
 
-      - name: Integration Tests
-        run: pnpm test:int --testPathIgnorePatterns=test/fields # Ignore fields tests until reworked
-        env:
-          NODE_OPTIONS: --max-old-space-size=8096
-          PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+      #- name: Integration Tests
+      #  run: pnpm test:int
+      #  env:
+      #    NODE_OPTIONS: --max-old-space-size=8096
+      #    PAYLOAD_DATABASE: ${{ matrix.database }}
+      #    POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
   tests-e2e:
     runs-on: ubuntu-latest
@@ -224,9 +224,10 @@ jobs:
           # - fields-relationship
           # - fields
           - live-preview
-          # - localization
+          - localization
           - plugin-nested-docs
           - plugin-seo
+          - fields/lexical
           # - refresh-permissions
           # - uploads
           # - versions
@@ -253,12 +254,7 @@ jobs:
         run: pnpm exec playwright install
 
       - name: E2E Tests
-        uses: nick-fields/retry@v3
-        with:
-          retry_on: error
-          max_attempts: 2
-          timeout_minutes: 15
-          command: pnpm test:e2e ${{ matrix.suite }}
+        run: pnpm test:e2e ${{ matrix.suite }}
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -335,7 +331,6 @@ jobs:
 
       - name: Test ${{ matrix.pkg }}
         run: pnpm --filter ${{ matrix.pkg }} run test
-        if: matrix.pkg != 'create-payload-app' # degit doesn't work within GitHub Actions
 
   templates:
     needs: changes

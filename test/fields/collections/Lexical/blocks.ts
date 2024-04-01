@@ -16,6 +16,17 @@ export const BlockColumns = ({ name }: { name: string }): ArrayField => ({
       name: 'text',
       type: 'text',
     },
+    {
+      name: 'subArray',
+      type: 'array',
+      fields: [
+        {
+          name: 'requiredText',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
   ],
 })
 export const ConditionalLayoutBlock: Block = {

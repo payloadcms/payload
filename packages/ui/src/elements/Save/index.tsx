@@ -1,16 +1,17 @@
 'use client'
-import type { CustomSaveButtonProps, DefaultSaveButtonProps } from 'payload/types'
 
 import React, { useRef } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
-const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) => {
+export const DefaultSaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+  const { t } = useTranslation()
+  const { submit } = useForm()
+  const label = labelProp || t('general:save')
   const ref = useRef<HTMLButtonElement>(null)
   const editDepth = useEditDepth()
 
@@ -23,29 +24,24 @@ const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) =>
   })
 
   return (
-    <FormSubmit buttonId="action-save" onClick={save} ref={ref} size="small" type="button">
+    <FormSubmit
+      buttonId="action-save"
+      onClick={() => submit()}
+      ref={ref}
+      size="small"
+      type="button"
+    >
       {label}
     </FormSubmit>
   )
 }
 
 type Props = {
-  CustomComponent?: CustomSaveButtonProps
+  CustomComponent?: React.ReactNode
 }
 
 export const Save: React.FC<Props> = ({ CustomComponent }) => {
-  const { t } = useTranslation()
-  const { submit } = useForm()
+  if (CustomComponent) return CustomComponent
 
-  return (
-    <RenderCustomComponent
-      CustomComponent={CustomComponent}
-      DefaultComponent={DefaultSaveButton}
-      componentProps={{
-        DefaultButton: DefaultSaveButton,
-        label: t('general:save'),
-        save: submit,
-      }}
-    />
-  )
+  return <DefaultSaveButton />
 }

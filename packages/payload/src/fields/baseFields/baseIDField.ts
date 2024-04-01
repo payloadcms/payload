@@ -12,10 +12,8 @@ export const baseIDField: Field = {
   name: 'id',
   type: 'text',
   admin: {
-    disabled: true,
+    hidden: true,
   },
-  hooks: {
-    beforeChange: [generateID],
-  },
+  defaultValue: generateID,
   label: 'ID',
 }

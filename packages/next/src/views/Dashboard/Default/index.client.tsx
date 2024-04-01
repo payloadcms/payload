@@ -1,6 +1,7 @@
 'use client'
 import type { EntityToGroup, Group } from '@payloadcms/ui/utilities/groupNavItems'
 import type { Permissions } from 'payload/auth'
+import type { VisibleEntities } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Button } from '@payloadcms/ui/elements/Button'
@@ -19,9 +20,8 @@ const baseClass = 'dashboard'
 export const DefaultDashboardClient: React.FC<{
   Link: React.ComponentType
   permissions: Permissions
-  visibleCollections: string[]
-  visibleGlobals: string[]
-}> = ({ Link, permissions, visibleCollections, visibleGlobals }) => {
+  visibleEntities: VisibleEntities
+}> = ({ Link, permissions, visibleEntities }) => {
   const config = useConfig()
 
   const {
@@ -40,13 +40,13 @@ export const DefaultDashboardClient: React.FC<{
     const collections = collectionsConfig.filter(
       (collection) =>
         permissions?.collections?.[collection.slug]?.read?.permission &&
-        visibleCollections.includes(collection.slug),
+        visibleEntities.collections.includes(collection.slug),
     )
 
     const globals = globalsConfig.filter(
       (global) =>
         permissions?.globals?.[global.slug]?.read?.permission &&
-        visibleGlobals.includes(global.slug),
+        visibleEntities.globals.includes(global.slug),
     )
 
     setGroups(
@@ -73,15 +73,7 @@ export const DefaultDashboardClient: React.FC<{
         i18n,
       ),
     )
-  }, [
-    permissions,
-    user,
-    i18n,
-    visibleCollections,
-    visibleGlobals,
-    collectionsConfig,
-    globalsConfig,
-  ])
+  }, [permissions, user, i18n, visibleEntities, collectionsConfig, globalsConfig])
 
   return (
     <Fragment>

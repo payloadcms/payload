@@ -18,13 +18,14 @@ const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 export type AddFieldStatePromiseArgs = {
+  addErrorPathToParent: (path: string) => void
   /**
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
   data: Data
-  errorPaths: Set<string>
   field: NonPresentationalField
+  fieldIndex: number
   /**
    * You can use this to filter down to only `localized` fields that require translation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
    */
@@ -72,9 +73,9 @@ export type AddFieldStatePromiseArgs = {
 export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Promise<void> => {
   const {
     id,
+    addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
     data,
-    errorPaths: parentErrorPaths,
     field,
     filter,
     forceFullValue = false,
@@ -92,10 +93,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   } = args
 
   if (fieldAffectsData(field)) {
-    const validate = operation === 'update' ? field.validate : undefined
+    const validate = field.validate
 
     const fieldState: FormField = {
-      errorPaths: new Set(),
+      errorPaths: [],
       fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       passesCondition,
@@ -110,7 +111,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       value: data?.[field.name],
     })
 
-    if (data?.[field.name]) {
+    if (typeof data?.[field.name] === 'undefined') {
       data[field.name] = valueWithDefault
     }
 
@@ -139,12 +140,21 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       })
     }
 
+    const addErrorPathToParent = (errorPath: string) => {
+      if (typeof addErrorPathToParentArg === 'function') {
+        addErrorPathToParentArg(errorPath)
+      }
+
+      if (!fieldState.errorPaths.includes(errorPath)) {
+        fieldState.errorPaths.push(errorPath)
+        fieldState.valid = false
+      }
+    }
+
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult
       fieldState.valid = false
-      // TODO: this is unpredictable, need to figure out why
-      // It will sometimes lead to inconsistencies across re-renders
-      parentErrorPaths.add(`${path}${field.name}`)
+      addErrorPathToParent(`${path}${field.name}`)
     } else {
       fieldState.valid = true
     }
@@ -172,9 +182,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             acc.promises.push(
               iterateFields({
                 id,
+                addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
                 data: row,
-                errorPaths: fieldState.errorPaths,
                 fields: field.fields,
                 filter,
                 forceFullValue,
@@ -200,7 +210,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 collapsedRowIDs === undefined
                   ? field.admin.initCollapsed
                   : collapsedRowIDs.includes(row.id),
-              errorPaths: fieldState.errorPaths,
             })
 
             return acc
@@ -285,9 +294,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.promises.push(
                 iterateFields({
                   id,
+                  addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
                   data: row,
-                  errorPaths: fieldState.errorPaths,
                   fields: block.fields,
                   filter,
                   forceFullValue,
@@ -314,7 +323,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   collapsedRowIDs === undefined
                     ? field.admin.initCollapsed
                     : collapsedRowIDs.includes(row.id),
-                errorPaths: fieldState.errorPaths,
               })
             }
 
@@ -354,9 +362,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'group': {
         await iterateFields({
           id,
+          addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
           data: data?.[field.name] || {},
-          errorPaths: parentErrorPaths,
           fields: field.fields,
           filter,
           forceFullValue,
@@ -489,9 +497,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Handle field types that do not use names (row, etc)
     await iterateFields({
       id,
+      // passthrough parent functionality
+      addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: field.localized || anyParentLocalized,
       data,
-      errorPaths: parentErrorPaths,
       fields: field.fields,
       filter,
       forceFullValue,
@@ -511,9 +520,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const promises = field.tabs.map((tab) =>
       iterateFields({
         id,
+        // passthrough parent functionality
+        addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
         data: tabHasName(tab) ? data?.[tab.name] : data,
-        errorPaths: parentErrorPaths,
         fields: tab.fields,
         filter,
         forceFullValue,

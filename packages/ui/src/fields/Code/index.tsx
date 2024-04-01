@@ -5,6 +5,7 @@ import type { CodeField as CodeFieldType, FieldBase } from 'payload/types'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import React, { useCallback } from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
@@ -43,6 +44,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     descriptionProps,
     editorOptions = {},
     errorProps,
+    label,
     labelProps,
     language = 'javascript',
     path: pathFromProps,
@@ -62,8 +64,10 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { setValue, showError, value } = useField({
-    path: pathFromProps || name,
+  const { path: pathFromContext } = useFieldProps()
+
+  const { path, setValue, showError, value } = useField({
+    path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
 
@@ -83,8 +87,13 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
         width,
       }}
     >
-      <FieldError CustomError={CustomError} {...(errorProps || {})} />
-      <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
+      <FieldError CustomError={CustomError} path={path} {...(errorProps || {})} />
+      <FieldLabel
+        CustomLabel={CustomLabel}
+        label={label}
+        required={required}
+        {...(labelProps || {})}
+      />
       <div>
         {BeforeInput}
         <CodeEditor
