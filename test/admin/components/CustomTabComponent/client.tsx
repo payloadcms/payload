@@ -2,7 +2,7 @@
 
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import LinkImport from 'next/link.js'
-import { useParams } from 'next/navigation'
+import { useParams } from 'next/navigation.js'
 import React from 'react'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default

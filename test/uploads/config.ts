@@ -7,7 +7,7 @@ import { devUser } from '../credentials.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import Uploads2 from './collections/Upload2/index.js'
-import AdminThumbnailCol from './collections/admin-thumbnail/index.js'
+import { AdminThumbnailCol } from './collections/admin-thumbnail/index.js'
 import {
   audioSlug,
   enlargeSlug,

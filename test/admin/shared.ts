@@ -21,6 +21,7 @@ export const customEditLabel = 'Custom Edit Label'
 export const customTabLabel = 'Custom Tab Label'
 
 export const customTabViewPath = '/custom-tab-component'
+export const customTabViewTitle = 'Custom View With Tab Component'
 
 export const customTabLabelViewTitle = 'Custom Tab Label View'
 
