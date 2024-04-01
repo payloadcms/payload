@@ -255,6 +255,8 @@ jobs:
 
       - name: E2E Tests
         run: pnpm test:e2e ${{ matrix.suite }}
+        env:
+          NODE_ENV: test
 
       - uses: actions/upload-artifact@v4
         if: always()
