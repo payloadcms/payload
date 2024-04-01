@@ -37,7 +37,6 @@ import {
 } from './shared.js'
 import {
   customIdCollectionId,
-  customIdCollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
   globalSlug,

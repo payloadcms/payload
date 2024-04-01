@@ -1,8 +1,8 @@
+import type { EditViewComponent } from 'payload/types'
+
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
-
-import type { EditViewComponent } from '../../../../../packages/payload/types.js'
 
 export const CustomEditView: EditViewComponent = ({ initPageResult }) => {
   if (!initPageResult) {
