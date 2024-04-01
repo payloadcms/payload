@@ -37,11 +37,10 @@ export default buildConfigWithDefaults({
   plugins: [
     seo({
       collections: ['users'],
-      fields: [],
       tabbedUI: true,
     }),
     seo({
-      collections: ['pages', 'posts'],
+      collections: ['pages'],
       fieldOverrides: {
         title: {
           required: true,
@@ -58,7 +57,6 @@ export default buildConfigWithDefaults({
       generateTitle: (data: any) => `Website.com — ${data?.doc?.title?.value}`,
       generateURL: ({ doc, locale }: any) =>
         `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug?.value || ''}`,
-      globals: ['settings'],
       tabbedUI: true,
       uploadsCollection: 'media',
     }),
