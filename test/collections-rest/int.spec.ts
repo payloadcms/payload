@@ -8,8 +8,7 @@ import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
-import configPromise, {
+import config, {
   customIdNumberSlug,
   customIdSlug,
   errorOnHookSlug,
@@ -23,7 +22,6 @@ let payload: Payload
 
 describe('collections-rest', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
 

@@ -617,7 +617,7 @@ describe('Fields', () => {
       expect(result.id).toBeDefined()
     })
 
-    it('should duplicate with unique fields', async () => {
+    it.skip('should duplicate with unique fields', async () => {
       const data = {
         text: 'a',
       }

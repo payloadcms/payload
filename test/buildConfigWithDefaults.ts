@@ -25,6 +25,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import { MongoMemoryReplSet } from 'mongodb-memory-server'
 // import { slateEditor } from '@payloadcms/richtext-slate'
 import { type Config, buildConfig } from 'payload/config'
 import sharp from 'sharp'
@@ -59,14 +60,27 @@ const databaseAdapters = {
   }),
 }
 
+let mongoMemoryServer = global._mongoMemoryServer
+
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
 ): Promise<SanitizedConfig> {
-  if (process.env.NODE_ENV === 'test') {
-    databaseAdapters.mongoose = mongooseAdapter({
-      mongoMemoryServer: global._mongoMemoryServer,
-      url: process.env.MONGODB_MEMORY_SERVER_URI,
-    })
+  if (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongoose') {
+    if (process.env.JEST_WORKER_ID || process.env.PW_TEST_SOURCE_TRANSFORM) {
+      if (!mongoMemoryServer) {
+        mongoMemoryServer = await MongoMemoryReplSet.create({
+          replSet: {
+            count: 3,
+            dbName: 'payloadmemory',
+          },
+        })
+
+        databaseAdapters.mongoose = mongooseAdapter({
+          mongoMemoryServer,
+          url: mongoMemoryServer.getUri(),
+        })
+      }
+    }
   }
 
   const config: Config = {

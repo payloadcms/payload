@@ -1,5 +1,3 @@
-import type { SanitizedConfig } from 'payload/config'
-
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { createServer } from 'http'
 import nextImport from 'next'
@@ -9,7 +7,6 @@ import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
 import { createTestHooks } from '../testHooks.js'
-import { startMemoryDB } from './startMemoryDB.js'
 
 type Args = {
   dirname: string
@@ -21,10 +18,14 @@ type Result = {
 }
 
 export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
+  // @ts-expect-error
+  process.env.NODE_ENV = 'test'
+  process.env.NODE_OPTIONS = '--no-deprecation'
+  process.env.PAYLOAD_DROP_DATABASE = 'true'
+
   const testSuiteName = dirname.split('/').pop()
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
-  await startMemoryDB()
 
   const { default: config } = await import(path.resolve(dirname, 'config.ts'))
 

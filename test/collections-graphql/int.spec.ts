@@ -8,8 +8,7 @@ import type { Post } from './payload-types.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { startMemoryDB } from '../startMemoryDB.js'
-import configPromise, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
+import config, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const title = 'title'
 
@@ -18,9 +17,8 @@ let payload: Payload
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(config))
 
-    const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
 
