@@ -3,6 +3,8 @@ export default {
     account: 'Account',
     apiKey: 'API-sleutel',
     enableAPIKey: 'Activeer API-sleutel',
+    loggedInChangePassword:
+      'Om uw wachtwoord te wijzigen, gaat u naar <0>account</0> en wijzigt u daar uw wachtwoord.',
     newAccountCreated:
       'Er is zojuist een nieuw account voor u aangemaakt waarmee u toegang krijgt tot <a href="{{serverURL}}">{{serverURL}}</a>. Klik op de volgende link, of plak onderstaande URL in uw browser om uw e-mailadres te verifiëren: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Na de verificatie van uw e-mail kunt u succesvol inloggen.',
     resetYourPassword: 'Reset uw wachtwoord',

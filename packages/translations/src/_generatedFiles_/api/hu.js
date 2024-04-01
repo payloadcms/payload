@@ -3,6 +3,8 @@ export default {
     account: 'Fiók',
     apiKey: 'API-kulcs',
     enableAPIKey: 'API-kulcs engedélyezése',
+    loggedInChangePassword:
+      'Jelszavának megváltoztatásához lépjen be <0>fiókjába</0>, és ott szerkessze jelszavát.',
     newAccountCreated:
       'Létrehoztunk egy új fiókot, amellyel hozzáférhet a következőhöz <a href="{{serverURL}}"> {{serverURL}} </a> Kérjük, kattintson a következő linkre, vagy illessze be az alábbi URL-t a böngészőbe az e-mail-cím ellenőrzéséhez : <a href="{{verificationURL}}"> {{verificationURL}} </a> <br> Az e-mail-cím ellenőrzése után sikeresen be tud majd jelentkezni.',
     resetYourPassword: 'Jelszó visszaállítása',

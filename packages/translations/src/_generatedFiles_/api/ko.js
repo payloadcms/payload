@@ -3,6 +3,8 @@ export default {
     account: '계정',
     apiKey: 'API 키',
     enableAPIKey: 'API 키 활성화',
+    loggedInChangePassword:
+      '비밀번호를 변경하려면 <0>계정 화면</0>으로 이동하여 비밀번호를 편집하세요.',
     newAccountCreated:
       '<a href="{{serverURL}}">{{serverURL}}</a>에 접근할 수 있는 새로운 계정이 생성되었습니다. 다음 링크를 클릭하거나 브라우저에 URL을 붙여넣으세요: <a href="{{verificationURL}}">{{verificationURL}}</a><br> 이메일을 확인한 후에 로그인할 수 있습니다.',
     resetYourPassword: '비밀번호 재설정',
