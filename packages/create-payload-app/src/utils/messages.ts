@@ -1,13 +1,14 @@
+/* eslint-disable no-console */
 import chalk from 'chalk'
-import figures from 'figures'
 import path from 'path'
 import terminalLink from 'terminal-link'
 
 import type { ProjectTemplate } from '../types.js'
+import type { PackageManager } from '../types.js'
 
 import { getValidTemplates } from '../lib/templates.js'
 
-const header = (message: string): string => `${chalk.yellow(figures.star)} ${chalk.bold(message)}`
+const header = (message: string): string => chalk.bold(message)
 
 export const welcomeMessage = chalk`
   {green Welcome to Payload. Let's create a project! }
@@ -15,14 +16,14 @@ export const welcomeMessage = chalk`
 
 const spacer = ' '.repeat(8)
 
-export function helpMessage(): string {
+export function helpMessage(): void {
   const validTemplates = getValidTemplates()
-  return chalk`
+  console.log(chalk`
   {bold USAGE}
 
       {dim $} {bold npx create-payload-app}
       {dim $} {bold npx create-payload-app} my-project
-      {dim $} {bold npx create-payload-app} -n my-project -t blog
+      {dim $} {bold npx create-payload-app} -n my-project -t template-name
 
   {bold OPTIONS}
 
@@ -36,7 +37,7 @@ export function helpMessage(): string {
       --use-pnpm                    Use pnpm to install dependencies
       --no-deps                     Do not install any dependencies
       -h                            Show help
-`
+`)
 }
 
 function formatTemplates(templates: ProjectTemplate[]) {
@@ -45,57 +46,56 @@ function formatTemplates(templates: ProjectTemplate[]) {
     .join(`\n${spacer}`)}`
 }
 
-export function successMessage(projectDir: string, packageManager: string): string {
+export function successMessage(projectDir: string, packageManager: PackageManager): string {
+  const relativePath = path.relative(process.cwd(), projectDir)
   return `
-  ${header('Launch Application:')}
+${header('Launch Application:')}
 
-    - cd ${projectDir}
-    - ${
-      packageManager === 'yarn' ? 'yarn' : 'npm run'
-    } dev or follow directions in ${createTerminalLink(
-      'README.md',
-      `file://${path.resolve(projectDir, 'README.md')}`,
-    )}
+  - cd ./${relativePath}
+  - ${
+    packageManager === 'npm' ? 'npm run' : packageManager
+  } dev or follow directions in ${createTerminalLink(
+    'README.md',
+    `file://${path.resolve(projectDir, 'README.md')}`,
+  )}
 
-  ${header('Documentation:')}
+${header('Documentation:')}
 
-    - ${createTerminalLink(
-      'Getting Started',
-      'https://payloadcms.com/docs/getting-started/what-is-payload',
-    )}
-    - ${createTerminalLink('Configuration', 'https://payloadcms.com/docs/configuration/overview')}
+  - ${createTerminalLink(
+    'Getting Started',
+    'https://payloadcms.com/docs/getting-started/what-is-payload',
+  )}
+  - ${createTerminalLink('Configuration', 'https://payloadcms.com/docs/configuration/overview')}
 
 `
 }
 
 export function successfulNextInit(): string {
-  return `
-  ${header('Successful Payload Installation!')}
-
-  ${header('Documentation:')}
-
-    - ${createTerminalLink(
-      'Getting Started',
-      'https://payloadcms.com/docs/getting-started/what-is-payload',
-    )}
-    - ${createTerminalLink('Configuration', 'https://payloadcms.com/docs/configuration/overview')}
+  return `- ${createTerminalLink(
+    'Getting Started',
+    'https://payloadcms.com/docs/getting-started/what-is-payload',
+  )}
+- ${createTerminalLink('Configuration', 'https://payloadcms.com/docs/configuration/overview')}
 `
 }
 
 export function moveMessage(args: { nextAppDir: string; projectDir: string }): string {
+  const relativePath = path.relative(process.cwd(), args.nextAppDir)
   return `
-  ${header('Next Steps:')}
+${header('Next Steps:')}
 
-  Payload does not support a top-level layout.tsx file in your Next.js app directory.
+Payload does not support a top-level layout.tsx file in your Next.js app directory.
 
-  ${chalk.bold('To continue:')}
+${chalk.bold('To continue:')}
 
-    - Move all files from ${args.nextAppDir} to a top-level directory named ${chalk.bold(
-      '(app)',
-    )} or similar.
+Move all files from ./${relativePath} to a named directory such as ${chalk.bold('(app)')}
 
-    Once moved, rerun the create-payload-app command again.
+Once moved, rerun the create-payload-app command again.
 `
+}
+
+export function feedbackOutro(): string {
+  return `${chalk.bgCyan(chalk.black(' Have feedback? '))} Visit ${createTerminalLink('GitHub', 'https://github.com/payloadcms/payload')}`
 }
 
 // Create terminalLink with fallback for unsupported terminals

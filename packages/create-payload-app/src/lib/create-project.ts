@@ -1,15 +1,14 @@
+import * as p from '@clack/prompts'
 import chalk from 'chalk'
 import degit from 'degit'
 import execa from 'execa'
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
-import ora from 'ora'
 import path from 'path'
 
 import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../types.js'
 
-import { log } from '../utils/log.js'
-import { debug, error, success, warning } from '../utils/log.js'
+import { debug, error, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -61,13 +60,11 @@ export async function createProject(args: {
   const { cliArgs, dbDetails, packageManager, projectDir, projectName, template } = args
 
   if (cliArgs['--dry-run']) {
-    log(`\n  Dry run: Creating project in ${chalk.green(projectDir)}\n`)
+    debug(`Dry run: Creating project in ${chalk.green(projectDir)}`)
     return
   }
 
   await createOrFindProjectDir(projectDir)
-
-  log(`\n  Creating project in ${chalk.green(projectDir)}\n`)
 
   if (cliArgs['--local-template']) {
     // Copy template from local path. For development purposes.
@@ -87,9 +84,11 @@ export async function createProject(args: {
     await emitter.clone(projectDir)
   }
 
-  const spinner = ora('Checking latest Payload version...').start()
+  const spinner = p.spinner()
+  spinner.start('Checking latest Payload version...')
 
   await updatePackageJSON({ projectDir, projectName })
+  spinner.message('Configuring Payload...')
   await configurePayloadConfig({ dbDetails, projectDirOrConfigPath: { projectDir } })
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
@@ -99,18 +98,16 @@ export async function createProject(args: {
   }
 
   if (!cliArgs['--no-deps']) {
-    spinner.text = 'Installing dependencies...'
+    spinner.message('Installing dependencies...')
     const result = await installDeps({ cliArgs, packageManager, projectDir })
     spinner.stop()
-    spinner.clear()
     if (result) {
-      success('Dependencies installed')
+      spinner.stop('Dependencies installed')
     } else {
-      error('Error installing dependencies')
+      spinner.stop('Error installing dependencies', 1)
     }
   } else {
-    spinner.stop()
-    spinner.clear()
+    spinner.stop('Dependency installation skipped')
   }
 }
 

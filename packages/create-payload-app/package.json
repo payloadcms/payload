@@ -21,6 +21,7 @@
     "bin"
   ],
   "dependencies": {
+    "@clack/prompts": "^0.7.0",
     "@sindresorhus/slugify": "^1.1.0",
     "arg": "^5.0.0",
     "chalk": "^4.1.0",
@@ -33,9 +34,6 @@
     "figures": "^3.2.0",
     "fs-extra": "^9.0.1",
     "globby": "11.1.0",
-    "handlebars": "^4.7.7",
-    "ora": "^5.1.0",
-    "prompts": "^2.4.2",
     "terminal-link": "^2.1.1"
   },
   "devDependencies": {
@@ -44,8 +42,7 @@
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.3",
-    "@types/node": "^16.6.2",
-    "@types/prompts": "^2.4.1"
+    "@types/node": "^16.6.2"
   },
   "exports": {
     "./commands": {

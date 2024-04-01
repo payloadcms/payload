@@ -1,5 +1,7 @@
+import * as p from '@clack/prompts'
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
+import chalk from 'chalk'
 import { detect } from 'detect-package-manager'
 import globby from 'globby'
 import path from 'path'
@@ -15,13 +17,8 @@ import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { writeEnvFile } from './lib/write-env-file.js'
-import { error, log, success } from './utils/log.js'
-import {
-  helpMessage,
-  successMessage,
-  successfulNextInit,
-  welcomeMessage,
-} from './utils/messages.js'
+import { error, info } from './utils/log.js'
+import { feedbackOutro, helpMessage, successMessage, successfulNextInit } from './utils/messages.js'
 
 export class Main {
   args: CliArgs
@@ -73,20 +70,19 @@ export class Main {
 
     try {
       if (this.args['--help']) {
-        log(helpMessage())
+        helpMessage()
         process.exit(0)
       }
-      log(welcomeMessage)
 
-      // Detect if inside Next.js project
+      // eslint-disable-next-line no-console
+      console.log('\n')
+      p.intro(chalk.bgCyan(chalk.black(' create-payload-app ')))
+      p.log.message("Welcome to Payload. Let's create a project!")
+      // Detect if inside Next.js projeckpt
       const nextConfigPath = (
         await globby('next.config.*js', { absolute: true, cwd: process.cwd() })
       )?.[0]
       initContext.nextConfigPath = nextConfigPath
-
-      success('Next.js app detected.')
-
-      // TODO: Prompt to continue
 
       if (initContext.nextConfigPath) {
         this.args['--name'] = slugify(path.basename(path.dirname(initContext.nextConfigPath)))
@@ -100,20 +96,30 @@ export class Main {
       const packageManager = await getPackageManager(this.args, projectDir)
 
       if (nextConfigPath) {
+        // p.note('Detected existing Next.js project.')
+        p.log.step(chalk.bold('Detected existing Next.js project.'))
+        const proceed = await p.confirm({
+          initialValue: true,
+          message: 'Install Payload in this project?',
+        })
+        if (p.isCancel(proceed) || !proceed) {
+          process.exit(0)
+        }
+
+        const dbDetails = await selectDb(this.args, projectName)
+
         const result = await initNext({
           ...this.args,
+          dbType: dbDetails.type,
           nextConfigPath,
           packageManager,
           projectDir,
         })
+
         if (result.success === false) {
-          error(result.reason)
           process.exit(1)
-        } else {
-          success('Payload app successfully initialized in Next.js project')
         }
 
-        const dbDetails = await selectDb(this.args, projectName)
         await configurePayloadConfig({
           dbDetails,
           projectDirOrConfigPath: {
@@ -121,9 +127,9 @@ export class Main {
           },
         })
 
-        // TODO: This should continue the normal prompt flow
-        success('Payload project successfully created')
-        log(successfulNextInit())
+        info('Payload project successfully created!')
+        p.note(successfulNextInit(), chalk.bgGreen(chalk.black(' Documentation ')))
+        p.outro(feedbackOutro())
         return
       }
 
@@ -131,13 +137,17 @@ export class Main {
       if (templateArg) {
         const valid = validateTemplate(templateArg)
         if (!valid) {
-          log(helpMessage())
+          helpMessage()
           process.exit(1)
         }
       }
 
       const validTemplates = getValidTemplates()
       const template = await parseTemplate(this.args, validTemplates)
+      if (!template) {
+        p.log.error('Invalid template given')
+        process.exit(1)
+      }
 
       switch (template.type) {
         case 'starter': {
@@ -172,8 +182,9 @@ export class Main {
         }
       }
 
-      success('Payload project successfully created')
-      log(successMessage(projectDir, packageManager))
+      info('Payload project successfully created!')
+      p.note(successMessage(projectDir, packageManager), chalk.bgGreen(chalk.black(' Next Steps ')))
+      p.outro(feedbackOutro())
     } catch (err: unknown) {
       error(err instanceof Error ? err.message : 'An error occurred')
     }

@@ -1,5 +1,6 @@
 import type { CompilerOptions } from 'typescript'
 
+import * as p from '@clack/prompts'
 import { parse, stringify } from 'comment-json'
 import execa from 'execa'
 import fs from 'fs'
@@ -7,7 +8,6 @@ import globby from 'globby'
 import path from 'path'
 import { promisify } from 'util'
 
-import { log } from '../utils/log.js'
 const readFile = promisify(fs.readFile)
 const writeFile = promisify(fs.writeFile)
 
@@ -16,14 +16,15 @@ const dirname = path.dirname(filename)
 
 import { fileURLToPath } from 'node:url'
 
-import type { CliArgs, PackageManager } from '../types.js'
+import type { CliArgs, DbType, PackageManager } from '../types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
-import { error, info, debug as origDebug, success, warning } from '../utils/log.js'
+import { debug as origDebug, warning } from '../utils/log.js'
 import { moveMessage } from '../utils/messages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
 
 type InitNextArgs = Pick<CliArgs, '--debug'> & {
+  dbType: DbType
   nextConfigPath: string
   packageManager: PackageManager
   projectDir: string
@@ -40,7 +41,7 @@ type InitNextResult =
   | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
 
 export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
-  const { packageManager, projectDir } = args
+  const { dbType: dbType, packageManager, projectDir } = args
 
   const isSrcDir = fs.existsSync(path.resolve(projectDir, 'src'))
 
@@ -61,7 +62,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   const layoutPath = path.resolve(nextAppDir, 'layout.tsx')
   if (fs.existsSync(layoutPath)) {
     // Output directions for user to move all files from app to top-level directory named `(app)`
-    log(moveMessage({ nextAppDir, projectDir }))
+    p.log.warn(moveMessage({ nextAppDir, projectDir }))
     return {
       isSrcDir,
       nextAppDir,
@@ -69,6 +70,9 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
       success: false,
     }
   }
+
+  const installSpinner = p.spinner()
+  installSpinner.start('Installing Payload and dependencies...')
 
   const configurationResult = installAndConfigurePayload({
     ...args,
@@ -78,11 +82,13 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   })
 
   if (configurationResult.success === false) {
+    installSpinner.stop(configurationResult.reason, 1)
     return { ...configurationResult, isSrcDir, success: false }
   }
 
-  const { success: installSuccess } = await installDeps(projectDir, packageManager)
+  const { success: installSuccess } = await installDeps(projectDir, packageManager, dbType)
   if (!installSuccess) {
+    installSpinner.stop('Failed to install dependencies', 1)
     return {
       ...configurationResult,
       isSrcDir,
@@ -93,7 +99,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
 
   // Add `@payload-config` to tsconfig.json `paths`
   await addPayloadConfigToTsConfig(projectDir, isSrcDir)
-
+  installSpinner.stop('Successfully installed Payload and dependencies')
   return { ...configurationResult, isSrcDir, nextAppDir, success: true }
 }
 
@@ -119,13 +125,14 @@ async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean)
 }
 
 function installAndConfigurePayload(
-  args: InitNextArgs & { isSrcDir: boolean; nextAppDir: string },
+  args: InitNextArgs & {
+    isSrcDir: boolean
+    nextAppDir: string
+  },
 ):
   | { payloadConfigPath: string; success: true }
   | { payloadConfigPath?: string; reason: string; success: false } {
   const { '--debug': debug, isSrcDir, nextAppDir, nextConfigPath, projectDir, useDistFiles } = args
-
-  info('Initializing Payload app in Next.js project', 1)
 
   const logDebug = (message: string) => {
     if (debug) origDebug(message)
@@ -174,21 +181,18 @@ function installAndConfigurePayload(
   // Wrap next.config.js with withPayload
   wrapNextConfig({ nextConfigPath })
 
-  success('Successfully initialized.')
   return {
     payloadConfigPath: path.resolve(nextAppDir, '../payload.config.ts'),
     success: true,
   }
 }
 
-async function installDeps(projectDir: string, packageManager: PackageManager) {
-  info(`Installing dependencies with ${packageManager}`, 1)
-  const packagesToInstall = [
-    'payload',
-    '@payloadcms/db-mongodb',
-    '@payloadcms/next',
-    '@payloadcms/richtext-lexical',
-  ].map((pkg) => `${pkg}@alpha`)
+async function installDeps(projectDir: string, packageManager: PackageManager, dbType: DbType) {
+  const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
+    (pkg) => `${pkg}@alpha`,
+  )
+
+  packagesToInstall.push(`@payloadcms/db-${dbType}@alpha`)
 
   let exitCode = 0
   switch (packageManager) {
@@ -212,10 +216,5 @@ async function installDeps(projectDir: string, packageManager: PackageManager) {
     }
   }
 
-  if (exitCode !== 0) {
-    error(`Failed to install dependencies with ${packageManager}`)
-  } else {
-    success(`Successfully installed dependencies`)
-  }
   return { success: exitCode === 0 }
 }

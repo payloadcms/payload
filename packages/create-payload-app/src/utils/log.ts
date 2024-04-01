@@ -1,34 +1,23 @@
 /* eslint-disable no-console */
+import * as p from '@clack/prompts'
 import chalk from 'chalk'
-import figures from 'figures'
-
-export const success = (message: string): void => {
-  console.log(`${chalk.green(figures.tick)} ${chalk.bold(message)}`)
-}
 
 export const warning = (message: string): void => {
-  console.log(chalk.yellow('? ') + chalk.bold(message))
+  p.log.warn(chalk.yellow('? ') + chalk.bold(message))
 }
 
-export const info = (message: string, paddingTop?: number): void => {
-  console.log(
-    `${'\n'.repeat(paddingTop || 0)}${chalk.green(figures.pointerSmall)} ${chalk.bold(message)}`,
-  )
+export const info = (message: string): void => {
+  p.log.step(chalk.bold(message))
 }
 
 export const error = (message: string): void => {
-  console.log(`${chalk.red(figures.cross)} ${chalk.bold(message)}`)
+  p.log.error(chalk.bold(message))
 }
 
 export const debug = (message: string): void => {
-  console.log(
-    `${chalk.gray(figures.pointerSmall)} ${chalk.bgGray('[DEBUG]')} ${chalk.gray(message)}`,
-  )
+  p.log.step(`${chalk.bgGray('[DEBUG]')} ${chalk.gray(message)}`)
 }
 
-/**
- * console.log passthrough
- */
 export const log = (message: string): void => {
-  console.log(message)
+  p.log.message(message)
 }
