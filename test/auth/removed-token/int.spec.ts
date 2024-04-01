@@ -4,15 +4,13 @@ import { getPayload } from 'payload'
 
 import { devUser } from '../../credentials.js'
 import { NextRESTClient } from '../../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../../startMemoryDB.js'
-import configPromise, { collectionSlug } from './config.js'
+import config, { collectionSlug } from './config.js'
 
 let restClient: NextRESTClient
 let payload: Payload
 
 describe('Remove token from auth responses', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
 

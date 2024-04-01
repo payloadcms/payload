@@ -77,8 +77,6 @@ export async function buildConfigWithDefaults(
 
         const url = mongoMemoryServer.getUri()
 
-        console.log({ url })
-
         databaseAdapters.mongodb = mongooseAdapter({
           mongoMemoryServer,
           url,

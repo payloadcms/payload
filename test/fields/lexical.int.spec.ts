@@ -14,7 +14,6 @@ import type { LexicalField, LexicalMigrateField, RichTextField } from './payload
 
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
@@ -22,7 +21,7 @@ import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
 import { textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
-import configPromise from './config.js'
+import config from './config.js'
 import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
@@ -45,7 +44,6 @@ let createdRichTextDocID: number | string = null
 describe('Lexical', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
   })
 

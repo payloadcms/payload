@@ -3,8 +3,7 @@ import type { Payload } from 'payload'
 import { getPayload } from 'payload'
 
 import { NextRESTClient } from '../../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../../startMemoryDB.js'
-import configPromise from './config.js'
+import config from './config.js'
 import { usersSlug } from './shared.js'
 
 let payload: Payload
@@ -18,7 +17,6 @@ const headers = {
 
 describe('AuthStrategies', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
     payload = await getPayload({ config })
     restClient = new NextRESTClient(payload.config)
   })
