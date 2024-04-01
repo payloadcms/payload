@@ -65,6 +65,13 @@ let mongoMemoryServer = global._mongoMemoryServer
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
 ): Promise<SanitizedConfig> {
+  console.log({
+    mongoMemoryServer,
+    payloadDatabase: process.env.PAYLOAD_DATABASE,
+    jestWorkerID: process.env.JEST_WORKER_ID,
+    pwTestSourceTransform: process.env.PW_TEST_SOURCE_TRANSFORM,
+  })
+
   if (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongoose') {
     if (process.env.JEST_WORKER_ID || process.env.PW_TEST_SOURCE_TRANSFORM) {
       if (!mongoMemoryServer) {
@@ -75,9 +82,13 @@ export async function buildConfigWithDefaults(
           },
         })
 
+        const url = mongoMemoryServer.getUri()
+
+        console.log({ url })
+
         databaseAdapters.mongoose = mongooseAdapter({
           mongoMemoryServer,
-          url: mongoMemoryServer.getUri(),
+          url,
         })
       }
     }
