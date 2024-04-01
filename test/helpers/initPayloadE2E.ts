@@ -12,7 +12,6 @@ import { createTestHooks } from '../testHooks.js'
 import { startMemoryDB } from './startMemoryDB.js'
 
 type Args = {
-  config: Promise<SanitizedConfig>
   dirname: string
 }
 
@@ -21,11 +20,13 @@ type Result = {
   serverURL: string
 }
 
-export async function initPayloadE2E({ config, dirname }: Args): Promise<Result> {
+export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   const testSuiteName = dirname.split('/').pop()
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
   await startMemoryDB()
+
+  const { default: config } = await import(path.resolve(dirname, 'config.ts'))
 
   const payload = await getPayloadHMR({ config })
 
