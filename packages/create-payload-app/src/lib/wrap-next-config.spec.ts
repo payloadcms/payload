@@ -1,4 +1,5 @@
 import { parseAndModifyConfigContent, withPayloadImportStatement } from './wrap-next-config.js'
+import * as p from '@clack/prompts'
 
 const defaultNextConfig = `/** @type {import('next').NextConfig} */
 const nextConfig = {};
@@ -47,7 +48,7 @@ describe('parseAndInsertWithPayload', () => {
 
   // Unsupported: export { wrapped as default }
   it('should give warning with a named export as default', () => {
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const warnLogSpy = jest.spyOn(p.log, 'warn').mockImplementation(() => {})
 
     const { modifiedConfigContent, success } = parseAndModifyConfigContent(
       nextConfigExportNamedDefault,
@@ -55,8 +56,6 @@ describe('parseAndInsertWithPayload', () => {
     expect(modifiedConfigContent).toContain(withPayloadImportStatement)
     expect(success).toBe(false)
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Could not automatically wrap'),
-    )
+    expect(warnLogSpy).toHaveBeenCalledWith(expect.stringContaining('Could not automatically wrap'))
   })
 })

@@ -67,6 +67,7 @@ describe('create-payload-app', () => {
         '--debug': true,
         projectDir,
         nextConfigPath: path.resolve(projectDir, 'next.config.mjs'),
+        dbType: 'mongodb',
         useDistFiles: true, // create-payload-app/dist/app/(payload)
         packageManager: 'pnpm',
       })
@@ -91,6 +92,7 @@ describe('create-payload-app', () => {
         '--debug': true,
         projectDir,
         nextConfigPath: path.resolve(projectDir, 'next.config.mjs'),
+        dbType: 'mongodb',
         useDistFiles: true, // create-payload-app/dist/app/(payload)
         packageManager: 'pnpm',
       })
