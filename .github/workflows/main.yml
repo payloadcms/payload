@@ -202,11 +202,11 @@ jobs:
         if: matrix.database == 'supabase'
 
       - name: Integration Tests
-       run: pnpm test:int
-       env:
-         NODE_OPTIONS: --max-old-space-size=8096
-         PAYLOAD_DATABASE: ${{ matrix.database }}
-         POSTGRES_URL: ${{ env.POSTGRES_URL }}
+        run: pnpm test:int
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
   tests-e2e:
     runs-on: ubuntu-latest
