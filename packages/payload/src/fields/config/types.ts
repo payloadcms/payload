@@ -524,7 +524,12 @@ export type RichTextField<
   AdapterProps = any,
   ExtraProperties = {},
 > = FieldBase & {
-  admin?: Admin
+  admin?: Admin & {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+    }
+  }
   editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
   type: 'richText'
 } & ExtraProperties
@@ -563,6 +568,8 @@ export type RadioField = FieldBase & {
 }
 
 export type Block = {
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>
   fields: Field[]
   /** @deprecated - please migrate to the interfaceName property instead. */
   graphQL?: {
@@ -579,8 +586,6 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
-  /** Extension point to add your custom data. */
-  custom?: Record<string, any>
 }
 
 export type BlockField = FieldBase & {
