@@ -360,6 +360,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       case 'group': {
+        state[`${path}${field.name}`] = fieldState
+
         await iterateFields({
           id,
           addErrorPathToParent,
