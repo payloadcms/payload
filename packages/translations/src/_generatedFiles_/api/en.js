@@ -3,6 +3,8 @@ export default {
     account: 'Account',
     apiKey: 'API Key',
     enableAPIKey: 'Enable API Key',
+    loggedInChangePassword:
+      'To change your password, go to your <0>account</0> and edit your password there.',
     newAccountCreated:
       'A new account has just been created for you to access <a href="{{serverURL}}">{{serverURL}}</a> Please click on the following link or paste the URL below into your browser to verify your email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> After verifying your email, you will be able to log in successfully.',
     resetYourPassword: 'Reset Your Password',
