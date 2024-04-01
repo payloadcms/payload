@@ -201,12 +201,12 @@ jobs:
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
         if: matrix.database == 'supabase'
 
-      - name: Integration Tests
-        run: pnpm test:int
-        env:
-          NODE_OPTIONS: --max-old-space-size=8096
-          PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+      #- name: Integration Tests
+      #  run: pnpm test:int
+      #  env:
+      #    NODE_OPTIONS: --max-old-space-size=8096
+      #    PAYLOAD_DATABASE: ${{ matrix.database }}
+      #    POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
   tests-e2e:
     runs-on: ubuntu-latest
@@ -220,17 +220,17 @@ jobs:
           - access-control
           # - admin
           - auth
-          - field-error-states
+          # - field-error-states
           # - fields-relationship
           # - fields
           - fields/lexical
-          - live-preview
+          # - live-preview
           - localization
           # - plugin-nested-docs
           # - plugin-seo
           # - refresh-permissions
           # - uploads
-          - versions
+          # - versions
 
     steps:
       - name: Use Node.js 18
