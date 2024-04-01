@@ -8,7 +8,7 @@ export default async () => {
   process.env.NODE_OPTIONS = '--no-deprecation'
 
   if (
-    (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongoose') &&
+    (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') &&
     !global._mongoMemoryServer
   ) {
     global._mongoMemoryServer = await MongoMemoryReplSet.create({

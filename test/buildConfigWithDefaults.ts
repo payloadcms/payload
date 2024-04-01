@@ -32,7 +32,7 @@ import sharp from 'sharp'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
 const databaseAdapters = {
-  mongoose: mongooseAdapter({
+  mongodb: mongooseAdapter({
     url: process.env.DATABASE_URI || 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
@@ -65,14 +65,13 @@ let mongoMemoryServer = global._mongoMemoryServer
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
 ): Promise<SanitizedConfig> {
-  console.log({
-    mongoMemoryServer,
-    payloadDatabase: process.env.PAYLOAD_DATABASE,
-    jestWorkerID: process.env.JEST_WORKER_ID,
-    pwTestSourceTransform: process.env.PW_TEST_SOURCE_TRANSFORM,
+  Object.entries(process.env).forEach(([key, val]) => {
+    if (key.startsWith('PW')) {
+      console.log({ key, val })
+    }
   })
 
-  if (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongoose') {
+  if (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') {
     if (process.env.JEST_WORKER_ID || process.env.PW_TEST_SOURCE_TRANSFORM) {
       if (!mongoMemoryServer) {
         mongoMemoryServer = await MongoMemoryReplSet.create({
@@ -86,7 +85,7 @@ export async function buildConfigWithDefaults(
 
         console.log({ url })
 
-        databaseAdapters.mongoose = mongooseAdapter({
+        databaseAdapters.mongodb = mongooseAdapter({
           mongoMemoryServer,
           url,
         })
@@ -95,7 +94,7 @@ export async function buildConfigWithDefaults(
   }
 
   const config: Config = {
-    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
+    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
     secret: 'TEST_SECRET',
     //editor: slateEditor({}),
     // editor: slateEditor({

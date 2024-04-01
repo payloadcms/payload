@@ -980,7 +980,7 @@ describe('collections-rest', () => {
         })
       })
 
-      if (['mongoose'].includes(process.env.PAYLOAD_DATABASE)) {
+      if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
         describe('near', () => {
           const point = [10, 20]
           const [lat, lng] = point
