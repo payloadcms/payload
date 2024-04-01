@@ -13,7 +13,6 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
 import { adminThumbnailSrc } from './collections/admin-thumbnail/RegisterThumbnailFn.js'
-import config from './config.js'
 import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -35,7 +34,7 @@ describe('uploads', () => {
   let audioDoc: Media
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
