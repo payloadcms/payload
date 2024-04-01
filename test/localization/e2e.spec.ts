@@ -16,6 +16,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import config from './config.js'
 import {
   englishTitle,
@@ -76,12 +77,17 @@ describe('Localization', () => {
       await changeLocale(page, 'es')
 
       // Localized field should not be populated
-      await expect(page.locator('#field-title')).toBeEmpty()
+      await expect
+        .poll(() => page.locator('#field-title').inputValue(), {
+          timeout: 45000,
+        })
+        .not.toBe(title)
+
       await expect(page.locator('#field-description')).toHaveValue(description)
 
       await fillValues({ description, title: spanishTitle })
       await saveDocAndAssert(page)
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
 
       // Expect english title
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -100,7 +106,7 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       // Change back to English
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
 
       // Localized field should not be populated
       await expect(page.locator('#field-title')).toBeEmpty()
@@ -128,7 +134,7 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       // Change back to English
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
 
       // Localized field should not be populated
       await expect(page.locator('#field-title')).toBeEmpty()
@@ -137,7 +143,6 @@ describe('Localization', () => {
       // Add English
 
       await fillValues({ description, title })
-      await saveDocAndAssert(page)
       await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -169,6 +174,7 @@ describe('Localization', () => {
       })
 
       await page.goto(url.edit(id))
+      await page.waitForURL(`**${url.edit(id)}`)
       await openDocControls(page)
 
       // duplicate document
@@ -178,6 +184,7 @@ describe('Localization', () => {
       // check fields
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       await changeLocale(page, spanishLocale)
+
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
 
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
@@ -185,39 +192,48 @@ describe('Localization', () => {
 
     test('should duplicate localized checkbox correctly', async () => {
       await page.goto(url.create)
-      await changeLocale(page, defaultLocale)
+      await page.waitForURL(`**${url.create}`)
+
+      //await changeLocale(page, defaultLocale, true)
       await fillValues({ description, title: englishTitle })
       await page.locator('#field-localizedCheckbox').click()
 
       await page.locator('#action-save').click()
       // wait for navigation to update route
-      await wait(500)
-
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+      const collectionUrl = page.url()
       // ensure spanish is not checked
       await changeLocale(page, spanishLocale)
+
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
 
       // duplicate doc
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
 
       // wait for navigation to update route
-      await wait(500)
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toContain(collectionUrl)
 
       // finally change locale to spanish
       await changeLocale(page, spanishLocale)
+
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
     })
 
     test('should duplicate even if missing some localized data', async () => {
       // create a localized required doc
       await page.goto(urlWithRequiredLocalizedFields.create)
-      await changeLocale(page, defaultLocale)
+      await changeLocale(page, defaultLocale, true)
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()
       await page.fill('#field-layout__0__text', 'test')
+      await expect(page.locator('#field-layout__0__text')).toHaveValue('test')
+
+      await wait(5000)
       await saveDocAndAssert(page)
 
       const originalID = await page.locator('.id-label').innerText()

@@ -1,13 +1,13 @@
 import type { CompilerOptions } from 'typescript'
 
-import chalk from 'chalk'
+import * as p from '@clack/prompts'
 import { parse, stringify } from 'comment-json'
 import execa from 'execa'
 import fs from 'fs'
-import fse from 'fs-extra'
 import globby from 'globby'
 import path from 'path'
 import { promisify } from 'util'
+
 const readFile = promisify(fs.readFile)
 const writeFile = promisify(fs.writeFile)
 
@@ -16,58 +16,94 @@ const dirname = path.dirname(filename)
 
 import { fileURLToPath } from 'node:url'
 
-import type { CliArgs, PackageManager } from '../types.js'
+import type { CliArgs, DbType, PackageManager } from '../types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
-import { error, info, debug as origDebug, success, warning } from '../utils/log.js'
+import { debug as origDebug, warning } from '../utils/log.js'
+import { moveMessage } from '../utils/messages.js'
+import { wrapNextConfig } from './wrap-next-config.js'
 
 type InitNextArgs = Pick<CliArgs, '--debug'> & {
+  dbType: DbType
+  nextConfigPath: string
   packageManager: PackageManager
-  projectDir?: string
+  projectDir: string
   useDistFiles?: boolean
 }
-type InitNextResult = { reason?: string; success: boolean; userAppDir?: string }
+
+type InitNextResult =
+  | {
+      isSrcDir: boolean
+      nextAppDir: string
+      payloadConfigPath: string
+      success: true
+    }
+  | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
 
 export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
-  const { packageManager, projectDir } = args
-  const templateResult = await applyPayloadTemplateFiles(args)
-  if (!templateResult.success) return templateResult
+  const { dbType: dbType, packageManager, projectDir } = args
 
-  const { success: installSuccess } = await installDeps(projectDir, packageManager)
-  if (!installSuccess) {
-    return { ...templateResult, reason: 'Failed to install dependencies', success: false }
+  const isSrcDir = fs.existsSync(path.resolve(projectDir, 'src'))
+
+  // Get app directory. Could be top-level or src/app
+  const nextAppDir = (
+    await globby(['**/app'], {
+      absolute: true,
+      cwd: projectDir,
+      onlyDirectories: true,
+    })
+  )?.[0]
+
+  if (!nextAppDir) {
+    return { isSrcDir, reason: `Could not find app directory in ${projectDir}`, success: false }
   }
 
-  // Create or find payload.config.ts
-  const createConfigResult = findOrCreatePayloadConfig(projectDir)
-  if (!createConfigResult.success) {
-    return { ...templateResult, ...createConfigResult }
+  // Check for top-level layout.tsx
+  const layoutPath = path.resolve(nextAppDir, 'layout.tsx')
+  if (fs.existsSync(layoutPath)) {
+    // Output directions for user to move all files from app to top-level directory named `(app)`
+    p.log.warn(moveMessage({ nextAppDir, projectDir }))
+    return {
+      isSrcDir,
+      nextAppDir,
+      reason: 'Found existing layout.tsx in app directory',
+      success: false,
+    }
+  }
+
+  const installSpinner = p.spinner()
+  installSpinner.start('Installing Payload and dependencies...')
+
+  const configurationResult = installAndConfigurePayload({
+    ...args,
+    isSrcDir,
+    nextAppDir,
+    useDistFiles: true, // Requires running 'pnpm pack-template-files' in cpa
+  })
+
+  if (configurationResult.success === false) {
+    installSpinner.stop(configurationResult.reason, 1)
+    return { ...configurationResult, isSrcDir, success: false }
+  }
+
+  const { success: installSuccess } = await installDeps(projectDir, packageManager, dbType)
+  if (!installSuccess) {
+    installSpinner.stop('Failed to install dependencies', 1)
+    return {
+      ...configurationResult,
+      isSrcDir,
+      reason: 'Failed to install dependencies',
+      success: false,
+    }
   }
 
   // Add `@payload-config` to tsconfig.json `paths`
-  await addPayloadConfigToTsConfig(projectDir)
-
-  // Output directions for user to update next.config.js
-  const withPayloadMessage = `
-
-  ${chalk.bold(`Wrap your existing next.config.js with the withPayload function. Here is an example:`)}
-
-  import withPayload from '@payloadcms/next/withPayload'
-
-  const nextConfig = {
-    // Your Next.js config here
-  }
-
-  export default withPayload(nextConfig)
-
-`
-
-  console.log(withPayloadMessage)
-
-  return templateResult
+  await addPayloadConfigToTsConfig(projectDir, isSrcDir)
+  installSpinner.stop('Successfully installed Payload and dependencies')
+  return { ...configurationResult, isSrcDir, nextAppDir, success: true }
 }
 
-async function addPayloadConfigToTsConfig(projectDir: string) {
+async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean) {
   const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
   const userTsConfigContent = await readFile(tsConfigPath, {
     encoding: 'utf8',
@@ -82,48 +118,39 @@ async function addPayloadConfigToTsConfig(projectDir: string) {
   if (!userTsConfig.compilerOptions.paths?.['@payload-config']) {
     userTsConfig.compilerOptions.paths = {
       ...(userTsConfig.compilerOptions.paths || {}),
-      '@payload-config': ['./payload.config.ts'],
+      '@payload-config': [`./${isSrcDir ? 'src/' : ''}payload.config.ts`],
     }
     await writeFile(tsConfigPath, stringify(userTsConfig, null, 2), { encoding: 'utf8' })
   }
 }
 
-async function applyPayloadTemplateFiles(args: InitNextArgs): Promise<InitNextResult> {
-  const { '--debug': debug, projectDir, useDistFiles } = args
-
-  info('Initializing Payload app in Next.js project', 1)
+function installAndConfigurePayload(
+  args: InitNextArgs & {
+    isSrcDir: boolean
+    nextAppDir: string
+  },
+):
+  | { payloadConfigPath: string; success: true }
+  | { payloadConfigPath?: string; reason: string; success: false } {
+  const { '--debug': debug, isSrcDir, nextAppDir, nextConfigPath, projectDir, useDistFiles } = args
 
   const logDebug = (message: string) => {
     if (debug) origDebug(message)
   }
 
   if (!fs.existsSync(projectDir)) {
-    return { reason: `Could not find specified project directory at ${projectDir}`, success: false }
-  }
-
-  // Next.js configs can be next.config.js, next.config.mjs, etc.
-  const foundConfig = (await globby('next.config.*js', { absolute: true, cwd: projectDir }))?.[0]
-
-  if (!foundConfig) {
-    throw new Error(`No next.config.js found at ${projectDir}`)
-  }
-
-  const nextConfigPath = path.resolve(projectDir, foundConfig)
-  if (!fs.existsSync(nextConfigPath)) {
     return {
-      reason: `No next.config.js found at ${nextConfigPath}. Ensure you are in a Next.js project directory.`,
+      reason: `Could not find specified project directory at ${projectDir}`,
       success: false,
     }
-  } else {
-    if (debug) logDebug(`Found Next config at ${nextConfigPath}`)
   }
 
   const templateFilesPath =
     dirname.endsWith('dist') || useDistFiles
-      ? path.resolve(dirname, '../..', 'dist/app')
-      : path.resolve(dirname, '../../../../app')
+      ? path.resolve(dirname, '../..', 'dist/template')
+      : path.resolve(dirname, '../../../../templates/blank-3.0')
 
-  if (debug) logDebug(`Using template files from: ${templateFilesPath}`)
+  logDebug(`Using template files from: ${templateFilesPath}`)
 
   if (!fs.existsSync(templateFilesPath)) {
     return {
@@ -131,38 +158,41 @@ async function applyPayloadTemplateFiles(args: InitNextArgs): Promise<InitNextRe
       success: false,
     }
   } else {
-    if (debug) logDebug('Found template source files')
+    logDebug('Found template source files')
   }
 
-  // src/app or app
-  const userAppDir = (
-    await globby(['**/app'], {
-      absolute: true,
-      cwd: projectDir,
-      onlyDirectories: true,
-    })
-  )?.[0]
+  logDebug(`Copying template files from ${templateFilesPath} to ${nextAppDir}`)
 
-  if (!fs.existsSync(userAppDir)) {
-    return { reason: `Could not find user app directory inside ${projectDir}`, success: false }
-  } else {
-    logDebug(`Found user app directory: ${userAppDir}`)
+  const templateSrcDir = path.resolve(templateFilesPath, isSrcDir ? '' : 'src')
+  // const templateSrcDir = path.resolve(templateFilesPath)
+
+  logDebug(`templateSrcDir: ${templateSrcDir}`)
+  logDebug(`nextAppDir: ${nextAppDir}`)
+  logDebug(`projectDir: ${projectDir}`)
+  logDebug(`nextConfigPath: ${nextConfigPath}`)
+
+  logDebug(
+    `isSrcDir: ${isSrcDir}. source: ${templateSrcDir}. dest: ${path.dirname(nextConfigPath)}`,
+  )
+
+  // This is a little clunky and needs to account for isSrcDir
+  copyRecursiveSync(templateSrcDir, path.dirname(nextConfigPath), debug)
+
+  // Wrap next.config.js with withPayload
+  wrapNextConfig({ nextConfigPath })
+
+  return {
+    payloadConfigPath: path.resolve(nextAppDir, '../payload.config.ts'),
+    success: true,
   }
-
-  logDebug(`Copying template files from ${templateFilesPath} to ${userAppDir}`)
-  copyRecursiveSync(templateFilesPath, userAppDir, debug)
-  success('Successfully initialized.')
-  return { success: true, userAppDir }
 }
 
-async function installDeps(projectDir: string, packageManager: PackageManager) {
-  info(`Installing dependencies with ${packageManager}`, 1)
-  const packagesToInstall = [
-    'payload',
-    '@payloadcms/db-mongodb',
-    '@payloadcms/next',
-    '@payloadcms/richtext-lexical',
-  ].map((pkg) => `${pkg}@alpha`)
+async function installDeps(projectDir: string, packageManager: PackageManager, dbType: DbType) {
+  const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
+    (pkg) => `${pkg}@alpha`,
+  )
+
+  packagesToInstall.push(`@payloadcms/db-${dbType}@alpha`)
 
   let exitCode = 0
   switch (packageManager) {
@@ -186,43 +216,5 @@ async function installDeps(projectDir: string, packageManager: PackageManager) {
     }
   }
 
-  if (exitCode !== 0) {
-    error(`Failed to install dependencies with ${packageManager}`)
-  } else {
-    success(`Successfully installed dependencies`)
-  }
   return { success: exitCode === 0 }
-}
-function findOrCreatePayloadConfig(projectDir: string) {
-  const configPath = path.resolve(projectDir, 'payload.config.ts')
-  if (fs.existsSync(configPath)) {
-    return { message: 'Found existing payload.config.ts', success: true }
-  } else {
-    // Create default config
-    // TODO: Pull this from templates
-    const defaultConfig = `import path from "path";
-
-import { mongooseAdapter } from "@payloadcms/db-mongodb"; // database-adapter-import
-import { lexicalEditor } from "@payloadcms/richtext-lexical"; // editor-import
-import { buildConfig } from "payload/config";
-
-export default buildConfig({
-  editor: slateEditor({}), // editor-config
-  collections: [],
-  secret: "asdfasdf",
-  typescript: {
-    outputFile: path.resolve(__dirname, "payload-types.ts"),
-  },
-  graphQL: {
-    schemaOutputFile: path.resolve(__dirname, "generated-schema.graphql"),
-  },
-  db: mongooseAdapter({
-    url: "mongodb://localhost:27017/next-payload-3",
-  }),
-});
-`
-
-    fse.writeFileSync(configPath, defaultConfig)
-    return { message: 'Created default payload.config.ts', success: true }
-  }
 }

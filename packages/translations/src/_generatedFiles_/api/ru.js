@@ -3,6 +3,8 @@ export default {
     account: 'Аккаунт',
     apiKey: 'API ключ',
     enableAPIKey: 'Активировать API ключ',
+    loggedInChangePassword:
+      'Чтобы изменить пароль, зайдите в свой <0>аккаунт</0> и измените пароль там.',
     newAccountCreated:
       'Новый аккаунт был создан для доступа к <a href="{{serverURL}}">{{serverURL}}</a> Пожалуйста, кликните по следующей ссылке или вставьте в адресную строку браузера чтобы подтвердить email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> После подтверждения вашего email, вы сможете успешно войти в систему.',
     resetYourPassword: 'Сброс вашего пароля',

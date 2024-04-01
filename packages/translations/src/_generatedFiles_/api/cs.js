@@ -3,6 +3,7 @@ export default {
     account: 'Účet',
     apiKey: 'Klíč API',
     enableAPIKey: 'Povolit klíč API',
+    loggedInChangePassword: 'Pro změnu hesla přejděte do svého <0>účtu</0> a zde si heslo upravte.',
     newAccountCreated:
       'Pro přístup k <a href="{{serverURL}}">{{serverURL}}</a> byl pro vás vytvořen nový účet. Klepněte na následující odkaz nebo zkopírujte URL do svého prohlížeče pro ověření vašeho emailu: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Po ověření vašeho emailu se budete moci úspěšně přihlásit.',
     resetYourPassword: 'Resetujte své heslo',

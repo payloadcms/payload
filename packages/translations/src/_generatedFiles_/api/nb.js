@@ -3,6 +3,8 @@ export default {
     account: 'Konto',
     apiKey: 'API-nøkkel',
     enableAPIKey: 'Aktiver API-nøkkel',
+    loggedInChangePassword:
+      'For å endre passordet ditt, gå til <0>kontoen</0> din og endre passordet der.',
     newAccountCreated:
       'En ny konto har blitt opprettet for deg på <a href="{{serverURL}}">{{serverURL}}</a> Klikk på lenken nedenfor eller lim inn URLen i nettleseren din for å bekrefte e-postadressen din: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Etter at du har bekreftet e-postadressen din, kan du logge inn.',
     resetYourPassword: 'Tilbakestill passordet ditt',

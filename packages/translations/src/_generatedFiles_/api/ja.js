@@ -3,6 +3,8 @@ export default {
     account: 'アカウント',
     apiKey: 'API Key',
     enableAPIKey: 'API Keyを許可',
+    loggedInChangePassword:
+      'パスワードを変更するには、<0>アカウント</0>にアクセスしてパスワードを編集してください。',
     newAccountCreated:
       '<a href="{{serverURL}}">{{serverURL}}</a>にアクセスするための新しいアカウントが作成されました。以下のリンクをクリックするか、ブラウザに以下のURLを貼り付けて、メールアドレスの確認を行ってください。<a href="{{verificationURL}}">{{verificationURL}}</a><br>メールアドレスの確認後に、正常にログインできるようになります。',
     resetYourPassword: 'パスワードの再設定',
