@@ -1,9 +1,3 @@
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
 /** @type {import('jest').Config} */
 const customJestConfig = {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
@@ -16,7 +10,6 @@ const customJestConfig = {
   },
   reporters: ['default', ['github-actions', { silent: false }], 'summary'],
   testEnvironment: 'node',
-  globalSetup: path.resolve(dirname, 'setup.ts'),
   testMatch: ['<rootDir>/**/*int.spec.ts'],
   testTimeout: 90000,
   transform: {
