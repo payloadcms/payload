@@ -2,11 +2,10 @@ export type { RichTextAdapter, RichTextFieldProps } from './RichText.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
-export type { DefaultPreviewButtonProps } from './elements/PreviewButton.js'
-export type { CustomPreviewButtonProps } from './elements/PreviewButton.js'
-export type { CustomPublishButtonProps } from './elements/PublishButton.js'
-export type { CustomSaveButtonProps } from './elements/SaveButton.js'
-export type { CustomSaveDraftButtonProps } from './elements/SaveDraftButton.js'
+export type { CustomPreviewButton } from './elements/PreviewButton.js'
+export type { CustomPublishButton } from './elements/PublishButton.js'
+export type { CustomSaveButton } from './elements/SaveButton.js'
+export type { CustomSaveDraftButton } from './elements/SaveDraftButton.js'
 export type {
   DocumentTab,
   DocumentTabComponent,

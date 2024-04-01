@@ -50,6 +50,7 @@ export const createClientCollectionConfig = (collection: SanitizedCollectionConf
   if ('upload' in sanitized && typeof sanitized.upload === 'object') {
     sanitized.upload = { ...sanitized.upload }
     delete sanitized.upload.handlers
+    delete sanitized.upload.adminThumbnail
   }
 
   if ('auth' in sanitized && typeof sanitized.auth === 'object') {

@@ -34,6 +34,7 @@ import { find } from './collections/find.js'
 import { findByID } from './collections/findByID.js'
 import { findVersionByID } from './collections/findVersionByID.js'
 import { findVersions } from './collections/findVersions.js'
+import { preview as previewCollection } from './collections/preview.js'
 import { restoreVersion } from './collections/restoreVersion.js'
 import { update } from './collections/update.js'
 import { updateByID } from './collections/updateByID.js'
@@ -42,6 +43,7 @@ import { docAccess as docAccessGlobal } from './globals/docAccess.js'
 import { findOne } from './globals/findOne.js'
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID.js'
 import { findVersions as findVersionsGlobal } from './globals/findVersions.js'
+import { preview as previewGlobal } from './globals/preview.js'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion.js'
 import { update as updateGlobal } from './globals/update.js'
 import { routeError } from './routeError.js'
@@ -60,6 +62,7 @@ const endpoints = {
       getFile,
       init,
       me,
+      preview: previewCollection,
       versions: findVersions,
     },
     PATCH: {
@@ -88,6 +91,7 @@ const endpoints = {
       'doc-versions': findVersionsGlobal,
       'doc-versions-by-id': findVersionByIdGlobal,
       findOne,
+      preview: previewGlobal,
     },
     POST: {
       'doc-access': docAccessGlobal,
@@ -171,6 +175,7 @@ export const GET =
         endpoints: req.payload.config.endpoints,
         request,
       })
+
       if (disableEndpoints) return disableEndpoints
 
       collection = req.payload.collections?.[slug1]
@@ -212,10 +217,16 @@ export const GET =
             if (slug2 === 'file') {
               // /:collection/file/:filename
               res = await endpoints.collection.GET.getFile({ collection, filename: slug3, req })
+            } else if (slug3 in endpoints.collection.GET) {
+              // /:collection/:id/preview
+              res = await (endpoints.collection.GET[slug3] as CollectionRouteHandlerWithID)({
+                id: slug2,
+                collection,
+                req,
+              })
             } else if (`doc-${slug2}-by-id` in endpoints.collection.GET) {
               // /:collection/access/:id
               // /:collection/versions/:id
-
               res = await (
                 endpoints.collection.GET[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
               )({ id: slug3, collection, req })
@@ -229,6 +240,7 @@ export const GET =
           endpoints: globalConfig.endpoints,
           request,
         })
+
         if (disableEndpoints) return disableEndpoints
 
         const customEndpointResponse = await handleCustomEndpoints({
@@ -236,6 +248,7 @@ export const GET =
           entitySlug: `${slug1}/${slug2}`,
           payloadRequest: req,
         })
+
         if (customEndpointResponse) return customEndpointResponse
 
         switch (slug.length) {
@@ -244,9 +257,16 @@ export const GET =
             res = await endpoints.global.GET.findOne({ globalConfig, req })
             break
           case 3:
-            if (`doc-${slug3}` in endpoints.global.GET) {
+            if (slug3 in endpoints.global.GET) {
+              // /globals/:slug/preview
+              res = await (endpoints.global.GET[slug3] as GlobalRouteHandler)({
+                globalConfig,
+                req,
+              })
+            } else if (`doc-${slug3}` in endpoints.global.GET) {
               // /globals/:slug/access
               // /globals/:slug/versions
+              // /globals/:slug/preview
               res = await (endpoints.global.GET?.[`doc-${slug3}`] as GlobalRouteHandler)({
                 globalConfig,
                 req,

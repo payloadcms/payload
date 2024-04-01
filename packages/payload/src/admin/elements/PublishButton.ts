@@ -1,1 +1,1 @@
-export type CustomPublishButtonProps = React.ComponentType
+export type CustomPublishButton = React.ComponentType
