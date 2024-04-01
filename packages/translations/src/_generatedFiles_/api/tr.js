@@ -3,6 +3,7 @@ export default {
     account: 'Hesap',
     apiKey: 'API Anahtarı',
     enableAPIKey: 'Api anahtarını etkinleştir',
+    loggedInChangePassword: 'Parolanızı değiştirmek için <0>hesabınıza</0> gidebilirsiniz.',
     newAccountCreated:
       '<0>{{serverURL}}</0> sitesinde adınıza yeni bir hesap oluşturuldu. E-postanızı doğrulamak için bağlantıya tıklayabilirsiniz: <1>{{verificationURL}}</1><br> E-postanızı doğruladıktan sonra siteye hesap bilgilerinizle giriş yapabilirsiniz.',
     resetYourPassword: 'Parolanızı Sıfırlayın',

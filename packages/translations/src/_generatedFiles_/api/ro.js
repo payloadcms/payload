@@ -3,6 +3,8 @@ export default {
     account: 'Cont',
     apiKey: 'Cheia API',
     enableAPIKey: 'Activați cheia API',
+    loggedInChangePassword:
+      'Pentru a vă schimba parola, accesați <0>contul</0> și editați-vă parola acolo.',
     newAccountCreated:
       'A fost creat un nou cont pe care îl puteți accesa <a href="{{serverURL}}">{{serverURL}}</a> Vă rugăm să intrați pe următorul link sau să copiați URL-ul de mai jos în browserul dvs. pentru a vă verifica emailul: <a href="{{verificationURL}}">{{verificationURL}}</a><br> După ce vă verificați adresa de email, vă veți putea autentifica cu succes.',
     resetYourPassword: 'Resetați-vă parola',

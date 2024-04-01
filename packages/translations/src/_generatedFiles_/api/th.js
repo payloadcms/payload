@@ -3,6 +3,7 @@ export default {
     account: 'บัญชี',
     apiKey: 'API Key',
     enableAPIKey: 'เปิดใช้ API Key',
+    loggedInChangePassword: 'หากต้องการเปลี่ยนรหัสผ่าน กรุณาแก้ไขที่หน้า<0>บัญชี</0>ของคุณ',
     newAccountCreated:
       'ระบบได้สร้างบัญชีผู้ใช้ให้คุณสำหรับเข้าใช้งาน <a href="{{serverURL}}">{{serverURL}}</a> เรียบร้อยแล้ว กรุณากดลิงก์ด้านล่างเพื่อยืนยันอีเมล หลังจากยืนยันอีเมลเสร็จสิ้น คุณจะสามารถเข้าใช้งานระบบได้',
     resetYourPassword: 'รีเซ็ตรหัสผ่านของคุณ',

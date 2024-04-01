@@ -3,6 +3,8 @@ export default {
     account: 'Nalog',
     apiKey: 'API ključ',
     enableAPIKey: 'Omogući API ključ',
+    loggedInChangePassword:
+      'Da biste promenili lozinku, otvorite svoj <0>nalog</0> i promenite lozinku.',
     newAccountCreated:
       'Novi nalog je kreiran. Pristupite nalogu klikom na <a href="{{serverURL}}">{{serverURL}}</a>. Molimo Vas kliknite na sledeći link ili zalepite URL koji se nalazi ispod u pretraživač da biste potvrdili adresu e-pošte: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Nakon što potvrdite adresu e-pošte možete se ulogovati.',
     resetYourPassword: 'Promeni svoju lozinku',

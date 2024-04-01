@@ -3,6 +3,7 @@ export default {
     account: '帳戶',
     apiKey: 'API金鑰',
     enableAPIKey: '啟用API金鑰',
+    loggedInChangePassword: '要更改您的密碼，請前往您的<0>帳戶</0>頁面並在那裡編輯您的密碼。',
     newAccountCreated:
       '剛剛為您建立了一個可以存取 <a href="{{serverURL}}">{{serverURL}}</a> 的新帳戶。請點擊以下連結或在瀏覽器中貼上以下網址以驗證您的電子郵件：<a href="{{verificationURL}}">{{verificationURL}}</a><br> 驗證您的電子郵件後，您將能夠成功登入。',
     resetYourPassword: '重設您的密碼',

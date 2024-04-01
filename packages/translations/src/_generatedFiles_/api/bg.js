@@ -3,6 +3,8 @@ export default {
     account: 'Профил',
     apiKey: 'API ключ',
     enableAPIKey: 'Активирай API ключ',
+    loggedInChangePassword:
+      'За да промениш паролата си, отиди в своя <0>профил</0> и я промени оттам.',
     newAccountCreated:
       'Току-що беше създаден нов профил за достъп до <a href="{{serverURL}}">{{serverURL}}</a> Моля, въведи връзката в браузъра си, за да потвърдиш имейла си: <a href="{{verificationURL}}">{{verificationURL}}</a><br> След като потвърдиш имейла си, ще можеш да влезеш успешно.',
     resetYourPassword: 'Възстанови паролата си',
