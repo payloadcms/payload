@@ -8,8 +8,8 @@ import { type Payload } from 'payload'
 import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
-import { startMemoryDB } from '../startMemoryDB.js'
 import { createTestHooks } from '../testHooks.js'
+import { startMemoryDB } from './startMemoryDB.js'
 
 type Args = {
   config: Promise<SanitizedConfig>
@@ -22,18 +22,12 @@ type Result = {
 }
 
 export async function initPayloadE2E({ config, dirname }: Args): Promise<Result> {
-  process.env.NODE_OPTIONS = '--no-deprecation'
   const testSuiteName = dirname.split('/').pop()
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
+  await startMemoryDB()
 
-  process.env.PAYLOAD_DROP_DATABASE = 'true'
-
-  // @ts-expect-error
-  process.env.NODE_ENV = 'test'
-
-  const configWithMemoryDB = await startMemoryDB(config)
-  const payload = await getPayloadHMR({ config: configWithMemoryDB })
+  const payload = await getPayloadHMR({ config })
 
   const port = 3000
   process.env.PORT = String(port)

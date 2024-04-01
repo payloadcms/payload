@@ -58,7 +58,17 @@ const databaseAdapters = {
     },
   }),
 }
-export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
+
+export async function buildConfigWithDefaults(
+  testConfig?: Partial<Config>,
+): Promise<SanitizedConfig> {
+  if (process.env.NODE_ENV === 'test') {
+    databaseAdapters.mongoose = mongooseAdapter({
+      mongoMemoryServer: global._mongoMemoryServer,
+      url: process.env.MONGODB_MEMORY_SERVER_URI,
+    })
+  }
+
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',

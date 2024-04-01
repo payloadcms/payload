@@ -2,18 +2,18 @@ import type { SanitizedConfig } from 'payload/config'
 
 import { type Payload, getPayload } from 'payload'
 
-import { startMemoryDB } from '../startMemoryDB.js'
 import { NextRESTClient } from './NextRESTClient.js'
+import { startMemoryDB } from './startMemoryDB.js'
 
 /**
  * Initialize Payload configured for integration tests
  */
 export async function initPayloadInt(
-  configPromise: Promise<SanitizedConfig>,
+  config: Promise<SanitizedConfig>,
 ): Promise<{ config: SanitizedConfig; payload: Payload; restClient: NextRESTClient }> {
-  const config = await startMemoryDB(configPromise)
+  await startMemoryDB()
   const payload = await getPayload({ config })
   const restClient = new NextRESTClient(payload.config)
 
-  return { config, payload, restClient }
+  return { config: payload.config, payload, restClient }
 }
