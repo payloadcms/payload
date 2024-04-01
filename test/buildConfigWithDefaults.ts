@@ -65,14 +65,8 @@ let mongoMemoryServer = global._mongoMemoryServer
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
 ): Promise<SanitizedConfig> {
-  Object.entries(process.env).forEach(([key, val]) => {
-    if (key.startsWith('PW')) {
-      console.log({ key, val })
-    }
-  })
-
   if (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') {
-    if (process.env.JEST_WORKER_ID || process.env.PW_TEST_SOURCE_TRANSFORM) {
+    if (process.env.JEST_WORKER_ID || process.env.PW_TS_ESM_LOADER_ON) {
       if (!mongoMemoryServer) {
         mongoMemoryServer = await MongoMemoryReplSet.create({
           replSet: {
