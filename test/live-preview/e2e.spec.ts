@@ -8,7 +8,6 @@ import { fileURLToPath } from 'url'
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
-import config from './config.js'
 import { mobileBreakpoint } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -47,7 +46,7 @@ describe('Live Preview', () => {
   }
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL, payload } = await initPayloadE2E({ config, dirname }))
+    ;({ serverURL, payload } = await initPayloadE2E({ dirname }))
     url = new AdminUrlUtil(serverURL, 'pages')
     const context = await browser.newContext()
     page = await context.newPage()

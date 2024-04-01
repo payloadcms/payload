@@ -5,11 +5,10 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { delayNetwork, initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
+import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
-import config from './config.js'
 import { apiKeysSlug, slug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,7 +34,7 @@ describe('auth', () => {
   let apiURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL, payload } = await initPayloadE2E({ config, dirname }))
+    ;({ serverURL, payload } = await initPayloadE2E({ dirname }))
     apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, slug)
 
