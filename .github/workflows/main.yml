@@ -223,11 +223,11 @@ jobs:
           # - field-error-states
           # - fields-relationship
           # - fields
-          - live-preview
+          - fields/lexical
+          # - live-preview
           - localization
           - plugin-nested-docs
           - plugin-seo
-          - fields/lexical
           # - refresh-permissions
           # - uploads
           # - versions
