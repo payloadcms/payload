@@ -1,1 +1,1 @@
-export type CustomSaveDraftButtonProps = React.ComponentType
+export type CustomSaveDraftButton = React.ComponentType
