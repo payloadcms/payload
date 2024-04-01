@@ -220,17 +220,17 @@ jobs:
           - access-control
           # - admin
           - auth
-          # - field-error-states
+          - field-error-states
           # - fields-relationship
           # - fields
           - fields/lexical
-          # - live-preview
+          - live-preview
           - localization
           # - plugin-nested-docs
           # - plugin-seo
           # - refresh-permissions
           # - uploads
-          # - versions
+          - versions
 
     steps:
       - name: Use Node.js 18

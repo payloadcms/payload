@@ -32,8 +32,8 @@ export async function initPayloadE2E({ config, dirname }: Args): Promise<Result>
   // @ts-expect-error
   process.env.NODE_ENV = 'test'
 
-  // const configWithMemoryDB = await startMemoryDB(config)
-  const payload = await getPayloadHMR({ config })
+  const configWithMemoryDB = await startMemoryDB(config)
+  const payload = await getPayloadHMR({ config: configWithMemoryDB })
 
   const port = 3000
   process.env.PORT = String(port)

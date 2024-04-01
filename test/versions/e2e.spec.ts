@@ -330,7 +330,7 @@ describe('versions', () => {
       const newDescription = 'new description'
 
       await page.goto(autosaveURL.create)
-      await page.waitForURL(`**/${autosaveURL.create}`)
+      await page.waitForURL(autosaveURL.create)
       await page.waitForURL(/\/(?!create$)[\w-]+$/)
       const titleField = page.locator('#field-title')
       const descriptionField = page.locator('#field-description')
