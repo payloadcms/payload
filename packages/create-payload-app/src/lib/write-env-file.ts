@@ -1,10 +1,9 @@
-import chalk from 'chalk'
 import fs from 'fs-extra'
 import path from 'path'
 
 import type { CliArgs, ProjectTemplate } from '../types.js'
 
-import { error, success } from '../utils/log.js'
+import { debug, error } from '../utils/log.js'
 
 /** Parse and swap .env.example values and write .env */
 export async function writeEnvFile(args: {
@@ -17,7 +16,7 @@ export async function writeEnvFile(args: {
   const { cliArgs, databaseUri, payloadSecret, projectDir, template } = args
 
   if (cliArgs['--dry-run']) {
-    success(`DRY RUN: .env file created`)
+    debug(`DRY RUN: .env file created`)
     return
   }
 
@@ -51,8 +50,6 @@ export async function writeEnvFile(args: {
       const content = `MONGODB_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`
       await fs.outputFile(`${projectDir}/.env`, content)
     }
-
-    success('.env file created')
   } catch (err: unknown) {
     error('Unable to write .env file')
     if (err instanceof Error) {

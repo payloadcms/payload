@@ -9,19 +9,27 @@ import { dbReplacements } from './packages.js'
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
   dbDetails: DbDetails | undefined
-  projectDir: string
+  projectDirOrConfigPath: { payloadConfigPath: string } | { projectDir: string }
 }): Promise<void> {
   if (!args.dbDetails) {
     return
   }
 
   try {
-    const payloadConfigPath = (
-      await globby('**/payload.config.ts', { absolute: true, cwd: args.projectDir })
-    )?.[0]
+    let payloadConfigPath: string | undefined
+    if (!('payloadConfigPath' in args.projectDirOrConfigPath)) {
+      payloadConfigPath = (
+        await globby('**/payload.config.ts', {
+          absolute: true,
+          cwd: args.projectDirOrConfigPath.projectDir,
+        })
+      )?.[0]
+    } else {
+      payloadConfigPath = args.projectDirOrConfigPath.payloadConfigPath
+    }
 
     if (!payloadConfigPath) {
-      warning('Unable to update payload.config.ts with plugins')
+      warning('Unable to update payload.config.ts with plugins. Could not find payload.config.ts.')
       return
     }
 
@@ -59,6 +67,8 @@ export async function configurePayloadConfig(args: {
 
     fse.writeFileSync(payloadConfigPath, configLines.join('\n'))
   } catch (err: unknown) {
-    warning('Unable to update payload.config.ts with plugins')
+    warning(
+      `Unable to update payload.config.ts with plugins: ${err instanceof Error ? err.message : ''}`,
+    )
   }
 }
