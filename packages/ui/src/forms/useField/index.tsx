@@ -65,6 +65,13 @@ export const useField = <T,>(options: Options): FieldType<T> => {
     (e, disableModifyingForm = false) => {
       const val = e && e.target ? e.target.value : e
 
+      dispatchField({
+        type: 'UPDATE',
+        disableFormData: disableFormData || (hasRows && val > 0),
+        path,
+        value: val,
+      })
+
       if (!disableModifyingForm) {
         if (typeof setModified === 'function') {
           // Only update setModified to true if the form is not already set to modified. Otherwise the following could happen:
@@ -89,13 +96,6 @@ export const useField = <T,>(options: Options): FieldType<T> => {
           }
         }
       }
-
-      dispatchField({
-        type: 'UPDATE',
-        disableFormData: disableFormData || (hasRows && val > 0),
-        path,
-        value: val,
-      })
     },
     [setModified, path, dispatchField, disableFormData, hasRows, modified],
   )

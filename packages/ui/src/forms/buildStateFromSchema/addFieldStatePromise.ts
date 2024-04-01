@@ -517,13 +517,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
     })
   } else if (field.type === 'tabs') {
-    const promises = field.tabs.map((tab) =>
-      iterateFields({
+    const promises = field.tabs.map((tab) => {
+      return iterateFields({
         id,
         // passthrough parent functionality
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
-        data: tabHasName(tab) ? data?.[tab.name] : data,
+        data: tabHasName(tab) ? data?.[tab.name] || {} : data,
         fields: tab.fields,
         filter,
         forceFullValue,
@@ -538,8 +538,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         skipConditionChecks,
         skipValidation,
         state,
-      }),
-    )
+      })
+    })
 
     await Promise.all(promises)
   }

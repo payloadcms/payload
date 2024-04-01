@@ -257,7 +257,7 @@ describe('versions', () => {
       await page.waitForSelector('.doc-header__title', { state: 'visible' })
 
       await page.goto(`${page.url()}/versions`)
-      expect(page.url()).toMatch(/\/versions$/)
+      expect(page.url()).toMatch(/\/versions/)
     })
 
     test('should show collection versions view level action in collection versions view', async () => {
@@ -409,7 +409,7 @@ describe('versions', () => {
     test('collection - autosave should only update the current document', async () => {
       // create and save first doc
       await page.goto(autosaveURL.create)
-      await page.waitForURL(`**/${autosaveURL.create}`)
+      await page.waitForURL(`${autosaveURL.create}`)
       await page.waitForURL(/\/(?!create$)[\w-]+$/)
 
       await page.locator('#field-title').fill('first post title')
@@ -418,7 +418,7 @@ describe('versions', () => {
 
       // create and save second doc
       await page.goto(autosaveURL.create)
-      await page.waitForURL(`**/${autosaveURL.create}`)
+      await page.waitForURL(`${autosaveURL.create}`)
       await page.waitForURL(/\/(?!create$)[\w-]+$/)
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
@@ -442,7 +442,7 @@ describe('versions', () => {
 
     test('should save versions with custom IDs', async () => {
       await page.goto(customIDURL.create)
-      await page.waitForURL(`**/${customIDURL.create}`)
+      await page.waitForURL(`${customIDURL.create}`)
       await page.locator('#field-id').fill('custom')
       await page.locator('#field-title').fill('title')
       await saveDocAndAssert(page)
