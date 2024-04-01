@@ -3,6 +3,7 @@ export default {
     account: 'Tài khoản',
     apiKey: 'API Key',
     enableAPIKey: 'Kích hoạt API Key',
+    loggedInChangePassword: 'Để đổi mật khẩu, hãy truy cập cài đặt <0>tài khoản</0>.',
     newAccountCreated:
       'Một tài khoản mới đã được tạo cho bạn. Tài khoản này được dùng để truy cập <a href="{{serverURL}}">{{serverURL}}</a> Hãy nhấp chuột hoặc sao chép đường dẫn sau vào trình duyệt của bạn để xác thực email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Sau khi email được xác thực, bạn sẽ có thể đăng nhập.',
     resetYourPassword: 'Tạo lại mật khẩu',

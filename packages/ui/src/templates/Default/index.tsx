@@ -1,5 +1,6 @@
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig, VisibleEntities } from 'payload/types'
 
+import { EntityVisibilityProvider } from '@payloadcms/ui/providers/EntityVisibility'
 import React from 'react'
 
 import type { NavProps } from '../../elements/Nav/index.js'
@@ -18,12 +19,14 @@ export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
+  visibleEntities?: VisibleEntities
 }
 
 export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
   children,
   className,
   config: configPromise,
+  visibleEntities,
 }) => {
   const config = await configPromise
 
@@ -40,23 +43,25 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = async ({
   }
 
   return (
-    <div>
-      <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-        <NavToggler className={`${baseClass}__nav-toggler`}>
-          <NavHamburger />
-        </NavToggler>
-      </div>
-      <Wrapper baseClass={baseClass} className={className}>
-        <RenderCustomComponent
-          CustomComponent={CustomNav}
-          DefaultComponent={DefaultNav}
-          componentProps={navProps}
-        />
-        <div className={`${baseClass}__wrap`}>
-          <AppHeader />
-          {children}
+    <EntityVisibilityProvider visibleEntities={visibleEntities}>
+      <div>
+        <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
+          <NavToggler className={`${baseClass}__nav-toggler`}>
+            <NavHamburger />
+          </NavToggler>
         </div>
-      </Wrapper>
-    </div>
+        <Wrapper baseClass={baseClass} className={className}>
+          <RenderCustomComponent
+            CustomComponent={CustomNav}
+            DefaultComponent={DefaultNav}
+            componentProps={navProps}
+          />
+          <div className={`${baseClass}__wrap`}>
+            <AppHeader />
+            {children}
+          </div>
+        </Wrapper>
+      </div>
+    </EntityVisibilityProvider>
   )
 }

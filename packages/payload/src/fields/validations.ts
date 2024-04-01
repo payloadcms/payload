@@ -399,6 +399,8 @@ const validateFilterOptions: Validate<
         return true
       }
 
+      if (!options[collection]) return true
+
       return options[collection].indexOf(requestedID) === -1
     })
 

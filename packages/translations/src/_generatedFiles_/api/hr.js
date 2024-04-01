@@ -3,6 +3,8 @@ export default {
     account: 'Račun',
     apiKey: 'API ključ',
     enableAPIKey: 'Omogući API ključ',
+    loggedInChangePassword:
+      'Da biste promijenili lozinku, otvorite svoj <0>račun</0> i promijenite lozinku tamo.',
     newAccountCreated:
       'Novi račun je kreiran. Pristupite računu klikom na <a href="{{serverURL}}">{{serverURL}}</a>. Molim kliknite na sljedeći link ili zalijepite URL, koji se nalazi ispod, u preglednik da biste potvrdili svoj email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Nakon što potvrdite email, moći ćete se prijaviti.',
     resetYourPassword: 'Restartiraj svoju lozinku',

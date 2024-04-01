@@ -8,9 +8,9 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import { lexicalHTML } from '@payloadcms/richtext-lexical'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
-import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters/html/field/index.js'
 import { richTextFieldsSlug } from '../../slugs.js'
 import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks.js'
 
@@ -307,6 +307,7 @@ const RichTextFields: CollectionConfig = {
           slug: 'richTextBlock',
           fields: [
             {
+              editor: slateEditor({}),
               name: 'text',
               type: 'richText',
             },
