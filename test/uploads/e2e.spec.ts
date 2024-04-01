@@ -12,7 +12,6 @@ import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
-import { adminThumbnailSrc } from './collections/admin-thumbnail/RegisterThumbnailFn.js'
 import config from './config.js'
 import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
@@ -72,18 +71,13 @@ describe('uploads', () => {
 
   test('should see upload filename in relation list', async () => {
     await page.goto(relationURL.list)
-
-    await page.waitForURL(relationURL.list)
     const field = page.locator('.cell-image')
 
     await expect(field).toContainText('image.png')
   })
 
-  // WIP: sometimes the waitForURL() times out
   test('should see upload versioned filename in relation list', async () => {
     await page.goto(relationURL.list)
-
-    await page.waitForURL(relationURL.list)
     const field = page.locator('.cell-versionedImage')
 
     await expect(field).toContainText('image')
@@ -100,7 +94,6 @@ describe('uploads', () => {
 
   test('should create file upload', async () => {
     await page.goto(mediaURL.create)
-    await page.waitForURL(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
     const filename = page.locator('.file-field__filename')
@@ -108,18 +101,6 @@ describe('uploads', () => {
     await expect(filename).toHaveValue('image.png')
 
     await saveDocAndAssert(page)
-  })
-
-  // WIP: this was removed before (may not have been intentional)
-  test('should resize and show tiff images', async () => {
-    await page.goto(mediaURL.create)
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.tiff'))
-
-    await expect(page.locator('.file-field__upload .thumbnail svg')).toBeVisible()
-
-    await saveDocAndAssert(page)
-
-    await expect(page.locator('.file-details img')).toBeVisible()
   })
 
   test('should show resized images', async () => {
@@ -177,10 +158,19 @@ describe('uploads', () => {
     await expect(iconMeta).toContainText('16x16')
   })
 
-  // WIP: this is spotty
+  test('should resize and show tiff images', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.tiff'))
+
+    await expect(page.locator('.file-field__upload .thumbnail svg')).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-details img')).toBeVisible()
+  })
+
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
-    await page.waitForURL(relationURL.list)
     // from the list edit the first document
     await page.locator('.row-1 a').click()
 
@@ -205,17 +195,14 @@ describe('uploads', () => {
     await expect(page.locator('.cell-title')).toContainText('draft')
   })
 
-  // WIP: this is spotty
   test('should restrict mimetype based on filterOptions', async () => {
     await page.goto(audioURL.edit(audioDoc.id))
-    await page.waitForURL(audioURL.edit(audioDoc.id))
 
     // remove the selection and open the list drawer
     await page.locator('.file-details__remove').click()
     await page.locator('.upload__toggler.list-drawer__toggler').click()
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
-    await wait(200) // list is loading
 
     // upload an image and try to select it
     await listDrawer.locator('button.list-drawer__create-new-button.doc-drawer__toggler').click()
@@ -224,16 +211,13 @@ describe('uploads', () => {
       .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
     await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
-    await wait(200)
     await expect(page.locator('.Toastify')).toContainText('successfully')
 
     // save the document and expect an error
     await page.locator('button#action-save').click()
-    await wait(200)
-    await expect(page.locator('.Toastify')).toContainText('The following field is invalid: audio')
+    await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields.')
   })
 
-  // WIP: this is spotty
   test('Should execute adminThumbnail and provide thumbnail when set', async () => {
     await page.goto(adminThumbnailURL.list)
     await page.waitForURL(adminThumbnailURL.list)

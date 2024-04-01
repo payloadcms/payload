@@ -12,5 +12,3 @@ export const AdminThumbnailCol: CollectionConfig = {
   },
   fields: [],
 }
-
-export default AdminThumbnailCol
