@@ -727,9 +727,10 @@ export const mapFields = (args: {
 
   if (!disableAddingID && !hasID) {
     // TODO: For all fields (not just this one) we need to add the name to both .fieldComponentProps.name AND .name. This can probably be improved
-    result.unshift({
+    result.push({
       name: 'id',
       type: 'text',
+      CustomField: null,
       cellComponentProps: {
         name: 'id',
       },
