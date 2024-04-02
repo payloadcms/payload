@@ -6,7 +6,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { Uploads1 } from './collections/Upload1/index.js'
-import Uploads2 from './collections/Upload2/index.js'
+import { Uploads2 } from './collections/Upload2/index.js'
 import { AdminThumbnailCol } from './collections/admin-thumbnail/index.js'
 import {
   audioSlug,
@@ -441,7 +441,10 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
-      upload: true,
+      upload: {
+        staticDir: path.resolve(dirname, `./${versionSlug}`),
+        filesRequiredOnCreate: true,
+      },
       versions: {
         drafts: true,
       },
