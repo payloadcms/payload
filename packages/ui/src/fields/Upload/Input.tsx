@@ -59,7 +59,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
 
   const { i18n, t } = useTranslation()
 
-  const [file, setFile] = useState(undefined)
+  const [fileDoc, setFileDoc] = useState(undefined)
   const [missingFile, setMissingFile] = useState(false)
   const [collectionSlugs] = useState([collection?.slug])
 
@@ -83,16 +83,16 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
         })
         if (response.ok) {
           const json = await response.json()
-          setFile(json)
+          setFileDoc(json)
         } else {
           setMissingFile(true)
-          setFile(undefined)
+          setFileDoc(undefined)
         }
       }
 
       void fetchFile()
     } else {
-      setFile(undefined)
+      setFileDoc(undefined)
     }
   }, [value, relationTo, api, serverURL, i18n])
 
@@ -142,10 +142,10 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
         />
         {collection?.upload && (
           <React.Fragment>
-            {file && !missingFile && (
+            {fileDoc && !missingFile && (
               <FileDetails
                 collectionSlug={relationTo}
-                doc={file}
+                doc={fileDoc}
                 handleRemove={
                   readOnly
                     ? undefined
@@ -156,7 +156,7 @@ export const UploadInput: React.FC<UploadInputProps> = (props) => {
                 uploadConfig={collection.upload}
               />
             )}
-            {(!file || missingFile) && (
+            {(!fileDoc || missingFile) && (
               <div className={`${baseClass}__wrap`}>
                 <div className={`${baseClass}__buttons`}>
                   <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>

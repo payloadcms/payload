@@ -91,7 +91,6 @@ export type ActionMap = {
 }
 
 export type CollectionComponentMap = ConfigComponentMapBase & {
-  AdminThumbnail: React.ReactNode
   AfterList: React.ReactNode
   AfterListTable: React.ReactNode
   BeforeList: React.ReactNode

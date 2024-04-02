@@ -59,7 +59,7 @@ export const DefaultEditView: React.FC = () => {
   const config = useConfig()
   const router = useRouter()
   const { dispatchFormQueryParams } = useFormQueryParams()
-  const { getComponentMap, getFieldMap } = useComponentMap()
+  const { getFieldMap } = useComponentMap()
   const params = useSearchParams()
   const depth = useEditDepth()
   const { reportUpdate } = useDocumentEvents()
@@ -73,8 +73,6 @@ export const DefaultEditView: React.FC = () => {
   } = config
 
   const locale = params.get('locale')
-
-  const componentMap = getComponentMap({ collectionSlug, globalSlug })
 
   const collectionConfig =
     collectionSlug && collections.find((collection) => collection.slug === collectionSlug)
@@ -178,8 +176,6 @@ export const DefaultEditView: React.FC = () => {
     [serverURL, apiRoute, id, operation, entitySlug, collectionSlug, globalSlug, getDocPreferences],
   )
 
-  const RegisterGetThumbnailFunction = componentMap?.[`${collectionSlug}.adminThumbnail`]
-
   return (
     <main className={classes}>
       <OperationProvider operation={operation}>
@@ -248,7 +244,6 @@ export const DefaultEditView: React.FC = () => {
                   )}
                   {upload && (
                     <React.Fragment>
-                      {RegisterGetThumbnailFunction && <RegisterGetThumbnailFunction />}
                       <Upload
                         collectionSlug={collectionConfig.slug}
                         initialState={initialState}

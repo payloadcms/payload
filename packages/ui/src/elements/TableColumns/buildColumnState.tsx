@@ -14,14 +14,15 @@ import { DefaultCell } from '../Table/DefaultCell/index.js'
 
 const fieldIsPresentationalOnly = (field: MappedField): boolean => field.type === 'ui'
 
-export const buildColumnState = (args: {
+type Args = {
   cellProps: Partial<CellComponentProps>[]
   columnPreferences: ColumnPreferences
   columns?: string[]
   enableRowSelections: boolean
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
-}): Column[] => {
+}
+export const buildColumnState = (args: Args): Column[] => {
   const { cellProps, columnPreferences, columns, enableRowSelections, fieldMap, useAsTitle } = args
 
   // swap useAsTitle field to first slot

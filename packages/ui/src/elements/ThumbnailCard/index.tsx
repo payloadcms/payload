@@ -5,7 +5,6 @@ import React from 'react'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle.js'
-import { Thumbnail } from '../Thumbnail/index.js'
 import './index.scss'
 
 export type ThumbnailCardProps = {
@@ -34,7 +33,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
 
   const config = useConfig()
 
-  const { i18n, t } = useTranslation()
+  const { i18n } = useTranslation()
 
   const classes = [
     baseClass,
@@ -59,10 +58,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
 
   return (
     <button className={classes} onClick={onClick} title={title} type="button">
-      <div className={`${baseClass}__thumbnail`}>
-        {thumbnail && thumbnail}
-        {!thumbnail && collection && doc && <Thumbnail doc={doc} size="expand" />}
-      </div>
+      <div className={`${baseClass}__thumbnail`}>{thumbnail && thumbnail}</div>
       <div className={`${baseClass}__label`}>{title}</div>
     </button>
   )

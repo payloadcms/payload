@@ -14,7 +14,6 @@ import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
 import { useDrawerSlug } from '@payloadcms/ui/elements/Drawer'
 import { File } from '@payloadcms/ui/graphics/File'
 import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
-import { useThumbnail } from '@payloadcms/ui/hooks/useThumbnail'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useCallback, useReducer, useState } from 'react'
@@ -76,7 +75,7 @@ const Component: React.FC<ElementProps> = (props) => {
     { initialParams },
   )
 
-  const thumbnailSRC = useThumbnail(relatedCollection.slug, relatedCollection.upload, data)
+  const thumbnailSRC = data?.thumbnailURL
 
   const removeUpload = useCallback(() => {
     editor.update(() => {
@@ -109,6 +108,7 @@ const Component: React.FC<ElementProps> = (props) => {
     >
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__topRow`}>
+          {/* TODO: migrate to use @payloadcms/ui/elements/Thumbnail component */}
           <div className={`${baseClass}__thumbnail`}>
             {thumbnailSRC ? <img alt={data?.filename} src={thumbnailSRC} /> : <File />}
           </div>
