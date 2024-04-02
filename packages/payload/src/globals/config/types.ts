@@ -33,7 +33,7 @@ export type BeforeValidateHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
-  req?: PayloadRequest
+  req: PayloadRequest
 }) => any
 
 export type BeforeChangeHook = (args: {

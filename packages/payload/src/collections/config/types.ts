@@ -66,7 +66,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req?: PayloadRequest
+  req: PayloadRequest
 }) => any
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
