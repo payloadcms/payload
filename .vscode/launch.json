@@ -10,7 +10,7 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "command": "node --no-deprecation test/dev.js fields",
+      "command": "node --no-deprecation test/dev.js _community",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Community",
       "request": "launch",

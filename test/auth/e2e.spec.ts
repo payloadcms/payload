@@ -1,18 +1,22 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config } from './payload-types.js'
+
 import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { apiKeysSlug, slug } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-let payload: Payload
+
+let payload: PayloadTestSDK<Config>
 
 /**
  * TODO: Auth
@@ -34,7 +38,7 @@ describe('auth', () => {
   let apiURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL, payload } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, slug)
 
