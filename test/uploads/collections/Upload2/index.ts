@@ -1,11 +1,14 @@
 import type { CollectionConfig } from 'payload/types'
 
+import { fileURLToPath } from 'node:url'
 import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const Uploads2: CollectionConfig = {
   slug: 'uploads-2',
   upload: {
-    staticDir: path.resolve(process.cwd(), 'test/uploads/collections/Upload2/uploads'),
+    staticDir: path.resolve(dirname, 'uploads'),
   },
   admin: {
     enableRichTextRelationship: false,
@@ -21,5 +24,3 @@ export const Uploads2: CollectionConfig = {
 export const uploadsDoc = {
   text: 'An upload here',
 }
-
-export default Uploads2
