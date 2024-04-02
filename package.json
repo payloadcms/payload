@@ -66,8 +66,9 @@
     "test:e2e": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 tsx ./test/runE2E.ts",
     "test:e2e:debug": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PWDEBUG=1 DISABLE_LOGGING=true playwright test",
     "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true playwright test --headed",
-    "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
+    "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=jest.config.js",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js",
+    "test:unit": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "devDependencies": {
