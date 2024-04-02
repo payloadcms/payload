@@ -1,4 +1,4 @@
-import type { HTMLConverter } from '../types'
+import type { HTMLConverter } from '../types.js'
 
 export const LinebreakHTMLConverter: HTMLConverter<any> = {
   converter() {

@@ -1,6 +1,6 @@
 import escapeHTML from 'escape-html'
 
-import { replaceDoubleCurlys } from '../replaceDoubleCurlys'
+import { replaceDoubleCurlys } from '../replaceDoubleCurlys.js'
 
 interface Node {
   bold?: boolean

@@ -2,8 +2,8 @@ import type { CollectionConfig } from 'payload/types'
 
 import type { PluginConfig } from '../../types.js'
 
-import createCharge from './hooks/createCharge.js'
-import sendEmail from './hooks/sendEmail.js'
+import { createCharge } from './hooks/createCharge.js'
+import { sendEmail } from './hooks/sendEmail.js'
 
 // all settings can be overridden by the config
 export const generateSubmissionCollection = (formConfig: PluginConfig): CollectionConfig => {
@@ -36,10 +36,10 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
           if (!payload) return true
 
           if (payload) {
-            let existingForm
+            let _existingForm
 
             try {
-              existingForm = await payload.findByID({
+              _existingForm = await payload.findByID({
                 id: value,
                 collection: formSlug,
                 req,

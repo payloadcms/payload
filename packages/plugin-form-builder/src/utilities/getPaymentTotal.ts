@@ -1,4 +1,4 @@
-import type { FieldValues, PaymentField, PriceCondition } from '../types'
+import type { FieldValues, PaymentField, PriceCondition } from '../types.js'
 
 export const getPaymentTotal = (
   args: Partial<PaymentField> & {

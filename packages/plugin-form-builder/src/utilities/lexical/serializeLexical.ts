@@ -1,6 +1,6 @@
-import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types'
+import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types.js'
 
-import { defaultHTMLConverters } from './defaultConverters'
+import { defaultHTMLConverters } from './defaultConverters.js'
 
 export async function serializeLexical(data?: any, submissionData?: any): Promise<string> {
   const converters: HTMLConverter[] = defaultHTMLConverters
