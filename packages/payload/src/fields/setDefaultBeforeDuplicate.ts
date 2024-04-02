@@ -1,9 +1,9 @@
+// default beforeDuplicate hook for required and unique fields
+import type { FieldAffectingData, FieldHook } from './config/types.js'
+
 import { extractTranslations } from '../translations/extractTranslations.js'
 
 const copyTranslations = extractTranslations(['general:copy'])
-
-// default beforeDuplicate hook for required and unique fields
-import type { FieldAffectingData, FieldHook } from './config/types.js'
 
 const unique: FieldHook = ({ value }) => (typeof value === 'string' ? `${value} - Copy` : undefined)
 const localizedUnique: FieldHook = ({ req, value }) =>

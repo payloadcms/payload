@@ -117,6 +117,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return find<T>(this, options)
   }
 
+  /**
+   * @description Find document by ID
+   * @param options
+   * @returns document with specified ID
+   */
   findByID = async <T extends keyof TGeneratedTypes['collections']>(
     options: FindByIDOptions<T>,
   ): Promise<TGeneratedTypes['collections'][T]> => {
@@ -193,12 +198,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   globals: Globals
 
   logger: pino.Logger
-
-  /**
-   * @description Find document by ID
-   * @param options
-   * @returns document with specified ID
-   */
 
   login = async <T extends keyof TGeneratedTypes['collections']>(
     options: LoginOptions<T>,

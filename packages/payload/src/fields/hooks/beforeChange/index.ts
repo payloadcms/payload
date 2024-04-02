@@ -12,6 +12,7 @@ type Args<T> = {
   data: Record<string, unknown> | T
   doc: Record<string, unknown> | T
   docWithLocales: Record<string, unknown>
+  duplicate?: boolean
   global: SanitizedGlobalConfig | null
   id?: number | string
   operation: Operation
@@ -19,6 +20,15 @@ type Args<T> = {
   skipValidation?: boolean
 }
 
+/**
+ * This function is responsible for the following actions, in order:
+ * - Run condition
+ * - Execute field hooks
+ * - Validate data
+ * - Transform data for storage
+ * - beforeDuplicate hooks (if duplicate)
+ * - Unflatten locales
+ */
 export const beforeChange = async <T extends Record<string, unknown>>({
   id,
   collection,
@@ -26,6 +36,7 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   data: incomingData,
   doc,
   docWithLocales,
+  duplicate = false,
   global,
   operation,
   req,
@@ -42,6 +53,7 @@ export const beforeChange = async <T extends Record<string, unknown>>({
     data,
     doc,
     docWithLocales,
+    duplicate,
     errors,
     fields: collection?.fields || global?.fields,
     global,
@@ -59,7 +71,10 @@ export const beforeChange = async <T extends Record<string, unknown>>({
     throw new ValidationError(errors, req.t)
   }
 
-  mergeLocaleActions.forEach((action) => action())
+  await mergeLocaleActions.reduce(async (priorAction, action) => {
+    await priorAction
+    await action()
+  }, Promise.resolve())
 
   return data
 }

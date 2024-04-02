@@ -11,11 +11,12 @@ type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
+  duplicate: boolean
   errors: { field: string; message: string }[]
   fields: (Field | TabAsField)[]
   global: SanitizedGlobalConfig | null
   id?: number | string
-  mergeLocaleActions: (() => void)[]
+  mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
   path: string
   req: PayloadRequest
@@ -25,6 +26,14 @@ type Args = {
   skipValidation?: boolean
 }
 
+/**
+ * This function is responsible for the following actions, in order:
+ * - Run condition
+ * - Execute field hooks
+ * - Validate data
+ * - Transform data for storage
+ * - Unflatten locales
+ */
 export const traverseFields = async ({
   id,
   collection,
@@ -32,6 +41,7 @@ export const traverseFields = async ({
   data,
   doc,
   docWithLocales,
+  duplicate,
   errors,
   fields,
   global,
@@ -55,6 +65,7 @@ export const traverseFields = async ({
         data,
         doc,
         docWithLocales,
+        duplicate,
         errors,
         field,
         global,

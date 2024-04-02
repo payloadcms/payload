@@ -36,6 +36,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
   incomingArgs: Arguments,
 ): Promise<GeneratedTypes['collections'][TSlug]> => {
   let args = incomingArgs
+  const operation = 'create'
 
   try {
     const shouldCommit = await initTransaction(args.req)
@@ -52,7 +53,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
           args,
           collection: args.collection.config,
           context: args.req.context,
-          operation: 'update',
+          operation,
           req: args.req,
         })) || args
     }, Promise.resolve())
@@ -63,11 +64,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       depth,
       draft: draftArg = true,
       overrideAccess,
-      req: {
-        fallbackLocale,
-        payload: { config },
-        payload,
-      },
+      req: { fallbackLocale, locale: localeArg, payload },
       req,
       showHiddenFields,
     } = args
@@ -107,131 +104,111 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     if (!docWithLocales && !hasWherePolicy) throw new NotFound(req.t)
     if (!docWithLocales && hasWherePolicy) throw new Forbidden(req.t)
 
-    // remove the createdAt timestamp and rely on the db to default it
+    // remove the createdAt timestamp and id to rely on the db to set the default it
     delete docWithLocales.createdAt
+    delete docWithLocales.id
 
     // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
     if (shouldSaveDraft) {
       docWithLocales._status = 'draft'
     }
 
-    // /////////////////////////////////////
-    // Iterate locales of document and call the db create or update functions
-    // /////////////////////////////////////
-
-    let locales = [undefined]
-
-    if (config.localization) {
-      // make sure the current request locale is the first locale to be handled to skip validation for other locales
-      locales = config.localization.locales.reduce(
-        (acc, { code }) => {
-          if (req.locale === code) return acc
-          acc.push(code)
-          return acc
-        },
-        [req.locale],
-      )
-    }
-
     let result
 
-    await locales.reduce(async (previousPromise, locale: string | undefined, i) => {
-      await previousPromise
-      const operation = i === 0 ? 'create' : 'update'
+    const originalDoc = await afterRead({
+      collection: collectionConfig,
+      context: req.context,
+      depth: 0,
+      doc: docWithLocales,
+      fallbackLocale: null,
+      global: null,
+      locale: req.locale,
+      overrideAccess: true,
+      req,
+      showHiddenFields: true,
+    })
 
-      const originalDoc = await afterRead({
-        collection: collectionConfig,
-        context: req.context,
-        depth: 0,
-        doc: docWithLocales,
-        fallbackLocale: null,
-        global: null,
-        locale,
-        overrideAccess: true,
-        req,
-        showHiddenFields: true,
-      })
+    // /////////////////////////////////////
+    // Create Access
+    // /////////////////////////////////////
 
-      let data = { ...originalDoc }
+    if (!overrideAccess) {
+      await executeAccess({ data: originalDoc, req }, collectionConfig.access.create)
+    }
 
-      // /////////////////////////////////////
-      // Create Access
-      // /////////////////////////////////////
+    // /////////////////////////////////////
+    // beforeValidate - Fields
+    // /////////////////////////////////////
 
-      if (operation === 'create' && !overrideAccess) {
-        await executeAccess({ data, req }, collectionConfig.access.create)
-      }
+    let data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+      id,
+      collection: collectionConfig,
+      context: req.context,
+      data: originalDoc,
+      doc: originalDoc,
+      duplicate: true,
+      global: null,
+      operation,
+      overrideAccess,
+      req,
+    })
 
-      // /////////////////////////////////////
-      // beforeValidate - Fields
-      // /////////////////////////////////////
+    // /////////////////////////////////////
+    // beforeValidate - Collection
+    // /////////////////////////////////////
 
-      data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
-        id,
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        doc: originalDoc,
-        duplicate: true,
-        global: null,
-        operation,
-        overrideAccess,
-        req,
-      })
+    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+      await priorHook
 
-      // /////////////////////////////////////
-      // beforeValidate - Collection
-      // /////////////////////////////////////
-
-      await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-        await priorHook
-
-        data =
-          (await hook({
-            collection: collectionConfig,
-            context: req.context,
-            data,
-            operation,
-            originalDoc,
-            req,
-          })) || result
-      }, Promise.resolve())
-
-      // /////////////////////////////////////
-      // beforeChange - Collection
-      // /////////////////////////////////////
-
-      await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-        await priorHook
-
-        data =
-          (await hook({
-            collection: collectionConfig,
-            context: req.context,
-            data,
-            operation,
-            originalDoc: result,
-            req,
-          })) || result
-      }, Promise.resolve())
-
-      // /////////////////////////////////////
-      // beforeChange - Fields
-      // /////////////////////////////////////
-
-      result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
-        id,
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        doc: originalDoc,
-        docWithLocales,
-        global: null,
-        operation,
-        req,
-        skipValidation: shouldSaveDraft || operation === 'update',
-      })
+      data =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          operation,
+          originalDoc,
+          req,
+        })) || result
     }, Promise.resolve())
+
+    // /////////////////////////////////////
+    // beforeChange - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      data =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          operation,
+          originalDoc: result,
+          req,
+        })) || result
+    }, Promise.resolve())
+
+    // /////////////////////////////////////
+    // beforeChange - Fields
+    // /////////////////////////////////////
+
+    result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+      id,
+      collection: collectionConfig,
+      context: req.context,
+      data,
+      doc: originalDoc,
+      docWithLocales,
+      duplicate: true,
+      global: null,
+      operation,
+      req,
+      skipValidation: shouldSaveDraft,
+    })
+
+    // set req.locale back to the original locale
+    req.locale = localeArg
 
     // /////////////////////////////////////
     // Create / Update
@@ -239,7 +216,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
 
     const versionDoc = await payload.db.create({
       collection: collectionConfig.slug,
-      data: docWithLocales,
+      data: result,
       req,
     })
 
@@ -272,7 +249,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       doc: versionDoc,
       fallbackLocale,
       global: null,
-      locale: req.locale,
+      locale: localeArg,
       overrideAccess,
       req,
       showHiddenFields,
@@ -304,7 +281,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
       data: versionDoc,
       doc: result,
       global: null,
-      operation: 'create',
+      operation,
       previousDoc: {},
       req,
     })
@@ -321,7 +298,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
           collection: collectionConfig,
           context: req.context,
           doc: result,
-          operation: 'create',
+          operation,
           previousDoc: {},
           req,
         })) || result
@@ -334,7 +311,7 @@ export const duplicateOperation = async <TSlug extends keyof GeneratedTypes['col
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
       collection: collectionConfig,
-      operation: 'create',
+      operation,
       result,
     })
 
