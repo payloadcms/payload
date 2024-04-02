@@ -1,8 +1,9 @@
+import type { Endpoint } from 'payload/config'
 import type { PayloadRequest } from 'payload/types'
 
 import httpStatus from 'http-status'
 
-export const localAPIHandler = async ({ payload, data, user, body }: PayloadRequest) => {
+export const handler = async ({ payload, data, user }: PayloadRequest) => {
   const method = String(data.method)
 
   if (typeof payload[method] === 'function') {
@@ -31,4 +32,10 @@ export const localAPIHandler = async ({ payload, data, user, body }: PayloadRequ
       status: httpStatus.BAD_REQUEST,
     },
   )
+}
+
+export const localAPIEndpoint: Endpoint = {
+  path: '/local-api',
+  method: 'post',
+  handler,
 }

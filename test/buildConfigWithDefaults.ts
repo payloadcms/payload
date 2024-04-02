@@ -30,7 +30,8 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { type Config, buildConfig } from 'payload/config'
 import sharp from 'sharp'
 
-import { localAPIHandler } from './helpers/sdk/handler.js'
+import { reInitEndpoint } from './helpers/reInit.js'
+import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
 const databaseAdapters = {
@@ -107,13 +108,7 @@ export async function buildConfigWithDefaults(
     //     },
     //   },
     // }),
-    endpoints: [
-      {
-        path: '/local-api',
-        method: 'post',
-        handler: localAPIHandler,
-      },
-    ],
+    endpoints: [localAPIEndpoint, reInitEndpoint],
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),
