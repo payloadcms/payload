@@ -27,7 +27,7 @@ const packageWhitelist = [
   'richtext-lexical',
   'plugin-cloud',
   'plugin-cloud-storage',
-  // 'plugin-form-builder',
+  'plugin-form-builder',
   'plugin-nested-docs',
   'plugin-redirects',
   'plugin-search',
