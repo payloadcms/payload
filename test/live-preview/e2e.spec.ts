@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -7,16 +6,12 @@ import { fileURLToPath } from 'url'
 
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
-import config from './config.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { mobileBreakpoint } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-let payload: Payload
 
 describe('Live Preview', () => {
   let page: Page
@@ -47,7 +42,7 @@ describe('Live Preview', () => {
   }
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL, payload } = await initPayloadE2E({ config, dirname }))
+    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
     url = new AdminUrlUtil(serverURL, 'pages')
     const context = await browser.newContext()
     page = await context.newPage()
@@ -149,7 +144,7 @@ describe('Live Preview', () => {
 
   test('global - can edit fields', async () => {
     await goToGlobalPreview(page, 'header')
-    const field = page.locator('input#field-navItems__0__link____newTab')
+    const field = page.locator('input#field-navItems__0__link__newTab') //field-navItems__0__link__newTab
     await expect(field).toBeVisible()
     await expect(field).toBeEnabled()
     await field.check()

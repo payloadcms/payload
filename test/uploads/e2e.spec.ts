@@ -12,7 +12,6 @@ import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
-import config from './config.js'
 import {
   adminThumbnailFunctionSlug,
   adminThumbnailSizeSlug,
@@ -40,7 +39,7 @@ describe('uploads', () => {
   let audioDoc: Media
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 

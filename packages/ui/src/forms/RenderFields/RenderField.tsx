@@ -84,6 +84,7 @@ export const RenderField: React.FC<Props> = ({
       readOnly={readOnly}
       schemaPath={schemaPath}
       siblingPermissions={siblingPermissions}
+      type={type}
     >
       {CustomField !== undefined ? CustomField : <DefaultField {...fieldComponentProps} />}
     </FieldPropsProvider>

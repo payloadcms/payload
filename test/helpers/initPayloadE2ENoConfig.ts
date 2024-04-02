@@ -1,35 +1,36 @@
-import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { createServer } from 'http'
 import nextImport from 'next'
 import path from 'path'
-import { type Payload } from 'payload'
 import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
+import type { GeneratedTypes } from './sdk/types.js'
+
 import { createTestHooks } from '../testHooks.js'
+import { PayloadTestSDK } from './sdk/index.js'
 import startMemoryDB from './startMemoryDB.js'
 
 type Args = {
   dirname: string
 }
 
-type Result = {
-  payload: Payload
+type Result<T extends GeneratedTypes<T>> = {
+  payload: PayloadTestSDK<T>
   serverURL: string
 }
 
-export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
+export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
+  dirname,
+}: Args): Promise<Result<T>> {
   const testSuiteName = dirname.split('/').pop()
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
-  await startMemoryDB()
-  const { default: config } = await import(path.resolve(dirname, 'config.ts'))
-
-  const payload = await getPayloadHMR({ config })
 
   const port = 3000
   process.env.PORT = String(port)
   const serverURL = `http://localhost:${port}`
+
+  await startMemoryDB()
 
   // @ts-expect-error
   const app = nextImport({
@@ -62,5 +63,8 @@ export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
 
   await wait(port)
 
-  return { payload, serverURL }
+  return {
+    serverURL,
+    payload: new PayloadTestSDK<T>({ serverURL }),
+  }
 }

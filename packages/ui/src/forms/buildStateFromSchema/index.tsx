@@ -6,6 +6,7 @@ import type {
   PayloadRequest,
 } from 'payload/types'
 
+import { calculateDefaultValues } from './calculateDefaultValues/index.js'
 import { iterateFields } from './iterateFields.js'
 
 type Args = {
@@ -38,10 +39,18 @@ export const buildStateFromSchema = async (args: Args): Promise<FormState> => {
   if (fieldSchema) {
     const state: FormState = {}
 
+    const dataWithDefaultValues = await calculateDefaultValues({
+      id,
+      data: fullData,
+      fields: fieldSchema,
+      req,
+      siblingData: fullData,
+    })
+
     await iterateFields({
       id,
       addErrorPathToParent: null,
-      data: fullData,
+      data: dataWithDefaultValues,
       fields: fieldSchema,
       fullData,
       operation,

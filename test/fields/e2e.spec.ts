@@ -21,7 +21,6 @@ import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { textDoc } from './collections/Text/shared.js'
-import config from './config.js'
 import { clearAndSeedEverything } from './seed.js'
 import {
   collapsibleFieldsSlug,
@@ -44,7 +43,7 @@ let serverURL: string
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
 
     const context = await browser.newContext()
     page = await context.newPage()

@@ -1571,12 +1571,18 @@ importers:
       execa:
         specifier: 5.1.1
         version: 5.1.1
+      http-status:
+        specifier: 1.6.2
+        version: 1.6.2
       payload:
         specifier: workspace:*
         version: link:../packages/payload
       tempy:
         specifier: ^1.0.1
         version: 1.0.1
+      ts-essentials:
+        specifier: 7.0.3
+        version: 7.0.3(typescript@5.4.2)
       typescript:
         specifier: 5.4.2
         version: 5.4.2
@@ -10928,7 +10934,6 @@ packages:
   /http-status@1.6.2:
     resolution: {integrity: sha512-oUExvfNckrpTpDazph7kNG8sQi5au3BeTo0idaZFXEhTaJKu7GNJCLHI0rYY2wljm548MSTM+Ljj/c6anqu2zQ==}
     engines: {node: '>= 0.4.0'}
-    dev: false
 
   /http2-wrapper@1.0.3:
     resolution: {integrity: sha512-V+23sDMr12Wnz7iTcDeJr3O6AIxlnvT/bmaAAAP/Xda35C90p9599p0F1eHR/N1KILWSoWVAiOMFjBBXaXSMxg==}

@@ -10,14 +10,14 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "command": "node --no-deprecation test/dev.js fields",
+      "command": "node --no-deprecation test/dev.js _community",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Community",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "pnpm run dev live-preview -- --no-turbo",
+      "command": "node --no-deprecation test/dev.js live-preview",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Live Preview",
       "request": "launch",

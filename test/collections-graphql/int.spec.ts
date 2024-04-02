@@ -1,15 +1,13 @@
 import type { Payload } from 'payload'
 
-import { getPayload } from 'payload'
 import { mapAsync } from 'payload/utilities'
 
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { startMemoryDB } from '../startMemoryDB.js'
-import configPromise, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
+import config, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const title = 'title'
 
@@ -18,11 +16,7 @@ let payload: Payload
 
 describe('collections-graphql', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(configPromise))
-
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(config))
 
     // Wait for indexes to be created,
     // as we need them to query by point
@@ -564,7 +558,7 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }))
       })
 
-      if (['mongoose'].includes(process.env.PAYLOAD_DATABASE)) {
+      if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
         describe('near', () => {
           const point = [10, 20]
           const [lat, lng] = point

@@ -4,7 +4,6 @@ import { File as FileBuffer } from 'buffer'
 import NodeFormData from 'form-data'
 import fs from 'fs'
 import path from 'path'
-import { getPayload } from 'payload'
 import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
@@ -13,7 +12,6 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
 import {
   enlargeSlug,
@@ -651,13 +649,12 @@ describe('Collections - Uploads', () => {
   describe('filesRequiredOnCreate', () => {
     // eslint-disable-next-line @typescript-eslint/require-await
     it('should allow file to be optional if filesRequiredOnCreate is false', async () => {
-      expect(
-        async () =>
-          await payload.create({
-            collection: 'optional-file',
-            data: {},
-          }),
-      ).not.toThrow()
+      const successfulCreate = await payload.create({
+        collection: 'optional-file',
+        data: {},
+      })
+
+      expect(successfulCreate.id).toBeDefined()
     })
 
     it('should throw an error if no file and filesRequiredOnCreate is true', async () => {

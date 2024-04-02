@@ -4,10 +4,10 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { clearAndSeedEverything } from './clearAndSeedEverything.js'
 import AutosavePosts from './collections/Autosave.js'
 import configPromise from './config.js'
 import AutosaveGlobal from './globals/Autosave.js'
-import { clearAndSeedEverything } from './seed.js'
 import { autosaveCollectionSlug, draftCollectionSlug } from './slugs.js'
 
 let payload: Payload

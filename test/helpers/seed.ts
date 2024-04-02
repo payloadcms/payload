@@ -7,7 +7,7 @@ import { isMongoose } from './isMongoose.js'
 import { resetDB } from './reset.js'
 import { createSnapshot, dbSnapshot, restoreFromSnapshot, uploadsDirCache } from './snapshot.js'
 
-type SeedFunction = (_payload: Payload) => Promise<void>
+type SeedFunction = (_payload: Payload) => Promise<void> | void
 
 export async function seedDB({
   _payload,
@@ -122,7 +122,9 @@ export async function seedDB({
   /**
    * Seed the database with data and save it to a snapshot
    **/
-  await seedFunction(_payload)
+  if (typeof seedFunction === 'function') {
+    await seedFunction(_payload)
+  }
 
   if (!alwaysSeed) {
     await createSnapshot(_payload, snapshotKey, collectionSlugs)

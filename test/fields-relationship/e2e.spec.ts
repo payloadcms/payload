@@ -27,7 +27,6 @@ import {
   relationWithTitleSlug,
   slug,
 } from './collectionSlugs.js'
-import config from './config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -48,7 +47,7 @@ describe('fields - relationship', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
 

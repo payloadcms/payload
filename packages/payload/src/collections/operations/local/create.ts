@@ -1,6 +1,6 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../..//index.js'
+import type { GeneratedTypes } from '../../../index.js'
 import type { Payload } from '../../../index.js'
 import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
@@ -58,7 +58,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     )
   }
 
-  const req = await createLocalReq(options, payload)
+  const req = createLocalReq(options, payload)
   req.file = file ?? (await getFileByPath(filePath))
 
   return createOperation<TSlug>({

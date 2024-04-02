@@ -1,15 +1,14 @@
 import type { Payload } from 'payload'
 
 import { randomBytes } from 'crypto'
-import { getPayload } from 'payload'
 import { mapAsync } from 'payload/utilities'
 
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
-import { startMemoryDB } from '../startMemoryDB.js'
-import configPromise, {
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import config, {
   customIdNumberSlug,
   customIdSlug,
   errorOnHookSlug,
@@ -23,9 +22,7 @@ let payload: Payload
 
 describe('collections-rest', () => {
   beforeAll(async () => {
-    const config = await startMemoryDB(configPromise)
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(config))
 
     // Wait for indexes to be created,
     // as we need them to query by point
@@ -982,7 +979,7 @@ describe('collections-rest', () => {
         })
       })
 
-      if (['mongoose'].includes(process.env.PAYLOAD_DATABASE)) {
+      if (['mongodb'].includes(process.env.PAYLOAD_DATABASE)) {
         describe('near', () => {
           const point = [10, 20]
           const [lat, lng] = point

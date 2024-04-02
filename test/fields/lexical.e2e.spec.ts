@@ -15,7 +15,6 @@ import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
-import config from './config.js'
 import { clearAndSeedEverything } from './seed.js'
 import { lexicalFieldsSlug } from './slugs.js'
 const filename = fileURLToPath(import.meta.url)
@@ -49,7 +48,7 @@ async function navigateToLexicalFields(navigateToListView: boolean = true) {
 describe('lexical', () => {
   beforeAll(async ({ browser }) => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
 
     const context = await browser.newContext()
     page = await context.newPage()

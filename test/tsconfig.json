@@ -42,6 +42,6 @@
     }
   },
   "exclude": ["dist", "build", "node_modules", ".eslintrc.js", "dist/**/*.js", "**/dist/**/*.js"],
-  "include": ["./**/*.ts", ".next/types/**/*.ts"],
+  "include": ["./**/*.ts", ".next/types/**/*.ts", "setup.js"],
   "references": []
 }
