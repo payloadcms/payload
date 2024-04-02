@@ -16,7 +16,7 @@ const customJestConfig = {
   },
   reporters: ['default', ['github-actions', { silent: false }], 'summary'],
   testEnvironment: 'node',
-  globalSetup: path.resolve(dirname, 'setup.ts'),
+  globalSetup: path.resolve(dirname, './helpers/startMemoryDB.ts'),
   testMatch: ['<rootDir>/**/*int.spec.ts'],
   testTimeout: 90000,
   transform: {

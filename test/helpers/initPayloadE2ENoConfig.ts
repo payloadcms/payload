@@ -8,6 +8,7 @@ import type { GeneratedTypes } from './sdk/types.js'
 
 import { createTestHooks } from '../testHooks.js'
 import { PayloadTestSDK } from './sdk/index.js'
+import startMemoryDB from './startMemoryDB.js'
 
 type Args = {
   dirname: string
@@ -28,6 +29,8 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
   const port = 3000
   process.env.PORT = String(port)
   const serverURL = `http://localhost:${port}`
+
+  await startMemoryDB()
 
   // @ts-expect-error
   const app = nextImport({
