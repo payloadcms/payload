@@ -7,6 +7,7 @@ import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
 import { createTestHooks } from '../testHooks.js'
+import startMemoryDB from './startMemoryDB.js'
 
 type Args = {
   dirname: string
@@ -21,7 +22,7 @@ export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   const testSuiteName = dirname.split('/').pop()
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
-
+  await startMemoryDB()
   const { default: config } = await import(path.resolve(dirname, 'config.ts'))
 
   const payload = await getPayloadHMR({ config })
