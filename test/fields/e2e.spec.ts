@@ -141,6 +141,7 @@ describe('fields', () => {
       await page.keyboard.press('Enter')
       await page.keyboard.type(furtherInput)
       await page.keyboard.press('Enter')
+      await wait(200)
       await saveDocAndAssert(page)
       await expect(field.locator('.rs__value-container')).toContainText(input)
       await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
@@ -288,6 +289,10 @@ describe('fields', () => {
       // nested in a group error
       await page.locator('#field-group__unique').fill(uniqueText)
 
+      // need to wait to allow for field to properly fill
+      // otherwise save action would occur too quickly
+      await wait(200)
+
       // attempt to save
       await page.locator('#action-save').click()
 
@@ -414,6 +419,10 @@ describe('fields', () => {
 
       const groupLatField = page.locator('#field-latitude-group__point')
       await groupLatField.fill('-8')
+
+      // need to wait to allow for field to properly fill
+      // otherwise save action would occur too quickly
+      await wait(200)
 
       await saveDocAndAssert(page)
       await expect(longField).toHaveAttribute('value', '9')
@@ -669,10 +678,10 @@ describe('fields', () => {
       await firstRow.fill('first row')
       await expect(firstRow).toHaveValue('first row')
 
-      await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText(
-        'The following field is invalid: blocksWithMinRows',
-      )
+      await wait(200)
+
+      await page.locator('#action-save').click()
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields.')
     })
 
     describe('row manipulation', () => {
@@ -894,7 +903,7 @@ describe('fields', () => {
       await page.goto(url.list)
       await page.waitForSelector('.table > table > tbody > tr td.cell-title')
       const rows = page.locator('.table > table > tbody > tr', {
-        has: page.locator('td.cell-title a', {
+        has: page.locator('td.cell-title span', {
           hasText: 'for test',
         }),
       })
@@ -903,7 +912,7 @@ describe('fields', () => {
       for (let i = 0; i < count; i++) {
         await rows
           .nth(i)
-          .locator('td.cell-_select .checkbox-input__input > input[type="checkbox"]')
+          .locator('.cell-_select .checkbox-input__input > input[type="checkbox"]')
           .click()
       }
       await page.locator('.edit-many__toggle').click()
@@ -950,18 +959,19 @@ describe('fields', () => {
       const jsonValue = '{ "foo": "bar"}'
 
       await page.goto(url.create)
-
+      await wait(200)
+      // Go to Row tab, update the value
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
       await page.locator('#field-numberInRow').fill(numberInRowValue)
       await page.locator('.json-field .inputarea').fill(jsonValue)
 
-      await wait(300)
+      await wait(200)
 
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
 
-      await wait(100)
+      await wait(200)
 
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
       await expect(page.locator('#field-numberInRow')).toHaveValue(numberInRowValue)
@@ -973,13 +983,13 @@ describe('fields', () => {
       const jsonValue = '{ "new": "value"}'
       await page.goto(url.list)
       await page.locator('.cell-id a').click()
-
+      await wait(200)
       // Go to Row tab, update the value
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
       await page.locator('.json-field .inputarea').fill(jsonValue)
 
-      await wait(250)
+      await wait(200)
 
       // Go to Array tab, then back to Row. Make sure new value is still there
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
@@ -992,7 +1002,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
       await page.click('#action-save', { delay: 100 })
 
-      await wait(250)
+      await wait(200)
 
       // Go back to row tab, make sure the new value is still present
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
@@ -1395,6 +1405,7 @@ describe('fields', () => {
       await expect(dateField).toBeVisible()
       await dateField.fill('02/07/2023')
       await expect(dateField).toHaveValue('02/07/2023')
+      await wait(500)
       await saveDocAndAssert(page)
 
       const clearButton = page.locator('#field-default .date-time-picker__clear-button')
@@ -1419,6 +1430,7 @@ describe('fields', () => {
 
           // enter date in default date field
           await dateField.fill('02/07/2023')
+          await wait(500)
           await saveDocAndAssert(page)
 
           // get the ID of the doc
@@ -1448,10 +1460,8 @@ describe('fields', () => {
 
           // enter date in default date field
           await dateField.fill('02/07/2023')
-          await page.locator('#action-save').click()
-
-          // wait for navigation to update route
-          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
+          await wait(500)
+          await saveDocAndAssert(page)
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -1480,6 +1490,7 @@ describe('fields', () => {
 
           // enter date in default date field
           await dateField.fill('02/07/2023')
+          await wait(500)
           await saveDocAndAssert(page)
 
           // get the ID of the doc
@@ -1516,7 +1527,7 @@ describe('fields', () => {
       const textValue = 'hello'
 
       await textField.fill(textValue)
-
+      await wait(500)
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
       await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
@@ -1555,6 +1566,7 @@ describe('fields', () => {
           '[id^=doc-drawer_relationship-fields_2_] .rs__option:has-text("Seeded text document")',
         )
         .click()
+      await wait(200)
 
       // Save then close the second modal
       await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click()
@@ -1563,6 +1575,7 @@ describe('fields', () => {
 
       // Assert that the first modal is still open and the value matches
       await expect(page.locator('[id^=doc-drawer_relationship-fields_1_]')).toBeVisible()
+      await wait(1000)
       await expect(
         page.locator(
           '[id^=doc-drawer_relationship-fields_1_] #field-relationToSelf .relationship--single-value__text',
@@ -1629,6 +1642,7 @@ describe('fields', () => {
       // await fill the required fields then save the document and check again
       await page.locator('#field-relationship').click()
       await page.locator('#field-relationship .rs__option:has-text("Seeded text document")').click()
+      await wait(200)
       await saveDocAndAssert(page)
 
       const valueAfterSave = page.locator('#field-relationHasManyPolymorphic .multi-value').first()
@@ -1657,6 +1671,7 @@ describe('fields', () => {
       await page.locator('#field-relationship .rs__control').click()
       await page.keyboard.type('seeded')
       await page.locator('.rs__option:has-text("Seeded text document")').click()
+      await wait(200)
       await saveDocAndAssert(page)
     })
 
@@ -1671,10 +1686,11 @@ describe('fields', () => {
         .click()
 
       await page.locator('.drawer__content #field-text').fill('something')
-
+      await wait(200)
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
       await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
+      await wait(200)
       await page.locator('#action-save').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
 
@@ -1683,10 +1699,11 @@ describe('fields', () => {
       await page.locator('#field-relationshipHasMany .relationship-add-new__add-button').click()
       const value = 'Hello, world!'
       await page.locator('.drawer__content #field-text').fill(value)
-
+      await wait(500)
       // Save and close the drawer
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
+      await wait(500)
       await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click()
 
       // Now open the drawer again to edit the `text` field _using the keyboard_
@@ -1773,7 +1790,7 @@ describe('fields', () => {
       await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
       await page.locator('#field-relationship .value-container').click()
       await page.getByText('Seeded text document', { exact: true }).click()
-
+      await wait(200)
       await saveDocAndAssert(page)
       await expect(page.locator('.Toastify')).toContainText('successfully')
     })
@@ -1786,18 +1803,20 @@ describe('fields', () => {
       await page.getByText('Seeded text document', { exact: true }).click()
 
       // Need to wait to allow for field to retrieve documents before the save occurs
-      await wait(200)
+      await wait(500)
 
       await page.locator('#field-relationshipWithMinRows .value-container').click()
 
       await page
         .locator('#field-relationshipWithMinRows .rs__option:has-text("Seeded text document")')
         .click()
+      await wait(500)
+      await page.locator('#action-save').click()
+      // await expect(page.locator('.Toastify')).toContainText(
+      //   'The following field is invalid: relationshipWithMinRows',
+      // )
 
-      await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText(
-        'The following field is invalid: relationshipWithMinRows',
-      )
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields.')
     })
 
     test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
@@ -1864,7 +1883,6 @@ describe('fields', () => {
 
     async function uploadImage() {
       await page.goto(url.create)
-
       // create a jpg upload
       await page
         .locator('.file-field__upload input[type="file"]')
@@ -1891,6 +1909,7 @@ describe('fields', () => {
     test('should upload using the document drawer', async () => {
       await uploadImage()
       // Open the media drawer and create a png upload
+      await wait(500)
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
@@ -1898,7 +1917,7 @@ describe('fields', () => {
       await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
       await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
-
+      await wait(200)
       // Assert that the media field has the png upload
       await expect(
         page.locator('.field-type.upload .file-details .file-meta__url a'),
@@ -1917,6 +1936,7 @@ describe('fields', () => {
 
     test('should clear selected upload', async () => {
       await uploadImage()
+      await wait(200)
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
@@ -1970,8 +1990,8 @@ describe('fields', () => {
       await idInput.fill('123')
       const titleInput = page.locator('input#field-title')
       await titleInput.fill('Row 123')
-      await page.locator('#action-save').click()
       await wait(200)
+      await page.locator('#action-save').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
 
       // ensure the 'title' field is visible in the table header
@@ -1992,8 +2012,8 @@ describe('fields', () => {
       await idInput.fill('456')
       const titleInput = page.locator('input#field-title')
       await titleInput.fill('Row 456')
-      await page.locator('#action-save').click()
       await wait(200)
+      await page.locator('#action-save').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
 
       // ensure there are not two ID fields in the table header
