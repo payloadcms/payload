@@ -257,8 +257,8 @@ importers:
         specifier: 0.8.5
         version: 0.8.5
       simple-git:
-        specifier: ^3.20.0
-        version: 3.22.0
+        specifier: ^3.24.0
+        version: 3.24.0
       slash:
         specifier: 3.0.0
         version: 3.0.0
@@ -15908,8 +15908,8 @@ packages:
       simple-concat: 1.0.1
     dev: true
 
-  /simple-git@3.22.0:
-    resolution: {integrity: sha512-6JujwSs0ac82jkGjMHiCnTifvf1crOiY/+tfs/Pqih6iow7VrpNKRRNdWm6RtaXpvvv/JGNYhlUtLhGFqHF+Yw==}
+  /simple-git@3.24.0:
+    resolution: {integrity: sha512-QqAKee9Twv+3k8IFOFfPB2hnk6as6Y6ACUpwCtQvRYBAes23Wv3SZlHVobAzqcE8gfsisCvPw3HGW3HYM+VYYw==}
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1

@@ -117,7 +117,35 @@ jobs:
       - run: pnpm install
       - run: pnpm run build:plugins
 
-  tests:
+  tests-unit:
+    runs-on: ubuntu-latest
+    needs: core-build
+    if: false # Disable until tests are updated for 3.0
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Unit Tests
+        run: pnpm test:unit
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+
+  tests-int:
     runs-on: ubuntu-latest
     needs: core-build
     strategy:
@@ -200,12 +228,6 @@ jobs:
         run: |
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
         if: matrix.database == 'supabase'
-
-      - name: Unit Tests
-        if: false # Disable until tests are updated for 3.0
-        run: pnpm test:unit
-        env:
-          NODE_OPTIONS: --max-old-space-size=8096
 
       - name: Integration Tests
         run: pnpm test:int
