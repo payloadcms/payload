@@ -1,9 +1,9 @@
 import type { Payload } from 'payload'
 
-import { getPayload } from 'payload'
+import type { NextRESTClient } from '../../helpers/NextRESTClient.js'
 
 import { devUser } from '../../credentials.js'
-import { NextRESTClient } from '../../helpers/NextRESTClient.js'
+import { initPayloadInt } from '../../helpers/initPayloadInt.js'
 import config, { collectionSlug } from './config.js'
 
 let restClient: NextRESTClient
@@ -11,8 +11,7 @@ let payload: Payload
 
 describe('Remove token from auth responses', () => {
   beforeAll(async () => {
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(config))
 
     await restClient.POST(`/${collectionSlug}/first-register`, {
       body: JSON.stringify(devUser),

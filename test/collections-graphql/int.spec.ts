@@ -1,11 +1,10 @@
 import type { Payload } from 'payload'
 
-import { getPayload } from 'payload'
 import { mapAsync } from 'payload/utilities'
 
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import config, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
@@ -18,9 +17,6 @@ let payload: Payload
 describe('collections-graphql', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(config))
-
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
 
     // Wait for indexes to be created,
     // as we need them to query by point

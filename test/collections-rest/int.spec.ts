@@ -1,13 +1,13 @@
 import type { Payload } from 'payload'
 
 import { randomBytes } from 'crypto'
-import { getPayload } from 'payload'
 import { mapAsync } from 'payload/utilities'
 
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import config, {
   customIdNumberSlug,
   customIdSlug,
@@ -22,8 +22,7 @@ let payload: Payload
 
 describe('collections-rest', () => {
   beforeAll(async () => {
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(config))
 
     // Wait for indexes to be created,
     // as we need them to query by point

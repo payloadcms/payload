@@ -21,7 +21,7 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   }
 
   if (cached.payload) {
-    const config = await options.config
+    const config = await options.config // TODO: check if we can move this inside the cached.reload === true condition
 
     if (cached.reload === true) {
       let resolve
@@ -65,6 +65,7 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
     cached.payload = await cached.promise
 
     if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+      console.log('6792364')
       try {
         const port = process.env.PORT || '3000'
         const ws = new WebSocket(`ws://localhost:${port}/_next/webpack-hmr`)

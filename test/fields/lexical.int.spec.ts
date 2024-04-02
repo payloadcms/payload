@@ -8,12 +8,11 @@ import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
 import type { Payload } from 'payload'
 import type { PaginatedDocs } from 'payload/database'
 
-import { getPayload } from 'payload'
-
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
@@ -44,7 +43,7 @@ let createdRichTextDocID: number | string = null
 describe('Lexical', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    payload = await getPayload({ config })
+    ;({ payload, restClient } = await initPayloadInt(config))
   })
 
   beforeEach(async () => {

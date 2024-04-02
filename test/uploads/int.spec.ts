@@ -4,7 +4,6 @@ import { File as FileBuffer } from 'buffer'
 import NodeFormData from 'form-data'
 import fs from 'fs'
 import path from 'path'
-import { getPayload } from 'payload'
 import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
@@ -13,7 +12,6 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { startMemoryDB } from '../startMemoryDB.js'
 import configPromise from './config.js'
 import {
   enlargeSlug,

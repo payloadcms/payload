@@ -1,8 +1,8 @@
 import type { Payload } from 'payload'
 
-import { getPayload } from 'payload'
+import type { NextRESTClient } from '../../helpers/NextRESTClient.js'
 
-import { NextRESTClient } from '../../helpers/NextRESTClient.js'
+import { initPayloadInt } from '../../helpers/initPayloadInt.js'
 import config from './config.js'
 import { usersSlug } from './shared.js'
 
@@ -17,8 +17,7 @@ const headers = {
 
 describe('AuthStrategies', () => {
   beforeAll(async () => {
-    payload = await getPayload({ config })
-    restClient = new NextRESTClient(payload.config)
+    ;({ payload, restClient } = await initPayloadInt(config))
   })
 
   afterAll(async () => {
