@@ -1,11 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type {
-  Data,
-  FormField,
-  FormState,
-  NonPresentationalField,
-  PayloadRequest,
-} from 'payload/types'
+import type { Data, Field, FormField, FormState, PayloadRequest } from 'payload/types'
 
 import ObjectIdImport from 'bson-objectid'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
@@ -23,7 +17,7 @@ export type AddFieldStatePromiseArgs = {
    */
   anyParentLocalized?: boolean
   data: Data
-  field: NonPresentationalField
+  field: Field
   fieldIndex: number
   /**
    * You can use this to filter down to only `localized` fields that require translation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
@@ -76,6 +70,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     anyParentLocalized = false,
     data,
     field,
+    fieldIndex,
     filter,
     forceFullValue = false,
     fullData,
@@ -348,6 +343,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       case 'group': {
+        if (!filter || filter(args)) {
+          fieldState.disableFormData = true
+          state[`${path}${field.name}`] = fieldState
+        }
+
         await iterateFields({
           id,
           addErrorPathToParent,
@@ -483,6 +483,18 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   } else if (fieldHasSubFields(field)) {
     // Handle field types that do not use names (row, etc)
+
+    if (!filter || filter(args)) {
+      state[`${path}_index-${fieldIndex}`] = {
+        disableFormData: true,
+        errorPaths: [],
+        initialValue: undefined,
+        passesCondition,
+        valid: true,
+        value: undefined,
+      }
+    }
+
     await iterateFields({
       id,
       // passthrough parent functionality
@@ -506,12 +518,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     })
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab) => {
+      const isNamedTab = tabHasName(tab)
+
       return iterateFields({
         id,
         // passthrough parent functionality
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
-        data: tabHasName(tab) ? data?.[tab.name] || {} : data,
+        data: isNamedTab ? data?.[tab.name] || {} : data,
         fields: tab.fields,
         filter,
         forceFullValue,
@@ -520,7 +534,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         omitParents,
         operation,
         parentPassesCondition: passesCondition,
-        path: tabHasName(tab) ? `${path}${tab.name}.` : path,
+        path: isNamedTab ? `${path}${tab.name}.` : path,
         preferences,
         req,
         skipConditionChecks,
@@ -530,5 +544,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     })
 
     await Promise.all(promises)
+  } else if (field.type === 'ui') {
+    if (!filter || filter(args)) {
+      state[`${path}_index-${fieldIndex}`] = {
+        disableFormData: true,
+        errorPaths: [],
+        initialValue: undefined,
+        passesCondition,
+        valid: true,
+        value: undefined,
+      }
+    }
   }
 }

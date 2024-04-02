@@ -19,26 +19,6 @@ export const PostsCollection: CollectionConfig = {
       fields: [],
     },
     {
-      name: 'richText',
-      type: 'richText',
-    },
-    {
-      name: 'relationship',
-      type: 'relationship',
-      // filterOptions: ({ id }) => {
-      //   return {
-      //     where: [
-      //       {
-      //         id: {
-      //           not_equals: id,
-      //         },
-      //       },
-      //     ],
-      //   }
-      // },
-      relationTo: ['posts'],
-    },
-    {
       name: 'associatedMedia',
       type: 'upload',
       access: {
@@ -46,27 +26,6 @@ export const PostsCollection: CollectionConfig = {
         update: () => false,
       },
       relationTo: mediaSlug,
-    },
-    {
-      name: 'blocksField',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'block1',
-          fields: [
-            {
-              name: 'group1',
-              type: 'group',
-              fields: [
-                {
-                  name: 'group1Text',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-        },
-      ],
     },
   ],
   versions: {
