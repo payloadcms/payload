@@ -1,7 +1,7 @@
-import type { HTMLConverter } from '../types'
+import type { HTMLConverter } from '../types.js'
 
-import { replaceDoubleCurlys } from '../../replaceDoubleCurlys'
-import { convertLexicalNodesToHTML } from '../serializeLexical'
+import { replaceDoubleCurlys } from '../../replaceDoubleCurlys.js'
+import { convertLexicalNodesToHTML } from '../serializeLexical.js'
 
 export const LinkHTMLConverter: HTMLConverter<any> = {
   async converter({ converters, node, parent, submissionData }) {

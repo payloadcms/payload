@@ -254,6 +254,7 @@ jobs:
           - fields/lexical
           - live-preview
           - localization
+          - plugin-form-builder
           - plugin-nested-docs
           - plugin-seo
           # - refresh-permissions

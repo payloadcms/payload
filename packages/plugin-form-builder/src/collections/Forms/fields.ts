@@ -587,5 +587,3 @@ export const fields = {
 } as {
   [key: string]: ((fieldConfig?: FieldConfig | boolean) => Block) | Block
 }
-
-export default fields

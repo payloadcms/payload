@@ -1,7 +1,7 @@
-import type { HTMLConverter } from '../types'
+import type { HTMLConverter } from '../types.js'
 
-import { replaceDoubleCurlys } from '../../replaceDoubleCurlys'
-import { NodeFormat } from '../nodeFormat'
+import { replaceDoubleCurlys } from '../../replaceDoubleCurlys.js'
+import { NodeFormat } from '../nodeFormat.js'
 
 export const TextHTMLConverter: HTMLConverter<any> = {
   converter({ node, submissionData }) {
