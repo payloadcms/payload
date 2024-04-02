@@ -1,15 +1,12 @@
 import type { Payload } from 'payload'
 import type { Where } from 'payload/types'
 
-import { getPayload } from 'payload'
-
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js'
 
 import { englishLocale } from '../globals/config.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { startMemoryDB } from '../startMemoryDB.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
 import configPromise from './config.js'
@@ -1011,6 +1008,51 @@ describe('Localization', () => {
       expect(rowDefault.textNotLocalized).toEqual('test')
       expect(rowSpanish.text).toEqual('spanish')
       expect(rowSpanish.textNotLocalized).toEqual('test')
+    })
+  })
+
+  describe('Duplicate Collection', () => {
+    it('should duplicate localized document', async () => {
+      const localizedPost = await payload.create({
+        collection: localizedPostsSlug,
+        data: {
+          localizedCheckbox: true,
+          title: englishTitle,
+        },
+        locale: defaultLocale,
+      })
+
+      const id = localizedPost.id.toString()
+
+      await payload.update({
+        id,
+        collection: localizedPostsSlug,
+        data: {
+          localizedCheckbox: false,
+          title: spanishTitle,
+        },
+        locale: spanishLocale,
+      })
+
+      const result = await payload.duplicate({
+        id,
+        collection: localizedPostsSlug,
+        locale: defaultLocale,
+      })
+
+      const allLocales = await payload.findByID({
+        id: result.id,
+        collection: localizedPostsSlug,
+        locale: 'all',
+      })
+
+      // check fields
+      expect(result.title).toStrictEqual(englishTitle)
+
+      expect(allLocales.title.es).toStrictEqual(spanishTitle)
+
+      expect(allLocales.localizedCheckbox.en).toBeTruthy()
+      expect(allLocales.localizedCheckbox.es).toBeFalsy()
     })
   })
 })

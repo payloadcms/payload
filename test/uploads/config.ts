@@ -8,7 +8,7 @@ import removeFiles from '../helpers/removeFiles.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
-import Uploads2 from './collections/Upload2/index.js'
+import { Uploads2 } from './collections/Upload2/index.js'
 import {
   audioSlug,
   enlargeSlug,
@@ -443,7 +443,10 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
-      upload: true,
+      upload: {
+        staticDir: path.resolve(dirname, `./${versionSlug}`),
+        filesRequiredOnCreate: true,
+      },
       versions: {
         drafts: true,
       },

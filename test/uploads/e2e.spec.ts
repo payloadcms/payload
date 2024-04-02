@@ -79,8 +79,8 @@ describe('uploads', () => {
 
   test('should see upload filename in relation list', async () => {
     await page.goto(relationURL.list)
-
     await page.waitForURL(relationURL.list)
+
     const field = page.locator('.cell-image')
 
     await expect(field).toContainText('image.png')
@@ -89,8 +89,8 @@ describe('uploads', () => {
   // WIP: sometimes the waitForURL() times out
   test('should see upload versioned filename in relation list', async () => {
     await page.goto(relationURL.list)
-
     await page.waitForURL(relationURL.list)
+
     const field = page.locator('.cell-versionedImage')
 
     await expect(field).toContainText('image')
@@ -188,6 +188,7 @@ describe('uploads', () => {
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
     await page.waitForURL(relationURL.list)
+
     // from the list edit the first document
     await page.locator('.row-1 a').click()
 
@@ -222,7 +223,6 @@ describe('uploads', () => {
     await page.locator('.upload__toggler.list-drawer__toggler').click()
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
-    await wait(200) // list is loading
 
     // upload an image and try to select it
     await listDrawer.locator('button.list-drawer__create-new-button.doc-drawer__toggler').click()
@@ -231,13 +231,11 @@ describe('uploads', () => {
       .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
     await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
-    await wait(200)
     await expect(page.locator('.Toastify')).toContainText('successfully')
 
     // save the document and expect an error
     await page.locator('button#action-save').click()
-    await wait(200)
-    await expect(page.locator('.Toastify')).toContainText('The following field is invalid: audio')
+    await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields.')
   })
 
   test('Should render adminThumbnail when using a function', async () => {

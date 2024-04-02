@@ -21,6 +21,16 @@ type Args = {
   showHiddenFields: boolean
 }
 
+/**
+ * This function is responsible for the following actions, in order:
+ * - Remove hidden fields from response
+ * - Flatten locales into requested locale
+ * - Sanitize outgoing data (point field, etc.)
+ * - Execute field hooks
+ * - Execute read access control
+ * - Populate relationships
+ */
+
 export async function afterRead<T = any>(args: Args): Promise<T> {
   const {
     collection,

@@ -4,6 +4,7 @@ import * as CommentJson from 'comment-json'
 import { initNext } from 'create-payload-app/commands'
 import execa from 'execa'
 import fs from 'fs'
+import fse from 'fs-extra'
 import path from 'path'
 import shelljs from 'shelljs'
 import tempy from 'tempy'
@@ -66,9 +67,8 @@ describe('create-payload-app', () => {
       const firstResult = await initNext({
         '--debug': true,
         projectDir,
-        nextConfigPath: path.resolve(projectDir, 'next.config.mjs'),
         dbType: 'mongodb',
-        useDistFiles: true, // create-payload-app/dist/app/(payload)
+        useDistFiles: true, // create-payload-app/dist/template
         packageManager: 'pnpm',
       })
 
@@ -91,7 +91,6 @@ describe('create-payload-app', () => {
       const result = await initNext({
         '--debug': true,
         projectDir,
-        nextConfigPath: path.resolve(projectDir, 'next.config.mjs'),
         dbType: 'mongodb',
         useDistFiles: true, // create-payload-app/dist/app/(payload)
         packageManager: 'pnpm',
@@ -117,11 +116,22 @@ describe('create-payload-app', () => {
       const userTsConfig = CommentJson.parse(userTsConfigContent) as {
         compilerOptions?: CompilerOptions
       }
+
+      // Check that `@payload-config` path is added to tsconfig
       expect(userTsConfig.compilerOptions.paths?.['@payload-config']).toStrictEqual([
         `./${result.isSrcDir ? 'src/' : ''}payload.config.ts`,
       ])
 
-      // TODO: Start the Next.js app and check if it runs
+      // Payload dependencies should be installed
+      const packageJson = fse.readJsonSync(path.resolve(projectDir, 'package.json')) as {
+        dependencies: Record<string, string>
+      }
+      expect(packageJson.dependencies).toMatchObject({
+        payload: expect.any(String),
+        '@payloadcms/db-mongodb': expect.any(String),
+        '@payloadcms/richtext-lexical': expect.any(String),
+        '@payloadcms/next': expect.any(String),
+      })
     })
   })
 })

@@ -18,13 +18,20 @@ type Args<T> = {
   req: PayloadRequest
 }
 
+/**
+ * This function is responsible for the following actions, in order:
+ * - Sanitize incoming data
+ * - Execute field hooks
+ * - Execute field access control
+ * - Merge original document data into incoming data
+ * - Compute default values for undefined fields
+ */
 export const beforeValidate = async <T extends Record<string, unknown>>({
   id,
   collection,
   context,
   data: incomingData,
   doc,
-  duplicate = false,
   global,
   operation,
   overrideAccess,
@@ -38,7 +45,6 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
     context,
     data,
     doc,
-    duplicate,
     fields: collection?.fields || global?.fields,
     global,
     operation,

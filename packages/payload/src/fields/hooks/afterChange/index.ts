@@ -16,6 +16,10 @@ type Args<T> = {
   req: PayloadRequest
 }
 
+/**
+ * This function is responsible for the following actions, in order:
+ * - Execute field hooks
+ */
 export const afterChange = async <T extends Record<string, unknown>>({
   collection,
   context,

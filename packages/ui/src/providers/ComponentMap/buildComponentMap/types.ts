@@ -102,12 +102,13 @@ export type GlobalComponentMap = ConfigComponentMapBase
 
 export type ConfigComponentMapBase = {
   Edit: React.ReactNode
-  /* PreviewButton: React.ReactNode */
+  PreviewButton: React.ReactNode
   PublishButton: React.ReactNode
   SaveButton: React.ReactNode
   SaveDraftButton: React.ReactNode
   actionsMap: ActionMap
   fieldMap: FieldMap
+  isPreviewEnabled: boolean
 }
 
 export type ComponentMap = {

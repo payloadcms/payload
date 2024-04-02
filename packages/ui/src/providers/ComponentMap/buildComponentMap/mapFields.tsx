@@ -13,8 +13,6 @@ import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import { isPlainObject } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
-import type { RadioFieldProps } from '../../..//fields/RadioGroup/index.js'
-import type { RichTextFieldProps } from '../../..//fields/RichText/index.js'
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
 import type { BlocksFieldProps } from '../../../fields/Blocks/index.js'
 import type { CheckboxFieldProps } from '../../../fields/Checkbox/index.js'
@@ -26,7 +24,9 @@ import type { GroupFieldProps } from '../../../fields/Group/index.js'
 import type { JSONFieldProps } from '../../../fields/JSON/index.js'
 import type { NumberFieldProps } from '../../../fields/Number/index.js'
 import type { PointFieldProps } from '../../../fields/Point/index.js'
+import type { RadioFieldProps } from '../../../fields/RadioGroup/index.js'
 import type { RelationshipFieldProps } from '../../../fields/Relationship/types.js'
+import type { RichTextFieldProps } from '../../../fields/RichText/index.js'
 import type { RowFieldProps } from '../../../fields/Row/types.js'
 import type { SelectFieldProps } from '../../../fields/Select/index.js'
 import type { TabsFieldProps } from '../../../fields/Tabs/index.js'
@@ -729,9 +729,10 @@ export const mapFields = (args: {
 
   if (!disableAddingID && !hasID) {
     // TODO: For all fields (not just this one) we need to add the name to both .fieldComponentProps.name AND .name. This can probably be improved
-    result.unshift({
+    result.push({
       name: 'id',
       type: 'text',
+      CustomField: null,
       cellComponentProps: {
         name: 'id',
       },
