@@ -236,7 +236,7 @@ jobs:
           - plugin-seo
           # - refresh-permissions
           - versions
-          - uploads
+          # - uploads
 
     steps:
       - name: Use Node.js 18
