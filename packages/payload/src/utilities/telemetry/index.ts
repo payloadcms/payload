@@ -18,6 +18,7 @@ export type BaseEvent = {
   envID: string
   nodeEnv: string
   nodeVersion: string
+  payloadPackages: Record<string, string>
   payloadVersion: string
   projectID: string
 }
@@ -43,6 +44,11 @@ export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
         envID: getEnvID(),
         nodeEnv: process.env.NODE_ENV || 'development',
         nodeVersion: process.version,
+        payloadPackages: Object.keys(packageJSON.dependencies || {}).reduce((acc, key) => {
+          return key.startsWith('@payloadcms/')
+            ? { ...acc, [key]: packageJSON.dependencies[key] }
+            : acc
+        }, {}),
         payloadVersion: getPayloadVersion(packageJSON),
         projectID: getProjectID(payload, packageJSON),
       }
