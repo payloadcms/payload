@@ -84,18 +84,18 @@ export function moveMessage(args: { nextAppDir: string; projectDir: string }): s
   return `
 ${header('Next Steps:')}
 
-Payload does not support a top-level layout.tsx file in your Next.js app directory.
+Payload does not support a top-level layout.tsx file in the app directory.
 
 ${chalk.bold('To continue:')}
 
-Move all files from ./${relativePath} to a named directory such as ${chalk.bold('(app)')}
+Move all files from ./${relativePath} to a named directory such as ./${relativePath}/${chalk.bold('(app)')}
 
 Once moved, rerun the create-payload-app command again.
 `
 }
 
 export function feedbackOutro(): string {
-  return `${chalk.bgCyan(chalk.black(' Have feedback? '))} Visit ${createTerminalLink('GitHub', 'https://github.com/payloadcms/payload')}`
+  return `${chalk.bgCyan(chalk.black(' Have feedback? '))} Visit us on ${createTerminalLink('GitHub', 'https://github.com/payloadcms/payload')}.`
 }
 
 // Create terminalLink with fallback for unsupported terminals

@@ -128,9 +128,4 @@ describe('createProject', () => {
       })
     })
   })
-
-  describe('Templates', () => {
-    it.todo('Verify that all templates are valid')
-    // Loop through all templates.ts that should have replacement comments, and verify that they are present
-  })
 })
