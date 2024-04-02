@@ -7,6 +7,12 @@ export default async () => {
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_OPTIONS = '--no-deprecation'
 
+  console.log(
+    'Inside startMemoryDB',
+    process.env.PAYLOAD_DATABASE,
+    process.env.PAYLOAD_DATABASE === 'mongodb',
+  )
+
   if (
     (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') &&
     !global._mongoMemoryServer
@@ -19,5 +25,7 @@ export default async () => {
     })
 
     process.env.MONGODB_MEMORY_SERVER_URI = global._mongoMemoryServer.getUri()
+
+    console.log('Started mongo memory DB. URI:', process.env.MONGODB_MEMORY_SERVER_URI)
   }
 }
