@@ -336,8 +336,11 @@ describe('versions', () => {
       const newDescription = 'new description'
 
       await page.goto(autosaveURL.create)
-      await page.waitForURL(autosaveURL.create)
-      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+      // gets redirected from /create to /slug/id due to autosave
+      await page.waitForURL(`${autosaveURL.list}/**`)
+      await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
       const titleField = page.locator('#field-title')
       const descriptionField = page.locator('#field-description')
 
@@ -417,9 +420,9 @@ describe('versions', () => {
       await page.goto(autosaveURL.create)
       // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
       await page.waitForURL(`${autosaveURL.list}/**`)
-      await expect(() => expect(page.url()).not.toContain(`/preview`)).toPass({
+      await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
-      }) // Make sure this doesnt match for list view and /create view, but only for the ID edit view
+      }) // Make sure this doesnt match for list view and /create view, but ONLY for the ID edit view
 
       await page.locator('#field-title').fill('first post title')
       await page.locator('#field-description').fill('first post description')
@@ -430,7 +433,7 @@ describe('versions', () => {
       await page.goto(autosaveURL.create)
       // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
       await page.waitForURL(`${autosaveURL.list}/**`)
-      await expect(() => expect(page.url()).not.toContain(`/preview`)).toPass({
+      await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       }) // Make sure this doesnt match for list view and /create view, but only for the ID edit view
       await page.locator('#field-title').fill('second post title')
