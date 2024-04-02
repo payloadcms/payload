@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 import type { NextRESTClient } from '../../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../../helpers/initPayloadInt.js'
-import config from './config.js'
+import configPromise from './config.js'
 import { usersSlug } from './shared.js'
 
 let payload: Payload
@@ -17,7 +17,7 @@ const headers = {
 
 describe('AuthStrategies', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(config))
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
   })
 
   afterAll(async () => {
