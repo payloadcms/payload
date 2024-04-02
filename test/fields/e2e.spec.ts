@@ -1812,9 +1812,6 @@ describe('fields', () => {
         .click()
       await wait(500)
       await page.locator('#action-save').click()
-      // await expect(page.locator('.Toastify')).toContainText(
-      //   'The following field is invalid: relationshipWithMinRows',
-      // )
 
       await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields.')
     })
