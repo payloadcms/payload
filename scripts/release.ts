@@ -36,9 +36,9 @@ const packageWhitelist = [
   // 'plugin-stripe',
 ]
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const cwd = path.resolve(__dirname, '..')
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+const cwd = path.resolve(dirname, '..')
 
 const git = simpleGit(cwd)
 
@@ -180,7 +180,7 @@ async function main() {
 
   // Set version in root package.json
   header(`${logPrefix}📦 Updating root package.json...`)
-  const rootPackageJsonPath = path.resolve(__dirname, '../package.json')
+  const rootPackageJsonPath = path.resolve(dirname, '../package.json')
   const rootPackageJson = await fse.readJSON(rootPackageJsonPath)
   rootPackageJson.version = nextReleaseVersion
   if (!dryRun) {
