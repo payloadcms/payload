@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { initPageConsoleErrorCatch } from '../helpers.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 
 const { beforeAll, describe } = test
 const filename = fileURLToPath(import.meta.url)
@@ -16,7 +16,7 @@ describe('field error states', () => {
   let page: Page
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL } = await initPayloadE2E({ dirname }))
+    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
