@@ -32,13 +32,15 @@
     "@payloadcms/richtext-slate": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "create-payload-app": "workspace:*",
-    "eslint-plugin-playwright": "1.5.3",
-    "eslint-plugin-payload": "workspace:*",
-    "payload": "workspace:*",
-    "execa": "5.1.1",
-    "tempy": "^1.0.1",
     "comment-json": "^4.2.3",
+    "create-payload-app": "workspace:*",
+    "eslint-plugin-payload": "workspace:*",
+    "eslint-plugin-playwright": "1.5.3",
+    "execa": "5.1.1",
+    "http-status": "1.6.2",
+    "payload": "workspace:*",
+    "tempy": "^1.0.1",
+    "ts-essentials": "7.0.3",
     "typescript": "5.4.2"
   }
 }

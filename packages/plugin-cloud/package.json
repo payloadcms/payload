@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo} && rimraf dev/yarn.lock",
     "prepublishOnly": "pnpm clean && pnpm turbo build",

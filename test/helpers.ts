@@ -90,6 +90,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 }
 
 export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
+  await wait(500) // TODO: Fix this
   await page.click(selector, { delay: 100 })
   await expect(page.locator('.Toastify')).toContainText('successfully')
   await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
