@@ -27,7 +27,7 @@ export const FileDetails: React.FC<FileDetailsProps> = (props) => {
   const { canEdit, collectionSlug, doc, handleRemove, hasImageSizes, imageCacheTag, uploadConfig } =
     props
 
-  const { id, filename, filesize, height, mimeType, url, width } = doc
+  const { id, filename, filesize, height, mimeType, thumbnailURL, url, width } = doc
 
   return (
     <div className={baseClass}>
@@ -35,6 +35,7 @@ export const FileDetails: React.FC<FileDetailsProps> = (props) => {
         <Thumbnail
           collectionSlug={collectionSlug}
           doc={doc}
+          fileSrc={thumbnailURL}
           imageCacheTag={imageCacheTag}
           uploadConfig={uploadConfig}
         />

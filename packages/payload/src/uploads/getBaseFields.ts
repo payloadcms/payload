@@ -14,12 +14,54 @@ const labels = extractTranslations([
   'upload:sizes',
 ])
 
+type GenerateURLArgs = {
+  collectionSlug: string
+  config: Config
+  filename?: string
+}
+const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
+  if (filename) {
+    return `${config.serverURL || ''}${config.routes.api || ''}/${collectionSlug}/file/${filename}`
+  }
+  return undefined
+}
+
+type Args = {
+  collectionConfig?: CollectionConfig
+  config: Config
+  doc: Record<string, unknown>
+}
+const generateAdminThumbnails = ({ collectionConfig, config, doc }: Args) => {
+  const adminThumbnail =
+    typeof collectionConfig.upload !== 'boolean'
+      ? collectionConfig.upload?.adminThumbnail
+      : undefined
+
+  if (typeof adminThumbnail === 'function') {
+    return adminThumbnail({ doc })
+  }
+
+  if ('sizes' in doc && doc.sizes?.[adminThumbnail]?.filename) {
+    return generateURL({
+      collectionSlug: collectionConfig.slug,
+      config,
+      filename: doc.sizes?.[adminThumbnail].filename as string,
+    })
+  }
+
+  return generateURL({
+    collectionSlug: collectionConfig.slug,
+    config,
+    filename: doc.filename as string,
+  })
+}
+
 type Options = {
   collection: CollectionConfig
   config: Config
 }
 
-const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
+export const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
   const uploadOptions: UploadConfig = typeof collection.upload === 'object' ? collection.upload : {}
 
   const mimeType: Field = {
@@ -40,6 +82,26 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
       readOnly: true,
     },
     label: 'URL',
+  }
+
+  const thumbnailURL: Field = {
+    name: 'thumbnailURL',
+    type: 'text',
+    admin: {
+      hidden: true,
+      readOnly: true,
+    },
+    hooks: {
+      afterRead: [
+        ({ data }) =>
+          generateAdminThumbnails({
+            collectionConfig: collection,
+            config,
+            doc: data,
+          }),
+      ],
+    },
+    label: 'Thumbnail URL',
   }
 
   const width: Field = {
@@ -90,16 +152,16 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
       ...url,
       hooks: {
         afterRead: [
-          ({ data }) => {
-            if (data?.filename) {
-              return `${config.serverURL}${config.routes.api}/${collection.slug}/file/${data.filename}`
-            }
-
-            return undefined
-          },
+          ({ data }) =>
+            generateURL({
+              collectionSlug: collection.slug,
+              config,
+              filename: data?.filename,
+            }),
         ],
       },
     },
+    thumbnailURL,
     filename,
     mimeType,
     filesize,
@@ -159,5 +221,3 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
   }
   return uploadFields
 }
-
-export default getBaseUploadFields

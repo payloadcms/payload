@@ -5,9 +5,10 @@ import { fileURLToPath } from 'url'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
+import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
-import { AdminThumbnailCol } from './collections/admin-thumbnail/index.js'
 import {
   audioSlug,
   enlargeSlug,
@@ -416,7 +417,8 @@ export default buildConfigWithDefaults({
     },
     Uploads1,
     Uploads2,
-    AdminThumbnailCol,
+    AdminThumbnailFunction,
+    AdminThumbnailSize,
     {
       slug: 'optional-file',
       fields: [],
@@ -508,7 +510,7 @@ export default buildConfigWithDefaults({
 
     // Create admin thumbnail media
     await payload.create({
-      collection: AdminThumbnailCol.slug,
+      collection: AdminThumbnailSize.slug,
       data: {},
       file: {
         ...audioFile,
@@ -517,11 +519,20 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
-      collection: AdminThumbnailCol.slug,
+      collection: AdminThumbnailSize.slug,
       data: {},
       file: {
         ...imageFile,
         name: `thumb-${imageFile.name}`,
+      },
+    })
+
+    await payload.create({
+      collection: AdminThumbnailFunction.slug,
+      data: {},
+      file: {
+        ...imageFile,
+        name: `function-image-${imageFile.name}`,
       },
     })
   },

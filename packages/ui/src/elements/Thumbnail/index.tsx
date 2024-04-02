@@ -1,13 +1,14 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
-import { File } from '../../graphics/File/index.js'
-import { useThumbnail } from '../../hooks/useThumbnail.js'
 import './index.scss'
 
 const baseClass = 'thumbnail'
 
 import type { SanitizedCollectionConfig } from 'payload/types'
+
+import { File } from '../../graphics/File/index.js'
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
 export type ThumbnailProps = {
   className?: string
@@ -19,33 +20,41 @@ export type ThumbnailProps = {
   uploadConfig?: SanitizedCollectionConfig['upload']
 }
 
+const ThumbnailContext = React.createContext({
+  className: '',
+  filename: '',
+  size: 'medium',
+  src: '',
+})
+
+export const useThumbnailContext = () => React.useContext(ThumbnailContext)
+
 export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
-  const {
-    className = '',
-    collectionSlug,
-    doc: { filename } = {},
-    doc,
-    fileSrc,
-    imageCacheTag,
-    size,
-    uploadConfig,
-  } = props
+  const { className = '', doc: { filename } = {}, fileSrc, size } = props
+  const [fileExists, setFileExists] = React.useState(undefined)
 
-  const thumbnailSRC = useThumbnail(collectionSlug, uploadConfig, doc) || fileSrc
-  const [src, setSrc] = useState(thumbnailSRC)
+  const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
-  const classes = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
-
-  useEffect(() => {
-    if (thumbnailSRC) {
-      setSrc(`${thumbnailSRC}${imageCacheTag ? `?${imageCacheTag}` : ''}`)
+  React.useEffect(() => {
+    if (!fileSrc) {
+      return
     }
-  }, [thumbnailSRC, imageCacheTag])
+
+    const img = new Image()
+    img.src = fileSrc
+    img.onload = () => {
+      setFileExists(true)
+    }
+    img.onerror = () => {
+      setFileExists(false)
+    }
+  }, [fileSrc])
 
   return (
-    <div className={classes}>
-      {src && <img alt={filename as string} src={src} />}
-      {!src && <File />}
+    <div className={classNames}>
+      {fileExists === undefined && <ShimmerEffect height="100%" />}
+      {fileExists && <img alt={filename as string} src={fileSrc} />}
+      {fileExists === false && <File />}
     </div>
   )
 }

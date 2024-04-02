@@ -37,7 +37,8 @@
       "@payloadcms/ui/templates/*": ["./packages/ui/src/templates/*/index.tsx"],
       "@payloadcms/ui/utilities/*": ["./packages/ui/src/utilities/*.ts"],
       "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
-      "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"]
+      "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
+      "payload/types": ["./packages/payload/src/exports/types/index.ts"],
     }
   },
   "exclude": ["dist", "build", "node_modules", ".eslintrc.js", "dist/**/*.js", "**/dist/**/*.js"],
