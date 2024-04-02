@@ -257,7 +257,6 @@ jobs:
           - plugin-form-builder
           - plugin-nested-docs
           - plugin-seo
-          # - refresh-permissions
           - versions
           # - uploads
 
