@@ -251,7 +251,6 @@ export type CollectionAdminOptions = {
    * Custom description for collection
    */
   description?: EntityDescription
-  disableDuplicate?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -318,6 +317,10 @@ export type CollectionConfig = {
    * Default field to sort by in collection list view
    */
   defaultSort?: string
+  /**
+   * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
+   */
+  disableDuplicate?: boolean
   /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */

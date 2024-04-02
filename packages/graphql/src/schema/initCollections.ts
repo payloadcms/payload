@@ -238,12 +238,14 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       resolve: getDeleteResolver(collection),
     }
 
-    graphqlResult.Mutation.fields[`duplicate${singularName}`] = {
-      type: collection.graphQL.type,
-      args: {
-        id: { type: new GraphQLNonNull(idType) },
-      },
-      resolve: duplicateResolver(collection),
+    if (collectionConfig.disableDuplicate !== true) {
+      graphqlResult.Mutation.fields[`duplicate${singularName}`] = {
+        type: collection.graphQL.type,
+        args: {
+          id: { type: new GraphQLNonNull(idType) },
+        },
+        resolve: duplicateResolver(collection),
+      }
     }
 
     if (collectionConfig.versions) {
