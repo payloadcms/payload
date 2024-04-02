@@ -11,7 +11,7 @@ export async function writeEnvFile(args: {
   databaseUri: string
   payloadSecret: string
   projectDir: string
-  template: ProjectTemplate
+  template?: ProjectTemplate
 }): Promise<void> {
   const { cliArgs, databaseUri, payloadSecret, projectDir, template } = args
 
@@ -21,7 +21,7 @@ export async function writeEnvFile(args: {
   }
 
   try {
-    if (template.type === 'starter' && fs.existsSync(path.join(projectDir, '.env.example'))) {
+    if (template?.type === 'starter' && fs.existsSync(path.join(projectDir, '.env.example'))) {
       // Parse .env file into key/value pairs
       const envFile = await fs.readFile(path.join(projectDir, '.env.example'), 'utf8')
       const envWithValues: string[] = envFile
@@ -47,7 +47,7 @@ export async function writeEnvFile(args: {
       // Write new .env file
       await fs.writeFile(path.join(projectDir, '.env'), envWithValues.join('\n'))
     } else {
-      const content = `MONGODB_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`
+      const content = `DATABASE_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`
       await fs.outputFile(`${projectDir}/.env`, content)
     }
   } catch (err: unknown) {

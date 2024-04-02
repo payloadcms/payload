@@ -2,8 +2,9 @@ import * as p from '@clack/prompts'
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
 import chalk from 'chalk'
+// @ts-expect-error no types
 import { detect } from 'detect-package-manager'
-import globby from 'globby'
+import figures from 'figures'
 import path from 'path'
 
 import type { CliArgs, PackageManager } from './types.js'
@@ -11,14 +12,20 @@ import type { CliArgs, PackageManager } from './types.js'
 import { configurePayloadConfig } from './lib/configure-payload-config.js'
 import { createProject } from './lib/create-project.js'
 import { generateSecret } from './lib/generate-secret.js'
-import { initNext } from './lib/init-next.js'
+import { getNextAppDetails, initNext } from './lib/init-next.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { writeEnvFile } from './lib/write-env-file.js'
 import { error, info } from './utils/log.js'
-import { feedbackOutro, helpMessage, successMessage, successfulNextInit } from './utils/messages.js'
+import {
+  feedbackOutro,
+  helpMessage,
+  moveMessage,
+  successMessage,
+  successfulNextInit,
+} from './utils/messages.js'
 
 export class Main {
   args: CliArgs
@@ -62,12 +69,6 @@ export class Main {
   }
 
   async init(): Promise<void> {
-    const initContext: {
-      nextConfigPath: string | undefined
-    } = {
-      nextConfigPath: undefined,
-    }
-
     try {
       if (this.args['--help']) {
         helpMessage()
@@ -77,15 +78,14 @@ export class Main {
       // eslint-disable-next-line no-console
       console.log('\n')
       p.intro(chalk.bgCyan(chalk.black(' create-payload-app ')))
-      p.log.message("Welcome to Payload. Let's create a project!")
-      // Detect if inside Next.js projeckpt
-      const nextConfigPath = (
-        await globby('next.config.*js', { absolute: true, cwd: process.cwd() })
-      )?.[0]
-      initContext.nextConfigPath = nextConfigPath
+      p.note("Welcome to Payload. Let's create a project!")
 
-      if (initContext.nextConfigPath) {
-        this.args['--name'] = slugify(path.basename(path.dirname(initContext.nextConfigPath)))
+      // Detect if inside Next.js project
+      const nextAppDetails = await getNextAppDetails(process.cwd())
+      const { hasTopLevelLayout, nextAppDir, nextConfigPath } = nextAppDetails
+
+      if (nextConfigPath) {
+        this.args['--name'] = slugify(path.basename(path.dirname(nextConfigPath)))
       }
 
       const projectName = await parseProjectName(this.args)
@@ -96,13 +96,23 @@ export class Main {
       const packageManager = await getPackageManager(this.args, projectDir)
 
       if (nextConfigPath) {
-        // p.note('Detected existing Next.js project.')
-        p.log.step(chalk.bold('Detected existing Next.js project.'))
+        p.log.step(
+          chalk.bold(`${chalk.bgBlack(` ${figures.triangleUp} Next.js `)} project detected!`),
+        )
+
         const proceed = await p.confirm({
           initialValue: true,
-          message: 'Install Payload in this project?',
+          message: chalk.bold(`Install ${chalk.green('Payload')} in this project?`),
         })
         if (p.isCancel(proceed) || !proceed) {
+          p.outro(feedbackOutro())
+          process.exit(0)
+        }
+
+        // Check for top-level layout.tsx
+        if (nextAppDir && hasTopLevelLayout) {
+          p.log.warn(moveMessage({ nextAppDir, projectDir }))
+          p.outro(feedbackOutro())
           process.exit(0)
         }
 
@@ -111,12 +121,13 @@ export class Main {
         const result = await initNext({
           ...this.args,
           dbType: dbDetails.type,
-          nextConfigPath,
+          nextAppDetails,
           packageManager,
           projectDir,
         })
 
         if (result.success === false) {
+          p.outro(feedbackOutro())
           process.exit(1)
         }
 
@@ -127,7 +138,14 @@ export class Main {
           },
         })
 
-        info('Payload project successfully created!')
+        await writeEnvFile({
+          cliArgs: this.args,
+          databaseUri: dbDetails.dbUri,
+          payloadSecret: generateSecret(),
+          projectDir,
+        })
+
+        info('Payload project successfully initialized!')
         p.note(successfulNextInit(), chalk.bgGreen(chalk.black(' Documentation ')))
         p.outro(feedbackOutro())
         return
@@ -146,6 +164,7 @@ export class Main {
       const template = await parseTemplate(this.args, validTemplates)
       if (!template) {
         p.log.error('Invalid template given')
+        p.outro(feedbackOutro())
         process.exit(1)
       }
 

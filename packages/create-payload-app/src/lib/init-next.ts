@@ -25,7 +25,7 @@ import { wrapNextConfig } from './wrap-next-config.js'
 
 type InitNextArgs = Pick<CliArgs, '--debug'> & {
   dbType: DbType
-  nextConfigPath: string
+  nextAppDetails?: NextAppDetails
   packageManager: PackageManager
   projectDir: string
   useDistFiles?: boolean
@@ -43,24 +43,16 @@ type InitNextResult =
 export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   const { dbType: dbType, packageManager, projectDir } = args
 
-  const isSrcDir = fs.existsSync(path.resolve(projectDir, 'src'))
+  const nextAppDetails = args.nextAppDetails || (await getNextAppDetails(projectDir))
 
-  // Get app directory. Could be top-level or src/app
-  const nextAppDir = (
-    await globby(['**/app'], {
-      absolute: true,
-      cwd: projectDir,
-      onlyDirectories: true,
-    })
-  )?.[0]
+  const { hasTopLevelLayout, isSrcDir, nextAppDir } =
+    nextAppDetails || (await getNextAppDetails(projectDir))
 
   if (!nextAppDir) {
     return { isSrcDir, reason: `Could not find app directory in ${projectDir}`, success: false }
   }
 
-  // Check for top-level layout.tsx
-  const layoutPath = path.resolve(nextAppDir, 'layout.tsx')
-  if (fs.existsSync(layoutPath)) {
+  if (hasTopLevelLayout) {
     // Output directions for user to move all files from app to top-level directory named `(app)`
     p.log.warn(moveMessage({ nextAppDir, projectDir }))
     return {
@@ -76,8 +68,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
 
   const configurationResult = installAndConfigurePayload({
     ...args,
-    isSrcDir,
-    nextAppDir,
+    nextAppDetails,
     useDistFiles: true, // Requires running 'pnpm pack-template-files' in cpa
   })
 
@@ -115,7 +106,10 @@ async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean)
     userTsConfig.compilerOptions = {}
   }
 
-  if (!userTsConfig.compilerOptions.paths?.['@payload-config']) {
+  if (
+    !userTsConfig.compilerOptions?.paths?.['@payload-config'] &&
+    userTsConfig.compilerOptions?.paths
+  ) {
     userTsConfig.compilerOptions.paths = {
       ...(userTsConfig.compilerOptions.paths || {}),
       '@payload-config': [`./${isSrcDir ? 'src/' : ''}payload.config.ts`],
@@ -125,14 +119,23 @@ async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean)
 }
 
 function installAndConfigurePayload(
-  args: InitNextArgs & {
-    isSrcDir: boolean
-    nextAppDir: string
-  },
+  args: InitNextArgs & { nextAppDetails: NextAppDetails; useDistFiles?: boolean },
 ):
   | { payloadConfigPath: string; success: true }
   | { payloadConfigPath?: string; reason: string; success: false } {
-  const { '--debug': debug, isSrcDir, nextAppDir, nextConfigPath, projectDir, useDistFiles } = args
+  const {
+    '--debug': debug,
+    nextAppDetails: { isSrcDir, nextAppDir, nextConfigPath } = {},
+    projectDir,
+    useDistFiles,
+  } = args
+
+  if (!nextAppDir || !nextConfigPath) {
+    return {
+      reason: 'Could not find app directory or next.config.js',
+      success: false,
+    }
+  }
 
   const logDebug = (message: string) => {
     if (debug) origDebug(message)
@@ -164,7 +167,6 @@ function installAndConfigurePayload(
   logDebug(`Copying template files from ${templateFilesPath} to ${nextAppDir}`)
 
   const templateSrcDir = path.resolve(templateFilesPath, isSrcDir ? '' : 'src')
-  // const templateSrcDir = path.resolve(templateFilesPath)
 
   logDebug(`templateSrcDir: ${templateSrcDir}`)
   logDebug(`nextAppDir: ${nextAppDir}`)
@@ -217,4 +219,44 @@ async function installDeps(projectDir: string, packageManager: PackageManager, d
   }
 
   return { success: exitCode === 0 }
+}
+
+type NextAppDetails = {
+  hasTopLevelLayout: boolean
+  isSrcDir: boolean
+  nextAppDir?: string
+  nextConfigPath?: string
+}
+
+export async function getNextAppDetails(projectDir: string): Promise<NextAppDetails> {
+  const isSrcDir = fs.existsSync(path.resolve(projectDir, 'src'))
+
+  const nextConfigPath: string | undefined = (
+    await globby('next.config.*js', { absolute: true, cwd: projectDir })
+  )?.[0]
+  if (!nextConfigPath || nextConfigPath.length === 0) {
+    return {
+      hasTopLevelLayout: false,
+      isSrcDir,
+      nextConfigPath: undefined,
+    }
+  }
+
+  let nextAppDir: string | undefined = (
+    await globby(['**/app'], {
+      absolute: true,
+      cwd: projectDir,
+      onlyDirectories: true,
+    })
+  )?.[0]
+
+  if (!nextAppDir || nextAppDir.length === 0) {
+    nextAppDir = undefined
+  }
+
+  const hasTopLevelLayout = nextAppDir
+    ? fs.existsSync(path.resolve(nextAppDir, 'layout.tsx'))
+    : false
+
+  return { hasTopLevelLayout, isSrcDir, nextAppDir, nextConfigPath }
 }

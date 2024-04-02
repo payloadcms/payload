@@ -40,10 +40,10 @@ export function parseAndModifyConfigContent(content: string): {
     throw new Error('Could not find ExportDefaultDeclaration in next.config.js')
   }
 
-  if (exportDefaultDeclaration) {
+  if (exportDefaultDeclaration && exportDefaultDeclaration.declaration?.loc) {
     const modifiedConfigContent = insertBeforeAndAfter(
       content,
-      exportDefaultDeclaration.declaration?.loc,
+      exportDefaultDeclaration.declaration.loc,
     )
     return { modifiedConfigContent, success: true }
   } else if (exportNamedDeclaration) {
@@ -65,13 +65,13 @@ export function parseAndModifyConfigContent(content: string): {
         success: false,
       }
     }
-  } else {
-    warning('Could not automatically wrap next.config.js with withPayload.')
-    warnUserWrapNotSuccessful()
-    return {
-      modifiedConfigContent: content,
-      success: false,
-    }
+  }
+
+  warning('Could not automatically wrap next.config.js with withPayload.')
+  warnUserWrapNotSuccessful()
+  return {
+    modifiedConfigContent: content,
+    success: false,
   }
 }
 
