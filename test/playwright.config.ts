@@ -1,4 +1,9 @@
 import { defineConfig } from '@playwright/test'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const EXPECT_TIMEOUT = 45000
 export const POLL_TOPASS_TIMEOUT = EXPECT_TIMEOUT * 4 // That way expect.poll() or expect().toPass can retry 4 times. 4x higher than default expect timeout => can retry 4 times if retryable expects are used inside
@@ -13,6 +18,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
   },
+  globalSetup: path.resolve(dirname, 'setup.js'),
   expect: {
     timeout: EXPECT_TIMEOUT,
   },

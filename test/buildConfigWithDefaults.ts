@@ -29,47 +29,48 @@ import {
 import { type Config, buildConfig } from 'payload/config'
 import sharp from 'sharp'
 
-import { getDBAdapter } from './getDBAdapter.js'
 import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
-const databaseAdapters = {
-  mongodb: mongooseAdapter({
-    url: process.env.DATABASE_URI || 'mongodb://127.0.0.1/payloadtests',
-  }),
-  postgres: postgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-  }),
-  'postgres-custom-schema': postgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-    schemaName: 'custom',
-  }),
-  'postgres-uuid': postgresAdapter({
-    idType: 'uuid',
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-  }),
-  supabase: postgresAdapter({
-    pool: {
-      connectionString:
-        process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
-    },
-  }),
-}
-
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
 ): Promise<SanitizedConfig> {
-  const adapter = await getDBAdapter()
+  console.log('MEMORY URI', process.env.MONGODB_MEMORY_SERVER_URI)
+  const databaseAdapters = {
+    mongodb: mongooseAdapter({
+      url:
+        process.env.MONGODB_MEMORY_SERVER_URI ||
+        process.env.DATABASE_URI ||
+        'mongodb://127.0.0.1/payloadtests',
+    }),
+    postgres: postgresAdapter({
+      pool: {
+        connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+      },
+    }),
+    'postgres-custom-schema': postgresAdapter({
+      pool: {
+        connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+      },
+      schemaName: 'custom',
+    }),
+    'postgres-uuid': postgresAdapter({
+      idType: 'uuid',
+      pool: {
+        connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+      },
+    }),
+    supabase: postgresAdapter({
+      pool: {
+        connectionString:
+          process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
+      },
+    }),
+  }
 
   const config: Config = {
-    db: adapter || databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
+    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
     secret: 'TEST_SECRET',
     //editor: slateEditor({}),
     // editor: slateEditor({

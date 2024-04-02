@@ -21,11 +21,6 @@ type Result<T extends GeneratedTypes<T>> = {
 export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
   dirname,
 }: Args): Promise<Result<T>> {
-  // @ts-expect-error
-  process.env.NODE_ENV = 'test'
-  process.env.NODE_OPTIONS = '--no-deprecation'
-  process.env.PAYLOAD_DROP_DATABASE = 'true'
-
   const testSuiteName = dirname.split('/').pop()
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
