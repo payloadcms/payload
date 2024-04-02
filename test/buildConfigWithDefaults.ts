@@ -36,6 +36,7 @@ import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
 ): Promise<SanitizedConfig> {
+  console.log('Using', process.env.MONGODB_MEMORY_SERVER_URI)
   const databaseAdapters = {
     mongodb: mongooseAdapter({
       url:
