@@ -26,6 +26,7 @@ type Args<T> = {
  * - Execute field hooks
  * - Validate data
  * - Transform data for storage
+ * - beforeDuplicate hooks (if duplicate)
  * - Unflatten locales
  */
 export const beforeChange = async <T extends Record<string, unknown>>({

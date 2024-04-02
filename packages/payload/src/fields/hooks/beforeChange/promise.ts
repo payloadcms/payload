@@ -36,7 +36,7 @@ type Args = {
 // - Execute field hooks
 // - Validate data
 // - Transform data for storage
-// - beforeDuplicate hooks
+// - beforeDuplicate hooks (if duplicate)
 // - Unflatten locales
 
 export const promise = async ({
