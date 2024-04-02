@@ -429,7 +429,6 @@ describe('versions', () => {
       await saveDocAndAssert(page)
 
       // create and save second doc
-      console.log('Goto autosaveURL.create', autosaveURL.create)
       await page.goto(autosaveURL.create)
       // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
       await page.waitForURL(`${autosaveURL.list}/**`)
