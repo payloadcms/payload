@@ -287,7 +287,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
+          name: test-results-${{ matrix.suite }}
           path: test/test-results/
           retention-days: 1
 
