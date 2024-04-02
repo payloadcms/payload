@@ -61,28 +61,43 @@ const databaseAdapters = {
     },
   }),
 }
+let cached = global._cachedDBAdapter
 
-let mongoMemoryServer = global._mongoMemoryServer
+if (!cached) {
+  // eslint-disable-next-line no-multi-assign
+  cached = global._cachedDBAdapter = {
+    promise: null,
+    adapter: null,
+  }
+}
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
 ): Promise<SanitizedConfig> {
   if (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') {
     if (process.env.JEST_WORKER_ID || process.env.PW_TS_ESM_LOADER_ON) {
-      if (!mongoMemoryServer) {
-        mongoMemoryServer = await MongoMemoryReplSet.create({
-          replSet: {
-            count: 3,
-            dbName: 'payloadmemory',
-          },
-        })
+      if (cached.adapter) {
+        databaseAdapters.mongodb = cached.adapter
+      } else {
+        if (!cached.promise) {
+          cached.promise = MongoMemoryReplSet.create({
+            replSet: {
+              count: 3,
+              dbName: 'payloadmemory',
+            },
+          }).then((server) => {
+            const url = server.getUri()
+            return mongooseAdapter({
+              mongoMemoryServer: server,
+              url,
+            })
+          })
+        }
 
-        const url = mongoMemoryServer.getUri()
+        cached.adapter = await cached.promise
+        cached.promise = null
 
-        databaseAdapters.mongodb = mongooseAdapter({
-          mongoMemoryServer,
-          url,
-        })
+        databaseAdapters.mongodb = cached.adapter
       }
     }
   }
