@@ -2,7 +2,7 @@ import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { createServer } from 'http'
 import nextImport from 'next'
 import path from 'path'
-import { type Payload } from 'payload'
+import { type Payload } from 'payload/types'
 import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
