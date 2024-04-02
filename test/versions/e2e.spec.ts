@@ -416,7 +416,10 @@ describe('versions', () => {
       // create and save first doc
       await page.goto(autosaveURL.create)
       // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
-      await page.waitForURL(`${autosaveURL.list}/**`) // TODO: Make sure this doesnt match for list view and /create view, but only for the ID edit view
+      await page.waitForURL(`${autosaveURL.list}/**`)
+      await expect(() => expect(page.url()).not.toContain(`/preview`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      }) // Make sure this doesnt match for list view and /create view, but only for the ID edit view
 
       await page.locator('#field-title').fill('first post title')
       await page.locator('#field-description').fill('first post description')
@@ -427,6 +430,9 @@ describe('versions', () => {
       await page.goto(autosaveURL.create)
       // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
       await page.waitForURL(`${autosaveURL.list}/**`)
+      await expect(() => expect(page.url()).not.toContain(`/preview`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      }) // Make sure this doesnt match for list view and /create view, but only for the ID edit view
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
       // publish changes
