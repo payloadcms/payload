@@ -649,13 +649,12 @@ describe('Collections - Uploads', () => {
   describe('filesRequiredOnCreate', () => {
     // eslint-disable-next-line @typescript-eslint/require-await
     it('should allow file to be optional if filesRequiredOnCreate is false', async () => {
-      expect(
-        async () =>
-          await payload.create({
-            collection: 'optional-file',
-            data: {},
-          }),
-      ).not.toThrow()
+      const successfulCreate = await payload.create({
+        collection: 'optional-file',
+        data: {},
+      })
+
+      expect(successfulCreate.id).toBeDefined()
     })
 
     it('should throw an error if no file and filesRequiredOnCreate is true', async () => {
