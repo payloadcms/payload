@@ -77,10 +77,13 @@ export async function buildConfigWithDefaults(
 ): Promise<SanitizedConfig> {
   if (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') {
     if (process.env.JEST_WORKER_ID || process.env.PW_TS_ESM_LOADER_ON) {
+      console.log('Good: Using in-memory MongoDB for tests')
       if (cached.adapter) {
+        console.log('MDB: Cached')
         databaseAdapters.mongodb = cached.adapter
       } else {
         if (!cached.promise) {
+          console.log('MDB: Creating')
           cached.promise = MongoMemoryReplSet.create({
             replSet: {
               count: 3,
@@ -94,13 +97,18 @@ export async function buildConfigWithDefaults(
             })
           })
         }
+        console.log('MDB: Awaiting')
 
         cached.adapter = await cached.promise
         cached.promise = null
 
         databaseAdapters.mongodb = cached.adapter
       }
+    } else {
+      console.log('Bad1!!')
     }
+  } else {
+    console.log('Bad2!!')
   }
 
   const config: Config = {

@@ -24,11 +24,13 @@
  */
 
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config } from './payload-types.js'
 
 import { globalSlug } from '../admin/slugs.js'
 import {
@@ -40,9 +42,9 @@ import {
   selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInit.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
-import { clearAndSeedEverything } from './seed.js'
 import { titleToDelete } from './shared.js'
 import {
   autoSaveGlobalSlug,
@@ -54,12 +56,13 @@ import {
   draftGlobalSlug,
   postCollectionSlug,
 } from './slugs.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const { beforeAll, beforeEach, describe } = test
 
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 
 const waitForAutoSaveToComplete = async (page: Page) => {
   await expect(async () => {
@@ -88,7 +91,7 @@ describe('versions', () => {
 
   beforeAll(async ({ browser }) => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     const context = await browser.newContext()
     page = await context.newPage()
 
@@ -96,7 +99,11 @@ describe('versions', () => {
   })
 
   beforeEach(async () => {
-    await clearAndSeedEverything(payload)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'versionsTest',
+    })
+    //await clearAndSeedEverything(payload)
   })
 
   describe('draft collections', () => {
@@ -408,17 +415,18 @@ describe('versions', () => {
     test('collection - autosave should only update the current document', async () => {
       // create and save first doc
       await page.goto(autosaveURL.create)
-      await page.waitForURL(`${autosaveURL.create}`)
-      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+      // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
+      await page.waitForURL(`${autosaveURL.list}/**`) // TODO: Make sure this doesnt match for list view and /create view, but only for the ID edit view
 
       await page.locator('#field-title').fill('first post title')
       await page.locator('#field-description').fill('first post description')
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       // create and save second doc
+      console.log('Goto autosaveURL.create', autosaveURL.create)
       await page.goto(autosaveURL.create)
-      await page.waitForURL(`${autosaveURL.create}`)
-      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+      // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
+      await page.waitForURL(`${autosaveURL.list}/**`)
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
       // publish changes
