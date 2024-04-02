@@ -15,7 +15,6 @@ type Args<T> = {
   context: RequestContext
   data: T
   doc: T
-  duplicate: boolean
   field: Field | TabAsField
   global: SanitizedGlobalConfig | null
   id?: number | string
@@ -39,7 +38,6 @@ export const promise = async <T>({
   context,
   data,
   doc,
-  duplicate,
   field,
   global,
   operation,
@@ -261,32 +259,6 @@ export const promise = async <T>({
         })
       }
     }
-
-    // Execute beforeDuplicate hook
-    if (duplicate && field.hooks?.beforeDuplicate) {
-      if (field.hooks?.beforeDuplicate) {
-        await field.hooks.beforeDuplicate.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
-            collection,
-            context,
-            data,
-            field,
-            global,
-            operation,
-            originalDoc: doc,
-            req,
-            siblingData,
-            value: siblingData[field.name],
-          })
-
-          if (hookedValue !== undefined) {
-            siblingData[field.name] = hookedValue
-          }
-        }, Promise.resolve())
-      }
-    }
   }
 
   // Traverse subfields
@@ -304,7 +276,6 @@ export const promise = async <T>({
         context,
         data,
         doc,
-        duplicate,
         fields: field.fields,
         global,
         operation,
@@ -330,7 +301,6 @@ export const promise = async <T>({
               context,
               data,
               doc,
-              duplicate,
               fields: field.fields,
               global,
               operation,
@@ -366,7 +336,6 @@ export const promise = async <T>({
                 context,
                 data,
                 doc,
-                duplicate,
                 fields: block.fields,
                 global,
                 operation,
@@ -392,7 +361,6 @@ export const promise = async <T>({
         context,
         data,
         doc,
-        duplicate,
         fields: field.fields,
         global,
         operation,
@@ -425,7 +393,6 @@ export const promise = async <T>({
         context,
         data,
         doc,
-        duplicate,
         fields: field.fields,
         global,
         operation,
@@ -445,7 +412,6 @@ export const promise = async <T>({
         context,
         data,
         doc,
-        duplicate,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
         operation,
