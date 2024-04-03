@@ -1,3 +1,11 @@
+## [2.12.1](https://github.com/payloadcms/payload/compare/v2.12.0...v2.12.1) (2024-04-03)
+
+
+### Bug Fixes
+
+* Skip parsing if operator is 'exist' ([#5404](https://github.com/payloadcms/payload/issues/5404)) ([742a7af](https://github.com/payloadcms/payload/commit/742a7af93d2e9ef4d41ee093cef875322792ae72))
+* updates colors of tooltip in light mode ([#5632](https://github.com/payloadcms/payload/issues/5632)) ([a7e7c92](https://github.com/payloadcms/payload/commit/a7e7c9276835e0a35a18daccb218c901ca2fdd8c))
+
 ## [2.12.0](https://github.com/payloadcms/payload/compare/v2.11.2...v2.12.0) (2024-04-03)
 
 
