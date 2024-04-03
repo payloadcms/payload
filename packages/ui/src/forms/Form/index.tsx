@@ -51,13 +51,13 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const {
     action,
+    beforeSubmit,
     children,
     className,
     disableSuccessStatus,
     disableValidationOnSubmit,
-    disabled,
+    disabled: disabledFromProps,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
-    beforeSubmit,
     handleResponse,
     initialState, // fully formed initial field state
     onChange,
@@ -85,6 +85,7 @@ export const Form: React.FC<FormProps> = (props) => {
     serverURL,
   } = config
 
+  const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [modified, setModified] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -180,7 +181,7 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       setProcessing(true)
-      setSubmitted(true)
+      setDisabled(true)
 
       if (waitForAutocomplete) await wait(100)
 
@@ -202,6 +203,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
         if (!isValid) {
           setProcessing(false)
+          setSubmitted(true)
+          setDisabled(false)
           return dispatchFields({ type: 'REPLACE_STATE', state: revalidatedFormState })
         }
       }
@@ -213,7 +216,8 @@ export const Form: React.FC<FormProps> = (props) => {
       if (!isValid) {
         toast.error(t('error:correctInvalidFields'))
         setProcessing(false)
-
+        setSubmitted(true)
+        setDisabled(false)
         return
       }
 
@@ -249,6 +253,7 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         setModified(false)
+        setDisabled(false)
 
         if (typeof handleResponse === 'function') {
           handleResponse(res)
@@ -275,6 +280,7 @@ export const Form: React.FC<FormProps> = (props) => {
           }
         } else {
           setProcessing(false)
+          setSubmitted(true)
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
@@ -334,6 +340,8 @@ export const Form: React.FC<FormProps> = (props) => {
         }
       } catch (err) {
         setProcessing(false)
+        setSubmitted(true)
+        setDisabled(false)
 
         toast.error(err)
       }
@@ -341,6 +349,7 @@ export const Form: React.FC<FormProps> = (props) => {
     [
       action,
       disableSuccessStatus,
+      disableValidationOnSubmit,
       disabled,
       dispatchFields,
       fields,
@@ -353,7 +362,6 @@ export const Form: React.FC<FormProps> = (props) => {
       t,
       i18n,
       waitForAutocomplete,
-      beforeSubmit,
       formQueryParams,
     ],
   )
@@ -496,6 +504,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.setProcessing = setProcessing
   contextRef.current.setSubmitted = setSubmitted
   contextRef.current.disabled = disabled
+  contextRef.current.setDisabled = setDisabled
   contextRef.current.formRef = formRef
   contextRef.current.reset = reset
   contextRef.current.replaceState = replaceState

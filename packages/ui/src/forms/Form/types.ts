@@ -202,6 +202,7 @@ export type Context = {
   }) => Promise<void>
   replaceState: (state: FormState) => void
   reset: Reset
+  setDisabled: (disabled: boolean) => void
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted
