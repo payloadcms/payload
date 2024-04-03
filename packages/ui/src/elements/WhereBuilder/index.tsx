@@ -1,12 +1,8 @@
 import { getTranslation } from '@payloadcms/translations'
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import React, { useState } from 'react'
 
-import type {
-  CollectionComponentMap,
-  FieldMap,
-} from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { CollectionComponentMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { WhereBuilderProps } from './types.js'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
@@ -14,51 +10,12 @@ import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
-import fieldTypes from './field-types.js'
 import './index.scss'
+import { reduceFieldMap } from './reduceFieldMap.js'
 import { transformWhereQuery } from './transformWhereQuery.js'
 import validateWhereQuery from './validateWhereQuery.js'
 
 const baseClass = 'where-builder'
-
-const reduceFields = (fieldMap: FieldMap, i18n) =>
-  fieldMap.reduce((reduced, field) => {
-    if (typeof fieldTypes[field.type] === 'object') {
-      const operatorKeys = new Set()
-      const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
-        if (!operatorKeys.has(operator.value)) {
-          operatorKeys.add(operator.value)
-          return [
-            ...acc,
-            {
-              ...operator,
-              label: i18n.t(`operators:${operator.label}`),
-            },
-          ]
-        }
-        return acc
-      }, [])
-
-      const formattedField = {
-        label: (
-          <FieldLabel
-            CustomLabel={field.fieldComponentProps.CustomLabel}
-            {...field.fieldComponentProps.labelProps}
-          />
-        ),
-        value: field.name,
-        ...fieldTypes[field.type],
-        operators,
-        props: {
-          ...field,
-        },
-      }
-
-      return [...reduced, formattedField]
-    }
-
-    return reduced
-  }, [])
 
 export { WhereBuilderProps }
 
@@ -72,7 +29,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { getComponentMap } = useComponentMap()
 
   const { fieldMap } = getComponentMap({ collectionSlug }) as CollectionComponentMap
-  const [reducedFields] = useState(() => reduceFields(fieldMap, i18n))
+  const [reducedFields] = useState(() => reduceFieldMap(fieldMap, i18n))
 
   const { searchParams } = useSearchParams()
   const { handleWhereChange } = useListQuery()
