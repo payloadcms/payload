@@ -1,3 +1,25 @@
+## [2.12.0](https://github.com/payloadcms/payload/compare/v2.11.2...v2.12.0) (2024-04-03)
+
+
+### Features
+
+* **plugin-seo:** adds Norwegian translation ([#5621](https://github.com/payloadcms/payload/issues/5621)) ([589b492](https://github.com/payloadcms/payload/commit/589b492b2e6bc578e6f17649ff6d936ffd88b8b5))
+* **richtext-*:** add ability to provide custom Field and Error components ([#5574](https://github.com/payloadcms/payload/issues/5574)) ([02d2c51](https://github.com/payloadcms/payload/commit/02d2c517176a775c6eeb4b164d9e6b45d8f5e4c1))
+
+
+### Bug Fixes
+
+* **db-postgres:** error on delete having joins ([#5459](https://github.com/payloadcms/payload/issues/5459)) ([9169230](https://github.com/payloadcms/payload/commit/916923071a2c28077326bfd2059d1665ef47e94f))
+* image resize tiff files ([#5415](https://github.com/payloadcms/payload/issues/5415)) ([8184e00](https://github.com/payloadcms/payload/commit/8184e0005af1b6da93d0921c31547515a4ce6343))
+* number field with hasMany accept defaultValue array ([#5618](https://github.com/payloadcms/payload/issues/5618)) ([a3ae416](https://github.com/payloadcms/payload/commit/a3ae4160850290c194bb228e1fbeb8c7533cead3))
+* regression of filterOptions using different transaction ([#5169](https://github.com/payloadcms/payload/issues/5169)) ([3ceb6ef](https://github.com/payloadcms/payload/commit/3ceb6efd32cfa9556c6656469fa43d61d7679b1d))
+* **richtext-lexical:** Blocks: generated output schema is not fully correct ([#5259](https://github.com/payloadcms/payload/issues/5259)) ([e7f6bfb](https://github.com/payloadcms/payload/commit/e7f6bfbe9da4cab42c7ec7019371d5e79af17ec9))
+* **richtext-lexical:** checklist html converter incorrectly outputting children ([#5570](https://github.com/payloadcms/payload/issues/5570)) ([2e5400f](https://github.com/payloadcms/payload/commit/2e5400fa7a5ac7441e00134a7f4299022228f64f))
+* **richtext-lexical:** disable instanceof HTMLImageElement check as it causes issues when used on the server ([2164dcc](https://github.com/payloadcms/payload/commit/2164dcc594b5c16d7111b71cdb01f5f7aaa7e127))
+* **richtext-lexical:** Link: add open-in-new-tab to html converter ([23df60d](https://github.com/payloadcms/payload/commit/23df60dba5682255ce6f60e3ee8e6901f6a70c7b))
+* **richtext-lexical:** properly center add- and drag-block handles ([#5568](https://github.com/payloadcms/payload/issues/5568)) ([48dc116](https://github.com/payloadcms/payload/commit/48dc116f57113c3124ff93a50fa1189053e21d76))
+* sets beforeValidateHook req type to required ([#5608](https://github.com/payloadcms/payload/issues/5608)) ([e10d5df](https://github.com/payloadcms/payload/commit/e10d5df0b2dd21b86cce44d0e36b31e9d3411b39))
+
 ## [2.11.2](https://github.com/payloadcms/payload/compare/v2.11.1...v2.11.2) (2024-02-23)
 
 
