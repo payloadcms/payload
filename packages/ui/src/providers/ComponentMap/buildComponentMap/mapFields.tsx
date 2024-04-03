@@ -1,6 +1,7 @@
 import type { FieldDescriptionProps } from '@payloadcms/ui/forms/FieldDescription'
 import type {
   CellComponentProps,
+  DescriptionComponent,
   Field,
   FieldBase,
   FieldWithPath,
@@ -10,7 +11,7 @@ import type {
 } from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import { isPlainObject } from 'payload/utilities'
+import { isReactComponent } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
@@ -87,26 +88,6 @@ export const mapFields = (args: {
           field.path || (isFieldAffectingData && 'name' in field ? field.name : '')
         }`
 
-        const labelProps: LabelProps = {
-          label:
-            'label' in field &&
-            (typeof field.label !== 'function' ||
-              (typeof field.label === 'object' && isPlainObject(field.label)))
-              ? field.label
-              : undefined,
-          required: 'required' in field ? field.required : undefined,
-        }
-
-        const descriptionProps: FieldDescriptionProps = {
-          description:
-            field.admin &&
-            'description' in field.admin &&
-            (typeof field.admin?.description === 'string' ||
-              typeof field.admin?.description === 'object')
-              ? field.admin.description
-              : undefined,
-        }
-
         const AfterInput =
           ('admin' in field &&
             'components' in field.admin &&
@@ -133,34 +114,10 @@ export const mapFields = (args: {
             )) ||
           null
 
-        const CustomDescriptionComponent =
-          (field.admin &&
-            'description' in field.admin &&
-            field.admin.description &&
-            typeof field.admin.description === 'function' &&
-            (field.admin.description as React.FC<any>)) ||
-          undefined
-
-        const CustomDescription =
-          CustomDescriptionComponent !== undefined ? (
-            <CustomDescriptionComponent {...(descriptionProps || {})} />
-          ) : undefined
-
-        const CustomErrorComponent =
-          ('admin' in field &&
-            field.admin?.components &&
-            'Error' in field.admin.components &&
-            field.admin?.components?.Error) ||
-          undefined
-
-        const errorProps = {
-          path,
+        const labelProps: LabelProps = {
+          label: 'label' in field && !isReactComponent(field.label) ? field.label : undefined,
+          required: 'required' in field ? field.required : undefined,
         }
-
-        const CustomError =
-          CustomErrorComponent !== undefined ? (
-            <CustomErrorComponent {...(errorProps || {})} />
-          ) : undefined
 
         const CustomLabelComponent =
           ('admin' in field &&
@@ -172,6 +129,44 @@ export const mapFields = (args: {
         const CustomLabel =
           CustomLabelComponent !== undefined ? (
             <CustomLabelComponent {...(labelProps || {})} />
+          ) : undefined
+
+        const descriptionProps: FieldDescriptionProps = {
+          description:
+            field.admin &&
+            'description' in field.admin &&
+            (typeof field.admin?.description === 'string' ||
+              typeof field.admin?.description === 'object')
+              ? field.admin.description
+              : undefined,
+        }
+
+        const CustomDescriptionComponent =
+          (field.admin &&
+            'description' in field.admin &&
+            isReactComponent<DescriptionComponent>(field.admin.description) &&
+            field.admin.description) ||
+          undefined
+
+        const CustomDescription =
+          CustomDescriptionComponent !== undefined ? (
+            <CustomDescriptionComponent {...(descriptionProps || {})} />
+          ) : undefined
+
+        const errorProps = {
+          path,
+        }
+
+        const CustomErrorComponent =
+          ('admin' in field &&
+            field.admin?.components &&
+            'Error' in field.admin.components &&
+            field.admin?.components?.Error) ||
+          undefined
+
+        const CustomError =
+          CustomErrorComponent !== undefined ? (
+            <CustomErrorComponent {...(errorProps || {})} />
           ) : undefined
 
         const baseFieldProps: FormFieldBase = {
@@ -212,12 +207,9 @@ export const mapFields = (args: {
               field.admin.components &&
               'RowLabel' in field.admin.components &&
               field.admin.components.RowLabel &&
-              (typeof field.admin.components.RowLabel === 'function' ||
-                // Do this to test for client components (`use client` directive) bc they import as empty objects
-                (typeof field.admin.components.RowLabel === 'object' &&
-                  !isPlainObject(field.admin.components.RowLabel)))
+              isReactComponent<RowLabelComponent>(field.admin.components.RowLabel)
             ) {
-              const CustomRowLabelComponent = field.admin.components.RowLabel as RowLabelComponent
+              const CustomRowLabelComponent = field.admin.components.RowLabel
               CustomRowLabel = <CustomRowLabelComponent />
             }
 
@@ -330,11 +322,7 @@ export const mapFields = (args: {
           case 'collapsible': {
             let CustomCollapsibleLabel: React.ReactNode
 
-            if (
-              typeof field.label === 'function' ||
-              // Do this to test for client components (`use client` directive) bc they import as empty objects
-              (typeof field.label === 'object' && !isPlainObject(field.label))
-            ) {
+            if (isReactComponent(field.label)) {
               const CustomCollapsibleLabelComponent = field.label as RowLabelComponent
               CustomCollapsibleLabel = <CustomCollapsibleLabelComponent />
             }
