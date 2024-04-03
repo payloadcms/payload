@@ -117,6 +117,7 @@ export const buildColumnState = (args: Args): Column[] => {
     if (field) {
       const column: Column = {
         name,
+        type: field.type,
         Label,
         accessor: name,
         active,

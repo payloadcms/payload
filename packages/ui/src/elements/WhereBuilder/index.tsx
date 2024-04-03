@@ -1,14 +1,13 @@
 import { getTranslation } from '@payloadcms/translations'
-import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
-import type { CollectionComponentMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 import type { WhereBuilderProps } from './types.js'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
+import { useTableColumns } from '../TableColumns/index.js'
 import { Condition } from './Condition/index.js'
 import './index.scss'
 import { reduceFieldMap } from './reduceFieldMap.js'
@@ -24,12 +23,15 @@ export { WhereBuilderProps }
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
-  const { collectionPluralLabel, collectionSlug } = props
+  const { collectionPluralLabel } = props
   const { i18n, t } = useTranslation()
-  const { getComponentMap } = useComponentMap()
+  const { columns } = useTableColumns()
 
-  const { fieldMap } = getComponentMap({ collectionSlug }) as CollectionComponentMap
-  const [reducedFields] = useState(() => reduceFieldMap(fieldMap, i18n))
+  const [reducedFields, setReducedColumns] = useState(() => reduceFieldMap(columns, i18n))
+
+  useEffect(() => {
+    setReducedColumns(reduceFieldMap(columns, i18n))
+  }, [columns, i18n])
 
   const { searchParams } = useSearchParams()
   const { handleWhereChange } = useListQuery()

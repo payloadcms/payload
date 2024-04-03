@@ -1,14 +1,12 @@
-import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
-import React from 'react'
-
-import type { FieldMap } from '../../utilities/buildComponentMap.js'
+import type { Column } from '../Table/index.js'
 
 import fieldTypes from './field-types.js'
 
-export const reduceFieldMap = (fieldMap: FieldMap, i18n) =>
+export const reduceFieldMap = (fieldMap: Column[], i18n) =>
   fieldMap.reduce((reduced, field) => {
     if (typeof fieldTypes[field.type] === 'object') {
       const operatorKeys = new Set()
+
       const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
@@ -24,12 +22,7 @@ export const reduceFieldMap = (fieldMap: FieldMap, i18n) =>
       }, [])
 
       const formattedField = {
-        label: (
-          <FieldLabel
-            CustomLabel={field.fieldComponentProps.CustomLabel}
-            {...field.fieldComponentProps.labelProps}
-          />
-        ),
+        label: field.Label,
         value: field.name,
         ...fieldTypes[field.type],
         operators,
