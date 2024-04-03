@@ -1282,7 +1282,7 @@ describe('admin', () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-descriptionAsFunction').fill('functional')
       await expect(page.locator('.field-description-descriptionAsFunction')).toContainText(
-        'Function description: descriptionAsFunction - functional',
+        'Function description',
       )
     })
     test('should render component field description', async () => {

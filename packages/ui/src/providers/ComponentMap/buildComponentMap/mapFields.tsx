@@ -1,17 +1,19 @@
-import type { FieldDescriptionProps } from '@payloadcms/ui/forms/FieldDescription'
 import type {
   CellComponentProps,
   DescriptionComponent,
+  DescriptionFunction,
   Field,
   FieldBase,
+  FieldDescriptionProps,
   FieldWithPath,
   LabelProps,
   RowLabelComponent,
   SanitizedConfig,
 } from 'payload/types'
 
+import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import { isReactComponent } from 'payload/utilities'
+import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
@@ -133,19 +135,23 @@ export const mapFields = (args: {
 
         const descriptionProps: FieldDescriptionProps = {
           description:
-            field.admin &&
-            'description' in field.admin &&
-            (typeof field.admin?.description === 'string' ||
-              typeof field.admin?.description === 'object')
-              ? field.admin.description
-              : undefined,
+            (field.admin &&
+              'description' in field.admin &&
+              (((typeof field.admin?.description === 'string' ||
+                typeof field.admin?.description === 'object') &&
+                field.admin.description) ||
+                (typeof field.admin?.description === 'function' &&
+                  isPlainFunction<DescriptionFunction>(field.admin?.description) &&
+                  field.admin?.description()))) ||
+            undefined,
         }
 
         const CustomDescriptionComponent =
           (field.admin &&
             'description' in field.admin &&
-            isReactComponent<DescriptionComponent>(field.admin.description) &&
-            field.admin.description) ||
+            ((isReactComponent<DescriptionComponent>(field.admin.description) &&
+              field.admin.description) ||
+              (isPlainFunction(field.admin.description) && FieldDescription))) ||
           undefined
 
         const CustomDescription =

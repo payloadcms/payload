@@ -1,8 +1,12 @@
 import type { User } from 'payload/auth'
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
-import type { DocumentPreferences, ErrorProps, LabelProps, Validate } from 'payload/types'
-
-import type { FieldDescriptionProps } from '../../forms/FieldDescription/types.js'
+import type {
+  DocumentPreferences,
+  ErrorProps,
+  FieldDescriptionProps,
+  LabelProps,
+  Validate,
+} from 'payload/types'
 
 export const fieldBaseClass = 'field-type'
 
