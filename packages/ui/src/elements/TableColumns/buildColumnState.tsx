@@ -17,7 +17,7 @@ const fieldIsPresentationalOnly = (field: MappedField): boolean => field.type ==
 type Args = {
   cellProps: Partial<CellComponentProps>[]
   columnPreferences: ColumnPreferences
-  columns?: string[]
+  columns?: ColumnPreferences
   enableRowSelections: boolean
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
@@ -25,18 +25,25 @@ type Args = {
 export const buildColumnState = (args: Args): Column[] => {
   const { cellProps, columnPreferences, columns, enableRowSelections, fieldMap, useAsTitle } = args
 
-  // swap useAsTitle field to first slot
   let sortedFieldMap = flattenFieldMap(fieldMap)
 
-  const useAsTitleFieldIndex = sortedFieldMap.findIndex((field) => field.name === useAsTitle)
+  // place the `ID` field first, if it exists
+  // do the same for the `useAsTitle` field with precedence over the `ID` field
+  // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
+  const useAsTitleFieldIndex = useAsTitle
+    ? sortedFieldMap.findIndex((field) => field.name === useAsTitle)
+    : -1
 
-  if (useAsTitleFieldIndex !== -1) {
-    const useAsTitleField = sortedFieldMap[useAsTitleFieldIndex]
-    sortedFieldMap = [
-      useAsTitleField,
-      ...sortedFieldMap.slice(0, useAsTitleFieldIndex),
-      ...sortedFieldMap.slice(useAsTitleFieldIndex + 1),
-    ]
+  const idFieldIndex = sortedFieldMap.findIndex((field) => field.name === 'id')
+
+  if (idFieldIndex > -1) {
+    const idField = sortedFieldMap.splice(idFieldIndex, 1)
+    sortedFieldMap.unshift(idField[0])
+  }
+
+  if (useAsTitleFieldIndex > -1) {
+    const useAsTitleField = sortedFieldMap.splice(useAsTitleFieldIndex, 1)
+    sortedFieldMap.unshift(useAsTitleField[0])
   }
 
   const sortTo = columnPreferences || columns
@@ -65,7 +72,7 @@ export const buildColumnState = (args: Args): Column[] => {
     if (columnPreference) {
       active = columnPreference.active
     } else if (columns && Array.isArray(columns) && columns.length > 0) {
-      active = 'name' in field && columns.includes(field.name)
+      active = columns.find((column) => column.accessor === field.name)?.active
     } else if (activeColumnsIndices.length < 4) {
       active = true
     }
