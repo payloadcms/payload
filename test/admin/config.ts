@@ -3,6 +3,7 @@ import { CustomIdRow } from './collections/CustomIdRow.js'
 import { CustomIdTab } from './collections/CustomIdTab.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
+import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -87,6 +88,7 @@ export default buildConfigWithDefaults({
     Geo,
     CustomIdTab,
     CustomIdRow,
+    DisableDuplicate,
   ],
   globals: [
     GlobalHidden,

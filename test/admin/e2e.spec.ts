@@ -2,9 +2,10 @@ import type { Page } from '@playwright/test'
 import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { wait } from 'payload/utilities'
-import { mapAsync } from 'payload/utilities'
+import path from 'path'
+import { mapAsync, wait } from 'payload/utilities'
 import qs from 'qs'
+import { fileURLToPath } from 'url'
 
 import type { Geo, Post } from './payload-types.js'
 
@@ -38,6 +39,7 @@ import {
 import {
   customIdCollectionId,
   customViews2CollectionSlug,
+  disableDuplicateSlug,
   geoCollectionSlug,
   globalSlug,
   group1Collection1Slug,
@@ -54,8 +56,6 @@ const description = 'Description'
 
 let payload: Payload
 
-import path from 'path'
-import { fileURLToPath } from 'url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -64,6 +64,7 @@ describe('admin', () => {
   let geoUrl: AdminUrlUtil
   let url: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
+  let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
@@ -72,6 +73,7 @@ describe('admin', () => {
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     url = new AdminUrlUtil(serverURL, postsCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -535,6 +537,14 @@ describe('admin', () => {
       await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+
+    test('should hide duplicate when disableDuplicate: true', async () => {
+      await page.goto(disableDuplicateURL.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await expect(page.locator('#action-duplicate')).toBeHidden()
     })
   })
 
