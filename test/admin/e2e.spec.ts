@@ -600,21 +600,21 @@ describe('admin', () => {
 
     test('should allow custom translation of locale labels', async () => {
       const selectOptionClass = '.localizer .popup-button-list__button'
-      const localizorButton = page.locator('.localizer .popup-button')
-      const secondLocale = page.locator(selectOptionClass).nth(1)
+      const localizerButton = page.locator('.localizer .popup-button')
+      const localeListItem1 = page.locator(selectOptionClass).nth(0)
 
-      async function checkLocalLabels(firstLabel: string, secondLabel: string) {
-        await localizorButton.click()
+      async function checkLocaleLabels(firstLabel: string, secondLabel: string) {
+        await localizerButton.click()
         await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
         await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
       }
 
-      await checkLocalLabels('English (en)', 'Spanish (es)')
+      await checkLocaleLabels('Spanish (es)', 'English (en)')
 
       // Change locale to Spanish
-      await localizorButton.click()
-      await expect(secondLocale).toContainText('Spanish (es)')
-      await secondLocale.click()
+      await localizerButton.click()
+      await expect(localeListItem1).toContainText('Spanish (es)')
+      await localeListItem1.click()
 
       // Go to account page
       await page.goto(postsUrl.account)
@@ -626,13 +626,13 @@ describe('admin', () => {
       await languageField.click()
       await options.locator('text=Español').click()
 
-      await checkLocalLabels('Inglés (en)', 'Español (es)')
+      await checkLocaleLabels('Español (es)', 'Inglés (en)')
 
       // Change locale and language back to English
       await languageField.click()
       await options.locator('text=English').click()
-      await localizorButton.click()
-      await expect(secondLocale).toContainText('Spanish (es)')
+      await localizerButton.click()
+      await expect(localeListItem1).toContainText('Spanish (es)')
     })
   })
 
