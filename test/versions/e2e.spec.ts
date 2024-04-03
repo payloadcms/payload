@@ -66,18 +66,22 @@ let payload: PayloadTestSDK<Config>
 
 const waitForAutoSaveToComplete = async (page: Page) => {
   await expect(async () => {
-    await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
-  }).toPass({
-    timeout: 45000,
-  })
-
-  await expect(async () => {
     await expect(
       page.locator('.autosave:has-text("Last saved less than a minute ago")'),
     ).toBeVisible()
   }).toPass({
     timeout: 45000,
   })
+}
+
+const waitForAutoSaveToRunAndComplete = async (page: Page) => {
+  await expect(async () => {
+    await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
+  }).toPass({
+    timeout: 45000,
+  })
+
+  await waitForAutoSaveToComplete(page)
 }
 
 describe('versions', () => {
@@ -320,7 +324,7 @@ describe('versions', () => {
       const titleField = page.locator('#field-title')
 
       await titleField.fill('global title')
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
       await expect(titleField).toHaveValue('global title')
 
       // refresh the page and ensure value autosaved
@@ -347,13 +351,13 @@ describe('versions', () => {
       // fill out en doc
       await titleField.fill(englishTitle)
       await descriptionField.fill('description')
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
 
       // change locale to spanish
       await changeLocale(page, es)
       // set localized title field
       await titleField.fill(spanishTitle)
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
 
       // change locale back to en
       await changeLocale(page, en)
@@ -361,7 +365,7 @@ describe('versions', () => {
       await expect(titleField).toHaveValue(englishTitle)
       // change non-localized description field
       await descriptionField.fill(newDescription)
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
 
       // change locale to spanish
       await changeLocale(page, es)
@@ -427,6 +431,7 @@ describe('versions', () => {
       await page.locator('#field-title').fill('first post title')
       await page.locator('#field-description').fill('first post description')
       await saveDocAndAssert(page)
+      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
 
       // create and save second doc
       await page.goto(autosaveURL.create)
@@ -435,15 +440,19 @@ describe('versions', () => {
       await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       }) // Make sure this doesnt match for list view and /create view, but only for the ID edit view
+
+      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
+
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
       // publish changes
       await saveDocAndAssert(page)
+      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
 
       // update second doc and wait for autosave
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
 
       // verify that the first doc is unchanged
       await page.goto(autosaveURL.list)
