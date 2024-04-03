@@ -204,6 +204,7 @@ describe('uploads', () => {
 
   test('should restrict mimetype based on filterOptions', async () => {
     await page.goto(audioURL.edit(audioDoc.id))
+    await page.waitForURL(audioURL.edit(audioDoc.id))
 
     // remove the selection and open the list drawer
     await page.locator('.file-details__remove').click()
