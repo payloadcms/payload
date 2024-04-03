@@ -12,11 +12,11 @@ import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui/utilities/findLocaleFromCode'
 import { headers as getHeaders } from 'next/headers.js'
 import { notFound, redirect } from 'next/navigation.js'
+import { parseCookies } from 'payload/auth'
 import { createLocalReq, isEntityHidden } from 'payload/utilities'
 import qs from 'qs'
 
 import { getPayloadHMR } from '../utilities/getPayloadHMR.js'
-import { auth } from './auth.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 
 type Args = {
@@ -35,11 +35,42 @@ export const initPage = async ({
   const headers = getHeaders()
   const localeParam = searchParams?.locale as string
   const payload = await getPayloadHMR({ config: configPromise })
+  const { collections, globals, localization, routes } = payload.config
 
-  const { cookies, permissions, user } = await auth({
-    headers,
-    payload,
+  const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+  const defaultLocale =
+    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
+  const localeCode = localeParam || defaultLocale
+  const locale = localization && findLocaleFromCode(localization, localeCode)
+  const cookies = parseCookies(headers)
+  const language = getRequestLanguage({ config: payload.config, cookies, headers })
+
+  const i18n = initI18n({
+    config: payload.config.i18n,
+    context: 'client',
+    language,
+    translations,
   })
+
+  const req = createLocalReq(
+    {
+      fallbackLocale: null,
+      locale: locale.code,
+      req: {
+        i18n,
+        query: qs.parse(queryString, {
+          depth: 10,
+          ignoreQueryPrefix: true,
+        }),
+        url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
+      } as PayloadRequest,
+    },
+    payload,
+  )
+
+  const { permissions, user } = await payload.auth({ cookies, headers, req })
+
+  req.user = user
 
   const visibleEntities: VisibleEntities = {
     collections: payload.config.collections
@@ -56,8 +87,6 @@ export const initPage = async ({
   const globalSlug = entityType === 'globals' ? entitySlug : undefined
   const docID = collectionSlug && createOrID !== 'create' ? createOrID : undefined
 
-  const { collections, globals, localization, routes } = payload.config
-
   if (redirectUnauthenticatedUser && !user && route !== '/login') {
     if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
 
@@ -67,38 +96,6 @@ export const initPage = async ({
 
     redirect(`${routes.admin}/login?redirect=${route + stringifiedSearchParams}`)
   }
-
-  const defaultLocale =
-    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-  const localeCode = localeParam || defaultLocale
-  const locale = localization && findLocaleFromCode(localization, localeCode)
-  const language = getRequestLanguage({ config: payload.config, cookies, headers })
-
-  const i18n = initI18n({
-    config: payload.config.i18n,
-    context: 'client',
-    language,
-    translations,
-  })
-
-  const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
-
-  const req = createLocalReq(
-    {
-      fallbackLocale: null,
-      locale: locale.code,
-      req: {
-        i18n,
-        query: qs.parse(queryString, {
-          depth: 10,
-          ignoreQueryPrefix: true,
-        }),
-        url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
-      } as PayloadRequest,
-      user,
-    },
-    payload,
-  )
 
   let collectionConfig: SanitizedCollectionConfig
   let globalConfig: SanitizedGlobalConfig

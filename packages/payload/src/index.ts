@@ -5,6 +5,7 @@ import type pino from 'pino'
 
 import crypto from 'crypto'
 
+import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
 import type { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword.js'
 import type { Options as LoginOptions } from './auth/operations/local/login.js'
@@ -59,6 +60,17 @@ import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/
  * @description Payload
  */
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
+  /**
+   * @description Authorization and Authentication using headers and cookies to run auth user strategies
+   * @returns cookies: Map<string, string>
+   * @returns permissions: Permissions
+   * @returns user: User
+   */
+  auth = async (options: AuthArgs) => {
+    const { auth } = localOperations.auth
+    return auth(this, options)
+  }
+
   authStrategies: AuthStrategy[]
 
   collections: {
