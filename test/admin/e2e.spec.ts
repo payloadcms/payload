@@ -1307,18 +1307,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
 }
 
 async function deleteAllPosts() {
-  const posts = await payload.find({
-    collection: postsCollectionSlug,
-    limit: 100,
-  })
-  await Promise.all([
-    ...posts.docs.map((post) => {
-      return payload.delete({
-        id: post.id,
-        collection: postsCollectionSlug,
-      })
-    }),
-  ])
+  await payload.delete({ collection: postsCollectionSlug, where: { id: { exists: true } } })
 }
 
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
