@@ -1,0 +1,22 @@
+{
+  "$schema": "./translation-schema.json",
+  "plugin-seo": {
+    "autoGenerate": "Auto-generer",
+    "imageAutoGenerationTip": "Auto-generering vil hente det valgte hero-bildet.",
+    "bestPractices": "beste praksis",
+    "lengthTipTitle": "Dette bør være mellom {{minLength}} og {{maxLength}} tegn. For hjelp til å skrive metatitler av god kvalitet, se ",
+    "lengthTipDescription": "Dette bør være mellom {{minLength}} og {{maxLength}} tegn. For hjelp til å skrive beskrivelser av god kvalitet, se ",
+    "good": "Bra",
+    "tooLong": "For lang",
+    "tooShort": "For kort",
+    "almostThere": "Nesten der",
+    "characterCount": "{{current}}/{{minLength}}-{{maxLength}} tegn, ",
+    "charactersToGo": "{{characters}} igjen",
+    "charactersLeftOver": "{{characters}} til overs",
+    "charactersTooMany": "{{characters}} for mange",
+    "noImage": "Bilde mangler",
+    "checksPassing": "{{current}}/{{max}} sjekker bestått",
+    "preview": "Forhåndsvisning",
+    "previewDescription": "Eksakte resultatoppføringer kan variere basert på innhold og søke relevans."
+  }
+}
