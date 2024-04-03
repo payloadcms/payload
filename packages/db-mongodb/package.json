@@ -2,7 +2,11 @@
   "name": "@payloadcms/db-mongodb",
   "version": "1.4.3",
   "description": "The officially supported MongoDB database adapter for Payload",
-  "repository": "https://github.com/payloadcms/payload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-mongodb"
+  },
   "license": "MIT",
   "homepage": "https://payloadcms.com",
   "author": {

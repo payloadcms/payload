@@ -266,7 +266,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/payloadcms/payload.git"
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/payload"
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"
