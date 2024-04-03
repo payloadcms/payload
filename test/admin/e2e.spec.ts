@@ -111,7 +111,7 @@ describe('admin', () => {
     test('should navigate to collection - card', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
-      const anchor = page.locator(`#card-${postsCollectionSlug}`)
+      const anchor = page.locator(`#card-${postsCollectionSlug} a.card__click`)
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
@@ -198,9 +198,7 @@ describe('admin', () => {
 
     test('should render custom view', async () => {
       await page.goto(`${serverURL}/admin${customViewPath}`)
-      const pageURL = page.url()
-      const pathname = new URL(pageURL).pathname
-      expect(pathname).toEqual(`/admin${customViewPath}`)
+      await page.waitForURL(`**/admin${customViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
@@ -227,10 +225,14 @@ describe('admin', () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
+
+      // wait for the update view to load
+      await page.waitForURL(/\/(?!create$)[\w-]+$/)
       const pageURL = page.url()
+
       const customNestedTabViewURL = `${pageURL}${customNestedTabViewPath}`
       await page.goto(customNestedTabViewURL)
-      expect(page.url()).toEqual(customNestedTabViewURL)
+      await page.waitForURL(customNestedTabViewURL)
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
     })
 
@@ -238,14 +240,10 @@ describe('admin', () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
-      const docURL = page.url()
-      const pathname = new URL(docURL).pathname
 
-      const editTab = page
-        .locator('.doc-tab', {
-          has: page.locator(`a[href="${pathname}"]`),
-        })
-        ?.first()
+      // wait for the update view to load
+      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+      const editTab = page.locator('.doc-tab a[tabindex="-1"]')
 
       await expect(editTab).toContainText(customEditLabel)
     })
@@ -255,11 +253,9 @@ describe('admin', () => {
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
 
-      const editTab = page.locator(`.doc-tab`, {
-        hasText: exactText(customTabLabel),
-      })
+      const customTab = page.locator(`.doc-tab a:has-text("${customTabLabel}")`)
 
-      await expect(editTab).toBeVisible()
+      await expect(customTab).toBeVisible()
     })
 
     test('collection - should not show API tab when disabled in config', async () => {

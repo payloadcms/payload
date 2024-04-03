@@ -54,7 +54,7 @@ export const getViewFromConfig = ({
 } => {
   let ViewToRender: AdminViewComponent = null
   let templateClassName: string
-  let templateType: 'default' | 'minimal'
+  let templateType: 'default' | 'minimal' = 'minimal'
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,

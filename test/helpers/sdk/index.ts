@@ -7,6 +7,27 @@ type Args = {
 }
 
 export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>> {
+  private fetch = async <T>({ jwt, reduceJSON, args, method }: FetchOptions): Promise<T> => {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    }
+
+    if (jwt) headers.Authorization = `JWT ${jwt}`
+
+    const json: T = await fetch(`${this.serverURL}/api/local-api`, {
+      method: 'post',
+      headers,
+      body: JSON.stringify({
+        args,
+        method,
+      }),
+    }).then((res) => res.json())
+
+    if (reduceJSON) return reduceJSON<T>(json)
+
+    return json
+  }
+
   create = async <T extends keyof TGeneratedTypes['collections']>({
     jwt,
     ...args
@@ -29,27 +50,6 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     })
   }
 
-  fetch = async <T>({ jwt, reduceJSON, args, method }: FetchOptions): Promise<T> => {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    }
-
-    if (jwt) headers.Authorization = `JWT ${jwt}`
-
-    const json: T = await fetch(`${this.serverURL}/api/local-api`, {
-      method: 'post',
-      headers,
-      body: JSON.stringify({
-        args,
-        method,
-      }),
-    }).then((res) => res.json())
-
-    if (reduceJSON) return reduceJSON<T>(json)
-
-    return json
-  }
-
   find = async <T extends keyof TGeneratedTypes['collections']>({
     jwt,
     ...args
@@ -58,7 +58,6 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
       method: 'find',
       args,
       jwt,
-      reduceJSON: (json) => json.docs,
     })
   }
 
