@@ -218,11 +218,14 @@ describe('uploads', () => {
       .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
     await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.Toastify .Toastify__toast--success')).toContainText('successfully')
+    await page.locator('.Toastify .Toastify__toast--success .Toastify__close-button').click()
 
     // save the document and expect an error
     await page.locator('button#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields.')
+    await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
+      'Please correct invalid fields.',
+    )
   })
 
   test('Should render adminThumbnail when using a function', async () => {
