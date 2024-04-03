@@ -62,7 +62,7 @@ export const sanitizeQueryValue = ({
     formattedValue = Number(val)
   }
 
-  if (field.type === 'date' && typeof val === 'string') {
+  if (field.type === 'date' && typeof val === 'string' && operator !== 'exists') {
     formattedValue = new Date(val)
     if (Number.isNaN(Date.parse(formattedValue))) {
       return undefined
