@@ -15,7 +15,7 @@ export type ThumbnailCardProps = {
   label?: string
   onClick?: () => void
   onKeyDown?: () => void
-  thumbnail?: React.ReactNode
+  thumbnail: React.ReactNode
 }
 
 const baseClass = 'thumbnail-card'
@@ -58,7 +58,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
 
   return (
     <button className={classes} onClick={onClick} title={title} type="button">
-      <div className={`${baseClass}__thumbnail`}>{thumbnail && thumbnail}</div>
+      <div className={`${baseClass}__thumbnail`}>{thumbnail}</div>
       <div className={`${baseClass}__label`}>{title}</div>
     </button>
   )
