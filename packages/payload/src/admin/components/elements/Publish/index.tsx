@@ -9,7 +9,7 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 
-export type CustomPublishButtonProps = React.ComponentType<
+export type CustomPublishButtonType = React.ComponentType<
   DefaultPublishButtonProps & {
     DefaultButton: React.ComponentType<DefaultPublishButtonProps>
   }
@@ -38,7 +38,7 @@ const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
 }
 
 type Props = {
-  CustomComponent?: CustomPublishButtonProps
+  CustomComponent?: CustomPublishButtonType
 }
 
 export const Publish: React.FC<Props> = ({ CustomComponent }) => {

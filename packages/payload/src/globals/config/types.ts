@@ -3,7 +3,7 @@ import type { DeepRequired } from 'ts-essentials'
 
 import type {
   CustomPreviewButtonProps,
-  CustomPublishButtonProps,
+  CustomPublishButtonType,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
@@ -86,7 +86,7 @@ export type GlobalAdminOptions = {
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButtonProps
+      PublishButton?: CustomPublishButtonType
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
