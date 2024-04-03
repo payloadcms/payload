@@ -38,6 +38,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     customProps,
     disabled = false,
     filterOption = undefined,
+    getOptionValue,
     isClearable = true,
     isCreatable,
     isLoading,
@@ -78,6 +79,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
           ...components,
         }}
         filterOption={filterOption}
+        getOptionValue={getOptionValue}
         isClearable={isClearable}
         isDisabled={disabled}
         isSearchable={isSearchable}

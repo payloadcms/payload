@@ -382,7 +382,16 @@ export type NamedTab = TabBase & {
 
 export type UnnamedTab = Omit<TabBase, 'name'> & {
   interfaceName?: never
-  label: Record<string, string> | string
+  /**
+   * Can be either:
+   * - A string, which will be used as the tab's label.
+   * - An object, where the key is the language code and the value is the label.
+   */
+  label:
+    | {
+        [selectedLanguage: string]: string
+      }
+    | string
   localized?: never
 }
 

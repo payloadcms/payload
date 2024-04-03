@@ -491,15 +491,21 @@ describe('admin', () => {
     })
 
     test('should bulk delete', async () => {
+      async function selectAndDeleteAll() {
+        await page.goto(postsUrl.list)
+        await page.locator('input#select-all').check()
+        await page.locator('.delete-documents__toggle').click()
+        await page.locator('#confirm-delete').click()
+      }
+
       // First, delete all posts created by the seed
       await deleteAllPosts()
-
-      await Promise.all([createPost(), createPost(), createPost()])
+      await createPost()
+      await createPost()
+      await createPost()
 
       await page.goto(postsUrl.list)
-      await page.locator('input#select-all').check()
-      await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await selectAndDeleteAll()
       await expect(page.locator('.Toastify__toast--success')).toHaveText(
         'Deleted 3 Posts successfully.',
       )
@@ -509,8 +515,9 @@ describe('admin', () => {
     test('should bulk update', async () => {
       // First, delete all posts created by the seed
       await deleteAllPosts()
-
-      await Promise.all([createPost(), createPost(), createPost()])
+      await createPost()
+      await createPost()
+      await createPost()
 
       const bulkTitle = 'Bulk update title'
       await page.goto(postsUrl.list)
@@ -519,7 +526,7 @@ describe('admin', () => {
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
 
-      const titleOption = page.locator('.rs__option', {
+      const titleOption = page.locator('.field-select .rs__option', {
         hasText: exactText('Title'),
       })
 
@@ -1189,15 +1196,8 @@ describe('admin', () => {
       beforeEach(async () => {
         // delete all posts created by the seed
         await deleteAllPosts()
-
-        await Promise.all([
-          createPost({
-            number: 1,
-          }),
-          createPost({
-            number: 2,
-          }),
-        ])
+        await createPost({ number: 1 })
+        await createPost({ number: 2 })
       })
 
       test('should sort', async () => {

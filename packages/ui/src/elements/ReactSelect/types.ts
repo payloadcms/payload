@@ -60,6 +60,11 @@ export type Props = {
         search: string,
       ) => boolean)
     | undefined
+  getOptionValue?: ReactSelectStateManagerProps<
+    Option,
+    boolean,
+    GroupBase<Option>
+  >['getOptionValue']
   inputId?: string
   isClearable?: boolean
   /** Allows you to create own values in the UI despite them not being pre-specified */

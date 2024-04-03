@@ -101,7 +101,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
 export const EditMany: React.FC<EditManyProps> = (props) => {
   const { useModal } = facelessUIImport
 
-  const { collection: { slug, fields, labels: { plural } } = {}, collection, fieldMap } = props
+  const { collection: { slug, labels: { plural } } = {}, collection, fieldMap } = props
 
   const { permissions } = useAuth()
   const { closeModal } = useModal()
@@ -114,8 +114,6 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const [selected, setSelected] = useState([])
   const { stringifyParams } = useSearchParams()
   const router = useRouter()
-  const { componentMap } = useComponentMap()
-  const [reducedFieldMap, setReducedFieldMap] = useState([])
   const [initialState, setInitialState] = useState<FormState>()
   const hasInitializedState = React.useRef(false)
   const { clearRouteCache } = useRouteCache()
@@ -124,21 +122,6 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const hasUpdatePermission = collectionPermissions?.update?.permission
 
   const drawerSlug = `edit-${slug}`
-
-  React.useEffect(() => {
-    if (componentMap?.collections?.[slug]?.fieldMap) {
-      const fieldMap = componentMap.collections[slug].fieldMap
-      const reducedFieldMap = []
-      fieldMap.map((field) => {
-        selected.map((selectedField) => {
-          if ('name' in field && field.name === selectedField.name) {
-            reducedFieldMap.push(field)
-          }
-        })
-      })
-      setReducedFieldMap(reducedFieldMap)
-    }
-  }, [componentMap.collections, fields, slug, selected])
 
   React.useEffect(() => {
     if (!hasInitializedState.current) {
@@ -228,13 +211,8 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                 onSuccess={onSuccess}
               >
                 <FieldSelect fieldMap={fieldMap} setSelected={setSelected} />
-                {reducedFieldMap.length === 0 ? null : (
-                  <RenderFields
-                    fieldMap={reducedFieldMap}
-                    path=""
-                    readOnly={false}
-                    schemaPath={slug}
-                  />
+                {selected.length === 0 ? null : (
+                  <RenderFields fieldMap={selected} path="" readOnly={false} schemaPath={slug} />
                 )}
                 <div className={`${baseClass}__sidebar-wrap`}>
                   <div className={`${baseClass}__sidebar`}>
