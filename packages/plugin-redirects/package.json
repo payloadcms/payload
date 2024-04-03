@@ -2,7 +2,11 @@
   "name": "@payloadcms/plugin-redirects",
   "version": "1.0.1",
   "homepage:": "https://payloadcms.com",
-  "repository": "git@github.com:payloadcms/plugin-redirects.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-redirects"
+  },
   "description": "Redirects plugin for Payload",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
