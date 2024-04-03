@@ -2,9 +2,7 @@
 // TODO: abstract the `next/navigation` dependency out from this component
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload/types'
 
-import { useRouter } from 'next/navigation.js'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { useAllFormFields, useFormModified } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
@@ -32,7 +30,7 @@ export const Autosave: React.FC<Props> = ({
   publishedDocUpdatedAt,
 }) => {
   const {
-    routes: { admin, api },
+    routes: { api },
     serverURL,
   } = useConfig()
   const { docConfig, getVersions, versions } = useDocumentInfo()
@@ -41,7 +39,6 @@ export const Autosave: React.FC<Props> = ({
   const [fields] = useAllFormFields()
   const modified = useFormModified()
   const { code: locale } = useLocale()
-  const router = useRouter()
   const { i18n, t } = useTranslation()
 
   let interval = 800
@@ -68,40 +65,6 @@ export const Autosave: React.FC<Props> = ({
   // Store locale in ref so the autosave func
   // can always retrieve the most to date locale
   localeRef.current = locale
-
-  const createCollectionDoc = useCallback(async () => {
-    const res = await fetch(
-      `${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true&autosave=true`,
-      {
-        body: JSON.stringify({}),
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-      },
-    )
-
-    if (res.status === 201) {
-      const json = await res.json()
-      router.replace(`${admin}/collections/${collection.slug}/${json.doc.id}`, {
-        // state: {
-        //   data: json.doc,
-        // },
-      })
-    } else {
-      toast.error(t('error:autosaving'))
-    }
-  }, [i18n, serverURL, api, collection, locale, router, admin, t])
-
-  useEffect(() => {
-    // If no ID, but this is used for a collection doc,
-    // Immediately save it and set lastSaved
-    if (!id && collection) {
-      void createCollectionDoc()
-    }
-  }, [id, collection, createCollectionDoc])
 
   // When debounced fields change, autosave
   useEffect(() => {
