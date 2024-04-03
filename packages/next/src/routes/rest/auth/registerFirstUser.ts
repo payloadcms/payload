@@ -5,11 +5,14 @@ import { registerFirstUserOperation } from 'payload/operations'
 import type { CollectionRouteHandler } from '../types.js'
 
 export const registerFirstUser: CollectionRouteHandler = async ({ collection, req }) => {
+  const data = req.data
+
   const result = await registerFirstUserOperation({
     collection,
     data: {
-      email: typeof req.data?.email === 'string' ? req.data.email : '',
-      password: typeof req.data?.password === 'string' ? req.data.password : '',
+      ...data,
+      email: typeof data?.email === 'string' ? data.email : '',
+      password: typeof data?.password === 'string' ? data.password : '',
     },
     req,
   })
