@@ -92,8 +92,10 @@
     &:hover {
       cursor: pointer;
 
-      svg {
-        opacity: 0.2;
+      .checkbox-input__icon {
+        svg {
+          opacity: 0.2;
+        }
       }
     }
   }
