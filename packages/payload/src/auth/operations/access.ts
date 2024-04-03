@@ -22,6 +22,7 @@ export const accessOperation = async (args: Arguments): Promise<Permissions> => 
     if (shouldCommit) await commitTransaction(req)
     return results
   } catch (e: unknown) {
+    console.log({ e })
     await killTransaction(req)
     throw e
   }
