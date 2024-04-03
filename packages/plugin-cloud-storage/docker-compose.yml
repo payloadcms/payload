@@ -15,6 +15,7 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock'
 
   azure-storage:
+    platform: linux/amd64
     image: mcr.microsoft.com/azure-storage/azurite:3.18.0
     restart: always
     command: 'azurite --loose --blobHost 0.0.0.0 --tableHost 0.0.0.0 --queueHost 0.0.0.0'
