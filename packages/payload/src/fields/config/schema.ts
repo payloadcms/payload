@@ -111,7 +111,13 @@ export const number = baseField.keys({
     placeholder: joi.string(),
     step: joi.number(),
   }),
-  defaultValue: joi.alternatives().try(joi.number(), joi.func()),
+  defaultValue: joi
+    .alternatives()
+    .try(
+      joi.number(),
+      joi.func(),
+      joi.array().when('hasMany', { not: true, then: joi.forbidden() }),
+    ),
   hasMany: joi.boolean().default(false),
   max: joi.number(),
   maxRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
