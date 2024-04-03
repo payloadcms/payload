@@ -643,6 +643,16 @@ describe('admin', () => {
     })
   })
 
+  describe('Custom CSS', () => {
+    test('should see custom css in admin UI', async () => {
+      await page.goto(postsUrl.admin)
+      await page.waitForURL(postsUrl.admin)
+      await openNav(page)
+      const navControls = page.locator('#custom-css')
+      await expect(navControls).toHaveCSS('font-family', 'monospace')
+    })
+  })
+
   describe('list view', () => {
     const tableRowLocator = 'table > tbody > tr'
 
@@ -1179,15 +1189,6 @@ describe('admin', () => {
         await paginator.locator('button').nth(0).click()
         expect(page.url()).toContain('page=1')
         await expect(tableItems).toHaveCount(10)
-      })
-    })
-
-    describe('custom css', () => {
-      test('should see custom css in admin UI', async () => {
-        await page.goto(postsUrl.admin)
-        await openNav(page)
-        const navControls = page.locator('#custom-css')
-        await expect(navControls).toHaveCSS('font-family', 'monospace')
       })
     })
 
