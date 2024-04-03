@@ -54,6 +54,7 @@ export const Form: React.FC<FormProps> = (props) => {
     children,
     className,
     disableSuccessStatus,
+    disableValidationOnSubmit,
     disabled,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     beforeSubmit,
@@ -205,7 +206,8 @@ export const Form: React.FC<FormProps> = (props) => {
         }
       }
 
-      const isValid = skipValidation ? true : await contextRef.current.validateForm()
+      const isValid =
+        skipValidation || disableValidationOnSubmit ? true : await contextRef.current.validateForm()
 
       // If not valid, prevent submission
       if (!isValid) {
