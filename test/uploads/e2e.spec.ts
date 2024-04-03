@@ -12,7 +12,13 @@ import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
-import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared.js'
+import {
+  adminThumbnailFunctionSlug,
+  adminThumbnailSizeSlug,
+  audioSlug,
+  mediaSlug,
+  relationSlug,
+} from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -24,7 +30,8 @@ let serverURL: string
 let mediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
-let adminThumbnailURL: AdminUrlUtil
+let adminThumbnailSizeURL: AdminUrlUtil
+let adminThumbnailFunctionURL: AdminUrlUtil
 
 describe('uploads', () => {
   let page: Page
@@ -39,7 +46,8 @@ describe('uploads', () => {
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
-    adminThumbnailURL = new AdminUrlUtil(serverURL, adminThumbnailSlug)
+    adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
+    adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -196,6 +204,7 @@ describe('uploads', () => {
 
   test('should restrict mimetype based on filterOptions', async () => {
     await page.goto(audioURL.edit(audioDoc.id))
+    await page.waitForURL(audioURL.edit(audioDoc.id))
 
     // remove the selection and open the list drawer
     await page.locator('.file-details__remove').click()
@@ -210,16 +219,31 @@ describe('uploads', () => {
       .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
     await page.locator('[id^=doc-drawer_media_2_] button#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('successfully')
+    await expect(page.locator('.Toastify .Toastify__toast--success')).toContainText('successfully')
+    await page.locator('.Toastify .Toastify__toast--success .Toastify__close-button').click()
 
     // save the document and expect an error
     await page.locator('button#action-save').click()
-    await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields.')
+    await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
+      'Please correct invalid fields.',
+    )
   })
 
-  test('Should execute adminThumbnail and provide thumbnail when set', async () => {
-    await page.goto(adminThumbnailURL.list)
-    await page.waitForURL(adminThumbnailURL.list)
+  test('Should render adminThumbnail when using a function', async () => {
+    await page.goto(adminThumbnailFunctionURL.list)
+    await page.waitForURL(adminThumbnailFunctionURL.list)
+
+    // Ensure sure false or null shows generic file svg
+    const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
+    await expect(genericUploadImage).toHaveAttribute(
+      'src',
+      'https://payloadcms.com/images/universal-truth.jpg',
+    )
+  })
+
+  test('Should render adminThumbnail when using a specific size', async () => {
+    await page.goto(adminThumbnailSizeURL.list)
+    await page.waitForURL(adminThumbnailSizeURL.list)
 
     // Ensure sure false or null shows generic file svg
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')

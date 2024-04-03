@@ -258,7 +258,7 @@ jobs:
           - plugin-nested-docs
           - plugin-seo
           - versions
-          # - uploads
+          - uploads
 
     steps:
       - name: Use Node.js 18

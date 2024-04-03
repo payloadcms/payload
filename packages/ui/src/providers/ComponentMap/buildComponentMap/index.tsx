@@ -96,15 +96,7 @@ export const buildComponentMap = (args: {
         afterListTable?.map((Component) => <Component />)) ||
       null
 
-    let AdminThumbnail = null
-    if (typeof collectionConfig?.upload?.adminThumbnail === 'function') {
-      AdminThumbnail = collectionConfig?.upload?.adminThumbnail
-    } else if (typeof collectionConfig?.upload?.adminThumbnail === 'string') {
-      AdminThumbnail = () => collectionConfig?.upload?.adminThumbnail
-    }
-
     const componentMap: CollectionComponentMap = {
-      AdminThumbnail,
       AfterList,
       AfterListTable,
       BeforeList,

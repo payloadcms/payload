@@ -131,6 +131,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     defaultColumns,
     useAsTitle,
     listPreferences,
+    initialColumns,
   ])
 
   // /////////////////////////////////////
