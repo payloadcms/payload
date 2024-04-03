@@ -2,7 +2,6 @@ import type { CollectionConfig } from 'payload/types'
 import type { FilterOptionsProps } from 'payload/types'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
-import { mapAsync } from 'payload/utilities'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -334,6 +333,8 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      depth: 0,
+      overrideAccess: true,
     })
     // Create docs to relate to
     const { id: relationOneDocId } = await payload.create({
@@ -341,29 +342,36 @@ export default buildConfigWithDefaults({
       data: {
         name: relationOneSlug,
       },
+      depth: 0,
+      overrideAccess: true,
     })
 
     const relationOneIDs: string[] = []
-    await mapAsync([...Array(11)], async () => {
+
+    for (let i = 0; i < 11; i++) {
       const doc = await payload.create({
         collection: relationOneSlug,
         data: {
           name: relationOneSlug,
         },
+        depth: 0,
+        overrideAccess: true,
       })
       relationOneIDs.push(doc.id)
-    })
+    }
 
     const relationTwoIDs: string[] = []
-    await mapAsync([...Array(11)], async () => {
+    for (let i = 0; i < 11; i++) {
       const doc = await payload.create({
         collection: relationTwoSlug,
         data: {
           name: relationTwoSlug,
         },
+        depth: 0,
+        overrideAccess: true,
       })
       relationTwoIDs.push(doc.id)
-    })
+    }
 
     // Existing relationships
     const { id: restrictedDocId } = await payload.create({
@@ -371,13 +379,16 @@ export default buildConfigWithDefaults({
       data: {
         name: 'relation-restricted',
       },
+      depth: 0,
+      overrideAccess: true,
     })
 
     const relationsWithTitle: string[] = []
-
-    await mapAsync(['relation-title', 'word boundary search'], async (title) => {
+    for (const title of ['relation-title', 'word boundary search']) {
       const { id } = await payload.create({
         collection: relationWithTitleSlug,
+        depth: 0,
+        overrideAccess: true,
         data: {
           name: title,
           meta: {
@@ -386,19 +397,24 @@ export default buildConfigWithDefaults({
         },
       })
       relationsWithTitle.push(id)
-    })
+    }
 
     await payload.create({
       collection: slug,
+      depth: 0,
+      overrideAccess: true,
       data: {
         relationship: relationOneDocId,
         relationshipRestricted: restrictedDocId,
         relationshipWithTitle: relationsWithTitle[0],
       },
     })
-    await mapAsync([...Array(11)], async () => {
+
+    for (let i = 0; i < 11; i++) {
       await payload.create({
         collection: slug,
+        depth: 0,
+        overrideAccess: true,
         data: {
           relationship: relationOneDocId,
           relationshipHasManyMultiple: relationOneIDs.map((id) => ({
@@ -408,13 +424,15 @@ export default buildConfigWithDefaults({
           relationshipRestricted: restrictedDocId,
         },
       })
-    })
+    }
 
-    await mapAsync([...Array(15)], async () => {
+    for (let i = 0; i < 15; i++) {
       const relationOneID = relationOneIDs[Math.floor(Math.random() * 10)]
       const relationTwoID = relationTwoIDs[Math.floor(Math.random() * 10)]
       await payload.create({
         collection: slug,
+        depth: 0,
+        overrideAccess: true,
         data: {
           relationship: relationOneDocId,
           relationshipHasMany: [relationOneID],
@@ -423,20 +441,25 @@ export default buildConfigWithDefaults({
           relationshipRestricted: restrictedDocId,
         },
       })
-    })
-    ;[...Array(15)].forEach((_, i) => {
-      void payload.create({
+    }
+
+    for (let i = 0; i < 15; i++) {
+      await payload.create({
         collection: collection1Slug,
+        depth: 0,
+        overrideAccess: true,
         data: {
           name: `relationship-test ${i}`,
         },
       })
-      void payload.create({
+      await payload.create({
         collection: collection2Slug,
+        depth: 0,
+        overrideAccess: true,
         data: {
           name: `relationship-test ${i}`,
         },
       })
-    })
+    }
   },
 })

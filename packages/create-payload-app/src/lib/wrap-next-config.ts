@@ -1,28 +1,30 @@
+import chalk from 'chalk'
 import { parseModule } from 'esprima'
 import fs from 'fs'
-import globby from 'globby'
-import path from 'path'
+
+import { warning } from '../utils/log.js'
+import { log } from '../utils/log.js'
 
 export const withPayloadImportStatement = `import { withPayload } from '@payloadcms/next'\n`
 
-export const wrapNextConfig = async (args: { projectDir: string }): Promise<void> => {
-  const foundConfig = (await globby('next.config.*js', { cwd: args.projectDir }))?.[0]
+export const wrapNextConfig = (args: { nextConfigPath: string }) => {
+  const { nextConfigPath } = args
+  const configContent = fs.readFileSync(nextConfigPath, 'utf8')
+  const { modifiedConfigContent: newConfig, success } = parseAndModifyConfigContent(configContent)
 
-  if (!foundConfig) {
-    throw new Error(`No Next config found at ${args.projectDir}`)
+  if (!success) {
+    return
   }
-  const configPath = path.resolve(args.projectDir, foundConfig)
-  const configContent = fs.readFileSync(configPath, 'utf8')
-  const { error, modifiedConfigContent: newConfig } = parseAndInsertWithPayload(configContent)
-  if (error) {
-    console.warn(error)
-  }
-  fs.writeFileSync(configPath, newConfig)
+
+  fs.writeFileSync(nextConfigPath, newConfig)
 }
 
-export function parseAndInsertWithPayload(content: string): {
-  error?: string
+/**
+ * Parses config content with AST and wraps it with withPayload function
+ */
+export function parseAndModifyConfigContent(content: string): {
   modifiedConfigContent: string
+  success: boolean
 } {
   content = withPayloadImportStatement + content
   const ast = parseModule(content, { loc: true })
@@ -38,12 +40,12 @@ export function parseAndInsertWithPayload(content: string): {
     throw new Error('Could not find ExportDefaultDeclaration in next.config.js')
   }
 
-  if (exportDefaultDeclaration) {
+  if (exportDefaultDeclaration && exportDefaultDeclaration.declaration?.loc) {
     const modifiedConfigContent = insertBeforeAndAfter(
       content,
-      exportDefaultDeclaration.declaration?.loc,
+      exportDefaultDeclaration.declaration.loc,
     )
-    return { modifiedConfigContent }
+    return { modifiedConfigContent, success: true }
   } else if (exportNamedDeclaration) {
     const exportSpecifier = exportNamedDeclaration.specifiers.find(
       (s) =>
@@ -54,16 +56,42 @@ export function parseAndInsertWithPayload(content: string): {
     )
 
     if (exportSpecifier) {
-      // TODO: Improve with this example and/or link to docs
+      warning('Could not automatically wrap next.config.js with withPayload.')
+      warning('Automatic wrapping of named exports as default not supported yet.')
+
+      warnUserWrapNotSuccessful()
       return {
-        error: `Automatic wrapping of named exports as default not supported yet.
-  Please manually wrap your Next config with the withPayload function`,
         modifiedConfigContent: content,
+        success: false,
       }
     }
-  } else {
-    throw new Error('Could not automatically wrap next.config.js with withPayload')
   }
+
+  warning('Could not automatically wrap next.config.js with withPayload.')
+  warnUserWrapNotSuccessful()
+  return {
+    modifiedConfigContent: content,
+    success: false,
+  }
+}
+
+function warnUserWrapNotSuccessful() {
+  // Output directions for user to update next.config.js
+  const withPayloadMessage = `
+
+  ${chalk.bold(`Please manually wrap your existing next.config.js with the withPayload function. Here is an example:`)}
+
+  import withPayload from '@payloadcms/next/withPayload'
+
+  const nextConfig = {
+    // Your Next.js config here
+  }
+
+  export default withPayload(nextConfig)
+
+`
+
+  log(withPayloadMessage)
 }
 
 type Directive = {

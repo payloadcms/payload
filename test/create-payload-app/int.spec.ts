@@ -4,14 +4,11 @@ import * as CommentJson from 'comment-json'
 import { initNext } from 'create-payload-app/commands'
 import execa from 'execa'
 import fs from 'fs'
+import fse from 'fs-extra'
 import path from 'path'
 import shelljs from 'shelljs'
 import tempy from 'tempy'
-import { fileURLToPath } from 'url'
 import { promisify } from 'util'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 const readFile = promisify(fs.readFile)
 const writeFile = promisify(fs.writeFile)
@@ -27,13 +24,6 @@ describe('create-payload-app', () => {
   beforeAll(() => {
     // Runs copyfiles copy app/(payload) -> dist/app/(payload)
     shelljs.exec('pnpm build:create-payload-app')
-  })
-
-  describe('Next.js app template files', () => {
-    it('should exist in dist', () => {
-      const distPath = path.resolve(dirname, '../../packages/create-payload-app/dist/app/(payload)')
-      expect(fs.existsSync(distPath)).toBe(true)
-    })
   })
 
   describe.each(Object.keys(nextCreateCommands))(`--init-next with %s`, (nextCmdKey) => {
@@ -74,19 +64,51 @@ describe('create-payload-app', () => {
     it('should install payload app in Next.js project', async () => {
       expect(fs.existsSync(projectDir)).toBe(true)
 
+      const firstResult = await initNext({
+        '--debug': true,
+        projectDir,
+        dbType: 'mongodb',
+        useDistFiles: true, // create-payload-app/dist/template
+        packageManager: 'pnpm',
+      })
+
+      // Will fail because we detect top-level layout.tsx file
+      expect(firstResult.success).toEqual(false)
+
+      // Move all files from app to top-level directory named `(app)`
+      if (firstResult.success === false && 'nextAppDir' in firstResult) {
+        fs.mkdirSync(path.resolve(firstResult.nextAppDir, '(app)'))
+        fs.readdirSync(path.resolve(firstResult.nextAppDir)).forEach((file) => {
+          if (file === '(app)') return
+          fs.renameSync(
+            path.resolve(firstResult.nextAppDir, file),
+            path.resolve(firstResult.nextAppDir, '(app)', file),
+          )
+        })
+      }
+
+      // Rerun after moving files
       const result = await initNext({
         '--debug': true,
         projectDir,
+        dbType: 'mongodb',
         useDistFiles: true, // create-payload-app/dist/app/(payload)
         packageManager: 'pnpm',
       })
 
-      expect(result.success).toBe(true)
+      expect(result.success).toEqual(true)
+      expect(result.nextAppDir).toEqual(
+        path.resolve(projectDir, result.isSrcDir ? 'src/app' : 'app'),
+      )
 
-      const payloadFilesPath = path.resolve(result.userAppDir, '(payload)')
+      const payloadFilesPath = path.resolve(result.nextAppDir, '(payload)')
+      // shelljs.exec(`tree ${projectDir}`)
       expect(fs.existsSync(payloadFilesPath)).toBe(true)
 
-      const payloadConfig = path.resolve(projectDir, 'payload.config.ts')
+      const payloadConfig = path.resolve(
+        projectDir,
+        result.isSrcDir ? 'src/payload.config.ts' : 'payload.config.ts',
+      )
       expect(fs.existsSync(payloadConfig)).toBe(true)
 
       const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
@@ -94,11 +116,22 @@ describe('create-payload-app', () => {
       const userTsConfig = CommentJson.parse(userTsConfigContent) as {
         compilerOptions?: CompilerOptions
       }
+
+      // Check that `@payload-config` path is added to tsconfig
       expect(userTsConfig.compilerOptions.paths?.['@payload-config']).toStrictEqual([
-        './payload.config.ts',
+        `./${result.isSrcDir ? 'src/' : ''}payload.config.ts`,
       ])
 
-      // TODO: Start the Next.js app and check if it runs
+      // Payload dependencies should be installed
+      const packageJson = fse.readJsonSync(path.resolve(projectDir, 'package.json')) as {
+        dependencies: Record<string, string>
+      }
+      expect(packageJson.dependencies).toMatchObject({
+        payload: expect.any(String),
+        '@payloadcms/db-mongodb': expect.any(String),
+        '@payloadcms/richtext-lexical': expect.any(String),
+        '@payloadcms/next': expect.any(String),
+      })
     })
   })
 })

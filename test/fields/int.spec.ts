@@ -620,6 +620,7 @@ describe('Fields', () => {
     it('should duplicate with unique fields', async () => {
       const data = {
         text: 'a',
+        // uniqueRequiredText: 'duplicate',
       }
       const doc = await payload.create({
         collection: 'indexed-fields',

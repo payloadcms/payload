@@ -44,12 +44,12 @@ export type UploadData = {
 }
 
 function convertUploadElement(domNode: Node): DOMConversionOutput | null {
-  if (domNode instanceof HTMLImageElement) {
-    // const { alt: altText, src } = domNode;
-    // const node = $createImageNode({ altText, src });
-    // return { node };
-    // TODO: Auto-upload functionality here!
-  }
+  //if (domNode instanceof HTMLImageElement) {
+  // const { alt: altText, src } = domNode;
+  // const node = $createImageNode({ altText, src });
+  // return { node };
+  // TODO: Auto-upload functionality here!
+  //}
   return null
 }
 

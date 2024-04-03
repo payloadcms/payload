@@ -1,18 +1,15 @@
-import type { SanitizedConfig } from 'payload/config'
-
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import { createServer } from 'http'
 import nextImport from 'next'
 import path from 'path'
-import { type Payload } from 'payload'
+import { type Payload } from 'payload/types'
 import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
-import { startMemoryDB } from '../startMemoryDB.js'
 import { createTestHooks } from '../testHooks.js'
+import startMemoryDB from './startMemoryDB.js'
 
 type Args = {
-  config: Promise<SanitizedConfig>
   dirname: string
 }
 
@@ -21,19 +18,14 @@ type Result = {
   serverURL: string
 }
 
-export async function initPayloadE2E({ config, dirname }: Args): Promise<Result> {
+export async function initPayloadE2E({ dirname }: Args): Promise<Result> {
   const testSuiteName = dirname.split('/').pop()
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
+  await startMemoryDB()
+  const { default: config } = await import(path.resolve(dirname, 'config.ts'))
 
-  process.env.NODE_OPTIONS = '--no-deprecation'
-  process.env.PAYLOAD_DROP_DATABASE = 'true'
-
-  // @ts-expect-error
-  process.env.NODE_ENV = 'test'
-
-  const configWithMemoryDB = await startMemoryDB(config)
-  const payload = await getPayloadHMR({ config: configWithMemoryDB })
+  const payload = await getPayloadHMR({ config })
 
   const port = 3000
   process.env.PORT = String(port)

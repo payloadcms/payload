@@ -11,6 +11,7 @@ import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { Posts } from './collections/Posts.js'
+import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
 import { AdminButton } from './components/AdminButton/index.js'
 import { AfterDashboard } from './components/AfterDashboard/index.js'
@@ -74,6 +75,7 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [
+    UploadCollection,
     Posts,
     Users,
     CollectionHidden,

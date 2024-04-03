@@ -1,12 +1,12 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
-import { payloadCloud } from '@payloadcms/plugin-cloud'
+// import { payloadCloud } from '@payloadcms/plugin-cloud'
 import { lexicalEditor } from '@payloadcms/richtext-lexical' // editor-import
 import path from 'path'
 import { buildConfig } from 'payload/config'
-import sharp from 'sharp'
+// import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
-import { Users } from './src/collections/Users'
+import { Users } from './collections/Users'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -17,7 +17,7 @@ export default buildConfig({
   },
   collections: [Users],
   editor: lexicalEditor({}),
-  plugins: [payloadCloud()],
+  // plugins: [payloadCloud()], // TODO: Re-enable when cloud supports 3.0
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -33,5 +33,6 @@ export default buildConfig({
 
   // This is temporary - we may make an adapter pattern
   // for this before reaching 3.0 stable
-  sharp,
+
+  // sharp,
 })

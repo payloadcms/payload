@@ -3,9 +3,10 @@ import merge from 'deepmerge'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { beforeDuplicate } from './beforeDuplicate.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -15,11 +16,12 @@ type Args = {
   data: Record<string, unknown>
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
+  duplicate: boolean
   errors: { field: string; message: string }[]
   field: Field | TabAsField
   global: SanitizedGlobalConfig | null
   id?: number | string
-  mergeLocaleActions: (() => void)[]
+  mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
   path: string
   req: PayloadRequest
@@ -34,6 +36,7 @@ type Args = {
 // - Execute field hooks
 // - Validate data
 // - Transform data for storage
+// - beforeDuplicate hooks (if duplicate)
 // - Unflatten locales
 
 export const promise = async ({
@@ -43,6 +46,7 @@ export const promise = async ({
   data,
   doc,
   docWithLocales,
+  duplicate,
   errors,
   field,
   global,
@@ -59,10 +63,8 @@ export const promise = async ({
     ? Boolean(field.admin.condition(data, siblingData, { user: req.user }))
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
-
-  const defaultLocale = req.payload.config?.localization
-    ? req.payload.config.localization?.defaultLocale
-    : 'en'
+  const { localization } = req.payload.config
+  const defaultLocale = localization ? localization?.defaultLocale : 'en'
   const operationLocale = req.locale || defaultLocale
 
   if (fieldAffectsData(field)) {
@@ -131,17 +133,34 @@ export const promise = async ({
       }
     }
 
+    const beforeDuplicateArgs: FieldHookArgs = {
+      collection,
+      context,
+      data,
+      field,
+      global: undefined,
+      req,
+      siblingData,
+      value: siblingData[field.name],
+    }
+
     // Push merge locale action if applicable
-    if (field.localized) {
-      mergeLocaleActions.push(() => {
-        if (req.payload.config.localization) {
-          const { localization } = req.payload.config
-          const localeData = localization.localeCodes.reduce((localizedValues, locale) => {
-            const fieldValue =
+    if (localization && field.localized) {
+      mergeLocaleActions.push(async () => {
+        const localeData = await localization.localeCodes.reduce(
+          async (localizedValuesPromise: Promise<Record<string, unknown>>, locale) => {
+            const localizedValues = await localizedValuesPromise
+            let fieldValue =
               locale === req.locale
                 ? siblingData[field.name]
                 : siblingDocWithLocales?.[field.name]?.[locale]
 
+            if (duplicate && field.hooks?.beforeDuplicate?.length) {
+              beforeDuplicateArgs.value = fieldValue
+              fieldValue = await beforeDuplicate(beforeDuplicateArgs)
+            }
+
+            // const result = await localizedValues
             // update locale value if it's not undefined
             if (typeof fieldValue !== 'undefined') {
               return {
@@ -150,14 +169,19 @@ export const promise = async ({
               }
             }
 
-            return localizedValues
-          }, {})
+            return localizedValuesPromise
+          },
+          Promise.resolve({}),
+        )
 
-          // If there are locales with data, set the data
-          if (Object.keys(localeData).length > 0) {
-            siblingData[field.name] = localeData
-          }
+        // If there are locales with data, set the data
+        if (Object.keys(localeData).length > 0) {
+          siblingData[field.name] = localeData
         }
+      })
+    } else if (duplicate && field.hooks?.beforeDuplicate?.length) {
+      mergeLocaleActions.push(async () => {
+        siblingData[field.name] = await beforeDuplicate(beforeDuplicateArgs)
       })
     }
   }
@@ -195,6 +219,7 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
+        duplicate,
         errors,
         fields: field.fields,
         global,
@@ -225,6 +250,7 @@ export const promise = async ({
               data,
               doc,
               docWithLocales,
+              duplicate,
               errors,
               fields: field.fields,
               global,
@@ -267,6 +293,7 @@ export const promise = async ({
                 data,
                 doc,
                 docWithLocales,
+                duplicate,
                 errors,
                 fields: block.fields,
                 global,
@@ -298,6 +325,7 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
+        duplicate,
         errors,
         fields: field.fields,
         global,
@@ -339,6 +367,7 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
+        duplicate,
         errors,
         fields: field.fields,
         global,
@@ -363,6 +392,7 @@ export const promise = async ({
         data,
         doc,
         docWithLocales,
+        duplicate,
         errors,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,

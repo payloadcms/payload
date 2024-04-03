@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -11,20 +10,20 @@ import type { Page as PayloadPage } from './payload-types.js'
 import { initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
-import config from '../uploads/config.js'
 import { mediaSlug } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
+
 let url: AdminUrlUtil
 let page: Page
 let id: string
-let payload: Payload
 
 describe('SEO Plugin', () => {
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E({ config, dirname })
+    const { serverURL, payload } = await initPayloadE2E({ dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
@@ -68,15 +67,17 @@ describe('SEO Plugin', () => {
     test('Should auto-generate meta title when button is clicked in tabs', async () => {
       const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
-      const metaTitleClass = '#field-title'
+      const metaTitleClass = '#field-meta__title'
 
       const secondTab = page.locator(contentTabsClass).nth(1)
       await secondTab.click()
 
-      const metaTitle = page.locator(metaTitleClass).nth(0)
+      const metaTitle = page.locator(metaTitleClass)
+
       await expect(metaTitle).toHaveValue('This is a test meta title')
 
       const autoGenButton = page.locator(autoGenerateButtonClass).nth(0)
+      await expect(autoGenButton).toContainText('Auto-generate')
       await autoGenButton.click()
 
       await expect(metaTitle).toHaveValue('Website.com — Test Page')
@@ -108,17 +109,17 @@ describe('SEO Plugin', () => {
       await page.goto(url.edit(id))
       const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
-      const metaDescriptionClass = '#field-description'
+      const metaDescriptionClass = '#field-meta__description'
       const previewClass =
-        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(6) > div:nth-child(3)'
+        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(6)'
 
       const secondTab = page.locator(contentTabsClass).nth(1)
       await secondTab.click()
 
-      const metaDescription = page.locator(metaDescriptionClass).nth(0)
+      const metaDescription = page.locator(metaDescriptionClass)
       await metaDescription.fill('My new amazing SEO description')
 
-      const preview = page.locator(previewClass).nth(0)
+      const preview = page.locator(previewClass)
       await expect(preview).toContainText('https://yoursite.com/en/')
       await expect(preview).toContainText('This is a test meta title')
       await expect(preview).toContainText('My new amazing SEO description')
@@ -147,6 +148,7 @@ describe('SEO Plugin', () => {
       // Change language to Spanish
       await languageField.click()
       await options.locator('text=Español').click()
+      await expect(languageField).toContainText('Español')
 
       // Navigate back to the page
       await page.goto(url.edit(id))

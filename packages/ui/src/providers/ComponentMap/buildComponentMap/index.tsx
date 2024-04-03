@@ -70,8 +70,8 @@ export const buildComponentMap = (args: {
     const SaveDraftButtonComponent = collectionConfig?.admin?.components?.edit?.SaveDraftButton
     const SaveDraftButton = SaveDraftButtonComponent ? <SaveDraftButtonComponent /> : undefined
 
-    /* const PreviewButtonComponent = collectionConfig?.admin?.components?.edit?.PreviewButton
-    const PreviewButton = PreviewButtonComponent ? <PreviewButtonComponent /> : undefined */
+    const PreviewButtonComponent = collectionConfig?.admin?.components?.edit?.PreviewButton
+    const PreviewButton = PreviewButtonComponent ? <PreviewButtonComponent /> : undefined
 
     const PublishButtonComponent = collectionConfig?.admin?.components?.edit?.PublishButton
     const PublishButton = PublishButtonComponent ? <PublishButtonComponent /> : undefined
@@ -96,22 +96,14 @@ export const buildComponentMap = (args: {
         afterListTable?.map((Component) => <Component />)) ||
       null
 
-    let AdminThumbnail = null
-    if (typeof collectionConfig?.upload?.adminThumbnail === 'function') {
-      AdminThumbnail = collectionConfig?.upload?.adminThumbnail
-    } else if (typeof collectionConfig?.upload?.adminThumbnail === 'string') {
-      AdminThumbnail = () => collectionConfig?.upload?.adminThumbnail
-    }
-
     const componentMap: CollectionComponentMap = {
-      AdminThumbnail,
       AfterList,
       AfterListTable,
       BeforeList,
       BeforeListTable,
       Edit: <Edit collectionSlug={collectionConfig.slug} />,
       List: <List collectionSlug={collectionConfig.slug} />,
-      /* PreviewButton, */
+      PreviewButton,
       PublishButton,
       SaveButton,
       SaveDraftButton,
@@ -123,6 +115,7 @@ export const buildComponentMap = (args: {
         fieldSchema: fields,
         readOnly: readOnlyOverride,
       }),
+      isPreviewEnabled: !!collectionConfig?.admin?.preview,
     }
 
     return {
@@ -143,8 +136,8 @@ export const buildComponentMap = (args: {
     const SaveDraftButton = globalConfig?.admin?.components?.elements?.SaveDraftButton
     const SaveDraftButtonComponent = SaveDraftButton ? <SaveDraftButton /> : undefined
 
-    /* const PreviewButton = globalConfig?.admin?.components?.elements?.PreviewButton
-    const PreviewButtonComponent = PreviewButton ? <PreviewButton /> : undefined */
+    const PreviewButton = globalConfig?.admin?.components?.elements?.PreviewButton
+    const PreviewButtonComponent = PreviewButton ? <PreviewButton /> : undefined
 
     const PublishButton = globalConfig?.admin?.components?.elements?.PublishButton
     const PublishButtonComponent = PublishButton ? <PublishButton /> : undefined
@@ -164,7 +157,7 @@ export const buildComponentMap = (args: {
 
     const componentMap: GlobalComponentMap = {
       Edit: <Edit globalSlug={globalConfig.slug} />,
-      /* PreviewButton: PreviewButtonComponent, */
+      PreviewButton: PreviewButtonComponent,
       PublishButton: PublishButtonComponent,
       SaveButton: SaveButtonComponent,
       SaveDraftButton: SaveDraftButtonComponent,
@@ -176,6 +169,7 @@ export const buildComponentMap = (args: {
         fieldSchema: fields,
         readOnly: readOnlyOverride,
       }),
+      isPreviewEnabled: !!globalConfig?.admin?.preview,
     }
 
     return {

@@ -1,5 +1,5 @@
+import * as p from '@clack/prompts'
 import slugify from '@sindresorhus/slugify'
-import prompts from 'prompts'
 
 import type { CliArgs, DbDetails, DbType } from '../types.js'
 
@@ -23,7 +23,7 @@ const dbChoiceRecord: Record<DbType, DbChoice> = {
 }
 
 export async function selectDb(args: CliArgs, projectName: string): Promise<DbDetails> {
-  let dbType: DbType | undefined = undefined
+  let dbType: DbType | symbol | undefined = undefined
   if (args['--db']) {
     if (!Object.values(dbChoiceRecord).some((dbChoice) => dbChoice.value === args['--db'])) {
       throw new Error(
@@ -34,31 +34,20 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
     }
     dbType = args['--db'] as DbType
   } else {
-    const dbTypeRes = await prompts(
-      {
-        name: 'value',
-        type: 'select',
-        choices: Object.values(dbChoiceRecord).map((dbChoice) => {
-          return {
-            title: dbChoice.title,
-            value: dbChoice.value,
-          }
-        }),
-        message: 'Select a database',
-        validate: (value: string) => !!value.length,
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
-        },
-      },
-    )
-    dbType = dbTypeRes.value
+    dbType = await p.select<{ label: string; value: DbType }[], DbType>({
+      initialValue: 'mongodb',
+      message: `Select a database`,
+      options: [
+        { label: 'MongoDB', value: 'mongodb' },
+        { label: 'Postgres', value: 'postgres' },
+      ],
+    })
+    if (p.isCancel(dbType)) process.exit(0)
   }
 
   const dbChoice = dbChoiceRecord[dbType]
 
-  let dbUri: string | undefined = undefined
+  let dbUri: string | symbol | undefined = undefined
   const initialDbUri = `${dbChoice.dbConnectionPrefix}${
     projectName === '.' ? `payload-${getRandomDigitSuffix()}` : slugify(projectName)
   }`
@@ -68,21 +57,11 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
   } else if (args['--db-connection-string']) {
     dbUri = args['--db-connection-string']
   } else {
-    const dbUriRes = await prompts(
-      {
-        name: 'value',
-        type: 'text',
-        initial: initialDbUri,
-        message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
-        validate: (value: string) => !!value.length,
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
-        },
-      },
-    )
-    dbUri = dbUriRes.value
+    dbUri = await p.text({
+      initialValue: initialDbUri,
+      message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
+    })
+    if (p.isCancel(dbUri)) process.exit(0)
   }
 
   return {

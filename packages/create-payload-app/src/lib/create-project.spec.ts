@@ -5,6 +5,7 @@ import { createProject } from './create-project.js'
 import { fileURLToPath } from 'node:url'
 import { dbReplacements } from './packages.js'
 import { getValidTemplates } from './templates.js'
+import globby from 'globby'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -104,12 +105,17 @@ describe('createProject', () => {
           Object.keys(packageJson.dependencies).filter((n) => n.startsWith('@payloadcms/db-')),
         ).toHaveLength(1)
 
-        let payloadConfigPath = path.resolve(projectDir, 'payload.config.ts')
+        const payloadConfigPath = (
+          await globby('**/payload.config.ts', {
+            absolute: true,
+            cwd: projectDir,
+          })
+        )?.[0]
 
-        // Website and ecommerce templates have payload.config.ts in src/payload
-        if (!fse.existsSync(payloadConfigPath)) {
-          payloadConfigPath = path.resolve(projectDir, 'src/payload/payload.config.ts')
+        if (!payloadConfigPath) {
+          throw new Error(`Could not find payload.config.ts inside ${projectDir}`)
         }
+
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')
 
         // Check payload.config.ts
@@ -121,10 +127,5 @@ describe('createProject', () => {
         expect(content).toContain(dbReplacement.configReplacement.join('\n'))
       })
     })
-  })
-
-  describe('Templates', () => {
-    it.todo('Verify that all templates are valid')
-    // Loop through all templates.ts that should have replacement comments, and verify that they are present
   })
 })

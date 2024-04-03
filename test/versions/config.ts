@@ -8,7 +8,7 @@ import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 
 export default buildConfigWithDefaults({
   collections: [DisablePublish, Posts, AutosavePosts, DraftPosts, VersionPosts, CustomIDs],
@@ -20,7 +20,7 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
 })

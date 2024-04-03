@@ -1,10 +1,9 @@
-import chalk from 'chalk'
 import fs from 'fs-extra'
 import path from 'path'
 
 import type { CliArgs, ProjectTemplate } from '../types.js'
 
-import { error, success } from '../utils/log.js'
+import { debug, error } from '../utils/log.js'
 
 /** Parse and swap .env.example values and write .env */
 export async function writeEnvFile(args: {
@@ -12,17 +11,17 @@ export async function writeEnvFile(args: {
   databaseUri: string
   payloadSecret: string
   projectDir: string
-  template: ProjectTemplate
+  template?: ProjectTemplate
 }): Promise<void> {
   const { cliArgs, databaseUri, payloadSecret, projectDir, template } = args
 
   if (cliArgs['--dry-run']) {
-    success(`DRY RUN: .env file created`)
+    debug(`DRY RUN: .env file created`)
     return
   }
 
   try {
-    if (template.type === 'starter' && fs.existsSync(path.join(projectDir, '.env.example'))) {
+    if (template?.type === 'starter' && fs.existsSync(path.join(projectDir, '.env.example'))) {
       // Parse .env file into key/value pairs
       const envFile = await fs.readFile(path.join(projectDir, '.env.example'), 'utf8')
       const envWithValues: string[] = envFile
@@ -48,11 +47,9 @@ export async function writeEnvFile(args: {
       // Write new .env file
       await fs.writeFile(path.join(projectDir, '.env'), envWithValues.join('\n'))
     } else {
-      const content = `MONGODB_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`
+      const content = `DATABASE_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`
       await fs.outputFile(`${projectDir}/.env`, content)
     }
-
-    success('.env file created')
   } catch (err: unknown) {
     error('Unable to write .env file')
     if (err instanceof Error) {

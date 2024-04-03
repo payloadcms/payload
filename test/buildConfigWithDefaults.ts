@@ -28,39 +28,48 @@ import {
 // import { slateEditor } from '@payloadcms/richtext-slate'
 import { type Config, buildConfig } from 'payload/config'
 import sharp from 'sharp'
+
+import { reInitEndpoint } from './helpers/reInit.js'
+import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
-const databaseAdapters = {
-  mongoose: mongooseAdapter({
-    url: process.env.DATABASE_URI || 'mongodb://127.0.0.1/payloadtests',
-  }),
-  postgres: postgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-  }),
-  'postgres-custom-schema': postgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-    schemaName: 'custom',
-  }),
-  'postgres-uuid': postgresAdapter({
-    idType: 'uuid',
-    pool: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
-    },
-  }),
-  supabase: postgresAdapter({
-    pool: {
-      connectionString:
-        process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
-    },
-  }),
-}
-export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
+export async function buildConfigWithDefaults(
+  testConfig?: Partial<Config>,
+): Promise<SanitizedConfig> {
+  const databaseAdapters = {
+    mongodb: mongooseAdapter({
+      url:
+        process.env.MONGODB_MEMORY_SERVER_URI ||
+        process.env.DATABASE_URI ||
+        'mongodb://127.0.0.1/payloadtests',
+    }),
+    postgres: postgresAdapter({
+      pool: {
+        connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+      },
+    }),
+    'postgres-custom-schema': postgresAdapter({
+      pool: {
+        connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+      },
+      schemaName: 'custom',
+    }),
+    'postgres-uuid': postgresAdapter({
+      idType: 'uuid',
+      pool: {
+        connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+      },
+    }),
+    supabase: postgresAdapter({
+      pool: {
+        connectionString:
+          process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
+      },
+    }),
+  }
+
   const config: Config = {
-    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
+    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongodb'],
     secret: 'TEST_SECRET',
     //editor: slateEditor({}),
     // editor: slateEditor({
@@ -79,6 +88,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     //     },
     //   },
     // }),
+    endpoints: [localAPIEndpoint, reInitEndpoint],
     editor: lexicalEditor({
       features: [
         ParagraphFeature(),

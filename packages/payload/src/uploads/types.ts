@@ -75,7 +75,7 @@ export type UploadConfig = {
    * - If a string, it should be one of the image size names.
    * - If a React component, register a function that generates the thumbnail URL using the `useAdminThumbnail` hook.
    **/
-  adminThumbnail?: React.ComponentType | string
+  adminThumbnail?: GetAdminThumbnail | string
   crop?: boolean
   disableLocalStorage?: boolean
   filesRequiredOnCreate?: boolean

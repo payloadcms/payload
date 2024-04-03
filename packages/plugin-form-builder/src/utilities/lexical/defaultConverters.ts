@@ -1,12 +1,12 @@
-import type { HTMLConverter } from './types'
+import type { HTMLConverter } from './types.js'
 
-import { HeadingHTMLConverter } from './converters/heading'
-import { LinebreakHTMLConverter } from './converters/linebreak'
-import { LinkHTMLConverter } from './converters/link'
-import { ListHTMLConverter, ListItemHTMLConverter } from './converters/list'
-import { ParagraphHTMLConverter } from './converters/paragraph'
-import { QuoteHTMLConverter } from './converters/quote'
-import { TextHTMLConverter } from './converters/text'
+import { HeadingHTMLConverter } from './converters/heading.js'
+import { LinebreakHTMLConverter } from './converters/linebreak.js'
+import { LinkHTMLConverter } from './converters/link.js'
+import { ListHTMLConverter, ListItemHTMLConverter } from './converters/list.js'
+import { ParagraphHTMLConverter } from './converters/paragraph.js'
+import { QuoteHTMLConverter } from './converters/quote.js'
+import { TextHTMLConverter } from './converters/text.js'
 
 export const defaultHTMLConverters: HTMLConverter[] = [
   ParagraphHTMLConverter,

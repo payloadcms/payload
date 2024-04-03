@@ -154,15 +154,9 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {/* {(collectionConfig?.admin?.preview || globalConfig?.admin?.preview) && (
-              <PreviewButton
-                CustomComponent={
-                  collectionConfig?.admin?.components?.edit?.PreviewButton ||
-                  globalConfig?.admin?.components?.elements?.PreviewButton
-                }
-                generatePreviewURL={collectionConfig?.admin?.preview || globalConfig?.admin?.preview}
-              />
-            )} */}
+            {componentMap?.isPreviewEnabled && (
+              <PreviewButton CustomComponent={componentMap.PreviewButton} />
+            )}
             {hasSavePermission && (
               <React.Fragment>
                 {collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts ? (

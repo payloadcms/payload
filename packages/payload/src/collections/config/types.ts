@@ -2,10 +2,10 @@ import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from '
 import type { DeepRequired } from 'ts-essentials'
 
 import type {
-  CustomPreviewButtonProps,
-  CustomPublishButtonProps,
-  CustomSaveButtonProps,
-  CustomSaveDraftButtonProps,
+  CustomPreviewButton,
+  CustomPublishButton,
+  CustomSaveButton,
+  CustomSaveDraftButton,
 } from '../../admin/types.js'
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
@@ -211,23 +211,23 @@ export type CollectionAdminOptions = {
       /**
        * Replaces the "Preview" button
        */
-      PreviewButton?: CustomPreviewButtonProps
+      PreviewButton?: CustomPreviewButton
       /**
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButtonProps
+      PublishButton?: CustomPublishButton
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
        */
-      SaveButton?: CustomSaveButtonProps
+      SaveButton?: CustomSaveButton
       /**
        * Replaces the "Save Draft" button
        * + drafts must be enabled
        * + autosave must be disabled
        */
-      SaveDraftButton?: CustomSaveDraftButtonProps
+      SaveDraftButton?: CustomSaveDraftButton
     }
     views?: {
       /**

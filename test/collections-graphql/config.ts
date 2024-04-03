@@ -1,12 +1,7 @@
 import type { CollectionConfig } from 'payload/types'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 export interface Relation {
   id: string
