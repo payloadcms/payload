@@ -18,9 +18,11 @@ export const baseIDField: Field = {
         // If creating new doc, need to disregard any
         // ids that have been passed in because they will cause
         // primary key unique conflicts in relational DBs
-        if (value && operation === 'create') {
+        if (!value || (operation === 'create' && value)) {
           return new ObjectId().toHexString()
         }
+
+        return value
       },
     ],
   },
