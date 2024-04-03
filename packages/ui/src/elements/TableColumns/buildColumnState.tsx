@@ -27,7 +27,9 @@ export const buildColumnState = (args: Args): Column[] => {
 
   // swap useAsTitle field to first slot
   let sortedFieldMap = flattenFieldMap(fieldMap)
+
   const useAsTitleFieldIndex = sortedFieldMap.findIndex((field) => field.name === useAsTitle)
+
   if (useAsTitleFieldIndex !== -1) {
     const useAsTitleField = sortedFieldMap[useAsTitleFieldIndex]
     sortedFieldMap = [

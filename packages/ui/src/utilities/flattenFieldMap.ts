@@ -11,43 +11,30 @@ export const flattenFieldMap = (
   fieldMap: FieldMap,
   keepPresentationalFields?: boolean,
 ): FieldMap => {
-  return fieldMap.reduce((fieldsToUse, field) => {
-    if ('name' in field || (keepPresentationalFields && field.type === 'ui')) {
-      fieldsToUse.push(field)
-      return fieldsToUse
+  return fieldMap.reduce((acc, field) => {
+    if ('name' in field || (keepPresentationalFields && field.fieldIsPresentational)) {
+      acc.push(field)
+      return acc
+    } else if ('fieldMap' in field.fieldComponentProps) {
+      acc.push(...flattenFieldMap(field.fieldComponentProps.fieldMap, keepPresentationalFields))
     } else if (
-      // has subfields
-      'fieldMap' in field.fieldComponentProps
+      field.type === 'tabs' &&
+      'tabs' in field.fieldComponentProps &&
+      Array.isArray(field.fieldComponentProps.tabs)
     ) {
-      fieldsToUse.push(
-        ...flattenFieldMap(field.fieldComponentProps.fieldMap, keepPresentationalFields),
-      )
-    }
-
-    if (field.type === 'tabs' && 'tabs' in field && Array.isArray(field.tabs)) {
       return [
-        ...fieldsToUse,
-        ...field.tabs.reduce(
-          (
-            tabFields,
-            tab: {
-              fieldMap?: FieldMap
-              label: string
-              name?: string
-            },
-          ) => {
-            return [
-              ...tabFields,
-              ...('name' in tab
-                ? [{ ...tab, type: 'tab' }]
-                : flattenFieldMap(tab.fieldMap, keepPresentationalFields)),
-            ]
-          },
-          [],
-        ),
+        ...acc,
+        ...field.fieldComponentProps.tabs.reduce((tabAcc, tab) => {
+          return [
+            ...tabAcc,
+            ...('name' in tab
+              ? [{ ...tab, type: 'tab' }]
+              : flattenFieldMap(tab.fieldMap, keepPresentationalFields)),
+          ]
+        }, []),
       ]
     }
 
-    return fieldsToUse
+    return acc
   }, [])
 }
