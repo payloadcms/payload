@@ -407,5 +407,7 @@ export default buildConfigWithDefaults({
       locale: 'es',
       slug: 'global-array',
     })
+
+    console.log('SEED COMPLETE')
   },
 })

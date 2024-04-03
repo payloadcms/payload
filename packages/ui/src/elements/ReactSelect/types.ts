@@ -74,6 +74,7 @@ export type Props = {
   numberOnly?: boolean
   onChange?: (value: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
   onInputChange?: (val: string) => void
+  onMenuClose?: () => void
   onMenuOpen?: () => void
   onMenuScrollToBottom?: () => void
   options: Option[] | OptionGroup[]
