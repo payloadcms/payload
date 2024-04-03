@@ -25,7 +25,7 @@ export type GeneratedTypes<T extends BaseTypes> = {
 export type FetchOptions = {
   args?: Record<string, unknown>
   jwt?: string
-  method: 'create' | 'find'
+  method: 'create' | 'delete' | 'find'
   reduceJSON?: <R>(json: any) => R
 }
 
@@ -71,5 +71,15 @@ export type FindArgs<
   showHiddenFields?: boolean
   sort?: string
   user?: TypeWithID
+  where?: Where
+} & BaseArgs
+
+export type DeleteArgs<
+  TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
+  TSlug extends keyof TGeneratedTypes['collections'],
+> = {
+  collection: TSlug
+  id?: string
+  overrideAccess?: boolean
   where?: Where
 } & BaseArgs
