@@ -36,6 +36,9 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, context, req: {
                     },
                   }
                 : {}),
+              _status: {
+                equals: 'published',
+              },
             },
             sort: '-publishedAt',
           })
