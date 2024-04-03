@@ -7,8 +7,6 @@ const baseClass = 'thumbnail'
 
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import isImage from 'packages/payload/src/uploads/isImage.js'
-
 import { File } from '../../graphics/File/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
@@ -38,7 +36,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
   React.useEffect(() => {
-    if (!fileSrc || !isImage(fileSrc)) {
+    if (!fileSrc) {
       setFileExists(false)
       return
     }
