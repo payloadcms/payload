@@ -251,7 +251,7 @@ describe('fields - relationship', () => {
     // then verify that the filtered field's options match
     let filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
-    const filteredOptions = filteredField.locator('.rs__option')
+    let filteredOptions = filteredField.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(1) // one doc
     await filteredOptions.nth(0).click()
     await expect(filteredField).toContainText(relationOneDoc.id)
@@ -268,6 +268,7 @@ describe('fields - relationship', () => {
     // then verify that the filtered field's options match
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
+    filteredOptions = filteredField.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(2) // two options because the currently selected option is still there
     await filteredOptions.nth(1).click()
     await expect(filteredField).toContainText(anotherRelationOneDoc.id)
