@@ -679,7 +679,7 @@ describe('admin', () => {
       // delete all posts created by the seed
       await deleteAllPosts()
       await page.goto(postsUrl.list)
-      await page.waitForURL(postsUrl.list)
+      await page.waitForURL((url) => url.toString().startsWith(postsUrl.list))
       await expect(page.locator(tableRowLocator)).toBeHidden()
 
       await createPost({ title: 'post1' })
@@ -695,6 +695,7 @@ describe('admin', () => {
 
         // prefill search with "a" from the query param
         await page.goto(`${postsUrl.list}?search=dennis`)
+        await page.waitForURL(`${postsUrl.list}?search=dennis`)
 
         // input should be filled out, list should filter
         await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
@@ -1264,7 +1265,7 @@ describe('admin', () => {
     })
 
     describe('i18n', () => {
-      test.skip('should display translated collections and globals config options', async () => {
+      test('should display translated collections and globals config options', async () => {
         await page.goto(postsUrl.list)
 
         // collection label
@@ -1277,7 +1278,7 @@ describe('admin', () => {
         await expect(page.locator('.view-description')).toContainText('Description')
       })
 
-      test.skip('should display translated field titles', async () => {
+      test('should display translated field titles', async () => {
         await createPost()
 
         // column controls

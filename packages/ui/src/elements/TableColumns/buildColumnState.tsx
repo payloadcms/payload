@@ -136,6 +136,10 @@ export const buildColumnState = (args: Args): Column[] => {
         cellProps: {
           ...cellProps?.[index],
           link: isFirstActiveColumn,
+          relationTo:
+            field.type === 'relationship' && 'relationTo' in field.fieldComponentProps
+              ? field.fieldComponentProps.relationTo
+              : undefined,
         },
         components: {
           Cell,
