@@ -676,7 +676,7 @@ describe('admin', () => {
       // delete all posts created by the seed
       await deleteAllPosts()
       await page.goto(postsUrl.list)
-      await page.waitForURL(postsUrl.list)
+      await page.waitForURL((url) => url.toString().startsWith(postsUrl.list))
       await expect(page.locator(tableRowLocator)).toBeHidden()
 
       await createPost({ title: 'post1' })
@@ -692,6 +692,7 @@ describe('admin', () => {
 
         // prefill search with "a" from the query param
         await page.goto(`${postsUrl.list}?search=dennis`)
+        await page.waitForURL(`${postsUrl.list}?search=dennis`)
 
         // input should be filled out, list should filter
         await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
