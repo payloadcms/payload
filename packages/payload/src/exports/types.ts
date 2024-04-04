@@ -19,6 +19,7 @@ export { FileData, ImageSize, IncomingUploadType } from '../uploads/types'
 
 export type {
   CustomPublishButtonProps,
+  CustomPublishButtonType,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from './../admin/components/elements/types'
