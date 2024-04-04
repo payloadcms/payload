@@ -1,24 +1,20 @@
 import type { PaginatedDocs } from 'payload/database'
 
-import type { CreateArgs, FetchOptions, FindArgs, GeneratedTypes, UpdateArgs } from './types.js'
+import type {
+  CreateArgs,
+  DeleteArgs,
+  FetchOptions,
+  FindArgs,
+  GeneratedTypes,
+  UpdateArgs,
+} from './types.js'
 
 type Args = {
   serverURL: string
 }
 
 export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>> {
-  create = async <T extends keyof TGeneratedTypes['collections']>({
-    jwt,
-    ...args
-  }: CreateArgs<TGeneratedTypes, T>) => {
-    return this.fetch<TGeneratedTypes['collections'][T]>({
-      method: 'create',
-      args,
-      jwt,
-    })
-  }
-
-  fetch = async <T>({ jwt, reduceJSON, args, method }: FetchOptions): Promise<T> => {
+  private fetch = async <T>({ jwt, reduceJSON, args, method }: FetchOptions): Promise<T> => {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     }
@@ -39,6 +35,28 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     return json
   }
 
+  create = async <T extends keyof TGeneratedTypes['collections']>({
+    jwt,
+    ...args
+  }: CreateArgs<TGeneratedTypes, T>) => {
+    return this.fetch<TGeneratedTypes['collections'][T]>({
+      method: 'create',
+      args,
+      jwt,
+    })
+  }
+
+  delete = async <T extends keyof TGeneratedTypes['collections']>({
+    jwt,
+    ...args
+  }: DeleteArgs<TGeneratedTypes, T>) => {
+    return this.fetch<PaginatedDocs<TGeneratedTypes['collections'][T]>>({
+      method: 'delete',
+      args,
+      jwt,
+    })
+  }
+
   find = async <T extends keyof TGeneratedTypes['collections']>({
     jwt,
     ...args
@@ -47,7 +65,6 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
       method: 'find',
       args,
       jwt,
-      reduceJSON: (json) => json.docs,
     })
   }
 

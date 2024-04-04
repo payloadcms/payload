@@ -19,7 +19,7 @@ export const filterFields = (fieldMap: FieldMap): FieldMap => {
               ...field.fieldComponentProps,
               tabs: field.fieldComponentProps.tabs.map((tab) => ({
                 ...tab,
-                fields: tab.fieldMap.filter((tabField) => !shouldSkipField(tabField)),
+                fieldMap: tab.fieldMap.filter((tabField) => !shouldSkipField(tabField)),
               })),
             },
           }

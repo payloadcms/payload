@@ -107,19 +107,16 @@ test.describe('Form Builder', () => {
 
     test('can create form submission', async () => {
       await page.goto(submissionsUrl.list)
+      await page.waitForURL(submissionsUrl.list)
 
-      const contactForm = await payload
-        .find({
-          collection: 'forms',
-        })
-        .then((data) => {
-          return data[0]
-        })
+      const { docs } = await payload.find({
+        collection: 'forms',
+      })
 
       const createdSubmission = await payload.create({
         collection: 'form-submissions',
         data: {
-          form: contactForm.id,
+          form: docs[0].id,
           submissionData: [
             {
               field: 'name',

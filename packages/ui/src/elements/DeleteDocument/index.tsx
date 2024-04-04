@@ -73,8 +73,8 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               setDeleting(false)
               toggleModal(modalSlug)
               toast.success(
-                json.message ||
-                  t('general:titleDeleted', { label: getTranslation(singularLabel, i18n), title }),
+                t('general:titleDeleted', { label: getTranslation(singularLabel, i18n), title }) ||
+                  json.message,
               )
 
               return router.push(`${admin}/collections/${collectionSlug}`)

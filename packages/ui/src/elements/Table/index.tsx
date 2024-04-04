@@ -5,6 +5,8 @@ import React from 'react'
 
 export * from './TableCellProvider/index.js'
 
+import type { FieldTypes } from 'payload/config'
+
 import type { FieldMap } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useTableColumns } from '../TableColumns/index.js'
@@ -25,6 +27,7 @@ export type Column = {
     Heading: React.ReactNode
   }
   name: FieldBase['name']
+  type: keyof FieldTypes
 }
 
 export type Props = {

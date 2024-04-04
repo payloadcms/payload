@@ -93,7 +93,7 @@ export async function createSnapshot(
   snapshotKey: string,
   collectionSlugs: string[],
 ) {
-  if (isMongoose(_payload)) {
+  if (isMongoose(_payload) && 'collections' in _payload.db) {
     const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
 
     await createMongooseSnapshot(mongooseCollections, snapshotKey)
@@ -112,7 +112,7 @@ export async function restoreFromSnapshot(
   snapshotKey: string,
   collectionSlugs: string[],
 ) {
-  if (isMongoose(_payload)) {
+  if (isMongoose(_payload) && 'collections' in _payload.db) {
     const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
     await restoreFromMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {

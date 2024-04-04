@@ -1,15 +1,17 @@
-import type { DescriptionComponent, DescriptionFunction } from 'payload/types'
+'use client'
+import type { DescriptionComponent } from 'payload/types'
 
+import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
+import { useFormFields } from '@payloadcms/ui/forms/Form'
 import React from 'react'
 
-export const FieldDescriptionComponent: DescriptionComponent<string> = ({ path, value }) => {
+export const FieldDescriptionComponent: DescriptionComponent = () => {
+  const { path } = useFieldProps()
+  const { value } = useFormFields(([fields]) => fields[path])
+
   return (
-    <div>
-      Component description: {path} - {value}
+    <div className={`field-description-${path}`}>
+      Component description: {path} - {value as string}
     </div>
   )
-}
-
-export const FieldDescriptionFunction: DescriptionFunction<string> = ({ path, value }) => {
-  return `Function description: ${path} - ${value}`
 }
