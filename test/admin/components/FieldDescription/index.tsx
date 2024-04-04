@@ -11,7 +11,7 @@ export const FieldDescriptionComponent: DescriptionComponent = () => {
 
   return (
     <div className={`field-description-${path}`}>
-      Component description: {path} - {value}
+      Component description: {path} - {value as string}
     </div>
   )
 }
