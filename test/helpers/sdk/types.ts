@@ -1,5 +1,5 @@
-import type { TypeWithID, Where } from 'payload/types'
-import type { MarkOptional } from 'ts-essentials'
+import type { TypeWithID, Where, WhereField } from 'payload/types'
+import type { DeepPartial, MarkOptional } from 'ts-essentials'
 
 type CollectionDoc = {
   createdAt?: string
@@ -25,7 +25,7 @@ export type GeneratedTypes<T extends BaseTypes> = {
 export type FetchOptions = {
   args?: Record<string, unknown>
   jwt?: string
-  method: 'create' | 'find'
+  method: 'create' | 'find' | 'update'
   reduceJSON?: <R>(json: any) => R
 }
 
@@ -53,6 +53,46 @@ export type CreateArgs<
   showHiddenFields?: boolean
   user?: TypeWithID
 } & BaseArgs
+
+export type UpdateByIDArgs<
+  TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
+  TSlug extends keyof TGeneratedTypes['collections'],
+> = UpdateBaseArgs<TGeneratedTypes, TSlug> & {
+  id: number | string
+  where?: never
+}
+
+export type UpdateManyArgs<
+  TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
+  TSlug extends keyof TGeneratedTypes['collections'],
+> = UpdateBaseArgs<TGeneratedTypes, TSlug> & {
+  id: never
+  where?: WhereField
+}
+
+export type UpdateBaseArgs<
+  TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
+  TSlug extends keyof TGeneratedTypes['collections'],
+> = {
+  autosave?: boolean
+  collection: TSlug
+  data: DeepPartial<TGeneratedTypes['collections'][TSlug]>
+  depth?: number
+  draft?: boolean
+  fallbackLocale?: string
+  file?: File
+  filePath?: string
+  locale?: string
+  overrideAccess?: boolean
+  overwriteExistingFiles?: boolean
+  showHiddenFields?: boolean
+  user?: TypeWithID
+} & BaseArgs
+
+export type UpdateArgs<
+  TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
+  TSlug extends keyof TGeneratedTypes['collections'],
+> = UpdateByIDArgs<TGeneratedTypes, TSlug> | UpdateManyArgs<TGeneratedTypes, TSlug>
 
 export type FindArgs<
   TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,

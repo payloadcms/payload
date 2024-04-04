@@ -1,12 +1,12 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { LocalizedPost } from './payload-types.js'
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config, LocalizedPost } from './payload-types.js'
 
 import {
   changeLocale,
@@ -46,7 +46,7 @@ const arabicTitle = 'arabic title'
 const description = 'description'
 
 let page: Page
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 let serverURL: string
 
 describe('Localization', () => {
