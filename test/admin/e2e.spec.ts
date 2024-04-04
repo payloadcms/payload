@@ -265,7 +265,9 @@ describe('admin', () => {
 
       await expect(customTab).toBeVisible()
     })
+  })
 
+  describe('API view', () => {
     test('collection — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.collection(noApiViewCollectionSlug))
       await page.locator('.collection-list .table a').click()
