@@ -10,6 +10,7 @@ import type { Config, LocalizedPost } from './payload-types.js'
 
 import {
   changeLocale,
+  ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
   openDocControls,
   saveDocAndAssert,
@@ -60,6 +61,8 @@ describe('Localization', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   describe('localized text', () => {

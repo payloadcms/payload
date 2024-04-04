@@ -35,6 +35,7 @@ import type { Config } from './payload-types.js'
 import { globalSlug } from '../admin/slugs.js'
 import {
   changeLocale,
+  ensureAutoLoginAndCompilationIsDone,
   exactText,
   findTableCell,
   initPageConsoleErrorCatch,
@@ -107,6 +108,8 @@ describe('versions', () => {
       serverURL,
       snapshotKey: 'versionsTest',
     })
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
     //await clearAndSeedEverything(payload)
   })
 

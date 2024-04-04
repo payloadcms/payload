@@ -4,7 +4,12 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureAutoLoginAndCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
@@ -49,6 +54,8 @@ describe('Live Preview', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('collection - has tab', async () => {

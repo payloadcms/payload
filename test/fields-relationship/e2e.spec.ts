@@ -16,6 +16,7 @@ import type {
 
 import {
   delayNetwork,
+  ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
   openDocControls,
   saveDocAndAssert,
@@ -129,6 +130,8 @@ describe('fields - relationship', () => {
         relationshipWithTitle: relationWithTitle.id,
       },
     })) as any
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('should create relationship', async () => {
