@@ -281,6 +281,17 @@ export default buildConfigWithDefaults({
 
     console.log('SEED BEGIN')
 
+    if (payload.db.name === 'mongoose') {
+      await new Promise((resolve, reject) => {
+        payload.db?.collections[localizedPostsSlug]?.ensureIndexes(function (err) {
+          if (err) reject(err)
+          resolve(true)
+        })
+      })
+    }
+
+    console.log('INDEXES CREATED')
+
     await payload.create({
       collection,
       data: {
