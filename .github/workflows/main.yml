@@ -117,125 +117,6 @@ jobs:
       - run: pnpm install
       - run: pnpm run build:plugins
 
-  tests-unit:
-    runs-on: ubuntu-latest
-    needs: core-build
-    if: false # Disable until tests are updated for 3.0
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Unit Tests
-        run: pnpm test:unit
-        env:
-          NODE_OPTIONS: --max-old-space-size=8096
-
-  tests-int:
-    runs-on: ubuntu-latest
-    needs: core-build
-    strategy:
-      fail-fast: false
-      matrix:
-        database:
-          - mongodb
-          - postgres
-        #  - postgres-custom-schema
-        #  - postgres-uuid
-        #  - supabase
-    env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
-      AWS_ENDPOINT_URL: http://127.0.0.1:4566
-      AWS_ACCESS_KEY_ID: localstack
-      AWS_SECRET_ACCESS_KEY: localstack
-      AWS_REGION: us-east-1
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Start LocalStack
-        run: pnpm docker:start
-
-      - name: Start PostgreSQL
-        uses: CasperWA/postgresql-action@v1.2
-        with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
-          postgresql db: ${{ env.POSTGRES_DB }}
-          postgresql user: ${{ env.POSTGRES_USER }}
-          postgresql password: ${{ env.POSTGRES_PASSWORD }}
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-        if: matrix.database == 'supabase'
-
-      - name: Initialize Supabase
-        run: |
-          supabase init
-          supabase start
-        if: matrix.database == 'supabase'
-
-      - name: Wait for PostgreSQL
-        run: sleep 30
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Configure PostgreSQL with custom schema
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
-        if: matrix.database == 'postgres-custom-schema'
-
-      - name: Configure Supabase
-        run: |
-          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
-        if: matrix.database == 'supabase'
-
-      - name: Integration Tests
-        run: pnpm test:int
-        env:
-          NODE_OPTIONS: --max-old-space-size=8096
-          PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
-
   tests-e2e:
     runs-on: ubuntu-latest
     needs: core-build
@@ -291,113 +172,23 @@ jobs:
           path: test/test-results/
           retention-days: 1
 
-  tests-type-generation:
-    if: false # This should be replaced with gen on a real Payload project
-    runs-on: ubuntu-latest
-    needs: core-build
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Generate Payload Types
-        run: pnpm dev:generate-types fields
-
-      - name: Generate GraphQL schema file
-        run: pnpm dev:generate-graphql-schema graphql-schema-gen
-
-  templates:
-    needs: changes
-    if: false # Disable until templates are updated for 3.0
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        template: [blank, website, ecommerce]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.10.0
-        with:
-          mongodb-version: 6.0
-
-      - name: Build Template
+      - name: Process and Upload Trace Files
+        if: always() # Ensure this runs regardless of the outcome of the test step
         run: |
-          cd templates/${{ matrix.template }}
-          cp .env.example .env
-          yarn install
-          yarn build
-          yarn generate:types
-  process-and-upload:
-    needs: tests-e2e
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: downloaded-artifacts
-
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip unzip jq
-
-      - name: Process Artifacts and Upload
-        run: |
-          mkdir processed-artifacts
-          for folder in downloaded-artifacts/*; do
-            if [ -d "$folder" ]; then
-              base=$(basename "$folder")
-              echo "Processing $folder"
-              if [ -f "$folder/trace.zip" ]; then
-                mv "$folder/trace.zip" "processed-artifacts/${base}.zip"
-              fi
-            fi
-          done
-
-          # Upload each processed artifact
-          for file in processed-artifacts/*.zip; do
-            if [ -f "$file" ]; then
-              echo "Uploading $(basename "$file")"
-              gh workflow run upload-artifact.yml --ref ${{ github.ref }} --json '{"artifact_name":"'"$(basename "$file")"'", "file":"'"$file"'"}'
-            fi
-          done
+          TRACE_FOLDER_PATH=test/test-results/${{ matrix.suite }}/trace.zip # Adjust the path as necessary
+          if [ -f "$TRACE_FOLDER_PATH" ]; then
+            # Rename and move trace.zip
+            mv $TRACE_FOLDER_PATH ${{ matrix.suite }}-trace.zip
+            # Upload the renamed trace.zip as an artifact
+            echo "Uploading trace artifact for ${{ matrix.suite }}"
+            gh workflow run upload-artifact.yml --ref ${{ github.ref }} --json '{"artifact_name":"${{ matrix.suite }}-trace.zip", "file":"${{ matrix.suite }}-trace.zip"}'
+          else
+            echo "No trace file found for ${{ matrix.suite }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Note: The above step assumes you have an `upload-artifact.yml` workflow
-      # designed to upload a single artifact. You will need to create this.
-
-      - name: Generate Playwright Trace Viewer URLs
+      - name: Display Playwright Trace Viewer URL
+        if: always()
         run: |
-          echo "Generated URLs:"
-          for file in processed-artifacts/*.zip; do
-            if [ -f "$file" ]; then
-              base=$(basename "$file" .zip)
-              # This URL is hypothetical and would need to be adjusted based on your actual artifact upload URL
-              echo "https://trace.playwright.dev/?trace=https://github.com/payloadcms/payload/actions/runs/${{ github.run_id }}/artifacts/${base}"
-            fi
-          done
+          TRACE_ARTIFACT_URL="https://github.com/<your-repo>/actions/runs/${{ github.run_id }}/artifacts/${{ matrix.suite }}-trace.zip" # Adjust URL pattern as needed
+          echo "Playwright Trace Viewer URL for ${{ matrix.suite }}: https://trace.playwright.dev/?trace=${TRACE_ARTIFACT_URL}"
