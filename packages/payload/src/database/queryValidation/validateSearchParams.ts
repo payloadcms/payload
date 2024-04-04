@@ -5,8 +5,8 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import isolateObjectProperty from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
@@ -90,15 +90,7 @@ export async function validateSearchParam({
               type: 'collection',
               entity: req.payload.collections[collectionSlug].config,
               operations: ['read'],
-              req: createLocalReq(
-                {
-                  context: req.context,
-                  fallbackLocale: req.fallbackLocale,
-                  locale: req.locale,
-                  user: req.user,
-                },
-                req.payload,
-              ),
+              req: isolateObjectProperty(req, 'transactionID'),
             })
           }
 
