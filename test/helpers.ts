@@ -35,6 +35,30 @@ const networkConditions = {
   },
 }
 
+/**
+ * Load admin panel and make sure autologin has passed before running tests
+ * @param page
+ * @param serverURL
+ */
+export async function ensureAutoLoginAndCompilationIsDone({
+  page,
+  serverURL,
+}: {
+  page: Page
+  serverURL: string
+}): Promise<void> {
+  const adminURL = `${serverURL}/admin`
+
+  await page.goto(adminURL)
+  await page.waitForURL(adminURL)
+  await expect(() => expect(page.url()).not.toContain(`/admin/login`)).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+  await expect(() => expect(page.url()).not.toContain(`/admin/create-first-user`)).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+}
+
 export async function delayNetwork({
   context,
   page,

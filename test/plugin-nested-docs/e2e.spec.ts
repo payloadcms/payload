@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 
 import type { Page as PayloadPage } from './payload-types.js'
 
-import { initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 
@@ -67,6 +67,8 @@ describe('Nested Docs Plugin', () => {
       _status: 'draft',
     })
     draftChildId = draftChildPage.id
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   describe('Core functionality', () => {

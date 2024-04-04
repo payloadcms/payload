@@ -35,6 +35,7 @@ import type { Config } from './payload-types.js'
 import { globalSlug } from '../admin/slugs.js'
 import {
   changeLocale,
+  ensureAutoLoginAndCompilationIsDone,
   exactText,
   findTableCell,
   initPageConsoleErrorCatch,
@@ -70,7 +71,7 @@ const waitForAutoSaveToComplete = async (page: Page) => {
       page.locator('.autosave:has-text("Last saved less than a minute ago")'),
     ).toBeVisible()
   }).toPass({
-    timeout: 45000,
+    timeout: POLL_TOPASS_TIMEOUT,
   })
 }
 
@@ -78,7 +79,7 @@ const waitForAutoSaveToRunAndComplete = async (page: Page) => {
   await expect(async () => {
     await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
   }).toPass({
-    timeout: 45000,
+    timeout: POLL_TOPASS_TIMEOUT,
   })
 
   await waitForAutoSaveToComplete(page)
@@ -107,6 +108,8 @@ describe('versions', () => {
       serverURL,
       snapshotKey: 'versionsTest',
     })
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
     //await clearAndSeedEverything(payload)
   })
 

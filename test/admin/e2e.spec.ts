@@ -11,6 +11,7 @@ import type { Geo, Post } from './payload-types.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
+  ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   openDocControls,
@@ -78,6 +79,7 @@ describe('admin', () => {
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   describe('Nav', () => {
