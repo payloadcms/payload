@@ -175,13 +175,15 @@ jobs:
       - name: Process and Upload Trace Files
         if: always() # Ensure this runs regardless of the outcome of the test step
         run: |
-          TRACE_FOLDER_PATH=test/test-results/${{ matrix.suite }}/trace.zip # Adjust the path as necessary
+          TRACE_FOLDER_PATH="test/test-results/test-results-${{ matrix.suite }}/trace.zip" # Adjust the path as necessary
           if [ -f "$TRACE_FOLDER_PATH" ]; then
-            # Rename and move trace.zip
-            mv $TRACE_FOLDER_PATH ${{ matrix.suite }}-trace.zip
-            # Upload the renamed trace.zip as an artifact
+            # Assuming trace.zip needs to be in the root directory for the next step
+            cp "$TRACE_FOLDER_PATH" "./test-results-${{ matrix.suite }}/trace.zip"
+
+            # Example of directly uploading an artifact using actions/upload-artifact
             echo "Uploading trace artifact for ${{ matrix.suite }}"
-            gh workflow run upload-artifact.yml --ref ${{ github.ref }} --json '{"artifact_name":"${{ matrix.suite }}-trace.zip", "file":"${{ matrix.suite }}-trace.zip"}'
+            # Use actions/upload-artifact to upload the trace file
+            # Note: Directly calling another workflow like this isn't possible in a run script block. Instead, use the upload-artifact action.
           else
             echo "No trace file found for ${{ matrix.suite }}"
         env:
