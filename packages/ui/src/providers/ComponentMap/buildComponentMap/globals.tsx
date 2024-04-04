@@ -1,5 +1,16 @@
-import type { EditViewProps, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
+import type {
+  EditViewProps,
+  EntityDescriptionComponent,
+  EntityDescriptionFunction,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+} from 'payload/types'
 
+import { ViewDescription, type ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
+import {
+  isPlainFunction,
+  isReactComponent,
+} from 'packages/payload/src/utilities/isReactComponent.js'
 import React from 'react'
 
 import type { GlobalComponentMap } from './types.js'
@@ -50,7 +61,34 @@ export const mapGlobals = ({
 
     const Edit = (CustomEditView as React.FC<EditViewProps>) || DefaultEditView
 
+    const descriptionProps: ViewDescriptionProps = {
+      description:
+        (globalConfig.admin &&
+          'description' in globalConfig.admin &&
+          (((typeof globalConfig.admin?.description === 'string' ||
+            typeof globalConfig.admin?.description === 'object') &&
+            globalConfig.admin.description) ||
+            (typeof globalConfig.admin?.description === 'function' &&
+              isPlainFunction<EntityDescriptionFunction>(globalConfig.admin?.description) &&
+              globalConfig.admin?.description()))) ||
+        undefined,
+    }
+
+    const DescriptionComponent =
+      (globalConfig.admin &&
+        'description' in globalConfig.admin &&
+        ((isReactComponent<EntityDescriptionComponent>(globalConfig.admin.description) &&
+          globalConfig.admin.description) ||
+          (globalConfig.admin.description && ViewDescription))) ||
+      undefined
+
+    const Description =
+      DescriptionComponent !== undefined ? (
+        <DescriptionComponent {...(descriptionProps || {})} />
+      ) : undefined
+
     const componentMap: GlobalComponentMap = {
+      Description,
       Edit: <Edit globalSlug={globalConfig.slug} />,
       PreviewButton: PreviewButtonComponent,
       PublishButton: PublishButtonComponent,

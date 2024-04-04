@@ -1,10 +1,15 @@
+import type { ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
 import type {
   AdminViewProps,
   EditViewProps,
+  EntityDescriptionComponent,
+  EntityDescriptionFunction,
   SanitizedCollectionConfig,
   SanitizedConfig,
 } from 'payload/types'
 
+import { ViewDescription } from '@payloadcms/ui/elements/ViewDescription'
+import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React from 'react'
 
 import type { CollectionComponentMap } from './types.js'
@@ -103,11 +108,38 @@ export const mapCollections = ({
         afterListTable?.map((Component) => <Component />)) ||
       null
 
+    const descriptionProps: ViewDescriptionProps = {
+      description:
+        (collectionConfig.admin &&
+          'description' in collectionConfig.admin &&
+          (((typeof collectionConfig.admin?.description === 'string' ||
+            typeof collectionConfig.admin?.description === 'object') &&
+            collectionConfig.admin.description) ||
+            (typeof collectionConfig.admin?.description === 'function' &&
+              isPlainFunction<EntityDescriptionFunction>(collectionConfig.admin?.description) &&
+              collectionConfig.admin?.description()))) ||
+        undefined,
+    }
+
+    const DescriptionComponent =
+      (collectionConfig.admin &&
+        'description' in collectionConfig.admin &&
+        ((isReactComponent<EntityDescriptionComponent>(collectionConfig.admin.description) &&
+          collectionConfig.admin.description) ||
+          (collectionConfig.admin.description && ViewDescription))) ||
+      undefined
+
+    const Description =
+      DescriptionComponent !== undefined ? (
+        <DescriptionComponent {...(descriptionProps || {})} />
+      ) : undefined
+
     const componentMap: CollectionComponentMap = {
       AfterList,
       AfterListTable,
       BeforeList,
       BeforeListTable,
+      Description,
       Edit: <Edit collectionSlug={collectionConfig.slug} />,
       List: <List collectionSlug={collectionConfig.slug} />,
       PreviewButton,

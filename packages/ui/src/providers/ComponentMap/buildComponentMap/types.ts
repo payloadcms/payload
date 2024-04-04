@@ -101,6 +101,7 @@ export type CollectionComponentMap = ConfigComponentMapBase & {
 export type GlobalComponentMap = ConfigComponentMapBase
 
 export type ConfigComponentMapBase = {
+  Description: React.ReactNode
   Edit: React.ReactNode
   PreviewButton: React.ReactNode
   PublishButton: React.ReactNode

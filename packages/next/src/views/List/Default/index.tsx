@@ -47,8 +47,15 @@ export const DefaultListView: React.FC = () => {
 
   const componentMap = getComponentMap({ collectionSlug }) as CollectionComponentMap
 
-  const { AfterList, AfterListTable, BeforeList, BeforeListTable, actionsMap, fieldMap } =
-    componentMap || {}
+  const {
+    AfterList,
+    AfterListTable,
+    BeforeList,
+    BeforeListTable,
+    Description,
+    actionsMap,
+    fieldMap,
+  } = componentMap || {}
 
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
@@ -106,11 +113,7 @@ export const DefaultListView: React.FC = () => {
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                 )}
-                {/* {description && (
-                  <div className={`${baseClass}__sub-header`}>
-                    <ViewDescription description={description} />
-                  </div>
-                )} */}
+                {Description && <div className={`${baseClass}__sub-header`}>{Description}</div>}
               </Fragment>
             )}
           </header>
