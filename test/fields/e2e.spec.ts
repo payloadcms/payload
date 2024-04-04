@@ -691,9 +691,14 @@ describe('fields', () => {
             .locator('.custom-blocks-field-management')
             .getByRole('button', { name: 'Add Block 1' })
             .click()
-          await expect(
-            page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
-          ).toHaveValue('Block 1: Prefilled Title')
+
+          const customBlocks = page.locator(
+            '#field-customBlocks input[name="customBlocks.0.block1Title"]',
+          )
+
+          await customBlocks.scrollIntoViewIfNeeded()
+
+          await expect(customBlocks).toHaveValue('Block 1: Prefilled Title')
 
           await page
             .locator('.custom-blocks-field-management')
@@ -985,6 +990,8 @@ describe('fields', () => {
       await page.goto(url.list)
       await page.locator('.cell-id a').click()
 
+      await wait(300)
+
       // Go to Row tab, update the value
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
@@ -1209,6 +1216,8 @@ describe('fields', () => {
           .locator('.rich-text__toolbar button:not([disabled]) .relationship-rich-text-button')
           .first()
           .click()
+
+        await wait(300)
 
         // open the list select menu
         await page.locator('.list-drawer__select-collection-wrap .rs__control').click()
