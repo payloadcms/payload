@@ -51,7 +51,6 @@ describe('auth', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
     //await delayNetwork({ context, page, delay: 'Slow 4G' })
 
     await login({
