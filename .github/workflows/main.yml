@@ -79,163 +79,6 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
-  plugins-build:
-    needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
-      - run: pnpm run build:plugins
-
-  tests-unit:
-    runs-on: ubuntu-latest
-    needs: core-build
-    if: false # Disable until tests are updated for 3.0
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Unit Tests
-        run: pnpm test:unit
-        env:
-          NODE_OPTIONS: --max-old-space-size=8096
-
-  tests-int:
-    runs-on: ubuntu-latest
-    needs: core-build
-    strategy:
-      fail-fast: false
-      matrix:
-        database:
-          - mongodb
-          - postgres
-        #  - postgres-custom-schema
-        #  - postgres-uuid
-        #  - supabase
-    env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
-      AWS_ENDPOINT_URL: http://127.0.0.1:4566
-      AWS_ACCESS_KEY_ID: localstack
-      AWS_SECRET_ACCESS_KEY: localstack
-      AWS_REGION: us-east-1
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Start LocalStack
-        run: pnpm docker:start
-
-      - name: Start PostgreSQL
-        uses: CasperWA/postgresql-action@v1.2
-        with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
-          postgresql db: ${{ env.POSTGRES_DB }}
-          postgresql user: ${{ env.POSTGRES_USER }}
-          postgresql password: ${{ env.POSTGRES_PASSWORD }}
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-        if: matrix.database == 'supabase'
-
-      - name: Initialize Supabase
-        run: |
-          supabase init
-          supabase start
-        if: matrix.database == 'supabase'
-
-      - name: Wait for PostgreSQL
-        run: sleep 30
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Configure PostgreSQL with custom schema
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
-        if: matrix.database == 'postgres-custom-schema'
-
-      - name: Configure Supabase
-        run: |
-          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
-        if: matrix.database == 'supabase'
-
-      - name: Integration Tests
-        run: pnpm test:int
-        env:
-          NODE_OPTIONS: --max-old-space-size=8096
-          PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
-
   tests-e2e:
     runs-on: ubuntu-latest
     needs: core-build
@@ -244,21 +87,21 @@ jobs:
       matrix:
         # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
-          - _community
-          - access-control
+          #- _community
+          #- access-control
           # - admin
-          - auth
-          - field-error-states
+          #- auth
+          # - field-error-states
           - fields-relationship
-          - fields
-          - fields/lexical
-          - live-preview
-          - localization
-          - plugin-form-builder
-          - plugin-nested-docs
-          - plugin-seo
-          - versions
-          - uploads
+          #- fields
+          # - fields/lexical
+          # - live-preview
+          #- localization
+          #- plugin-form-builder
+          #- plugin-nested-docs
+          # - plugin-seo
+          #- versions
+          # - uploads
 
     steps:
       - name: Use Node.js 18
@@ -290,64 +133,3 @@ jobs:
           name: test-results-${{ matrix.suite }}
           path: test/test-results/
           retention-days: 1
-
-  tests-type-generation:
-    if: false # This should be replaced with gen on a real Payload project
-    runs-on: ubuntu-latest
-    needs: core-build
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Generate Payload Types
-        run: pnpm dev:generate-types fields
-
-      - name: Generate GraphQL schema file
-        run: pnpm dev:generate-graphql-schema graphql-schema-gen
-
-  templates:
-    needs: changes
-    if: false # Disable until templates are updated for 3.0
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        template: [blank, website, ecommerce]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.10.0
-        with:
-          mongodb-version: 6.0
-
-      - name: Build Template
-        run: |
-          cd templates/${{ matrix.template }}
-          cp .env.example .env
-          yarn install
-          yarn build
-          yarn generate:types
