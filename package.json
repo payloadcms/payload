@@ -159,8 +159,7 @@
     "yocto-queue": "^1.0.0"
   },
   "peerDependencies": {
-    "react": "18.2.0",
-    "react-router-dom": "5.3.4"
+    "react": "18.2.0"
   },
   "engines": {
     "node": ">=18.17.0",
