@@ -3,12 +3,13 @@ import type { ClientCollectionConfig, FieldAffectingData, Where } from 'payload/
 
 import * as facelessUIImport from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData } from 'payload/types'
 import React, { useState } from 'react'
 import AnimateHeightImport from 'react-animate-height'
 
 const AnimateHeight = (AnimateHeightImport.default ||
   AnimateHeightImport) as typeof AnimateHeightImport.default
+
+import { useUseTitleField } from '@payloadcms/ui/hooks/useUseAsTitle'
 
 import type { FieldMap } from '../../utilities/buildComponentMap.js'
 
@@ -38,7 +39,6 @@ export type ListControlsProps = {
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
   textFieldsToBeSearched?: FieldAffectingData[]
-  titleField: FieldAffectingData
 }
 
 /**
@@ -53,31 +53,39 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableSort = false,
     fieldMap,
     textFieldsToBeSearched,
-    titleField,
   } = props
 
   const { useWindowInfo } = facelessUIImport
+
   const { handleSearchChange } = useListQuery()
-
   const { searchParams } = useSearchParams()
-  const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
-
-  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
-    shouldInitializeWhereOpened ? 'where' : undefined,
-  )
+  const titleField = useUseTitleField(collectionConfig, fieldMap)
   const { i18n, t } = useTranslation()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
+
+  const shouldInitializeWhereOpened = validateWhereQuery(searchParams?.where)
+  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
+    shouldInitializeWhereOpened ? 'where' : undefined,
+  )
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <SearchFilter
           fieldLabel={
-            (titleField && getTranslation(titleField.label || titleField.name, i18n)) ?? undefined
+            (titleField &&
+              getTranslation(
+                'label' in titleField.fieldComponentProps &&
+                  typeof titleField.fieldComponentProps.label === 'string'
+                  ? titleField.fieldComponentProps.label
+                  : titleField.name,
+                i18n,
+              )) ??
+            undefined
           }
-          fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
+          fieldName={titleField.name}
           handleChange={handleSearchChange}
           listSearchableFields={textFieldsToBeSearched}
         />

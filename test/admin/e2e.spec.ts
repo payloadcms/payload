@@ -1275,7 +1275,7 @@ describe('admin', () => {
         await expect(page.locator('.view-description')).toContainText('Description')
       })
 
-      test.skip('should display translated field titles', async () => {
+      test('should display translated field titles', async () => {
         await createPost()
 
         // column controls
