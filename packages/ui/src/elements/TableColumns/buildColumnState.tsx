@@ -94,6 +94,7 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const CustomLabelToRender =
       field &&
+      'fieldComponentProps' in field &&
       'CustomLabel' in field.fieldComponentProps &&
       field.fieldComponentProps.CustomLabel !== undefined
         ? field.fieldComponentProps.CustomLabel
@@ -102,7 +103,7 @@ export const buildColumnState = (args: Args): Column[] => {
     const Label = (
       <FieldLabel
         CustomLabel={CustomLabelToRender}
-        {...field.fieldComponentProps.labelProps}
+        {...field.fieldComponentProps?.labelProps}
         unstyled
       />
     )
@@ -116,7 +117,11 @@ export const buildColumnState = (args: Args): Column[] => {
           undefined
         }
         // eslint-disable-next-line react/jsx-no-duplicate-props
-        label={'label' in field.fieldComponentProps ? field.fieldComponentProps.label : undefined}
+        label={
+          'fieldComponentProps' in field && 'label' in field.fieldComponentProps
+            ? field.fieldComponentProps.label
+            : undefined
+        }
         name={'name' in field ? field.name : undefined}
       />
     )

@@ -28,7 +28,7 @@ export const flattenFieldMap = (
           return [
             ...tabAcc,
             ...('name' in tab
-              ? [{ ...tab, type: 'tab' }]
+              ? [{ ...tab }]
               : flattenFieldMap(tab.fieldMap, keepPresentationalFields)),
           ]
         }, []),
