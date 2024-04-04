@@ -5,6 +5,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-cloud-storage"
+  },
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",

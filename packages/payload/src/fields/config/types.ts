@@ -539,7 +539,12 @@ export type RichTextField<
   AdapterProps = any,
   ExtraProperties = {},
 > = FieldBase & {
-  admin?: Admin
+  admin?: Admin & {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+    }
+  }
   editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
   type: 'richText'
 } & ExtraProperties

@@ -111,7 +111,13 @@ export const number = baseField.keys({
     placeholder: joi.string(),
     step: joi.number(),
   }),
-  defaultValue: joi.alternatives().try(joi.number(), joi.func()),
+  defaultValue: joi
+    .alternatives()
+    .try(
+      joi.number(),
+      joi.func(),
+      joi.array().when('hasMany', { not: true, then: joi.forbidden() }),
+    ),
   hasMany: joi.boolean().default(false),
   max: joi.number(),
   maxRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
@@ -442,7 +448,12 @@ export const blocks = baseField.keys({
 export const richText = baseField.keys({
   name: joi.string().required(),
   type: joi.string().valid('richText').required(),
-  admin: baseAdminFields.default(),
+  admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+    }),
+  }),
   defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func(), joi.object()),
   editor: joi
     .object()

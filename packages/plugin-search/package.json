@@ -2,7 +2,11 @@
   "name": "@payloadcms/plugin-search",
   "version": "1.1.0",
   "homepage:": "https://payloadcms.com",
-  "repository": "git@github.com:payloadcms/plugin-search.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-search"
+  },
   "description": "Search plugin for Payload",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
