@@ -14,102 +14,104 @@ import {
   usersCollectionSlug,
 } from './slugs.js'
 
-export async function clearAndSeedEverything(_payload: Payload, parallel: boolean = false) {
+export const seed = async (_payload) => {
+  await executePromises(
+    [
+      () =>
+        _payload.create({
+          collection: usersCollectionSlug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      ...[...Array(11)].map(
+        () => () =>
+          _payload.create({
+            collection: postsCollectionSlug,
+            data: {
+              title: 'Title',
+              description: 'Description',
+            },
+            depth: 0,
+            overrideAccess: true,
+          }),
+      ),
+      () =>
+        _payload.create({
+          collection: customViews1CollectionSlug,
+          data: {
+            title: 'Custom View',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: customViews2CollectionSlug,
+          data: {
+            title: 'Custom View',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: geoCollectionSlug,
+          data: {
+            point: [7, -7],
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: geoCollectionSlug,
+          data: {
+            point: [5, -5],
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: noApiViewCollectionSlug,
+          data: {},
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: 'customIdTab',
+          data: {
+            id: customIdCollectionId,
+            title: 'Hello world title',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: 'customIdRow',
+          data: {
+            id: customIdCollectionId,
+            title: 'Hello world title',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+    ],
+    false,
+  )
+}
+
+export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({
     snapshotKey: 'adminTest',
     collectionSlugs,
     _payload,
-    seedFunction: async (_payload) => {
-      await executePromises(
-        [
-          () =>
-            _payload.create({
-              collection: usersCollectionSlug,
-              data: {
-                email: devUser.email,
-                password: devUser.password,
-              },
-              depth: 0,
-              overrideAccess: true,
-            }),
-          ...[...Array(11)].map(
-            () => () =>
-              _payload.create({
-                collection: postsCollectionSlug,
-                data: {
-                  title: 'Title',
-                  description: 'Description',
-                },
-                depth: 0,
-                overrideAccess: true,
-              }),
-          ),
-          () =>
-            _payload.create({
-              collection: customViews1CollectionSlug,
-              data: {
-                title: 'Custom View',
-              },
-              depth: 0,
-              overrideAccess: true,
-            }),
-          () =>
-            _payload.create({
-              collection: customViews2CollectionSlug,
-              data: {
-                title: 'Custom View',
-              },
-              depth: 0,
-              overrideAccess: true,
-            }),
-          () =>
-            _payload.create({
-              collection: geoCollectionSlug,
-              data: {
-                point: [7, -7],
-              },
-              depth: 0,
-              overrideAccess: true,
-            }),
-          () =>
-            _payload.create({
-              collection: geoCollectionSlug,
-              data: {
-                point: [5, -5],
-              },
-              depth: 0,
-              overrideAccess: true,
-            }),
-          () =>
-            _payload.create({
-              collection: noApiViewCollectionSlug,
-              data: {},
-              depth: 0,
-              overrideAccess: true,
-            }),
-          () =>
-            _payload.create({
-              collection: 'customIdTab',
-              data: {
-                id: customIdCollectionId,
-                title: 'Hello world title',
-              },
-              depth: 0,
-              overrideAccess: true,
-            }),
-          () =>
-            _payload.create({
-              collection: 'customIdRow',
-              data: {
-                id: customIdCollectionId,
-                title: 'Hello world title',
-              },
-              depth: 0,
-              overrideAccess: true,
-            }),
-        ],
-        parallel,
-      )
-    },
+    seedFunction: seed,
   })
 }
