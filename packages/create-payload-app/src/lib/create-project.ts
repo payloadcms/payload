@@ -100,9 +100,8 @@ export async function createProject(args: {
   if (!cliArgs['--no-deps']) {
     spinner.message('Installing dependencies...')
     const result = await installDeps({ cliArgs, packageManager, projectDir })
-    spinner.stop()
     if (result) {
-      spinner.stop('Dependencies installed')
+      spinner.stop('Successfully installed Payload and dependencies')
     } else {
       spinner.stop('Error installing dependencies', 1)
     }

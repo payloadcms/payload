@@ -192,7 +192,7 @@ export default buildConfigWithDefaults({
     },
     {
       admin: {
-        useAsTitle: 'meta.title',
+        useAsTitle: 'name',
       },
       fields: [
         ...baseRelationshipFields,

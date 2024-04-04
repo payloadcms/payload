@@ -48,11 +48,14 @@
       "type": "node-terminal"
     },
     {
-      "command": "pnpm run dev:postgres versions",
+      "command": "node --no-deprecation test/dev.js versions",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Postgres",
       "request": "launch",
-      "type": "node-terminal"
+      "type": "node-terminal",
+      "env": {
+        "PAYLOAD_DATABASE": "postgres"
+      }
     },
     {
       "command": "pnpm run dev versions",

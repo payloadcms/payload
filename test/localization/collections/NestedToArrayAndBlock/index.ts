@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
-export const nestedToArrayAndBlockCollectionSlug = 'nested-to-array-and-block'
+export const nestedToArrayAndBlockCollectionSlug = 'nested'
 
 export const NestedToArrayAndBlock: CollectionConfig = {
   slug: nestedToArrayAndBlockCollectionSlug,

@@ -128,6 +128,8 @@ export const ExtraFieldsUploadDrawer: React.FC<
     >
       {initialState !== false && (
         <Form
+          beforeSubmit={[onChange]}
+          disableValidationOnSubmit
           // @ts-expect-error TODO: Fix this
           fields={fieldMap}
           initialState={initialState}

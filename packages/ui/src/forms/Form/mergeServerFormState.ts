@@ -1,5 +1,7 @@
 import type { FormState } from 'payload/types'
 
+import deepEquals from 'deep-equal'
+
 import { mergeErrorPaths } from './mergeErrorPaths.js'
 
 const serverPropsToAccept = ['passesCondition', 'valid', 'errorMessage']
@@ -36,6 +38,16 @@ export const mergeServerFormState = (
           changed = errorPathsResult.changed
         }
         newFieldState.errorPaths = errorPathsResult.result
+      }
+
+      /**
+       * Handle filterOptions
+       */
+      if (incomingState[path]?.filterOptions || newFieldState.filterOptions) {
+        if (!deepEquals(incomingState[path]?.filterOptions, newFieldState.filterOptions)) {
+          changed = true
+          newFieldState.filterOptions = incomingState[path].filterOptions
+        }
       }
 
       /**
