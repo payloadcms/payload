@@ -1,8 +1,11 @@
+import type { Payload } from 'payload'
+
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
+import { seedDB } from '../helpers/seed.js'
 import { anotherArrayDoc, arrayDoc } from './collections/Array/shared.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { codeDoc } from './collections/Code/shared.js'
@@ -26,6 +29,7 @@ import {
   blockFieldsSlug,
   codeFieldsSlug,
   collapsibleFieldsSlug,
+  collectionSlugs,
   conditionalLogicSlug,
   dateFieldsSlug,
   groupFieldsSlug,
@@ -296,5 +300,15 @@ export const seed = async (_payload) => {
     data: numberDoc,
     depth: 0,
     overrideAccess: true,
+  })
+}
+
+export async function clearAndSeedEverything(_payload: Payload) {
+  return await seedDB({
+    _payload,
+    collectionSlugs,
+    seedFunction: seed,
+    snapshotKey: 'fieldsTest',
+    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
   })
 }

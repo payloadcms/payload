@@ -1152,7 +1152,7 @@ describe('fields', () => {
         await expect(menu).not.toContainText('Uploads3')
       })
 
-      // TODO: this test can't find the selector for the search filter, but it works.
+      // TODO: this test can't find the selector for the search filter, but functionality works.
       // Need to debug
       test.skip('should search correct useAsTitle field after toggling collection in list drawer', async () => {
         await navigateToRichTextFields()
