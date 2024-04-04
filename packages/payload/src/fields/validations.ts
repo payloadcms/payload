@@ -314,69 +314,67 @@ const validateFilterOptions: Validate<
     const collections = typeof relationTo === 'string' ? [relationTo] : relationTo
     const values = Array.isArray(value) ? value : [value]
 
-    await Promise.all(
-      collections.map(async (collection) => {
-        try {
-          let optionFilter =
-            typeof filterOptions === 'function'
-              ? await filterOptions({
-                  id,
-                  data,
-                  relationTo: collection,
-                  siblingData,
-                  user,
-                })
-              : filterOptions
+    for (const collection of collections) {
+      try {
+        let optionFilter =
+          typeof filterOptions === 'function'
+            ? await filterOptions({
+                id,
+                data,
+                relationTo: collection,
+                siblingData,
+                user,
+              })
+            : filterOptions
 
-          if (optionFilter === true) {
-            optionFilter = null
+        if (optionFilter === true) {
+          optionFilter = null
+        }
+
+        const valueIDs: (number | string)[] = []
+
+        values.forEach((val) => {
+          if (typeof val === 'object' && val?.value) {
+            valueIDs.push(val.value)
           }
 
-          const valueIDs: (number | string)[] = []
-
-          values.forEach((val) => {
-            if (typeof val === 'object' && val?.value) {
-              valueIDs.push(val.value)
-            }
-
-            if (typeof val === 'string' || typeof val === 'number') {
-              valueIDs.push(val)
-            }
-          })
-
-          if (valueIDs.length > 0) {
-            const findWhere: Where = {
-              and: [{ id: { in: valueIDs } }],
-            }
-
-            if (optionFilter && optionFilter !== true) findWhere.and.push(optionFilter)
-
-            if (optionFilter === false) {
-              falseCollections.push(collection)
-            }
-
-            const result = await payload.find({
-              collection,
-              depth: 0,
-              limit: 0,
-              pagination: false,
-              req,
-              where: findWhere,
-            })
-
-            options[collection] = result.docs.map((doc) => doc.id)
-          } else {
-            options[collection] = []
+          if (typeof val === 'string' || typeof val === 'number') {
+            valueIDs.push(val)
           }
-        } catch (err) {
-          req.payload.logger.error({
-            err,
-            msg: `Error validating filter options for collection ${collection}`,
+        })
+
+        if (valueIDs.length > 0) {
+          const findWhere: Where = {
+            and: [{ id: { in: valueIDs } }],
+          }
+
+          if (optionFilter && optionFilter !== true) findWhere.and.push(optionFilter)
+
+          if (optionFilter === false) {
+            falseCollections.push(collection)
+          }
+
+          const result = await payload.find({
+            collection,
+            depth: 0,
+            limit: 0,
+            pagination: false,
+            req,
+            where: findWhere,
           })
+
+          options[collection] = result.docs.map((doc) => doc.id)
+        } else {
           options[collection] = []
         }
-      }),
-    )
+      } catch (err) {
+        req.payload.logger.error({
+          err,
+          msg: `Error validating filter options for collection ${collection}`,
+        })
+        options[collection] = []
+      }
+    }
 
     const invalidRelationships = values.filter((val) => {
       let collection: string

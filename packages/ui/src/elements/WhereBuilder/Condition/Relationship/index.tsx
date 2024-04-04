@@ -177,7 +177,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
   const addOptionByID = useCallback(
     async (id, relation) => {
-      if (!errorLoading && id !== 'null') {
+      if (!errorLoading && id !== 'null' && id && relation) {
         const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, {
           credentials: 'include',
           headers: {
@@ -269,28 +269,32 @@ export const RelationshipField: React.FC<Props> = (props) => {
           isMulti={hasMany}
           isSortable={isSortable}
           onChange={(selected) => {
+            if (!selected) {
+              onChange(null)
+              return
+            }
             if (hasMany) {
               onChange(
                 selected
                   ? selected.map((option) => {
                       if (hasMultipleRelations) {
                         return {
-                          relationTo: option.relationTo,
-                          value: option.value,
+                          relationTo: option?.relationTo,
+                          value: option?.value,
                         }
                       }
 
-                      return option.value
+                      return option?.value
                     })
                   : null,
               )
             } else if (hasMultipleRelations) {
               onChange({
-                relationTo: selected.relationTo,
-                value: selected.value,
+                relationTo: selected?.relationTo,
+                value: selected?.value,
               })
             } else {
-              onChange(selected.value)
+              onChange(selected?.value)
             }
           }}
           onInputChange={handleInputChange}
