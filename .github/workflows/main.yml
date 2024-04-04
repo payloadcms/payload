@@ -173,19 +173,18 @@ jobs:
           retention-days: 1
 
       - name: Process and Upload Trace Files
-        if: always() # Ensure this runs regardless of the outcome of the test step
+        if: always() # Ensures this runs regardless of the outcome of the preceding steps
         run: |
-          TRACE_FOLDER_PATH="test/test-results/test-results-${{ matrix.suite }}/trace.zip" # Adjust the path as necessary
+          TRACE_FOLDER_PATH="test/test-results/test-results-_community/trace.zip"
           if [ -f "$TRACE_FOLDER_PATH" ]; then
-            # Assuming trace.zip needs to be in the root directory for the next step
-            cp "$TRACE_FOLDER_PATH" "./test-results-${{ matrix.suite }}/trace.zip"
+            # Assuming trace.zip needs to be moved
+            cp "$TRACE_FOLDER_PATH" "./test-results-_community-trace.zip"
 
-            # Example of directly uploading an artifact using actions/upload-artifact
-            echo "Uploading trace artifact for ${{ matrix.suite }}"
-            # Use actions/upload-artifact to upload the trace file
-            # Note: Directly calling another workflow like this isn't possible in a run script block. Instead, use the upload-artifact action.
+            echo "Uploading trace artifact for _community"
+            # Placeholder for actions/upload-artifact usage
           else
-            echo "No trace file found for ${{ matrix.suite }}"
+            echo "No trace file found for _community"
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
