@@ -115,8 +115,6 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
       sort,
       value: valueArg,
     }) => {
-      console.log('inside getResults')
-
       if (!permissions) {
         return
       }
@@ -383,12 +381,9 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     // If the menu is open while filterOptions changes
     // due to latency of getFormState and fast clicking into this field,
     // re-fetch options
-    console.log('in useEffect')
 
     if (hasLoadedFirstPageRef.current && menuIsOpen.current) {
       setIsLoading(true)
-      console.log('in useEffect > getResults')
-
       void getResults({
         lastLoadedPage: {},
         onSuccess: () => {
@@ -538,11 +533,9 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
             }}
             onMenuOpen={() => {
               menuIsOpen.current = true
-              console.log('onMenuOpen')
 
               if (!hasLoadedFirstPageRef.current) {
                 setIsLoading(true)
-                console.log('Getting results...')
                 void getResults({
                   lastLoadedPage: {},
                   onSuccess: () => {
