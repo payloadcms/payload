@@ -351,3 +351,53 @@ jobs:
           yarn install
           yarn build
           yarn generate:types
+  process-and-upload:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: downloaded-artifacts
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip unzip jq
+
+      - name: Process Artifacts and Upload
+        run: |
+          mkdir processed-artifacts
+          for folder in downloaded-artifacts/*; do
+            if [ -d "$folder" ]; then
+              base=$(basename "$folder")
+              echo "Processing $folder"
+              if [ -f "$folder/trace.zip" ]; then
+                mv "$folder/trace.zip" "processed-artifacts/${base}.zip"
+              fi
+            fi
+          done
+
+          # Upload each processed artifact
+          for file in processed-artifacts/*.zip; do
+            if [ -f "$file" ]; then
+              echo "Uploading $(basename "$file")"
+              gh workflow run upload-artifact.yml --ref ${{ github.ref }} --json '{"artifact_name":"'"$(basename "$file")"'", "file":"'"$file"'"}'
+            fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Note: The above step assumes you have an `upload-artifact.yml` workflow
+      # designed to upload a single artifact. You will need to create this.
+
+      - name: Generate Playwright Trace Viewer URLs
+        run: |
+          echo "Generated URLs:"
+          for file in processed-artifacts/*.zip; do
+            if [ -f "$file" ]; then
+              base=$(basename "$file" .zip)
+              # This URL is hypothetical and would need to be adjusted based on your actual artifact upload URL
+              echo "https://trace.playwright.dev/?trace=https://github.com/<your-repo>/actions/runs/${{ github.run_id }}/artifacts/${base}"
+            fi
+          done
