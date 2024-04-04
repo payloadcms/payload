@@ -28,6 +28,7 @@ export const reduceFieldMap = (fieldMap: Column[], i18n) =>
         operators,
         props: {
           ...field,
+          ...(field?.cellProps || {}),
         },
       }
 
