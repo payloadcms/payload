@@ -7,10 +7,7 @@ import type {
 } from 'payload/types'
 
 import { ViewDescription, type ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
-import {
-  isPlainFunction,
-  isReactComponent,
-} from 'packages/payload/src/utilities/isReactComponent.js'
+import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React from 'react'
 
 import type { GlobalComponentMap } from './types.js'
