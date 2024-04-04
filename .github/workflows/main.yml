@@ -250,7 +250,7 @@ jobs:
           - auth
           - field-error-states
           - fields-relationship
-          # - fields
+          - fields
           - fields/lexical
           - live-preview
           - localization
