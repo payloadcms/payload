@@ -9,6 +9,7 @@ import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config, RelationshipField, TextField } from './payload-types.js'
 
 import {
+  ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
@@ -61,6 +62,8 @@ describe('fields', () => {
     }
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
   describe('text', () => {
     let url: AdminUrlUtil

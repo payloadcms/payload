@@ -4,6 +4,12 @@
   "main": "./src/exports/index.ts",
   "types": "./src/types.ts",
   "type": "module",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/translations"
+  },
   "scripts": {
     "build:types": "tsc --outDir dist",
     "build": "pnpm writeFiles && pnpm build:types",

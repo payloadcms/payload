@@ -2,7 +2,7 @@ import type { DocumentTabComponent } from 'payload/types'
 
 import React from 'react'
 
-import { CustomTabComponentClient } from './client'
+import { CustomTabComponentClient } from './client.js'
 import './index.scss'
 
 export const CustomTabComponent: DocumentTabComponent = (props) => {

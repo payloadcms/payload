@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",
+  "homepage": "https://payloadcms.com",
   "bin": {
     "create-payload-app": "bin/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/create-payload-app"
   },
   "scripts": {
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",

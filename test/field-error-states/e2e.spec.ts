@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 
 const { beforeAll, describe } = test
@@ -20,6 +20,8 @@ describe('field error states', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('Remove row should remove error states from parent fields', async () => {

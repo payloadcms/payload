@@ -14,7 +14,13 @@ import type {
   RelationWithTitle,
 } from './payload-types.js'
 
-import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers.js'
+import {
+  delayNetwork,
+  ensureAutoLoginAndCompilationIsDone,
+  initPageConsoleErrorCatch,
+  openDocControls,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import {
@@ -123,6 +129,8 @@ describe('fields - relationship', () => {
         relationshipWithTitle: relationWithTitle.id,
       },
     })) as any
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('should create relationship', async () => {
@@ -143,7 +151,8 @@ describe('fields - relationship', () => {
     await saveDocAndAssert(page)
   })
 
-  test('should create relations to multiple collections', async () => {
+  // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
+  test.skip('should create relations to multiple collections', async () => {
     await page.goto(url.create)
 
     const field = page.locator('#field-relationshipMultiple')
@@ -341,7 +350,8 @@ describe('fields - relationship', () => {
     await expect(options).not.toContainText('exclude')
   })
 
-  test('should not query for a relationship when filterOptions returns false', async () => {
+  // TODO: Flaky test in CI - fix. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
+  test.skip('should not query for a relationship when filterOptions returns false', async () => {
     await payload.create({
       collection: relationFalseFilterOptionSlug,
       data: {
@@ -510,7 +520,7 @@ describe('fields - relationship', () => {
   })
 
   describe('externally update relationship field', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       const externalRelationURL = new AdminUrlUtil(serverURL, relationUpdatedExternallySlug)
       await page.goto(externalRelationURL.create)
     })

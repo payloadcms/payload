@@ -1,10 +1,11 @@
 import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
+import type { ColumnPreferences } from '../../providers/ListInfo/index.js'
 
 export function fieldAffectsData(field: MappedField): boolean {
   return 'name' in field && field.type !== 'ui'
 }
 
-const getRemainingColumns = (fieldMap: FieldMap, useAsTitle: string): string[] =>
+const getRemainingColumns = (fieldMap: FieldMap, useAsTitle: string): ColumnPreferences =>
   fieldMap.reduce((remaining, field) => {
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
@@ -34,21 +35,24 @@ export const getInitialColumns = (
   fieldMap: FieldMap,
   useAsTitle: string,
   defaultColumns: string[],
-): string[] => {
+): ColumnPreferences => {
   let initialColumns = []
 
   if (Array.isArray(defaultColumns) && defaultColumns.length >= 1) {
-    return defaultColumns
+    initialColumns = defaultColumns
+  } else {
+    if (useAsTitle) {
+      initialColumns.push(useAsTitle)
+    }
+
+    const remainingColumns = getRemainingColumns(fieldMap, useAsTitle)
+
+    initialColumns = initialColumns.concat(remainingColumns)
+    initialColumns = initialColumns.slice(0, 4)
   }
 
-  if (useAsTitle) {
-    initialColumns.push(useAsTitle)
-  }
-
-  const remainingColumns = getRemainingColumns(fieldMap, useAsTitle)
-
-  initialColumns = initialColumns.concat(remainingColumns)
-  initialColumns = initialColumns.slice(0, 4)
-
-  return initialColumns
+  return initialColumns.map((column) => ({
+    accessor: column,
+    active: true,
+  }))
 }

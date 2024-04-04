@@ -6,7 +6,7 @@ import { sql } from 'drizzle-orm'
 import { isMongoose } from './isMongoose.js'
 
 export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
-  if (isMongoose(_payload)) {
+  if (isMongoose(_payload) && 'collections' in _payload.db && collectionSlugs.length > 0) {
     await _payload.db.collections[collectionSlugs[0]].db.dropDatabase()
   } else {
     const db: PostgresAdapter = _payload.db as unknown as PostgresAdapter

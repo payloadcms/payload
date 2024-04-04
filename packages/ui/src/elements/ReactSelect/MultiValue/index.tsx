@@ -2,6 +2,7 @@ import type { MultiValueProps } from 'react-select'
 
 import React from 'react'
 import { components as SelectComponents } from 'react-select'
+import { v4 as uuid } from 'uuid'
 
 import type { Option } from '../types.js'
 
@@ -20,7 +21,7 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
   } = props
 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
-    id: value.toString(),
+    id: typeof value === 'object' && 'path' in value ? String(value.path) : uuid(),
     disabled: !isSortable,
   })
 

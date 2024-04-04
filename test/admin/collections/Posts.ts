@@ -5,10 +5,7 @@ import { slateEditor } from '@payloadcms/richtext-slate'
 import { CustomCell } from '../components/CustomCell/index.js'
 import { DemoUIFieldCell } from '../components/DemoUIField/Cell.js'
 import { DemoUIField } from '../components/DemoUIField/Field.js'
-import {
-  FieldDescriptionComponent,
-  FieldDescriptionFunction,
-} from '../components/FieldDescription/index.js'
+import { FieldDescriptionComponent } from '../components/FieldDescription/index.js'
 import { slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug } from '../slugs.js'
 
@@ -115,7 +112,7 @@ export const Posts: CollectionConfig = {
       name: 'descriptionAsFunction',
       type: 'text',
       admin: {
-        description: FieldDescriptionFunction,
+        description: () => 'Function description',
       },
     },
     {
