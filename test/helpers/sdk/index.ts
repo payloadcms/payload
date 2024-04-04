@@ -1,6 +1,6 @@
 import type { PaginatedDocs } from 'payload/database'
 
-import type { CreateArgs, FetchOptions, FindArgs, GeneratedTypes } from './types.js'
+import type { CreateArgs, FetchOptions, FindArgs, GeneratedTypes, UpdateArgs } from './types.js'
 
 type Args = {
   serverURL: string
@@ -52,6 +52,17 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
   }
 
   serverURL: string
+
+  update = async <T extends keyof TGeneratedTypes['collections']>({
+    jwt,
+    ...args
+  }: UpdateArgs<TGeneratedTypes, T>) => {
+    return this.fetch<TGeneratedTypes['collections'][T]>({
+      method: 'update',
+      args,
+      jwt,
+    })
+  }
 
   constructor({ serverURL }: Args) {
     this.serverURL = serverURL
