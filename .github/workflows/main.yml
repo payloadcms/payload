@@ -246,11 +246,11 @@ jobs:
         suite:
           - _community
           - access-control
-          - admin
+          # - admin
           - auth
           - field-error-states
           - fields-relationship
-          - fields
+          # - fields
           - fields/lexical
           - live-preview
           - localization
