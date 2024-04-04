@@ -663,7 +663,17 @@ describe('admin', () => {
     const tableRowLocator = 'table > tbody > tr'
 
     beforeEach(async () => {
+      // delete all posts created by the seed
+      await deleteAllPosts()
       await page.goto(postsUrl.list)
+      await page.waitForURL(postsUrl.list)
+      await expect(page.locator(tableRowLocator)).toBeHidden()
+
+      await createPost({ title: 'post1' })
+      await createPost({ title: 'post2' })
+      await page.goto(postsUrl.list)
+      await page.waitForURL(postsUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
     })
 
     describe('filtering', () => {
@@ -681,14 +691,18 @@ describe('admin', () => {
 
       test('search by id with listSearchableFields', async () => {
         const { id } = await createPost()
-        await page.goto(`${postsUrl.list}?limit=10&page=1&search=${id}`)
+        const url = `${postsUrl.list}?limit=10&page=1&search=${id}`
+        await page.goto(url)
+        await page.waitForURL(url)
         const tableItems = page.locator(tableRowLocator)
         await expect(tableItems).toHaveCount(1)
       })
 
       test('search by id without listSearchableFields', async () => {
         const { id } = await createGeo()
-        await page.goto(`${geoUrl.list}?limit=10&page=1&search=${id}`)
+        const url = `${geoUrl.list}?limit=10&page=1&search=${id}`
+        await page.goto(url)
+        await page.waitForURL(url)
         const tableItems = page.locator(tableRowLocator)
         await expect(tableItems).toHaveCount(1)
       })
@@ -707,9 +721,6 @@ describe('admin', () => {
       })
 
       test('toggle columns', async () => {
-        // delete all posts created by the seed
-        await deleteAllPosts()
-
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
 
@@ -737,7 +748,7 @@ describe('admin', () => {
 
         // Add back ID column
         await idButton.click()
-        await expect(page.locator('.cell-id')).toBeVisible()
+        await expect(page.locator('.cell-id').first()).toBeVisible()
 
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
@@ -768,12 +779,6 @@ describe('admin', () => {
       })
 
       test('filter rows', async () => {
-        // delete all posts created by the seed
-        await deleteAllPosts()
-
-        const { id } = await createPost({ title: 'post1' })
-        await createPost({ title: 'post2' })
-
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
 
@@ -785,6 +790,8 @@ describe('admin', () => {
         const idButton = page.locator('.column-selector .column-selector__column', {
           hasText: exactText('ID'),
         })
+
+        const id = await page.locator('.cell-id').first().innerText()
 
         const buttonClasses = await idButton.getAttribute('class')
 
@@ -802,7 +809,7 @@ describe('admin', () => {
         await page.locator('.where-builder__add-first-filter').click()
 
         const operatorField = page.locator('.condition__operator')
-        const valueField = page.locator('.condition__value > input')
+        const valueField = page.locator('.condition__value input')
 
         await operatorField.click()
 
@@ -821,8 +828,7 @@ describe('admin', () => {
       })
 
       test('resets filter value and operator on field update', async () => {
-        const { id } = await createPost({ title: 'post1' })
-        await createPost({ title: 'post2' })
+        const id = await page.locator('.cell-id').first().innerText()
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
@@ -853,8 +859,16 @@ describe('admin', () => {
       })
 
       test('should accept where query from valid URL where parameter', async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+        await page.goto(postsUrl.list)
+        await expect(page.locator(tableRowLocator)).toBeHidden()
+
         await createPost({ title: 'post1' })
         await createPost({ title: 'post2' })
+        await page.goto(postsUrl.list)
+        await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
         await page.goto(
           `${postsUrl.list}?limit=10&page=1&where[or][0][and][0][title][equals]=post1`,
         )
@@ -864,8 +878,16 @@ describe('admin', () => {
       })
 
       test('should accept transformed where query from invalid URL where parameter', async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+        await page.goto(postsUrl.list)
+        await expect(page.locator(tableRowLocator)).toBeHidden()
+
         await createPost({ title: 'post1' })
         await createPost({ title: 'post2' })
+        await page.goto(postsUrl.list)
+        await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
         // [title][equals]=post1 should be getting transformed into a valid where[or][0][and][0][title][equals]=post1
         await page.goto(`${postsUrl.list}?limit=10&page=1&where[title][equals]=post1`)
 
