@@ -183,6 +183,7 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
+                    editor: slateEditor({}),
                   },
                 ],
               },
@@ -230,6 +231,7 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
+                    editor: slateEditor({}),
                   },
                 ],
               },

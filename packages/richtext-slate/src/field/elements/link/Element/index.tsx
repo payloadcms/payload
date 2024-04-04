@@ -46,6 +46,8 @@ const insertChange = (editor, fields) => {
     url: data.url,
   }
 
+  if (data.fields) newNode.fields = data.fields
+
   Transforms.setNodes(editor, newNode, { at: parentPath })
 
   Transforms.delete(editor, { at: editor.selection.focus.path, unit: 'block' })
@@ -98,8 +100,6 @@ export const LinkElement = () => {
       const state = await getFormState({
         apiRoute: config.routes.api,
         body: {
-          id,
-          collectionSlug,
           data,
           operation: 'update',
           schemaPath: fieldMapPath,
@@ -110,7 +110,9 @@ export const LinkElement = () => {
       setInitialState(state)
     }
 
-    void awaitInitialState()
+    if (renderModal) {
+      void awaitInitialState()
+    }
   }, [renderModal, element, user, locale, t, collectionSlug, config, id, fieldMapPath])
 
   return (
@@ -127,6 +129,7 @@ export const LinkElement = () => {
             handleModalSubmit={(fields) => {
               insertChange(editor, fields)
               closeModal(drawerSlug)
+              setRenderModal(false)
             }}
             initialState={initialState}
           />
