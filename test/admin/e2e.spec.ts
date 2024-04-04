@@ -1262,7 +1262,7 @@ describe('admin', () => {
     })
 
     describe('i18n', () => {
-      test.skip('should display translated collections and globals config options', async () => {
+      test('should display translated collections and globals config options', async () => {
         await page.goto(postsUrl.list)
 
         // collection label
