@@ -901,8 +901,6 @@ describe('fields', () => {
       })
       const count = await rows.count()
 
-      console.log({ count })
-
       for (let i = 0; i < count; i++) {
         await rows
           .nth(i)
