@@ -30,20 +30,20 @@ export const buildColumnState = (args: Args): Column[] => {
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
   // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
+  const idFieldIndex = sortedFieldMap.findIndex((field) => field.name === 'id')
+
+  if (idFieldIndex > -1) {
+    const idField = sortedFieldMap.splice(idFieldIndex, 1)[0]
+    sortedFieldMap.unshift(idField)
+  }
+
   const useAsTitleFieldIndex = useAsTitle
     ? sortedFieldMap.findIndex((field) => field.name === useAsTitle)
     : -1
 
-  const idFieldIndex = sortedFieldMap.findIndex((field) => field.name === 'id')
-
-  if (idFieldIndex > -1) {
-    const idField = sortedFieldMap.splice(idFieldIndex, 1)
-    sortedFieldMap.unshift(idField[0])
-  }
-
   if (useAsTitleFieldIndex > -1) {
-    const useAsTitleField = sortedFieldMap.splice(useAsTitleFieldIndex, 1)
-    sortedFieldMap.unshift(useAsTitleField[0])
+    const useAsTitleField = sortedFieldMap.splice(useAsTitleFieldIndex, 1)[0]
+    sortedFieldMap.unshift(useAsTitleField)
   }
 
   const sortTo = columnPreferences || columns
