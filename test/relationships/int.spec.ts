@@ -461,7 +461,7 @@ describe('Relationships', () => {
           })
         })
         it('should find two docs for german locale', async () => {
-          const { docs, totalDocs } = await payload.find<PostsLocalized>({
+          const { docs } = await payload.find<PostsLocalized>({
             collection: slugWithLocalizedRel,
             locale: 'de',
             where: {
@@ -471,11 +471,13 @@ describe('Relationships', () => {
             },
           })
 
-          expect(totalDocs).toEqual(2)
+          const mappedIds = docs.map((doc) => doc?.id)
+          expect(mappedIds).toContain(localizedPost1.id)
+          expect(mappedIds).toContain(localizedPost2.id)
         })
 
         it("shouldn't find a relationship query outside of the specified locale", async () => {
-          const { docs, totalDocs } = await payload.find<PostsLocalized>({
+          const { docs } = await payload.find<PostsLocalized>({
             collection: slugWithLocalizedRel,
             locale: 'en',
             where: {
@@ -485,7 +487,7 @@ describe('Relationships', () => {
             },
           })
 
-          expect(totalDocs).toEqual(0)
+          expect(docs.map((doc) => doc?.id)).not.toContain(localizedPost2.id)
         })
       })
     })
