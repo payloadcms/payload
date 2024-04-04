@@ -14,9 +14,15 @@ import type {
   RelationWithTitle,
 } from './payload-types.js'
 
-import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers.js'
+import {
+  delayNetwork,
+  initPageConsoleErrorCatch,
+  openDocControls,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   relationFalseFilterOptionSlug,
   relationOneSlug,

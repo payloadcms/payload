@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { mobileBreakpoint } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -22,7 +23,7 @@ describe('Live Preview', () => {
     await page.goto(url.list)
     const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
 
-    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: 45000 })
+    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     const linkDocHref = await linkToDoc.getAttribute('href')
 
     await linkToDoc.click()
@@ -57,13 +58,15 @@ describe('Live Preview', () => {
       hasText: exactText('Live Preview'),
     })
 
-    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: 45000 })
+    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
     const href = await livePreviewTab.locator('a').first().getAttribute('href')
     const docURL = page.url()
     const pathname = new URL(docURL).pathname
 
-    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({ timeout: 45000 })
+    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 
   test('collection - has route', async () => {
@@ -71,7 +74,9 @@ describe('Live Preview', () => {
     const url = page.url()
     await goToCollectionPreview(page)
 
-    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({ timeout: 45000 })
+    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 
   test('collection - renders iframe', async () => {
@@ -90,13 +95,13 @@ describe('Live Preview', () => {
 
     // Forces the test to wait for the nextjs route to render before we try editing a field
     await expect(() => expect(frame.locator('#page-title')).toBeVisible()).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     await field.fill(titleValue)
 
     await expect(() => expect(frame.locator('#page-title')).toHaveText(titleValue)).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     await saveDocAndAssert(page)
@@ -123,17 +128,21 @@ describe('Live Preview', () => {
       hasText: exactText('Live Preview'),
     })
 
-    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: 45000 })
+    await expect(() => expect(livePreviewTab).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     const href = await livePreviewTab.locator('a').first().getAttribute('href')
 
-    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({ timeout: 45000 })
+    await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 
   test('global - has route', async () => {
     const url = page.url()
     await goToGlobalPreview(page, 'header')
 
-    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({ timeout: 45000 })
+    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 
   test('global - renders iframe', async () => {
@@ -160,7 +169,9 @@ describe('Live Preview', () => {
 
     await goToCollectionPreview(page)
 
-    await expect(() => expect(page.url()).toContain('/preview')).toPass({ timeout: 45000 })
+    await expect(() => expect(page.url()).toContain('/preview')).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
 
     const iframe = page.locator('iframe')
 
@@ -172,10 +183,10 @@ describe('Live Preview', () => {
 
     const widthInput = page.locator('.live-preview-toolbar input[name="live-preview-width"]')
 
-    await expect(() => expect(widthInput).toBeTruthy()).toPass({ timeout: 45000 })
+    await expect(() => expect(widthInput).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     const heightInput = page.locator('.live-preview-toolbar input[name="live-preview-height"]')
 
-    await expect(() => expect(heightInput).toBeTruthy()).toPass({ timeout: 45000 })
+    await expect(() => expect(heightInput).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
     const widthInputValue = await widthInput.getAttribute('value')
     const width = parseInt(widthInputValue)
@@ -186,19 +197,19 @@ describe('Live Preview', () => {
     const tolerance = 2
 
     await expect(() => expect(iframeWidthInPx).toBeLessThanOrEqual(width + tolerance)).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     await expect(() => expect(iframeWidthInPx).toBeGreaterThanOrEqual(width - tolerance)).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     await expect(() => expect(iframeHeightInPx).toBeLessThanOrEqual(height + tolerance)).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     await expect(() => expect(iframeHeightInPx).toBeGreaterThanOrEqual(height - tolerance)).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
   })
 
@@ -211,7 +222,7 @@ describe('Live Preview', () => {
     await goToCollectionPreview(page)
 
     await expect(() => expect(page.url()).toContain('/preview')).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     // Check that the breakpoint select is present
@@ -220,7 +231,7 @@ describe('Live Preview', () => {
     )
 
     await expect(() => expect(breakpointSelector).toBeTruthy()).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     // Select the mobile breakpoint
@@ -241,7 +252,7 @@ describe('Live Preview', () => {
     const iframe = page.locator('iframe')
 
     await expect(() => expect(iframe).toBeTruthy()).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
     const iframeSize = await iframe.boundingBox()
     const iframeWidthInPx = iframeSize?.width
@@ -251,49 +262,49 @@ describe('Live Preview', () => {
     await expect(() =>
       expect(iframeWidthInPx).toBeLessThanOrEqual(mobileBreakpoint.width + tolerance),
     ).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     await expect(() =>
       expect(iframeWidthInPx).toBeGreaterThanOrEqual(mobileBreakpoint.width - tolerance),
     ).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     await expect(() =>
       expect(iframeHeightInPx).toBeLessThanOrEqual(mobileBreakpoint.height + tolerance),
     ).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     await expect(() =>
       expect(iframeHeightInPx).toBeGreaterThanOrEqual(mobileBreakpoint.height - tolerance),
     ).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
 
     // Check that the inputs have been updated to reflect the new size
     const widthInput = page.locator('.live-preview-toolbar input[name="live-preview-width"]')
 
     await expect(() => expect(widthInput).toBeTruthy()).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
     const heightInput = page.locator('.live-preview-toolbar input[name="live-preview-height"]')
 
     await expect(() => expect(heightInput).toBeTruthy()).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
     const widthInputValue = await widthInput.getAttribute('value')
     const width = parseInt(widthInputValue)
 
     await expect(() => expect(width).toBe(mobileBreakpoint.width)).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
     const heightInputValue = await heightInput.getAttribute('value')
     const height = parseInt(heightInputValue)
 
     await expect(() => expect(height).toBe(mobileBreakpoint.height)).toPass({
-      timeout: 45000,
+      timeout: POLL_TOPASS_TIMEOUT,
     })
   })
 })

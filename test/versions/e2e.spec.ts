@@ -70,7 +70,7 @@ const waitForAutoSaveToComplete = async (page: Page) => {
       page.locator('.autosave:has-text("Last saved less than a minute ago")'),
     ).toBeVisible()
   }).toPass({
-    timeout: 45000,
+    timeout: POLL_TOPASS_TIMEOUT,
   })
 }
 
@@ -78,7 +78,7 @@ const waitForAutoSaveToRunAndComplete = async (page: Page) => {
   await expect(async () => {
     await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
   }).toPass({
-    timeout: 45000,
+    timeout: POLL_TOPASS_TIMEOUT,
   })
 
   await waitForAutoSaveToComplete(page)
