@@ -161,11 +161,10 @@ export const Condition: React.FC<Props> = (props) => {
                 options: valueOptions,
                 relationTo:
                   internalField?.props?.type === 'relationship' &&
-                  'components' in internalField.props
-                    ? (
-                        (internalField?.props?.components as any)?.Cell
-                          ?.props as RelationshipFieldProps
-                      )?.relationTo
+                  'cellProps' in internalField.props &&
+                  typeof internalField.props.cellProps === 'object' &&
+                  'relationTo' in internalField.props.cellProps
+                    ? internalField.props.cellProps?.relationTo
                     : undefined,
                 value: internalQueryValue ?? '',
               }}

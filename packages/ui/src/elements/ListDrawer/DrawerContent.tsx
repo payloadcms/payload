@@ -10,7 +10,6 @@ import type { ListDrawerProps } from './types.js'
 
 import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import usePayloadAPI from '../../hooks/usePayloadAPI.js'
-import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { X } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useComponentMap } from '../../providers/ComponentMap/index.js'
@@ -55,7 +54,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
-  const { getPreference, setPreference } = usePreferences()
+  const { setPreference } = usePreferences()
   const { closeModal, isModalOpen } = useModal()
   const [limit, setLimit] = useState<number>()
   const [sort, setSort] = useState<string>(null)
@@ -96,8 +95,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   )
 
   // const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig))
-
-  const titleField = useUseTitleField(selectedCollectionConfig)
 
   useEffect(() => {
     // setFields(formatFields(selectedCollectionConfig))
@@ -141,7 +138,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
 
   useEffect(() => {
-    const { slug, admin: { listSearchableFields } = {}, versions } = selectedCollectionConfig
+    const {
+      slug,
+      admin: { listSearchableFields, useAsTitle } = {},
+      versions,
+    } = selectedCollectionConfig
     const params: {
       cacheBust?: number
       draft?: string
@@ -160,7 +161,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     }
 
     if (search) {
-      const searchAsConditions = (listSearchableFields || [titleField?.name]).map((fieldName) => {
+      const searchAsConditions = (listSearchableFields || [useAsTitle]).map((fieldName) => {
         return {
           [fieldName]: {
             like: search,
@@ -184,18 +185,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     if (versions?.drafts) params.draft = 'true'
 
     setParams(params)
-  }, [
-    page,
-    sort,
-    where,
-    search,
-    cacheBust,
-    filterOptions,
-    selectedCollectionConfig,
-    t,
-    setParams,
-    titleField?.name,
-  ])
+  }, [page, sort, where, search, cacheBust, filterOptions, selectedCollectionConfig, t, setParams])
 
   useEffect(() => {
     const newPreferences = {
@@ -282,7 +272,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       collectionSlug={selectedCollectionConfig.slug}
       hasCreatePermission={hasCreatePermission}
       newDocumentURL={null}
-      titleField={titleField}
     >
       <ListQueryProvider
         data={data}
