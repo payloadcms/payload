@@ -800,7 +800,7 @@ describe('admin', () => {
           hasText: exactText('ID'),
         })
 
-        const id = await page.locator('.cell-id').first().innerText()
+        const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
         const buttonClasses = await idButton.getAttribute('class')
 
@@ -837,7 +837,7 @@ describe('admin', () => {
       })
 
       test('should reset filter value and operator on field update', async () => {
-        const id = await page.locator('.cell-id').first().innerText()
+        const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
