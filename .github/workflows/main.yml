@@ -246,7 +246,7 @@ jobs:
         suite:
           - _community
           - access-control
-          # - admin
+          - admin
           - auth
           - field-error-states
           - fields-relationship

@@ -39,7 +39,15 @@ export type {
 } from './../collections/config/types.js'
 
 export type { ClientConfig } from './../config/client.js'
-export type { Access, AccessArgs, EditViewComponent, SanitizedConfig } from './../config/types.js'
+export type {
+  Access,
+  AccessArgs,
+  EditViewComponent,
+  EntityDescription,
+  EntityDescriptionComponent,
+  EntityDescriptionFunction,
+  SanitizedConfig,
+} from './../config/types.js'
 export type { ClientFieldConfig } from './../fields/config/client.js'
 export type {
   ArrayField,
