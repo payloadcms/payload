@@ -1885,10 +1885,10 @@ describe('fields', () => {
         .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
       await expect(page.locator('.file-field .file-field__filename')).toHaveValue('payload.jpg')
       await page.locator('#action-save').click()
-      await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
     }
 
+    // eslint-disable-next-line playwright/expect-expect
     test('should upload files', async () => {
       await uploadImage()
     })
@@ -1910,7 +1910,6 @@ describe('fields', () => {
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
         .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
       await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
-      await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
 
       // Assert that the media field has the png upload
@@ -1924,9 +1923,7 @@ describe('fields', () => {
         'src',
         '/api/uploads/file/payload-1.png',
       )
-      await page.locator('#action-save').click()
-      await wait(200)
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await saveDocAndAssert(page)
     })
 
     test('should clear selected upload', async () => {
@@ -1936,7 +1933,6 @@ describe('fields', () => {
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
         .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
       await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
-      await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
       await page.locator('.field-type.upload .file-details__remove').click()
     })
@@ -1947,7 +1943,9 @@ describe('fields', () => {
       await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click()
       await wait(200)
       const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')
-      expect(await jpgImages.count()).toEqual(0)
+      await expect
+        .poll(async () => await jpgImages.count(), { timeout: POLL_TOPASS_TIMEOUT })
+        .toEqual(0)
     })
 
     test.skip('should show drawer for input field when enableRichText is false', async () => {
