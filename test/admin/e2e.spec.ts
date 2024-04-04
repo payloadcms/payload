@@ -679,8 +679,7 @@ describe('admin', () => {
 
       await createPost({ title: 'post1' })
       await createPost({ title: 'post2' })
-      await page.goto(postsUrl.list)
-      await page.waitForURL(postsUrl.list)
+      await page.reload()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
     })
 
@@ -1191,6 +1190,8 @@ describe('admin', () => {
       })
 
       test('should delete many', async () => {
+        await page.goto(postsUrl.list)
+        await page.waitForURL(postsUrl.list)
         // delete should not appear without selection
         await expect(page.locator('#confirm-delete')).toHaveCount(0)
         // select one row
