@@ -1,8 +1,11 @@
 import { eq } from 'drizzle-orm'
 import { numeric, timestamp, varchar } from 'drizzle-orm/pg-core'
+import { createRequire } from 'module'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from '../types.js'
+
+const require = createRequire(import.meta.url)
 
 /**
  * Pushes the development schema to the database using Drizzle.
@@ -11,9 +14,7 @@ import type { PostgresAdapter } from '../types.js'
  * @returns {Promise<void>} - A promise that resolves once the schema push is complete.
  */
 export const pushDevSchema = async (db: PostgresAdapter) => {
-  const { pushSchema } = require
-    ? require('drizzle-kit/payload')
-    : await import('drizzle-kit/payload')
+  const { pushSchema } = require('drizzle-kit/payload')
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
