@@ -37,7 +37,7 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
-  const { Header, collectionSlug, hasCreatePermission, newDocumentURL, titleField } = useListInfo()
+  const { Header, collectionSlug, hasCreatePermission, newDocumentURL } = useListInfo()
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
 
@@ -114,11 +114,7 @@ export const DefaultListView: React.FC = () => {
               </Fragment>
             )}
           </header>
-          <ListControls
-            collectionConfig={collectionConfig}
-            fieldMap={fieldMap}
-            titleField={titleField}
-          />
+          <ListControls collectionConfig={collectionConfig} fieldMap={fieldMap} />
           {BeforeListTable}
           {!data.docs && (
             <StaggeredShimmers

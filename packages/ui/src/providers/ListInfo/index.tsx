@@ -21,7 +21,6 @@ export type ListInfoContext = {
   collectionSlug: string
   hasCreatePermission: boolean
   newDocumentURL: string
-  titleField?: FieldAffectingData
 }
 
 const Context = createContext({} as ListInfoContext)
