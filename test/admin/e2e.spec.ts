@@ -87,8 +87,8 @@ describe('admin', () => {
     })
   })
 
-  describe('Nav', () => {
-    test('should nav to collection - nav', async () => {
+  describe('navigation', () => {
+    test('nav — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
       await openNav(page)
@@ -98,7 +98,7 @@ describe('admin', () => {
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
 
-    test('should nav to a global - nav', async () => {
+    test('nav — should navigate to a global', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
       await openNav(page)
@@ -108,7 +108,7 @@ describe('admin', () => {
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
 
-    test('should navigate to collection - card', async () => {
+    test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
       const anchor = page.locator(`#card-${postsCollectionSlug} a.card__click`)
@@ -117,7 +117,7 @@ describe('admin', () => {
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
 
-    test('should collapse and expand collection groups', async () => {
+    test('nav — should collapse and expand collection groups', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
       await openNav(page)
@@ -135,7 +135,7 @@ describe('admin', () => {
       await expect(link).toBeVisible()
     })
 
-    test('should collapse and expand globals groups', async () => {
+    test('nav — should collapse and expand globals groups', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
 
@@ -152,7 +152,7 @@ describe('admin', () => {
       await expect(link).toBeVisible()
     })
 
-    test('should save nav group collapse preferences', async () => {
+    test('nav — should save group collapse preferences', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
       await openNav(page)
@@ -161,13 +161,13 @@ describe('admin', () => {
       await expect(link).toBeHidden()
     })
 
-    test('breadcrumbs - from list to dashboard', async () => {
+    test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
       await page.locator('.step-nav a[href="/admin"]').click()
       expect(page.url()).toContain(postsUrl.admin)
     })
 
-    test('breadcrumbs - from document to collection', async () => {
+    test('breadcrumbs — should navigate from document to collection', async () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
       const collectionBreadcrumb = page.locator(
@@ -177,32 +177,40 @@ describe('admin', () => {
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
       expect(page.url()).toContain(postsUrl.list)
     })
+  })
 
-    test('should not show hidden collections and globals', async () => {
+  describe('hidden entities', () => {
+    test('nav — should not show hidden collections and globals', async () => {
       await page.goto(postsUrl.admin)
-
       // nav menu
       await expect(page.locator('#nav-hidden-collection')).toBeHidden()
       await expect(page.locator('#nav-hidden-global')).toBeHidden()
+    })
 
+    test('dashboard — should not show hidden collections and globals', async () => {
+      await page.goto(postsUrl.admin)
       // dashboard
       await expect(page.locator('#card-hidden-collection')).toBeHidden()
       await expect(page.locator('#card-hidden-global')).toBeHidden()
+    })
 
+    test('routing — should 404 on hidden collections and globals', async () => {
       // routing
       await page.goto(postsUrl.collection('hidden-collection'))
       await expect(page.locator('.not-found')).toContainText('Nothing found')
       await page.goto(postsUrl.global('hidden-global'))
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
+  })
 
-    test('should render custom view', async () => {
+  describe('custom views', () => {
+    test('root — should render custom view', async () => {
       await page.goto(`${serverURL}/admin${customViewPath}`)
       await page.waitForURL(`**/admin${customViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('should render custom nested view', async () => {
+    test('root — should render custom nested view', async () => {
       await page.goto(`${serverURL}/admin${customNestedViewPath}`)
       const pageURL = page.url()
       const pathname = new URL(pageURL).pathname
@@ -221,7 +229,7 @@ describe('admin', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customTabViewTitle)
     })
 
-    test('collection - should render custom nested tab view', async () => {
+    test('collection — should render custom nested tab view', async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -236,7 +244,7 @@ describe('admin', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
     })
 
-    test('collection - should render custom tab label', async () => {
+    test('collection — should render custom tab label', async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -248,7 +256,7 @@ describe('admin', () => {
       await expect(editTab).toContainText(customEditLabel)
     })
 
-    test('collection - should render custom tab component', async () => {
+    test('collection — should render custom tab component', async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -258,13 +266,13 @@ describe('admin', () => {
       await expect(customTab).toBeVisible()
     })
 
-    test('collection - should not show API tab when disabled in config', async () => {
+    test('collection — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.collection(noApiViewCollectionSlug))
       await page.locator('.collection-list .table a').click()
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
-    test('collection - should not enable API route when disabled in config', async () => {
+    test('collection — should not enable API route when disabled in config', async () => {
       const collectionItems = await payload.find({
         collection: noApiViewCollectionSlug,
         limit: 1,
@@ -276,25 +284,25 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
 
-    test('collection - sidebar fields should respond to permission', async () => {
+    test('collection — sidebar fields should respond to permission', async () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
 
       await expect(page.locator('#field-sidebarField')).toBeDisabled()
     })
 
-    test('global - should not show API tab when disabled in config', async () => {
+    test('global — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.global(noApiViewGlobalSlug))
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
-    test('global - should not enable API route when disabled in config', async () => {
+    test('global — should not enable API route when disabled in config', async () => {
       await page.goto(`${postsUrl.global(noApiViewGlobalSlug)}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
   })
 
-  describe('app-header', () => {
+  describe('header actions', () => {
     test('should show admin level action in admin panel', async () => {
       await page.goto(postsUrl.admin)
       // Check if the element with the class .admin-button exists
@@ -350,8 +358,8 @@ describe('admin', () => {
     })
   })
 
-  describe('ui', () => {
-    test('collection - should render preview button when `admin.preview` is set', async () => {
+  describe('preview button', () => {
+    test('collection — should render preview button when `admin.preview` is set', async () => {
       const collectionWithPreview = new AdminUrlUtil(serverURL, postsCollectionSlug)
       await page.goto(collectionWithPreview.create)
       await page.locator('#field-title').fill(title)
@@ -359,7 +367,7 @@ describe('admin', () => {
       await expect(page.locator('.btn.preview-btn')).toBeVisible()
     })
 
-    test('collection - should not render preview button when `admin.preview` is not set', async () => {
+    test('collection — should not render preview button when `admin.preview` is not set', async () => {
       const collectionWithoutPreview = new AdminUrlUtil(serverURL, group1Collection1Slug)
       await page.goto(collectionWithoutPreview.create)
       await page.locator('#field-title').fill(title)
@@ -367,13 +375,13 @@ describe('admin', () => {
       await expect(page.locator('.btn.preview-btn')).toBeHidden()
     })
 
-    test('global - should render preview button when `admin.preview` is set', async () => {
+    test('global — should render preview button when `admin.preview` is set', async () => {
       const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
       await page.goto(globalWithPreview.global(globalSlug))
       await expect(page.locator('.btn.preview-btn')).toBeVisible()
     })
 
-    test('global - should not render preview button when `admin.preview` is not set', async () => {
+    test('global — should not render preview button when `admin.preview` is not set', async () => {
       const globalWithoutPreview = new AdminUrlUtil(serverURL, group1GlobalSlug)
       await page.goto(globalWithoutPreview.global(group1GlobalSlug))
       await page.locator('#field-title').fill(title)
@@ -382,8 +390,8 @@ describe('admin', () => {
     })
   })
 
-  describe('doc titles', () => {
-    test('collection - should render fallback titles when creating new', async () => {
+  describe('document titles', () => {
+    test('collection — should render fallback titles when creating new', async () => {
       await page.goto(postsUrl.create)
       await checkPageTitle(page, '[Untitled]')
       await checkBreadcrumb(page, 'Create New')
@@ -391,7 +399,7 @@ describe('admin', () => {
       expect(true).toBe(true)
     })
 
-    test('collection - should render `useAsTitle` field', async () => {
+    test('collection — should render `useAsTitle` field', async () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
@@ -401,7 +409,7 @@ describe('admin', () => {
       expect(true).toBe(true)
     })
 
-    test('collection - should render `id` as `useAsTitle` fallback', async () => {
+    test('collection — should render `id` as `useAsTitle` fallback', async () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
       await page.locator('#field-title')?.fill('')
@@ -409,7 +417,7 @@ describe('admin', () => {
       await saveDocAndAssert(page)
     })
 
-    test('global - should render custom, localized label', async () => {
+    test('global — should render custom, localized label', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
       await openNav(page)
@@ -421,7 +429,7 @@ describe('admin', () => {
       await checkBreadcrumb(page, label)
     })
 
-    test('global - should render simple label strings', async () => {
+    test('global — should render simple label strings', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
       await openNav(page)
@@ -434,7 +442,7 @@ describe('admin', () => {
       await saveDocAndAssert(page)
     })
 
-    test('global - should render slug in sentence case as fallback', async () => {
+    test('global — should render slug in sentence case as fallback', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
       await openNav(page)
@@ -564,8 +572,8 @@ describe('admin', () => {
     })
   })
 
-  describe('Custom IDs', () => {
-    test('should allow custom ID field nested inside an unnamed tab', async () => {
+  describe('custom IDs', () => {
+    test('unnamed tab — should allow custom ID field', async () => {
       await page.goto(postsUrl.collection('customIdTab') + '/' + customIdCollectionId)
 
       const idField = page.locator('#field-id')
@@ -573,7 +581,7 @@ describe('admin', () => {
       await expect(idField).toHaveValue(customIdCollectionId)
     })
 
-    test('should allow custom ID field nested inside a row', async () => {
+    test('row — should allow custom ID field', async () => {
       await page.goto(postsUrl.collection('customIdRow') + '/' + customIdCollectionId)
 
       const idField = page.locator('#field-id')
@@ -649,7 +657,7 @@ describe('admin', () => {
     })
   })
 
-  describe('Custom CSS', () => {
+  describe('custom CSS', () => {
     test('should see custom css in admin UI', async () => {
       await page.goto(postsUrl.admin)
       await page.waitForURL(postsUrl.admin)
@@ -689,7 +697,7 @@ describe('admin', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
-      test('search by id with listSearchableFields', async () => {
+      test('should search by id with listSearchableFields', async () => {
         const { id } = await createPost()
         const url = `${postsUrl.list}?limit=10&page=1&search=${id}`
         await page.goto(url)
@@ -698,7 +706,7 @@ describe('admin', () => {
         await expect(tableItems).toHaveCount(1)
       })
 
-      test('search by id without listSearchableFields', async () => {
+      test('should search by id without listSearchableFields', async () => {
         const { id } = await createGeo()
         const url = `${geoUrl.list}?limit=10&page=1&search=${id}`
         await page.goto(url)
@@ -707,7 +715,7 @@ describe('admin', () => {
         await expect(tableItems).toHaveCount(1)
       })
 
-      test('search by title or description', async () => {
+      test('should search by title or description', async () => {
         await createPost({
           description: 'this is fun',
           title: 'find me',
@@ -720,7 +728,7 @@ describe('admin', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
-      test('toggle columns', async () => {
+      test('should toggle columns', async () => {
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
 
@@ -754,7 +762,7 @@ describe('admin', () => {
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
       })
 
-      test('2nd cell is a link', async () => {
+      test('should link second cell', async () => {
         const { id } = await createPost()
         const linkCell = page.locator(`${tableRowLocator} td`).nth(1).locator('a')
         await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`)
@@ -778,7 +786,7 @@ describe('admin', () => {
         await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`)
       })
 
-      test('filter rows', async () => {
+      test('should filter rows', async () => {
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
 
@@ -827,7 +835,7 @@ describe('admin', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(2)
       })
 
-      test('resets filter value and operator on field update', async () => {
+      test('should reset filter value and operator on field update', async () => {
         const id = await page.locator('.cell-id').first().innerText()
 
         // open the column controls
@@ -1300,7 +1308,7 @@ describe('admin', () => {
     })
   })
 
-  describe('Field descriptions', () => {
+  describe('field descriptions', () => {
     test('should render static field description', async () => {
       await page.goto(postsUrl.create)
       await expect(page.locator('.field-description-descriptionAsString')).toContainText(
