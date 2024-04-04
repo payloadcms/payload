@@ -6,6 +6,12 @@
   "types": "./src/index.ts",
   "license": "MIT",
   "type": "module",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-cloud"
+  },
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build",
