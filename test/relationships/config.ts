@@ -37,6 +37,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 }
 
 export const slug = 'posts'
+export const slugWithLocalizedRel = 'postsLocalized'
 export const relationSlug = 'relation'
 export const defaultAccessRelSlug = 'strict-access'
 export const chainedRelSlug = 'chained'
@@ -46,6 +47,10 @@ export const polymorphicRelationshipsSlug = 'polymorphic-relationships'
 export const treeSlug = 'tree'
 
 export default buildConfigWithDefaults({
+  localization: {
+    locales: ['en', 'de'],
+    defaultLocale: 'en',
+  },
   collections: [
     {
       slug,
@@ -105,6 +110,23 @@ export default buildConfigWithDefaults({
               not_equals: true,
             },
           },
+        },
+      ],
+    },
+    {
+      slug: slugWithLocalizedRel,
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        // Relationship
+        {
+          name: 'relationField',
+          type: 'relationship',
+          relationTo: relationSlug,
+          localized: true,
         },
       ],
     },
@@ -273,6 +295,13 @@ export default buildConfigWithDefaults({
       collection: relationSlug,
       data: {
         name: 'name',
+      },
+    })
+
+    const rel2 = await payload.create({
+      collection: relationSlug,
+      data: {
+        name: 'another name',
       },
     })
 
