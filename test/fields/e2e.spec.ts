@@ -1906,9 +1906,13 @@ describe('fields', () => {
       await uploadImage()
       // Open the media drawer and create a png upload
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
+      await wait(500) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
         .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
+      await expect(
+        page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+      ).toHaveValue('payload.png')
       await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
 
@@ -1929,9 +1933,14 @@ describe('fields', () => {
     test('should clear selected upload', async () => {
       await uploadImage()
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
+      await wait(500) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
+
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
         .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
+      await expect(
+        page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+      ).toHaveValue('payload.png')
       await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
       await page.locator('.field-type.upload .file-details__remove').click()
@@ -1941,7 +1950,8 @@ describe('fields', () => {
       await uploadImage()
 
       await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click()
-      await wait(200)
+      await wait(500) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
+
       const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')
       await expect
         .poll(async () => await jpgImages.count(), { timeout: POLL_TOPASS_TIMEOUT })
