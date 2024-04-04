@@ -6,6 +6,7 @@ import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
+import pMap from 'p-map'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
@@ -25,15 +26,19 @@ const packageWhitelist = [
   'db-postgres',
   'richtext-slate',
   'richtext-lexical',
+
+  'create-payload-app',
+
+  // Plugins
   'plugin-cloud',
   'plugin-cloud-storage',
   'plugin-form-builder',
   'plugin-nested-docs',
   'plugin-redirects',
   'plugin-search',
-  // 'plugin-sentry',
   'plugin-seo',
   // 'plugin-stripe',
+  // 'plugin-sentry',
 ]
 
 const filename = fileURLToPath(import.meta.url)
@@ -127,7 +132,7 @@ async function main() {
     `${packageDetails.map((p) => `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}`).join('\n')}\n`,
   )
 
-  const confirmPublish = await confirm('Are you sure your want to create these versions?')
+  const confirmPublish = await confirm('Are you sure you want to create these versions?')
 
   if (!confirmPublish) {
     abort()
@@ -205,8 +210,9 @@ async function main() {
   }
 
   // Publish
-  const results: { name: string; success: boolean; details?: string }[] = await Promise.all(
-    packageDetails.map(async (pkg) => {
+  const results: { name: string; success: boolean; details?: string }[] = await pMap(
+    packageDetails,
+    async (pkg) => {
       try {
         console.log(logPrefix, chalk.bold(`🚀 ${pkg.name} publishing...`))
         const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
@@ -232,11 +238,11 @@ async function main() {
         console.error(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: ${error.message}\n\n`))
         return { name: pkg.name, success: false }
       }
-    }),
+    },
+    { concurrency: 5 },
   )
 
-  console.log(chalk.bold.green(`\n\nResults:\n\n`))
-  console.log(results.map(({ name, success }) => `  ${success ? '✅' : '❌'} ${name}`).join('\n'))
+  console.log(chalk.bold.green(`\n\nResults:\n`))
 
   // New results format
   console.log(
@@ -248,7 +254,7 @@ async function main() {
         }
         return summary
       })
-      .join('\n'),
+      .join('\n') + '\n',
   )
 
   // TODO: Push commit and tag

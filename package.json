@@ -131,6 +131,7 @@
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
     "open": "^10.1.0",
+    "p-map": "^7.0.2",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
     "playwright": "^1.42.1",
@@ -153,7 +154,7 @@
     "tempy": "^1.0.1",
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
-    "turbo": "^1.13.0",
+    "turbo": "^1.13.2",
     "typescript": "5.4.2",
     "uuid": "^9.0.1",
     "yocto-queue": "^1.0.0"
