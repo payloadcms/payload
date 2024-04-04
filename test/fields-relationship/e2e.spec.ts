@@ -396,6 +396,8 @@ describe('fields - relationship', () => {
     )
     await button.click()
 
+    await wait(500)
+
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
   })
