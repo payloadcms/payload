@@ -91,7 +91,7 @@ export const traverseFields = ({
             config: field,
             locales: true,
             parentTableName: currentTableName,
-            prefix: `${currentTableName}_`,
+            prefix: `${currentTableName}_${path}`,
           })
 
           if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales

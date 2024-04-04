@@ -295,6 +295,7 @@ export const buildTable = ({
         const formattedRelationTo = getTableName({
           adapter,
           config: relationshipConfig,
+          throwValidationError: true,
         })
         let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
         const relatedCollectionCustomID = relationshipConfig.fields.find(
@@ -343,6 +344,7 @@ export const buildTable = ({
           const relatedTableName = getTableName({
             adapter,
             config: adapter.payload.collections[relationTo].config,
+            throwValidationError: true,
           })
           const idColumnName = `${relationTo}ID`
           result[idColumnName] = one(adapter.tables[relatedTableName], {

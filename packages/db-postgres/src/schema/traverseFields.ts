@@ -90,6 +90,7 @@ export const traverseFields = ({
   rootTableName,
   versions,
 }: Args): Result => {
+  const throwValidationError = true
   let hasLocalizedField = false
   let hasLocalizedRelationshipField = false
   let hasManyTextField: 'index' | boolean = false
@@ -226,6 +227,7 @@ export const traverseFields = ({
           parentTableName: newTableName,
           prefix: `enum_${newTableName}_`,
           target: 'enumName',
+          throwValidationError,
           versions,
         })
 
@@ -246,6 +248,7 @@ export const traverseFields = ({
             config: field,
             parentTableName: newTableName,
             prefix: `${newTableName}_`,
+            throwValidationError,
             versions,
           })
           const baseColumns: Record<string, PgColumnBuilder> = {
@@ -318,6 +321,7 @@ export const traverseFields = ({
           config: field,
           parentTableName: newTableName,
           prefix: `${newTableName}_`,
+          throwValidationError,
         })
         const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),
@@ -403,6 +407,7 @@ export const traverseFields = ({
             config: block,
             parentTableName: rootTableName,
             prefix: `${rootTableName}_blocks_`,
+            throwValidationError,
           })
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {

@@ -1,5 +1,6 @@
 import type { DBIdentifierName } from 'payload/database'
 
+import { APIError } from 'payload/errors'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types'
@@ -23,6 +24,7 @@ type Args = {
   relationships?: boolean
   /** For tables based on fields that could have both enumName and dbName (ie: select with hasMany), default: 'dbName' */
   target?: 'dbName' | 'enumName'
+  throwValidationError?: boolean
   /** Adds the versions suffix, should only be used on the base collection to duplicate suffixing */
   versions?: boolean
 }
@@ -40,6 +42,7 @@ export const getTableName = ({
   prefix = '',
   relationships = false,
   target = 'dbName',
+  throwValidationError = false,
   versions = false,
 }: Args): string => {
   let result: string
@@ -59,9 +62,13 @@ export const getTableName = ({
   if (versions) result = `_${result}${adapter.versionsSuffix}`
   if (relationships) result = `${result}${adapter.relationshipsSuffix}`
 
+  if (!throwValidationError) {
+    return result
+  }
+
   if (result.length > 63) {
-    throw new Error(
-      `Exceeded max identifier length for table or enum name of 63 characters. Invalid ${target}: ${result}`,
+    throw new APIError(
+      `Exceeded max identifier length for table or enum name of 63 characters. Invalid name: ${result}`,
     )
   }
   return result
