@@ -35,10 +35,6 @@
     "lint": "eslint \"src/**/*.ts\"",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "pretest": "pnpm build",
-    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.js",
-    "release:major": "release-it major",
-    "release:minor": "release-it minor",
-    "release:patch": "release-it patch",
     "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts"
   },
   "dependencies": {
@@ -75,7 +71,6 @@
   "devDependencies": {
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/eslint-config": "workspace:*",
-    "@release-it/conventional-changelog": "8.0.1",
     "@types/asap": "2.0.0",
     "@types/body-parser": "1.19.2",
     "@types/compression": "1.7.2",
@@ -113,7 +108,6 @@
     "object.assign": "4.1.4",
     "object.entries": "1.1.6",
     "passport-strategy": "1.0.0",
-    "release-it": "17.1.1",
     "rimraf": "3.0.2",
     "serve-static": "1.15.0",
     "sharp": "0.32.6",
@@ -185,7 +179,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/payloadcms/payload.git"
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/payload"
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"

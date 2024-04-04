@@ -2,7 +2,11 @@
   "name": "@payloadcms/plugin-seo",
   "version": "3.0.0-alpha.49",
   "homepage:": "https://payloadcms.com",
-  "repository": "git@github.com:payloadcms/plugin-seo.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-seo"
+  },
   "description": "SEO plugin for Payload",
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",

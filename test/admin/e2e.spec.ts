@@ -11,6 +11,7 @@ import type { Config } from './payload-types.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
+  ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   openDocControls,
@@ -85,6 +86,8 @@ describe('admin', () => {
       serverURL,
       snapshotKey: 'adminTests',
     })
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   describe('navigation', () => {

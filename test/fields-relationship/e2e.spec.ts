@@ -14,9 +14,16 @@ import type {
   RelationWithTitle,
 } from './payload-types.js'
 
-import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers.js'
+import {
+  delayNetwork,
+  ensureAutoLoginAndCompilationIsDone,
+  initPageConsoleErrorCatch,
+  openDocControls,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   relationFalseFilterOptionSlug,
   relationOneSlug,
@@ -123,6 +130,8 @@ describe('fields - relationship', () => {
         relationshipWithTitle: relationWithTitle.id,
       },
     })) as any
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('should create relationship', async () => {

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
@@ -33,6 +33,8 @@ test.describe('Form Builder', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test.describe('Forms collection', () => {

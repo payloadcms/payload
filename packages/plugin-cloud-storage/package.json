@@ -6,6 +6,12 @@
   "types": "./src/index.ts",
   "type": "module",
   "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-cloud-storage"
+  },
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types && tsx ../../scripts/exportPointerFiles.ts ../packages/plugin-cloud-storage dist/exports",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
