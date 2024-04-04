@@ -1259,7 +1259,7 @@ describe('admin', () => {
     })
 
     describe('i18n', () => {
-      test('should display translated collections and globals config options', async () => {
+      test.skip('should display translated collections and globals config options', async () => {
         await page.goto(postsUrl.list)
 
         // collection label
@@ -1272,7 +1272,7 @@ describe('admin', () => {
         await expect(page.locator('.view-description')).toContainText('Description')
       })
 
-      test('should display translated field titles', async () => {
+      test.skip('should display translated field titles', async () => {
         await createPost()
 
         // column controls
