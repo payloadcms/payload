@@ -1,6 +1,7 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { collectionDefaults } from 'payload/config'
+import { isNumber } from 'payload/utilities'
 import React from 'react'
 
 import { Chevron } from '../../icons/Chevron/index.js'
@@ -13,6 +14,7 @@ const baseClass = 'per-page'
 const defaultLimits = collectionDefaults.admin.pagination.limits
 
 export type PerPageProps = {
+  defaultLimit?: number
   handleChange?: (limit: number) => void
   limit: number
   limits: number[]
@@ -20,18 +22,21 @@ export type PerPageProps = {
 }
 
 export const PerPage: React.FC<PerPageProps> = ({
+  defaultLimit = 10,
   handleChange,
   limit,
   limits = defaultLimits,
 }) => {
   const { t } = useTranslation()
 
+  const limitToUse = isNumber(limit) ? limit : defaultLimit
+
   return (
     <div className={baseClass}>
       <Popup
         button={
           <div className={`${baseClass}__base-button`}>
-            <span>{t('general:perPage', { limit })}</span>
+            <span>{t('general:perPage', { limit: limitToUse })}</span>
             &nbsp;
             <Chevron className={`${baseClass}__icon`} />
           </div>
@@ -43,7 +48,7 @@ export const PerPage: React.FC<PerPageProps> = ({
               <PopupList.Button
                 className={[
                   `${baseClass}__button`,
-                  limitNumber === Number(limit) && `${baseClass}__button-active`,
+                  limitNumber === limitToUse && `${baseClass}__button-active`,
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -53,7 +58,7 @@ export const PerPage: React.FC<PerPageProps> = ({
                   if (handleChange) handleChange(limitNumber)
                 }}
               >
-                {limitNumber === Number(limit) && (
+                {limitNumber === limitToUse && (
                   <div className={`${baseClass}__chevron`}>
                     <Chevron direction="right" />
                   </div>

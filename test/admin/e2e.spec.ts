@@ -410,6 +410,8 @@ describe('admin', () => {
     })
 
     test('global - should render custom, localized label', async () => {
+      await page.goto(postsUrl.admin)
+      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const label = 'My Global Label'
       const globalLabel = page.locator(`#nav-global-global`)
@@ -420,6 +422,8 @@ describe('admin', () => {
     })
 
     test('global - should render simple label strings', async () => {
+      await page.goto(postsUrl.admin)
+      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const label = 'Group Globals 1'
       const globalLabel = page.locator(`#nav-global-group-globals-one`)
@@ -431,6 +435,8 @@ describe('admin', () => {
     })
 
     test('global - should render slug in sentence case as fallback', async () => {
+      await page.goto(postsUrl.admin)
+      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const label = 'Group Globals Two'
       const globalLabel = page.locator(`#nav-global-group-globals-two`)
@@ -1133,9 +1139,9 @@ describe('admin', () => {
         // delete all posts created by the seed
         await deleteAllPosts()
 
-        await mapAsync([...Array(3)], async () => {
-          await createPost()
-        })
+        await createPost()
+        await createPost()
+        await createPost()
       })
 
       test('should select multiple rows', async () => {
