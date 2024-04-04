@@ -117,7 +117,10 @@ export const mapFields = (args: {
           null
 
         const labelProps: LabelProps = {
-          label: 'label' in field && !isReactComponent(field.label) ? field.label : undefined,
+          label:
+            'label' in field && !isPlainFunction(field.label) && !isReactComponent(field.label)
+              ? field.label
+              : undefined,
           required: 'required' in field ? field.required : undefined,
         }
 
@@ -232,7 +235,7 @@ export const mapFields = (args: {
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
-              label: field?.label || undefined,
+              label: field?.label,
               labels: field.labels,
               maxRows: field.maxRows,
               minRows: field.minRows,
@@ -272,7 +275,7 @@ export const mapFields = (args: {
               blocks,
               className: field.admin?.className,
               disabled: field.admin?.disabled,
-              label: field?.label || undefined,
+              label: field?.label,
               labels: field.labels,
               maxRows: field.maxRows,
               minRows: field.minRows,
@@ -328,7 +331,7 @@ export const mapFields = (args: {
           case 'collapsible': {
             let CustomCollapsibleLabel: React.ReactNode
 
-            if (isReactComponent(field.label)) {
+            if (isReactComponent(field.label) || isPlainFunction(field.label)) {
               const CustomCollapsibleLabelComponent = field.label as RowLabelComponent
               CustomCollapsibleLabel = <CustomCollapsibleLabelComponent />
             }
