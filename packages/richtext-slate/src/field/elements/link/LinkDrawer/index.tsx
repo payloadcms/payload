@@ -53,7 +53,13 @@ export const LinkDrawer: React.FC<Props> = ({
 
   return (
     <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
-      <Form initialState={initialState} onChange={[onChange]} onSubmit={handleModalSubmit}>
+      <Form
+        beforeSubmit={[onChange]}
+        disableValidationOnSubmit
+        initialState={initialState}
+        onChange={[onChange]}
+        onSubmit={handleModalSubmit}
+      >
         <RenderFields fieldMap={fieldMap} forceRender path="" readOnly={false} schemaPath="" />
         <LinkSubmit />
       </Form>

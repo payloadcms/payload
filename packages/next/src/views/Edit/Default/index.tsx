@@ -182,6 +182,7 @@ export const DefaultEditView: React.FC = () => {
         <Form
           action={action}
           className={`${baseClass}__form`}
+          disableValidationOnSubmit
           disabled={!hasSavePermission}
           initialState={initialState}
           method={id ? 'PATCH' : 'POST'}

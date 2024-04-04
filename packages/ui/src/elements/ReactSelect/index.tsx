@@ -45,6 +45,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     noOptionsMessage,
     numberOnly = false,
     onChange,
+    onMenuClose,
     onMenuOpen,
     options,
     placeholder = t('general:selectValue'),
@@ -84,6 +85,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         menuPlacement="auto"
         noOptionsMessage={noOptionsMessage}
         onChange={onChange}
+        onMenuClose={onMenuClose}
         onMenuOpen={onMenuOpen}
         options={options}
         value={value}
@@ -155,6 +157,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       onChange={onChange}
       onInputChange={(newValue) => setInputValue(newValue)}
       onKeyDown={handleKeyDown}
+      onMenuClose={onMenuClose}
       onMenuOpen={onMenuOpen}
       options={options}
       value={value}

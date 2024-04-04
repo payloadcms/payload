@@ -225,7 +225,7 @@ describe('uploads', () => {
     // save the document and expect an error
     await page.locator('button#action-save').click()
     await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
-      'Please correct invalid fields.',
+      'The following field is invalid: audio',
     )
   })
 

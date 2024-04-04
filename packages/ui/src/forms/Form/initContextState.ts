@@ -41,6 +41,7 @@ export const initContextState: Context = {
   replaceFieldRow: () => undefined,
   replaceState: () => undefined,
   reset,
+  setDisabled: () => undefined,
   setModified,
   setProcessing,
   setSubmitted,
