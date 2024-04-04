@@ -429,7 +429,7 @@ export default buildConfigWithDefaults({
     for (let i = 0; i < 15; i++) {
       const relationOneID = relationOneIDs[Math.floor(Math.random() * 10)]
       const relationTwoID = relationTwoIDs[Math.floor(Math.random() * 10)]
-      const a = await payload.create({
+      await payload.create({
         collection: slug,
         depth: 0,
         overrideAccess: true,
@@ -441,7 +441,6 @@ export default buildConfigWithDefaults({
           relationshipRestricted: restrictedDocId,
         },
       })
-      console.log('aa', a)
     }
 
     for (let i = 0; i < 15; i++) {
