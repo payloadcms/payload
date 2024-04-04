@@ -20,7 +20,7 @@ describe('Live Preview', () => {
 
   const goToDoc = async (page: Page) => {
     await page.goto(url.list)
-    const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
+    const linkToDoc = page.locator('tbody tr:first-child .cell-id a').first()
 
     await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: 45000 })
     const linkDocHref = await linkToDoc.getAttribute('href')
@@ -50,7 +50,7 @@ describe('Live Preview', () => {
     initPageConsoleErrorCatch(page)
   })
 
-  test('collection - has tab', async () => {
+  test('collection — has tab', async () => {
     await goToDoc(page)
 
     const livePreviewTab = page.locator('.doc-tab', {
@@ -66,7 +66,7 @@ describe('Live Preview', () => {
     await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({ timeout: 45000 })
   })
 
-  test('collection - has route', async () => {
+  test('collection — has route', async () => {
     await goToDoc(page)
     const url = page.url()
     await goToCollectionPreview(page)
@@ -74,13 +74,13 @@ describe('Live Preview', () => {
     await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({ timeout: 45000 })
   })
 
-  test('collection - renders iframe', async () => {
+  test('collection — renders iframe', async () => {
     await goToCollectionPreview(page)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
   })
 
-  test('collection - can edit fields and can preview updated value', async () => {
+  test('collection — can edit fields and can preview updated value', async () => {
     await goToCollectionPreview(page)
     const titleValue = 'Title 1'
     const field = page.locator('#field-title')
@@ -102,17 +102,17 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
-  test('collection - should show live-preview view level action in live-preview view', async () => {
+  test('collection — should show live-preview view level action in live-preview view', async () => {
     await goToCollectionPreview(page)
     await expect(page.locator('.app-header .collection-live-preview-button')).toHaveCount(1)
   })
 
-  test('global - should show live-preview view level action in live-preview view', async () => {
+  test('global — should show live-preview view level action in live-preview view', async () => {
     await goToGlobalPreview(page, 'footer')
     await expect(page.locator('.app-header .global-live-preview-button')).toHaveCount(1)
   })
 
-  test('global - has tab', async () => {
+  test('global — has tab', async () => {
     const global = new AdminUrlUtil(serverURL, 'header')
     await page.goto(global.global('header'))
 
@@ -129,20 +129,20 @@ describe('Live Preview', () => {
     await expect(() => expect(href).toBe(`${pathname}/preview`)).toPass({ timeout: 45000 })
   })
 
-  test('global - has route', async () => {
+  test('global — has route', async () => {
     const url = page.url()
     await goToGlobalPreview(page, 'header')
 
     await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({ timeout: 45000 })
   })
 
-  test('global - renders iframe', async () => {
+  test('global — renders iframe', async () => {
     await goToGlobalPreview(page, 'header')
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
   })
 
-  test('global - can edit fields', async () => {
+  test('global — can edit fields', async () => {
     await goToGlobalPreview(page, 'header')
     const field = page.locator('input#field-navItems__0__link__newTab') //field-navItems__0__link__newTab
     await expect(field).toBeVisible()
