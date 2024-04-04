@@ -1,12 +1,12 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { RelationshipField, TextField } from './payload-types.js'
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config, RelationshipField, TextField } from './payload-types.js'
 
 import {
   exactText,
@@ -15,13 +15,13 @@ import {
   saveDocHotkeyAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInit.js'
 import { RESTClient } from '../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { textDoc } from './collections/Text/shared.js'
-import { clearAndSeedEverything } from './seed.js'
 import {
   collapsibleFieldsSlug,
   pointFieldsSlug,
@@ -34,7 +34,7 @@ const dirname = path.dirname(filename)
 
 const { beforeAll, beforeEach, describe } = test
 
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let page: Page
 let serverURL: string
@@ -43,14 +43,19 @@ let serverURL: string
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
-    await clearAndSeedEverything(payload)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsTest',
+      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    })
+
     if (client) {
       await client.logout()
     }
@@ -262,7 +267,7 @@ describe('fields', () => {
       })
 
       await page.goto(url.create)
-      await page.waitForURL(`**/${url.create}`)
+      await page.waitForURL(url.create)
 
       await page.locator('#field-text').fill('test')
       await page.locator('#field-uniqueText').fill(uniqueText)
@@ -952,6 +957,8 @@ describe('fields', () => {
 
       await page.goto(url.create)
 
+      await wait(300)
+
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
       await page.locator('#field-numberInRow').fill(numberInRowValue)
@@ -1020,6 +1027,7 @@ describe('fields', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
       await page.goto(url.list)
+      await page.waitForURL(url.list)
       await page.locator('.row-1 .cell-title a').click()
     }
 
@@ -1057,6 +1065,7 @@ describe('fields', () => {
         await editLinkModal.locator('#field-url').fill('')
         await wait(200)
         await editLinkModal.locator('button[type="submit"]').click()
+        await wait(400)
         const errorField = page.locator(
           '[id^=drawer_1_rich-text-link-] .render-fields > :nth-child(3)',
         )
@@ -1075,11 +1084,12 @@ describe('fields', () => {
         await expect(editLinkModal).toBeVisible()
 
         // Fill values and click Confirm
-        await editLinkModal.locator('#field-text').fill('link text')
+        await editLinkModal.locator('.drawer__content #field-text').fill('link text')
         await editLinkModal.locator('label[for="field-linkType-custom"]').click()
         await editLinkModal.locator('#field-url').fill('https://payloadcms.com')
-        await wait(200)
+        await wait(2000)
         await editLinkModal.locator('button[type="submit"]').click()
+        await wait(400)
         await saveDocAndAssert(page)
 
         // Remove link from editor body
