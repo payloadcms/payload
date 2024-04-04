@@ -352,7 +352,7 @@ jobs:
           yarn build
           yarn generate:types
   process-and-upload:
-    needs: test
+    needs: changes
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
@@ -398,6 +398,6 @@ jobs:
             if [ -f "$file" ]; then
               base=$(basename "$file" .zip)
               # This URL is hypothetical and would need to be adjusted based on your actual artifact upload URL
-              echo "https://trace.playwright.dev/?trace=https://github.com/<your-repo>/actions/runs/${{ github.run_id }}/artifacts/${base}"
+              echo "https://trace.playwright.dev/?trace=https://github.com/payloadcms/payload/actions/runs/${{ github.run_id }}/artifacts/${base}"
             fi
           done
