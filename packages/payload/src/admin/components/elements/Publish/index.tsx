@@ -14,6 +14,11 @@ export type CustomPublishButtonType = React.ComponentType<
     DefaultButton: React.ComponentType<DefaultPublishButtonProps>
   }
 >
+/**
+ * @deprecated Use `CustomPublishButtonType` instead - renamed from `CustomPublishButtonProps`
+ */
+export type CustomPublishButtonProps = CustomPublishButtonType
+
 export type DefaultPublishButtonProps = {
   canPublish: boolean
   disabled: boolean
