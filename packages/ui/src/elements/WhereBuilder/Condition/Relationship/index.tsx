@@ -269,6 +269,10 @@ export const RelationshipField: React.FC<Props> = (props) => {
           isMulti={hasMany}
           isSortable={isSortable}
           onChange={(selected) => {
+            if (!selected) {
+              onChange(null)
+              return
+            }
             if (hasMany) {
               onChange(
                 selected
