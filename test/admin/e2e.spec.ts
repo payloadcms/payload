@@ -1210,6 +1210,12 @@ describe('admin', () => {
 
     describe('pagination', () => {
       test('should paginate', async () => {
+        await deleteAllPosts()
+        await mapAsync([...Array(11)], async () => {
+          await createPost()
+        })
+        await page.reload()
+
         const pageInfo = page.locator('.collection-list__page-info')
         const perPage = page.locator('.per-page')
         const paginator = page.locator('.paginator')
@@ -1221,10 +1227,10 @@ describe('admin', () => {
 
         // Forward one page and back using numbers
         await paginator.locator('button').nth(1).click()
-        expect(page.url()).toContain('page=2')
+        await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=2')
         await expect(tableItems).toHaveCount(1)
         await paginator.locator('button').nth(0).click()
-        expect(page.url()).toContain('page=1')
+        await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('page=1')
         await expect(tableItems).toHaveCount(10)
       })
     })
