@@ -23,7 +23,6 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   relationFalseFilterOptionSlug,
   relationOneSlug,
@@ -519,7 +518,7 @@ describe('fields - relationship', () => {
   })
 
   describe('externally update relationship field', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       const externalRelationURL = new AdminUrlUtil(serverURL, relationUpdatedExternallySlug)
       await page.goto(externalRelationURL.create)
     })
