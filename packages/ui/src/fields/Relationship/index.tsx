@@ -378,7 +378,11 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
-    if (hasLoadedFirstPageRef.current && menuIsOpen) {
+    // If the menu is open while filterOptions changes
+    // due to latency of getFormState and fast clicking into this field,
+    // re-fetch options
+
+    if (hasLoadedFirstPageRef.current && menuIsOpen.current) {
       setIsLoading(true)
       void getResults({
         lastLoadedPage: {},
@@ -390,11 +394,24 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
       })
     }
 
+    // If the menu is not open, still reset the field state
+    // because we need to get new options next time the menu
+    // opens by the user
+
     dispatchOptions({ type: 'CLEAR' })
     setLastFullyLoadedRelation(-1)
     setLastLoadedPage({})
     hasLoadedFirstPageRef.current = false
-  }, [relationTo, filterOptions, locale, menuIsOpen, getResults, valueRef, hasLoadedFirstPageRef])
+  }, [
+    relationTo,
+    filterOptions,
+    locale,
+    menuIsOpen,
+    getResults,
+    valueRef,
+    hasLoadedFirstPageRef,
+    path,
+  ])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {

@@ -244,8 +244,10 @@ describe('fields - relationship', () => {
 
     // fill the first relation field
     const field = page.locator('#field-relationship')
+
     await field.click({ delay: 100 })
     const options = page.locator('.rs__option')
+
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
 
@@ -262,18 +264,21 @@ describe('fields - relationship', () => {
     await options.nth(1).click()
     await expect(field).toContainText(anotherRelationOneDoc.id)
 
+    // Need to wait form state to come back
+    // before clicking save
+    await wait(2000)
+
     // Now, save the document. This should fail, as the filitered field doesn't match the selected relationship value
     await page.locator('#action-save').click()
     await expect(page.locator('.Toastify')).toContainText(`is invalid: ${fieldName}`)
 
-    // TODO: Playwright is not passing because of a race condition
-    // that is difficult to pinpoint.
-    // Need to revisit this
-
     // then verify that the filtered field's options match
     filteredField = page.locator(`#field-${fieldName} .react-select`)
+
     await filteredField.click({ delay: 100 })
+
     filteredOptions = filteredField.locator('.rs__option')
+
     await expect(filteredOptions).toHaveCount(2) // two options because the currently selected option is still there
     await filteredOptions.nth(1).click()
     await expect(filteredField).toContainText(anotherRelationOneDoc.id)
@@ -283,12 +288,12 @@ describe('fields - relationship', () => {
   }
 
   // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
-  test.skip('should allow dynamic filterOptions', async () => {
+  test('should allow dynamic filterOptions', async () => {
     await runFilterOptionsTest('relationshipFiltered')
   })
 
   // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
-  test.skip('should allow dynamic async filterOptions', async () => {
+  test('should allow dynamic async filterOptions', async () => {
     await runFilterOptionsTest('relationshipFilteredAsync')
   })
 

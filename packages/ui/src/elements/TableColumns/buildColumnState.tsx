@@ -92,9 +92,16 @@ export const buildColumnState = (args: Args): Column[] => {
         <DefaultCell {...field.cellComponentProps} />
       )
 
+    const CustomLabelToRender =
+      field &&
+      'CustomLabel' in field.fieldComponentProps &&
+      field.fieldComponentProps.CustomLabel !== undefined
+        ? field.fieldComponentProps.CustomLabel
+        : undefined
+
     const Label = (
       <FieldLabel
-        CustomLabel={field.fieldComponentProps.CustomLabel}
+        CustomLabel={CustomLabelToRender}
         {...field.fieldComponentProps.labelProps}
         unstyled
       />
