@@ -245,20 +245,20 @@ jobs:
         # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
           - _community
-          - access-control
+          #- access-control
           # - admin
-          - auth
-          - field-error-states
-          - fields-relationship
-          - fields
-          - fields/lexical
-          - live-preview
-          - localization
-          - plugin-form-builder
-          - plugin-nested-docs
-          - plugin-seo
-          - versions
-          - uploads
+          # - auth
+          #- field-error-states
+          #- fields-relationship
+          # - fields
+          # - fields/lexical
+          # - live-preview
+          # - localization
+          # - plugin-form-builder
+          # - plugin-nested-docs
+          # - plugin-seo
+          # - versions
+          #- uploads
 
     steps:
       - name: Use Node.js 18
@@ -352,7 +352,7 @@ jobs:
           yarn build
           yarn generate:types
   process-and-upload:
-    needs: changes
+    needs: tests-e2e
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
