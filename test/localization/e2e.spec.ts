@@ -15,7 +15,7 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   englishTitle,
@@ -51,7 +51,7 @@ let serverURL: string
 
 describe('Localization', () => {
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
