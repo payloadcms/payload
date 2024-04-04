@@ -95,7 +95,7 @@ export const getTableColumnFromPath = ({
       field: {
         name: 'id',
         type: adapter.idType === 'uuid' ? 'text' : 'number',
-      } as TextField | NumberField,
+      } as NumberField | TextField,
       table: adapter.tables[newTableName],
     }
   }
@@ -359,14 +359,32 @@ export const getTableColumnFromPath = ({
           aliasRelationshipTableName,
         )
 
-        // Join in the relationships table
-        joinAliases.push({
-          condition: and(
-            eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
-            like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
-          ),
-          table: aliasRelationshipTable,
-        })
+        if (locale && field.localized && adapter.payload.config.localization) {
+          joinAliases.push({
+            condition: and(
+              eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+              eq(aliasRelationshipTable.locale, locale),
+              like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
+            ),
+            table: aliasRelationshipTable,
+          })
+          if (locale !== 'all') {
+            constraints.push({
+              columnName: 'locale',
+              table: aliasRelationshipTable,
+              value: locale,
+            })
+          }
+        } else {
+          // Join in the relationships table
+          joinAliases.push({
+            condition: and(
+              eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+              like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
+            ),
+            table: aliasRelationshipTable,
+          })
+        }
 
         selectFields[`${relationTableName}.path`] = aliasRelationshipTable.path
 

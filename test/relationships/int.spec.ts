@@ -9,6 +9,7 @@ import type {
   Post,
   Relation,
 } from './payload-types'
+import type { PostsLocalized } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
@@ -21,6 +22,7 @@ import config, {
   defaultAccessRelSlug,
   relationSlug,
   slug,
+  slugWithLocalizedRel,
   treeSlug,
 } from './config'
 
@@ -407,6 +409,85 @@ describe('Relationships', () => {
           expect(doc?.maxDepthRelation).not.toHaveProperty('name')
           // should not affect other fields
           expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name })
+        })
+      })
+
+      describe('with localization', () => {
+        let relation1: Relation
+        let relation2: Relation
+        let localizedPost1: PostsLocalized
+        let localizedPost2: PostsLocalized
+
+        beforeAll(async () => {
+          relation1 = await payload.create<Relation>({
+            collection: relationSlug,
+            data: {
+              name: 'english',
+            },
+          })
+
+          relation2 = await payload.create<Relation>({
+            collection: relationSlug,
+            data: {
+              name: 'german',
+            },
+          })
+
+          localizedPost1 = await payload.create<'postsLocalized'>({
+            collection: slugWithLocalizedRel,
+            data: {
+              title: 'english',
+              relationField: relation1.id,
+            },
+            locale: 'en',
+          })
+
+          await payload.update({
+            id: localizedPost1.id,
+            collection: slugWithLocalizedRel,
+            locale: 'de',
+            data: {
+              relationField: relation2.id,
+            },
+          })
+
+          localizedPost2 = await payload.create({
+            collection: slugWithLocalizedRel,
+            data: {
+              title: 'german',
+              relationField: relation2.id,
+            },
+            locale: 'de',
+          })
+        })
+        it('should find two docs for german locale', async () => {
+          const { docs } = await payload.find<PostsLocalized>({
+            collection: slugWithLocalizedRel,
+            locale: 'de',
+            where: {
+              relationField: {
+                equals: relation2.id,
+              },
+            },
+          })
+
+          const mappedIds = docs.map((doc) => doc?.id)
+          expect(mappedIds).toContain(localizedPost1.id)
+          expect(mappedIds).toContain(localizedPost2.id)
+        })
+
+        it("shouldn't find a relationship query outside of the specified locale", async () => {
+          const { docs } = await payload.find<PostsLocalized>({
+            collection: slugWithLocalizedRel,
+            locale: 'en',
+            where: {
+              relationField: {
+                equals: relation2.id,
+              },
+            },
+          })
+
+          expect(docs.map((doc) => doc?.id)).not.toContain(localizedPost2.id)
         })
       })
     })
