@@ -36,6 +36,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
         generatedTypes: {
           modifyOutputSchema: ({
             collectionIDFieldTypes,
+            config,
             currentSchema,
             field,
             interfaceNameDefinitions,
@@ -46,14 +47,14 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
             }
 
             // sanitize blocks
-            const validRelationships = payload.config.collections.map((c) => c.slug) || []
+            const validRelationships = config?.collections?.map((c) => c.slug) || []
 
             const sanitizedBlocks = props.blocks.map((block) => {
               const blockCopy = cloneDeep(block)
               return {
                 ...blockCopy,
                 fields: sanitizeFields({
-                  config: payload.config,
+                  config,
                   fields: blockCopy.fields,
                   validRelationships,
                 }),
@@ -73,6 +74,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
               [blocksField],
               interfaceNameDefinitions,
               payload,
+              config,
             )
 
             return currentSchema

@@ -1,4 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
+import type { SanitizedConfig } from 'payload/config'
 
 import type { PayloadRequest } from '../../../../../express/types'
 import type { RequestContext } from '../../../../../express/types'
@@ -30,12 +31,14 @@ type RichTextAdapterBase<
   }) => Promise<void> | null
   outputSchema?: ({
     collectionIDFieldTypes,
+    config,
     field,
     interfaceNameDefinitions,
     isRequired,
     payload,
   }: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+    config?: SanitizedConfig
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
     /**
      * Allows you to define new top-level interfaces that can be re-used in the output schema.
