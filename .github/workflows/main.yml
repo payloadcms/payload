@@ -123,25 +123,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
           - _community
-          #- access-control
-          # - admin
-          # - auth
-          #- field-error-states
-          #- fields-relationship
-          # - fields
-          # - fields/lexical
-          # - live-preview
-          # - localization
-          # - plugin-form-builder
-          # - plugin-nested-docs
-          # - plugin-seo
-          # - versions
-          #- uploads
-
-
+          # Add other suites as needed
     steps:
       - name: Use Node.js 18
         uses: actions/setup-node@v4
@@ -174,23 +158,23 @@ jobs:
           retention-days: 1
 
       - name: Process and Upload Trace Files
-        if: always() # Ensures this runs regardless of the outcome of the preceding steps
         run: |
-          TRACE_FOLDER_PATH="test/test-results/test-results-_community/trace.zip"
+          TRACE_FOLDER_PATH="test/test-results/test-results-${{ matrix.suite }}/trace.zip"
           if [ -f "$TRACE_FOLDER_PATH" ]; then
-            # Assuming trace.zip needs to be moved
-            cp "$TRACE_FOLDER_PATH" "./test-results-_community-trace.zip"
-
-            echo "Uploading trace artifact for _community"
-            # Placeholder for actions/upload-artifact usage
+            cp "$TRACE_FOLDER_PATH" "./${{ matrix.suite }}-trace.zip"
+            echo "Uploading trace artifact for ${{ matrix.suite }}"
           else
-            echo "No trace file found for _community"
+            echo "No trace file found for ${{ matrix.suite }}"
+          fi
         shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.suite }}-trace
+          path: ./${{ matrix.suite }}-trace.zip
 
       - name: Display Playwright Trace Viewer URL
         if: always()
         run: |
-          TRACE_ARTIFACT_URL="https://github.com/<your-repo>/actions/runs/${{ github.run_id }}/artifacts/${{ matrix.suite }}-trace.zip" # Adjust URL pattern as needed
-          echo "Playwright Trace Viewer URL for ${{ matrix.suite }}: https://trace.playwright.dev/?trace=${TRACE_ARTIFACT_URL}"
+          echo "Trace Viewer URL for ${{ matrix.suite }} might be accessible through the artifacts on the Actions page of your repository."
