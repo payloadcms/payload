@@ -122,19 +122,13 @@ jobs:
       - name: Process and Upload Trace Files
         if: always()
         run: |
-          # Log all files in the test dir
-          ls -la test
-
           # Log all files in the test/test-results directory
           ls -la test/test-results
-          # Unzip the main archive
-          echo "Unzipping test-results-${{ matrix.suite }}.zip"
-          unzip "test/test-results/test-results-${{ matrix.suite }}.zip" -d unzipped-results
-          echo "Unzipped test-results-${{ matrix.suite }}.zip"
 
           # Loop through each folder in the unzipped directory
-          for folder in unzipped-results/*; do
+          for folder in test/test-results/*; do
             if [ -d "$folder" ]; then
+              echo "Processing $folder"
               # Assuming trace.zip is directly inside each folder
               TRACE_PATH="$folder/trace.zip"
               if [ -f "$TRACE_PATH" ]; then
@@ -145,6 +139,7 @@ jobs:
                 # Now upload the renamed trace.zip as an artifact
                 echo "Uploading trace artifact for $FOLDER_NAME"
                 gh artifact upload "./${FOLDER_NAME}-trace.zip"
+                echo "Uploaded trace artifact for $FOLDER_NAME"
               else
                 echo "No trace file found in $folder"
               fi
