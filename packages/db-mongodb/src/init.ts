@@ -5,11 +5,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import mongoose from 'mongoose'
 import paginate from 'mongoose-paginate-v2'
-import {
-  buildVersionCollectionFields,
-  buildVersionGlobalFields,
-  getVersionsModelName,
-} from 'payload/versions'
+import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 
 import type { MongooseAdapter } from './index.js'
 import type { CollectionModel } from './types.js'
@@ -18,13 +14,14 @@ import buildCollectionSchema from './models/buildCollectionSchema.js'
 import { buildGlobalModel } from './models/buildGlobalModel.js'
 import buildSchema from './models/buildSchema.js'
 import getBuildQueryPlugin from './queries/buildQuery.js'
+import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schema = buildCollectionSchema(collection, this.payload.config)
 
     if (collection.versions) {
-      const versionModelName = getVersionsModelName(collection)
+      const versionModelName = getDBName({ config: collection, versions: true })
 
       const versionCollectionFields = buildVersionCollectionFields(collection)
 
@@ -54,7 +51,7 @@ export const init: Init = function init(this: MongooseAdapter) {
     }
 
     const model = mongoose.model(
-      collection.slug,
+      getDBName({ config: collection }),
       schema,
       this.autoPluralization === true ? undefined : collection.slug,
     ) as CollectionModel
@@ -72,7 +69,7 @@ export const init: Init = function init(this: MongooseAdapter) {
 
   this.payload.config.globals.forEach((global) => {
     if (global.versions) {
-      const versionModelName = getVersionsModelName(global)
+      const versionModelName = getDBName({ config: global, versions: true })
 
       const versionGlobalFields = buildVersionGlobalFields(global)
 
