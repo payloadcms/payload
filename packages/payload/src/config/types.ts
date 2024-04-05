@@ -63,8 +63,9 @@ export type LivePreviewConfig = {
    */
   url?:
     | ((args: {
+        collectionConfig?: SanitizedCollectionConfig
         data: Record<string, any>
-        documentInfo: any // TODO: remove or populate this
+        globalConfig?: SanitizedGlobalConfig
         locale: Locale
       }) => Promise<string> | string)
     | string

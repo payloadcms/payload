@@ -1,4 +1,9 @@
-export const formatLivePreviewURL = async ({ data, documentInfo }) => {
+import type { LivePreviewConfig } from 'payload/config'
+
+export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
+  data,
+  collectionConfig,
+}) => {
   let baseURL = 'http://localhost:3000/live-preview'
 
   // You can run async requests here, if needed
@@ -21,6 +26,6 @@ export const formatLivePreviewURL = async ({ data, documentInfo }) => {
   // I.e. append '/posts' to the URL if the document is a post
   // You can also do this on individual collection or global config, if preferred
   return `${baseURL}${
-    documentInfo?.slug && documentInfo.slug !== 'pages' ? `/${documentInfo.slug}` : ''
+    collectionConfig && collectionConfig.slug !== 'pages' ? `/${collectionConfig.slug}` : ''
   }${data?.slug && data.slug !== 'home' ? `/${data.slug}` : ''}`
 }
