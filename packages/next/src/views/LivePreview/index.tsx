@@ -1,6 +1,7 @@
 import type { LivePreviewConfig } from 'payload/config'
 import type { EditViewComponent, TypeWithID } from 'payload/types'
 
+import { notFound } from 'next/navigation.js'
 import React from 'react'
 
 import { LivePreviewClient } from './index.client.js'
@@ -25,23 +26,27 @@ export const LivePreviewView: EditViewComponent = async (props) => {
 
   let data: TypeWithID
 
-  if (collectionConfig) {
-    data = await initPageResult.req.payload.findByID({
-      id: docID,
-      collection: collectionConfig.slug,
-      depth: 0,
-      draft: true,
-      fallbackLocale: null,
-    })
-  }
+  try {
+    if (collectionConfig) {
+      data = await initPageResult.req.payload.findByID({
+        id: docID,
+        collection: collectionConfig.slug,
+        depth: 0,
+        draft: true,
+        fallbackLocale: null,
+      })
+    }
 
-  if (globalConfig) {
-    data = await initPageResult.req.payload.findGlobal({
-      slug: globalConfig.slug,
-      depth: 0,
-      draft: true,
-      fallbackLocale: null,
-    })
+    if (globalConfig) {
+      data = await initPageResult.req.payload.findGlobal({
+        slug: globalConfig.slug,
+        depth: 0,
+        draft: true,
+        fallbackLocale: null,
+      })
+    }
+  } catch (error) {
+    notFound()
   }
 
   let livePreviewConfig: LivePreviewConfig = topLevelLivePreviewConfig
@@ -77,6 +82,7 @@ export const LivePreviewView: EditViewComponent = async (props) => {
           data,
           globalConfig,
           locale,
+          payload: initPageResult.req.payload,
         })
       : livePreviewConfig?.url
 

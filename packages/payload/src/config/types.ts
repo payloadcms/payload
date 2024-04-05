@@ -67,6 +67,7 @@ export type LivePreviewConfig = {
         data: Record<string, any>
         globalConfig?: SanitizedGlobalConfig
         locale: Locale
+        payload: Payload
       }) => Promise<string> | string)
     | string
 }
