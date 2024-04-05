@@ -160,6 +160,7 @@ export function fieldsToJSONSchema(
                 field,
                 interfaceNameDefinitions,
                 isRequired,
+                payload,
               })
             } else {
               // Maintain backwards compatibility with existing rich text editors
