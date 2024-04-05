@@ -35,91 +35,8 @@ jobs:
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
-  core-build:
-    needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
-      - run: pnpm run build:core
-
-      - name: Cache build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-  plugins-build:
-    needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
-      - run: pnpm run build:plugins
-
   tests-e2e:
     runs-on: ubuntu-latest
-    needs: core-build
     strategy:
       fail-fast: false
       matrix:
@@ -159,8 +76,15 @@ jobs:
 
       - name: Process and Upload Trace Files
         run: |
+          # Log all files in the test dir
+          ls -la test
+
+          # Log all files in the test/test-results directory
+          ls -la test/test-results
           # Unzip the main archive
+          echo "Unzipping test-results-${{ matrix.suite }}.zip"
           unzip "test/test-results/test-results-${{ matrix.suite }}.zip" -d unzipped-results
+          echo "Unzipped test-results-${{ matrix.suite }}.zip"
 
           # Loop through each folder in the unzipped directory
           for folder in unzipped-results/*; do

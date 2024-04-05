@@ -22,14 +22,9 @@ test.describe('Admin Panel', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('example test', async () => {
-    await page.goto(url.list)
-
-    const textCell = page.locator('.row-1 .cell-text')
-    await expect(textCell).toHaveText('example post')
     await expect(true).toBe(false)
   })
 })
