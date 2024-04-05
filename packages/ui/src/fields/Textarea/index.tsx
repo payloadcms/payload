@@ -36,6 +36,7 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
     minLength,
     path: pathFromProps,
     placeholder,
+    readOnly: readOnlyFromProps,
     required,
     rows,
     rtl,
@@ -63,9 +64,10 @@ const TextareaField: React.FC<TextareaFieldProps> = (props) => {
     [validate, required, maxLength, minLength],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, readOnly, setValue, showError, value } = useField<string>({
+  const { path, setValue, showError, value } = useField<string>({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })

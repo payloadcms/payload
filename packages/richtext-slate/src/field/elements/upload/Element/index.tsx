@@ -80,7 +80,7 @@ const UploadElement: React.FC<Props & { enabledCollectionSlugs?: string[] }> = (
     { initialParams },
   )
 
-  const thumbnailSRC = data?.thumbnailURL
+  const thumbnailSRC = data?.thumbnailURL || data?.url
 
   const removeUpload = useCallback(() => {
     const elementPath = ReactEditor.findPath(editor, element)

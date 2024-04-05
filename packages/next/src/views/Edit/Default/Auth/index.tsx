@@ -106,43 +106,42 @@ export const Auth: React.FC<Props> = (props) => {
                 required
               />
               <ConfirmPassword disabled={readOnly} />
-              {!requirePassword && (
-                <Button
-                  buttonStyle="secondary"
-                  disabled={readOnly}
-                  onClick={() => handleChangePassword(false)}
-                  size="small"
-                >
-                  {t('general:cancel')}
-                </Button>
-              )}
             </div>
           )}
-          {((!changingPassword && !requirePassword) || operation === 'update') && (
-            <div className={`${baseClass}__controls`}>
-              {!changingPassword && !requirePassword && (
-                <Button
-                  buttonStyle="secondary"
-                  disabled={readOnly}
-                  id="change-password"
-                  onClick={() => handleChangePassword(true)}
-                  size="small"
-                >
-                  {t('authentication:changePassword')}
-                </Button>
-              )}
-              {operation === 'update' && (
-                <Button
-                  buttonStyle="secondary"
-                  disabled={readOnly}
-                  onClick={() => unlock()}
-                  size="small"
-                >
-                  {t('authentication:forceUnlock')}
-                </Button>
-              )}
-            </div>
-          )}
+
+          <div className={`${baseClass}__controls`}>
+            {changingPassword && !requirePassword && (
+              <Button
+                buttonStyle="secondary"
+                disabled={readOnly}
+                onClick={() => handleChangePassword(false)}
+                size="small"
+              >
+                {t('general:cancel')}
+              </Button>
+            )}
+            {!changingPassword && !requirePassword && (
+              <Button
+                buttonStyle="secondary"
+                disabled={readOnly}
+                id="change-password"
+                onClick={() => handleChangePassword(true)}
+                size="small"
+              >
+                {t('authentication:changePassword')}
+              </Button>
+            )}
+            {operation === 'update' && (
+              <Button
+                buttonStyle="secondary"
+                disabled={readOnly}
+                onClick={() => unlock()}
+                size="small"
+              >
+                {t('authentication:forceUnlock')}
+              </Button>
+            )}
+          </div>
         </React.Fragment>
       )}
       {useAPIKey && (
