@@ -55,14 +55,16 @@ const Select: React.FC<
 
   if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
 
+  const options = 'options' in field.fieldComponentProps && field.fieldComponentProps.options
+
   const comparisonToRender =
     typeof comparison !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(comparison, field.options, field.hasMany), i18n)
+      ? getTranslatedOptions(getOptionsToRender(comparison, options, field.hasMany), i18n)
       : placeholder
 
   const versionToRender =
     typeof version !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(version, field.options, field.hasMany), i18n)
+      ? getTranslatedOptions(getOptionsToRender(version, options, field.hasMany), i18n)
       : placeholder
 
   return (
