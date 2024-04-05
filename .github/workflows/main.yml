@@ -122,29 +122,30 @@ jobs:
       - name: Process and Upload Trace Files
         if: always()
         run: |
-          mkdir -p renamed-traces
           count=0
           for folder in test/test-results/*; do
           if [ -d "$folder" ] && [ -f "$folder/trace.zip" ]; then
            ((count++))
            if [ "$count" -le 5 ]; then
              test_name=$(basename "$folder")
+
+             echo "Processing $test_name"
+
              new_trace_name="trace-${{ matrix.suite }}-$count.zip"
-             cp "$folder/trace.zip" "renamed-traces/$new_trace_name"
+             cp "$folder/trace.zip" "$new_trace_name"
              echo "$test_name: $new_trace_name" >> map.txt
            else
              break
            fi
           fi
           done
-          zip -r "renamed-traces-${{ matrix.suite }}.zip" renamed-traces
           cat map.txt
         shell: bash
 
       - uses: actions/upload-artifact@v4
         with:
           name: trace-${{ matrix.suite }}-1
-          path: renamed-traces/trace-${{ matrix.suite }}-1.zip
+          path: trace-${{ matrix.suite }}-1.zip
 
       - name: Display Mapped Names and Links
         run: |
