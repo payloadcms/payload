@@ -37,6 +37,7 @@ export const blockPopulationPromiseHOC = (
       block.fields = sanitizeFields({
         config: payloadConfig,
         fields: block.fields,
+        requireFieldLevelRichTextEditor: true,
         validRelationships,
       })
     })

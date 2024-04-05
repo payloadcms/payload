@@ -79,6 +79,7 @@ export const getGenerateComponentMap =
               const sanitizedFields = sanitizeFields({
                 config,
                 fields: cloneDeep(fields),
+                requireFieldLevelRichTextEditor: true,
                 validRelationships,
               })
 

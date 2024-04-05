@@ -25,7 +25,7 @@ export type GeneratedTypes<T extends BaseTypes> = {
 export type FetchOptions = {
   args?: Record<string, unknown>
   jwt?: string
-  method: 'create' | 'delete' | 'find' | 'update'
+  method: 'create' | 'delete' | 'find' | 'sendEmail' | 'update'
   reduceJSON?: <R>(json: any) => R
 }
 

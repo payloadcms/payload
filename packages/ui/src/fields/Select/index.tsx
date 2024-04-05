@@ -62,7 +62,7 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
     onChange: onChangeFromProps,
     options: optionsFromProps = [],
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     style,
     validate,
@@ -81,7 +81,8 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
     [validate, required, hasMany, options],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
