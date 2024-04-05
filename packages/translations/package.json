@@ -33,6 +33,8 @@
   },
   "publishConfig": {
     "access": "public",
+    "main": "./dist/exports/index.js",
+    "types": "./dist/exports/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/exports/index.js",

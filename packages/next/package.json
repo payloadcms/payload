@@ -80,7 +80,7 @@
   },
   "publishConfig": {
     "main": "./dist/index.js",
-    "types": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       "./css": {
         "import": "./dist/prod/styles.css",
