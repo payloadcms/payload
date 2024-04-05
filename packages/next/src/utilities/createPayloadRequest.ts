@@ -47,7 +47,7 @@ export const createPayloadRequest = async ({
   const isGraphQL =
     !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
 
-  const { data, file } = await getDataAndFile({
+  const { data, file, formData } = await getDataAndFile({
     collection,
     config,
     request,
@@ -115,6 +115,7 @@ export const createPayloadRequest = async ({
   const req: PayloadRequest = Object.assign(request, customRequest)
 
   if (data) req.json = () => Promise.resolve(data)
+  if (formData) req.formData = () => Promise.resolve(formData)
   req.payloadDataLoader = getDataLoader(req)
 
   req.user = await getAuthenticatedUser({

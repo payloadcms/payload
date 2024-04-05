@@ -9,8 +9,10 @@ type GetDataAndFile = (args: {
 }) => Promise<{
   data: Record<string, any>
   file: CustomPayloadRequest['file']
+  formData: FormData
 }>
 export const getDataAndFile: GetDataAndFile = async ({ collection, config, request }) => {
+  let formData: FormData = undefined
   let data: Record<string, any> = undefined
   let file: CustomPayloadRequest['file'] = undefined
 
@@ -24,7 +26,7 @@ export const getDataAndFile: GetDataAndFile = async ({ collection, config, reque
       if (collection?.config?.upload) {
         // load file in memory
         if (!config.upload?.useTempFiles) {
-          const formData = await request.formData()
+          formData = await request.formData()
           const formFile = formData.get('file')
 
           if (formFile instanceof Blob) {
@@ -63,7 +65,7 @@ export const getDataAndFile: GetDataAndFile = async ({ collection, config, reque
         }
       } else {
         // non upload request
-        const formData = await request.formData()
+        formData = await request.formData()
         const payloadData = formData.get('_payload')
 
         if (typeof payloadData === 'string') {
@@ -76,5 +78,6 @@ export const getDataAndFile: GetDataAndFile = async ({ collection, config, reque
   return {
     data,
     file,
+    formData,
   }
 }
