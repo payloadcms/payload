@@ -1917,9 +1917,10 @@ describe('fields', () => {
 
     test('should upload using the document drawer', async () => {
       await uploadImage()
+      await wait(500)
       // Open the media drawer and create a png upload
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
-      await wait(500) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
+      await wait(1000) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
         .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
@@ -1945,8 +1946,8 @@ describe('fields', () => {
 
     test('should clear selected upload', async () => {
       await uploadImage()
+      await wait(1000) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
-      await wait(500) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
 
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
