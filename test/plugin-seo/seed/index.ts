@@ -2,7 +2,7 @@ import type { Payload } from 'payload'
 import type { PayloadRequest } from 'payload/types'
 
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
+import { getFileByPath } from 'payload/node'
 
 import { mediaSlug } from '../shared.js'
 
