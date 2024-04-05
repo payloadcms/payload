@@ -1,4 +1,3 @@
-import callsites from 'callsites'
 import path from 'node:path'
 
 import type { SanitizedConfig } from '../config/types.js'
@@ -15,11 +14,28 @@ export const importConfig = async (configPath: string) => {
     return await config.default
   }
 
-  const callerDir = path.dirname(callsites()[1].getFileName()).replace('file://', '')
+  const callerDir = path.dirname(getCallerInfo()[1].getFileName()).replace('file://', '')
   const fullConfigPath = path.resolve(callerDir, configPath)
 
   const config = await importWithoutClientFiles<{ default: Promise<SanitizedConfig> }>(
     fullConfigPath,
   )
   return await config.default
+}
+
+const getCallerInfo = () => {
+  const _prepareStackTrace = Error.prepareStackTrace
+  try {
+    let result = []
+    Error.prepareStackTrace = (_, callSites) => {
+      const callSitesWithoutCurrent = callSites.slice(1)
+      result = callSitesWithoutCurrent
+      return callSitesWithoutCurrent
+    }
+
+    new Error().stack
+    return result
+  } finally {
+    Error.prepareStackTrace = _prepareStackTrace
+  }
 }
