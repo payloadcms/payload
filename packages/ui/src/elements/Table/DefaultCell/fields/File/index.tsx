@@ -26,7 +26,7 @@ export const FileCell: React.FC<FileCellProps> = ({
           ...rowData,
           filename,
         }}
-        fileSrc={rowData?.thumbnailURL}
+        fileSrc={rowData?.thumbnailURL || rowData?.url}
         size="small"
         uploadConfig={uploadConfig}
       />
