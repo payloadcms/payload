@@ -7,7 +7,7 @@ import type {
 
 import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/api'
-import { getAuthenticatedUser } from 'payload/auth'
+import { executeAuthStrategies } from 'payload/auth'
 import { parseCookies } from 'payload/auth'
 import { getDataLoader } from 'payload/utilities'
 import qs from 'qs'
@@ -117,7 +117,7 @@ export const createPayloadRequest = async ({
   if (data) req.json = () => Promise.resolve(data)
   req.payloadDataLoader = getDataLoader(req)
 
-  req.user = await getAuthenticatedUser({
+  req.user = await executeAuthStrategies({
     cookies,
     headers: req.headers,
     isGraphQL,
