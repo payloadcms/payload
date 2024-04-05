@@ -1,11 +1,11 @@
 import ObjectIdImport from 'bson-objectid'
 
-import type { Field } from '../config/types.js'
+import type { TextField } from '../config/types.js'
 
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
-export const baseIDField: Field = {
+export const baseIDField: TextField = {
   name: 'id',
   type: 'text',
   admin: {
