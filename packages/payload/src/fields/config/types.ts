@@ -17,6 +17,7 @@ import type {
 } from '../../admin/types.js'
 import type { User } from '../../auth/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
+import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
@@ -68,9 +69,11 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
    * The `id` of the current document being read or updated. `id` is undefined during the `create` operation.
    */
   id?: number | string
-  /** The `Express` request object containing the currently authenticated `user` */
-  req: PayloadRequest<U>
   /** The `payload` object to interface with the payload API */
+  req: PayloadRequest<U>
+  /**
+   * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
+   */
   siblingData?: Partial<P>
 }) => Promise<boolean> | boolean
 
@@ -478,6 +481,14 @@ export type SelectField = FieldBase & {
     isClearable?: boolean
     isSortable?: boolean
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
+  /**
+   * Customize the DB enum name
+   */
+  enumName?: DBIdentifierName
   hasMany?: boolean
   options: Option[]
   type: 'select'
@@ -598,6 +609,14 @@ export type RadioField = FieldBase & {
     }
     layout?: 'horizontal' | 'vertical'
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
+  /**
+   * Customize the DB enum name
+   */
+  enumName?: DBIdentifierName
   options: Option[]
   type: 'radio'
 }
