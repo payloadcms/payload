@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import type { Breadcrumb, PluginConfig } from '../types.js'
 
-const formatBreadcrumb = (
+export const formatBreadcrumb = (
   pluginConfig: PluginConfig,
   collection: CollectionConfig,
   docs: Array<Record<string, unknown>>,
@@ -10,7 +10,7 @@ const formatBreadcrumb = (
   let url: string | undefined = undefined
   let label: string
 
-  const lastDoc = docs[docs.length - 1]
+  const lastDoc = docs?.[docs?.length - 1]
 
   if (typeof pluginConfig?.generateURL === 'function') {
     url = pluginConfig.generateURL(docs, lastDoc)
@@ -20,14 +20,12 @@ const formatBreadcrumb = (
     label = pluginConfig.generateLabel(docs, lastDoc)
   } else {
     const useAsTitle = collection?.admin?.useAsTitle || 'id'
-    label = lastDoc[useAsTitle] as string
+    label = lastDoc?.[useAsTitle] as string
   }
 
   return {
-    doc: lastDoc.id as string,
+    doc: lastDoc?.id as string,
     label,
     url,
   }
 }
-
-export default formatBreadcrumb

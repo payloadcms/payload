@@ -1,16 +1,16 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig, PayloadRequest } from 'payload/types'
 
 import type { PluginConfig } from '../types.js'
 
-const getParents = async (
-  req: any,
+export const getParents = async (
+  req: PayloadRequest,
   pluginConfig: PluginConfig,
   collection: CollectionConfig,
   doc: Record<string, unknown>,
   docs: Array<Record<string, unknown>> = [],
 ): Promise<Array<Record<string, unknown>>> => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
-  const parent = doc[parentSlug]
+  const parent = doc?.[parentSlug]
   let retrievedParent
 
   if (parent) {
@@ -31,18 +31,19 @@ const getParents = async (
     }
 
     if (retrievedParent) {
-      if (retrievedParent[parentSlug]) {
-        return getParents(req, pluginConfig, collection, retrievedParent, [
-          retrievedParent,
-          ...docs,
-        ])
+      if (retrievedParent?.[parentSlug]) {
+        return getParents(
+          req,
+          pluginConfig,
+          collection,
+          retrievedParent as unknown as Record<string, unknown>,
+          [retrievedParent as unknown as Record<string, unknown>, ...docs],
+        )
       }
 
-      return [retrievedParent, ...docs]
+      return [retrievedParent as unknown as Record<string, unknown>, ...docs]
     }
   }
 
   return docs
 }
-
-export default getParents

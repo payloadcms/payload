@@ -5,12 +5,14 @@ import type { PluginConfig } from '../types.js'
 // This hook automatically re-saves a document after it is created
 // so that we can build its breadcrumbs with the newly created document's ID.
 
-const resaveSelfAfterCreate =
-  (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
-  async ({ doc, operation, req }) => {
+export const resaveSelfAfterCreate = (
+  pluginConfig: PluginConfig,
+  collection: CollectionConfig,
+): CollectionAfterChangeHook => {
+  return async ({ doc, operation, req }) => {
     const { locale, payload } = req
     const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
-    const breadcrumbs = doc[breadcrumbSlug]
+    const breadcrumbs = doc?.[breadcrumbSlug]
 
     if (operation === 'create') {
       const originalDocWithDepth0 = await payload.findByID({
@@ -32,9 +34,9 @@ const resaveSelfAfterCreate =
           data: {
             ...originalDocWithDepth0,
             [breadcrumbSlug]:
-              breadcrumbs?.map((crumb, i) => ({
+              breadcrumbs?.map((crumb: { doc: unknown }, i: number) => ({
                 ...crumb,
-                doc: breadcrumbs.length === i + 1 ? doc.id : crumb.doc,
+                doc: breadcrumbs.length === i + 1 ? doc?.id : crumb?.doc,
               })) || [],
           },
           depth: 0,
@@ -52,5 +54,4 @@ const resaveSelfAfterCreate =
 
     return undefined
   }
-
-export default resaveSelfAfterCreate
+}

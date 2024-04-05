@@ -1,17 +1,22 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig, PayloadRequest } from 'payload/types'
 
 import type { PluginConfig } from '../types.js'
 
-import formatBreadcrumb from './formatBreadcrumb.js'
-import getParents from './getParents.js'
+import { formatBreadcrumb } from './formatBreadcrumb.js'
+import { getParents } from './getParents.js'
+import { shouldPopulateBreadcrumbs } from './shouldPopulateBreadcrumbs.js'
 
-const populateBreadcrumbs = async (
-  req: any,
+export const populateBreadcrumbs = async (
+  req: PayloadRequest,
   pluginConfig: PluginConfig,
   collection: CollectionConfig,
   data: any,
   originalDoc?: any,
-): Promise<any> => {
+): Promise<unknown> => {
+  if (!shouldPopulateBreadcrumbs(pluginConfig, data, collection, originalDoc)) {
+    return data
+  }
+
   const newData = data
   const breadcrumbDocs = [
     ...(await getParents(req, pluginConfig, collection, {
@@ -33,12 +38,10 @@ const populateBreadcrumbs = async (
 
   const breadcrumbs = breadcrumbDocs.map((_, i) =>
     formatBreadcrumb(pluginConfig, collection, breadcrumbDocs.slice(0, i + 1)),
-  ) // eslint-disable-line function-paren-newline
+  )
 
   return {
     ...newData,
     [pluginConfig?.breadcrumbsFieldSlug || 'breadcrumbs']: breadcrumbs,
   }
 }
-
-export default populateBreadcrumbs
