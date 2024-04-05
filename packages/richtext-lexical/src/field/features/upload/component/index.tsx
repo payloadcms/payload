@@ -75,7 +75,7 @@ const Component: React.FC<ElementProps> = (props) => {
     { initialParams },
   )
 
-  const thumbnailSRC = data?.thumbnailURL
+  const thumbnailSRC = data?.thumbnailURL || data?.url
 
   const removeUpload = useCallback(() => {
     editor.update(() => {

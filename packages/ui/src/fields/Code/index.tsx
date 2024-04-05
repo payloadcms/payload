@@ -48,7 +48,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     labelProps,
     language = 'javascript',
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     style,
     validate,
@@ -64,7 +64,8 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,

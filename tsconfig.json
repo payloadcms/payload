@@ -40,7 +40,7 @@
         "./packages/payload/src/exports/types.ts"
       ],
       "@payload-config": [
-        "./test/fields/config.ts"
+        "./test/live-preview/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"

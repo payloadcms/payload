@@ -43,7 +43,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     label,
     labelProps,
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     style,
     validate,
@@ -62,7 +62,8 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     [validate, required, jsonError],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { initialValue, path, setValue, showError, value } = useField<string>({
     path: pathFromContext || pathFromProps || name,

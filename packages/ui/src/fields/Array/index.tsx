@@ -65,12 +65,13 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     minRows,
     path: pathFromProps,
     permissions,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     validate,
   } = props
 
-  const { indexPath } = useFieldProps()
+  const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()

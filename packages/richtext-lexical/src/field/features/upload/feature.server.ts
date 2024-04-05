@@ -1,4 +1,4 @@
-import type { Field, Payload } from 'payload/types'
+import type { Field, FieldWithRichTextRequiredEditor, Payload } from 'payload/types'
 
 import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'
@@ -12,7 +12,7 @@ import { uploadValidation } from './validate.js'
 export type UploadFeatureProps = {
   collections: {
     [collection: string]: {
-      fields: Field[]
+      fields: FieldWithRichTextRequiredEditor[]
     }
   }
 }
