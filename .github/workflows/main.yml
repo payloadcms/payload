@@ -159,13 +159,27 @@ jobs:
 
       - name: Process and Upload Trace Files
         run: |
-          TRACE_FOLDER_PATH="test/test-results/test-results-${{ matrix.suite }}/trace.zip"
-          if [ -f "$TRACE_FOLDER_PATH" ]; then
-            cp "$TRACE_FOLDER_PATH" "./${{ matrix.suite }}-trace.zip"
-            echo "Uploading trace artifact for ${{ matrix.suite }}"
-          else
-            echo "No trace file found for ${{ matrix.suite }}"
-          fi
+          # Unzip the main archive
+          unzip "test/test-results/test-results-${{ matrix.suite }}.zip" -d unzipped-results
+
+          # Loop through each folder in the unzipped directory
+          for folder in unzipped-results/*; do
+            if [ -d "$folder" ]; then
+              # Assuming trace.zip is directly inside each folder
+              TRACE_PATH="$folder/trace.zip"
+              if [ -f "$TRACE_PATH" ]; then
+                FOLDER_NAME=$(basename "$folder")
+                # Copy and rename the trace.zip file
+                cp "$TRACE_PATH" "./${FOLDER_NAME}-trace.zip"
+
+                # Now upload the renamed trace.zip as an artifact
+                echo "Uploading trace artifact for $FOLDER_NAME"
+                gh artifact upload "./${FOLDER_NAME}-trace.zip"
+              else
+                echo "No trace file found in $folder"
+              fi
+            fi
+          done
         shell: bash
 
       - uses: actions/upload-artifact@v4
