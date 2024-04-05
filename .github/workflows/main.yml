@@ -122,38 +122,34 @@ jobs:
       - name: Process and Upload Trace Files
         if: always()
         run: |
-          # Log all files in the test/test-results directory
-          ls -la test/test-results
-
-          # Loop through each folder in the unzipped directory
+          mkdir -p renamed-traces
+          count=0
           for folder in test/test-results/*; do
-            if [ -d "$folder" ]; then
-              echo "Processing $folder"
-              # Assuming trace.zip is directly inside each folder
-              TRACE_PATH="$folder/trace.zip"
-              if [ -f "$TRACE_PATH" ]; then
-                FOLDER_NAME=$(basename "$folder")
-                # Copy and rename the trace.zip file
-                cp "$TRACE_PATH" "./${FOLDER_NAME}-trace.zip"
-
-                # Now upload the renamed trace.zip as an artifact
-                echo "Uploading trace artifact for $FOLDER_NAME"
-                gh artifact upload "./${FOLDER_NAME}-trace.zip"
-                echo "Uploaded trace artifact for $FOLDER_NAME"
-              else
-                echo "No trace file found in $folder"
-              fi
-            fi
+          if [ -d "$folder" ] && [ -f "$folder/trace.zip" ]; then
+           ((count++))
+           if [ "$count" -le 5 ]; then
+             test_name=$(basename "$folder")
+             new_trace_name="trace-${{ matrix.suite }}-$count.zip"
+             cp "$folder/trace.zip" "renamed-traces/$new_trace_name"
+             echo "$test_name: $new_trace_name" >> map.txt
+           else
+             break
+           fi
+          fi
           done
+          zip -r "renamed-traces-${{ matrix.suite }}.zip" renamed-traces
+          cat map.txt
         shell: bash
 
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: ${{ matrix.suite }}-trace
-          path: ./${{ matrix.suite }}-trace.zip
+          name: trace-${{ matrix.suite }}-1
+          path: renamed-traces/trace-${{ matrix.suite }}-1.zip
 
-      - name: Display Playwright Trace Viewer URL
-        if: always()
+      - name: Display Mapped Names and Links
         run: |
-          echo "Trace Viewer URL for ${{ matrix.suite }} might be accessible through the artifacts on the Actions page of your repository."
+          while IFS= read -r line; do
+            IFS=': ' read -r test_name trace_name <<< "$line"
+            echo "${test_name}: https://github.com/payloadcms/payload/actions/runs/${GITHUB_RUN_ID}/artifacts/${trace_name}"
+          done < map.txt
+        shell: bash
