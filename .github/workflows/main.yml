@@ -120,6 +120,7 @@ jobs:
           retention-days: 1
 
       - name: Process and Upload Trace Files
+        if: always()
         run: |
           # Log all files in the test dir
           ls -la test
