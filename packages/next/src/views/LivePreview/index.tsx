@@ -1,6 +1,7 @@
 import type { LivePreviewConfig } from 'payload/config'
-import type { EditViewComponent } from 'payload/types'
+import type { EditViewComponent, TypeWithID } from 'payload/types'
 
+import { notFound } from 'next/navigation.js'
 import React from 'react'
 
 import { LivePreviewClient } from './index.client.js'
@@ -11,6 +12,7 @@ export const LivePreviewView: EditViewComponent = async (props) => {
 
   const {
     collectionConfig,
+    docID,
     globalConfig,
     locale,
     req: {
@@ -22,8 +24,30 @@ export const LivePreviewView: EditViewComponent = async (props) => {
     } = {},
   } = initPageResult
 
-  // TODO(JAKE): not sure what `data` is or what it should be
-  const data = 'data' in props ? props.data : {}
+  let data: TypeWithID
+
+  try {
+    if (collectionConfig) {
+      data = await initPageResult.req.payload.findByID({
+        id: docID,
+        collection: collectionConfig.slug,
+        depth: 0,
+        draft: true,
+        fallbackLocale: null,
+      })
+    }
+
+    if (globalConfig) {
+      data = await initPageResult.req.payload.findGlobal({
+        slug: globalConfig.slug,
+        depth: 0,
+        draft: true,
+        fallbackLocale: null,
+      })
+    }
+  } catch (error) {
+    notFound()
+  }
 
   let livePreviewConfig: LivePreviewConfig = topLevelLivePreviewConfig
 
@@ -54,10 +78,11 @@ export const LivePreviewView: EditViewComponent = async (props) => {
   const url =
     typeof livePreviewConfig?.url === 'function'
       ? await livePreviewConfig.url({
+          collectionConfig,
           data,
-          documentInfo: {}, // TODO: recreate this object server-side, see `useDocumentInfo`
-          // @ts-expect-error
+          globalConfig,
           locale,
+          payload: initPageResult.req.payload,
         })
       : livePreviewConfig?.url
 

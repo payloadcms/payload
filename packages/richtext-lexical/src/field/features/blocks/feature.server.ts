@@ -1,4 +1,4 @@
-import type { Block, BlockField, Field } from 'payload/types'
+import type { Block, BlockField, Field, FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { baseBlockFields, sanitizeFields } from 'payload/config'
 import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
@@ -13,7 +13,11 @@ import { blockPopulationPromiseHOC } from './populationPromise.js'
 import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
-  blocks: Block[]
+  blocks: Array<
+    Omit<Block, 'fields'> & {
+      fields: FieldWithRichTextRequiredEditor[]
+    }
+  >
 }
 
 export const BlocksFeature: FeatureProviderProviderServer<
@@ -118,6 +122,7 @@ export const BlocksFeature: FeatureProviderProviderServer<
                 fields: sanitizeFields({
                   config,
                   fields: blockCopy.fields,
+                  requireFieldLevelRichTextEditor: true,
                   validRelationships,
                 }),
               }
