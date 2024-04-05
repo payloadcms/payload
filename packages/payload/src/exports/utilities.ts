@@ -29,8 +29,6 @@ export { getCollectionIDFieldTypes } from '../utilities/getCollectionIDFieldType
 export { getIDType } from '../utilities/getIDType.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { default as getUniqueListBy } from '../utilities/getUniqueListBy.js'
-export { importConfig } from '../utilities/importConfig.js'
-export { importWithoutClientFiles } from '../utilities/importWithoutClientFiles.js'
 
 export { isEntityHidden } from '../utilities/isEntityHidden.js'
 
