@@ -68,7 +68,7 @@ export const initPage = async ({
     payload,
   )
 
-  const { permissions, user } = await payload.auth({ cookies, headers, req })
+  const { permissions, user } = await payload.auth({ headers, req })
 
   req.user = user
 
