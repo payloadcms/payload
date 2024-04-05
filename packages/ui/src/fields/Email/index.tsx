@@ -42,7 +42,7 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
     labelProps,
     path: pathFromProps,
     placeholder,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     style,
     validate,
@@ -60,7 +60,8 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
@@ -88,7 +89,7 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
         {BeforeInput}
         <input
           autoComplete={autoComplete}
-          disabled={Boolean(readOnly)}
+          disabled={readOnly}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}

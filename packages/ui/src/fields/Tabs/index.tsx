@@ -43,11 +43,18 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
     descriptionProps,
     forceRender = false,
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     tabs = [],
   } = props
 
-  const { indexPath, path: pathFromContext, permissions, schemaPath } = useFieldProps()
+  const {
+    indexPath,
+    path: pathFromContext,
+    permissions,
+    readOnly: readOnlyFromContext,
+    schemaPath,
+  } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
   const path = pathFromContext || pathFromProps || name
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()

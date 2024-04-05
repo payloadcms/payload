@@ -54,7 +54,7 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     onChange: onChangeFromProps,
     path: pathFromProps,
     placeholder,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     step = 1,
     style,
@@ -73,7 +73,8 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
     [validate, min, max, required],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { path, setValue, showError, value } = useField<number | number[]>({
     path: pathFromContext || pathFromProps || name,
