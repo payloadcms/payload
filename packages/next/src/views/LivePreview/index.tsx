@@ -56,7 +56,6 @@ export const LivePreviewView: EditViewComponent = async (props) => {
       ? await livePreviewConfig.url({
           data,
           documentInfo: {}, // TODO: recreate this object server-side, see `useDocumentInfo`
-          // @ts-expect-error
           locale,
         })
       : livePreviewConfig?.url
