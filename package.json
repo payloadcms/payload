@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.54",
+  "version": "3.0.0-alpha.55",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -131,7 +131,6 @@
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
     "open": "^10.1.0",
-    "p-map": "^7.0.2",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
     "playwright": "^1.42.1",
