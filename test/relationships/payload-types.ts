@@ -8,6 +8,7 @@
 export interface Config {
   collections: {
     posts: Post
+    postsLocalized: PostsLocalized
     relation: Relation
     'strict-access': StrictAccess
     'chained-relation': ChainedRelation
@@ -32,6 +33,13 @@ export interface Post {
   customIdRelation?: string | CustomIdRelation
   customIdNumberRelation?: number | CustomIdNumberRelation
   filteredRelation?: string | Relation
+  updatedAt: string
+  createdAt: string
+}
+export interface PostsLocalized {
+  id: string
+  title?: string | null
+  relationField?: (string | null) | Relation
   updatedAt: string
   createdAt: string
 }

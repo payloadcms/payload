@@ -43,12 +43,13 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     initCollapsed = false,
     labelProps,
     path: pathFromProps,
+    readOnly: readOnlyFromProps,
   } = props
 
   const {
     indexPath,
     path: pathFromContext,
-    readOnly,
+    readOnly: readOnlyFromContext,
     schemaPath,
     siblingPermissions,
   } = useFieldProps()
@@ -109,6 +110,8 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
   }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
 
   if (typeof collapsedOnMount !== 'boolean') return null
+
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   return (
     <Fragment>

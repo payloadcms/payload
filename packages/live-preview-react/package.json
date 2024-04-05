@@ -2,7 +2,11 @@
   "name": "@payloadcms/live-preview-react",
   "version": "0.2.0",
   "description": "The official live preview React SDK for Payload",
-  "repository": "https://github.com/payloadcms/payload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/live-preview-react"
+  },
   "license": "MIT",
   "homepage": "https://payloadcms.com",
   "author": "Payload CMS, Inc.",

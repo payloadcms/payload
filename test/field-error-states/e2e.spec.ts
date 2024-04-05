@@ -1,15 +1,13 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-
-import { initPageConsoleErrorCatch } from '../helpers.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
-import config from './config.js'
-
-const { beforeAll, describe } = test
-
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+
+const { beforeAll, describe } = test
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -18,10 +16,12 @@ describe('field error states', () => {
   let page: Page
 
   beforeAll(async ({ browser }) => {
-    ;({ serverURL } = await initPayloadE2E({ config, dirname }))
+    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('Remove row should remove error states from parent fields', async () => {

@@ -74,7 +74,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()
-  const [initialColumns] = useState<string[]>(() =>
+
+  const [initialColumns] = useState<ColumnPreferences>(() =>
     getInitialColumns(filterFields(fieldMap), useAsTitle, defaultColumns),
   )
 
@@ -131,6 +132,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
     defaultColumns,
     useAsTitle,
     listPreferences,
+    initialColumns,
   ])
 
   // /////////////////////////////////////

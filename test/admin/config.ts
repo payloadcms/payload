@@ -12,6 +12,7 @@ import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { Posts } from './collections/Posts.js'
+import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
 import { AdminButton } from './components/AdminButton/index.js'
 import { AfterDashboard } from './components/AfterDashboard/index.js'
@@ -31,7 +32,7 @@ import { GlobalGroup1A } from './globals/Group1A.js'
 import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 import { customNestedViewPath, customParamViewPath, customViewPath } from './shared.js'
 
 export default buildConfigWithDefaults({
@@ -75,6 +76,7 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [
+    UploadCollection,
     Posts,
     Users,
     CollectionHidden,
@@ -129,7 +131,7 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
 })

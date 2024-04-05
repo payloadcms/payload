@@ -3,6 +3,7 @@ package-lock.json
 dist
 /.idea/*
 !/.idea/runConfigurations
+!/.idea/payload.iml
 
 test-results
 .devcontainer
@@ -15,6 +16,7 @@ test-results
 
 # Ignore test directory media folder/files
 /media
+test/media
 /versions
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode

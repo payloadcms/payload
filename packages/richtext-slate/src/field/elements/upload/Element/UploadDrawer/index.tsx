@@ -6,7 +6,7 @@ import type { ClientCollectionConfig } from 'payload/types'
 import * as facelessUIImport from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { Drawer } from '@payloadcms/ui/elements/Drawer'
-import { Form } from '@payloadcms/ui/forms/Form'
+import { Form, type FormProps } from '@payloadcms/ui/forms/Form'
 import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
 import { FormSubmit } from '@payloadcms/ui/forms/Submit'
 import { useAuth } from '@payloadcms/ui/providers/Auth'
@@ -99,6 +99,23 @@ export const UploadDrawer: React.FC<{
     relatedCollection.slug,
   ])
 
+  const onChange: FormProps['onChange'][0] = useCallback(
+    async ({ formState: prevFormState }) => {
+      return await getFormState({
+        apiRoute: config.routes.api,
+        body: {
+          id,
+          formState: prevFormState,
+          operation: 'update',
+          schemaPath: `${schemaPath}.${uploadFieldsSchemaPath}.${relatedCollection.slug}`,
+        },
+        serverURL: config.serverURL,
+      })
+    },
+
+    [config.routes.api, config.serverURL, relatedCollection.slug, schemaPath, id],
+  )
+
   return (
     <Drawer
       slug={drawerSlug}
@@ -106,7 +123,13 @@ export const UploadDrawer: React.FC<{
         label: getTranslation(relatedCollection.labels.singular, i18n),
       })}
     >
-      <Form initialState={initialState} onSubmit={handleUpdateEditData}>
+      <Form
+        beforeSubmit={[onChange]}
+        disableValidationOnSubmit
+        initialState={initialState}
+        onChange={[onChange]}
+        onSubmit={handleUpdateEditData}
+      >
         <RenderFields
           fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
           path=""

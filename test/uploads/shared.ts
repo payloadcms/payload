@@ -10,7 +10,9 @@ export const enlargeSlug = 'enlarge'
 
 export const reduceSlug = 'reduce'
 
-export const adminThumbnailSlug = 'admin-thumbnail'
+export const adminThumbnailFunctionSlug = 'admin-thumbnail-function'
+
+export const adminThumbnailSizeSlug = 'admin-thumbnail-size'
 
 export const unstoredMediaSlug = 'unstored-media'
 

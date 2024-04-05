@@ -44,11 +44,12 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
     fieldMap,
     hideGutter,
     labelProps,
+    readOnly: readOnlyFromProps,
     style,
     width,
   } = props
 
-  const { path, permissions, readOnly, schemaPath } = useFieldProps()
+  const { path, permissions, readOnly: readOnlyFromContext, schemaPath } = useFieldProps()
   const { i18n } = useTranslation()
   const isWithinCollapsible = useCollapsible()
   const isWithinGroup = useGroup()
@@ -58,6 +59,7 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
   const submitted = useFormSubmitted()
   const errorCount = errorPaths.length
   const fieldHasErrors = submitted && errorCount > 0
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 

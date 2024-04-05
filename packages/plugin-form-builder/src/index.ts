@@ -1,12 +1,12 @@
 import type { Config } from 'payload/config'
 
-import type { PluginConfig } from './types'
+import type { PluginConfig } from './types.js'
 
-import { generateSubmissionCollection } from './collections/FormSubmissions'
-import { generateFormCollection } from './collections/Forms'
+import { generateSubmissionCollection } from './collections/FormSubmissions/index.js'
+import { generateFormCollection } from './collections/Forms/index.js'
 
-export { fields } from './collections/Forms/fields'
-export { getPaymentTotal } from './utilities/getPaymentTotal'
+export { fields } from './collections/Forms/fields.js'
+export { getPaymentTotal } from './utilities/getPaymentTotal.js'
 
 const FormBuilder =
   (incomingFormConfig: PluginConfig) =>

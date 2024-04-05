@@ -6,10 +6,9 @@ import { fileURLToPath } from 'url'
 
 import type { Page as PayloadPage } from './payload-types.js'
 
-import { initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
-import config from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +23,7 @@ let childId: string
 
 describe('Nested Docs Plugin', () => {
   beforeAll(async ({ browser }) => {
-    const { serverURL, payload } = await initPayloadE2E({ config, dirname })
+    const { serverURL, payload } = await initPayloadE2E({ dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
     const context = await browser.newContext()
     page = await context.newPage()
@@ -68,6 +67,8 @@ describe('Nested Docs Plugin', () => {
       _status: 'draft',
     })
     draftChildId = draftChildPage.id
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   describe('Core functionality', () => {

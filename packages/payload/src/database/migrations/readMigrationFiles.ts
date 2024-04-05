@@ -37,7 +37,7 @@ export const readMigrationFiles = async ({
     files.map(async (filePath) => {
       // eval used to circumvent errors bundling
       let migration = await eval(
-        `${require ? 'require' : 'import'}('${filePath.replaceAll('\\', '/')}')`,
+        `${typeof require === 'function' ? 'require' : 'import'}('${filePath.replaceAll('\\', '/')}')`,
       )
       if ('default' in migration) migration = migration.default
 

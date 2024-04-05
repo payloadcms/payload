@@ -60,6 +60,7 @@ export type Action = ADD | CLEAR | UPDATE
 
 export type GetResults = (args: {
   lastFullyLoadedRelation?: number
+  lastLoadedPage: Record<string, number>
   onSuccess?: () => void
   search?: string
   sort?: boolean

@@ -1,6 +1,6 @@
-import type { HTMLConverter } from '../types'
+import type { HTMLConverter } from '../types.js'
 
-import { convertLexicalNodesToHTML } from '../serializeLexical'
+import { convertLexicalNodesToHTML } from '../serializeLexical.js'
 
 export const HeadingHTMLConverter: HTMLConverter<any> = {
   async converter({ converters, node, parent, submissionData }) {

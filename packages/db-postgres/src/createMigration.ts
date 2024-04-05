@@ -3,15 +3,17 @@ import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type { CreateMigration } from 'payload/database'
 
 import fs from 'fs'
+import { createRequire } from 'module'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types.js'
 
+const require = createRequire(import.meta.url)
+
 const migrationTemplate = (
   upSQL?: string,
   downSQL?: string,
-) => `import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres'
-import { sql } from 'drizzle-orm'
+) => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
 ${
@@ -60,9 +62,7 @@ export const createMigration: CreateMigration = async function createMigration(
     fs.mkdirSync(dir)
   }
 
-  const { generateDrizzleJson, generateMigration } = require
-    ? require('drizzle-kit/payload')
-    : await import('drizzle-kit/payload')
+  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')

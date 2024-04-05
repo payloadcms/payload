@@ -1,4 +1,5 @@
 'use client'
+import type { FieldTypes } from 'payload/config'
 import type { FieldPermissions } from 'payload/types'
 
 import React from 'react'
@@ -12,9 +13,11 @@ export type FieldPropsContextType = {
   siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
+  type: keyof FieldTypes
 }
 
 const FieldPropsContext = React.createContext<FieldPropsContextType>({
+  type: '' as keyof FieldTypes,
   indexPath: '',
   path: '',
   permissions: {} as FieldPermissions,
@@ -33,9 +36,11 @@ export type Props = {
   siblingPermissions: {
     [fieldName: string]: FieldPermissions
   }
+  type: keyof FieldTypes
 }
 
 export const FieldPropsProvider: React.FC<Props> = ({
+  type,
   children,
   indexPath,
   path,
@@ -47,6 +52,7 @@ export const FieldPropsProvider: React.FC<Props> = ({
   return (
     <FieldPropsContext.Provider
       value={{
+        type,
         indexPath,
         path,
         permissions,

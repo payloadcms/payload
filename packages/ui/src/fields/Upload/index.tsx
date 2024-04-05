@@ -25,7 +25,7 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
     label,
     labelProps,
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     relationTo,
     required,
     style,
@@ -50,7 +50,8 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { filterOptions, path, setValue, showError, value } = useField<string>({
     path: pathFromContext || pathFromProps,
@@ -77,6 +78,7 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
         descriptionProps={descriptionProps}
         errorProps={errorProps}
         filterOptions={filterOptions}
+        label={label}
         labelProps={labelProps}
         onChange={onChange}
         path={path}

@@ -1,5 +1,5 @@
 /** @type {import('jest').Config} */
-const customJestConfig = {
+const baseJestConfig = {
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   setupFilesAfterEnv: ['<rootDir>/test/jest.setup.ts'],
   moduleNameMapper: {
@@ -8,9 +8,8 @@ const customJestConfig = {
       '<rootDir>/test/helpers/mocks/fileMock.js',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  reporters: ['default', ['github-actions', { silent: false }], 'summary'],
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/packages/payload/src/**/*.spec.ts', '<rootDir>/test/**/*int.spec.ts'],
+  testMatch: ['<rootDir>/packages/*/src/**/*.spec.ts'],
   testTimeout: 90000,
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
@@ -19,7 +18,7 @@ const customJestConfig = {
 }
 
 if (process.env.CI) {
-  customJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
+  baseJestConfig.reporters = [['github-actions', { silent: false }], 'summary']
 }
 
-export default customJestConfig
+export default baseJestConfig

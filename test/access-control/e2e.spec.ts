@@ -9,6 +9,7 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
 import {
   closeNav,
+  ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   openDocControls,
@@ -18,7 +19,6 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
-import config from './config.js'
 import {
   docLevelAccessSlug,
   readOnlySlug,
@@ -50,7 +50,7 @@ describe('access control', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
+    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug)
@@ -60,6 +60,7 @@ describe('access control', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('field without read access should not show', async () => {

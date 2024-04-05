@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/client'
@@ -45,8 +45,12 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
    * displayed in the link editor drawer.
    */
   fields?:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
-    | Field[]
+    | ((args: {
+        config: SanitizedConfig
+        defaultFields: FieldWithRichTextRequiredEditor[]
+        i18n: I18n
+      }) => FieldWithRichTextRequiredEditor[])
+    | FieldWithRichTextRequiredEditor[]
 }
 
 export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, ClientProps> = (

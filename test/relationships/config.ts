@@ -10,6 +10,7 @@ import {
   polymorphicRelationshipsSlug,
   relationSlug,
   slug,
+  slugWithLocalizedRel,
   treeSlug,
 } from './shared.js'
 
@@ -47,6 +48,10 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 }
 
 export default buildConfigWithDefaults({
+  localization: {
+    locales: ['en', 'de'],
+    defaultLocale: 'en',
+  },
   collections: [
     {
       slug,
@@ -106,6 +111,23 @@ export default buildConfigWithDefaults({
               not_equals: true,
             },
           },
+        },
+      ],
+    },
+    {
+      slug: slugWithLocalizedRel,
+      access: openAccess,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        // Relationship
+        {
+          name: 'relationField',
+          type: 'relationship',
+          relationTo: relationSlug,
+          localized: true,
         },
       ],
     },

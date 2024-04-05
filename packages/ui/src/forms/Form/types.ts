@@ -21,6 +21,11 @@ export type FormProps = (
   children?: React.ReactNode
   className?: string
   disableSuccessStatus?: boolean
+  /**
+   * If you would like to solely leverage server-side validation on submit,
+   * you can disable checks that the form makes before it submits
+   */
+  disableValidationOnSubmit?: boolean
   disabled?: boolean
   /**
    * By default, the form will get the field schema (not data) from the current document. If you pass this in, you can override that behavior.
@@ -197,6 +202,7 @@ export type Context = {
   }) => Promise<void>
   replaceState: (state: FormState) => void
   reset: Reset
+  setDisabled: (disabled: boolean) => void
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted

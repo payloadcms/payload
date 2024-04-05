@@ -35,6 +35,30 @@ const networkConditions = {
   },
 }
 
+/**
+ * Load admin panel and make sure autologin has passed before running tests
+ * @param page
+ * @param serverURL
+ */
+export async function ensureAutoLoginAndCompilationIsDone({
+  page,
+  serverURL,
+}: {
+  page: Page
+  serverURL: string
+}): Promise<void> {
+  const adminURL = `${serverURL}/admin`
+
+  await page.goto(adminURL)
+  await page.waitForURL(adminURL)
+  await expect(() => expect(page.url()).not.toContain(`/admin/login`)).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+  await expect(() => expect(page.url()).not.toContain(`/admin/create-first-user`)).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+}
+
 export async function delayNetwork({
   context,
   page,
@@ -90,6 +114,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
 }
 
 export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
+  await wait(500) // TODO: Fix this
   await page.click(selector, { delay: 100 })
   await expect(page.locator('.Toastify')).toContainText('successfully')
   await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
@@ -102,7 +127,6 @@ export async function openNav(page: Page): Promise<void> {
   if (await page.locator('.template-default.template-default--nav-open').isVisible()) return
   // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
   await page.locator('.nav-toggler >> visible=true').click()
-
   await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 

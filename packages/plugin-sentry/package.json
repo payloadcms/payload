@@ -2,14 +2,18 @@
   "name": "@payloadcms/plugin-sentry",
   "version": "0.0.6",
   "homepage:": "https://payloadcms.com",
-  "repository": "git@github.com:payloadcms/plugin-sentry.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-sentry"
+  },
   "description": "Sentry plugin for Payload",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "type": "module",
   "scripts": {
     "build": "echo \"Build temporarily disabled.\" && exit 0",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build"

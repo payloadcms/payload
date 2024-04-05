@@ -4,10 +4,9 @@ import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
-import config from './config.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -17,12 +16,13 @@ test.describe('Admin Panel', () => {
   let url: AdminUrlUtil
 
   test.beforeAll(async ({ browser }) => {
-    const { payload, serverURL } = await initPayloadE2E({ config, dirname })
+    const { payload, serverURL } = await initPayloadE2ENoConfig({ dirname })
     url = new AdminUrlUtil(serverURL, 'posts')
 
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('example test', async () => {

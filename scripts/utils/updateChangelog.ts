@@ -11,7 +11,7 @@ import { default as getConventionalPreset } from 'conventional-changelog-convent
 import { once } from 'events'
 import fse from 'fs-extra'
 import minimist from 'minimist'
-import simpleGit from 'simple-git'
+import { simpleGit } from 'simple-git'
 import tempfile from 'tempfile'
 
 const { createReadStream, createWriteStream } = fse

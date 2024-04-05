@@ -6,6 +6,7 @@ import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import isolateObjectProperty from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
@@ -89,7 +90,7 @@ export async function validateSearchParam({
               type: 'collection',
               entity: req.payload.collections[collectionSlug].config,
               operations: ['read'],
-              req,
+              req: isolateObjectProperty(req, 'transactionID'),
             })
           }
 

@@ -27,9 +27,10 @@ export const buildVersionColumns = ({
 }): Column[] => {
   const entityConfig = collectionConfig || globalConfig
 
-  const columns = [
+  const columns: Column[] = [
     {
       name: '',
+      type: 'date',
       Label: '',
       accessor: 'updatedAt',
       active: true,
@@ -46,6 +47,7 @@ export const buildVersionColumns = ({
     },
     {
       name: '',
+      type: 'text',
       Label: '',
       accessor: 'id',
       active: true,
@@ -62,6 +64,7 @@ export const buildVersionColumns = ({
   ) {
     columns.push({
       name: '',
+      type: 'checkbox',
       Label: '',
       accessor: '_status',
       active: true,

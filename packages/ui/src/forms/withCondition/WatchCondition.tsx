@@ -1,4 +1,6 @@
 'use client'
+import type { FieldTypes } from 'payload/config'
+
 import React from 'react'
 import { Fragment } from 'react'
 
@@ -6,14 +8,23 @@ import { useFormFields } from '../Form/context.js'
 
 export const WatchCondition: React.FC<{
   children: React.ReactNode
+  indexPath: string
   name?: string
   path?: string
+  type: keyof FieldTypes
 }> = (props) => {
-  const { name, children, path: pathFromProps } = props
+  const { name, type, children, indexPath, path: pathFromProps } = props
 
   const path = typeof pathFromProps === 'string' ? pathFromProps : name
 
-  const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
+  let formStateID = path
+
+  if (['collapsible', 'row'].includes(type)) {
+    const index = indexPath.split('.').pop()
+    formStateID = `${path ? `${path}.` : ''}_index-${index}`
+  }
+
+  const field = useFormFields(([fields]) => (fields && fields?.[formStateID]) || null)
 
   const { passesCondition } = field || {}
 

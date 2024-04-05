@@ -10,16 +10,23 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "command": "node --no-deprecation test/dev.js fields",
+      "command": "node --no-deprecation test/dev.js _community",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Community",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "pnpm run dev live-preview -- --no-turbo",
+      "command": "node --no-deprecation test/dev.js live-preview",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Live Preview",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "node --no-deprecation test/dev.js admin",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Admin",
       "request": "launch",
       "type": "node-terminal"
     },
@@ -34,18 +41,21 @@
       }
     },
     {
-      "command": "pnpm run dev fields",
+      "command": "node --no-deprecation test/dev.js fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",
       "request": "launch",
       "type": "node-terminal"
     },
     {
-      "command": "pnpm run dev:postgres versions",
+      "command": "node --no-deprecation test/dev.js versions",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Postgres",
       "request": "launch",
-      "type": "node-terminal"
+      "type": "node-terminal",
+      "env": {
+        "PAYLOAD_DATABASE": "postgres"
+      }
     },
     {
       "command": "pnpm run dev versions",

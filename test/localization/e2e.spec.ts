@@ -1,23 +1,23 @@
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { LocalizedPost } from './payload-types.js'
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config, LocalizedPost } from './payload-types.js'
 
 import {
   changeLocale,
+  ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
   openDocControls,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
-import config from './config.js'
 import {
   englishTitle,
   localizedPostsSlug,
@@ -47,15 +47,12 @@ const arabicTitle = 'arabic title'
 const description = 'description'
 
 let page: Page
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 let serverURL: string
 
 describe('Localization', () => {
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({
-      config,
-      dirname,
-    }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
@@ -64,6 +61,8 @@ describe('Localization', () => {
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   describe('localized text', () => {

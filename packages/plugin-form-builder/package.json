@@ -1,9 +1,13 @@
 {
   "name": "@payloadcms/plugin-form-builder",
   "description": "Form builder plugin for Payload CMS",
-  "version": "1.2.1",
+  "version": "3.0.0-alpha.54",
   "homepage:": "https://payloadcms.com",
-  "repository": "git@github.com:payloadcms/plugin-form-builder.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-form-builder"
+  },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "license": "MIT",
@@ -12,7 +16,7 @@
   "scripts": {
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build": "echo \"Build temporarily disabled.\" && exit 0",
+    "build": "swc ./src -d ./dist --config-file .swcrc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "echo \"No tests available.\""

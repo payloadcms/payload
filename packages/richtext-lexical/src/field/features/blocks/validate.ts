@@ -28,6 +28,7 @@ export const blockValidationHOC = (
       block.fields = sanitizeFields({
         config,
         fields: block.fields,
+        requireFieldLevelRichTextEditor: true,
         validRelationships,
       })
     })

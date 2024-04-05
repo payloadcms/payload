@@ -382,7 +382,16 @@ export type NamedTab = TabBase & {
 
 export type UnnamedTab = Omit<TabBase, 'name'> & {
   interfaceName?: never
-  label: Record<string, string> | string
+  /**
+   * Can be either:
+   * - A string, which will be used as the tab's label.
+   * - An object, where the key is the language code and the value is the label.
+   */
+  label:
+    | {
+        [selectedLanguage: string]: string
+      }
+    | string
   localized?: never
 }
 
@@ -560,6 +569,14 @@ export type RichTextField<
   type: 'richText'
 } & ExtraProperties
 
+export type RichTextFieldRequiredEditor<
+  Value extends object = any,
+  AdapterProps = any,
+  ExtraProperties = object,
+> = Omit<RichTextField<Value, AdapterProps, ExtraProperties>, 'editor'> & {
+  editor: RichTextAdapter<Value, AdapterProps, ExtraProperties>
+}
+
 export type ArrayField = FieldBase & {
   admin?: Admin & {
     components?: {
@@ -652,6 +669,10 @@ export type Field =
   | TextareaField
   | UIField
   | UploadField
+
+export type FieldWithRichTextRequiredEditor =
+  | Exclude<Field, RichTextField>
+  | RichTextFieldRequiredEditor
 
 export type FieldAffectingData =
   | ArrayField

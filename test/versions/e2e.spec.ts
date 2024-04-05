@@ -24,15 +24,18 @@
  */
 
 import type { Page } from '@playwright/test'
-import type { Payload } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config } from './payload-types.js'
+
 import { globalSlug } from '../admin/slugs.js'
 import {
   changeLocale,
+  ensureAutoLoginAndCompilationIsDone,
   exactText,
   findTableCell,
   initPageConsoleErrorCatch,
@@ -40,10 +43,9 @@ import {
   selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInit.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
-import config from './config.js'
-import { clearAndSeedEverything } from './seed.js'
 import { titleToDelete } from './shared.js'
 import {
   autoSaveGlobalSlug,
@@ -55,27 +57,32 @@ import {
   draftGlobalSlug,
   postCollectionSlug,
 } from './slugs.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const { beforeAll, beforeEach, describe } = test
 
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 
 const waitForAutoSaveToComplete = async (page: Page) => {
-  await expect(async () => {
-    await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
-  }).toPass({
-    timeout: 45000,
-  })
-
   await expect(async () => {
     await expect(
       page.locator('.autosave:has-text("Last saved less than a minute ago")'),
     ).toBeVisible()
   }).toPass({
-    timeout: 45000,
+    timeout: POLL_TOPASS_TIMEOUT,
   })
+}
+
+const waitForAutoSaveToRunAndComplete = async (page: Page) => {
+  await expect(async () => {
+    await expect(page.locator('.autosave:has-text("Saving...")')).toBeVisible()
+  }).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+
+  await waitForAutoSaveToComplete(page)
 }
 
 describe('versions', () => {
@@ -89,7 +96,7 @@ describe('versions', () => {
 
   beforeAll(async ({ browser }) => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2E({ config, dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     const context = await browser.newContext()
     page = await context.newPage()
 
@@ -97,7 +104,13 @@ describe('versions', () => {
   })
 
   beforeEach(async () => {
-    await clearAndSeedEverything(payload)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'versionsTest',
+    })
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+    //await clearAndSeedEverything(payload)
   })
 
   describe('draft collections', () => {
@@ -257,7 +270,7 @@ describe('versions', () => {
       await page.waitForSelector('.doc-header__title', { state: 'visible' })
 
       await page.goto(`${page.url()}/versions`)
-      expect(page.url()).toMatch(/\/versions$/)
+      expect(page.url()).toMatch(/\/versions/)
     })
 
     test('should show collection versions view level action in collection versions view', async () => {
@@ -314,7 +327,7 @@ describe('versions', () => {
       const titleField = page.locator('#field-title')
 
       await titleField.fill('global title')
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
       await expect(titleField).toHaveValue('global title')
 
       // refresh the page and ensure value autosaved
@@ -330,21 +343,24 @@ describe('versions', () => {
       const newDescription = 'new description'
 
       await page.goto(autosaveURL.create)
-      await page.waitForURL(`**/${autosaveURL.create}`)
-      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+      // gets redirected from /create to /slug/id due to autosave
+      await page.waitForURL(`${autosaveURL.list}/**`)
+      await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
       const titleField = page.locator('#field-title')
       const descriptionField = page.locator('#field-description')
 
       // fill out en doc
       await titleField.fill(englishTitle)
       await descriptionField.fill('description')
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
 
       // change locale to spanish
       await changeLocale(page, es)
       // set localized title field
       await titleField.fill(spanishTitle)
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
 
       // change locale back to en
       await changeLocale(page, en)
@@ -352,7 +368,7 @@ describe('versions', () => {
       await expect(titleField).toHaveValue(englishTitle)
       // change non-localized description field
       await descriptionField.fill(newDescription)
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
 
       // change locale to spanish
       await changeLocale(page, es)
@@ -409,26 +425,37 @@ describe('versions', () => {
     test('collection - autosave should only update the current document', async () => {
       // create and save first doc
       await page.goto(autosaveURL.create)
-      await page.waitForURL(`**/${autosaveURL.create}`)
-      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+      // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
+      await page.waitForURL(`${autosaveURL.list}/**`)
+      await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      }) // Make sure this doesnt match for list view and /create view, but ONLY for the ID edit view
 
       await page.locator('#field-title').fill('first post title')
       await page.locator('#field-description').fill('first post description')
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
+      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
 
       // create and save second doc
       await page.goto(autosaveURL.create)
-      await page.waitForURL(`**/${autosaveURL.create}`)
-      await page.waitForURL(/\/(?!create$)[\w-]+$/)
+      // Should redirect from /create to /[collectionslug]/[new id] due to auto-save
+      await page.waitForURL(`${autosaveURL.list}/**`)
+      await expect(() => expect(page.url()).not.toContain(`/create`)).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      }) // Make sure this doesnt match for list view and /create view, but only for the ID edit view
+
+      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
+
       await page.locator('#field-title').fill('second post title')
       await page.locator('#field-description').fill('second post description')
       // publish changes
       await saveDocAndAssert(page)
+      await waitForAutoSaveToComplete(page) // Make sure nothing is auto-saving before next steps
 
       // update second doc and wait for autosave
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
-      await waitForAutoSaveToComplete(page)
+      await waitForAutoSaveToRunAndComplete(page)
 
       // verify that the first doc is unchanged
       await page.goto(autosaveURL.list)
@@ -442,7 +469,7 @@ describe('versions', () => {
 
     test('should save versions with custom IDs', async () => {
       await page.goto(customIDURL.create)
-      await page.waitForURL(`**/${customIDURL.create}`)
+      await page.waitForURL(`${customIDURL.create}`)
       await page.locator('#field-id').fill('custom')
       await page.locator('#field-title').fill('title')
       await saveDocAndAssert(page)

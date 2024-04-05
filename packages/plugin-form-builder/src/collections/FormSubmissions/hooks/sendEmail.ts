@@ -4,7 +4,7 @@ import { serializeLexical } from '../../../utilities/lexical/serializeLexical.js
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys.js'
 import { serializeSlate } from '../../../utilities/slate/serializeSlate.js'
 
-const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promise<any> => {
+export const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promise<any> => {
   const { data, operation, req } = beforeChangeData
 
   if (operation === 'create') {
@@ -98,5 +98,3 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promi
 
   return data
 }
-
-export default sendEmail

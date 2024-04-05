@@ -76,6 +76,8 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
     <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
       {initialState !== false && (
         <Form
+          beforeSubmit={[onChange]}
+          disableValidationOnSubmit
           fields={Array.isArray(fieldMap) ? fieldMap : []}
           initialState={initialState}
           onChange={[onChange]}
