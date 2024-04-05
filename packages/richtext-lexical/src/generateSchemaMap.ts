@@ -31,6 +31,7 @@ export const getGenerateSchemaMap =
         const sanitizedFields = sanitizeFields({
           config,
           fields: cloneDeep(fields),
+          requireFieldLevelRichTextEditor: true,
           validRelationships,
         })
 
