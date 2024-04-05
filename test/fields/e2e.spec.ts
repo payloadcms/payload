@@ -699,6 +699,8 @@ describe('fields', () => {
             '#field-customBlocks input[name="customBlocks.0.block1Title"]',
           )
 
+          await page.mouse.wheel(0, 1750)
+
           await customBlocks.scrollIntoViewIfNeeded()
 
           await expect(customBlocks).toHaveValue('Block 1: Prefilled Title')
@@ -778,6 +780,7 @@ describe('fields', () => {
         const assertText3 = 'array row 3'
         const assertGroupText3 = 'text in group in row 3'
         await page.goto(url.create)
+        await page.mouse.wheel(0, 1750)
         await page.locator('#field-potentiallyEmptyArray').scrollIntoViewIfNeeded()
         await wait(300)
 
