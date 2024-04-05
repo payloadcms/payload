@@ -48,6 +48,10 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 }
 
 export default buildConfigWithDefaults({
+  localization: {
+    locales: ['en', 'de'],
+    defaultLocale: 'en',
+  },
   collections: [
     {
       slug,
