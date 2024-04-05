@@ -37,6 +37,7 @@ import {
 import {
   customIdCollectionId,
   customViews2CollectionSlug,
+  disableDuplicateSlug,
   geoCollectionSlug,
   globalSlug,
   group1Collection1Slug,
@@ -68,6 +69,7 @@ describe('admin', () => {
   let geoUrl: AdminUrlUtil
   let postsUrl: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
+  let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
@@ -76,6 +78,7 @@ describe('admin', () => {
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -576,6 +579,14 @@ describe('admin', () => {
       await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+
+    test('should hide duplicate when disableDuplicate: true', async () => {
+      await page.goto(disableDuplicateURL.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await expect(page.locator('#action-duplicate')).toBeHidden()
     })
   })
 

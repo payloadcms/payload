@@ -12,8 +12,7 @@ import { Autosave } from '../Autosave/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
-import { PopupList } from '../Popup/index.js'
-import { Popup } from '../Popup/index.js'
+import { Popup, PopupList } from '../Popup/index.js'
 import { PreviewButton } from '../PreviewButton/index.js'
 import { Publish } from '../Publish/index.js'
 import { Save } from '../Save/index.js'
@@ -198,7 +197,7 @@ export const DocumentControls: React.FC<{
                     >
                       {i18n.t('general:createNew')}
                     </PopupList.Button>
-                    {!collectionConfig?.admin?.disableDuplicate && isEditing && (
+                    {!collectionConfig.disableDuplicate && isEditing && (
                       <DuplicateDocument
                         id={id.toString()}
                         singularLabel={collectionConfig?.labels?.singular}

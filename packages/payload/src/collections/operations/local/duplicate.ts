@@ -43,7 +43,14 @@ export async function duplicate<TSlug extends keyof GeneratedTypes['collections'
     )
   }
 
-  const req = await createLocalReq(options, payload)
+  if (collection.config.disableDuplicate === false) {
+    throw new APIError(
+      `The collection with slug ${String(collectionSlug)} cannot be duplicated.`,
+      400,
+    )
+  }
+
+  const req = createLocalReq(options, payload)
 
   return duplicateOperation<TSlug>({
     id,
