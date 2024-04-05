@@ -597,6 +597,10 @@ export type RadioField = FieldBase & {
 export type Block = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   fields: Field[]
   /** @deprecated - please migrate to the interfaceName property instead. */
   graphQL?: {
