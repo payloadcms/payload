@@ -18,6 +18,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'csrf'
   | 'db'
   | 'editor'
+  | 'email'
   | 'endpoints'
   | 'hooks'
   | 'onInit'
@@ -59,6 +60,7 @@ export const createClientConfig = async (
     'typescript',
     'cors',
     'csrf',
+    'email',
     // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
   ]
 
