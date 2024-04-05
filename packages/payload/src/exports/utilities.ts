@@ -29,17 +29,17 @@ export { getCollectionIDFieldTypes } from '../utilities/getCollectionIDFieldType
 export { getIDType } from '../utilities/getIDType.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { default as getUniqueListBy } from '../utilities/getUniqueListBy.js'
+
 export { isEntityHidden } from '../utilities/isEntityHidden.js'
 
 export { isNumber } from '../utilities/isNumber.js'
-
 export { isPlainObject } from '../utilities/isPlainObject.js'
-export { isPlainFunction, isReactComponent } from '../utilities/isReactComponent.js'
 
+export { isPlainFunction, isReactComponent } from '../utilities/isReactComponent.js'
 export { isValidID } from '../utilities/isValidID.js'
 export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
-export { mapAsync } from '../utilities/mapAsync.js'
 
+export { mapAsync } from '../utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from '../utilities/mergeListSearchAndWhere.js'
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 export { default as toKebabCase } from '../utilities/toKebabCase.js'

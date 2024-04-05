@@ -58,7 +58,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     )
   }
 
-  const req = await createLocalReq(options, payload)
+  const req = createLocalReq(options, payload)
   req.file = file ?? (await getFileByPath(filePath))
 
   return createOperation<TSlug>({

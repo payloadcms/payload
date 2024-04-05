@@ -378,7 +378,7 @@ export const POST =
               res = await (
                 endpoints.collection.POST[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
               )({ id: slug3, collection, req })
-            } else if (slug3 === 'duplicate') {
+            } else if (slug3 === 'duplicate' && collection.config.disableDuplicate !== true) {
               // /:collection/:id/duplicate
               res = await endpoints.collection.POST.duplicate({ id: slug2, collection, req })
             }

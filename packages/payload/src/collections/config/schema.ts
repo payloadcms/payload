@@ -59,7 +59,6 @@ const collectionSchema = joi.object().keys({
     }),
     defaultColumns: joi.array().items(joi.string()),
     description: joi.alternatives().try(joi.string(), componentSchema),
-    disableDuplicate: joi.bool(),
     enableRichTextLink: joi.boolean(),
     enableRichTextRelationship: joi.boolean(),
     group: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
@@ -111,6 +110,7 @@ const collectionSchema = joi.object().keys({
   custom: joi.object().pattern(joi.string(), joi.any()),
   dbName: joi.alternatives().try(joi.string(), joi.func()),
   defaultSort: joi.string(),
+  disableDuplicate: joi.bool(),
   endpoints: endpointsSchema,
   fields: joi.array(),
   graphQL: joi.alternatives().try(
@@ -137,12 +137,6 @@ const collectionSchema = joi.object().keys({
     beforeRead: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),
   }),
-  indexes: joi.array().items(
-    joi.object().keys({
-      fields: joi.object().required(),
-      options: joi.object(),
-    }),
-  ),
   labels: joi.object({
     plural: joi
       .alternatives()
