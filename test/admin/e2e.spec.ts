@@ -72,7 +72,10 @@ describe('admin', () => {
 
   beforeAll(async ({ browser }) => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
+      dirname,
+      prebuild: Boolean(process.env.CI),
+    }))
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)

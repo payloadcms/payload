@@ -1,18 +1,19 @@
 import { createServer } from 'http'
 import nextImport from 'next'
 import nextBuild from 'next/dist/build/index.js'
-import path from 'path'
 import { wait } from 'payload/utilities'
 import { parse } from 'url'
 
 import type { GeneratedTypes } from './sdk/types.js'
 
 import { createTestHooks } from '../testHooks.js'
+import { getNextJSRootDir } from './getNextJSRootDir.js'
 import { PayloadTestSDK } from './sdk/index.js'
 import startMemoryDB from './startMemoryDB.js'
 
 type Args = {
   dirname: string
+  prebuild?: boolean
 }
 
 type Result<T extends GeneratedTypes<T>> = {
@@ -22,6 +23,7 @@ type Result<T extends GeneratedTypes<T>> = {
 
 export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
   dirname,
+  prebuild,
 }: Args): Promise<Result<T>> {
   const testSuiteName = dirname.split('/').pop()
   const { beforeTest } = await createTestHooks(testSuiteName)
@@ -33,27 +35,18 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 
   await startMemoryDB()
 
-  // process.env.CI = 'true'
+  const dir = getNextJSRootDir(testSuiteName)
 
-  if (process.env.CI) {
-    await nextBuild.default(
-      path.resolve(dirname, '../../'),
-      false,
-      false,
-      false,
-      true,
-      true,
-      false,
-      'default',
-    )
+  if (prebuild) {
+    await nextBuild.default(dir, false, false, false, true, true, false, 'default')
   }
 
   // @ts-expect-error
   const app = nextImport({
-    dev: !process.env.CI,
+    dev: !prebuild,
     hostname: 'localhost',
     port,
-    dir: path.resolve(dirname, '../../'),
+    dir,
   })
 
   const handle = app.getRequestHandler()
