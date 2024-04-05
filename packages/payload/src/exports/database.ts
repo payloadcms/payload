@@ -12,6 +12,7 @@ export {
   CreateMigration,
   CreateVersion,
   CreateVersionArgs,
+  DBIdentifierName,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,

@@ -6,14 +6,18 @@ desc: Set up your Global config for your needs by defining fields, adding slugs 
 keywords: globals, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Global configs are in many ways similar to [Collections](/docs/configuration/collections). The big difference is that Collections will potentially contain _many_ documents, while a Global is a "one-off". Globals are perfect for things like header nav, site-wide banner alerts, app-wide localized strings, and other "global" data that your site or app might rely on.
+Global configs are in many ways similar to [Collections](/docs/configuration/collections). The big difference is that
+Collections will potentially contain _many_ documents, while a Global is a "one-off". Globals are perfect for things
+like header nav, site-wide banner alerts, app-wide localized strings, and other "global" data that your site or app
+might rely on.
 
-As with Collection configs, it's often best practice to write your Globals in separate files and then import them into the main Payload config.
+As with Collection configs, it's often best practice to write your Globals in separate files and then import them into
+the main Payload config.
 
 ## Options
 
 | Option             | Description                                                                                                                                                                                                          |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`slug`** \*      | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                                          |
 | **`fields`** \*    | Array of field types that will determine the structure and functionality of the data stored within this Global. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
 | **`label`**        | Text for the name in the Admin panel or an object with keys for each language. Auto-generated from slug if not defined.                                                                                              |
@@ -26,6 +30,7 @@ As with Collection configs, it's often best practice to write your Globals in se
 | **`graphQL.name`** | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                                             |
 | **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                  |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
+| **`dbName`**       | Custom table or collection name for this global depending on the database adapter. Auto-generated from slug if not defined.
 
 _\* An asterisk denotes that a property is required._
 
@@ -59,26 +64,30 @@ export default Nav
 
 #### Global config example
 
-You can find a few [example Global configs](https://github.com/payloadcms/public-demo/tree/master/src/payload/globals) in the Public Demo source code on GitHub.
+You can find a few [example Global configs](https://github.com/payloadcms/public-demo/tree/master/src/payload/globals)
+in the Public Demo source code on GitHub.
 
 ### Admin options
 
-You can customize the way that the Admin panel behaves on a Global-by-Global basis by defining the `admin` property on a Global's config.
+You can customize the way that the Admin panel behaves on a Global-by-Global basis by defining the `admin` property on a
+Global's config.
 
-| Option       | Description                                                                                                                               |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `group`      | Text used as a label for grouping collection and global links together in the navigation.                                                 |
-| `hidden`     | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing.         |
-| `components` | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                                   |
-| `preview`    | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview).                   |
-| `livePreview`| Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                  |
-| `hideAPIURL` | Hides the "API URL" meta field while editing documents within this collection.                                                            |
+| Option        | Description                                                                                                                       |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `group`       | Text used as a label for grouping collection and global links together in the navigation.                                         |
+| `hidden`      | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing. |
+| `components`  | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                           |
+| `preview`     | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview).           |
+| `livePreview` | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).          |
+| `hideAPIURL`  | Hides the "API URL" meta field while editing documents within this collection.                                                    |
 
 ### Preview
 
-Global `admin` options can accept a `preview` function that will be used to generate a link pointing to the frontend of your app to preview data.
+Global `admin` options can accept a `preview` function that will be used to generate a link pointing to the frontend of
+your app to preview data.
 
-If the function is specified, a Preview button will automatically appear in the corresponding global's Edit view. Clicking the Preview button will link to the URL that is generated by the function.
+If the function is specified, a Preview button will automatically appear in the corresponding global's Edit view.
+Clicking the Preview button will link to the URL that is generated by the function.
 
 **The preview function accepts two arguments:**
 
@@ -113,15 +122,20 @@ export const MyGlobal: GlobalConfig = {
 
 ### Access control
 
-As with Collections, you can specify extremely granular access control (what users can do with this Global) on a Global-by-Global basis. However, Globals only have `update` and `read` access control due to their nature of only having one document. To learn more, go to the [Access Control](/docs/access-control/overview) docs.
+As with Collections, you can specify extremely granular access control (what users can do with this Global) on a
+Global-by-Global basis. However, Globals only have `update` and `read` access control due to their nature of only having
+one document. To learn more, go to the [Access Control](/docs/access-control/overview) docs.
 
 ### Hooks
 
-Globals also fully support a smaller subset of Hooks. To learn more, go to the [Hooks](/docs/hooks/overview) documentation.
+Globals also fully support a smaller subset of Hooks. To learn more, go to the [Hooks](/docs/hooks/overview)
+documentation.
 
 ### Field types
 
-Globals support all field types that Payload has to offer—including simple fields like text and checkboxes all the way to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/overview) to learn more about field types.
+Globals support all field types that Payload has to offer—including simple fields like text and checkboxes all the way
+to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/overview) to learn more about
+field types.
 
 ### TypeScript
 

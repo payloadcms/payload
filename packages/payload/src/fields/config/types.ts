@@ -15,6 +15,7 @@ import type { RichTextAdapter } from '../../admin/components/forms/field-types/R
 import type { User } from '../../auth'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'
+import type { DBIdentifierName } from '../../database/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { Payload } from '../../payload'
@@ -78,7 +79,11 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
 export type Condition<T extends TypeWithID = any, P = any> = (
   data: Partial<T>,
   siblingData: Partial<P>,
-  { user }: { user: User },
+  {
+    user,
+  }: {
+    user: User
+  },
 ) => boolean
 
 export type FilterOptionsProps<T = any> = {
@@ -443,6 +448,14 @@ export type SelectField = FieldBase & {
     isClearable?: boolean
     isSortable?: boolean
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
+  /**
+   * Customize the DB enum name
+   */
+  enumName?: DBIdentifierName
   hasMany?: boolean
   options: Option[]
   type: 'select'
@@ -492,7 +505,9 @@ type RelationshipAdmin = Admin & {
 }
 export type PolymorphicRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
-    sortOptions?: { [collectionSlug: string]: string }
+    sortOptions?: {
+      [collectionSlug: string]: string
+    }
   }
   relationTo: string[]
 }
@@ -541,6 +556,10 @@ export type ArrayField = FieldBase & {
     } & Admin['components']
     initCollapsed?: boolean | false
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
    * By default it is bound to the collection.
@@ -563,6 +582,14 @@ export type RadioField = FieldBase & {
     }
     layout?: 'horizontal' | 'vertical'
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
+  /**
+   * Customize the DB enum name
+   */
+  enumName?: DBIdentifierName
   options: Option[]
   type: 'radio'
 }

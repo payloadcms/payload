@@ -200,9 +200,11 @@ export const select = baseField.keys({
     isClearable: joi.boolean().default(false),
     isSortable: joi.boolean().default(false),
   }),
+  dbName: joi.alternatives().try(joi.string(), joi.func()),
   defaultValue: joi
     .alternatives()
     .try(joi.string().allow(''), joi.array().items(joi.string().allow('')), joi.func()),
+  enumName: joi.alternatives().try(joi.string(), joi.func()),
   hasMany: joi.boolean().default(false),
   options: joi
     .array()
@@ -232,6 +234,7 @@ export const radio = baseField.keys({
     layout: joi.string().valid('vertical', 'horizontal'),
   }),
   defaultValue: joi.alternatives().try(joi.string().allow(''), joi.func()),
+  enumName: joi.alternatives().try(joi.string(), joi.func()),
   options: joi
     .array()
     .min(1)
@@ -309,6 +312,7 @@ export const array = baseField.keys({
         .default({}),
     })
     .default({}),
+  dbName: joi.alternatives().try(joi.string(), joi.func()),
   defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func()),
   fields: joi.array().items(joi.link('#field')).required(),
   interfaceName: joi.string(),
@@ -409,6 +413,7 @@ export const blocks = baseField.keys({
       joi.object({
         slug: joi.string().required(),
         custom: joi.object().pattern(joi.string(), joi.any()),
+        dbName: joi.alternatives().try(joi.string(), joi.func()),
         fields: joi.array().items(joi.link('#field')),
         graphQL: joi.object().keys({
           singularName: joi.string(),
