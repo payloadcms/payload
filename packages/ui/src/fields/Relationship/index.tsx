@@ -52,7 +52,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     label,
     labelProps,
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     relationTo,
     required,
     sortOptions,
@@ -92,7 +92,8 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     },
     [validate, required],
   )
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { filterOptions, initialValue, path, setValue, showError, value } = useField<
     Value | Value[]

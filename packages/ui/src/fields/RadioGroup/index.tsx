@@ -50,7 +50,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     onChange: onChangeFromProps,
     options = [],
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     style,
     validate,
@@ -68,7 +68,8 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     [validate, options, required],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const {
     path,

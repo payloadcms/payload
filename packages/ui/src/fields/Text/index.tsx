@@ -39,6 +39,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
     minRows,
     path: pathFromProps,
     placeholder,
+    readOnly: readOnlyFromProps,
     required,
     rtl,
     style,
@@ -58,9 +59,10 @@ const TextField: React.FC<TextFieldProps> = (props) => {
     [validate, minLength, maxLength, required],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
-  const { path, readOnly, setValue, showError, value } = useField({
+  const { formProcessing, path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
@@ -137,7 +139,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={readOnly}
+      readOnly={formProcessing || readOnly}
       required={required}
       rtl={renderRTL}
       showError={showError}

@@ -43,7 +43,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     labelProps,
     path: pathFromProps,
     placeholder,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     step,
     style,
@@ -62,7 +62,8 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const {
     path,
@@ -89,7 +90,8 @@ const PointField: React.FC<PointFieldProps> = (props) => {
 
   const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
     const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
-    const fieldLabel = labelProps && labelProps.label ? labelProps.label : ''
+    const fieldLabel = labelProps && labelProps.label ? getTranslation(labelProps.label, i18n) : ''
+
     return {
       ...labelProps,
       label: `${fieldLabel}${fieldLabel ? ' - ' : ''}${suffix}`,

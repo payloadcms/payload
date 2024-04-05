@@ -39,7 +39,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
     onChange: onChangeFromProps,
     partialChecked,
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     style,
     validate,
@@ -57,7 +57,8 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { path, setValue, showError, value } = useField({
     disableFormData,

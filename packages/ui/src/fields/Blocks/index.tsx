@@ -69,12 +69,13 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     maxRows,
     minRows,
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     validate,
   } = props
 
-  const { indexPath } = useFieldProps()
+  const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
