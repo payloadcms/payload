@@ -14,8 +14,8 @@ type Args = {
   }
 }
 
-export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>
-  generatePageMetadata({ config, params, searchParams })
+export const generateMetadata = ({ params }: Args): Promise<Metadata> =>
+  generatePageMetadata({ config, params })
 
 const NotFound = ({ params, searchParams }: Args) => NotFoundPage({ config, params, searchParams })
 

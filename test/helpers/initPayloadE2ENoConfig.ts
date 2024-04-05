@@ -1,5 +1,6 @@
 import { createServer } from 'http'
 import nextImport from 'next'
+import nextBuild from 'next/dist/build/index.js'
 import path from 'path'
 import { wait } from 'payload/utilities'
 import { parse } from 'url'
@@ -32,9 +33,24 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 
   await startMemoryDB()
 
+  // process.env.CI = 'true'
+
+  if (process.env.CI) {
+    await nextBuild.default(
+      path.resolve(dirname, '../../'),
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      'default',
+    )
+  }
+
   // @ts-expect-error
   const app = nextImport({
-    dev: true,
+    dev: !process.env.CI,
     hostname: 'localhost',
     port,
     dir: path.resolve(dirname, '../../'),
