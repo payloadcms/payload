@@ -7,9 +7,9 @@ import type {
   CustomIdRelation,
   Director,
   Post,
+  PostsLocalized,
   Relation,
 } from './payload-types'
-import type { PostsLocalized } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
@@ -343,6 +343,106 @@ describe('Relationships', () => {
         expect(query.docs).toHaveLength(1) // Due to limit: 1
       })
 
+      it('should query using "contains" by hasMany relationship field', async () => {
+        const movie1 = await payload.create({
+          collection: 'movies',
+          data: {},
+        })
+        const movie2 = await payload.create({
+          collection: 'movies',
+          data: {},
+        })
+
+        await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+            movies: [movie2.id, movie1.id],
+          },
+        })
+
+        await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+            movies: [movie2.id],
+          },
+        })
+
+        const query1 = await payload.find({
+          collection: 'directors',
+          depth: 0,
+          where: {
+            movies: {
+              contains: movie1.id,
+            },
+          },
+        })
+        const query2 = await payload.find({
+          collection: 'directors',
+          depth: 0,
+          where: {
+            movies: {
+              contains: movie2.id,
+            },
+          },
+        })
+
+        expect(query1.totalDocs).toStrictEqual(1)
+        expect(query2.totalDocs).toStrictEqual(2)
+      })
+
+      it('should query using "in" by hasMany relationship field', async () => {
+        const tree1 = await payload.create({
+          collection: treeSlug,
+          data: {
+            text: 'Tree 1',
+          },
+        })
+
+        const tree2 = await payload.create({
+          collection: treeSlug,
+          data: {
+            parent: tree1.id,
+            text: 'Tree 2',
+          },
+        })
+
+        const tree3 = await payload.create({
+          collection: treeSlug,
+          data: {
+            parent: tree2.id,
+            text: 'Tree 3',
+          },
+        })
+
+        const tree4 = await payload.create({
+          collection: treeSlug,
+          data: {
+            parent: tree3.id,
+            text: 'Tree 4',
+          },
+        })
+
+        const validParents = [tree2.id, tree3.id]
+
+        const query = await payload.find({
+          collection: treeSlug,
+          depth: 0,
+          sort: 'createdAt',
+          where: {
+            parent: {
+              in: validParents,
+            },
+          },
+        })
+        // should only return tree3 and tree4
+
+        expect(query.totalDocs).toEqual(2)
+        expect(query.docs[0].text).toEqual('Tree 3')
+        expect(query.docs[1].text).toEqual('Tree 4')
+      })
+
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
           const { doc } = await client.findByID<Post>({ id: post.id })
@@ -436,8 +536,8 @@ describe('Relationships', () => {
           localizedPost1 = await payload.create<'postsLocalized'>({
             collection: slugWithLocalizedRel,
             data: {
-              title: 'english',
               relationField: relation1.id,
+              title: 'english',
             },
             locale: 'en',
           })
@@ -445,17 +545,17 @@ describe('Relationships', () => {
           await payload.update({
             id: localizedPost1.id,
             collection: slugWithLocalizedRel,
-            locale: 'de',
             data: {
               relationField: relation2.id,
             },
+            locale: 'de',
           })
 
           localizedPost2 = await payload.create({
             collection: slugWithLocalizedRel,
             data: {
-              title: 'german',
               relationField: relation2.id,
+              title: 'german',
             },
             locale: 'de',
           })
