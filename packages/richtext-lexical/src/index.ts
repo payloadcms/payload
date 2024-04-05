@@ -101,6 +101,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     editorConfig: finalSanitizedEditorConfig,
     outputSchema: ({
       collectionIDFieldTypes,
+      config,
       field,
       interfaceNameDefinitions,
       isRequired,
@@ -166,6 +167,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         .modifyOutputSchemas) {
         outputSchema = modifyOutputSchema({
           collectionIDFieldTypes,
+          config,
           currentSchema: outputSchema,
           field,
           interfaceNameDefinitions,
