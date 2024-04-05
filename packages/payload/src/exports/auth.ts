@@ -1,7 +1,7 @@
 export * from '../auth/index.js'
 export { default as executeAccess } from '../auth/executeAccess.js'
+export { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 export { getAccessResults } from '../auth/getAccessResults.js'
-export { getAuthenticatedUser } from '../auth/getAuthenticatedUser.js'
 
 export type {
   AuthStrategyFunction,
