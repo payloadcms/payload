@@ -587,6 +587,10 @@ export type ArrayField = FieldBase & {
     } & Admin['components']
     initCollapsed?: boolean
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
    * By default it is bound to the collection.
@@ -624,6 +628,10 @@ export type RadioField = FieldBase & {
 export type Block = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   fields: Field[]
   /** @deprecated - please migrate to the interfaceName property instead. */
   graphQL?: {
