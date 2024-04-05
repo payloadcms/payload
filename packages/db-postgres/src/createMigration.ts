@@ -13,8 +13,7 @@ const require = createRequire(import.meta.url)
 const migrationTemplate = (
   upSQL?: string,
   downSQL?: string,
-) => `import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres'
-import { sql } from 'drizzle-orm'
+) => `import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
 ${

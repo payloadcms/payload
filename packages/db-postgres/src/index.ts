@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 import type { DatabaseAdapterObj } from 'payload/database'
+export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 import fs from 'fs'
 import path from 'path'
@@ -38,7 +39,7 @@ import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
 import { updateVersion } from './updateVersion.js'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
+export { sql } from 'drizzle-orm'
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   function adapter({ payload }: { payload: Payload }) {
