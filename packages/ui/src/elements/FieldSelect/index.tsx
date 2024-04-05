@@ -18,32 +18,52 @@ export type FieldSelectProps = {
   setSelected: (fields: FieldWithPath[]) => void
 }
 
-const combineLabel = (prefix: JSX.Element, field: MappedField): JSX.Element => {
+const combineLabel = ({
+  customLabel,
+  field,
+  prefix,
+}: {
+  customLabel?: string
+  field?: MappedField
+  prefix?: JSX.Element | string
+}): JSX.Element => {
+  const CustomLabelToRender =
+    field &&
+    'CustomLabel' in field.fieldComponentProps &&
+    field.fieldComponentProps.CustomLabel !== undefined
+      ? field.fieldComponentProps.CustomLabel
+      : null
+  const DefaultLabelToRender =
+    field && 'labelProps' in field.fieldComponentProps && field.fieldComponentProps.labelProps ? (
+      <FieldLabel {...field.fieldComponentProps.labelProps} />
+    ) : null
+
+  const LabelToRender = CustomLabelToRender || DefaultLabelToRender || customLabel
+
+  if (!LabelToRender) return null
+
   return (
     <Fragment>
-      <span style={{ display: 'inline-block' }}>{prefix}</span>
-      {prefix ? <Fragment>{' > '}</Fragment> : ''}
-      <span style={{ display: 'inline-block' }}>
-        {'CustomLabel' in field.fieldComponentProps &&
-        field.fieldComponentProps.CustomLabel !== undefined ? (
-          field.fieldComponentProps.CustomLabel
-        ) : (
-          <FieldLabel
-            {...(('labelProps' in field.fieldComponentProps &&
-              field.fieldComponentProps.labelProps) ||
-              {})}
-          />
-        )}
-      </span>
+      {prefix && (
+        <Fragment>
+          <span style={{ display: 'inline-block' }}>{prefix}</span>
+          {' > '}
+        </Fragment>
+      )}
+      <span style={{ display: 'inline-block' }}>{LabelToRender}</span>
     </Fragment>
   )
 }
 
-const reduceFields = (
-  fieldMap: FieldMap,
+const reduceFields = ({
+  fieldMap,
+  labelPrefix = null,
   path = '',
-  labelPrefix: JSX.Element = null,
-): { Label: JSX.Element; value: FieldWithPath }[] => {
+}: {
+  fieldMap: FieldMap
+  labelPrefix?: JSX.Element | string
+  path?: string
+}): { Label: JSX.Element; value: FieldWithPath }[] => {
   if (!fieldMap) {
     return []
   }
@@ -67,26 +87,27 @@ const reduceFields = (
     ) {
       return [
         ...fieldsToUse,
-        ...reduceFields(
-          field.fieldComponentProps.fieldMap,
-          createNestedClientFieldPath(path, field),
-          combineLabel(labelPrefix, field),
-        ),
+        ...reduceFields({
+          fieldMap: field.fieldComponentProps.fieldMap,
+          labelPrefix: combineLabel({ field, prefix: labelPrefix }),
+          path: createNestedClientFieldPath(path, field),
+        }),
       ]
     }
 
-    if (field.type === 'tabs' && 'fieldMap' in field.fieldComponentProps) {
+    if (field.type === 'tabs' && 'tabs' in field.fieldComponentProps) {
       return [
         ...fieldsToUse,
-        ...field.fieldComponentProps.fieldMap.reduce((tabFields, tab) => {
-          if ('fieldMap' in tab.fieldComponentProps) {
+        ...field.fieldComponentProps.tabs.reduce((tabFields, tab) => {
+          if ('fieldMap' in tab) {
+            const isNamedTab = 'name' in tab && tab.name
             return [
               ...tabFields,
-              ...reduceFields(
-                tab.fieldComponentProps.fieldMap,
-                'name' in tab && tab.name ? createNestedClientFieldPath(path, field) : path,
-                combineLabel(labelPrefix, field),
-              ),
+              ...reduceFields({
+                fieldMap: tab.fieldMap,
+                labelPrefix,
+                path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
+              }),
             ]
           }
         }, []),
@@ -94,7 +115,7 @@ const reduceFields = (
     }
 
     const formattedField = {
-      label: combineLabel(labelPrefix, field),
+      label: combineLabel({ field, prefix: labelPrefix }),
       value: {
         ...field,
         path: createNestedClientFieldPath(path, field),
@@ -107,7 +128,7 @@ const reduceFields = (
 
 export const FieldSelect: React.FC<FieldSelectProps> = ({ fieldMap, setSelected }) => {
   const { t } = useTranslation()
-  const [options] = useState(() => reduceFields(fieldMap))
+  const [options] = useState(() => reduceFields({ fieldMap }))
 
   const { dispatchFields, getFields } = useForm()
 
@@ -140,7 +161,17 @@ export const FieldSelect: React.FC<FieldSelectProps> = ({ fieldMap, setSelected 
   return (
     <div className={baseClass}>
       <FieldLabel label={t('fields:selectFieldsToEdit')} />
-      <ReactSelect isMulti onChange={handleChange} options={options} />
+      <ReactSelect
+        getOptionValue={(option) => {
+          if (typeof option.value === 'object' && 'path' in option.value) {
+            return String(option.value.path)
+          }
+          return String(option.value)
+        }}
+        isMulti
+        onChange={handleChange}
+        options={options}
+      />
     </div>
   )
 }

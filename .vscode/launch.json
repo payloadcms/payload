@@ -24,6 +24,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "node --no-deprecation test/dev.js admin",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Admin",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "pnpm run dev plugin-cloud-storage",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev - plugin-cloud-storage",
@@ -34,7 +41,7 @@
       }
     },
     {
-      "command": "pnpm run dev fields",
+      "command": "node --no-deprecation test/dev.js fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",
       "request": "launch",

@@ -1,5 +1,6 @@
 export const usersSlug = 'users'
 export const slug = 'posts'
+export const slugWithLocalizedRel = 'postsLocalized'
 export const relationSlug = 'relation'
 export const defaultAccessRelSlug = 'strict-access'
 export const chainedRelSlug = 'chained'

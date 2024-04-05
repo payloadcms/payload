@@ -8,7 +8,11 @@ import { fileURLToPath } from 'url'
 
 import type { Media } from './payload-types.js'
 
-import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureAutoLoginAndCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
 import { RESTClient } from '../helpers/rest.js'
@@ -74,6 +78,8 @@ describe('uploads', () => {
     })
 
     audioDoc = findAudio.docs[0] as unknown as Media
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('should see upload filename in relation list', async () => {
@@ -225,7 +231,7 @@ describe('uploads', () => {
     // save the document and expect an error
     await page.locator('button#action-save').click()
     await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
-      'Please correct invalid fields.',
+      'The following field is invalid: audio',
     )
   })
 

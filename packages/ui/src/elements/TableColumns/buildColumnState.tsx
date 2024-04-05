@@ -17,7 +17,7 @@ const fieldIsPresentationalOnly = (field: MappedField): boolean => field.type ==
 type Args = {
   cellProps: Partial<CellComponentProps>[]
   columnPreferences: ColumnPreferences
-  columns?: string[]
+  columns?: ColumnPreferences
   enableRowSelections: boolean
   fieldMap: FieldMap
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
@@ -25,16 +25,25 @@ type Args = {
 export const buildColumnState = (args: Args): Column[] => {
   const { cellProps, columnPreferences, columns, enableRowSelections, fieldMap, useAsTitle } = args
 
-  // swap useAsTitle field to first slot
   let sortedFieldMap = flattenFieldMap(fieldMap)
-  const useAsTitleFieldIndex = sortedFieldMap.findIndex((field) => field.name === useAsTitle)
-  if (useAsTitleFieldIndex !== -1) {
-    const useAsTitleField = sortedFieldMap[useAsTitleFieldIndex]
-    sortedFieldMap = [
-      useAsTitleField,
-      ...sortedFieldMap.slice(0, useAsTitleFieldIndex),
-      ...sortedFieldMap.slice(useAsTitleFieldIndex + 1),
-    ]
+
+  // place the `ID` field first, if it exists
+  // do the same for the `useAsTitle` field with precedence over the `ID` field
+  // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
+  const idFieldIndex = sortedFieldMap.findIndex((field) => field.name === 'id')
+
+  if (idFieldIndex > -1) {
+    const idField = sortedFieldMap.splice(idFieldIndex, 1)[0]
+    sortedFieldMap.unshift(idField)
+  }
+
+  const useAsTitleFieldIndex = useAsTitle
+    ? sortedFieldMap.findIndex((field) => field.name === useAsTitle)
+    : -1
+
+  if (useAsTitleFieldIndex > -1) {
+    const useAsTitleField = sortedFieldMap.splice(useAsTitleFieldIndex, 1)[0]
+    sortedFieldMap.unshift(useAsTitleField)
   }
 
   const sortTo = columnPreferences || columns
@@ -63,7 +72,7 @@ export const buildColumnState = (args: Args): Column[] => {
     if (columnPreference) {
       active = columnPreference.active
     } else if (columns && Array.isArray(columns) && columns.length > 0) {
-      active = 'name' in field && columns.includes(field.name)
+      active = columns.find((column) => column.accessor === field.name)?.active
     } else if (activeColumnsIndices.length < 4) {
       active = true
     }
@@ -83,10 +92,18 @@ export const buildColumnState = (args: Args): Column[] => {
         <DefaultCell {...field.cellComponentProps} />
       )
 
+    const CustomLabelToRender =
+      field &&
+      'fieldComponentProps' in field &&
+      'CustomLabel' in field.fieldComponentProps &&
+      field.fieldComponentProps.CustomLabel !== undefined
+        ? field.fieldComponentProps.CustomLabel
+        : undefined
+
     const Label = (
       <FieldLabel
-        CustomLabel={field.fieldComponentProps.CustomLabel}
-        {...field.fieldComponentProps.labelProps}
+        CustomLabel={CustomLabelToRender}
+        {...field.fieldComponentProps?.labelProps}
         unstyled
       />
     )
@@ -100,7 +117,11 @@ export const buildColumnState = (args: Args): Column[] => {
           undefined
         }
         // eslint-disable-next-line react/jsx-no-duplicate-props
-        label={'label' in field.fieldComponentProps ? field.fieldComponentProps.label : undefined}
+        label={
+          'fieldComponentProps' in field && 'label' in field.fieldComponentProps
+            ? field.fieldComponentProps.label
+            : undefined
+        }
         name={'name' in field ? field.name : undefined}
       />
     )
@@ -108,12 +129,17 @@ export const buildColumnState = (args: Args): Column[] => {
     if (field) {
       const column: Column = {
         name,
+        type: field.type,
         Label,
         accessor: name,
         active,
         cellProps: {
           ...cellProps?.[index],
           link: isFirstActiveColumn,
+          relationTo:
+            field.type === 'relationship' && 'relationTo' in field.fieldComponentProps
+              ? field.fieldComponentProps.relationTo
+              : undefined,
         },
         components: {
           Cell,

@@ -248,6 +248,7 @@ jobs:
           - access-control
           # - admin
           - auth
+          - email
           - field-error-states
           - fields-relationship
           # - fields
@@ -279,7 +280,7 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Install Playwright
-        run: pnpm exec playwright install
+        run: pnpm exec playwright install --with-deps
 
       - name: E2E Tests
         run: pnpm test:e2e ${{ matrix.suite }}

@@ -1,9 +1,8 @@
-import type { Endpoint } from 'payload/config'
-import type { PayloadRequest } from 'payload/types'
+import type { Endpoint, PayloadHandler } from 'payload/config'
 
 import httpStatus from 'http-status'
 
-export const handler = async ({ payload, data, user }: PayloadRequest) => {
+export const handler: PayloadHandler = async ({ payload, data, user }) => {
   const method = String(data.method)
 
   if (typeof payload[method] === 'function') {

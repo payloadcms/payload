@@ -45,7 +45,9 @@ export const createMigration: CreateMigration = async function createMigration({
 
     // Check if predefined migration exists
     if (fs.existsSync(cleanPath)) {
-      let migration = await eval(`${require ? 'require' : 'import'}(${cleanPath})`)
+      let migration = await eval(
+        `${typeof require === 'function' ? 'require' : 'import'}(${cleanPath})`,
+      )
       if ('default' in migration) migration = migration.default
       const { down, up } = migration
 

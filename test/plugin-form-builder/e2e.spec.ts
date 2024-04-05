@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
@@ -33,6 +33,8 @@ test.describe('Form Builder', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test.describe('Forms collection', () => {
@@ -105,19 +107,16 @@ test.describe('Form Builder', () => {
 
     test('can create form submission', async () => {
       await page.goto(submissionsUrl.list)
+      await page.waitForURL(submissionsUrl.list)
 
-      const contactForm = await payload
-        .find({
-          collection: 'forms',
-        })
-        .then((data) => {
-          return data[0]
-        })
+      const { docs } = await payload.find({
+        collection: 'forms',
+      })
 
       const createdSubmission = await payload.create({
         collection: 'form-submissions',
         data: {
-          form: contactForm.id,
+          form: docs[0].id,
           submissionData: [
             {
               field: 'name',

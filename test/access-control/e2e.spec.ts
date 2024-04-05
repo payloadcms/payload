@@ -9,6 +9,7 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
 import {
   closeNav,
+  ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   openDocControls,
@@ -59,6 +60,7 @@ describe('access control', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
 
   test('field without read access should not show', async () => {

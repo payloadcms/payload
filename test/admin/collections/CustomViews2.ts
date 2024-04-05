@@ -44,7 +44,7 @@ export const CustomViews2: CollectionConfig = {
           MyCustomViewWithNestedPath: {
             Component: CustomNestedTabView,
             path: customNestedTabViewPath,
-            tab: {
+            Tab: {
               label: 'Custom Nested Tab View',
               href: customNestedTabViewPath,
             },

@@ -9,7 +9,7 @@ import { RenderCustomComponent } from '@payloadcms/ui/elements/RenderCustomCompo
 import { DocumentInfoProvider } from '@payloadcms/ui/providers/DocumentInfo'
 import { EditDepthProvider } from '@payloadcms/ui/providers/EditDepth'
 import { FormQueryParamsProvider } from '@payloadcms/ui/providers/FormQueryParams'
-import { notFound } from 'next/navigation.js'
+import { notFound, redirect } from 'next/navigation.js'
 import { docAccessOperation } from 'payload/operations'
 import React from 'react'
 
@@ -38,7 +38,7 @@ export const Document: React.FC<AdminViewProps> = async ({
       payload: {
         config,
         config: {
-          routes: { api: apiRoute },
+          routes: { admin: adminRoute, api: apiRoute },
           serverURL,
         },
       },
@@ -150,6 +150,35 @@ export const Document: React.FC<AdminViewProps> = async ({
 
         notFound()
       }
+    }
+  }
+
+  /**
+   * Handle case where autoSave is enabled and the document is being created
+   * => create document and redirect
+   */
+  const shouldAutosave =
+    hasSavePermission &&
+    ((collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
+      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave))
+
+  if (shouldAutosave && !id && collectionSlug) {
+    const doc = await payload.create({
+      collection: collectionSlug,
+      data: {},
+      depth: 0,
+      draft: true,
+      fallbackLocale: null,
+      locale: locale.code,
+      req,
+      user,
+    })
+
+    if (doc?.id) {
+      const redirectURL = `${serverURL}${adminRoute}/collections/${collectionSlug}/${doc.id}`
+      redirect(redirectURL)
+    } else {
+      notFound()
     }
   }
 

@@ -31,7 +31,7 @@ import { GlobalGroup1A } from './globals/Group1A.js'
 import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 import { customNestedViewPath, customParamViewPath, customViewPath } from './shared.js'
 
 export default buildConfigWithDefaults({
@@ -129,7 +129,7 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
 })

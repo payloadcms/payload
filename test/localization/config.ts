@@ -279,6 +279,19 @@ export default buildConfigWithDefaults({
   onInit: async (payload) => {
     const collection = localizedPostsSlug
 
+    console.log('SEED BEGIN')
+
+    if (payload.db.name === 'mongoose') {
+      await new Promise((resolve, reject) => {
+        payload.db?.collections[localizedPostsSlug]?.ensureIndexes(function (err) {
+          if (err) reject(err)
+          resolve(true)
+        })
+      })
+    }
+
+    console.log('INDEXES CREATED')
+
     await payload.create({
       collection,
       data: {
@@ -292,6 +305,8 @@ export default buildConfigWithDefaults({
         title: englishTitle,
       },
     })
+
+    console.log('SEED 1')
 
     await payload.create({
       collection: 'users',
@@ -311,6 +326,8 @@ export default buildConfigWithDefaults({
       locale: spanishLocale,
     })
 
+    console.log('SEED 2')
+
     const localizedRelation = await payload.create({
       collection,
       data: {
@@ -327,6 +344,8 @@ export default buildConfigWithDefaults({
       locale: spanishLocale,
     })
 
+    console.log('SEED 3')
+
     const localizedRelation2 = await payload.create({
       collection,
       data: {
@@ -341,6 +360,8 @@ export default buildConfigWithDefaults({
       },
       locale: spanishLocale,
     })
+
+    console.log('SEED 4')
 
     await payload.create({
       collection: withLocalizedRelSlug,
@@ -373,6 +394,8 @@ export default buildConfigWithDefaults({
       locale: 'en',
     })
 
+    console.log('SEED 5')
+
     const globalArray = await payload.updateGlobal({
       data: {
         array: [
@@ -397,5 +420,7 @@ export default buildConfigWithDefaults({
       locale: 'es',
       slug: 'global-array',
     })
+
+    console.log('SEED COMPLETE')
   },
 })

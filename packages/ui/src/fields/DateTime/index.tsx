@@ -49,7 +49,7 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
     labelProps,
     path: pathFromProps,
     placeholder,
-    readOnly,
+    readOnly: readOnlyFromProps,
     required,
     style,
     validate,
@@ -67,12 +67,14 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
     [validate, required],
   )
 
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { path, setValue, showError, value } = useField<Date>({
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   return (
     <div

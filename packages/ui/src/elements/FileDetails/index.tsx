@@ -35,7 +35,7 @@ export const FileDetails: React.FC<FileDetailsProps> = (props) => {
         <Thumbnail
           collectionSlug={collectionSlug}
           doc={doc}
-          fileSrc={thumbnailURL}
+          fileSrc={thumbnailURL || url}
           imageCacheTag={imageCacheTag}
           uploadConfig={uploadConfig}
         />

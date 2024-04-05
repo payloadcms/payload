@@ -12,13 +12,17 @@ export default async () => {
     (!process.env.PAYLOAD_DATABASE || process.env.PAYLOAD_DATABASE === 'mongodb') &&
     !global._mongoMemoryServer
   ) {
-    global._mongoMemoryServer = await MongoMemoryReplSet.create({
+    const db = await MongoMemoryReplSet.create({
       replSet: {
         count: 3,
         dbName: 'payloadmemory',
       },
     })
 
-    process.env.MONGODB_MEMORY_SERVER_URI = global._mongoMemoryServer.getUri()
+    global._mongoMemoryServer = db
+
+    process.env.MONGODB_MEMORY_SERVER_URI = `${global._mongoMemoryServer.getUri()}&retryWrites=true`
+
+    console.log(process.env.MONGODB_MEMORY_SERVER_URI)
   }
 }

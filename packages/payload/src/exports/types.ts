@@ -39,7 +39,15 @@ export type {
 } from './../collections/config/types.js'
 
 export type { ClientConfig } from './../config/client.js'
-export type { Access, AccessArgs, EditViewComponent, SanitizedConfig } from './../config/types.js'
+export type {
+  Access,
+  AccessArgs,
+  EditViewComponent,
+  EntityDescription,
+  EntityDescriptionComponent,
+  EntityDescriptionFunction,
+  SanitizedConfig,
+} from './../config/types.js'
 export type { ClientFieldConfig } from './../fields/config/client.js'
 export type {
   ArrayField,
@@ -62,6 +70,7 @@ export type {
   FieldWithMany,
   FieldWithMaxDepth,
   FieldWithPath,
+  FieldWithRichTextRequiredEditor,
   FieldWithSubFields,
   FilterOptions,
   FilterOptionsProps,
@@ -80,6 +89,7 @@ export type {
   RelationshipField,
   RelationshipValue,
   RichTextField,
+  RichTextFieldRequiredEditor,
   RowAdmin,
   RowField,
   SelectField,

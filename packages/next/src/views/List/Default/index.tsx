@@ -37,7 +37,7 @@ const baseClass = 'collection-list'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC = () => {
-  const { Header, collectionSlug, hasCreatePermission, newDocumentURL, titleField } = useListInfo()
+  const { Header, collectionSlug, hasCreatePermission, newDocumentURL } = useListInfo()
   const { data, defaultLimit, handlePageChange, handlePerPageChange } = useListQuery()
   const { searchParams } = useSearchParams()
 
@@ -47,8 +47,15 @@ export const DefaultListView: React.FC = () => {
 
   const componentMap = getComponentMap({ collectionSlug }) as CollectionComponentMap
 
-  const { AfterList, AfterListTable, BeforeList, BeforeListTable, actionsMap, fieldMap } =
-    componentMap || {}
+  const {
+    AfterList,
+    AfterListTable,
+    BeforeList,
+    BeforeListTable,
+    Description,
+    actionsMap,
+    fieldMap,
+  } = componentMap || {}
 
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
@@ -106,19 +113,11 @@ export const DefaultListView: React.FC = () => {
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collectionConfig.labels.plural, i18n)} />
                 )}
-                {/* {description && (
-                  <div className={`${baseClass}__sub-header`}>
-                    <ViewDescription description={description} />
-                  </div>
-                )} */}
+                {Description && <div className={`${baseClass}__sub-header`}>{Description}</div>}
               </Fragment>
             )}
           </header>
-          <ListControls
-            collectionConfig={collectionConfig}
-            fieldMap={fieldMap}
-            titleField={titleField}
-          />
+          <ListControls collectionConfig={collectionConfig} fieldMap={fieldMap} />
           {BeforeListTable}
           {!data.docs && (
             <StaggeredShimmers

@@ -26,36 +26,6 @@ const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
   return undefined
 }
 
-type Args = {
-  collectionConfig?: CollectionConfig
-  config: Config
-  doc: Record<string, unknown>
-}
-const generateAdminThumbnails = ({ collectionConfig, config, doc }: Args) => {
-  const adminThumbnail =
-    typeof collectionConfig.upload !== 'boolean'
-      ? collectionConfig.upload?.adminThumbnail
-      : undefined
-
-  if (typeof adminThumbnail === 'function') {
-    return adminThumbnail({ doc })
-  }
-
-  if ('sizes' in doc && doc.sizes?.[adminThumbnail]?.filename) {
-    return generateURL({
-      collectionSlug: collectionConfig.slug,
-      config,
-      filename: doc.sizes?.[adminThumbnail].filename as string,
-    })
-  }
-
-  return generateURL({
-    collectionSlug: collectionConfig.slug,
-    config,
-    filename: doc.filename as string,
-  })
-}
-
 type Options = {
   collection: CollectionConfig
   config: Config
@@ -74,16 +44,6 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     label: 'MIME Type',
   }
 
-  const url: Field = {
-    name: 'url',
-    type: 'text',
-    admin: {
-      hidden: true,
-      readOnly: true,
-    },
-    label: 'URL',
-  }
-
   const thumbnailURL: Field = {
     name: 'thumbnailURL',
     type: 'text',
@@ -93,12 +53,28 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     },
     hooks: {
       afterRead: [
-        ({ data }) =>
-          generateAdminThumbnails({
-            collectionConfig: collection,
-            config,
-            doc: data,
-          }),
+        ({ originalDoc }) => {
+          const adminThumbnail =
+            typeof collection.upload !== 'boolean' ? collection.upload?.adminThumbnail : undefined
+
+          if (typeof adminThumbnail === 'function') {
+            return adminThumbnail({ doc: originalDoc })
+          }
+
+          if (
+            typeof adminThumbnail === 'string' &&
+            'sizes' in originalDoc &&
+            originalDoc.sizes?.[adminThumbnail]?.filename
+          ) {
+            return generateURL({
+              collectionSlug: collection.slug,
+              config,
+              filename: originalDoc.sizes?.[adminThumbnail].filename as string,
+            })
+          }
+
+          return null
+        },
       ],
     },
     label: 'Thumbnail URL',
@@ -145,6 +121,16 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     index: true,
     label: labels['upload:fileName'],
     unique: true,
+  }
+
+  const url: Field = {
+    name: 'url',
+    type: 'text',
+    admin: {
+      hidden: true,
+      readOnly: true,
+    },
+    label: 'URL',
   }
 
   let uploadFields: Field[] = [

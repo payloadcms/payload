@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload/types.js'
+import type { AdminViewProps } from 'payload/types'
 
 import React from 'react'
 

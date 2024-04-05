@@ -52,7 +52,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     label,
     labelProps,
     path: pathFromProps,
-    readOnly,
+    readOnly: readOnlyFromProps,
     relationTo,
     required,
     sortOptions,
@@ -80,9 +80,9 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   const [errorLoading, setErrorLoading] = useState('')
   const [search, setSearch] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [hasLoadedFirstPage, setHasLoadedFirstPage] = useState(false)
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
-  const firstRun = useRef(true)
+  const menuIsOpen = useRef(false)
+  const hasLoadedFirstPageRef = useRef(false)
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
@@ -92,7 +92,8 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     },
     [validate, required],
   )
-  const { path: pathFromContext } = useFieldProps()
+  const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
+  const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { filterOptions, initialValue, path, setValue, showError, value } = useField<
     Value | Value[]
@@ -101,11 +102,15 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
     validate: memoizedValidate,
   })
 
+  const valueRef = useRef(value)
+  valueRef.current = value
+
   const [drawerIsOpen, setDrawerIsOpen] = useState(false)
 
   const getResults: GetResults = useCallback(
     async ({
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
+      lastLoadedPage: lastLoadedPageArg,
       onSuccess,
       search: searchArg,
       sort,
@@ -138,7 +143,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
           if (search !== searchArg) {
             lastLoadedPageToUse = 1
           } else {
-            lastLoadedPageToUse = lastLoadedPage[relation] + 1
+            lastLoadedPageToUse = lastLoadedPageArg[relation] + 1
           }
           await priorRelation
 
@@ -253,7 +258,6 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
       hasMany,
       errorLoading,
       search,
-      lastLoadedPage,
       collections,
       locale,
       filterOptions,
@@ -267,7 +271,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   )
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    void getResults({ search: searchArg, sort: true, value: valueArg })
+    void getResults({ lastLoadedPage: {}, search: searchArg, sort: true, value: valueArg })
     setSearch(searchArg)
   }, 300)
 
@@ -375,16 +379,40 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
-    if (firstRun.current) {
-      firstRun.current = false
-      return
+    // If the menu is open while filterOptions changes
+    // due to latency of getFormState and fast clicking into this field,
+    // re-fetch options
+
+    if (hasLoadedFirstPageRef.current && menuIsOpen.current) {
+      setIsLoading(true)
+      void getResults({
+        lastLoadedPage: {},
+        onSuccess: () => {
+          hasLoadedFirstPageRef.current = true
+          setIsLoading(false)
+        },
+        value: valueRef.current,
+      })
     }
+
+    // If the menu is not open, still reset the field state
+    // because we need to get new options next time the menu
+    // opens by the user
 
     dispatchOptions({ type: 'CLEAR' })
     setLastFullyLoadedRelation(-1)
     setLastLoadedPage({})
-    setHasLoadedFirstPage(false)
-  }, [relationTo, filterOptions, locale])
+    hasLoadedFirstPageRef.current = false
+  }, [
+    relationTo,
+    filterOptions,
+    locale,
+    menuIsOpen,
+    getResults,
+    valueRef,
+    hasLoadedFirstPageRef,
+    path,
+  ])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
@@ -501,12 +529,18 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
                 : undefined
             }
             onInputChange={(newSearch) => handleInputChange(newSearch, value)}
+            onMenuClose={() => {
+              menuIsOpen.current = false
+            }}
             onMenuOpen={() => {
-              if (!hasLoadedFirstPage) {
+              menuIsOpen.current = true
+
+              if (!hasLoadedFirstPageRef.current) {
                 setIsLoading(true)
                 void getResults({
+                  lastLoadedPage: {},
                   onSuccess: () => {
-                    setHasLoadedFirstPage(true)
+                    hasLoadedFirstPageRef.current = true
                     setIsLoading(false)
                   },
                   value: initialValue,
@@ -516,6 +550,7 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
             onMenuScrollToBottom={() => {
               void getResults({
                 lastFullyLoadedRelation,
+                lastLoadedPage,
                 search,
                 sort: false,
                 value: initialValue,

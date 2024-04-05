@@ -72,27 +72,33 @@ export const Condition: React.FC<Props> = (props) => {
     removeCondition,
     updateCondition,
   } = props
-  const [activeField, setActiveField] = useState<FieldCondition>(() =>
+  const [internalField, setInternalField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
-
-  const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
   const [internalOperatorOption, setInternalOperatorOption] = useState(operator)
+  const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
 
   const debouncedValue = useDebounce(internalQueryValue, 300)
 
   useEffect(() => {
-    updateCondition({
-      andIndex,
-      fieldName: activeField.value,
-      operator: internalOperatorOption,
-      orIndex,
-      value: debouncedValue,
-    })
+    // This is to trigger changes when the debounced value changes
+    if (
+      internalField.value &&
+      internalOperatorOption &&
+      ![null, undefined].includes(debouncedValue)
+    ) {
+      updateCondition({
+        andIndex,
+        fieldName: internalField.value,
+        operator: internalOperatorOption,
+        orIndex,
+        value: debouncedValue,
+      })
+    }
   }, [
     debouncedValue,
     andIndex,
-    activeField?.value,
+    internalField?.value,
     internalOperatorOption,
     orIndex,
     updateCondition,
@@ -100,16 +106,16 @@ export const Condition: React.FC<Props> = (props) => {
   ])
 
   const booleanSelect =
-    ['exists'].includes(internalOperatorOption) || activeField?.props?.type === 'checkbox'
+    ['exists'].includes(internalOperatorOption) || internalField?.props?.type === 'checkbox'
   const ValueComponent = booleanSelect
     ? Select
-    : valueFields[activeField?.component] || valueFields.Text
+    : valueFields[internalField?.component] || valueFields.Text
 
   let valueOptions
   if (booleanSelect) {
     valueOptions = ['true', 'false']
-  } else if (activeField?.props && 'options' in activeField.props) {
-    valueOptions = activeField.props.options
+  } else if (internalField?.props && 'options' in internalField.props) {
+    valueOptions = internalField.props.options
   }
 
   return (
@@ -120,36 +126,24 @@ export const Condition: React.FC<Props> = (props) => {
             <ReactSelect
               isClearable={false}
               onChange={(field) => {
-                setActiveField(fields.find((f) => f.value === field.value))
-                updateCondition({
-                  andIndex,
-                  fieldName: field.value,
-                  operator,
-                  orIndex,
-                  value: internalQueryValue,
-                })
+                setInternalField(fields.find((f) => f.value === field.value))
+                setInternalOperatorOption(undefined)
+                setInternalQueryValue(undefined)
               }}
               options={fields}
-              value={fields.find((field) => activeField.value === field.value) || fields[0]}
+              value={fields.find((field) => internalField.value === field.value) || fields[0]}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!activeField.value}
+              disabled={!internalField.value}
               isClearable={false}
               onChange={(operator) => {
                 setInternalOperatorOption(operator.value)
-                updateCondition({
-                  andIndex,
-                  fieldName: activeField.value,
-                  operator: operator.value,
-                  orIndex,
-                  value: internalQueryValue,
-                })
               }}
-              options={activeField?.operators}
+              options={internalField?.operators}
               value={
-                activeField?.operators.find(
+                internalField?.operators.find(
                   (operator) => internalOperatorOption === operator.value,
                 ) || null
               }
@@ -157,19 +151,20 @@ export const Condition: React.FC<Props> = (props) => {
           </div>
           <div className={`${baseClass}__value`}>
             <RenderCustomComponent
-              CustomComponent={activeField?.props?.admin?.components?.Filter}
+              CustomComponent={internalField?.props?.admin?.components?.Filter}
               DefaultComponent={ValueComponent}
               componentProps={{
-                ...activeField?.props,
+                ...internalField?.props,
                 disabled: !internalOperatorOption,
                 onChange: setInternalQueryValue,
                 operator: internalOperatorOption,
                 options: valueOptions,
                 relationTo:
-                  activeField?.props?.type === 'relationship' &&
-                  'fieldComponentProps' in activeField.props
-                    ? (activeField?.props?.fieldComponentProps as RelationshipFieldProps)
-                        ?.relationTo
+                  internalField?.props?.type === 'relationship' &&
+                  'cellProps' in internalField.props &&
+                  typeof internalField.props.cellProps === 'object' &&
+                  'relationTo' in internalField.props.cellProps
+                    ? internalField.props.cellProps?.relationTo
                     : undefined,
                 value: internalQueryValue ?? '',
               }}
