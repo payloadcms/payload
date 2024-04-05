@@ -79,7 +79,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return create<T>(this, options)
   }
 
-  db: BaseDatabaseAdapter
+  db: DatabaseAdapter
 
   decrypt = decrypt
 
@@ -469,6 +469,6 @@ interface RequestContext {
   [key: string]: unknown
 }
 
-// type DatabaseAdapter = BaseDatabaseAdapter
+type DatabaseAdapter = BaseDatabaseAdapter
 
-export type { GeneratedTypes, Payload, RequestContext }
+export type { DatabaseAdapter, GeneratedTypes, Payload, RequestContext }

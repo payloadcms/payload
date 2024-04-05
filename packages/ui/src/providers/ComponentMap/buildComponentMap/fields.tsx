@@ -154,7 +154,7 @@ export const mapFields = (args: {
             'description' in field.admin &&
             ((isReactComponent<DescriptionComponent>(field.admin.description) &&
               field.admin.description) ||
-              (isPlainFunction(field.admin.description) && FieldDescription))) ||
+              (field.admin.description && FieldDescription))) ||
           undefined
 
         const CustomDescription =

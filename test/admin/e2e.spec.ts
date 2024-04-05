@@ -367,6 +367,7 @@ describe('admin', () => {
     test('collection — should render preview button when `admin.preview` is set', async () => {
       const collectionWithPreview = new AdminUrlUtil(serverURL, postsCollectionSlug)
       await page.goto(collectionWithPreview.create)
+      await page.waitForURL(collectionWithPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       await expect(page.locator('.btn.preview-btn')).toBeVisible()
@@ -375,6 +376,7 @@ describe('admin', () => {
     test('collection — should not render preview button when `admin.preview` is not set', async () => {
       const collectionWithoutPreview = new AdminUrlUtil(serverURL, group1Collection1Slug)
       await page.goto(collectionWithoutPreview.create)
+      await page.waitForURL(collectionWithoutPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       await expect(page.locator('.btn.preview-btn')).toBeHidden()
@@ -679,7 +681,7 @@ describe('admin', () => {
       // delete all posts created by the seed
       await deleteAllPosts()
       await page.goto(postsUrl.list)
-      await page.waitForURL(postsUrl.list)
+      await page.waitForURL((url) => url.toString().startsWith(postsUrl.list))
       await expect(page.locator(tableRowLocator)).toBeHidden()
 
       await createPost({ title: 'post1' })
@@ -695,6 +697,7 @@ describe('admin', () => {
 
         // prefill search with "a" from the query param
         await page.goto(`${postsUrl.list}?search=dennis`)
+        await page.waitForURL(`${postsUrl.list}?search=dennis`)
 
         // input should be filled out, list should filter
         await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
@@ -768,6 +771,7 @@ describe('admin', () => {
 
       test('should link second cell', async () => {
         const { id } = await createPost()
+        await page.reload()
         const linkCell = page.locator(`${tableRowLocator} td`).nth(1).locator('a')
         await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`)
 
@@ -1179,6 +1183,7 @@ describe('admin', () => {
       })
 
       test('should select multiple rows', async () => {
+        await page.reload()
         const selectAll = page.locator('.checkbox-input:has(#select-all)')
         await page.locator('.row-1 .cell-_select input').check()
 
@@ -1250,6 +1255,7 @@ describe('admin', () => {
       })
 
       test('should sort', async () => {
+        await page.reload()
         const upChevron = page.locator('#heading-number .sort-column__asc')
         const downChevron = page.locator('#heading-number .sort-column__desc')
 
@@ -1264,7 +1270,7 @@ describe('admin', () => {
     })
 
     describe('i18n', () => {
-      test.skip('should display translated collections and globals config options', async () => {
+      test('should display translated collections and globals config options', async () => {
         await page.goto(postsUrl.list)
 
         // collection label
@@ -1277,7 +1283,7 @@ describe('admin', () => {
         await expect(page.locator('.view-description')).toContainText('Description')
       })
 
-      test.skip('should display translated field titles', async () => {
+      test('should display translated field titles', async () => {
         await createPost()
 
         // column controls

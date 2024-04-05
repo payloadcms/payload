@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-alpha.49",
+  "version": "3.0.0-alpha.54",
   "main": "./src/index.js",
   "types": "./src/index.js",
   "type": "module",
@@ -80,7 +80,7 @@
   },
   "publishConfig": {
     "main": "./dist/index.js",
-    "types": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       "./css": {
         "import": "./dist/prod/styles.css",

@@ -1,16 +1,17 @@
 import type { ClientCollectionConfig, FieldAffectingData } from 'payload/types'
 
-import { fieldAffectsData } from 'payload/types'
-import { flattenTopLevelFields } from 'payload/utilities'
+import type { FieldMap, MappedField } from '../utilities/buildComponentMap.js'
 
-export const useUseTitleField = (collection: ClientCollectionConfig): FieldAffectingData => {
+import { flattenFieldMap } from '../utilities/flattenFieldMap.js'
+
+export const useUseTitleField = (
+  collection: ClientCollectionConfig,
+  fieldMap: FieldMap,
+): MappedField => {
   const {
     admin: { useAsTitle },
-    fields,
   } = collection
 
-  const topLevelFields = flattenTopLevelFields(fields)
-  return topLevelFields.find(
-    (field) => fieldAffectsData(field) && field.name === useAsTitle,
-  ) as FieldAffectingData
+  const topLevelFields = flattenFieldMap(fieldMap)
+  return topLevelFields.find((field) => field.name === useAsTitle)
 }

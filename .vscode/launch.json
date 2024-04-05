@@ -41,7 +41,7 @@
       }
     },
     {
-      "command": "pnpm run dev fields",
+      "command": "node --no-deprecation test/dev.js fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",
       "request": "launch",

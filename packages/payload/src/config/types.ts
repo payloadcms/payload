@@ -711,8 +711,12 @@ export type EditConfig =
     )
   | EditViewComponent
 
+export type EntityDescriptionComponent = React.ComponentType<any>
+
+export type EntityDescriptionFunction = () => string
+
 export type EntityDescription =
-  | (() => string)
-  | React.ComponentType<any>
+  | EntityDescriptionComponent
+  | EntityDescriptionFunction
   | Record<string, string>
   | string
