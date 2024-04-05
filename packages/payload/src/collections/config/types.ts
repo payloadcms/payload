@@ -341,7 +341,8 @@ export type CollectionAdminOptions = {
   useAsTitle?: string
 }
 
-export type BaseCollectionConfig = {
+/** Manage all aspects of a data collection */
+export type CollectionConfig = {
   /**
    * Access control
    */
@@ -447,9 +448,6 @@ export type BaseCollectionConfig = {
    */
   versions?: IncomingCollectionVersions | boolean
 }
-
-/** Manage all aspects of a data collection */
-export type CollectionConfig = BaseCollectionConfig
 
 export interface SanitizedCollectionConfig
   extends Omit<
