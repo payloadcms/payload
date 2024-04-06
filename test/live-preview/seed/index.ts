@@ -31,16 +31,15 @@ export const seed: Config['onInit'] = async (payload) => {
     },
   })
 
-  const [tenant1Doc] = await Promise.all([
-    await payload.create({
-      collection: tenantsSlug,
-      data: tenant1,
-    }),
-    await payload.create({
-      collection: tenantsSlug,
-      data: tenant2,
-    }),
-  ])
+  const tenant1Doc = await payload.create({
+    collection: tenantsSlug,
+    data: tenant1,
+  })
+
+  await payload.create({
+    collection: tenantsSlug,
+    data: tenant2,
+  })
 
   const media = await payload.create({
     collection: 'media',
@@ -53,32 +52,32 @@ export const seed: Config['onInit'] = async (payload) => {
   const mediaID = payload.db.defaultIDType === 'number' ? media.id : `"${media.id}"`
   const tenantID = payload.db.defaultIDType === 'number' ? tenant1Doc.id : `"${tenant1Doc.id}"`
 
-  const [post1Doc, post2Doc, post3Doc] = await Promise.all([
-    await payload.create({
-      collection: postsSlug,
-      data: JSON.parse(
-        JSON.stringify(post1)
-          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
-          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
-      ),
-    }),
-    await payload.create({
-      collection: postsSlug,
-      data: JSON.parse(
-        JSON.stringify(post2)
-          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
-          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
-      ),
-    }),
-    await payload.create({
-      collection: postsSlug,
-      data: JSON.parse(
-        JSON.stringify(post3)
-          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
-          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
-      ),
-    }),
-  ])
+  const post1Doc = await payload.create({
+    collection: postsSlug,
+    data: JSON.parse(
+      JSON.stringify(post1)
+        .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+        .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+    ),
+  })
+
+  const post2Doc = await payload.create({
+    collection: postsSlug,
+    data: JSON.parse(
+      JSON.stringify(post2)
+        .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+        .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+    ),
+  })
+
+  const post3Doc = await payload.create({
+    collection: postsSlug,
+    data: JSON.parse(
+      JSON.stringify(post3)
+        .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+        .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+    ),
+  })
 
   const postsPageDoc = await payload.create({
     collection: pagesSlug,
