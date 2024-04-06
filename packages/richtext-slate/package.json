@@ -33,8 +33,8 @@
   "devDependencies": {
     "@payloadcms/ui": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/node": "20.5.7",
-    "@types/react": "18.2.15",
+    "@types/node": "20.12.5",
+    "@types/react": "18.2.74",
     "payload": "workspace:*"
   },
   "peerDependencies": {

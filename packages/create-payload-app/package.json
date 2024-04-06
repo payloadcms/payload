@@ -48,7 +48,7 @@
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.3",
-    "@types/node": "^16.6.2"
+    "@types/node": "20.12.5"
   },
   "exports": {
     "./commands": {

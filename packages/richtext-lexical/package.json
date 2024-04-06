@@ -47,9 +47,9 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
-    "@types/node": "20.6.2",
-    "@types/react": "18.2.15",
-    "@types/react-dom": "18.2.7",
+    "@types/node": "20.12.5",
+    "@types/react": "18.2.74",
+    "@types/react-dom": "18.2.24",
     "payload": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",

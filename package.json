@@ -76,7 +76,7 @@
     "@octokit/core": "^5.1.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
-    "@playwright/test": "^1.42.1",
+    "@playwright/test": "1.43.0",
     "@swc/cli": "^0.1.62",
     "@swc/jest": "0.2.36",
     "@testing-library/jest-dom": "6.4.2",
@@ -88,13 +88,13 @@
     "@types/conventional-changelog-writer": "^4.0.10",
     "@types/fs-extra": "^11.0.2",
     "@types/jest": "29.5.12",
-    "@types/minimist": "1.2.2",
-    "@types/node": "20.11.28",
+    "@types/minimist": "1.2.5",
+    "@types/node": "20.12.5",
     "@types/prompts": "^2.4.5",
-    "@types/qs": "6.9.7",
-    "@types/react": "18.2.15",
+    "@types/qs": "6.9.14",
+    "@types/react": "18.2.74",
     "@types/semver": "^7.5.3",
-    "@types/shelljs": "0.8.12",
+    "@types/shelljs": "0.8.15",
     "add-stream": "^1.0.0",
     "chalk": "^4.1.2",
     "comment-json": "^4.2.3",
@@ -133,8 +133,8 @@
     "open": "^10.1.0",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
-    "playwright": "^1.42.1",
-    "playwright-core": "^1.42.1",
+    "playwright": "1.43.0",
+    "playwright-core": "1.43.0",
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
@@ -154,7 +154,7 @@
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
     "turbo": "^1.13.2",
-    "typescript": "5.4.2",
+    "typescript": "5.4.4",
     "uuid": "^9.0.1",
     "yocto-queue": "^1.0.0"
   },
@@ -194,8 +194,7 @@
       "domexception": "4"
     },
     "patchedDependencies": {
-      "playwright@1.42.1": "patches/playwright@1.42.1.patch"
+      "playwright@1.43.0": "patches/playwright@1.43.0.patch"
     }
-  },
-  "packageManager": "pnpm@8.15.4+sha256.cea6d0bdf2de3a0549582da3983c70c92ffc577ff4410cbf190817ddc35137c2"
+  }
 }

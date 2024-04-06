@@ -41,6 +41,6 @@
     "payload": "workspace:*",
     "tempy": "^1.0.1",
     "ts-essentials": "7.0.3",
-    "typescript": "5.4.2"
+    "typescript": "5.4.4"
   }
 }

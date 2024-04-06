@@ -62,7 +62,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
     })
   }
 
-  process.env.NODE_OPTIONS = '--max-old-space-size=8192'
+  process.env.NODE_OPTIONS = '--max-old-space-size=8192 --no-deprecation'
 
   // @ts-expect-error
   const app = nextImport({

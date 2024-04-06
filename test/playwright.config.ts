@@ -1,4 +1,12 @@
 import { defineConfig } from '@playwright/test'
+import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+dotenv.config({ path: path.resolve(dirname, 'test.env') })
 
 export const EXPECT_TIMEOUT = 45000
 export const POLL_TOPASS_TIMEOUT = EXPECT_TIMEOUT * 4 // That way expect.poll() or expect().toPass can retry 4 times. 4x higher than default expect timeout => can retry 4 times if retryable expects are used inside
