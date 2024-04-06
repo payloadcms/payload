@@ -18,7 +18,7 @@ import { updateChangelog } from './utils/updateChangelog.js'
 // Update this list with any packages to publish
 const packageWhitelist = [
   'payload',
-  'translations',
+  // 'translations',
   'ui',
   'next',
   'graphql',
@@ -27,7 +27,7 @@ const packageWhitelist = [
   'richtext-slate',
   'richtext-lexical',
 
-  'create-payload-app',
+  // 'create-payload-app',
 
   // Plugins
   'plugin-cloud',
@@ -210,9 +210,8 @@ async function main() {
   }
 
   // Publish
-  const results: { name: string; success: boolean; details?: string }[] = await pMap(
-    packageDetails,
-    async (pkg) => {
+  const results: { name: string; success: boolean; details?: string }[] = await Promise.all(
+    packageDetails.map(async (pkg) => {
       try {
         console.log(logPrefix, chalk.bold(`🚀 ${pkg.name} publishing...`))
         const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
@@ -238,8 +237,7 @@ async function main() {
         console.error(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: ${error.message}\n\n`))
         return { name: pkg.name, success: false }
       }
-    },
-    { concurrency: 5 },
+    }),
   )
 
   console.log(chalk.bold.green(`\n\nResults:\n`))

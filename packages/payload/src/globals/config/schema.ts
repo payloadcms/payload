@@ -49,6 +49,7 @@ const globalSchema = joi
       preview: joi.func(),
     }),
     custom: joi.object().pattern(joi.string(), joi.any()),
+    dbName: joi.alternatives().try(joi.string(), joi.func()),
     endpoints: endpointsSchema,
     fields: joi.array(),
     graphQL: joi.alternatives().try(

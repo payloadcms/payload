@@ -411,3 +411,10 @@ export type DatabaseAdapterResult<T = BaseDatabaseAdapter> = {
   defaultIDType: 'number' | 'text'
   init: (args: { payload: Payload }) => T
 }
+
+export type DBIdentifierName =
+  | ((Args: {
+      /** The name of the parent table when using relational DBs */
+      tableName?: string
+    }) => string)
+  | string

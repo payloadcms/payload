@@ -4,6 +4,5 @@ export { deleteCollectionVersions } from '../versions/deleteCollectionVersions.j
 export { enforceMaxVersions } from '../versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from '../versions/getLatestGlobalVersion.js'
-export { getVersionsModelName } from '../versions/getVersionsModelName.js'
 export { saveVersion } from '../versions/saveVersion.js'
 export type { TypeWithVersion } from '../versions/types.js'
