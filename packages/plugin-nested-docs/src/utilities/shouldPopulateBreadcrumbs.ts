@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import type { CollectionConfig } from 'payload/types'
 
 import type { PluginConfig } from '../types.js'
