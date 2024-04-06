@@ -1,14 +1,10 @@
 import minimist from 'minimist'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { nextDev } from 'next/dist/cli/next-dev.js'
-import { dirname, resolve } from 'path'
-import { fileURLToPath } from 'url'
-import open, { openApp, apps } from 'open'
+import open from 'open'
+import { getNextJSRootDir } from './helpers/getNextJSRootDir.js'
 
 import { createTestHooks } from './testHooks.js'
-
-const _filename = fileURLToPath(import.meta.url)
-const _dirname = dirname(_filename)
 
 process.env.PAYLOAD_DROP_DATABASE = 'true'
 
@@ -26,7 +22,7 @@ process.env.PAYLOAD_DROP_DATABASE = 'true'
 const { afterTest, beforeTest } = await createTestHooks(testSuiteArg)
 await beforeTest()
 
-const rootDir = resolve(_dirname, '../')
+const rootDir = getNextJSRootDir(testSuiteArg)
 
 // Open the admin if the -o flag is passed
 if (args.o) {

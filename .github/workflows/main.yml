@@ -250,7 +250,7 @@ jobs:
         suite:
           - _community
           - access-control
-          # - admin
+          - admin
           - auth
           - email
           - field-error-states

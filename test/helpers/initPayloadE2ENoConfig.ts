@@ -1,17 +1,24 @@
 import { createServer } from 'http'
 import nextImport from 'next'
-import path from 'path'
+import { spawn } from 'node:child_process'
+import { dirname, resolve } from 'path'
 import { wait } from 'payload/utilities'
 import { parse } from 'url'
+import { fileURLToPath } from 'url'
 
 import type { GeneratedTypes } from './sdk/types.js'
 
 import { createTestHooks } from '../testHooks.js'
+import { getNextJSRootDir } from './getNextJSRootDir.js'
 import { PayloadTestSDK } from './sdk/index.js'
 import startMemoryDB from './startMemoryDB.js'
 
+const _filename = fileURLToPath(import.meta.url)
+const _dirname = dirname(_filename)
+
 type Args = {
   dirname: string
+  prebuild?: boolean
 }
 
 type Result<T extends GeneratedTypes<T>> = {
@@ -21,6 +28,7 @@ type Result<T extends GeneratedTypes<T>> = {
 
 export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
   dirname,
+  prebuild,
 }: Args): Promise<Result<T>> {
   const testSuiteName = dirname.split('/').pop()
   const { beforeTest } = await createTestHooks(testSuiteName)
@@ -32,12 +40,36 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 
   await startMemoryDB()
 
+  const dir = getNextJSRootDir(testSuiteName)
+
+  if (prebuild) {
+    await new Promise<void>((res, rej) => {
+      const buildArgs = ['--max-old-space-size=8192', resolve(_dirname, 'build.js')]
+
+      const childProcess = spawn('node', buildArgs, {
+        stdio: 'inherit',
+        env: {
+          PATH: process.env.PATH,
+          NODE_ENV: 'production',
+          NEXTJS_DIR: dir,
+        },
+      })
+
+      childProcess.on('close', (code) => {
+        if (code === 0) res()
+        rej()
+      })
+    })
+  }
+
+  process.env.NODE_OPTIONS = '--max-old-space-size=8192'
+
   // @ts-expect-error
   const app = nextImport({
-    dev: true,
+    dev: !prebuild,
     hostname: 'localhost',
     port,
-    dir: path.resolve(dirname, '../../'),
+    dir,
   })
 
   const handle = app.getRequestHandler()

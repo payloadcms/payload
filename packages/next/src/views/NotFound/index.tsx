@@ -2,6 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
+import { getNextI18n } from '@payloadcms/next/utilities/getNextI18n.js'
 import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import React, { Fragment } from 'react'
@@ -10,13 +11,18 @@ import { initPage } from '../../utilities/initPage.js'
 import { NotFoundClient } from './index.client.js'
 
 export const generatePageMetadata = async ({
-  i18n,
+  config: configPromise,
 }: {
-  config: SanitizedConfig
-  i18n: I18n
+  config: Promise<SanitizedConfig> | SanitizedConfig
   params?: { [key: string]: string | string[] }
   //eslint-disable-next-line @typescript-eslint/require-await
 }): Promise<Metadata> => {
+  const config = await configPromise
+
+  const i18n = getNextI18n({
+    config,
+  })
+
   return {
     title: i18n.t('general:notFound'),
   }

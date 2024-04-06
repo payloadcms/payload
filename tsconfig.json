@@ -36,8 +36,11 @@
       }
     ],
     "paths": {
+      "payload/types": [
+        "./packages/payload/src/exports/types.ts"
+      ],
       "@payload-config": [
-        "./test/live-preview/config.ts"
+        "./test/_community/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -156,6 +159,7 @@
     }
   ],
   "include": [
+    "app",
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "scripts/**/*.ts"

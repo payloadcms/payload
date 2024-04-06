@@ -25,6 +25,7 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
       "@payloadcms/ui/assets": ["./packages/ui/src/assets/index.ts"],
       "@payloadcms/ui/elements/*": ["./packages/ui/src/elements/*/index.tsx"],
@@ -39,6 +40,9 @@
       "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
       "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
       "payload/types": ["./packages/payload/src/exports/types/index.ts"],
+      "@payloadcms/next/*": ["./packages/next/src/*"],
+      "@payloadcms/next": ["./packages/next/src/exports/*"],
+      "@payload-config": ["./_community/config.ts"]
     }
   },
   "exclude": ["dist", "build", "node_modules", ".eslintrc.js", "dist/**/*.js", "**/dist/**/*.js"],

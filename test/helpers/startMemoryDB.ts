@@ -22,7 +22,5 @@ export default async () => {
     global._mongoMemoryServer = db
 
     process.env.MONGODB_MEMORY_SERVER_URI = `${global._mongoMemoryServer.getUri()}&retryWrites=true`
-
-    console.log(process.env.MONGODB_MEMORY_SERVER_URI)
   }
 }

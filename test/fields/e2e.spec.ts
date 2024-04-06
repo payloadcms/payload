@@ -42,9 +42,16 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('fields', () => {
-  beforeAll(async ({ browser }) => {
+  beforeAll(async ({ browser }, testInfo) => {
+    const prebuild = Boolean(process.env.CI)
+
+    if (prebuild) testInfo.setTimeout(testInfo.timeout * 3)
+
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+      dirname,
+      prebuild,
+    }))
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -696,6 +703,8 @@ describe('fields', () => {
             '#field-customBlocks input[name="customBlocks.0.block1Title"]',
           )
 
+          await page.mouse.wheel(0, 1750)
+
           await customBlocks.scrollIntoViewIfNeeded()
 
           await expect(customBlocks).toHaveValue('Block 1: Prefilled Title')
@@ -775,6 +784,7 @@ describe('fields', () => {
         const assertText3 = 'array row 3'
         const assertGroupText3 = 'text in group in row 3'
         await page.goto(url.create)
+        await page.mouse.wheel(0, 1750)
         await page.locator('#field-potentiallyEmptyArray').scrollIntoViewIfNeeded()
         await wait(300)
 

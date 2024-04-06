@@ -769,9 +769,6 @@ importers:
       pino-pretty:
         specifier: 10.2.0
         version: 10.2.0
-      pirates:
-        specifier: ^4.0.6
-        version: 4.0.6
       pluralize:
         specifier: 8.0.0
         version: 8.0.0

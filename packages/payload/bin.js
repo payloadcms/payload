@@ -12,7 +12,7 @@ if (process.env.DISABLE_SWC !== 'true') {
   const dirname = path.dirname(filename)
   const url = pathToFileURL(dirname).toString() + '/'
 
-  register('./dist/bin/register/index.js', url)
+  register('./dist/bin/loader/index.js', url)
 }
 
 bin()
