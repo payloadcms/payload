@@ -18,6 +18,7 @@ export const shouldPopulateBreadcrumbs = (
   collection: CollectionConfig,
   originalDoc?: any,
 ) => {
+  // the originalDoc is not present, so we should populate the breadcrumbs
   if (!originalDoc) return true
 
   // if it's a nested collection, we should populate the breadcrumbs
