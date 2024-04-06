@@ -10,9 +10,6 @@
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/next"
   },
-  "bin": {
-    "@payloadcms/next": "./dist/bin/index.js"
-  },
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:webpack && rm dist/prod/index.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
