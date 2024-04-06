@@ -61,7 +61,6 @@
     "nodemailer": "6.9.10",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
-    "pirates": "^4.0.6",
     "pluralize": "8.0.0",
     "probe-image-size": "^7.2.3",
     "sanitize-filename": "1.6.3",
