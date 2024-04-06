@@ -5,7 +5,7 @@ import ts from 'typescript'
 import { fileURLToPath, pathToFileURL } from 'url'
 
 import { CLIENT_EXTENSIONS } from './clientExtensions.js'
-import { compile } from './register.js'
+import { compile } from './compile.js'
 
 interface ResolveContext {
   conditions: string[]
@@ -44,10 +44,15 @@ const host: ts.ModuleResolutionHost = {
   fileExists: ts.sys.fileExists,
   readFile: ts.sys.readFile,
 }
-const EXTENSIONS: string[] = [ts.Extension.Ts, ts.Extension.Tsx, ts.Extension.Dts, ts.Extension.Mts]
+const TS_EXTENSIONS: string[] = [
+  ts.Extension.Ts,
+  ts.Extension.Tsx,
+  ts.Extension.Dts,
+  ts.Extension.Mts,
+]
 
 export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
-  const isTS = EXTENSIONS.some((ext) => specifier.endsWith(ext))
+  const isTS = TS_EXTENSIONS.some((ext) => specifier.endsWith(ext))
   const isClient = CLIENT_EXTENSIONS.some((ext) => specifier.endsWith(ext))
 
   if (isClient) {
@@ -86,7 +91,7 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   // import from local project to local project TS file
   if (resolvedModule) {
     const resolvedIsNodeModule = resolvedModule.resolvedFileName.includes('/node_modules/')
-    const resolvedIsTS = EXTENSIONS.includes(resolvedModule.extension)
+    const resolvedIsTS = TS_EXTENSIONS.includes(resolvedModule.extension)
 
     if (!resolvedIsNodeModule && resolvedIsTS) {
       return {
@@ -151,7 +156,7 @@ export const load: LoadFn = async (url, context, nextLoad) => {
   if (context.format === 'ts') {
     const { source } = await nextLoad(url, context)
     const code = typeof source === 'string' ? source : Buffer.from(source).toString()
-    const compiled = await compile(code, fileURLToPath(url), swcOptions, true)
+    const compiled = await compile(code, fileURLToPath(url), swcOptions)
     return {
       format: 'module',
       shortCircuit: true,

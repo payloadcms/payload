@@ -8,7 +8,7 @@ export const load = async (filePath) => {
   const url = pathToFileURL(dirname).toString() + '/'
 
   // Need to register loader from payload/dist for a true test of functionality
-  register('../../packages/payload/dist/bin/register/index.js', url)
+  register('../../packages/payload/dist/bin/loader/index.js', url)
 
   const result = await import(filePath)
 
