@@ -46,6 +46,6 @@
     }
   },
   "exclude": ["dist", "build", "node_modules", ".eslintrc.js", "dist/**/*.js", "**/dist/**/*.js"],
-  "include": ["./**/*.ts", ".next/types/**/*.ts", "setup.js", "helpers/getNextJSRootDir.js"],
+  "include": ["./**/*.ts", ".next/types/**/*.ts", "setup.js"],
   "references": []
 }
