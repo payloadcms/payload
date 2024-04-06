@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { generateTypes } from 'payload/utilities'
+import { generateTypes } from 'payload/node'
 
 import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
 

@@ -1,4 +1,6 @@
-export { generateTypes } from '../bin/generateTypes.js'
+// NOTE: all exports within this file need to be browser-safe.
+// If you need to export a Node-only utility, add it to exports/node.ts
+
 export { getDataLoader } from '../collections/dataloader.js'
 export { default as getDefaultValue } from '../fields/getDefaultValue.js'
 export { promise as afterReadPromise } from '../fields/hooks/afterRead/promise.js'
