@@ -27,7 +27,13 @@ const locatedConfig = getTsconfig()
 const tsconfig = locatedConfig.config.compilerOptions as unknown as ts.CompilerOptions
 
 tsconfig.module = ts.ModuleKind.ESNext
-tsconfig.moduleResolution = ts.ModuleResolutionKind.NodeNext
+
+// Specify bundler resolution for Next.js compatibility.
+// We will use TS to resolve file paths for most flexibility
+tsconfig.moduleResolution = ts.ModuleResolutionKind.Bundler
+
+// Don't resolve d.ts files, because we aren't type-checking
+tsconfig.noDtsResolution = true
 
 const moduleResolutionCache = ts.createModuleResolutionCache(
   ts.sys.getCurrentDirectory(),
@@ -78,16 +84,21 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   )
 
   // import from local project to local project TS file
-  if (
-    resolvedModule &&
-    !resolvedModule.resolvedFileName.includes('/node_modules/') &&
-    EXTENSIONS.includes(resolvedModule.extension)
-  ) {
-    return {
-      format: 'ts',
-      shortCircuit: true,
-      url: pathToFileURL(resolvedModule.resolvedFileName).href,
+  if (resolvedModule) {
+    const resolvedIsNodeModule = resolvedModule.resolvedFileName.includes('/node_modules/')
+    const resolvedIsTS = EXTENSIONS.includes(resolvedModule.extension)
+
+    if (!resolvedIsNodeModule && resolvedIsTS) {
+      return {
+        format: 'ts',
+        shortCircuit: true,
+        url: pathToFileURL(resolvedModule.resolvedFileName).href,
+      }
     }
+
+    // We want to use TS "Bundler" moduleResolution for just about all files
+    // so we pass the TS result here
+    return nextResolve(pathToFileURL(resolvedModule.resolvedFileName).href)
   }
 
   // import from local project to either:

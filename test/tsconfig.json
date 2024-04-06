@@ -25,6 +25,7 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
       "@payloadcms/ui/assets": ["./packages/ui/src/assets/index.ts"],
       "@payloadcms/ui/elements/*": ["./packages/ui/src/elements/*/index.tsx"],
