@@ -76,7 +76,10 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   }
 
   // import/require from external library
-  if (context.parentURL.includes('/node_modules/') && !isTS) {
+  const isMonorepoParent =
+    context.parentURL.includes('/node_modules/@payloadcms') ||
+    context.parentURL.includes('/node_modules/payload') // TODO: Disable this if load function used outside this monorepo (unnecessary for alpha-demo)
+  if (context.parentURL.includes('/node_modules/') && !isTS && !isMonorepoParent) {
     return nextResolve(specifier)
   }
 
@@ -90,10 +93,14 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
 
   // import from local project to local project TS file
   if (resolvedModule) {
-    const resolvedIsNodeModule = resolvedModule.resolvedFileName.includes('/node_modules/')
+    const resolvedIsMonorepo =
+      resolvedModule.resolvedFileName.includes('/node_modules/@payloadcms') ||
+      resolvedModule.resolvedFileName.includes('/node_modules/payload') // TODO: Disable this if load function used outside this monorepo (unnecessary for alpha-demo)
+    const resolvedIsNodeModule =
+      resolvedModule.resolvedFileName.includes('/node_modules/') && !resolvedIsMonorepo
     const resolvedIsTS = TS_EXTENSIONS.includes(resolvedModule.extension)
 
-    if (!resolvedIsNodeModule && resolvedIsTS) {
+    if (resolvedIsTS && !resolvedIsNodeModule) {
       return {
         format: 'ts',
         shortCircuit: true,
