@@ -4,7 +4,7 @@ import { File as FileBuffer } from 'buffer'
 import NodeFormData from 'form-data'
 import fs from 'fs'
 import path from 'path'
-import { getFileByPath } from 'payload/uploads'
+import { getFileByPath } from 'payload/node'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 

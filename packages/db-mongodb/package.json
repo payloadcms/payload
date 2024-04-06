@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "3.0.0-alpha.54",
+  "version": "3.0.0-alpha.55",
   "description": "The officially supported MongoDB database adapter for Payload",
   "repository": {
     "type": "git",
@@ -30,7 +30,6 @@
     "get-port": "5.1.1",
     "http-status": "1.6.2",
     "mongoose": "6.12.3",
-    "mongoose-aggregate-paginate-v2": "1.0.6",
     "mongoose-paginate-v2": "1.7.22",
     "prompts": "2.4.2",
     "uuid": "9.0.0"

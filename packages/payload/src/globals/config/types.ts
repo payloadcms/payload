@@ -16,6 +16,7 @@ import type {
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types.js'
+import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { PayloadRequest, RequestContext } from '../../types/index.js'
 import type { Where } from '../../types/index.js'
@@ -141,6 +142,10 @@ export type GlobalConfig = {
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   endpoints?: Omit<Endpoint, 'root'>[] | false
   fields: Field[]
   graphQL?:

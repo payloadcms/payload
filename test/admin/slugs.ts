@@ -9,6 +9,7 @@ export const group2Collection1Slug = 'group-two-collection-ones'
 export const group2Collection2Slug = 'group-two-collection-twos'
 export const hiddenCollectionSlug = 'hidden-collection'
 export const noApiViewCollectionSlug = 'collection-no-api-view'
+export const disableDuplicateSlug = 'disable-duplicate'
 export const uploadCollectionSlug = 'uploads'
 export const collectionSlugs = [
   usersCollectionSlug,
@@ -22,6 +23,7 @@ export const collectionSlugs = [
   group2Collection2Slug,
   hiddenCollectionSlug,
   noApiViewCollectionSlug,
+  disableDuplicateSlug,
 ]
 
 export const customGlobalViews1GlobalSlug = 'custom-global-views-one'

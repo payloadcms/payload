@@ -99,7 +99,7 @@ const sanitizeCollection = (
     if (sanitized.upload === true) sanitized.upload = {}
 
     // disable duplicate for uploads by default
-    sanitized.admin.disableDuplicate = sanitized.admin.disableDuplicate || true
+    sanitized.disableDuplicate = sanitized.disableDuplicate || true
 
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
@@ -140,7 +140,7 @@ const sanitizeCollection = (
     }
 
     // disable duplicate for auth enabled collections by default
-    sanitized.admin.disableDuplicate = sanitized.admin.disableDuplicate || true
+    sanitized.disableDuplicate = sanitized.disableDuplicate || true
 
     if (!sanitized.auth.strategies) {
       sanitized.auth.strategies = []

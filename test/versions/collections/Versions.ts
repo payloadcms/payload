@@ -4,15 +4,6 @@ import { versionCollectionSlug } from '../slugs.js'
 
 const VersionPosts: CollectionConfig = {
   slug: versionCollectionSlug,
-  admin: {
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'description', 'createdAt'],
-    preview: () => 'https://payloadcms.com',
-  },
-  versions: {
-    drafts: false,
-    maxPerDoc: 2,
-  },
   access: {
     read: ({ req: { user } }) => {
       if (user) {
@@ -36,22 +27,31 @@ const VersionPosts: CollectionConfig = {
     },
     readVersions: ({ req: { user } }) => Boolean(user),
   },
+  admin: {
+    defaultColumns: ['title', 'description', 'createdAt'],
+    preview: () => 'https://payloadcms.com',
+    useAsTitle: 'title',
+  },
   fields: [
     {
       name: 'title',
-      label: 'Title',
       type: 'text',
+      label: 'Title',
+      localized: true,
       required: true,
       unique: true,
-      localized: true,
     },
     {
       name: 'description',
-      label: 'Description',
       type: 'textarea',
+      label: 'Description',
       required: true,
     },
   ],
+  versions: {
+    drafts: false,
+    maxPerDoc: 2,
+  },
 }
 
 export default VersionPosts

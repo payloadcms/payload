@@ -1,6 +1,6 @@
 import type { AuthStrategyFunctionArgs, User } from './index.js'
 
-export const getAuthenticatedUser = async (
+export const executeAuthStrategies = async (
   args: AuthStrategyFunctionArgs,
 ): Promise<User | null> => {
   return args.payload.authStrategies.reduce(async (accumulatorPromise, strategy) => {
