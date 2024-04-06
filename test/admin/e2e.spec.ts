@@ -1267,15 +1267,14 @@ describe('admin', () => {
         const downChevron = page.locator('#heading-number .sort-column__desc')
 
         await upChevron.click()
-
-        await wait(300)
+        await page.waitForURL(/sort=number/)
 
         await expect(page.locator('.row-1 .cell-number')).toHaveText('1')
         await expect(page.locator('.row-2 .cell-number')).toHaveText('2')
 
-        await wait(300)
-
         await downChevron.click()
+        await page.waitForURL(/sort=-number/)
+
         await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
         await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
       })

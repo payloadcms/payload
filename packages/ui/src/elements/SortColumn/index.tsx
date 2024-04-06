@@ -1,7 +1,6 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { usePathname, useRouter } from 'next/navigation.js'
-import queryString from 'qs'
+import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 
 export type SortColumnProps = {
@@ -22,9 +21,8 @@ const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, Label, disable = false, label } = props
-  const { searchParams } = useSearchParams()
+  const { searchParams, stringifyParams } = useSearchParams()
   const router = useRouter()
-  const pathname = usePathname()
   const { t } = useTranslation()
 
   const { sort } = searchParams
@@ -40,17 +38,16 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
 
   const setSort = useCallback(
     (newSort) => {
-      const search = queryString.stringify(
-        {
-          ...searchParams,
-          sort: newSort,
-        },
-        { addQueryPrefix: true },
+      router.replace(
+        stringifyParams({
+          params: {
+            sort: newSort,
+          },
+          replace: true,
+        }),
       )
-
-      router.replace(`${pathname}?${search}`)
     },
-    [searchParams, pathname, router],
+    [router, stringifyParams],
   )
 
   return (
