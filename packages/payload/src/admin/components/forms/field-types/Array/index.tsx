@@ -35,11 +35,11 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     forceRender = false,
     indexPath,
     localized,
+    required,
+    minRows = required ? 1 : 0,
     maxRows,
-    minRows,
     path: pathFromProps,
     permissions,
-    required,
     validate = array,
   } = props
 
@@ -265,7 +265,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   {t('validation:requiresAtLeast', {
                     count: minRows,
                     label:
-                      getTranslation(minRows ? labels.plural : labels.singular, i18n) ||
+                      getTranslation(minRows > 1 ? labels.plural : labels.singular, i18n) ||
                       t(minRows > 1 ? 'general:row' : 'general:rows'),
                   })}
                 </Banner>
