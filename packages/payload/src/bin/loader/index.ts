@@ -80,7 +80,7 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
     context.parentURL.includes('/node_modules/@payloadcms') ||
     context.parentURL.includes('/node_modules/payload') // TODO: Disable this if load function used outside this monorepo (unnecessary for alpha-demo)
   if (context.parentURL.includes('/node_modules/') && !isTS && !isMonorepoParent) {
-    return nextResolve(specifier)
+    return nextResolve(specifier, context)
   }
 
   const { resolvedModule } = ts.resolveModuleName(
@@ -110,7 +110,7 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
 
     // We want to use TS "Bundler" moduleResolution for just about all files
     // so we pass the TS result here
-    return nextResolve(pathToFileURL(resolvedModule.resolvedFileName).href)
+    return nextResolve(pathToFileURL(resolvedModule.resolvedFileName).href, context)
   }
 
   // import from local project to either:
