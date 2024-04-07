@@ -12,6 +12,8 @@
 /errors.js
 /graphql.d.ts
 /graphql.js
+/node.d.ts
+/node.js
 /types.d.ts
 /types.js
 /utilities.d.ts
