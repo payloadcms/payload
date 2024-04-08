@@ -436,6 +436,8 @@ type JSONAdmin = Admin & {
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
   admin?: JSONAdmin
+  // TODO: figure out why schema type isn't working
+  schema?: string //Record<string, unknown>
   type: 'json'
 }
 
