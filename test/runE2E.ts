@@ -53,14 +53,7 @@ if (!suiteName) {
 } else {
   // Run specific suite
   clearWebpackCache()
-  let suitePath: string
-  if (suiteName.includes('/')) {
-    // Used for fields/lexical.e2e.spec.ts which is run from CI as fields/lexical
-    const suiteNameSplit = suiteName.split('/')
-    suitePath = path.resolve(dirname, suiteNameSplit[0], suiteNameSplit[1] + '.e2e.spec.ts')
-  } else {
-    suitePath = path.resolve(dirname, suiteName, 'e2e.spec.ts')
-  }
+  const suitePath = path.resolve(dirname, suiteName, '.e2e.spec.ts')
   executePlaywright(suitePath)
 }
 
