@@ -107,7 +107,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           ) : undefined
         }
         className={classNames}
-        collapsed={row.collapsed}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         dragHandleProps={{
           id: row.id,
@@ -126,6 +125,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
+        isCollapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <RenderFields

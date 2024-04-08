@@ -2,34 +2,36 @@
 import React, { createContext, useContext } from 'react'
 
 type ContextType = {
-  collapsed: boolean
+  isCollapsed: boolean
   isVisible: boolean
+  isWithinCollapsible: boolean
   toggle: () => void
-  withinCollapsible: boolean
 }
+
 const Context = createContext({
-  collapsed: false,
-  isVisible: true,
+  isCollapsed: undefined,
+  isVisible: undefined,
+  isWithinCollapsible: undefined,
   toggle: () => {},
-  withinCollapsible: true,
-})
+} as ContextType)
 
 export const CollapsibleProvider: React.FC<{
   children?: React.ReactNode
-  collapsed?: boolean
+  isCollapsed?: boolean
+  isWithinCollapsible?: boolean
   toggle: () => void
-  withinCollapsible?: boolean
-}> = ({ children, collapsed, toggle, withinCollapsible = true }) => {
-  const { collapsed: parentIsCollapsed, isVisible } = useCollapsible()
+}> = ({ children, isCollapsed, isWithinCollapsible = true, toggle }) => {
+  const { isCollapsed: parentIsCollapsed, isVisible } = useCollapsible()
 
   const contextValue = React.useMemo((): ContextType => {
     return {
-      collapsed: Boolean(collapsed),
+      isCollapsed,
       isVisible: isVisible && !parentIsCollapsed,
+      isWithinCollapsible,
       toggle,
-      withinCollapsible,
     }
-  }, [collapsed, withinCollapsible, toggle, parentIsCollapsed, isVisible])
+  }, [isCollapsed, isWithinCollapsible, toggle, parentIsCollapsed, isVisible])
+
   return <Context.Provider value={contextValue}>{children}</Context.Provider>
 }
 

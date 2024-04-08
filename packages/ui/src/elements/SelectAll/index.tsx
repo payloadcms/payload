@@ -23,7 +23,7 @@ export const SelectAll: React.FC = () => {
       checked={
         selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable
       }
-      className={`${baseClass}__checkbox`}
+      className={[baseClass, `${baseClass}__checkbox`].join(' ')}
       id="select-all"
       name="select-all"
       onToggle={() => toggleAll()}

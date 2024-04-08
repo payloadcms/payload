@@ -66,7 +66,7 @@ export const BlockContent: React.FC<Props> = (props) => {
   // is important to consider for the data path used in setDocFieldPreferences
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
 
-  const [collapsed, setCollapsed] = React.useState<boolean>(() => {
+  const [isCollapsed, setIsCollapsed] = React.useState<boolean>(() => {
     let initialState = false
 
     void getDocPreferences().then((currentDocPreferences) => {
@@ -76,7 +76,7 @@ export const BlockContent: React.FC<Props> = (props) => {
 
       if (collapsedArray && collapsedArray.includes(formData.id)) {
         initialState = true
-        setCollapsed(true)
+        setIsCollapsed(true)
       }
     })
     return initialState
@@ -196,7 +196,6 @@ export const BlockContent: React.FC<Props> = (props) => {
     <React.Fragment>
       <Collapsible
         className={classNames}
-        collapsed={collapsed}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
           <div className={`${baseClass}__block-header`}>
@@ -228,10 +227,11 @@ export const BlockContent: React.FC<Props> = (props) => {
             )}
           </div>
         }
+        isCollapsed={isCollapsed}
         key={0}
-        onToggle={(collapsed) => {
-          onCollapsedChange(collapsed)
-          setCollapsed(collapsed)
+        onToggle={(incomingCollapsedState) => {
+          onCollapsedChange(incomingCollapsedState)
+          setIsCollapsed(incomingCollapsedState)
         }}
       >
         <RenderFields

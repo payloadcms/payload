@@ -639,12 +639,12 @@ export const CustomArrayManager = () => {
 
 The `useCollapsible` hook allows you to control parent collapsibles:
 
-| Property                | Description                                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------ | --- |
-| **`collapsed`**         | State of the collapsible. `true` if open, `false` if collapsed                                               |
-| **`isVisible`**         | If nested, determine if the nearest collapsible is visible. `true` if no parent is closed, `false` otherwise |
-| **`toggle`**            | Toggles the state of the nearest collapsible                                                                 |
-| **`withinCollapsible`** | Determine when you are within another collaspible                                                            |     |
+| Property                  | Description                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ | --- |
+| **`isCollapsed`**         | State of the collapsible. `true` if open, `false` if collapsed                                               |
+| **`isVisible`**           | If nested, determine if the nearest collapsible is visible. `true` if no parent is closed, `false` otherwise |
+| **`toggle`**              | Toggles the state of the nearest collapsible                                                                 |
+| **`isWithinCollapsible`** | Determine when you are within another collaspible                                                            |     |
 
 **Example:**
 
@@ -654,10 +654,11 @@ import React from 'react'
 import { useCollapsible } from 'payload/components/utilities'
 
 const CustomComponent: React.FC = () => {
-  const { collapsed, toggle } = useCollapsible()
+  const { isCollapsed, toggle } = useCollapsible()
+
   return (
     <div>
-      <p className="field-type">I am {collapsed ? 'closed' : 'open'}</p>
+      <p className="field-type">I am {isCollapsed ? 'closed' : 'open'}</p>
       <button onClick={toggle} type="button">
         Toggle
       </button>
