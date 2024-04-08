@@ -258,6 +258,7 @@ jobs:
           - fields
           - fields/collections/Blocks
           - fields/collections/Array
+          - fields/collections/Relationship
           # - fields/lexical
           # - live-preview
           # - localization
