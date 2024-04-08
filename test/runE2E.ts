@@ -53,7 +53,7 @@ if (!suiteName) {
 } else {
   // Run specific suite
   clearWebpackCache()
-  const suitePath = path.resolve(dirname, suiteName, 'e2e.spec.ts')
+  const suitePath = path.resolve(dirname, suiteName, 'e2e.spec.ts').replace('__', '/')
   executePlaywright(suitePath)
 }
 
