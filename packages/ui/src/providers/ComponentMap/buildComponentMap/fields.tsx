@@ -209,6 +209,8 @@ export const mapFields = (args: {
                 value: option.value,
               }
             }
+
+            return option
           })
         }
 

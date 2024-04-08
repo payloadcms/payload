@@ -53,6 +53,8 @@ export const createClientFieldConfig = ({
           value: option.value,
         }
       }
+
+      return option
     })
   }
 
