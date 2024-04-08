@@ -43,14 +43,14 @@ let serverURL: string
 
 describe('fields', () => {
   beforeAll(async ({ browser }, testInfo) => {
-    const prebuild = Boolean(process.env.CI)
+    // const prebuild = Boolean(process.env.CI)
 
-    if (prebuild) testInfo.setTimeout(testInfo.timeout * 3)
+    // if (prebuild) testInfo.setTimeout(testInfo.timeout * 3)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({
       dirname,
-      prebuild,
+      // prebuild,
     }))
 
     const context = await browser.newContext()
