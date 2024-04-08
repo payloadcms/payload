@@ -50,6 +50,6 @@ export const dateLocales = {
   th,
   tr,
   vi,
-  zh: zhCN,
-  'zh-tw': zhTW,
+  zhCN,
+  zhTW,
 }

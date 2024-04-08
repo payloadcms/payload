@@ -176,21 +176,26 @@ const acceptedLanguages = [
   'ua',
   'vi',
   'zh',
-  'zhTw',
+  'zhTW',
 ]
 
 export function matchLanguage(header: string): string | undefined {
   const parsedHeader = parseAcceptLanguage(header)
 
+  let matchedLanguage = ''
+
   for (const { language } of parsedHeader) {
     for (const acceptedLanguage of acceptedLanguages) {
-      if (language.startsWith(acceptedLanguage)) {
-        return acceptedLanguage
+      if (
+        language.startsWith(acceptedLanguage) &&
+        acceptedLanguage.length > matchedLanguage.length
+      ) {
+        matchedLanguage = acceptedLanguage
       }
     }
   }
 
-  return undefined
+  return matchedLanguage || undefined
 }
 
 const initTFunction: InitTFunction = (args) => {

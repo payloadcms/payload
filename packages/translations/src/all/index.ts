@@ -27,7 +27,7 @@ import tr from './tr.js'
 import ua from './ua.js'
 import vi from './vi.js'
 import zh from './zh.js'
-import zhTw from './zh-tw.js'
+import zhTW from './zhTW.js'
 
 export const translations = {
   ar,
@@ -59,7 +59,7 @@ export const translations = {
   ua,
   vi,
   zh,
-  'zh-tw': zhTw,
+  zhTW,
 } as {
   [locale: string]: Record<string, Record<string, string>>
 }
