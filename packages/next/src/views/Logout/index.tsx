@@ -10,7 +10,7 @@ const baseClass = 'logout'
 
 export { generateLogoutMetadata } from './meta.js'
 
-export const Logout: React.FC<
+export const LogoutView: React.FC<
   AdminViewProps & {
     inactivity?: boolean
   }
@@ -39,5 +39,5 @@ export const Logout: React.FC<
 }
 
 export const LogoutInactivity: React.FC<AdminViewProps> = (props) => {
-  return <Logout inactivity {...props} />
+  return <LogoutView inactivity {...props} />
 }

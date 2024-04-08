@@ -9,6 +9,9 @@ export const PostsCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
   },
+  access: {
+    readVersions: () => false,
+  },
   fields: [
     {
       name: 'text',

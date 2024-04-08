@@ -10,7 +10,7 @@ import type {
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { LivePreviewView as DefaultLivePreviewView } from '../LivePreview/index.js'
-import { Unauthorized } from '../Unauthorized/index.js'
+import { UnauthorizedView } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
@@ -77,7 +77,7 @@ export const getViewsFromConfig = ({
                 CustomView = getCustomViewByKey(views, 'Default')
                 DefaultView = DefaultEditView
               } else {
-                ErrorView = Unauthorized
+                ErrorView = UnauthorizedView
               }
               break
             }
@@ -87,7 +87,7 @@ export const getViewsFromConfig = ({
                 CustomView = getCustomViewByKey(views, 'Default')
                 DefaultView = DefaultEditView
               } else {
-                ErrorView = Unauthorized
+                ErrorView = UnauthorizedView
               }
               break
             }
@@ -118,7 +118,7 @@ export const getViewsFromConfig = ({
                 CustomView = getCustomViewByKey(views, 'Versions')
                 DefaultView = DefaultVersionsView
               } else {
-                ErrorView = Unauthorized
+                ErrorView = UnauthorizedView
               }
               break
             }
@@ -150,7 +150,7 @@ export const getViewsFromConfig = ({
               CustomView = getCustomViewByKey(views, 'Version')
               DefaultView = DefaultVersionView
             } else {
-              ErrorView = Unauthorized
+              ErrorView = UnauthorizedView
             }
           } else {
             const baseRoute = [adminRoute, collectionEntity, collectionSlug, segment3]
@@ -191,7 +191,7 @@ export const getViewsFromConfig = ({
             CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = DefaultEditView
           } else {
-            ErrorView = Unauthorized
+            ErrorView = UnauthorizedView
           }
           break
         }
@@ -219,7 +219,7 @@ export const getViewsFromConfig = ({
                 CustomView = getCustomViewByKey(views, 'Versions')
                 DefaultView = DefaultVersionsView
               } else {
-                ErrorView = Unauthorized
+                ErrorView = UnauthorizedView
               }
               break
             }
@@ -229,7 +229,7 @@ export const getViewsFromConfig = ({
                 CustomView = getCustomViewByKey(views, 'Default')
                 DefaultView = DefaultEditView
               } else {
-                ErrorView = Unauthorized
+                ErrorView = UnauthorizedView
               }
               break
             }
@@ -244,7 +244,7 @@ export const getViewsFromConfig = ({
               CustomView = getCustomViewByKey(views, 'Version')
               DefaultView = DefaultVersionView
             } else {
-              ErrorView = Unauthorized
+              ErrorView = UnauthorizedView
             }
           } else {
             const baseRoute = [adminRoute, 'globals', globalSlug].filter(Boolean).join('/')
