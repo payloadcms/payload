@@ -12,7 +12,7 @@ import './index.scss'
 
 export { generateCreateFirstUserMetadata } from './meta.js'
 
-export const CreateFirstUser: React.FC<AdminViewProps> = async ({ initPageResult }) => {
+export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageResult }) => {
   const {
     req,
     req: {

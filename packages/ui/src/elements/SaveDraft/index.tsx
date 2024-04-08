@@ -25,7 +25,6 @@ const DefaultSaveDraftButton: React.FC = () => {
   const editDepth = useEditDepth()
   const { t } = useTranslation()
   const { submit } = useForm()
-  const label = t('general:save')
 
   const saveDraft = useCallback(async () => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
@@ -74,7 +73,7 @@ const DefaultSaveDraftButton: React.FC = () => {
       size="small"
       type="button"
     >
-      {label}
+      {t('version:saveDraft')}
     </FormSubmit>
   )
 }

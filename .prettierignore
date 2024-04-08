@@ -10,3 +10,5 @@
 **/temp
 **/docs/**
 tsconfig.json
+packages/payload/*.js
+packages/payload/*.d.ts

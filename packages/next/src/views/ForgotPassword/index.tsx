@@ -13,7 +13,7 @@ export { generateForgotPasswordMetadata } from './meta.js'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 export const forgotPasswordBaseClass = 'forgot-password'
 
-export const ForgotPassword: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult }) => {
   const {
     req: {
       i18n,
