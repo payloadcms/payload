@@ -46,3 +46,6 @@ process.on('SIGINT', async () => {
   await afterTest()
   process.exit(0)
 })
+
+// fetch the admin url to force a render
+fetch(`http://localhost:${process.env.PORT || 3000}/admin`)
