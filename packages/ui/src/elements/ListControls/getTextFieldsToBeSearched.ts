@@ -1,17 +1,16 @@
-import type { Field, FieldAffectingData } from 'payload/types'
+import { flattenFieldMap } from '@payloadcms/ui/utilities/flattenFieldMap'
 
-import { fieldAffectsData } from 'payload/types'
-import { flattenTopLevelFields } from 'payload/utilities'
+import type { FieldMap, MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 export const getTextFieldsToBeSearched = (
   listSearchableFields: string[],
-  fields: Field[],
-): FieldAffectingData[] => {
+  fieldMap: FieldMap,
+): MappedField[] => {
   if (listSearchableFields) {
-    const flattenedFields = flattenTopLevelFields(fields)
+    const flattenedFields = flattenFieldMap(fieldMap)
     return flattenedFields.filter(
-      (field) => fieldAffectsData(field) && listSearchableFields.includes(field.name),
-    ) as FieldAffectingData[]
+      (field) => field.isFieldAffectingData && listSearchableFields.includes(field.name),
+    )
   }
 
   return null
