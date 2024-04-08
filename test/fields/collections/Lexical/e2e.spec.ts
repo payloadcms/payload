@@ -18,7 +18,8 @@ import { clearAndSeedEverything } from '../../seed.js'
 import { lexicalFieldsSlug } from '../../slugs.js'
 import { lexicalDocData } from './data.js'
 const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const currentFolder = path.dirname(filename)
+const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
