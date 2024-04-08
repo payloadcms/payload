@@ -19,10 +19,7 @@ export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<P
 
   if (userCollectionConfig) {
     results.canAccessAdmin = userCollectionConfig.access.admin
-      ? await userCollectionConfig.access.admin({
-          payload,
-          user,
-        })
+      ? await userCollectionConfig.access.admin({ req })
       : isLoggedIn
   } else {
     results.canAccessAdmin = false

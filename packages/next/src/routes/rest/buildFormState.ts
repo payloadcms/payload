@@ -46,7 +46,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
 
       // Run the admin access function from the config if it exists
       if (adminAccessFunction) {
-        const canAccessAdmin = await adminAccessFunction(req)
+        const canAccessAdmin = await adminAccessFunction({ req })
 
         if (!canAccessAdmin) {
           return Response.json(null, {
