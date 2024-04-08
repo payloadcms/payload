@@ -26,6 +26,7 @@ import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
+import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 import './index.scss'
 
 const baseClass = 'list-controls'
@@ -38,7 +39,6 @@ export type ListControlsProps = {
   handleSearchChange?: (search: string) => void
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
-  textFieldsToBeSearched?: FieldAffectingData[]
 }
 
 /**
@@ -47,13 +47,7 @@ export type ListControlsProps = {
  * the collection's documents.
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
-  const {
-    collectionConfig,
-    enableColumns = true,
-    enableSort = false,
-    fieldMap,
-    textFieldsToBeSearched,
-  } = props
+  const { collectionConfig, enableColumns = true, enableSort = false, fieldMap } = props
 
   const { useWindowInfo } = facelessUIImport
 
@@ -87,7 +81,10 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           }
           fieldName={titleField.name}
           handleChange={handleSearchChange}
-          listSearchableFields={textFieldsToBeSearched}
+          listSearchableFields={getTextFieldsToBeSearched(
+            collectionConfig.admin.listSearchableFields,
+            fieldMap,
+          )}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
