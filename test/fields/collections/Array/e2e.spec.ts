@@ -87,10 +87,10 @@ describe('Array', () => {
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
   })
 
+  // eslint-disable-next-line playwright/expect-expect
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    await expect(page.locator('.Toastify')).toContainText('successfully')
   })
 
   test('should fail min rows validation when rows are present', async () => {
