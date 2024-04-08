@@ -26,14 +26,10 @@ type ResolveFn = (...args: Required<ResolveArgs>) => Promise<ResolveResult>
 const locatedConfig = getTsconfig()
 const tsconfig = locatedConfig.config.compilerOptions as unknown as ts.CompilerOptions
 
-tsconfig.module = ts.ModuleKind.ESNext
-
-// Specify bundler resolution for Next.js compatibility.
-// We will use TS to resolve file paths for most flexibility
-tsconfig.moduleResolution = ts.ModuleResolutionKind.Bundler
-
 // Don't resolve d.ts files, because we aren't type-checking
 tsconfig.noDtsResolution = true
+tsconfig.module = ts.ModuleKind.ESNext
+tsconfig.moduleResolution = ts.ModuleResolutionKind.NodeNext
 
 const moduleResolutionCache = ts.createModuleResolutionCache(
   ts.sys.getCurrentDirectory(),
@@ -55,12 +51,14 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   const isTS = TS_EXTENSIONS.some((ext) => specifier.endsWith(ext))
   const isClient = CLIENT_EXTENSIONS.some((ext) => specifier.endsWith(ext))
 
+  // If a client file is resolved, we'll set `format: client`
+  // and short circuit, so the load step
+  // will return source code of empty object
   if (isClient) {
     const nextResult = await nextResolve(specifier, context, nextResolve)
-    const specifierSegments = specifier.split('.')
 
     return {
-      format: '.' + specifierSegments[specifierSegments.length - 1],
+      format: 'client',
       shortCircuit: true,
       url: nextResult.url,
     }
@@ -75,9 +73,28 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
     }
   }
 
-  // import/require from external library
-  if (context.parentURL.includes('/node_modules/') && !isTS) {
-    return nextResolve(specifier)
+  // Try and resolve normally
+  // This could fail, so we need to swallow that error
+  // and keep going
+  let nextResult: ResolveResult
+
+  // First, try to
+  if (!isTS) {
+    try {
+      nextResult = await nextResolve(specifier, context, nextResolve)
+    } catch (_) {
+      // swallow error
+    }
+  }
+
+  if (nextResult) {
+    const nextResultIsTS = TS_EXTENSIONS.some((ext) => nextResult.url.endsWith(ext))
+
+    // If the next result is NOT TS, it does not need to be compiled
+    // so just send it on
+    if (!nextResultIsTS) {
+      return nextResult
+    }
   }
 
   const { resolvedModule } = ts.resolveModuleName(
@@ -88,29 +105,20 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
     moduleResolutionCache,
   )
 
-  // import from local project to local project TS file
   if (resolvedModule) {
-    const resolvedIsNodeModule = resolvedModule.resolvedFileName.includes('/node_modules/')
     const resolvedIsTS = TS_EXTENSIONS.includes(resolvedModule.extension)
 
-    if (!resolvedIsNodeModule && resolvedIsTS) {
-      return {
-        format: 'ts',
-        shortCircuit: true,
-        url: pathToFileURL(resolvedModule.resolvedFileName).href,
-      }
+    return {
+      format: resolvedIsTS ? 'ts' : undefined,
+      shortCircuit: true,
+      url: pathToFileURL(resolvedModule.resolvedFileName).href,
     }
-
-    // We want to use TS "Bundler" moduleResolution for just about all files
-    // so we pass the TS result here
-    return nextResolve(pathToFileURL(resolvedModule.resolvedFileName).href)
   }
 
   // import from local project to either:
   // - something TS couldn't resolve
-  // - external library
   // - local project non-TS file
-  return nextResolve(specifier)
+  return nextResolve(specifier, context, nextResolve)
 }
 
 interface LoadContext {
@@ -143,11 +151,11 @@ if (tsconfig.paths) {
 }
 
 export const load: LoadFn = async (url, context, nextLoad) => {
-  if (CLIENT_EXTENSIONS.some((e) => context.format === e)) {
-    const rawSource = '{}'
+  if (context.format === 'client') {
+    const rawSource = 'export default {}'
 
     return {
-      format: 'json',
+      format: 'module',
       shortCircuit: true,
       source: rawSource,
     }

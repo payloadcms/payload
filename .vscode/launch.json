@@ -31,6 +31,7 @@
       "type": "node-terminal",
       "env": {
         "LOADER_TEST_FILE_PATH": "./dependency-test.js"
+        // "LOADER_TEST_FILE_PATH": "../fields/config.ts"
       }
     },
     {
