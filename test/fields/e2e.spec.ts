@@ -541,7 +541,7 @@ describe('fields', () => {
 
       await page.goto(url.create)
 
-      await wait(300)
+      await wait(1000)
 
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
