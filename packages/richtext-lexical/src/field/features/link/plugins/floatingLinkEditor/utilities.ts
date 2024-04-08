@@ -7,6 +7,7 @@ import { getBaseFields } from '../../drawer/baseFields.js'
 /**
  * This function is run to enrich the basefields which every link has with potential, custom user-added fields.
  */
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function transformExtraFields(
   customFieldSchema:
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
