@@ -2,7 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { getNextI18n } from '@payloadcms/next/utilities/getNextI18n.js'
+import { getNextI18n } from '@payloadcms/next/utilities'
 import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import React, { Fragment } from 'react'
