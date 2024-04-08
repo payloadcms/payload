@@ -181,21 +181,25 @@ const acceptedLanguages = [
 
 export function matchLanguage(header: string): string | undefined {
   const parsedHeader = parseAcceptLanguage(header)
-
-  let matchedLanguage = ''
+  let matchedLanguage = { isExactMatch: false, language: '' }
 
   for (const { language } of parsedHeader) {
     for (const acceptedLanguage of acceptedLanguages) {
-      if (
+      if (language === acceptedLanguage) {
+        if (!matchedLanguage.isExactMatch || matchedLanguage.language === '') {
+          matchedLanguage = { isExactMatch: true, language: acceptedLanguage }
+        }
+      } else if (
         language.startsWith(acceptedLanguage) &&
-        acceptedLanguage.length > matchedLanguage.length
+        !matchedLanguage.isExactMatch &&
+        acceptedLanguage.length > matchedLanguage.language.length
       ) {
-        matchedLanguage = acceptedLanguage
+        matchedLanguage.language = acceptedLanguage
       }
     }
   }
 
-  return matchedLanguage || undefined
+  return matchedLanguage.language || undefined
 }
 
 const initTFunction: InitTFunction = (args) => {
