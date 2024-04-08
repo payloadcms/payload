@@ -67,7 +67,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           enabledCollections: props.enabledCollections,
         } as ExclusiveLinkCollectionsProps,
         generateSchemaMap: async ({ config, props }) => {
-          const i18n = await initI18n({ config: config.i18n, context: 'client' })
+          const i18n = initI18n({ config: config.i18n, context: 'client' })
 
           return {
             fields: await transformExtraFields(

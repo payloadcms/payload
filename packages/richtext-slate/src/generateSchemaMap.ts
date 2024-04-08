@@ -12,8 +12,8 @@ import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
 
 export const getGenerateSchemaMap =
   (args: AdapterArguments): RichTextAdapter['generateSchemaMap'] =>
-  async ({ config, schemaMap, schemaPath }) => {
-    const i18n = await initI18n({ config: config.i18n, context: 'client' })
+  ({ config, schemaMap, schemaPath }) => {
+    const i18n = initI18n({ config: config.i18n, context: 'client' })
     const validRelationships = config.collections.map((c) => c.slug) || []
 
     ;(args?.admin?.elements || Object.values(elementTypes)).forEach((el) => {

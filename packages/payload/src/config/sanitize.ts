@@ -1,3 +1,4 @@
+import en from '@payloadcms/translations/languages/en'
 import merge from 'deepmerge'
 
 import type {
@@ -86,7 +87,9 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   config.i18n = {
     fallbackLanguage: 'en',
-    supportedLanguages: ['en'],
+    supportedLanguages: {
+      en,
+    },
     translations: {},
     ...(incomingConfig?.i18n ?? {}),
   }

@@ -44,7 +44,7 @@ export const initPage = async ({
   const cookies = parseCookies(headers)
   const language = getRequestLanguage({ config: payload.config, cookies, headers })
 
-  const i18n = await initI18n({
+  const i18n = initI18n({
     config: payload.config.i18n,
     context: 'client',
     language,

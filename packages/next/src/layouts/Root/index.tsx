@@ -40,7 +40,7 @@ export const RootLayout = async ({
       headers,
     }) ?? config.i18n.fallbackLanguage
 
-  const i18n = await initI18n({ config: config.i18n, context: 'client', language: lang })
+  const i18n = initI18n({ config: config.i18n, context: 'client', language: lang })
   const clientConfig = await createClientConfig({ config, t: i18n.t })
 
   const dir = rtlLanguages.includes(lang) ? 'RTL' : 'LTR'

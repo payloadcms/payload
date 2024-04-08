@@ -22,7 +22,7 @@ export type I18n = {
 
 export type I18nOptions = {
   fallbackLanguage?: string
-  supportedLanguages?: string[]
+  supportedLanguages?: Translations
   translations?: {
     [language: string]:
       | {
@@ -45,4 +45,4 @@ export type InitI18n = (args: {
   config: I18nOptions
   context: 'api' | 'client'
   language?: string
-}) => Promise<I18n>
+}) => I18n

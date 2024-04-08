@@ -1,7 +1,7 @@
 import type { I18n, InitI18n, InitTFunction, Translations } from '../types.js'
 
 import { deepMerge } from './deepMerge.js'
-import { dynamicallyImportLanguages } from './dynamicImport.js'
+import { reduceLanguages } from './reduceLanguages.js'
 
 /**
  * @function getTranslationString
@@ -211,14 +211,14 @@ const initTFunction: InitTFunction = (args) => {
   }
 }
 
-function memoize(fn: (args: unknown) => Promise<I18n>, keys: string[]) {
+function memoize(fn: (args: unknown) => I18n, keys: string[]) {
   const cacheMap = new Map()
 
-  const memoized = async (args) => {
+  const memoized = (args) => {
     const cacheKey = keys.reduce((acc, key) => acc + args[key], '')
 
     if (!cacheMap.has(cacheKey)) {
-      const result = await fn(args)
+      const result = fn(args)
       cacheMap.set(cacheKey, result)
     }
 
@@ -229,8 +229,8 @@ function memoize(fn: (args: unknown) => Promise<I18n>, keys: string[]) {
 }
 
 export const initI18n: InitI18n = memoize(
-  async ({ config, context, language = 'en' }: Parameters<InitI18n>[0]) => {
-    const languages = await dynamicallyImportLanguages(config.supportedLanguages, context)
+  ({ config, context, language = 'en' }: Parameters<InitI18n>[0]) => {
+    const languages = reduceLanguages(config.supportedLanguages, context)
 
     const { t, translations } = initTFunction({
       config,
