@@ -21,11 +21,11 @@ export type Props = {
   actions?: React.ReactNode
   children: React.ReactNode
   className?: string
-  collapsed?: boolean
   collapsibleStyle?: 'default' | 'error'
   dragHandleProps?: DragHandleProps
   header?: React.ReactNode
   initCollapsed?: boolean
+  isCollapsed?: boolean
   onToggle?: (collapsed: boolean) => void
 }
 
@@ -33,24 +33,24 @@ export const Collapsible: React.FC<Props> = ({
   actions,
   children,
   className,
-  collapsed: collapsedFromProps,
   collapsibleStyle = 'default',
   dragHandleProps,
   header,
   initCollapsed,
+  isCollapsed: collapsedFromProps,
   onToggle,
 }) => {
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed))
   const [hoveringToggle, setHoveringToggle] = useState(false)
-  const { withinCollapsible } = useCollapsible()
+  const { isWithinCollapsible } = useCollapsible()
   const { t } = useTranslation()
 
-  const collapsed = typeof collapsedFromProps === 'boolean' ? collapsedFromProps : collapsedLocal
+  const isCollapsed = typeof collapsedFromProps === 'boolean' ? collapsedFromProps : collapsedLocal
 
   const toggleCollapsible = React.useCallback(() => {
-    if (typeof onToggle === 'function') onToggle(!collapsed)
-    setCollapsedLocal(!collapsed)
-  }, [onToggle, collapsed])
+    if (typeof onToggle === 'function') onToggle(!isCollapsed)
+    setCollapsedLocal(!isCollapsed)
+  }, [onToggle, isCollapsed])
 
   return (
     <div
@@ -58,15 +58,15 @@ export const Collapsible: React.FC<Props> = ({
         baseClass,
         className,
         dragHandleProps && `${baseClass}--has-drag-handle`,
-        collapsed && `${baseClass}--collapsed`,
-        withinCollapsible && `${baseClass}--nested`,
+        isCollapsed && `${baseClass}--collapsed`,
+        isWithinCollapsible && `${baseClass}--nested`,
         hoveringToggle && `${baseClass}--hovered`,
         `${baseClass}--style-${collapsibleStyle}`,
       ]
         .filter(Boolean)
         .join(' ')}
     >
-      <CollapsibleProvider collapsed={collapsed} toggle={toggleCollapsible}>
+      <CollapsibleProvider isCollapsed={isCollapsed} toggle={toggleCollapsible}>
         <div
           className={`${baseClass}__toggle-wrap`}
           onMouseEnter={() => setHoveringToggle(true)}
@@ -84,7 +84,7 @@ export const Collapsible: React.FC<Props> = ({
           <button
             className={[
               `${baseClass}__toggle`,
-              `${baseClass}__toggle--${collapsed ? 'collapsed' : 'open'}`,
+              `${baseClass}__toggle--${isCollapsed ? 'collapsed' : 'open'}`,
             ]
               .filter(Boolean)
               .join(' ')}
@@ -108,11 +108,11 @@ export const Collapsible: React.FC<Props> = ({
           <div className={`${baseClass}__actions-wrap`}>
             {actions && <div className={`${baseClass}__actions`}>{actions}</div>}
             <div className={`${baseClass}__indicator`}>
-              <Chevron direction={!collapsed ? 'up' : undefined} />
+              <Chevron direction={!isCollapsed ? 'up' : undefined} />
             </div>
           </div>
         </div>
-        <AnimateHeight duration={200} height={collapsed ? 0 : 'auto'}>
+        <AnimateHeight duration={200} height={isCollapsed ? 0 : 'auto'}>
           <div className={`${baseClass}__content`}>{children}</div>
         </AnimateHeight>
       </CollapsibleProvider>

@@ -106,7 +106,6 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           ) : undefined
         }
         className={classNames}
-        collapsed={row.collapsed}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         dragHandleProps={{
           id: row.id,
@@ -128,6 +127,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
           </div>
         }
+        isCollapsed={row.collapsed}
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
