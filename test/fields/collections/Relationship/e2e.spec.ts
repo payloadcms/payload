@@ -301,7 +301,7 @@ describe('relationship', () => {
 
     // Need to wait to properly open drawer - without this the drawer state is flakey and closes before
     // the text below can be filled before the save on the drawer
-    await wait(200)
+    await wait(1000)
 
     // Click edit button which opens drawer
     await page.getByRole('button', { name: 'Edit Seeded text document' }).click()
