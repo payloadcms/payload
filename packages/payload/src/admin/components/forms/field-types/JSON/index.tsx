@@ -30,6 +30,7 @@ const JSONField: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
+    schema,
     validate = json,
   } = props
 
@@ -60,6 +61,8 @@ const JSONField: React.FC<Props> = (props) => {
         if (readOnly) return
         setStringValue(val)
 
+        // TODO: Check schema
+        console.log('check schema', schema)
         setValue(val ? JSON.parse(val) : '')
         setJsonError(undefined)
       } catch (e) {
