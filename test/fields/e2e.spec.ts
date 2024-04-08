@@ -283,6 +283,8 @@ describe('fields', () => {
       await page.locator('#field-uniqueText').fill(uniqueText)
       await page.locator('#field-localizedUniqueRequiredText').fill('localizedUniqueRequired2')
 
+      await wait(500)
+
       // attempt to save
       await page.click('#action-save', { delay: 200 })
 
