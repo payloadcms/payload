@@ -1,23 +1,18 @@
-import { load } from './load.js'
-
-const loadConfig = async (configPath: string) => {
-  const configPromise = await load(configPath)
-  return configPromise.default
-}
+import { startChildProcess } from './startChildProcess.js'
 
 describe('Loader', () => {
-  it('should load using TS moduleResolution: bundler', async () => {
-    const file = await load('./next-navigation-test.js')
-    expect(typeof file.redirect).toStrictEqual('function')
+  it('should load dependencies without extensions', async () => {
+    const code = await startChildProcess('./dependency-test.js')
+    expect(code).toStrictEqual(0)
   })
 
   it('should import complex configs', async () => {
-    const config = await loadConfig('../fields/config.ts')
-    expect(Array.isArray(config.collections)).toStrictEqual(true)
+    const code = await startChildProcess('../fields/config.ts')
+    expect(code).toStrictEqual(0)
   })
 
   it('should import configs that rely on custom components', async () => {
-    const config = await loadConfig('../admin/config.ts')
-    expect(Array.isArray(config.collections)).toStrictEqual(true)
+    const code = await startChildProcess('../admin/config.ts')
+    expect(code).toStrictEqual(0)
   })
 })

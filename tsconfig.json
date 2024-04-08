@@ -36,9 +36,6 @@
       }
     ],
     "paths": {
-      "payload/types": [
-        "./packages/payload/src/exports/types.ts"
-      ],
       "@payload-config": [
         "./test/_community/config.ts"
       ],

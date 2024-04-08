@@ -24,6 +24,17 @@
       "type": "node-terminal"
     },
     {
+      "command": "node --no-deprecation test/loader/init.js",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Loader",
+      "request": "launch",
+      "type": "node-terminal",
+      "env": {
+        "LOADER_TEST_FILE_PATH": "./dependency-test.js"
+        // "LOADER_TEST_FILE_PATH": "../fields/config.ts"
+      }
+    },
+    {
       "command": "node --no-deprecation test/dev.js admin",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Admin",
