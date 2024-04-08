@@ -259,7 +259,7 @@ jobs:
           - fields/collections/Blocks
           - fields/collections/Array
           - fields/collections/Relationship
-          # - fields/lexical
+          - fields/collections/Lexical
           # - live-preview
           # - localization
           # - plugin-form-builder

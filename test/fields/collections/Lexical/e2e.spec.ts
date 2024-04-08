@@ -7,16 +7,16 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { LexicalField } from './payload-types.js'
+import type { LexicalField } from '../../payload-types.js'
 
-import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
-import { RESTClient } from '../helpers/rest.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
-import { lexicalDocData } from './collections/Lexical/data.js'
-import { clearAndSeedEverything } from './seed.js'
-import { lexicalFieldsSlug } from './slugs.js'
+import { initPageConsoleErrorCatch, saveDocAndAssert } from '../../../helpers.js'
+import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
+import { initPayloadE2E } from '../../../helpers/initPayloadE2E.js'
+import { RESTClient } from '../../../helpers/rest.js'
+import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
+import { clearAndSeedEverything } from '../../seed.js'
+import { lexicalFieldsSlug } from '../../slugs.js'
+import { lexicalDocData } from './data.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
