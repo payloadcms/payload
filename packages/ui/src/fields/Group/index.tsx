@@ -51,7 +51,7 @@ const GroupField: React.FC<GroupFieldProps> = (props) => {
 
   const { path, permissions, readOnly: readOnlyFromContext, schemaPath } = useFieldProps()
   const { i18n } = useTranslation()
-  const isWithinCollapsible = useCollapsible()
+  const { isWithinCollapsible } = useCollapsible()
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
