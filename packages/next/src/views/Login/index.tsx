@@ -11,7 +11,7 @@ export { generateLoginMetadata } from './meta.js'
 
 export const loginBaseClass = 'login'
 
-export const Login: React.FC<AdminViewProps> = ({ initPageResult, searchParams }) => {
+export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, searchParams }) => {
   const { req } = initPageResult
 
   const {

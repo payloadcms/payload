@@ -4,15 +4,15 @@ import type { AdminViewComponent } from 'payload/types'
 import type { initPage } from '../../utilities/initPage.js'
 
 import { Account } from '../Account/index.js'
-import { CreateFirstUser } from '../CreateFirstUser/index.js'
+import { CreateFirstUserView } from '../CreateFirstUser/index.js'
 import { Dashboard } from '../Dashboard/index.js'
 import { Document as DocumentView } from '../Document/index.js'
-import { ForgotPassword, forgotPasswordBaseClass } from '../ForgotPassword/index.js'
+import { ForgotPasswordView, forgotPasswordBaseClass } from '../ForgotPassword/index.js'
 import { ListView } from '../List/index.js'
-import { Login, loginBaseClass } from '../Login/index.js'
-import { Logout, LogoutInactivity } from '../Logout/index.js'
+import { LoginView, loginBaseClass } from '../Login/index.js'
+import { LogoutInactivity, LogoutView } from '../Logout/index.js'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
-import { Unauthorized } from '../Unauthorized/index.js'
+import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
@@ -24,12 +24,12 @@ const baseClasses = {
 }
 
 const oneSegmentViews = {
-  'create-first-user': CreateFirstUser,
-  forgot: ForgotPassword,
-  login: Login,
-  logout: Logout,
+  'create-first-user': CreateFirstUserView,
+  forgot: ForgotPasswordView,
+  login: LoginView,
+  logout: LogoutView,
   'logout-inactivity': LogoutInactivity,
-  unauthorized: Unauthorized,
+  unauthorized: UnauthorizedView,
 }
 
 export const getViewFromConfig = ({
