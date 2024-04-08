@@ -90,10 +90,10 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   if (nextResult) {
     const nextResultIsTS = TS_EXTENSIONS.some((ext) => nextResult.url.endsWith(ext))
 
-    // If the next result is NOT TS, it does not need to be compiled
-    // so just send it on
-    if (!nextResultIsTS) {
-      return nextResult
+    return {
+      ...nextResult,
+      format: nextResultIsTS ? 'ts' : nextResult.format,
+      shortCircuit: true,
     }
   }
 
