@@ -256,10 +256,10 @@ jobs:
           # - field-error-states
           # - fields-relationship
           - fields
-          - fields/collections/Blocks
-          - fields/collections/Array
-          - fields/collections/Relationship
-          - fields/collections/Lexical
+          - fields__collections__Blocks
+          - fields__collections__Array
+          - fields__collections__Relationship
+          - fields__collections__Lexical
           # - live-preview
           # - localization
           # - plugin-form-builder
