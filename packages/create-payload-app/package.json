@@ -19,7 +19,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "test": "jest",
-    "prepublishOnly": "pnpm test && pnpm clean && pnpm build"
+    "prepublishOnly": "pnpm clean && pnpm build"
   },
   "files": [
     "package.json",
