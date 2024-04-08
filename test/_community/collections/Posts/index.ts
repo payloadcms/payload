@@ -11,6 +11,11 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'json',
+      schema: '{"test": "string"}',
+      type: 'json',
+    },
+    {
       name: 'associatedMedia',
       access: {
         create: () => true,
