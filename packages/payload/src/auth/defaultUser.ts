@@ -1,9 +1,5 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 
-import { extractTranslations } from '../translations/extractTranslations.js'
-
-const labels = extractTranslations(['general:user', 'general:users'])
-
 export const defaultUserCollection: CollectionConfig = {
   slug: 'users',
   admin: {
@@ -14,7 +10,7 @@ export const defaultUserCollection: CollectionConfig = {
   },
   fields: [],
   labels: {
-    plural: labels['general:users'],
-    singular: labels['general:user'],
+    plural: ({ t }) => t('general:users'),
+    singular: ({ t }) => t('general:user'),
   },
 }

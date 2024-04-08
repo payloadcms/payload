@@ -1,13 +1,12 @@
 import type { SanitizedConfig } from 'payload/types'
 
-import { translations } from '@payloadcms/translations/client'
+import { initI18n } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui/providers/Root'
 import '@payloadcms/ui/scss/app.scss'
 import { buildComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { parseCookies } from 'payload/auth'
 import { createClientConfig } from 'payload/config'
-import { deepMerge } from 'payload/utilities'
 import React from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -30,7 +29,6 @@ export const RootLayout = async ({
   config: Promise<SanitizedConfig>
 }) => {
   const config = await configPromise
-  const clientConfig = await createClientConfig(config)
 
   const headers = getHeaders()
   const cookies = parseCookies(headers)
@@ -40,16 +38,19 @@ export const RootLayout = async ({
       config,
       cookies,
       headers,
-    }) ?? clientConfig.i18n.fallbackLanguage
+    }) ?? config.i18n.fallbackLanguage
+
+  const i18n = await initI18n({ config: config.i18n, context: 'client', language: lang })
+  const clientConfig = await createClientConfig({ config, t: i18n.t })
 
   const dir = rtlLanguages.includes(lang) ? 'RTL' : 'LTR'
 
-  const mergedTranslations = deepMerge(translations, clientConfig.i18n.translations)
-
-  const languageOptions = Object.entries(translations || {}).map(([language, translations]) => ({
-    label: translations.general.thisLanguage,
-    value: language,
-  }))
+  const languageOptions = Object.entries(i18n.translations || {}).map(
+    ([language, translations]) => ({
+      label: translations.general.thisLanguage,
+      value: language,
+    }),
+  )
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async function switchLanguageServerAction(lang: string): Promise<void> {
@@ -66,6 +67,7 @@ export const RootLayout = async ({
     DefaultListView,
     children,
     config,
+    i18n,
   })
 
   return (
@@ -79,7 +81,7 @@ export const RootLayout = async ({
           languageOptions={languageOptions}
           // eslint-disable-next-line react/jsx-no-bind
           switchLanguageServerAction={switchLanguageServerAction}
-          translations={mergedTranslations[lang]}
+          translations={i18n.translations[lang]}
         >
           {wrappedChildren}
         </RootProvider>

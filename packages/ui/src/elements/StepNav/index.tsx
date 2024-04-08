@@ -1,4 +1,6 @@
 'use client'
+import type { LabelFunction } from 'payload/config'
+
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, createContext, useContext, useState } from 'react'
 
@@ -10,7 +12,7 @@ import './index.scss'
 export { SetStepNav } from './SetStepNav.js'
 
 export type StepNavItem = {
-  label: Record<string, string> | string
+  label: LabelFunction | Record<string, string> | string
   url?: string
 }
 

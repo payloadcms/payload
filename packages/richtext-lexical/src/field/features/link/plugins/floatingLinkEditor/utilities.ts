@@ -7,7 +7,7 @@ import { getBaseFields } from '../../drawer/baseFields.js'
 /**
  * This function is run to enrich the basefields which every link has with potential, custom user-added fields.
  */
-export function transformExtraFields(
+export async function transformExtraFields(
   customFieldSchema:
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
     | Field[],
@@ -15,7 +15,7 @@ export function transformExtraFields(
   i18n: I18n,
   enabledCollections?: false | string[],
   disabledCollections?: false | string[],
-): Field[] {
+): Promise<Field[]> {
   const baseFields: Field[] = getBaseFields(config, enabledCollections, disabledCollections)
 
   const fields =

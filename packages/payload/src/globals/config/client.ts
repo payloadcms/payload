@@ -1,3 +1,5 @@
+import type { TFunction } from '@payloadcms/translations'
+
 import type {
   LivePreviewConfig,
   SanitizedConfig,
@@ -30,11 +32,15 @@ export type ClientGlobalConfig = Omit<
   fields: ClientFieldConfig[]
 }
 
-export const createClientGlobalConfig = (
-  global: SanitizedConfig['globals'][0],
-): ClientGlobalConfig => {
+export const createClientGlobalConfig = ({
+  global,
+  t,
+}: {
+  global: SanitizedConfig['globals'][0]
+  t: TFunction
+}): ClientGlobalConfig => {
   const sanitized = { ...global }
-  sanitized.fields = createClientFieldConfigs(sanitized.fields)
+  sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
 
   const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
     'hooks',
@@ -73,6 +79,10 @@ export const createClientGlobalConfig = (
   return sanitized
 }
 
-export const createClientGlobalConfigs = (
-  globals: SanitizedConfig['globals'],
-): ClientGlobalConfig[] => globals.map((global) => createClientGlobalConfig(global))
+export const createClientGlobalConfigs = ({
+  globals,
+  t,
+}: {
+  globals: SanitizedConfig['globals']
+  t: TFunction
+}): ClientGlobalConfig[] => globals.map((global) => createClientGlobalConfig({ global, t }))

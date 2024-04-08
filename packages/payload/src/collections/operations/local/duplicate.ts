@@ -50,7 +50,7 @@ export async function duplicate<TSlug extends keyof GeneratedTypes['collections'
     )
   }
 
-  const req = createLocalReq(options, payload)
+  const req = await createLocalReq(options, payload)
 
   return duplicateOperation<TSlug>({
     id,

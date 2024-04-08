@@ -12,9 +12,8 @@
   },
   "scripts": {
     "build:types": "tsc --outDir dist",
-    "build": "pnpm writeFiles && pnpm build:types",
+    "build": "pnpm build:types",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "writeFiles": "npx tsx ./writeTranslationFiles.ts",
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "exports": {
@@ -22,13 +21,13 @@
       "import": "./src/exports/index.ts",
       "require": "./src/exports/index.ts"
     },
-    "./api": {
-      "import": "./src/_generatedFiles_/api/index.ts",
-      "require": "./src/_generatedFiles_/api/index.ts"
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts"
     },
-    "./client": {
-      "import": "./src/_generatedFiles_/client/index.ts",
-      "require": "./src/_generatedFiles_/client/index.ts"
+    "./languages/*": {
+      "import": "./src/languages/*.ts",
+      "require": "./src/languages/*.ts"
     }
   },
   "publishConfig": {
@@ -41,15 +40,15 @@
         "require": "./dist/exports/index.js",
         "types": "./dist/exports/*.d.ts"
       },
-      "./api": {
-        "import": "./dist/_generatedFiles_/api/index.js",
-        "require": "./dist/_generatedFiles_/api/index.js",
-        "types": "./dist/_generatedFiles_/exports/*.d.ts"
+      "./*": {
+        "import": "./dist/exports/*.js",
+        "require": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
       },
-      "./client": {
-        "import": "./dist/_generatedFiles_/client/index.js",
-        "require": "./dist/_generatedFiles_/client/index.js",
-        "types": "./dist/_generatedFiles_/exports/*.d.ts"
+      "./languages/*": {
+        "import": "./dist/languages/*.js",
+        "require": "./dist/languages/*.js",
+        "types": "./dist/languages/*.d.ts"
       }
     }
   },

@@ -1,9 +1,8 @@
 import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/api'
 
 import type { SanitizedConfig } from '../config/types.js'
 
-export const getLocalI18n = ({
+export const getLocalI18n = async ({
   config,
   language = 'en',
 }: {
@@ -14,5 +13,4 @@ export const getLocalI18n = ({
     config: config.i18n,
     context: 'api',
     language,
-    translations,
   })

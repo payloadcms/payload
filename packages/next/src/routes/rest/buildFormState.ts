@@ -15,21 +15,32 @@ import type { FieldSchemaMap } from '../../utilities/buildFieldSchemaMap/types.j
 
 import { buildFieldSchemaMap } from '../../utilities/buildFieldSchemaMap/index.js'
 
-let cached = global._payload_fieldSchemaMap
-
+let cached: {
+  promise: Promise<FieldSchemaMap> | null
+  schemaMap: FieldSchemaMap | null
+} = global._payload_fieldSchemaMap
 if (!cached) {
   // eslint-disable-next-line no-multi-assign
-  cached = global._payload_fieldSchemaMap = null
+  cached = global._payload_fieldSchemaMap = { promise: null, schemaMap: null }
 }
 
-export const getFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
-  if (cached && process.env.NODE_ENV !== 'development') {
-    return cached
+export const getFieldSchemaMap = async (config: SanitizedConfig): Promise<FieldSchemaMap> => {
+  if (cached.schemaMap && process.env.NODE_ENV !== 'development') {
+    return cached.schemaMap
   }
 
-  cached = buildFieldSchemaMap(config)
+  if (!cached.promise) {
+    cached.promise = buildFieldSchemaMap(config)
+  }
 
-  return cached
+  try {
+    cached.schemaMap = await cached.promise
+  } catch (e) {
+    cached.promise = null
+    throw e
+  }
+
+  return cached.schemaMap
 }
 
 export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
@@ -65,7 +76,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       })
     }
 
-    const fieldSchemaMap = getFieldSchemaMap(req.payload.config)
+    const fieldSchemaMap = await getFieldSchemaMap(req.payload.config)
 
     const id = collectionSlug ? reqData.id : undefined
     const schemaPathSegments = schemaPath.split('.')

@@ -1,4 +1,4 @@
-import type { I18nOptions } from '@payloadcms/translations'
+import type { I18nOptions, TFunction } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
 import type { Transporter } from 'nodemailer'
@@ -362,6 +362,8 @@ export type SanitizedLocalizationConfig = Prettify<
 export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
+
+export type LabelFunction = ({ t }: { t: TFunction }) => string
 
 export type SharpDependency = (
   input?:

@@ -1,3 +1,5 @@
+import type { TFunction } from '@payloadcms/translations'
+
 import type { Field, FieldBase } from '../../fields/config/types.js'
 
 export type ClientFieldConfig = Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate'>
@@ -13,8 +15,14 @@ export type ServerOnlyFieldAdminProperties = keyof Pick<
   'components' | 'condition' | 'description'
 >
 
-export const createClientFieldConfig = (f: Field) => {
-  const field = { ...f }
+export const createClientFieldConfig = ({
+  field: incomingField,
+  t,
+}: {
+  field: Field
+  t: TFunction
+}) => {
+  const field = { ...incomingField }
 
   const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
     'hooks',
@@ -37,21 +45,32 @@ export const createClientFieldConfig = (f: Field) => {
     }
   })
 
+  if ('options' in field && Array.isArray(field.options)) {
+    field.options = field.options.map((option) => {
+      if (typeof option === 'object' && typeof option.label === 'function') {
+        return {
+          label: option.label({ t }),
+          value: option.value,
+        }
+      }
+    })
+  }
+
   if ('fields' in field) {
-    field.fields = createClientFieldConfigs(field.fields)
+    field.fields = createClientFieldConfigs({ fields: field.fields, t })
   }
 
   if ('blocks' in field) {
     field.blocks = field.blocks.map((block) => {
       const sanitized = { ...block }
-      sanitized.fields = createClientFieldConfigs(sanitized.fields)
+      sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
       return sanitized
     })
   }
 
   if ('tabs' in field) {
     // @ts-expect-error
-    field.tabs = field.tabs.map((tab) => createClientFieldConfig(tab))
+    field.tabs = field.tabs.map((tab) => createClientFieldConfig({ field: tab, t }))
   }
 
   if ('admin' in field) {
@@ -73,5 +92,10 @@ export const createClientFieldConfig = (f: Field) => {
   return field
 }
 
-export const createClientFieldConfigs = (fields: Field[]): Field[] =>
-  fields.map(createClientFieldConfig)
+export const createClientFieldConfigs = ({
+  fields,
+  t,
+}: {
+  fields: Field[]
+  t: TFunction
+}): Field[] => fields.map((field) => createClientFieldConfig({ field, t }))

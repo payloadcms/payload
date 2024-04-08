@@ -3,7 +3,6 @@ import type { SanitizedConfig } from 'payload/config'
 import type { FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/client'
 
 import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'
@@ -67,11 +66,11 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           disabledCollections: props.disabledCollections,
           enabledCollections: props.enabledCollections,
         } as ExclusiveLinkCollectionsProps,
-        generateSchemaMap: ({ config, props }) => {
-          const i18n = initI18n({ config: config.i18n, context: 'client', translations })
+        generateSchemaMap: async ({ config, props }) => {
+          const i18n = await initI18n({ config: config.i18n, context: 'client' })
 
           return {
-            fields: transformExtraFields(
+            fields: await transformExtraFields(
               props.fields,
               config,
               i18n,

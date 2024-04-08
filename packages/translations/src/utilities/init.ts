@@ -1,6 +1,7 @@
 import type { I18n, InitI18n, InitTFunction, Translations } from '../types.js'
 
 import { deepMerge } from './deepMerge.js'
+import { dynamicallyImportLanguages } from './dynamicImport.js'
 
 /**
  * @function getTranslationString
@@ -146,7 +147,7 @@ function parseAcceptLanguage(header: string): LanguagePreference[] {
     .sort((a, b) => b.quality - a.quality) // Sort by quality, highest to lowest
 }
 
-const acceptedLanguages = [
+export const acceptedLanguages = [
   'ar',
   'az',
   'bg',
@@ -210,14 +211,14 @@ const initTFunction: InitTFunction = (args) => {
   }
 }
 
-function memoize(fn: Function, keys: string[]) {
+function memoize(fn: (args: unknown) => Promise<I18n>, keys: string[]) {
   const cacheMap = new Map()
 
-  const memoized = (args) => {
+  const memoized = async (args) => {
     const cacheKey = keys.reduce((acc, key) => acc + args[key], '')
 
     if (!cacheMap.has(cacheKey)) {
-      const result = fn(args)
+      const result = await fn(args)
       cacheMap.set(cacheKey, result)
     }
 
@@ -228,11 +229,13 @@ function memoize(fn: Function, keys: string[]) {
 }
 
 export const initI18n: InitI18n = memoize(
-  ({ config, language = 'en', translations: incomingTranslations }: Parameters<InitI18n>[0]) => {
+  async ({ config, context, language = 'en' }: Parameters<InitI18n>[0]) => {
+    const languages = await dynamicallyImportLanguages(config.supportedLanguages, context)
+
     const { t, translations } = initTFunction({
       config,
       language: language || config.fallbackLanguage,
-      translations: incomingTranslations,
+      translations: languages,
     })
 
     const i18n: I18n = {

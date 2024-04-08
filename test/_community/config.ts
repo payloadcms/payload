@@ -12,11 +12,14 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [PostsCollection, MediaCollection],
-  globals: [
-    MenuGlobal,
-    // ...add more globals here
+  collections: [
+    PostsCollection,
+    // MediaCollection
   ],
+  // globals: [
+  //   MenuGlobal,
+  //   // ...add more globals here
+  // ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -33,14 +36,14 @@ export default buildConfigWithDefaults({
       },
     })
 
-    // Create image
-    const imageFilePath = path.resolve(dirname, '../uploads/image.png')
-    const imageFile = await getFileByPath(imageFilePath)
+    // // Create image
+    // const imageFilePath = path.resolve(dirname, '../uploads/image.png')
+    // const imageFile = await getFileByPath(imageFilePath)
 
-    await payload.create({
-      collection: 'media',
-      data: {},
-      file: imageFile,
-    })
+    // await payload.create({
+    //   collection: 'media',
+    //   data: {},
+    //   file: imageFile,
+    // })
   },
 })

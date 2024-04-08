@@ -23,14 +23,22 @@ export type ClientCollectionConfig = Omit<
   fields: ClientFieldConfig[]
 }
 
+import type { TFunction } from '@payloadcms/translations'
+
 import type { ClientFieldConfig } from '../../fields/config/client.js'
 import type { SanitizedCollectionConfig } from './types.js'
 
 import { createClientFieldConfigs } from '../../fields/config/client.js'
 
-export const createClientCollectionConfig = (collection: SanitizedCollectionConfig) => {
+export const createClientCollectionConfig = ({
+  collection,
+  t,
+}: {
+  collection: SanitizedCollectionConfig
+  t: TFunction
+}) => {
   const sanitized = { ...collection }
-  sanitized.fields = createClientFieldConfigs(sanitized.fields)
+  sanitized.fields = createClientFieldConfigs({ fields: sanitized.fields, t })
 
   const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
     'hooks',
@@ -60,6 +68,14 @@ export const createClientCollectionConfig = (collection: SanitizedCollectionConf
     delete sanitized.auth.verify
   }
 
+  if (sanitized.labels) {
+    Object.entries(sanitized.labels).forEach(([labelType, collectionLabel]) => {
+      if (typeof collectionLabel === 'function') {
+        sanitized.labels[labelType] = collectionLabel({ t })
+      }
+    })
+  }
+
   if ('admin' in sanitized) {
     sanitized.admin = { ...sanitized.admin }
 
@@ -85,7 +101,11 @@ export const createClientCollectionConfig = (collection: SanitizedCollectionConf
   return sanitized
 }
 
-export const createClientCollectionConfigs = (
-  collections: SanitizedCollectionConfig[],
-): ClientCollectionConfig[] =>
-  collections.map((collection) => createClientCollectionConfig(collection))
+export const createClientCollectionConfigs = ({
+  collections,
+  t,
+}: {
+  collections: SanitizedCollectionConfig[]
+  t: TFunction
+}): ClientCollectionConfig[] =>
+  collections.map((collection) => createClientCollectionConfig({ collection, t }))

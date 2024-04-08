@@ -1,3 +1,4 @@
+import type { I18n } from '@payloadcms/translations'
 import type {
   CellComponentProps,
   DescriptionComponent,
@@ -7,6 +8,7 @@ import type {
   FieldDescriptionProps,
   FieldWithPath,
   LabelProps,
+  Option,
   RowLabelComponent,
   SanitizedConfig,
 } from 'payload/types'
@@ -55,6 +57,7 @@ export const mapFields = (args: {
   disableAddingID?: boolean
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
+  i18n: I18n
   parentPath?: string
   readOnly?: boolean
 }): FieldMap => {
@@ -63,6 +66,8 @@ export const mapFields = (args: {
     disableAddingID,
     fieldSchema,
     filter,
+    i18n,
+    i18n: { t },
     parentPath,
     readOnly: readOnlyOverride,
   } = args
@@ -145,7 +150,7 @@ export const mapFields = (args: {
                 field.admin.description) ||
                 (typeof field.admin?.description === 'function' &&
                   isPlainFunction<DescriptionFunction>(field.admin?.description) &&
-                  field.admin?.description()))) ||
+                  field.admin?.description({ t })))) ||
             undefined,
         }
 
@@ -194,6 +199,19 @@ export const mapFields = (args: {
 
         let fieldComponentProps: FieldComponentProps
 
+        let fieldOptions: Option[]
+
+        if ('options' in field) {
+          fieldOptions = field.options.map((option) => {
+            if (typeof option === 'object' && typeof option.label === 'function') {
+              return {
+                label: option.label({ t: i18n.t }),
+                value: option.value,
+              }
+            }
+          })
+        }
+
         const cellComponentProps: CellComponentProps = {
           name: 'name' in field ? field.name : undefined,
           fieldType: field.type,
@@ -203,7 +221,7 @@ export const mapFields = (args: {
               ? field.label
               : undefined,
           labels: 'labels' in field ? field.labels : undefined,
-          options: 'options' in field ? field.options : undefined,
+          options: 'options' in field ? fieldOptions : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
         }
 
@@ -232,6 +250,7 @@ export const mapFields = (args: {
                 config,
                 fieldSchema: field.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
@@ -254,6 +273,7 @@ export const mapFields = (args: {
                 config,
                 fieldSchema: block.fields,
                 filter,
+                i18n,
                 parentPath: `${path}.${block.slug}`,
                 readOnly: readOnlyOverride,
               })
@@ -346,6 +366,7 @@ export const mapFields = (args: {
                 disableAddingID: true,
                 fieldSchema: field.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
@@ -407,6 +428,7 @@ export const mapFields = (args: {
                 disableAddingID: true,
                 fieldSchema: field.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
@@ -501,14 +523,14 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               label: field.label,
-              options: field.options,
+              options: fieldOptions,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
               width: field.admin?.width,
             }
 
-            cellComponentProps.options = field.options
+            cellComponentProps.options = fieldOptions
             fieldComponentProps = radioField
             break
           }
@@ -529,7 +551,7 @@ export const mapFields = (args: {
             const RichTextCellComponent = field.editor.CellComponent
 
             if (typeof field.editor.generateComponentMap === 'function') {
-              const result = field.editor.generateComponentMap({ config, schemaPath: path })
+              const result = field.editor.generateComponentMap({ config, i18n, schemaPath: path })
               richTextField.richTextComponentMap = result
               cellComponentProps.richTextComponentMap = result
             }
@@ -556,6 +578,7 @@ export const mapFields = (args: {
                 disableAddingID: true,
                 fieldSchema: field.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
@@ -576,6 +599,7 @@ export const mapFields = (args: {
                 disableAddingID: true,
                 fieldSchema: tab.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               })
@@ -676,14 +700,14 @@ export const mapFields = (args: {
               hasMany: field.hasMany,
               isClearable: field.admin?.isClearable,
               label: field.label,
-              options: field.options,
+              options: fieldOptions,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
               width: field.admin?.width,
             }
 
-            cellComponentProps.options = field.options
+            cellComponentProps.options = fieldOptions
             fieldComponentProps = selectField
             break
           }
