@@ -566,14 +566,14 @@ describe('fields', () => {
       await page.goto(url.list)
       await page.locator('.cell-id a').click()
 
-      await wait(300)
+      await wait(500)
 
       // Go to Row tab, update the value
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
       await page.locator('.json-field .inputarea').fill(jsonValue)
 
-      await wait(250)
+      await wait(500)
 
       // Go to Array tab, then back to Row. Make sure new value is still there
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
@@ -586,7 +586,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
       await page.click('#action-save', { delay: 100 })
 
-      await wait(250)
+      await wait(500)
 
       // Go back to row tab, make sure the new value is still present
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
