@@ -1,5 +1,5 @@
 import path from 'path'
-import { getFileByPath } from 'payload/node'
+import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
