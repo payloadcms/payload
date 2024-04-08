@@ -293,7 +293,7 @@ export type CollectionConfig = {
    * Access control
    */
   access?: {
-    admin?: (args?: any) => Promise<boolean> | boolean
+    admin?: ({ req }: { req: PayloadRequest }) => Promise<boolean> | boolean
     create?: Access
     delete?: Access
     read?: Access
