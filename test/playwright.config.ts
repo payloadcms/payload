@@ -25,5 +25,5 @@ export default defineConfig({
     timeout: EXPECT_TIMEOUT,
   },
   workers: 16,
-  maxFailures: 1,
+  maxFailures: process.env.CI ? 1 : undefined,
 })
