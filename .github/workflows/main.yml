@@ -256,6 +256,8 @@ jobs:
           # - field-error-states
           # - fields-relationship
           - fields
+          - fields/collections/Blocks
+          - fields/collections/Array
           # - fields/lexical
           # - live-preview
           # - localization
