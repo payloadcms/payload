@@ -1,5 +1,3 @@
-import type { FieldAffectingData } from 'payload/types'
-
 import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { usePathname, useRouter } from 'next/navigation.js'
@@ -9,8 +7,10 @@ export type SearchFilterProps = {
   fieldLabel?: string
   fieldName?: string
   handleChange?: (search: string) => void
-  listSearchableFields?: FieldAffectingData[]
+  listSearchableFields?: MappedField[]
 }
+
+import type { MappedField } from '../../providers/ComponentMap/buildComponentMap/types.js'
 
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { Search } from '../../icons/Search/index.js'
@@ -57,15 +57,24 @@ export const SearchFilter: React.FC<SearchFilterProps> = (props) => {
     if (listSearchableFields?.length > 0) {
       placeholder.current = listSearchableFields.reduce(
         (placeholderText: string, field, i: number) => {
+          const label =
+            'fieldComponentProps' in field &&
+            'label' in field.fieldComponentProps &&
+            field.fieldComponentProps.label
+              ? field.fieldComponentProps.label
+              : field.name
+
           if (i === 0) {
             return `${t('general:searchBy', {
-              label: getTranslation(field.label || field.name, i18n),
+              label: getTranslation(label, i18n),
             })}`
           }
+
           if (i === listSearchableFields.length - 1) {
-            return `${placeholderText} ${t('general:or')} ${getTranslation(field.label || field.name, i18n)}`
+            return `${placeholderText} ${t('general:or')} ${getTranslation(label, i18n)}`
           }
-          return `${placeholderText}, ${getTranslation(field?.label || field?.name, i18n)}`
+
+          return `${placeholderText}, ${getTranslation(label, i18n)}`
         },
         '',
       )
