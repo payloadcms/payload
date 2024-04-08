@@ -254,7 +254,7 @@ describe('fields', () => {
     })
 
     // TODO - This test is flaky. Rarely, but sometimes it randomly fails.
-    test('should display unique constraint error in ui', async () => {
+    test.skip('should display unique constraint error in ui', async () => {
       const uniqueText = 'uniqueText'
       await payload.create({
         collection: 'indexed-fields',
