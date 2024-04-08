@@ -1,6 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from 'payload/types'
+import type { AdminViewComponent, SanitizedConfig } from 'payload/types'
 
 import { getNextI18n } from '@payloadcms/next/utilities'
 import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
@@ -64,4 +64,8 @@ export const NotFoundPage = async ({
       </DefaultTemplate>
     </Fragment>
   )
+}
+
+export const NotFoundView: AdminViewComponent = () => {
+  return <NotFoundClient marginTop="large" />
 }

@@ -56,7 +56,7 @@ export const RootLayout = async ({
   async function switchLanguageServerAction(lang: string): Promise<void> {
     'use server'
     nextCookies().set({
-      name: `${config.cookiePrefix || 'payload'}-lng'`,
+      name: `${config.cookiePrefix || 'payload'}-lng`,
       path: '/',
       value: lang,
     })
