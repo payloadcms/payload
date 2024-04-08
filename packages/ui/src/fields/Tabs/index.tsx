@@ -59,7 +59,7 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
-  const isWithinCollapsible = useCollapsible()
+  const { isWithinCollapsible } = useCollapsible()
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
   const tabsPrefKey = `tabs-${indexPath}`
 

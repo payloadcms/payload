@@ -36,11 +36,8 @@
       }
     ],
     "paths": {
-      "payload/types": [
-        "./packages/payload/src/exports/types.ts"
-      ],
       "@payload-config": [
-        "./test/_community/config.ts"
+        "./test/admin/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -85,7 +82,7 @@
         "./packages/ui/src/scss/app.scss"
       ],
       "@payloadcms/next/*": [
-        "./packages/next/src/*"
+        "./packages/next/src/exports/*"
       ],
       "@payloadcms/next": [
         "./packages/next/src/exports/*"

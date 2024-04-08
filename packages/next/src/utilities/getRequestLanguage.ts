@@ -17,7 +17,7 @@ export const getRequestLanguage = ({
   headers,
 }: GetRequestLanguageArgs): string => {
   const acceptLanguage = headers.get('Accept-Language')
-  const cookieLanguage = cookies.get(`${config.cookiePrefix || 'payload'}-lng'`)
+  const cookieLanguage = cookies.get(`${config.cookiePrefix || 'payload'}-lng`)
 
   const reqLanguage =
     (typeof cookieLanguage === 'string' ? cookieLanguage : cookieLanguage?.value) ||
