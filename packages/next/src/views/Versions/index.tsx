@@ -101,7 +101,7 @@ export const VersionsView: EditViewComponent = async (props) => {
   return (
     <React.Fragment>
       <SetStepNav
-        collectionSlug={collectionConfig?.slug || globalConfig?.slug}
+        collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
         pluralLabel={collectionConfig?.labels?.plural || globalConfig?.label}
