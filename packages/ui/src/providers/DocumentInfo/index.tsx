@@ -339,6 +339,7 @@ export const DocumentInfoProvider: React.FC<
             void onLoadError()
           }
           setIsError(true)
+          setInitialState({})
           setIsLoading(false)
         }
       }
@@ -404,8 +405,6 @@ export const DocumentInfoProvider: React.FC<
     collectionSlug,
     globalSlug,
   ])
-
-  if (isError) notFound()
 
   if (!initialState || isLoading) {
     return <LoadingOverlay />
