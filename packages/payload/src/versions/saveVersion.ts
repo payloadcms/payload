@@ -130,6 +130,7 @@ export const saveVersion = async ({
       errorMessage = `There was an error while saving a version for the global ${global.label}.`
     payload.logger.error(errorMessage)
     payload.logger.error(err)
+    return
   }
 
   let max = 100

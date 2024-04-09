@@ -392,7 +392,10 @@ export const traverseFields = ({
         })
         return
       } else {
-        fieldName = `${columnName}`
+        fieldName = columnName
+        if (fieldData && typeof fieldData === 'object' && 'id' in fieldData && fieldData?.id) {
+          fieldData = fieldData.id
+        }
       }
     }
 
