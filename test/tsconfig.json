@@ -41,10 +41,7 @@
       "@payloadcms/ui/scss/app.scss": ["../packages/ui/src/scss/app.scss"],
       "payload/types": ["../packages/payload/src/exports/types/index.ts"],
       "@payloadcms/next/*": [
-        "./packages/next/src/exports/*"
-      ],
-      "@payloadcms/next": [
-        "./packages/next/src/exports/*"
+        "./packages/next/src/exports/*.ts"
       ],
       "@payload-config": ["./_community/config.ts"]
     }
