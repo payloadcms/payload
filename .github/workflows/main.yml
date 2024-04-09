@@ -87,7 +87,7 @@ jobs:
 
   tests-unit:
     runs-on: ubuntu-latest
-    needs: core-build
+    needs: build
     if: false # Disable until tests are updated for 3.0
 
     steps:
@@ -116,7 +116,7 @@ jobs:
 
   tests-int:
     runs-on: ubuntu-latest
-    needs: core-build
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -208,7 +208,7 @@ jobs:
 
   tests-e2e:
     runs-on: ubuntu-latest
-    needs: core-build
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -266,7 +266,7 @@ jobs:
   tests-type-generation:
     if: false # This should be replaced with gen on a real Payload project
     runs-on: ubuntu-latest
-    needs: core-build
+    needs: build
 
     steps:
       - name: Use Node.js 18
