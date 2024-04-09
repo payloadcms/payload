@@ -884,6 +884,22 @@ describe('lexical', () => {
       await shouldRespectRowRemovalTest()
     })
 
+    test('ensure pre-seeded uploads node is visible', async () => {
+      // Due to issues with the relationships condition, we had issues with that not being visible. Checking for visibility ensures there is no breakage there again
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const uploadBlock = richTextField.locator('.ContentEditable__root > div').first() // Check for the first div, as we wanna make sure it's the first div in the editor (1. node is a paragraph, second node is a div which is the upload node)
+      await uploadBlock.scrollIntoViewIfNeeded()
+      await expect(uploadBlock).toBeVisible()
+
+      await expect(uploadBlock.locator('.lexical-upload__doc-drawer-toggler strong')).toHaveText(
+        'payload.jpg',
+      )
+    })
+
     test.skip('should respect required error state in deeply nested text field', async () => {
       await navigateToLexicalFields()
       const richTextField = page.locator('.rich-text-lexical').nth(1) // second
