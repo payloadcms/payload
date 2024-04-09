@@ -71,7 +71,7 @@ export const createPayloadRequest = async ({
     headers: request.headers,
   })
 
-  const i18n = initI18n({
+  const i18n = await initI18n({
     config: config.i18n,
     context: 'api',
     language,

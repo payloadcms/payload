@@ -25,6 +25,8 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import { de } from '@payloadcms/translations/languages/de'
+import { en } from '@payloadcms/translations/languages/en'
 // import { slateEditor } from '@payloadcms/richtext-slate'
 import { type Config, buildConfig } from 'payload/config'
 import sharp from 'sharp'
@@ -171,6 +173,12 @@ export async function buildConfigWithDefaults(
     }),
     sharp,
     telemetry: false,
+    i18n: {
+      supportedLanguages: {
+        en,
+        de,
+      },
+    },
     typescript: {
       declare: false,
     },

@@ -1,7 +1,8 @@
-import type { I18n, InitI18n, InitTFunction, Translations } from '../types.js'
+import type { I18n, InitI18n, InitTFunction, Language } from '../types.js'
 
+import { importDateFNSLocale } from '../importDateFNSLocale.js'
 import { deepMerge } from './deepMerge.js'
-import { reduceLanguages } from './reduceLanguages.js'
+import { getTranslationsByContext } from './getTranslationsByContext.js'
 
 /**
  * @function getTranslationString
@@ -17,7 +18,7 @@ export const getTranslationString = ({
 }: {
   count?: number
   key: string
-  translations: Translations[0]
+  translations: Language['translations']
 }) => {
   const keys = key.split(':')
   let keySuffix = ''
@@ -104,7 +105,7 @@ type TFunctionConstructor = ({
   vars,
 }: {
   key: string
-  translations?: Translations[0]
+  translations?: Language['translations']
   vars?: Record<string, any>
 }) => string
 
@@ -178,7 +179,7 @@ export const acceptedLanguages = [
   'vi',
   'zh',
   'zhTw',
-]
+] as const
 
 export function matchLanguage(header: string): string | undefined {
   const parsedHeader = parseAcceptLanguage(header)
@@ -196,14 +197,13 @@ export function matchLanguage(header: string): string | undefined {
 
 const initTFunction: InitTFunction = (args) => {
   const { config, language, translations } = args
-  const mergedTranslations = deepMerge(config?.translations ?? {}, translations)
-  const languagePreference = matchLanguage(language)
+  const mergedTranslations = deepMerge(config?.translations?.[language] ?? {}, translations)
 
   return {
     t: (key, vars) => {
       return t({
         key,
-        translations: mergedTranslations[languagePreference],
+        translations: mergedTranslations,
         vars,
       })
     },
@@ -211,14 +211,14 @@ const initTFunction: InitTFunction = (args) => {
   }
 }
 
-function memoize(fn: (args: unknown) => I18n, keys: string[]) {
+function memoize(fn: (args: unknown) => Promise<I18n>, keys: string[]) {
   const cacheMap = new Map()
 
-  const memoized = (args) => {
+  const memoized = async (args) => {
     const cacheKey = keys.reduce((acc, key) => acc + args[key], '')
 
     if (!cacheMap.has(cacheKey)) {
-      const result = fn(args)
+      const result = await fn(args)
       cacheMap.set(cacheKey, result)
     }
 
@@ -229,20 +229,29 @@ function memoize(fn: (args: unknown) => I18n, keys: string[]) {
 }
 
 export const initI18n: InitI18n = memoize(
-  ({ config, context, language = 'en' }: Parameters<InitI18n>[0]) => {
-    const languages = reduceLanguages(config.supportedLanguages, context)
+  async ({ config, context, language = 'en' }: Parameters<InitI18n>[0]) => {
+    const translations = getTranslationsByContext(
+      config.supportedLanguages[language].translations,
+      context,
+    )
 
-    const { t, translations } = initTFunction({
+    const { t, translations: mergedTranslations } = initTFunction({
       config,
       language: language || config.fallbackLanguage,
-      translations: languages,
+      translations,
     })
 
+    const dateFNSKey = config.supportedLanguages[language]?.dateFNSKey || 'en-US'
+
+    const dateFNS = await importDateFNSLocale(dateFNSKey)
+
     const i18n: I18n = {
+      dateFNS,
+      dateFNSKey,
       fallbackLanguage: config.fallbackLanguage,
       language: language || config.fallbackLanguage,
       t,
-      translations,
+      translations: mergedTranslations,
     }
 
     return i18n

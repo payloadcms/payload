@@ -1,4 +1,4 @@
-import en from '@payloadcms/translations/languages/en'
+import { en } from '@payloadcms/translations/languages/en'
 import merge from 'deepmerge'
 
 import type {

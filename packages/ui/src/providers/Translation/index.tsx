@@ -1,9 +1,12 @@
 'use client'
-import type { I18n, LanguageTranslations } from '@payloadcms/translations'
+import type { I18n, Language } from '@payloadcms/translations'
+import type { Locale } from 'date-fns'
 import type { ClientConfig } from 'payload/types'
 
 import { t } from '@payloadcms/translations'
-import React, { createContext, useContext } from 'react'
+import { importDateFNSLocale } from '@payloadcms/translations'
+import enUS from 'date-fns/locale/en-US'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
 import { useRouteCache } from '../RouteCache/index.js'
 
@@ -19,6 +22,8 @@ const Context = createContext<{
   t: (key: string, vars?: Record<string, any>) => string
 }>({
   i18n: {
+    dateFNS: enUS,
+    dateFNSKey: 'en-US',
     fallbackLanguage: 'en',
     language: 'en',
     t: (key) => key,
@@ -31,22 +36,25 @@ const Context = createContext<{
 
 type Props = {
   children: React.ReactNode
+  dateFNSKey: Language['dateFNSKey']
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
-  lang: string
+  language: string
   languageOptions: LanguageOptions
   switchLanguageServerAction: (lang: string) => Promise<void>
-  translations: LanguageTranslations
+  translations: Language['translations']
 }
 
 export const TranslationProvider: React.FC<Props> = ({
   children,
+  dateFNSKey,
   fallbackLang,
-  lang,
+  language,
   languageOptions,
   switchLanguageServerAction,
   translations,
 }) => {
   const { clearRouteCache } = useRouteCache()
+  const [dateFNS, setDateFNS] = useState<Locale>()
 
   const nextT = (key: string, vars?: Record<string, unknown>): string =>
     t({
@@ -68,16 +76,26 @@ export const TranslationProvider: React.FC<Props> = ({
     [switchLanguageServerAction, clearRouteCache],
   )
 
+  useEffect(() => {
+    const loadDateFNS = async () => {
+      const imported = await importDateFNSLocale(dateFNSKey)
+
+      setDateFNS(imported)
+    }
+
+    void loadDateFNS()
+  }, [dateFNSKey])
+
   return (
     <Context.Provider
       value={{
         i18n: {
+          dateFNS,
+          dateFNSKey,
           fallbackLanguage: fallbackLang,
-          language: lang,
+          language,
           t: nextT,
-          translations: {
-            [lang]: translations,
-          },
+          translations,
         },
         languageOptions,
         switchLanguage,

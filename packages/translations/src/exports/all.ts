@@ -1,9 +1,11 @@
-import ar from '../languages/ar.js'
+import type { SupportedLanguages } from '../types.js'
+
+import { ar } from '../languages/ar.js'
 import az from '../languages/az.js'
 import bg from '../languages/bg.js'
 import cs from '../languages/cs.js'
-import de from '../languages/de.js'
-import en from '../languages/en.js'
+import { de } from '../languages/de.js'
+import { en } from '../languages/en.js'
 import es from '../languages/es.js'
 import fa from '../languages/fa.js'
 import fr from '../languages/fr.js'
@@ -31,35 +33,33 @@ import zhTw from '../languages/zhTw.js'
 
 export const translations = {
   ar,
-  az,
-  bg,
-  cs,
+  // az,
+  // bg,
+  // cs,
   de,
   en,
-  es,
-  fa,
-  fr,
-  hr,
-  hu,
-  it,
-  ja,
-  ko,
-  my,
-  nb,
-  nl,
-  pl,
-  pt,
-  ro,
-  rs,
-  'rs-latin': rsLatin,
-  ru,
-  sv,
-  th,
-  tr,
-  ua,
-  vi,
-  zh,
-  'zh-tw': zhTw,
-} as {
-  [locale: string]: Record<string, Record<string, string>>
-}
+  // es,
+  // fa,
+  // fr,
+  // hr,
+  // hu,
+  // it,
+  // ja,
+  // ko,
+  // my,
+  // nb,
+  // nl,
+  // pl,
+  // pt,
+  // ro,
+  // rs,
+  // 'rs-latin': rsLatin,
+  // ru,
+  // sv,
+  // th,
+  // tr,
+  // ua,
+  // vi,
+  // zh,
+  // 'zh-tw': zhTw,
+} as SupportedLanguages

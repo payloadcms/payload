@@ -1345,6 +1345,9 @@ importers:
       '@types/react':
         specifier: 18.2.74
         version: 18.2.74
+      date-fns:
+        specifier: 3.3.1
+        version: 3.3.1
       typescript:
         specifier: 5.4.4
         version: 5.4.4
@@ -8358,7 +8361,6 @@ packages:
 
   /date-fns@3.3.1:
     resolution: {integrity: sha512-y8e109LYGgoQDveiEBD3DYXKba1jWf5BA8YU1FL5Tvm0BTdEfy54WLCwnuYWZNnzzvALy/QQ4Hov+Q9RVRv+Zw==}
-    dev: false
 
   /dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}

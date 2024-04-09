@@ -131,7 +131,7 @@ export const Autosave: React.FC<Props> = ({
       {!saving && lastSaved && (
         <React.Fragment>
           {t('version:lastSavedAgo', {
-            distance: formatTimeToNow(lastSaved, i18n.language),
+            distance: formatTimeToNow({ date: lastSaved, i18n }),
           })}
         </React.Fragment>
       )}

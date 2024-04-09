@@ -61,7 +61,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   } = config
 
   const formattedCreatedAt = doc?.createdAt
-    ? formatDate(doc.createdAt, dateFormat, i18n.language)
+    ? formatDate({ date: doc.createdAt, i18n, pattern: dateFormat })
     : ''
 
   const originalDocFetchURL = `${serverURL}${apiRoute}/${globalSlug ? 'globals/' : ''}${

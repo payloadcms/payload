@@ -39,6 +39,7 @@ export const getGenerateComponentMap =
           ) {
             const components = resolvedFeature.generateComponentMap({
               config,
+              i18n,
               props: resolvedFeature.serverFeatureProps,
               schemaPath,
             })
@@ -68,6 +69,7 @@ export const getGenerateComponentMap =
           ) {
             const schemas = resolvedFeature.generateSchemaMap({
               config,
+              i18n,
               props: resolvedFeature.serverFeatureProps,
               schemaMap: new Map(),
               schemaPath,

@@ -1,11 +1,5 @@
 import type { BuildFormStateArgs } from '@payloadcms/ui/forms/buildStateFromSchema'
-import type {
-  DocumentPreferences,
-  Field,
-  PayloadRequest,
-  SanitizedConfig,
-  TypeWithID,
-} from 'payload/types'
+import type { DocumentPreferences, Field, PayloadRequest, TypeWithID } from 'payload/types'
 
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
@@ -15,32 +9,21 @@ import type { FieldSchemaMap } from '../../utilities/buildFieldSchemaMap/types.j
 
 import { buildFieldSchemaMap } from '../../utilities/buildFieldSchemaMap/index.js'
 
-let cached: {
-  promise: Promise<FieldSchemaMap> | null
-  schemaMap: FieldSchemaMap | null
-} = global._payload_fieldSchemaMap
+let cached = global._payload_fieldSchemaMap
+
 if (!cached) {
   // eslint-disable-next-line no-multi-assign
-  cached = global._payload_fieldSchemaMap = { promise: null, schemaMap: null }
+  cached = global._payload_fieldSchemaMap = null
 }
 
-export const getFieldSchemaMap = async (config: SanitizedConfig): Promise<FieldSchemaMap> => {
-  if (cached.schemaMap && process.env.NODE_ENV !== 'development') {
-    return cached.schemaMap
+export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
+  if (cached && process.env.NODE_ENV !== 'development') {
+    return cached
   }
 
-  if (!cached.promise) {
-    cached.promise = buildFieldSchemaMap(config)
-  }
+  cached = buildFieldSchemaMap(req)
 
-  try {
-    cached.schemaMap = await cached.promise
-  } catch (e) {
-    cached.promise = null
-    throw e
-  }
-
-  return cached.schemaMap
+  return cached
 }
 
 export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
@@ -76,7 +59,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       })
     }
 
-    const fieldSchemaMap = await getFieldSchemaMap(req.payload.config)
+    const fieldSchemaMap = getFieldSchemaMap(req)
 
     const id = collectionSlug ? reqData.id : undefined
     const schemaPathSegments = schemaPath.split('.')

@@ -1,4 +1,4 @@
-import type { Translations } from '../types.js'
+import type { Language } from '../types.js'
 
 import { clientTranslationKeys } from '../clientKeys.js'
 
@@ -54,18 +54,10 @@ function sortObject(obj) {
   return sortedObject
 }
 
-export const reduceLanguages = (supportedLanguages: Translations, context: 'api' | 'client') => {
-  const languages = {}
-
-  Object.entries(supportedLanguages).forEach(([lang, translations]) => {
-    if (context === 'client') {
-      const clientTranslations = sortObject(filterKeys(translations, '', clientTranslationKeys))
-
-      languages[lang] = clientTranslations
-    } else {
-      languages[lang] = translations
-    }
-  })
-
-  return languages
+export const getTranslationsByContext = (translations: Language, context: 'api' | 'client') => {
+  if (context === 'client') {
+    return sortObject(filterKeys(translations, '', clientTranslationKeys))
+  } else {
+    return translations
+  }
 }

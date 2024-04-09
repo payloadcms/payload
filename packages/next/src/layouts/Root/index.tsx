@@ -33,23 +33,30 @@ export const RootLayout = async ({
   const headers = getHeaders()
   const cookies = parseCookies(headers)
 
-  const lang =
+  const languageCode =
     getRequestLanguage({
       config,
       cookies,
       headers,
     }) ?? config.i18n.fallbackLanguage
 
-  const i18n = initI18n({ config: config.i18n, context: 'client', language: lang })
+  const i18n = await initI18n({ config: config.i18n, context: 'client', language: languageCode })
   const clientConfig = await createClientConfig({ config, t: i18n.t })
 
-  const dir = rtlLanguages.includes(lang) ? 'RTL' : 'LTR'
+  const dir = rtlLanguages.includes(languageCode) ? 'RTL' : 'LTR'
 
-  const languageOptions = Object.entries(i18n.translations || {}).map(
-    ([language, translations]) => ({
-      label: translations.general.thisLanguage,
-      value: language,
-    }),
+  const languageOptions = Object.entries(config.i18n.supportedLanguages || {}).reduce(
+    (acc, [language, languageConfig]) => {
+      if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
+        acc.push({
+          label: languageConfig.translations.general.thisLanguage,
+          value: language,
+        })
+      }
+
+      return acc
+    },
+    [],
   )
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -71,17 +78,18 @@ export const RootLayout = async ({
   })
 
   return (
-    <html dir={dir} lang={lang}>
+    <html dir={dir} lang={languageCode}>
       <body>
         <RootProvider
           componentMap={componentMap}
           config={clientConfig}
+          dateFNSKey={i18n.dateFNSKey}
           fallbackLang={clientConfig.i18n.fallbackLanguage}
-          lang={lang}
+          languageCode={languageCode}
           languageOptions={languageOptions}
           // eslint-disable-next-line react/jsx-no-bind
           switchLanguageServerAction={switchLanguageServerAction}
-          translations={i18n.translations[lang]}
+          translations={i18n.translations}
         >
           {wrappedChildren}
         </RootProvider>

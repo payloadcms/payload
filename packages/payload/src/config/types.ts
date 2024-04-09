@@ -673,11 +673,12 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'endpoint' | 'globals' | 'localization'
+  'collections' | 'endpoint' | 'globals' | 'i18n' | 'localization'
 > & {
   collections: SanitizedCollectionConfig[]
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
+  i18n: Required<I18nOptions>
   localization: SanitizedLocalizationConfig | false
   paths: {
     config: string

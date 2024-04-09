@@ -89,7 +89,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     }
   }
 
-  const i18n = getNextI18n({
+  const i18n = await getNextI18n({
     config,
   })
 

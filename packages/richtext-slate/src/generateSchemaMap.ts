@@ -1,6 +1,5 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { initI18n } from '@payloadcms/translations'
 import { sanitizeFields } from 'payload/config'
 
 import type { AdapterArguments, RichTextCustomElement } from './types.js'
@@ -12,8 +11,7 @@ import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
 
 export const getGenerateSchemaMap =
   (args: AdapterArguments): RichTextAdapter['generateSchemaMap'] =>
-  ({ config, schemaMap, schemaPath }) => {
-    const i18n = initI18n({ config: config.i18n, context: 'client' })
+  ({ config, i18n, schemaMap, schemaPath }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
 
     ;(args?.admin?.elements || Object.values(elementTypes)).forEach((el) => {

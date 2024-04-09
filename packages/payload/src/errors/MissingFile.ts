@@ -1,14 +1,16 @@
 import type { TFunction } from '@payloadcms/translations'
 
-import en from '@payloadcms/translations/languages/en'
-
+import { en } from '@payloadcms/translations/languages/en'
 import httpStatus from 'http-status'
 
 import APIError from './APIError.js'
 
 class MissingFile extends APIError {
   constructor(t?: TFunction) {
-    super(t ? t('error:noFilesUploaded') : en.error.noFilesUploaded, httpStatus.BAD_REQUEST)
+    super(
+      t ? t('error:noFilesUploaded') : en.translations.error.noFilesUploaded,
+      httpStatus.BAD_REQUEST,
+    )
   }
 }
 

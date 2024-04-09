@@ -34,9 +34,10 @@ type RichTextAdapterBase<
   }) => Map<string, React.ReactNode>
   generateSchemaMap?: (args: {
     config: SanitizedConfig
+    i18n: I18n
     schemaMap: Map<string, Field[]>
     schemaPath: string
-  }) => Map<string, Field[]> | Promise<Map<string, Field[]>>
+  }) => Map<string, Field[]>
   outputSchema?: ({
     collectionIDFieldTypes,
     config,
