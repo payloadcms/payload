@@ -19,7 +19,7 @@ type FilteredCollectionsT = (
 
 const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
   return collections.filter(({ slug, admin: { enableRichTextRelationship }, upload }) => {
-    if (options.visibleEntities.collections.includes(slug)) {
+    if (!options.visibleEntities.collections.includes(slug)) {
       return false
     }
 

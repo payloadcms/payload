@@ -1,4 +1,4 @@
-import type { SerializedBlockNode } from '@payloadcms/richtext-lexical'
+import type { SerializedBlockNode, SerializedLinkNode } from '@payloadcms/richtext-lexical'
 import type { Page } from '@playwright/test'
 import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 import type { Payload } from 'payload'
@@ -402,7 +402,7 @@ describe('lexical', () => {
       for (let i = 0; i < 18; i++) {
         await page.keyboard.press('Shift+ArrowRight')
       }
-      // The following text should now be selected: elationship node 1
+      // The following text should now be selectedelationship node 1
 
       const floatingToolbar_formatSection = page.locator(
         '.floating-select-toolbar-popup__section-format',
@@ -463,6 +463,92 @@ describe('lexical', () => {
         timeout: POLL_TOPASS_TIMEOUT,
       })
     })
+
+    test('should be able to select text, make it an external link and receive the updated link value', async () => {
+      // Reproduces https://github.com/payloadcms/payload/issues/4025
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      // Find span in contentEditable with text "Some text below relationship node"
+      const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
+      await expect(spanInEditor).toBeVisible()
+      await spanInEditor.click() // Use click, because focus does not work
+
+      await page.keyboard.press('ArrowRight')
+      // Now select some text
+      for (let i = 0; i < 4; i++) {
+        await page.keyboard.press('Shift+ArrowRight')
+      }
+      // The following text should now be "Node"
+
+      const floatingToolbar = page.locator('.floating-select-toolbar-popup')
+
+      await expect(floatingToolbar).toBeVisible()
+
+      const linkButton = floatingToolbar
+        .locator('.floating-select-toolbar-popup__button-link')
+        .first()
+
+      await expect(linkButton).toBeVisible()
+      await linkButton.click()
+
+      /**
+       * In drawer
+       */
+      const drawerContent = page.locator('.drawer__content').first()
+      await expect(drawerContent).toBeVisible()
+
+      const urlField = drawerContent.locator('input#field-fields__url').first()
+      await expect(urlField).toBeVisible()
+      // Fill with https://www.payloadcms.com
+      await urlField.fill('https://www.payloadcms.com')
+      await expect(urlField).toHaveValue('https://www.payloadcms.com')
+      await drawerContent.locator('.form-submit button').click({ delay: 100 })
+      await expect(drawerContent).toBeHidden()
+
+      /**
+       * check if it worked correctly
+       */
+
+      const linkInEditor = richTextField.locator('a.LexicalEditorTheme__link').first()
+      await expect(linkInEditor).toBeVisible()
+      await expect(linkInEditor).toHaveAttribute('href', 'https://www.payloadcms.com')
+
+      await saveDocAndAssert(page)
+
+      // Check if it persists after saving
+      await expect(linkInEditor).toBeVisible()
+      await expect(linkInEditor).toHaveAttribute('href', 'https://www.payloadcms.com')
+
+      // Make sure it's being returned from the API as well
+      await expect(async () => {
+        const lexicalDoc: LexicalField = (
+          await payload.find({
+            collection: lexicalFieldsSlug,
+            depth: 0,
+            where: {
+              title: {
+                equals: lexicalDocData.title,
+              },
+            },
+          })
+        ).docs[0] as never
+
+        const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+
+        expect(
+          (
+            (lexicalField.root.children[0] as SerializedParagraphNode)
+              .children[1] as SerializedLinkNode
+          ).fields.url,
+        ).toBe('https://www.payloadcms.com')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+    })
+
     test('ensure slash menu is not hidden behind other blocks', async () => {
       // This test makes sure there are no z-index issues here
       await navigateToLexicalFields()
@@ -797,6 +883,22 @@ describe('lexical', () => {
       await navigateToLexicalFields(false)
 
       await shouldRespectRowRemovalTest()
+    })
+
+    test('ensure pre-seeded uploads node is visible', async () => {
+      // Due to issues with the relationships condition, we had issues with that not being visible. Checking for visibility ensures there is no breakage there again
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const uploadBlock = richTextField.locator('.ContentEditable__root > div').first() // Check for the first div, as we wanna make sure it's the first div in the editor (1. node is a paragraph, second node is a div which is the upload node)
+      await uploadBlock.scrollIntoViewIfNeeded()
+      await expect(uploadBlock).toBeVisible()
+
+      await expect(uploadBlock.locator('.lexical-upload__doc-drawer-toggler strong')).toHaveText(
+        'payload.jpg',
+      )
     })
 
     test.skip('should respect required error state in deeply nested text field', async () => {

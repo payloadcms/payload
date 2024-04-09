@@ -2,12 +2,12 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { AdminViewComponent, SanitizedConfig } from 'payload/types'
 
-import { getNextI18n } from '@payloadcms/next/utilities'
 import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import React, { Fragment } from 'react'
 
 import { initPage } from '../../utilities/initPage.js'
+import { getNextI18n } from '.././../utilities/getNextI18n.js'
 import { NotFoundClient } from './index.client.js'
 
 export const generatePageMetadata = async ({

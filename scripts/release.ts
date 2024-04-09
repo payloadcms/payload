@@ -6,19 +6,23 @@ import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
-import pMap from 'p-map'
+import pLimit from 'p-limit'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
 import { simpleGit } from 'simple-git'
 
+import type { PackageDetails } from './lib/getPackageDetails.js'
+
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { updateChangelog } from './utils/updateChangelog.js'
+
+const npmPublishLimit = pLimit(2)
 
 // Update this list with any packages to publish
 const packageWhitelist = [
   'payload',
-  // 'translations',
+  'translations',
   'ui',
   'next',
   'graphql',
@@ -27,7 +31,7 @@ const packageWhitelist = [
   'richtext-slate',
   'richtext-lexical',
 
-  // 'create-payload-app',
+  'create-payload-app',
 
   // Plugins
   'plugin-cloud',
@@ -143,23 +147,10 @@ async function main() {
 
   await execa('pnpm', ['install'], execaOpts)
 
-  const buildResult = await execa('pnpm', ['build:core', '--output-logs=errors-only'], execaOpts)
-  // const buildResult = execSync('pnpm build:all', execOpts)
+  const buildResult = await execa('pnpm', ['build:all', '--output-logs=errors-only'], execaOpts)
   if (buildResult.exitCode !== 0) {
     console.error(chalk.bold.red('Build failed'))
     console.log(buildResult.stderr)
-    abort('Build failed')
-  }
-
-  const buildPluginsResult = await execa(
-    'pnpm',
-    ['build:plugins', '--output-logs=errors-only'],
-    execaOpts,
-  )
-
-  if (buildPluginsResult.exitCode !== 0) {
-    console.error(chalk.bold.red('Build failed'))
-    console.log(buildPluginsResult.stderr)
     abort('Build failed')
   }
 
@@ -209,35 +200,8 @@ async function main() {
     abort('2FA code is required')
   }
 
-  // Publish
-  const results: { name: string; success: boolean; details?: string }[] = await Promise.all(
-    packageDetails.map(async (pkg) => {
-      try {
-        console.log(logPrefix, chalk.bold(`🚀 ${pkg.name} publishing...`))
-        const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
-        if (dryRun) {
-          cmdArgs.push('--dry-run')
-        } else {
-          cmdArgs.push('--otp', otp)
-        }
-        const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
-          cwd,
-          stdio: ['ignore', 'ignore', 'pipe'],
-          // stdio: 'inherit',
-        })
-
-        if (exitCode !== 0) {
-          console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n`))
-          return { name: pkg.name, success: false, details: stderr }
-        }
-
-        console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
-        return { name: pkg.name, success: true }
-      } catch (error) {
-        console.error(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: ${error.message}\n\n`))
-        return { name: pkg.name, success: false }
-      }
-    }),
+  const results = await Promise.all(
+    packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun, otp })),
   )
 
   console.log(chalk.bold.green(`\n\nResults:\n`))
@@ -269,6 +233,42 @@ main().catch((error) => {
   console.error(error)
   process.exit(1)
 })
+
+/** Publish with promise concurrency throttling */
+async function publishPackageThrottled(
+  pkg: PackageDetails,
+  opts?: { dryRun?: boolean; otp?: string },
+) {
+  const { dryRun = false, otp } = opts ?? {}
+  return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun, otp }))
+}
+
+async function publishSinglePackage(
+  pkg: PackageDetails,
+  opts?: { dryRun?: boolean; otp?: string },
+) {
+  const { dryRun = false, otp } = opts ?? {}
+  console.log(chalk.bold(`🚀 ${pkg.name} publishing...`))
+  const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
+  if (dryRun) {
+    cmdArgs.push('--dry-run')
+  } else {
+    cmdArgs.push('--otp', otp)
+  }
+  const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
+    cwd,
+    stdio: ['ignore', 'ignore', 'pipe'],
+    // stdio: 'inherit',
+  })
+
+  if (exitCode !== 0) {
+    console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`))
+    return { name: pkg.name, success: false, details: stderr }
+  }
+
+  console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
+  return { name: pkg.name, success: true }
+}
 
 function abort(message = 'Abort', exitCode = 1) {
   console.error(chalk.bold.red(`\n${message}\n`))

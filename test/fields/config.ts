@@ -26,7 +26,7 @@ import Uploads from './collections/Upload/index.js'
 import Uploads2 from './collections/Upload2/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
 import TabsWithRichText from './globals/TabsWithRichText.js'
-import { seed } from './seed.js'
+import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
   LexicalFields,
@@ -79,7 +79,7 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
+      await clearAndSeedEverything(payload)
     }
   },
 })

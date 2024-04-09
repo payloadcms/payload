@@ -39,7 +39,7 @@ jobs:
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
-  core-build:
+  build:
     needs: changes
     if: ${{ needs.changes.outputs.needs_build == 'true' }}
     runs-on: ubuntu-latest
@@ -65,65 +65,29 @@ jobs:
         run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        timeout-minutes: 720
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+            pnpm-store-
+            pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm install
-      - run: pnpm run build:core
+      - run: pnpm run build:all
 
       - name: Cache build
         uses: actions/cache@v4
+        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
-  plugins-build:
-    needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
-      - run: pnpm run build:plugins
-
   tests-unit:
     runs-on: ubuntu-latest
-    needs: core-build
+    needs: build
     if: false # Disable until tests are updated for 3.0
 
     steps:
@@ -140,6 +104,7 @@ jobs:
 
       - name: Restore build
         uses: actions/cache@v4
+        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -151,7 +116,7 @@ jobs:
 
   tests-int:
     runs-on: ubuntu-latest
-    needs: core-build
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -184,6 +149,7 @@ jobs:
 
       - name: Restore build
         uses: actions/cache@v4
+        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -242,7 +208,7 @@ jobs:
 
   tests-e2e:
     runs-on: ubuntu-latest
-    needs: core-build
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -282,6 +248,7 @@ jobs:
 
       - name: Restore build
         uses: actions/cache@v4
+        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -302,7 +269,7 @@ jobs:
   tests-type-generation:
     if: false # This should be replaced with gen on a real Payload project
     runs-on: ubuntu-latest
-    needs: core-build
+    needs: build
 
     steps:
       - name: Use Node.js 18
@@ -318,6 +285,7 @@ jobs:
 
       - name: Restore build
         uses: actions/cache@v4
+        timeout-minutes: 10
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
