@@ -146,7 +146,7 @@ function parseAcceptLanguage(header: string): LanguagePreference[] {
     .sort((a, b) => b.quality - a.quality) // Sort by quality, highest to lowest
 }
 
-const acceptedLanguages = [
+const acceptedLanguages = new Set([
   'ar',
   'az',
   'bg',
@@ -177,31 +177,25 @@ const acceptedLanguages = [
   'vi',
   'zh',
   'zhTW',
-]
+])
 
 export function matchLanguage(header: string): string | undefined {
   const parsedHeader = parseAcceptLanguage(header)
-  let bestMatch = { isExactMatch: false, language: '' }
+  let matchedLanguage: string
 
   for (const { language } of parsedHeader) {
-    for (const acceptedLanguage of acceptedLanguages) {
-      if (language === acceptedLanguage) {
-        // exact match
-        if (!bestMatch.isExactMatch) {
-          bestMatch = { isExactMatch: true, language: acceptedLanguage }
+    if (acceptedLanguages.has(language)) {
+      matchedLanguage = language
+    } else {
+      acceptedLanguages.forEach((acceptedLanguage) => {
+        if (language.startsWith(acceptedLanguage)) {
+          matchedLanguage = acceptedLanguage
         }
-      } else if (
-        !bestMatch.isExactMatch &&
-        language.startsWith(acceptedLanguage) &&
-        acceptedLanguage !== bestMatch.language
-      ) {
-        // closest match
-        bestMatch = { isExactMatch: false, language: acceptedLanguage }
-      }
+      })
     }
   }
 
-  return bestMatch.language || undefined
+  return matchedLanguage
 }
 
 const initTFunction: InitTFunction = (args) => {
