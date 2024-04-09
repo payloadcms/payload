@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 
 import type { Props } from './types'
 
@@ -55,14 +55,46 @@ const JSONField: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
+  function handleEditorDidMount(editor, monaco) {
+    // monaco.editor.getModels().forEach((mdl) => mdl.dispose()) // remove all previous models
+    const modelUri = monaco.Uri.parse(
+      `payload://json/schema/${Math.ceil(Math.random() * 99999)}.json`, // TODO: this id should be unique but follow a pattern
+    )
+    const model = monaco.editor.createModel(stringValue, 'json', modelUri)
+
+    // TODO: build this array of schemas using [a config schema]
+    const schemas = schema.map((sch) => {
+      sch.fileMatch = [modelUri.toString()]
+      sch.uri = modelUri.toString()
+      return sch
+    })
+
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      schemas: [
+        {
+          fileMatch: [modelUri.toString()], // associate with our model
+          schema: {
+            type: 'object',
+            properties: {
+              test: {
+                enum: ['string to test ok', 'ok', 'still ok'],
+              },
+            },
+          },
+          uri: modelUri.toString(), // id of the first schema
+        },
+      ],
+      validate: true,
+    })
+    console.log('DEBUG:', editor, modelUri.toString())
+    editor.setModel(model) // add updated model
+  }
+
   const handleChange = useCallback(
     (val) => {
       try {
         if (readOnly) return
         setStringValue(val)
-
-        // TODO: Check schema
-        console.log('check schema', schema)
         setValue(val ? JSON.parse(val) : '')
         setJsonError(undefined)
       } catch (e) {
@@ -105,8 +137,10 @@ const JSONField: React.FC<Props> = (props) => {
       <ErrorComp message={errorMessage} showError={showError} />
       <LabelComp htmlFor={`field-${path}`} label={label} required={required} />
       <CodeEditor
+        // beforeMount={handleEditorWillMount}
         defaultLanguage="json"
         onChange={handleChange}
+        onMount={handleEditorDidMount}
         options={editorOptions}
         readOnly={readOnly}
         value={stringValue}
