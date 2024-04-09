@@ -1,6 +1,8 @@
 import type React from 'react'
 
-export type DescriptionFunction = () => string
+import type { LabelFunction } from '../../config/types.js'
+
+export type DescriptionFunction = LabelFunction
 
 export type DescriptionComponent = React.ComponentType<FieldDescriptionProps>
 

@@ -52,7 +52,12 @@ export const baseField = joi
     index: joi.boolean().default(false),
     label: joi
       .alternatives()
-      .try(joi.object().pattern(joi.string(), [joi.string()]), joi.string(), joi.valid(false)),
+      .try(
+        joi.func(),
+        joi.object().pattern(joi.string(), [joi.string()]),
+        joi.string(),
+        joi.valid(false),
+      ),
     localized: joi.boolean().default(false),
     required: joi.boolean().default(false),
     saveToJWT: joi.alternatives().try(joi.boolean(), joi.string()).default(false),
@@ -216,7 +221,7 @@ export const select = baseField.keys({
         joi.object({
           label: joi
             .alternatives()
-            .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
+            .try(joi.func(), joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
           value: joi.string().required().allow(''),
         }),
       ),
@@ -245,7 +250,7 @@ export const radio = baseField.keys({
         joi.object({
           label: joi
             .alternatives()
-            .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]))
+            .try(joi.func(), joi.string(), joi.object().pattern(joi.string(), [joi.string()]))
             .required(),
           value: joi.string().required().allow(''),
         }),

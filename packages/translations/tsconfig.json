@@ -12,5 +12,4 @@
     "emitDeclarationOnly": false
   },
   "include": ["src/**/*.ts", "src/**/*.js"],
-  "exclude": ["src/all"]
 }

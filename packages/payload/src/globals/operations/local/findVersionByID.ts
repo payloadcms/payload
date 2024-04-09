@@ -20,6 +20,7 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
   user?: Document
 }
 
+// eslint-disable-next-line no-restricted-exports
 export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['globals']>(
   payload: Payload,
   options: Options<T>,

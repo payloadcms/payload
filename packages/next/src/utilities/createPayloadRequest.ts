@@ -6,7 +6,6 @@ import type {
 } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/api'
 import { executeAuthStrategies } from 'payload/auth'
 import { parseCookies } from 'payload/auth'
 import { getDataLoader } from 'payload/utilities'
@@ -72,11 +71,10 @@ export const createPayloadRequest = async ({
     headers: request.headers,
   })
 
-  const i18n = initI18n({
+  const i18n = await initI18n({
     config: config.i18n,
     context: 'api',
     language,
-    translations,
   })
 
   const customRequest: CustomPayloadRequest = {

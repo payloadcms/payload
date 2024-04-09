@@ -1,6 +1,8 @@
-import type { I18n, InitI18n, InitTFunction, Translations } from '../types.js'
+import type { I18n, InitI18n, InitTFunction, Language } from '../types.js'
 
+import { importDateFNSLocale } from '../importDateFNSLocale.js'
 import { deepMerge } from './deepMerge.js'
+import { getTranslationsByContext } from './getTranslationsByContext.js'
 
 /**
  * @function getTranslationString
@@ -16,7 +18,7 @@ export const getTranslationString = ({
 }: {
   count?: number
   key: string
-  translations: Translations[0]
+  translations: Language['translations']
 }) => {
   const keys = key.split(':')
   let keySuffix = ''
@@ -103,7 +105,7 @@ type TFunctionConstructor = ({
   vars,
 }: {
   key: string
-  translations?: Translations[0]
+  translations?: Language['translations']
   vars?: Record<string, any>
 }) => string
 
@@ -128,81 +130,15 @@ export const t: TFunctionConstructor = ({ key, translations, vars }) => {
   return translationString
 }
 
-type LanguagePreference = {
-  language: string
-  quality?: number
-}
-
-function parseAcceptLanguage(header: string): LanguagePreference[] {
-  return header
-    .split(',')
-    .map((lang) => {
-      const [language, quality] = lang.trim().split(';q=')
-      return {
-        language,
-        quality: quality ? parseFloat(quality) : 1,
-      }
-    })
-    .sort((a, b) => b.quality - a.quality) // Sort by quality, highest to lowest
-}
-
-const acceptedLanguages = [
-  'ar',
-  'az',
-  'bg',
-  'cs',
-  'de',
-  'en',
-  'es',
-  'fa',
-  'fr',
-  'hr',
-  'hu',
-  'it',
-  'ja',
-  'ko',
-  'my',
-  'nb',
-  'nl',
-  'pl',
-  'pt',
-  'ro',
-  'rs',
-  'rsLatin',
-  'ru',
-  'sv',
-  'th',
-  'tr',
-  'ua',
-  'vi',
-  'zh',
-  'zhTw',
-]
-
-export function matchLanguage(header: string): string | undefined {
-  const parsedHeader = parseAcceptLanguage(header)
-
-  for (const { language } of parsedHeader) {
-    for (const acceptedLanguage of acceptedLanguages) {
-      if (language.startsWith(acceptedLanguage)) {
-        return acceptedLanguage
-      }
-    }
-  }
-
-  return undefined
-}
-
 const initTFunction: InitTFunction = (args) => {
   const { config, language, translations } = args
-  const mergedTranslations = deepMerge(config?.translations ?? {}, translations)
-  const languagePreference = matchLanguage(language)
+  const mergedTranslations = deepMerge(translations, config?.translations?.[language] ?? {})
 
   return {
     t: (key, vars) => {
       return t({
         key,
-        translations: mergedTranslations[languagePreference],
+        translations: mergedTranslations,
         vars,
       })
     },
@@ -210,14 +146,14 @@ const initTFunction: InitTFunction = (args) => {
   }
 }
 
-function memoize(fn: Function, keys: string[]) {
+function memoize(fn: (args: unknown) => Promise<I18n>, keys: string[]) {
   const cacheMap = new Map()
 
-  const memoized = (args) => {
+  const memoized = async (args) => {
     const cacheKey = keys.reduce((acc, key) => acc + args[key], '')
 
     if (!cacheMap.has(cacheKey)) {
-      const result = fn(args)
+      const result = await fn(args)
       cacheMap.set(cacheKey, result)
     }
 
@@ -228,18 +164,26 @@ function memoize(fn: Function, keys: string[]) {
 }
 
 export const initI18n: InitI18n = memoize(
-  ({ config, language = 'en', translations: incomingTranslations }: Parameters<InitI18n>[0]) => {
-    const { t, translations } = initTFunction({
+  async ({ config, context, language = 'en' }: Parameters<InitI18n>[0]) => {
+    const translations = getTranslationsByContext(config.supportedLanguages[language], context)
+
+    const { t, translations: mergedTranslations } = initTFunction({
       config,
       language: language || config.fallbackLanguage,
-      translations: incomingTranslations,
+      translations,
     })
 
+    const dateFNSKey = config.supportedLanguages[language]?.dateFNSKey || 'en-US'
+
+    const dateFNS = await importDateFNSLocale(dateFNSKey)
+
     const i18n: I18n = {
+      dateFNS,
+      dateFNSKey,
       fallbackLanguage: config.fallbackLanguage,
       language: language || config.fallbackLanguage,
       t,
-      translations,
+      translations: mergedTranslations,
     }
 
     return i18n

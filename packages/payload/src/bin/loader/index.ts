@@ -78,7 +78,6 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   // and keep going
   let nextResult: ResolveResult
 
-  // First, try to
   if (!isTS) {
     try {
       nextResult = await nextResolve(specifier, context, nextResolve)

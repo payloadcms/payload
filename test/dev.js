@@ -1,5 +1,4 @@
 import minimist from 'minimist'
-import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { nextDev } from 'next/dist/cli/next-dev.js'
 import open from 'open'
 import { getNextJSRootDir } from './helpers/getNextJSRootDir.js'
@@ -28,15 +27,6 @@ const rootDir = getNextJSRootDir(testSuiteArg)
 if (args.o) {
   await open('http://localhost:3000/admin')
 }
-
-global._mongoMemoryServer = await MongoMemoryReplSet.create({
-  replSet: {
-    count: 3,
-    dbName: 'payloadmemory',
-  },
-})
-
-process.env.MONGODB_MEMORY_SERVER_URI = global._mongoMemoryServer.getUri()
 
 // @ts-expect-error
 await nextDev({ port: process.env.PORT || 3000, dirname: rootDir }, 'default', rootDir)

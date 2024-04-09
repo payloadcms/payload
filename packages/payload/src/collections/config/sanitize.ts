@@ -11,14 +11,11 @@ import TimestampsRequired from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
-import { extractTranslations } from '../../translations/extractTranslations.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { authDefaults, defaults } from './defaults.js'
-
-const translations = extractTranslations(['general:createdAt', 'general:updatedAt'])
 
 const sanitizeCollection = (
   config: Config,
@@ -51,7 +48,7 @@ const sanitizeCollection = (
           disableBulkEdit: true,
           hidden: true,
         },
-        label: translations['general:updatedAt'],
+        label: ({ t }) => t('general:updatedAt'),
       })
     }
     if (!hasCreatedAt) {
@@ -64,7 +61,7 @@ const sanitizeCollection = (
         // The default sort for list view is createdAt. Thus, enabling indexing by default, is a major performance improvement, especially for large or a large amount of collections.
         type: 'date',
         index: true,
-        label: translations['general:createdAt'],
+        label: ({ t }) => t('general:createdAt'),
       })
     }
   }

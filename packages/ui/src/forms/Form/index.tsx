@@ -317,14 +317,9 @@ export const Form: React.FC<FormProps> = (props) => {
               [[], []],
             )
 
-            fieldErrors.forEach((err) => {
-              dispatchFields({
-                type: 'UPDATE',
-                ...(contextRef.current?.fields?.[err.field] || {}),
-                errorMessage: err.message,
-                path: err.field,
-                valid: false,
-              })
+            dispatchFields({
+              type: 'ADD_SERVER_ERRORS',
+              errors: fieldErrors,
             })
 
             nonFieldErrors.forEach((err) => {

@@ -1,3 +1,5 @@
+import type { LexicalNode } from 'lexical'
+
 import type { LinkFields } from '../../nodes/types.js'
 
 /**
@@ -6,6 +8,7 @@ import type { LinkFields } from '../../nodes/types.js'
  */
 export type LinkPayload = {
   fields: LinkFields
+  selectedNodes?: LexicalNode[]
   /**
    * The text content of the link node - will be displayed in the drawer
    */

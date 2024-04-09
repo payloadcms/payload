@@ -2,15 +2,12 @@ import crypto from 'crypto'
 
 import type { Field, FieldHook } from '../../fields/config/types.js'
 
-import { extractTranslations } from '../../translations/extractTranslations.js'
-
-const labels = extractTranslations(['authentication:enableAPIKey', 'authentication:apiKey'])
-
 const encryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.encrypt(value as string) : null
 const decryptKey: FieldHook = ({ req, value }) =>
   value ? req.payload.decrypt(value as string) : undefined
 
+// eslint-disable-next-line no-restricted-exports
 export default [
   {
     name: 'enableAPIKey',
@@ -21,7 +18,7 @@ export default [
       },
     },
     defaultValue: false,
-    label: labels['authentication:enableAPIKey'],
+    label: ({ t }) => t('authentication:enableAPIKey'),
   },
   {
     name: 'apiKey',
@@ -35,7 +32,7 @@ export default [
       afterRead: [decryptKey],
       beforeChange: [encryptKey],
     },
-    label: labels['authentication:apiKey'],
+    label: ({ t }) => t('authentication:apiKey'),
   },
   {
     name: 'apiKeyIndex',
