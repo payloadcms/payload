@@ -1,7 +1,7 @@
 import type { Language } from '../types.js'
 
 export const my: Language = {
-  dateFNSKey: 'my',
+  dateFNSKey: 'en-US',
   translations: {
     authentication: {
       account: 'အကောင့်',

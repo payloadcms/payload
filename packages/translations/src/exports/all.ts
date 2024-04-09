@@ -26,7 +26,7 @@ import { ru } from '../languages/ru.js'
 import { sv } from '../languages/sv.js'
 import { th } from '../languages/th.js'
 import { tr } from '../languages/tr.js'
-import { ua } from '../languages/ua.js'
+import { uk } from '../languages/uk.js'
 import { vi } from '../languages/vi.js'
 import { zh } from '../languages/zh.js'
 import { zhTw } from '../languages/zhTw.js'
@@ -58,7 +58,7 @@ export const translations = {
   sv,
   th,
   tr,
-  ua,
+  uk,
   vi,
   zh,
   'zh-TW': zhTw,
