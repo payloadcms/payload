@@ -376,12 +376,12 @@ export const traverseFields = ({
             })
           })
         }
-      } else {
+        return
+      } else if (Array.isArray(field.relationTo) || ('hasMany' in field && field.hasMany)) {
         if (fieldData === null || (Array.isArray(fieldData) && fieldData.length === 0)) {
           relationshipsToDelete.push({ path: relationshipPath })
           return
         }
-
         transformRelationship({
           baseRow: {
             path: relationshipPath,
@@ -390,9 +390,10 @@ export const traverseFields = ({
           field,
           relationships,
         })
+        return
+      } else {
+        fieldName = `${columnName}`
       }
-
-      return
     }
 
     if (field.type === 'text' && field.hasMany) {
