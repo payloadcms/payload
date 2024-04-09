@@ -1,4 +1,6 @@
 import { seo } from '@payloadcms/plugin-seo'
+import { en } from '@payloadcms/translations/languages/en'
+import { es } from '@payloadcms/translations/languages/es'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -10,6 +12,10 @@ import { seed } from './seed/index.js'
 export default buildConfigWithDefaults({
   collections: [Users, Pages, Media],
   i18n: {
+    supportedLanguages: {
+      en,
+      es,
+    },
     translations: {
       es: {
         'plugin-seo': {
