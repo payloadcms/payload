@@ -8,7 +8,6 @@ import type {
 } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui/utilities/findLocaleFromCode'
 import { headers as getHeaders } from 'next/headers.js'
 import { notFound, redirect } from 'next/navigation.js'
@@ -45,14 +44,13 @@ export const initPage = async ({
   const cookies = parseCookies(headers)
   const language = getRequestLanguage({ config: payload.config, cookies, headers })
 
-  const i18n = initI18n({
+  const i18n = await initI18n({
     config: payload.config.i18n,
     context: 'client',
     language,
-    translations,
   })
 
-  const req = createLocalReq(
+  const req = await createLocalReq(
     {
       fallbackLocale: null,
       locale: locale.code,

@@ -1,3 +1,4 @@
+import type { I18n } from '@payloadcms/translations'
 import type { AdminViewProps, EditViewProps, SanitizedConfig } from 'payload/types'
 
 import React from 'react'
@@ -12,18 +13,20 @@ export const buildComponentMap = (args: {
   DefaultListView: React.FC<AdminViewProps>
   children: React.ReactNode
   config: SanitizedConfig
+  i18n: I18n
   readOnly?: boolean
 }): {
   componentMap: ComponentMap
   wrappedChildren: React.ReactNode
 } => {
-  const { DefaultEditView, DefaultListView, children, config, readOnly } = args
+  const { DefaultEditView, DefaultListView, children, config, i18n, readOnly } = args
 
   const collections = mapCollections({
     DefaultEditView,
     DefaultListView,
     collections: config.collections,
     config,
+    i18n,
     readOnly,
   })
 
@@ -31,6 +34,7 @@ export const buildComponentMap = (args: {
     DefaultEditView,
     config,
     globals: config.globals,
+    i18n,
     readOnly,
   })
 

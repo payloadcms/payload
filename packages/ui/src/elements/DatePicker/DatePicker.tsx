@@ -11,7 +11,7 @@ import type { Props } from './types.js'
 import { Calendar as CalendarIcon } from '../../icons/Calendar/index.js'
 import { X as XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { getDateLocale } from '../../utilities/getDateLocale.js'
+import { getFormattedLocale } from './getFormattedLocale.js'
 import './index.scss'
 
 const baseClass = 'date-time-picker'
@@ -37,10 +37,10 @@ const DateTime: React.FC<Props> = (props) => {
   // Use the user's AdminUI language preference for the locale
   const { i18n } = useTranslation()
 
-  const { locale, localeData } = getDateLocale(i18n.language)
+  const datepickerLocale = getFormattedLocale(i18n.language)
 
   try {
-    registerLocale(locale, localeData)
+    registerLocale(datepickerLocale, i18n.dateFNS)
   } catch (e) {
     console.warn(`Could not find DatePicker locale for ${i18n.language}`)
   }
@@ -108,7 +108,7 @@ const DateTime: React.FC<Props> = (props) => {
         <ReactDatePicker
           {...dateTimePickerProps}
           dropdownMode="select"
-          locale={locale}
+          locale={datepickerLocale}
           showMonthDropdown
           showYearDropdown
         />

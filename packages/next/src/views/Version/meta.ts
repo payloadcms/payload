@@ -22,7 +22,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   const doc: any = {} // TODO: figure this out
 
   const formattedCreatedAt = doc?.createdAt
-    ? formatDate(doc.createdAt, config?.admin?.dateFormat, i18n?.language)
+    ? formatDate({ date: doc.createdAt, i18n, pattern: config?.admin?.dateFormat })
     : ''
 
   if (collectionConfig) {

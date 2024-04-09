@@ -117,7 +117,10 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       <Fragment>
         <HydrateClientUser permissions={permissions} user={user} />
         <ListInfoProvider
-          collectionConfig={createClientCollectionConfig(collectionConfig)}
+          collectionConfig={createClientCollectionConfig({
+            collection: collectionConfig,
+            t: initPageResult.req.i18n.t,
+          })}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
           newDocumentURL={`${admin}/collections/${collectionSlug}/create`}

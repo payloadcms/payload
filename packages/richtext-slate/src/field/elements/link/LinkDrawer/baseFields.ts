@@ -2,41 +2,28 @@ import type { User } from 'payload/auth'
 import type { Config } from 'payload/config'
 import type { Field } from 'payload/types'
 
-import { extractTranslations } from 'payload/utilities'
-
-const translations = extractTranslations([
-  'fields:textToDisplay',
-  'fields:linkType',
-  'fields:chooseBetweenCustomTextOrDocument',
-  'fields:customURL',
-  'fields:internalLink',
-  'fields:enterURL',
-  'fields:chooseDocumentToLink',
-  'fields:openInNewTab',
-])
-
 export const getBaseFields = (config: Config): Field[] => [
   {
     name: 'text',
     type: 'text',
-    label: translations['fields:textToDisplay'],
+    label: ({ t }) => t('fields:textToDisplay'),
     required: true,
   },
   {
     name: 'linkType',
     type: 'radio',
     admin: {
-      description: translations['fields:chooseBetweenCustomTextOrDocument'],
+      description: ({ t }) => t('fields:chooseBetweenCustomTextOrDocument'),
     },
     defaultValue: 'custom',
-    label: translations['fields:linkType'],
+    label: ({ t }) => t('fields:linkType'),
     options: [
       {
-        label: translations['fields:customURL'],
+        label: ({ t }) => t('fields:customURL'),
         value: 'custom',
       },
       {
-        label: translations['fields:internalLink'],
+        label: ({ t }) => t('fields:internalLink'),
         value: 'internal',
       },
     ],
@@ -48,7 +35,7 @@ export const getBaseFields = (config: Config): Field[] => [
     admin: {
       condition: ({ linkType }) => linkType !== 'internal',
     },
-    label: translations['fields:enterURL'],
+    label: ({ t }) => t('fields:enterURL'),
     required: true,
   },
   {
@@ -66,7 +53,7 @@ export const getBaseFields = (config: Config): Field[] => [
         return false
       }
     },
-    label: translations['fields:chooseDocumentToLink'],
+    label: ({ t }) => t('fields:chooseDocumentToLink'),
     relationTo: config.collections
       .filter(({ admin: { enableRichTextLink, hidden } }) => {
         if (typeof hidden !== 'function' && hidden) {
@@ -80,6 +67,6 @@ export const getBaseFields = (config: Config): Field[] => [
   {
     name: 'newTab',
     type: 'checkbox',
-    label: translations['fields:openInNewTab'],
+    label: ({ t }) => t('fields:openInNewTab'),
   },
 ]

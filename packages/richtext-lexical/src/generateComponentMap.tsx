@@ -13,7 +13,7 @@ export const getGenerateComponentMap =
   (args: {
     resolvedFeatureMap: ResolvedServerFeatureMap
   }): RichTextAdapter['generateComponentMap'] =>
-  ({ config, schemaPath }) => {
+  ({ config, i18n, schemaPath }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
 
     const componentMap = new Map()
@@ -39,6 +39,7 @@ export const getGenerateComponentMap =
           ) {
             const components = resolvedFeature.generateComponentMap({
               config,
+              i18n,
               props: resolvedFeature.serverFeatureProps,
               schemaPath,
             })
@@ -68,6 +69,7 @@ export const getGenerateComponentMap =
           ) {
             const schemas = resolvedFeature.generateSchemaMap({
               config,
+              i18n,
               props: resolvedFeature.serverFeatureProps,
               schemaMap: new Map(),
               schemaPath,
@@ -87,6 +89,7 @@ export const getGenerateComponentMap =
                 config,
                 disableAddingID: true,
                 fieldSchema: sanitizedFields,
+                i18n,
                 parentPath: `${schemaPath}.feature.${featureKey}.fields.${schemaKey}`,
                 readOnly: false,
               })

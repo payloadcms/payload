@@ -88,7 +88,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
           setOptions((existingOptions) => [
             ...existingOptions,
             ...data.docs.map((doc) => ({
-              label: formatDate(doc.updatedAt, dateFormat, i18n.language),
+              label: formatDate({ date: doc.updatedAt, i18n, pattern: dateFormat }),
               value: doc.id,
             })),
           ])

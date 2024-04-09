@@ -122,13 +122,15 @@ export const DocumentControls: React.FC<{
                     .filter(Boolean)
                     .join(' ')}
                   title={
-                    data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n.language) : ''
+                    data?.updatedAt
+                      ? formatDate({ date: data?.updatedAt, i18n, pattern: dateFormat })
+                      : ''
                   }
                 >
                   <p className={`${baseClass}__label`}>{i18n.t('general:lastModified')}:&nbsp;</p>
                   {data?.updatedAt && (
                     <p className={`${baseClass}__value`}>
-                      {formatDate(data.updatedAt, dateFormat, i18n.language)}
+                      {formatDate({ date: data?.updatedAt, i18n, pattern: dateFormat })}
                     </p>
                   )}
                 </li>
@@ -137,13 +139,15 @@ export const DocumentControls: React.FC<{
                     .filter(Boolean)
                     .join(' ')}
                   title={
-                    data?.createdAt ? formatDate(data?.createdAt, dateFormat, i18n.language) : ''
+                    data?.createdAt
+                      ? formatDate({ date: data?.createdAt, i18n, pattern: dateFormat })
+                      : ''
                   }
                 >
                   <p className={`${baseClass}__label`}>{i18n.t('general:created')}:&nbsp;</p>
                   {data?.createdAt && (
                     <p className={`${baseClass}__value`}>
-                      {formatDate(data?.createdAt, dateFormat, i18n.language)}
+                      {formatDate({ date: data?.createdAt, i18n, pattern: dateFormat })}
                     </p>
                   )}
                 </li>

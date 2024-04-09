@@ -1,5 +1,5 @@
 'use client'
-import type { LanguageTranslations } from '@payloadcms/translations'
+import type { Language } from '@payloadcms/translations'
 import type { ClientConfig } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
@@ -33,19 +33,21 @@ type Props = {
   children: React.ReactNode
   componentMap: ComponentMap
   config: ClientConfig
+  dateFNSKey: Language['dateFNSKey']
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
-  lang: string
+  languageCode: string
   languageOptions: LanguageOptions
   switchLanguageServerAction?: (lang: string) => Promise<void>
-  translations: LanguageTranslations
+  translations: Language['translations']
 }
 
 export const RootProvider: React.FC<Props> = ({
   children,
   componentMap,
   config,
+  dateFNSKey,
   fallbackLang,
-  lang,
+  languageCode,
   languageOptions,
   switchLanguageServerAction,
   translations,
@@ -65,8 +67,9 @@ export const RootProvider: React.FC<Props> = ({
             <FieldComponentsProvider>
               <ClientFunctionProvider>
                 <TranslationProvider
+                  dateFNSKey={dateFNSKey}
                   fallbackLang={fallbackLang}
-                  lang={lang}
+                  language={languageCode}
                   languageOptions={languageOptions}
                   switchLanguageServerAction={switchLanguageServerAction}
                   translations={translations}

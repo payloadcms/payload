@@ -18,5 +18,5 @@ export const DateCell: React.FC<DefaultCellComponentProps<Date | number | string
 
   const dateFormat = dateDisplayFormat || dateFormatFromConfig
 
-  return <span>{cellData && formatDate(cellData, dateFormat, i18n.language)}</span>
+  return <span>{cellData && formatDate({ date: cellData, i18n, pattern: dateFormat })}</span>
 }

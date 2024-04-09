@@ -1,4 +1,4 @@
-import type { I18nOptions } from '@payloadcms/translations'
+import type { I18nOptions, TFunction } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
 import type { Transporter } from 'nodemailer'
@@ -363,6 +363,8 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
+export type LabelFunction = ({ t }: { t: TFunction }) => string
+
 export type SharpDependency = (
   input?:
     | ArrayBuffer
@@ -671,11 +673,12 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'endpoint' | 'globals' | 'localization'
+  'collections' | 'endpoint' | 'globals' | 'i18n' | 'localization'
 > & {
   collections: SanitizedCollectionConfig[]
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
+  i18n: Required<I18nOptions>
   localization: SanitizedLocalizationConfig | false
   paths: {
     config: string

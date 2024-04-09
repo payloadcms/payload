@@ -1,3 +1,4 @@
+import type { I18n } from '@payloadcms/translations'
 import type {
   EditViewProps,
   EntityDescriptionComponent,
@@ -19,11 +20,13 @@ export const mapGlobals = ({
   DefaultEditView,
   config,
   globals,
+  i18n,
   readOnly: readOnlyOverride,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   config: SanitizedConfig
   globals: SanitizedGlobalConfig[]
+  i18n: I18n
   readOnly?: boolean
 }): {
   [key: SanitizedGlobalConfig['slug']]: GlobalComponentMap
@@ -97,6 +100,7 @@ export const mapGlobals = ({
       fieldMap: mapFields({
         config,
         fieldSchema: fields,
+        i18n,
         readOnly: readOnlyOverride,
       }),
       isPreviewEnabled: !!globalConfig?.admin?.preview,

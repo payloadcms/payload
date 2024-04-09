@@ -17,6 +17,7 @@ import type {
 } from '../../admin/types.js'
 import type { User } from '../../auth/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
+import type { LabelFunction } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
@@ -134,8 +135,8 @@ type Admin = {
 }
 
 export type Labels = {
-  plural: Record<string, string> | string
-  singular: Record<string, string> | string
+  plural: LabelFunction | Record<string, string> | string
+  singular: LabelFunction | Record<string, string> | string
 }
 
 export type BaseValidateOptions<TData, TSiblingData> = {
@@ -165,7 +166,7 @@ export type Validate<
 export type ClientValidate = Omit<Validate, 'req'>
 
 export type OptionObject = {
-  label: Record<string, string> | string
+  label: LabelFunction | Record<string, string> | string
   value: string
 }
 
@@ -193,7 +194,7 @@ export interface FieldBase {
     beforeValidate?: FieldHook[]
   }
   index?: boolean
-  label?: Record<string, string> | false | string
+  label?: LabelFunction | Record<string, string> | false | string
   localized?: boolean
   name: string
   required?: boolean
@@ -394,6 +395,7 @@ export type UnnamedTab = Omit<TabBase, 'name'> & {
     | {
         [selectedLanguage: string]: string
       }
+    | LabelFunction
     | string
   localized?: never
 }
