@@ -54,10 +54,10 @@ function sortObject(obj) {
   return sortedObject
 }
 
-export const getTranslationsByContext = (translations: Language, context: 'api' | 'client') => {
+export const getTranslationsByContext = (selectedLanguage: Language, context: 'api' | 'client') => {
   if (context === 'client') {
-    return sortObject(filterKeys(translations, '', clientTranslationKeys))
+    return sortObject(filterKeys(selectedLanguage.translations, '', clientTranslationKeys))
   } else {
-    return translations
+    return selectedLanguage.translations
   }
 }

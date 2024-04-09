@@ -130,74 +130,9 @@ export const t: TFunctionConstructor = ({ key, translations, vars }) => {
   return translationString
 }
 
-type LanguagePreference = {
-  language: string
-  quality?: number
-}
-
-function parseAcceptLanguage(header: string): LanguagePreference[] {
-  return header
-    .split(',')
-    .map((lang) => {
-      const [language, quality] = lang.trim().split(';q=')
-      return {
-        language,
-        quality: quality ? parseFloat(quality) : 1,
-      }
-    })
-    .sort((a, b) => b.quality - a.quality) // Sort by quality, highest to lowest
-}
-
-export const acceptedLanguages = [
-  'ar',
-  'az',
-  'bg',
-  'cs',
-  'de',
-  'en',
-  'es',
-  'fa',
-  'fr',
-  'hr',
-  'hu',
-  'it',
-  'ja',
-  'ko',
-  'my',
-  'nb',
-  'nl',
-  'pl',
-  'pt',
-  'ro',
-  'rs',
-  'rsLatin',
-  'ru',
-  'sv',
-  'th',
-  'tr',
-  'ua',
-  'vi',
-  'zh',
-  'zhTw',
-] as const
-
-export function matchLanguage(header: string): string | undefined {
-  const parsedHeader = parseAcceptLanguage(header)
-
-  for (const { language } of parsedHeader) {
-    for (const acceptedLanguage of acceptedLanguages) {
-      if (language.startsWith(acceptedLanguage)) {
-        return acceptedLanguage
-      }
-    }
-  }
-
-  return undefined
-}
-
 const initTFunction: InitTFunction = (args) => {
   const { config, language, translations } = args
-  const mergedTranslations = deepMerge(config?.translations?.[language] ?? {}, translations)
+  const mergedTranslations = deepMerge(translations, config?.translations?.[language] ?? {})
 
   return {
     t: (key, vars) => {
@@ -230,10 +165,7 @@ function memoize(fn: (args: unknown) => Promise<I18n>, keys: string[]) {
 
 export const initI18n: InitI18n = memoize(
   async ({ config, context, language = 'en' }: Parameters<InitI18n>[0]) => {
-    const translations = getTranslationsByContext(
-      config.supportedLanguages[language].translations,
-      context,
-    )
+    const translations = getTranslationsByContext(config.supportedLanguages[language], context)
 
     const { t, translations: mergedTranslations } = initTFunction({
       config,

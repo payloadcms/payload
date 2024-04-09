@@ -1,5 +1,7 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/types'
 
+import { rtlLanguages } from '@payloadcms/translations'
 import { initI18n } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui/providers/Root'
 import '@payloadcms/ui/scss/app.scss'
@@ -19,8 +21,6 @@ export const metadata = {
   title: 'Next.js',
 }
 
-const rtlLanguages = ['ar', 'fa', 'ha', 'ku', 'ur', 'ps', 'dv', 'ks', 'khw', 'he', 'yi']
-
 export const RootLayout = async ({
   children,
   config: configPromise,
@@ -33,17 +33,18 @@ export const RootLayout = async ({
   const headers = getHeaders()
   const cookies = parseCookies(headers)
 
-  const languageCode =
-    getRequestLanguage({
-      config,
-      cookies,
-      headers,
-    }) ?? config.i18n.fallbackLanguage
+  const languageCode = getRequestLanguage({
+    config,
+    cookies,
+    headers,
+  })
 
   const i18n = await initI18n({ config: config.i18n, context: 'client', language: languageCode })
   const clientConfig = await createClientConfig({ config, t: i18n.t })
 
-  const dir = rtlLanguages.includes(languageCode) ? 'RTL' : 'LTR'
+  const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
+    ? 'RTL'
+    : 'LTR'
 
   const languageOptions = Object.entries(config.i18n.supportedLanguages || {}).reduce(
     (acc, [language, languageConfig]) => {

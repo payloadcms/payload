@@ -1,7 +1,7 @@
 import type { Language } from '../types.js'
 
 export const fa: Language = {
-  dateFNSKey: 'fa',
+  dateFNSKey: 'fa-IR',
   translations: {
     authentication: {
       account: 'نمایه',

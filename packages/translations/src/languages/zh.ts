@@ -1,7 +1,7 @@
 import type { Language } from '../types.js'
 
 export const zh: Language = {
-  dateFNSKey: 'zh',
+  dateFNSKey: 'zh-CN',
   translations: {
     authentication: {
       account: '帐户',

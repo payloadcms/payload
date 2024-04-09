@@ -61,5 +61,5 @@ export const translations = {
   ua,
   vi,
   zh,
-  'zh-tw': zhTw,
+  'zh-TW': zhTw,
 } as SupportedLanguages

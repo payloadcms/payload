@@ -1,9 +1,37 @@
 import type { Locale } from 'date-fns'
 
-import type { acceptedLanguages } from './utilities/init.js'
+import type { acceptedLanguages } from './utilities/languages.js'
+
+type DateFNSKeys =
+  | 'ar'
+  | 'az'
+  | 'bg'
+  | 'cs'
+  | 'de'
+  | 'en-US'
+  | 'es'
+  | 'fa-IR'
+  | 'fr'
+  | 'hr'
+  | 'hu'
+  | 'it'
+  | 'ja'
+  | 'ko'
+  | 'nb'
+  | 'nl'
+  | 'pl'
+  | 'pt'
+  | 'ro'
+  | 'ru'
+  | 'sv'
+  | 'th'
+  | 'tr'
+  | 'vi'
+  | 'zh-CN'
+  | 'zh-TW'
 
 export type Language = {
-  dateFNSKey: string
+  dateFNSKey: DateFNSKeys
   translations: {
     [namespace: string]: {
       [key: string]: string
@@ -22,7 +50,7 @@ export type TFunction = (key: string, options?: Record<string, any>) => string
 export type I18n = {
   dateFNS: Locale
   /** Corresponding dateFNS key */
-  dateFNSKey: string
+  dateFNSKey: DateFNSKeys
   /** The fallback language */
   fallbackLanguage: string
   /** The language of the request */
@@ -52,5 +80,10 @@ export type InitTFunction = (args: {
 export type InitI18n = (args: {
   config: I18nOptions
   context: 'api' | 'client'
-  language?: string
+  language?: AcceptedLanguages
 }) => Promise<I18n>
+
+export type LanguagePreference = {
+  language: AcceptedLanguages
+  quality?: number
+}

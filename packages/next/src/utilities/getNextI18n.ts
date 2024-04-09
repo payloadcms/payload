@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { AcceptedLanguages, I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
@@ -11,7 +11,7 @@ export const getNextI18n = async ({
   language,
 }: {
   config: SanitizedConfig
-  language?: string
+  language?: AcceptedLanguages
 }): Promise<I18n> =>
   initI18n({
     config: config.i18n,
