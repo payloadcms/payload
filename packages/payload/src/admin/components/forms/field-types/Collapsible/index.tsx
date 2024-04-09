@@ -70,17 +70,17 @@ const CollapsibleField: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
-    if (!preferencesKey) {
-      setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
-    }
-
     const fetchInitialState = async () => {
-      const preferences = await getPreference(preferencesKey)
-      if (preferences) {
-        const initCollapsedFromPref = path
-          ? preferences?.fields?.[path]?.collapsed
-          : preferences?.fields?.[fieldPreferencesKey]?.collapsed
-        setCollapsedOnMount(Boolean(initCollapsedFromPref))
+      if (preferencesKey) {
+        const preferences = await getPreference(preferencesKey)
+        if (preferences) {
+          const initCollapsedFromPref = path
+            ? preferences?.fields?.[path]?.collapsed
+            : preferences?.fields?.[fieldPreferencesKey]?.collapsed
+          setCollapsedOnMount(Boolean(initCollapsedFromPref))
+        } else {
+          setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
+        }
       } else {
         setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
       }
