@@ -214,25 +214,25 @@ jobs:
       matrix:
         # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
         suite:
-          # - _community
-          # - access-control
-          # - admin
-          # - auth
-          # - email
-          # - field-error-states
-          # - fields-relationship
+          - _community
+          - access-control
+          - admin
+          - auth
+          - email
+          - field-error-states
+          - fields-relationship
           - fields
           - fields__collections__Blocks
           - fields__collections__Array
           - fields__collections__Relationship
           - fields__collections__Lexical
-          # - live-preview
-          # - localization
-          # - plugin-form-builder
-          # - plugin-nested-docs
-          # - plugin-seo
-          # - versions
-          # - uploads
+          - live-preview
+          - localization
+          - plugin-form-builder
+          - plugin-nested-docs
+          - plugin-seo
+          - versions
+          - uploads
 
     steps:
       - name: Use Node.js 18
