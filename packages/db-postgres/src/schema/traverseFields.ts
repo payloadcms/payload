@@ -25,7 +25,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, PostgresAdapter } from '../types.js'
 import type { BaseExtraConfig } from './build.js'
-import type { RelationMap} from './build.js';
+import type { RelationMap } from './build.js'
 
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import { buildTable } from './build.js'
@@ -701,6 +701,7 @@ export const traverseFields = ({
           const slug: string = field.relationTo
           const relationshipConfig = adapter.payload.collections[slug].config
 
+          // get the id type of the related collection
           let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
           const relatedCollectionCustomID = relationshipConfig.fields.find(
             (field) => fieldAffectsData(field) && field.name === 'id',
@@ -708,14 +709,19 @@ export const traverseFields = ({
           if (relatedCollectionCustomID?.type === 'number') colType = 'numeric'
           if (relatedCollectionCustomID?.type === 'text') colType = 'varchar'
 
-          targetTable[`${field.name}ID`] = parentIDColumnMap[colType](
-            `${field.name}_id`,
-          ).references(() => adapter.tables[slug].id, { onDelete: 'cascade' })
-          if (!disableNotNull && field.required && !field.admin?.condition) {
-            targetTable[`${field.name}ID`].notNull()
-          }
+          // make the foreign key column for relationship using the correct id column type
+          targetTable[`${fieldName}ID`] = parentIDColumnMap[colType](`${columnName}_id`).references(
+            () => adapter.tables[slug].id,
+            { onDelete: 'cascade' },
+          )
 
-          relationsToBuild.set(field.name, { type: 'one', target: slug })
+          // add relationship to table
+          relationsToBuild.set(fieldName, { type: 'one', target: slug })
+
+          // add notNull if when not required
+          if (!disableNotNull && field.required && !field.admin?.condition) {
+            targetTable[`${fieldName}ID`].notNull()
+          }
         }
 
         if (field.localized && adapter.payload.config.localization) {
