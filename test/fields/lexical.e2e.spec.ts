@@ -537,11 +537,6 @@ describe('lexical', () => {
 
         const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
 
-        console.log(
-          'LF',
-          (lexicalField.root.children[0] as SerializedParagraphNode)
-            .children[1] as SerializedLinkNode,
-        )
         expect(
           (
             (lexicalField.root.children[0] as SerializedParagraphNode)
