@@ -31,7 +31,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
   } = props
 
   const { getPreference, setPreference } = usePreferences()
-  const { preferencesKey } = useDocumentInfo()
+  const { id: docID, preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
   const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
@@ -41,33 +41,39 @@ const CollapsibleField: React.FC<Props> = (props) => {
     async (newCollapsedState: boolean) => {
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
-      setPreference(preferencesKey, {
-        ...existingPreferences,
-        ...(path
-          ? {
-              fields: {
-                ...(existingPreferences?.fields || {}),
-                [path]: {
-                  ...existingPreferences?.fields?.[path],
-                  collapsed: newCollapsedState,
+      if (preferencesKey) {
+        await setPreference(preferencesKey, {
+          ...existingPreferences,
+          ...(path
+            ? {
+                fields: {
+                  ...(existingPreferences?.fields || {}),
+                  [path]: {
+                    ...existingPreferences?.fields?.[path],
+                    collapsed: newCollapsedState,
+                  },
                 },
-              },
-            }
-          : {
-              fields: {
-                ...(existingPreferences?.fields || {}),
-                [fieldPreferencesKey]: {
-                  ...existingPreferences?.fields?.[fieldPreferencesKey],
-                  collapsed: newCollapsedState,
+              }
+            : {
+                fields: {
+                  ...(existingPreferences?.fields || {}),
+                  [fieldPreferencesKey]: {
+                    ...existingPreferences?.fields?.[fieldPreferencesKey],
+                    collapsed: newCollapsedState,
+                  },
                 },
-              },
-            }),
-      })
+              }),
+        })
+      }
     },
     [preferencesKey, fieldPreferencesKey, getPreference, setPreference, path],
   )
 
   useEffect(() => {
+    if (!docID) {
+      setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
+    }
+
     const fetchInitialState = async () => {
       const preferences = await getPreference(preferencesKey)
       if (preferences) {
@@ -81,7 +87,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     }
 
     fetchInitialState()
-  }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
+  }, [docID, getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
 
   if (typeof collapsedOnMount !== 'boolean') return null
 
