@@ -25,6 +25,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, IDType, PostgresAdapter } from '../types.js'
 import type { BaseExtraConfig } from './build.js'
+import type { RelationMap} from './build.js';
 
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import { buildTable } from './build.js'
@@ -51,9 +52,9 @@ type Args = {
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   newTableName: string
   parentTableName: string
-  relationsToBuild: Map<string, string>
+  relationsToBuild: RelationMap
   relationships: Set<string>
-  rootRelationsToBuild?: Map<string, string>
+  rootRelationsToBuild?: RelationMap
   rootTableIDColType: string
   rootTableName: string
   versions: boolean
@@ -289,7 +290,7 @@ export const traverseFields = ({
             versions,
           })
 
-          relationsToBuild.set(fieldName, selectTableName)
+          relationsToBuild.set(fieldName, { type: 'many', target: selectTableName })
 
           const selectTableRelations = relations(adapter.tables[selectTableName], ({ one }) => {
             const result: Record<string, Relation<string>> = {
@@ -376,7 +377,7 @@ export const traverseFields = ({
             hasManyNumberField = subHasManyNumberField
         }
 
-        relationsToBuild.set(fieldName, arrayTableName)
+        relationsToBuild.set(fieldName, { type: 'many', target: arrayTableName })
 
         const arrayTableRelations = relations(adapter.tables[arrayTableName], ({ many, one }) => {
           const result: Record<string, Relation<string>> = {
@@ -390,8 +391,8 @@ export const traverseFields = ({
             result._locales = many(adapter.tables[`${arrayTableName}${adapter.localesSuffix}`])
           }
 
-          subRelationsToBuild.forEach((val, key) => {
-            result[key] = many(adapter.tables[val])
+          subRelationsToBuild.forEach(({ target }, key) => {
+            result[key] = many(adapter.tables[target])
           })
 
           return result
@@ -484,8 +485,8 @@ export const traverseFields = ({
                   )
                 }
 
-                subRelationsToBuild.forEach((val, key) => {
-                  result[key] = many(adapter.tables[val])
+                subRelationsToBuild.forEach(({ target }, key) => {
+                  result[key] = many(adapter.tables[target])
                 })
 
                 return result
@@ -502,7 +503,10 @@ export const traverseFields = ({
               tableLocales: adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
             })
           }
-          rootRelationsToBuild.set(`_blocks_${block.slug}`, blockTableName)
+          rootRelationsToBuild.set(`_blocks_${block.slug}`, {
+            type: 'many',
+            target: blockTableName,
+          })
         })
 
         break
@@ -687,13 +691,37 @@ export const traverseFields = ({
       case 'upload':
         if (Array.isArray(field.relationTo)) {
           field.relationTo.forEach((relation) => relationships.add(relation))
-        } else {
+        } else if (
+          (field.type === 'relationship' && field.hasMany) ||
+          (field.localized && adapter.payload.config.localization)
+        ) {
           relationships.add(field.relationTo)
+        } else {
+          // simple relationships get a column on the targetTable with a foreign key to the relationTo table
+          const slug: string = field.relationTo
+          const relationshipConfig = adapter.payload.collections[slug].config
+
+          let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
+          const relatedCollectionCustomID = relationshipConfig.fields.find(
+            (field) => fieldAffectsData(field) && field.name === 'id',
+          )
+          if (relatedCollectionCustomID?.type === 'number') colType = 'numeric'
+          if (relatedCollectionCustomID?.type === 'text') colType = 'varchar'
+
+          targetTable[`${field.name}ID`] = parentIDColumnMap[colType](
+            `${field.name}_id`,
+          ).references(() => adapter.tables[slug].id, { onDelete: 'cascade' })
+          if (!disableNotNull && field.required && !field.admin?.condition) {
+            targetTable[`${field.name}ID`].notNull()
+          }
+
+          relationsToBuild.set(field.name, { type: 'one', target: slug })
         }
 
         if (field.localized && adapter.payload.config.localization) {
           hasLocalizedRelationshipField = true
         }
+
         break
 
       default:
