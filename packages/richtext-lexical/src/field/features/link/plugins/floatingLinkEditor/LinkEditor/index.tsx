@@ -81,7 +81,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         setIsLink(false)
         setIsAutoLink(false)
         setLinkUrl('')
-        setLinkLabel(null)
+        setLinkLabel('')
         setSelectedNodes([])
         return
       }
