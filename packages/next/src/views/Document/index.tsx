@@ -15,7 +15,6 @@ import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
-import { NotFoundView } from '../NotFound/index.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getViewsFromConfig } from './getViewsFromConfig.js'
 
@@ -107,8 +106,12 @@ export const Document: React.FC<AdminViewProps> = async ({
       ErrorView = collectionViews?.ErrorView
     }
 
-    if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
-      ErrorView = NotFoundView
+    if (!CustomView && !DefaultView && !ViewOverride) {
+      if (ErrorView) {
+        return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
+      }
+
+      notFound()
     }
   }
 
@@ -140,8 +143,12 @@ export const Document: React.FC<AdminViewProps> = async ({
       DefaultView = globalViews?.DefaultView
       ErrorView = globalViews?.ErrorView
 
-      if (!CustomView && !DefaultView && !ViewOverride && !ErrorView) {
-        ErrorView = NotFoundView
+      if (!CustomView && !DefaultView && !ViewOverride) {
+        if (ErrorView) {
+          return <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
+        }
+
+        notFound()
       }
     }
   }
@@ -212,15 +219,11 @@ export const Document: React.FC<AdminViewProps> = async ({
             uploadEdits: undefined,
           }}
         >
-          {ErrorView ? (
-            <ErrorView initPageResult={initPageResult} searchParams={searchParams} />
-          ) : (
-            <RenderCustomComponent
-              CustomComponent={ViewOverride || CustomView}
-              DefaultComponent={DefaultView}
-              componentProps={viewComponentProps}
-            />
-          )}
+          <RenderCustomComponent
+            CustomComponent={ViewOverride || CustomView}
+            DefaultComponent={DefaultView}
+            componentProps={viewComponentProps}
+          />
         </FormQueryParamsProvider>
       </EditDepthProvider>
     </DocumentInfoProvider>
