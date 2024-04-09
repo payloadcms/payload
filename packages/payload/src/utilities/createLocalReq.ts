@@ -58,8 +58,9 @@ export const createLocalReq: CreateLocalReq = (
   req.t = i18n.t
   req.user = user || req?.user || null
   req.collection = collection
-    ? payload.collections?.[collection] &&
-      isolateObjectProperty(payload.collections?.[collection], collection)
+    ? payload.collections?.[collection]
+      ? isolateObjectProperty(payload.collections[collection], collection)
+      : null
     : null
   req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req)
 
