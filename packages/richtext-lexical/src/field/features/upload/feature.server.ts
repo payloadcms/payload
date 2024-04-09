@@ -65,10 +65,22 @@ export const UploadFeature: FeatureProviderProviderServer<
               html: {
                 converter: async ({ node, payload }) => {
                   if (payload) {
-                    const uploadDocument: any = await payload.findByID({
-                      id: node.value.id,
-                      collection: node.relationTo,
-                    })
+                    let uploadDocument: any
+                    try {
+                      uploadDocument = await payload.findByID({
+                        id: node.value.id,
+                        collection: node.relationTo,
+                      })
+                    } catch (ignored) {
+                      // eslint-disable-next-line no-console
+                      console.error(
+                        'Lexical upload node HTML converter: error fetching upload file',
+                        ignored,
+                        'Node:',
+                        node,
+                      )
+                      return `<img />`
+                    }
 
                     const url: string = getAbsoluteURL(uploadDocument?.url as string, payload)
 
