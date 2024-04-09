@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-alpha.60",
+  "version": "3.0.0-alpha.61",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./src/index.ts",
