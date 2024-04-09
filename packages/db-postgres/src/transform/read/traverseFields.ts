@@ -267,7 +267,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (field.type === 'relationship' || field.type === 'upload') {
         const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
-        if (!relationPathMatch) {
+        if (
+          (!relationPathMatch && 'hasMany' in field && !field.hasMany) ||
+          typeof field.relationTo === 'string'
+        ) {
           if ('hasMany' in field && field.hasMany) {
             if (field.localized && config.localization && config.localization.locales) {
               result[field.name] = {
@@ -276,9 +279,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
             } else {
               result[field.name] = []
             }
+            return result
           }
-
-          return result
         }
 
         if (field.localized) {
@@ -300,15 +302,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
               relations,
             })
           })
-        } else {
+          return result
+        } else if (('hasMany' in field && field.hasMany) || Array.isArray(field.relationTo)) {
           transformRelationship({
             field,
             ref: result,
             relations: relationPathMatch,
           })
+          return result
         }
-
-        return result
+        result[field.name] = fieldData
       }
 
       if (field.type === 'text' && field?.hasMany) {

@@ -402,7 +402,10 @@ export const buildTable = ({
 
     relationsToBuild.forEach(({ type, target }, key) => {
       if (type === 'one') {
-        result[key] = one(adapter.tables[target])
+        result[key] = one(adapter.tables[target], {
+          fields: [table[key]],
+          references: [adapter.tables[target].id],
+        })
       }
       if (type === 'many') {
         result[key] = many(adapter.tables[target])
