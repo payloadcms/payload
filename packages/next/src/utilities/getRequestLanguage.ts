@@ -7,7 +7,7 @@ import { matchLanguage } from '@payloadcms/translations'
 type GetRequestLanguageArgs = {
   config: SanitizedConfig
   cookies: Map<string, string> | ReadonlyRequestCookies
-  defaultLanguage?: string
+  defaultLanguage?: AcceptedLanguages
   headers: Request['headers']
 }
 
@@ -26,5 +26,5 @@ export const getRequestLanguage = ({
     config.i18n.fallbackLanguage ||
     defaultLanguage
 
-  return matchLanguage(reqLanguage)
+  return matchLanguage(reqLanguage) || defaultLanguage
 }
