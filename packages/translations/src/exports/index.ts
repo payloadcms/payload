@@ -1,4 +1,5 @@
 export { importDateFNSLocale } from '../importDateFNSLocale.js'
 export { getTranslation } from '../utilities/getTranslation.js'
-export { initI18n, matchLanguage, t } from '../utilities/init.js'
+export { initI18n, t } from '../utilities/init.js'
+export { acceptedLanguages, matchLanguage, rtlLanguages } from '../utilities/languages.js'
 export type * from '../types.js'

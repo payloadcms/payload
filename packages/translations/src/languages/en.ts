@@ -1,4 +1,6 @@
-export const en = {
+import type { Language } from '../types.js'
+
+export const en: Language = {
   dateFNSKey: 'en-US',
   translations: {
     authentication: {
