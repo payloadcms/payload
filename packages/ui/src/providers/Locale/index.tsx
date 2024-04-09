@@ -20,7 +20,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
 
   const { searchParams } = useSearchParams()
-  const localeFromParams = searchParams?.locale || ''
+  const localeFromParams = searchParams?.locale
 
   const [localeCode, setLocaleCode] = useState<string>(
     (localeFromParams as string) || defaultLocale,
