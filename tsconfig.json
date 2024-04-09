@@ -82,7 +82,7 @@
         "./packages/ui/src/scss/app.scss"
       ],
       "@payloadcms/next/*": [
-        "./packages/next/src/exports/*"
+        "./packages/next/src/*"
       ],
       "@payloadcms/next": [
         "./packages/next/src/exports/*"
