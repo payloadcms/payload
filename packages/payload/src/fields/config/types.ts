@@ -434,10 +434,16 @@ type JSONAdmin = Admin & {
   editorOptions?: EditorProps['options']
 }
 
+type JSONSchema = [
+  {
+    properties: unknown
+    type: string
+  },
+]
+
 export type JSONField = Omit<FieldBase, 'admin'> & {
   admin?: JSONAdmin
-  // TODO: figure out why schema type isn't working
-  schema?: string //Record<string, unknown>
+  schema?: JSONSchema
   type: 'json'
 }
 
