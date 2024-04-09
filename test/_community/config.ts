@@ -35,6 +35,12 @@ export default buildConfigWithDefaults({
         json: {
           test: 'string to test',
         },
+        json2: {
+          test: 'string to test',
+        },
+        json3: {
+          test: 'string to test',
+        },
       },
     })
   },

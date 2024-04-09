@@ -12,7 +12,44 @@ export const PostsCollection: CollectionConfig = {
     },
     {
       name: 'json',
-      schema: '{"test": "string"}',
+      schema: [
+        {
+          type: 'object',
+          properties: {
+            test: {
+              enum: ['string to test ok', 'ok', 'still ok'],
+            },
+          },
+        },
+      ],
+      type: 'json',
+    },
+    {
+      name: 'json2',
+      schema: [
+        {
+          type: 'object',
+          properties: {
+            test: {
+              enum: ['strings to test ok'],
+            },
+          },
+        },
+      ],
+      type: 'json',
+    },
+    {
+      name: 'json3',
+      schema: [
+        {
+          type: 'object',
+          properties: {
+            test: {
+              enum: ['strings to test ok'],
+            },
+          },
+        },
+      ],
       type: 'json',
     },
     {
