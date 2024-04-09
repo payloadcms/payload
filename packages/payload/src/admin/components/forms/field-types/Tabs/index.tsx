@@ -80,7 +80,7 @@ const TabsField: React.FC<Props> = (props) => {
   } = props
 
   const { getPreference, setPreference } = usePreferences()
-  const { id: docID, preferencesKey } = useDocumentInfo()
+  const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
 
   const { withinCollapsible } = useCollapsible()
@@ -88,20 +88,17 @@ const TabsField: React.FC<Props> = (props) => {
   const tabsPrefKey = `tabs-${indexPath}`
 
   useEffect(() => {
-    if (!docID) {
-      setActiveTabIndex(0)
-      return
+    if (preferencesKey) {
+      const getInitialPref = async () => {
+        const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
+        const initialIndex = path
+          ? existingPreferences?.fields?.[path]?.tabIndex
+          : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
+        setActiveTabIndex(initialIndex || 0)
+      }
+      void getInitialPref()
     }
-
-    const getInitialPref = async () => {
-      const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
-      const initialIndex = path
-        ? existingPreferences?.fields?.[path]?.tabIndex
-        : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
-      setActiveTabIndex(initialIndex || 0)
-    }
-    void getInitialPref()
-  }, [docID, path, indexPath, getPreference, preferencesKey, tabsPrefKey])
+  }, [path, indexPath, getPreference, preferencesKey, tabsPrefKey])
 
   const handleTabChange = useCallback(
     async (incomingTabIndex: number) => {

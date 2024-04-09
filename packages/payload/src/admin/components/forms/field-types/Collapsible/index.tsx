@@ -31,7 +31,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
   } = props
 
   const { getPreference, setPreference } = usePreferences()
-  const { id: docID, preferencesKey } = useDocumentInfo()
+  const { preferencesKey } = useDocumentInfo()
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
   const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
@@ -70,7 +70,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
-    if (!docID) {
+    if (!preferencesKey) {
       setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
     }
 
@@ -87,7 +87,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     }
 
     fetchInitialState()
-  }, [docID, getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
+  }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
 
   if (typeof collapsedOnMount !== 'boolean') return null
 
