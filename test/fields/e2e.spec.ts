@@ -296,6 +296,8 @@ describe('fields', () => {
       // nested in a group error
       await page.locator('#field-group__unique').fill(uniqueText)
 
+      await wait(1000)
+
       // attempt to save
       await page.locator('#action-save').click()
 
