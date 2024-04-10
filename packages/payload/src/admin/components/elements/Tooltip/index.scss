@@ -78,7 +78,7 @@
     bottom: auto;
     left: auto;
     right: calc(var(--base) * 0.5);
-    transform: translate3d(0%, calc(var(--caret-size)*-1), 0);
+    transform: translate3d(0%, calc(var(--caret-size) * -1), 0);
     max-width: 75%;
 
     &::after {
