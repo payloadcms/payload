@@ -166,6 +166,8 @@ const NumberField: React.FC<Props> = (props) => {
           <input
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}
+            max={max}
+            min={min}
             name={path}
             onChange={handleChange}
             onWheel={(e) => {
