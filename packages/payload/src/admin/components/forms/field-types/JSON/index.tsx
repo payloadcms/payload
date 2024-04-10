@@ -11,6 +11,7 @@ import useField from '../../useField'
 import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
+import { useJSONSchemaContext } from './provider'
 
 const baseClass = 'json-field'
 
@@ -41,6 +42,13 @@ const JSONField: React.FC<Props> = (props) => {
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
   const [hasLoadedValue, setHasLoadedValue] = useState(false)
+  const [schemas, setSchemas] = useState([])
+  const [monacoRef, setMonacoRef] = useState([])
+  const WIP = useJSONSchemaContext()
+
+  // const {schemas, setSchemas} = useJSONSchemaContext() // TODO: this is what I want
+
+  console.log('TODO 🔥: context', WIP)
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -55,38 +63,34 @@ const JSONField: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
+  useEffect(() => {
+    monacoRef?.languages?.json?.jsonDefaults.setDiagnosticsOptions({
+      schemas, // TODO 🔥: should total 2 schemas
+      validate: true,
+    })
+  }, [schemas])
+
   function handleEditorDidMount(editor, monaco) {
     // monaco.editor.getModels().forEach((mdl) => mdl.dispose()) // remove all previous models
     const modelUri = monaco.Uri.parse(
       `payload://json/schema/${Math.ceil(Math.random() * 99999)}.json`, // TODO: this id should be unique but follow a pattern
     )
     const model = monaco.editor.createModel(stringValue, 'json', modelUri)
+    setMonacoRef(monaco)
 
-    // TODO: build this array of schemas using [a config schema]
-    const schemas = schema.map((sch) => {
-      sch.fileMatch = [modelUri.toString()]
-      sch.uri = modelUri.toString()
-      return sch
-    })
-
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      schemas: [
+    // TODO 🔥: schema needs to be shared between JSON fields
+    const thisSchema = schema.map((initialSchema) =>
+      Object.assign(
         {
-          fileMatch: [modelUri.toString()], // associate with our model
-          schema: {
-            type: 'object',
-            properties: {
-              test: {
-                enum: ['string to test ok', 'ok', 'still ok'],
-              },
-            },
-          },
-          uri: modelUri.toString(), // id of the first schema
+          fileMatch: [modelUri.toString()], //fileMatch, // associate with our model
+          schema: { ...initialSchema },
+          uri: modelUri.toString(),
         },
-      ],
-      validate: true,
-    })
-    console.log('DEBUG:', editor, modelUri.toString())
+        {},
+      ),
+    )
+    setSchemas((prev) => [...prev, ...thisSchema])
+
     editor.setModel(model) // add updated model
   }
 
@@ -137,7 +141,6 @@ const JSONField: React.FC<Props> = (props) => {
       <ErrorComp message={errorMessage} showError={showError} />
       <LabelComp htmlFor={`field-${path}`} label={label} required={required} />
       <CodeEditor
-        // beforeMount={handleEditorWillMount}
         defaultLanguage="json"
         onChange={handleChange}
         onMount={handleEditorDidMount}
