@@ -1,4 +1,4 @@
-import type { Field } from 'payload/types'
+import type { FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import payload from 'payload'
 
@@ -15,7 +15,7 @@ import { uploadValidation } from './validate'
 export type UploadFeatureProps = {
   collections: {
     [collection: string]: {
-      fields: Field[]
+      fields: FieldWithRichTextRequiredEditor[]
     }
   }
 }
