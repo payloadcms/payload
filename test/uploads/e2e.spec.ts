@@ -11,6 +11,7 @@ import type { Media } from './payload-types.js'
 import {
   ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -203,7 +204,7 @@ describe('uploads', () => {
     await page.locator('.field-type:nth-of-type(2) .icon--x').click()
 
     // choose from existing
-    await page.locator('.list-drawer__toggler').click()
+    await openDocDrawer(page, '.list-drawer__toggler')
 
     await expect(page.locator('.cell-title')).toContainText('draft')
   })
@@ -214,13 +215,16 @@ describe('uploads', () => {
 
     // remove the selection and open the list drawer
     await page.locator('.file-details__remove').click()
-    await page.locator('.upload__toggler.list-drawer__toggler').click()
+
+    await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')
+
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
 
-    // upload an image and try to select it
-    await listDrawer.locator('button.list-drawer__create-new-button.doc-drawer__toggler').click()
+    await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
     await expect(page.locator('[id^=doc-drawer_media_2_]')).toBeVisible()
+
+    // upload an image and try to select it
     await page
       .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))

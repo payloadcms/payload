@@ -1,14 +1,13 @@
 # Payload Translations
 
-These are the translations for Payload. Translations are used on both the server and the client. The admin panel uses translations to display text to the user in their selected language. The server uses translations when sending API responses.
+The home of Payloads API and Admin Panel translations.
 
 ## How to contribute
 
 #### Updating a translation
 
-1. Open the language file you wish to edit located within the `src/all` folder
-2. Update the translation value
-3. Run one of the following:
+1. Update the translation value
+2. Run one of the following:
    ```sh
    yarn build
    // or
@@ -19,9 +18,8 @@ These are the translations for Payload. Translations are used on both the server
 
 #### Adding a new translation
 
-1. Add the new translation key/value pair for all languages located in the `src/all` folder
-2. Open the `writeTranslationFiles.ts` file and add the key to either `clientTranslationKeys` or `serverTranslationKeys` depending on where the translation will be used.
-3. Run one of the following:
+1. Add the new translation key/value pair for **all** languages located in the `<payload-repo-root>/packages/translations/src/languages` folder
+2. Run one of the following:
    ```sh
    yarn build
    // or
@@ -32,10 +30,9 @@ These are the translations for Payload. Translations are used on both the server
 
 #### Adding a new language
 
-1. Create a new JSON file in the `src/all` folder with the language code as the file name (e.g. `en.json` for English)
-2. Translate all of the keys in the new file
-3. Open the `src/index.ts` file and import your json file and then export it inside the `translations` object
-4. Run one of the following:
+1. Create a new TS file in the `<payload-repo-root>/packages/translations/src/languages` folder, use the language code as the file name (e.g. `<payload-repo-root>/packages/translations/src/languages/en.ts` for English)
+2. Copy all translations from an existing language file and update all of the translations to match your new language
+3. Run one of the following:
    ```sh
    yarn build
    // or
@@ -43,6 +40,8 @@ These are the translations for Payload. Translations are used on both the server
    // or
    pnpm build
    ```
+4. Import and export your new language file from within `<payload-repo-root>/packages/translations/src/exports/all.ts`
+5. Re-export the file from within `<payload-repo-root>/packages/payload/src/exports/i18n/[your-new-language].ts`
 
 Here is a full list of language keys. Note that these are not all implemented, but if you would like to contribute and add a new language, you can use this list as a reference:
 

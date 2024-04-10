@@ -130,6 +130,11 @@ export async function openNav(page: Page): Promise<void> {
   await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 
+export async function openDocDrawer(page: Page, selector: string): Promise<void> {
+  await page.locator(selector).click()
+  await wait(300) // wait for drawer form state to initialize
+}
+
 export async function closeNav(page: Page): Promise<void> {
   if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) return
   await page.locator('.nav-toggler >> visible=true').click()
@@ -141,11 +146,10 @@ export async function openDocControls(page: Page): Promise<void> {
   await expect(page.locator('.doc-controls__popup >> .popup__content')).toBeVisible()
 }
 
-export async function changeLocale(page: Page, newLocale: string, skipURLCheck: boolean = false) {
+export async function changeLocale(page: Page, newLocale: string) {
   await page.locator('.localizer >> button').first().click()
   await page
-    .locator(`.localizer`)
-    .locator(`.popup >> button`, {
+    .locator(`.localizer .popup.popup--active .popup-button-list button`, {
       hasText: newLocale,
     })
     .first()
@@ -153,11 +157,7 @@ export async function changeLocale(page: Page, newLocale: string, skipURLCheck: 
 
   const regexPattern = new RegExp(`locale=${newLocale}`)
 
-  if (skipURLCheck) {
-    await wait(500)
-  } else {
-    await expect(page).toHaveURL(regexPattern)
-  }
+  await expect(page).toHaveURL(regexPattern)
 }
 
 export function exactText(text: string) {
@@ -196,10 +196,23 @@ export const findTableCell = (page: Page, fieldName: string, rowTitle?: string):
   return cell
 }
 
+export async function navigateToListCellLink(page: Page, selector = '.cell-id') {
+  const cellLink = page.locator(`${selector} a`).first()
+  const linkURL = await cellLink.getAttribute('href')
+  await cellLink.click()
+  await page.waitForURL(`**${linkURL}`)
+}
+
 export const findTableRow = (page: Page, title: string): Locator => {
   const row = page.locator(`tbody tr:has-text("${title}")`)
   expect(row).toBeTruthy()
   return row
+}
+
+export async function switchTab(page: Page, selector: string) {
+  await page.locator(selector).click()
+  await wait(300)
+  await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
 }
 
 /**

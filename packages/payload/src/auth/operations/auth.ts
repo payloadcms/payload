@@ -10,7 +10,7 @@ import { getAccessResults } from '../getAccessResults.js'
 
 export type AuthArgs = {
   headers: Request['headers']
-  req: Omit<PayloadRequest, 'user'>
+  req?: Omit<PayloadRequest, 'user'>
 }
 
 export type AuthResult = {
@@ -19,7 +19,7 @@ export type AuthResult = {
   user: User | null
 }
 
-export const auth = async (args: AuthArgs): Promise<AuthResult> => {
+export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
   const { headers } = args
   const req = args.req as PayloadRequest
   const { payload } = req

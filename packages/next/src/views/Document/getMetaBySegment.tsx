@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/t
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { getNextI18n } from '../../utilities/getNextI18n.js'
+import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateMetadata as apiMeta } from '../API/meta.js'
 import { generateMetadata as editMeta } from '../Edit/meta.js'
 import { generateMetadata as livePreviewMeta } from '../LivePreview/meta.js'
@@ -89,7 +89,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     }
   }
 
-  const i18n = await getNextI18n({
+  const i18n = await getNextRequestI18n({
     config,
   })
 

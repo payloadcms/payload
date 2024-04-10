@@ -8,6 +8,7 @@ import {
   ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  navigateToListCellLink,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -26,25 +27,21 @@ describe('Live Preview', () => {
 
   const goToDoc = async (page: Page) => {
     await page.goto(url.list)
-    const linkToDoc = page.locator('tbody tr:first-child .cell-id a').first()
-
-    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-    const linkDocHref = await linkToDoc.getAttribute('href')
-
-    await linkToDoc.click()
-
-    await page.waitForURL(`**${linkDocHref}`)
+    await page.waitForURL(url.list)
+    await navigateToListCellLink(page)
   }
 
   const goToCollectionPreview = async (page: Page): Promise<void> => {
     await goToDoc(page)
     await page.goto(`${page.url()}/preview`)
+    await page.waitForURL(`**/preview`)
   }
 
   const goToGlobalPreview = async (page: Page, slug: string): Promise<void> => {
     const global = new AdminUrlUtil(serverURL, slug)
     const previewURL = `${global.global(slug)}/preview`
     await page.goto(previewURL)
+    await page.waitForURL(previewURL)
   }
 
   beforeAll(async ({ browser }) => {
@@ -78,12 +75,9 @@ describe('Live Preview', () => {
 
   test('collection — has route', async () => {
     await goToDoc(page)
-    const url = page.url()
     await goToCollectionPreview(page)
 
-    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
+    await expect(page.locator('.live-preview')).toBeVisible()
   })
 
   test('collection — renders iframe', async () => {
@@ -127,6 +121,7 @@ describe('Live Preview', () => {
   test('global — has tab', async () => {
     const global = new AdminUrlUtil(serverURL, 'header')
     await page.goto(global.global('header'))
+    await page.waitForURL(global.global('header'))
 
     const docURL = page.url()
     const pathname = new URL(docURL).pathname
@@ -169,16 +164,12 @@ describe('Live Preview', () => {
 
   test('properly measures iframe and displays size', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
     await page.locator('#field-title').fill('Title 3')
     await page.locator('#field-slug').fill('slug-3')
 
     await saveDocAndAssert(page)
-
     await goToCollectionPreview(page)
-
-    await expect(() => expect(page.url()).toContain('/preview')).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
 
     const iframe = page.locator('iframe')
 
@@ -222,16 +213,12 @@ describe('Live Preview', () => {
 
   test('resizes iframe to specified breakpoint', async () => {
     await page.goto(url.create)
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
+    await page.waitForURL(url.create)
     await page.locator('#field-title').fill('Title 4')
     await page.locator('#field-slug').fill('slug-4')
 
     await saveDocAndAssert(page)
     await goToCollectionPreview(page)
-
-    await expect(() => expect(page.url()).toContain('/preview')).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
 
     // Check that the breakpoint select is present
     const breakpointSelector = page.locator(
