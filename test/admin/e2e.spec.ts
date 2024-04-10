@@ -15,6 +15,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   openDocControls,
+  openDocDrawer,
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -1052,8 +1053,8 @@ describe('admin', () => {
         await createPost()
         await page.goto(postsUrl.create)
 
-        // Open the drawer
-        await page.locator('.rich-text .list-drawer__toggler').click()
+        await openDocDrawer(page, '.rich-text .list-drawer__toggler')
+
         const listDrawer = page.locator('[id^=list-drawer_1_]')
         await expect(listDrawer).toBeVisible()
 
@@ -1092,7 +1093,7 @@ describe('admin', () => {
         await page.goto(postsUrl.create)
 
         // Open the drawer
-        await page.locator('.rich-text .list-drawer__toggler').click()
+        await openDocDrawer(page, '.rich-text .list-drawer__toggler')
         const listDrawer = page.locator('[id^=list-drawer_1_]')
         await expect(listDrawer).toBeVisible()
 

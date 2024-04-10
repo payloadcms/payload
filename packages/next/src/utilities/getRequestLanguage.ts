@@ -19,7 +19,9 @@ export const getRequestLanguage = ({
 }: GetRequestLanguageArgs): AcceptedLanguages => {
   const langCookie = cookies.get(`${config.cookiePrefix || 'payload'}-lng`)
   const languageFromCookie = typeof langCookie === 'string' ? langCookie : langCookie?.value
-  const languageFromHeader = extractHeaderLanguage(headers.get('Accept-Language'))
+  const languageFromHeader = headers.get('Accept-Language')
+    ? extractHeaderLanguage(headers.get('Accept-Language'))
+    : undefined
   const fallbackLang = config?.i18n?.fallbackLanguage || defaultLanguage
 
   const supportedLanguageKeys = Object.keys(config?.i18n?.supportedLanguages || {})
