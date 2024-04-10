@@ -44,7 +44,7 @@ export const blockValidationHOC = (
 
     for (const field of block.fields) {
       if ('validate' in field && typeof field.validate === 'function' && field.validate) {
-        const fieldValue = 'name' in field ? node.fields[field.name] : null
+        const fieldValue = 'name' in field ? node?.fields?.[field.name] : null
 
         const passesCondition = field.admin?.condition
           ? Boolean(

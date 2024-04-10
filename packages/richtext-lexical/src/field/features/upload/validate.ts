@@ -54,7 +54,7 @@ export const uploadValidation = (
 
     for (const field of sanitizedFields) {
       if ('validate' in field && typeof field.validate === 'function' && field.validate) {
-        const fieldValue = 'name' in field ? node.fields?.[field.name] : null
+        const fieldValue = 'name' in field ? node?.fields?.[field.name] : null
 
         const validationResult = await field.validate(fieldValue, {
           ...field,

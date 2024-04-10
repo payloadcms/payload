@@ -49,7 +49,7 @@ export const linkValidation = (
         if ('name' in field && field.name === 'text') {
           continue // Skip text field validation, as the text field value is not included in the node data. It should only be validated within the link drawer on the frontend.
         }
-        const fieldValue = 'name' in field ? node.fields[field.name] : null
+        const fieldValue = 'name' in field ? node?.fields?.[field.name] : null
 
         const passesCondition = field.admin?.condition
           ? Boolean(
