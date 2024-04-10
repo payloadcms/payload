@@ -52,6 +52,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     sanitizeFields({
       config: payloadConfig,
       fields: unsanitizedFormSchema,
+      requireFieldLevelRichTextEditor: true,
       validRelationships,
     }),
     blockFieldWrapperName,
