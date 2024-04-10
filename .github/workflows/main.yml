@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
   push:
-    branches: ['main', 'alpha']
+    branches: ['main', 'beta']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
