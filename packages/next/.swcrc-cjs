@@ -6,10 +6,10 @@
     "parser": {
       "syntax": "typescript",
       "tsx": true,
-      "dts": true,
-    },
+      "dts": true
+    }
   },
   "module": {
-    "type": "commonjs",
-  },
+    "type": "commonjs"
+  }
 }
