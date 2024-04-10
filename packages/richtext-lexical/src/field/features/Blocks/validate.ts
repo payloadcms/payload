@@ -27,6 +27,7 @@ export const blockValidationHOC = (
       block.fields = sanitizeFields({
         config: payloadConfig,
         fields: block.fields,
+        requireFieldLevelRichTextEditor: true,
         validRelationships,
       })
     })
