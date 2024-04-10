@@ -67,40 +67,47 @@ const CollapsibleField: React.FC<CollapsibleFieldProps> = (props) => {
     async (newCollapsedState: boolean) => {
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
-      void setPreference(preferencesKey, {
-        ...existingPreferences,
-        ...(path
-          ? {
-              fields: {
-                ...(existingPreferences?.fields || {}),
-                [path]: {
-                  ...existingPreferences?.fields?.[path],
-                  collapsed: newCollapsedState,
+      if (preferencesKey) {
+        void setPreference(preferencesKey, {
+          ...existingPreferences,
+          ...(path
+            ? {
+                fields: {
+                  ...(existingPreferences?.fields || {}),
+                  [path]: {
+                    ...existingPreferences?.fields?.[path],
+                    collapsed: newCollapsedState,
+                  },
                 },
-              },
-            }
-          : {
-              fields: {
-                ...(existingPreferences?.fields || {}),
-                [fieldPreferencesKey]: {
-                  ...existingPreferences?.fields?.[fieldPreferencesKey],
-                  collapsed: newCollapsedState,
+              }
+            : {
+                fields: {
+                  ...(existingPreferences?.fields || {}),
+                  [fieldPreferencesKey]: {
+                    ...existingPreferences?.fields?.[fieldPreferencesKey],
+                    collapsed: newCollapsedState,
+                  },
                 },
-              },
-            }),
-      })
+              }),
+        })
+      }
     },
     [preferencesKey, fieldPreferencesKey, getPreference, setPreference, path],
   )
 
   useEffect(() => {
     const fetchInitialState = async () => {
-      const preferences = await getPreference(preferencesKey)
-      if (preferences) {
-        const initCollapsedFromPref = path
+      if (preferencesKey) {
+        const preferences = await getPreference(preferencesKey)
+        const specificPreference = path
           ? preferences?.fields?.[path]?.collapsed
           : preferences?.fields?.[fieldPreferencesKey]?.collapsed
-        setCollapsedOnMount(Boolean(initCollapsedFromPref))
+
+        if (specificPreference !== undefined) {
+          setCollapsedOnMount(Boolean(specificPreference))
+        } else {
+          setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
+        }
       } else {
         setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
       }
