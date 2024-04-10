@@ -191,6 +191,8 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       status: httpStatus.OK,
     })
   } catch (err) {
+    req.payload.logger.error({ err, msg: `There was an error building form state` })
+
     return Response.json(
       {
         message: 'There was an error building form state',
