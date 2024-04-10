@@ -12,6 +12,7 @@ import {
   ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
 } from '../../../helpers.js'
@@ -70,8 +71,8 @@ describe('relationship', () => {
   test('should create inline relationship within field with many relations', async () => {
     await page.goto(url.create)
 
-    const button = page.locator('#relationship-add-new .relationship-add-new__add-button')
-    await button.click()
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
@@ -97,7 +98,7 @@ describe('relationship', () => {
     await page.goto(url.create)
     await page.waitForURL(`**/${url.create}`)
     // Open first modal
-    await page.locator('#relationToSelf-add-new .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#relationToSelf-add-new .relationship-add-new__add-button')
 
     // Fill first modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
@@ -108,9 +109,10 @@ describe('relationship', () => {
       .click()
 
     // Open second modal
-    await page
-      .locator('[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button')
-      .click()
+    await openDocDrawer(
+      page,
+      '[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button',
+    )
 
     // Fill second modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click()
@@ -230,7 +232,7 @@ describe('relationship', () => {
     await page.goto(url.create)
     await page.waitForURL(`**/${url.create}`)
     // First fill out the relationship field, as it's required
-    await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
@@ -245,7 +247,7 @@ describe('relationship', () => {
 
     // Create a new doc for the `relationshipHasMany` field
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
-    await page.locator('#field-relationshipHasMany .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#field-relationshipHasMany .relationship-add-new__add-button')
     const value = 'Hello, world!'
     await page.locator('.drawer__content #field-text').fill(value)
 
@@ -294,7 +296,7 @@ describe('relationship', () => {
   test('should save using hotkey in edit document drawer', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page.locator('#field-relationship .value-container').click()
     // Select "Seeded text document" relationship
     await page.getByText('Seeded text document', { exact: true }).click()
@@ -334,7 +336,7 @@ describe('relationship', () => {
   test.skip('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
@@ -345,7 +347,7 @@ describe('relationship', () => {
   test('should fail min rows validation when rows are present', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 

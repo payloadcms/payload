@@ -131,7 +131,7 @@ export async function openNav(page: Page): Promise<void> {
 }
 
 export async function openDocDrawer(page: Page, selector: string): Promise<void> {
-  await page.locator(selector).click()
+  await page.locator(selector).click({ delay: 100 })
   await wait(300) // wait for drawer form state to initialize
 }
 
