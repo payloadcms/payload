@@ -5,8 +5,6 @@ import DataLoader from 'dataloader'
 import type { PayloadRequest } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 
-import { fieldAffectsData } from '../fields/config/types.js'
-import { getIDType } from '../utilities/getIDType.js'
 import { isValidID } from '../utilities/isValidID.js'
 
 // Payload uses `dataloader` to solve the classic GraphQL N+1 problem.
@@ -71,15 +69,13 @@ const batchAndLoadDocs =
 
       const batchKey = JSON.stringify(batchKeyArray)
 
-      const idField = payload.collections?.[collection].config.fields.find(
-        (field) => fieldAffectsData(field) && field.name === 'id',
-      )
+      const idType = payload.collections?.[collection].customIDType || payload.db.defaultIDType
 
       let sanitizedID: number | string = id
 
-      if (idField?.type === 'number') sanitizedID = parseFloat(id)
+      if (idType === 'number') sanitizedID = parseFloat(id)
 
-      if (isValidID(sanitizedID, getIDType(idField, payload?.db?.defaultIDType))) {
+      if (isValidID(sanitizedID, idType)) {
         return {
           ...batches,
           [batchKey]: [...(batches[batchKey] || []), sanitizedID],

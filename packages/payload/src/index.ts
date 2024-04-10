@@ -52,7 +52,9 @@ import { validateSchema } from './config/validate.js'
 import buildEmail from './email/build.js'
 import { defaults as emailDefaults } from './email/defaults.js'
 import sendEmail from './email/sendEmail.js'
+import { fieldAffectsData } from './exports/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
+import flattenFields from './utilities/flattenTopLevelFields.js'
 import Logger from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 
@@ -340,8 +342,17 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     this.config.collections.forEach((collection) => {
+      const customID = flattenFields(collection.fields).find(
+        (field) => fieldAffectsData(field) && field.name === 'id',
+      )
+
+      let customIDType
+
+      if (customID?.type === 'number' || customID?.type === 'text') customIDType = customID.type
+
       this.collections[collection.slug] = {
         config: collection,
+        customIDType,
       }
     })
 
