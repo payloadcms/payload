@@ -291,7 +291,11 @@ export type EditViewConfig =
  */
 export type EditView = EditViewComponent | EditViewConfig
 
-export type ServerProps = { payload?: Payload }
+export type ServerProps = {
+  payload: Payload
+}
+
+export const serverProps: (keyof ServerProps)[] = ['payload']
 
 export type ComponentWithServerProps<T extends any = any> = React.ComponentType<T & ServerProps>
 

@@ -17,7 +17,12 @@ import type {
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import { isPlainFunction, isReactComponent } from 'payload/utilities'
+import {
+  isPlainFunction,
+  isReactClientComponent,
+  isReactComponent,
+  isReactServerComponent,
+} from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
