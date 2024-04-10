@@ -14,6 +14,7 @@ import type {
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
+  LabelFunction,
   LivePreviewConfig,
 } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
@@ -360,8 +361,8 @@ export type CollectionConfig = {
    * Label configuration
    */
   labels?: {
-    plural?: Record<string, string> | string
-    singular?: Record<string, string> | string
+    plural?: LabelFunction | Record<string, string> | string
+    singular?: LabelFunction | Record<string, string> | string
   }
   slug: string
   /**

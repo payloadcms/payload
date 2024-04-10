@@ -47,19 +47,30 @@ export async function convertLexicalNodesToHTML({
       const converterForNode = converters.find((converter) =>
         converter.nodeTypes.includes(node.type),
       )
-      if (!converterForNode) {
-        if (unknownConverter) {
-          return unknownConverter.converter({ childIndex: i, converters, node, parent, payload })
+      try {
+        if (!converterForNode) {
+          if (unknownConverter) {
+            return await unknownConverter.converter({
+              childIndex: i,
+              converters,
+              node,
+              parent,
+              payload,
+            })
+          }
+          return '<span>unknown node</span>'
         }
-        return '<span>unknown node</span>'
+        return await converterForNode.converter({
+          childIndex: i,
+          converters,
+          node,
+          parent,
+          payload,
+        })
+      } catch (error) {
+        console.error('Error converting lexical node to HTML:', error, 'node:', node)
+        return ''
       }
-      return converterForNode.converter({
-        childIndex: i,
-        converters,
-        node,
-        parent,
-        payload,
-      })
     }),
   )
 

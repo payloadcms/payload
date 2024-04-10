@@ -1,3 +1,4 @@
+import type { I18n } from '@payloadcms/translations'
 import type { ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
 import type {
   AdminViewProps,
@@ -22,12 +23,14 @@ export const mapCollections = ({
   DefaultListView,
   collections,
   config,
+  i18n,
   readOnly: readOnlyOverride,
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
   collections: SanitizedCollectionConfig[]
   config: SanitizedConfig
+  i18n: I18n
   readOnly?: boolean
 }): {
   [key: SanitizedCollectionConfig['slug']]: CollectionComponentMap
@@ -152,6 +155,7 @@ export const mapCollections = ({
       fieldMap: mapFields({
         config,
         fieldSchema: fields,
+        i18n,
         readOnly: readOnlyOverride,
       }),
       isPreviewEnabled: !!collectionConfig?.admin?.preview,

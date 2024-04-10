@@ -49,7 +49,7 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
   const isGlobal = segmentOne === 'globals'
   const isCollection = segmentOne === 'collections'
 
-  const i18n = getNextI18n({
+  const i18n = await getNextI18n({
     config,
   })
 

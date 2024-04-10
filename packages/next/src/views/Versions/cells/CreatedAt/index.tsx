@@ -38,7 +38,8 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
 
   return (
     <Link href={to}>
-      {cellData && formatDate(cellData as Date | number | string, dateFormat, i18n.language)}
+      {cellData &&
+        formatDate({ date: cellData as Date | number | string, i18n, pattern: dateFormat })}
     </Link>
   )
 }

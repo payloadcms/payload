@@ -1,22 +1,24 @@
+import type { I18n } from '@payloadcms/translations'
+
 import { format, formatDistanceToNow } from 'date-fns'
 
-import { getDateLocale } from './getDateLocale.js'
-
-export const formatDate = (
-  date: Date | number | string | undefined,
-  pattern: string,
-  locale?: string,
-): string => {
-  const theDate = new Date(date)
-  const { localeData } = getDateLocale(locale)
-  return format(theDate, pattern, { locale: localeData })
+type FormatDateArgs = {
+  date: Date | number | string | undefined
+  i18n: I18n
+  pattern: string
 }
 
-export const formatTimeToNow = (
-  date: Date | number | string | undefined,
-  locale?: string,
-): string => {
+export const formatDate = ({ date, i18n, pattern }: FormatDateArgs): string => {
   const theDate = new Date(date)
-  const { localeData } = getDateLocale(locale)
-  return formatDistanceToNow(theDate, { locale: localeData })
+  return format(theDate, pattern, { locale: i18n.dateFNS })
+}
+
+type FormatTimeToNowArgs = {
+  date: Date | number | string | undefined
+  i18n: I18n
+}
+
+export const formatTimeToNow = ({ date, i18n }: FormatTimeToNowArgs): string => {
+  const theDate = new Date(date)
+  return formatDistanceToNow(theDate, { locale: i18n.dateFNS })
 }

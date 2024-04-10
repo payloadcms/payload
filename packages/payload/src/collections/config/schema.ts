@@ -140,10 +140,10 @@ const collectionSchema = joi.object().keys({
   labels: joi.object({
     plural: joi
       .alternatives()
-      .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
+      .try(joi.func(), joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
     singular: joi
       .alternatives()
-      .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
+      .try(joi.func(), joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
   }),
   timestamps: joi.boolean(),
   typescript: joi.object().keys({

@@ -85,7 +85,9 @@ export const SetStepNav: React.FC<{
           url: `${adminRoute}/collections/${collectionSlug}/${id}/versions`,
         },
         {
-          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
+          label: doc?.createdAt
+            ? formatDate({ date: doc.createdAt, i18n, pattern: dateFormat })
+            : '',
         },
       ]
     }
@@ -101,7 +103,9 @@ export const SetStepNav: React.FC<{
           url: `${adminRoute}/globals/${globalConfig.slug}/versions`,
         },
         {
-          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
+          label: doc?.createdAt
+            ? formatDate({ date: doc.createdAt, i18n, pattern: dateFormat })
+            : '',
         },
       ]
     }

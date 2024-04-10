@@ -16,6 +16,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
   const {
     req,
     req: {
+      i18n,
       payload: {
         config,
         config: {
@@ -51,6 +52,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
   const createFirstUserFieldMap = mapFields({
     config,
     fieldSchema: fields,
+    i18n,
     parentPath: userSlug,
   })
 

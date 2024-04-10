@@ -222,6 +222,7 @@ describe('Live Preview', () => {
 
   test('resizes iframe to specified breakpoint', async () => {
     await page.goto(url.create)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
     await page.locator('#field-title').fill('Title 4')
     await page.locator('#field-slug').fill('slug-4')
 

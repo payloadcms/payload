@@ -14,19 +14,19 @@ export const PostsCollection: CollectionConfig = {
       name: 'text',
       type: 'text',
     },
-    {
-      type: 'row',
-      fields: [],
-    },
-    {
-      name: 'associatedMedia',
-      type: 'upload',
-      access: {
-        create: () => true,
-        update: () => false,
-      },
-      relationTo: mediaSlug,
-    },
+    // {
+    //   type: 'row',
+    //   fields: [],
+    // },
+    // {
+    //   name: 'associatedMedia',
+    //   type: 'upload',
+    //   access: {
+    //     create: () => true,
+    //     update: () => false,
+    //   },
+    //   relationTo: mediaSlug,
+    // },
   ],
   versions: {
     drafts: true,

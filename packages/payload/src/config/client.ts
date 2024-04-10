@@ -1,3 +1,5 @@
+import type { TFunction } from '@payloadcms/translations'
+
 import type { ClientCollectionConfig } from '../collections/config/client.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { ClientGlobalConfig } from '../globals/config/client.js'
@@ -41,10 +43,13 @@ export type ClientConfig = Omit<
   globals: ClientGlobalConfig[]
 }
 
-export const createClientConfig = async (
-  configPromise: Promise<SanitizedConfig> | SanitizedConfig,
-): Promise<ClientConfig> => {
-  const config = await configPromise
+export const createClientConfig = async ({
+  config,
+  t,
+}: {
+  config: SanitizedConfig
+  t: TFunction
+}): Promise<ClientConfig> => {
   const clientConfig: ClientConfig = { ...config }
 
   const serverOnlyConfigProperties: Partial<ServerOnlyRootProperties>[] = [
@@ -95,11 +100,15 @@ export const createClientConfig = async (
     }
   }
 
-  clientConfig.collections = createClientCollectionConfigs(
-    clientConfig.collections as SanitizedCollectionConfig[],
-  )
+  clientConfig.collections = createClientCollectionConfigs({
+    collections: clientConfig.collections as SanitizedCollectionConfig[],
+    t,
+  })
 
-  clientConfig.globals = createClientGlobalConfigs(clientConfig.globals as SanitizedGlobalConfig[])
+  clientConfig.globals = createClientGlobalConfigs({
+    globals: clientConfig.globals as SanitizedGlobalConfig[],
+    t,
+  })
 
   return clientConfig
 }

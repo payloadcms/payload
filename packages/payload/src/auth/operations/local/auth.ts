@@ -10,6 +10,6 @@ export const auth = async (payload: Payload, options: AuthArgs): Promise<AuthRes
 
   return await authOperation({
     headers,
-    req: createLocalReq({ req: options.req as PayloadRequest }, payload),
+    req: await createLocalReq({ req: options.req as PayloadRequest }, payload),
   })
 }

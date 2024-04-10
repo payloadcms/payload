@@ -2,7 +2,6 @@ export { getDataLoader } from '../collections/dataloader.js'
 export { default as getDefaultValue } from '../fields/getDefaultValue.js'
 export { promise as afterReadPromise } from '../fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from '../fields/hooks/afterRead/traverseFields.js'
-export { extractTranslations } from '../translations/extractTranslations.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 

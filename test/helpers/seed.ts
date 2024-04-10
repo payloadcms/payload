@@ -67,10 +67,10 @@ export async function seedDB({
     /**
      * Restore uploads dir if it exists
      */
-    if (uploadsDir && fs.existsSync(uploadsDirCache.path)) {
+    if (uploadsDir && fs.existsSync(uploadsDirCache[snapshotKey])) {
       // move all files from inside uploadsDirCacheFolder to uploadsDir
       await fs.promises
-        .readdir(uploadsDirCache.path, { withFileTypes: true })
+        .readdir(uploadsDirCache[snapshotKey], { withFileTypes: true })
         .then(async (files) => {
           for (const file of files) {
             if (file.isDirectory()) {
@@ -78,12 +78,12 @@ export async function seedDB({
                 recursive: true,
               })
               await fs.promises.copyFile(
-                path.join(uploadsDirCache.path, file.name),
+                path.join(uploadsDirCache[snapshotKey], file.name),
                 path.join(uploadsDir, file.name),
               )
             } else {
               await fs.promises.copyFile(
-                path.join(uploadsDirCache.path, file.name),
+                path.join(uploadsDirCache[snapshotKey], file.name),
                 path.join(uploadsDir, file.name),
               )
             }
@@ -106,7 +106,6 @@ export async function seedDB({
   if (isMongoose(_payload)) {
     await Promise.all([
       ...collectionSlugs.map(async (collectionSlug) => {
-        // @ts-expect-error TODO: Type this better
         await _payload.db.collections[collectionSlug].createIndexes()
       }),
     ])
@@ -134,33 +133,37 @@ export async function seedDB({
    * Cache uploads dir to a cache folder if uploadsDir exists
    */
   if (!alwaysSeed && uploadsDir && fs.existsSync(uploadsDir)) {
-    if (!uploadsDirCache.path) {
+    if (!uploadsDirCache[snapshotKey]) {
       // Define new cache folder path to the OS temp directory (well a random folder inside it)
-      uploadsDirCache.path = path.join(os.tmpdir(), `payload-e2e-tests-uploads-cache`)
+      uploadsDirCache[snapshotKey] = path.join(
+        os.tmpdir(),
+        `${snapshotKey}`,
+        `payload-e2e-tests-uploads-cache`,
+      )
     }
 
     // delete the cache folder if it exists
-    if (fs.existsSync(uploadsDirCache.path)) {
-      await fs.promises.rm(uploadsDirCache.path, { recursive: true })
+    if (fs.existsSync(uploadsDirCache[snapshotKey])) {
+      await fs.promises.rm(uploadsDirCache[snapshotKey], { recursive: true })
     }
-    await fs.promises.mkdir(uploadsDirCache.path, { recursive: true })
+    await fs.promises.mkdir(uploadsDirCache[snapshotKey], { recursive: true })
     // recursively move all files and directories from uploadsDir to uploadsDirCacheFolder
     await fs.promises
       .readdir(uploadsDir, { withFileTypes: true })
       .then(async (files) => {
         for (const file of files) {
           if (file.isDirectory()) {
-            await fs.promises.mkdir(path.join(uploadsDirCache.path, file.name), {
+            await fs.promises.mkdir(path.join(uploadsDirCache[snapshotKey], file.name), {
               recursive: true,
             })
             await fs.promises.copyFile(
               path.join(uploadsDir, file.name),
-              path.join(uploadsDirCache.path, file.name),
+              path.join(uploadsDirCache[snapshotKey], file.name),
             )
           } else {
             await fs.promises.copyFile(
               path.join(uploadsDir, file.name),
-              path.join(uploadsDirCache.path, file.name),
+              path.join(uploadsDirCache[snapshotKey], file.name),
             )
           }
         }

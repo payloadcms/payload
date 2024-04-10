@@ -8,7 +8,7 @@ import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 
 export const getGenerateSchemaMap =
   (args: { resolvedFeatureMap: ResolvedServerFeatureMap }): RichTextAdapter['generateSchemaMap'] =>
-  ({ config, schemaMap, schemaPath }) => {
+  ({ config, i18n, schemaMap, schemaPath }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
 
     for (const [featureKey, resolvedFeature] of args.resolvedFeatureMap.entries()) {
@@ -20,6 +20,7 @@ export const getGenerateSchemaMap =
       }
       const schemas = resolvedFeature.generateSchemaMap({
         config,
+        i18n,
         props: resolvedFeature.serverFeatureProps,
         schemaMap,
         schemaPath,

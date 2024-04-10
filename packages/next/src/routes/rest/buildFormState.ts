@@ -1,11 +1,5 @@
 import type { BuildFormStateArgs } from '@payloadcms/ui/forms/buildStateFromSchema'
-import type {
-  DocumentPreferences,
-  Field,
-  PayloadRequest,
-  SanitizedConfig,
-  TypeWithID,
-} from 'payload/types'
+import type { DocumentPreferences, Field, PayloadRequest, TypeWithID } from 'payload/types'
 
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
@@ -22,12 +16,12 @@ if (!cached) {
   cached = global._payload_fieldSchemaMap = null
 }
 
-export const getFieldSchemaMap = (config: SanitizedConfig): FieldSchemaMap => {
+export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
   if (cached && process.env.NODE_ENV !== 'development') {
     return cached
   }
 
-  cached = buildFieldSchemaMap(config)
+  cached = buildFieldSchemaMap(req)
 
   return cached
 }
@@ -65,7 +59,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       })
     }
 
-    const fieldSchemaMap = getFieldSchemaMap(req.payload.config)
+    const fieldSchemaMap = getFieldSchemaMap(req)
 
     const id = collectionSlug ? reqData.id : undefined
     const schemaPathSegments = schemaPath.split('.')

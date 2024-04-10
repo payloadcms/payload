@@ -37,7 +37,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/_community/config.ts"
+        "./test/fields/config.ts"
       ],
       "@payloadcms/live-preview": [
         "./packages/live-preview/src"
@@ -82,7 +82,7 @@
         "./packages/ui/src/scss/app.scss"
       ],
       "@payloadcms/next/*": [
-        "./packages/next/src/*"
+        "./packages/next/src/exports/*.ts"
       ],
       "@payloadcms/next": [
         "./packages/next/src/exports/*"

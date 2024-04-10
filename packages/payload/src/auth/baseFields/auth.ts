@@ -1,9 +1,6 @@
 import type { Field } from '../../fields/config/types.js'
 
 import { email } from '../../fields/validations.js'
-import { extractTranslations } from '../../translations/extractTranslations.js'
-
-const labels = extractTranslations(['general:email'])
 
 const baseAuthFields: Field[] = [
   {
@@ -14,7 +11,7 @@ const baseAuthFields: Field[] = [
         Field: () => null,
       },
     },
-    label: labels['general:email'],
+    label: ({ t }) => t('general:email'),
     required: true,
     unique: true,
     validate: email,

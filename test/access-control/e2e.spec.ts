@@ -100,7 +100,7 @@ describe('access control', () => {
 
     beforeAll(async () => {
       existingDoc = await payload.create({
-        collection: readOnlySlug,
+        collection: restrictedSlug,
         data: {
           name: 'name',
         },
@@ -135,7 +135,7 @@ describe('access control', () => {
 
     test('should not have access to existing doc', async () => {
       await page.goto(restrictedUrl.edit(existingDoc.id))
-      await expect(page.locator('.unauthorized')).toBeVisible()
+      await expect(page.locator('.not-found')).toBeVisible()
     })
   })
 
