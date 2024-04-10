@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
 import { json } from '../../../../../fields/validations'
 import { CodeEditor } from '../../../elements/CodeEditor'
+import { useDocumentInfo } from '../../../utilities/DocumentInfo'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
@@ -11,7 +12,6 @@ import useField from '../../useField'
 import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
-import { useJSONSchemaContext } from './provider'
 
 const baseClass = 'json-field'
 
@@ -42,13 +42,7 @@ const JSONField: React.FC<Props> = (props) => {
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
   const [hasLoadedValue, setHasLoadedValue] = useState(false)
-  const [schemas, setSchemas] = useState([])
-  const [monacoRef, setMonacoRef] = useState([])
-  const WIP = useJSONSchemaContext()
-
-  // const {schemas, setSchemas} = useJSONSchemaContext() // TODO: this is what I want
-
-  console.log('TODO 🔥: context', WIP)
+  const { id } = useDocumentInfo()
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -63,35 +57,63 @@ const JSONField: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
-  useEffect(() => {
-    monacoRef?.languages?.json?.jsonDefaults.setDiagnosticsOptions({
-      schemas, // TODO 🔥: should total 2 schemas
-      validate: true,
-    })
-  }, [schemas])
-
   function handleEditorDidMount(editor, monaco) {
-    // monaco.editor.getModels().forEach((mdl) => mdl.dispose()) // remove all previous models
-    const modelUri = monaco.Uri.parse(
-      `payload://json/schema/${Math.ceil(Math.random() * 99999)}.json`, // TODO: this id should be unique but follow a pattern
-    )
-    const model = monaco.editor.createModel(stringValue, 'json', modelUri)
-    setMonacoRef(monaco)
+    const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
+    const schemas = []
 
-    // TODO 🔥: schema needs to be shared between JSON fields
-    const thisSchema = schema.map((initialSchema) =>
+    const fieldId = `field-${path?.replace(/\./g, '__')}`
+    const jsonUri = `payload://json/schema/${id}/${fieldId}`
+    const modelUri = monaco.Uri.parse(jsonUri)
+
+    const initialModelValue = JSON.stringify(value, null, 2)
+
+    // TODO 🔥: add conditional -- CREATE model only if it doesn't exist otherwise GET existing model
+    const model = monaco.editor.createModel(initialModelValue, 'json', modelUri)
+    // let model = {}
+    // let hasModel = false
+    // const models = monaco.editor.getModels().forEach((existingModel) => {
+    //   if (existingModel.uri.toString() === jsonUri) {
+    //     model = existingModel
+    //     hasModel = true
+    //   } else {
+    //     model = monaco.editor.createModel(initialModelValue, 'json', modelUri)
+    //   }
+    // })
+    //
+    // if (hasModel) return
+    //
+    // console.log(models)
+    // console.log('🔥:check how many models', models.length)
+
+    const monacoFormattedSchemas = schema.map((initialSchema) =>
       Object.assign(
         {
-          fileMatch: [modelUri.toString()], //fileMatch, // associate with our model
+          fileMatch: [modelUri.toString()],
           schema: { ...initialSchema },
           uri: modelUri.toString(),
         },
         {},
       ),
     )
-    setSchemas((prev) => [...prev, ...thisSchema])
 
-    editor.setModel(model) // add updated model
+    monacoFormattedSchemas.forEach((formattedSchema) => {
+      if (!existingSchemas.map(({ uri }) => uri).includes(jsonUri)) {
+        schemas.push(formattedSchema)
+      }
+    })
+
+    existingSchemas.forEach((existingSchema) => {
+      if (!schemas.map(({ uri }) => uri).includes(existingSchema.uri)) {
+        schemas.push(existingSchema)
+      }
+    })
+
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      schemas,
+      validate: true,
+    })
+
+    editor.setModel(model)
   }
 
   const handleChange = useCallback(
