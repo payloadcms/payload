@@ -1,10 +1,16 @@
 import type { I18n } from '@payloadcms/translations'
-import type { AdminViewProps, EditViewProps, Payload, SanitizedConfig } from 'payload/types'
+import type {
+  AdminViewProps,
+  EditViewProps,
+  Payload,
+  SanitizedConfig,
+  WithServerSideProps as WithPayloadType,
+} from 'payload/types'
 
 import { isReactServerComponent } from 'packages/payload/utilities.js'
 import React from 'react'
 
-import type { ComponentMap, WithServerSideProps as WithPayloadType } from './types.js'
+import type { ComponentMap } from './types.js'
 
 import { mapCollections } from './collections.js'
 import { mapGlobals } from './globals.js'

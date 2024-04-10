@@ -5,13 +5,14 @@ import type {
   EntityDescriptionFunction,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
 import { ViewDescription, type ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
 import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React from 'react'
 
-import type { GlobalComponentMap, WithServerSideProps } from './types.js'
+import type { GlobalComponentMap } from './types.js'
 
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
@@ -25,7 +26,7 @@ export const mapGlobals = ({
   readOnly: readOnlyOverride,
 }: {
   DefaultEditView: React.FC<EditViewProps>
-  WithServerSideProps: WithServerSideProps
+  WithServerSideProps: WithServerSidePropsType
   config: SanitizedConfig
   globals: SanitizedGlobalConfig[]
   i18n: I18n

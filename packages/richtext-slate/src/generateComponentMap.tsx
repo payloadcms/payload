@@ -14,7 +14,7 @@ import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 
 export const getGenerateComponentMap =
   (args: AdapterArguments): RichTextAdapter['generateComponentMap'] =>
-  ({ config, i18n }) => {
+  ({ WithServerSideProps, config, i18n }) => {
     const componentMap = new Map()
 
     const validRelationships = config.collections.map((c) => c.slug) || []
@@ -73,6 +73,7 @@ export const getGenerateComponentMap =
             })
 
             const mappedFields = mapFields({
+              WithServerSideProps,
               config,
               fieldSchema: linkFields,
               i18n,
@@ -104,6 +105,7 @@ export const getGenerateComponentMap =
                 })
 
                 const mappedFields = mapFields({
+                  WithServerSideProps,
                   config,
                   fieldSchema: uploadFields,
                   i18n,

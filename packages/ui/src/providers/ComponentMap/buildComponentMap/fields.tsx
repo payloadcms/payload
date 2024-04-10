@@ -12,6 +12,7 @@ import type {
   Option,
   RowLabelComponent,
   SanitizedConfig,
+  WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
@@ -46,13 +47,12 @@ import type {
   MappedField,
   MappedTab,
   ReducedBlock,
-  WithServerSideProps as WithPayloadType,
 } from './types.js'
 
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
 
 export const mapFields = (args: {
-  WithServerSideProps: WithPayloadType
+  WithServerSideProps: WithServerSidePropsType
   config: SanitizedConfig
   /**
    * If mapFields is used outside of collections, you might not want it to add an id field
@@ -566,7 +566,12 @@ export const mapFields = (args: {
             const RichTextCellComponent = field.editor.CellComponent
 
             if (typeof field.editor.generateComponentMap === 'function') {
-              const result = field.editor.generateComponentMap({ config, i18n, schemaPath: path })
+              const result = field.editor.generateComponentMap({
+                WithServerSideProps,
+                config,
+                i18n,
+                schemaPath: path,
+              })
               richTextField.richTextComponentMap = result
               cellComponentProps.richTextComponentMap = result
             }

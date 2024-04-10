@@ -7,13 +7,14 @@ import type {
   EntityDescriptionFunction,
   SanitizedCollectionConfig,
   SanitizedConfig,
+  WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
 import { ViewDescription } from '@payloadcms/ui/elements/ViewDescription'
 import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React from 'react'
 
-import type { CollectionComponentMap, WithServerSideProps } from './types.js'
+import type { CollectionComponentMap } from './types.js'
 
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
@@ -29,7 +30,7 @@ export const mapCollections = ({
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
-  WithServerSideProps: WithServerSideProps
+  WithServerSideProps: WithServerSidePropsType
   collections: SanitizedCollectionConfig[]
   config: SanitizedConfig
   i18n: I18n
