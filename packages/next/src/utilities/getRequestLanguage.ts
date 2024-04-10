@@ -2,7 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
 import type { SanitizedConfig } from 'payload/config'
 
-import { matchLanguage } from '@payloadcms/translations'
+import { extractHeaderLanguage } from '@payloadcms/translations'
 
 type GetRequestLanguageArgs = {
   config: SanitizedConfig
@@ -17,14 +17,20 @@ export const getRequestLanguage = ({
   defaultLanguage = 'en',
   headers,
 }: GetRequestLanguageArgs): AcceptedLanguages => {
-  const acceptLanguage = headers.get('Accept-Language')
-  const cookieLanguage = cookies.get(`${config.cookiePrefix || 'payload'}-lng`)
+  const langCookie = cookies.get(`${config.cookiePrefix || 'payload'}-lng`)
+  const languageFromCookie = typeof langCookie === 'string' ? langCookie : langCookie?.value
+  const languageFromHeader = extractHeaderLanguage(headers.get('Accept-Language'))
+  const fallbackLang = config?.i18n?.fallbackLanguage || defaultLanguage
 
-  const reqLanguage =
-    (typeof cookieLanguage === 'string' ? cookieLanguage : cookieLanguage?.value) ||
-    acceptLanguage ||
-    config.i18n.fallbackLanguage ||
-    defaultLanguage
+  const supportedLanguageKeys = Object.keys(config?.i18n?.supportedLanguages || {})
 
-  return matchLanguage(reqLanguage) || defaultLanguage
+  if (languageFromCookie && supportedLanguageKeys.includes(languageFromCookie)) {
+    return languageFromCookie as AcceptedLanguages
+  }
+
+  if (languageFromHeader && supportedLanguageKeys.includes(languageFromHeader)) {
+    return languageFromHeader
+  }
+
+  return supportedLanguageKeys.includes(fallbackLang) ? (fallbackLang as AcceptedLanguages) : 'en'
 }
