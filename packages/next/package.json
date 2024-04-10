@@ -11,6 +11,7 @@
     "directory": "packages/next"
   },
   "scripts": {
+    "build:cjs": "swc ./src/withPayload.js -d ./dist/cjs --config-file .swcrc-cjs",
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:webpack && rm dist/prod/index.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
@@ -84,9 +85,9 @@
         "require": "./dist/prod/styles.css",
         "default": "./dist/prod/styles.css"
       },
-      ".": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.js"
+      "./withPayload": {
+        "import": "./dist/withPayload.js",
+        "require": "./dist/cjs/withPayload.js"
       },
       "./*": {
         "import": "./dist/exports/*.js",
