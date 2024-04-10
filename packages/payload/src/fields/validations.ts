@@ -494,7 +494,8 @@ export const relationship: Validate<
 
       if (requestedID === null) return false
 
-      const idType = payload.collections[collectionSlug]?.customIDType || payload.db.defaultIDType
+      const idType =
+        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
 
       return !isValidID(requestedID, idType)
     })
