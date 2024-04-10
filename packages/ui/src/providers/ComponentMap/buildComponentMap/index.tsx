@@ -4,14 +4,14 @@ import type {
   EditViewProps,
   Payload,
   SanitizedConfig,
-  WithServerSideProps as WithPayloadType,
+  WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
-import { isReactServerComponent } from 'packages/payload/utilities.js'
 import React from 'react'
 
 import type { ComponentMap } from './types.js'
 
+import { WithServerSideProps as WithServerSidePropsGeneric } from './WithServerSideProps.js'
 import { mapCollections } from './collections.js'
 import { mapGlobals } from './globals.js'
 
@@ -29,21 +29,8 @@ export const buildComponentMap = (args: {
 } => {
   const { DefaultEditView, DefaultListView, children, config, i18n, payload, readOnly } = args
 
-  const WithServerSideProps: WithPayloadType = ({ Component, ...rest }) => {
-    if (Component) {
-      const WithServerSideProps: React.FC<any> = (passedProps) => {
-        const propsWithPayload = {
-          ...passedProps,
-          ...(isReactServerComponent(Component) ? { payload } : {}),
-        }
-
-        return <Component {...propsWithPayload} />
-      }
-
-      return <WithServerSideProps {...rest} />
-    }
-
-    return null
+  const WithServerSideProps: WithServerSidePropsType = ({ Component, ...rest }) => {
+    return <WithServerSidePropsGeneric Component={Component} payload={payload} {...rest} />
   }
 
   const collections = mapCollections({
