@@ -4,6 +4,7 @@ import * as p from '@clack/prompts'
 import { parse, stringify } from 'comment-json'
 import execa from 'execa'
 import fs from 'fs'
+import fse from 'fs-extra'
 import globby from 'globby'
 import path from 'path'
 import { promisify } from 'util'
@@ -31,6 +32,8 @@ type InitNextArgs = Pick<CliArgs, '--debug'> & {
   useDistFiles?: boolean
 }
 
+type NextConfigType = 'cjs' | 'esm'
+
 type InitNextResult =
   | {
       isSrcDir: boolean
@@ -45,11 +48,22 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
 
   const nextAppDetails = args.nextAppDetails || (await getNextAppDetails(projectDir))
 
-  const { hasTopLevelLayout, isSrcDir, nextAppDir } =
-    nextAppDetails || (await getNextAppDetails(projectDir))
+  if (!nextAppDetails.nextAppDir) {
+    warning(`Could not find app directory in ${projectDir}, creating...`)
+    const createdAppDir = path.resolve(projectDir, nextAppDetails.isSrcDir ? 'src/app' : 'app')
+    fse.mkdirSync(createdAppDir, { recursive: true })
+    nextAppDetails.nextAppDir = createdAppDir
+  }
 
-  if (!nextAppDir) {
-    return { isSrcDir, reason: `Could not find app directory in ${projectDir}`, success: false }
+  const { hasTopLevelLayout, isSrcDir, nextAppDir, nextConfigType } = nextAppDetails
+
+  if (!nextConfigType) {
+    return {
+      isSrcDir,
+      nextAppDir,
+      reason: `Could not determine Next Config type in ${projectDir}. Possibly try renaming next.config.js to next.config.cjs or next.config.mjs.`,
+      success: false,
+    }
   }
 
   if (hasTopLevelLayout) {
@@ -69,6 +83,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
   const configurationResult = installAndConfigurePayload({
     ...args,
     nextAppDetails,
+    nextConfigType,
     useDistFiles: true, // Requires running 'pnpm pack-template-files' in cpa
   })
 
@@ -96,6 +111,13 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
 
 async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean) {
   const tsConfigPath = path.resolve(projectDir, 'tsconfig.json')
+
+  // Check if tsconfig.json exists
+  if (!fs.existsSync(tsConfigPath)) {
+    warning(`Could not find tsconfig.json to add @payload-config path.`)
+    return
+  }
+
   const userTsConfigContent = await readFile(tsConfigPath, {
     encoding: 'utf8',
   })
@@ -119,13 +141,18 @@ async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean)
 }
 
 function installAndConfigurePayload(
-  args: InitNextArgs & { nextAppDetails: NextAppDetails; useDistFiles?: boolean },
+  args: InitNextArgs & {
+    nextAppDetails: NextAppDetails
+    nextConfigType: NextConfigType
+    useDistFiles?: boolean
+  },
 ):
   | { payloadConfigPath: string; success: true }
   | { payloadConfigPath?: string; reason: string; success: false } {
   const {
     '--debug': debug,
     nextAppDetails: { isSrcDir, nextAppDir, nextConfigPath } = {},
+    nextConfigType,
     projectDir,
     useDistFiles,
   } = args
@@ -172,6 +199,7 @@ function installAndConfigurePayload(
   logDebug(`nextAppDir: ${nextAppDir}`)
   logDebug(`projectDir: ${projectDir}`)
   logDebug(`nextConfigPath: ${nextConfigPath}`)
+  logDebug(`payloadConfigPath: ${path.resolve(projectDir, 'payload.config.ts')}`)
 
   logDebug(
     `isSrcDir: ${isSrcDir}. source: ${templateSrcDir}. dest: ${path.dirname(nextConfigPath)}`,
@@ -181,7 +209,7 @@ function installAndConfigurePayload(
   copyRecursiveSync(templateSrcDir, path.dirname(nextConfigPath), debug)
 
   // Wrap next.config.js with withPayload
-  wrapNextConfig({ nextConfigPath })
+  wrapNextConfig({ nextConfigPath, nextConfigType })
 
   return {
     payloadConfigPath: path.resolve(nextAppDir, '../payload.config.ts'),
@@ -226,6 +254,7 @@ type NextAppDetails = {
   isSrcDir: boolean
   nextAppDir?: string
   nextConfigPath?: string
+  nextConfigType?: NextConfigType
 }
 
 export async function getNextAppDetails(projectDir: string): Promise<NextAppDetails> {
@@ -246,6 +275,7 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
     await globby(['**/app'], {
       absolute: true,
       cwd: projectDir,
+      ignore: ['**/node_modules/**'],
       onlyDirectories: true,
     })
   )?.[0]
@@ -254,9 +284,31 @@ export async function getNextAppDetails(projectDir: string): Promise<NextAppDeta
     nextAppDir = undefined
   }
 
+  const configType = await getProjectType(projectDir, nextConfigPath)
+
   const hasTopLevelLayout = nextAppDir
     ? fs.existsSync(path.resolve(nextAppDir, 'layout.tsx'))
     : false
 
-  return { hasTopLevelLayout, isSrcDir, nextAppDir, nextConfigPath }
+  return { hasTopLevelLayout, isSrcDir, nextAppDir, nextConfigPath, nextConfigType: configType }
+}
+
+async function getProjectType(projectDir: string, nextConfigPath: string): Promise<'cjs' | 'esm'> {
+  if (nextConfigPath.endsWith('.mjs')) {
+    return 'esm'
+  }
+  if (nextConfigPath.endsWith('.cjs')) {
+    return 'cjs'
+  }
+
+  const packageObj = await fse.readJson(path.resolve(projectDir, 'package.json'))
+  const packageJsonType = packageObj.type
+  if (packageJsonType === 'module') {
+    return 'esm'
+  }
+  if (packageJsonType === 'commonjs') {
+    return 'cjs'
+  }
+
+  return 'cjs'
 }
