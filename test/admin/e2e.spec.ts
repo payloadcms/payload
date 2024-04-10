@@ -432,6 +432,7 @@ describe('admin', () => {
       const postURL = postsUrl.edit(id)
       await page.goto(postURL)
       await page.waitForURL(postURL)
+      await wait(300)
       await page.locator('#field-title')?.fill('')
       await expect(page.locator('.doc-header__title.render-title:has-text("ID:")')).toBeVisible()
       await saveDocAndAssert(page)
