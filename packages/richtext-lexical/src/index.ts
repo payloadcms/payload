@@ -212,7 +212,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
 export { AlignFeature } from './field/features/align/feature.server.js'
 export { BlockQuoteFeature } from './field/features/blockquote/feature.server.js'
-export { BlocksFeature, type BlocksFeatureProps } from './field/features/blocks/feature.server.js'
+export {
+  BlocksFeature,
+  type BlocksFeatureProps,
+  type LexicalBlock,
+} from './field/features/blocks/feature.server.js'
 export {
   $createBlockNode,
   $isBlockNode,

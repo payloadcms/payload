@@ -12,12 +12,12 @@ import { BlockNode } from './nodes/BlocksNode.js'
 import { blockPopulationPromiseHOC } from './populationPromise.js'
 import { blockValidationHOC } from './validate.js'
 
+export type LexicalBlock = Omit<Block, 'fields'> & {
+  fields: FieldWithRichTextRequiredEditor[]
+}
+
 export type BlocksFeatureProps = {
-  blocks: Array<
-    Omit<Block, 'fields'> & {
-      fields: FieldWithRichTextRequiredEditor[]
-    }
-  >
+  blocks: LexicalBlock[]
 }
 
 export const BlocksFeature: FeatureProviderProviderServer<
