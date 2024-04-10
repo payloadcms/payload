@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { getNextI18n } from '../../utilities/getNextI18n.js'
+import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAccountMetadata } from '../Account/index.js'
 import { generateCreateFirstUserMetadata } from '../CreateFirstUser/index.js'
 import { generateDashboardMetadata } from '../Dashboard/index.js'
@@ -49,7 +49,7 @@ export const generatePageMetadata = async ({ config: configPromise, params }: Ar
   const isGlobal = segmentOne === 'globals'
   const isCollection = segmentOne === 'collections'
 
-  const i18n = await getNextI18n({
+  const i18n = await getNextRequestI18n({
     config,
   })
 

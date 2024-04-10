@@ -6,8 +6,8 @@ import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import React, { Fragment } from 'react'
 
+import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { initPage } from '../../utilities/initPage.js'
-import { getNextI18n } from '.././../utilities/getNextI18n.js'
 import { NotFoundClient } from './index.client.js'
 
 export const generatePageMetadata = async ({
@@ -19,7 +19,7 @@ export const generatePageMetadata = async ({
 }): Promise<Metadata> => {
   const config = await configPromise
 
-  const i18n = await getNextI18n({
+  const i18n = await getNextRequestI18n({
     config,
   })
 
