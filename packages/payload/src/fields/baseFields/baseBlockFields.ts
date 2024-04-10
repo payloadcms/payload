@@ -1,8 +1,8 @@
-import type { FieldWithRichTextRequiredEditor } from '../config/types.js'
+import type { Field } from '../config/types.js'
 
 import { baseIDField } from './baseIDField.js'
 
-export const baseBlockFields: FieldWithRichTextRequiredEditor[] = [
+export const baseBlockFields: Field[] = [
   baseIDField,
   {
     name: 'blockName',

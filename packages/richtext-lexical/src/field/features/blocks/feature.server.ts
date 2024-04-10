@@ -32,7 +32,8 @@ export const BlocksFeature: FeatureProviderProviderServer<
 
       return {
         ...blockCopy,
-        fields: blockCopy.fields.concat(baseBlockFields),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        fields: blockCopy.fields.concat(baseBlockFields as FieldWithRichTextRequiredEditor[]),
         labels: !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels,
       }
     })
