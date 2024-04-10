@@ -86,7 +86,7 @@ describe('Localization', () => {
 
       await fillValues({ description, title: spanishTitle })
       await saveDocAndAssert(page)
-      await changeLocale(page, defaultLocale, true)
+      await changeLocale(page, defaultLocale)
 
       // Expect english title
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -105,7 +105,7 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       // Change back to English
-      await changeLocale(page, defaultLocale, true)
+      await changeLocale(page, defaultLocale)
 
       // Localized field should not be populated
       await expect(page.locator('#field-title')).toBeEmpty()
@@ -133,7 +133,7 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       // Change back to English
-      await changeLocale(page, defaultLocale, true)
+      await changeLocale(page, defaultLocale)
 
       // Localized field should not be populated
       await expect(page.locator('#field-title')).toBeEmpty()
@@ -191,9 +191,9 @@ describe('Localization', () => {
 
     test('should duplicate localized checkbox correctly', async () => {
       await page.goto(url.create)
-      await page.waitForURL(`**${url.create}`)
+      await page.waitForURL(url.create)
 
-      //await changeLocale(page, defaultLocale, true)
+      await changeLocale(page, defaultLocale)
       await fillValues({ description, title: englishTitle })
       await page.locator('#field-localizedCheckbox').click()
 
@@ -207,7 +207,7 @@ describe('Localization', () => {
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
 
       // duplicate doc
-      await changeLocale(page, defaultLocale, true)
+      await changeLocale(page, defaultLocale)
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
 
@@ -225,7 +225,7 @@ describe('Localization', () => {
     test('should duplicate even if missing some localized data', async () => {
       // create a localized required doc
       await page.goto(urlWithRequiredLocalizedFields.create)
-      await changeLocale(page, defaultLocale, true)
+      await changeLocale(page, defaultLocale)
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()

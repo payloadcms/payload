@@ -430,7 +430,7 @@ describe('admin', () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
       await page.locator('#field-title')?.fill('')
-      expect(await page.locator('.doc-header__title.render-title')?.innerText()).toContain('ID:')
+      await expect(page.locator('.doc-header__title.render-title:has-text("ID:")')).toBeVisible()
       await saveDocAndAssert(page)
     })
 
