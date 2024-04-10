@@ -136,7 +136,7 @@ export const UploadFeature: FeatureProviderProviderServer<
             },
             node: UploadNode,
             populationPromises: [uploadPopulationPromiseHOC(props)],
-            validations: [uploadValidation()],
+            validations: [uploadValidation(props)],
           },
         ],
         serverFeatureProps: props,
