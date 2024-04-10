@@ -141,11 +141,10 @@ export async function openDocControls(page: Page): Promise<void> {
   await expect(page.locator('.doc-controls__popup >> .popup__content')).toBeVisible()
 }
 
-export async function changeLocale(page: Page, newLocale: string, skipURLCheck: boolean = false) {
+export async function changeLocale(page: Page, newLocale: string) {
   await page.locator('.localizer >> button').first().click()
   await page
-    .locator(`.localizer`)
-    .locator(`.popup >> button`, {
+    .locator(`.localizer .popup.popup--active .popup-button-list button`, {
       hasText: newLocale,
     })
     .first()
@@ -153,11 +152,7 @@ export async function changeLocale(page: Page, newLocale: string, skipURLCheck: 
 
   const regexPattern = new RegExp(`locale=${newLocale}`)
 
-  if (skipURLCheck) {
-    await wait(500)
-  } else {
-    await expect(page).toHaveURL(regexPattern)
-  }
+  await expect(page).toHaveURL(regexPattern)
 }
 
 export function exactText(text: string) {
