@@ -16,6 +16,7 @@ import type {
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
+  ReactComponentWithPayload,
 } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { GeneratedTypes } from '../../index.js'
@@ -201,10 +202,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    AfterList?: React.ComponentType<any>[]
-    AfterListTable?: React.ComponentType<any>[]
-    BeforeList?: React.ComponentType<any>[]
-    BeforeListTable?: React.ComponentType<any>[]
+    AfterList?: ReactComponentWithPayload[]
+    AfterListTable?: ReactComponentWithPayload[]
+    BeforeList?: ReactComponentWithPayload[]
+    BeforeListTable?: ReactComponentWithPayload[]
     /**
      * Components within the edit view
      */
@@ -239,7 +240,7 @@ export type CollectionAdminOptions = {
       List?:
         | {
             Component?: React.ComponentType<any>
-            actions?: React.ComponentType<any>[]
+            actions?: ReactComponentWithPayload[]
           }
         | React.ComponentType<any>
     }

@@ -1,8 +1,10 @@
+import type { ReactComponentWithPayload } from 'payload/config'
+
 import React from 'react'
 
 const baseClass = 'collection-edit-button'
 
-export const CollectionEditButton: React.FC = () => {
+export const CollectionEditButton: ReactComponentWithPayload = () => {
   return (
     <div
       className={baseClass}

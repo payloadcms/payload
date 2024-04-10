@@ -242,7 +242,7 @@ export const mapFields = (args: {
               isReactComponent<RowLabelComponent>(field.admin.components.RowLabel)
             ) {
               const CustomRowLabelComponent = field.admin.components.RowLabel
-              CustomRowLabel = <CustomRowLabelComponent />
+              CustomRowLabel = <WithPayload Component={CustomRowLabelComponent} />
             }
 
             const arrayFieldProps: Omit<ArrayFieldProps, 'indexPath' | 'permissions'> = {
@@ -360,7 +360,7 @@ export const mapFields = (args: {
 
             if (isReactComponent(field.label) || isPlainFunction(field.label)) {
               const CustomCollapsibleLabelComponent = field.label as RowLabelComponent
-              CustomCollapsibleLabel = <CustomCollapsibleLabelComponent />
+              CustomCollapsibleLabel = <WithPayload Component={CustomCollapsibleLabelComponent} />
             }
 
             const collapsibleField: Omit<CollapsibleFieldProps, 'indexPath' | 'permissions'> = {
@@ -570,7 +570,9 @@ export const mapFields = (args: {
             }
 
             if (RichTextCellComponent) {
-              cellComponentProps.CellComponentOverride = <RichTextCellComponent />
+              cellComponentProps.CellComponentOverride = (
+                <WithPayload Component={RichTextCellComponent} />
+              )
             }
 
             fieldComponentProps = richTextField

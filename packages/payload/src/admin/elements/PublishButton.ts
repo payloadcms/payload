@@ -1,1 +1,3 @@
-export type CustomPublishButton = React.ComponentType
+import type { ReactComponentWithPayload } from '../../config/types.js'
+
+export type CustomPublishButton = ReactComponentWithPayload

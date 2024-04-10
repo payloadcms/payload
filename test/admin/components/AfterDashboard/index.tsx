@@ -1,10 +1,12 @@
+import type { SanitizedConfig } from 'payload/types'
+
 import React from 'react'
 
 import './index.scss'
 
 const baseClass = 'after-dashboard'
 
-export const AfterDashboard: React.FC = () => {
+export const AfterDashboard: SanitizedConfig['admin']['components']['afterDashboard'][0] = () => {
   return (
     <div className={baseClass}>
       <h4>Test Config</h4>

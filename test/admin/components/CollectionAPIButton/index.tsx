@@ -1,8 +1,10 @@
+import type { ReactComponentWithPayload } from 'payload/config'
+
 import React from 'react'
 
 const baseClass = 'collection-api-button'
 
-export const CollectionAPIButton: React.FC = () => {
+export const CollectionAPIButton: ReactComponentWithPayload = () => {
   return (
     <div
       className={baseClass}
