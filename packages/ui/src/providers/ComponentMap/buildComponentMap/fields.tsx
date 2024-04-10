@@ -1,4 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
+import type { ReactComponentWithPayload } from 'packages/payload/src/config/types.js'
 import type {
   CellComponentProps,
   DescriptionComponent,
@@ -77,7 +78,7 @@ export const mapFields = (args: {
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let CustomFieldComponent: React.ComponentType<FieldComponentProps> =
+    let CustomFieldComponent: ReactComponentWithPayload<FieldComponentProps> =
       field.admin?.components?.Field
 
     const CustomCellComponent = field.admin?.components?.Cell
