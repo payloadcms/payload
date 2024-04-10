@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs",
-    "build": "pnpm copyfiles && pnpm build:swc && p build:cjs && pnpm build:types && pnpm build:webpack && rm dist/prod/index.js",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:cjs && pnpm build:types && pnpm build:webpack && rm dist/prod/index.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:webpack": "webpack --config webpack.config.js",
