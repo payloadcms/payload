@@ -191,6 +191,13 @@ export const findTableCell = (page: Page, fieldName: string, rowTitle?: string):
   return cell
 }
 
+export async function navigateToListCellLink(page: Page, selector = '.cell-id') {
+  const cellLink = page.locator(`${selector} a`)
+  const linkURL = await cellLink.getAttribute('href')
+  await cellLink.click()
+  await page.waitForURL(`**${linkURL}`)
+}
+
 export const findTableRow = (page: Page, title: string): Locator => {
   const row = page.locator(`tbody tr:has-text("${title}")`)
   expect(row).toBeTruthy()

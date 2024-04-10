@@ -11,6 +11,7 @@ import type { Config } from './payload-types.js'
 import {
   ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
+  navigateToListCellLink,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -542,8 +543,7 @@ describe('fields', () => {
       const jsonValue = '{ "foo": "bar"}'
 
       await page.goto(url.create)
-
-      await wait(1000)
+      await page.waitForURL(url.create)
 
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
@@ -566,9 +566,7 @@ describe('fields', () => {
       const textInRowValue = 'new value'
       const jsonValue = '{ "new": "value"}'
       await page.goto(url.list)
-      await page.locator('.cell-id a').click()
-
-      await wait(500)
+      await navigateToListCellLink(page)
 
       // Go to Row tab, update the value
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
@@ -586,9 +584,7 @@ describe('fields', () => {
 
       // Go to array tab, save the doc
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
-      await page.click('#action-save', { delay: 100 })
-
-      await wait(500)
+      await saveDocAndAssert(page)
 
       // Go back to row tab, make sure the new value is still present
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
@@ -597,14 +593,14 @@ describe('fields', () => {
 
     test('should render array data within unnamed tabs', async () => {
       await page.goto(url.list)
-      await page.locator('.cell-id a').click()
+      await navigateToListCellLink(page)
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
       await expect(page.locator('#field-array__0__text')).toHaveValue("Hello, I'm the first row")
     })
 
     test('should render array data within named tabs', async () => {
       await page.goto(url.list)
-      await page.locator('.cell-id a').click()
+      await navigateToListCellLink(page)
       await page.locator('.tabs-field__tab-button:nth-child(5)').click()
       await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
         "Hello, I'm the first row, in a named tab",
