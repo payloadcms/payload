@@ -224,6 +224,7 @@ jobs:
           - fields__collections__Blocks
           - fields__collections__Array
           - fields__collections__Relationship
+          - fields__collections__RichText
           - fields__collections__Lexical
           - live-preview
           - localization
