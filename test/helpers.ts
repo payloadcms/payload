@@ -130,6 +130,11 @@ export async function openNav(page: Page): Promise<void> {
   await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 
+export async function openDocDrawer(page: Page, selector: string): Promise<void> {
+  await page.locator(selector).click()
+  await wait(300) // wait for drawer form state to initialize
+}
+
 export async function closeNav(page: Page): Promise<void> {
   if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) return
   await page.locator('.nav-toggler >> visible=true').click()

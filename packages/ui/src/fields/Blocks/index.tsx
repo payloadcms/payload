@@ -67,7 +67,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     labels: labelsFromProps,
     localized,
     maxRows,
-    minRows,
+    minRows: minRowsProp,
     path: pathFromProps,
     readOnly: readOnlyFromProps,
     required,
@@ -76,6 +76,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
 
   const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
+  const minRows = minRowsProp ?? required ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -313,12 +314,9 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                 <Banner type="error">
                   {t('validation:requiresAtLeast', {
                     count: minRows,
-                    label: getTranslation(
-                      minRows === 1 || typeof minRows === 'undefined'
-                        ? labels.singular
-                        : labels.plural,
-                      i18n,
-                    ),
+                    label:
+                      getTranslation(minRows > 1 ? labels.plural : labels.singular, i18n) ||
+                      t(minRows > 1 ? 'general:row' : 'general:rows'),
                   })}
                 </Banner>
               )}
