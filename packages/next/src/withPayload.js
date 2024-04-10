@@ -1,4 +1,8 @@
-/** @type {import('next').NextConfig} */
+/**
+ * @param {import('next').NextConfig} nextConfig
+ *
+ * @returns {import('next').NextConfig}
+ * */
 const withPayload = (nextConfig = {}) => {
   return {
     ...nextConfig,
