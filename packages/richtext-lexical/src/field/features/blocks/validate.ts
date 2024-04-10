@@ -23,6 +23,7 @@ export const blockValidationHOC = (
     } = validation
 
     // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
+    // TODO: Might need a deepCopy. Does it sanitize already-sanitized blocks?
     const validRelationships = config.collections.map((c) => c.slug) || []
     blocks.forEach((block) => {
       block.fields = sanitizeFields({

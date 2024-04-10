@@ -1,3 +1,5 @@
+import { sanitizeFields } from 'payload/config'
+
 import type { NodeValidation } from '../types.js'
 import type { LinkFeatureServerProps } from './feature.server.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from './nodes/types.js'
@@ -21,11 +23,10 @@ export const linkValidation = (
           payload: { config },
           user,
         },
-        siblingData,
       },
     },
   }) => {
-    const finalLinkFields = transformExtraFields(
+    const transformedLinkFields = transformExtraFields(
       props.fields,
       config,
       i18n,
@@ -33,8 +34,21 @@ export const linkValidation = (
       props.disabledCollections,
     )
 
-    for (const field of finalLinkFields) {
+    // TODO: Sanitization should happen sometime before this, so that it doesn't need to re-sanitize every time a field is validated
+    const validRelationships = config.collections.map((c) => c.slug) || []
+    // TODO: Might need a deepCopy. Does it sanitize already-sanitized fields?
+    const sanitizedFields = sanitizeFields({
+      config,
+      fields: transformedLinkFields,
+      requireFieldLevelRichTextEditor: true,
+      validRelationships,
+    })
+
+    for (const field of sanitizedFields) {
       if ('validate' in field && typeof field.validate === 'function' && field.validate) {
+        if ('name' in field && field.name === 'text') {
+          continue // Skip text field validation, as the text field value is not included in the node data. It should only be validated within the link drawer on the frontend.
+        }
         const fieldValue = 'name' in field ? node.fields[field.name] : null
 
         const passesCondition = field.admin?.condition
@@ -54,7 +68,7 @@ export const linkValidation = (
           data: fieldValue,
           operation,
           req,
-          siblingData,
+          siblingData: node.fields,
         })
 
         if (validationResult !== true) {
