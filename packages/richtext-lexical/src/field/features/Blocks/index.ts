@@ -12,12 +12,12 @@ import { INSERT_BLOCK_COMMAND } from './plugin/commands'
 import { blockPopulationPromiseHOC } from './populationPromise'
 import { blockValidationHOC } from './validate'
 
+export type LexicalBlock = Omit<Block, 'fields'> & {
+  fields: FieldWithRichTextRequiredEditor[]
+}
+
 export type BlocksFeatureProps = {
-  blocks: Array<
-    Omit<Block, 'fields'> & {
-      fields: FieldWithRichTextRequiredEditor[]
-    }
-  >
+  blocks: LexicalBlock[]
 }
 
 export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {

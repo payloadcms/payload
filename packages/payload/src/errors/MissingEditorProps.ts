@@ -1,7 +1,7 @@
-import type { Field } from '../fields/config/types.js'
+import type { Field } from '../fields/config/types'
 
-import { fieldAffectsData } from '../fields/config/types.js'
-import APIError from './APIError.js'
+import { fieldAffectsData } from '../fields/config/types'
+import APIError from './APIError'
 
 class MissingEditorProp extends APIError {
   constructor(field: Field) {
