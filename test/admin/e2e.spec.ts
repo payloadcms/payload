@@ -75,7 +75,7 @@ describe('admin', () => {
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = Boolean(process.env.CI)
 
-    if (prebuild) testInfo.setTimeout(testInfo.timeout * 2)
+    if (prebuild) testInfo.setTimeout(testInfo.timeout * 3)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
