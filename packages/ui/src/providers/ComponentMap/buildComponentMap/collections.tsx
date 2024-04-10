@@ -13,7 +13,7 @@ import { ViewDescription } from '@payloadcms/ui/elements/ViewDescription'
 import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React from 'react'
 
-import type { CollectionComponentMap } from './types.js'
+import type { CollectionComponentMap, WithPayload } from './types.js'
 
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
@@ -21,6 +21,7 @@ import { mapFields } from './fields.js'
 export const mapCollections = ({
   DefaultEditView,
   DefaultListView,
+  WithPayload,
   collections,
   config,
   i18n,
@@ -28,6 +29,7 @@ export const mapCollections = ({
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
+  WithPayload: WithPayload
   collections: SanitizedCollectionConfig[]
   config: SanitizedConfig
   i18n: I18n
@@ -71,44 +73,60 @@ export const mapCollections = ({
 
     const List = CustomListView || DefaultListView
 
-    const beforeList = collectionConfig?.admin?.components?.BeforeList
-
-    const beforeListTable = collectionConfig?.admin?.components?.BeforeListTable
-
-    const afterList = collectionConfig?.admin?.components?.AfterList
-
-    const afterListTable = collectionConfig?.admin?.components?.AfterListTable
-
     const SaveButtonComponent = collectionConfig?.admin?.components?.edit?.SaveButton
-    const SaveButton = SaveButtonComponent ? <SaveButtonComponent /> : undefined
+
+    const SaveButton = SaveButtonComponent ? (
+      <WithPayload Component={SaveButtonComponent} />
+    ) : undefined
 
     const SaveDraftButtonComponent = collectionConfig?.admin?.components?.edit?.SaveDraftButton
-    const SaveDraftButton = SaveDraftButtonComponent ? <SaveDraftButtonComponent /> : undefined
+
+    const SaveDraftButton = SaveDraftButtonComponent ? (
+      <WithPayload Component={SaveDraftButtonComponent} />
+    ) : undefined
 
     const PreviewButtonComponent = collectionConfig?.admin?.components?.edit?.PreviewButton
-    const PreviewButton = PreviewButtonComponent ? <PreviewButtonComponent /> : undefined
+
+    const PreviewButton = PreviewButtonComponent ? (
+      <WithPayload Component={PreviewButtonComponent} />
+    ) : undefined
 
     const PublishButtonComponent = collectionConfig?.admin?.components?.edit?.PublishButton
-    const PublishButton = PublishButtonComponent ? <PublishButtonComponent /> : undefined
+
+    const PublishButton = PublishButtonComponent ? (
+      <WithPayload Component={PublishButtonComponent} />
+    ) : undefined
+
+    const beforeList = collectionConfig?.admin?.components?.BeforeList
 
     const BeforeList =
-      (beforeList && Array.isArray(beforeList) && beforeList?.map((Component) => <Component />)) ||
+      (beforeList &&
+        Array.isArray(beforeList) &&
+        beforeList?.map((Component) => <WithPayload Component={Component} />)) ||
       null
+
+    const beforeListTable = collectionConfig?.admin?.components?.BeforeListTable
 
     const BeforeListTable =
       (beforeListTable &&
         Array.isArray(beforeListTable) &&
-        beforeListTable?.map((Component) => <Component />)) ||
+        beforeListTable?.map((Component) => <WithPayload Component={Component} />)) ||
       null
 
+    const afterList = collectionConfig?.admin?.components?.AfterList
+
     const AfterList =
-      (afterList && Array.isArray(afterList) && afterList?.map((Component) => <Component />)) ||
+      (afterList &&
+        Array.isArray(afterList) &&
+        afterList?.map((Component) => <WithPayload Component={Component} />)) ||
       null
+
+    const afterListTable = collectionConfig?.admin?.components?.AfterListTable
 
     const AfterListTable =
       (afterListTable &&
         Array.isArray(afterListTable) &&
-        afterListTable?.map((Component) => <Component />)) ||
+        afterListTable?.map((Component) => <WithPayload Component={Component} />)) ||
       null
 
     const descriptionProps: ViewDescriptionProps = {
@@ -134,7 +152,7 @@ export const mapCollections = ({
 
     const Description =
       DescriptionComponent !== undefined ? (
-        <DescriptionComponent {...(descriptionProps || {})} />
+        <WithPayload Component={DescriptionComponent} {...(descriptionProps || {})} />
       ) : undefined
 
     const componentMap: CollectionComponentMap = {
@@ -150,9 +168,11 @@ export const mapCollections = ({
       SaveButton,
       SaveDraftButton,
       actionsMap: mapActions({
+        WithPayload,
         collectionConfig,
       }),
       fieldMap: mapFields({
+        WithPayload,
         config,
         fieldSchema: fields,
         i18n,

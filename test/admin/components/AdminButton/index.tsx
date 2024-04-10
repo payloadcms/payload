@@ -2,7 +2,7 @@ import React from 'react'
 
 const baseClass = 'admin-button'
 
-export const AdminButton: React.FC = () => {
+export const AdminButton: React.FC = (props) => {
   return (
     <div
       className={baseClass}

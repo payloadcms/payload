@@ -11,19 +11,21 @@ import { ViewDescription, type ViewDescriptionProps } from '@payloadcms/ui/eleme
 import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React from 'react'
 
-import type { GlobalComponentMap } from './types.js'
+import type { GlobalComponentMap, WithPayload } from './types.js'
 
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
 
 export const mapGlobals = ({
   DefaultEditView,
+  WithPayload,
   config,
   globals,
   i18n,
   readOnly: readOnlyOverride,
 }: {
   DefaultEditView: React.FC<EditViewProps>
+  WithPayload: WithPayload
   config: SanitizedConfig
   globals: SanitizedGlobalConfig[]
   i18n: I18n
@@ -37,16 +39,26 @@ export const mapGlobals = ({
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
     const SaveButton = globalConfig?.admin?.components?.elements?.SaveButton
-    const SaveButtonComponent = SaveButton ? <SaveButton /> : undefined
+
+    const SaveButtonComponent = SaveButton ? <WithPayload Component={SaveButton} /> : undefined
 
     const SaveDraftButton = globalConfig?.admin?.components?.elements?.SaveDraftButton
-    const SaveDraftButtonComponent = SaveDraftButton ? <SaveDraftButton /> : undefined
+
+    const SaveDraftButtonComponent = SaveDraftButton ? (
+      <WithPayload Component={SaveDraftButton} />
+    ) : undefined
 
     const PreviewButton = globalConfig?.admin?.components?.elements?.PreviewButton
-    const PreviewButtonComponent = PreviewButton ? <PreviewButton /> : undefined
+
+    const PreviewButtonComponent = PreviewButton ? (
+      <WithPayload Component={PreviewButton} />
+    ) : undefined
 
     const PublishButton = globalConfig?.admin?.components?.elements?.PublishButton
-    const PublishButtonComponent = PublishButton ? <PublishButton /> : undefined
+
+    const PublishButtonComponent = PublishButton ? (
+      <WithPayload Component={PublishButton} />
+    ) : undefined
 
     const CustomEditView =
       typeof editViewFromConfig === 'function'
@@ -84,7 +96,7 @@ export const mapGlobals = ({
 
     const Description =
       DescriptionComponent !== undefined ? (
-        <DescriptionComponent {...(descriptionProps || {})} />
+        <WithPayload Component={DescriptionComponent} {...(descriptionProps || {})} />
       ) : undefined
 
     const componentMap: GlobalComponentMap = {
@@ -95,9 +107,11 @@ export const mapGlobals = ({
       SaveButton: SaveButtonComponent,
       SaveDraftButton: SaveDraftButtonComponent,
       actionsMap: mapActions({
+        WithPayload,
         globalConfig,
       }),
       fieldMap: mapFields({
+        WithPayload,
         config,
         fieldSchema: fields,
         i18n,

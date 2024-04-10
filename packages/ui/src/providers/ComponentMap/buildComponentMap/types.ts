@@ -123,3 +123,8 @@ export type ComponentMap = {
     [slug: SanitizedGlobalConfig['slug']]: GlobalComponentMap
   }
 }
+
+export type WithPayload = (args: {
+  [key: string]: any
+  Component: React.ComponentType<any>
+}) => React.ReactNode
