@@ -11,13 +11,13 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'json',
+      name: 'jsonField1',
       schema: [
         {
           type: 'object',
           properties: {
             test: {
-              enum: ['string to test ok', 'ok', 'still ok'],
+              enum: ['string to test one'],
             },
           },
         },
@@ -25,13 +25,13 @@ export const PostsCollection: CollectionConfig = {
       type: 'json',
     },
     {
-      name: 'json2',
+      name: 'jsonField2',
       schema: [
         {
           type: 'object',
           properties: {
             test: {
-              enum: ['strings to test ok'],
+              enum: ['string to test two'],
             },
           },
         },
@@ -39,13 +39,13 @@ export const PostsCollection: CollectionConfig = {
       type: 'json',
     },
     {
-      name: 'json3',
+      name: 'jsonField3',
       schema: [
         {
           type: 'object',
           properties: {
             test: {
-              enum: ['strings to test ok'],
+              enum: ['string to test three'],
             },
           },
         },
