@@ -218,7 +218,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 }
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'
-export { BlocksFeature } from './field/features/Blocks'
+export { BlocksFeature, type BlocksFeatureProps, type LexicalBlock } from './field/features/Blocks'
 export {
   $createBlockNode,
   $isBlockNode,

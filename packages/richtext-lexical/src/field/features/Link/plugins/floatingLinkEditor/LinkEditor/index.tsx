@@ -77,6 +77,7 @@ export function LinkEditor({
     const fields = sanitizeFields({
       config,
       fields: fieldsUnsanitized,
+      requireFieldLevelRichTextEditor: true,
       validRelationships,
     })
 
