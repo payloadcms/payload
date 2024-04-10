@@ -192,7 +192,7 @@ export const findTableCell = (page: Page, fieldName: string, rowTitle?: string):
 }
 
 export async function navigateToListCellLink(page: Page, selector = '.cell-id') {
-  const cellLink = page.locator(`${selector} a`)
+  const cellLink = page.locator(`${selector} a`).first()
   const linkURL = await cellLink.getAttribute('href')
   await cellLink.click()
   await page.waitForURL(`**${linkURL}`)
