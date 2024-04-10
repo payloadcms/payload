@@ -293,7 +293,7 @@ export type EditView = EditViewComponent | EditViewConfig
 
 export type ServerProps = { payload?: Payload }
 
-export type ComponentWithServerProps<T extends any = {}> = React.ComponentType<T & ServerProps>
+export type ComponentWithServerProps<T extends any = any> = React.ComponentType<T & ServerProps>
 
 export type Locale = {
   /**
