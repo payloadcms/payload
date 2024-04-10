@@ -78,9 +78,6 @@
     width: 100%;
   }
 
-  @include mid-break {
-    display: none;
-  }
 }
 
 html[data-theme='light'] {
