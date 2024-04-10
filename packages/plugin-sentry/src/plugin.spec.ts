@@ -34,13 +34,11 @@ describe('plugin', () => {
 })
 
 function assertPluginRan(config: Config) {
-  expect(config.admin?.webpack).toBeDefined()
   expect(config.hooks?.afterError).toBeDefined()
   expect(config.onInit).toBeDefined()
 }
 
 function assertPluginDidNotRun(config: Config) {
-  expect(config.admin?.webpack).toBeDefined()
   expect(config.hooks?.afterError).toBeUndefined()
   expect(config.onInit).toBeUndefined()
 }
