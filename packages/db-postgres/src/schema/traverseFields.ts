@@ -37,9 +37,6 @@ import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdent
 
 type Args = {
   adapter: PostgresAdapter
-  buildNumbers: boolean
-  buildRelationships: boolean
-  buildTexts: boolean
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
   disableNotNull: boolean
@@ -71,9 +68,6 @@ type Result = {
 
 export const traverseFields = ({
   adapter,
-  buildNumbers,
-  buildRelationships,
-  buildTexts,
   columnPrefix,
   columns,
   disableNotNull,
@@ -252,10 +246,14 @@ export const traverseFields = ({
             prefix: `${newTableName}_`,
             throwValidationError,
           })
-          const baseColumns: Record<string, PgColumnBuilder> = {
+          const selectColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
             parent: parentIDColumnMap[parentIDColType]('parent_id').notNull(),
             value: adapter.enums[enumName]('value'),
+          }
+
+          if (field.localized) {
+            selectColumns.locale = adapter.enums.enum__locales('locale').notNull()
           }
 
           const baseExtraConfig: BaseExtraConfig = {
@@ -269,41 +267,31 @@ export const traverseFields = ({
             parentIdx: (cols) => index(`${selectTableName}_parent_idx`).on(cols.parent),
           }
 
-          if (field.localized) {
-            baseColumns.locale = adapter.enums.enum__locales('locale').notNull()
-            baseExtraConfig.localeIdx = (cols) =>
-              index(`${selectTableName}_locale_idx`).on(cols.locale)
-          }
-
-          if (field.index) {
-            baseExtraConfig.value = (cols) => index(`${selectTableName}_value_idx`).on(cols.value)
-          }
-
-          buildTable({
-            adapter,
-            baseColumns,
-            baseExtraConfig,
-            disableNotNull,
-            disableUnique,
-            fields: [],
-            tableName: selectTableName,
-            versions,
+          adapter.pgSchema.table(selectTableName, selectColumns, (cols) => {
+            const result: Record<string, IndexBuilder> = {
+              orderIdx: index(`${selectTableName}_order_idx`).on(cols.order),
+              parentIdx: index(`${selectTableName}_parent_idx`).on(cols.parent),
+            }
+            if (field.localized) {
+              result.localeIdx = index(`${selectTableName}_locale_idx`).on(cols.locale)
+            }
+            if (field.index) {
+              result.valueIdx = index(`${selectTableName}_value_idx`).on(cols.value)
+            }
+            return result
           })
 
           relationsToBuild.set(fieldName, { type: 'many', target: selectTableName })
 
-          const selectTableRelations = relations(adapter.tables[selectTableName], ({ one }) => {
-            const result: Record<string, Relation<string>> = {
+          adapter.relations[`relation_${selectTableName}`] = relations(
+            adapter.tables[selectTableName],
+            ({ one }) => ({
               parent: one(adapter.tables[parentTableName], {
                 fields: [adapter.tables[selectTableName].parent],
                 references: [adapter.tables[parentTableName].id],
               }),
-            }
-
-            return result
-          })
-
-          adapter.relations[`relation_${selectTableName}`] = selectTableRelations
+            }),
+          )
         } else {
           targetTable[fieldName] = adapter.enums[enumName](fieldName)
         }
@@ -379,26 +367,27 @@ export const traverseFields = ({
 
         relationsToBuild.set(fieldName, { type: 'many', target: arrayTableName })
 
-        const arrayTableRelations = relations(adapter.tables[arrayTableName], ({ many, one }) => {
-          const result: Record<string, Relation<string>> = {
-            _parentID: one(adapter.tables[parentTableName], {
-              fields: [adapter.tables[arrayTableName]._parentID],
-              references: [adapter.tables[parentTableName].id],
-            }),
-          }
+        adapter.relations[`relations_${arrayTableName}`] = relations(
+          adapter.tables[arrayTableName],
+          ({ many, one }) => {
+            const result: Record<string, Relation<string>> = {
+              _parentID: one(adapter.tables[parentTableName], {
+                fields: [adapter.tables[arrayTableName]._parentID],
+                references: [adapter.tables[parentTableName].id],
+              }),
+            }
 
-          if (hasLocalesTable(field.fields)) {
-            result._locales = many(adapter.tables[`${arrayTableName}${adapter.localesSuffix}`])
-          }
+            if (hasLocalesTable(field.fields)) {
+              result._locales = many(adapter.tables[`${arrayTableName}${adapter.localesSuffix}`])
+            }
 
-          subRelationsToBuild.forEach(({ target }, key) => {
-            result[key] = many(adapter.tables[target])
-          })
+            subRelationsToBuild.forEach(({ target }, key) => {
+              result[key] = many(adapter.tables[target])
+            })
 
-          return result
-        })
-
-        adapter.relations[`relations_${arrayTableName}`] = arrayTableRelations
+            return result
+          },
+        )
 
         break
       }
@@ -524,9 +513,6 @@ export const traverseFields = ({
             hasManyTextField: groupHasManyTextField,
           } = traverseFields({
             adapter,
-            buildNumbers,
-            buildRelationships,
-            buildTexts,
             columnPrefix,
             columns,
             disableNotNull,
@@ -567,9 +553,6 @@ export const traverseFields = ({
           hasManyTextField: groupHasManyTextField,
         } = traverseFields({
           adapter,
-          buildNumbers,
-          buildRelationships,
-          buildTexts,
           columnPrefix: `${columnName}_`,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -611,9 +594,6 @@ export const traverseFields = ({
           hasManyTextField: tabHasManyTextField,
         } = traverseFields({
           adapter,
-          buildNumbers,
-          buildRelationships,
-          buildTexts,
           columnPrefix,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -655,9 +635,6 @@ export const traverseFields = ({
           hasManyTextField: rowHasManyTextField,
         } = traverseFields({
           adapter,
-          buildNumbers,
-          buildRelationships,
-          buildTexts,
           columnPrefix,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -691,10 +668,7 @@ export const traverseFields = ({
       case 'upload':
         if (Array.isArray(field.relationTo)) {
           field.relationTo.forEach((relation) => relationships.add(relation))
-        } else if (
-          (field.type === 'relationship' && field.hasMany) ||
-          (field.localized && adapter.payload.config.localization)
-        ) {
+        } else if (field.type === 'relationship' && field.hasMany) {
           relationships.add(field.relationTo)
         } else {
           // simple relationships get a column on the targetTable with a foreign key to the relationTo table
@@ -710,17 +684,21 @@ export const traverseFields = ({
           if (relatedCollectionCustomID?.type === 'text') colType = 'varchar'
 
           // make the foreign key column for relationship using the correct id column type
-          targetTable[`${fieldName}`] = parentIDColumnMap[colType](`${columnName}_id`).references(
+          targetTable[fieldName] = parentIDColumnMap[colType](`${columnName}_id`).references(
             () => adapter.tables[slug].id,
             { onDelete: 'cascade' },
           )
 
           // add relationship to table
-          relationsToBuild.set(fieldName, { type: 'one', target: slug })
+          relationsToBuild.set(fieldName, {
+            type: 'one',
+            localized: adapter.payload.config.localization && field.localized,
+            target: slug,
+          })
 
-          // add notNull if when not required
+          // add notNull when not required
           if (!disableNotNull && field.required && !field.admin?.condition) {
-            targetTable[`${fieldName}`].notNull()
+            targetTable[fieldName].notNull()
           }
         }
 

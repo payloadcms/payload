@@ -283,7 +283,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           }
         }
 
-        if (field.localized) {
+        if (field.localized && Array.isArray(field.relationTo)) {
           result[field.name] = {}
           const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
 

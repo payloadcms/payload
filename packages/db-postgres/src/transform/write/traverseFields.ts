@@ -354,7 +354,10 @@ export const traverseFields = ({
     if (field.type === 'relationship' || field.type === 'upload') {
       const relationshipPath = `${path || ''}${field.name}`
 
-      if (field.localized) {
+      if (
+        field.localized &&
+        (Array.isArray(field.relationTo) || ('hasMany' in field && field.hasMany))
+      ) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             if (localeData === null) {
@@ -393,7 +396,13 @@ export const traverseFields = ({
         return
       } else {
         fieldName = columnName
-        if (fieldData && typeof fieldData === 'object' && 'id' in fieldData && fieldData?.id) {
+        if (
+          !field.localized &&
+          fieldData &&
+          typeof fieldData === 'object' &&
+          'id' in fieldData &&
+          fieldData?.id
+        ) {
           fieldData = fieldData.id
         }
       }

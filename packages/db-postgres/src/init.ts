@@ -32,9 +32,6 @@ export const init: Init = function init(this: PostgresAdapter) {
 
     buildTable({
       adapter: this,
-      buildNumbers: true,
-      buildRelationships: true,
-      buildTexts: true,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.fields,
@@ -54,9 +51,6 @@ export const init: Init = function init(this: PostgresAdapter) {
 
       buildTable({
         adapter: this,
-        buildNumbers: true,
-        buildRelationships: true,
-        buildTexts: true,
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
         fields: versionFields,
@@ -72,9 +66,6 @@ export const init: Init = function init(this: PostgresAdapter) {
 
     buildTable({
       adapter: this,
-      buildNumbers: true,
-      buildRelationships: true,
-      buildTexts: true,
       disableNotNull: !!global?.versions?.drafts,
       disableUnique: false,
       fields: global.fields,
@@ -94,9 +85,6 @@ export const init: Init = function init(this: PostgresAdapter) {
 
       buildTable({
         adapter: this,
-        buildNumbers: true,
-        buildRelationships: true,
-        buildTexts: true,
         disableNotNull: !!global.versions?.drafts,
         disableUnique: true,
         fields: versionFields,

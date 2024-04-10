@@ -34,8 +34,11 @@ export const traverseFields = ({
   fields.forEach((field) => {
     // handle simple relationship
     if (
-      field.type === 'upload' ||
-      (field.type === 'relationship' && !field.hasMany && typeof field.relationTo === 'string')
+      (field.type === 'upload' ||
+        (field.type === 'relationship' &&
+          !field.hasMany &&
+          typeof field.relationTo === 'string')) &&
+      !field.localized
     ) {
       currentArgs.with[`${path}${field.name}`] = true
     }
