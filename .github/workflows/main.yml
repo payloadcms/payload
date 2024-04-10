@@ -88,7 +88,6 @@ jobs:
   tests-unit:
     runs-on: ubuntu-latest
     needs: build
-    if: false # Disable until tests are updated for 3.0
 
     steps:
       - name: Use Node.js 18
