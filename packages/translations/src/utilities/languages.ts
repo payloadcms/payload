@@ -149,7 +149,7 @@ function parseAcceptLanguage(acceptLanguageHeader: string): LanguagePreference[]
     .sort((a, b) => b.quality - a.quality) // Sort by quality, highest to lowest
 }
 
-export function matchLanguage(acceptLanguageHeader: string): AcceptedLanguages | undefined {
+export function extractHeaderLanguage(acceptLanguageHeader: string): AcceptedLanguages | undefined {
   const parsedHeader = parseAcceptLanguage(acceptLanguageHeader)
 
   let matchedLanguage: AcceptedLanguages
