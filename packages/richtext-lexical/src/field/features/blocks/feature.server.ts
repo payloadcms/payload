@@ -12,12 +12,12 @@ import { BlockNode } from './nodes/BlocksNode.js'
 import { blockPopulationPromiseHOC } from './populationPromise.js'
 import { blockValidationHOC } from './validate.js'
 
+export type LexicalBlock = Omit<Block, 'fields'> & {
+  fields: FieldWithRichTextRequiredEditor[]
+}
+
 export type BlocksFeatureProps = {
-  blocks: Array<
-    Omit<Block, 'fields'> & {
-      fields: FieldWithRichTextRequiredEditor[]
-    }
-  >
+  blocks: LexicalBlock[]
 }
 
 export const BlocksFeature: FeatureProviderProviderServer<
@@ -32,7 +32,8 @@ export const BlocksFeature: FeatureProviderProviderServer<
 
       return {
         ...blockCopy,
-        fields: blockCopy.fields.concat(baseBlockFields),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        fields: blockCopy.fields.concat(baseBlockFields as FieldWithRichTextRequiredEditor[]),
         labels: !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels,
       }
     })
