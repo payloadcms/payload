@@ -204,6 +204,12 @@ export const findTableRow = (page: Page, title: string): Locator => {
   return row
 }
 
+export async function switchTab(page: Page, selector: string) {
+  await page.locator(selector).click()
+  await wait(300)
+  await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
+}
+
 /**
  * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
  * in the e2e test failing.

@@ -13,6 +13,7 @@ import {
   initPageConsoleErrorCatch,
   navigateToListCellLink,
   saveDocAndAssert,
+  switchTab,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -35,11 +36,7 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('fields', () => {
-  beforeAll(async ({ browser }, testInfo) => {
-    // const prebuild = Boolean(process.env.CI)
-
-    // if (prebuild) testInfo.setTimeout(testInfo.timeout * 3)
-
+  beforeAll(async ({ browser }) => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({
       dirname,
@@ -545,17 +542,15 @@ describe('fields', () => {
       await page.goto(url.create)
       await page.waitForURL(url.create)
 
-      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
       await page.locator('#field-textInRow').fill(textInRowValue)
       await page.locator('#field-numberInRow').fill(numberInRowValue)
       await page.locator('.json-field .inputarea').fill(jsonValue)
 
       await wait(300)
 
-      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
-      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
-
-      await wait(100)
+      await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Array")')
+      await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
 
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
       await expect(page.locator('#field-numberInRow')).toHaveValue(numberInRowValue)
@@ -569,39 +564,40 @@ describe('fields', () => {
       await navigateToListCellLink(page)
 
       // Go to Row tab, update the value
-      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
+
       await page.locator('#field-textInRow').fill(textInRowValue)
       await page.locator('.json-field .inputarea').fill(jsonValue)
 
       await wait(500)
 
       // Go to Array tab, then back to Row. Make sure new value is still there
-      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
-      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Array")')
+      await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
 
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
       await expect(page.locator('.json-field .lines-content')).toContainText(jsonValue)
 
       // Go to array tab, save the doc
-      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Array")')
       await saveDocAndAssert(page)
 
       // Go back to row tab, make sure the new value is still present
-      await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
     })
 
     test('should render array data within unnamed tabs', async () => {
       await page.goto(url.list)
       await navigateToListCellLink(page)
-      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Array")')
       await expect(page.locator('#field-array__0__text')).toHaveValue("Hello, I'm the first row")
     })
 
     test('should render array data within named tabs', async () => {
       await page.goto(url.list)
       await navigateToListCellLink(page)
-      await page.locator('.tabs-field__tab-button:nth-child(5)').click()
+      await switchTab(page, '.tabs-field__tab-button:nth-child(5)')
       await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
         "Hello, I'm the first row, in a named tab",
       )
