@@ -3,7 +3,7 @@
  *
  * @returns {import('next').NextConfig}
  * */
-const withPayload = (nextConfig = {}) => {
+export const withPayload = (nextConfig = {}) => {
   return {
     ...nextConfig,
     experimental: {
