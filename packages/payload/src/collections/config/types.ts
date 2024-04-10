@@ -10,13 +10,13 @@ import type {
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
+  ComponentWithServerProps,
   EditConfig,
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
-  ReactComponentWithPayload,
 } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { GeneratedTypes } from '../../index.js'
@@ -202,10 +202,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    AfterList?: ReactComponentWithPayload[]
-    AfterListTable?: ReactComponentWithPayload[]
-    BeforeList?: ReactComponentWithPayload[]
-    BeforeListTable?: ReactComponentWithPayload[]
+    AfterList?: ComponentWithServerProps[]
+    AfterListTable?: ComponentWithServerProps[]
+    BeforeList?: ComponentWithServerProps[]
+    BeforeListTable?: ComponentWithServerProps[]
     /**
      * Components within the edit view
      */
@@ -240,7 +240,7 @@ export type CollectionAdminOptions = {
       List?:
         | {
             Component?: React.ComponentType<any>
-            actions?: ReactComponentWithPayload[]
+            actions?: ComponentWithServerProps[]
           }
         | React.ComponentType<any>
     }

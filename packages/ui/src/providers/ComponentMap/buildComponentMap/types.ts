@@ -124,7 +124,7 @@ export type ComponentMap = {
   }
 }
 
-export type WithPayload = (args: {
+export type WithServerSideProps = (args: {
   [key: string]: any
   Component: React.ComponentType<any>
 }) => React.ReactNode

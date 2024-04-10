@@ -1,5 +1,5 @@
-import type { ReactComponentWithPayload } from '../../config/types.js'
+import type { ComponentWithServerProps } from '../../config/types.js'
 
-export type RowLabelComponent = ReactComponentWithPayload
+export type RowLabelComponent = ComponentWithServerProps
 
 export type RowLabel = Record<string, string> | RowLabelComponent | string

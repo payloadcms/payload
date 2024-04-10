@@ -1,3 +1,3 @@
-import type { ReactComponentWithPayload } from '../../config/types.js'
+import type { ComponentWithServerProps } from '../../config/types.js'
 
-export type CustomSaveDraftButton = ReactComponentWithPayload
+export type CustomSaveDraftButton = ComponentWithServerProps

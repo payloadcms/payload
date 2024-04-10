@@ -2,14 +2,14 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/t
 
 import React from 'react'
 
-import type { ActionMap, WithPayload as WithPayloadType } from './types.js'
+import type { ActionMap, WithServerSideProps as WithPayloadType } from './types.js'
 
 export const mapActions = (args: {
-  WithPayload: WithPayloadType
+  WithServerSideProps: WithPayloadType
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
 }): ActionMap => {
-  const { WithPayload, collectionConfig, globalConfig } = args
+  const { WithServerSideProps, collectionConfig, globalConfig } = args
 
   const editViews = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit
 
@@ -29,7 +29,7 @@ export const mapActions = (args: {
         view.actions.forEach((action) => {
           const Action = action
           if (typeof Action === 'function') {
-            result.Edit[key] = [...(result[key] || []), <WithPayload Component={Action} />]
+            result.Edit[key] = [...(result[key] || []), <WithServerSideProps Component={Action} />]
           }
         })
       }
@@ -41,7 +41,7 @@ export const mapActions = (args: {
       const Action = action
       if (typeof Action === 'function') {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        result.List = [...result.List, <WithPayload Component={Action} />]
+        result.List = [...result.List, <WithServerSideProps Component={Action} />]
       }
     })
   }

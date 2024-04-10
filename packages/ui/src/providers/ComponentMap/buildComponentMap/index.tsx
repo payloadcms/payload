@@ -4,7 +4,7 @@ import type { AdminViewProps, EditViewProps, Payload, SanitizedConfig } from 'pa
 import { isReactServerComponent } from 'packages/payload/utilities.js'
 import React from 'react'
 
-import type { ComponentMap, WithPayload as WithPayloadType } from './types.js'
+import type { ComponentMap, WithServerSideProps as WithPayloadType } from './types.js'
 
 import { mapCollections } from './collections.js'
 import { mapGlobals } from './globals.js'
@@ -23,18 +23,18 @@ export const buildComponentMap = (args: {
 } => {
   const { DefaultEditView, DefaultListView, children, config, i18n, payload, readOnly } = args
 
-  const WithPayload: WithPayloadType = ({ Component, ...rest }) => {
+  const WithServerSideProps: WithPayloadType = ({ Component, ...rest }) => {
     if (Component) {
-      const WithPayload: React.FC<any> = (passedProps) => {
+      const WithServerSideProps: React.FC<any> = (passedProps) => {
         const propsWithPayload = {
           ...passedProps,
-          payload: isReactServerComponent(Component) ? payload : undefined,
+          ...(isReactServerComponent(Component) ? { payload } : {}),
         }
 
         return <Component {...propsWithPayload} />
       }
 
-      return <WithPayload {...rest} />
+      return <WithServerSideProps {...rest} />
     }
 
     return null
@@ -43,7 +43,7 @@ export const buildComponentMap = (args: {
   const collections = mapCollections({
     DefaultEditView,
     DefaultListView,
-    WithPayload,
+    WithServerSideProps,
     collections: config.collections,
     config,
     i18n,
@@ -52,7 +52,7 @@ export const buildComponentMap = (args: {
 
   const globals = mapGlobals({
     DefaultEditView,
-    WithPayload,
+    WithServerSideProps,
     config,
     globals: config.globals,
     i18n,
@@ -74,19 +74,19 @@ export const buildComponentMap = (args: {
   const LogoutButtonComponent = config.admin?.components?.logout?.Button
 
   const LogoutButton = LogoutButtonComponent ? (
-    <WithPayload Component={LogoutButtonComponent} />
+    <WithServerSideProps Component={LogoutButtonComponent} />
   ) : null
 
   const IconComponent = config.admin?.components?.graphics?.Icon
 
-  const Icon = IconComponent ? <WithPayload Component={IconComponent} /> : null
+  const Icon = IconComponent ? <WithServerSideProps Component={IconComponent} /> : null
 
   return {
     componentMap: {
       Icon,
       LogoutButton,
       actions: config.admin?.components?.actions?.map((Component) => (
-        <WithPayload Component={Component} />
+        <WithServerSideProps Component={Component} />
       )),
       collections,
       globals,

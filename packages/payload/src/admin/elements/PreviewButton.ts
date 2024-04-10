@@ -1,3 +1,3 @@
-import type { ReactComponentWithPayload } from '../../config/types.js'
+import type { ComponentWithServerProps } from '../../config/types.js'
 
-export type CustomPreviewButton = ReactComponentWithPayload
+export type CustomPreviewButton = ComponentWithServerProps

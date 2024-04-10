@@ -1,11 +1,11 @@
 import type React from 'react'
 
-import type { LabelFunction, ReactComponentWithPayload } from '../../config/types.js'
+import type { ComponentWithServerProps, LabelFunction } from '../../config/types.js'
 import type { Payload } from '../../index.js'
 
 export type DescriptionFunction = LabelFunction
 
-export type DescriptionComponent = ReactComponentWithPayload<FieldDescriptionProps>
+export type DescriptionComponent = ComponentWithServerProps<FieldDescriptionProps>
 
 export type Description =
   | DescriptionComponent

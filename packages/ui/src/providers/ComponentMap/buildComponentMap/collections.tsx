@@ -13,7 +13,7 @@ import { ViewDescription } from '@payloadcms/ui/elements/ViewDescription'
 import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React from 'react'
 
-import type { CollectionComponentMap, WithPayload } from './types.js'
+import type { CollectionComponentMap, WithServerSideProps } from './types.js'
 
 import { mapActions } from './actions.js'
 import { mapFields } from './fields.js'
@@ -21,7 +21,7 @@ import { mapFields } from './fields.js'
 export const mapCollections = ({
   DefaultEditView,
   DefaultListView,
-  WithPayload,
+  WithServerSideProps,
   collections,
   config,
   i18n,
@@ -29,7 +29,7 @@ export const mapCollections = ({
 }: {
   DefaultEditView: React.FC<EditViewProps>
   DefaultListView: React.FC<AdminViewProps>
-  WithPayload: WithPayload
+  WithServerSideProps: WithServerSideProps
   collections: SanitizedCollectionConfig[]
   config: SanitizedConfig
   i18n: I18n
@@ -76,25 +76,25 @@ export const mapCollections = ({
     const SaveButtonComponent = collectionConfig?.admin?.components?.edit?.SaveButton
 
     const SaveButton = SaveButtonComponent ? (
-      <WithPayload Component={SaveButtonComponent} />
+      <WithServerSideProps Component={SaveButtonComponent} />
     ) : undefined
 
     const SaveDraftButtonComponent = collectionConfig?.admin?.components?.edit?.SaveDraftButton
 
     const SaveDraftButton = SaveDraftButtonComponent ? (
-      <WithPayload Component={SaveDraftButtonComponent} />
+      <WithServerSideProps Component={SaveDraftButtonComponent} />
     ) : undefined
 
     const PreviewButtonComponent = collectionConfig?.admin?.components?.edit?.PreviewButton
 
     const PreviewButton = PreviewButtonComponent ? (
-      <WithPayload Component={PreviewButtonComponent} />
+      <WithServerSideProps Component={PreviewButtonComponent} />
     ) : undefined
 
     const PublishButtonComponent = collectionConfig?.admin?.components?.edit?.PublishButton
 
     const PublishButton = PublishButtonComponent ? (
-      <WithPayload Component={PublishButtonComponent} />
+      <WithServerSideProps Component={PublishButtonComponent} />
     ) : undefined
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList
@@ -102,7 +102,7 @@ export const mapCollections = ({
     const BeforeList =
       (beforeList &&
         Array.isArray(beforeList) &&
-        beforeList?.map((Component) => <WithPayload Component={Component} />)) ||
+        beforeList?.map((Component) => <WithServerSideProps Component={Component} />)) ||
       null
 
     const beforeListTable = collectionConfig?.admin?.components?.BeforeListTable
@@ -110,7 +110,7 @@ export const mapCollections = ({
     const BeforeListTable =
       (beforeListTable &&
         Array.isArray(beforeListTable) &&
-        beforeListTable?.map((Component) => <WithPayload Component={Component} />)) ||
+        beforeListTable?.map((Component) => <WithServerSideProps Component={Component} />)) ||
       null
 
     const afterList = collectionConfig?.admin?.components?.AfterList
@@ -118,7 +118,7 @@ export const mapCollections = ({
     const AfterList =
       (afterList &&
         Array.isArray(afterList) &&
-        afterList?.map((Component) => <WithPayload Component={Component} />)) ||
+        afterList?.map((Component) => <WithServerSideProps Component={Component} />)) ||
       null
 
     const afterListTable = collectionConfig?.admin?.components?.AfterListTable
@@ -126,7 +126,7 @@ export const mapCollections = ({
     const AfterListTable =
       (afterListTable &&
         Array.isArray(afterListTable) &&
-        afterListTable?.map((Component) => <WithPayload Component={Component} />)) ||
+        afterListTable?.map((Component) => <WithServerSideProps Component={Component} />)) ||
       null
 
     const descriptionProps: ViewDescriptionProps = {
@@ -152,7 +152,7 @@ export const mapCollections = ({
 
     const Description =
       DescriptionComponent !== undefined ? (
-        <WithPayload Component={DescriptionComponent} {...(descriptionProps || {})} />
+        <WithServerSideProps Component={DescriptionComponent} {...(descriptionProps || {})} />
       ) : undefined
 
     const componentMap: CollectionComponentMap = {
@@ -168,11 +168,11 @@ export const mapCollections = ({
       SaveButton,
       SaveDraftButton,
       actionsMap: mapActions({
-        WithPayload,
+        WithServerSideProps,
         collectionConfig,
       }),
       fieldMap: mapFields({
-        WithPayload,
+        WithServerSideProps,
         config,
         fieldSchema: fields,
         i18n,

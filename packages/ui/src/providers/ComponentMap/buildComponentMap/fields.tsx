@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { ReactComponentWithPayload } from 'packages/payload/src/config/types.js'
+import type { ComponentWithServerProps } from 'packages/payload/src/config/types.js'
 import type {
   CellComponentProps,
   DescriptionComponent,
@@ -46,13 +46,13 @@ import type {
   MappedField,
   MappedTab,
   ReducedBlock,
-  WithPayload as WithPayloadType,
+  WithServerSideProps as WithPayloadType,
 } from './types.js'
 
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
 
 export const mapFields = (args: {
-  WithPayload: WithPayloadType
+  WithServerSideProps: WithPayloadType
   config: SanitizedConfig
   /**
    * If mapFields is used outside of collections, you might not want it to add an id field
@@ -65,7 +65,7 @@ export const mapFields = (args: {
   readOnly?: boolean
 }): FieldMap => {
   const {
-    WithPayload,
+    WithServerSideProps,
     config,
     disableAddingID,
     fieldSchema,
@@ -78,7 +78,7 @@ export const mapFields = (args: {
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let CustomFieldComponent: ReactComponentWithPayload<FieldComponentProps> =
+    let CustomFieldComponent: ComponentWithServerProps<FieldComponentProps> =
       field.admin?.components?.Field
 
     const CustomCellComponent = field.admin?.components?.Cell
@@ -106,7 +106,7 @@ export const mapFields = (args: {
             Array.isArray(field.admin?.components?.afterInput) && (
               <Fragment>
                 {field.admin.components.afterInput.map((Component, i) => (
-                  <WithPayload Component={Component} key={i} />
+                  <WithServerSideProps Component={Component} key={i} />
                 ))}
               </Fragment>
             )) ||
@@ -119,7 +119,7 @@ export const mapFields = (args: {
             Array.isArray(field.admin.components.beforeInput) && (
               <Fragment>
                 {field.admin.components.beforeInput.map((Component, i) => (
-                  <WithPayload Component={Component} key={i} />
+                  <WithServerSideProps Component={Component} key={i} />
                 ))}
               </Fragment>
             )) ||
@@ -142,7 +142,7 @@ export const mapFields = (args: {
 
         const CustomLabel =
           CustomLabelComponent !== undefined ? (
-            <WithPayload Component={CustomLabelComponent} {...(labelProps || {})} />
+            <WithServerSideProps Component={CustomLabelComponent} {...(labelProps || {})} />
           ) : undefined
 
         const descriptionProps: FieldDescriptionProps = {
@@ -168,7 +168,10 @@ export const mapFields = (args: {
 
         const CustomDescription =
           CustomDescriptionComponent !== undefined ? (
-            <WithPayload Component={CustomDescriptionComponent} {...(descriptionProps || {})} />
+            <WithServerSideProps
+              Component={CustomDescriptionComponent}
+              {...(descriptionProps || {})}
+            />
           ) : undefined
 
         const errorProps = {
@@ -184,7 +187,7 @@ export const mapFields = (args: {
 
         const CustomError =
           CustomErrorComponent !== undefined ? (
-            <WithPayload Component={CustomErrorComponent} {...(errorProps || {})} />
+            <WithServerSideProps Component={CustomErrorComponent} {...(errorProps || {})} />
           ) : undefined
 
         const baseFieldProps: FormFieldBase = {
@@ -243,7 +246,7 @@ export const mapFields = (args: {
               isReactComponent<RowLabelComponent>(field.admin.components.RowLabel)
             ) {
               const CustomRowLabelComponent = field.admin.components.RowLabel
-              CustomRowLabel = <WithPayload Component={CustomRowLabelComponent} />
+              CustomRowLabel = <WithServerSideProps Component={CustomRowLabelComponent} />
             }
 
             const arrayFieldProps: Omit<ArrayFieldProps, 'indexPath' | 'permissions'> = {
@@ -253,7 +256,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
-                WithPayload,
+                WithServerSideProps,
                 config,
                 fieldSchema: field.fields,
                 filter,
@@ -277,7 +280,7 @@ export const mapFields = (args: {
           case 'blocks': {
             const blocks = field.blocks.map((block) => {
               const blockFieldMap = mapFields({
-                WithPayload,
+                WithServerSideProps,
                 config,
                 fieldSchema: block.fields,
                 filter,
@@ -361,7 +364,9 @@ export const mapFields = (args: {
 
             if (isReactComponent(field.label) || isPlainFunction(field.label)) {
               const CustomCollapsibleLabelComponent = field.label as RowLabelComponent
-              CustomCollapsibleLabel = <WithPayload Component={CustomCollapsibleLabelComponent} />
+              CustomCollapsibleLabel = (
+                <WithServerSideProps Component={CustomCollapsibleLabelComponent} />
+              )
             }
 
             const collapsibleField: Omit<CollapsibleFieldProps, 'indexPath' | 'permissions'> = {
@@ -370,7 +375,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
-                WithPayload,
+                WithServerSideProps,
                 config,
                 disableAddingID: true,
                 fieldSchema: field.fields,
@@ -433,7 +438,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
-                WithPayload,
+                WithServerSideProps,
                 config,
                 disableAddingID: true,
                 fieldSchema: field.fields,
@@ -572,7 +577,7 @@ export const mapFields = (args: {
 
             if (RichTextCellComponent) {
               cellComponentProps.CellComponentOverride = (
-                <WithPayload Component={RichTextCellComponent} />
+                <WithServerSideProps Component={RichTextCellComponent} />
               )
             }
 
@@ -586,7 +591,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
-                WithPayload,
+                WithServerSideProps,
                 config,
                 disableAddingID: true,
                 fieldSchema: field.fields,
@@ -608,7 +613,7 @@ export const mapFields = (args: {
             // `tabs` fields require a field map of each of its tab's nested fields
             const tabs = field.tabs.map((tab) => {
               const tabFieldMap = mapFields({
-                WithPayload,
+                WithServerSideProps,
                 config,
                 disableAddingID: true,
                 fieldSchema: tab.fields,
@@ -734,10 +739,10 @@ export const mapFields = (args: {
           name: 'name' in field ? field.name : undefined,
           type: field.type,
           CustomCell: CustomCellComponent ? (
-            <WithPayload Component={CustomCellComponent} {...cellComponentProps} />
+            <WithServerSideProps Component={CustomCellComponent} {...cellComponentProps} />
           ) : undefined,
           CustomField: CustomFieldComponent ? (
-            <WithPayload Component={CustomFieldComponent} {...fieldComponentProps} />
+            <WithServerSideProps Component={CustomFieldComponent} {...fieldComponentProps} />
           ) : undefined,
           cellComponentProps,
           disableBulkEdit:
