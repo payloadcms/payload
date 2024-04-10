@@ -19,7 +19,7 @@ export type AuthResult = {
   user: User | null
 }
 
-export const auth = async (args: AuthArgs): Promise<AuthResult> => {
+export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
   const { headers } = args
   const req = args.req as PayloadRequest
   const { payload } = req
