@@ -10,7 +10,7 @@ import { getAccessResults } from '../getAccessResults.js'
 
 export type AuthArgs = {
   headers: Request['headers']
-  req: Omit<PayloadRequest, 'user'>
+  req?: Omit<PayloadRequest, 'user'>
 }
 
 export type AuthResult = {
