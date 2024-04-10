@@ -65,7 +65,7 @@ export function transformExtraFields(
     }
   }
 
-  if (Array.isArray(customFieldSchema) || fields.length > 0) {
+  if ((Array.isArray(customFieldSchema) && customFieldSchema?.length) || extraFields?.length) {
     fields.push({
       name: 'fields',
       type: 'group',
