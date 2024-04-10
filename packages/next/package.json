@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.0",
+  "version": "3.0.0-beta.1",
   "main": "./src/index.js",
   "types": "./src/index.js",
   "type": "module",
