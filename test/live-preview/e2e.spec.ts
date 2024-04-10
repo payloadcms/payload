@@ -34,7 +34,7 @@ describe('Live Preview', () => {
   const goToCollectionPreview = async (page: Page): Promise<void> => {
     await goToDoc(page)
     await page.goto(`${page.url()}/preview`)
-    await page.waitForURL(`${page.url()}/preview`)
+    await page.waitForURL(`**/preview`)
   }
 
   const goToGlobalPreview = async (page: Page, slug: string): Promise<void> => {
@@ -75,12 +75,9 @@ describe('Live Preview', () => {
 
   test('collection — has route', async () => {
     await goToDoc(page)
-    const url = page.url()
     await goToCollectionPreview(page)
 
-    await expect(() => expect(page.url()).toBe(`${url}/preview`)).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
+    await expect(page.locator('.live-preview')).toBeVisible()
   })
 
   test('collection — renders iframe', async () => {
@@ -227,10 +224,6 @@ describe('Live Preview', () => {
 
     await saveDocAndAssert(page)
     await goToCollectionPreview(page)
-
-    await expect(() => expect(page.url()).toContain('/preview')).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
 
     // Check that the breakpoint select is present
     const breakpointSelector = page.locator(
