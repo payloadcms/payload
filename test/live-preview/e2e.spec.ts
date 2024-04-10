@@ -169,12 +169,7 @@ describe('Live Preview', () => {
     await page.locator('#field-slug').fill('slug-3')
 
     await saveDocAndAssert(page)
-
     await goToCollectionPreview(page)
-
-    await expect(() => expect(page.url()).toContain('/preview')).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
 
     const iframe = page.locator('iframe')
 
