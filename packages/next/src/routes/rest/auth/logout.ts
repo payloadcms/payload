@@ -5,7 +5,7 @@ import { logoutOperation } from 'payload/operations'
 import type { CollectionRouteHandler } from '../types.js'
 
 export const logout: CollectionRouteHandler = async ({ collection, req }) => {
-  const result = logoutOperation({
+  const result = await logoutOperation({
     collection,
     req,
   })
