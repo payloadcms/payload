@@ -18,7 +18,7 @@ export const sanitizeCollectionID = ({ id, collectionSlug, payload }: Args): num
   // UNLESS the custom ID for this collection is text.... then we leave it
   const hasIdField = flattenFields(collection.config.fields).find((field) => field.name === 'id')
 
-  if (shouldSanitize && hasCustomIdField) shouldSanitize = false
+  if (shouldSanitize && hasIdField) shouldSanitize = false
 
   // If we still should sanitize, parse float
   if (shouldSanitize) sanitizedID = parseFloat(sanitizedID)
