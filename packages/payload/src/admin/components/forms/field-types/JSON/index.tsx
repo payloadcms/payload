@@ -24,8 +24,8 @@ const JSONField: React.FC<Props> = (props) => {
       condition,
       description,
       editorOptions,
+      jsonSchema,
       readOnly,
-      schema,
       style,
       width,
     } = {},
@@ -59,46 +59,11 @@ const JSONField: React.FC<Props> = (props) => {
 
   function handleMount(editor, monaco) {
     const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
-    const schemas = []
+    const modelUri = monaco.Uri.parse(jsonSchema.uri)
 
-    const fieldId = `field-${path?.replace(/\./g, '__')}`
-    const jsonUri = `payload://json/schema/${id}/${fieldId}`
-    const modelUri = monaco.Uri.parse(jsonUri)
-
-    const initialModelValue = JSON.stringify(value, null, 2)
-
-    const model = monaco.editor.createModel(initialModelValue, 'json', modelUri)
-
-    const monacoFormattedSchemas = schema.map((initialSchema) => {
-      const schemaProperties = {}
-      Object.keys(initialSchema).forEach((key) => {
-        schemaProperties[key] = { enum: initialSchema[key] }
-      })
-
-      return Object.assign(
-        {
-          fileMatch: [modelUri.toString()],
-          schema: { type: 'object', properties: schemaProperties },
-          uri: modelUri.toString(),
-        },
-        {},
-      )
-    })
-
-    monacoFormattedSchemas.forEach((formattedSchema) => {
-      if (!existingSchemas.map(({ uri }) => uri).includes(jsonUri)) {
-        schemas.push(formattedSchema)
-      }
-    })
-
-    existingSchemas.forEach((existingSchema) => {
-      if (!schemas.map(({ uri }) => uri).includes(existingSchema.uri)) {
-        schemas.push(existingSchema)
-      }
-    })
-
+    const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      schemas,
+      schemas: [...existingSchemas, jsonSchema],
       validate: true,
     })
 
@@ -129,6 +94,7 @@ const JSONField: React.FC<Props> = (props) => {
         setHasLoadedValue(true)
       }
     } catch (e) {
+      console.log(e)
       setJsonError(e)
     }
   }, [initialValue, value, hasLoadedValue])

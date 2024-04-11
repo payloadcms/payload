@@ -432,7 +432,7 @@ type JSONAdmin = Admin & {
     Label?: React.ComponentType<LabelProps>
   }
   editorOptions?: EditorProps['options']
-  schema?: [any]
+  jsonSchema?: any
 }
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
