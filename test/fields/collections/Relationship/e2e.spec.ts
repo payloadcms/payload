@@ -176,6 +176,7 @@ describe('relationship', () => {
   // TODO: React-Select not loading things sometimes. Fix later
   test.skip('should display `hasMany` polymorphic relationships', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
     const field = page.locator('#field-relationHasManyPolymorphic')
     await field.click()
 
@@ -211,6 +212,7 @@ describe('relationship', () => {
 
   test('should populate relationship dynamic default value', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
     await expect(
       page.locator('#field-relationWithDynamicDefault .relationship--single-value__text'),
     ).toContainText('dev@payloadcms.com')
@@ -347,6 +349,7 @@ describe('relationship', () => {
 
   test('should fail min rows validation when rows are present', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
     // First fill out the relationship field, as it's required
     await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page.locator('#field-relationship .value-container').click()
@@ -369,26 +372,28 @@ describe('relationship', () => {
 
   test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
 
     const field = page.locator('#field-relationship')
     await field.click()
 
-    const firstOption = page.locator('.rs__option').first()
-    await expect(firstOption).toBeVisible()
-    const firstOptionText = await firstOption.textContent()
-    expect(firstOptionText.trim()).toBe('Another text document')
+    const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
+    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstOptionLabel = await firstTextDocOption.textContent()
+    expect(firstOptionLabel.trim()).toBe('Another text document')
   })
 
   test('should sort relationHasManyPolymorphic options by sortOptions property: text-fields collection (items in descending order)', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
 
     const field = page.locator('#field-relationHasManyPolymorphic')
     await field.click()
 
-    const firstOption = page.locator('.rs__option').first()
-    await expect(firstOption).toBeVisible()
-    const firstOptionText = await firstOption.textContent()
-    expect(firstOptionText.trim()).toBe('Seeded text document')
+    const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
+    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstOptionLabel = await firstTextDocOption.textContent()
+    expect(firstOptionLabel).toBe('Seeded text document')
   })
 
   test('should allow filtering by relationship field / equals', async () => {
@@ -396,6 +401,7 @@ describe('relationship', () => {
     await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
 
     await page.goto(url.list)
+    await page.waitForURL(url.list)
 
     await page.locator('.list-controls__toggle-columns').click()
     await page.locator('.list-controls__toggle-where').click()
