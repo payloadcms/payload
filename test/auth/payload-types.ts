@@ -7,73 +7,112 @@
  */
 
 export interface Config {
+  user:
+    | (User & {
+        collection: 'users'
+      })
+    | (ApiKey & {
+        collection: 'api-keys'
+      })
+    | (PublicUser & {
+        collection: 'public-users'
+      })
   collections: {
     users: User
     'api-keys': ApiKey
     'public-users': PublicUser
+    relationsCollection: RelationsCollection
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
   globals: {}
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string
+  adminOnlyField?: string | null
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[]
-  namedSaveToJWT?: string
+  namedSaveToJWT?: string | null
   group?: {
-    liftedSaveToJWT?: string
+    liftedSaveToJWT?: string | null
   }
   groupSaveToJWT?: {
-    saveToJWTString?: string
-    saveToJWTFalse?: string
+    saveToJWTString?: string | null
+    saveToJWTFalse?: string | null
   }
   saveToJWTTab: {
-    test?: string
+    test?: string | null
   }
   tabSaveToJWTString: {
-    includedByDefault?: string
+    includedByDefault?: string | null
   }
-  tabLiftedSaveToJWT?: string
-  unnamedTabSaveToJWTString?: string
-  unnamedTabSaveToJWTFalse?: string
-  custom?: string
+  tabLiftedSaveToJWT?: string | null
+  unnamedTabSaveToJWTString?: string | null
+  unnamedTabSaveToJWTFalse?: string | null
+  custom?: string | null
   updatedAt: string
   createdAt: string
-  enableAPIKey?: boolean
-  apiKey?: string
-  apiKeyIndex?: string
+  enableAPIKey?: boolean | null
+  apiKey?: string | null
+  apiKeyIndex?: string | null
   email: string
-  resetPasswordToken?: string
-  resetPasswordExpiration?: string
-  salt?: string
-  hash?: string
-  loginAttempts?: number
-  lockUntil?: string
-  password?: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys".
+ */
 export interface ApiKey {
   id: string
   updatedAt: string
   createdAt: string
-  enableAPIKey?: boolean
-  apiKey?: string
-  apiKeyIndex?: string
+  enableAPIKey?: boolean | null
+  apiKey?: string | null
+  apiKeyIndex?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "public-users".
+ */
 export interface PublicUser {
   id: string
   updatedAt: string
   createdAt: string
   email: string
-  resetPasswordToken?: string
-  resetPasswordExpiration?: string
-  salt?: string
-  hash?: string
-  _verified?: boolean
-  _verificationToken?: string
-  loginAttempts?: number
-  lockUntil?: string
-  password?: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  _verified?: boolean | null
+  _verificationToken?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password?: string | null
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationsCollection".
+ */
+export interface RelationsCollection {
+  id: string
+  rel?: (string | null) | User
+  text?: string | null
+  updatedAt: string
+  createdAt: string
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string
   user:
@@ -89,7 +128,7 @@ export interface PayloadPreference {
         relationTo: 'public-users'
         value: string | PublicUser
       }
-  key?: string
+  key?: string | null
   value?:
     | {
         [k: string]: unknown
@@ -102,19 +141,14 @@ export interface PayloadPreference {
   updatedAt: string
   createdAt: string
 }
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string
-  name?: string
-  batch?: number
-  schema?:
-    | {
-        [k: string]: unknown
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null
+  name?: string | null
+  batch?: number | null
   updatedAt: string
   createdAt: string
 }
