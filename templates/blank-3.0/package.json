@@ -10,7 +10,8 @@
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint"
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
+    "generate:types": "payload generate:types"
   },
   "engines": {
     "node": ">=18.19.0"
