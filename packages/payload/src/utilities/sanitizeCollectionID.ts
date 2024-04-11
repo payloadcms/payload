@@ -16,8 +16,7 @@ export const sanitizeCollectionID = ({ id, collectionSlug, payload }: Args): num
   let shouldSanitize = Boolean(payload.db.defaultIDType === 'number')
 
   // UNLESS the custom ID for this collection is text.... then we leave it
-  const hasCustomIdField =
-    flattenFields(collection.config.fields).findIndex((field) => field.name === 'id') > -1
+  const hasIdField = flattenFields(collection.config.fields).find((field) => field.name === 'id')
 
   if (shouldSanitize && hasCustomIdField) shouldSanitize = false
 
