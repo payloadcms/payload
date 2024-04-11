@@ -8,9 +8,13 @@ const __dirname = path.dirname(__filename)
 const packagesDir = path.resolve(__dirname, '../../packages')
 
 export type PackageDetails = {
+  /** Name in package.json / npm registry */
   name: string
+  /** Full path to package */
   packagePath: string
+  /** Short name is the directory name */
   shortName: string
+  /** Version in package.json */
   version: string
 }
 
