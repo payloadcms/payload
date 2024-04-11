@@ -279,7 +279,7 @@ export type EditViewConfig =
       path: string
     }
   | {
-      actions?: ComponentWithServerSideProps[]
+      actions?: CustomComponent[]
     }
 
 /**
@@ -297,7 +297,7 @@ export type ServerProps = {
 
 export const serverProps: (keyof ServerProps)[] = ['payload']
 
-export type ComponentWithServerSideProps<T extends any = any> = React.ComponentType<T & ServerProps>
+export type CustomComponent<T extends any = any> = React.ComponentType<T & ServerProps>
 
 export type Locale = {
   /**
@@ -428,46 +428,46 @@ export type Config = {
       /**
        * Replace the navigation with a custom component
        */
-      Nav?: ComponentWithServerSideProps
+      Nav?: CustomComponent
       /**
        * Add custom components to the top right of the Admin Panel
        */
-      actions?: ComponentWithServerSideProps[]
+      actions?: CustomComponent[]
       /**
        * Add custom components after the collection overview
        */
-      afterDashboard?: ComponentWithServerSideProps[]
+      afterDashboard?: CustomComponent[]
       /**
        * Add custom components after the email/password field
        */
-      afterLogin?: ComponentWithServerSideProps[]
+      afterLogin?: CustomComponent[]
       /**
        * Add custom components after the navigation links
        */
-      afterNavLinks?: ComponentWithServerSideProps[]
+      afterNavLinks?: CustomComponent[]
       /**
        * Add custom components before the collection overview
        */
-      beforeDashboard?: ComponentWithServerSideProps[]
+      beforeDashboard?: CustomComponent[]
       /**
        * Add custom components before the email/password field
        */
-      beforeLogin?: ComponentWithServerSideProps[]
+      beforeLogin?: CustomComponent[]
       /**
        * Add custom components before the navigation links
        */
-      beforeNavLinks?: ComponentWithServerSideProps[]
+      beforeNavLinks?: CustomComponent[]
       /** Replace graphical components */
       graphics?: {
         /** Replace the icon in the navigation */
-        Icon?: ComponentWithServerSideProps
+        Icon?: CustomComponent
         /** Replace the logo on the login page */
-        Logo?: ComponentWithServerSideProps
+        Logo?: CustomComponent
       }
       /** Replace logout related components */
       logout?: {
         /** Replace the logout button  */
-        Button?: ComponentWithServerSideProps
+        Button?: CustomComponent
       }
       /**
        * Wrap the admin dashboard in custom context providers
@@ -724,7 +724,7 @@ export type EditConfig =
     )
   | EditViewComponent
 
-export type EntityDescriptionComponent = ComponentWithServerSideProps
+export type EntityDescriptionComponent = CustomComponent
 
 export type EntityDescriptionFunction = () => string
 

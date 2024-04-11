@@ -1,5 +1,5 @@
-import type { ComponentWithServerSideProps } from '../../config/types.js'
+import type { CustomComponent } from '../../config/types.js'
 
-export type RowLabelComponent = ComponentWithServerSideProps
+export type RowLabelComponent = CustomComponent
 
 export type RowLabel = Record<string, string> | RowLabelComponent | string

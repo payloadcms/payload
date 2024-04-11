@@ -1,10 +1,10 @@
-import type { ComponentWithServerSideProps } from 'payload/config'
+import type { CustomComponent } from 'payload/config'
 
 import React from 'react'
 
 const baseClass = 'collection-edit-button'
 
-export const CollectionEditButton: ComponentWithServerSideProps = () => {
+export const CollectionEditButton: CustomComponent = () => {
   return (
     <div
       className={baseClass}
