@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
-import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { mediaSlug } from '../Media/index.js'
 
 export const postsSlug = 'posts'
 
@@ -19,26 +19,19 @@ export const PostsCollection: CollectionConfig = {
       type: 'richText',
     },
     {
-      name: 'richText2',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          BlocksFeature({
-            blocks: [
-              {
-                slug: 'testblock',
-                fields: [
-                  {
-                    name: 'testfield',
-                    type: 'text',
-                  },
-                ],
-              },
-            ],
-          }),
-        ],
-      }),
+      name: 'category',
+      type: 'relationship',
+      localized: true,
+      relationTo: 'categories',
+    },
+    {
+      name: 'associatedMedia',
+      type: 'upload',
+      access: {
+        create: () => true,
+        update: () => false,
+      },
+      relationTo: mediaSlug,
     },
     // {
     //   type: 'row',
