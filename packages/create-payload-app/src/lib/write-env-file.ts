@@ -20,32 +20,41 @@ export async function writeEnvFile(args: {
     return
   }
 
+  const envOutputPath = path.join(projectDir, '.env')
+
   try {
-    if (template?.type === 'starter' && fs.existsSync(path.join(projectDir, '.env.example'))) {
-      // Parse .env file into key/value pairs
-      const envFile = await fs.readFile(path.join(projectDir, '.env.example'), 'utf8')
-      const envWithValues: string[] = envFile
-        .split('\n')
-        .filter((e) => e)
-        .map((line) => {
-          if (line.startsWith('#') || !line.includes('=')) return line
+    if (fs.existsSync(envOutputPath)) {
+      if (template?.type === 'starter') {
+        // Parse .env file into key/value pairs
+        const envFile = await fs.readFile(path.join(projectDir, '.env.example'), 'utf8')
+        const envWithValues: string[] = envFile
+          .split('\n')
+          .filter((e) => e)
+          .map((line) => {
+            if (line.startsWith('#') || !line.includes('=')) return line
 
-          const split = line.split('=')
-          const key = split[0]
-          let value = split[1]
+            const split = line.split('=')
+            const key = split[0]
+            let value = split[1]
 
-          if (key === 'MONGODB_URI' || key === 'MONGO_URL' || key === 'DATABASE_URI') {
-            value = databaseUri
-          }
-          if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {
-            value = payloadSecret
-          }
+            if (key === 'MONGODB_URI' || key === 'MONGO_URL' || key === 'DATABASE_URI') {
+              value = databaseUri
+            }
+            if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {
+              value = payloadSecret
+            }
 
-          return `${key}=${value}`
-        })
+            return `${key}=${value}`
+          })
 
-      // Write new .env file
-      await fs.writeFile(path.join(projectDir, '.env'), envWithValues.join('\n'))
+        // Write new .env file
+        await fs.writeFile(envOutputPath, envWithValues.join('\n'))
+      } else {
+        const existingEnv = await fs.readFile(envOutputPath, 'utf8')
+        const newEnv =
+          existingEnv + `\nDATABASE_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}\n`
+        await fs.writeFile(envOutputPath, newEnv)
+      }
     } else {
       const content = `DATABASE_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`
       await fs.outputFile(`${projectDir}/.env`, content)
