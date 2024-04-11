@@ -18,43 +18,46 @@ export function getValidTemplates(): ProjectTemplate[] {
       name: 'blank-3.0',
       type: 'starter',
       description: 'Blank 3.0 Template',
-      url: 'https://github.com/payloadcms/payload/templates/blank-3.0',
+      url: 'https://github.com/payloadcms/payload/templates/blank-3.0#beta',
     },
-    {
-      name: 'blank',
-      type: 'starter',
-      description: 'Blank Template',
-      url: 'https://github.com/payloadcms/payload/templates/blank',
-    },
-    {
-      name: 'website',
-      type: 'starter',
-      description: 'Website Template',
-      url: 'https://github.com/payloadcms/payload/templates/website',
-    },
-    {
-      name: 'ecommerce',
-      type: 'starter',
-      description: 'E-commerce Template',
-      url: 'https://github.com/payloadcms/payload/templates/ecommerce',
-    },
-    {
-      name: 'plugin',
-      type: 'plugin',
-      description: 'Template for creating a Payload plugin',
-      url: 'https://github.com/payloadcms/payload-plugin-template',
-    },
-    {
-      name: 'payload-demo',
-      type: 'starter',
-      description: 'Payload demo site at https://demo.payloadcms.com',
-      url: 'https://github.com/payloadcms/public-demo',
-    },
-    {
-      name: 'payload-website',
-      type: 'starter',
-      description: 'Payload website CMS at https://payloadcms.com',
-      url: 'https://github.com/payloadcms/website-cms',
-    },
+
+    // Remove these until they have been updated for 3.0
+
+    // {
+    //   name: 'blank',
+    //   type: 'starter',
+    //   description: 'Blank Template',
+    //   url: 'https://github.com/payloadcms/payload/templates/blank',
+    // },
+    // {
+    //   name: 'website',
+    //   type: 'starter',
+    //   description: 'Website Template',
+    //   url: 'https://github.com/payloadcms/payload/templates/website',
+    // },
+    // {
+    //   name: 'ecommerce',
+    //   type: 'starter',
+    //   description: 'E-commerce Template',
+    //   url: 'https://github.com/payloadcms/payload/templates/ecommerce',
+    // },
+    // {
+    //   name: 'plugin',
+    //   type: 'plugin',
+    //   description: 'Template for creating a Payload plugin',
+    //   url: 'https://github.com/payloadcms/payload-plugin-template',
+    // },
+    // {
+    //   name: 'payload-demo',
+    //   type: 'starter',
+    //   description: 'Payload demo site at https://demo.payloadcms.com',
+    //   url: 'https://github.com/payloadcms/public-demo',
+    // },
+    // {
+    //   name: 'payload-website',
+    //   type: 'starter',
+    //   description: 'Payload website CMS at https://payloadcms.com',
+    //   url: 'https://github.com/payloadcms/website-cms',
+    // },
   ]
 }
