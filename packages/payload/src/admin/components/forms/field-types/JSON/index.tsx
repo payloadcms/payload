@@ -94,7 +94,6 @@ const JSONField: React.FC<Props> = (props) => {
         setHasLoadedValue(true)
       }
     } catch (e) {
-      console.log(e)
       setJsonError(e)
     }
   }, [initialValue, value, hasLoadedValue])
