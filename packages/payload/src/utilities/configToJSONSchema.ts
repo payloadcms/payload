@@ -67,6 +67,30 @@ function generateEntitySchemas(
   }
 }
 
+function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONSchema4 {
+  const properties: JSONSchema4[] = [...entities]
+    .filter(({ auth }) => Boolean(auth))
+    .map(({ slug }) => {
+      return {
+        allOf: [
+          { $ref: `#/definitions/${slug}` },
+          {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              collection: { type: 'string', enum: [slug] },
+            },
+            required: ['collection'],
+          },
+        ],
+      }
+    }, {})
+
+  return {
+    oneOf: properties,
+  }
+}
+
 /**
  * Returns a JSON Schema Type with 'null' added if the field is not required.
  */
@@ -553,8 +577,9 @@ export function configToJSONSchema(
     properties: {
       collections: generateEntitySchemas(config.collections || []),
       globals: generateEntitySchemas(config.globals || []),
+      user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['collections', 'globals'],
+    required: ['user', 'collections', 'globals'],
     title: 'Config',
   }
 }
