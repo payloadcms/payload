@@ -76,7 +76,8 @@ export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url
 
 type GeneratePreviewURLOptions = {
   locale: string
-  token: string
+  req: PayloadRequest
+  token: null | string
 }
 
 export type GeneratePreviewURL = (
