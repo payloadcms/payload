@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
-import type { User } from '../../../payload/payload-types'
+import type { User } from '../../../payload-types'
 
 // eslint-disable-next-line no-unused-vars
 type ResetPassword = (args: {

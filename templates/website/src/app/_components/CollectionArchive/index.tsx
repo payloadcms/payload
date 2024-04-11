@@ -3,7 +3,7 @@
 import qs from 'qs'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
-import type { Post, Project } from '../../../payload/payload-types'
+import type { Post, Project } from '../../../payload-types'
 import type { ArchiveBlockProps } from '../../_blocks/ArchiveBlock/types'
 
 import { Card } from '../Card'

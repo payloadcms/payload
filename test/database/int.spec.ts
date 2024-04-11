@@ -48,6 +48,34 @@ describe('database', () => {
     }
   })
 
+  describe('id type', () => {
+    it('should sanitize incoming IDs if ID type is number', async () => {
+      const created = await restClient
+        .POST(`/posts`, {
+          body: JSON.stringify({
+            title: 'post to test that ID comes in as proper type',
+          }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      const { doc: updated } = await restClient
+        .PATCH(`/posts/${created.doc.id}`, {
+          body: JSON.stringify({
+            title: 'hello',
+          }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(updated.id).toStrictEqual(created.doc.id)
+    })
+  })
+
   describe('migrations', () => {
     beforeAll(async () => {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
@@ -185,34 +213,6 @@ describe('database', () => {
         expect(db.enums.selectEnum).toBeDefined()
         expect(db.enums.radioEnum).toBeDefined()
       }
-    })
-  })
-
-  describe('id type', () => {
-    it('should sanitize incoming IDs if ID type is number', async () => {
-      const { doc } = await restClient
-        .POST(`/posts`, {
-          body: JSON.stringify({
-            title: 'post to test that ID comes in as proper type',
-          }),
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => res.json())
-
-      const { doc: updated } = await restClient
-        .PATCH(`/posts/${doc.id}`, {
-          body: JSON.stringify({
-            title: 'hello',
-          }),
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => res.json())
-
-      expect(updated.id).toStrictEqual(doc.id)
     })
   })
 

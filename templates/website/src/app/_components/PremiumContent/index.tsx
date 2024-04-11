@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import React, { useEffect } from 'react'
 
-import type { Page } from '../../../payload/payload-types'
+import type { Page } from '../../../payload-types'
 
 import { POST_PREMIUM_CONTENT } from '../../_graphql/posts'
 import { useAuth } from '../../_providers/Auth'

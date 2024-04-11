@@ -18,6 +18,11 @@ export default someFunc(
 const wrapped = someFunc(asdf);
 export { wrapped as default };
 `,
+  nextConfigWithSpread: `const nextConfig = {
+  ...someConfig,
+};
+export default nextConfig;
+`,
 }
 
 const cjsConfigs = {
@@ -38,6 +43,9 @@ module.exports = someFunc(
   nextConfigExportNamedDefault: `const nextConfig = {};
 const wrapped = someFunc(asdf);
 module.exports = wrapped;
+`,
+  nextConfigWithSpread: `const nextConfig = { ...someConfig };
+module.exports = nextConfig;
 `,
 }
 
@@ -68,6 +76,15 @@ describe('parseAndInsertWithPayload', () => {
       )
       expect(modifiedConfigContent).toContain(importStatement)
       expect(modifiedConfigContent).toMatch(/withPayload\(someFunc\(\n  nextConfig\n\)\)/)
+    })
+
+    it('should parse the config with a spread', () => {
+      const { modifiedConfigContent } = parseAndModifyConfigContent(
+        esmConfigs.nextConfigWithSpread,
+        configType,
+      )
+      expect(modifiedConfigContent).toContain(importStatement)
+      expect(modifiedConfigContent).toContain('withPayload(nextConfig)')
     })
 
     // Unsupported: export { wrapped as default }
@@ -128,6 +145,15 @@ describe('parseAndInsertWithPayload', () => {
       )
       expect(modifiedConfigContent).toContain(requireStatement)
       expect(modifiedConfigContent).toContain('withPayload(wrapped)')
+    })
+
+    it('should parse the config with a spread', () => {
+      const { modifiedConfigContent } = parseAndModifyConfigContent(
+        cjsConfigs.nextConfigWithSpread,
+        configType,
+      )
+      expect(modifiedConfigContent).toContain(requireStatement)
+      expect(modifiedConfigContent).toContain('withPayload(nextConfig)')
     })
   })
 })

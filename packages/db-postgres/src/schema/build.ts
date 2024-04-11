@@ -299,7 +299,8 @@ export const buildTable = ({
         })
         let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
 
-        const relatedCollectionCustomIDType = adapter.payload[relationshipConfig.slug]?.customIDType
+        const relatedCollectionCustomIDType =
+          adapter.payload.collections[relationshipConfig.slug]?.customIDType
 
         if (relatedCollectionCustomIDType === 'number') colType = 'numeric'
         if (relatedCollectionCustomIDType === 'text') colType = 'varchar'

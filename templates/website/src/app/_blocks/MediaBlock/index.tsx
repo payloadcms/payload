@@ -2,7 +2,7 @@ import type { StaticImageData } from 'next/image'
 
 import React from 'react'
 
-import type { Page } from '../../../payload/payload-types'
+import type { Page } from '../../../payload-types'
 
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'

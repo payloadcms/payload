@@ -35,7 +35,10 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
       cached.payload.config = config
 
       cached.payload.collections = config.collections.reduce((collections, collection) => {
-        collections[collection.slug] = { config: collection }
+        collections[collection.slug] = {
+          config: collection,
+          customIDType: cached.payload.collections[collection.slug]?.customIDType,
+        }
         return collections
       }, {})
 

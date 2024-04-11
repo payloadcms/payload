@@ -5,6 +5,7 @@ import type {
   EntityDescriptionFunction,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
 import { ViewDescription, type ViewDescriptionProps } from '@payloadcms/ui/elements/ViewDescription'
@@ -18,12 +19,14 @@ import { mapFields } from './fields.js'
 
 export const mapGlobals = ({
   DefaultEditView,
+  WithServerSideProps,
   config,
   globals,
   i18n,
   readOnly: readOnlyOverride,
 }: {
   DefaultEditView: React.FC<EditViewProps>
+  WithServerSideProps: WithServerSidePropsType
   config: SanitizedConfig
   globals: SanitizedGlobalConfig[]
   i18n: I18n
@@ -37,16 +40,28 @@ export const mapGlobals = ({
     const editViewFromConfig = globalConfig?.admin?.components?.views?.Edit
 
     const SaveButton = globalConfig?.admin?.components?.elements?.SaveButton
-    const SaveButtonComponent = SaveButton ? <SaveButton /> : undefined
+
+    const SaveButtonComponent = SaveButton ? (
+      <WithServerSideProps Component={SaveButton} />
+    ) : undefined
 
     const SaveDraftButton = globalConfig?.admin?.components?.elements?.SaveDraftButton
-    const SaveDraftButtonComponent = SaveDraftButton ? <SaveDraftButton /> : undefined
+
+    const SaveDraftButtonComponent = SaveDraftButton ? (
+      <WithServerSideProps Component={SaveDraftButton} />
+    ) : undefined
 
     const PreviewButton = globalConfig?.admin?.components?.elements?.PreviewButton
-    const PreviewButtonComponent = PreviewButton ? <PreviewButton /> : undefined
+
+    const PreviewButtonComponent = PreviewButton ? (
+      <WithServerSideProps Component={PreviewButton} />
+    ) : undefined
 
     const PublishButton = globalConfig?.admin?.components?.elements?.PublishButton
-    const PublishButtonComponent = PublishButton ? <PublishButton /> : undefined
+
+    const PublishButtonComponent = PublishButton ? (
+      <WithServerSideProps Component={PublishButton} />
+    ) : undefined
 
     const CustomEditView =
       typeof editViewFromConfig === 'function'
@@ -84,7 +99,7 @@ export const mapGlobals = ({
 
     const Description =
       DescriptionComponent !== undefined ? (
-        <DescriptionComponent {...(descriptionProps || {})} />
+        <WithServerSideProps Component={DescriptionComponent} {...(descriptionProps || {})} />
       ) : undefined
 
     const componentMap: GlobalComponentMap = {
@@ -95,9 +110,11 @@ export const mapGlobals = ({
       SaveButton: SaveButtonComponent,
       SaveDraftButton: SaveDraftButtonComponent,
       actionsMap: mapActions({
+        WithServerSideProps,
         globalConfig,
       }),
       fieldMap: mapFields({
+        WithServerSideProps,
         config,
         fieldSchema: fields,
         i18n,

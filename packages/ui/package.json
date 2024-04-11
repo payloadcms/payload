@@ -82,9 +82,9 @@
       "types": "./src/utilities/*.ts"
     },
     "./scss": {
-      "import": "./src/scss.scss",
-      "require": "./src/scss.scss",
-      "default": "./src/scss.scss"
+      "import": "./src/styles.scss",
+      "require": "./src/styles.scss",
+      "default": "./src/styles.scss"
     },
     "./scss/app.scss": "./src/scss/app.scss"
   },
@@ -163,9 +163,9 @@
         "default": "./dist/prod/styles.css"
       },
       "./scss": {
-        "import": "./dist/scss.scss",
-        "require": "./dist/scss.scss",
-        "default": "./dist/scss.scss"
+        "import": "./dist/styles.scss",
+        "require": "./dist/styles.scss",
+        "default": "./dist/styles.scss"
       },
       "./scss/app.scss": "./dist/scss/app.scss"
     }

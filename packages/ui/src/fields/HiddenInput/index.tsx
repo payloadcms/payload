@@ -10,7 +10,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 export type HiddenInputFieldProps = FormFieldBase & {
   disableModifyingForm?: false
   forceUsePathFromProps?: boolean
-  name: string
+  name?: string
   path?: string
   value?: unknown
 }

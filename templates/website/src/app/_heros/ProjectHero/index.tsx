@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, { Fragment } from 'react'
 
-import type { Project } from '../../../payload/payload-types'
+import type { Project } from '../../../payload-types'
 
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'

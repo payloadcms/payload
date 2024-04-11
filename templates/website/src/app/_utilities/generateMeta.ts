@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import type { Page, Post, Project } from '../../payload/payload-types'
+import type { Page, Post, Project } from '../../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import React, { Fragment, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 
-import type { Comment } from '../../../../payload/payload-types'
+import type { Comment } from '../../../../payload-types'
 
 import { Button } from '../../../_components/Button'
 import { Input } from '../../../_components/Input'

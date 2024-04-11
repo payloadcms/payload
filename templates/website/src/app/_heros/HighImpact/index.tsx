@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import type { Page } from '../../../payload/payload-types'
+import type { Page } from '../../../payload-types'
 
 import { Gutter } from '../../_components/Gutter'
 import { CMSLink } from '../../_components/Link'

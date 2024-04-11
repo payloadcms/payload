@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
-const ContentSecurityPolicy = require('./csp')
-const redirects = require('./redirects')
+import ContentSecurityPolicy from './csp.js'
+import redirects from './redirects.js'
+import { withPayload } from '@payloadcms/next/withPayload'
 
 const nextConfig = {
   async headers() {
@@ -47,4 +48,4 @@ const nextConfig = {
   swcMinify: true,
 }
 
-module.exports = nextConfig
+export default withPayload(nextConfig)

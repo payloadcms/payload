@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-import type { Page } from '../../../payload/payload-types'
+import type { Page } from '../../../payload-types'
 import type { Props as ButtonProps } from '../Button'
 
 import { Button } from '../Button'

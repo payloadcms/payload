@@ -1,9 +1,7 @@
-// Note: This will not work in dev mode and will throw an error upon startup
-// This is because the Payload APIs are not yet running when the Next.js server starts
-// This is not a problem in production as Payload is booted up before building Next.js
-// For this reason the errors can be silently ignored in dev mode
+import { getPayload } from 'payload'
+import { importConfig } from 'payload/node'
 
-module.exports = async () => {
+export default async () => {
   const internetExplorerRedirect = {
     destination: '/ie-incompatible.html',
     has: [
@@ -18,12 +16,14 @@ module.exports = async () => {
   }
 
   try {
-    const redirectsRes = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/redirects?limit=1000&depth=1`,
-    )
+    const config = await importConfig('./src/payload.config.ts')
+    const payload = await getPayload({ config })
 
-    const redirectsData = await redirectsRes.json()
-    const { docs } = redirectsData
+    const { docs } = await payload.find({
+      collection: 'redirects',
+      limit: 1000,
+      depth: 1,
+    })
 
     let dynamicRedirects = []
 

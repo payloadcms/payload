@@ -9,7 +9,7 @@ const policies = {
   'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
 }
 
-module.exports = Object.entries(policies)
+export default Object.entries(policies)
   .map(([key, value]) => {
     if (Array.isArray(value)) {
       return `${key} ${value.join(' ')}`

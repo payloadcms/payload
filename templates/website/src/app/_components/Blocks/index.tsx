@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import type { Page } from '../../../payload/payload-types.js'
+import type { Page } from '../../../payload-types.js'
 import type { VerticalPaddingOptions } from '../VerticalPadding'
 
 import { ArchiveBlock } from '../../_blocks/ArchiveBlock'

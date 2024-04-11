@@ -1,1 +1,3 @@
-export type CustomPreviewButton = React.ComponentType
+import type { CustomComponent } from '../../config/types.js'
+
+export type CustomPreviewButton = CustomComponent
