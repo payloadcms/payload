@@ -13,6 +13,7 @@ export type {
   DocumentTabConfig,
   DocumentTabProps,
 } from './elements/Tab.js'
+export type { WithServerSideProps } from './elements/WithServerSideProps.js'
 export type { ErrorProps } from './forms/Error.js'
 export type {
   Description,

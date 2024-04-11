@@ -34,7 +34,12 @@ export { isEntityHidden } from '../utilities/isEntityHidden.js'
 export { isNumber } from '../utilities/isNumber.js'
 export { isPlainObject } from '../utilities/isPlainObject.js'
 
-export { isPlainFunction, isReactComponent } from '../utilities/isReactComponent.js'
+export {
+  isPlainFunction,
+  isReactClientComponent,
+  isReactComponent,
+  isReactServerComponent,
+} from '../utilities/isReactComponent.js'
 export { isValidID } from '../utilities/isValidID.js'
 export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 

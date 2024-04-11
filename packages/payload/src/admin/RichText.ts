@@ -4,6 +4,7 @@ import type { JSONSchema4 } from 'json-schema'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, RichTextField, Validate } from '../fields/config/types.js'
 import type { PayloadRequest, RequestContext } from '../types/index.js'
+import type { WithServerSideProps } from './elements/WithServerSideProps.js'
 
 export type RichTextFieldProps<
   Value extends object,
@@ -28,6 +29,7 @@ type RichTextAdapterBase<
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
   generateComponentMap: (args: {
+    WithServerSideProps: WithServerSideProps
     config: SanitizedConfig
     i18n: I18n
     schemaPath: string

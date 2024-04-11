@@ -12,6 +12,7 @@ import { createClientConfig } from 'payload/config'
 import React from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
+import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { DefaultEditView } from '../../views/Edit/Default/index.js'
 import { DefaultListView } from '../../views/List/Default/index.js'
@@ -39,6 +40,7 @@ export const RootLayout = async ({
     headers,
   })
 
+  const payload = await getPayloadHMR({ config })
   const i18n = await initI18n({ config: config.i18n, context: 'client', language: languageCode })
   const clientConfig = await createClientConfig({ config, t: i18n.t })
 
@@ -76,6 +78,7 @@ export const RootLayout = async ({
     children,
     config,
     i18n,
+    payload,
   })
 
   return (

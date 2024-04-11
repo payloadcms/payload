@@ -1,9 +1,10 @@
-import type { Field } from 'payload/types'
+import type { Field, WithServerSideProps as WithServerSidePropsType } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
 import { Form } from '@payloadcms/ui/forms/Form'
 import { FormSubmit } from '@payloadcms/ui/forms/Submit'
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
+import { WithServerSideProps as WithServerSidePropsGeneric } from '@payloadcms/ui/providers/ComponentMap'
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
 import React from 'react'
 
@@ -17,6 +18,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     req,
     req: {
       i18n,
+      payload,
       payload: {
         config,
         config: {
@@ -49,7 +51,12 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     },
   ]
 
+  const WithServerSideProps: WithServerSidePropsType = ({ Component, ...rest }) => {
+    return <WithServerSidePropsGeneric Component={Component} payload={payload} {...rest} />
+  }
+
   const createFirstUserFieldMap = mapFields({
+    WithServerSideProps,
     config,
     fieldSchema: fields,
     i18n,
