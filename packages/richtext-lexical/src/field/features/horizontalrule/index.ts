@@ -1,5 +1,3 @@
-import { QuoteNode } from '@lexical/rich-text'
-
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
 import type { SerializedHorizontalRuleNode } from './nodes/HorizontalRuleNode'
@@ -22,7 +20,7 @@ export const HorizontalRuleFeature = (): FeatureProvider => {
                 converter: () => {
                   return `<hr/>`
                 },
-                nodeTypes: [QuoteNode.getType()],
+                nodeTypes: [HorizontalRuleNode.getType()],
               } as HTMLConverter<SerializedHorizontalRuleNode>,
             },
             node: HorizontalRuleNode,
