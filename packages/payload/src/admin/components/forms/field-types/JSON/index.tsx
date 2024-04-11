@@ -75,6 +75,7 @@ const JSONField: React.FC<Props> = (props) => {
       try {
         if (readOnly) return
         setStringValue(val)
+
         setValue(val ? JSON.parse(val) : '')
         setJsonError(undefined)
       } catch (e) {
