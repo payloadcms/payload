@@ -4,6 +4,7 @@ import type DataLoader from 'dataloader'
 import type { User } from '../auth/types.js'
 import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types.js'
 import type payload from '../index.js'
+import type { GeneratedTypes } from '../index.js'
 import type { validOperators } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
@@ -20,7 +21,7 @@ export type UploadEdits = {
   }
 }
 
-export type CustomPayloadRequest<U = any> = {
+export type CustomPayloadRequest<U = unknown> = {
   context: RequestContext
   /** Data from the request body */
   data?: Record<string, unknown>
@@ -73,12 +74,12 @@ export type CustomPayloadRequest<U = any> = {
    */
   transactionIDPromise?: Promise<void>
   /** The signed in user */
-  user: (U & User) | null
+  user: (U & GeneratedTypes['user']) | null
 } & Pick<
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
 >
-export type PayloadRequest<U = any> = Partial<Request> &
+export type PayloadRequest<U = unknown> = Partial<Request> &
   Required<Pick<Request, 'headers'>> &
   CustomPayloadRequest<U>
 export interface RequestContext {
