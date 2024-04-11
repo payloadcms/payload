@@ -17,58 +17,37 @@ export const getDataAndFile: GetDataAndFile = async ({ collection, config, reque
   if (['PATCH', 'POST', 'PUT'].includes(request.method.toUpperCase()) && request.body) {
     const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
-    if (contentType === 'application/json') {
-      data = await request.json()
-    } else if (contentType === 'multipart/form-data') {
-      // possible upload request
-      if (collection?.config?.upload) {
-        // load file in memory
-        if (!config.upload?.useTempFiles) {
-          const formData = await request.formData()
-          const formFile = formData.get('file')
+    if (contentType === 'multipart/form-data') {
+      const { error, fields, files } = await nextFileUpload({
+        options: config.upload as any,
+        request,
+      })
 
-          if (formFile instanceof Blob) {
-            const bytes = await formFile.arrayBuffer()
-            const buffer = Buffer.from(bytes)
+      if (error) {
+        throw new Error(error.message)
+      }
 
-            file = {
-              name: formFile.name,
-              data: buffer,
-              mimetype: formFile.type,
-              size: formFile.size,
-            }
-          }
+      if (collection?.config?.upload && files?.file) {
+        file = files.file
+      }
 
-          const payloadData = formData.get('_payload')
-
-          if (typeof payloadData === 'string') {
-            data = JSON.parse(payloadData)
-          }
-        } else {
-          // store temp file on disk
-          const { error, fields, files } = await nextFileUpload({
-            options: config.upload as any,
-            request,
-          })
-
-          if (error) {
-            throw new Error(error.message)
-          }
-
-          if (files?.file) file = files.file
-
-          if (fields?._payload && typeof fields._payload === 'string') {
-            data = JSON.parse(fields._payload)
-          }
+      if (fields?._payload && typeof fields._payload === 'string') {
+        data = JSON.parse(fields._payload)
+      }
+    } else if (contentType === 'application/json') {
+      const bodyByteSize = parseInt(request.headers.get('Content-Length') || '0', 10)
+      const upperByteLimit =
+        typeof config.upload?.limits?.fieldSize === 'number'
+          ? config.upload.limits.fieldSize
+          : undefined
+      if (bodyByteSize <= upperByteLimit || upperByteLimit === undefined) {
+        try {
+          data = await request.json()
+        } catch (error) {
+          data = {}
         }
       } else {
-        // non upload request
-        const formData = await request.formData()
-        const payloadData = formData.get('_payload')
-
-        if (typeof payloadData === 'string') {
-          data = JSON.parse(payloadData)
-        }
+        throw new Error('Request body size exceeds the limit')
       }
     }
   }

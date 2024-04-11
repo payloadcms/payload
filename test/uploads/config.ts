@@ -452,6 +452,12 @@ export default buildConfigWithDefaults({
       },
     },
   ],
+  upload: {
+    abortOnLimit: true,
+    limits: {
+      fileSize: 2_000_000, // 2MB
+    },
+  },
   onInit: async (payload) => {
     const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
