@@ -1,7 +1,7 @@
 import type { Collection, PayloadRequest } from 'payload/types'
 
 import httpStatus from 'http-status'
-import { APIError, ValidationError } from 'payload/errors'
+import { APIError } from 'payload/errors'
 
 export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
 
