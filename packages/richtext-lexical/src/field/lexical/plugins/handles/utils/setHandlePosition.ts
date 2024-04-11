@@ -1,4 +1,4 @@
-import { doesLineHeightAffectElement } from './doesLineHeightAffectElement'
+import { doesLineHeightAffectElement } from './doesLineHeightAffectElement.js'
 
 export function setHandlePosition(
   targetElem: HTMLElement | null,
