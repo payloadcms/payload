@@ -21,10 +21,10 @@ export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   data: DeepPartial<GeneratedTypes['collections'][TSlug]>
   depth?: number
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: GeneratedTypes['locale']
   file?: File
   filePath?: string
-  locale?: string
+  locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   req?: PayloadRequest

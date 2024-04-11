@@ -12,8 +12,8 @@ export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   data: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
   depth?: number
   draft?: boolean
-  fallbackLocale?: string
-  locale?: string
+  fallbackLocale?: GeneratedTypes['locale']
+  locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean
