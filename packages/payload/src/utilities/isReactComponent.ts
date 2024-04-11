@@ -7,7 +7,7 @@ import { isPlainObject } from './isPlainObject.js'
 export function isReactServerComponent<T extends any>(
   component: React.ComponentType | any,
 ): component is T {
-  return typeof component === 'function' && !isValidElement(component)
+  return typeof component === 'function' && isValidElement(component)
 }
 
 export function isReactClientComponent<T extends any>(

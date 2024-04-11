@@ -50,7 +50,8 @@ export const getGenerateComponentMap =
               if (Component) {
                 componentMap.set(
                   `feature.${featureKey}.components.${componentKey}`,
-                  <Component
+                  <WithServerSideProps
+                    Component={Component}
                     componentKey={componentKey}
                     featureKey={resolvedFeature.key}
                     key={`${resolvedFeature.key}-${componentKey}`}
