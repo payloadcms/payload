@@ -1,4 +1,5 @@
 import httpStatus from 'http-status'
+import { extractJWT } from 'payload/auth'
 import { findOneOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
@@ -24,11 +25,14 @@ export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
     (config) => config.slug === globalConfig.slug,
   )?.admin?.preview
 
+  const token = extractJWT(req)
+
   if (typeof generatePreviewURL === 'function') {
     try {
       previewURL = await generatePreviewURL(result, {
         locale: req.locale,
-        token: req.user?.token,
+        req,
+        token,
       })
     } catch (err) {
       routeError({
