@@ -10,19 +10,20 @@
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
-    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint"
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
+    "generate:types": "payload generate:types"
   },
   "engines": {
     "node": ">=18.19.0"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "alpha",
-    "@payloadcms/next": "alpha",
-    "@payloadcms/plugin-cloud": "alpha",
-    "@payloadcms/richtext-lexical": "alpha",
+    "@payloadcms/db-mongodb": "beta",
+    "@payloadcms/next": "beta",
+    "@payloadcms/plugin-cloud": "beta",
+    "@payloadcms/richtext-lexical": "beta",
     "cross-env": "^7.0.3",
     "next": "14.2.0-canary.23",
-    "payload": "alpha",
+    "payload": "beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sharp": "0.32.6"

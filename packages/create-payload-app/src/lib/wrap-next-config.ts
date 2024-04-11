@@ -5,12 +5,23 @@ import fs from 'fs'
 import { warning } from '../utils/log.js'
 import { log } from '../utils/log.js'
 
-export const withPayloadImportStatement = `import { withPayload } from '@payloadcms/next'\n`
+export const withPayloadStatement = {
+  cjs: `const { withPayload } = require('@payloadcms/next/withPayload')\n`,
+  esm: `import { withPayload } from '@payloadcms/next/withPayload'\n`,
+}
 
-export const wrapNextConfig = (args: { nextConfigPath: string }) => {
-  const { nextConfigPath } = args
+type NextConfigType = 'cjs' | 'esm'
+
+export const wrapNextConfig = (args: {
+  nextConfigPath: string
+  nextConfigType: NextConfigType
+}) => {
+  const { nextConfigPath, nextConfigType: configType } = args
   const configContent = fs.readFileSync(nextConfigPath, 'utf8')
-  const { modifiedConfigContent: newConfig, success } = parseAndModifyConfigContent(configContent)
+  const { modifiedConfigContent: newConfig, success } = parseAndModifyConfigContent(
+    configContent,
+    configType,
+  )
 
   if (!success) {
     return
@@ -22,72 +33,110 @@ export const wrapNextConfig = (args: { nextConfigPath: string }) => {
 /**
  * Parses config content with AST and wraps it with withPayload function
  */
-export function parseAndModifyConfigContent(content: string): {
-  modifiedConfigContent: string
-  success: boolean
-} {
-  content = withPayloadImportStatement + content
+export function parseAndModifyConfigContent(
+  content: string,
+  configType: NextConfigType,
+): { modifiedConfigContent: string; success: boolean } {
+  content = withPayloadStatement[configType] + content
   const ast = parseModule(content, { loc: true })
-  const exportDefaultDeclaration = ast.body.find((p) => p.type === 'ExportDefaultDeclaration') as
-    | Directive
-    | undefined
 
-  const exportNamedDeclaration = ast.body.find((p) => p.type === 'ExportNamedDeclaration') as
-    | ExportNamedDeclaration
-    | undefined
+  if (configType === 'esm') {
+    const exportDefaultDeclaration = ast.body.find((p) => p.type === 'ExportDefaultDeclaration') as
+      | Directive
+      | undefined
 
-  if (!exportDefaultDeclaration && !exportNamedDeclaration) {
-    throw new Error('Could not find ExportDefaultDeclaration in next.config.js')
-  }
+    const exportNamedDeclaration = ast.body.find((p) => p.type === 'ExportNamedDeclaration') as
+      | ExportNamedDeclaration
+      | undefined
 
-  if (exportDefaultDeclaration && exportDefaultDeclaration.declaration?.loc) {
-    const modifiedConfigContent = insertBeforeAndAfter(
-      content,
-      exportDefaultDeclaration.declaration.loc,
-    )
-    return { modifiedConfigContent, success: true }
-  } else if (exportNamedDeclaration) {
-    const exportSpecifier = exportNamedDeclaration.specifiers.find(
-      (s) =>
-        s.type === 'ExportSpecifier' &&
-        s.exported?.name === 'default' &&
-        s.local?.type === 'Identifier' &&
-        s.local?.name,
-    )
+    if (!exportDefaultDeclaration && !exportNamedDeclaration) {
+      throw new Error('Could not find ExportDefaultDeclaration in next.config.js')
+    }
 
-    if (exportSpecifier) {
-      warning('Could not automatically wrap next.config.js with withPayload.')
-      warning('Automatic wrapping of named exports as default not supported yet.')
+    if (exportDefaultDeclaration && exportDefaultDeclaration.declaration?.loc) {
+      const modifiedConfigContent = insertBeforeAndAfter(
+        content,
+        exportDefaultDeclaration.declaration.loc,
+        configType,
+      )
+      return { modifiedConfigContent, success: true }
+    } else if (exportNamedDeclaration) {
+      const exportSpecifier = exportNamedDeclaration.specifiers.find(
+        (s) =>
+          s.type === 'ExportSpecifier' &&
+          s.exported?.name === 'default' &&
+          s.local?.type === 'Identifier' &&
+          s.local?.name,
+      )
 
-      warnUserWrapNotSuccessful()
-      return {
-        modifiedConfigContent: content,
-        success: false,
+      if (exportSpecifier) {
+        warning('Could not automatically wrap next.config.js with withPayload.')
+        warning('Automatic wrapping of named exports as default not supported yet.')
+
+        warnUserWrapNotSuccessful(configType)
+        return {
+          modifiedConfigContent: content,
+          success: false,
+        }
       }
+    }
+
+    warning('Could not automatically wrap Next config with withPayload.')
+    warnUserWrapNotSuccessful(configType)
+    return {
+      modifiedConfigContent: content,
+      success: false,
+    }
+  } else if (configType === 'cjs') {
+    // Find `module.exports = X`
+    const moduleExports = ast.body.find(
+      (p) =>
+        p.type === 'ExpressionStatement' &&
+        p.expression?.type === 'AssignmentExpression' &&
+        p.expression.left?.type === 'MemberExpression' &&
+        p.expression.left.object?.type === 'Identifier' &&
+        p.expression.left.object.name === 'module' &&
+        p.expression.left.property?.type === 'Identifier' &&
+        p.expression.left.property.name === 'exports',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any
+
+    if (moduleExports && moduleExports.expression.right?.loc) {
+      const modifiedConfigContent = insertBeforeAndAfter(
+        content,
+        moduleExports.expression.right.loc,
+        configType,
+      )
+      return { modifiedConfigContent, success: true }
+    }
+
+    return {
+      modifiedConfigContent: content,
+      success: false,
     }
   }
 
-  warning('Could not automatically wrap next.config.js with withPayload.')
-  warnUserWrapNotSuccessful()
+  warning('Could not automatically wrap Next config with withPayload.')
+  warnUserWrapNotSuccessful(configType)
   return {
     modifiedConfigContent: content,
     success: false,
   }
 }
 
-function warnUserWrapNotSuccessful() {
+function warnUserWrapNotSuccessful(configType: NextConfigType) {
   // Output directions for user to update next.config.js
   const withPayloadMessage = `
 
   ${chalk.bold(`Please manually wrap your existing next.config.js with the withPayload function. Here is an example:`)}
 
-  import withPayload from '@payloadcms/next/withPayload'
+  ${withPayloadStatement[configType]}
 
   const nextConfig = {
     // Your Next.js config here
   }
 
-  export default withPayload(nextConfig)
+  ${configType === 'esm' ? 'export default withPayload(nextConfig)' : 'module.exports = withPayload(nextConfig)'}
 
 `
 
@@ -125,7 +174,7 @@ type Loc = {
   start: { column: number; line: number }
 }
 
-function insertBeforeAndAfter(content: string, loc: Loc) {
+function insertBeforeAndAfter(content: string, loc: Loc, configType: NextConfigType) {
   const { end, start } = loc
   const lines = content.split('\n')
 
