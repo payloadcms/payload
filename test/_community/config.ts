@@ -32,15 +32,6 @@ export default buildConfigWithDefaults({
       collection: postsSlug,
       data: {
         text: 'example post',
-        jsonField1: {
-          test: 'string to test',
-        },
-        jsonField2: {
-          test: 'string to test',
-        },
-        jsonField3: {
-          test: 'string to test',
-        },
       },
     })
   },

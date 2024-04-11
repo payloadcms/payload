@@ -11,48 +11,6 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'jsonField1',
-      schema: [
-        {
-          type: 'object',
-          properties: {
-            test: {
-              enum: ['string to test one'],
-            },
-          },
-        },
-      ],
-      type: 'json',
-    },
-    {
-      name: 'jsonField2',
-      schema: [
-        {
-          type: 'object',
-          properties: {
-            test: {
-              enum: ['string to test two'],
-            },
-          },
-        },
-      ],
-      type: 'json',
-    },
-    {
-      name: 'jsonField3',
-      schema: [
-        {
-          type: 'object',
-          properties: {
-            test: {
-              enum: ['string to test three'],
-            },
-          },
-        },
-      ],
-      type: 'json',
-    },
-    {
       name: 'associatedMedia',
       access: {
         create: () => true,
