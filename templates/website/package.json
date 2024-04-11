@@ -23,7 +23,7 @@
     "@payloadcms/richtext-lexical": "^3.0.0-beta.6",
     "@payloadcms/richtext-slate": "^3.0.0-beta.6",
     "@payloadcms/ui": "^3.0.0-beta.6",
-    "@payloadcms/plugin-cloud": "^3.0.0-beta.6",
+    "@payloadcms/plugin-cloud": "3.0.0-beta.6",
     "@payloadcms/plugin-redirects": "^3.0.0-beta.6",
     "@payloadcms/plugin-seo": "^3.0.0-beta.6",
     "cross-env": "^7.0.3",

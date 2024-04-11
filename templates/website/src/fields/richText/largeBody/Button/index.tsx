@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import ElementButton from '@payloadcms/richtext-slate/dist/field/elements/Button'
+import { ElementButton } from '@payloadcms/richtext-slate'
 // eslint-disable-next-line no-use-before-define
 import React from 'react'
 
