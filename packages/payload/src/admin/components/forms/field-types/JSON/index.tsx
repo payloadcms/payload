@@ -57,7 +57,7 @@ const JSONField: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
-  function handleEditorDidMount(editor, monaco) {
+  function handleMount(editor, monaco) {
     const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
     const schemas = []
 
@@ -67,23 +67,7 @@ const JSONField: React.FC<Props> = (props) => {
 
     const initialModelValue = JSON.stringify(value, null, 2)
 
-    // TODO 🔥: add conditional -- CREATE model only if it doesn't exist otherwise GET existing model
     const model = monaco.editor.createModel(initialModelValue, 'json', modelUri)
-    // let model = {}
-    // let hasModel = false
-    // const models = monaco.editor.getModels().forEach((existingModel) => {
-    //   if (existingModel.uri.toString() === jsonUri) {
-    //     model = existingModel
-    //     hasModel = true
-    //   } else {
-    //     model = monaco.editor.createModel(initialModelValue, 'json', modelUri)
-    //   }
-    // })
-    //
-    // if (hasModel) return
-    //
-    // console.log(models)
-    // console.log('🔥:check how many models', models.length)
 
     const monacoFormattedSchemas = schema.map((initialSchema) =>
       Object.assign(
@@ -165,7 +149,7 @@ const JSONField: React.FC<Props> = (props) => {
       <CodeEditor
         defaultLanguage="json"
         onChange={handleChange}
-        onMount={handleEditorDidMount}
+        onMount={handleMount}
         options={editorOptions}
         readOnly={readOnly}
         value={stringValue}
