@@ -1,11 +1,12 @@
 import type { User } from '../auth/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { deepCopyObject } from '../utilities/deepCopyObject.js'
 
 type Args = {
   defaultValue: unknown
   locale: string | undefined
-  user: User
+  user: PayloadRequest['user']
   value?: unknown
 }
 
