@@ -293,9 +293,9 @@ describe('relationship', () => {
   // opened through the edit button can be saved using the hotkey.
   test('should save using hotkey in edit document drawer', async () => {
     await page.goto(url.create)
-    // First fill out the relationship field, as it's required
-    await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+    await wait(500)
     await page.locator('#field-relationship .value-container').click()
+    await wait(500)
     // Select "Seeded text document" relationship
     await page.getByText('Seeded text document', { exact: true }).click()
 

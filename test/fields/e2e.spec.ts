@@ -800,6 +800,8 @@ describe('fields', () => {
 
       await openDocDrawer(page, '.field-type.upload .upload__toggler.doc-drawer__toggler')
 
+      await wait(1000)
+
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
         .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
