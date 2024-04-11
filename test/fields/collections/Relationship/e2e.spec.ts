@@ -12,6 +12,7 @@ import {
   ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
 } from '../../../helpers.js'
@@ -70,8 +71,8 @@ describe('relationship', () => {
   test('should create inline relationship within field with many relations', async () => {
     await page.goto(url.create)
 
-    const button = page.locator('#relationship-add-new .relationship-add-new__add-button')
-    await button.click()
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
+
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
@@ -97,7 +98,7 @@ describe('relationship', () => {
     await page.goto(url.create)
     await page.waitForURL(`**/${url.create}`)
     // Open first modal
-    await page.locator('#relationToSelf-add-new .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#relationToSelf-add-new .relationship-add-new__add-button')
 
     // Fill first modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
@@ -108,9 +109,10 @@ describe('relationship', () => {
       .click()
 
     // Open second modal
-    await page
-      .locator('[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button')
-      .click()
+    await openDocDrawer(
+      page,
+      '[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button',
+    )
 
     // Fill second modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click()
@@ -174,6 +176,7 @@ describe('relationship', () => {
   // TODO: React-Select not loading things sometimes. Fix later
   test.skip('should display `hasMany` polymorphic relationships', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
     const field = page.locator('#field-relationHasManyPolymorphic')
     await field.click()
 
@@ -209,6 +212,7 @@ describe('relationship', () => {
 
   test('should populate relationship dynamic default value', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
     await expect(
       page.locator('#field-relationWithDynamicDefault .relationship--single-value__text'),
     ).toContainText('dev@payloadcms.com')
@@ -230,7 +234,7 @@ describe('relationship', () => {
     await page.goto(url.create)
     await page.waitForURL(`**/${url.create}`)
     // First fill out the relationship field, as it's required
-    await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
@@ -245,7 +249,7 @@ describe('relationship', () => {
 
     // Create a new doc for the `relationshipHasMany` field
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
-    await page.locator('#field-relationshipHasMany .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#field-relationshipHasMany .relationship-add-new__add-button')
     const value = 'Hello, world!'
     await page.locator('.drawer__content #field-text').fill(value)
 
@@ -293,7 +297,8 @@ describe('relationship', () => {
   // opened through the edit button can be saved using the hotkey.
   test('should save using hotkey in edit document drawer', async () => {
     await page.goto(url.create)
-    await wait(500)
+    // First fill out the relationship field, as it's required
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page.locator('#field-relationship .value-container').click()
     await wait(500)
     // Select "Seeded text document" relationship
@@ -334,7 +339,7 @@ describe('relationship', () => {
   test.skip('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
@@ -344,8 +349,9 @@ describe('relationship', () => {
 
   test('should fail min rows validation when rows are present', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
     // First fill out the relationship field, as it's required
-    await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+    await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
@@ -366,26 +372,28 @@ describe('relationship', () => {
 
   test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
 
     const field = page.locator('#field-relationship')
     await field.click()
 
-    const firstOption = page.locator('.rs__option').first()
-    await expect(firstOption).toBeVisible()
-    const firstOptionText = await firstOption.textContent()
-    expect(firstOptionText.trim()).toBe('Another text document')
+    const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
+    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstOptionLabel = await firstTextDocOption.textContent()
+    expect(firstOptionLabel.trim()).toBe('Another text document')
   })
 
   test('should sort relationHasManyPolymorphic options by sortOptions property: text-fields collection (items in descending order)', async () => {
     await page.goto(url.create)
+    await page.waitForURL(url.create)
 
     const field = page.locator('#field-relationHasManyPolymorphic')
     await field.click()
 
-    const firstOption = page.locator('.rs__option').first()
-    await expect(firstOption).toBeVisible()
-    const firstOptionText = await firstOption.textContent()
-    expect(firstOptionText.trim()).toBe('Seeded text document')
+    const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
+    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstOptionLabel = await firstTextDocOption.textContent()
+    expect(firstOptionLabel).toBe('Seeded text document')
   })
 
   test('should allow filtering by relationship field / equals', async () => {
@@ -393,6 +401,7 @@ describe('relationship', () => {
     await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
 
     await page.goto(url.list)
+    await page.waitForURL(url.list)
 
     await page.locator('.list-controls__toggle-columns').click()
     await page.locator('.list-controls__toggle-where').click()

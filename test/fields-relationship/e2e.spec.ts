@@ -19,6 +19,7 @@ import {
   ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
   openDocControls,
+  openDocDrawer,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -387,19 +388,14 @@ describe('fields - relationship', () => {
   })
 
   test('should open document drawer from read-only relationships', async () => {
-    await page.goto(url.edit(docWithExistingRelations.id))
+    const editURL = url.edit(docWithExistingRelations.id)
+    await page.goto(editURL)
+    await page.waitForURL(editURL)
 
-    const field = page.locator('#field-relationshipReadOnly')
-
-    const button = field.locator(
-      'button.relationship--single-value__drawer-toggler.doc-drawer__toggler',
+    await openDocDrawer(
+      page,
+      '#field-relationshipReadOnly button.relationship--single-value__drawer-toggler.doc-drawer__toggler',
     )
-
-    await wait(1000)
-
-    await button.click()
-
-    await wait(1000)
 
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()

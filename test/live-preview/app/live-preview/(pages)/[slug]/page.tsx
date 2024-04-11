@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import type { Page } from '../../../../test/live-preview/payload-types.js'
+import type { Page } from '../../../../payload-types.js'
 
 import { fetchDoc } from '../../_api/fetchDoc.js'
 import { fetchDocs } from '../../_api/fetchDocs.js'
@@ -28,6 +28,7 @@ export default async function Page({ params: { slug = 'home' } }) {
 }
 
 export async function generateStaticParams() {
+  process.env.PAYLOAD_DROP_DATABASE = 'false'
   try {
     const pages = await fetchDocs<Page>('pages')
     return pages?.map(({ slug }) => slug)
