@@ -25,13 +25,13 @@ const JSONField: React.FC<Props> = (props) => {
       description,
       editorOptions,
       readOnly,
+      schema,
       style,
       width,
     } = {},
     label,
     path: pathFromProps,
     required,
-    schema,
     validate = json,
   } = props
 
