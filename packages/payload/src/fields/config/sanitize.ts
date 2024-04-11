@@ -1,5 +1,5 @@
 import type { Config } from '../../config/types'
-import type { Field } from './types'
+import type { Block, Field } from './types'
 
 import withCondition from '../../admin/components/forms/withCondition'
 import {
@@ -18,6 +18,7 @@ type Args = {
   config: Config
   existingFieldNames?: Set<string>
   fields: Field[]
+  sanitizedBlocksMap?: Record<string, Block>
   /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
@@ -29,6 +30,7 @@ export const sanitizeFields = ({
   config,
   existingFieldNames = new Set(),
   fields,
+  sanitizedBlocksMap = {},
   validRelationships,
 }: Args): Field[] => {
   if (!fields) return []
@@ -96,10 +98,16 @@ export const sanitizeFields = ({
     }
 
     if (field.type === 'blocks' && field.blocks) {
-      field.blocks = field.blocks.map((block) => ({
-        ...block,
-        fields: block.fields.concat(baseBlockFields),
-      }))
+      field.blocks = field.blocks.map((block) => {
+        // break recursion
+        if (!block.slug && Object.keys(block)[0]) {
+          return sanitizedBlocksMap[Object.keys(block)[0]]
+        }
+        return {
+          ...block,
+          fields: block.fields.concat(baseBlockFields),
+        }
+      })
     }
 
     if (field.type === 'array' && field.fields) {
@@ -113,7 +121,7 @@ export const sanitizeFields = ({
     if (fieldAffectsData(field)) {
       if (existingFieldNames.has(field.name)) {
         throw new DuplicateFieldName(field.name)
-      } else if (!['id', 'blockName'].includes(field.name)) {
+      } else if (!['blockName', 'id'].includes(field.name)) {
         existingFieldNames.add(field.name)
       }
 
@@ -169,16 +177,29 @@ export const sanitizeFields = ({
 
     if ('blocks' in field && field.blocks) {
       field.blocks = field.blocks.map((block) => {
-        const unsanitizedBlock = { ...block }
+        if (sanitizedBlocksMap[block?.interfaceName || block.slug]) {
+          return sanitizedBlocksMap[block?.interfaceName || block.slug]
+        }
+
+        // break recursion
+        if (!block.slug && Object.keys(block)[0]) {
+          return sanitizedBlocksMap[Object.keys(block)[0]]
+        }
+
+        sanitizedBlocksMap[block?.interfaceName || block.slug] = { ...block }
+
+        const unsanitizedBlock = sanitizedBlocksMap[block?.interfaceName || block.slug]
+
         unsanitizedBlock.labels = !unsanitizedBlock.labels
           ? formatLabels(unsanitizedBlock.slug)
           : unsanitizedBlock.labels
 
         unsanitizedBlock.fields = sanitizeFields({
           config,
-          fields: block.fields,
-          validRelationships,
           existingFieldNames: new Set(),
+          fields: block.fields,
+          sanitizedBlocksMap,
+          validRelationships,
         })
 
         return unsanitizedBlock
