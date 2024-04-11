@@ -1,3 +1,5 @@
+import type { Program } from 'esprima'
+
 import chalk from 'chalk'
 import { parseModule } from 'esprima'
 import fs from 'fs'
@@ -38,7 +40,20 @@ export function parseAndModifyConfigContent(
   configType: NextConfigType,
 ): { modifiedConfigContent: string; success: boolean } {
   content = withPayloadStatement[configType] + content
-  const ast = parseModule(content, { loc: true })
+
+  let ast: Program | undefined
+  try {
+    ast = parseModule(content, { loc: true })
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      warning(`Unable to parse Next config. Error: ${error.message} `)
+      warnUserWrapNotSuccessful(configType)
+    }
+    return {
+      modifiedConfigContent: content,
+      success: false,
+    }
+  }
 
   if (configType === 'esm') {
     const exportDefaultDeclaration = ast.body.find((p) => p.type === 'ExportDefaultDeclaration') as
