@@ -3,11 +3,11 @@ import type { Endpoint, PayloadHandler } from 'payload/config'
 import httpStatus from 'http-status'
 
 export const handler: PayloadHandler = async ({ payload, data, user }) => {
-  const method = String(data.method)
+  const operation = String(data.operation)
 
-  if (typeof payload[method] === 'function') {
+  if (typeof payload[operation] === 'function') {
     try {
-      const result = await payload[method]({
+      const result = await payload[operation]({
         ...(typeof data.args === 'object' ? data.args : {}),
         user,
       })

@@ -81,7 +81,7 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
 export type Condition<T extends TypeWithID = any, P = any> = (
   data: Partial<T>,
   siblingData: Partial<P>,
-  { user }: { user: User },
+  { user }: { user: PayloadRequest['user'] },
 ) => boolean
 
 export type FilterOptionsProps<T = any> = {
@@ -104,7 +104,7 @@ export type FilterOptionsProps<T = any> = {
   /**
    * An object containing the currently authenticated user.
    */
-  user: Partial<User>
+  user: Partial<PayloadRequest['user']>
 }
 
 export type FilterOptions<T = any> =

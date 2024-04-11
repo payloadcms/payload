@@ -685,10 +685,7 @@ describe('fields', () => {
 
           // enter date in default date field
           await dateField.fill('02/07/2023')
-          await page.locator('#action-save').click()
-
-          // wait for navigation to update route
-          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
+          await saveDocAndAssert(page)
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')

@@ -8,6 +8,7 @@ import type {
   FindArgs,
   GeneratedTypes,
   UpdateArgs,
+  UpdateGlobalArgs,
 } from './types.js'
 
 type Args = {
@@ -15,7 +16,7 @@ type Args = {
 }
 
 export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>> {
-  private fetch = async <T>({ jwt, reduceJSON, args, method }: FetchOptions): Promise<T> => {
+  private fetch = async <T>({ jwt, reduceJSON, args, operation }: FetchOptions): Promise<T> => {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     }
@@ -27,7 +28,7 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
       headers,
       body: JSON.stringify({
         args,
-        method,
+        operation,
       }),
     }).then((res) => res.json())
 
@@ -41,7 +42,7 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     ...args
   }: CreateArgs<TGeneratedTypes, T>) => {
     return this.fetch<TGeneratedTypes['collections'][T]>({
-      method: 'create',
+      operation: 'create',
       args,
       jwt,
     })
@@ -52,7 +53,7 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     ...args
   }: DeleteArgs<TGeneratedTypes, T>) => {
     return this.fetch<PaginatedDocs<TGeneratedTypes['collections'][T]>>({
-      method: 'delete',
+      operation: 'delete',
       args,
       jwt,
     })
@@ -63,7 +64,7 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     ...args
   }: FindArgs<TGeneratedTypes, T>) => {
     return this.fetch<PaginatedDocs<TGeneratedTypes['collections'][T]>>({
-      method: 'find',
+      operation: 'find',
       args,
       jwt,
     })
@@ -71,7 +72,7 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
 
   sendEmail = async ({ jwt, ...args }: { jwt?: string } & SendMailOptions): Promise<unknown> => {
     return this.fetch({
-      method: 'sendEmail',
+      operation: 'sendEmail',
       args,
       jwt,
     })
@@ -84,7 +85,18 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     ...args
   }: UpdateArgs<TGeneratedTypes, T>) => {
     return this.fetch<TGeneratedTypes['collections'][T]>({
-      method: 'update',
+      operation: 'update',
+      args,
+      jwt,
+    })
+  }
+
+  updateGlobal = async <T extends keyof TGeneratedTypes['globals']>({
+    jwt,
+    ...args
+  }: UpdateGlobalArgs<TGeneratedTypes, T>) => {
+    return this.fetch<TGeneratedTypes['collections'][T]>({
+      operation: 'updateGlobal',
       args,
       jwt,
     })
