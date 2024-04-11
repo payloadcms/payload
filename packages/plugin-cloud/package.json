@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/plugin-cloud",
   "description": "The official Payload Cloud plugin",
-  "version": "3.0.0-beta.2",
+  "version": "3.0.0-beta.3",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "license": "MIT",
