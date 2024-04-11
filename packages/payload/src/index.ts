@@ -473,6 +473,7 @@ type GeneratedTypes = {
   globals: {
     [slug: number | string | symbol]: GlobalTypeWithID & Record<string, unknown>
   }
+  user: TypeWithID & Record<string, unknown> & { collection: string }
 }
 
 type Payload = BasePayload<GeneratedTypes>
