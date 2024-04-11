@@ -21,6 +21,12 @@ export function helpMessage(): void {
   console.log(chalk`
   {bold USAGE}
 
+      {dim Inside of an existing Next.js project}
+
+      {dim $} {bold npx create-payload-app}
+
+      {dim Create a new project from scratch}
+
       {dim $} {bold npx create-payload-app}
       {dim $} {bold npx create-payload-app} my-project
       {dim $} {bold npx create-payload-app} -n my-project -t template-name
