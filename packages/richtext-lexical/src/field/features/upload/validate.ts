@@ -1,5 +1,4 @@
-import { fieldAffectsData } from 'payload/types'
-import { getIDType, isValidID } from 'payload/utilities'
+import { isValidID } from 'payload/utilities'
 
 import type { NodeValidation } from '../types.js'
 import type { SerializedUploadNode } from './nodes/UploadNode.js'
@@ -11,21 +10,14 @@ export const uploadValidation = (): NodeValidation<SerializedUploadNode> => {
     node,
     validation: {
       options: {
-        req: {
-          payload: { config, db },
-          t,
-        },
+        req: { payload, t },
       },
     },
   }) => {
     if (!CAN_USE_DOM) {
-      const idField = config.collections
-        .find(({ slug }) => slug === node.relationTo)
-        .fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+      const idType = payload.collections[node.relationTo].customIDType || payload.db.defaultIDType
 
-      const type = getIDType(idField, db?.defaultIDType)
-
-      if (!isValidID(node.value?.id, type)) {
+      if (!isValidID(node.value?.id, idType)) {
         return t('validation:validUploadID')
       }
     }

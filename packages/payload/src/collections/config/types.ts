@@ -409,6 +409,7 @@ export interface SanitizedCollectionConfig
 
 export type Collection = {
   config: SanitizedCollectionConfig
+  customIDType?: 'number' | 'text'
   graphQL?: {
     JWT: GraphQLObjectType
     mutationInputType: GraphQLNonNull<any>

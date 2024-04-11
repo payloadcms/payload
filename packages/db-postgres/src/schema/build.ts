@@ -298,11 +298,12 @@ export const buildTable = ({
           throwValidationError: true,
         })
         let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
-        const relatedCollectionCustomID = relationshipConfig.fields.find(
-          (field) => fieldAffectsData(field) && field.name === 'id',
-        )
-        if (relatedCollectionCustomID?.type === 'number') colType = 'numeric'
-        if (relatedCollectionCustomID?.type === 'text') colType = 'varchar'
+
+        const relatedCollectionCustomIDType =
+          adapter.payload.collections[relationshipConfig.slug]?.customIDType
+
+        if (relatedCollectionCustomIDType === 'number') colType = 'numeric'
+        if (relatedCollectionCustomIDType === 'text') colType = 'varchar'
 
         relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
           `${formattedRelationTo}_id`,

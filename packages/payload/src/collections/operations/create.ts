@@ -22,7 +22,6 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import flattenFields from '../../utilities/flattenTopLevelFields.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
@@ -106,11 +105,8 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
     // /////////////////////////////////////
     // Custom id
     // /////////////////////////////////////
-    // @todo: Refactor code to store 'customId' on the collection configuration itself so we don't need to repeat flattenFields
-    const hasIdField =
-      flattenFields(collectionConfig.fields).findIndex((field) => field.name === 'id') > -1
 
-    if (hasIdField) {
+    if (payload.collections[collectionConfig.slug].customIDType) {
       data = {
         _id: data.id,
         ...data,

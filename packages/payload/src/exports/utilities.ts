@@ -25,7 +25,6 @@ export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFi
 export { formatLabels, formatNames, toWords } from '../utilities/formatLabels.js'
 
 export { getCollectionIDFieldTypes } from '../utilities/getCollectionIDFieldTypes.js'
-export { getIDType } from '../utilities/getIDType.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { default as getUniqueListBy } from '../utilities/getUniqueListBy.js'
 

@@ -394,9 +394,12 @@ describe('fields - relationship', () => {
     const button = field.locator(
       'button.relationship--single-value__drawer-toggler.doc-drawer__toggler',
     )
+
+    await wait(1000)
+
     await button.click()
 
-    await wait(500)
+    await wait(1000)
 
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()

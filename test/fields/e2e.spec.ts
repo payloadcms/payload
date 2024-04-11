@@ -746,8 +746,7 @@ describe('fields', () => {
         .locator('.file-field__upload input[type="file"]')
         .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
       await expect(page.locator('.file-field .file-field__filename')).toHaveValue('payload.jpg')
-      await page.locator('#action-save').click()
-      await expect(page.locator('.Toastify')).toContainText('successfully')
+      await saveDocAndAssert(page)
     }
 
     // eslint-disable-next-line playwright/expect-expect
@@ -766,7 +765,7 @@ describe('fields', () => {
 
     test('should upload using the document drawer', async () => {
       await uploadImage()
-      await wait(500)
+      await wait(1000)
       // Open the media drawer and create a png upload
 
       await openDocDrawer(page, '.field-type.upload .upload__toggler.doc-drawer__toggler')
@@ -799,6 +798,8 @@ describe('fields', () => {
       await wait(1000) // TODO: Fix this. Need to wait a bit until the form in the drawer mounted, otherwise values sometimes disappear. This is an issue for all drawers
 
       await openDocDrawer(page, '.field-type.upload .upload__toggler.doc-drawer__toggler')
+
+      await wait(1000)
 
       await page
         .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')

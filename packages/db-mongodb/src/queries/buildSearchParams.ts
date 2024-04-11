@@ -59,17 +59,12 @@ export async function buildSearchParam({
   let hasCustomID = false
 
   if (sanitizedPath === '_id') {
-    const customIDfield = payload.collections[collectionSlug]?.config.fields.find(
-      (field) => fieldAffectsData(field) && field.name === 'id',
-    )
+    const customIDFieldType = payload.collections[collectionSlug]?.customIDType
 
     let idFieldType: 'number' | 'text' = 'text'
 
-    if (customIDfield) {
-      if (customIDfield?.type === 'text' || customIDfield?.type === 'number') {
-        idFieldType = customIDfield.type
-      }
-
+    if (customIDFieldType) {
+      idFieldType = customIDFieldType
       hasCustomID = true
     }
 
@@ -213,18 +208,11 @@ export async function buildSearchParam({
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
               (relationTo) => {
-                const isRelatedToCustomNumberID = payload.collections[
-                  relationTo
-                ]?.config?.fields.find((relatedField) => {
-                  return (
-                    fieldAffectsData(relatedField) &&
-                    relatedField.name === 'id' &&
-                    relatedField.type === 'number'
-                  )
-                })
+                const isRelatedToCustomNumberID =
+                  payload.collections[relationTo]?.customIDType === 'number'
 
                 if (isRelatedToCustomNumberID) {
-                  if (isRelatedToCustomNumberID.type === 'number') hasNumberIDRelation = true
+                  hasNumberIDRelation = true
                 }
               },
             )
