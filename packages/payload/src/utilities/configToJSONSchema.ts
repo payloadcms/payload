@@ -67,6 +67,25 @@ function generateEntitySchemas(
   }
 }
 
+function generateLocaleEntitySchemas(localization: SanitizedConfig['localization']): JSONSchema4 {
+  if (localization && 'locales' in localization && localization?.locales) {
+    const localesFromConfig = localization?.locales
+
+    const locales = [...localesFromConfig].map((locale) => {
+      return locale.code
+    }, [])
+
+    return {
+      type: 'string',
+      enum: locales,
+    }
+  }
+
+  return {
+    type: 'null',
+  }
+}
+
 function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONSchema4 {
   const properties: JSONSchema4[] = [...entities]
     .filter(({ auth }) => Boolean(auth))
@@ -577,9 +596,10 @@ export function configToJSONSchema(
     properties: {
       collections: generateEntitySchemas(config.collections || []),
       globals: generateEntitySchemas(config.globals || []),
+      locale: generateLocaleEntitySchemas(config.localization),
       user: generateAuthEntitySchemas(config.collections),
     },
-    required: ['user', 'collections', 'globals'],
+    required: ['user', 'locale', 'collections', 'globals'],
     title: 'Config',
   }
 }
