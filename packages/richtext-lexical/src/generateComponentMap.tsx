@@ -13,7 +13,7 @@ export const getGenerateComponentMap =
   (args: {
     resolvedFeatureMap: ResolvedServerFeatureMap
   }): RichTextAdapter['generateComponentMap'] =>
-  ({ config, i18n, schemaPath }) => {
+  ({ WithServerSideProps, config, i18n, schemaPath }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
 
     const componentMap = new Map()
@@ -50,7 +50,8 @@ export const getGenerateComponentMap =
               if (Component) {
                 componentMap.set(
                   `feature.${featureKey}.components.${componentKey}`,
-                  <Component
+                  <WithServerSideProps
+                    Component={Component}
                     componentKey={componentKey}
                     featureKey={resolvedFeature.key}
                     key={`${resolvedFeature.key}-${componentKey}`}
@@ -86,6 +87,7 @@ export const getGenerateComponentMap =
               })
 
               const mappedFields = mapFields({
+                WithServerSideProps,
                 config,
                 disableAddingID: true,
                 fieldSchema: sanitizedFields,

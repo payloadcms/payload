@@ -4,11 +4,23 @@ import { isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
-export const updateByID: CollectionRouteHandlerWithID = async ({ id, collection, req }) => {
+import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
+
+export const updateByID: CollectionRouteHandlerWithID = async ({
+  id: incomingID,
+  collection,
+  req,
+}) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
+
+  const id = sanitizeCollectionID({
+    id: incomingID,
+    collectionSlug: collection.config.slug,
+    payload: req.payload,
+  })
 
   const doc = await updateByIDOperation({
     id,

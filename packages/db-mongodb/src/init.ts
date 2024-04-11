@@ -56,12 +56,6 @@ export const init: Init = function init(this: MongooseAdapter) {
       this.autoPluralization === true ? undefined : collection.slug,
     ) as CollectionModel
     this.collections[collection.slug] = model
-
-    // TS expect error only needed until we launch 2.0.0
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    this.payload.collections[collection.slug] = {
-      config: collection,
-    }
   })
 
   const model = buildGlobalModel(this.payload.config)

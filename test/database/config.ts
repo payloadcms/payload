@@ -5,6 +5,21 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'posts',
+      hooks: {
+        beforeOperation: [
+          ({ req, operation, args }) => {
+            if (operation === 'update') {
+              const defaultIDType = req.payload.db.defaultIDType
+
+              if (defaultIDType === 'number' && typeof args.id === 'string') {
+                throw new Error('ID was not sanitized to a number properly')
+              }
+            }
+
+            return args
+          },
+        ],
+      },
       fields: [
         {
           name: 'title',

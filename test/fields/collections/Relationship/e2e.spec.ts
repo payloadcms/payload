@@ -298,6 +298,7 @@ describe('relationship', () => {
     // First fill out the relationship field, as it's required
     await openDocDrawer(page, '#relationship-add-new .relationship-add-new__add-button')
     await page.locator('#field-relationship .value-container').click()
+    await wait(500)
     // Select "Seeded text document" relationship
     await page.getByText('Seeded text document', { exact: true }).click()
 

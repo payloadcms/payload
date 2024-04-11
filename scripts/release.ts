@@ -6,7 +6,6 @@ import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
-import pLimit from 'p-limit'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
@@ -16,8 +15,6 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { updateChangelog } from './utils/updateChangelog.js'
-
-const npmPublishLimit = pLimit(2)
 
 // Update this list with any packages to publish
 const packageWhitelist = [
@@ -126,7 +123,7 @@ async function main() {
     return // For TS type checking
   }
 
-  const packageDetails = await getPackageDetails(packageWhitelist)
+  let packageDetails = await getPackageDetails(packageWhitelist)
 
   console.log(chalk.bold(`\n  Version: ${monorepoVersion} => ${chalk.green(nextReleaseVersion)}\n`))
   console.log(chalk.bold.yellow(`  Bump: ${bump}`))
@@ -194,15 +191,16 @@ async function main() {
   header(`🏷️  Tagging release v${nextReleaseVersion}`, { enable: gitTag })
   runCmd(`git tag -a v${nextReleaseVersion} -m "v${nextReleaseVersion}"`, execOpts)
 
-  const otp = dryRun ? undefined : await question('Enter your 2FA code')
+  // Publish only payload to get 5 min auth token
+  packageDetails = packageDetails.filter((p) => p.name !== 'payload')
+  runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
 
-  if (!dryRun && !otp) {
-    abort('2FA code is required')
+  const results: { name: string; success: boolean; details?: string }[] = []
+  // Sequential publish
+  for (const pkg of packageDetails) {
+    const result = await publishSinglePackage(pkg, { dryRun })
+    results.push(result)
   }
-
-  const results = await Promise.all(
-    packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun, otp })),
-  )
 
   console.log(chalk.bold.green(`\n\nResults:\n`))
 
@@ -234,26 +232,12 @@ main().catch((error) => {
   process.exit(1)
 })
 
-/** Publish with promise concurrency throttling */
-async function publishPackageThrottled(
-  pkg: PackageDetails,
-  opts?: { dryRun?: boolean; otp?: string },
-) {
-  const { dryRun = false, otp } = opts ?? {}
-  return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun, otp }))
-}
-
-async function publishSinglePackage(
-  pkg: PackageDetails,
-  opts?: { dryRun?: boolean; otp?: string },
-) {
-  const { dryRun = false, otp } = opts ?? {}
+async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
+  const { dryRun = false } = opts ?? {}
   console.log(chalk.bold(`🚀 ${pkg.name} publishing...`))
   const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
   if (dryRun) {
     cmdArgs.push('--dry-run')
-  } else {
-    cmdArgs.push('--otp', otp)
   }
   const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
     cwd,

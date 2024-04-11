@@ -1,3 +1,4 @@
+import { serverProps } from 'payload/config'
 import { deepMerge } from 'payload/utilities'
 import React from 'react'
 
@@ -21,14 +22,23 @@ import React from 'react'
  */
 export function withMergedProps<ToMergeIntoProps, CompleteReturnProps>({
   Component,
+  sanitizeServerOnlyProps = true,
   toMergeIntoProps,
 }: {
   Component: React.FC<CompleteReturnProps>
+  sanitizeServerOnlyProps?: boolean
   toMergeIntoProps: ToMergeIntoProps
 }): React.FC<CompleteReturnProps> {
   // A wrapper around the args.Component to inject the args.toMergeArgs as props, which are merged with the passed props
   const MergedPropsComponent: React.FC<CompleteReturnProps> = (passedProps) => {
     const mergedProps = deepMerge(passedProps, toMergeIntoProps)
+
+    if (sanitizeServerOnlyProps) {
+      serverProps.forEach((prop) => {
+        delete (mergedProps)[prop]
+      })
+    }
+
     return <Component {...mergedProps} />
   }
 
