@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { ComponentWithServerProps } from 'packages/payload/src/config/types.js'
+import type { ComponentWithServerSideProps } from 'packages/payload/src/config/types.js'
 import type {
   CellComponentProps,
   DescriptionComponent,
@@ -83,7 +83,7 @@ export const mapFields = (args: {
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let CustomFieldComponent: ComponentWithServerProps<FieldComponentProps> =
+    let CustomFieldComponent: ComponentWithServerSideProps<FieldComponentProps> =
       field.admin?.components?.Field
 
     const CustomCellComponent = field.admin?.components?.Cell

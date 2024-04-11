@@ -1,10 +1,10 @@
-import type { ReactComponentWithPayload } from 'payload/config'
+import type { ComponentWithServerSideProps } from 'payload/config'
 
 import React from 'react'
 
 const baseClass = 'collection-api-button'
 
-export const CollectionAPIButton: ReactComponentWithPayload = () => {
+export const CollectionAPIButton: ComponentWithServerSideProps = () => {
   return (
     <div
       className={baseClass}

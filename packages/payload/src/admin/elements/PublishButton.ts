@@ -1,3 +1,3 @@
-import type { ComponentWithServerProps } from '../../config/types.js'
+import type { ComponentWithServerSideProps } from '../../config/types.js'
 
-export type CustomPublishButton = ComponentWithServerProps
+export type CustomPublishButton = ComponentWithServerSideProps

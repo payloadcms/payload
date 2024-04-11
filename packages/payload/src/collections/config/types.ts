@@ -10,7 +10,7 @@ import type {
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
-  ComponentWithServerProps,
+  ComponentWithServerSideProps,
   EditConfig,
   Endpoint,
   EntityDescription,
@@ -202,10 +202,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    AfterList?: ComponentWithServerProps[]
-    AfterListTable?: ComponentWithServerProps[]
-    BeforeList?: ComponentWithServerProps[]
-    BeforeListTable?: ComponentWithServerProps[]
+    AfterList?: ComponentWithServerSideProps[]
+    AfterListTable?: ComponentWithServerSideProps[]
+    BeforeList?: ComponentWithServerSideProps[]
+    BeforeListTable?: ComponentWithServerSideProps[]
     /**
      * Components within the edit view
      */
@@ -240,7 +240,7 @@ export type CollectionAdminOptions = {
       List?:
         | {
             Component?: React.ComponentType<any>
-            actions?: ComponentWithServerProps[]
+            actions?: ComponentWithServerSideProps[]
           }
         | React.ComponentType<any>
     }
