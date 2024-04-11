@@ -156,7 +156,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
           })
         }
 
-        if (globalSlug) {
+        if (globalSlug && schemaPath === globalSlug) {
           resolvedData = await req.payload.findGlobal({
             slug: globalSlug,
             depth: 0,
