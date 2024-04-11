@@ -672,8 +672,15 @@ export const traverseFields = ({
           relationships.add(field.relationTo)
         } else {
           // simple relationships get a column on the targetTable with a foreign key to the relationTo table
-          const slug: string = field.relationTo
-          const relationshipConfig = adapter.payload.collections[slug].config
+          const relationshipConfig = adapter.payload.collections[field.relationTo].config
+
+          // TODO: tableName is not right
+          const tableName = toSnakeCase(field.relationTo)
+          // const tableName = getTableName({
+          //   adapter,
+          //   config: relationshipConfig,
+          //   versions,
+          // })
 
           // get the id type of the related collection
           let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
@@ -685,7 +692,7 @@ export const traverseFields = ({
 
           // make the foreign key column for relationship using the correct id column type
           targetTable[fieldName] = parentIDColumnMap[colType](`${columnName}_id`).references(
-            () => adapter.tables[slug].id,
+            () => adapter.tables[tableName].id,
             { onDelete: 'cascade' },
           )
 
@@ -693,7 +700,7 @@ export const traverseFields = ({
           relationsToBuild.set(fieldName, {
             type: 'one',
             localized: adapter.payload.config.localization && field.localized,
-            target: slug,
+            target: tableName,
           })
 
           // add notNull when not required
