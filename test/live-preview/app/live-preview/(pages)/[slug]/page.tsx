@@ -28,6 +28,7 @@ export default async function Page({ params: { slug = 'home' } }) {
 }
 
 export async function generateStaticParams() {
+  process.env.PAYLOAD_DROP_DATABASE = 'false'
   try {
     const pages = await fetchDocs<Page>('pages')
     return pages?.map(({ slug }) => slug)

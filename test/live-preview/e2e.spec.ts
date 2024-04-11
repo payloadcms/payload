@@ -212,7 +212,6 @@ describe('Live Preview', () => {
   })
 
   test('resizes iframe to specified breakpoint', async () => {
-    await page.goto(url.list) // works around a "flake" probably not a flake, but something strange
     await page.goto(url.create)
     await page.waitForURL(url.create)
     await page.locator('#field-title').fill('Title 4')
