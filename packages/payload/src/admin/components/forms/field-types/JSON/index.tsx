@@ -69,16 +69,21 @@ const JSONField: React.FC<Props> = (props) => {
 
     const model = monaco.editor.createModel(initialModelValue, 'json', modelUri)
 
-    const monacoFormattedSchemas = schema.map((initialSchema) =>
-      Object.assign(
+    const monacoFormattedSchemas = schema.map((initialSchema) => {
+      const schemaProperties = {}
+      Object.keys(initialSchema).forEach((key) => {
+        schemaProperties[key] = { enum: initialSchema[key] }
+      })
+
+      return Object.assign(
         {
           fileMatch: [modelUri.toString()],
-          schema: { ...initialSchema },
+          schema: { type: 'object', properties: schemaProperties },
           uri: modelUri.toString(),
         },
         {},
-      ),
-    )
+      )
+    })
 
     monacoFormattedSchemas.forEach((formattedSchema) => {
       if (!existingSchemas.map(({ uri }) => uri).includes(jsonUri)) {

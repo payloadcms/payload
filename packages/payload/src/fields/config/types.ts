@@ -426,20 +426,13 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
   type: 'code'
 }
 
-type JSONSchema = [
-  {
-    properties: unknown
-    type: string
-  },
-]
-
 type JSONAdmin = Admin & {
   components?: {
     Error?: React.ComponentType<ErrorProps>
     Label?: React.ComponentType<LabelProps>
   }
   editorOptions?: EditorProps['options']
-  schema?: JSONSchema
+  schema?: [any]
 }
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
