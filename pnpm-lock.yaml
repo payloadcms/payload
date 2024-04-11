@@ -319,9 +319,9 @@ importers:
       detect-package-manager:
         specifier: ^3.0.1
         version: 3.0.1
-      esprima:
-        specifier: ^4.0.1
-        version: 4.0.1
+      esprima-next:
+        specifier: ^6.0.3
+        version: 6.0.3
       execa:
         specifier: ^5.0.0
         version: 5.1.1
@@ -9395,6 +9395,12 @@ packages:
       acorn: 8.11.3
       acorn-jsx: 5.3.2(acorn@8.11.3)
       eslint-visitor-keys: 3.4.3
+
+  /esprima-next@6.0.3:
+    resolution: {integrity: sha512-fVfE+9qIOJSbS3AR7roIuL0gCeS+tC86bJV9GlJtwXCRoo67q6tsGGUjThW+JtR5IQSShnHqaDqX8D0IYDfRGA==}
+    engines: {node: '>=12'}
+    hasBin: true
+    dev: false
 
   /esprima@4.0.1:
     resolution: {integrity: sha512-eGuFFw7Upda+g4p+QHvnW0RyTX/SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB/sbNop0Kszm0jsaWU4A==}
