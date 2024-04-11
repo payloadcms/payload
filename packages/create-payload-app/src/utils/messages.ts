@@ -21,6 +21,12 @@ export function helpMessage(): void {
   console.log(chalk`
   {bold USAGE}
 
+      {dim Inside of an existing Next.js project}
+
+      {dim $} {bold npx create-payload-app}
+
+      {dim Create a new project from scratch}
+
       {dim $} {bold npx create-payload-app}
       {dim $} {bold npx create-payload-app} my-project
       {dim $} {bold npx create-payload-app} -n my-project -t template-name
@@ -80,7 +86,7 @@ export function successfulNextInit(): string {
 }
 
 export function moveMessage(args: { nextAppDir: string; projectDir: string }): string {
-  const relativePath = path.relative(process.cwd(), args.nextAppDir)
+  const relativeAppDir = path.relative(process.cwd(), args.nextAppDir)
   return `
 ${header('Next Steps:')}
 
@@ -88,7 +94,10 @@ Payload does not support a top-level layout.tsx file in the app directory.
 
 ${chalk.bold('To continue:')}
 
-Move all files from ./${relativePath} to a named directory such as ./${relativePath}/${chalk.bold('(app)')}
+- Create a new directory in ./${relativeAppDir} such as ./${relativeAppDir}/${chalk.bold('(app)')}
+- Move all files from ./${relativeAppDir} into that directory
+
+It is recommended to do this from your IDE if your app has existing file references.
 
 Once moved, rerun the create-payload-app command again.
 `
