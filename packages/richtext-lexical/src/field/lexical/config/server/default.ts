@@ -13,6 +13,7 @@ import { SubscriptFeature } from '../../../features/format/subscript/feature.ser
 import { SuperscriptFeature } from '../../../features/format/superscript/feature.server.js'
 import { UnderlineFeature } from '../../../features/format/underline/feature.server.js'
 import { HeadingFeature } from '../../../features/heading/feature.server.js'
+import { HorizontalRuleFeature } from '../../../features/horizontalrule/feature.server.js'
 import { IndentFeature } from '../../../features/indent/feature.server.js'
 import { LinkFeature } from '../../../features/link/feature.server.js'
 import { CheckListFeature } from '../../../features/lists/checklist/feature.server.js'
@@ -48,6 +49,7 @@ export const defaultEditorFeatures: FeatureProviderServer<unknown, unknown>[] = 
   RelationshipFeature(),
   BlockQuoteFeature(),
   UploadFeature(),
+  HorizontalRuleFeature(),
 ]
 
 export const defaultEditorConfig: ServerEditorConfig = {
