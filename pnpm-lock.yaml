@@ -98,6 +98,9 @@ importers:
       add-stream:
         specifier: ^1.0.0
         version: 1.0.0
+      ajv:
+        specifier: ^8.12.0
+        version: 8.12.0
       chalk:
         specifier: ^5.3.0
         version: 5.3.0
