@@ -2,15 +2,15 @@ import type { SanitizedConfig } from 'payload/config'
 import type { Where } from 'payload/types'
 import type { ParsedQs } from 'qs'
 
+import {
+  REST_DELETE as createDELETE,
+  REST_GET as createGET,
+  REST_PATCH as createPATCH,
+  REST_POST as createPOST,
+} from '@payloadcms/next/routes'
+import { GRAPHQL_POST as createGraphqlPOST } from '@payloadcms/next/routes'
 import QueryString from 'qs'
 
-import { GRAPHQL_POST as createGraphqlPOST } from '../../packages/next/src/routes/graphql/index.js'
-import {
-  DELETE as createDELETE,
-  GET as createGET,
-  PATCH as createPATCH,
-  POST as createPOST,
-} from '../../packages/next/src/routes/rest/index.js'
 import { devUser } from '../credentials.js'
 
 type ValidPath = `/${string}`

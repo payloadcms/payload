@@ -77,7 +77,7 @@ export const tempFileHandler: Handler = (options, fieldname, filename) => {
 }
 
 export const memHandler: Handler = (options, fieldname, filename) => {
-  const buffers = []
+  const buffers: Buffer[] = []
   const hash = crypto.createHash('md5')
   let fileSize = 0
   let completed = false

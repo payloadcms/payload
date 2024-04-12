@@ -1,4 +1,5 @@
 import Busboy from 'busboy'
+import httpStatus from 'http-status'
 import { APIError } from 'payload/errors'
 
 import type { NextFileUploadOptions, NextFileUploadResponse } from './index.js'
@@ -73,7 +74,9 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         debugLog(options, `Aborting upload because of size limit ${field}->${filename}.`)
         cleanup()
         parsingRequest = false
-        throw new APIError(options.responseOnLimit, 413, { size: getFileSize() })
+        throw new APIError(options.responseOnLimit, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
+          size: getFileSize(),
+        })
       }
     })
 
@@ -129,7 +132,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     uploadTimer.set()
   })
 
-  busboy.on('finish', () => {
+  busboy.on('finish', async () => {
     debugLog(options, `Busboy finished parsing request.`)
     if (options.parseNested) {
       result.fields = processNested(result.fields)
@@ -137,7 +140,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     }
 
     if (request[waitFlushProperty]) {
-      Promise.all(request[waitFlushProperty]).then(() => {
+      await Promise.all(request[waitFlushProperty]).then(() => {
         delete request[waitFlushProperty]
       })
     }
@@ -146,7 +149,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   busboy.on('error', (err) => {
     debugLog(options, `Busboy error`)
     parsingRequest = false
-    throw new APIError('Busboy error parsing multipart request', 500)
+    throw new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
   })
 
   const reader = request.body.getReader()
