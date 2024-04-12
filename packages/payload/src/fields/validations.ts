@@ -1,3 +1,4 @@
+import Ajv from 'ajv'
 import type { RichTextAdapter } from '../exports/types'
 import type {
   ArrayField,
@@ -132,7 +133,7 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { req
 
 export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (
   value: string,
-  { jsonError, required, t },
+  { admin, jsonError, required, t },
 ) => {
   if (required && !value) {
     return t('validation:required')
@@ -140,6 +141,15 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
 
   if (jsonError !== undefined) {
     return t('validation:invalidInput')
+  }
+
+  if (admin?.jsonSchema?.schema) {
+    const ajv = new Ajv()
+    const valid = ajv.validate(admin?.jsonSchema?.schema, value)
+
+    if (!valid) {
+      return t('validation:invalidInput')
+    }
   }
 
   return true
