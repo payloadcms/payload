@@ -4,6 +4,8 @@ gcs.d.ts
 gcs.js
 s3.d.ts
 s3.js
+vercelBlob.d.ts
+vercelBlob.js
 
 dev/tmp
 dev/yarn.lock

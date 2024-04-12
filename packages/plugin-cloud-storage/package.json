@@ -26,6 +26,7 @@
     "@azure/abort-controller": "^1.0.0",
     "@azure/storage-blob": "^12.11.0",
     "@google-cloud/storage": "^7.7.0",
+    "@vercel/blob": "^0.22.3",
     "payload": "workspace:*"
   },
   "peerDependenciesMeta": {
