@@ -13,7 +13,7 @@
     "directory": "packages/plugin-cloud-storage"
   },
   "scripts": {
-    "build": "pnpm build:swc && pnpm build:types && tsx ../../scripts/exportPointerFiles.ts ../packages/plugin-cloud-storage dist/exports",
+    "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",

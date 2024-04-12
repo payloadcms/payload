@@ -14,7 +14,7 @@
   "types": "./src/index.ts",
   "type": "module",
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && tsx ../../scripts/exportPointerFiles.ts ../packages/richtext-lexical dist/exports",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
