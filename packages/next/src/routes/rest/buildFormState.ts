@@ -187,6 +187,16 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       req,
     })
 
+    // Maintain form state of file
+    if (
+      collectionSlug &&
+      req.payload.collections[collectionSlug]?.config?.upload &&
+      formState &&
+      formState.file
+    ) {
+      result.file = formState.file
+    }
+
     return Response.json(result, {
       status: httpStatus.OK,
     })
