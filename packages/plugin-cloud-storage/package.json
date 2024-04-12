@@ -26,6 +26,7 @@
     "@azure/abort-controller": "^1.0.0",
     "@azure/storage-blob": "^12.11.0",
     "@google-cloud/storage": "^7.7.0",
+    "@vercel/blob": "^0.22.3",
     "payload": "workspace:*"
   },
   "peerDependenciesMeta": {
@@ -43,6 +44,9 @@
     },
     "@google-cloud/storage": {
       "optional": true
+    },
+    "@vercel/blob": {
+      "optional": true
     }
   },
   "files": [
@@ -56,6 +60,7 @@
     "@azure/storage-blob": "^12.11.0",
     "@google-cloud/storage": "^7.7.0",
     "@types/find-node-modules": "^2.1.2",
+    "@vercel/blob": "^0.22.3",
     "payload": "workspace:*"
   },
   "dependencies": {
