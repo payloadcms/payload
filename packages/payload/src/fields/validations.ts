@@ -143,12 +143,27 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
     return t('validation:invalidInput')
   }
 
-  if (admin?.jsonSchema?.schema) {
-    const ajv = new Ajv()
-    const valid = ajv.validate(admin?.jsonSchema?.schema, value)
+  function isNotEmpty(value) {
+    if (value === undefined || value === null) {
+      return false
+    }
 
-    if (!valid) {
-      return t('validation:invalidInput')
+    if (Array.isArray(value) && value.length === 0) {
+      return false
+    }
+
+    if (typeof value === 'object' && value !== null && Object.keys(value).length === 0) {
+      return false
+    }
+
+    return true
+  }
+
+  if (isNotEmpty(value) && admin?.jsonSchema?.schema) {
+    const ajv = new Ajv()
+
+    if (!ajv.validate(admin?.jsonSchema?.schema, value)) {
+      return t(ajv.errorsText())
     }
   }
 
