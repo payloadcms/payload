@@ -6,7 +6,8 @@ import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { Media } from './payload-types.js'
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config, Media } from './payload-types.js'
 
 import {
   ensureAutoLoginAndCompilationIsDone,
@@ -15,7 +16,7 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../helpers/rest.js'
 import {
   adminThumbnailFunctionSlug,
@@ -29,7 +30,7 @@ const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let serverURL: string
 let mediaURL: AdminUrlUtil
@@ -44,7 +45,7 @@ describe('uploads', () => {
   let audioDoc: Media
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
