@@ -235,6 +235,19 @@ This method employs `convertLexicalToHTML` from `@payloadcms/richtext-lexical`, 
 
 Because every `Feature` is able to provide html converters, and because the `htmlFeature` can modify those or provide their own, we need to consolidate them with the default html Converters using the `consolidateHTMLConverters` function.
 
+#### CSS
+
+Payload's lexical HTML converter does not generate CSS for you, but it does add classes to the generated HTML. You can use these classes to style the HTML in your frontend.
+
+Here is some "base" CSS you can use to ensure that nested lists render correctly:
+
+```css
+/* Base CSS for Lexical HTML */
+.nestedListItem, .list-check {
+  list-style-type: none;
+}
+```
+
 #### Creating your own HTML Converter
 
 HTML Converters are typed as `HTMLConverter`, which contains the node type it should handle, and a function that accepts the serialized node from the lexical editor, and outputs the HTML string. Here's the HTML Converter of the Upload node as an example:
