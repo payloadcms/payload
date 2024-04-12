@@ -10,6 +10,7 @@ type JSONField = {
 }
 
 const JSON: CollectionConfig = {
+  slug: jsonFieldsSlug,
   access: {
     read: () => true,
   },
@@ -17,9 +18,25 @@ const JSON: CollectionConfig = {
     {
       name: 'json',
       type: 'json',
+      admin: {
+        jsonSchema: {
+          fileMatch: ['a://b/foo.json'],
+          schema: {
+            type: 'object',
+            properties: {
+              foo: {
+                enum: ['bar', 'foobar'],
+              },
+              number: {
+                enum: [10, 5],
+              },
+            },
+          },
+          uri: 'a://b/foo.json',
+        },
+      },
     },
   ],
-  slug: jsonFieldsSlug,
   versions: {
     maxPerDoc: 1,
   },
