@@ -6,6 +6,7 @@ import type { Data } from 'payload/types'
 import { Text } from '@payloadcms/ui/fields/Text'
 import { useWatchForm } from '@payloadcms/ui/forms/Form'
 import { useLocale } from '@payloadcms/ui/providers/Locale'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React, { useEffect, useState } from 'react'
 
 type FieldWithID = {
@@ -19,6 +20,7 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
   const { fields, getData, getDataByPath } = useWatchForm()
 
   const locale = useLocale()
+  const { i18n } = useTranslation()
 
   const [isNumberField, setIsNumberField] = useState<boolean>()
   const [valueType, setValueType] = useState<'static' | 'valueOfField'>()
@@ -52,7 +54,12 @@ export const DynamicPriceSelector: React.FC<TextFieldProps> = (props) => {
 
   const localeCode = typeof locale === 'object' && 'code' in locale ? locale.code : locale
 
-  const localLabels = typeof label === 'object' ? label : { [localeCode]: label }
+  const localLabels =
+    typeof label === 'function'
+      ? label({ t: i18n.t })
+      : typeof label === 'object'
+        ? label
+        : { [localeCode]: label }
   const labelValue = localLabels[localeCode] || localLabels['en'] || ''
 
   if (valueType === 'valueOfField' && !isNumberField) {
