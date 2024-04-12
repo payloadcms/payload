@@ -1,4 +1,5 @@
 import type { AccessResult } from '../../config/types.js'
+import type { GeneratedTypes } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -13,7 +14,6 @@ type Args = {
   depth?: number
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
-  locale?: string
   overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean

@@ -13,9 +13,9 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: GeneratedTypes['locale']
   id: string
-  locale?: string
+  locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean
