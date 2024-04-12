@@ -58,6 +58,8 @@ const JSONField: React.FC<Props> = (props) => {
   })
 
   function handleMount(editor, monaco) {
+    if (!jsonSchema) return
+
     const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
     const modelUri = monaco.Uri.parse(jsonSchema.uri)
 
