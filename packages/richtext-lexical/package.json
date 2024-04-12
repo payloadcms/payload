@@ -91,7 +91,7 @@
     "types": "./dist/index.d.ts"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=18.20.2"
   },
   "files": [
     "dist",
