@@ -42,10 +42,6 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     seo({
-      collections: ['users'],
-      tabbedUI: true,
-    }),
-    seo({
       collections: ['pages'],
       fieldOverrides: {
         title: {

@@ -6,8 +6,10 @@ import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type {
   FieldsRelationship as CollectionWithRelationships,
+  Config,
   RelationOne,
   RelationRestricted,
   RelationTwo,
@@ -23,7 +25,7 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import {
   relationFalseFilterOptionSlug,
   relationOneSlug,
@@ -34,12 +36,13 @@ import {
   relationWithTitleSlug,
   slug,
 } from './collectionSlugs.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const { beforeAll, beforeEach, describe } = test
 
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 
 describe('fields - relationship', () => {
   let url: AdminUrlUtil
@@ -54,7 +57,7 @@ describe('fields - relationship', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
 
