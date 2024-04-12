@@ -158,6 +158,10 @@ When defined, the `parent` field will not be provided for you automatically, and
 own `parent` field to each collection manually. This gives you complete control over where you put the field in your
 admin dashboard, etc. Set this property to the `name` of your custom field.
 
+#### `urlFieldSlug`
+
+When defined and generateURL is set, it will check the value of this field against the old one before attempting to recreate the breadcrumbs.
+
 #### `breadcrumbsFieldSlug`
 
 When defined, the `breadcrumbs` field will not be provided for you, and instead, expects you to add your

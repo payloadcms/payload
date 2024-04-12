@@ -2,22 +2,28 @@ import type { CollectionAfterChangeHook, CollectionConfig, PayloadRequest } from
 
 import type { PluginConfig } from '../types.js'
 
-import populateBreadcrumbs from '../utilities/populateBreadcrumbs.js'
+import { populateBreadcrumbs } from '../utilities/populateBreadcrumbs.js'
+import { shouldPopulateBreadcrumbs } from '../utilities/shouldPopulateBreadcrumbs.js'
 
 type ResaveArgs = {
   collection: CollectionConfig
   doc: Record<string, unknown>
   draft: boolean
   pluginConfig: PluginConfig
+  previousDoc: Record<string, unknown>
   req: PayloadRequest
 }
 
-const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {
+const resave = async ({ collection, doc, draft, pluginConfig, previousDoc, req }: ResaveArgs) => {
+  if (!shouldPopulateBreadcrumbs(pluginConfig, previousDoc, collection, doc)) {
+    return
+  }
+
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
-  const parentDocIsPublished = doc._status === 'published'
+  const parentDocIsPublished = doc?._status === 'published'
 
   const children = await req.payload.find({
-    collection: collection.slug,
+    collection: collection?.slug,
     depth: 0,
     draft,
     locale: req.locale,
@@ -65,14 +71,15 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
   }
 }
 
-const resaveChildren =
+export const resaveChildren =
   (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
-  async ({ doc, req }) => {
+  async ({ doc, previousDoc, req }) => {
     await resave({
       collection,
       doc,
       draft: true,
       pluginConfig,
+      previousDoc,
       req,
     })
 
@@ -82,10 +89,10 @@ const resaveChildren =
         doc,
         draft: false,
         pluginConfig,
+        previousDoc,
         req,
       })
     }
 
     return undefined
   }
-export default resaveChildren

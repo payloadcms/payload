@@ -1,7 +1,8 @@
+/* eslint-disable payload/no-relative-monorepo-imports */
 import type { CollectionConfig } from 'payload/types'
 
 import { createBreadcrumbsField } from '../../../packages/plugin-nested-docs/src/fields/breadcrumbs.js'
-import createParentField from '../../../packages/plugin-nested-docs/src/fields/parent.js'
+import { createParentField } from '../../../packages/plugin-nested-docs/src/fields/parent.js'
 
 export const Categories: CollectionConfig = {
   access: {
