@@ -1,19 +1,32 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
-import { payloadFavicon, payloadOgImage } from '@payloadcms/ui/assets'
+import { payloadFavicon } from '@payloadcms/ui/assets'
 
-export const meta = async (args: {
+const defaultOpenGraph: Metadata['openGraph'] = {
+  type: 'website',
+  description:
+    'Payload is a headless CMS and application framework built with TypeScript, Node.js, React and MongoDB',
+  images: [
+    {
+      url: `/api/og`,
+    },
+  ],
+  siteName: 'Payload App',
+  title: 'Payload App',
+}
+
+export const meta = (args: {
   config: SanitizedConfig
   description?: string
   keywords?: string
   title: string
-}): Promise<Metadata> => {
-  const { config, description = '', keywords = 'CMS, Admin, Dashboard', title } = args
+}): Metadata => {
+  const { config, description, keywords = 'CMS, Admin, Dashboard', title } = args
 
   const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
   const favicon = config?.admin?.meta?.favicon ?? payloadFavicon?.src
-  const ogImage = config.admin?.meta?.ogImage ?? payloadOgImage?.src
+  const ogImage = config.admin?.meta?.ogImage
 
   return {
     description,
@@ -31,13 +44,13 @@ export const meta = async (args: {
         `http://localhost:${process.env.PORT || 3000}`,
     ),
     openGraph: {
-      type: 'website',
+      ...defaultOpenGraph,
       description,
-      images: [
+      images: ogImage || [
         {
           alt: `${title} ${titleSuffix}`,
           height: 630,
-          url: ogImage,
+          url: `/api/og?title=${title}`,
           width: 1200,
         },
       ],
