@@ -1,5 +1,7 @@
+import type { Program } from 'esprima-next'
+
 import chalk from 'chalk'
-import { parseModule } from 'esprima'
+import { Syntax, parseModule } from 'esprima-next'
 import fs from 'fs'
 
 import { warning } from '../utils/log.js'
@@ -38,16 +40,29 @@ export function parseAndModifyConfigContent(
   configType: NextConfigType,
 ): { modifiedConfigContent: string; success: boolean } {
   content = withPayloadStatement[configType] + content
-  const ast = parseModule(content, { loc: true })
+
+  let ast: Program | undefined
+  try {
+    ast = parseModule(content, { loc: true })
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      warning(`Unable to parse Next config. Error: ${error.message} `)
+      warnUserWrapNotSuccessful(configType)
+    }
+    return {
+      modifiedConfigContent: content,
+      success: false,
+    }
+  }
 
   if (configType === 'esm') {
-    const exportDefaultDeclaration = ast.body.find((p) => p.type === 'ExportDefaultDeclaration') as
-      | Directive
-      | undefined
+    const exportDefaultDeclaration = ast.body.find(
+      (p) => p.type === Syntax.ExportDefaultDeclaration,
+    ) as Directive | undefined
 
-    const exportNamedDeclaration = ast.body.find((p) => p.type === 'ExportNamedDeclaration') as
-      | ExportNamedDeclaration
-      | undefined
+    const exportNamedDeclaration = ast.body.find(
+      (p) => p.type === Syntax.ExportNamedDeclaration,
+    ) as ExportNamedDeclaration | undefined
 
     if (!exportDefaultDeclaration && !exportNamedDeclaration) {
       throw new Error('Could not find ExportDefaultDeclaration in next.config.js')
@@ -57,7 +72,6 @@ export function parseAndModifyConfigContent(
       const modifiedConfigContent = insertBeforeAndAfter(
         content,
         exportDefaultDeclaration.declaration.loc,
-        configType,
       )
       return { modifiedConfigContent, success: true }
     } else if (exportNamedDeclaration) {
@@ -91,12 +105,12 @@ export function parseAndModifyConfigContent(
     // Find `module.exports = X`
     const moduleExports = ast.body.find(
       (p) =>
-        p.type === 'ExpressionStatement' &&
-        p.expression?.type === 'AssignmentExpression' &&
-        p.expression.left?.type === 'MemberExpression' &&
-        p.expression.left.object?.type === 'Identifier' &&
+        p.type === Syntax.ExpressionStatement &&
+        p.expression?.type === Syntax.AssignmentExpression &&
+        p.expression.left?.type === Syntax.MemberExpression &&
+        p.expression.left.object?.type === Syntax.Identifier &&
         p.expression.left.object.name === 'module' &&
-        p.expression.left.property?.type === 'Identifier' &&
+        p.expression.left.property?.type === Syntax.Identifier &&
         p.expression.left.property.name === 'exports',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any
@@ -105,7 +119,6 @@ export function parseAndModifyConfigContent(
       const modifiedConfigContent = insertBeforeAndAfter(
         content,
         moduleExports.expression.right.loc,
-        configType,
       )
       return { modifiedConfigContent, success: true }
     }
@@ -174,7 +187,7 @@ type Loc = {
   start: { column: number; line: number }
 }
 
-function insertBeforeAndAfter(content: string, loc: Loc, configType: NextConfigType) {
+function insertBeforeAndAfter(content: string, loc: Loc) {
   const { end, start } = loc
   const lines = content.split('\n')
 

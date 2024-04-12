@@ -15,6 +15,8 @@ export default buildConfigWithDefaults({
                 throw new Error('ID was not sanitized to a number properly')
               }
             }
+
+            return args
           },
         ],
       },

@@ -14,7 +14,10 @@ import type { BaseDatabaseAdapter } from '../../database/types.js'
 
 const dummyConfig: Config = {
   collections: [],
-  db: () => ({}) as BaseDatabaseAdapter,
+  db: {
+    defaultIDType: 'text',
+    init: () => ({}) as BaseDatabaseAdapter['init'],
+  } as BaseDatabaseAdapter,
 }
 
 describe('sanitizeFields', () => {

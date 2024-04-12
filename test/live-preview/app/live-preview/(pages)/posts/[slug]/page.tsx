@@ -27,6 +27,7 @@ export default async function Post({ params: { slug = '' } }) {
 }
 
 export async function generateStaticParams() {
+  process.env.PAYLOAD_DROP_DATABASE = 'false'
   try {
     const posts = await fetchDocs<Post>('posts')
     return posts?.map(({ slug }) => slug)

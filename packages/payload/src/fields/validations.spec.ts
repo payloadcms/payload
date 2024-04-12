@@ -12,7 +12,12 @@ let options: ValidateOptions<any, any> = {
     t,
     context: {},
     payload: {
-      config: {},
+      config: {
+        db: {
+          defaultIDType: 'text',
+          init: () => null,
+        },
+      },
     },
   },
 }

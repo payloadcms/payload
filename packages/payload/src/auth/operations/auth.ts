@@ -1,3 +1,4 @@
+import type { GeneratedTypes } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { Permissions, User } from '../types.js'
 
@@ -16,7 +17,7 @@ export type AuthArgs = {
 export type AuthResult = {
   cookies: Map<string, string>
   permissions: Permissions
-  user: User | null
+  user: GeneratedTypes['user'] | null
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {

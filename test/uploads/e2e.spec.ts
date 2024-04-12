@@ -214,6 +214,7 @@ describe('uploads', () => {
     await page.waitForURL(audioURL.edit(audioDoc.id))
 
     // remove the selection and open the list drawer
+    await wait(500) // flake workaround
     await page.locator('.file-details__remove').click()
 
     await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')

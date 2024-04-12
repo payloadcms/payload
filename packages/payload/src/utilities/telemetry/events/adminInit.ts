@@ -1,5 +1,6 @@
 import type { User } from '../../../auth/types.js'
 import type { Payload } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 
 import { sendEvent } from '../index.js'
 import { oneWayHash } from '../oneWayHash.js'
@@ -13,7 +14,7 @@ export type AdminInitEvent = {
 type Args = {
   headers: Request['headers']
   payload: Payload
-  user: User | null
+  user: PayloadRequest['user']
 }
 export const adminInit = ({ headers, payload, user }: Args): void => {
   const host = headers.get('host')
