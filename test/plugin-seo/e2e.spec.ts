@@ -5,11 +5,11 @@ import path from 'path'
 import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 
-import type { Page as PayloadPage } from './payload-types.js'
+import type { Config, Page as PayloadPage } from './payload-types.js'
 
 import { ensureAutoLoginAndCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -23,7 +23,7 @@ let id: string
 
 describe('SEO Plugin', () => {
   beforeAll(async ({ browser }) => {
-    const { serverURL, payload } = await initPayloadE2E({ dirname })
+    const { serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()

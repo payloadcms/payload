@@ -45,7 +45,7 @@ const seo =
                 Field: (props) => (
                   <MetaTitle
                     {...props}
-                    hasGenerateTitleFn={typeof pluginConfig.generateTitle === 'function'}
+                    hasGenerateTitleFn={typeof pluginConfig?.generateTitle === 'function'}
                   />
                 ),
               },
@@ -62,7 +62,7 @@ const seo =
                   <MetaDescription
                     {...props}
                     hasGenerateDescriptionFn={
-                      typeof pluginConfig.generateDescription === 'function'
+                      typeof pluginConfig?.generateDescription === 'function'
                     }
                   />
                 ),
@@ -82,7 +82,7 @@ const seo =
                       Field: (props) => (
                         <MetaImage
                           {...props}
-                          hasGenerateImageFn={typeof pluginConfig.generateImage === 'function'}
+                          hasGenerateImageFn={typeof pluginConfig?.generateImage === 'function'}
                         />
                       ),
                     },
@@ -105,7 +105,7 @@ const seo =
                 Field: (props) => (
                   <Preview
                     {...props}
-                    hasGenerateURLFn={typeof pluginConfig.generateURL === 'function'}
+                    hasGenerateURLFn={typeof pluginConfig?.generateURL === 'function'}
                   />
                 ),
               },
@@ -194,11 +194,12 @@ const seo =
           return collection
         }) || [],
       endpoints: [
+        ...config.endpoints,
         {
           handler: async (req) => {
             const args: Parameters<GenerateTitle>[0] =
               req.data as unknown as Parameters<GenerateTitle>[0]
-            const result = await pluginConfig.generateTitle(args)
+            const result = pluginConfig.generateTitle ? await pluginConfig.generateTitle(args) : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -208,7 +209,9 @@ const seo =
           handler: async (req) => {
             const args: Parameters<GenerateDescription>[0] =
               req.data as unknown as Parameters<GenerateDescription>[0]
-            const result = await pluginConfig.generateDescription(args)
+            const result = pluginConfig.generateDescription
+              ? await pluginConfig.generateDescription(args)
+              : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -218,7 +221,7 @@ const seo =
           handler: async (req) => {
             const args: Parameters<GenerateURL>[0] =
               req.data as unknown as Parameters<GenerateURL>[0]
-            const result = await pluginConfig.generateURL(args)
+            const result = pluginConfig.generateURL ? await pluginConfig.generateURL(args) : ''
             return new Response(JSON.stringify({ result }), { status: 200 })
           },
           method: 'post',
@@ -228,7 +231,7 @@ const seo =
           handler: async (req) => {
             const args: Parameters<GenerateImage>[0] =
               req.data as unknown as Parameters<GenerateImage>[0]
-            const result = await pluginConfig.generateImage(args)
+            const result = pluginConfig.generateImage ? await pluginConfig.generateImage(args) : ''
             return new Response(result, { status: 200 })
           },
           method: 'post',
