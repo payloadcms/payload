@@ -200,7 +200,7 @@ importers:
         specifier: ^9.0
         version: 9.1.8
       next:
-        specifier: ^14.2
+        specifier: ^14.2.0-canary.23
         version: 14.2.0(@babel/core@7.24.4)(@playwright/test@1.43.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.74.1)
       node-mocks-http:
         specifier: ^1.14.1
@@ -628,7 +628,7 @@ importers:
         specifier: 1.6.2
         version: 1.6.2
       next:
-        specifier: ^14.2
+        specifier: ^14.2.0-canary.23
         version: 14.2.0(@babel/core@7.24.4)(@playwright/test@1.43.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.74.1)
       path-to-regexp:
         specifier: ^6.2.1
@@ -1397,7 +1397,7 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       next:
-        specifier: ^14.2
+        specifier: ^14.2.0-canary.23
         version: 14.2.0(@babel/core@7.24.4)(@playwright/test@1.43.0)(react-dom@18.2.0)(react@18.2.0)(sass@1.74.1)
       object-to-formdata:
         specifier: 4.5.1
