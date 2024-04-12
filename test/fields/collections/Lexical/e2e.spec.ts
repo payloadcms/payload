@@ -1,29 +1,30 @@
 import type { SerializedBlockNode, SerializedLinkNode } from '@payloadcms/richtext-lexical'
 import type { Page } from '@playwright/test'
+import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import { initPayloadE2ENoConfig } from 'helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from 'helpers/reInit.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { LexicalField } from '../../payload-types.js'
+import type { Config, LexicalField } from '../../payload-types.js'
 
 import { initPageConsoleErrorCatch, saveDocAndAssert } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../../../helpers/initPayloadE2E.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
-import { clearAndSeedEverything } from '../../seed.js'
 import { lexicalFieldsSlug } from '../../slugs.js'
 import { lexicalDocData } from './data.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let page: Page
 let serverURL: string
@@ -49,7 +50,7 @@ async function navigateToLexicalFields(navigateToListView: boolean = true) {
 describe('lexical', () => {
   beforeAll(async ({ browser }) => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -57,7 +58,12 @@ describe('lexical', () => {
     initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
-    await clearAndSeedEverything(payload)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsLexicalTest',
+      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+    })
+
     if (client) {
       await client.logout()
     }
