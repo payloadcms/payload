@@ -22,6 +22,16 @@ export const metadata = {
   title: 'Next.js',
 }
 
+import { Merriweather } from 'next/font/google'
+
+const merriweather = Merriweather({
+  display: 'swap',
+  style: ['normal', 'italic'],
+  subsets: ['latin'],
+  variable: '--font-serif',
+  weight: ['400', '900'],
+})
+
 export const RootLayout = async ({
   children,
   config: configPromise,
@@ -82,7 +92,7 @@ export const RootLayout = async ({
   })
 
   return (
-    <html dir={dir} lang={languageCode}>
+    <html className={merriweather.variable} dir={dir} lang={languageCode}>
       <body>
         <RootProvider
           componentMap={componentMap}
