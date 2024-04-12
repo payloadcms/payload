@@ -113,7 +113,7 @@
     "ts-essentials": "7.0.3"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=18.20.2"
   },
   "files": [
     "bin.js",
