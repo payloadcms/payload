@@ -127,7 +127,7 @@
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "^14.2",
+    "next": "^14.2.0-canary.23",
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
     "open": "^10.1.0",

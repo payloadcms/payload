@@ -77,7 +77,7 @@
   },
   "peerDependencies": {
     "http-status": "1.6.2",
-    "next": "^14.2",
+    "next": "^14.2.0-canary.23",
     "payload": "workspace:*"
   },
   "publishConfig": {
