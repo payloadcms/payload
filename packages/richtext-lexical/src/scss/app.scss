@@ -1,4 +1,3 @@
-@import 'fonts';
 @import 'styles';
 @import './toastify.scss';
 @import './colors.scss';
@@ -20,7 +19,8 @@
   --theme-overlay: rgba(5, 5, 5, 0.5);
   --theme-baseline: #{$baseline-px};
   --theme-baseline-body-size: #{$baseline-body-size};
-  --font-body: 'Suisse Intl', system-ui;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   --font-mono: monospace;
 
   --style-radius-s: #{$style-radius-s};
