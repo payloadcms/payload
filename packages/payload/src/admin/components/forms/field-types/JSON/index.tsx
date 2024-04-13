@@ -4,7 +4,6 @@ import type { Props } from './types'
 
 import { json } from '../../../../../fields/validations'
 import { CodeEditor } from '../../../elements/CodeEditor'
-import { useDocumentInfo } from '../../../utilities/DocumentInfo'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
@@ -42,7 +41,6 @@ const JSONField: React.FC<Props> = (props) => {
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
   const [hasLoadedValue, setHasLoadedValue] = useState(false)
-  const { id } = useDocumentInfo()
 
   const memoizedValidate = useCallback(
     (value, options) => {
