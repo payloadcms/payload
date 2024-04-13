@@ -1,5 +1,5 @@
 {
-  "name": "@payloadcms/next",
+  "name": "@r1tsu/next",
   "version": "3.0.0-beta.10",
   "main": "./src/index.js",
   "types": "./src/index.js",

@@ -1,5 +1,5 @@
 {
-  "name": "@payloadcms/db-postgres",
+  "name": "@r1tsu/db-postgres",
   "version": "3.0.0-beta.10",
   "description": "The officially supported Postgres database adapter for Payload",
   "repository": {
