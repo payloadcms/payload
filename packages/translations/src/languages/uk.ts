@@ -73,8 +73,8 @@ export const uk: Language = {
       correctInvalidFields: 'Будь ласка, виправте невірні поля.',
       deletingFile: 'Виникла помилка під час видалення файлу',
       deletingTitle:
-        "Виникла помилка під час видалення {{title}}, Будь ласка, перевірте ваше з'єднання та спробуйте ще раз.",
-      emailOrPasswordIncorrect: 'Вказаний email або пароль є невірними',
+        "Виникла помилка під час видалення {{title}}. Будь ласка, перевірте ваше з'єднання та спробуйте ще раз.",
+      emailOrPasswordIncorrect: 'Вказана адреса електронної пошти або пароль є невірними',
       followingFieldsInvalid_one: 'Наступне поле невірне:',
       followingFieldsInvalid_other: 'Наступні поля невірні',
       incorrectCollection: 'Неправильна колекція',
