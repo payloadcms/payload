@@ -384,6 +384,7 @@ export const uk: Language = {
       versionCount_none: 'Версій не знайдено',
       versionCount_one: '{{count}} версія знайдена',
       versionCount_other: '{{count}} версій знайдено',
+      versionCount_two: '{{count}} версії знайдено',
       versionCreatedOn: '{{version}} створена:',
       versionID: 'ID версії',
       versions: 'Версії',
