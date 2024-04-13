@@ -231,6 +231,37 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: blocksWithLocalizedSameName,
+      fields: [
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'block_first',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+            {
+              slug: 'block_second',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   globals: [
     {
