@@ -133,7 +133,7 @@ export const generateFileData = async <T>({
     }
 
     if (fileSupportsResize || isImage(file.mimetype)) {
-      dimensions = getImageSize(file)
+      dimensions = await getImageSize(file)
       fileData.width = dimensions.width
       fileData.height = dimensions.height
     }
