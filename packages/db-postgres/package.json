@@ -1,10 +1,10 @@
 {
   "name": "@r1tsu/db-postgres",
-  "version": "3.0.0-beta.10",
-  "description": "The officially supported Postgres database adapter for Payload",
+  "version": "3.0.0-beta.11",
+  "description": "Not officially supported",
   "repository": {
     "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
+    "url": "https://github.com/r1tsuu/payload.git",
     "directory": "packages/db-postgres"
   },
   "license": "MIT",
