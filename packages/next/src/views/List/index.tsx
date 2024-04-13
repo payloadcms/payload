@@ -87,7 +87,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       },
     })
     const limit = isNumber(query?.limit)
-      ? query.limit
+      ? Number(query.limit)
       : listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
     const sort =
       query?.sort && typeof query.sort === 'string'
