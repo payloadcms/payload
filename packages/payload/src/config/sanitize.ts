@@ -1,6 +1,7 @@
 import { en } from '@payloadcms/translations/languages/en'
 import merge from 'deepmerge'
 
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
@@ -94,8 +95,11 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     ...(incomingConfig?.i18n ?? {}),
   }
 
-  configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults))
-  configWithDefaults.collections.push(migrationsCollection)
+  config.collections = [
+    ...config.collections,
+    getPreferencesCollection(configWithDefaults) as SanitizedCollectionConfig,
+    migrationsCollection as SanitizedCollectionConfig,
+  ]
 
   config.collections = config.collections.map((collection) =>
     sanitizeCollection(configWithDefaults, collection),
