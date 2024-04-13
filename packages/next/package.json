@@ -41,6 +41,7 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.1.0",
     "@payloadcms/eslint-config": "workspace:*",
+    "@types/mime-types": "^2.1.4",
     "@types/react": "18.2.74",
     "@types/react-dom": "18.2.24",
     "@types/ws": "^8.5.10",
@@ -68,6 +69,7 @@
     "graphql": "16.8.1",
     "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
+    "mime-types": "^2.1.35",
     "path-to-regexp": "^6.2.1",
     "qs": "6.11.2",
     "react-diff-viewer-continued": "3.2.6",
