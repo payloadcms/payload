@@ -133,7 +133,7 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { req
 
 export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (
   value: string,
-  { admin, jsonError, required, t },
+  { jsonError, jsonSchema, required, t },
 ) => {
   if (required && !value) {
     return t('validation:required')
@@ -159,10 +159,10 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
     return true
   }
 
-  if (isNotEmpty(value) && admin?.jsonSchema?.schema) {
+  if (isNotEmpty(value) && jsonSchema?.schema) {
     const ajv = new Ajv()
 
-    if (!ajv.validate(admin?.jsonSchema?.schema, value)) {
+    if (!ajv.validate(jsonSchema?.schema, value)) {
       return t(ajv.errorsText())
     }
   }
