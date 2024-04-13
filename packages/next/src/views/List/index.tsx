@@ -78,7 +78,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       CustomListView = CustomList.Component
     }
 
-    const page = isNumber(query?.page) ? query.page : 0
+    const page = isNumber(query?.page) ? Number(query.page) : 0
     const whereQuery = mergeListSearchAndWhere({
       collectionConfig,
       query: {
