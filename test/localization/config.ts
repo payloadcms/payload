@@ -5,6 +5,7 @@ import { devUser } from '../credentials.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
 import {
+  blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
   localizedPostsSlug,
