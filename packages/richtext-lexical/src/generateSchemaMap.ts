@@ -26,17 +26,17 @@ export const getGenerateSchemaMap =
         schemaPath,
       })
 
-      for (const schemaKey in schemas) {
-        const fields = schemas[schemaKey]
+      if (schemas) {
+        for (const [schemaKey, fields] of schemas.entries()) {
+          const sanitizedFields = sanitizeFields({
+            config,
+            fields: cloneDeep(fields),
+            requireFieldLevelRichTextEditor: true,
+            validRelationships,
+          })
 
-        const sanitizedFields = sanitizeFields({
-          config,
-          fields: cloneDeep(fields),
-          requireFieldLevelRichTextEditor: true,
-          validRelationships,
-        })
-
-        schemaMap.set(`${schemaPath}.feature.${featureKey}.${schemaKey}`, sanitizedFields)
+          schemaMap.set(`${schemaPath}.feature.${featureKey}.${schemaKey}`, sanitizedFields)
+        }
       }
     }
 

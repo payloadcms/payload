@@ -140,9 +140,9 @@ export const ExtraFieldsUploadDrawer: React.FC<
           <RenderFields
             fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
             forceRender
-            path=""
+            path="" // See Blocks feature path for details as for why this is empty
             readOnly={false}
-            schemaPath=""
+            schemaPath={schemaFieldsPath}
           />
           <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
         </Form>
