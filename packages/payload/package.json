@@ -67,6 +67,14 @@
     "scheduler": "0.23.0",
     "scmp": "2.1.0"
   },
+  "peerDependencies": {
+    "@swc/core": "^1.4.13"
+  },
+  "peerDependenciesMeta": {
+    "@swc/core": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/eslint-config": "workspace:*",
