@@ -138,7 +138,7 @@ import { CallToAction } from '../blocks/CallToAction'
 Here's an overview of all the included features:
 
 | Feature Name                   | Included by default | Description                                                                                                                                                                            |
-| ------------------------------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`BoldTextFeature`**          | Yes                 | Handles the bold text format                                                                                                                                                           |
 | **`ItalicTextFeature`**        | Yes                 | Handles the italic text format                                                                                                                                                         |
 | **`UnderlineTextFeature`**     | Yes                 | Handles the underline text format                                                                                                                                                      |
@@ -157,7 +157,8 @@ Here's an overview of all the included features:
 | **`RelationshipFeature`**      | Yes                 | Allows you to create block-level (not inline) relationships to other documents                                                                                                         |
 | **`BlockQuoteFeature`**        | Yes                 | Allows you to create block-level quotes                                                                                                                                                |
 | **`UploadFeature`**            | Yes                 | Allows you to create block-level upload nodes - this supports all kinds of uploads, not just images                                                                                    |
-| **`BlocksFeature`**            | No                  | Allows you to use Payload's [Blocks Field](/docs/fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field. |
+| **`HorizontalRuleFeature`**    | Yes                 | Horizontal rules / separators. Basically displays an <hr> element                                                                                                                      |
+| **`BlocksFeature`**            | No                  | Allows you to use Payload's [Blocks Field](/docs/fields/blocks) directly inside your editor. In the feature props, you can specify the allowed blocks - just like in the Blocks field.                 |
 | **`TreeViewFeature`**          | No                  | Adds a debug box under the editor, which allows you to see the current editor state live, the dom, as well as time travel. Very useful for debugging                                   |
 
 ## Creating your own, custom Feature
@@ -233,6 +234,19 @@ async function lexicalToHTML(
 This method employs `convertLexicalToHTML` from `@payloadcms/richtext-lexical`, which converts the serialized editor state into HTML.
 
 Because every `Feature` is able to provide html converters, and because the `htmlFeature` can modify those or provide their own, we need to consolidate them with the default html Converters using the `consolidateHTMLConverters` function.
+
+#### CSS
+
+Payload's lexical HTML converter does not generate CSS for you, but it does add classes to the generated HTML. You can use these classes to style the HTML in your frontend.
+
+Here is some "base" CSS you can use to ensure that nested lists render correctly:
+
+```css
+/* Base CSS for Lexical HTML */
+.nestedListItem, .list-check {
+  list-style-type: none;
+}
+```
 
 #### Creating your own HTML Converter
 

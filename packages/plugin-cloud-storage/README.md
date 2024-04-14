@@ -63,6 +63,7 @@ This plugin supports the following adapters:
 - [Azure Blob Storage](#azure-blob-storage-adapter)
 - [AWS S3-style Storage](#s3-adapter)
 - [Google Cloud Storage](#gcs-adapter)
+- [Vercel Blob Storage](#vercel-blob-adapter)
 
 However, you can create your own adapter for any third-party service you would like to use.
 
@@ -175,6 +176,20 @@ const adapter = gcsAdapter({
 
 // Now you can pass this adapter to the plugin
 ```
+
+### Vercel Blob Adapter
+
+To use the Vercel Blob adapter, you need to have `@vercel/blob` installed in your project dependencies.
+
+```ts
+import { vercelBlobAdapter } from '@payloadcms/plugin-cloud-storage/vercelBlob'
+
+const adapter = vercelBlobAdapter({
+  token: process.env.BLOB_READ_WRITE_TOKEN || '',
+})
+```
+
+Credit to @JarvisPrestidge for the original implementation of this plugin.
 
 ### Payload Access Control
 

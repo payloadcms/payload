@@ -42,7 +42,7 @@ export type CustomPayloadRequest<U = unknown> = {
    * The requested locale if specified
    * Only available for localized collections
    */
-  locale?: string
+  locale?: GeneratedTypes['locale']
   /**
    * The payload object
    */

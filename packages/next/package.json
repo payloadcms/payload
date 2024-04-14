@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.10",
   "main": "./src/index.js",
   "types": "./src/index.js",
   "type": "module",
@@ -79,7 +79,7 @@
   },
   "peerDependencies": {
     "http-status": "1.6.2",
-    "next": "14.2.0-canary.23",
+    "next": "^14.2.0-canary.23",
     "payload": "workspace:*"
   },
   "publishConfig": {
@@ -104,7 +104,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=18.20.2"
   },
   "files": [
     "dist"

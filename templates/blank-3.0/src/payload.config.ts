@@ -1,6 +1,6 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 // import { payloadCloud } from '@payloadcms/plugin-cloud'
-import { lexicalEditor } from '@payloadcms/richtext-lexical' // editor-import
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload/config'
 // import sharp from 'sharp'
@@ -27,6 +27,7 @@ export default buildConfig({
     url: process.env.DATABASE_URI || '',
   }),
   // database-adapter-config-end
+
   // Sharp is now an optional dependency -
   // if you want to resize images, crop, set focal point, etc.
   // make sure to install it and pass it to the config.

@@ -18,7 +18,11 @@ export const getDataAndFile: GetDataAndFile = async ({ collection, config, reque
     const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
     if (contentType === 'application/json') {
-      data = await request.json()
+      try {
+        data = await request.json()
+      } catch (error) {
+        data = {}
+      }
     } else if (contentType === 'multipart/form-data') {
       // possible upload request
       if (collection?.config?.upload) {

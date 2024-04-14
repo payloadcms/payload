@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.10",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./src/index.ts",
@@ -22,7 +22,7 @@
     }
   },
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && tsx ../../scripts/exportPointerFiles.ts ../packages/payload dist/exports",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
@@ -113,7 +113,7 @@
     "ts-essentials": "7.0.3"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=18.20.2"
   },
   "files": [
     "bin.js",

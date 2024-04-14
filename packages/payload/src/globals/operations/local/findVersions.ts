@@ -10,9 +10,9 @@ import { findVersionsOperation } from '../findVersions.js'
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
   depth?: number
-  fallbackLocale?: string
+  fallbackLocale?: GeneratedTypes['locale']
   limit?: number
-  locale?: string
+  locale?: 'all' | GeneratedTypes['locale']
   overrideAccess?: boolean
   page?: number
   req?: PayloadRequest
