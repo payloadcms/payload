@@ -1,7 +1,6 @@
 import { en } from '@payloadcms/translations/languages/en'
 import merge from 'deepmerge'
 
-import type { AdminView } from '../admin/views/types.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
