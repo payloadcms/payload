@@ -134,7 +134,7 @@ export const buildColumnState = (args: Args): Column[] => {
         accessor: name,
         active,
         cellProps: {
-          ...cellProps?.[index],
+          ...field.cellComponentProps,
           link: isFirstActiveColumn,
           relationTo:
             field.type === 'relationship' && 'relationTo' in field.fieldComponentProps
