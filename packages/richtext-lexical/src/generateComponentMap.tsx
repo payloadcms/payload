@@ -76,27 +76,27 @@ export const getGenerateComponentMap =
               schemaPath,
             })
 
-            for (const schemaKey in schemas) {
-              const fields = schemas[schemaKey]
+            if (schemas) {
+              for (const [schemaKey, fields] of schemas.entries()) {
+                const sanitizedFields = sanitizeFields({
+                  config,
+                  fields: cloneDeep(fields),
+                  requireFieldLevelRichTextEditor: true,
+                  validRelationships,
+                })
 
-              const sanitizedFields = sanitizeFields({
-                config,
-                fields: cloneDeep(fields),
-                requireFieldLevelRichTextEditor: true,
-                validRelationships,
-              })
+                const mappedFields = mapFields({
+                  WithServerSideProps,
+                  config,
+                  disableAddingID: true,
+                  fieldSchema: sanitizedFields,
+                  i18n,
+                  parentPath: `${schemaPath}.feature.${featureKey}.fields.${schemaKey}`,
+                  readOnly: false,
+                })
 
-              const mappedFields = mapFields({
-                WithServerSideProps,
-                config,
-                disableAddingID: true,
-                fieldSchema: sanitizedFields,
-                i18n,
-                parentPath: `${schemaPath}.feature.${featureKey}.fields.${schemaKey}`,
-                readOnly: false,
-              })
-
-              componentMap.set(`feature.${featureKey}.fields.${schemaKey}`, mappedFields)
+                componentMap.set(`feature.${featureKey}.fields.${schemaKey}`, mappedFields)
+              }
             }
           }
 
