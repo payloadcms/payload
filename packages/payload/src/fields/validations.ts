@@ -131,7 +131,7 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { req
   return true
 }
 
-export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (
+export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = async (
   value: string,
   { jsonError, jsonSchema, required, t },
 ) => {
@@ -143,7 +143,7 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
     return t('validation:invalidInput')
   }
 
-  function isNotEmpty(value) {
+  const isNotEmpty = (value) => {
     if (value === undefined || value === null) {
       return false
     }
@@ -159,11 +159,36 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
     return true
   }
 
-  if (isNotEmpty(value) && jsonSchema?.schema) {
-    const ajv = new Ajv()
+  const fetchSchema = ({ uri, schema }) => {
+    if (uri && schema) return schema
+    return fetch(uri)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        return response.json()
+      })
+      .then((json) => {
+        const jsonSchemaSanitizations = {
+          id: undefined,
+          $id: json.id,
+          $schema: 'http://json-schema.org/draft-07/schema#',
+        }
+        return Object.assign(json, jsonSchemaSanitizations)
+      })
+  }
 
-    if (!ajv.validate(jsonSchema?.schema, value)) {
-      return t(ajv.errorsText())
+  if (isNotEmpty(value)) {
+    try {
+      jsonSchema.schema = await fetchSchema(jsonSchema)
+      const { schema } = jsonSchema
+      const ajv = new Ajv()
+
+      if (!ajv.validate(schema, value)) {
+        return t(ajv.errorsText())
+      }
+    } catch (error) {
+      return t(error.message)
     }
   }
 

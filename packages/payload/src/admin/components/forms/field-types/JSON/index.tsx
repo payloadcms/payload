@@ -65,6 +65,7 @@ const JSONField: React.FC<Props> = (props) => {
     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
       schemas: [...existingSchemas, jsonSchema],
       validate: true,
+      enableSchemaRequest: true,
     })
 
     editor.setModel(model)
