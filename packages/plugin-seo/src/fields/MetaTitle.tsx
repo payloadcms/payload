@@ -77,7 +77,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

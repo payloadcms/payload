@@ -76,7 +76,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
+          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
           {hasGenerateDescriptionFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
