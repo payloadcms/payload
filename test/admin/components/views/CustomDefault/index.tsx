@@ -7,6 +7,8 @@ import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
+import type { InitPageResult } from 'payload/types'
+
 import { Button } from '@payloadcms/ui/elements/Button'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
 
@@ -14,7 +16,11 @@ import { customViewPath } from '../../../shared.js'
 import './index.scss'
 const baseClass = 'custom-default-view'
 
-export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export const CustomDefaultView: React.FC<AdminViewProps> = ({
+  initPageResult,
+}: {
+  initPageResult: InitPageResult
+}) => {
   const {
     permissions,
     req: {
@@ -36,7 +42,7 @@ export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) 
   }
 
   return (
-    <DefaultTemplate config={config} i18n={i18n} permissions={permissions} user={user}>
+    <div>
       <SetStepNav
         nav={[
           {
@@ -71,6 +77,6 @@ export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) 
           </Button>
         </div>
       </div>
-    </DefaultTemplate>
+    </div>
   )
 }

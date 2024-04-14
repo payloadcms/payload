@@ -6,6 +6,14 @@ export const customViewPath = '/custom-view'
 
 export const customParamViewPathBase = '/custom-param'
 
+export const customDefaultViewPath = '/custom-default-view'
+
+export const customDefaultViewClass = 'custom-default-view'
+
+export const customMinimalViewPath = '/custom-minimal-view'
+
+export const customMinimalViewClass = 'custom-minimal-view'
+
 export const customParamViewPath = `${customParamViewPathBase}/:id`
 
 export const customViewTitle = 'Custom View'

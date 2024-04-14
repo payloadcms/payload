@@ -1,6 +1,7 @@
 import { en } from '@payloadcms/translations/languages/en'
 import merge from 'deepmerge'
 
+import type { AdminView } from '../admin/views/types.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
@@ -37,6 +38,13 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,
     )
   }
+
+  if (sanitizedConfig?.admin?.components?.views)
+    Object.entries(sanitizedConfig.admin.components.views).forEach(([_key, view]) => {
+      if (typeof view === 'function' || view.templateType) return
+
+      view.templateType = 'none'
+    })
 
   return sanitizedConfig as Partial<SanitizedConfig>
 }
