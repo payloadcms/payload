@@ -1,24 +1,29 @@
 import type { PayloadRequest } from '../types/index.ts'
-import type { File, FileData } from './types.js'
+import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
 
 type Args = {
   data: FileData
   req: PayloadRequest
+  uploadConfig: UploadConfig
 }
-export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
+export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
   const baseUrl = req.origin || `${req.protocol}://${req.host}`
   const { filename, url } = data
 
   if (typeof url === 'string') {
     const fileURL = `${baseUrl}${url}`
 
+    const headers = uploadConfig.externalFileHeaderFilter
+      ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
+      : {
+          cookie: req.headers['cookie'],
+        }
+
     const res = await fetch(fileURL, {
       credentials: 'include',
-      headers: {
-        ...req.headers,
-      },
+      headers,
       method: 'GET',
     })
 
