@@ -19,8 +19,10 @@ export const shouldPopulateBreadcrumbs = (
   // the originalDoc is not present, so we should populate the breadcrumbs
   if (!originalDoc) return true
 
+  const breadcrumbsFieldSlug = pluginConfig?.breadcrumbsFieldSlug || 'breadcrumbs'
+
   // if it's a nested collection, we should populate the breadcrumbs
-  if (data?.hierarchy && !Array.isArray(data?.hierarchy)) {
+  if (data?.[breadcrumbsFieldSlug] && !Array.isArray(data?.[breadcrumbsFieldSlug])) {
     return true
   }
 
