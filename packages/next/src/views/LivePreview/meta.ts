@@ -18,8 +18,12 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   let description: string = ''
   let title: string = ''
   let keywords: string = ''
+  let leader: string = ''
 
   if (collectionConfig) {
+    const entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
+    leader = entityLabel
+
     description = `${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
       collectionConfig.labels.singular,
       i18n,
@@ -34,6 +38,8 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   }
 
   if (globalConfig) {
+    const entityLabel = getTranslation(globalConfig.label, i18n)
+    leader = entityLabel
     description = getTranslation(globalConfig.label, i18n)
     keywords = `${getTranslation(globalConfig.label, i18n)}, Payload, CMS`
     title = getTranslation(globalConfig.label, i18n)
@@ -43,6 +49,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     config,
     description,
     keywords,
+    leader,
     title,
   })
 }

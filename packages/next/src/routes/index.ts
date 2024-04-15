@@ -1,5 +1,7 @@
 export { GRAPHQL_PLAYGROUND_GET, GRAPHQL_POST } from './graphql/index.js'
 
+export { OG_GET } from './og/index.js'
+
 export {
   DELETE as REST_DELETE,
   GET as REST_GET,

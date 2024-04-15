@@ -4,7 +4,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { meta } from '../../utilities/meta.js'
 
-export const generateNotFoundMeta = ({
+export const generateNotFoundMeta = async ({
   config,
   i18n,
 }: {

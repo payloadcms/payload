@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload/types'
 
 import { payloadFavicon } from '@payloadcms/ui/assets'
+import QueryString from 'qs'
 
 const defaultOpenGraph: Metadata['openGraph'] = {
   type: 'website',
@@ -20,9 +21,10 @@ export const meta = (args: {
   config: SanitizedConfig
   description?: string
   keywords?: string
+  leader?: string
   title: string
 }): Metadata => {
-  const { config, description, keywords = 'CMS, Admin, Dashboard', title } = args
+  const { config, description, keywords = 'CMS, Admin, Dashboard', leader, title } = args
 
   const titleSuffix = config.admin.meta?.titleSuffix ?? '- Payload'
   const favicon = config?.admin?.meta?.favicon ?? payloadFavicon?.src
@@ -50,7 +52,10 @@ export const meta = (args: {
         {
           alt: `${title} ${titleSuffix}`,
           height: 630,
-          url: `/api/og?title=${title}`,
+          url: `/api/og${QueryString.stringify({
+            leader,
+            title: `${title} ${titleSuffix}`,
+          })}`,
           width: 1200,
         },
       ],
