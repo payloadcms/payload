@@ -35,7 +35,8 @@ export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
         token,
       })
     } catch (err) {
-      routeError({
+      return routeError({
+        config: req.payload.config,
         err,
         req,
       })

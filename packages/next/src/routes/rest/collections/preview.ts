@@ -35,8 +35,9 @@ export const preview: CollectionRouteHandlerWithID = async ({ id, collection, re
         token,
       })
     } catch (err) {
-      routeError({
+      return routeError({
         collection,
+        config: req.payload.config,
         err,
         req,
       })
