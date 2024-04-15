@@ -5,7 +5,7 @@ export type PreferenceRequest = {
   key: string
   overrideAccess?: boolean
   req: PayloadRequest
-  user: User
+  user: PayloadRequest['user']
 }
 
 export type PreferenceUpdateRequest = PreferenceRequest & { value: unknown }

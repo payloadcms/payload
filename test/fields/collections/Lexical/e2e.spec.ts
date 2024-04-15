@@ -1,29 +1,31 @@
 import type { SerializedBlockNode, SerializedLinkNode } from '@payloadcms/richtext-lexical'
 import type { Page } from '@playwright/test'
+import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
-import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
+import { initPayloadE2ENoConfig } from 'helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from 'helpers/reInit.js'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { LexicalField } from '../../payload-types.js'
+import type { Config, LexicalField, Upload } from '../../payload-types.js'
 
 import { initPageConsoleErrorCatch, saveDocAndAssert } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../../../helpers/initPayloadE2E.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
-import { clearAndSeedEverything } from '../../seed.js'
 import { lexicalFieldsSlug } from '../../slugs.js'
 import { lexicalDocData } from './data.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let page: Page
 let serverURL: string
@@ -49,7 +51,7 @@ async function navigateToLexicalFields(navigateToListView: boolean = true) {
 describe('lexical', () => {
   beforeAll(async ({ browser }) => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -57,7 +59,12 @@ describe('lexical', () => {
     initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
-    await clearAndSeedEverything(payload)
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fieldsLexicalTest',
+      uploadsDir: path.resolve(dirname, '../Upload/uploads'),
+    })
+
     if (client) {
       await client.logout()
     }
@@ -141,6 +148,7 @@ describe('lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
@@ -210,6 +218,7 @@ describe('lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
@@ -360,6 +369,7 @@ describe('lexical', () => {
           await payload.find({
             collection: lexicalFieldsSlug,
             depth: 0,
+            overrideAccess: true,
             where: {
               title: {
                 equals: lexicalDocData.title,
@@ -369,8 +379,11 @@ describe('lexical', () => {
         ).docs[0] as never
 
         const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+
         const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
-        const textNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1].children[0]
+
+        const textNodeInBlockNodeRichText =
+          blockNode.fields.richTextField.root.children[1].children[0]
 
         expect(textNodeInBlockNodeRichText.text).toBe(
           'Some text below relationship node 1 inserted text',
@@ -437,6 +450,7 @@ describe('lexical', () => {
           await payload.find({
             collection: lexicalFieldsSlug,
             depth: 0,
+            overrideAccess: true,
             where: {
               title: {
                 equals: lexicalDocData.title,
@@ -447,7 +461,7 @@ describe('lexical', () => {
 
         const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
         const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
-        const paragraphNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1]
+        const paragraphNodeInBlockNodeRichText = blockNode.fields.richTextField.root.children[1]
 
         expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
 
@@ -528,6 +542,7 @@ describe('lexical', () => {
           await payload.find({
             collection: lexicalFieldsSlug,
             depth: 0,
+            overrideAccess: true,
             where: {
               title: {
                 equals: lexicalDocData.title,
@@ -674,6 +689,7 @@ describe('lexical', () => {
           await payload.find({
             collection: lexicalFieldsSlug,
             depth: 0,
+            overrideAccess: true,
             where: {
               title: {
                 equals: lexicalDocData.title,
@@ -691,6 +707,189 @@ describe('lexical', () => {
         const createdTextAreaBlock = subBlocks[1]
 
         expect(createdTextAreaBlock.content).toBe('text123')
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+    })
+
+    // Big test which tests a bunch of things: Creation of blocks via slash commands, creation of deeply nested sub-lexical-block fields via slash commands, properly populated deeply nested fields within those
+    test('ensure creation of a lexical, lexical-field-block, which contains another lexical, lexical-and-upload-field-block, works and that the sub-upload field is properly populated', async () => {
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const lastParagraph = richTextField.locator('p').last()
+      await lastParagraph.scrollIntoViewIfNeeded()
+      await expect(lastParagraph).toBeVisible()
+
+      /**
+       * Create new sub-block
+       */
+      // type / to open the slash menu
+      await lastParagraph.click()
+      await page.keyboard.press('/')
+      await page.keyboard.type('Rich')
+
+      // Create Rich Text Block
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      // Click 1. Button and ensure it's the Rich Text block creation button (it should be! Otherwise, sorting wouldn't work)
+      const richTextBlockSelectButton = slashMenuPopover.locator('button').first()
+      await expect(richTextBlockSelectButton).toBeVisible()
+      await expect(richTextBlockSelectButton).toContainText('Rich Text')
+      await richTextBlockSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const newRichTextBlock = richTextField
+        .locator('.lexical-block:not(.lexical-block .lexical-block)')
+        .last() // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+      await newRichTextBlock.scrollIntoViewIfNeeded()
+      await expect(newRichTextBlock).toBeVisible()
+
+      // Ensure that sub-editor is empty
+      const newRichTextEditorParagraph = newRichTextBlock.locator('p').first()
+      await expect(newRichTextEditorParagraph).toBeVisible()
+      await expect(newRichTextEditorParagraph).toHaveText('')
+
+      await newRichTextEditorParagraph.click()
+      await page.keyboard.press('/')
+      await page.keyboard.type('Lexical')
+      await expect(slashMenuPopover).toBeVisible()
+      // Click 1. Button and ensure it's the Lexical And Upload block creation button (it should be! Otherwise, sorting wouldn't work)
+      const lexicalAndUploadBlockSelectButton = slashMenuPopover.locator('button').first()
+      await expect(lexicalAndUploadBlockSelectButton).toBeVisible()
+      await expect(lexicalAndUploadBlockSelectButton).toContainText('Lexical And Upload')
+      await lexicalAndUploadBlockSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      // Ensure that sub-editor is created
+      const newSubLexicalAndUploadBlock = newRichTextBlock.locator('.lexical-block').first()
+      await newSubLexicalAndUploadBlock.scrollIntoViewIfNeeded()
+      await expect(newSubLexicalAndUploadBlock).toBeVisible()
+
+      // Type in newSubLexicalAndUploadBlock
+      const paragraphInSubEditor = newSubLexicalAndUploadBlock.locator('p').first()
+      await expect(paragraphInSubEditor).toBeVisible()
+      await paragraphInSubEditor.click()
+      await page.keyboard.type('Some subText')
+      // Upload something
+      const chooseExistingUploadButton = newSubLexicalAndUploadBlock
+        .locator('.upload__toggler.list-drawer__toggler')
+        .first()
+      await expect(chooseExistingUploadButton).toBeVisible()
+      await chooseExistingUploadButton.click()
+      await wait(500) // wait for drawer form state to initialize (it's a flake)
+      const uploadListDrawer = page.locator('dialog[id^=list-drawer_1_]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
+      await expect(uploadListDrawer).toBeVisible()
+      // find button which has a span with text "payload.jpg" and click it in playwright
+      const uploadButton = uploadListDrawer.locator('button').getByText('payload.jpg').first()
+      await expect(uploadButton).toBeVisible()
+      await uploadButton.click()
+      await expect(uploadListDrawer).toBeHidden()
+      // Check if the upload is there
+      await expect(
+        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+      ).toHaveText('payload.jpg')
+      // save document and assert
+      await saveDocAndAssert(page)
+      await expect(
+        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+      ).toHaveText('payload.jpg')
+      await expect(paragraphInSubEditor).toHaveText('Some subText')
+
+      // reload page and assert again
+      await page.reload()
+      await expect(
+        newSubLexicalAndUploadBlock.locator('.field-type.upload .file-meta__url a'),
+      ).toHaveText('payload.jpg')
+      await expect(paragraphInSubEditor).toHaveText('Some subText')
+
+      // Check if the API result is populated correctly - Depth 0
+      await expect(async () => {
+        const lexicalDoc: LexicalField = (
+          await payload.find({
+            collection: lexicalFieldsSlug,
+            depth: 0,
+            overrideAccess: true,
+            where: {
+              title: {
+                equals: lexicalDocData.title,
+              },
+            },
+          })
+        ).docs[0] as never
+
+        const uploadDoc: Upload = (
+          await payload.find({
+            collection: 'uploads',
+            depth: 0,
+            overrideAccess: true,
+            where: {
+              filename: {
+                equals: 'payload.jpg',
+              },
+            },
+          })
+        ).docs[0] as never
+
+        const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+        const richTextBlock: SerializedBlockNode = lexicalField.root
+          .children[12] as SerializedBlockNode
+        const subRichTextBlock: SerializedBlockNode = richTextBlock.fields.richTextField.root
+          .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
+
+        const subSubRichTextField = subRichTextBlock.fields.subRichTextField
+        const subSubUploadField = subRichTextBlock.fields.subUploadField
+
+        expect(subSubRichTextField.root.children[0].children[0].text).toBe('Some subText')
+        expect(subSubUploadField).toBe(uploadDoc.id)
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      // Check if the API result is populated correctly - Depth 1
+      await expect(async () => {
+        // Now with depth 1
+        const lexicalDocDepth1: LexicalField = (
+          await payload.find({
+            collection: lexicalFieldsSlug,
+            depth: 1,
+            overrideAccess: true,
+            where: {
+              title: {
+                equals: lexicalDocData.title,
+              },
+            },
+          })
+        ).docs[0] as never
+
+        const uploadDoc: Upload = (
+          await payload.find({
+            collection: 'uploads',
+            depth: 0,
+            overrideAccess: true,
+            where: {
+              filename: {
+                equals: 'payload.jpg',
+              },
+            },
+          })
+        ).docs[0] as never
+
+        const lexicalField2: SerializedEditorState = lexicalDocDepth1.lexicalWithBlocks
+        const richTextBlock2: SerializedBlockNode = lexicalField2.root
+          .children[12] as SerializedBlockNode
+        const subRichTextBlock2: SerializedBlockNode = richTextBlock2.fields.richTextField.root
+          .children[1] as SerializedBlockNode // index 0 and 2 are paragraphs created by default around the block node when a new block is added via slash command
+
+        const subSubRichTextField2 = subRichTextBlock2.fields.subRichTextField
+        const subSubUploadField2 = subRichTextBlock2.fields.subUploadField
+
+        expect(subSubRichTextField2.root.children[0].children[0].text).toBe('Some subText')
+        expect(subSubUploadField2.id).toBe(uploadDoc.id)
+        expect(subSubUploadField2.filename).toBe(uploadDoc.filename)
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
@@ -744,6 +943,7 @@ describe('lexical', () => {
           await payload.find({
             collection: lexicalFieldsSlug,
             depth: 0,
+            overrideAccess: true,
             where: {
               title: {
                 equals: lexicalDocData.title,

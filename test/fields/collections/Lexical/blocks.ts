@@ -1,6 +1,7 @@
 import type { LexicalBlock } from '@payloadcms/richtext-lexical'
 import type { ArrayField } from 'payload/types'
 
+import { BlocksFeature } from '@payloadcms/richtext-lexical'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { textFieldsSlug } from '../Text/shared.js'
@@ -113,12 +114,35 @@ export const RadioButtonsBlock: LexicalBlock = {
 export const RichTextBlock: LexicalBlock = {
   fields: [
     {
-      name: 'richText',
+      name: 'richTextField',
       type: 'richText',
-      editor: lexicalEditor(),
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            blocks: [
+              {
+                fields: [
+                  {
+                    name: 'subRichTextField',
+                    type: 'richText',
+                    editor: lexicalEditor({}),
+                  },
+                  {
+                    name: 'subUploadField',
+                    type: 'upload',
+                    relationTo: 'uploads',
+                  },
+                ],
+                slug: 'lexicalAndUploadBlock',
+              },
+            ],
+          }),
+        ],
+      }),
     },
   ],
-  slug: 'richText',
+  slug: 'richTextBlock',
 }
 
 export const UploadAndRichTextBlock: LexicalBlock = {

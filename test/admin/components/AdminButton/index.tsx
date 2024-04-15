@@ -1,8 +1,10 @@
+import type { SanitizedConfig } from 'payload/types'
+
 import React from 'react'
 
 const baseClass = 'admin-button'
 
-export const AdminButton: React.FC = () => {
+export const AdminButton: SanitizedConfig['admin']['components']['actions'][0] = () => {
   return (
     <div
       className={baseClass}

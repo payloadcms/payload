@@ -75,7 +75,7 @@ export const DefaultPublishButton: React.FC<{ label?: string }> = ({ label: labe
     void fetchPublishAccess()
   }, [api, code, collectionSlug, getData, globalSlug, id, serverURL])
 
-  if (!canPublish) return null
+  if (!hasPublishPermission) return null
 
   return (
     <FormSubmit

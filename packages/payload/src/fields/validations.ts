@@ -21,10 +21,8 @@ import type {
   Validate,
 } from './config/types.js'
 
-import { getIDType } from '../utilities/getIDType.js'
 import { isNumber } from '../utilities/isNumber.js'
 import { isValidID } from '../utilities/isValidID.js'
-import { fieldAffectsData } from './config/types.js'
 
 export const text: Validate<string | string[], unknown, unknown, TextField> = (
   value,
@@ -425,13 +423,11 @@ export const upload: Validate<unknown, unknown, unknown, UploadField> = (
   }
 
   if (typeof value !== 'undefined' && value !== null) {
-    const idField = options?.req?.payload?.config?.collections
-      ?.find((collection) => collection.slug === options.relationTo)
-      ?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id')
+    const idType =
+      options?.req?.payload?.collections[options.relationTo]?.customIDType ||
+      options?.req?.payload?.db?.defaultIDType
 
-    const type = getIDType(idField, options?.req?.payload?.db?.defaultIDType)
-
-    if (!isValidID(value, type)) {
+    if (!isValidID(value, idType)) {
       return options.req?.t('validation:validUploadID')
     }
   }
@@ -449,11 +445,7 @@ export const relationship: Validate<
     maxRows,
     minRows,
     relationTo,
-    req: {
-      payload,
-      payload: { config },
-      t,
-    },
+    req: { payload, t },
     required,
   } = options
 
@@ -502,13 +494,10 @@ export const relationship: Validate<
 
       if (requestedID === null) return false
 
-      const idField = config?.collections
-        ?.find((collection) => collection.slug === collectionSlug)
-        ?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id')
+      const idType =
+        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
 
-      const type = getIDType(idField, payload?.db?.defaultIDType)
-
-      return !isValidID(requestedID, type)
+      return !isValidID(requestedID, idType)
     })
 
     if (invalidRelationships.length > 0) {

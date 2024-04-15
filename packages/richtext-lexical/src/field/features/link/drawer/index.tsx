@@ -87,9 +87,9 @@ export const LinkDrawer: React.FC<Props> = ({ drawerSlug, handleModalSubmit, sta
           <RenderFields
             fieldMap={Array.isArray(fieldMap) ? fieldMap : []}
             forceRender
-            path=""
+            path="" // See Blocks feature path for details as for why this is empty
             readOnly={false}
-            schemaPath=""
+            schemaPath={schemaFieldsPath}
           />
 
           <FormSubmit>{t('general:submit')}</FormSubmit>

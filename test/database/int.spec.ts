@@ -1,4 +1,5 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload } from 'payload'
 import type { PayloadRequest, TypeWithID } from 'payload/types'
 
@@ -18,13 +19,15 @@ const dirname = path.dirname(filename)
 
 let payload: Payload
 let user: TypeWithID & Record<string, unknown>
+let token: string
+let restClient: NextRESTClient
 const collection = 'posts'
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(configPromise))
+    ;({ payload, restClient } = await initPayloadInt(configPromise))
     payload.db.migrationDir = path.join(dirname, './migrations')
 
     const loginResult = await payload.login({
@@ -36,12 +39,41 @@ describe('database', () => {
     })
 
     user = loginResult.user
+    token = loginResult.token
   })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
     }
+  })
+
+  describe('id type', () => {
+    it('should sanitize incoming IDs if ID type is number', async () => {
+      const created = await restClient
+        .POST(`/posts`, {
+          body: JSON.stringify({
+            title: 'post to test that ID comes in as proper type',
+          }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      const { doc: updated } = await restClient
+        .PATCH(`/posts/${created.doc.id}`, {
+          body: JSON.stringify({
+            title: 'hello',
+          }),
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(updated.id).toStrictEqual(created.doc.id)
+    })
   })
 
   describe('migrations', () => {

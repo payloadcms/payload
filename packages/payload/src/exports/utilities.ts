@@ -25,7 +25,6 @@ export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFi
 export { formatLabels, formatNames, toWords } from '../utilities/formatLabels.js'
 
 export { getCollectionIDFieldTypes } from '../utilities/getCollectionIDFieldTypes.js'
-export { getIDType } from '../utilities/getIDType.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 export { default as getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
@@ -34,7 +33,12 @@ export { isEntityHidden } from '../utilities/isEntityHidden.js'
 export { isNumber } from '../utilities/isNumber.js'
 export { isPlainObject } from '../utilities/isPlainObject.js'
 
-export { isPlainFunction, isReactComponent } from '../utilities/isReactComponent.js'
+export {
+  isPlainFunction,
+  isReactClientComponent,
+  isReactComponent,
+  isReactServerComponent,
+} from '../utilities/isReactComponent.js'
 export { isValidID } from '../utilities/isValidID.js'
 export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 

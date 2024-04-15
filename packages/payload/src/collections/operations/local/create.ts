@@ -23,10 +23,10 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: GeneratedTypes['locale']
   file?: File
   filePath?: string
-  locale?: string
+  locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   req?: PayloadRequest

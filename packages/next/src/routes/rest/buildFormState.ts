@@ -156,7 +156,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
           })
         }
 
-        if (globalSlug) {
+        if (globalSlug && schemaPath === globalSlug) {
           resolvedData = await req.payload.findGlobal({
             slug: globalSlug,
             depth: 0,
@@ -186,6 +186,16 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       preferences: docPreferences || { fields: {} },
       req,
     })
+
+    // Maintain form state of file
+    if (
+      collectionSlug &&
+      req.payload.collections[collectionSlug]?.config?.upload &&
+      formState &&
+      formState.file
+    ) {
+      result.file = formState.file
+    }
 
     return Response.json(result, {
       status: httpStatus.OK,

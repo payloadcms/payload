@@ -25,11 +25,11 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import { de } from '@payloadcms/translations/languages/de'
-import { en } from '@payloadcms/translations/languages/en'
-import { es } from '@payloadcms/translations/languages/es'
 // import { slateEditor } from '@payloadcms/richtext-slate'
 import { type Config, buildConfig } from 'payload/config'
+import { de } from 'payload/i18n/de'
+import { en } from 'payload/i18n/en'
+import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
 
 import { reInitEndpoint } from './helpers/reInit.js'

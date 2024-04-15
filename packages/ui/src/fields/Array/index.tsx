@@ -62,7 +62,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     labelProps,
     localized,
     maxRows,
-    minRows,
+    minRows: minRowsProp,
     path: pathFromProps,
     permissions,
     readOnly: readOnlyFromProps,
@@ -72,6 +72,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
 
   const { indexPath, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
+  const minRows = minRowsProp ?? required ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
@@ -300,7 +301,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
                   {t('validation:requiresAtLeast', {
                     count: minRows,
                     label:
-                      getTranslation(minRows ? labels.plural : labels.singular, i18n) ||
+                      getTranslation(minRows > 1 ? labels.plural : labels.singular, i18n) ||
                       t(minRows > 1 ? 'general:row' : 'general:rows'),
                   })}
                 </Banner>

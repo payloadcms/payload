@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.0",
+  "version": "3.0.0-beta.10",
   "type": "module",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -82,9 +82,9 @@
       "types": "./src/utilities/*.ts"
     },
     "./scss": {
-      "import": "./src/scss.scss",
-      "require": "./src/scss.scss",
-      "default": "./src/scss.scss"
+      "import": "./src/scss/styles.scss",
+      "require": "./src/scss/styles.scss",
+      "default": "./src/scss/styles.scss"
     },
     "./scss/app.scss": "./src/scss/app.scss"
   },
@@ -163,9 +163,9 @@
         "default": "./dist/prod/styles.css"
       },
       "./scss": {
-        "import": "./dist/scss.scss",
-        "require": "./dist/scss.scss",
-        "default": "./dist/scss.scss"
+        "import": "./dist/scss/styles.scss",
+        "require": "./dist/scss/styles.scss",
+        "default": "./dist/scss/styles.scss"
       },
       "./scss/app.scss": "./dist/scss/app.scss"
     }
@@ -216,12 +216,12 @@
     "uuid": "9.0.1"
   },
   "peerDependencies": {
-    "next": "14.2.0-canary.23",
+    "next": "^14.2.0-canary.23",
     "payload": "workspace:*",
     "react": "^18.0.0"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=18.20.2"
   },
   "files": [
     "dist"

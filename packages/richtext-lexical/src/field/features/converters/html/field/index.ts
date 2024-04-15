@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field, RichTextField, TextField } from 'payload/types'
+import type { Field, RichTextField } from 'payload/types'
 
 import type { AdapterProps, LexicalRichTextAdapter } from '../../../../../types.js'
 import type { SanitizedServerEditorConfig } from '../../../../lexical/config/types.js'
@@ -10,6 +10,12 @@ import { defaultHTMLConverters } from '../converter/defaultConverters.js'
 import { convertLexicalToHTML } from '../converter/index.js'
 
 type Props = {
+  /**
+   * Whether the lexicalHTML field should be hidden in the admin panel
+   *
+   * @default true
+   */
+  hidden?: boolean
   name: string
 }
 
@@ -53,13 +59,16 @@ export const lexicalHTML: (
    **/
   lexicalFieldName: string,
   props: Props,
-) => TextField = (lexicalFieldName, props) => {
-  const { name = 'lexicalHTML' } = props
+) => Field = (lexicalFieldName, props) => {
+  const { name = 'lexicalHTML', hidden = true } = props
   return {
     name,
-    type: 'text',
+    type: 'code',
     admin: {
-      hidden: true,
+      editorOptions: {
+        language: 'html',
+      },
+      hidden,
     },
     hooks: {
       afterRead: [

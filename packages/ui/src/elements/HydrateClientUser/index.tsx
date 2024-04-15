@@ -1,15 +1,16 @@
 'use client'
 
-import type { Permissions, User } from 'payload/auth'
+import type { Permissions } from 'payload/auth'
+import type { PayloadRequest } from 'payload/types'
 
 import { useEffect } from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
 
-export const HydrateClientUser: React.FC<{ permissions: Permissions; user: User }> = ({
-  permissions,
-  user,
-}) => {
+export const HydrateClientUser: React.FC<{
+  permissions: Permissions
+  user: PayloadRequest['user']
+}> = ({ permissions, user }) => {
   const { setPermissions, setUser } = useAuth()
 
   useEffect(() => {

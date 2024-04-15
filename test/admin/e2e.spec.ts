@@ -15,6 +15,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   openDocControls,
+  openDocDrawer,
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -428,7 +429,10 @@ describe('admin', () => {
 
     test('collection — should render `id` as `useAsTitle` fallback', async () => {
       const { id } = await createPost()
-      await page.goto(postsUrl.edit(id))
+      const postURL = postsUrl.edit(id)
+      await page.goto(postURL)
+      await page.waitForURL(postURL)
+      await wait(500)
       await page.locator('#field-title')?.fill('')
       await expect(page.locator('.doc-header__title.render-title:has-text("ID:")')).toBeVisible()
       await saveDocAndAssert(page)
@@ -1052,8 +1056,8 @@ describe('admin', () => {
         await createPost()
         await page.goto(postsUrl.create)
 
-        // Open the drawer
-        await page.locator('.rich-text .list-drawer__toggler').click()
+        await openDocDrawer(page, '.rich-text .list-drawer__toggler')
+
         const listDrawer = page.locator('[id^=list-drawer_1_]')
         await expect(listDrawer).toBeVisible()
 
@@ -1092,7 +1096,7 @@ describe('admin', () => {
         await page.goto(postsUrl.create)
 
         // Open the drawer
-        await page.locator('.rich-text .list-drawer__toggler').click()
+        await openDocDrawer(page, '.rich-text .list-drawer__toggler')
         const listDrawer = page.locator('[id^=list-drawer_1_]')
         await expect(listDrawer).toBeVisible()
 

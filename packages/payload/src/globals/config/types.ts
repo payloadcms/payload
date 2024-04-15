@@ -117,7 +117,7 @@ export type GlobalAdminOptions = {
   /**
    * Exclude the global from the admin nav and routes
    */
-  hidden?: ((args: { user: User }) => boolean) | boolean
+  hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
   /**
    * Hide the API URL within the Edit view
    */

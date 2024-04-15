@@ -13,7 +13,7 @@ export const getGenerateComponentMap =
   (args: {
     resolvedFeatureMap: ResolvedServerFeatureMap
   }): RichTextAdapter['generateComponentMap'] =>
-  ({ config, i18n, schemaPath }) => {
+  ({ WithServerSideProps, config, i18n, schemaPath }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
 
     const componentMap = new Map()
@@ -50,7 +50,8 @@ export const getGenerateComponentMap =
               if (Component) {
                 componentMap.set(
                   `feature.${featureKey}.components.${componentKey}`,
-                  <Component
+                  <WithServerSideProps
+                    Component={Component}
                     componentKey={componentKey}
                     featureKey={resolvedFeature.key}
                     key={`${resolvedFeature.key}-${componentKey}`}
@@ -75,26 +76,27 @@ export const getGenerateComponentMap =
               schemaPath,
             })
 
-            for (const schemaKey in schemas) {
-              const fields = schemas[schemaKey]
+            if (schemas) {
+              for (const [schemaKey, fields] of schemas.entries()) {
+                const sanitizedFields = sanitizeFields({
+                  config,
+                  fields: cloneDeep(fields),
+                  requireFieldLevelRichTextEditor: true,
+                  validRelationships,
+                })
 
-              const sanitizedFields = sanitizeFields({
-                config,
-                fields: cloneDeep(fields),
-                requireFieldLevelRichTextEditor: true,
-                validRelationships,
-              })
+                const mappedFields = mapFields({
+                  WithServerSideProps,
+                  config,
+                  disableAddingID: true,
+                  fieldSchema: sanitizedFields,
+                  i18n,
+                  parentPath: `${schemaPath}.feature.${featureKey}.fields.${schemaKey}`,
+                  readOnly: false,
+                })
 
-              const mappedFields = mapFields({
-                config,
-                disableAddingID: true,
-                fieldSchema: sanitizedFields,
-                i18n,
-                parentPath: `${schemaPath}.feature.${featureKey}.fields.${schemaKey}`,
-                readOnly: false,
-              })
-
-              componentMap.set(`feature.${featureKey}.fields.${schemaKey}`, mappedFields)
+                componentMap.set(`feature.${featureKey}.fields.${schemaKey}`, mappedFields)
+              }
             }
           }
 

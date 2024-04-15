@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "3.0.0-beta.0",
+  "version": "3.0.0-beta.10",
   "description": "The officially supported Slate richtext adapter for Payload",
   "repository": {
     "type": "git",
@@ -50,13 +50,19 @@
     }
   },
   "publishConfig": {
-    "exports": null,
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=18.20.2"
   },
   "files": [
     "dist"

@@ -110,7 +110,7 @@ export function generateLexicalRichText() {
           version: 2,
           fields: {
             id: '65298b1ddb4ef8c744a7faab',
-            richText: {
+            richTextField: {
               root: {
                 type: 'root',
                 format: '',
@@ -149,7 +149,7 @@ export function generateLexicalRichText() {
               },
             },
             blockName: 'Block Node, with RichText Field, with Relationship Node',
-            blockType: 'richText',
+            blockType: 'richTextBlock',
           },
         },
         {
