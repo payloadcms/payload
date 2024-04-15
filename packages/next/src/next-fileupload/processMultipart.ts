@@ -128,6 +128,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       cleanup()
     })
 
+    // Start upload process.
     debugLog(options, `New upload started ${field}->${filename}, bytes:${getFileSize()}`)
     uploadTimer.set()
   })
@@ -140,10 +141,16 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     }
 
     if (request[waitFlushProperty]) {
-      await Promise.all(request[waitFlushProperty]).then(() => {
-        delete request[waitFlushProperty]
-      })
+      try {
+        await Promise.all(request[waitFlushProperty]).then(() => {
+          delete request[waitFlushProperty]
+        })
+      } catch (err) {
+        debugLog(options, `Error waiting for file write promises: ${err}`)
+      }
     }
+
+    return result
   })
 
   busboy.on('error', (err) => {
@@ -154,6 +161,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
 
   const reader = request.body.getReader()
 
+  // Start parsing request
   while (parsingRequest) {
     const { done, value } = await reader.read()
 

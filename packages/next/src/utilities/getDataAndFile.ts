@@ -1,5 +1,7 @@
 import type { Collection, CustomPayloadRequest, SanitizedConfig } from 'payload/types'
 
+import type { NextFileUploadOptions } from '../next-fileupload/index.js'
+
 import { nextFileUpload } from '../next-fileupload/index.js'
 
 type GetDataAndFile = (args: {
@@ -10,18 +12,42 @@ type GetDataAndFile = (args: {
   data: Record<string, any>
   file: CustomPayloadRequest['file']
 }>
-export const getDataAndFile: GetDataAndFile = async ({ collection, config, request }) => {
+export const getDataAndFile: GetDataAndFile = async ({
+  collection,
+  config,
+  request: incomingRequest,
+}) => {
   let data: Record<string, any> = undefined
   let file: CustomPayloadRequest['file'] = undefined
 
-  if (['PATCH', 'POST', 'PUT'].includes(request.method.toUpperCase()) && request.body) {
+  if (
+    ['PATCH', 'POST', 'PUT'].includes(incomingRequest.method.toUpperCase()) &&
+    incomingRequest.body
+  ) {
+    const request = new Request(incomingRequest)
     const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
-    if (contentType === 'multipart/form-data') {
+    if (contentType === 'application/json') {
+      const bodyByteSize = parseInt(request.headers.get('Content-Length') || '0', 10)
+      const upperByteLimit =
+        typeof config.upload?.limits?.fieldSize === 'number'
+          ? config.upload.limits.fields
+          : undefined
+      if (bodyByteSize <= upperByteLimit || upperByteLimit === undefined) {
+        try {
+          data = await request.json()
+        } catch (error) {
+          data = {}
+        }
+      } else {
+        throw new Error('Request body size exceeds the limit')
+      }
+    } else {
       const { error, fields, files } = await nextFileUpload({
-        options: config.upload as any,
+        options: config.upload as NextFileUploadOptions,
         request,
       })
+      console.log({ fields, files })
 
       if (error) {
         throw new Error(error.message)
@@ -33,21 +59,6 @@ export const getDataAndFile: GetDataAndFile = async ({ collection, config, reque
 
       if (fields?._payload && typeof fields._payload === 'string') {
         data = JSON.parse(fields._payload)
-      }
-    } else if (contentType === 'application/json') {
-      const bodyByteSize = parseInt(request.headers.get('Content-Length') || '0', 10)
-      const upperByteLimit =
-        typeof config.upload?.limits?.fieldSize === 'number'
-          ? config.upload.limits.fieldSize
-          : undefined
-      if (bodyByteSize <= upperByteLimit || upperByteLimit === undefined) {
-        try {
-          data = await request.json()
-        } catch (error) {
-          data = {}
-        }
-      } else {
-        throw new Error('Request body size exceeds the limit')
       }
     }
   }

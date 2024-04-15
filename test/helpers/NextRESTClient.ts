@@ -16,7 +16,6 @@ import { devUser } from '../credentials.js'
 type ValidPath = `/${string}`
 type RequestOptions = {
   auth?: boolean
-  file?: boolean
   query?: {
     depth?: number
     fallbackLocale?: string
@@ -26,6 +25,10 @@ type RequestOptions = {
     sort?: string
     where?: Where
   }
+}
+
+type FileArg = {
+  file?: Omit<File, 'webkitRelativePath'>
 }
 
 function generateQueryString(query: RequestOptions['query'], params: ParsedQs): string {
@@ -67,12 +70,16 @@ export class NextRESTClient {
     this._GRAPHQL_POST = createGraphqlPOST(config)
   }
 
-  private buildHeaders(options: RequestInit & RequestOptions): Headers {
+  private buildHeaders(options: RequestInit & RequestOptions & FileArg): Headers {
     const defaultHeaders = {
       'Content-Type': 'application/json',
     }
     const headers = new Headers({
-      ...(options?.file ? {} : defaultHeaders),
+      ...(options?.file
+        ? {
+            // 'content-length': options.file.size.toString(),
+          }
+        : defaultHeaders),
       ...(options?.headers || {}),
     })
 
@@ -141,7 +148,7 @@ export class NextRESTClient {
     return this._GRAPHQL_POST(request)
   }
 
-  async PATCH(path: ValidPath, options: RequestInit & RequestOptions): Promise<Response> {
+  async PATCH(path: ValidPath, options: RequestInit & RequestOptions & FileArg): Promise<Response> {
     const { url, slug, params } = this.generateRequestParts(path)
     const { query, ...rest } = options
     const queryParams = generateQueryString(query, params)
@@ -156,11 +163,10 @@ export class NextRESTClient {
 
   async POST(
     path: ValidPath,
-    options: RequestInit & RequestOptions & { file?: boolean } = {},
+    options: RequestInit & RequestOptions & FileArg = {},
   ): Promise<Response> {
     const { url, slug, params } = this.generateRequestParts(path)
     const queryParams = generateQueryString({}, params)
-
     const request = new Request(`${url}${queryParams}`, {
       ...options,
       method: 'POST',
