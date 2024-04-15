@@ -15,14 +15,14 @@ type CookieOptions = {
 }
 
 type CookieObject = {
-  Domain?: string
-  HttpOnly?: boolean
-  'Max-Age'?: number
-  Path?: string
-  SameSite?: 'Lax' | 'None' | 'Strict'
-  Secure?: boolean
+  domain?: string
   expires?: string
+  httpOnly?: boolean
+  maxAge?: number
   name: string
+  path?: string
+  sameSite?: 'Lax' | 'None' | 'Strict'
+  secure?: boolean
   value: string
 }
 
@@ -50,27 +50,61 @@ export const generateCookie = <ReturnCookieAsString = boolean>(
 
   const secure = secureArg || sameSite === 'None'
 
-  function buildResponse(propertyName, value: boolean | string) {
+  if (expires) {
     if (returnCookieAsObject) {
-      cookieString += `; ${propertyName}${typeof value === 'string' ? `=${value}` : ''}`
+      cookieObject.expires = expires.toUTCString()
     } else {
-      cookieObject[propertyName] = value
+      cookieString += `; Expires=${expires.toUTCString()}}`
     }
   }
 
-  if (expires) buildResponse('Expires', expires.toUTCString())
+  if (maxAge) {
+    if (returnCookieAsObject) {
+      cookieObject.maxAge = maxAge
+    } else {
+      cookieString += `; Max-Age=${maxAge.toString()}}`
+    }
+  }
 
-  if (maxAge) buildResponse('Max-Age', maxAge.toString())
+  if (domain) {
+    if (returnCookieAsObject) {
+      cookieObject.domain = domain
+    } else {
+      cookieString += `; Domain=${domain}}`
+    }
+  }
 
-  if (domain) buildResponse('Domain', domain)
+  if (path) {
+    if (returnCookieAsObject) {
+      cookieObject.path = path
+    } else {
+      cookieString += `; Path=${path}}`
+    }
+  }
 
-  if (path) buildResponse('Path', path)
+  if (secure) {
+    if (returnCookieAsObject) {
+      cookieObject.secure = secure
+    } else {
+      cookieString += `; Secure=${secure}}`
+    }
+  }
 
-  if (secure) buildResponse('Secure', secure)
+  if (httpOnly) {
+    if (returnCookieAsObject) {
+      cookieObject.httpOnly = httpOnly
+    } else {
+      cookieString += `; HttpOnly=${httpOnly}}`
+    }
+  }
 
-  if (httpOnly) buildResponse('HttpOnly', httpOnly)
-
-  if (sameSite) buildResponse('SameSite', sameSite)
+  if (sameSite) {
+    if (returnCookieAsObject) {
+      cookieObject.sameSite = sameSite
+    } else {
+      cookieString += `; SameSite=${sameSite}}`
+    }
+  }
 
   return (returnCookieAsObject ? cookieString : cookieObject) as ReturnCookieAsString extends true
     ? CookieObject
@@ -102,7 +136,7 @@ type GeneratePayloadCookieArgs = {
 export const generatePayloadCookie = <T extends GeneratePayloadCookieArgs>({
   collectionConfig,
   payload,
-  returnCookieAsObject = true,
+  returnCookieAsObject = false,
   token,
 }: T): T['returnCookieAsObject'] extends true ? CookieObject : string => {
   const sameSite =
@@ -128,7 +162,7 @@ export const generatePayloadCookie = <T extends GeneratePayloadCookieArgs>({
 export const generateExpiredPayloadCookie = <T extends Omit<GeneratePayloadCookieArgs, 'token'>>({
   collectionConfig,
   payload,
-  returnCookieAsObject = true,
+  returnCookieAsObject = false,
 }: T): T['returnCookieAsObject'] extends true ? CookieObject : string => {
   const sameSite =
     typeof collectionConfig.auth.cookies.sameSite === 'string'
