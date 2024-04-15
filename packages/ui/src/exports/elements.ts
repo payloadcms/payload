@@ -46,9 +46,7 @@ export { Tooltip } from '../elements/Tooltip/index.js'
 export { Translation } from '../elements/Translation/index.js'
 export { UnpublishMany } from '../elements/UnpublishMany/index.js'
 export { Upload } from '../elements/Upload/index.js'
-export { BlocksDrawer } from '../fields/Blocks/BlocksDrawer/index.js'
 import * as facelessUIImport from '@faceless-ui/modal'
-export { SetViewActions } from '../providers/Actions/SetViewActions/index.js'
 const { Modal } =
   facelessUIImport && 'Modal' in facelessUIImport ? facelessUIImport : { Modal: undefined }
 export { Modal }
