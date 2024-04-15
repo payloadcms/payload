@@ -77,7 +77,7 @@ export class NextRESTClient {
     const headers = new Headers({
       ...(options?.file
         ? {
-            // 'content-length': options.file.size.toString(),
+            'Content-Length': options.file.size.toString(),
           }
         : defaultHeaders),
       ...(options?.headers || {}),

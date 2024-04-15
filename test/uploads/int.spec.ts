@@ -1,10 +1,6 @@
 import type { Payload } from 'payload'
 
-import { File } from 'buffer'
-import NodeFormData from 'form-data'
 import fs from 'fs'
-import { open } from 'node:fs/promises'
-import { basename } from 'node:path'
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
@@ -15,6 +11,7 @@ import type { Enlarge, Media } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
+import { createStreamableFile } from './createStreamableFile.js'
 import {
   enlargeSlug,
   mediaSlug,
@@ -27,20 +24,6 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const stat = promisify(fs.stat)
-
-async function createStreamableFile(path: string): Promise<File> {
-  const name = basename(path)
-  const handle = await open(path)
-  const { size } = await handle.stat()
-
-  const file = new File([], name)
-  file.stream = () => handle.readableWebStream()
-
-  // Set correct size otherwise, fetch will encounter UND_ERR_REQ_CONTENT_LENGTH_MISMATCH
-  Object.defineProperty(file, 'size', { get: () => size })
-
-  return file
-}
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -63,7 +46,7 @@ describe('Collections - Uploads', () => {
       it('creates from form data given a png', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
-        const file = await createStreamableFile(filePath)
+        const { file, handle } = await createStreamableFile(filePath)
         formData.append('file', file)
 
         const response = await restClient.POST(`/${mediaSlug}`, {
@@ -71,6 +54,8 @@ describe('Collections - Uploads', () => {
           file,
         })
         const { doc } = await response.json()
+
+        await handle.close()
 
         expect(response.status).toBe(201)
 
@@ -100,30 +85,17 @@ describe('Collections - Uploads', () => {
       it('creates from form data given an svg', async () => {
         const filePath = path.join(dirname, './image.svg')
         const formData = new FormData()
-        const formDataNode = new NodeFormData()
-        const file = await createStreamableFile(filePath)
+        const { file, handle } = await createStreamableFile(filePath)
         formData.append('file', file)
-        formDataNode.append('file', fs.createReadStream(filePath))
-
-        const contentLength = await new Promise((resolve, reject) => {
-          formDataNode.getLength((err, length) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(length)
-            }
-          })
-        })
 
         const response = await restClient.POST(`/${mediaSlug}`, {
           body: formData,
           file,
-          headers: {
-            'content-length': String(contentLength),
-          },
         })
 
         const { doc } = await response.json()
+
+        await handle.close()
 
         expect(response.status).toBe(201)
 
@@ -140,7 +112,7 @@ describe('Collections - Uploads', () => {
       it('should have valid image url', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.svg')
-        const file = await createStreamableFile(filePath)
+        const { file, handle } = await createStreamableFile(filePath)
         formData.append('file', file)
 
         const response = await restClient.POST(`/${mediaSlug}`, {
@@ -148,6 +120,8 @@ describe('Collections - Uploads', () => {
           file,
         })
         const { doc } = await response.json()
+
+        await handle.close()
 
         expect(response.status).toBe(201)
         const expectedPath = path.join(dirname, './media')
@@ -159,7 +133,7 @@ describe('Collections - Uploads', () => {
       it('creates images that do not require all sizes', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './small.png')
-        const file = await createStreamableFile(filePath)
+        const { file, handle } = await createStreamableFile(filePath)
         formData.append('file', file)
 
         const response = await restClient.POST(`/${mediaSlug}`, {
@@ -167,6 +141,8 @@ describe('Collections - Uploads', () => {
           file,
         })
         const { doc } = await response.json()
+
+        await handle.close()
 
         expect(response.status).toBe(201)
 
@@ -185,7 +161,7 @@ describe('Collections - Uploads', () => {
       it('creates images from a different format', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.jpg')
-        const file = await createStreamableFile(filePath)
+        const { file, handle } = await createStreamableFile(filePath)
         formData.append('file', file)
 
         const response = await restClient.POST(`/${mediaSlug}`, {
@@ -193,6 +169,8 @@ describe('Collections - Uploads', () => {
           file,
         })
         const { doc } = await response.json()
+
+        await handle.close()
 
         expect(response.status).toBe(201)
 
@@ -214,7 +192,7 @@ describe('Collections - Uploads', () => {
       it('creates media without storing a file', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './unstored.png')
-        const file = await createStreamableFile(filePath)
+        const { file, handle } = await createStreamableFile(filePath)
         formData.append('file', file)
 
         // unstored media
@@ -223,6 +201,8 @@ describe('Collections - Uploads', () => {
           file,
         })
         const { doc } = await response.json()
+
+        await handle.close()
 
         expect(response.status).toBe(201)
 
@@ -248,13 +228,15 @@ describe('Collections - Uploads', () => {
 
         const formData = new FormData()
         const filePath2 = path.resolve(dirname, './small.png')
-        const file2 = await createStreamableFile(filePath)
-        formData.append('file', filePath2)
+        const { file: file2, handle } = await createStreamableFile(filePath2)
+        formData.append('file', file2)
 
         const response = await restClient.PATCH(`/${mediaSlug}/${mediaDoc.id}`, {
           body: formData,
           file: file2,
         })
+
+        await handle.close()
 
         expect(response.status).toBe(200)
 
@@ -278,7 +260,7 @@ describe('Collections - Uploads', () => {
 
         const formData = new FormData()
         const filePath2 = path.resolve(dirname, './small.png')
-        const file2 = await createStreamableFile(filePath2)
+        const { file: file2, handle } = await createStreamableFile(filePath2)
         formData.append('file', file2)
 
         const response = await restClient.PATCH(`/${mediaSlug}`, {
@@ -292,6 +274,8 @@ describe('Collections - Uploads', () => {
             },
           },
         })
+
+        await handle.close()
 
         expect(response.status).toBe(200)
 
@@ -307,7 +291,8 @@ describe('Collections - Uploads', () => {
       it('should remove related files when deleting by ID', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
-        const file = await createStreamableFile(filePath)
+        const { file, handle } = await createStreamableFile(filePath)
+
         formData.append('file', file)
 
         const { doc } = await restClient
@@ -316,6 +301,8 @@ describe('Collections - Uploads', () => {
             file,
           })
           .then((res) => res.json())
+
+        await handle.close()
 
         const response2 = await restClient.DELETE(`/${mediaSlug}/${doc.id}`)
         expect(response2.status).toBe(200)
@@ -326,7 +313,7 @@ describe('Collections - Uploads', () => {
       it('should remove all related files when deleting with where query', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
-        const file = await createStreamableFile(filePath)
+        const { file, handle } = await createStreamableFile(filePath)
         formData.append('file', file)
 
         const { doc } = await restClient
@@ -335,6 +322,8 @@ describe('Collections - Uploads', () => {
             file,
           })
           .then((res) => res.json())
+
+        await handle.close()
 
         const { errors } = await restClient
           .DELETE(`/${mediaSlug}`, {

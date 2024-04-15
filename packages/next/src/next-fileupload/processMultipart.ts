@@ -18,6 +18,17 @@ type ProcessMultipart = (args: {
 }) => Promise<NextFileUploadResponse>
 export const processMultipart: ProcessMultipart = async ({ options, request }) => {
   let parsingRequest = true
+
+  let fileCount = 0
+  let filesCompleted = 0
+  let allFilesHaveResolved: (value?: unknown) => void
+  let failedResolvingFiles: (err: Error) => void
+
+  const allFilesComplete = new Promise((res, rej) => {
+    allFilesHaveResolved = res
+    failedResolvingFiles = rej
+  })
+
   const result: NextFileUploadResponse = {
     fields: undefined,
     files: undefined,
@@ -37,6 +48,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
 
   // Build req.files fields
   busboy.on('file', (field, file, info) => {
+    fileCount += 1
     // Parse file name(cutting huge names, decoding, etc..).
     const { encoding, filename: name, mimeType: mime } = info
     const filename = parseFileName(options, name)
@@ -98,6 +110,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         return debugLog(options, `Don't add file instance if original name and size are empty`)
       }
 
+      filesCompleted += 1
+
       result.files = buildFields(
         result.files,
         field,
@@ -120,12 +134,17 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         request[waitFlushProperty] = []
       }
       request[waitFlushProperty].push(writePromise)
+
+      if (filesCompleted === fileCount) {
+        allFilesHaveResolved()
+      }
     })
 
     file.on('error', (err) => {
       uploadTimer.clear()
       debugLog(options, `File Error: ${err.message}`)
       cleanup()
+      failedResolvingFiles(err)
     })
 
     // Start upload process.
@@ -173,6 +192,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       busboy.write(value)
     }
   }
+
+  await allFilesComplete
 
   return result
 }

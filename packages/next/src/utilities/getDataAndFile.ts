@@ -47,7 +47,6 @@ export const getDataAndFile: GetDataAndFile = async ({
         options: config.upload as NextFileUploadOptions,
         request,
       })
-      console.log({ fields, files })
 
       if (error) {
         throw new Error(error.message)

@@ -453,7 +453,7 @@ export default buildConfigWithDefaults({
     },
   ],
   upload: {
-    debug: true,
+    // debug: true,
     abortOnLimit: true,
     limits: {
       fileSize: 2_000_000, // 2MB
