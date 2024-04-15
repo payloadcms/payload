@@ -106,7 +106,7 @@ export const generateCookie = <ReturnCookieAsString = boolean>(
     }
   }
 
-  return (returnCookieAsObject ? cookieString : cookieObject) as ReturnCookieAsString extends true
+  return (returnCookieAsObject ? cookieObject : cookieString) as ReturnCookieAsString extends true
     ? CookieObject
     : string
 }
