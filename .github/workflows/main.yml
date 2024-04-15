@@ -19,6 +19,8 @@ jobs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       templates: ${{ steps.filter.outputs.templates }}
     steps:
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
       - uses: actions/checkout@v4
         with:
           fetch-depth: 25
@@ -205,8 +207,9 @@ jobs:
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
+# test
   tests-e2e:
-    runs-on: ubuntu-latest-m
+    runs-on: ubuntu-latest
     needs: build
     strategy:
       fail-fast: false
@@ -234,6 +237,9 @@ jobs:
           - uploads
 
     steps:
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+
       - name: Use Node.js 18
         uses: actions/setup-node@v4
         with:
