@@ -154,7 +154,7 @@ export const saveVersion = async ({
   createdVersion.updatedAt = result.updatedAt
 
   createdVersion = sanitizeInternalFields(createdVersion)
-  createdVersion.id = id
+  createdVersion.id = result.parent
 
   return createdVersion
 }
