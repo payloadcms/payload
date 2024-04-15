@@ -1,20 +1,23 @@
 import type { Adapter } from '@payloadcms/plugin-cloud-storage/types'
 
 import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage/azure'
+import { gcsAdapter } from '@payloadcms/plugin-cloud-storage/gcs'
+import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
 import dotenv from 'dotenv'
 import path from 'path'
 
-import { azureBlobStorageAdapter } from '../../packages/plugin-cloud-storage/src/adapters/azure/index.js'
-import { gcsAdapter } from '../../packages/plugin-cloud-storage/src/adapters/gcs/index.js'
-import { s3Adapter } from '../../packages/plugin-cloud-storage/src/adapters/s3/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
+import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { Users } from './collections/Users.js'
+import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 let adapter: Adapter
 let uploadOptions
 
+// Load config to work with emulated services
 dotenv.config({
   path: path.resolve(process.cwd(), './test/plugin-cloud-storage/.env.emulated'),
 })
@@ -84,7 +87,7 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'r2') {
 }
 
 export default buildConfigWithDefaults({
-  collections: [Media, Users],
+  collections: [Media, MediaWithPrefix, Users],
   onInit: async (payload) => {
     /*const client = new AWS.S3({
       endpoint: process.env.S3_ENDPOINT,
@@ -115,8 +118,12 @@ export default buildConfigWithDefaults({
   plugins: [
     cloudStorage({
       collections: {
-        media: {
+        [mediaSlug]: {
           adapter,
+        },
+        [mediaWithPrefixSlug]: {
+          adapter,
+          prefix,
         },
       },
     }),
