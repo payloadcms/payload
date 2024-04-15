@@ -30,6 +30,7 @@ This field uses the `monaco-react` editor syntax highlighting.
 | **`unique`**       | Enforce that each entry in the Collection has a unique value for this field.                                                                                                |
 | **`index`**        | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                |
+| **`jsonSchema`**   | Provide a JSON schema that will be used for validation. [JSON schemas](https://json-schema.org/learn/getting-started-step-by-step)
 | **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                               |
 | **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                  |
 | **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                     |
