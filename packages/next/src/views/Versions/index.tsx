@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/utilities'
 import React from 'react'
 
-import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
+import { SetStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { buildVersionColumns } from './buildColumns.js'
 import { VersionsViewClient } from './index.client.js'
 import './index.scss'

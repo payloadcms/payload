@@ -18,7 +18,7 @@ import qs from 'qs'
 import * as React from 'react'
 import { toast } from 'react-toastify'
 
-import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
+import { SetStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
 import './index.scss'
 
