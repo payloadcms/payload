@@ -85,7 +85,7 @@ export const validateExistingBlockIsIdentical = ({
 
   if (missingField) {
     throw new InvalidConfiguration(
-      `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${missingField}, while the other block does not.`,
+      `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${typeof missingField === 'string' ? missingField : missingField.name}, while the other block does not.`,
     )
   }
 
