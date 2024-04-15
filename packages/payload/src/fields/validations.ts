@@ -152,7 +152,7 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
       return false
     }
 
-    if (typeof value === 'object' && value !== null && Object.keys(value).length === 0) {
+    if (typeof value === 'object' && Object.keys(value).length === 0) {
       return false
     }
 
@@ -178,7 +178,7 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
       })
   }
 
-  if (isNotEmpty(value)) {
+  if (jsonSchema && isNotEmpty(value)) {
     try {
       jsonSchema.schema = await fetchSchema(jsonSchema)
       const { schema } = jsonSchema
