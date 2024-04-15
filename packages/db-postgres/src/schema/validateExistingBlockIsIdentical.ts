@@ -72,8 +72,8 @@ export const validateExistingBlockIsIdentical = ({
   const missingField =
     // ensure every field from the config is in the matching table
     fieldNames.find(({ name, localized }) => {
-      if (localized && tableLocales) return Object.keys(tableLocales).indexOf(name) === -1
-      return Object.keys(table).indexOf(name) === -1
+      const fieldTable = localized && tableLocales ? tableLocales : table
+      return Object.keys(fieldTable).indexOf(name) === -1
     }) ||
     // ensure every table column is matched for every field from the config
     Object.keys(table).find((fieldName) => {
