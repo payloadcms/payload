@@ -178,7 +178,7 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
       })
   }
 
-  if (jsonSchema && isNotEmpty(value)) {
+  if (!canUseDOM && jsonSchema && isNotEmpty(value)) {
     try {
       jsonSchema.schema = await fetchSchema(jsonSchema)
       const { schema } = jsonSchema
