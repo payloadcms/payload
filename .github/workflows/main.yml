@@ -206,7 +206,7 @@ jobs:
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
   tests-e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
     needs: build
     strategy:
       fail-fast: false
