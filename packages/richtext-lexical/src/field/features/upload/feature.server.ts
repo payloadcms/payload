@@ -1,5 +1,7 @@
 import type { Field, FieldWithRichTextRequiredEditor, Payload } from 'payload/types'
 
+import { traverseFields } from '@payloadcms/next/utilities'
+
 import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
@@ -46,18 +48,27 @@ export const UploadFeature: FeatureProviderProviderServer<
       return {
         ClientComponent: UploadFeatureClientComponent,
         clientFeatureProps: clientProps,
-        generateSchemaMap: ({ props }) => {
-          if (!props?.collections) return {}
+        generateSchemaMap: ({ config, i18n, props }) => {
+          if (!props?.collections) return null
 
-          const map: {
-            [key: string]: Field[]
-          } = {}
+          const schemaMap = new Map<string, Field[]>()
+          const validRelationships = config.collections.map((c) => c.slug) || []
 
           for (const collection in props.collections) {
-            map[collection] = props.collections[collection].fields
+            if (props.collections[collection].fields?.length) {
+              schemaMap.set(collection, props.collections[collection].fields)
+              traverseFields({
+                config,
+                fields: props.collections[collection].fields,
+                i18n,
+                schemaMap,
+                schemaPath: collection,
+                validRelationships,
+              })
+            }
           }
 
-          return map
+          return schemaMap
         },
         nodes: [
           {

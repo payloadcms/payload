@@ -66,13 +66,6 @@ export const buildTable = ({
   const columns: Record<string, PgColumnBuilder> = baseColumns
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
 
-  let hasLocalizedField = false
-  let hasLocalizedRelationshipField = false
-  let hasManyTextField: 'index' | boolean = false
-  let hasManyNumberField: 'index' | boolean = false
-  let hasLocalizedManyTextField = false
-  let hasLocalizedManyNumberField = false
-
   const localesColumns: Record<string, PgColumnBuilder> = {}
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
   let localesTable: GenericTable | PgTableWithColumns<any>
@@ -89,7 +82,7 @@ export const buildTable = ({
 
   const idColType: IDType = setColumnID({ adapter, columns, fields })
 
-  ;({
+  const {
     hasLocalizedField,
     hasLocalizedManyNumberField,
     hasLocalizedManyTextField,
@@ -116,7 +109,7 @@ export const buildTable = ({
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
     versions,
-  }))
+  })
 
   if (timestamps) {
     columns.createdAt = timestamp('created_at', {

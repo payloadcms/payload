@@ -331,6 +331,10 @@
     list-style-position: inside;
   }
 
+  &__ul ul {
+    margin: 0;
+  }
+
   &__listItem {
     margin: 0 0px 0.4em 16px;
   }

@@ -33,7 +33,6 @@ import {
 
 let payload: Payload
 let restClient: NextRESTClient
-let token: string
 
 let createdArrayDocID: number | string = null
 let createdJPGDocID: number | string = null
@@ -409,7 +408,7 @@ describe('Lexical', () => {
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
         .children[4] as SerializedBlockNode
 
-      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richTextField
 
       const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
         .children[0] as SerializedRelationshipNode
@@ -440,7 +439,7 @@ describe('Lexical', () => {
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
         .children[4] as SerializedBlockNode
 
-      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richTextField
 
       const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
         .children[0] as SerializedRelationshipNode
@@ -487,7 +486,7 @@ describe('Lexical', () => {
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
         .children[4] as SerializedBlockNode
 
-      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richTextField
 
       const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
         .children[0] as SerializedRelationshipNode

@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/plugin-cloud-storage",
   "description": "The official cloud storage plugin for Payload CMS",
-  "version": "3.0.0-beta.6",
+  "version": "3.0.0-beta.10",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "type": "module",
@@ -13,7 +13,7 @@
     "directory": "packages/plugin-cloud-storage"
   },
   "scripts": {
-    "build": "pnpm build:swc && pnpm build:types && tsx ../../scripts/exportPointerFiles.ts ../packages/plugin-cloud-storage dist/exports",
+    "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.0.0-beta.6",
+  "version": "3.0.0-beta.10",
   "type": "module",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -216,12 +216,12 @@
     "uuid": "9.0.1"
   },
   "peerDependencies": {
-    "next": "14.2.0-canary.23",
+    "next": "^14.2.0-canary.23",
     "payload": "workspace:*",
     "react": "^18.0.0"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=18.20.2"
   },
   "files": [
     "dist"

@@ -191,13 +191,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     props: ServerProps
     schemaMap: Map<string, Field[]>
     schemaPath: string
-  }) =>
-    | {
-        [key: string]: Field[]
-      }
-    | Promise<{
-        [key: string]: Field[]
-      }>
+  }) => Map<string, Field[]> | null
   generatedTypes?: {
     modifyOutputSchema: ({
       collectionIDFieldTypes,
