@@ -1,14 +1,15 @@
 import type { Request } from 'express'
 
-import type { File, FileData } from './types'
+import type { File, FileData, IncomingUploadType } from './types'
 
 import { APIError } from '../errors'
 
 type Args = {
   data: FileData
   req: Request
+  uploadConfig: IncomingUploadType
 }
-export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
+export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
   const { filename, url } = data
 
   if (typeof url === 'string') {
@@ -20,10 +21,19 @@ export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
 
     const { default: fetch } = (await import('node-fetch')) as any
 
+    // Convert headers
+    const convertedHeaders: Record<string, string> = headersToObject(req.headers)
+
+    const headers = uploadConfig.externalFileHeaderFilter
+      ? uploadConfig.externalFileHeaderFilter(convertedHeaders)
+      : {
+          cookie: req.headers['cookie'],
+        }
+
     const res = await fetch(fileURL, {
       credentials: 'include',
       headers: {
-        ...req.headers,
+        headers,
       },
       method: 'GET',
     })
@@ -41,4 +51,17 @@ export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
   }
 
   throw new APIError('Invalid file url', 400)
+}
+
+function headersToObject(headers) {
+  const headersObj = {}
+  headers.forEach((value, key) => {
+    // If the header value is an array, join its elements into a single string
+    if (Array.isArray(value)) {
+      headersObj[key] = value.join(', ')
+    } else {
+      headersObj[key] = value
+    }
+  })
+  return headersObj
 }
