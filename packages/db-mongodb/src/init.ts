@@ -6,11 +6,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 import mongoose from 'mongoose'
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
-import {
-  buildVersionCollectionFields,
-  buildVersionGlobalFields,
-  getVersionsModelName,
-} from 'payload/versions'
+import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
 
 import type { MongooseAdapter } from '.'
 import type { CollectionModel } from './types'
@@ -33,6 +29,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
       const versionSchema = buildSchema(this.payload.config, versionCollectionFields, {
         disableUnique: true,
         draftsEnabled: true,
+        indexSortableFields: this.payload.config.indexSortableFields,
         options: {
           minimize: false,
           timestamps: false,
