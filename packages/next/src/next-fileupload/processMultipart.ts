@@ -193,7 +193,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     }
   }
 
-  await allFilesComplete
+  if (fileCount !== 0) await allFilesComplete
 
   return result
 }
