@@ -83,7 +83,7 @@ export type UploadConfig = {
    *
    * Useful for adding custom headers to fetch from external providers.
    */
-  externalFileHeaderFilter?: (headers: Headers) => Headers
+  externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   filesRequiredOnCreate?: boolean
   focalPoint?: boolean
   /** Options for original upload file only. For sizes, set each formatOptions individually. */

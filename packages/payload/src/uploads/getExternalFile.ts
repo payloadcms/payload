@@ -16,9 +16,8 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
     const fileURL = `${baseUrl}${url}`
 
     const headers = uploadConfig.externalFileHeaderFilter
-      ? uploadConfig.externalFileHeaderFilter(req.headers)
+      ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
       : {
-          Authorization: req.headers['authorization'],
           cookie: req.headers['cookie'],
         }
 
