@@ -4,7 +4,7 @@ import fa from './fa.json'
 import fr from './fr.json'
 import nb from './nb.json'
 import pl from './pl.json'
-import uk from './uk.json'
+import ua from './ua.json'
 
 export default {
   en,
@@ -13,5 +13,5 @@ export default {
   fr,
   nb,
   pl,
-  uk,
+  ua,
 }
