@@ -17,32 +17,23 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx src"
   },
   "dependencies": {
-    "@payloadcms/bundler-webpack": "latest",
-    "@payloadcms/db-mongodb": "latest",
-    "@payloadcms/richtext-slate": "latest",
+    "@payloadcms/db-mongodb": "3.0.0-beta.9",
+    "@payloadcms/next": "3.0.0-beta.9",
+    "@payloadcms/richtext-slate": "3.0.0-beta.9",
+    "@payloadcms/ui": "3.0.0-beta.9",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "payload": "latest"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "^0.0.1",
-    "@types/express": "^4.17.9",
-    "@types/node": "18.11.3",
-    "@types/react": "18.0.21",
-    "@typescript-eslint/eslint-plugin": "^5.51.0",
-    "@typescript-eslint/parser": "^5.51.0",
-    "copyfiles": "^2.4.1",
-    "cross-env": "^7.0.3",
-    "eslint": "^8.19.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-filenames": "^1.3.2",
-    "eslint-plugin-import": "2.25.4",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-simple-import-sort": "^10.0.0",
-    "nodemon": "^2.0.6",
-    "prettier": "^2.7.1",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.8.4"
+    "@types/node": "^20.11.25",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.1.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.2"
   }
 }
