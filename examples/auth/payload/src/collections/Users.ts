@@ -12,7 +12,7 @@ export const Users: CollectionConfig = {
   auth: {
     tokenExpiration: 28800, // 8 hours
     cookies: {
-      sameSite: 'none',
+      sameSite: 'None',
       secure: true,
       domain: process.env.COOKIE_DOMAIN,
     },

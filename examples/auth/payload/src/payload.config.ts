@@ -6,6 +6,10 @@ import { buildConfig } from 'payload/config'
 import { Users } from './collections/Users'
 import BeforeLogin from './components/BeforeLogin'
 
+import { fileURLToPath } from 'node:url'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 export default buildConfig({
   collections: [Users],
   admin: {
@@ -13,6 +17,7 @@ export default buildConfig({
       beforeLogin: [BeforeLogin],
     },
   },
+  secret: process.env.PAYLOAD_SECRET || '',
   editor: slateEditor({}),
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
@@ -26,6 +31,6 @@ export default buildConfig({
     process.env.PAYLOAD_PUBLIC_SITE_URL || '',
   ].filter(Boolean),
   typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
