@@ -6,6 +6,7 @@ export const clientTranslationKeys = [
   'authentication:backToLogin',
   'authentication:beginCreateFirstUser',
   'authentication:changePassword',
+  'authentication:checkYourEmailForPasswordReset',
   'authentication:confirmGeneration',
   'authentication:confirmPassword',
   'authentication:createFirstUser',
@@ -222,10 +223,13 @@ export const clientTranslationKeys = [
   'upload:sizesFor',
   'upload:width',
 
+  'validation:emailAddress',
   'validation:fieldHasNo',
   'validation:limitReached',
+  'validation:longerThanMin',
   'validation:required',
   'validation:requiresAtLeast',
+  'validation:shorterThanMax',
 
   'version:aboutToPublishSelection',
   'version:aboutToRestore',
