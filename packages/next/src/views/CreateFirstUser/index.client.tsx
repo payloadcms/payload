@@ -14,7 +14,7 @@ export const CreateFirstUserFields: React.FC<{
 
   const fieldMap = getFieldMap({ collectionSlug: userSlug })
 
-  const newMap = createFirstUserFieldMap.map((field) => {
+  const firstUserFieldMapWithPasswordFields = createFirstUserFieldMap.map((field) => {
     if (field.name === 'password') {
       const type: keyof FieldTypes = 'password'
 
@@ -36,7 +36,7 @@ export const CreateFirstUserFields: React.FC<{
 
   return (
     <RenderFields
-      fieldMap={[...(newMap || []), ...(fieldMap || [])]}
+      fieldMap={[...(firstUserFieldMapWithPasswordFields || []), ...(fieldMap || [])]}
       operation="create"
       path=""
       readOnly={false}
