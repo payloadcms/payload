@@ -59,12 +59,15 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
 
     const data = streamFile(filePath)
 
-    const { mime } = await getFileType.fromFile(filePath)
+    const headers = new Headers({
+      'content-length': stats.size + '',
+    })
+
+    const fileTypeResult = await getFileType.fromFile(filePath)
+    if (fileTypeResult?.mime) headers.set('content-type', fileTypeResult.mime)
+
     return new Response(data, {
-      headers: {
-        'content-length': stats.size + '',
-        'content-type': mime,
-      },
+      headers,
       status: httpStatus.OK,
     })
   } catch (error) {
