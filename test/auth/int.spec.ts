@@ -74,6 +74,7 @@ describe('Auth', () => {
         body: JSON.stringify({
           email,
           password,
+          'confirm-password': password,
         }),
       })
 
