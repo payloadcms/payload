@@ -27,37 +27,39 @@ export const getDataAndFile: GetDataAndFile = async ({
     const request = new Request(incomingRequest)
     const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
-    if (contentType === 'application/json') {
-      const bodyByteSize = parseInt(request.headers.get('Content-Length') || '0', 10)
-      const upperByteLimit =
-        typeof config.upload?.limits?.fieldSize === 'number'
-          ? config.upload.limits.fields
-          : undefined
-      if (bodyByteSize <= upperByteLimit || upperByteLimit === undefined) {
-        try {
-          data = await request.json()
-        } catch (error) {
-          data = {}
+    if (request.headers.has('Content-Length') && request.headers.get('Content-Length') !== '0') {
+      if (contentType === 'application/json') {
+        const bodyByteSize = parseInt(request.headers.get('Content-Length'), 10)
+        const upperByteLimit =
+          typeof config.upload?.limits?.fieldSize === 'number'
+            ? config.upload.limits.fields
+            : undefined
+        if (bodyByteSize <= upperByteLimit || upperByteLimit === undefined) {
+          try {
+            data = await request.json()
+          } catch (error) {
+            data = {}
+          }
+        } else {
+          throw new Error('Request body size exceeds the limit')
         }
       } else {
-        throw new Error('Request body size exceeds the limit')
-      }
-    } else {
-      const { error, fields, files } = await nextFileUpload({
-        options: config.upload as NextFileUploadOptions,
-        request,
-      })
+        const { error, fields, files } = await nextFileUpload({
+          options: config.upload as NextFileUploadOptions,
+          request,
+        })
 
-      if (error) {
-        throw new Error(error.message)
-      }
+        if (error) {
+          throw new Error(error.message)
+        }
 
-      if (collection?.config?.upload && files?.file) {
-        file = files.file
-      }
+        if (collection?.config?.upload && files?.file) {
+          file = files.file
+        }
 
-      if (fields?._payload && typeof fields._payload === 'string') {
-        data = JSON.parse(fields._payload)
+        if (fields?._payload && typeof fields._payload === 'string') {
+          data = JSON.parse(fields._payload)
+        }
       }
     }
   }
