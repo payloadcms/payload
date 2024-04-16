@@ -26,13 +26,13 @@ export { formatLabels, formatNames, toWords } from '../utilities/formatLabels.js
 
 export { getCollectionIDFieldTypes } from '../utilities/getCollectionIDFieldTypes.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
-
 export { default as getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export { isEntityHidden } from '../utilities/isEntityHidden.js'
-export { isNumber } from '../utilities/isNumber.js'
 
+export { isNumber } from '../utilities/isNumber.js'
 export { isPlainObject } from '../utilities/isPlainObject.js'
+
 export {
   isPlainFunction,
   isReactClientComponent,
