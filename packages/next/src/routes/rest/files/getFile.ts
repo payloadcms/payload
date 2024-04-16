@@ -4,7 +4,7 @@ import fsPromises from 'fs/promises'
 import httpStatus from 'http-status'
 import path from 'path'
 import { APIError } from 'payload/errors'
-import { getFileType } from 'payload/utilities'
+import { getFileType } from 'payload/uploads'
 
 import { streamFile } from '../../../next-stream-file/index.js'
 import { routeError } from '../routeError.js'
@@ -59,15 +59,12 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
 
     const data = streamFile(filePath)
 
-    const headers = new Headers({
-      'content-length': stats.size + '',
-    })
-
-    const { mime } = await getFileType({ filePath })
-    if (mime) headers.set('content-type', mime)
-
+    const { mime } = await getFileType.fromFile(filePath)
     return new Response(data, {
-      headers,
+      headers: {
+        'content-length': stats.size + '',
+        'content-type': mime,
+      },
       status: httpStatus.OK,
     })
   } catch (error) {
