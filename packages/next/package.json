@@ -69,7 +69,6 @@
     "graphql": "16.8.1",
     "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
-    "mime-types": "^2.1.35",
     "path-to-regexp": "^6.2.1",
     "qs": "6.11.2",
     "react-diff-viewer-continued": "3.2.6",

@@ -2,9 +2,9 @@ import type { Collection, PayloadRequest } from 'payload/types'
 
 import fsPromises from 'fs/promises'
 import httpStatus from 'http-status'
-import mime from 'mime-types'
 import path from 'path'
 import { APIError } from 'payload/errors'
+import { getFileType } from 'payload/utilities'
 
 import { streamFile } from '../../../next-stream-file/index.js'
 import { routeError } from '../routeError.js'
@@ -63,8 +63,8 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
       'content-length': stats.size + '',
     })
 
-    const contentType = mime.contentType(path.extname(filePath))
-    if (contentType) headers.set('content-type', contentType)
+    const { mime } = await getFileType({ filePath })
+    if (mime) headers.set('content-type', mime)
 
     return new Response(data, {
       headers,
