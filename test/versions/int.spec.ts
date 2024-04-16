@@ -471,6 +471,47 @@ describe('Versions', () => {
         expect(draftPost.title.es).toBe(spanishTitle)
       })
     })
+
+    describe('Update Many', () => {
+      it('should update many using drafts', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'initial value',
+            description: 'description to bulk update',
+            _status: 'published',
+          },
+        })
+
+        await payload.update({
+          collection: draftCollectionSlug,
+          id: doc.id,
+          draft: true,
+          data: {
+            title: 'updated title',
+          },
+        })
+
+        const updated = await payload.update({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'updated description',
+          },
+          draft: true,
+          where: {
+            id: {
+              in: [doc.id],
+            },
+          },
+        })
+
+        const updatedDoc = updated.docs?.[0]
+
+        expect(updatedDoc.description).toStrictEqual('updated description')
+        expect(updatedDoc.title).toStrictEqual('updated title') // probably will fail
+      })
+    })
+
     describe('Delete', () => {
       let postToDelete
       beforeEach(async () => {
