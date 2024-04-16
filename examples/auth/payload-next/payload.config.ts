@@ -6,6 +6,10 @@ import { buildConfig } from 'payload/config'
 import { Users } from './src/collections/Users'
 import BeforeLogin from './src/components/BeforeLogin'
 
+import { fileURLToPath } from 'node:url'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
 export default buildConfig({
   collections: [Users],
   admin: {
@@ -21,6 +25,6 @@ export default buildConfig({
   cors: [process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(Boolean),
   csrf: [process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(Boolean),
   typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
