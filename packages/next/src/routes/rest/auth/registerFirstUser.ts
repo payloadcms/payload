@@ -36,7 +36,8 @@ export const registerFirstUser: CollectionRouteHandler = async ({ collection, re
   return Response.json(
     {
       exp: result.exp,
-      message: req.t('Successfully registered first user.'),
+      // TODO(translate)
+      message: 'Successfully registered first user.',
       token: result.token,
       user: result.user,
     },
