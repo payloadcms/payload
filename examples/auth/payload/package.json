@@ -29,14 +29,19 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "^0.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "@next/eslint-plugin-next": "^13.1.6",
+    "@payloadcms/eslint-config": "^1.1.1",
     "@swc/core": "^1.4.14",
+    "@swc/types": "^0.1.6",
     "@types/node": "^20.11.25",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
+    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.1.0",
+    "eslint-config-next": "13.4.3",
     "tsx": "^4.7.1",
-    "typescript": "^5.4.2"
+    "typescript": "^4.8.4"
   }
 }

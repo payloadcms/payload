@@ -1,15 +1,14 @@
 'use client'
 
-import React, { useCallback, useRef } from 'react'
-import { useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import React, { useCallback, useRef } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { Button } from '../../_components/Button'
 import { Input } from '../../_components/Input'
 import { Message } from '../../_components/Message'
 import { useAuth } from '../../_providers/Auth'
-
 import classes from './index.module.scss'
 
 type FormData = {
@@ -23,12 +22,12 @@ export const LoginForm: React.FC = () => {
   const redirect = useRef(searchParams.get('redirect'))
   const { login } = useAuth()
   const router = useRouter()
-  const [error, setError] = React.useState<string | null>(null)
+  const [error, setError] = React.useState<null | string>(null)
 
   const {
-    register,
-    handleSubmit,
     formState: { errors, isLoading },
+    handleSubmit,
+    register,
   } = useForm<FormData>({
     defaultValues: {
       email: 'demo@payloadcms.com',
@@ -40,7 +39,7 @@ export const LoginForm: React.FC = () => {
     async (data: FormData) => {
       try {
         await login(data)
-        if (redirect?.current) router.push(redirect.current as string)
+        if (redirect?.current) router.push(redirect.current)
         else router.push('/account')
       } catch (_) {
         setError('There was an error with the credentials provided. Please try again.')
@@ -50,7 +49,7 @@ export const LoginForm: React.FC = () => {
   )
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
+    <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
       <p>
         {'To log in, use the email '}
         <b>demo@payloadcms.com</b>
@@ -62,29 +61,29 @@ export const LoginForm: React.FC = () => {
         </Link>
         .
       </p>
-      <Message error={error} className={classes.message} />
+      <Message className={classes.message} error={error} />
       <Input
-        name="email"
-        label="Email Address"
-        required
-        register={register}
         error={errors.email}
+        label="Email Address"
+        name="email"
+        register={register}
+        required
         type="email"
       />
       <Input
-        name="password"
-        type="password"
-        label="Password"
-        required
-        register={register}
         error={errors.password}
+        label="Password"
+        name="password"
+        register={register}
+        required
+        type="password"
       />
       <Button
-        type="submit"
-        disabled={isLoading}
-        className={classes.submit}
-        label={isLoading ? 'Processing' : 'Login'}
         appearance="primary"
+        className={classes.submit}
+        disabled={isLoading}
+        label={isLoading ? 'Processing' : 'Login'}
+        type="submit"
       />
       <div>
         <Link href={`/create-account${allParams}`}>Create an account</Link>

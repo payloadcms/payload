@@ -2,16 +2,17 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
-import { User } from '../../payload-types'
-import { gql, USER } from './gql'
+import type { User } from '../../../../payload-types'
+import type { AuthContext, Create, ForgotPassword, Login, Logout, ResetPassword } from './types'
+
+import { USER, gql } from './gql'
 import { rest } from './rest'
-import { AuthContext, Create, ForgotPassword, Login, Logout, ResetPassword } from './types'
 
 const Context = createContext({} as AuthContext)
 
-export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 'gql' }> = ({
-  children,
+export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.ReactNode }> = ({
   api = 'rest',
+  children,
 }) => {
   const [user, setUser] = useState<User | null>()
 
@@ -161,13 +162,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
   return (
     <Context.Provider
       value={{
-        user,
-        setUser,
+        create,
+        forgotPassword,
         login,
         logout,
-        create,
         resetPassword,
-        forgotPassword,
+        setUser,
+        user,
       }}
     >
       {children}

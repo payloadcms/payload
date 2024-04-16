@@ -9,14 +9,14 @@ export const USER = `
 export const gql = async (query: string): Promise<any> => {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/graphql`, {
-      method: 'POST',
+      body: JSON.stringify({
+        query,
+      }),
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        query,
-      }),
+      method: 'POST',
     })
 
     const { data, errors } = await res.json()

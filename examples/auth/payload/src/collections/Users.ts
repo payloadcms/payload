@@ -9,26 +9,23 @@ import { protectRoles } from './hooks/protectRoles'
 
 export const Users: CollectionConfig = {
   slug: 'users',
-  auth: {
-    tokenExpiration: 28800, // 8 hours
-    cookies: {
-      sameSite: 'None',
-      secure: true,
-      domain: process.env.COOKIE_DOMAIN,
-    },
+  access: {
+    admin: ({ req: { user } }) => checkRole(['admin'], user),
+    create: anyone,
+    delete: admins,
+    read: adminsAndUser,
+    update: adminsAndUser,
   },
   admin: {
     useAsTitle: 'email',
   },
-  access: {
-    read: adminsAndUser,
-    create: anyone,
-    update: adminsAndUser,
-    delete: admins,
-    admin: ({ req: { user } }) => checkRole(['admin'], user),
-  },
-  hooks: {
-    afterChange: [loginAfterCreate],
+  auth: {
+    cookies: {
+      domain: process.env.COOKIE_DOMAIN,
+      sameSite: 'None',
+      secure: true,
+    },
+    tokenExpiration: 28800, // 8 hours
   },
   fields: [
     {
@@ -43,7 +40,6 @@ export const Users: CollectionConfig = {
       name: 'roles',
       type: 'select',
       hasMany: true,
-      saveToJWT: true,
       hooks: {
         beforeChange: [protectRoles],
       },
@@ -57,6 +53,10 @@ export const Users: CollectionConfig = {
           value: 'user',
         },
       ],
+      saveToJWT: true,
     },
   ],
+  hooks: {
+    afterChange: [loginAfterCreate],
+  },
 }

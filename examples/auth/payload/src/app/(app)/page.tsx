@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import React from 'react'
 
 import { Gutter } from './_components/Gutter'
 
@@ -8,15 +9,15 @@ export default function Home() {
       <h1>Payload Auth Example</h1>
       <p>
         {'This is a '}
-        <Link href="https://payloadcms.com" target="_blank" rel="noopener noreferrer">
+        <Link href="https://payloadcms.com" rel="noopener noreferrer" target="_blank">
           Payload
         </Link>
         {' + '}
-        <Link href="https://nextjs.org" target="_blank" rel="noopener noreferrer">
+        <Link href="https://nextjs.org" rel="noopener noreferrer" target="_blank">
           Next.js
         </Link>
         {' app using the '}
-        <Link href="https://nextjs.org/docs/app" target="_blank" rel="noopener noreferrer">
+        <Link href="https://nextjs.org/docs/app" rel="noopener noreferrer" target="_blank">
           App Router
         </Link>
         {' made explicitly for the '}
@@ -38,7 +39,7 @@ export default function Home() {
         <Link href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/users`}>
           login to the admin dashboard
         </Link>
-        {'.'}
+        .
       </p>
     </Gutter>
   )

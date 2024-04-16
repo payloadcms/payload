@@ -1,14 +1,14 @@
 'use client'
-
 import { useSearchParams } from 'next/navigation'
+import React from 'react'
 
 import { Message } from '../Message'
 
 export const RenderParams: React.FC<{
-  params?: string[]
-  message?: string
   className?: string
-}> = ({ params = ['error', 'message', 'success'], message, className }) => {
+  message?: string
+  params?: string[]
+}> = ({ className, message, params = ['error', 'message', 'success'] }) => {
   const searchParams = useSearchParams()
   const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)
 

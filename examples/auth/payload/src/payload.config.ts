@@ -1,27 +1,21 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { slateEditor } from '@payloadcms/richtext-slate'
+import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { buildConfig } from 'payload/config'
 
 import { Users } from './collections/Users'
 import BeforeLogin from './components/BeforeLogin'
-
-import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
-  collections: [Users],
   admin: {
     components: {
       beforeLogin: [BeforeLogin],
     },
   },
-  secret: process.env.PAYLOAD_SECRET || '',
-  editor: slateEditor({}),
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
-  }),
+  collections: [Users],
   cors: [
     process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
     process.env.PAYLOAD_PUBLIC_SITE_URL || '',
@@ -30,6 +24,11 @@ export default buildConfig({
     process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
     process.env.PAYLOAD_PUBLIC_SITE_URL || '',
   ].filter(Boolean),
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI || '',
+  }),
+  editor: slateEditor({}),
+  secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

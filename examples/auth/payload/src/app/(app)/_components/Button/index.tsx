@@ -1,37 +1,39 @@
 'use client'
 
-import React, { ElementType } from 'react'
+import type { ElementType } from 'react';
+
 import Link from 'next/link'
+import React from 'react'
 
 import classes from './index.module.scss'
 
 export type Props = {
-  label?: string
   appearance?: 'default' | 'primary' | 'secondary'
-  el?: 'button' | 'link' | 'a'
-  onClick?: () => void
-  href?: string
-  newTab?: boolean
   className?: string
-  type?: 'submit' | 'button'
   disabled?: boolean
+  el?: 'a' | 'button' | 'link'
+  href?: string
   invert?: boolean
+  label?: string
+  newTab?: boolean
+  onClick?: () => void
+  type?: 'button' | 'submit'
 }
 
 export const Button: React.FC<Props> = ({
-  el: elFromProps = 'link',
-  label,
-  newTab,
-  href,
+  type = 'button',
   appearance,
   className: classNameFromProps,
-  onClick,
-  type = 'button',
   disabled,
+  el: elFromProps = 'link',
+  href,
   invert,
+  label,
+  newTab,
+  onClick,
 }) => {
   let el = elFromProps
-  const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+  const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
 
   const className = [
     classes.button,
@@ -52,7 +54,7 @@ export const Button: React.FC<Props> = ({
 
   if (el === 'link') {
     return (
-      <Link href={href || ''} className={className} {...newTabProps} onClick={onClick}>
+      <Link className={className} href={href || ''} {...newTabProps} onClick={onClick}>
         {content}
       </Link>
     )
@@ -62,12 +64,12 @@ export const Button: React.FC<Props> = ({
 
   return (
     <Element
-      href={href}
       className={className}
+      href={href}
       type={type}
       {...newTabProps}
-      onClick={onClick}
       disabled={disabled}
+      onClick={onClick}
     >
       {content}
     </Element>

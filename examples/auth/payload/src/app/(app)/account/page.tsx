@@ -1,12 +1,11 @@
-import React from 'react'
 import Link from 'next/link'
+import React from 'react'
 
 import { Button } from '../_components/Button'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
 import { getMeUser } from '../_utilities/getMeUser'
 import { AccountForm } from './AccountForm'
-
 import classes from './index.module.scss'
 
 export default async function Account() {
@@ -25,10 +24,10 @@ export default async function Account() {
         <Link href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/users`}>
           login to the admin dashboard
         </Link>
-        {'.'}
+        .
       </p>
       <AccountForm />
-      <Button href="/logout" appearance="secondary" label="Log out" />
+      <Button appearance="secondary" href="/logout" label="Log out" />
     </Gutter>
   )
 }

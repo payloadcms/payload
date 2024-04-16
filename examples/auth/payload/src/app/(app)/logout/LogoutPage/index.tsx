@@ -1,7 +1,7 @@
 'use client'
 
-import React, { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
+import React, { Fragment, useEffect, useState } from 'react'
 
 import { useAuth } from '../../_providers/Auth'
 
@@ -33,7 +33,7 @@ export const LogoutPage: React.FC = props => {
             <Link href="/">Click here</Link>
             {` to go to the home page. To log back in, `}
             <Link href="/login">click here</Link>
-            {'.'}
+            .
           </p>
         </div>
       )}

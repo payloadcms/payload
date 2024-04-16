@@ -1,10 +1,9 @@
 'use client'
 
-import React from 'react'
 import Link from 'next/link'
+import React from 'react'
 
 import { useAuth } from '../../../_providers/Auth'
-
 import classes from './index.module.scss'
 
 export const HeaderNav: React.FC = () => {
