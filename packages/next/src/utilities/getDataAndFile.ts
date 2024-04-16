@@ -27,23 +27,23 @@ export const getDataAndFile: GetDataAndFile = async ({
     const request = new Request(incomingRequest)
     const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
-    if (request.headers.has('Content-Length') && request.headers.get('Content-Length') !== '0') {
-      if (contentType === 'application/json') {
-        const bodyByteSize = parseInt(request.headers.get('Content-Length'), 10)
-        const upperByteLimit =
-          typeof config.upload?.limits?.fieldSize === 'number'
-            ? config.upload.limits.fields
-            : undefined
-        if (bodyByteSize <= upperByteLimit || upperByteLimit === undefined) {
-          try {
-            data = await request.json()
-          } catch (error) {
-            data = {}
-          }
-        } else {
-          throw new Error('Request body size exceeds the limit')
+    if (contentType === 'application/json') {
+      const bodyByteSize = parseInt(request.headers.get('Content-Length') || '0', 10)
+      const upperByteLimit =
+        typeof config.upload?.limits?.fieldSize === 'number'
+          ? config.upload.limits.fields
+          : undefined
+      if (bodyByteSize <= upperByteLimit || upperByteLimit === undefined) {
+        try {
+          data = await request.json()
+        } catch (error) {
+          data = {}
         }
       } else {
+        throw new Error('Request body size exceeds the limit')
+      }
+    } else {
+      if (request.headers.has('Content-Length') && request.headers.get('Content-Length') !== '0') {
         const { error, fields, files } = await nextFileUpload({
           options: config.upload as NextFileUploadOptions,
           request,
