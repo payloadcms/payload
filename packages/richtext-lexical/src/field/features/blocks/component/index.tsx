@@ -154,7 +154,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
     reducedBlock,
     blockFieldWrapperName,
     onChange,
-  ])
+    schemaFieldsPath,
+    path,
+  ]) // Adding formData to the dependencies here might break it
 
   return <div className={baseClass}>{formContent}</div>
 }

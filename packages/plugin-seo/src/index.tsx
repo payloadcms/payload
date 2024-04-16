@@ -194,7 +194,7 @@ const seo =
           return collection
         }) || [],
       endpoints: [
-        ...config.endpoints,
+        ...(config.endpoints ?? []),
         {
           handler: async (req) => {
             const args: Parameters<GenerateTitle>[0] =

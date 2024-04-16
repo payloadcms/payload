@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import type { Breadcrumb, PluginConfig } from '../types.js'
 
-const formatBreadcrumb = (
+export const formatBreadcrumb = (
   pluginConfig: PluginConfig,
   collection: CollectionConfig,
   docs: Array<Record<string, unknown>>,
@@ -29,5 +29,3 @@ const formatBreadcrumb = (
     url,
   }
 }
-
-export default formatBreadcrumb

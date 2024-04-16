@@ -70,7 +70,11 @@ export const generateFileData = async <T>({
         file = response
         overwriteExistingFiles = true
       } else if (filename && url) {
-        file = await getExternalFile({ data: data as FileData, req })
+        file = await getExternalFile({
+          data: data as FileData,
+          req,
+          uploadConfig: collectionConfig.upload,
+        })
         overwriteExistingFiles = true
       }
     } catch (err) {
@@ -133,7 +137,7 @@ export const generateFileData = async <T>({
     }
 
     if (fileSupportsResize || isImage(file.mimetype)) {
-      dimensions = getImageSize(file)
+      dimensions = await getImageSize(file)
       fileData.width = dimensions.width
       fileData.height = dimensions.height
     }

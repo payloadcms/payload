@@ -18,8 +18,8 @@ import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
+import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from '../Edit/Default/SetDocumentTitle/index.js'
-import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
 import { useLivePreviewContext } from './Context/context.js'
 import { LivePreviewProvider } from './Context/index.js'
 import { LivePreview } from './Preview/index.js'
@@ -140,7 +140,7 @@ const PreviewView: React.FC<Props> = ({
             (globalConfig &&
               !(globalConfig.versions?.drafts && globalConfig.versions?.drafts?.autosave))) &&
             !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <SetStepNav
+          <SetDocumentStepNav
             collectionSlug={collectionSlug}
             globalLabel={globalConfig?.label}
             globalSlug={globalSlug}
