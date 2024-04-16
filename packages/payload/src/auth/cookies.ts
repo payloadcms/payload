@@ -26,9 +26,9 @@ type CookieObject = {
   value: string
 }
 
-export const generateCookie = <ReturnCookieAsString = boolean>(
+export const generateCookie = <ReturnCookieAsObject = boolean>(
   args: CookieOptions,
-): ReturnCookieAsString extends true ? CookieObject : string => {
+): ReturnCookieAsObject extends true ? CookieObject : string => {
   const {
     name,
     domain,
@@ -54,7 +54,7 @@ export const generateCookie = <ReturnCookieAsString = boolean>(
     if (returnCookieAsObject) {
       cookieObject.expires = expires.toUTCString()
     } else {
-      cookieString += `; Expires=${expires.toUTCString()}}`
+      cookieString += `; Expires=${expires.toUTCString()}`
     }
   }
 
@@ -62,7 +62,7 @@ export const generateCookie = <ReturnCookieAsString = boolean>(
     if (returnCookieAsObject) {
       cookieObject.maxAge = maxAge
     } else {
-      cookieString += `; Max-Age=${maxAge.toString()}}`
+      cookieString += `; Max-Age=${maxAge.toString()}`
     }
   }
 
@@ -70,7 +70,7 @@ export const generateCookie = <ReturnCookieAsString = boolean>(
     if (returnCookieAsObject) {
       cookieObject.domain = domain
     } else {
-      cookieString += `; Domain=${domain}}`
+      cookieString += `; Domain=${domain}`
     }
   }
 
@@ -78,7 +78,7 @@ export const generateCookie = <ReturnCookieAsString = boolean>(
     if (returnCookieAsObject) {
       cookieObject.path = path
     } else {
-      cookieString += `; Path=${path}}`
+      cookieString += `; Path=${path}`
     }
   }
 
@@ -86,7 +86,7 @@ export const generateCookie = <ReturnCookieAsString = boolean>(
     if (returnCookieAsObject) {
       cookieObject.secure = secure
     } else {
-      cookieString += `; Secure=${secure}}`
+      cookieString += `; Secure=${secure}`
     }
   }
 
@@ -94,7 +94,7 @@ export const generateCookie = <ReturnCookieAsString = boolean>(
     if (returnCookieAsObject) {
       cookieObject.httpOnly = httpOnly
     } else {
-      cookieString += `; HttpOnly=${httpOnly}}`
+      cookieString += `; HttpOnly=${httpOnly}`
     }
   }
 
@@ -102,11 +102,11 @@ export const generateCookie = <ReturnCookieAsString = boolean>(
     if (returnCookieAsObject) {
       cookieObject.sameSite = sameSite
     } else {
-      cookieString += `; SameSite=${sameSite}}`
+      cookieString += `; SameSite=${sameSite}`
     }
   }
 
-  return (returnCookieAsObject ? cookieObject : cookieString) as ReturnCookieAsString extends true
+  return (returnCookieAsObject ? cookieObject : cookieString) as ReturnCookieAsObject extends true
     ? CookieObject
     : string
 }
