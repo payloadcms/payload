@@ -712,6 +712,9 @@ importers:
       '@swc-node/sourcemap-support':
         specifier: ^0.5.0
         version: 0.5.0
+      '@swc/core':
+        specifier: ^1.4.13
+        version: 1.4.13
       '@types/probe-image-size':
         specifier: ^7.2.4
         version: 7.2.4
