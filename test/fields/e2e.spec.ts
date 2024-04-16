@@ -355,6 +355,29 @@ describe('fields', () => {
       await saveDocAndAssert(page)
       await expect(field.locator('.rs__value-container')).toContainText('One')
     })
+
+    test('should not allow filtering by hasMany field / equals / not equals', async () => {
+      await page.goto(url.list)
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = page.locator('.condition__field')
+      await conditionField.click()
+
+      const dropdownFieldOptions = conditionField.locator('.rs__option')
+      await dropdownFieldOptions.locator('text=Select Has Many').nth(0).click()
+
+      const operatorField = page.locator('.condition__operator')
+      await operatorField.click()
+
+      const dropdownOperatorOptions = operatorField.locator('.rs__option')
+
+      await expect(dropdownOperatorOptions.locator('text=equals')).toBeHidden()
+      await expect(dropdownOperatorOptions.locator('text=not equals')).toBeHidden()
+    })
   })
 
   describe('point', () => {
