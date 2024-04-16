@@ -78,6 +78,12 @@ export type UploadConfig = {
   adminThumbnail?: GetAdminThumbnail | string
   crop?: boolean
   disableLocalStorage?: boolean
+  /**
+   * Accepts existing headers and can filter/modify them.
+   *
+   * Useful for adding custom headers to fetch from external providers.
+   */
+  externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   filesRequiredOnCreate?: boolean
   focalPoint?: boolean
   /** Options for original upload file only. For sizes, set each formatOptions individually. */

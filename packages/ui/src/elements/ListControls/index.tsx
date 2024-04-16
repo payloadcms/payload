@@ -79,7 +79,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               )) ??
             undefined
           }
-          fieldName={titleField.name}
+          fieldName={titleField?.name}
           handleChange={handleSearchChange}
           listSearchableFields={getTextFieldsToBeSearched(
             collectionConfig.admin.listSearchableFields,

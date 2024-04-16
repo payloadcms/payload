@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload/types'
 export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
-    disableLocalStorage: true, // don't save me
+    disableLocalStorage: true,
     resizeOptions: {
       position: 'center',
       width: 200,
