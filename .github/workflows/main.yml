@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NODE_VERSION: 18.20.2
+
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -57,10 +60,10 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
+      - name: Setup Node@${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -102,10 +105,10 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
+      - name: Setup Node@${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -151,10 +154,10 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
+      - name: Setup Node@${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -254,10 +257,10 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
+      - name: Setup Node@${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -295,10 +298,10 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
+      - name: Setup Node@${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -336,10 +339,10 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - name: Use Node.js 18
+      - name: Setup Node@${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0
