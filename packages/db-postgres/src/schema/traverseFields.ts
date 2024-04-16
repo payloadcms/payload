@@ -493,7 +493,6 @@ export const traverseFields = ({
               localized: field.localized,
               rootTableName,
               table: adapter.tables[blockTableName],
-              tableLocales: adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
             })
           }
           adapter.blockTableNames[`${rootTableName}.${toSnakeCase(block.slug)}`] = blockTableName

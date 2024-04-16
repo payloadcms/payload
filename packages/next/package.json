@@ -1,13 +1,13 @@
 {
-  "name": "@r1tsu/next",
-  "version": "3.0.0-beta.11",
+  "name": "@payloadcms/next",
+  "version": "3.0.0-beta.10",
   "main": "./src/index.js",
   "types": "./src/index.js",
   "type": "module",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/r1tsuu/payload.git",
+    "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/next"
   },
   "scripts": {

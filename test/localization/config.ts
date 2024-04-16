@@ -5,7 +5,6 @@ import { devUser } from '../credentials.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock/index.js'
 import {
-  blocksWithLocalizedSameName,
   defaultLocale,
   englishTitle,
   localizedPostsSlug,
@@ -229,37 +228,6 @@ export default buildConfigWithDefaults({
           name: 'date',
           type: 'date',
           localized: true,
-        },
-      ],
-    },
-    {
-      slug: blocksWithLocalizedSameName,
-      fields: [
-        {
-          type: 'blocks',
-          name: 'blocks',
-          blocks: [
-            {
-              slug: 'block_first',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  localized: true,
-                },
-              ],
-            },
-            {
-              slug: 'block_second',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  localized: true,
-                },
-              ],
-            },
-          ],
         },
       ],
     },

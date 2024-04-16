@@ -1,6 +1,7 @@
+import type { PayloadRequest } from 'payload/types'
+
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { PayloadRequest } from '../types/index.js'
 
 export const isEntityHidden = ({
   hidden,

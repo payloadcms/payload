@@ -10,13 +10,9 @@ type Args = {
   localized: boolean
   rootTableName: string
   table: GenericTable
-  tableLocales?: GenericTable
 }
 
-const getFlattenedFieldNames = (
-  fields: Field[],
-  prefix: string = '',
-): { localized?: boolean; name: string }[] => {
+const getFlattenedFieldNames = (fields: Field[], prefix: string = ''): string[] => {
   return fields.reduce((fieldsToUse, field) => {
     let fieldPrefix = prefix
 
@@ -48,13 +44,7 @@ const getFlattenedFieldNames = (
     }
 
     if (fieldAffectsData(field)) {
-      return [
-        ...fieldsToUse,
-        {
-          name: `${fieldPrefix?.replace('.', '_') || ''}${field.name}`,
-          localized: field.localized,
-        },
-      ]
+      return [...fieldsToUse, `${fieldPrefix?.replace('.', '_') || ''}${field.name}`]
     }
 
     return fieldsToUse
@@ -66,20 +56,16 @@ export const validateExistingBlockIsIdentical = ({
   localized,
   rootTableName,
   table,
-  tableLocales,
 }: Args): void => {
   const fieldNames = getFlattenedFieldNames(block.fields)
 
   const missingField =
     // ensure every field from the config is in the matching table
-    fieldNames.find(({ name, localized }) => {
-      if (localized && tableLocales) return Object.keys(tableLocales).indexOf(name) === -1
-      return Object.keys(table).indexOf(name) === -1
-    }) ||
+    fieldNames.find((name) => Object.keys(table).indexOf(name) === -1) ||
     // ensure every table column is matched for every field from the config
     Object.keys(table).find((fieldName) => {
       if (!['_locale', '_order', '_parentID', '_path', '_uuid'].includes(fieldName)) {
-        return fieldNames.findIndex((field) => field.name) === -1
+        return fieldNames.indexOf(fieldName) === -1
       }
     })
 
