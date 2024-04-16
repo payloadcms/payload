@@ -1,7 +1,7 @@
 import type { Language } from '../types.js'
 
-export const ua: Language = {
-  dateFNSKey: 'ua',
+export const uk: Language = {
+  dateFNSKey: 'uk',
   translations: {
     authentication: {
       account: 'Обліковий запис',
@@ -33,8 +33,7 @@ export const ua: Language = {
       lockUntil: 'Заблокувати до',
       logBackIn: 'Увійти знову',
       logOut: 'Вийти',
-      loggedIn:
-        'Щоб увйти в систему з іншого облікового запису, спочатку <0>вийдіть з системи</0>.',
+      loggedIn: 'Щоб увйти в систему з іншого облікового запису, спочатку <0>вийдіть з системи</0>.',
       loggedInChangePassword:
         'Щоб змінити ваш пароль, перейдіть до <0>сторінки облікового запису</0> і змініть ваш пароль.',
       loggedOutInactivity: 'Ви вийшли з системи через бездіяльність.',
@@ -42,8 +41,7 @@ export const ua: Language = {
       login: 'Увійти',
       loginAttempts: 'Спроби входу',
       loginUser: 'Вхід користувача в систему',
-      loginWithAnotherUser:
-        'Щоб увйти в систему з іншого облікового запису, спочатку <0>вийдіть з системи</0>.',
+      loginWithAnotherUser: 'Щоб увйти в систему з іншого облікового запису, спочатку <0>вийдіть з системи</0>.',
       logout: 'Вийти',
       logoutUser: 'Вийти з системи',
       newAPIKeyGenerated: 'Новий API ключ згенеровано.',

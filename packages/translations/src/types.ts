@@ -26,7 +26,7 @@ type DateFNSKeys =
   | 'sv'
   | 'th'
   | 'tr'
-  | 'ua'
+  | 'uk'
   | 'vi'
   | 'zh-CN'
   | 'zh-TW'
