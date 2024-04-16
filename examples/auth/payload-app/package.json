@@ -1,0 +1,43 @@
+{
+  "name": "payload-example-auth",
+  "description": "Payload authentication example.",
+  "version": "1.0.0",
+  "main": "dist/server.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "cross-env PAYLOAD_PUBLIC_SEED=true PAYLOAD_DROP_DATABASE=true NODE_OPTIONS=--no-deprecation next dev",
+    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
+    "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types",
+    "generate:graphQLSchema": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix --ext .ts,.tsx src"
+  },
+  "dependencies": {
+    "@payloadcms/db-mongodb": "3.0.0-beta.9",
+    "@payloadcms/next": "3.0.0-beta.9",
+    "@payloadcms/richtext-slate": "3.0.0-beta.9",
+    "@payloadcms/ui": "3.0.0-beta.9",
+    "cross-env": "^7.0.3",
+    "next": "14.2.0-canary.33",
+    "payload": "3.0.0-beta.9",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.45.1",
+    "sharp": "0.32.6"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "^0.0.1",
+    "@types/node": "^20.11.25",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.1.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.2"
+  }
+}
