@@ -73,7 +73,7 @@ export const getBaseFields = (
           label: ({ t }) => t('fields:enterURL'),
           required: true,
           validate: (value: string) => {
-            if (value && !validateUrl(value)) {
+            if (!validateUrl(value)) {
               return 'Invalid URL'
             }
           },
