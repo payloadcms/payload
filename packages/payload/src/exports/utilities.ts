@@ -40,8 +40,8 @@ export {
   isReactServerComponent,
 } from '../utilities/isReactComponent.js'
 export { isValidID } from '../utilities/isValidID.js'
-
 export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
+
 export { mapAsync } from '../utilities/mapAsync.js'
 export { mergeListSearchAndWhere } from '../utilities/mergeListSearchAndWhere.js'
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
