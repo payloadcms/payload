@@ -85,7 +85,7 @@
         "./packages/next/src/exports/*.ts"
       ],
       "@payloadcms/next": [
-        "./packages/next/src/exports/*"
+        "./packages/next/src/exports/index.ts"
       ]
     }
   },

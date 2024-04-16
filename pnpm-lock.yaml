@@ -293,6 +293,22 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
 
+  packages/config-loader:
+    dependencies:
+      find-up:
+        specifier: 4.1.0
+        version: 4.1.0
+      get-tsconfig:
+        specifier: ^4.7.2
+        version: 4.7.3
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/create-payload-app:
     dependencies:
       '@clack/prompts':
@@ -652,6 +668,9 @@ importers:
       '@next/eslint-plugin-next':
         specifier: ^14.1.0
         version: 14.1.4
+      '@payloadcms/config-loader':
+        specifier: workspace:*
+        version: link:../config-loader
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload

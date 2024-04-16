@@ -18,13 +18,8 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/withPayload.js" /* Include the withPayload.js file in the build */
   ],
   "references": [
-    { "path": "../config-loader" },
     { "path": "../payload" },
-    { "path": "../ui" },
-    { "path": "../translations" },
-    { "path": "../graphql" }
   ]
 }

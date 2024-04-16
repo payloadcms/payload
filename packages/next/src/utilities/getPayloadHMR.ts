@@ -1,6 +1,7 @@
 import type { GeneratedTypes, Payload } from 'payload'
 import type { InitOptions } from 'payload/config'
 
+import { loadConfig } from '@payloadcms/config-loader'
 import { BasePayload } from 'payload'
 import WebSocket from 'ws'
 
@@ -15,15 +16,15 @@ if (!cached) {
   cached = global._payload = { payload: null, promise: null, reload: false }
 }
 
-export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
-  if (!options?.config) {
-    throw new Error('Error: the payload config is required for getPayload to work.')
+export const getPayloadHMR = async (incomingOptions?: Partial<InitOptions>): Promise<Payload> => {
+  const options: InitOptions = {
+    ...(incomingOptions || {}),
+    config: incomingOptions?.config || loadConfig(),
   }
 
   if (cached.payload) {
-    const config = await options.config // TODO: check if we can move this inside the cached.reload === true condition
-
     if (cached.reload === true) {
+      const config = await options.config
       let resolve
 
       cached.reload = new Promise((res) => (resolve = res))

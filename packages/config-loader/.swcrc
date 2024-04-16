@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "sourceMaps": true,
+  "jsc": {
+    "target": "esnext",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "dts": true
+    },
+    "experimental": {
+      "plugins": [
+        [
+          "swc-plugin-transform-remove-imports",
+          {
+            "test": "\\.(scss|css)$"
+          }
+        ]
+      ]
+    }
+  },
+  "module": {
+    "type": "commonjs"
+  }
+}

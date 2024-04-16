@@ -23,6 +23,7 @@ export const withPayload = (nextConfig = {}) => {
         'libsql',
         'pino',
         'pino-pretty',
+        '@payloadcms/config-loader',
       ],
     },
     webpack: (webpackConfig, webpackOptions) => {

@@ -9,6 +9,12 @@ const withBundleAnalyzer = bundleAnalyzer({
 // eslint-disable-next-line no-restricted-exports
 export default withBundleAnalyzer(
   withPayload({
+    experimental: {
+      serverComponentsExternalPackages: [
+        './packages/config-loader/src/index.ts',
+        '@payloadcms/config-loader',
+      ],
+    },
     reactStrictMode: false,
     eslint: {
       ignoreDuringBuilds: true,

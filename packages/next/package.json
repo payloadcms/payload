@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.1.0",
+    "@payloadcms/config-loader": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "18.2.74",
     "@types/react-dom": "18.2.24",
@@ -97,6 +98,11 @@
         "import": "./dist/exports/*.js",
         "require": "./dist/exports/*.js",
         "types": "./dist/exports/*.d.ts"
+      },
+      ".": {
+        "import": "./dist/exports/index.js",
+        "require": "./dist/exports/index.js",
+        "types": "./dist/exports/index.d.ts"
       }
     },
     "registry": "https://registry.npmjs.org/"
