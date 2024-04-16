@@ -303,6 +303,7 @@ export const GET =
     } catch (error) {
       return routeError({
         collection,
+        config,
         err: error,
         req,
       })
@@ -445,6 +446,7 @@ export const POST =
     } catch (error) {
       return routeError({
         collection,
+        config,
         err: error,
         req,
       })
@@ -514,6 +516,7 @@ export const DELETE =
     } catch (error) {
       return routeError({
         collection,
+        config,
         err: error,
         req,
       })
@@ -583,6 +586,7 @@ export const PATCH =
     } catch (error) {
       return routeError({
         collection,
+        config,
         err: error,
         req,
       })

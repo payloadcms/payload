@@ -1,4 +1,4 @@
-const ACCEPTABLE_CONTENT_TYPE = /^multipart\/['"()+-_]+(?:; ?['"()+-_]*)+$/i
+const ACCEPTABLE_CONTENT_TYPE = /multipart\/['"()+-_]+(?:; ?['"()+-_]*)+$/i
 const UNACCEPTABLE_METHODS = new Set(['GET', 'HEAD', 'DELETE', 'OPTIONS', 'CONNECT', 'TRACE'])
 
 const hasBody = (req: Request): boolean => {

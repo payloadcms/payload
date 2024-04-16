@@ -66,6 +66,7 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
   } catch (error) {
     return routeError({
       collection,
+      config: req.payload.config,
       err: error,
       req,
     })
