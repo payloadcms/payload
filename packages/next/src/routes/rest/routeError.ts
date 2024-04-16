@@ -94,7 +94,7 @@ export const routeError = async ({
     }
   }
 
-  const { config, logger } = req.payload
+  const { config, logger } = payload
 
   let response = formatErrors(err)
 
