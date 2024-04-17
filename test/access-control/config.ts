@@ -76,12 +76,12 @@ export default buildConfigWithDefaults({
       slug: 'users',
       auth: true,
       access: {
-        // admin: () => true,
-        admin: async () =>
-          new Promise((resolve) => {
-            // Simulate a request to an external service to determine access, i.e. another instance of Payload
-            setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
-          }),
+        admin: () => false,
+        // admin: async () =>
+        //   new Promise((resolve) => {
+        //     // Simulate a request to an external service to determine access, i.e. another instance of Payload
+        //     setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
+        //   }),
       },
       fields: [
         {

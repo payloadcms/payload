@@ -68,6 +68,10 @@ export const initPage = async ({
 
   const { permissions, user } = await payload.auth({ headers, req })
 
+  if (!permissions.canAccessAdmin) {
+    notFound()
+  }
+
   req.user = user
 
   const visibleEntities: VisibleEntities = {
