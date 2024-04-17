@@ -7,6 +7,7 @@ import type {
   FetchOptions,
   FindArgs,
   GeneratedTypes,
+  LoginArgs,
   UpdateArgs,
   UpdateGlobalArgs,
 } from './types.js'
@@ -65,6 +66,17 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
   }: FindArgs<TGeneratedTypes, T>) => {
     return this.fetch<PaginatedDocs<TGeneratedTypes['collections'][T]>>({
       operation: 'find',
+      args,
+      jwt,
+    })
+  }
+
+  login = async <T extends keyof TGeneratedTypes['collections']>({
+    jwt,
+    ...args
+  }: LoginArgs<TGeneratedTypes, T>) => {
+    return this.fetch<TGeneratedTypes['collections'][T]>({
+      operation: 'login',
       args,
       jwt,
     })

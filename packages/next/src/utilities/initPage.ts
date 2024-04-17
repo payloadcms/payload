@@ -25,6 +25,8 @@ type Args = {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
+const authRoutes = ['/login', '/logout', '/create-first-user', '/forgot', '/reset', '/verify']
+
 export const initPage = async ({
   config: configPromise,
   redirectUnauthenticatedUser = false,
@@ -79,13 +81,19 @@ export const initPage = async ({
       .filter(Boolean),
   }
 
-  const routeSegments = route.replace(payload.config.routes.admin, '').split('/').filter(Boolean)
+  const {
+    routes: { admin: adminRoute },
+  } = payload.config
+
+  const routeSegments = route.replace(adminRoute, '').split('/').filter(Boolean)
   const [entityType, entitySlug, createOrID] = routeSegments
   const collectionSlug = entityType === 'collections' ? entitySlug : undefined
   const globalSlug = entityType === 'globals' ? entitySlug : undefined
   const docID = collectionSlug && createOrID !== 'create' ? createOrID : undefined
 
-  if (redirectUnauthenticatedUser && !user && route !== '/login') {
+  const isAuthRoute = authRoutes.some((r) => r === route.replace(adminRoute, ''))
+
+  if (redirectUnauthenticatedUser && !user && !isAuthRoute) {
     if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
 
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
@@ -93,6 +101,10 @@ export const initPage = async ({
       : ''
 
     redirect(`${routes.admin}/login?redirect=${route + stringifiedSearchParams}`)
+  }
+
+  if (!permissions.canAccessAdmin && !isAuthRoute) {
+    notFound()
   }
 
   let collectionConfig: SanitizedCollectionConfig
