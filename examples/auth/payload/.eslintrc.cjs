@@ -1,5 +1,4 @@
 module.exports = {
-  root: true,
   extends: ['plugin:@next/next/core-web-vitals', '@payloadcms'],
   ignorePatterns: ['**/payload-types.ts'],
   overrides: [
@@ -9,6 +8,8 @@ module.exports = {
     },
   ],
   parserOptions: {
-    project: './tsconfig.json',
+    project: ['./tsconfig.json'],
+    tsconfigRootDir: __dirname,
   },
+  root: true,
 }

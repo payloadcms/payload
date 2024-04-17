@@ -40,6 +40,6 @@
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "tsx": "^4.7.1",
-    "typescript": "^4.8.4"
+    "typescript": "5.4.4"
   }
 }

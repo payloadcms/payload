@@ -8,7 +8,7 @@ type Props = {
   error: any
   label: string
   name: string
-  register: UseFormRegister<FieldValues & any>
+  register: UseFormRegister<FieldValues & any> // eslint-disable-line @typescript-eslint/no-redundant-type-constituents
   required?: boolean
   type?: 'email' | 'number' | 'password' | 'text'
   validate?: (value: string) => boolean | string

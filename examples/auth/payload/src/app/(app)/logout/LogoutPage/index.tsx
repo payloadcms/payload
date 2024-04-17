@@ -5,7 +5,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 
 import { useAuth } from '../../_providers/Auth'
 
-export const LogoutPage: React.FC = props => {
+export const LogoutPage: React.FC = () => {
   const { logout } = useAuth()
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
@@ -20,7 +20,7 @@ export const LogoutPage: React.FC = props => {
       }
     }
 
-    performLogout()
+    void performLogout()
   }, [logout])
 
   return (
@@ -32,8 +32,7 @@ export const LogoutPage: React.FC = props => {
             {'What would you like to do next? '}
             <Link href="/">Click here</Link>
             {` to go to the home page. To log back in, `}
-            <Link href="/login">click here</Link>
-            .
+            <Link href="/login">click here</Link>.
           </p>
         </div>
       )}

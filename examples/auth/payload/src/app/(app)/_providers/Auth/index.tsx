@@ -17,7 +17,7 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
   const [user, setUser] = useState<User | null>()
 
   const create = useCallback<Create>(
-    async args => {
+    async (args) => {
       if (api === 'rest') {
         const user = await rest(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, args)
         setUser(user)
@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
   )
 
   const login = useCallback<Login>(
-    async args => {
+    async (args) => {
       if (api === 'rest') {
         const user = await rest(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/login`, args)
         setUser(user)
@@ -107,11 +107,11 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
       }
     }
 
-    fetchMe()
+    void fetchMe()
   }, [api])
 
   const forgotPassword = useCallback<ForgotPassword>(
-    async args => {
+    async (args) => {
       if (api === 'rest') {
         const user = await rest(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/forgot-password`,
@@ -133,7 +133,7 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
   )
 
   const resetPassword = useCallback<ResetPassword>(
-    async args => {
+    async (args) => {
       if (api === 'rest') {
         const user = await rest(
           `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/reset-password`,
