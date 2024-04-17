@@ -16,8 +16,8 @@ import type { FileData, FileToSave, ProbedImageSize } from './types'
 import { FileUploadError, MissingFile } from '../errors'
 import canResizeImage from './canResizeImage'
 import cropImage from './cropImage'
-import getFileByPath from './getFileByPath'
 import { getExternalFile } from './getExternalFile'
+import getFileByPath from './getFileByPath'
 import getImageSize from './getImageSize'
 import getSafeFileName from './getSafeFilename'
 import resizeAndTransformImageSizes from './imageResizer'
@@ -73,7 +73,11 @@ export const generateFileData = async <T>({
         file = response as UploadedFile
         overwriteExistingFiles = true
       } else if (filename && url) {
-        file = (await getExternalFile({ req, data: data as FileData })) as UploadedFile
+        file = (await getExternalFile({
+          data: data as FileData,
+          req,
+          uploadConfig: collectionConfig.upload,
+        })) as UploadedFile
         overwriteExistingFiles = true
       }
     } catch (err) {
@@ -135,7 +139,7 @@ export const generateFileData = async <T>({
       }
     }
 
-    if (isImage(file.mimetype)) {
+    if (fileSupportsResize || isImage(file.mimetype)) {
       dimensions = await getImageSize(file)
       fileData.width = dimensions.width
       fileData.height = dimensions.height

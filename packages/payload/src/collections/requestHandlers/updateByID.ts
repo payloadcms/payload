@@ -5,6 +5,7 @@ import httpStatus from 'http-status'
 import type { PayloadRequest } from '../../express/types'
 
 import formatSuccessResponse from '../../express/responses/formatSuccess'
+import { sanitizeCollectionID } from '../../utilities/sanitizeCollectionID'
 import updateByID from '../operations/updateByID'
 
 export type UpdateResult = {
@@ -29,12 +30,18 @@ export default async function updateByIDHandler(
   res: Response,
   next: NextFunction,
 ): Promise<Response<UpdateResult> | void> {
+  const id = sanitizeCollectionID({
+    id: req.params.id,
+    collectionSlug: req.collection.config.slug,
+    payload: req.payload,
+  })
+
   try {
     const draft = req.query.draft === 'true'
     const autosave = req.query.autosave === 'true'
 
     const doc = await updateByID({
-      id: req.params.id,
+      id,
       autosave,
       collection: req.collection,
       data: req.body,

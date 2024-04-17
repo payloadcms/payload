@@ -5,9 +5,7 @@ import type { Document } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import { getDataLoader } from '../../dataloader'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import findVersionByID from '../findVersionByID'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
@@ -35,24 +33,13 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   const {
     id,
     collection: collectionSlug,
-    context,
     depth,
     disableErrors = false,
-    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
-    locale: localeArg = null,
     overrideAccess = true,
-    req = {} as PayloadRequest,
     showHiddenFields,
   } = options
-  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
-  const localizationConfig = payload?.config?.localization
-  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
-  const locale = localeArg || req.locale || defaultLocale
-  const fallbackLocale = localizationConfig
-    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -62,15 +49,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     )
   }
 
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.locale = locale
-  req.fallbackLocale =
-    typeof fallbackLocaleArg !== 'undefined' ? fallbackLocaleArg : fallbackLocale || defaultLocale
-  req.i18n = i18nInit(payload.config.i18n)
-  req.payload = payload
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
+  const req = createLocalReq(options, payload)
 
   return findVersionByID({
     id,

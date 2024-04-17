@@ -46,43 +46,45 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection.config,
-        context: args.req.context,
-        operation: 'update',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    id,
-    autosave = false,
-    collection: { config: collectionConfig },
-    collection,
-    depth,
-    draft: draftArg = false,
-    overrideAccess,
-    overwriteExistingFiles = false,
-    req: {
-      locale,
-      payload: { config },
-      payload,
-      t,
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection.config,
+          context: args.req.context,
+          operation: 'update',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      id,
+      autosave = false,
+      collection: { config: collectionConfig },
+      collection,
+      depth,
+      draft: draftArg = false,
+      overrideAccess,
+      overwriteExistingFiles = false,
+      req: {
+        fallbackLocale,
+        locale,
+        payload: { config },
+        payload,
+        t,
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     if (!id) {
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
@@ -129,7 +131,9 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth: 0,
       doc: docWithLocales,
+      fallbackLocale: null,
       global: null,
+      locale,
       overrideAccess: true,
       req,
       showHiddenFields: true,
@@ -296,7 +300,9 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
       depth,
       doc: result,
+      fallbackLocale,
       global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -376,7 +382,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

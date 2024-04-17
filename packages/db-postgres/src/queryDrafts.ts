@@ -2,9 +2,9 @@ import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 
 import { type QueryDrafts, combineQueries } from 'payload/database'
 import { buildVersionCollectionFields } from 'payload/versions'
-import toSnakeCase from 'to-snake-case'
 
 import { findMany } from './find/findMany'
+import { getTableName } from './schema/getTableName'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts({
   collection,
@@ -17,7 +17,11 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
   where,
 }) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const tableName = `_${toSnakeCase(collection)}_v`
+  const tableName = getTableName({
+    adapter: this,
+    config: collectionConfig,
+    versions: true,
+  })
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)

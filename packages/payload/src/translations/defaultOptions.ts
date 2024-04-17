@@ -5,10 +5,10 @@ import translations from './index'
 export const defaultOptions: InitOptions = {
   debug: false,
   detection: {
-    caches: ['header', 'cookie', 'localStorage'],
+    caches: ['cookie', 'localStorage', 'header'],
     lookupCookie: 'lng',
     lookupLocalStorage: 'lng',
-    order: ['header', 'cookie', 'localStorage'],
+    order: ['cookie', 'localStorage', 'header'],
   },
   fallbackLng: 'en',
   interpolation: {

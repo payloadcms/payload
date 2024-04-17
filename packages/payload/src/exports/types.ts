@@ -19,6 +19,7 @@ export { FileData, ImageSize, IncomingUploadType } from '../uploads/types'
 
 export type {
   CustomPublishButtonProps,
+  CustomPublishButtonType,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from './../admin/components/elements/types'
@@ -67,6 +68,7 @@ export type {
   FieldWithMany,
   FieldWithMaxDepth,
   FieldWithPath,
+  FieldWithRichTextRequiredEditor,
   FieldWithSubFields,
   FilterOptions,
   FilterOptionsProps,
@@ -85,6 +87,7 @@ export type {
   RelationshipField,
   RelationshipValue,
   RichTextField,
+  RichTextFieldRequiredEditor,
   RowAdmin,
   RowField,
   SelectField,
@@ -109,6 +112,7 @@ export {
   fieldHasSubFields,
   fieldIsArrayType,
   fieldIsBlockType,
+  fieldIsGroupType,
   fieldIsLocalized,
   fieldIsPresentationalOnly,
   fieldSupportsMany,

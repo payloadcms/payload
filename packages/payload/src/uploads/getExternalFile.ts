@@ -1,25 +1,41 @@
-import type { File, FileData } from './types'
-import { Request } from 'express'
+import type { Request } from 'express'
+
+import type { File, FileData, IncomingUploadType } from './types'
+
 import { APIError } from '../errors'
 
 type Args = {
-  req: Request
   data: FileData
+  req: Request
+  uploadConfig: IncomingUploadType
 }
-export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
-  const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
-  const { url, filename } = data
+export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
+  const { filename, url } = data
 
   if (typeof url === 'string') {
-    const fileURL = `${baseUrl}${url}`
+    let fileURL = url
+    if (!url.startsWith('http')) {
+      const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
+      fileURL = `${baseUrl}${url}`
+    }
+
     const { default: fetch } = (await import('node-fetch')) as any
+
+    // Convert headers
+    const convertedHeaders: Record<string, string> = headersToObject(req.headers)
+
+    const headers = uploadConfig.externalFileHeaderFilter
+      ? uploadConfig.externalFileHeaderFilter(convertedHeaders)
+      : {
+          cookie: req.headers['cookie'],
+        }
 
     const res = await fetch(fileURL, {
       credentials: 'include',
-      method: 'GET',
       headers: {
-        ...req.headers,
+        headers,
       },
+      method: 'GET',
     })
 
     if (!res.ok) throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
@@ -35,4 +51,17 @@ export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
   }
 
   throw new APIError('Invalid file url', 400)
+}
+
+function headersToObject(headers) {
+  const headersObj = {}
+  headers.forEach((value, key) => {
+    // If the header value is an array, join its elements into a single string
+    if (Array.isArray(value)) {
+      headersObj[key] = value.join(', ')
+    } else {
+      headersObj[key] = value
+    }
+  })
+  return headersObj
 }

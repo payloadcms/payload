@@ -1,8 +1,10 @@
 import type { JSONSchema4 } from 'json-schema'
+import type { SanitizedConfig } from 'payload/config'
 
 import type { PayloadRequest } from '../../../../../express/types'
 import type { RequestContext } from '../../../../../express/types'
 import type { RichTextField, Validate } from '../../../../../fields/config/types'
+import type { Payload } from '../../../../../payload'
 import type { CellComponentProps } from '../../../views/collections/List/Cell/types'
 
 export type RichTextFieldProps<
@@ -28,11 +30,22 @@ type RichTextAdapterBase<
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
   outputSchema?: ({
+    collectionIDFieldTypes,
+    config,
     field,
+    interfaceNameDefinitions,
     isRequired,
+    payload,
   }: {
+    collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+    config?: SanitizedConfig
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    /**
+     * Allows you to define new top-level interfaces that can be re-used in the output schema.
+     */
+    interfaceNameDefinitions: Map<string, JSONSchema4>
     isRequired: boolean
+    payload?: Payload
   }) => JSONSchema4
   populationPromise?: (data: {
     context: RequestContext

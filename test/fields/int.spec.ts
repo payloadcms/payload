@@ -100,8 +100,8 @@ describe('Fields', () => {
       const { id } = await payload.create({
         collection: 'text-fields',
         data: {
-          text,
           localizedHasMany,
+          text,
         },
         locale: 'en',
       })
@@ -114,6 +114,39 @@ describe('Fields', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
+    })
+
+    it('should query hasMany in', async () => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          hasMany: ['one', 'five'],
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          hasMany: ['two'],
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            in: ['one'],
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
     })
   })
 
@@ -312,6 +345,37 @@ describe('Fields', () => {
       expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true)
       expect(updatedDoc.selectHasMany).toEqual(['one', 'two'])
     })
+
+    it('should query hasMany in', async () => {
+      const hit = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'four'],
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['three'],
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'select-fields',
+        where: {
+          selectHasMany: {
+            in: ['one'],
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
   })
 
   describe('number', () => {
@@ -416,15 +480,46 @@ describe('Fields', () => {
       // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
+
+    it('should query hasMany in', async () => {
+      const hit = await payload.create({
+        collection: 'number-fields',
+        data: {
+          hasMany: [5, 10],
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'number-fields',
+        data: {
+          hasMany: [13],
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'number-fields',
+        where: {
+          hasMany: {
+            in: [5],
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
   })
 
-  if (isMongoose(payload) || !['postgres'].includes(process.env.PAYLOAD_DATABASE)) {
+  if (isMongoose(payload)) {
     describe('indexes', () => {
       let indexes
       const definitions: Record<string, IndexDirection> = {}
       const options: Record<string, IndexOptions> = {}
 
-      beforeEach(() => {
+      beforeAll(() => {
         indexes = (payload.db as MongooseAdapter).collections[
           'indexed-fields'
         ].schema.indexes() as [Record<string, IndexDirection>, IndexOptions]
@@ -441,8 +536,13 @@ describe('Fields', () => {
         expect(definitions.text).toEqual(1)
       })
 
-      it('should have unique indexes', () => {
+      it('should have unique sparse indexes when field is not required', () => {
         expect(definitions.uniqueText).toEqual(1)
+        expect(options.uniqueText).toMatchObject({ sparse: true, unique: true })
+      })
+
+      it('should have unique indexes that are not sparse when field is required', () => {
+        expect(definitions.uniqueRequiredText).toEqual(1)
         expect(options.uniqueText).toMatchObject({ unique: true })
       })
 
@@ -594,6 +694,25 @@ describe('Fields', () => {
         return result.error
       }).toBeDefined()
     })
+
+    it('should not throw validation error saving multiple null values for unique fields', async () => {
+      const data = {
+        text: 'a',
+        uniqueRequiredText: 'a',
+        // uniqueText omitted on purpose
+      }
+      await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+      data.uniqueRequiredText = 'b'
+      const result = await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+
+      expect(result.id).toBeDefined()
+    })
   })
 
   describe('array', () => {
@@ -618,6 +737,51 @@ describe('Fields', () => {
     it('should create with defaultValue', async () => {
       expect(doc.items).toMatchObject(arrayDefaultValue)
       expect(doc.localized).toMatchObject(arrayDefaultValue)
+    })
+
+    it('should create and update localized subfields with versions', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              localizedText: 'test',
+              text: 'required',
+            },
+          ],
+          localized: [
+            {
+              text: 'english',
+            },
+          ],
+        },
+      })
+
+      const spanish = await payload.update({
+        id: doc.id,
+        collection,
+        data: {
+          items: [
+            {
+              id: doc.items[0].id,
+              localizedText: 'spanish',
+              text: 'required',
+            },
+          ],
+        },
+        locale: 'es',
+      })
+
+      const result = await payload.findByID({
+        id: doc.id,
+        collection,
+        locale: 'all',
+      })
+
+      expect(doc.items[0].localizedText).toStrictEqual('test')
+      expect(spanish.items[0].localizedText).toStrictEqual('spanish')
+      expect(result.items[0].localizedText.en).toStrictEqual('test')
+      expect(result.items[0].localizedText.es).toStrictEqual('spanish')
     })
 
     it('should create with nested array', async () => {
@@ -977,6 +1141,70 @@ describe('Fields', () => {
       expect(result.docs).toHaveLength(1)
       expect(result.docs[0]).toMatchObject(blockDoc)
     })
+
+    it('should query by blockType', async () => {
+      const text = 'blockType query test'
+
+      const hit = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'content',
+              text,
+            },
+          ],
+        },
+      })
+      const miss = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'number',
+              number: 5,
+            },
+          ],
+          duplicate: [
+            {
+              blockType: 'content',
+              text,
+            },
+          ],
+        },
+      })
+
+      const { docs: equalsDocs } = await payload.find({
+        collection: blockFieldsSlug,
+        where: {
+          and: [
+            {
+              'blocks.blockType': { equals: 'content' },
+            },
+            {
+              'blocks.text': { equals: text },
+            },
+          ],
+        },
+      })
+
+      const { docs: inDocs } = await payload.find({
+        collection: blockFieldsSlug,
+        where: {
+          'blocks.blockType': { in: ['content'] },
+        },
+      })
+
+      const equalsHitResult = equalsDocs.find(({ id }) => id === hit.id)
+      const inHitResult = inDocs.find(({ id }) => id === hit.id)
+      const equalsMissResult = equalsDocs.find(({ id }) => id === miss.id)
+      const inMissResult = inDocs.find(({ id }) => id === miss.id)
+
+      expect(equalsHitResult.id).toStrictEqual(hit.id)
+      expect(inHitResult.id).toStrictEqual(hit.id)
+      expect(equalsMissResult).toBeUndefined()
+      expect(inMissResult).toBeUndefined()
+    })
   })
 
   describe('json', () => {
@@ -1145,6 +1373,63 @@ describe('Fields', () => {
         expect(existTrueIDs).toContain(hasJSON.id)
         expect(existFalseIDs).not.toContain(hasJSON.id)
       })
+
+      it('exists should not return null values', async () => {
+        const { id } = await payload.create({
+          collection: 'select-fields',
+          data: {
+            select: 'one',
+          },
+        })
+
+        const existsResult = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: true },
+          },
+        })
+
+        expect(existsResult.docs).toHaveLength(1)
+
+        const existsFalseResult = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: false },
+          },
+        })
+
+        expect(existsFalseResult.docs).toHaveLength(0)
+
+        await payload.update({
+          id,
+          collection: 'select-fields',
+          data: {
+            select: null,
+          },
+        })
+
+        const existsTrueResult = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: true },
+          },
+        })
+
+        expect(existsTrueResult.docs).toHaveLength(0)
+
+        const result = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: false },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+      })
     })
   })
 
@@ -1200,8 +1485,8 @@ describe('Fields', () => {
       expect(nodes).toBeDefined()
       const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
       expect(child).toMatchObject({
-        linkType: 'internal',
         type: 'link',
+        linkType: 'internal',
       })
       expect(child.doc.relationTo).toEqual('array-fields')
 
@@ -1247,6 +1532,65 @@ describe('Fields', () => {
       })
 
       expect(query.docs).toBeDefined()
+    })
+  })
+
+  describe('clearable fields - exists', () => {
+    it('exists should not return null values', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          select: 'one',
+        },
+      })
+
+      const existsResult = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: true },
+        },
+      })
+
+      expect(existsResult.docs).toHaveLength(1)
+
+      const existsFalseResult = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: false },
+        },
+      })
+
+      expect(existsFalseResult.docs).toHaveLength(0)
+
+      await payload.update({
+        id,
+        collection: 'select-fields',
+        data: {
+          select: null,
+        },
+      })
+
+      const existsTrueResult = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: true },
+        },
+      })
+
+      expect(existsTrueResult.docs).toHaveLength(0)
+
+      const result = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: false },
+        },
+      })
+
+      expect(result.docs).toHaveLength(1)
     })
   })
 })

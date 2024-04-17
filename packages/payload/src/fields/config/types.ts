@@ -15,6 +15,7 @@ import type { RichTextAdapter } from '../../admin/components/forms/field-types/R
 import type { User } from '../../auth'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'
+import type { DBIdentifierName } from '../../database/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { Payload } from '../../payload'
@@ -38,8 +39,9 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   originalDoc?: T
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: T
-  /** The sibling data from the previous document in `afterChange` hook. */
+  /** The sibling data of the document before changes being applied, only in `beforeChange` and `afterChange` hook. */
   previousSiblingDoc?: T
+  /** The previous value of the field, before changes, only in `beforeChange` and `afterChange` hooks. */
   previousValue?: P
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
@@ -77,7 +79,11 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
 export type Condition<T extends TypeWithID = any, P = any> = (
   data: Partial<T>,
   siblingData: Partial<P>,
-  { user }: { user: User },
+  {
+    user,
+  }: {
+    user: User
+  },
 ) => boolean
 
 export type FilterOptionsProps<T = any> = {
@@ -442,6 +448,14 @@ export type SelectField = FieldBase & {
     isClearable?: boolean
     isSortable?: boolean
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
+  /**
+   * Customize the DB enum name
+   */
+  enumName?: DBIdentifierName
   hasMany?: boolean
   options: Option[]
   type: 'select'
@@ -491,7 +505,9 @@ type RelationshipAdmin = Admin & {
 }
 export type PolymorphicRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
-    sortOptions?: { [collectionSlug: string]: string }
+    sortOptions?: {
+      [collectionSlug: string]: string
+    }
   }
   relationTo: string[]
 }
@@ -523,10 +539,23 @@ export type RichTextField<
   AdapterProps = any,
   ExtraProperties = {},
 > = FieldBase & {
-  admin?: Admin
+  admin?: Admin & {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+    }
+  }
   editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
   type: 'richText'
 } & ExtraProperties
+
+export type RichTextFieldRequiredEditor<
+  Value extends object = any,
+  AdapterProps = any,
+  ExtraProperties = object,
+> = Omit<RichTextField<Value, AdapterProps, ExtraProperties>, 'editor'> & {
+  editor: RichTextAdapter<Value, AdapterProps, ExtraProperties>
+}
 
 export type ArrayField = FieldBase & {
   admin?: Admin & {
@@ -535,6 +564,10 @@ export type ArrayField = FieldBase & {
     } & Admin['components']
     initCollapsed?: boolean | false
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
    * By default it is bound to the collection.
@@ -557,11 +590,25 @@ export type RadioField = FieldBase & {
     }
     layout?: 'horizontal' | 'vertical'
   }
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
+  /**
+   * Customize the DB enum name
+   */
+  enumName?: DBIdentifierName
   options: Option[]
   type: 'radio'
 }
 
 export type Block = {
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>
+  /**
+   * Customize the SQL table name
+   */
+  dbName?: DBIdentifierName
   fields: Field[]
   /** @deprecated - please migrate to the interfaceName property instead. */
   graphQL?: {
@@ -578,8 +625,6 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
-  /** Extension point to add your custom data. */
-  custom?: Record<string, any>
 }
 
 export type BlockField = FieldBase & {
@@ -620,6 +665,10 @@ export type Field =
   | TextareaField
   | UIField
   | UploadField
+
+export type FieldWithRichTextRequiredEditor =
+  | Exclude<Field, RichTextField>
+  | RichTextFieldRequiredEditor
 
 export type FieldAffectingData =
   | ArrayField
@@ -690,6 +739,10 @@ export function fieldIsArrayType(field: Field): field is ArrayField {
 
 export function fieldIsBlockType(field: Field): field is BlockField {
   return field.type === 'blocks'
+}
+
+export function fieldIsGroupType(field: Field): field is GroupField {
+  return field.type === 'group'
 }
 
 export function optionIsObject(option: Option): option is OptionObject {

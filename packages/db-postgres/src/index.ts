@@ -42,22 +42,29 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types'
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
-
+    const idType = args.idType || 'serial'
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
 
       // Postgres-specific
+      blockTableNames: {},
       drizzle: undefined,
       enums: {},
       fieldConstraints: {},
+      idType,
+      localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      pgSchema: undefined,
       pool: undefined,
       poolOptions: args.pool,
       push: args.push,
       relations: {},
+      relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},
+      schemaName: args.schemaName,
       sessions: {},
       tables: {},
+      versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
       beginTransaction,
@@ -68,7 +75,10 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       createGlobalVersion,
       createMigration,
       createVersion,
-      defaultIDType: 'number',
+      /**
+       * This represents how a default ID is treated in Payload as were a field type
+       */
+      defaultIDType: idType === 'serial' ? 'number' : 'text',
       deleteMany,
       deleteOne,
       deleteVersions,

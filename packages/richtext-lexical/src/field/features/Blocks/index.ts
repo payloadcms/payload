@@ -1,28 +1,34 @@
-import type { Block } from 'payload/types'
+import type { Block, BlockField, FieldWithRichTextRequiredEditor } from 'payload/types'
 
-import { baseBlockFields } from 'payload/config'
-import { formatLabels, getTranslation } from 'payload/utilities'
+import { baseBlockFields, sanitizeFields } from 'payload/config'
+import { fieldsToJSONSchema, formatLabels, getTranslation } from 'payload/utilities'
 
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import { cloneDeep } from '../../lexical/utils/cloneDeep'
 import { BlockNode } from './nodes/BlocksNode'
 import { INSERT_BLOCK_COMMAND } from './plugin/commands'
 import { blockPopulationPromiseHOC } from './populationPromise'
 import { blockValidationHOC } from './validate'
 
+export type LexicalBlock = Omit<Block, 'fields'> & {
+  fields: FieldWithRichTextRequiredEditor[]
+}
+
 export type BlocksFeatureProps = {
-  blocks: Block[]
+  blocks: LexicalBlock[]
 }
 
 export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
   // Sanitization taken from payload/src/fields/config/sanitize.ts
   if (props?.blocks?.length) {
     props.blocks = props.blocks.map((block) => {
+      const blockCopy = cloneDeep(block)
       return {
-        ...block,
-        fields: block.fields.concat(baseBlockFields),
-        labels: !block.labels ? formatLabels(block.slug) : block.labels,
+        ...blockCopy,
+        fields: blockCopy.fields.concat(baseBlockFields as FieldWithRichTextRequiredEditor[]),
+        labels: !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels,
       }
     })
     //  unsanitizedBlock.fields are sanitized in the React component and not here.
@@ -31,11 +37,59 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
   return {
     feature: () => {
       return {
+        generatedTypes: {
+          modifyOutputSchema: ({
+            collectionIDFieldTypes,
+            config,
+            currentSchema,
+            field,
+            interfaceNameDefinitions,
+            payload,
+          }) => {
+            if (!props?.blocks?.length) {
+              return currentSchema
+            }
+
+            // sanitize blocks
+            const validRelationships = config?.collections?.map((c) => c.slug) || []
+
+            const sanitizedBlocks = props.blocks.map((block) => {
+              const blockCopy = cloneDeep(block)
+              return {
+                ...blockCopy,
+                fields: sanitizeFields({
+                  config,
+                  fields: blockCopy.fields,
+                  requireFieldLevelRichTextEditor: true,
+                  validRelationships,
+                }),
+              }
+            })
+
+            const blocksField: BlockField = {
+              name: field?.name + '_lexical_blocks',
+              type: 'blocks',
+              blocks: sanitizedBlocks,
+            }
+
+            // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
+            // we don't actually use the JSON Schema itself in the generated types yet.
+            fieldsToJSONSchema(
+              collectionIDFieldTypes,
+              [blocksField],
+              interfaceNameDefinitions,
+              payload,
+              config,
+            )
+
+            return currentSchema
+          },
+        },
         nodes: [
           {
+            type: BlockNode.getType(),
             node: BlockNode,
             populationPromises: [blockPopulationPromiseHOC(props)],
-            type: BlockNode.getType(),
             validations: [blockValidationHOC(props)],
           },
         ],
@@ -47,7 +101,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
             position: 'normal',
           },
         ],
-        props: props,
+        props,
         slashMenu: {
           options: [
             {

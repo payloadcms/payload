@@ -133,9 +133,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
 
   useEffect(() => {
-    const { slug, admin: { listSearchableFields } = {} } = selectedCollectionConfig
+    const { slug, admin: { listSearchableFields } = {}, versions } = selectedCollectionConfig
     const params: {
       cacheBust?: number
+      draft?: string
       limit?: number
       page?: number
       search?: string
@@ -172,6 +173,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     if (sort) params.sort = sort
     if (cacheBust) params.cacheBust = cacheBust
     if (copyOfWhere) params.where = copyOfWhere
+    if (versions?.drafts) params.draft = 'true'
 
     setParams(params)
   }, [

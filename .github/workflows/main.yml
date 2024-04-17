@@ -2,9 +2,9 @@ name: build
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [ opened, reopened, synchronize ]
   push:
-    branches: ['main']
+    branches: [ 'main' ]
 
 jobs:
   changes:
@@ -15,25 +15,29 @@ jobs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       templates: ${{ steps.filter.outputs.templates }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 25
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          needs_build:
-            - '.github/workflows/**'
-            - 'packages/**'
-            - 'test/**'
-            - 'pnpm-lock.yaml'
-            - 'package.json'
-          templates:
-            - 'templates/**'
-    - name: Log all filter results
-      run: |
-        echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
-        echo "templates: ${{ steps.filter.outputs.templates }}"
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            needs_build:
+              - '.github/workflows/**'
+              - 'packages/**'
+              - 'test/**'
+              - 'pnpm-lock.yaml'
+              - 'package.json'
+            templates:
+              - 'templates/**'
+      - name: Log all filter results
+        run: |
+          echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
+          echo "templates: ${{ steps.filter.outputs.templates }}"
 
   core-build:
     needs: changes
@@ -45,6 +49,10 @@ jobs:
         with:
           fetch-depth: 25
 
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+        
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -85,13 +93,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        database: [mongoose, postgres]
+        database: [mongoose, postgres, postgres-custom-schema, postgres-uuid, supabase]
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: payloadtests
+      AWS_ENDPOINT_URL: http://127.0.0.1:4566
+      AWS_ACCESS_KEY_ID: localstack
+      AWS_SECRET_ACCESS_KEY: localstack
+      AWS_REGION: us-east-1
 
     steps:
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -109,6 +125,9 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
+      - name: Start LocalStack
+        run: pnpm docker:start
+
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
@@ -116,15 +135,40 @@ jobs:
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
-        if: matrix.database == 'postgres'
+        if: startsWith(matrix.database, 'postgres')
 
-      - run: sleep 30
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+        if: matrix.database == 'supabase'
+
+      - name: Initialize Supabase
+        run: |
+          supabase init
+          supabase start
+        if: matrix.database == 'supabase'
+
+      - name: Wait for PostgreSQL
+        run: sleep 30
+        if: startsWith(matrix.database, 'postgres')
+
       - name: Configure PostgreSQL
         run: |
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: matrix.database == 'postgres'
+        if: startsWith(matrix.database, 'postgres')
+
+      - name: Configure PostgreSQL with custom schema
+        run: |
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
+        if: matrix.database == 'postgres-custom-schema'
+
+      - name: Configure Supabase
+        run: |
+          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
+        if: matrix.database == 'supabase'
 
       - name: Component Tests
         run: pnpm test:components
@@ -142,9 +186,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        part: [1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
+        part: [ 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8 ]
 
     steps:
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -182,6 +230,10 @@ jobs:
     needs: core-build
 
     steps:
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -222,6 +274,10 @@ jobs:
           - live-preview-react
 
     steps:
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -259,6 +315,10 @@ jobs:
           - plugin-seo
 
     steps:
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
+
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -290,12 +350,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        template: [blank, website, ecommerce]
+        template: [ blank, website, ecommerce ]
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 25
+
+      # https://github.com/actions/virtual-environments/issues/1187
+      - name: tune linux network
+        run: sudo ethtool -K eth0 tx off rx off
 
       - name: Use Node.js 18
         uses: actions/setup-node@v3

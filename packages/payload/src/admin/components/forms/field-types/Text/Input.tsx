@@ -110,7 +110,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
               if (isOverHasMany) {
                 return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
               }
-              return t('general:noOptions')
+              return null
             }}
             onChange={onChange}
             options={[]}

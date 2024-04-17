@@ -2,10 +2,11 @@
 import type { Field } from 'payload/types'
 
 import { fieldAffectsData, tabHasName } from 'payload/types'
-import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types'
 import type { Result } from './buildFindManyArgs'
+
+import { getTableName } from '../schema/getTableName'
 
 type TraverseFieldArgs = {
   _locales: Record<string, unknown>
@@ -78,9 +79,22 @@ export const traverseFields = ({
             with: {},
           }
 
-          const arrayTableName = `${currentTableName}_${toSnakeCase(field.name)}`
+          const arrayTableName = getTableName({
+            adapter,
+            config: field,
+            parentTableName: currentTableName,
+            prefix: `${currentTableName}_${path}`,
+          })
 
-          if (adapter.tables[`${arrayTableName}_locales`]) withArray.with._locales = _locales
+          const arrayTableNameWithLocales = getTableName({
+            adapter,
+            config: field,
+            locales: true,
+            parentTableName: currentTableName,
+            prefix: `${currentTableName}_${path}`,
+          })
+
+          if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
           currentArgs.with[`${path}${field.name}`] = withArray
 
           traverseFields({
@@ -128,9 +142,15 @@ export const traverseFields = ({
                 with: {},
               }
 
-              const tableName = `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`
+              const tableName = getTableName({
+                adapter,
+                config: block,
+                parentTableName: topLevelTableName,
+                prefix: `${topLevelTableName}_blocks_`,
+              })
 
-              if (adapter.tables[`${tableName}_locales`]) withBlock.with._locales = _locales
+              if (adapter.tables[`${tableName}${adapter.localesSuffix}`])
+                withBlock.with._locales = _locales
               topLevelArgs.with[blockKey] = withBlock
 
               traverseFields({

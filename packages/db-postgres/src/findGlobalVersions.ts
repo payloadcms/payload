@@ -2,11 +2,11 @@ import type { FindGlobalVersions } from 'payload/database'
 import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
 import { buildVersionGlobalFields } from 'payload/versions'
-import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
+import { getTableName } from './schema/getTableName'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: PostgresAdapter,
@@ -27,7 +27,11 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   )
   const sort = typeof sortArg === 'string' ? sortArg : '-createdAt'
 
-  const tableName = `_${toSnakeCase(global)}_v`
+  const tableName = getTableName({
+    adapter: this,
+    config: globalConfig,
+    versions: true,
+  })
   const fields = buildVersionGlobalFields(globalConfig)
 
   return findMany({
