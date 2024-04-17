@@ -129,6 +129,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
       const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
         collection: collectionConfig.slug,
         locale,
+        pagination: false,
         req,
         where: versionsWhere,
       })
