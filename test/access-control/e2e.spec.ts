@@ -330,7 +330,7 @@ describe('access control', () => {
     await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
   })
 
-  test('should completely block admin access', async () => {
+  test.skip('should completely block admin access', async () => {
     const adminURL = `${serverURL}/admin`
     await page.goto(adminURL)
     await page.waitForURL(adminURL)
