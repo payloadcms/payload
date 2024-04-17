@@ -2,7 +2,9 @@ import type { Page } from '@playwright/test'
 import type { TypeWithID } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
+import { devUser } from 'credentials.js'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -13,6 +15,7 @@ import {
   ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  login,
   openDocControls,
   openNav,
   saveDocAndAssert,
@@ -62,7 +65,8 @@ describe('access control', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+
+    await login({ page, serverURL })
   })
 
   test('field without read access should not show', async () => {
@@ -330,7 +334,7 @@ describe('access control', () => {
     await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
   })
 
-  test.skip('should completely block admin access', async () => {
+  test('should completely block admin access', async () => {
     const adminURL = `${serverURL}/admin`
     await page.goto(adminURL)
     await page.waitForURL(adminURL)
@@ -338,17 +342,16 @@ describe('access control', () => {
     await expect(page.locator('.dashboard')).toBeVisible()
 
     await page.goto(`${serverURL}/admin/logout`)
+    await page.waitForURL(`${serverURL}/admin/logout`)
 
-    await payload.login({
-      collection: 'users',
+    await login({
+      page,
+      serverURL,
       data: {
         email: noAdminAccessEmail,
         password: 'test',
       },
     })
-
-    await page.goto(adminURL)
-    await page.waitForURL(adminURL)
 
     await expect(page.locator('.next-error-h1')).toBeVisible()
   })

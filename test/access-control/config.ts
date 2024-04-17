@@ -42,6 +42,7 @@ const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
+    autoLogin: false,
   },
   globals: [
     {
