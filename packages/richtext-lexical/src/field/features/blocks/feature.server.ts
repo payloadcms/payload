@@ -8,6 +8,7 @@ import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'
 
 import { cloneDeep } from '../../lexical/utils/cloneDeep.js'
+import { createNode } from '../typeUtilities.js'
 import { BlocksFeatureClientComponent } from './feature.client.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { blockPopulationPromiseHOC } from './populationPromise.js'
@@ -131,11 +132,11 @@ export const BlocksFeature: FeatureProviderProviderServer<
           },
         },
         nodes: [
-          {
+          createNode({
             node: BlockNode,
             populationPromises: [blockPopulationPromiseHOC(props)],
             validations: [blockValidationHOC(props)],
-          },
+          }),
         ],
         serverFeatureProps: props,
       }

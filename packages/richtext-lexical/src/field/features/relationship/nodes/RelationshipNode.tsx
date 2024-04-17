@@ -25,11 +25,7 @@ const RelationshipComponent = React.lazy(() =>
 
 export type RelationshipData = {
   relationTo: string
-  value: {
-    // Actual relationship, populated in afterRead hook
-    [key: string]: unknown
-    id: string
-  }
+  value: number | string
 }
 
 export type SerializedRelationshipNode = Spread<RelationshipData, SerializedDecoratorBlockNode>
@@ -41,9 +37,7 @@ function relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutput
   if (id != null && relationTo != null) {
     const node = $createRelationshipNode({
       relationTo,
-      value: {
-        id,
-      },
+      value: id,
     })
     return { node }
   }
@@ -96,6 +90,10 @@ export class RelationshipNode extends DecoratorBlockNode {
   }
 
   static importJSON(serializedNode: SerializedRelationshipNode): RelationshipNode {
+    if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
+      serializedNode.value = (serializedNode.value as unknown as { id: string }).id
+    }
+
     const importedData: RelationshipData = {
       relationTo: serializedNode.relationTo,
       value: serializedNode.value,
@@ -108,6 +106,7 @@ export class RelationshipNode extends DecoratorBlockNode {
   static isInline(): false {
     return false
   }
+
   decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
     return (
       <RelationshipComponent
@@ -118,10 +117,9 @@ export class RelationshipNode extends DecoratorBlockNode {
       />
     )
   }
-
   exportDOM(): DOMExportOutput {
     const element = document.createElement('div')
-    element.setAttribute('data-lexical-relationship-id', this.__data?.value?.id)
+    element.setAttribute('data-lexical-relationship-id', String(this.__data?.value))
     element.setAttribute('data-lexical-relationship-relationTo', this.__data?.relationTo)
 
     const text = document.createTextNode(this.getTextContent())
@@ -134,7 +132,7 @@ export class RelationshipNode extends DecoratorBlockNode {
       ...super.exportJSON(),
       ...this.getData(),
       type: this.getType(),
-      version: 1,
+      version: 2,
     }
   }
 
@@ -143,7 +141,7 @@ export class RelationshipNode extends DecoratorBlockNode {
   }
 
   getTextContent(): string {
-    return `${this.__data?.relationTo} relation to ${this.__data?.value?.id}`
+    return `${this.__data?.relationTo} relation to ${this.__data?.value}`
   }
 
   setData(data: RelationshipData): void {

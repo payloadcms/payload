@@ -33,9 +33,15 @@ let serverURL: string
 /**
  * Client-side navigation to the lexical editor from list view
  */
-async function navigateToLexicalFields(navigateToListView: boolean = true) {
+async function navigateToLexicalFields(
+  navigateToListView: boolean = true,
+  localized: boolean = false,
+) {
   if (navigateToListView) {
-    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
+    const url: AdminUrlUtil = new AdminUrlUtil(
+      serverURL,
+      localized ? 'lexical-localized-fields' : 'lexical-fields',
+    )
     await page.goto(url.list)
   }
 
@@ -1101,7 +1107,7 @@ describe('lexical', () => {
       )
     })
 
-    test.skip('should respect required error state in deeply nested text field', async () => {
+    test('should respect required error state in deeply nested text field', async () => {
       await navigateToLexicalFields()
       const richTextField = page.locator('.rich-text-lexical').nth(1) // second
       await richTextField.scrollIntoViewIfNeeded()
@@ -1117,12 +1123,18 @@ describe('lexical', () => {
       await page.click('#action-save', { delay: 100 })
       await expect(page.locator('.Toastify')).toContainText('The following field is invalid')
 
+      const requiredTooltip = conditionalArrayBlock
+        .locator('.tooltip-content:has-text("This field is required.")')
+        .first()
+      await requiredTooltip.scrollIntoViewIfNeeded()
       // Check if error is shown next to field
-      await expect(
-        conditionalArrayBlock
-          .locator('.tooltip-content:has-text("This field is required.")')
-          .first(),
-      ).toBeVisible()
+      await expect(requiredTooltip).toBeInViewport() // toBeVisible() doesn't work for some reason
+    })
+  })
+
+  describe('localization', () => {
+    test.skip('ensure simple localized lexical field works', async () => {
+      await navigateToLexicalFields(true, true)
     })
   })
 })

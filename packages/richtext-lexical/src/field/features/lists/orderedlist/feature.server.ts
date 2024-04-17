@@ -3,6 +3,7 @@ const { ListItemNode, ListNode } = lexicalListImport
 
 import type { FeatureProviderProviderServer } from '../../types.js'
 
+import { createNode } from '../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter.js'
 import { OrderedListFeatureClientComponent } from './feature.client.js'
 import { ORDERED_LIST } from './markdownTransformer.js'
@@ -16,18 +17,18 @@ export const OrderedListFeature: FeatureProviderProviderServer<undefined, undefi
         nodes: featureProviderMap.has('unorderedlist')
           ? []
           : [
-              {
+              createNode({
                 converters: {
                   html: ListHTMLConverter,
                 },
                 node: ListNode,
-              },
-              {
+              }),
+              createNode({
                 converters: {
                   html: ListItemHTMLConverter,
                 },
                 node: ListItemNode,
-              },
+              }),
             ],
         serverFeatureProps: props,
       }

@@ -16,6 +16,7 @@ export const blockPopulationPromiseHOC = (
     currentDepth,
     depth,
     editorPopulationPromises,
+    fieldPromises,
     findMany,
     flattenLocales,
     node,
@@ -27,8 +28,6 @@ export const blockPopulationPromiseHOC = (
   }) => {
     const blocks: Block[] = props.blocks
     const blockFieldData = node.fields
-
-    const promises: Promise<void>[] = []
 
     // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
     const payloadConfig = req.payload.config
@@ -45,7 +44,7 @@ export const blockPopulationPromiseHOC = (
     // find block used in this node
     const block = props.blocks.find((block) => block.slug === blockFieldData.blockType)
     if (!block || !block?.fields?.length || !blockFieldData) {
-      return promises
+      return
     }
 
     recurseNestedFields({
@@ -54,19 +53,17 @@ export const blockPopulationPromiseHOC = (
       data: blockFieldData,
       depth,
       editorPopulationPromises,
+      fieldPromises,
       fields: block.fields,
       findMany,
       flattenLocales,
       overrideAccess,
       populationPromises,
-      promises,
       req,
       showHiddenFields,
       // The afterReadPromise gets its data from looking for field.name inside the siblingDoc. Thus, here we cannot pass the whole document's siblingDoc, but only the siblingDoc (sibling fields) of the current field.
       siblingDoc: blockFieldData,
     })
-
-    return promises
   }
 
   return blockPopulationPromise

@@ -2,7 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedConfig } from '../config/types.js'
-import type { Field, RichTextField, Validate } from '../fields/config/types.js'
+import type { Field, FieldBase, RichTextField, Validate } from '../fields/config/types.js'
 import type { PayloadRequest, RequestContext } from '../types/index.js'
 import type { WithServerSideProps } from './elements/WithServerSideProps.js'
 
@@ -19,15 +19,6 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  afterReadPromise?: ({
-    field,
-    incomingEditorState,
-    siblingDoc,
-  }: {
-    field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
-    incomingEditorState: Value
-    siblingDoc: Record<string, unknown>
-  }) => Promise<void> | null
   generateComponentMap: (args: {
     WithServerSideProps: WithServerSideProps
     config: SanitizedConfig
@@ -40,6 +31,7 @@ type RichTextAdapterBase<
     schemaMap: Map<string, Field[]>
     schemaPath: string
   }) => Map<string, Field[]>
+  hooks?: FieldBase['hooks']
   outputSchema?: ({
     collectionIDFieldTypes,
     config,
@@ -56,11 +48,18 @@ type RichTextAdapterBase<
     interfaceNameDefinitions: Map<string, JSONSchema4>
     isRequired: boolean
   }) => JSONSchema4
-  populationPromise?: (data: {
+  /**
+   * Like an afterRead hook, but runs for both afterRead AND in the GraphQL resolver. For populating data, this should be used.
+   *
+   * To populate stuff / resolve field hooks, mutate the incoming populationPromises or fieldPromises array. They will then be awaited in the correct order within payload itself.
+   * @param data
+   */
+  populationPromises?: (data: {
     context: RequestContext
     currentDepth?: number
     depth: number
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    fieldPromises: Promise<void>[]
     findMany: boolean
     flattenLocales: boolean
     overrideAccess?: boolean
@@ -68,7 +67,7 @@ type RichTextAdapterBase<
     req: PayloadRequest
     showHiddenFields: boolean
     siblingDoc: Record<string, unknown>
-  }) => Promise<void> | null
+  }) => void
   validate: Validate<
     Value,
     Value,

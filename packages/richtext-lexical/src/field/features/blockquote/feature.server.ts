@@ -1,10 +1,10 @@
-import lexicalRichTextImport, { type SerializedQuoteNode } from '@lexical/rich-text'
+import lexicalRichTextImport from '@lexical/rich-text'
 const { QuoteNode } = lexicalRichTextImport
 
-import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'
 
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
+import { createNode } from '../typeUtilities.js'
 import { BlockQuoteFeatureClientComponent } from './feature.client.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 
@@ -16,7 +16,7 @@ export const BlockQuoteFeature: FeatureProviderProviderServer<undefined, undefin
         clientFeatureProps: null,
         markdownTransformers: [MarkdownTransformer],
         nodes: [
-          {
+          createNode({
             converters: {
               html: {
                 converter: async ({ converters, node, parent, payload }) => {
@@ -33,10 +33,10 @@ export const BlockQuoteFeature: FeatureProviderProviderServer<undefined, undefin
                   return `<blockquote>${childrenText}</blockquote>`
                 },
                 nodeTypes: [QuoteNode.getType()],
-              } as HTMLConverter<SerializedQuoteNode>,
+              },
             },
             node: QuoteNode,
-          },
+          }),
         ],
         serverFeatureProps: props,
       }

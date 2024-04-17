@@ -6,7 +6,13 @@ import type { SerializedLexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
 import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
-import type { Field, PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
+import type {
+  Field,
+  PayloadRequest,
+  ReplaceAny,
+  RichTextField,
+  ValidateOptions,
+} from 'payload/types'
 import type React from 'react'
 
 import type { AdapterProps } from '../../types.js'
@@ -21,6 +27,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   depth,
   editorPopulationPromises,
   field,
+  fieldPromises,
   findMany,
   flattenLocales,
   node,
@@ -38,6 +45,10 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
    */
   editorPopulationPromises: Map<string, Array<PopulationPromise>>
   field: RichTextField<SerializedEditorState, AdapterProps>
+  /**
+   * fieldPromises are used for things like field hooks. They will be awaited before awaiting populationPromises
+   */
+  fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
   node: T
@@ -46,7 +57,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
-}) => Promise<void>[]
+}) => void
 
 export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   node,
@@ -171,6 +182,44 @@ export type ClientComponentProps<ClientFeatureProps> = ClientFeatureProps & {
   order: number
 }
 
+export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
+  context: RequestContext
+  /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
+  findMany?: boolean
+  /** The value of the field. */
+  node?: T
+  /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
+  operation?: 'create' | 'delete' | 'read' | 'update'
+  /** The Express request object. It is mocked for Local API operations. */
+  req: PayloadRequest
+}
+
+export type FieldNodeHook<T extends SerializedLexicalNode> = (
+  args: FieldNodeHookArgs<T>,
+) => Promise<T> | T
+
+// Define the node with hooks that use the node's exportJSON return type
+export type NodeWithHooks<T extends LexicalNode = any> = {
+  converters?: {
+    html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
+  }
+  hooks?: {
+    afterChange?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+    afterRead?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+    beforeChange?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+    /**
+     * Runs before a document is duplicated to prevent errors in unique fields or return null to use defaultValue.
+     */
+    beforeDuplicate?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+    beforeValidate?: Array<FieldNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+  }
+  node: Klass<T> | LexicalNodeReplacement
+  populationPromises?: Array<
+    PopulationPromise<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
+  >
+  validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+}
+
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
   ClientComponent?: React.FC<ClientComponentProps<ClientFeatureProps>>
   /**
@@ -215,26 +264,8 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       isRequired: boolean
     }) => JSONSchema4
   }
-  hooks?: {
-    afterReadPromise?: ({
-      field,
-      incomingEditorState,
-      siblingDoc,
-    }: {
-      field: RichTextField<SerializedEditorState, AdapterProps>
-      incomingEditorState: SerializedEditorState
-      siblingDoc: Record<string, unknown>
-    }) => Promise<void> | null
-  }
   markdownTransformers?: Transformer[]
-  nodes?: Array<{
-    converters?: {
-      html?: HTMLConverter
-    }
-    node: Klass<LexicalNode> | LexicalNodeReplacement
-    populationPromises?: Array<PopulationPromise>
-    validations?: Array<NodeValidation>
-  }>
+  nodes?: Array<NodeWithHooks>
 
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
   serverFeatureProps: ServerProps
@@ -325,20 +356,18 @@ export type SanitizedServerFeatures = Required<
       }) => JSONSchema4
     >
   }
-  hooks: {
-    afterReadPromises: Array<
-      ({
-        field,
-        incomingEditorState,
-        siblingDoc,
-      }: {
-        field: RichTextField<SerializedEditorState, AdapterProps>
-        incomingEditorState: SerializedEditorState
-        siblingDoc: Record<string, unknown>
-      }) => Promise<void> | null
-    >
-  }
-  /**  The node types mapped to their populationPromises */
+  /**  The node types mapped to their hooks */
+
+  hooks?: {
+    afterChange?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+    afterRead?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+    beforeChange?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+    /**
+     * Runs before a document is duplicated to prevent errors in unique fields or return null to use defaultValue.
+     */
+    beforeDuplicate?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+    beforeValidate?: Map<string, Array<FieldNodeHook<SerializedLexicalNode>>>
+  } /**  The node types mapped to their populationPromises */
   populationPromises: Map<string, Array<PopulationPromise>>
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>

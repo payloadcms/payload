@@ -125,6 +125,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       reducedBlock &&
       initialState !== false && (
         <Form
+          beforeSubmit={[onChange]}
           // @ts-expect-error TODO: Fix this
           fields={fieldMap}
           initialState={initialState}

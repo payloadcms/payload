@@ -28,7 +28,7 @@ export const populate = async ({
 }: Omit<Arguments, 'field'> & {
   collection: Collection
   field: Field
-  id: string
+  id: number | string
 }): Promise<void> => {
   const dataRef = data as Record<string, unknown>
 
