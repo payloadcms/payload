@@ -25,11 +25,12 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
         },
       }
     },
-    populationPromise({
+    populationPromises({
       context,
       currentDepth,
       depth,
       field,
+      fieldPromises,
       findMany,
       flattenLocales,
       overrideAccess,
@@ -44,11 +45,12 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
         field.admin?.elements?.includes('link') ||
         !field?.admin?.elements
       ) {
-        return richTextRelationshipPromise({
+        richTextRelationshipPromise({
           context,
           currentDepth,
           depth,
           field,
+          fieldPromises,
           findMany,
           flattenLocales,
           overrideAccess,
@@ -58,7 +60,6 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
           siblingDoc,
         })
       }
-      return null
     },
     validate: richTextValidate,
   }

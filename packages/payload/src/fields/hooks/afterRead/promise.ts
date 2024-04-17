@@ -18,6 +18,9 @@ type Args = {
   doc: Record<string, unknown>
   fallbackLocale: null | string
   field: Field | TabAsField
+  /**
+   * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
+   */
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
@@ -140,12 +143,13 @@ export const promise = async ({
     case 'richText': {
       const editor: RichTextAdapter = field?.editor
       // This is run here AND in the GraphQL Resolver
-      if (editor?.populationPromise) {
-        const populationPromise = editor.populationPromise({
+      if (editor?.populationPromises) {
+        editor.populationPromises({
           context,
           currentDepth,
           depth,
           field,
+          fieldPromises,
           findMany,
           flattenLocales,
           overrideAccess,
@@ -154,12 +158,8 @@ export const promise = async ({
           showHiddenFields,
           siblingDoc,
         })
-
-        if (populationPromise) {
-          populationPromises.push(populationPromise)
-        }
       }
-
+      /*
       // This is only run here, independent of depth
       if (editor?.afterReadPromise) {
         const afterReadPromise = editor?.afterReadPromise({
@@ -171,7 +171,7 @@ export const promise = async ({
         if (afterReadPromise) {
           populationPromises.push(afterReadPromise)
         }
-      }
+      }*/ //TODO: HOOKS!
 
       break
     }

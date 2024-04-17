@@ -15,6 +15,7 @@ import { dateDoc } from './collections/Date/shared.js'
 import { groupDoc } from './collections/Group/shared.js'
 import { jsonDoc } from './collections/JSON/shared.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
+import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
@@ -35,6 +36,7 @@ import {
   groupFieldsSlug,
   jsonFieldsSlug,
   lexicalFieldsSlug,
+  lexicalLocalizedFieldsSlug,
   lexicalMigrateFieldsSlug,
   numberFieldsSlug,
   pointFieldsSlug,
@@ -49,7 +51,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const seed = async (_payload) => {
+export const seed = async (_payload: Payload) => {
   if (_payload.db.name === 'mongoose') {
     await Promise.all(
       _payload.config.collections.map(async (coll) => {
@@ -270,6 +272,74 @@ export const seed = async (_payload) => {
   await _payload.create({
     collection: lexicalFieldsSlug,
     data: lexicalDocWithRelId,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const lexicalLocalizedDoc1 = await _payload.create({
+    collection: lexicalLocalizedFieldsSlug,
+    data: {
+      title: 'Localized Lexical en',
+      lexicalSimple: textToLexicalJSON({ text: 'English text' }),
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }),
+      lexicalBlocksSubLocalized: textToLexicalJSON({ text: 'English text' }),
+    },
+    locale: 'en',
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.update({
+    collection: lexicalLocalizedFieldsSlug,
+    id: lexicalLocalizedDoc1.id,
+    data: {
+      title: 'Localized Lexical es',
+      lexicalSimple: textToLexicalJSON({ text: 'Spanish text' }),
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }),
+      lexicalBlocksSubLocalized: textToLexicalJSON({ text: 'Spanish text' }),
+    },
+    locale: 'es',
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const lexicalLocalizedDoc2 = await _payload.create({
+    collection: lexicalLocalizedFieldsSlug,
+    data: {
+      title: 'Localized Lexical en 2',
+      lexicalSimple: textToLexicalJSON({
+        text: 'English text 2',
+        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+      }),
+      lexicalBlocksLocalized: textToLexicalJSON({
+        text: 'English text 2',
+        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+      }),
+      lexicalBlocksSubLocalized: textToLexicalJSON({
+        text: 'English text 2',
+        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+      }),
+    },
+    locale: 'en',
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.update({
+    collection: lexicalLocalizedFieldsSlug,
+    id: lexicalLocalizedDoc2.id,
+    data: {
+      title: 'Localized Lexical es 2',
+      lexicalSimple: textToLexicalJSON({
+        text: 'Spanish text 2',
+        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+      }),
+      lexicalBlocksLocalized: textToLexicalJSON({
+        text: 'Spanish text 2',
+        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+      }),
+    },
+    locale: 'es',
     depth: 0,
     overrideAccess: true,
   })

@@ -1,3 +1,5 @@
+import { sanitizeFields } from 'payload/config'
+
 import type { PopulationPromise } from '../types.js'
 import type { UploadFeatureProps } from './feature.server.js'
 import type { SerializedUploadNode } from './nodes/UploadNode.js'
@@ -8,12 +10,13 @@ import { recurseNestedFields } from '../../../populate/recurseNestedFields.js'
 export const uploadPopulationPromiseHOC = (
   props?: UploadFeatureProps,
 ): PopulationPromise<SerializedUploadNode> => {
-  const uploadPopulationPromise: PopulationPromise<SerializedUploadNode> = ({
+  return ({
     context,
     currentDepth,
     depth,
     editorPopulationPromises,
     field,
+    fieldPromises,
     findMany,
     flattenLocales,
     node,
@@ -21,17 +24,19 @@ export const uploadPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
-    siblingDoc,
   }) => {
-    const promises: Promise<void>[] = []
+    const payloadConfig = req.payload.config
 
-    if (node?.value?.id) {
+    if (node?.value) {
       const collection = req.payload.collections[node?.relationTo]
 
       if (collection) {
-        promises.push(
+        // @ts-expect-error
+        const id = node?.value?.id || node?.value // for backwards-compatibility
+
+        populationPromises.push(
           populate({
-            id: node?.value?.id,
+            id,
             collection,
             currentDepth,
             data: node,
@@ -45,27 +50,36 @@ export const uploadPopulationPromiseHOC = (
         )
       }
       if (Array.isArray(props?.collections?.[node?.relationTo]?.fields)) {
+        const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
+
+        // TODO: Sanitize & transform ahead of time! On startup!
+        const sanitizedFields = sanitizeFields({
+          config: payloadConfig,
+          fields: props?.collections?.[node?.relationTo]?.fields,
+          requireFieldLevelRichTextEditor: true,
+          validRelationships,
+        })
+
+        if (!sanitizedFields?.length) {
+          return
+        }
         recurseNestedFields({
           context,
           currentDepth,
           data: node.fields || {},
           depth,
           editorPopulationPromises,
-          fields: props?.collections?.[node?.relationTo]?.fields,
+          fieldPromises,
+          fields: sanitizedFields,
           findMany,
           flattenLocales,
           overrideAccess,
           populationPromises,
-          promises,
           req,
           showHiddenFields,
           siblingDoc: node.fields || {},
         })
       }
     }
-
-    return promises
   }
-
-  return uploadPopulationPromise
 }

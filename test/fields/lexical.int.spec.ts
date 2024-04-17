@@ -416,9 +416,10 @@ describe('Lexical', () => {
       /**
        * Depth 1 population:
        */
-      expect(subEditorRelationshipNode.value.id).toStrictEqual(createdRichTextDocID)
+      expect(subEditorRelationshipNode.value).toStrictEqual(createdRichTextDocID)
       // But the value should not be populated and only have the id field:
-      expect(Object.keys(subEditorRelationshipNode.value)).toHaveLength(1)
+
+      expect(typeof subEditorRelationshipNode.value).not.toStrictEqual('object')
     })
 
     it('should populate relationship nodes inside of a sub-editor from a blocks node with 1 depth', async () => {
@@ -463,9 +464,9 @@ describe('Lexical', () => {
       /**
        * Depth 2 population:
        */
-      expect(populatedDocEditorRelationshipNode.value.id).toStrictEqual(createdTextDocID)
+      expect(populatedDocEditorRelationshipNode.value).toStrictEqual(createdTextDocID)
       // But the value should not be populated and only have the id field - that's because it would require a depth of 2
-      expect(Object.keys(populatedDocEditorRelationshipNode.value)).toHaveLength(1)
+      expect(populatedDocEditorRelationshipNode.value).not.toStrictEqual('object')
     })
 
     it('should populate relationship nodes inside of a sub-editor from a blocks node with depth 2', async () => {

@@ -18,12 +18,12 @@ import type { LexicalCommand } from 'lexical'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import React, { useEffect } from 'react'
 
-import type { RawUploadPayload } from '../nodes/UploadNode.js'
+import type { UploadData } from '../nodes/UploadNode.js'
 
 import { UploadDrawer } from '../drawer/index.js'
 import { $createUploadNode, UploadNode } from '../nodes/UploadNode.js'
 
-export type InsertUploadPayload = Readonly<RawUploadPayload>
+export type InsertUploadPayload = Readonly<UploadData>
 
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
@@ -46,9 +46,7 @@ export function UploadPlugin(): JSX.Element | null {
               data: {
                 fields: payload.fields,
                 relationTo: payload.relationTo,
-                value: {
-                  id: payload.id,
-                },
+                value: payload.value,
               },
             })
 

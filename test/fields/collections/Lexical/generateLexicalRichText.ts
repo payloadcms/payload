@@ -27,7 +27,7 @@ export function generateLexicalRichText() {
         {
           format: '',
           type: 'upload',
-          version: 1,
+          version: 2,
           fields: {
             caption: {
               root: {
@@ -57,11 +57,9 @@ export function generateLexicalRichText() {
                   {
                     format: '',
                     type: 'relationship',
-                    version: 1,
+                    version: 2,
                     relationTo: 'text-fields',
-                    value: {
-                      id: '{{TEXT_DOC_ID}}',
-                    },
+                    value: '{{TEXT_DOC_ID}}',
                   },
                 ],
                 direction: 'ltr',
@@ -69,9 +67,7 @@ export function generateLexicalRichText() {
             },
           },
           relationTo: 'uploads',
-          value: {
-            id: '{{UPLOAD_DOC_ID}}',
-          },
+          value: '{{UPLOAD_DOC_ID}}',
         },
         {
           format: '',
@@ -120,11 +116,9 @@ export function generateLexicalRichText() {
                   {
                     format: '',
                     type: 'relationship',
-                    version: 1,
+                    version: 2,
                     relationTo: 'rich-text-fields',
-                    value: {
-                      id: '{{RICH_TEXT_DOC_ID}}',
-                    },
+                    value: '{{RICH_TEXT_DOC_ID}}',
                   },
                   {
                     children: [
@@ -173,11 +167,9 @@ export function generateLexicalRichText() {
                       {
                         format: '',
                         type: 'relationship',
-                        version: 1,
+                        version: 2,
                         relationTo: 'text-fields',
-                        value: {
-                          id: '{{TEXT_DOC_ID}}',
-                        },
+                        value: '{{TEXT_DOC_ID}}',
                       },
                       {
                         children: [

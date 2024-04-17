@@ -1,5 +1,6 @@
 import type { FeatureProviderProviderServer } from '../types.js'
 
+import { createNode } from '../typeUtilities.js'
 import { RelationshipFeatureClientComponent } from './feature.client.js'
 import { RelationshipNode } from './nodes/RelationshipNode.js'
 import { relationshipPopulationPromise } from './populationPromise.js'
@@ -36,11 +37,11 @@ export const RelationshipFeature: FeatureProviderProviderServer<
         ClientComponent: RelationshipFeatureClientComponent,
         clientFeatureProps: props,
         nodes: [
-          {
+          createNode({
             node: RelationshipNode,
             populationPromises: [relationshipPopulationPromise],
             // TODO: Add validation similar to upload
-          },
+          }),
         ],
         serverFeatureProps: props,
       }

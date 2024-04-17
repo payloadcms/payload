@@ -470,19 +470,24 @@ function buildObjectType({
           // is run here again, with the provided depth.
           // In the graphql find.ts resolver, the depth is then hard-coded to 0.
           // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
-          if (editor?.populationPromise) {
-            await editor?.populationPromise({
+          if (editor?.populationPromises) {
+            const fieldPromises = []
+            const populationPromises = []
+            editor?.populationPromises({
               context,
               depth,
               field,
+              fieldPromises,
               findMany: false,
               flattenLocales: false,
               overrideAccess: false,
-              populationPromises: [],
+              populationPromises,
               req: context.req,
               showHiddenFields: false,
               siblingDoc: parent,
             })
+            await Promise.all(fieldPromises)
+            await Promise.all(populationPromises)
           }
 
           return parent[field.name]

@@ -65,13 +65,13 @@ const Component: React.FC<ElementProps> = (props) => {
   const drawerSlug = useDrawerSlug('upload-drawer')
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
-    id: value?.id,
+    id: value,
     collectionSlug: relatedCollection.slug,
   })
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
+    `${serverURL}${api}/${relatedCollection.slug}/${value}`,
     { initialParams },
   )
 
@@ -172,7 +172,7 @@ const Component: React.FC<ElementProps> = (props) => {
           </DocumentDrawerToggler>
         </div>
       </div>
-      {value?.id && <DocumentDrawer onSave={updateUpload} />}
+      {value && <DocumentDrawer onSave={updateUpload} />}
       {hasExtraFields ? (
         <ExtraFieldsUploadDrawer
           drawerSlug={drawerSlug}

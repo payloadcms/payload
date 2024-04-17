@@ -14,12 +14,15 @@ type NestedRichTextFieldsArgs = {
    * This maps all the population promises to the node types
    */
   editorPopulationPromises: Map<string, Array<PopulationPromise>>
+  /**
+   * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
+   */
+  fieldPromises: Promise<void>[]
   fields: Field[]
   findMany: boolean
   flattenLocales: boolean
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  promises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
@@ -30,12 +33,12 @@ export const recurseNestedFields = ({
   currentDepth = 0,
   data,
   depth,
+  fieldPromises,
   fields,
   findMany,
   flattenLocales,
   overrideAccess = false,
   populationPromises,
-  promises,
   req,
   showHiddenFields,
   siblingDoc,
@@ -47,7 +50,7 @@ export const recurseNestedFields = ({
     depth,
     doc: data as any, // Looks like it's only needed for hooks and access control, so doesn't matter what we pass here right now
     fallbackLocale: req.fallbackLocale,
-    fieldPromises: promises, // Not sure if what I pass in here makes sense. But it doesn't seem like it's used at all anyways
+    fieldPromises,
     fields,
     findMany,
     flattenLocales,
@@ -58,7 +61,7 @@ export const recurseNestedFields = ({
     req,
     showHiddenFields,
     siblingDoc,
-    triggerAccessControl: false, // TODO: Enable this to support access control
-    triggerHooks: false, // TODO: Enable this to support hooks
+    //triggerAccessControl: false, // TODO: Enable this to support access control
+    //triggerHooks: false, // TODO: Enable this to support hooks
   })
 }

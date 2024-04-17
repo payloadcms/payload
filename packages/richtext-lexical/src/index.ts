@@ -20,7 +20,7 @@ import { sanitizeServerFeatures } from './field/lexical/config/server/sanitize.j
 import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
-import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise.js'
+import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'
 import { richTextValidateHOC } from './validate/index.js'
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapter {
@@ -64,29 +64,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       Component: RichTextField,
       toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
     }),
-    afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
-      return new Promise<void>((resolve, reject) => {
-        const promises: Promise<void>[] = []
-
-        if (finalSanitizedEditorConfig?.features?.hooks?.afterReadPromises?.length) {
-          for (const afterReadPromise of finalSanitizedEditorConfig.features.hooks
-            .afterReadPromises) {
-            const promise = afterReadPromise({
-              field,
-              incomingEditorState,
-              siblingDoc,
-            })
-            if (promise) {
-              promises.push(promise)
-            }
-          }
-        }
-
-        Promise.all(promises)
-          .then(() => resolve())
-          .catch((error) => reject(error))
-      })
-    },
     editorConfig: finalSanitizedEditorConfig,
     generateComponentMap: getGenerateComponentMap({
       resolvedFeatureMap,
@@ -94,6 +71,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     generateSchemaMap: getGenerateSchemaMap({
       resolvedFeatureMap,
     }),
+    /* hooks: {
+      afterChange: finalSanitizedEditorConfig.features.hooks.afterChange,
+      afterRead: finalSanitizedEditorConfig.features.hooks.afterRead,
+      beforeChange: finalSanitizedEditorConfig.features.hooks.beforeChange,
+      beforeDuplicate: finalSanitizedEditorConfig.features.hooks.beforeDuplicate,
+      beforeValidate: finalSanitizedEditorConfig.features.hooks.beforeValidate,
+    },*/
     outputSchema: ({
       collectionIDFieldTypes,
       config,
@@ -171,11 +155,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       return outputSchema
     },
-    populationPromise({
+    populationPromises({
       context,
       currentDepth,
       depth,
       field,
+      fieldPromises,
       findMany,
       flattenLocales,
       overrideAccess,
@@ -186,12 +171,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     }) {
       // check if there are any features with nodes which have populationPromises for this field
       if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
-        return richTextRelationshipPromise({
+        populateLexicalPopulationPromises({
           context,
           currentDepth,
           depth,
           editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
           field,
+          fieldPromises,
           findMany,
           flattenLocales,
           overrideAccess,
@@ -201,8 +187,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           siblingDoc,
         })
       }
-
-      return null
     },
     validate: richTextValidateHOC({
       editorConfig: finalSanitizedEditorConfig,
@@ -311,14 +295,19 @@ export {
   RelationshipNode,
   type SerializedRelationshipNode,
 } from './field/features/relationship/nodes/RelationshipNode.js'
+export { createNode } from './field/features/typeUtilities.js'
 export type {
+  ClientComponentProps,
   ClientFeature,
   ClientFeatureProviderMap,
   FeatureProviderClient,
   FeatureProviderProviderClient,
   FeatureProviderProviderServer,
   FeatureProviderServer,
+  FieldNodeHook,
+  FieldNodeHookArgs,
   NodeValidation,
+  NodeWithHooks,
   PopulationPromise,
   ResolvedClientFeature,
   ResolvedClientFeatureMap,
@@ -333,8 +322,6 @@ export type {
 export { UploadFeature } from './field/features/upload/feature.server.js'
 
 export type { UploadFeatureProps } from './field/features/upload/feature.server.js'
-
-export type { RawUploadPayload } from './field/features/upload/nodes/UploadNode.js'
 
 export {
   $createUploadNode,
