@@ -49,9 +49,6 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import localOperations from './collections/operations/local/index.js'
 import { validateSchema } from './config/validate.js'
-import { createNodemailerAdapter } from './email/adapters/nodemailer/index.js'
-import { emailDefaults } from './email/defaults.js'
-import { sendEmail } from './email/sendEmail.js'
 import { fieldAffectsData } from './exports/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
@@ -366,8 +363,12 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       await this.db.connect()
     }
 
-    // TODO: Move nodemailer adapter into separate package after verifying all existing functionality
-    this.email = await createNodemailerAdapter(emailDefaults)
+    // Load email adapter
+    if (this.config.email instanceof Promise) {
+      this.email = await this.config.email
+    } else {
+      this.email = this.config.email
+    }
 
     this.sendEmail = this.email.sendEmail
 

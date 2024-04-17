@@ -440,6 +440,19 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/email-nodemailer:
+    dependencies:
+      nodemailer:
+        specifier: 6.9.10
+        version: 6.9.10
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+    devDependencies:
+      '@types/nodemailer':
+        specifier: 6.4.14
+        version: 6.4.14
+
   packages/eslint-config-payload:
     dependencies:
       '@types/eslint':
@@ -1502,6 +1515,9 @@ importers:
       '@payloadcms/db-postgres':
         specifier: workspace:*
         version: link:../packages/db-postgres
+      '@payloadcms/email-nodemailer':
+        specifier: workspace:*
+        version: link:../packages/email-nodemailer
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../packages/eslint-config-payload

@@ -531,7 +531,7 @@ export type Config = {
    *
    * @see https://payloadcms.com/docs/email/overview
    */
-  email?: EmailAdapter<any, unknown>
+  email?: EmailAdapter<any, unknown> | Promise<EmailAdapter<any, unknown>>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**

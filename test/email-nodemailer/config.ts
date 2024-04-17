@@ -1,33 +1,24 @@
+import { createNodemailerAdapter } from '@payloadcms/email-nodemailer'
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
-import { PostsCollection, postsSlug } from './collections/Posts/index.js'
-import { MenuGlobal } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [PostsCollection, MediaCollection],
-  globals: [MenuGlobal],
+  collections: [],
+  email: createNodemailerAdapter(),
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
-      },
-    })
-
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        text: 'example post',
       },
     })
 
