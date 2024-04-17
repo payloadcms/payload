@@ -38,6 +38,7 @@ export const baseField = joi
     }),
     admin: baseAdminFields.default(),
     custom: joi.object().pattern(joi.string(), joi.any()),
+    customClient: joi.object().pattern(joi.string(), joi.any()),
     hidden: joi.boolean().default(false),
     hooks: joi
       .object()
@@ -520,6 +521,7 @@ export const ui = joi.object().keys({
     })
     .default(),
   custom: joi.object().pattern(joi.string(), joi.any()),
+  customClient: joi.object().pattern(joi.string(), joi.any()),
   label: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
 })
 
