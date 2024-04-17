@@ -53,7 +53,7 @@ export const RecoverPasswordForm: React.FC = () => {
           <div className={classes.formWrapper}>
             <p>
               {`Please enter your email below. You will receive an email message with instructions on
-              how to reset your password. To manage your all users, `}
+              how to reset your password. To manage all of your users, `}
               <Link href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/users`}>
                 login to the admin dashboard
               </Link>
