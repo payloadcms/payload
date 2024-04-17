@@ -43,6 +43,7 @@ import {
   selectFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
+  uiSlug,
   uploadsSlug,
   usersSlug,
 } from './slugs.js'
@@ -300,6 +301,13 @@ export const seed = async (_payload) => {
     data: numberDoc,
     depth: 0,
     overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: uiSlug,
+    data: {
+      text: 'text',
+    },
   })
 }
 
