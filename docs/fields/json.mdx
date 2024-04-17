@@ -76,7 +76,7 @@ Payload JSON fields fully support the [JSON schema](https://json-schema.org/) st
 If you only provide a URL to a schema, Payload will fetch the desired schema if it is publicly available. If not, it is recommended to add the schema directly to your config or import it from another file so that it can be implemented consistently in your project.
 
 
-#### JSON Schema with Local Config Example
+#### Local JSON Schema
 
 `collections/ExampleCollection.ts
 
@@ -109,7 +109,7 @@ export const ExampleCollection: CollectionConfig = {
 // Attempting to create {"foo": "not-bar"} will throw an error
 ```
 
-#### JSON Schema with Remote Config Example
+#### Remote JSON Schema
 
 `collections/ExampleCollection.ts
 
