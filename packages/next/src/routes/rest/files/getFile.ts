@@ -1,5 +1,6 @@
 import type { Collection, PayloadRequest } from 'payload/types'
 
+import getFileType from 'file-type'
 import fsPromises from 'fs/promises'
 import httpStatus from 'http-status'
 import path from 'path'
@@ -55,12 +56,18 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
     const filePath = path.resolve(`${fileDir}/${filename}`)
 
     const stats = await fsPromises.stat(filePath)
+
     const data = streamFile(filePath)
 
+    const headers = new Headers({
+      'content-length': stats.size + '',
+    })
+
+    const fileTypeResult = await getFileType.fromFile(filePath)
+    if (fileTypeResult?.mime) headers.set('content-type', fileTypeResult.mime)
+
     return new Response(data, {
-      headers: new Headers({
-        'content-length': stats.size + '',
-      }),
+      headers,
       status: httpStatus.OK,
     })
   } catch (error) {
