@@ -25,13 +25,6 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
       )
     }
 
-    if (collection.config.upload.disableLocalStorage && !collection.config.upload.handlers) {
-      throw new APIError(
-        `This collection has local storage disabled: ${collection.config.slug}`,
-        httpStatus.BAD_REQUEST,
-      )
-    }
-
     await checkFileAccess({
       collection,
       filename,
@@ -49,7 +42,7 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
         })
       }
 
-      return response
+      if (response instanceof Response) return response
     }
 
     const fileDir = collection.config.upload?.staticDir || collection.config.slug
@@ -70,11 +63,11 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
       headers,
       status: httpStatus.OK,
     })
-  } catch (error) {
+  } catch (err) {
     return routeError({
       collection,
       config: req.payload.config,
-      err: error,
+      err,
       req,
     })
   }
