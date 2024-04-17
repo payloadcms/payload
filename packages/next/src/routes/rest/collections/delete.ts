@@ -3,7 +3,7 @@ import type { Where } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
 import { deleteOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
 
@@ -54,6 +54,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
       message,
     },
     {
+      headers: corsHeaders(req),
       status: httpStatus.BAD_REQUEST,
     },
   )

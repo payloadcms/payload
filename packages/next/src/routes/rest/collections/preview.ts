@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 import { extractJWT } from 'payload/auth'
 import { findByIDOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
@@ -45,6 +45,7 @@ export const preview: CollectionRouteHandlerWithID = async ({ id, collection, re
   }
 
   return Response.json(previewURL, {
+    headers: corsHeaders(req),
     status: httpStatus.OK,
   })
 }

@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 import { updateOperationGlobal } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { GlobalRouteHandler } from '../types.js'
 
@@ -31,6 +31,7 @@ export const update: GlobalRouteHandler = async ({ globalConfig, req }) => {
       result,
     },
     {
+      headers: corsHeaders(req),
       status: httpStatus.OK,
     },
   )

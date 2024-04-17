@@ -2,6 +2,7 @@ import type { Endpoint } from 'payload/config'
 import type { Collection, GlobalConfig, PayloadRequest, SanitizedConfig } from 'payload/types'
 
 import httpStatus from 'http-status'
+import { corsHeaders } from 'packages/payload/src/utilities/corsHeaders.js'
 import { match } from 'path-to-regexp'
 
 import type {
@@ -153,6 +154,32 @@ const RouteNotFoundResponse = (slug: string[]) =>
     },
     { status: httpStatus.NOT_FOUND },
   )
+
+export const OPTIONS =
+  (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
+    let req: PayloadRequest
+
+    try {
+      req = await createPayloadRequest({
+        config,
+        request,
+      })
+
+      return Response.json(
+        {},
+        {
+          headers: corsHeaders(req),
+          status: 200,
+        },
+      )
+    } catch (error) {
+      return routeError({
+        config,
+        err: error,
+        req,
+      })
+    }
+  }
 
 export const GET =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>

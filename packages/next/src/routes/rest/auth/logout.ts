@@ -1,6 +1,7 @@
 import httpStatus from 'http-status'
 import { generateExpiredPayloadCookie } from 'payload/auth'
 import { logoutOperation } from 'payload/operations'
+import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
 
@@ -32,9 +33,7 @@ export const logout: CollectionRouteHandler = async ({ collection, req }) => {
       message: 'Logout successful.',
     },
     {
-      headers: new Headers({
-        'Set-Cookie': expiredCookie,
-      }),
+      headers: { ...corsHeaders(req), 'Set-Cookie': expiredCookie },
       status: httpStatus.OK,
     },
   )

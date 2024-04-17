@@ -1,7 +1,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
 import { duplicateOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
@@ -41,6 +41,7 @@ export const duplicate: CollectionRouteHandlerWithID = async ({
       message,
     },
     {
+      headers: corsHeaders(req),
       status: httpStatus.OK,
     },
   )

@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 import { findVersionByIDOperationGlobal } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { GlobalRouteHandlerWithID } from '../types.js'
 
@@ -16,6 +16,7 @@ export const findVersionByID: GlobalRouteHandlerWithID = async ({ id, globalConf
   })
 
   return Response.json(result, {
+    headers: corsHeaders(req),
     status: httpStatus.OK,
   })
 }

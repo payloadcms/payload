@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 import { restoreVersionOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
@@ -33,6 +33,7 @@ export const restoreVersion: CollectionRouteHandlerWithID = async ({
       message: req.t('version:restoredSuccessfully'),
     },
     {
+      headers: corsHeaders(req),
       status: httpStatus.OK,
     },
   )

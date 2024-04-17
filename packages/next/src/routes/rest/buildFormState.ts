@@ -4,6 +4,7 @@ import type { DocumentPreferences, Field, PayloadRequest, TypeWithID } from 'pay
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
 import httpStatus from 'http-status'
+import { corsHeaders } from 'payload/utilities'
 
 import type { FieldSchemaMap } from '../../utilities/buildFieldSchemaMap/types.js'
 
@@ -198,6 +199,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
     }
 
     return Response.json(result, {
+      headers: corsHeaders(req),
       status: httpStatus.OK,
     })
   } catch (err) {

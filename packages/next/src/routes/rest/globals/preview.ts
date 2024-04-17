@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 import { extractJWT } from 'payload/auth'
 import { findOneOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { GlobalRouteHandler } from '../types.js'
 
@@ -44,6 +44,7 @@ export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
   }
 
   return Response.json(previewURL, {
+    headers: corsHeaders(req),
     status: httpStatus.OK,
   })
 }

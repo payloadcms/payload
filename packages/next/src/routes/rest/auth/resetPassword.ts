@@ -1,6 +1,7 @@
 import httpStatus from 'http-status'
 import { generatePayloadCookie } from 'payload/auth'
 import { resetPasswordOperation } from 'payload/operations'
+import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
 
@@ -35,9 +36,7 @@ export const resetPassword: CollectionRouteHandler = async ({ collection, req })
       ...result,
     },
     {
-      headers: new Headers({
-        'Set-Cookie': cookie,
-      }),
+      headers: { ...corsHeaders(req), 'Set-Cookie': cookie },
       status: httpStatus.OK,
     },
   )

@@ -2,6 +2,7 @@ import httpStatus from 'http-status'
 import { generatePayloadCookie } from 'payload/auth'
 import { ValidationError } from 'payload/errors'
 import { registerFirstUserOperation } from 'payload/operations'
+import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
 
@@ -42,9 +43,7 @@ export const registerFirstUser: CollectionRouteHandler = async ({ collection, re
       user: result.user,
     },
     {
-      headers: new Headers({
-        'Set-Cookie': cookie,
-      }),
+      headers: { ...corsHeaders(req), 'Set-Cookie': cookie },
       status: httpStatus.OK,
     },
   )

@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 import { updateByIDOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
@@ -43,6 +43,7 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
       message,
     },
     {
+      headers: corsHeaders(req),
       status: httpStatus.OK,
     },
   )

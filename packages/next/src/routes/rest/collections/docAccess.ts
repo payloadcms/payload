@@ -1,5 +1,6 @@
 import httpStatus from 'http-status'
 import { docAccessOperation } from 'payload/operations'
+import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
@@ -11,6 +12,7 @@ export const docAccess: CollectionRouteHandlerWithID = async ({ id, collection, 
   })
 
   return Response.json(result, {
+    headers: corsHeaders(req),
     status: httpStatus.OK,
   })
 }

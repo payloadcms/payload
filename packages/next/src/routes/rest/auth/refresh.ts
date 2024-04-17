@@ -2,6 +2,7 @@ import httpStatus from 'http-status'
 import { extractJWT } from 'payload/auth'
 import { generatePayloadCookie } from 'payload/auth'
 import { refreshOperation } from 'payload/operations'
+import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
 
@@ -43,9 +44,7 @@ export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
       ...result,
     },
     {
-      headers: new Headers({
-        'Set-Cookie': cookie,
-      }),
+      headers: { ...corsHeaders(req), 'Set-Cookie': cookie },
       status: httpStatus.OK,
     },
   )

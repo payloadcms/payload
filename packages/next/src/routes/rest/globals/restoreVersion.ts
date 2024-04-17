@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 import { restoreVersionOperationGlobal } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { GlobalRouteHandlerWithID } from '../types.js'
 
@@ -21,6 +21,7 @@ export const restoreVersion: GlobalRouteHandlerWithID = async ({ id, globalConfi
       message: req.t('version:restoredSuccessfully'),
     },
     {
+      headers: corsHeaders(req),
       status: httpStatus.OK,
     },
   )

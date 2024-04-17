@@ -1,7 +1,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
 import { createOperation } from 'payload/operations'
-import { isNumber } from 'payload/utilities'
+import { corsHeaders, isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
 
@@ -28,6 +28,7 @@ export const create: CollectionRouteHandler = async ({ collection, req }) => {
       }),
     },
     {
+      headers: corsHeaders(req),
       status: httpStatus.CREATED,
     },
   )
