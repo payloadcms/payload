@@ -17,12 +17,7 @@ import type {
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import {
-  isPlainFunction,
-  isReactClientComponent,
-  isReactComponent,
-  isReactServerComponent,
-} from 'payload/utilities'
+import { isPlainFunction, isReactComponent } from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
@@ -200,6 +195,7 @@ export const mapFields = (args: {
           CustomDescription,
           CustomError,
           CustomLabel,
+          custom: field.custom,
           descriptionProps,
           disabled: 'admin' in field && 'disabled' in field.admin ? field.admin?.disabled : false,
           errorProps,
@@ -754,6 +750,7 @@ export const mapFields = (args: {
             <WithServerSideProps Component={CustomFieldComponent} {...fieldComponentProps} />
           ) : undefined,
           cellComponentProps,
+          custom: field?.custom,
           disableBulkEdit:
             'admin' in field && 'disableBulkEdit' in field.admin && field.admin.disableBulkEdit,
           fieldComponentProps,

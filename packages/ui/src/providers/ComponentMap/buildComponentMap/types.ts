@@ -68,6 +68,7 @@ export type MappedField = {
   CustomCell?: React.ReactNode
   CustomField?: React.ReactNode
   cellComponentProps: CellComponentProps
+  custom?: Record<string, unknown>
   disableBulkEdit?: boolean
   disabled?: boolean
   fieldComponentProps: FieldComponentProps
