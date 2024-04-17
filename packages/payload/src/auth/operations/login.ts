@@ -8,7 +8,7 @@ import type { PayloadRequest } from '../../express/types'
 import type { User } from '../types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'
-import { AuthenticationError, LockedAuth } from '../../errors'
+import { AuthenticationError, LockedAuth, ValidationError } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { commitTransaction } from '../../utilities/commitTransaction'
 import getCookieExpiration from '../../utilities/getCookieExpiration'
@@ -87,14 +87,10 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     const { email: unsanitizedEmail, password } = data
 
     if (typeof unsanitizedEmail !== 'string' || unsanitizedEmail.trim() === '') {
-      throw new Error(
-        `${req.i18n.t('error:followingFieldsInvalid_one')} ${req.i18n.t('general:email')}`,
-      )
+      throw new ValidationError([{ field: 'email', message: req.i18n.t('validation:required') }])
     }
     if (typeof password !== 'string' || password.trim() === '') {
-      throw new Error(
-        `${req.i18n.t('error:followingFieldsInvalid_one')} ${req.i18n.t('general:password')}`,
-      )
+      throw new ValidationError([{ field: 'password', message: req.i18n.t('validation:required') }])
     }
 
     const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null
