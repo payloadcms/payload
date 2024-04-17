@@ -191,6 +191,8 @@ export const en: Language = {
       deleting: 'Deleting...',
       descending: 'Descending',
       deselectAllRows: 'Deselect all rows',
+      document: 'Document',
+      documents: 'Documents',
       duplicate: 'Duplicate',
       duplicateWithoutSaving: 'Duplicate without saving changes',
       edit: 'Edit',

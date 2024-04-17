@@ -193,6 +193,8 @@ export const pl: Language = {
       deleting: 'Usuwanie...',
       descending: 'Malejąco',
       deselectAllRows: 'Odznacz wszystkie wiersze',
+      document: 'Dokument',
+      documents: 'Dokumenty',
       duplicate: 'Zduplikuj',
       duplicateWithoutSaving: 'Zduplikuj bez zapisywania zmian',
       edit: 'Edytuj',

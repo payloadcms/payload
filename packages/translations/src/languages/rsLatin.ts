@@ -190,6 +190,8 @@ export const rsLatin: Language = {
       deleting: 'Brisanje...',
       descending: 'Opadajuće',
       deselectAllRows: 'Deselektujte sve redove',
+      document: 'Dokument',
+      documents: 'Dokumenti',
       duplicate: 'Duplikat',
       duplicateWithoutSaving: 'Ponovi bez čuvanja promena',
       edit: 'Uredi',

@@ -185,6 +185,8 @@ export const zhTw: Language = {
       deleting: '刪除中...',
       descending: '降冪',
       deselectAllRows: '取消選擇全部',
+      document: '文件',
+      documents: '文件',
       duplicate: '複製',
       duplicateWithoutSaving: '複製而不儲存變更。',
       edit: '編輯',

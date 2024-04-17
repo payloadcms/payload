@@ -190,6 +190,8 @@ export const bg: Language = {
       deleting: 'Изтриване...',
       descending: 'Низходящо',
       deselectAllRows: 'Деселектирай всички редове',
+      document: 'Документ',
+      documents: 'Документи',
       duplicate: 'Дупликирай',
       duplicateWithoutSaving: 'Дупликирай без да запазваш промените',
       edit: 'Редактирай',

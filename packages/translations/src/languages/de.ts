@@ -194,6 +194,8 @@ export const de: Language = {
       deleting: 'Lösche...',
       descending: 'Absteigend',
       deselectAllRows: 'Alle Zeilen abwählen',
+      document: 'Dokument',
+      documents: 'Dokumente',
       duplicate: 'Duplizieren',
       duplicateWithoutSaving: 'Dupliziere ohne Änderungen zu speichern',
       edit: 'Bearbeiten',

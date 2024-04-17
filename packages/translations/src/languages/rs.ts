@@ -190,6 +190,8 @@ export const rs: Language = {
       deleting: 'Брисање...',
       descending: 'Опадајуће',
       deselectAllRows: 'Деселектујте све редове',
+      document: 'Dokument',
+      documents: 'Dokumenti',
       duplicate: 'Дупликат',
       duplicateWithoutSaving: 'Понови без чувања промена',
       edit: 'Уреди',

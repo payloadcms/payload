@@ -192,6 +192,8 @@ export const pt: Language = {
       deleting: 'Excluindo...',
       descending: 'Decrescente',
       deselectAllRows: 'Desmarcar todas as linhas',
+      document: 'Documento',
+      documents: 'Documentos',
       duplicate: 'Duplicar',
       duplicateWithoutSaving: 'Duplicar sem salvar alterações',
       edit: 'Editar',
