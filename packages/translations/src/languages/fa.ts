@@ -81,6 +81,8 @@ export const fa: Language = {
       invalidFileType: 'نوع رسانه نامعتبر است',
       invalidFileTypeValue: 'نوع رسانه نامعتبر: {{value}}',
       loadingDocument: 'مشکلی در بارگیری رسانه با شناسه {{id}} پیش آمد.',
+      localesNotSaved_one: 'امکان ذخیره‌سازی تنظیمات محلی زیر وجود ندارد:',
+      localesNotSaved_other: 'امکان ذخیره‌سازی تنظیمات محلی زیر وجود ندارد:',
       missingEmail: 'رایانامه وارد نشده.',
       missingIDOfDocument: 'شناسه سند جهت بروزرسانی نامعتبر است.',
       missingIDOfVersion: 'شناسه نگارش وارد نشده.',

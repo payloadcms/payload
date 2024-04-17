@@ -82,6 +82,8 @@ export const cs: Language = {
       invalidFileType: 'Neplatný typ souboru',
       invalidFileTypeValue: 'Neplatný typ souboru: {{value}}',
       loadingDocument: 'Při načítání dokumentu s ID {{id}} došlo k chybě.',
+      localesNotSaved_one: 'Následující lokalitu se nepodařilo uložit:',
+      localesNotSaved_other: 'Následující lokality se nepodařilo uložit:',
       missingEmail: 'Chybějící email.',
       missingIDOfDocument: 'Chybějící ID dokumentu pro aktualizaci.',
       missingIDOfVersion: 'Chybějící ID verze.',

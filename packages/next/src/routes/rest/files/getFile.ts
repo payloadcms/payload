@@ -1,5 +1,6 @@
 import type { Collection, PayloadRequest } from 'payload/types'
 
+import getFileType from 'file-type'
 import fsPromises from 'fs/promises'
 import httpStatus from 'http-status'
 import path from 'path'
@@ -25,13 +26,6 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
       )
     }
 
-    if (collection.config.upload.disableLocalStorage && !collection.config.upload.handlers) {
-      throw new APIError(
-        `This collection has local storage disabled: ${collection.config.slug}`,
-        httpStatus.BAD_REQUEST,
-      )
-    }
-
     await checkFileAccess({
       collection,
       filename,
@@ -49,24 +43,32 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
         })
       }
 
-      return response
+      if (response instanceof Response) return response
     }
 
     const fileDir = collection.config.upload?.staticDir || collection.config.slug
     const filePath = path.resolve(`${fileDir}/${filename}`)
 
     const stats = await fsPromises.stat(filePath)
+
     const data = streamFile(filePath)
 
+    const headers = new Headers({
+      'content-length': stats.size + '',
+    })
+
+    const fileTypeResult = await getFileType.fromFile(filePath)
+    if (fileTypeResult?.mime) headers.set('content-type', fileTypeResult.mime)
+
     return new Response(data, {
-      headers: { ...corsHeaders(req), 'content-length': stats.size + '' },
+      headers: { ...corsHeaders(req), ...Object.fromEntries(headers) },
       status: httpStatus.OK,
     })
-  } catch (error) {
+  } catch (err) {
     return routeError({
       collection,
       config: req.payload.config,
-      err: error,
+      err,
       req,
     })
   }

@@ -82,6 +82,8 @@ export const ru: Language = {
       invalidFileType: 'Недопустимый тип файла',
       invalidFileTypeValue: 'Недопустимый тип файла: {{value}}',
       loadingDocument: 'Возникла проблема при загрузке документа с ID {{id}}.',
+      localesNotSaved_one: 'Следующую локализацию не удалось сохранить:',
+      localesNotSaved_other: 'Следующие локализации не удалось сохранить:',
       missingEmail: 'Отсутствует email.',
       missingIDOfDocument: 'Отсутствующий ID документа для обновления.',
       missingIDOfVersion: 'Отсутствует ID версии.',

@@ -81,6 +81,8 @@ export const my: Language = {
       invalidFileType: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား',
       invalidFileTypeValue: 'မမှန်ကန်သော ဖိုင်အမျိုးအစား: {{value}}',
       loadingDocument: '{{id}} ID ဖြင့် ဖိုင်ကို ဖွင့်ရာတွင် ပြဿနာရှိနေသည်။',
+      localesNotSaved_one: 'အောက်ပါ ဒေသသတ်မှတ်ချက်ကို သိမ်းဆည်း၍ မရပါ။',
+      localesNotSaved_other: 'အောက်ပါ ဒေသသတ်မှတ်ချက်များကို သိမ်းဆည်း၍ မရပါ။',
       missingEmail: 'အီးမေးလ်ပျောက်ဆုံး',
       missingIDOfDocument: 'ပြင်ဆင်ရန် ဖိုင် ID ပျောက်နေပါသည်။',
       missingIDOfVersion: 'ပျောက်ဆုံး ဗားရှင်း ID',

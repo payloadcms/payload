@@ -82,6 +82,8 @@ export const nl: Language = {
       invalidFileType: 'Ongeldig bestandstype',
       invalidFileTypeValue: 'Ongeldig bestandstype: {{value}}',
       loadingDocument: 'Er was een probleem met het laden van het document met ID {{id}}.',
+      localesNotSaved_one: 'De volgende taalinstelling kon niet worden opgeslagen:',
+      localesNotSaved_other: 'De volgende taalinstellingen konden niet worden opgeslagen:',
       missingEmail: 'E-mailadres ontbreekt.',
       missingIDOfDocument: 'ID ontbreekt van het aan te passen document.',
       missingIDOfVersion: 'ID van versie ontbreekt.',

@@ -33,7 +33,8 @@ export const uk: Language = {
       lockUntil: 'Заблокувати до',
       logBackIn: 'Увійти знову',
       logOut: 'Вийти',
-      loggedIn: 'Щоб увйти в систему з іншого облікового запису, спочатку <0>вийдіть з системи</0>.',
+      loggedIn:
+        'Щоб увйти в систему з іншого облікового запису, спочатку <0>вийдіть з системи</0>.',
       loggedInChangePassword:
         'Щоб змінити ваш пароль, перейдіть до <0>сторінки облікового запису</0> і змініть ваш пароль.',
       loggedOutInactivity: 'Ви вийшли з системи через бездіяльність.',
@@ -41,7 +42,8 @@ export const uk: Language = {
       login: 'Увійти',
       loginAttempts: 'Спроби входу',
       loginUser: 'Вхід користувача в систему',
-      loginWithAnotherUser: 'Щоб увйти в систему з іншого облікового запису, спочатку <0>вийдіть з системи</0>.',
+      loginWithAnotherUser:
+        'Щоб увйти в систему з іншого облікового запису, спочатку <0>вийдіть з системи</0>.',
       logout: 'Вийти',
       logoutUser: 'Вийти з системи',
       newAPIKeyGenerated: 'Новий API ключ згенеровано.',
@@ -81,6 +83,8 @@ export const uk: Language = {
       invalidFileType: 'Невірний тип файлу',
       invalidFileTypeValue: 'Невірний тип файлу: {{value}}',
       loadingDocument: 'Виникла помилка під час завантаження документа з ID {{id}}.',
+      localesNotSaved_one: 'Не вдалося зберегти наступну мову:',
+      localesNotSaved_other: 'Не вдалося зберегти такі мови:',
       missingEmail: 'Відсутній email.',
       missingIDOfDocument: 'Відсутній ID документа для оновлення.',
       missingIDOfVersion: 'Відсутній ID версії.',

@@ -81,6 +81,8 @@ export const pl: Language = {
       invalidFileType: 'Nieprawidłowy typ pliku',
       invalidFileTypeValue: 'Nieprawidłowy typ pliku: {{value}}',
       loadingDocument: 'Wystapił problem podczas ładowania dokumentu o ID {{id}}.',
+      localesNotSaved_one: 'Następującej lokalizacji nie można było zapisać:',
+      localesNotSaved_other: 'Następujących lokalizacji nie można było zapisać:',
       missingEmail: 'Brak adresu email.',
       missingIDOfDocument: 'Brak ID dokumentu do aktualizacji.',
       missingIDOfVersion: 'Brak ID wersji',

@@ -82,6 +82,8 @@ export const tr: Language = {
       invalidFileType: 'Geçersiz dosya türü',
       invalidFileTypeValue: 'Geçersiz dosya türü: {{value}}',
       loadingDocument: "{{id}} ID'ye sahip döküman yüklenirken bir sorun oluştu.",
+      localesNotSaved_one: 'Aşağıdaki yerel ayar kaydedilemedi:',
+      localesNotSaved_other: 'Aşağıdaki yerel ayarlar kaydedilemedi:',
       missingEmail: 'E-posta adresi girilmedi.',
       missingIDOfDocument: "Güncellenecek döküman ID'si eksik.",
       missingIDOfVersion: "Versiyon ID'si geçersiz.",

@@ -82,6 +82,8 @@ export const sv: Language = {
       invalidFileType: 'Ogiltig filtyp',
       invalidFileTypeValue: 'Ogiltig filtyp: {{value}}',
       loadingDocument: 'Det gick inte att läsa in dokumentet med ID {{id}}.',
+      localesNotSaved_one: 'Följande lokal kunde inte sparas:',
+      localesNotSaved_other: 'Följande lokaler kunde inte sparas:',
       missingEmail: 'E-postadress saknas.',
       missingIDOfDocument: 'Saknar ID för dokumentet som ska uppdateras.',
       missingIDOfVersion: 'ID för versionen saknas.',

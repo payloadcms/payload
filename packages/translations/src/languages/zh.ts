@@ -77,6 +77,8 @@ export const zh: Language = {
       invalidFileType: '无效的文件类型',
       invalidFileTypeValue: '无效的文件类型： {{value}}',
       loadingDocument: '加载ID为{{id}}的文件时出现了问题。',
+      localesNotSaved_one: '无法保存以下区域设置：',
+      localesNotSaved_other: '无法保存以下区域设置：',
       missingEmail: '缺少电子邮件。',
       missingIDOfDocument: '缺少需要更新的文档的ID。',
       missingIDOfVersion: '缺少版本的ID。',
