@@ -179,6 +179,8 @@
     "deleting": "刪除中...",
     "descending": "降冪",
     "deselectAllRows": "取消選擇全部",
+    "document": "文件",
+    "documents": "文件",
     "duplicate": "複製",
     "duplicateWithoutSaving": "複製而不儲存變更。",
     "edit": "編輯",
@@ -317,8 +319,8 @@
     "trueOrFalse": "該字串只能等於是或否。",
     "validUploadID": "該字串不是有效的上傳ID。"
   },
-"version": {
-    "aboutToPublishSelection": "您確定即將發佈所選的 {{label}} 嗎？",  
+  "version": {
+    "aboutToPublishSelection": "您確定即將發佈所選的 {{label}} 嗎？",
     "aboutToRestore": "您將把這個文件{{label}}回復到{{versionDate}}時的狀態",
     "aboutToRestoreGlobal": "您要將痊域的{{label}}回復到{{versionDate}}時的狀態",
     "aboutToRevertToPublished": "您將要將這個文件的內容還原到它的發佈狀態。您確定嗎？",
@@ -370,5 +372,5 @@
     "viewingVersionGlobal": "正在查看全域{{entityLabel}}的版本",
     "viewingVersions": "正在查看{{entityLabel}} {{documentTitle}}的版本",
     "viewingVersionsGlobal": "正在查看全域{{entityLabel}}的版本"
-}
+  }
 }
