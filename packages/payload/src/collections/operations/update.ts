@@ -297,7 +297,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
               ...result,
               createdAt: doc.createdAt,
             },
-            draft: shouldSaveDraft,
             payload,
             req,
           })
