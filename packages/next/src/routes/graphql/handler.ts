@@ -5,7 +5,7 @@ import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
 import httpStatus from 'http-status'
-import { corsHeaders } from 'packages/payload/src/utilities/corsHeaders.js'
+import { corsHeaders } from 'payload/utilities'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 
