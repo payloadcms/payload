@@ -295,7 +295,6 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
               ...result,
               createdAt: doc.createdAt,
             },
-            draft: shouldSaveDraft,
             payload,
             req,
           })
