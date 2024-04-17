@@ -5,7 +5,7 @@ import type { FieldPermissions } from 'payload/types'
 import React from 'react'
 
 export type FieldPropsContextType = {
-  custom?: Record<string, unknown>
+  customClient?: Record<string, any>
   indexPath?: string
   path: string
   permissions?: FieldPermissions
@@ -29,7 +29,7 @@ const FieldPropsContext = React.createContext<FieldPropsContextType>({
 
 export type Props = {
   children: React.ReactNode
-  custom?: Record<string, unknown>
+  customClient?: Record<string, any>
   indexPath?: string
   path: string
   permissions?: FieldPermissions
@@ -44,7 +44,7 @@ export type Props = {
 export const FieldPropsProvider: React.FC<Props> = ({
   type,
   children,
-  custom,
+  customClient,
   indexPath,
   path,
   permissions,
@@ -56,7 +56,7 @@ export const FieldPropsProvider: React.FC<Props> = ({
     <FieldPropsContext.Provider
       value={{
         type,
-        custom,
+        customClient,
         indexPath,
         path,
         permissions,
@@ -71,6 +71,6 @@ export const FieldPropsProvider: React.FC<Props> = ({
 }
 
 export const useFieldProps = () => {
-  const path = React.useContext(FieldPropsContext)
-  return path
+  const props = React.useContext(FieldPropsContext)
+  return props
 }

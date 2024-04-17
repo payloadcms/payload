@@ -15,7 +15,6 @@ import type {
   RichTextAdapter,
   RowLabel,
 } from '../../admin/types.js'
-import type { User } from '../../auth/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { CustomComponent, LabelFunction } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -179,8 +178,12 @@ export interface FieldBase {
     update?: FieldAccess
   }
   admin?: Admin
-  /** Extension point to add your custom data. */
+  /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+  /**
+   * Extension point to add your custom data to the client bundle.
+   */
+  customClient?: Record<string, any>
   defaultValue?: any
   hidden?: boolean
   hooks?: {
@@ -425,8 +428,12 @@ export type UIField = {
     position?: string
     width?: string
   }
-  /** Extension point to add your custom data. */
+  /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+  /**
+   * Extension point to add your custom data to the client bundle.
+   */
+  customClient?: Record<string, any>
   label?: Record<string, string> | string
   name: string
   type: 'ui'
