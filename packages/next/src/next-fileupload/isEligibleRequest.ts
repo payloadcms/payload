@@ -1,5 +1,3 @@
-// eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-obscure-range
-const ACCEPTABLE_CONTENT_TYPE = /multipart\/['"()+-_]+(?:; ?['"()+-_]*)+$/i
 const UNACCEPTABLE_METHODS = new Set(['GET', 'HEAD', 'DELETE', 'OPTIONS', 'CONNECT', 'TRACE'])
 
 const hasBody = (req: Request): boolean => {
@@ -13,7 +11,7 @@ const hasAcceptableMethod = (req: Request): boolean => !UNACCEPTABLE_METHODS.has
 
 const hasAcceptableContentType = (req: Request): boolean => {
   const contType = req.headers.get('content-type')
-  return contType.includes('boundary=') && ACCEPTABLE_CONTENT_TYPE.test(contType)
+  return contType.includes('multipart/form-data; boundary=')
 }
 
 export const isEligibleRequest = (req: Request): boolean => {

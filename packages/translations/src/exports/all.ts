@@ -29,7 +29,7 @@ import { tr } from '../languages/tr.js'
 import { uk } from '../languages/uk.js'
 import { vi } from '../languages/vi.js'
 import { zh } from '../languages/zh.js'
-import { zhTw } from '../languages/zhTw.js'
+import { zhTW } from '../languages/zh-TW.js'
 
 export const translations = {
   ar,
@@ -61,5 +61,5 @@ export const translations = {
   uk,
   vi,
   zh,
-  'zh-TW': zhTw,
+  zhTW,
 } as SupportedLanguages

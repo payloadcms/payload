@@ -32,7 +32,7 @@ export const acceptedLanguages = [
   'uk',
   'vi',
   'zh',
-  'zh-TW',
+  'zhTW',
 
   /**
    * Languages not implemented:

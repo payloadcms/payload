@@ -1,1 +1,1 @@
-export { zhTw } from '@payloadcms/translations/languages/zhTw'
+export { zhTW } from '@payloadcms/translations/languages/zh-TW'
