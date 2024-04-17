@@ -117,13 +117,17 @@ async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean)
     warning(`Could not find tsconfig.json to add @payload-config path.`)
     return
   }
-
   const userTsConfigContent = await readFile(tsConfigPath, {
     encoding: 'utf8',
   })
   const userTsConfig = parse(userTsConfigContent) as {
     compilerOptions?: CompilerOptions
   }
+
+  const hasBaseUrl =
+    userTsConfig?.compilerOptions?.baseUrl && userTsConfig?.compilerOptions?.baseUrl !== '.'
+  const baseUrl = hasBaseUrl ? userTsConfig?.compilerOptions?.baseUrl : './'
+
   if (!userTsConfig.compilerOptions && !('extends' in userTsConfig)) {
     userTsConfig.compilerOptions = {}
   }
@@ -134,7 +138,7 @@ async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean)
   ) {
     userTsConfig.compilerOptions.paths = {
       ...(userTsConfig.compilerOptions.paths || {}),
-      '@payload-config': [`./${isSrcDir ? 'src/' : ''}payload.config.ts`],
+      '@payload-config': [`${baseUrl}${isSrcDir ? 'src/' : ''}payload.config.ts`],
     }
     await writeFile(tsConfigPath, stringify(userTsConfig, null, 2), { encoding: 'utf8' })
   }
