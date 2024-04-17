@@ -81,6 +81,8 @@ export const ar: Language = {
       invalidFileType: 'نوع ملف غير صالح',
       invalidFileTypeValue: 'نوع ملف غير صالح: {{value}}',
       loadingDocument: 'حدثت مشكلة أثناء تحميل المستند برقم التعريف {{id}}.',
+      localesNotSaved_one: 'لم يتم حفظ اللغة التالية:',
+      localesNotSaved_other: 'لم يتم حفظ اللغات التالية:',
       missingEmail: 'البريد الإلكتروني مفقود.',
       missingIDOfDocument: 'معرّف المستند المراد تحديثه مفقود.',
       missingIDOfVersion: 'معرّف النسخة مفقود.',

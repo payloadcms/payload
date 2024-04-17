@@ -82,6 +82,8 @@ export const pt: Language = {
       invalidFileType: 'Tipo de arquivo inválido',
       invalidFileTypeValue: 'Tipo de arquivo inválido: {{value}}',
       loadingDocument: 'Ocorreu um problema ao carregar o documento com ID {{id}}.',
+      localesNotSaved_one: 'A seguinte configuração regional não pôde ser salva:',
+      localesNotSaved_other: 'As seguintes configurações regionais não puderam ser salvas:',
       missingEmail: 'Email ausente.',
       missingIDOfDocument: 'ID do documento a ser atualizado ausente.',
       missingIDOfVersion: 'ID da versão ausente.',

@@ -81,6 +81,8 @@ export const rsLatin: Language = {
       invalidFileType: 'Nevalidan tip datoteke',
       invalidFileTypeValue: 'Nevalidan tip datoteke: {{value}}',
       loadingDocument: 'Postoji problem pri učitavanju dokumenta čiji je ID {{id}}.',
+      localesNotSaved_one: 'Nije moglo da se sačuva sledeće lokalno podešavanje:',
+      localesNotSaved_other: 'Nisu mogla da se sačuvaju sledeća lokalna podešavanja:',
       missingEmail: 'Nedostaje adresa e-pošte.',
       missingIDOfDocument: 'Nedostaje ID dokumenta da bi se ažurirao.',
       missingIDOfVersion: 'Nedostaje ID verzije.',

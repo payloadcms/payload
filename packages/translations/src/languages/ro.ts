@@ -83,6 +83,8 @@ export const ro: Language = {
       invalidFileType: 'Tip de fișier invalid',
       invalidFileTypeValue: 'Tip de fișier invalid: {{value}}',
       loadingDocument: 'A existat o problemă la încărcarea documentului cu ID-ul de {{id}}.',
+      localesNotSaved_one: 'Următoarea localizare nu a putut fi salvată:',
+      localesNotSaved_other: 'Următoarele localizări nu au putut fi salvate:',
       missingEmail: 'Lipsește emailul.',
       missingIDOfDocument: 'Lipsește ID-ul documentului care trebuie actualizat.',
       missingIDOfVersion: 'Lipsește ID-ul versiunii.',
