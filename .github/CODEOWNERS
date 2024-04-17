@@ -1,6 +1,7 @@
 # Order matters. The last matching pattern takes precedence.
 
-### Core ###
+### Package Exports ###
+/**/exports/ @denolfe @jmikrut
 
 ### Adapters ###
 /packages/richtext-*/ @AlessioGr
