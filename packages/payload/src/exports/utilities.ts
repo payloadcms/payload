@@ -1,3 +1,7 @@
+/**
+ * WARNING: This file contains exports that can only be safely used on the front-end
+ */
+
 export { getDataLoader } from '../collections/dataloader.js'
 export { default as getDefaultValue } from '../fields/getDefaultValue.js'
 export { promise as afterReadPromise } from '../fields/hooks/afterRead/promise.js'
