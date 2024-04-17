@@ -22,6 +22,7 @@ import type { FormFieldBase } from '../shared/index.js'
 
 export type JSONFieldProps = FormFieldBase & {
   editorOptions?: JSONFieldType['admin']['editorOptions']
+  jsonSchema?: Record<string, unknown>
   label?: FieldBase['label']
   name?: string
   path?: string
@@ -40,6 +41,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     descriptionProps,
     editorOptions,
     errorProps,
+    jsonSchema,
     label,
     labelProps,
     path: pathFromProps,
@@ -69,6 +71,25 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
     path: pathFromContext || pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const handleMount = useCallback(
+    (editor, monaco) => {
+      if (!jsonSchema) return
+
+      const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
+      const modelUri = monaco.Uri.parse(jsonSchema.uri)
+
+      const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
+      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        enableSchemaRequest: true,
+        schemas: [...existingSchemas, jsonSchema],
+        validate: true,
+      })
+
+      editor.setModel(model)
+    },
+    [jsonSchema, value],
+  )
 
   const handleChange = useCallback(
     (val) => {
@@ -122,6 +143,7 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
         <CodeEditor
           defaultLanguage="json"
           onChange={handleChange}
+          onMount={handleMount}
           options={editorOptions}
           readOnly={readOnly}
           value={stringValue}
