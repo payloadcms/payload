@@ -1,5 +1,12 @@
 /* eslint-disable no-param-reassign */
-import type { Data, Field, FormField, FormState, PayloadRequest } from 'payload/types'
+import type {
+  Data,
+  DocumentPreferences,
+  Field,
+  FormField,
+  FormState,
+  PayloadRequest,
+} from 'payload/types'
 
 import ObjectIdImport from 'bson-objectid'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
@@ -40,9 +47,8 @@ export type AddFieldStatePromiseArgs = {
   operation: 'create' | 'update'
   passesCondition: boolean
   path: string
-  preferences: {
-    [key: string]: unknown
-  }
+  preferences: DocumentPreferences
+
   /**
    * Req is used for validation and defaultValue calculation. If you don't need validation,
    * just create your own req and pass in the locale and the user
@@ -120,6 +126,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         siblingData: data,
         // @ts-expect-error-next-line
         jsonError,
+        preferences,
       })
     }
 
