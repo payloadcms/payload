@@ -78,7 +78,7 @@
   },
   "peerDependencies": {
     "http-status": "1.6.2",
-    "next": "^14.2.0-canary.23",
+    "next": "^14.3.0-canary.7",
     "payload": "workspace:*",
     "file-type": "16.5.4"
   },
