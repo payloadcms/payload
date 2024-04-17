@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  extends: ['plugin:@next/next/recommended', '@payloadcms'],
+  extends: ['plugin:@next/next/core-web-vitals', '@payloadcms'],
   ignorePatterns: ['**/payload-types.ts'],
   overrides: [
     {
