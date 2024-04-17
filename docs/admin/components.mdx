@@ -168,7 +168,7 @@ import * as React from 'react'
 import {
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
-  CustomPublishButtonProps,
+  CustomPublishButtonType,
   CustomPreviewButtonProps,
 } from 'payload/types'
 
@@ -185,7 +185,7 @@ export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
   return <DefaultButton label={label} disabled={disabled} saveDraft={saveDraft} />
 }
 
-export const CustomPublishButton: CustomPublishButtonProps = ({
+export const CustomPublishButton: CustomPublishButtonType = ({
   DefaultButton,
   disabled,
   label,

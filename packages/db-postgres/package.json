@@ -1,8 +1,12 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "The officially supported Postgres database adapter for Payload",
-  "repository": "https://github.com/payloadcms/payload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-postgres"
+  },
   "license": "MIT",
   "homepage": "https://payloadcms.com",
   "author": {

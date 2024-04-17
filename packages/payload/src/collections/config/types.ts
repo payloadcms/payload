@@ -6,7 +6,7 @@ import type { DeepRequired } from 'ts-essentials'
 import type { GeneratedTypes } from '../../'
 import type {
   CustomPreviewButtonProps,
-  CustomPublishButtonProps,
+  CustomPublishButtonType,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
@@ -21,6 +21,7 @@ import type {
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types'
+import type { DBIdentifierName } from '../../database/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { IncomingUploadType, Upload } from '../../uploads/types'
@@ -66,7 +67,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req?: PayloadRequest
+  req: PayloadRequest
 }) => any
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
@@ -105,7 +106,9 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
-  query: { [key: string]: any }
+  query: {
+    [key: string]: any
+  }
   req: PayloadRequest
 }) => any
 
@@ -115,7 +118,9 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   findMany?: boolean
-  query?: { [key: string]: any }
+  query?: {
+    [key: string]: any
+  }
   req: PayloadRequest
 }) => any
 
@@ -146,7 +151,10 @@ export type AfterErrorHook = (
   context: RequestContext,
   /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
   collection: SanitizedCollectionConfig | null,
-) => { response: any; status: number } | void
+) => {
+  response: any
+  status: number
+} | void
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
@@ -228,7 +236,7 @@ export type CollectionAdminOptions = {
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButtonProps
+      PublishButton?: CustomPublishButtonType
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
@@ -360,6 +368,11 @@ export type CollectionConfig = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
   /**
+   * Used to override the default naming of the database table or collection with your using a function or string
+   * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
+   */
+  dbName?: DBIdentifierName
+  /**
    * Default field to sort by in collection list view
    */
   defaultSort?: string
@@ -427,6 +440,7 @@ export type CollectionConfig = {
    * @default false // disable uploads
    */
   upload?: IncomingUploadType | boolean
+
   /**
    * Customize the handling of incoming file uploads
    *

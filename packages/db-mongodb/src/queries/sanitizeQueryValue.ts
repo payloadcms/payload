@@ -62,7 +62,7 @@ export const sanitizeQueryValue = ({
     formattedValue = Number(val)
   }
 
-  if (field.type === 'date' && typeof val === 'string') {
+  if (field.type === 'date' && typeof val === 'string' && operator !== 'exists') {
     formattedValue = new Date(val)
     if (Number.isNaN(Date.parse(formattedValue))) {
       return undefined
@@ -142,7 +142,10 @@ export const sanitizeQueryValue = ({
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains') {
-      formattedValue = { $options: 'i', $regex: formattedValue }
+      formattedValue = {
+        $options: 'i',
+        $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+      }
     }
   }
 

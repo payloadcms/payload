@@ -156,7 +156,9 @@ function useDraggableBlockMenu(
         return
       }
 
-      setDraggableBlockElem(_draggableBlockElem)
+      if (draggableBlockElem !== _draggableBlockElem) {
+        setDraggableBlockElem(_draggableBlockElem)
+      }
     }
 
     // Since the draggableBlockElem is outside the actual editor, we need to listen to the document
@@ -167,7 +169,7 @@ function useDraggableBlockMenu(
     return () => {
       document?.removeEventListener('mousemove', onDocumentMouseMove)
     }
-  }, [scrollerElem, anchorElem, editor, calculateDistanceFromScrollerElem])
+  }, [scrollerElem, anchorElem, editor, calculateDistanceFromScrollerElem, draggableBlockElem])
 
   useEffect(() => {
     if (menuRef.current) {
@@ -321,7 +323,9 @@ function useDraggableBlockMenu(
         } else {
           targetNode.insertBefore(draggedNode)
         }*/
-        setDraggableBlockElem(null)
+        if (draggableBlockElem !== null) {
+          setDraggableBlockElem(null)
+        }
       })
 
       return true

@@ -1,4 +1,4 @@
-import type { Block, BlockField } from 'payload/types'
+import type { Block, BlockField, FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { baseBlockFields, sanitizeFields } from 'payload/config'
 import { fieldsToJSONSchema, formatLabels, getTranslation } from 'payload/utilities'
@@ -12,8 +12,12 @@ import { INSERT_BLOCK_COMMAND } from './plugin/commands'
 import { blockPopulationPromiseHOC } from './populationPromise'
 import { blockValidationHOC } from './validate'
 
+export type LexicalBlock = Omit<Block, 'fields'> & {
+  fields: FieldWithRichTextRequiredEditor[]
+}
+
 export type BlocksFeatureProps = {
-  blocks: Block[]
+  blocks: LexicalBlock[]
 }
 
 export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
@@ -23,7 +27,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
       const blockCopy = cloneDeep(block)
       return {
         ...blockCopy,
-        fields: blockCopy.fields.concat(baseBlockFields),
+        fields: blockCopy.fields.concat(baseBlockFields as FieldWithRichTextRequiredEditor[]),
         labels: !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels,
       }
     })
@@ -36,6 +40,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
         generatedTypes: {
           modifyOutputSchema: ({
             collectionIDFieldTypes,
+            config,
             currentSchema,
             field,
             interfaceNameDefinitions,
@@ -46,15 +51,16 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
             }
 
             // sanitize blocks
-            const validRelationships = payload.config.collections.map((c) => c.slug) || []
+            const validRelationships = config?.collections?.map((c) => c.slug) || []
 
             const sanitizedBlocks = props.blocks.map((block) => {
               const blockCopy = cloneDeep(block)
               return {
                 ...blockCopy,
                 fields: sanitizeFields({
-                  config: payload.config,
+                  config,
                   fields: blockCopy.fields,
+                  requireFieldLevelRichTextEditor: true,
                   validRelationships,
                 }),
               }
@@ -73,6 +79,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
               [blocksField],
               interfaceNameDefinitions,
               payload,
+              config,
             )
 
             return currentSchema
