@@ -31,11 +31,6 @@ export default buildConfigWithDefaults({
       },
     })
 
-    const email = await payload.sendEmail({
-      to: 'test@example.com',
-      subject: 'This was sent on init',
-    })
-
     // Create image
     const imageFilePath = path.resolve(dirname, '../uploads/image.png')
     const imageFile = await getFileByPath(imageFilePath)

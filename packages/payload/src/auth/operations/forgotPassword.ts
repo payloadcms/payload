@@ -57,7 +57,7 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
       disableEmail,
       expiration,
       req: {
-        payload: { config, emailOptions, sendEmail: email },
+        payload: { config, email },
         payload,
       },
       req,
@@ -132,8 +132,8 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
       }
 
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      email({
-        from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
+      email.sendEmail({
+        from: `"${email.defaultFromName}" <${email.defaultFromAddress}>`,
         html,
         subject,
         to: data.email,

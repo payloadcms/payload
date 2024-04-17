@@ -1,6 +1,9 @@
-import type { EmailOptions } from '../config/types.js'
+import type { EmailAdapter } from './types.js'
 
-export const defaults: EmailOptions = {
-  fromAddress: 'info@payloadcms.com',
-  fromName: 'Payload',
+export const emailDefaults: Pick<
+  EmailAdapter<any, unknown>,
+  'defaultFromAddress' | 'defaultFromName'
+> = {
+  defaultFromAddress: 'info@payloadcms.com',
+  defaultFromName: 'Payload',
 }

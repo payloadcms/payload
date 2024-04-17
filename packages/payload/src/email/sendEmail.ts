@@ -1,13 +1,36 @@
 import type { SendMailOptions } from 'nodemailer'
 
-export default async function sendEmail(message: SendMailOptions): Promise<unknown> {
+import type { Payload } from '../types/index.js'
+
+export async function sendEmail(this: Payload, message: SendMailOptions): Promise<unknown> {
   let result
 
   try {
-    const email = await this.email
-    result = await email.transport.sendMail(message)
-  } catch (err) {
-    this.logger.error(err, `Failed to send mail to ${message.to}, subject: ${message.subject}`)
+    result = await this.email.sendEmail(message)
+  } catch (err: unknown) {
+    let stringifiedTo: string | undefined
+
+    if (typeof message.to === 'string') {
+      stringifiedTo = message.to
+    } else if (Array.isArray(message.to)) {
+      stringifiedTo = message.to
+        .map((to) => {
+          if (typeof to === 'string') {
+            return to
+          } else if (to.address) {
+            return to.address
+          }
+          return ''
+        })
+        .join(', ')
+    } else if (message.to.address) {
+      stringifiedTo = message.to.address
+    }
+
+    this.logger.error({
+      err,
+      msg: `Failed to send mail to ${stringifiedTo}, subject: ${message.subject ?? 'No Subject'}`,
+    })
     return err
   }
 
