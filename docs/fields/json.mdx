@@ -4,7 +4,7 @@ label: JSON
 order: 50
 desc: The JSON field type will store any string in the Database. Learn how to use JSON fields, see examples and options.
 
-keywords: json, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: json, jsonSchema, schema, validation, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
 <Banner>
@@ -68,4 +68,68 @@ export const ExampleCollection: CollectionConfig = {
     },
   ],
 }
+```
+### JSON Schema Validation
+
+Payload JSON fields fully support the [JSON schema](https://json-schema.org/) standard. By providing a schema in your field config, the editor will be guided in the admin UI, getting typeahead for properties and their formats automatically. When the document is saved, the default validation will prevent saving any invalid data in the field according to the schema in your config.
+
+If you only provide a URL to a schema, Payload will fetch the desired schema if it is publicly available. If not, it is recommended to add the schema directly to your config or import it from another file so that it can be implemented consistently in your project.
+
+
+#### JSON Schema with Local Config Example
+
+`collections/ExampleCollection.ts
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'customerJSON', // required
+      type: 'json', // required
+      jsonSchema: {
+        uri: 'a://b/foo.json', // required
+        fileMatch: ['a://b/foo.json'], // required
+        schema: {
+          type: 'object',
+          properties: {
+            foo: {
+              enum: ['bar', 'foobar'],
+            }
+          },
+        },
+      },
+
+    },
+  ],
+}
+// {"foo": "bar"} or {"foo": "foobar"} - ok
+// Attempting to create {"foo": "not-bar"} will throw an error
+```
+
+#### JSON Schema with Remote Config Example
+
+`collections/ExampleCollection.ts
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'customerJSON', // required
+      type: 'json', // required
+      jsonSchema: {
+        uri: 'https://example.com/customer.schema.json', // required
+        fileMatch: ['https://example.com/customer.schema.json'], // required
+      },
+    },
+  ],
+}
+// If 'https://example.com/customer.schema.json' has a JSON schema
+// {"foo": "bar"} or {"foo": "foobar"} - ok
+// Attempting to create {"foo": "not-bar"} will throw an error
 ```
