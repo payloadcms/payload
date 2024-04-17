@@ -1,8 +1,11 @@
 import type React from 'react'
 
-export type DescriptionFunction = () => string
+import type { CustomComponent, LabelFunction } from '../../config/types.js'
+import type { Payload } from '../../index.js'
 
-export type DescriptionComponent = React.ComponentType<FieldDescriptionProps>
+export type DescriptionFunction = LabelFunction
+
+export type DescriptionComponent = CustomComponent<FieldDescriptionProps>
 
 export type Description =
   | DescriptionComponent
@@ -15,4 +18,5 @@ export type FieldDescriptionProps = {
   className?: string
   description?: Record<string, string> | string
   marginPlacement?: 'bottom' | 'top'
+  payload?: Payload
 }

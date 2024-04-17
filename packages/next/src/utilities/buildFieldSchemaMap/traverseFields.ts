@@ -1,3 +1,4 @@
+import type { I18n } from '@payloadcms/translations'
 import type { Field, SanitizedConfig } from 'payload/types'
 
 import { tabHasName } from 'payload/types'
@@ -7,6 +8,7 @@ import type { FieldSchemaMap } from './types.js'
 type Args = {
   config: SanitizedConfig
   fields: Field[]
+  i18n: I18n
   schemaMap: FieldSchemaMap
   schemaPath: string
   validRelationships: string[]
@@ -15,6 +17,7 @@ type Args = {
 export const traverseFields = ({
   config,
   fields,
+  i18n,
   schemaMap,
   schemaPath,
   validRelationships,
@@ -28,6 +31,7 @@ export const traverseFields = ({
         traverseFields({
           config,
           fields: field.fields,
+          i18n,
           schemaMap,
           schemaPath: `${schemaPath}.${field.name}`,
           validRelationships,
@@ -39,6 +43,7 @@ export const traverseFields = ({
         traverseFields({
           config,
           fields: field.fields,
+          i18n,
           schemaMap,
           schemaPath,
           validRelationships,
@@ -54,6 +59,7 @@ export const traverseFields = ({
           traverseFields({
             config,
             fields: block.fields,
+            i18n,
             schemaMap,
             schemaPath: blockSchemaPath,
             validRelationships,
@@ -65,6 +71,7 @@ export const traverseFields = ({
         if (typeof field.editor.generateSchemaMap === 'function') {
           field.editor.generateSchemaMap({
             config,
+            i18n,
             schemaMap,
             schemaPath: `${schemaPath}.${field.name}`,
           })
@@ -83,6 +90,7 @@ export const traverseFields = ({
           traverseFields({
             config,
             fields: tab.fields,
+            i18n,
             schemaMap,
             schemaPath: tabSchemaPath,
             validRelationships,

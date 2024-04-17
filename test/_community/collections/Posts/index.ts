@@ -15,18 +15,22 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      type: 'row',
-      fields: [],
+      name: 'richText',
+      type: 'richText',
     },
-    {
-      name: 'associatedMedia',
-      type: 'upload',
-      access: {
-        create: () => true,
-        update: () => false,
-      },
-      relationTo: mediaSlug,
-    },
+    // {
+    //   type: 'row',
+    //   fields: [],
+    // },
+    // {
+    //   name: 'associatedMedia',
+    //   type: 'upload',
+    //   access: {
+    //     create: () => true,
+    //     update: () => false,
+    //   },
+    //   relationTo: mediaSlug,
+    // },
   ],
   versions: {
     drafts: true,

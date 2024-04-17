@@ -246,10 +246,10 @@ export const TOGGLE_LINK_COMMAND: LexicalCommand<LinkPayload | null> =
 export function toggleLink(payload: LinkPayload): void {
   const selection = $getSelection()
 
-  if (!$isRangeSelection(selection)) {
+  if (!$isRangeSelection(selection) && !payload.selectedNodes.length) {
     return
   }
-  const nodes = selection.extract()
+  const nodes = $isRangeSelection(selection) ? selection.extract() : payload.selectedNodes
 
   if (payload === null) {
     // Remove LinkNodes

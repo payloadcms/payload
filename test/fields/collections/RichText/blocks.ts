@@ -1,8 +1,8 @@
-import type { Block } from 'payload/types'
+import type { LexicalBlock } from '@payloadcms/richtext-lexical'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
-export const TextBlock: Block = {
+export const TextBlock: LexicalBlock = {
   fields: [
     {
       name: 'text',
@@ -13,7 +13,7 @@ export const TextBlock: Block = {
   slug: 'text',
 }
 
-export const UploadAndRichTextBlock: Block = {
+export const UploadAndRichTextBlock: LexicalBlock = {
   fields: [
     {
       name: 'upload',
@@ -30,7 +30,7 @@ export const UploadAndRichTextBlock: Block = {
   slug: 'uploadAndRichText',
 }
 
-export const RelationshipBlock: Block = {
+export const RelationshipBlock: LexicalBlock = {
   fields: [
     {
       name: 'rel',
@@ -42,7 +42,7 @@ export const RelationshipBlock: Block = {
   slug: 'relationshipBlock',
 }
 
-export const SelectFieldBlock: Block = {
+export const SelectFieldBlock: LexicalBlock = {
   fields: [
     {
       name: 'select',

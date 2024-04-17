@@ -129,6 +129,14 @@ export type MOVE_ROW = {
   type: 'MOVE_ROW'
 }
 
+export type ADD_SERVER_ERRORS = {
+  errors: {
+    field: string
+    message: string
+  }[]
+  type: 'ADD_SERVER_ERRORS'
+}
+
 export type SET_ROW_COLLAPSED = {
   collapsed: boolean
   path: string
@@ -146,6 +154,7 @@ export type SET_ALL_ROWS_COLLAPSED = {
 
 export type FieldAction =
   | ADD_ROW
+  | ADD_SERVER_ERRORS
   | DUPLICATE_ROW
   | MODIFY_CONDITION
   | MOVE_ROW

@@ -1,5 +1,7 @@
-import type { ArrayField, Block } from 'payload/types'
+import type { LexicalBlock } from '@payloadcms/richtext-lexical'
+import type { ArrayField } from 'payload/types'
 
+import { BlocksFeature } from '@payloadcms/richtext-lexical'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { textFieldsSlug } from '../Text/shared.js'
@@ -29,7 +31,7 @@ export const BlockColumns = ({ name }: { name: string }): ArrayField => ({
     },
   ],
 })
-export const ConditionalLayoutBlock: Block = {
+export const ConditionalLayoutBlock: LexicalBlock = {
   fields: [
     {
       label: 'Layout',
@@ -73,7 +75,7 @@ export const ConditionalLayoutBlock: Block = {
   slug: 'conditionalLayout',
 }
 
-export const TextBlock: Block = {
+export const TextBlock: LexicalBlock = {
   fields: [
     {
       name: 'text',
@@ -84,7 +86,7 @@ export const TextBlock: Block = {
   slug: 'text',
 }
 
-export const RadioButtonsBlock: Block = {
+export const RadioButtonsBlock: LexicalBlock = {
   interfaceName: 'LexicalBlocksRadioButtonsBlock',
   fields: [
     {
@@ -109,18 +111,41 @@ export const RadioButtonsBlock: Block = {
   slug: 'radioButtons',
 }
 
-export const RichTextBlock: Block = {
+export const RichTextBlock: LexicalBlock = {
   fields: [
     {
-      name: 'richText',
+      name: 'richTextField',
       type: 'richText',
-      editor: lexicalEditor(),
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            blocks: [
+              {
+                fields: [
+                  {
+                    name: 'subRichTextField',
+                    type: 'richText',
+                    editor: lexicalEditor({}),
+                  },
+                  {
+                    name: 'subUploadField',
+                    type: 'upload',
+                    relationTo: 'uploads',
+                  },
+                ],
+                slug: 'lexicalAndUploadBlock',
+              },
+            ],
+          }),
+        ],
+      }),
     },
   ],
-  slug: 'richText',
+  slug: 'richTextBlock',
 }
 
-export const UploadAndRichTextBlock: Block = {
+export const UploadAndRichTextBlock: LexicalBlock = {
   fields: [
     {
       name: 'upload',
@@ -137,7 +162,7 @@ export const UploadAndRichTextBlock: Block = {
   slug: 'uploadAndRichText',
 }
 
-export const RelationshipHasManyBlock: Block = {
+export const RelationshipHasManyBlock: LexicalBlock = {
   fields: [
     {
       name: 'rel',
@@ -149,7 +174,7 @@ export const RelationshipHasManyBlock: Block = {
   ],
   slug: 'relationshipHasManyBlock',
 }
-export const RelationshipBlock: Block = {
+export const RelationshipBlock: LexicalBlock = {
   fields: [
     {
       name: 'rel',
@@ -161,7 +186,7 @@ export const RelationshipBlock: Block = {
   slug: 'relationshipBlock',
 }
 
-export const SelectFieldBlock: Block = {
+export const SelectFieldBlock: LexicalBlock = {
   fields: [
     {
       name: 'select',
@@ -193,7 +218,7 @@ export const SelectFieldBlock: Block = {
   slug: 'select',
 }
 
-export const SubBlockBlock: Block = {
+export const SubBlockBlock: LexicalBlock = {
   slug: 'subBlock',
   fields: [
     {

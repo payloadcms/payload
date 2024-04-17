@@ -1,2 +1,3 @@
-export { getNextI18n } from '../utilities/getNextI18n.js'
+export { traverseFields } from '../utilities/buildFieldSchemaMap/traverseFields.js'
+export { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
 export { getPayloadHMR } from '../utilities/getPayloadHMR.js'

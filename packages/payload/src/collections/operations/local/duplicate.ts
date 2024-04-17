@@ -14,9 +14,9 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: GeneratedTypes['locale']
   id: number | string
-  locale?: string
+  locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean
@@ -50,7 +50,7 @@ export async function duplicate<TSlug extends keyof GeneratedTypes['collections'
     )
   }
 
-  const req = createLocalReq(options, payload)
+  const req = await createLocalReq(options, payload)
 
   return duplicateOperation<TSlug>({
     id,

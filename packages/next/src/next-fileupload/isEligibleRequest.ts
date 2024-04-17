@@ -1,4 +1,5 @@
-const ACCEPTABLE_CONTENT_TYPE = /^multipart\/['"()+-_]+(?:; ?['"()+-_]*)+$/i
+// eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-obscure-range
+const ACCEPTABLE_CONTENT_TYPE = /multipart\/['"()+-_]+(?:; ?['"()+-_]*)+$/i
 const UNACCEPTABLE_METHODS = new Set(['GET', 'HEAD', 'DELETE', 'OPTIONS', 'CONNECT', 'TRACE'])
 
 const hasBody = (req: Request): boolean => {

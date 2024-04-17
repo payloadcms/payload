@@ -1,10 +1,13 @@
 'use client'
 
+import type { SanitizedConfig } from 'payload/types'
+
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
-export const BeforeLogin: React.FC = () => {
+export const BeforeLogin: SanitizedConfig['admin']['components']['beforeLogin'][0] = () => {
   const translation = useTranslation()
+
   return (
     <div>
       <h3>{translation.t('general:welcome')}</h3>

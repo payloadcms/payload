@@ -7,11 +7,18 @@ import path from 'path'
  * If no tsconfig.json file is found, returns the current working directory.
  * @returns An object containing the source and output paths.
  */
-const getTSConfigPaths = (): { outPath: string; srcPath: string } => {
+const getTSConfigPaths = (): {
+  configPath?: string
+  outPath?: string
+  rootPath?: string
+  srcPath?: string
+} => {
   const tsConfigPath = findUp.sync('tsconfig.json')
 
   if (!tsConfigPath) {
-    return { outPath: process.cwd(), srcPath: process.cwd() }
+    return {
+      rootPath: process.cwd(),
+    }
   }
 
   try {
@@ -23,13 +30,25 @@ const getTSConfigPaths = (): { outPath: string; srcPath: string } => {
 
     const tsConfig = JSON.parse(rawTsConfig)
 
-    const srcPath = tsConfig.compilerOptions?.rootDir || process.cwd()
-    const outPath = tsConfig.compilerOptions?.outDir || process.cwd()
-
-    return { outPath, srcPath }
+    const rootPath = process.cwd()
+    const srcPath = tsConfig.compilerOptions?.rootDir || path.resolve(process.cwd(), 'src')
+    const outPath = tsConfig.compilerOptions?.outDir || path.resolve(process.cwd(), 'dist')
+    const tsConfigDir = path.dirname(tsConfigPath)
+    let configPath = tsConfig.compilerOptions?.paths?.['@payload-config']?.[0]
+    if (configPath) {
+      configPath = path.resolve(tsConfigDir, configPath)
+    }
+    return {
+      configPath,
+      outPath,
+      rootPath,
+      srcPath,
+    }
   } catch (error) {
     console.error(`Error parsing tsconfig.json: ${error}`) // Do not throw the error, as we can still continue with the other config path finding methods
-    return { outPath: process.cwd(), srcPath: process.cwd() }
+    return {
+      rootPath: process.cwd(),
+    }
   }
 }
 
@@ -49,12 +68,17 @@ export const findConfig = (): string => {
     return path.resolve(process.cwd(), process.env.PAYLOAD_CONFIG_PATH)
   }
 
-  const { outPath, srcPath } = getTSConfigPaths()
+  const { configPath, outPath, rootPath, srcPath } = getTSConfigPaths()
 
-  const searchPaths = process.env.NODE_ENV === 'production' ? [outPath, srcPath] : [srcPath]
+  const searchPaths =
+    process.env.NODE_ENV === 'production'
+      ? [configPath, outPath, srcPath, rootPath]
+      : [configPath, srcPath, rootPath]
 
   // eslint-disable-next-line no-restricted-syntax
   for (const searchPath of searchPaths) {
+    if (!searchPath) continue
+
     const configPath = findUp.sync(
       (dir) => {
         const tsPath = path.join(dir, 'payload.config.ts')

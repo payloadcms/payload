@@ -17,6 +17,7 @@ import type {
 } from '../../admin/types.js'
 import type { User } from '../../auth/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
+import type { CustomComponent, LabelFunction } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
@@ -80,7 +81,7 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
 export type Condition<T extends TypeWithID = any, P = any> = (
   data: Partial<T>,
   siblingData: Partial<P>,
-  { user }: { user: User },
+  { user }: { user: PayloadRequest['user'] },
 ) => boolean
 
 export type FilterOptionsProps<T = any> = {
@@ -103,7 +104,7 @@ export type FilterOptionsProps<T = any> = {
   /**
    * An object containing the currently authenticated user.
    */
-  user: Partial<User>
+  user: Partial<PayloadRequest['user']>
 }
 
 export type FilterOptions<T = any> =
@@ -114,8 +115,8 @@ export type FilterOptions<T = any> =
 type Admin = {
   className?: string
   components?: {
-    Cell?: React.ComponentType<any>
-    Field?: React.ComponentType<any>
+    Cell?: CustomComponent
+    Field?: CustomComponent
     Filter?: React.ComponentType<any>
   }
   /**
@@ -134,8 +135,8 @@ type Admin = {
 }
 
 export type Labels = {
-  plural: Record<string, string> | string
-  singular: Record<string, string> | string
+  plural: LabelFunction | Record<string, string> | string
+  singular: LabelFunction | Record<string, string> | string
 }
 
 export type BaseValidateOptions<TData, TSiblingData> = {
@@ -165,7 +166,7 @@ export type Validate<
 export type ClientValidate = Omit<Validate, 'req'>
 
 export type OptionObject = {
-  label: Record<string, string> | string
+  label: LabelFunction | Record<string, string> | string
   value: string
 }
 
@@ -193,7 +194,7 @@ export interface FieldBase {
     beforeValidate?: FieldHook[]
   }
   index?: boolean
-  label?: Record<string, string> | false | string
+  label?: LabelFunction | Record<string, string> | false | string
   localized?: boolean
   name: string
   required?: boolean
@@ -207,10 +208,10 @@ export type NumberField = FieldBase & {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
-      afterInput?: React.ComponentType<any>[]
-      beforeInput?: React.ComponentType<any>[]
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
     }
     /** Set this property to define a placeholder string for the field. */
     placeholder?: Record<string, string> | string
@@ -245,10 +246,10 @@ export type TextField = FieldBase & {
   admin?: Admin & {
     autoComplete?: string
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
-      afterInput?: React.ComponentType<any>[]
-      beforeInput?: React.ComponentType<any>[]
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
     }
     placeholder?: Record<string, string> | string
     rtl?: boolean
@@ -279,10 +280,10 @@ export type EmailField = FieldBase & {
   admin?: Admin & {
     autoComplete?: string
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
-      afterInput?: React.ComponentType<any>[]
-      beforeInput?: React.ComponentType<any>[]
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
     }
     placeholder?: Record<string, string> | string
   }
@@ -292,10 +293,10 @@ export type EmailField = FieldBase & {
 export type TextareaField = FieldBase & {
   admin?: Admin & {
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
-      afterInput?: React.ComponentType<any>[]
-      beforeInput?: React.ComponentType<any>[]
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
     }
     placeholder?: Record<string, string> | string
     rows?: number
@@ -309,10 +310,10 @@ export type TextareaField = FieldBase & {
 export type CheckboxField = FieldBase & {
   admin?: Admin & {
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
-      afterInput?: React.ComponentType<any>[]
-      beforeInput?: React.ComponentType<any>[]
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
     }
   }
   type: 'checkbox'
@@ -321,10 +322,10 @@ export type CheckboxField = FieldBase & {
 export type DateField = FieldBase & {
   admin?: Admin & {
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
-      afterInput?: React.ComponentType<any>[]
-      beforeInput?: React.ComponentType<any>[]
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
     }
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
@@ -394,6 +395,7 @@ export type UnnamedTab = Omit<TabBase, 'name'> & {
     | {
         [selectedLanguage: string]: string
       }
+    | LabelFunction
     | string
   localized?: never
 }
@@ -414,8 +416,8 @@ export type TabAsField = Tab & {
 export type UIField = {
   admin: {
     components?: {
-      Cell?: React.ComponentType<any>
-      Field: React.ComponentType<any>
+      Cell?: CustomComponent
+      Field: CustomComponent
       Filter?: React.ComponentType<any>
     }
     condition?: Condition
@@ -433,8 +435,8 @@ export type UIField = {
 export type UploadField = FieldBase & {
   admin?: {
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
     }
   }
   filterOptions?: FilterOptions
@@ -445,8 +447,8 @@ export type UploadField = FieldBase & {
 
 type CodeAdmin = Admin & {
   components?: {
-    Error?: React.ComponentType<ErrorProps>
-    Label?: React.ComponentType<LabelProps>
+    Error?: CustomComponent<ErrorProps>
+    Label?: CustomComponent<LabelProps>
   }
   editorOptions?: EditorProps['options']
   language?: string
@@ -461,8 +463,8 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
 
 type JSONAdmin = Admin & {
   components?: {
-    Error?: React.ComponentType<ErrorProps>
-    Label?: React.ComponentType<LabelProps>
+    Error?: CustomComponent<ErrorProps>
+    Label?: CustomComponent<LabelProps>
   }
   editorOptions?: EditorProps['options']
 }
@@ -475,8 +477,8 @@ export type JSONField = Omit<FieldBase, 'admin'> & {
 export type SelectField = FieldBase & {
   admin?: Admin & {
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
     }
     isClearable?: boolean
     isSortable?: boolean
@@ -531,8 +533,8 @@ type SharedRelationshipProperties = FieldBase & {
 type RelationshipAdmin = Admin & {
   allowCreate?: boolean
   components?: {
-    Error?: React.ComponentType<ErrorProps>
-    Label?: React.ComponentType<LabelProps>
+    Error?: CustomComponent<ErrorProps>
+    Label?: CustomComponent<LabelProps>
   }
   isSortable?: boolean
 }
@@ -572,8 +574,8 @@ export type RichTextField<
 > = FieldBase & {
   admin?: Admin & {
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
     }
   }
   editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
@@ -616,8 +618,8 @@ export type ArrayField = FieldBase & {
 export type RadioField = FieldBase & {
   admin?: Admin & {
     components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
+      Error?: CustomComponent<ErrorProps>
+      Label?: CustomComponent<LabelProps>
     }
     layout?: 'horizontal' | 'vertical'
   }

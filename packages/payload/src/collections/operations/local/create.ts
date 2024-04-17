@@ -23,10 +23,10 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: GeneratedTypes['locale']
   file?: File
   filePath?: string
-  locale?: string
+  locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   req?: PayloadRequest
@@ -34,6 +34,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   user?: Document
 }
 
+// eslint-disable-next-line no-restricted-exports
 export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<TSlug>,
@@ -58,7 +59,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     )
   }
 
-  const req = createLocalReq(options, payload)
+  const req = await createLocalReq(options, payload)
   req.file = file ?? (await getFileByPath(filePath))
 
   return createOperation<TSlug>({

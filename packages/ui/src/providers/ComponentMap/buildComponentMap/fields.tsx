@@ -1,3 +1,5 @@
+import type { I18n } from '@payloadcms/translations'
+import type { CustomComponent } from 'packages/payload/src/config/types.js'
 import type {
   CellComponentProps,
   DescriptionComponent,
@@ -7,13 +9,20 @@ import type {
   FieldDescriptionProps,
   FieldWithPath,
   LabelProps,
+  Option,
   RowLabelComponent,
   SanitizedConfig,
+  WithServerSideProps as WithServerSidePropsType,
 } from 'payload/types'
 
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import { isPlainFunction, isReactComponent } from 'payload/utilities'
+import {
+  isPlainFunction,
+  isReactClientComponent,
+  isReactComponent,
+  isReactServerComponent,
+} from 'payload/utilities'
 import React, { Fragment } from 'react'
 
 import type { ArrayFieldProps } from '../../../fields/Array/index.js'
@@ -48,6 +57,7 @@ import type {
 import { HiddenInput } from '../../../fields/HiddenInput/index.js'
 
 export const mapFields = (args: {
+  WithServerSideProps: WithServerSidePropsType
   config: SanitizedConfig
   /**
    * If mapFields is used outside of collections, you might not want it to add an id field
@@ -55,22 +65,25 @@ export const mapFields = (args: {
   disableAddingID?: boolean
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
+  i18n: I18n
   parentPath?: string
   readOnly?: boolean
 }): FieldMap => {
   const {
+    WithServerSideProps,
     config,
     disableAddingID,
     fieldSchema,
     filter,
+    i18n,
+    i18n: { t },
     parentPath,
     readOnly: readOnlyOverride,
   } = args
 
   const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
-    let CustomFieldComponent: React.ComponentType<FieldComponentProps> =
-      field.admin?.components?.Field
+    let CustomFieldComponent: CustomComponent<FieldComponentProps> = field.admin?.components?.Field
 
     const CustomCellComponent = field.admin?.components?.Cell
 
@@ -97,7 +110,7 @@ export const mapFields = (args: {
             Array.isArray(field.admin?.components?.afterInput) && (
               <Fragment>
                 {field.admin.components.afterInput.map((Component, i) => (
-                  <Component key={i} />
+                  <WithServerSideProps Component={Component} key={i} />
                 ))}
               </Fragment>
             )) ||
@@ -110,7 +123,7 @@ export const mapFields = (args: {
             Array.isArray(field.admin.components.beforeInput) && (
               <Fragment>
                 {field.admin.components.beforeInput.map((Component, i) => (
-                  <Component key={i} />
+                  <WithServerSideProps Component={Component} key={i} />
                 ))}
               </Fragment>
             )) ||
@@ -128,12 +141,12 @@ export const mapFields = (args: {
           ('admin' in field &&
             field.admin?.components &&
             'Label' in field.admin.components &&
-            field.admin?.components?.Label) ||
+            field.admin.components?.Label) ||
           undefined
 
         const CustomLabel =
           CustomLabelComponent !== undefined ? (
-            <CustomLabelComponent {...(labelProps || {})} />
+            <WithServerSideProps Component={CustomLabelComponent} {...(labelProps || {})} />
           ) : undefined
 
         const descriptionProps: FieldDescriptionProps = {
@@ -145,7 +158,7 @@ export const mapFields = (args: {
                 field.admin.description) ||
                 (typeof field.admin?.description === 'function' &&
                   isPlainFunction<DescriptionFunction>(field.admin?.description) &&
-                  field.admin?.description()))) ||
+                  field.admin?.description({ t })))) ||
             undefined,
         }
 
@@ -159,7 +172,10 @@ export const mapFields = (args: {
 
         const CustomDescription =
           CustomDescriptionComponent !== undefined ? (
-            <CustomDescriptionComponent {...(descriptionProps || {})} />
+            <WithServerSideProps
+              Component={CustomDescriptionComponent}
+              {...(descriptionProps || {})}
+            />
           ) : undefined
 
         const errorProps = {
@@ -175,7 +191,7 @@ export const mapFields = (args: {
 
         const CustomError =
           CustomErrorComponent !== undefined ? (
-            <CustomErrorComponent {...(errorProps || {})} />
+            <WithServerSideProps Component={CustomErrorComponent} {...(errorProps || {})} />
           ) : undefined
 
         const baseFieldProps: FormFieldBase = {
@@ -194,6 +210,21 @@ export const mapFields = (args: {
 
         let fieldComponentProps: FieldComponentProps
 
+        let fieldOptions: Option[]
+
+        if ('options' in field) {
+          fieldOptions = field.options.map((option) => {
+            if (typeof option === 'object' && typeof option.label === 'function') {
+              return {
+                label: option.label({ t: i18n.t }),
+                value: option.value,
+              }
+            }
+
+            return option
+          })
+        }
+
         const cellComponentProps: CellComponentProps = {
           name: 'name' in field ? field.name : undefined,
           fieldType: field.type,
@@ -203,7 +234,7 @@ export const mapFields = (args: {
               ? field.label
               : undefined,
           labels: 'labels' in field ? field.labels : undefined,
-          options: 'options' in field ? field.options : undefined,
+          options: 'options' in field ? fieldOptions : undefined,
           relationTo: 'relationTo' in field ? field.relationTo : undefined,
         }
 
@@ -219,7 +250,7 @@ export const mapFields = (args: {
               isReactComponent<RowLabelComponent>(field.admin.components.RowLabel)
             ) {
               const CustomRowLabelComponent = field.admin.components.RowLabel
-              CustomRowLabel = <CustomRowLabelComponent />
+              CustomRowLabel = <WithServerSideProps Component={CustomRowLabelComponent} />
             }
 
             const arrayFieldProps: Omit<ArrayFieldProps, 'indexPath' | 'permissions'> = {
@@ -229,9 +260,11 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
+                WithServerSideProps,
                 config,
                 fieldSchema: field.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
@@ -251,9 +284,11 @@ export const mapFields = (args: {
           case 'blocks': {
             const blocks = field.blocks.map((block) => {
               const blockFieldMap = mapFields({
+                WithServerSideProps,
                 config,
                 fieldSchema: block.fields,
                 filter,
+                i18n,
                 parentPath: `${path}.${block.slug}`,
                 readOnly: readOnlyOverride,
               })
@@ -333,7 +368,9 @@ export const mapFields = (args: {
 
             if (isReactComponent(field.label) || isPlainFunction(field.label)) {
               const CustomCollapsibleLabelComponent = field.label as RowLabelComponent
-              CustomCollapsibleLabel = <CustomCollapsibleLabelComponent />
+              CustomCollapsibleLabel = (
+                <WithServerSideProps Component={CustomCollapsibleLabelComponent} />
+              )
             }
 
             const collapsibleField: Omit<CollapsibleFieldProps, 'indexPath' | 'permissions'> = {
@@ -342,10 +379,12 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
+                WithServerSideProps,
                 config,
                 disableAddingID: true,
                 fieldSchema: field.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
@@ -403,10 +442,12 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
+                WithServerSideProps,
                 config,
                 disableAddingID: true,
                 fieldSchema: field.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
@@ -501,14 +542,14 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               label: field.label,
-              options: field.options,
+              options: fieldOptions,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
               width: field.admin?.width,
             }
 
-            cellComponentProps.options = field.options
+            cellComponentProps.options = fieldOptions
             fieldComponentProps = radioField
             break
           }
@@ -529,7 +570,12 @@ export const mapFields = (args: {
             const RichTextCellComponent = field.editor.CellComponent
 
             if (typeof field.editor.generateComponentMap === 'function') {
-              const result = field.editor.generateComponentMap({ config, schemaPath: path })
+              const result = field.editor.generateComponentMap({
+                WithServerSideProps,
+                config,
+                i18n,
+                schemaPath: path,
+              })
               richTextField.richTextComponentMap = result
               cellComponentProps.richTextComponentMap = result
             }
@@ -539,7 +585,9 @@ export const mapFields = (args: {
             }
 
             if (RichTextCellComponent) {
-              cellComponentProps.CellComponentOverride = <RichTextCellComponent />
+              cellComponentProps.CellComponentOverride = (
+                <WithServerSideProps Component={RichTextCellComponent} />
+              )
             }
 
             fieldComponentProps = richTextField
@@ -552,10 +600,12 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
+                WithServerSideProps,
                 config,
                 disableAddingID: true,
                 fieldSchema: field.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               }),
@@ -572,10 +622,12 @@ export const mapFields = (args: {
             // `tabs` fields require a field map of each of its tab's nested fields
             const tabs = field.tabs.map((tab) => {
               const tabFieldMap = mapFields({
+                WithServerSideProps,
                 config,
                 disableAddingID: true,
                 fieldSchema: tab.fields,
                 filter,
+                i18n,
                 parentPath: path,
                 readOnly: readOnlyOverride,
               })
@@ -676,14 +728,14 @@ export const mapFields = (args: {
               hasMany: field.hasMany,
               isClearable: field.admin?.isClearable,
               label: field.label,
-              options: field.options,
+              options: fieldOptions,
               readOnly: field.admin?.readOnly,
               required: field.required,
               style: field.admin?.style,
               width: field.admin?.width,
             }
 
-            cellComponentProps.options = field.options
+            cellComponentProps.options = fieldOptions
             fieldComponentProps = selectField
             break
           }
@@ -696,10 +748,10 @@ export const mapFields = (args: {
           name: 'name' in field ? field.name : undefined,
           type: field.type,
           CustomCell: CustomCellComponent ? (
-            <CustomCellComponent {...cellComponentProps} />
+            <WithServerSideProps Component={CustomCellComponent} {...cellComponentProps} />
           ) : undefined,
           CustomField: CustomFieldComponent ? (
-            <CustomFieldComponent {...fieldComponentProps} />
+            <WithServerSideProps Component={CustomFieldComponent} {...fieldComponentProps} />
           ) : undefined,
           cellComponentProps,
           disableBulkEdit:

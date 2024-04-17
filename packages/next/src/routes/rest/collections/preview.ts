@@ -1,4 +1,5 @@
 import httpStatus from 'http-status'
+import { extractJWT } from 'payload/auth'
 import { findByIDOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
@@ -24,15 +25,19 @@ export const preview: CollectionRouteHandlerWithID = async ({ id, collection, re
     (config) => config.slug === collection.config.slug,
   )?.admin?.preview
 
+  const token = extractJWT(req)
+
   if (typeof generatePreviewURL === 'function') {
     try {
       previewURL = await generatePreviewURL(result, {
         locale: req.locale,
-        token: req.user?.token,
+        req,
+        token,
       })
     } catch (err) {
-      routeError({
+      return routeError({
         collection,
+        config: req.payload.config,
         err,
         req,
       })

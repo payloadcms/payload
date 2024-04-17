@@ -1,9 +1,8 @@
 import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
-import type { FieldWithRichTextRequiredEditor } from 'payload/types'
+import type { Field, FieldWithRichTextRequiredEditor } from 'payload/types'
 
-import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/client'
+import { traverseFields } from '@payloadcms/next/utilities'
 
 import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'
@@ -67,18 +66,34 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           disabledCollections: props.disabledCollections,
           enabledCollections: props.enabledCollections,
         } as ExclusiveLinkCollectionsProps,
-        generateSchemaMap: ({ config, props }) => {
-          const i18n = initI18n({ config: config.i18n, context: 'client', translations })
-
-          return {
-            fields: transformExtraFields(
-              props.fields,
-              config,
-              i18n,
-              props.enabledCollections,
-              props.disabledCollections,
-            ),
+        generateSchemaMap: ({ config, i18n, props }) => {
+          if (!props?.fields || !Array.isArray(props.fields) || props.fields.length === 0) {
+            return null
           }
+          const schemaMap = new Map<string, Field[]>()
+
+          const validRelationships = config.collections.map((c) => c.slug) || []
+
+          const transformedFields = transformExtraFields(
+            props.fields,
+            config,
+            i18n,
+            props.enabledCollections,
+            props.disabledCollections,
+          )
+
+          schemaMap.set('fields', transformedFields)
+
+          traverseFields({
+            config,
+            fields: transformedFields,
+            i18n,
+            schemaMap,
+            schemaPath: 'fields',
+            validRelationships,
+          })
+
+          return schemaMap
         },
         nodes: [
           {

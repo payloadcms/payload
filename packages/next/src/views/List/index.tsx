@@ -78,7 +78,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       CustomListView = CustomList.Component
     }
 
-    const page = isNumber(query?.page) ? query.page : 0
+    const page = isNumber(query?.page) ? Number(query.page) : 0
     const whereQuery = mergeListSearchAndWhere({
       collectionConfig,
       query: {
@@ -87,7 +87,7 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       },
     })
     const limit = isNumber(query?.limit)
-      ? query.limit
+      ? Number(query.limit)
       : listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
     const sort =
       query?.sort && typeof query.sort === 'string'
@@ -117,7 +117,10 @@ export const ListView: React.FC<AdminViewProps> = async ({ initPageResult, searc
       <Fragment>
         <HydrateClientUser permissions={permissions} user={user} />
         <ListInfoProvider
-          collectionConfig={createClientCollectionConfig(collectionConfig)}
+          collectionConfig={createClientCollectionConfig({
+            collection: collectionConfig,
+            t: initPageResult.req.i18n.t,
+          })}
           collectionSlug={collectionSlug}
           hasCreatePermission={permissions?.collections?.[collectionSlug]?.create?.permission}
           newDocumentURL={`${admin}/collections/${collectionSlug}/create`}

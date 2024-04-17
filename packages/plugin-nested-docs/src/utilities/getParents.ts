@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import type { PluginConfig } from '../types.js'
 
-const getParents = async (
+export const getParents = async (
   req: any,
   pluginConfig: PluginConfig,
   collection: CollectionConfig,
@@ -44,5 +44,3 @@ const getParents = async (
 
   return docs
 }
-
-export default getParents

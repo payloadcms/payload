@@ -3,16 +3,7 @@ import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { UploadConfig } from './types.js'
 
-import { extractTranslations } from '../translations/extractTranslations.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
-
-const labels = extractTranslations([
-  'upload:width',
-  'upload:height',
-  'upload:fileSize',
-  'upload:fileName',
-  'upload:sizes',
-])
 
 type GenerateURLArgs = {
   collectionSlug: string
@@ -87,7 +78,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       hidden: true,
       readOnly: true,
     },
-    label: labels['upload:width'],
+    label: ({ t }) => t('upload:width'),
   }
 
   const height: Field = {
@@ -97,7 +88,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       hidden: true,
       readOnly: true,
     },
-    label: labels['upload:height'],
+    label: ({ t }) => t('upload:height'),
   }
 
   const filesize: Field = {
@@ -107,7 +98,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       hidden: true,
       readOnly: true,
     },
-    label: labels['upload:fileSize'],
+    label: ({ t }) => t('upload:fileSize'),
   }
 
   const filename: Field = {
@@ -119,7 +110,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       readOnly: true,
     },
     index: true,
-    label: labels['upload:fileName'],
+    label: ({ t }) => t('upload:fileName'),
     unique: true,
   }
 
@@ -201,7 +192,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           ],
           label: size.name,
         })),
-        label: labels['upload:Sizes'],
+        label: ({ t }) => t('upload:Sizes'),
       },
     ])
   }

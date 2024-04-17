@@ -65,7 +65,9 @@ const globalSchema = joi
       beforeRead: joi.array().items(joi.func()),
       beforeValidate: joi.array().items(joi.func()),
     }),
-    label: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
+    label: joi
+      .alternatives()
+      .try(joi.func(), joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
     typescript: joi.object().keys({
       interface: joi.string(),
     }),

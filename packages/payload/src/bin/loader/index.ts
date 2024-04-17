@@ -26,6 +26,11 @@ type ResolveFn = (...args: Required<ResolveArgs>) => Promise<ResolveResult>
 const locatedConfig = getTsconfig()
 const tsconfig = locatedConfig.config.compilerOptions as unknown as ts.CompilerOptions
 
+// Ensure baseUrl is set in order to support paths
+if (!tsconfig.baseUrl) {
+  tsconfig.baseUrl = '.'
+}
+
 // Don't resolve d.ts files, because we aren't type-checking
 tsconfig.noDtsResolution = true
 tsconfig.module = ts.ModuleKind.ESNext
@@ -78,7 +83,6 @@ export const resolve: ResolveFn = async (specifier, context, nextResolve) => {
   // and keep going
   let nextResult: ResolveResult
 
-  // First, try to
   if (!isTS) {
     try {
       nextResult = await nextResolve(specifier, context, nextResolve)

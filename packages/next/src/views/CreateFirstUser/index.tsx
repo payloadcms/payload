@@ -1,9 +1,11 @@
-import type { Field } from 'payload/types'
+import type { FieldTypes } from 'payload/config'
+import type { Field, WithServerSideProps as WithServerSidePropsType } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
 import { Form } from '@payloadcms/ui/forms/Form'
 import { FormSubmit } from '@payloadcms/ui/forms/Submit'
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
+import { WithServerSideProps as WithServerSidePropsGeneric } from '@payloadcms/ui/providers/ComponentMap'
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
 import React from 'react'
 
@@ -16,6 +18,8 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
   const {
     req,
     req: {
+      i18n,
+      payload,
       payload: {
         config,
         config: {
@@ -48,10 +52,35 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     },
   ]
 
+  const WithServerSideProps: WithServerSidePropsType = ({ Component, ...rest }) => {
+    return <WithServerSidePropsGeneric Component={Component} payload={payload} {...rest} />
+  }
+
   const createFirstUserFieldMap = mapFields({
+    WithServerSideProps,
     config,
     fieldSchema: fields,
+    i18n,
     parentPath: userSlug,
+  }).map((field) => {
+    // Transform field types for the password and confirm-password fields
+    if (field.name === 'password') {
+      const type: keyof FieldTypes = 'password'
+
+      return {
+        ...field,
+        type,
+      }
+    }
+    if (field.name === 'confirm-password') {
+      const type: keyof FieldTypes = 'confirmPassword'
+
+      return {
+        ...field,
+        type,
+      }
+    }
+    return field
   })
 
   const formState = await buildStateFromSchema({

@@ -64,14 +64,16 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
   const tabsPrefKey = `tabs-${indexPath}`
 
   useEffect(() => {
-    const getInitialPref = async () => {
-      const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
-      const initialIndex = path
-        ? existingPreferences?.fields?.[path]?.tabIndex
-        : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
-      setActiveTabIndex(initialIndex || 0)
+    if (preferencesKey) {
+      const getInitialPref = async () => {
+        const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
+        const initialIndex = path
+          ? existingPreferences?.fields?.[path]?.tabIndex
+          : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
+        setActiveTabIndex(initialIndex || 0)
+      }
+      void getInitialPref()
     }
-    void getInitialPref()
   }, [path, getPreference, preferencesKey, tabsPrefKey])
 
   const handleTabChange = useCallback(
@@ -80,28 +82,30 @@ const TabsField: React.FC<TabsFieldProps> = (props) => {
 
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
-      void setPreference(preferencesKey, {
-        ...existingPreferences,
-        ...(path
-          ? {
-              fields: {
-                ...(existingPreferences?.fields || {}),
-                [path]: {
-                  ...existingPreferences?.fields?.[path],
-                  tabIndex: incomingTabIndex,
+      if (preferencesKey) {
+        void setPreference(preferencesKey, {
+          ...existingPreferences,
+          ...(path
+            ? {
+                fields: {
+                  ...(existingPreferences?.fields || {}),
+                  [path]: {
+                    ...existingPreferences?.fields?.[path],
+                    tabIndex: incomingTabIndex,
+                  },
                 },
-              },
-            }
-          : {
-              fields: {
-                ...existingPreferences?.fields,
-                [tabsPrefKey]: {
-                  ...existingPreferences?.fields?.[tabsPrefKey],
-                  tabIndex: incomingTabIndex,
+              }
+            : {
+                fields: {
+                  ...existingPreferences?.fields,
+                  [tabsPrefKey]: {
+                    ...existingPreferences?.fields?.[tabsPrefKey],
+                    tabIndex: incomingTabIndex,
+                  },
                 },
-              },
-            }),
-      })
+              }),
+        })
+      }
     },
     [preferencesKey, getPreference, setPreference, path, tabsPrefKey],
   )

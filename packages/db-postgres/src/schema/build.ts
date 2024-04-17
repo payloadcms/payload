@@ -66,13 +66,6 @@ export const buildTable = ({
   const columns: Record<string, PgColumnBuilder> = baseColumns
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
 
-  let hasLocalizedField = false
-  let hasLocalizedRelationshipField = false
-  let hasManyTextField: 'index' | boolean = false
-  let hasManyNumberField: 'index' | boolean = false
-  let hasLocalizedManyTextField = false
-  let hasLocalizedManyNumberField = false
-
   const localesColumns: Record<string, PgColumnBuilder> = {}
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
   let localesTable: GenericTable | PgTableWithColumns<any>
@@ -89,7 +82,7 @@ export const buildTable = ({
 
   const idColType: IDType = setColumnID({ adapter, columns, fields })
 
-  ;({
+  const {
     hasLocalizedField,
     hasLocalizedManyNumberField,
     hasLocalizedManyTextField,
@@ -116,7 +109,7 @@ export const buildTable = ({
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
     versions,
-  }))
+  })
 
   if (timestamps) {
     columns.createdAt = timestamp('created_at', {
@@ -298,11 +291,12 @@ export const buildTable = ({
           throwValidationError: true,
         })
         let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
-        const relatedCollectionCustomID = relationshipConfig.fields.find(
-          (field) => fieldAffectsData(field) && field.name === 'id',
-        )
-        if (relatedCollectionCustomID?.type === 'number') colType = 'numeric'
-        if (relatedCollectionCustomID?.type === 'text') colType = 'varchar'
+
+        const relatedCollectionCustomIDType =
+          adapter.payload.collections[relationshipConfig.slug]?.customIDType
+
+        if (relatedCollectionCustomIDType === 'number') colType = 'numeric'
+        if (relatedCollectionCustomIDType === 'text') colType = 'varchar'
 
         relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
           `${formattedRelationTo}_id`,

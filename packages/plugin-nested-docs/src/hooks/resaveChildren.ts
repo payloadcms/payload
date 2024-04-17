@@ -2,7 +2,7 @@ import type { CollectionAfterChangeHook, CollectionConfig, PayloadRequest } from
 
 import type { PluginConfig } from '../types.js'
 
-import populateBreadcrumbs from '../utilities/populateBreadcrumbs.js'
+import { populateBreadcrumbs } from '../utilities/populateBreadcrumbs.js'
 
 type ResaveArgs = {
   collection: CollectionConfig
@@ -65,7 +65,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
   }
 }
 
-const resaveChildren =
+export const resaveChildren =
   (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
   async ({ doc, req }) => {
     await resave({
@@ -88,4 +88,3 @@ const resaveChildren =
 
     return undefined
   }
-export default resaveChildren

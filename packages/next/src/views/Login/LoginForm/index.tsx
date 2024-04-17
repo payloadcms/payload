@@ -6,7 +6,7 @@ import React from 'react'
 const baseClass = 'login__form'
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-import type { FormState } from 'payload/types'
+import type { FormState, PayloadRequest } from 'payload/types'
 
 import { FormLoadingOverlayToggle } from '@payloadcms/ui/elements/Loading'
 import { Email } from '@payloadcms/ui/fields/Email'
@@ -15,6 +15,7 @@ import { Form } from '@payloadcms/ui/forms/Form'
 import { FormSubmit } from '@payloadcms/ui/forms/Submit'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { email, password } from 'payload/fields/validations'
 
 import './index.scss'
 
@@ -57,8 +58,43 @@ export const LoginForm: React.FC<{
     >
       <FormLoadingOverlayToggle action="loading" name="login-form" />
       <div className={`${baseClass}__inputWrap`}>
-        <Email autoComplete="email" label={t('general:email')} name="email" required />
-        <Password autoComplete="off" label={t('general:password')} name="password" required />
+        <Email
+          autoComplete="email"
+          label={t('general:email')}
+          name="email"
+          required
+          validate={(value) =>
+            email(value, {
+              name: 'email',
+              type: 'email',
+              data: {},
+              req: { t } as PayloadRequest,
+              required: true,
+              siblingData: {},
+            })
+          }
+        />
+        <Password
+          autoComplete="off"
+          label={t('general:password')}
+          name="password"
+          required
+          validate={(value) =>
+            password(value, {
+              name: 'password',
+              type: 'text',
+              data: {},
+              req: {
+                payload: {
+                  config,
+                },
+                t,
+              } as PayloadRequest,
+              required: true,
+              siblingData: {},
+            })
+          }
+        />
       </div>
       <Link href={`${admin}/forgot`}>{t('authentication:forgotPasswordQuestion')}</Link>
       <FormSubmit>{t('authentication:login')}</FormSubmit>

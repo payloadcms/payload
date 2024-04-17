@@ -10,10 +10,12 @@ import type {
 import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
+  CustomComponent,
   EditConfig,
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
+  LabelFunction,
   LivePreviewConfig,
 } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
@@ -200,10 +202,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    AfterList?: React.ComponentType<any>[]
-    AfterListTable?: React.ComponentType<any>[]
-    BeforeList?: React.ComponentType<any>[]
-    BeforeListTable?: React.ComponentType<any>[]
+    AfterList?: CustomComponent[]
+    AfterListTable?: CustomComponent[]
+    BeforeList?: CustomComponent[]
+    BeforeListTable?: CustomComponent[]
     /**
      * Components within the edit view
      */
@@ -238,7 +240,7 @@ export type CollectionAdminOptions = {
       List?:
         | {
             Component?: React.ComponentType<any>
-            actions?: React.ComponentType<any>[]
+            actions?: CustomComponent[]
           }
         | React.ComponentType<any>
     }
@@ -360,8 +362,8 @@ export type CollectionConfig = {
    * Label configuration
    */
   labels?: {
-    plural?: Record<string, string> | string
-    singular?: Record<string, string> | string
+    plural?: LabelFunction | Record<string, string> | string
+    singular?: LabelFunction | Record<string, string> | string
   }
   slug: string
   /**
@@ -407,6 +409,7 @@ export interface SanitizedCollectionConfig
 
 export type Collection = {
   config: SanitizedCollectionConfig
+  customIDType?: 'number' | 'text'
   graphQL?: {
     JWT: GraphQLObjectType
     mutationInputType: GraphQLNonNull<any>

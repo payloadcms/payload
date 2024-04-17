@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-alpha.59",
+  "version": "3.0.0-beta.11",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -127,7 +127,7 @@
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "14.2.0-canary.22",
+    "next": "^14.2.0-canary.23",
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
     "open": "^10.1.0",
@@ -163,7 +163,7 @@
     "react": "18.2.0"
   },
   "engines": {
-    "node": ">=18.17.0",
+    "node": ">=18.20.2",
     "pnpm": ">=8"
   },
   "lint-staged": {

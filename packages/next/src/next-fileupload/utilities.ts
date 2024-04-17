@@ -19,7 +19,7 @@ let tempCounter = 0
 export const debugLog = (options: NextFileUploadOptions, msg: string) => {
   const opts = options || {}
   if (!opts.debug) return false
-  console.log(`Express-file-upload: ${msg}`) // eslint-disable-line
+  console.log(`Next-file-upload: ${msg}`) // eslint-disable-line
   return true
 }
 
@@ -287,8 +287,9 @@ export const parseFileName: ParseFileName = (opts, fileName) => {
       ? opts.safeFileNames
       : SAFE_FILE_NAME_REGEX
   // Parse file name extension.
-  let { name, extension } = parseFileNameExtension(opts.preserveExtension, parsedName)
-  if (extension.length) extension = '.' + extension.replace(nameRegex, '')
+  const parsedFileName = parseFileNameExtension(opts.preserveExtension, parsedName)
+  if (parsedFileName.extension.length)
+    parsedFileName.extension = '.' + parsedFileName.extension.replace(nameRegex, '')
 
-  return name.replace(nameRegex, '').concat(extension)
+  return parsedFileName.name.replace(nameRegex, '').concat(parsedFileName.extension)
 }

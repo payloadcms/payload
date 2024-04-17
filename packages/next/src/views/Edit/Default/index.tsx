@@ -22,8 +22,8 @@ import React, { Fragment, useCallback } from 'react'
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
 // import { getTranslation } from '@payloadcms/translations'
 import { Auth } from './Auth/index.js'
+import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import { SetStepNav } from './SetStepNav/index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'
@@ -202,7 +202,7 @@ export const DefaultEditView: React.FC = () => {
           />
           {BeforeDocument}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <SetStepNav
+          <SetDocumentStepNav
             collectionSlug={collectionConfig?.slug}
             globalSlug={globalConfig?.slug}
             id={id}

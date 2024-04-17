@@ -1248,46 +1248,164 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([post1])
       })
 
-      describe('limit', () => {
+      describe('pagination', () => {
+        let relatedDoc
+
         beforeEach(async () => {
-          await mapAsync([...Array(50)], async (_, i) =>
-            createPost({ number: i, title: 'limit-test' }),
-          )
-        })
-
-        it('should query a limited set of docs', async () => {
-          const response = await restClient.GET(`/${slug}`, {
-            query: {
-              where: {
-                title: {
-                  equals: 'limit-test',
-                },
-              },
-              limit: 15,
+          relatedDoc = await payload.create({
+            collection: relationSlug,
+            data: {
+              name: 'test',
             },
           })
-          const result = await response.json()
-
-          expect(response.status).toEqual(200)
-          expect(result.docs).toHaveLength(15)
+          await mapAsync([...Array(10)], async (_, i) => {
+            await createPost({
+              number: i,
+              relationField: relatedDoc.id as string,
+              title: 'paginate-test',
+            })
+          })
         })
 
-        it('should query all docs when limit=0', async () => {
-          const response = await restClient.GET(`/${slug}`, {
-            query: {
-              where: {
-                title: {
-                  equals: 'limit-test',
-                },
+        it('should paginate with where query', async () => {
+          const query = {
+            limit: 4,
+            where: {
+              title: {
+                equals: 'paginate-test',
               },
-              limit: 0,
             },
-          })
-          const result = await response.json()
+          }
+          let response = await restClient.GET(`/${slug}`, { query })
+          const page1 = await response.json()
 
-          expect(response.status).toEqual(200)
-          expect(result.docs).toHaveLength(50)
-          expect(result.totalPages).toEqual(1)
+          response = await restClient.GET(`/${slug}`, { query: { ...query, page: 2 } })
+          const page2 = await response.json()
+
+          response = await restClient.GET(`/${slug}`, { query: { ...query, page: 3 } })
+          const page3 = await response.json()
+
+          expect(page1.hasNextPage).toStrictEqual(true)
+          expect(page1.hasPrevPage).toStrictEqual(false)
+          expect(page1.limit).toStrictEqual(4)
+          expect(page1.nextPage).toStrictEqual(2)
+          expect(page1.page).toStrictEqual(1)
+          expect(page1.pagingCounter).toStrictEqual(1)
+          expect(page1.prevPage).toStrictEqual(null)
+          expect(page1.totalDocs).toStrictEqual(10)
+          expect(page1.totalPages).toStrictEqual(3)
+
+          expect(page2.hasNextPage).toStrictEqual(true)
+          expect(page2.hasPrevPage).toStrictEqual(true)
+          expect(page2.limit).toStrictEqual(4)
+          expect(page2.nextPage).toStrictEqual(3)
+          expect(page2.page).toStrictEqual(2)
+          expect(page2.pagingCounter).toStrictEqual(5)
+          expect(page2.prevPage).toStrictEqual(1)
+          expect(page2.totalDocs).toStrictEqual(10)
+          expect(page2.totalPages).toStrictEqual(3)
+
+          expect(page3.hasNextPage).toStrictEqual(false)
+          expect(page3.hasPrevPage).toStrictEqual(true)
+          expect(page3.limit).toStrictEqual(4)
+          expect(page3.nextPage).toStrictEqual(null)
+          expect(page3.page).toStrictEqual(3)
+          expect(page3.pagingCounter).toStrictEqual(9)
+          expect(page3.prevPage).toStrictEqual(2)
+          expect(page3.totalDocs).toStrictEqual(10)
+          expect(page3.totalPages).toStrictEqual(3)
+        })
+
+        it('should paginate with where query on relationships', async () => {
+          const query = {
+            limit: 4,
+            where: {
+              relationField: {
+                equals: relatedDoc.id,
+              },
+            },
+          }
+          let response = await restClient.GET(`/${slug}`, { query })
+          const page1 = await response.json()
+
+          response = await restClient.GET(`/${slug}`, { query: { ...query, page: 2 } })
+          const page2 = await response.json()
+
+          response = await restClient.GET(`/${slug}`, { query: { ...query, page: 3 } })
+          const page3 = await response.json()
+
+          expect(page1.hasNextPage).toStrictEqual(true)
+          expect(page1.hasPrevPage).toStrictEqual(false)
+          expect(page1.limit).toStrictEqual(4)
+          expect(page1.nextPage).toStrictEqual(2)
+          expect(page1.page).toStrictEqual(1)
+          expect(page1.pagingCounter).toStrictEqual(1)
+          expect(page1.prevPage).toStrictEqual(null)
+          expect(page1.totalDocs).toStrictEqual(10)
+          expect(page1.totalPages).toStrictEqual(3)
+
+          expect(page2.hasNextPage).toStrictEqual(true)
+          expect(page2.hasPrevPage).toStrictEqual(true)
+          expect(page2.limit).toStrictEqual(4)
+          expect(page2.nextPage).toStrictEqual(3)
+          expect(page2.page).toStrictEqual(2)
+          expect(page2.pagingCounter).toStrictEqual(5)
+          expect(page2.prevPage).toStrictEqual(1)
+          expect(page2.totalDocs).toStrictEqual(10)
+          expect(page2.totalPages).toStrictEqual(3)
+
+          expect(page3.hasNextPage).toStrictEqual(false)
+          expect(page3.hasPrevPage).toStrictEqual(true)
+          expect(page3.limit).toStrictEqual(4)
+          expect(page3.nextPage).toStrictEqual(null)
+          expect(page3.page).toStrictEqual(3)
+          expect(page3.pagingCounter).toStrictEqual(9)
+          expect(page3.prevPage).toStrictEqual(2)
+          expect(page3.totalDocs).toStrictEqual(10)
+          expect(page3.totalPages).toStrictEqual(3)
+        })
+
+        describe('limit', () => {
+          beforeEach(async () => {
+            await mapAsync([...Array(50)], async (_, i) =>
+              createPost({ number: i, title: 'limit-test' }),
+            )
+          })
+
+          it('should query a limited set of docs', async () => {
+            const response = await restClient.GET(`/${slug}`, {
+              query: {
+                where: {
+                  title: {
+                    equals: 'limit-test',
+                  },
+                },
+                limit: 15,
+              },
+            })
+            const result = await response.json()
+
+            expect(response.status).toEqual(200)
+            expect(result.docs).toHaveLength(15)
+          })
+
+          it('should query all docs when limit=0', async () => {
+            const response = await restClient.GET(`/${slug}`, {
+              query: {
+                where: {
+                  title: {
+                    equals: 'limit-test',
+                  },
+                },
+                limit: 0,
+              },
+            })
+            const result = await response.json()
+
+            expect(response.status).toEqual(200)
+            expect(result.docs).toHaveLength(50)
+            expect(result.totalPages).toEqual(1)
+          })
         })
       })
 

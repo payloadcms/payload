@@ -8,6 +8,8 @@ const { useLexicalComposerContext } = lexicalComposerContextImport
 
 import lexicalUtilsImport from '@lexical/utils'
 const { $findMatchingParent, mergeRegister } = lexicalUtilsImport
+import type { LexicalNode } from 'lexical'
+
 import { getTranslation } from '@payloadcms/translations'
 import lexicalImport from 'lexical'
 const {
@@ -57,6 +59,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
   const [isLink, setIsLink] = useState(false)
+  const [selectedNodes, setSelectedNodes] = useState<LexicalNode[]>([])
+
   const [isAutoLink, setIsAutoLink] = useState(false)
 
   const drawerSlug = formatDrawerSlug({
@@ -78,6 +82,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         setIsAutoLink(false)
         setLinkUrl('')
         setLinkLabel('')
+        setSelectedNodes([])
         return
       }
 
@@ -115,6 +120,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
       setStateData(data)
       setIsLink(true)
+      setSelectedNodes(selection ? selection?.getNodes() : [])
+
       if ($isAutoLinkNode(linkParent)) {
         setIsAutoLink(true)
       } else {
@@ -291,17 +298,25 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
           const newLinkPayload: LinkPayload = data as LinkPayload
 
+          newLinkPayload.selectedNodes = selectedNodes
+
           // See: https://github.com/facebook/lexical/pull/5536. This updates autolink nodes to link nodes whenever a change was made (which is good!).
           editor.update(() => {
             const selection = $getSelection()
+            let linkParent = null
             if ($isRangeSelection(selection)) {
-              const parent = getSelectedNode(selection).getParent()
-              if ($isAutoLinkNode(parent)) {
-                const linkNode = $createLinkNode({
-                  fields: newLinkPayload.fields,
-                })
-                parent.replace(linkNode, true)
+              linkParent = getSelectedNode(selection).getParent()
+            } else {
+              if (selectedNodes.length) {
+                linkParent = selectedNodes[0].getParent()
               }
+            }
+
+            if (linkParent && $isAutoLinkNode(linkParent)) {
+              const linkNode = $createLinkNode({
+                fields: newLinkPayload.fields,
+              })
+              linkParent.replace(linkNode, true)
             }
           })
 

@@ -1,16 +1,12 @@
 import type { Field } from '../fields/config/types.js'
 
-import { extractTranslations } from '../translations/extractTranslations.js'
-
-const labels = extractTranslations(['version:draft', 'version:published', 'version:status'])
-
 export const statuses = [
   {
-    label: labels['version:draft'],
+    label: ({ t }) => t('version:draft'),
     value: 'draft',
   },
   {
-    label: labels['version:published'],
+    label: ({ t }) => t('version:published'),
     value: 'published',
   },
 ]
@@ -26,7 +22,7 @@ const baseVersionFields: Field[] = [
       disableBulkEdit: true,
     },
     defaultValue: 'draft',
-    label: labels['version:status'],
+    label: ({ t }) => t('version:status'),
     options: statuses,
   },
 ]

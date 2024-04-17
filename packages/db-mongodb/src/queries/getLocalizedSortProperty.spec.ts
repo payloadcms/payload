@@ -1,18 +1,20 @@
-import { sanitizeConfig } from 'payload/config'
+import { SanitizedConfig, sanitizeConfig } from 'payload/config'
 import { Config } from 'payload/config'
 import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 
-const config = {
+const config = sanitizeConfig({
   localization: {
     locales: ['en', 'es'],
+    defaultLocale: 'en',
+    fallback: true,
   },
-} as Config
+} as Config) as SanitizedConfig
 
 describe('get localized sort property', () => {
   it('passes through a non-localized sort property', () => {
     const result = getLocalizedSortProperty({
       segments: ['title'],
-      config: sanitizeConfig(config),
+      config,
       fields: [
         {
           name: 'title',
@@ -28,7 +30,7 @@ describe('get localized sort property', () => {
   it('properly localizes an un-localized sort property', () => {
     const result = getLocalizedSortProperty({
       segments: ['title'],
-      config: sanitizeConfig(config),
+      config,
       fields: [
         {
           name: 'title',
@@ -45,7 +47,7 @@ describe('get localized sort property', () => {
   it('keeps specifically asked-for localized sort properties', () => {
     const result = getLocalizedSortProperty({
       segments: ['title', 'es'],
-      config: sanitizeConfig(config),
+      config,
       fields: [
         {
           name: 'title',
@@ -62,7 +64,7 @@ describe('get localized sort property', () => {
   it('properly localizes nested sort properties', () => {
     const result = getLocalizedSortProperty({
       segments: ['group', 'title'],
-      config: sanitizeConfig(config),
+      config,
       fields: [
         {
           name: 'group',
@@ -85,7 +87,7 @@ describe('get localized sort property', () => {
   it('keeps requested locale with nested sort properties', () => {
     const result = getLocalizedSortProperty({
       segments: ['group', 'title', 'es'],
-      config: sanitizeConfig(config),
+      config,
       fields: [
         {
           name: 'group',
@@ -108,7 +110,7 @@ describe('get localized sort property', () => {
   it('properly localizes field within row', () => {
     const result = getLocalizedSortProperty({
       segments: ['title'],
-      config: sanitizeConfig(config),
+      config,
       fields: [
         {
           type: 'row',
@@ -130,7 +132,7 @@ describe('get localized sort property', () => {
   it('properly localizes field within named tab', () => {
     const result = getLocalizedSortProperty({
       segments: ['tab', 'title'],
-      config: sanitizeConfig(config),
+      config,
       fields: [
         {
           type: 'tabs',
@@ -157,7 +159,7 @@ describe('get localized sort property', () => {
   it('properly localizes field within unnamed tab', () => {
     const result = getLocalizedSortProperty({
       segments: ['title'],
-      config: sanitizeConfig(config),
+      config,
       fields: [
         {
           type: 'tabs',

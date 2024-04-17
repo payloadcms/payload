@@ -6,11 +6,12 @@ import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
-import pMap from 'p-map'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
 import { simpleGit } from 'simple-git'
+
+import type { PackageDetails } from './lib/getPackageDetails.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { updateChangelog } from './utils/updateChangelog.js'
@@ -18,7 +19,7 @@ import { updateChangelog } from './utils/updateChangelog.js'
 // Update this list with any packages to publish
 const packageWhitelist = [
   'payload',
-  // 'translations',
+  'translations',
   'ui',
   'next',
   'graphql',
@@ -27,7 +28,7 @@ const packageWhitelist = [
   'richtext-slate',
   'richtext-lexical',
 
-  // 'create-payload-app',
+  'create-payload-app',
 
   // Plugins
   'plugin-cloud',
@@ -122,7 +123,7 @@ async function main() {
     return // For TS type checking
   }
 
-  const packageDetails = await getPackageDetails(packageWhitelist)
+  let packageDetails = await getPackageDetails(packageWhitelist)
 
   console.log(chalk.bold(`\n  Version: ${monorepoVersion} => ${chalk.green(nextReleaseVersion)}\n`))
   console.log(chalk.bold.yellow(`  Bump: ${bump}`))
@@ -143,23 +144,10 @@ async function main() {
 
   await execa('pnpm', ['install'], execaOpts)
 
-  const buildResult = await execa('pnpm', ['build:core', '--output-logs=errors-only'], execaOpts)
-  // const buildResult = execSync('pnpm build:all', execOpts)
+  const buildResult = await execa('pnpm', ['build:all', '--output-logs=errors-only'], execaOpts)
   if (buildResult.exitCode !== 0) {
     console.error(chalk.bold.red('Build failed'))
     console.log(buildResult.stderr)
-    abort('Build failed')
-  }
-
-  const buildPluginsResult = await execa(
-    'pnpm',
-    ['build:plugins', '--output-logs=errors-only'],
-    execaOpts,
-  )
-
-  if (buildPluginsResult.exitCode !== 0) {
-    console.error(chalk.bold.red('Build failed'))
-    console.log(buildPluginsResult.stderr)
     abort('Build failed')
   }
 
@@ -203,42 +191,16 @@ async function main() {
   header(`🏷️  Tagging release v${nextReleaseVersion}`, { enable: gitTag })
   runCmd(`git tag -a v${nextReleaseVersion} -m "v${nextReleaseVersion}"`, execOpts)
 
-  const otp = dryRun ? undefined : await question('Enter your 2FA code')
+  // Publish only payload to get 5 min auth token
+  packageDetails = packageDetails.filter((p) => p.name !== 'payload')
+  runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
 
-  if (!dryRun && !otp) {
-    abort('2FA code is required')
+  const results: { name: string; success: boolean; details?: string }[] = []
+  // Sequential publish
+  for (const pkg of packageDetails) {
+    const result = await publishSinglePackage(pkg, { dryRun })
+    results.push(result)
   }
-
-  // Publish
-  const results: { name: string; success: boolean; details?: string }[] = await Promise.all(
-    packageDetails.map(async (pkg) => {
-      try {
-        console.log(logPrefix, chalk.bold(`🚀 ${pkg.name} publishing...`))
-        const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
-        if (dryRun) {
-          cmdArgs.push('--dry-run')
-        } else {
-          cmdArgs.push('--otp', otp)
-        }
-        const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
-          cwd,
-          stdio: ['ignore', 'ignore', 'pipe'],
-          // stdio: 'inherit',
-        })
-
-        if (exitCode !== 0) {
-          console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n`))
-          return { name: pkg.name, success: false, details: stderr }
-        }
-
-        console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
-        return { name: pkg.name, success: true }
-      } catch (error) {
-        console.error(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: ${error.message}\n\n`))
-        return { name: pkg.name, success: false }
-      }
-    }),
-  )
 
   console.log(chalk.bold.green(`\n\nResults:\n`))
 
@@ -269,6 +231,28 @@ main().catch((error) => {
   console.error(error)
   process.exit(1)
 })
+
+async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
+  const { dryRun = false } = opts ?? {}
+  console.log(chalk.bold(`🚀 ${pkg.name} publishing...`))
+  const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--json', '--tag', tag]
+  if (dryRun) {
+    cmdArgs.push('--dry-run')
+  }
+  const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
+    cwd,
+    stdio: ['ignore', 'ignore', 'pipe'],
+    // stdio: 'inherit',
+  })
+
+  if (exitCode !== 0) {
+    console.log(chalk.bold.red(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`))
+    return { name: pkg.name, success: false, details: stderr }
+  }
+
+  console.log(`${logPrefix} ${chalk.green(`✅ ${pkg.name} published`)}`)
+  return { name: pkg.name, success: true }
+}
 
 function abort(message = 'Abort', exitCode = 1) {
   console.error(chalk.bold.red(`\n${message}\n`))

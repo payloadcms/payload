@@ -44,7 +44,7 @@ export const formatDocTitle = ({
           const dateFormat =
             ('date' in fieldConfig.admin && fieldConfig?.admin?.date?.displayFormat) ||
             dateFormatFromConfig
-          title = formatDate(title, dateFormat, i18n.language) || title
+          title = formatDate({ date: title, i18n, pattern: dateFormat }) || title
         }
       }
     }

@@ -1,7 +1,6 @@
-// const payload = require('payload');
 import type { CollectionConfig } from 'payload/types'
 
-import populateFullTitle from './populateFullTitle.js'
+import { populateFullTitle } from './populateFullTitle.js'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',

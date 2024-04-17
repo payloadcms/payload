@@ -173,11 +173,13 @@ const Component: React.FC<ElementProps> = (props) => {
         </div>
       </div>
       {value?.id && <DocumentDrawer onSave={updateUpload} />}
-      <ExtraFieldsUploadDrawer
-        drawerSlug={drawerSlug}
-        relatedCollection={relatedCollection}
-        {...props}
-      />
+      {hasExtraFields ? (
+        <ExtraFieldsUploadDrawer
+          drawerSlug={drawerSlug}
+          relatedCollection={relatedCollection}
+          {...props}
+        />
+      ) : null}
     </div>
   )
 }

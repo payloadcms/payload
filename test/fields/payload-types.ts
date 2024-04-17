@@ -13,6 +13,12 @@
 export type BlockColumns =
   | {
       text?: string | null
+      subArray?:
+        | {
+            requiredText: string
+            id?: string | null
+          }[]
+        | null
       id?: string | null
     }[]
   | null
@@ -202,7 +208,7 @@ export interface User {
   hash?: string | null
   loginAttempts?: number | null
   lockUntil?: string | null
-  password: string | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -244,12 +250,6 @@ export interface ArrayField {
         groupInRow?: {
           textInGroupInRow?: string | null
         }
-        id?: string | null
-      }[]
-    | null
-  rowLabelAsFunction?:
-    | {
-        title?: string | null
         id?: string | null
       }[]
     | null
@@ -774,6 +774,7 @@ export interface IndexedField {
   text: string
   uniqueText?: string | null
   uniqueRequiredText: string
+  localizedUniqueRequiredText: string
   /**
    * @minItems 2
    * @maxItems 2
@@ -1115,14 +1116,25 @@ export interface Upload {
   id: string
   text?: string | null
   media?: string | Upload | null
-  richText?:
-    | {
+  richText?: {
+    root: {
+      type: string
+      children: {
+        type: string
+        version: number
         [k: string]: unknown
       }[]
-    | null
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      version: number
+    }
+    [k: string]: unknown
+  } | null
   updatedAt: string
   createdAt: string
   url?: string | null
+  thumbnailURL?: string | null
   filename?: string | null
   mimeType?: string | null
   filesize?: number | null
@@ -1140,6 +1152,7 @@ export interface Uploads2 {
   updatedAt: string
   createdAt: string
   url?: string | null
+  thumbnailURL?: string | null
   filename?: string | null
   mimeType?: string | null
   filesize?: number | null
@@ -1153,14 +1166,25 @@ export interface Uploads2 {
 export interface Uploads3 {
   id: string
   media?: string | Uploads3 | null
-  richText?:
-    | {
+  richText?: {
+    root: {
+      type: string
+      children: {
+        type: string
+        version: number
         [k: string]: unknown
       }[]
-    | null
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      version: number
+    }
+    [k: string]: unknown
+  } | null
   updatedAt: string
   createdAt: string
   url?: string | null
+  thumbnailURL?: string | null
   filename?: string | null
   mimeType?: string | null
   filesize?: number | null

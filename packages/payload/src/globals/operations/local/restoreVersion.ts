@@ -8,9 +8,9 @@ import { restoreVersionOperation } from '../restoreVersion.js'
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
   depth?: number
-  fallbackLocale?: string
+  fallbackLocale?: GeneratedTypes['locale']
   id: string
-  locale?: string
+  locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean

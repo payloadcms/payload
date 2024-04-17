@@ -77,17 +77,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {CustomLabel !== undefined ? CustomLabel : <FieldLabel {...(labelProps || {})} />}
-          {required && (
-            <span
-              style={{
-                color: 'var(--theme-error-500)',
-                marginLeft: '5px',
-              }}
-            >
-              *
-            </span>
-          )}
+          <FieldLabel CustomLabel={CustomLabel} {...(labelProps || {})} />
           {hasGenerateImageFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

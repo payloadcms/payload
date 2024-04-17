@@ -6,15 +6,17 @@ import path from 'path'
 import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { Media } from './payload-types.js'
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config, Media } from './payload-types.js'
 
 import {
   ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
+  openDocDrawer,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../helpers/rest.js'
 import {
   adminThumbnailFunctionSlug,
@@ -28,7 +30,7 @@ const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let serverURL: string
 let mediaURL: AdminUrlUtil
@@ -43,7 +45,7 @@ describe('uploads', () => {
   let audioDoc: Media
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
@@ -203,7 +205,7 @@ describe('uploads', () => {
     await page.locator('.field-type:nth-of-type(2) .icon--x').click()
 
     // choose from existing
-    await page.locator('.list-drawer__toggler').click()
+    await openDocDrawer(page, '.list-drawer__toggler')
 
     await expect(page.locator('.cell-title')).toContainText('draft')
   })
@@ -213,14 +215,18 @@ describe('uploads', () => {
     await page.waitForURL(audioURL.edit(audioDoc.id))
 
     // remove the selection and open the list drawer
+    await wait(500) // flake workaround
     await page.locator('.file-details__remove').click()
-    await page.locator('.upload__toggler.list-drawer__toggler').click()
+
+    await openDocDrawer(page, '.upload__toggler.list-drawer__toggler')
+
     const listDrawer = page.locator('[id^=list-drawer_1_]')
     await expect(listDrawer).toBeVisible()
 
-    // upload an image and try to select it
-    await listDrawer.locator('button.list-drawer__create-new-button.doc-drawer__toggler').click()
+    await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
     await expect(page.locator('[id^=doc-drawer_media_2_]')).toBeVisible()
+
+    // upload an image and try to select it
     await page
       .locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]')
       .setInputFiles(path.resolve(dirname, './image.png'))
@@ -232,6 +238,17 @@ describe('uploads', () => {
     await page.locator('button#action-save').click()
     await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
       'The following field is invalid: audio',
+    )
+  })
+
+  test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
+
+    await wait(500) // TODO: Fix this
+    await page.click('#action-save', { delay: 100 })
+    await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
+      'File size limit has been reached',
     )
   })
 

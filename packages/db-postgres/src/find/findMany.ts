@@ -120,7 +120,7 @@ export const findMany = async function find({
 
   const findPromise = db.query[tableName].findMany(findManyArgs)
 
-  if (pagination !== false && (orderedIDs ? orderedIDs?.length >= limit : true)) {
+  if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : true)) {
     const selectCountMethods: ChainedMethods = []
 
     joinAliases.forEach(({ condition, table }) => {

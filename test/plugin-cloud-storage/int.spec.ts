@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
+import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -41,6 +42,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
 
         await createTestBucket()
+        await clearTestBucket()
       })
 
       afterEach(async () => {
@@ -49,14 +51,36 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('can upload', async () => {
         const upload = await payload.create({
-          collection: 'media',
+          collection: mediaSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),
         })
 
         expect(upload.id).toBeTruthy()
 
-        await verifyUploads(upload.id)
+        await verifyUploads({
+          collectionSlug: mediaSlug,
+          uploadId: upload.id,
+        })
+
+        expect(upload.url).toEqual(`/api/${mediaSlug}/file/${upload.filename as string}`)
+      })
+
+      it('can upload with prefix', async () => {
+        const upload = await payload.create({
+          collection: mediaWithPrefixSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+
+        await verifyUploads({
+          collectionSlug: mediaWithPrefixSlug,
+          uploadId: upload.id,
+          prefix,
+        })
+        expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
       })
     })
   })
@@ -105,26 +129,42 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     }
   }
 
-  async function verifyUploads(uploadId: number | string) {
+  async function verifyUploads({
+    collectionSlug,
+    uploadId,
+    prefix = '',
+  }: {
+    collectionSlug: string
+    prefix?: string
+    uploadId: number | string
+  }) {
+    const uploadData = (await payload.findByID({
+      collection: collectionSlug,
+      id: uploadId,
+    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+
+    const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
+      const rawFilename = uploadData.sizes[key].filename
+      return prefix ? `${prefix}/${rawFilename}` : rawFilename
+    })
+
+    fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
     try {
-      const uploadData = (await payload.findByID({
-        collection: 'media',
-        id: uploadId,
-      })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
-
-      const fileKeys = Object.keys(uploadData.sizes).map((key) => uploadData.sizes[key].filename)
-      fileKeys.push(uploadData.filename)
-
       for (const key of fileKeys) {
         const { $metadata } = await client.send(
           new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
         )
 
+        if ($metadata.httpStatusCode !== 200) {
+          console.error('Error verifying uploads', key, $metadata)
+          throw new Error(`Error verifying uploads: ${key}, ${$metadata.httpStatusCode}`)
+        }
+
         // Verify each size was properly uploaded
         expect($metadata.httpStatusCode).toBe(200)
       }
     } catch (error: unknown) {
-      console.error('Error verifying uploads:', error)
+      console.error('Error verifying uploads:', fileKeys, error)
       throw error
     }
   }

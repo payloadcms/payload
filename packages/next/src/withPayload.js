@@ -1,5 +1,9 @@
-/** @type {import('next').NextConfig} */
-const withPayload = (nextConfig = {}) => {
+/**
+ * @param {import('next').NextConfig} nextConfig
+ *
+ * @returns {import('next').NextConfig}
+ * */
+export const withPayload = (nextConfig = {}) => {
   return {
     ...nextConfig,
     experimental: {

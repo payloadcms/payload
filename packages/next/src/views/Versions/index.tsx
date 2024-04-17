@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/utilities'
 import React from 'react'
 
-import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
+import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { buildVersionColumns } from './buildColumns.js'
 import { VersionsViewClient } from './index.client.js'
 import './index.scss'
@@ -100,8 +100,8 @@ export const VersionsView: EditViewComponent = async (props) => {
 
   return (
     <React.Fragment>
-      <SetStepNav
-        collectionSlug={collectionConfig?.slug || globalConfig?.slug}
+      <SetDocumentStepNav
+        collectionSlug={collectionConfig?.slug}
         globalSlug={globalConfig?.slug}
         id={id}
         pluralLabel={collectionConfig?.labels?.plural || globalConfig?.label}

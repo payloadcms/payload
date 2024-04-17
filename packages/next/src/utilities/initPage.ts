@@ -8,7 +8,6 @@ import type {
 } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/client'
 import { findLocaleFromCode } from '@payloadcms/ui/utilities/findLocaleFromCode'
 import { headers as getHeaders } from 'next/headers.js'
 import { notFound, redirect } from 'next/navigation.js'
@@ -25,6 +24,8 @@ type Args = {
   route: string
   searchParams: { [key: string]: string | string[] | undefined }
 }
+
+const authRoutes = ['/login', '/logout', '/create-first-user', '/forgot', '/reset', '/verify']
 
 export const initPage = async ({
   config: configPromise,
@@ -45,14 +46,13 @@ export const initPage = async ({
   const cookies = parseCookies(headers)
   const language = getRequestLanguage({ config: payload.config, cookies, headers })
 
-  const i18n = initI18n({
+  const i18n = await initI18n({
     config: payload.config.i18n,
     context: 'client',
     language,
-    translations,
   })
 
-  const req = createLocalReq(
+  const req = await createLocalReq(
     {
       fallbackLocale: null,
       locale: locale.code,
@@ -81,13 +81,19 @@ export const initPage = async ({
       .filter(Boolean),
   }
 
-  const routeSegments = route.replace(payload.config.routes.admin, '').split('/').filter(Boolean)
+  const {
+    routes: { admin: adminRoute },
+  } = payload.config
+
+  const routeSegments = route.replace(adminRoute, '').split('/').filter(Boolean)
   const [entityType, entitySlug, createOrID] = routeSegments
   const collectionSlug = entityType === 'collections' ? entitySlug : undefined
   const globalSlug = entityType === 'globals' ? entitySlug : undefined
   const docID = collectionSlug && createOrID !== 'create' ? createOrID : undefined
 
-  if (redirectUnauthenticatedUser && !user && route !== '/login') {
+  const isAuthRoute = authRoutes.some((r) => r === route.replace(adminRoute, ''))
+
+  if (redirectUnauthenticatedUser && !user && !isAuthRoute) {
     if (searchParams && 'redirect' in searchParams) delete searchParams.redirect
 
     const stringifiedSearchParams = Object.keys(searchParams ?? {}).length
@@ -95,6 +101,10 @@ export const initPage = async ({
       : ''
 
     redirect(`${routes.admin}/login?redirect=${route + stringifiedSearchParams}`)
+  }
+
+  if (!permissions.canAccessAdmin && !isAuthRoute) {
+    notFound()
   }
 
   let collectionConfig: SanitizedCollectionConfig

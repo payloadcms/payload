@@ -1,16 +1,18 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/types'
 
-import { translations } from '@payloadcms/translations/client'
+import { rtlLanguages } from '@payloadcms/translations'
+import { initI18n } from '@payloadcms/translations'
 import { RootProvider } from '@payloadcms/ui/providers/Root'
 import '@payloadcms/ui/scss/app.scss'
 import { buildComponentMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { parseCookies } from 'payload/auth'
 import { createClientConfig } from 'payload/config'
-import { deepMerge } from 'payload/utilities'
 import React from 'react'
 import 'react-toastify/dist/ReactToastify.css'
 
+import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage.js'
 import { DefaultEditView } from '../../views/Edit/Default/index.js'
 import { DefaultListView } from '../../views/List/Default/index.js'
@@ -20,7 +22,15 @@ export const metadata = {
   title: 'Next.js',
 }
 
-const rtlLanguages = ['ar', 'fa', 'ha', 'ku', 'ur', 'ps', 'dv', 'ks', 'khw', 'he', 'yi']
+import { Merriweather } from 'next/font/google'
+
+const merriweather = Merriweather({
+  display: 'swap',
+  style: ['normal', 'italic'],
+  subsets: ['latin'],
+  variable: '--font-serif',
+  weight: ['400', '900'],
+})
 
 export const RootLayout = async ({
   children,
@@ -30,26 +40,37 @@ export const RootLayout = async ({
   config: Promise<SanitizedConfig>
 }) => {
   const config = await configPromise
-  const clientConfig = await createClientConfig(config)
 
   const headers = getHeaders()
   const cookies = parseCookies(headers)
 
-  const lang =
-    getRequestLanguage({
-      config,
-      cookies,
-      headers,
-    }) ?? clientConfig.i18n.fallbackLanguage
+  const languageCode = getRequestLanguage({
+    config,
+    cookies,
+    headers,
+  })
 
-  const dir = rtlLanguages.includes(lang) ? 'RTL' : 'LTR'
+  const payload = await getPayloadHMR({ config })
+  const i18n = await initI18n({ config: config.i18n, context: 'client', language: languageCode })
+  const clientConfig = await createClientConfig({ config, t: i18n.t })
 
-  const mergedTranslations = deepMerge(translations, clientConfig.i18n.translations)
+  const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
+    ? 'RTL'
+    : 'LTR'
 
-  const languageOptions = Object.entries(translations || {}).map(([language, translations]) => ({
-    label: translations.general.thisLanguage,
-    value: language,
-  }))
+  const languageOptions = Object.entries(config.i18n.supportedLanguages || {}).reduce(
+    (acc, [language, languageConfig]) => {
+      if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
+        acc.push({
+          label: languageConfig.translations.general.thisLanguage,
+          value: language,
+        })
+      }
+
+      return acc
+    },
+    [],
+  )
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async function switchLanguageServerAction(lang: string): Promise<void> {
@@ -66,20 +87,23 @@ export const RootLayout = async ({
     DefaultListView,
     children,
     config,
+    i18n,
+    payload,
   })
 
   return (
-    <html dir={dir} lang={lang}>
+    <html className={merriweather.variable} dir={dir} lang={languageCode}>
       <body>
         <RootProvider
           componentMap={componentMap}
           config={clientConfig}
+          dateFNSKey={i18n.dateFNSKey}
           fallbackLang={clientConfig.i18n.fallbackLanguage}
-          lang={lang}
+          languageCode={languageCode}
           languageOptions={languageOptions}
           // eslint-disable-next-line react/jsx-no-bind
           switchLanguageServerAction={switchLanguageServerAction}
-          translations={mergedTranslations[lang]}
+          translations={i18n.translations}
         >
           {wrappedChildren}
         </RootProvider>

@@ -9,8 +9,8 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: string
-  locale?: string
+  fallbackLocale?: GeneratedTypes['locale']
+  locale?: 'all' | GeneratedTypes['locale']
   overrideAccess?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean

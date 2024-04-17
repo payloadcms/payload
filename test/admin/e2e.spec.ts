@@ -15,6 +15,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   openDocControls,
+  openDocDrawer,
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -75,7 +76,7 @@ describe('admin', () => {
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = Boolean(process.env.CI)
 
-    if (prebuild) testInfo.setTimeout(testInfo.timeout * 2)
+    if (prebuild) testInfo.setTimeout(testInfo.timeout * 3)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
@@ -428,9 +429,12 @@ describe('admin', () => {
 
     test('collection — should render `id` as `useAsTitle` fallback', async () => {
       const { id } = await createPost()
-      await page.goto(postsUrl.edit(id))
+      const postURL = postsUrl.edit(id)
+      await page.goto(postURL)
+      await page.waitForURL(postURL)
+      await wait(500)
       await page.locator('#field-title')?.fill('')
-      expect(await page.locator('.doc-header__title.render-title')?.innerText()).toContain('ID:')
+      await expect(page.locator('.doc-header__title.render-title:has-text("ID:")')).toBeVisible()
       await saveDocAndAssert(page)
     })
 
@@ -1052,8 +1056,8 @@ describe('admin', () => {
         await createPost()
         await page.goto(postsUrl.create)
 
-        // Open the drawer
-        await page.locator('.rich-text .list-drawer__toggler').click()
+        await openDocDrawer(page, '.rich-text .list-drawer__toggler')
+
         const listDrawer = page.locator('[id^=list-drawer_1_]')
         await expect(listDrawer).toBeVisible()
 
@@ -1092,7 +1096,7 @@ describe('admin', () => {
         await page.goto(postsUrl.create)
 
         // Open the drawer
-        await page.locator('.rich-text .list-drawer__toggler').click()
+        await openDocDrawer(page, '.rich-text .list-drawer__toggler')
         const listDrawer = page.locator('[id^=list-drawer_1_]')
         await expect(listDrawer).toBeVisible()
 

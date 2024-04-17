@@ -1,7 +1,5 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/client'
 import { mapFields } from '@payloadcms/ui/utilities/buildComponentMap'
 import { sanitizeFields } from 'payload/config'
 import React from 'react'
@@ -16,10 +14,9 @@ import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 
 export const getGenerateComponentMap =
   (args: AdapterArguments): RichTextAdapter['generateComponentMap'] =>
-  ({ config }) => {
+  ({ WithServerSideProps, config, i18n }) => {
     const componentMap = new Map()
 
-    const i18n = initI18n({ config: config.i18n, context: 'client', translations })
     const validRelationships = config.collections.map((c) => c.slug) || []
 
     ;(args?.admin?.leaves || Object.values(leafTypes)).forEach((leaf) => {
@@ -76,8 +73,10 @@ export const getGenerateComponentMap =
             })
 
             const mappedFields = mapFields({
+              WithServerSideProps,
               config,
               fieldSchema: linkFields,
+              i18n,
               readOnly: false,
             })
 
@@ -106,8 +105,10 @@ export const getGenerateComponentMap =
                 })
 
                 const mappedFields = mapFields({
+                  WithServerSideProps,
                   config,
                   fieldSchema: uploadFields,
+                  i18n,
                   readOnly: false,
                 })
 

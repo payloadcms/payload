@@ -74,6 +74,7 @@ describe('Auth', () => {
         body: JSON.stringify({
           email,
           password,
+          'confirm-password': password,
         }),
       })
 
@@ -620,6 +621,20 @@ describe('Auth', () => {
       })
 
       expect(fail.status).toStrictEqual(404)
+    })
+  })
+
+  describe('Local API', () => {
+    it('should login via the local API', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      expect(authenticated.token).toBeTruthy()
     })
   })
 })
