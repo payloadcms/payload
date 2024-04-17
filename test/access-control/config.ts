@@ -8,6 +8,7 @@ import {
   firstArrayText,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  noAdminAccessEmail,
   readOnlySlug,
   relyOnRequestHeadersSlug,
   restrictedSlug,
@@ -76,12 +77,17 @@ export default buildConfigWithDefaults({
       slug: 'users',
       auth: true,
       access: {
-        admin: () => false,
-        // admin: async () =>
-        //   new Promise((resolve) => {
-        //     // Simulate a request to an external service to determine access, i.e. another instance of Payload
-        //     setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
-        //   }),
+        // admin:  () => true,
+        admin: async ({ req }) => {
+          if (req.user?.email === noAdminAccessEmail) {
+            return false
+          }
+
+          return new Promise((resolve) => {
+            // Simulate a request to an external service to determine access, i.e. another instance of Payload
+            setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
+          })
+        },
       },
       fields: [
         {
@@ -428,6 +434,14 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+      },
+    })
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: noAdminAccessEmail,
+        password: 'test',
       },
     })
 

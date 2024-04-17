@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { Payload, TypeWithID } from 'payload/types'
+import type { TypeWithID } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -22,6 +22,7 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   docLevelAccessSlug,
+  noAdminAccessEmail,
   readOnlySlug,
   restrictedSlug,
   restrictedVersionsSlug,
@@ -327,6 +328,29 @@ describe('access control', () => {
 
     // ensure user is allowed to edit this document
     await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
+  })
+
+  test('should completely block admin access', async () => {
+    const adminURL = `${serverURL}/admin`
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
+
+    await expect(page.locator('.dashboard')).toBeVisible()
+
+    await page.goto(`${serverURL}/admin/logout`)
+
+    await payload.login({
+      collection: 'users',
+      data: {
+        email: noAdminAccessEmail,
+        password: 'test',
+      },
+    })
+
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
+
+    await expect(page.locator('.next-error-h1')).toBeVisible()
   })
 })
 

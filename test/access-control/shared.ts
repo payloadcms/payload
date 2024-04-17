@@ -14,3 +14,5 @@ export const docLevelAccessSlug = 'doc-level-access'
 export const hiddenFieldsSlug = 'hidden-fields'
 
 export const hiddenAccessSlug = 'hidden-access'
+
+export const noAdminAccessEmail = 'no-admin-access@payloadcms.com'
