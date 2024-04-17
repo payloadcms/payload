@@ -55,21 +55,24 @@ const JSONField: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
-  function handleMount(editor, monaco) {
-    if (!jsonSchema) return
+  const handleMount = useCallback(
+    (editor, monaco) => {
+      if (!jsonSchema) return
 
-    const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
-    const modelUri = monaco.Uri.parse(jsonSchema.uri)
+      const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
+      const modelUri = monaco.Uri.parse(jsonSchema.uri)
 
-    const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      schemas: [...existingSchemas, jsonSchema],
-      validate: true,
-      enableSchemaRequest: true,
-    })
+      const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
+      monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        enableSchemaRequest: true,
+        schemas: [...existingSchemas, jsonSchema],
+        validate: true,
+      })
 
-    editor.setModel(model)
-  }
+      editor.setModel(model)
+    },
+    [value, jsonSchema],
+  )
 
   const handleChange = useCallback(
     (val) => {
