@@ -83,6 +83,8 @@ export const hu: Language = {
       invalidFileType: 'Érvénytelen fájltípus',
       invalidFileTypeValue: 'Érvénytelen fájltípus: {{value}}',
       loadingDocument: 'Hiba történt a {{id}} azonosítójú dokumentum betöltésekor.',
+      localesNotSaved_one: 'Az alábbi helyi beállítást nem sikerült menteni:',
+      localesNotSaved_other: 'Az alábbi helyi beállításokat nem sikerült menteni:',
       missingEmail: 'Hiányzó e-mail.',
       missingIDOfDocument: 'Hiányzik a frissítendő dokumentum azonosítója.',
       missingIDOfVersion: 'A verzió azonosítója hiányzik.',

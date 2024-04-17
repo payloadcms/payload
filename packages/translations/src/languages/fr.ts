@@ -84,6 +84,8 @@ export const fr: Language = {
       invalidFileTypeValue: 'Type de fichier invalide : {{value}}',
       loadingDocument:
         'Un problème est survenu lors du chargement du document qui a pour identifiant {{id}}.',
+      localesNotSaved_one: "Le paramètre régional suivant n'a pas pu être enregistré :",
+      localesNotSaved_other: "Les paramètres régionaux suivants n'ont pas pu être enregistrés :",
       missingEmail: 'E-mail manquant.',
       missingIDOfDocument: "Il manque l'identifiant du document à mettre à jour.",
       missingIDOfVersion: "Il manque l'identifiant de la version.",

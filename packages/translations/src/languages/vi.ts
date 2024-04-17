@@ -81,6 +81,8 @@ export const vi: Language = {
       invalidFileType: 'Lỗi - Định dạng tệp không hợp lệ.',
       invalidFileTypeValue: 'Lỗi - Định dạng tệp không hợp lệ: {{value}}.',
       loadingDocument: 'Lỗi - Đã xảy ra vấn để khi tải bản tài liệu với ID {{id}}.',
+      localesNotSaved_one: 'Không thể lưu trữ cài đặt vùng sau đây:',
+      localesNotSaved_other: 'Không thể lưu trữ các cài đặt vùng sau đây:',
       missingEmail: 'Lỗi - Thiếu email.',
       missingIDOfDocument: 'Lỗi - Thiếu ID của bản tài liệu cần cập nhật.',
       missingIDOfVersion: 'Lỗi - Thiếu ID của phiên bản.',

@@ -79,6 +79,8 @@ export const th: Language = {
       invalidFileType: 'ประเภทของไฟล์ไม่ถูกต้อง',
       invalidFileTypeValue: 'ประเภทของไฟล์ไม่ถูกต้อง: {{value}}',
       loadingDocument: 'เกิดปัญหาระหว่างการโหลดเอกสารที่มี ID {{id}}',
+      localesNotSaved_one: 'ไม่สามารถบันทึกกำหนดสถานที่ต่อไปนี้ได้:',
+      localesNotSaved_other: 'ไม่สามารถบันทึกกำหนดสถานที่ต่อไปนี้ได้:',
       missingEmail: 'ไม่พบอีเมล',
       missingIDOfDocument: 'ไม่พบ ID ของเอกสารที่ต้องการแก้ไข',
       missingIDOfVersion: 'ไม่พบ ID ของเวอร์ชัน',
