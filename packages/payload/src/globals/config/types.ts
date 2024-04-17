@@ -140,8 +140,10 @@ export type GlobalConfig = {
     update?: Access
   }
   admin?: GlobalAdminOptions
-  /** Extension point to add your custom data. */
+  /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+  /** Extension point to add your custom data to the client side.*/
+  customClient?: Record<string, any>
   /**
    * Customize the SQL table name
    */

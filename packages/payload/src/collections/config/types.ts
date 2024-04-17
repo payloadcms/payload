@@ -313,8 +313,10 @@ export type CollectionConfig = {
    * Use `true` to enable with default options
    */
   auth?: IncomingAuthType | boolean
-  /** Extension point to add your custom data. */
+  /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+  /** Extension point to add your custom data to the client side.*/
+  customClient?: Record<string, any>
   /**
    * Default field to sort by in collection list view
    */
