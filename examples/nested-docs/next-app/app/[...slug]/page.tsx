@@ -24,12 +24,12 @@ export default async function Page({ params }: PageParams) {
   let { slug } = params || {}
   if (!slug) slug = ['home']
 
-  const lastSlug = slug[slug.length - 1]
+  const fullPathSlug = slug.join('/');
 
   const page: Page = await fetch(
     `${
       process.env.NEXT_PUBLIC_PAYLOAD_URL
-    }/api/pages?where[slug][equals]=${lastSlug.toLowerCase()}&depth=1`,
+    }/api/pages?where[slug][equals]=${fullPathSlug.toLowerCase()}&depth=1`,
   )?.then(res => res.json()?.then(data => data.docs[0]))
 
   if (!page) {
