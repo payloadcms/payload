@@ -1,5 +1,7 @@
 import type { SendMailOptions } from 'nodemailer'
 
+export type { SendMailOptions }
+
 export type EmailAdapter<
   TSendEmailOptions extends SendMailOptions,
   KSendEmailResponse = unknown,

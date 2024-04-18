@@ -16,7 +16,7 @@ import type {
   SanitizedCollectionConfig,
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
-import type { EmailAdapter } from '../email/types.js'
+import type { EmailAdapter, SendMailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
