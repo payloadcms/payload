@@ -5,7 +5,7 @@ export type * from '../uploads/types.js'
 export type { DocumentPermissions, FieldPermissions } from '../auth/index.js'
 
 export type { MeOperationResult } from '../auth/operations/me.js'
-export type { EmailAdapter } from '../email/types.js'
+export type { EmailAdapter, SendMailOptions } from '../email/types.js'
 
 export type {
   CollapsedPreferences,

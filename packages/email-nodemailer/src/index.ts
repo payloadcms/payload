@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import type { SendMailOptions, Transporter } from 'nodemailer'
+import type { Transporter } from 'nodemailer'
 import type SMTPConnection from 'nodemailer/lib/smtp-connection'
-import type { EmailAdapter } from 'payload/types'
+import type { EmailAdapter, SendMailOptions } from 'payload/types'
 
 import nodemailer from 'nodemailer'
 import { InvalidConfiguration } from 'payload/errors'
