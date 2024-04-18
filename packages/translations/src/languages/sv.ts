@@ -194,6 +194,8 @@ export const sv: Language = {
       deleting: 'Tar bort...',
       descending: 'Fallande',
       deselectAllRows: 'Avmarkera alla rader',
+      document: 'Dokument',
+      documents: 'Dokument',
       duplicate: 'Duplicera',
       duplicateWithoutSaving: 'Duplicera utan att spara ändringar',
       edit: 'Redigera',

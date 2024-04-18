@@ -193,6 +193,8 @@ export const nb: Language = {
       deleting: 'Sletter...',
       descending: 'Synkende',
       deselectAllRows: 'Fjern markeringen fra alle rader',
+      document: 'Dokument',
+      documents: 'Dokumenter',
       duplicate: 'Dupliser',
       duplicateWithoutSaving: 'Dupliser uten å lagre endringer',
       edit: 'Redigere',

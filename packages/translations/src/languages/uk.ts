@@ -195,6 +195,8 @@ export const uk: Language = {
       deleting: 'Видалення...',
       descending: 'В порядку спадання',
       deselectAllRows: 'Скасувати вибір всіх рядків',
+      document: 'Документ',
+      documents: 'Документи',
       duplicate: 'Дублювати',
       duplicateWithoutSaving: 'Дублювання без збереження змін',
       edit: 'Редагувати',

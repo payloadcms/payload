@@ -195,6 +195,8 @@ export const my: Language = {
       deleting: 'ဖျက်နေဆဲ ...',
       descending: 'ဆင်းသက်လာသည်။',
       deselectAllRows: 'အားလုံးကို မရွေးနိုင်ပါ',
+      document: 'စာရွက်စာတမ်း',
+      documents: 'စာရွက်စာတမ်းများ',
       duplicate: 'ပုံတူပွားမည်။',
       duplicateWithoutSaving: 'သေချာပါပြီ။',
       edit: 'တည်းဖြတ်ပါ။',

@@ -193,6 +193,8 @@ export const hr: Language = {
       deleting: 'Brisanje...',
       descending: 'Silazno',
       deselectAllRows: 'Odznači sve redove',
+      document: 'Dokument',
+      documents: 'Dokumenti',
       duplicate: 'Duplikat',
       duplicateWithoutSaving: 'Dupliciraj bez spremanja promjena',
       edit: 'Uredi',

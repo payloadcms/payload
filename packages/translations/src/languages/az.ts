@@ -194,6 +194,8 @@ export const az: Language = {
       deleting: 'Silinir...',
       descending: 'Azalan',
       deselectAllRows: 'Bütün sıraları seçimi ləğv edin',
+      document: 'Sənəd',
+      documents: 'Sənədlər',
       duplicate: 'Dublikat',
       duplicateWithoutSaving: 'Dəyişiklikləri saxlamadan dublikatla',
       edit: 'Redaktə et',

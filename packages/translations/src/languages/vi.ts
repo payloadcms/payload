@@ -192,6 +192,8 @@ export const vi: Language = {
       deleting: 'Đang xóa...',
       descending: 'Xếp theo thứ tự giảm dần',
       deselectAllRows: 'Bỏ chọn tất cả các hàng',
+      document: 'Tài liệu',
+      documents: 'Tài liệu',
       duplicate: 'Tạo bản sao',
       duplicateWithoutSaving: 'Không lưu dữ liệu và tạo bản sao',
       edit: 'Chỉnh sửa',

@@ -195,6 +195,8 @@ export const ru: Language = {
       deleting: 'Удаление...',
       descending: 'Уменьшение',
       deselectAllRows: 'Снять выделение со всех строк',
+      document: 'Документ',
+      documents: 'Документы',
       duplicate: 'Дублировать',
       duplicateWithoutSaving: 'Дублирование без сохранения изменений',
       edit: 'Редактировать',

@@ -187,6 +187,8 @@ export const zh: Language = {
       deleting: '删除中...',
       descending: '降序',
       deselectAllRows: '取消选择所有行',
+      document: '文件',
+      documents: '文件',
       duplicate: '重复',
       duplicateWithoutSaving: '重复而不保存更改。',
       edit: '编辑',

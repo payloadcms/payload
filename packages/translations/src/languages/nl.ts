@@ -195,6 +195,8 @@ export const nl: Language = {
       deleting: 'Verwijderen...',
       descending: 'Aflopend',
       deselectAllRows: 'Deselecteer alle rijen',
+      document: 'Document',
+      documents: 'Documenten',
       duplicate: 'Dupliceren',
       duplicateWithoutSaving: 'Dupliceren zonder wijzigingen te bewaren',
       edit: 'Bewerk',

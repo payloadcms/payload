@@ -193,6 +193,8 @@ export const ko: Language = {
       deleting: '삭제 중...',
       descending: '내림차순',
       deselectAllRows: '모든 행 선택 해제',
+      document: '문서',
+      documents: '문서들',
       duplicate: '복제',
       duplicateWithoutSaving: '변경 사항 저장 없이 복제',
       edit: '수정',
