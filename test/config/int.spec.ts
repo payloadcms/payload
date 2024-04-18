@@ -20,20 +20,28 @@ describe('Config', () => {
   describe('payload config', () => {
     it('allows a custom field at the config root', () => {
       const { config } = payload
-      expect(config.custom).toEqual({ name: 'Customer portal' })
+      expect(config.custom).toEqual({
+        client: { name: 'Customer portal' },
+        server: { name: 'Customer portal' },
+      })
     })
 
     it('allows a custom field in the root endpoints', () => {
       const [endpoint] = payload.config.endpoints
 
-      expect(endpoint.custom).toEqual({ description: 'Get the sanitized payload config' })
+      expect(endpoint.custom).toEqual({
+        description: 'Get the sanitized payload config',
+      })
     })
   })
 
   describe('collection config', () => {
     it('allows a custom field in collections', () => {
       const [collection] = payload.config.collections
-      expect(collection.custom).toEqual({ externalLink: 'https://foo.bar' })
+      expect(collection.custom).toEqual({
+        client: { externalLink: 'https://foo.bar' },
+        server: { externalLink: 'https://foo.bar' },
+      })
     })
 
     it('allows a custom field in collection endpoints', () => {
@@ -49,7 +57,12 @@ describe('Config', () => {
       const [collection] = payload.config.collections
       const [field] = collection.fields
 
-      expect(field.custom).toEqual({ description: 'The title of this page' })
+      console.log({ custom: field.custom })
+
+      expect(field.custom).toEqual({
+        client: { description: 'The title of this page' },
+        server: { description: 'The title of this page' },
+      })
     })
 
     it('allows a custom field in blocks in collection fields', () => {
@@ -57,7 +70,8 @@ describe('Config', () => {
       const [, blocksField] = collection.fields
 
       expect((blocksField as BlockField).blocks[0].custom).toEqual({
-        description: 'The blockOne of this page',
+        server: { description: 'The blockOne of this page' },
+        client: { description: 'The blockOne of this page' },
       })
     })
   })
@@ -65,7 +79,7 @@ describe('Config', () => {
   describe('global config', () => {
     it('allows a custom field in globals', () => {
       const [global] = payload.config.globals
-      expect(global.custom).toEqual({ foo: 'bar' })
+      expect(global.custom).toEqual({ client: { foo: 'bar' }, server: { foo: 'bar' } })
     })
 
     it('allows a custom field in global endpoints', () => {
@@ -79,7 +93,10 @@ describe('Config', () => {
       const [global] = payload.config.globals
       const [field] = global.fields
 
-      expect(field.custom).toEqual({ description: 'The title of my global' })
+      expect(field.custom).toEqual({
+        client: { description: 'The title of my global' },
+        server: { description: 'The title of my global' },
+      })
     })
   })
 })
