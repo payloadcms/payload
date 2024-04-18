@@ -11,10 +11,6 @@
   "exclude": [
     "dist",
     "node_modules",
-    "src/**/*.spec.js",
-    "src/**/*.spec.jsx",
-    "src/**/*.spec.ts",
-    "src/**/*.spec.tsx"
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
   "references": [

@@ -53,6 +53,7 @@
     "dist"
   ],
   "devDependencies": {
+    "payload": "workspace:*",
     "@types/nodemailer": "6.4.14"
   }
 }
