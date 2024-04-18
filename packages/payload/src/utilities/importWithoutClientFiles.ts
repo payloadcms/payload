@@ -8,10 +8,9 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const importWithoutClientFiles = async <T = unknown>(filePath: string) => {
-  const url = pathToFileURL(filePath).toString()
-
-  register(path.resolve(dirname, '../../dist/bin/loader/index.js'), url)
-  const result = await import(filePath)
+  const filePathUrl = pathToFileURL(filePath).href
+  register(pathToFileURL(path.resolve(dirname, '../../dist/bin/loader/index.js')).href, filePathUrl)
+  const result = await import(filePathUrl)
   return result as T
 }
 
@@ -25,7 +24,11 @@ export const importConfig = async (configPath: string) => {
     return await config.default
   }
 
-  const callerDir = path.dirname(getCallerInfo()[1].getFileName()).replace('file://', '')
+  const callerDir = path
+    .dirname(getCallerInfo()[1].getFileName())
+    .replace('file:///', '')
+    .replace('file://', '')
+
   const fullConfigPath = path.resolve(callerDir, configPath)
 
   const config = await importWithoutClientFiles<{ default: Promise<SanitizedConfig> }>(
