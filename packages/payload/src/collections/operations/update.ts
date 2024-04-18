@@ -267,7 +267,8 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
           global: null,
           operation: 'update',
           req,
-          skipValidation: data._status !== 'published',
+          skipValidation:
+            Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
         })
 
         // /////////////////////////////////////
