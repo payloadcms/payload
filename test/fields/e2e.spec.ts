@@ -904,6 +904,20 @@ describe('fields', () => {
         'Updated 3 Array Fields successfully.',
       )
     })
+    test('should show select hasMany values nested inside array after save', async () => {
+      await page.goto(url.create)
+      await wait(1000)
+      await saveDocAndAssert(page)
+      await wait(1000)
+      const field = page.locator('#field-items__0__selectHasMany')
+      await field.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      // Select an option
+      await options.locator('text=Value One').click()
+
+      await saveDocAndAssert(page)
+      await expect(field.locator('.rs__value-container')).toContainText('Value One')
+    })
   })
 
   describe('tabs', () => {

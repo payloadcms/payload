@@ -228,7 +228,6 @@ export const traverseFields = ({
           prefix: `enum_${newTableName}_`,
           target: 'enumName',
           throwValidationError,
-          versions,
         })
 
         adapter.enums[enumName] = pgEnum(
@@ -249,7 +248,6 @@ export const traverseFields = ({
             parentTableName: newTableName,
             prefix: `${newTableName}_`,
             throwValidationError,
-            versions,
           })
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),

@@ -39,6 +39,25 @@ const ArrayFields: CollectionConfig = {
           ],
           type: 'array',
         },
+        {
+          name: 'selectHasMany',
+          hasMany: true,
+          type: 'select',
+          admin: {
+            isClearable: true,
+            isSortable: true,
+          },
+          options: [
+            {
+              label: 'Value One',
+              value: 'one',
+            },
+            {
+              label: 'Value Two',
+              value: 'two',
+            },
+          ],
+        },
       ],
       required: true,
       type: 'array',
