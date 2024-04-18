@@ -475,7 +475,7 @@ describe('Versions', () => {
         expect(draftPost.title.es).toBe(spanishTitle)
       })
 
-      it('should validate publishing without the draft arg', async () => {
+      it('should validate when publishing with the draft arg', async () => {
         // no title (not valid for publishing)
         const doc = await payload.create({
           collection: draftCollectionSlug,
