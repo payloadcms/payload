@@ -1,22 +1,23 @@
 {
-    "$schema": "./translation-schema.json",
-    "plugin-seo": {
-        "autoGenerate": "Auto-générer",
-        "imageAutoGenerationTip": "L'auto-génération récupérera l'image principale sélectionnée.",
-        "bestPractices": "bonnes pratiques",
-        "lengthTipTitle": "Ceci devrait contenir entre {{minLength}} et {{maxLength}} caractères. Pour obtenir de l'aide pour rédiger des titres meta de qualité, consultez les ",
-        "lengthTipDescription": "Ceci devrait contenir entre {{minLength}} et {{maxLength}} caractères. Pour obtenir de l'aide pour rédiger des descriptions meta de qualité, consultez les ",
-        "good": "Bien",
-        "tooLong": "Trop long",
-        "tooShort": "Trop court",
-        "almostThere": "On y est presque",
-        "characterCount": "{{current}}/{{minLength}}-{{maxLength}} caractères, ",
-        "charactersToGo": "{{characters}} à ajouter",
-        "charactersLeftOver": "{{characters}} restants",
-        "charactersTooMany": "{{characters}} en trop",
-        "noImage": "Pas d'image",
-        "checksPassing": "{{current}}/{{max}} vérifications réussies",
-        "preview": "Aperçu",
-        "previewDescription": "Les résultats exacts peuvent varier en fonction du contenu et de la pertinence de la recherche."
-    }
+  "$schema": "./translation-schema.json",
+  "plugin-seo": {
+    "autoGenerate": "Auto-générer",
+    "imageAutoGenerationTip": "L'auto-génération récupérera l'image principale sélectionnée.",
+    "bestPractices": "bonnes pratiques",
+    "lengthTipTitle": "Ceci devrait contenir entre {{minLength}} et {{maxLength}} caractères. Pour obtenir de l'aide pour rédiger des titres meta de qualité, consultez les ",
+    "lengthTipDescription": "Ceci devrait contenir entre {{minLength}} et {{maxLength}} caractères. Pour obtenir de l'aide pour rédiger des descriptions meta de qualité, consultez les ",
+    "good": "Bien",
+    "tooLong": "Trop long",
+    "tooShort": "Trop court",
+    "almostThere": "On y est presque",
+    "missing": "Missing",
+    "characterCount": "{{current}}/{{minLength}}-{{maxLength}} caractères, ",
+    "charactersToGo": "{{characters}} à ajouter",
+    "charactersLeftOver": "{{characters}} restants",
+    "charactersTooMany": "{{characters}} en trop",
+    "noImage": "Pas d'image",
+    "checksPassing": "{{current}}/{{max}} vérifications réussies",
+    "preview": "Aperçu",
+    "previewDescription": "Les résultats exacts peuvent varier en fonction du contenu et de la pertinence de la recherche."
+  }
 }
