@@ -548,7 +548,16 @@ export type Config = {
   csrf?: string[]
 
   /** Extension point to add your custom data. */
-  custom?: Record<string, any>
+  custom?: {
+    /**
+     * Available in client bundle.
+     */
+    client?: Record<string, any>
+    /**
+     * Server only.
+     */
+    server?: Record<string, any>
+  }
 
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult

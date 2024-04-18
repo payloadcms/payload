@@ -55,6 +55,12 @@ export const createClientGlobalConfig = ({
     }
   })
 
+  if ('custom' in sanitized && sanitized.custom) {
+    if ('server' in sanitized.custom && sanitized.custom.server) {
+      delete sanitized.custom.server
+    }
+  }
+
   if ('admin' in sanitized) {
     sanitized.admin = { ...sanitized.admin }
 
