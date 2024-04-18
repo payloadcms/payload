@@ -48,10 +48,13 @@ async function buildEmail(
   emailConfig?: NodemailerAdapterArgs,
 ): Promise<{ defaultFromAddress: string; defaultFromName: string; transport: Transporter }> {
   if (!emailConfig) {
+    const transport = await createMockAccount(emailConfig)
+    if (!transport) throw new InvalidConfiguration('Unable to create Nodemailer test account.')
+
     return {
       defaultFromAddress: 'info@payloadcms.com',
       defaultFromName: 'Payload',
-      transport: await createMockAccount(emailConfig),
+      transport,
     }
   }
 
@@ -94,12 +97,12 @@ const ensureConfigHasFrom = (emailConfig: NodemailerAdapterArgs) => {
 /**
  * Use ethereal.email to create a mock email account
  */
-async function createMockAccount(emailConfig: NodemailerAdapterArgs) {
+async function createMockAccount(emailConfig?: NodemailerAdapterArgs) {
   try {
     const etherealAccount = await nodemailer.createTestAccount()
 
     const smtpOptions = {
-      ...emailConfig,
+      ...(emailConfig || {}),
       auth: {
         pass: etherealAccount.pass,
         user: etherealAccount.user,
@@ -120,7 +123,13 @@ async function createMockAccount(emailConfig: NodemailerAdapterArgs) {
       console.info(`Mock email account password: ${pass}`)
     }
     return transport
-  } catch (err) {
-    console.error({ err, msg: 'There was a problem setting up the mock email handler' })
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error({ err, msg: 'There was a problem setting up the mock email handler' })
+      throw new InvalidConfiguration(
+        `Unable to create Nodemailer test account. Error: ${err.message}`,
+      )
+    }
+    throw new InvalidConfiguration('Unable to create Nodemailer test account.')
   }
 }
