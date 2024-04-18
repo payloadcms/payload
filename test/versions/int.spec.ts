@@ -1,6 +1,7 @@
 import { GraphQLClient, request } from 'graphql-request'
 
 import payload from '../../packages/payload/src'
+import { ValidationError } from '../../packages/payload/src/errors'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import AutosavePosts from './collections/Autosave'
@@ -469,6 +470,42 @@ describe('Versions', () => {
         expect(publishedPost.title).toBe(originalTitle)
         expect(draftPost.title.en).toBe(patchedTitle)
         expect(draftPost.title.es).toBe(spanishTitle)
+      })
+
+      it('should validate publishing without the draft arg', async () => {
+        // no title (not valid for publishing)
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'desc',
+          },
+          draft: true,
+        })
+
+        await expect(async () => {
+          // should not be able to publish a doc that fails validation
+          await payload.update({
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: { _status: 'published' },
+            draft: true,
+          })
+        }).rejects.toThrow(ValidationError)
+
+        // succeeds but returns zero docs updated, with an error
+        const updateManyResult = await payload.update({
+          collection: draftCollectionSlug,
+          data: { _status: 'published' },
+          draft: true,
+          where: {
+            id: { equals: doc.id },
+          },
+        })
+
+        expect(updateManyResult.docs).toHaveLength(0)
+        expect(updateManyResult.errors).toStrictEqual([
+          { id: doc.id, message: 'The following field is invalid: title' },
+        ])
       })
     })
 
