@@ -6,18 +6,14 @@ import type { EmailAdapter } from 'payload/types'
 import nodemailer from 'nodemailer'
 import { InvalidConfiguration } from 'payload/errors'
 
-type Email = {
+export type NodemailerAdapterArgs = {
   defaultFromAddress: string
   defaultFromName: string
-  logMockCredentials?: boolean
-}
-
-type EmailTransportOptions = Email & {
+  skipVerify?: boolean
   transport?: Transporter
-  transportOptions: SMTPConnection.Options
+  transportOptions?: SMTPConnection.Options
 }
 
-export type NodemailerAdapterArgs = Email | EmailTransportOptions
 export type NodemailerAdapter = EmailAdapter<SendMailOptions, unknown>
 
 /**
@@ -58,8 +54,6 @@ async function buildEmail(
     }
   }
 
-  ensureConfigHasFrom(emailConfig)
-
   // Create or extract transport
   let transport: Transporter
   if ('transport' in emailConfig && emailConfig.transport) {
@@ -70,7 +64,10 @@ async function buildEmail(
     transport = await createMockAccount(emailConfig)
   }
 
-  await verifyTransport(transport)
+  if (emailConfig.skipVerify !== false) {
+    await verifyTransport(transport)
+  }
+
   return {
     defaultFromAddress: emailConfig.defaultFromAddress,
     defaultFromName: emailConfig.defaultFromName,
@@ -83,14 +80,6 @@ async function verifyTransport(transport: Transporter) {
     await transport.verify()
   } catch (err: unknown) {
     console.error({ err, msg: 'Error verifying Nodemailer transport.' })
-  }
-}
-
-const ensureConfigHasFrom = (emailConfig: NodemailerAdapterArgs) => {
-  if (!emailConfig?.defaultFromName || !emailConfig?.defaultFromAddress) {
-    throw new InvalidConfiguration(
-      'Email fromName and fromAddress must be configured when transport is configured',
-    )
   }
 }
 
@@ -116,12 +105,10 @@ async function createMockAccount(emailConfig?: NodemailerAdapterArgs) {
     const transport = nodemailer.createTransport(smtpOptions)
     const { pass, user, web } = etherealAccount
 
-    if (emailConfig?.logMockCredentials) {
-      console.info('E-mail configured with mock configuration')
-      console.info(`Log into mock email provider at ${web}`)
-      console.info(`Mock email account username: ${user}`)
-      console.info(`Mock email account password: ${pass}`)
-    }
+    console.info('E-mail configured with ethereal.email test account. ')
+    console.info(`Log into mock email provider at ${web}`)
+    console.info(`Mock email account username: ${user}`)
+    console.info(`Mock email account password: ${pass}`)
     return transport
   } catch (err: unknown) {
     if (err instanceof Error) {
