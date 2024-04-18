@@ -33,8 +33,7 @@ export const defaultValuePromise = async <T>({
     ) {
       siblingData[field.name] = await getDefaultValue({
         defaultValue: field.defaultValue,
-        locale: req.locale,
-        user: req.user,
+        req,
         value: siblingData[field.name],
       })
     }

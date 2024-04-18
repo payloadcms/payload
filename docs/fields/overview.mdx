@@ -224,12 +224,9 @@ The `condition` function should return a boolean that will control if the field 
 
 Fields can be prefilled with starting values using the `defaultValue` property. This is used in the admin UI and also on the backend as API requests will be populated with missing or undefined field values. You can assign the defaultValue directly in the field configuration or supply a function for dynamic behavior. Values assigned during a create request on the server are added before validation occurs.
 
-Functions are called with an optional argument object containing:
+Functions are called with an argument `req` - The Payload `request` object:
 
-- `user` - the authenticated user object
-- `locale` - the currently selected locale string
-
-Here is an example of a defaultValue function that uses both:
+Here is an example of a defaultValue function that uses `req`:
 
 ```ts
 const translation: {
@@ -241,7 +238,7 @@ const field = {
   name: 'attribution',
   type: 'text',
   // highlight-start
-  defaultValue: ({ user, locale }) => `${translation[locale]} ${user.name}`,
+  defaultValue: (req) => `${translation[req.locale]} ${req.user.name}`,
   // highlight-end
 }
 ```

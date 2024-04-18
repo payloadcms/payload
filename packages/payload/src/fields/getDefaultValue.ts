@@ -1,22 +1,20 @@
-import type { User } from '../auth/index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { deepCopyObject } from '../utilities/deepCopyObject.js'
 
 type Args = {
   defaultValue: unknown
-  locale: string | undefined
-  user: PayloadRequest['user']
+  req: PayloadRequest
   value?: unknown
 }
 
-const getValueWithDefault = ({ defaultValue, locale, user, value }: Args): unknown => {
+const getValueWithDefault = ({ defaultValue, req, value }: Args): unknown => {
   if (typeof value !== 'undefined') {
     return value
   }
 
   if (defaultValue && typeof defaultValue === 'function') {
-    return defaultValue({ locale, user })
+    return defaultValue(req)
   }
 
   if (typeof defaultValue === 'object') {

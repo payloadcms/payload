@@ -181,7 +181,7 @@ export interface FieldBase {
   admin?: Admin
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
-  defaultValue?: any
+  defaultValue?: ((req: PayloadRequest) => unknown) | boolean | number | object | string
   hidden?: boolean
   hooks?: {
     afterChange?: FieldHook[]
