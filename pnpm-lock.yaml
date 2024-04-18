@@ -782,9 +782,6 @@ importers:
       monaco-editor:
         specifier: 0.38.0
         version: 0.38.0
-      nodemailer:
-        specifier: 6.9.10
-        version: 6.9.10
       pino:
         specifier: 8.15.0
         version: 8.15.0
