@@ -1,0 +1,56 @@
+{
+  "name": "@payloadcms/email-resend-rest",
+  "version": "0.0.0",
+  "description": "Payload Nodemailer Email Adapter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/email-resend-rest"
+  },
+  "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "author": "Payload CMS, Inc.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    },
+    "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.d.ts"
+  },
+  "engines": {
+    "node": ">=18.20.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/nodemailer": "6.4.14",
+    "payload": "workspace:*"
+  }
+}

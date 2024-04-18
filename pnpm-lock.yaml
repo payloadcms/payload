@@ -452,6 +452,15 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/email-resend-rest:
+    devDependencies:
+      '@types/nodemailer':
+        specifier: 6.4.14
+        version: 6.4.14
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/eslint-config-payload:
     dependencies:
       '@types/eslint':
@@ -1604,6 +1613,9 @@ importers:
       '@payloadcms/email-nodemailer':
         specifier: workspace:*
         version: link:../packages/email-nodemailer
+      '@payloadcms/email-resend-rest':
+        specifier: workspace:*
+        version: link:../packages/email-resend-rest
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../packages/eslint-config-payload

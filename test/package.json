@@ -15,6 +15,7 @@
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
+    "@payloadcms/email-resend-rest": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/live-preview": "workspace:*",
