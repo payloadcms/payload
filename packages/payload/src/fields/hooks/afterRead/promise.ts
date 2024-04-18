@@ -276,8 +276,7 @@ export const promise = async ({
     ) {
       siblingDoc[field.name] = await getValueWithDefault({
         defaultValue: field.defaultValue,
-        locale,
-        user: req.user,
+        req,
         value: siblingDoc[field.name],
       })
     }

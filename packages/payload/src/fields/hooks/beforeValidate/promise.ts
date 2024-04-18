@@ -253,8 +253,7 @@ export const promise = async <T>({
       } else if (typeof field.defaultValue !== 'undefined') {
         siblingData[field.name] = await getValueWithDefault({
           defaultValue: field.defaultValue,
-          locale: req.locale,
-          user: req.user,
+          req,
           value: siblingData[field.name],
         })
       }
