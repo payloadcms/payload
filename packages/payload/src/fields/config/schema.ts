@@ -37,7 +37,10 @@ export const baseField = joi
       update: joi.func(),
     }),
     admin: baseAdminFields.default(),
-    custom: joi.object().pattern(joi.string(), joi.any()),
+    custom: joi.object().keys({
+      client: joi.object().pattern(joi.string(), joi.any()),
+      server: joi.object().pattern(joi.string(), joi.any()),
+    }),
     hidden: joi.boolean().default(false),
     hooks: joi
       .object()
@@ -418,7 +421,10 @@ export const blocks = baseField.keys({
     .items(
       joi.object({
         slug: joi.string().required(),
-        custom: joi.object().pattern(joi.string(), joi.any()),
+        custom: joi.object().keys({
+          client: joi.object().pattern(joi.string(), joi.any()),
+          server: joi.object().pattern(joi.string(), joi.any()),
+        }),
         dbName: joi.alternatives().try(joi.string(), joi.func()),
         fields: joi.array().items(joi.link('#field')),
         graphQL: joi.object().keys({
@@ -519,7 +525,10 @@ export const ui = joi.object().keys({
       width: joi.string(),
     })
     .default(),
-  custom: joi.object().pattern(joi.string(), joi.any()),
+  custom: joi.object().keys({
+    client: joi.object().pattern(joi.string(), joi.any()),
+    server: joi.object().pattern(joi.string(), joi.any()),
+  }),
   label: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
 })
 

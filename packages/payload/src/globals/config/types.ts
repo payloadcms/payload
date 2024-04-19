@@ -141,7 +141,16 @@ export type GlobalConfig = {
   }
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. */
-  custom?: Record<string, any>
+  custom?: {
+    /**
+     * Available in client bundle.
+     */
+    client?: Record<string, any>
+    /**
+     * Server only.
+     */
+    server?: Record<string, any>
+  }
   /**
    * Customize the SQL table name
    */

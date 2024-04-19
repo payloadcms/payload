@@ -25,7 +25,10 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
-          custom: { description: 'The title of this page' },
+          custom: {
+            client: { description: 'The title of this page' },
+            server: { description: 'The title of this page' },
+          },
         },
         {
           name: 'myBlocks',
@@ -43,13 +46,22 @@ export default buildConfigWithDefaults({
                   type: 'text',
                 },
               ],
-              custom: { description: 'The blockOne of this page' },
+              custom: {
+                client: { description: 'The blockOne of this page' },
+                server: { description: 'The blockOne of this page' },
+              },
             },
           ],
-          custom: { description: 'The blocks of this page' },
+          custom: {
+            client: { description: 'The blocks of this page' },
+            server: { description: 'The blocks of this page' },
+          },
         },
       ],
-      custom: { externalLink: 'https://foo.bar' },
+      custom: {
+        client: { externalLink: 'https://foo.bar' },
+        server: { externalLink: 'https://foo.bar' },
+      },
     },
   ],
   globals: [
@@ -70,10 +82,13 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
-          custom: { description: 'The title of my global' },
+          custom: {
+            client: { description: 'The title of my global' },
+            server: { description: 'The title of my global' },
+          },
         },
       ],
-      custom: { foo: 'bar' },
+      custom: { client: { foo: 'bar' }, server: { foo: 'bar' } },
     },
   ],
   endpoints: [
@@ -86,7 +101,7 @@ export default buildConfigWithDefaults({
       custom: { description: 'Get the sanitized payload config' },
     },
   ],
-  custom: { name: 'Customer portal' },
+  custom: { client: { name: 'Customer portal' }, server: { name: 'Customer portal' } },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

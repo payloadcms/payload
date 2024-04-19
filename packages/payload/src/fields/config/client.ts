@@ -45,6 +45,12 @@ export const createClientFieldConfig = ({
     }
   })
 
+  if ('custom' in field && field.custom) {
+    if ('server' in field.custom && field.custom.server) {
+      delete field.custom.server
+    }
+  }
+
   if ('options' in field && Array.isArray(field.options)) {
     field.options = field.options.map((option) => {
       if (typeof option === 'object' && typeof option.label === 'function') {

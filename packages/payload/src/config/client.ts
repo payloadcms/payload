@@ -49,6 +49,7 @@ export const createClientConfig = async ({
 }: {
   config: SanitizedConfig
   t: TFunction
+  // eslint-disable-next-line @typescript-eslint/require-await
 }): Promise<ClientConfig> => {
   const clientConfig: ClientConfig = { ...config }
 
@@ -81,6 +82,12 @@ export const createClientConfig = async ({
     clientConfig.localization.locales.forEach((locale) => {
       delete locale.toString
     })
+  }
+
+  if ('custom' in clientConfig && clientConfig.custom) {
+    if ('server' in clientConfig.custom && clientConfig.custom.server) {
+      delete clientConfig.custom.server
+    }
   }
 
   if ('admin' in clientConfig) {

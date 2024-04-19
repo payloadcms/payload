@@ -22,6 +22,7 @@ import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import TextFields from './collections/Text/index.js'
+import UIFields from './collections/UI/index.js'
 import Uploads from './collections/Upload/index.js'
 import Uploads2 from './collections/Upload2/index.js'
 import Uploads3 from './collections/Uploads3/index.js'
@@ -67,11 +68,20 @@ export const collectionSlugs: CollectionConfig[] = [
   Uploads,
   Uploads2,
   Uploads3,
+  UIFields,
 ]
 
 export default buildConfigWithDefaults({
   collections: collectionSlugs,
   globals: [TabsWithRichText],
+  custom: {
+    client: {
+      'new-value': 'client available',
+    },
+    server: {
+      'new-server-value': 'only available on server',
+    },
+  },
   localization: {
     defaultLocale: 'en',
     fallback: true,

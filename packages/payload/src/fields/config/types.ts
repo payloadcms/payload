@@ -180,7 +180,16 @@ export interface FieldBase {
   }
   admin?: Admin
   /** Extension point to add your custom data. */
-  custom?: Record<string, any>
+  custom?: {
+    /**
+     * Available in client bundle.
+     */
+    client?: Record<string, any>
+    /**
+     * Server only.
+     */
+    server?: Record<string, any>
+  }
   defaultValue?: any
   hidden?: boolean
   hooks?: {
@@ -426,7 +435,16 @@ export type UIField = {
     width?: string
   }
   /** Extension point to add your custom data. */
-  custom?: Record<string, any>
+  custom?: {
+    /**
+     * Available in client bundle.
+     */
+    client?: Record<string, any>
+    /**
+     * Server only.
+     */
+    server?: Record<string, any>
+  }
   label?: Record<string, string> | string
   name: string
   type: 'ui'
@@ -637,7 +655,16 @@ export type RadioField = FieldBase & {
 
 export type Block = {
   /** Extension point to add your custom data. */
-  custom?: Record<string, any>
+  custom?: {
+    /**
+     * Available in client bundle.
+     */
+    client?: Record<string, any>
+    /**
+     * Server only.
+     */
+    server?: Record<string, any>
+  }
   /**
    * Customize the SQL table name
    */
