@@ -1,5 +1,5 @@
 import { register } from 'node:module'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { URL, fileURLToPath, pathToFileURL } from 'node:url'
 import path from 'path'
 
 import type { SanitizedConfig } from '../config/types.js'
@@ -24,10 +24,11 @@ export const importConfig = async (configPath: string) => {
     return await config.default
   }
 
-  const callerDir = path
-    .dirname(getCallerInfo()[1].getFileName())
-    .replace('file:///', '')
-    .replace('file://', '')
+  const callerFilename = getCallerInfo()[1].getFileName()
+
+  const url = new URL(callerFilename)
+
+  const callerDir = path.dirname(url.pathname).replace(/^\/([A-Z])/i, '$1')
 
   const fullConfigPath = path.resolve(callerDir, configPath)
 
