@@ -5,6 +5,8 @@ import fr from './fr.json'
 import nb from './nb.json'
 import pl from './pl.json'
 import ua from './ua.json'
+import zh from './zh.json'
+import zhTw from './zh-tw.json'
 
 export default {
   en,
@@ -12,6 +14,8 @@ export default {
   fa,
   fr,
   nb,
-  pl,
+  pl,  
   ua,
+  zh,
+  zhTw,
 }
