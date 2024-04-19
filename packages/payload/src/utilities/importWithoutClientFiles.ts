@@ -1,5 +1,5 @@
 import { register } from 'node:module'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { URL, fileURLToPath, pathToFileURL } from 'node:url'
 import path from 'path'
 
 import type { SanitizedConfig } from '../config/types.js'
@@ -8,10 +8,11 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const importWithoutClientFiles = async <T = unknown>(filePath: string) => {
-  const url = pathToFileURL(filePath).toString()
+  const { href: filePathUrl } = pathToFileURL(filePath)
+  const { href: loaderUrl } = pathToFileURL(path.resolve(dirname, '../../dist/bin/loader/index.js'))
 
-  register(path.resolve(dirname, '../../dist/bin/loader/index.js'), url)
-  const result = await import(filePath)
+  register(loaderUrl, filePathUrl)
+  const result = await import(filePathUrl)
   return result as T
 }
 
@@ -25,7 +26,12 @@ export const importConfig = async (configPath: string) => {
     return await config.default
   }
 
-  const callerDir = path.dirname(getCallerInfo()[1].getFileName()).replace('file://', '')
+  const callerFilename = getCallerInfo()[1].getFileName()
+
+  const url = new URL(callerFilename)
+
+  const callerDir = path.dirname(fileURLToPath(url))
+
   const fullConfigPath = path.resolve(callerDir, configPath)
 
   const config = await importWithoutClientFiles<{ default: Promise<SanitizedConfig> }>(
