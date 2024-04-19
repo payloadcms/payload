@@ -57,8 +57,9 @@ export const ExtraFieldsUploadDrawer: React.FC<
   // Sanitize custom fields here
   const validRelationships = config.collections.map((c) => c.slug) || []
   const fieldSchema = sanitizeFields({
-    config: config,
+    config,
     fields: fieldSchemaUnsanitized,
+    requireFieldLevelRichTextEditor: true,
     validRelationships,
   })
 
@@ -85,8 +86,9 @@ export const ExtraFieldsUploadDrawer: React.FC<
     // Sanitize custom fields here
     const validRelationships = config.collections.map((c) => c.slug) || []
     const fieldSchema = sanitizeFields({
-      config: config,
+      config,
       fields: fieldSchemaUnsanitized,
+      requireFieldLevelRichTextEditor: true,
       validRelationships,
     })
 

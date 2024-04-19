@@ -6,6 +6,7 @@ import type { PayloadRequest } from '../../express/types'
 import type { Document } from '../../types'
 
 import formatSuccessResponse from '../../express/responses/formatSuccess'
+import { sanitizeCollectionID } from '../../utilities/sanitizeCollectionID'
 import restoreVersion from '../operations/restoreVersion'
 
 export type RestoreResult = {
@@ -18,8 +19,14 @@ export default async function restoreVersionHandler(
   res: Response,
   next: NextFunction,
 ): Promise<Response<RestoreResult> | void> {
-  const options = {
+  const id = sanitizeCollectionID({
     id: req.params.id,
+    collectionSlug: req.collection.config.slug,
+    payload: req.payload,
+  })
+
+  const options = {
+    id,
     collection: req.collection,
     depth: Number(req.query.depth),
     payload: req.payload,

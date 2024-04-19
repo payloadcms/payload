@@ -225,6 +225,85 @@ export const getTableColumnFromPath = ({
         })
       }
 
+      case 'select': {
+        if (field.hasMany) {
+          newTableName = getTableName({
+            adapter,
+            config: field,
+            parentTableName: `${tableName}_${tableNameSuffix}`,
+            prefix: `${tableName}_${tableNameSuffix}`,
+          })
+
+          if (locale && field.localized && adapter.payload.config.localization) {
+            joins[newTableName] = and(
+              eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+              eq(adapter.tables[newTableName]._locale, locale),
+            )
+            if (locale !== 'all') {
+              constraints.push({
+                columnName: '_locale',
+                table: adapter.tables[newTableName],
+                value: locale,
+              })
+            }
+          } else {
+            joins[newTableName] = eq(
+              adapter.tables[tableName].id,
+              adapter.tables[newTableName].parent,
+            )
+          }
+
+          return {
+            columnName: 'value',
+            constraints,
+            field,
+            table: adapter.tables[newTableName],
+          }
+        }
+        break
+      }
+
+      case 'text':
+      case 'number': {
+        if (field.hasMany) {
+          let tableType = 'texts'
+          let columnName = 'text'
+          if (field.type === 'number') {
+            tableType = 'numbers'
+            columnName = 'number'
+          }
+          newTableName = `${tableName}_${tableType}`
+          const joinConstraints = [
+            eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+            eq(adapter.tables[newTableName].path, `${constraintPath}${field.name}`),
+          ]
+
+          if (locale && field.localized && adapter.payload.config.localization) {
+            joins[newTableName] = and(
+              ...joinConstraints,
+              eq(adapter.tables[newTableName]._locale, locale),
+            )
+            if (locale !== 'all') {
+              constraints.push({
+                columnName: 'locale',
+                table: adapter.tables[newTableName],
+                value: locale,
+              })
+            }
+          } else {
+            joins[newTableName] = and(...joinConstraints)
+          }
+
+          return {
+            columnName,
+            constraints,
+            field,
+            table: adapter.tables[newTableName],
+          }
+        }
+        break
+      }
+
       case 'array': {
         newTableName = getTableName({
           adapter,
@@ -484,42 +563,40 @@ export const getTableColumnFromPath = ({
           value,
         })
       }
+    }
 
-      default: {
-        if (fieldAffectsData(field)) {
-          if (field.localized && adapter.payload.config.localization) {
-            // If localized, we go to localized table and set aliasTable to undefined
-            // so it is not picked up below to be used as targetTable
-            newTableName = `${tableName}${adapter.localesSuffix}`
+    if (fieldAffectsData(field)) {
+      if (field.localized && adapter.payload.config.localization) {
+        // If localized, we go to localized table and set aliasTable to undefined
+        // so it is not picked up below to be used as targetTable
+        newTableName = `${tableName}${adapter.localesSuffix}`
 
-            const parentTable = aliasTable || adapter.tables[tableName]
+        const parentTable = aliasTable || adapter.tables[tableName]
 
-            joins[newTableName] = eq(parentTable.id, adapter.tables[newTableName]._parentID)
+        joins[newTableName] = eq(parentTable.id, adapter.tables[newTableName]._parentID)
 
-            aliasTable = undefined
+        aliasTable = undefined
 
-            if (locale !== 'all') {
-              constraints.push({
-                columnName: '_locale',
-                table: adapter.tables[newTableName],
-                value: locale,
-              })
-            }
-          }
-
-          const targetTable = aliasTable || adapter.tables[newTableName]
-
-          selectFields[`${newTableName}.${columnPrefix}${field.name}`] =
-            targetTable[`${columnPrefix}${field.name}`]
-
-          return {
-            columnName: `${columnPrefix}${field.name}`,
-            constraints,
-            field,
-            pathSegments,
-            table: targetTable,
-          }
+        if (locale !== 'all') {
+          constraints.push({
+            columnName: '_locale',
+            table: adapter.tables[newTableName],
+            value: locale,
+          })
         }
+      }
+
+      const targetTable = aliasTable || adapter.tables[newTableName]
+
+      selectFields[`${newTableName}.${columnPrefix}${field.name}`] =
+        targetTable[`${columnPrefix}${field.name}`]
+
+      return {
+        columnName: `${columnPrefix}${field.name}`,
+        constraints,
+        field,
+        pathSegments,
+        table: targetTable,
       }
     }
   }

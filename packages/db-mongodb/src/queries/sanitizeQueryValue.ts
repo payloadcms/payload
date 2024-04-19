@@ -142,7 +142,10 @@ export const sanitizeQueryValue = ({
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains') {
-      formattedValue = { $options: 'i', $regex: formattedValue }
+      formattedValue = {
+        $options: 'i',
+        $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+      }
     }
   }
 

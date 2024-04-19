@@ -10,9 +10,13 @@ type Args = {
   localized: boolean
   rootTableName: string
   table: GenericTable
+  tableLocales?: GenericTable
 }
 
-const getFlattenedFieldNames = (fields: Field[], prefix: string = ''): string[] => {
+const getFlattenedFieldNames = (
+  fields: Field[],
+  prefix: string = '',
+): { localized?: boolean; name: string }[] => {
   return fields.reduce((fieldsToUse, field) => {
     let fieldPrefix = prefix
 
@@ -44,7 +48,13 @@ const getFlattenedFieldNames = (fields: Field[], prefix: string = ''): string[] 
     }
 
     if (fieldAffectsData(field)) {
-      return [...fieldsToUse, `${fieldPrefix?.replace('.', '_') || ''}${field.name}`]
+      return [
+        ...fieldsToUse,
+        {
+          name: `${fieldPrefix?.replace('.', '_') || ''}${field.name}`,
+          localized: field.localized,
+        },
+      ]
     }
 
     return fieldsToUse
@@ -56,22 +66,25 @@ export const validateExistingBlockIsIdentical = ({
   localized,
   rootTableName,
   table,
+  tableLocales,
 }: Args): void => {
   const fieldNames = getFlattenedFieldNames(block.fields)
-
   const missingField =
     // ensure every field from the config is in the matching table
-    fieldNames.find((name) => Object.keys(table).indexOf(name) === -1) ||
+    fieldNames.find(({ name, localized }) => {
+      const fieldTable = localized && tableLocales ? tableLocales : table
+      return Object.keys(fieldTable).indexOf(name) === -1
+    }) ||
     // ensure every table column is matched for every field from the config
     Object.keys(table).find((fieldName) => {
       if (!['_locale', '_order', '_parentID', '_path', '_uuid'].includes(fieldName)) {
-        return fieldNames.indexOf(fieldName) === -1
+        return fieldNames.findIndex((field) => field.name) === -1
       }
     })
 
   if (missingField) {
     throw new InvalidConfiguration(
-      `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${missingField}, while the other block does not.`,
+      `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${typeof missingField === 'string' ? missingField : missingField.name}, while the other block does not.`,
     )
   }
 

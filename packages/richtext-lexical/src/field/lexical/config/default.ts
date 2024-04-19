@@ -15,6 +15,7 @@ import { StrikethroughTextFeature } from '../../features/format/strikethrough'
 import { SubscriptTextFeature } from '../../features/format/subscript'
 import { SuperscriptTextFeature } from '../../features/format/superscript'
 import { UnderlineTextFeature } from '../../features/format/underline'
+import { HorizontalRuleFeature } from '../../features/horizontalrule'
 import { IndentFeature } from '../../features/indent'
 import { CheckListFeature } from '../../features/lists/CheckList'
 import { OrderedListFeature } from '../../features/lists/OrderedList'
@@ -40,6 +41,7 @@ export const defaultEditorFeatures: FeatureProvider[] = [
   RelationshipFeature(),
   BlockQuoteFeature(),
   UploadFeature(),
+  HorizontalRuleFeature(),
   //BlocksFeature(), // Adding this by default makes no sense if no blocks are defined
 ]
 

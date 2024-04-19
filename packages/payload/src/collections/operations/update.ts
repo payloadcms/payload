@@ -268,7 +268,8 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           global: null,
           operation: 'update',
           req,
-          skipValidation: shouldSaveDraft || data._status === 'draft',
+          skipValidation:
+            Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
         })
 
         // /////////////////////////////////////
@@ -297,7 +298,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
               ...result,
               createdAt: doc.createdAt,
             },
-            draft: shouldSaveDraft,
             payload,
             req,
           })
