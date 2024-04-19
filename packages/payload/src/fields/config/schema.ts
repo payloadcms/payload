@@ -423,10 +423,12 @@ export const blocks = baseField.keys({
     .items(
       joi.object({
         slug: joi.string().required(),
-        custom: joi.object().keys({
-          client: joi.object().pattern(joi.string(), joi.any()),
-          server: joi.object().pattern(joi.string(), joi.any()),
-        }),
+        custom: joi
+          .object()
+          .pattern(joi.string(), joi.any())
+          .keys({
+            server: joi.object().pattern(joi.string(), joi.any()),
+          }),
         dbName: joi.alternatives().try(joi.string(), joi.func()),
         fields: joi.array().items(joi.link('#field')),
         graphQL: joi.object().keys({
