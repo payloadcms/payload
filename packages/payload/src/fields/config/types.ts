@@ -124,6 +124,8 @@ type Admin = {
    * This is also run on the server, to determine if the field should be validated.
    */
   condition?: Condition
+  /** Extension point to add your custom data. Available in server and client. */
+  custom?: Record<string, any>
   description?: Description
   disableBulkEdit?: boolean
   disabled?: boolean
@@ -179,13 +181,8 @@ export interface FieldBase {
     update?: FieldAccess
   }
   admin?: Admin
-  /** Extension point to add your custom data. */
-  custom?: {
-    /**
-     * Server only.
-     */
-    server?: Record<string, any>
-  } & Record<string, any>
+  /** Extension point to add your custom data. Server only. */
+  custom?: Record<string, any>
   defaultValue?: any
   hidden?: boolean
   hooks?: {
@@ -426,17 +423,14 @@ export type UIField = {
       Filter?: React.ComponentType<any>
     }
     condition?: Condition
+    /** Extension point to add your custom data. Available in server and client. */
+    custom?: Record<string, any>
     disableBulkEdit?: boolean
     position?: string
     width?: string
   }
-  /** Extension point to add your custom data. */
-  custom?: {
-    /**
-     * Server only.
-     */
-    server?: Record<string, any>
-  } & Record<string, any>
+  /** Extension point to add your custom data. Server only. */
+  custom?: Record<string, any>
   label?: Record<string, string> | string
   name: string
   type: 'ui'
@@ -646,13 +640,12 @@ export type RadioField = FieldBase & {
 }
 
 export type Block = {
-  /** Extension point to add your custom data. */
-  custom?: {
-    /**
-     * Server only.
-     */
-    server?: Record<string, any>
-  } & Record<string, any>
+  admin?: {
+    /** Extension point to add your custom data. Available in server and client. */
+    custom?: Record<string, any>
+  }
+  /** Extension point to add your custom data. Server only. */
+  custom?: Record<string, any>
   /**
    * Customize the SQL table name
    */

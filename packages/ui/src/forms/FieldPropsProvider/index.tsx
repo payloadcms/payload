@@ -5,7 +5,7 @@ import type { FieldPermissions } from 'payload/types'
 import React from 'react'
 
 export type FieldPropsContextType = {
-  custom?: Record<string, any>
+  custom?: Record<any, string>
   indexPath?: string
   path: string
   permissions?: FieldPermissions
@@ -19,6 +19,7 @@ export type FieldPropsContextType = {
 
 const FieldPropsContext = React.createContext<FieldPropsContextType>({
   type: '' as keyof FieldTypes,
+  custom: {},
   indexPath: '',
   path: '',
   permissions: {} as FieldPermissions,
@@ -29,7 +30,7 @@ const FieldPropsContext = React.createContext<FieldPropsContextType>({
 
 export type Props = {
   children: React.ReactNode
-  custom?: Record<string, any>
+  custom?: Record<any, string>
   indexPath?: string
   path: string
   permissions?: FieldPermissions

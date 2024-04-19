@@ -57,6 +57,7 @@ const collectionSchema = joi.object().keys({
         ),
       }),
     }),
+    custom: joi.object().pattern(joi.string(), joi.any()),
     defaultColumns: joi.array().items(joi.string()),
     description: joi.alternatives().try(joi.string(), componentSchema),
     enableRichTextLink: joi.boolean(),
@@ -107,12 +108,7 @@ const collectionSchema = joi.object().keys({
     }),
     joi.boolean(),
   ),
-  custom: joi
-    .object()
-    .pattern(joi.string(), joi.any())
-    .keys({
-      server: joi.object().pattern(joi.string(), joi.any()),
-    }),
+  custom: joi.object().pattern(joi.string(), joi.any()),
   dbName: joi.alternatives().try(joi.string(), joi.func()),
   defaultSort: joi.string(),
   disableDuplicate: joi.bool(),
