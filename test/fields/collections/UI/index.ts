@@ -24,12 +24,10 @@ const UIFields: CollectionConfig = {
         },
       },
       custom: {
-        client: {
-          customValue: `client-side-configuration`,
-        },
         server: {
-          'new-server-value': 'only available on server',
+          serverOnly: 'string',
         },
+        customValue: `client-side-configuration`,
       },
     },
   ],
