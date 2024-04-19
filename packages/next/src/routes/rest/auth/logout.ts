@@ -5,6 +5,7 @@ import { logoutOperation } from 'payload/operations'
 import type { CollectionRouteHandler } from '../types.js'
 
 export const logout: CollectionRouteHandler = async ({ collection, req }) => {
+  const { t } = req
   const result = await logoutOperation({
     collection,
     req,
@@ -13,7 +14,7 @@ export const logout: CollectionRouteHandler = async ({ collection, req }) => {
   if (!result) {
     return Response.json(
       {
-        message: 'Logout failed.',
+        message: t('error:logoutFailed'),
       },
       {
         status: httpStatus.BAD_REQUEST,
@@ -28,8 +29,7 @@ export const logout: CollectionRouteHandler = async ({ collection, req }) => {
 
   return Response.json(
     {
-      // TODO(translate)
-      message: 'Logout successful.',
+      message: t('authentication:logoutSuccessful'),
     },
     {
       headers: new Headers({
