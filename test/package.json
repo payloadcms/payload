@@ -30,6 +30,7 @@
     "@payloadcms/plugin-stripe": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/richtext-slate": "workspace:*",
+    "@payloadcms/storage-s3": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "comment-json": "^4.2.3",

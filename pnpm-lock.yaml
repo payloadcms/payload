@@ -1346,6 +1346,22 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/storage-s3:
+    dependencies:
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../plugin-cloud-storage
+    devDependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.525.0
+        version: 3.550.0
+      '@aws-sdk/lib-storage':
+        specifier: ^3.525.0
+        version: 3.550.0(@aws-sdk/client-s3@3.550.0)
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/translations:
     devDependencies:
       '@payloadcms/eslint-config':
@@ -1553,6 +1569,9 @@ importers:
       '@payloadcms/richtext-slate':
         specifier: workspace:*
         version: link:../packages/richtext-slate
+      '@payloadcms/storage-s3':
+        specifier: workspace:*
+        version: link:../packages/storage-s3
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../packages/translations

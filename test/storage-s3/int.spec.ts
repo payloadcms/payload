@@ -4,7 +4,6 @@ import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
@@ -14,9 +13,25 @@ const dirname = path.dirname(filename)
 
 let payload: Payload
 
-describe('@payloadcms/plugin-cloud-storage', () => {
+describe('@payloadcms/storage-s3', () => {
+  const TEST_BUCKET = process.env.S3_BUCKET
+  let client: AWS.S3Client
+
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(configPromise))
+
+    client = new AWS.S3({
+      endpoint: process.env.S3_ENDPOINT,
+      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+      region: process.env.S3_REGION,
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY_ID,
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+      },
+    })
+
+    await createTestBucket()
+    await clearTestBucket()
   })
 
   afterAll(async () => {
@@ -24,73 +39,42 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       await payload.db.destroy()
     }
   })
+  afterEach(async () => {
+    await clearTestBucket()
+  })
 
-  const TEST_BUCKET = 'payload-bucket'
-
-  let client: AWS.S3Client
-  describeIfInCIOrHasLocalstack()('plugin-cloud-storage', () => {
-    describe('S3', () => {
-      beforeAll(async () => {
-        client = new AWS.S3({
-          endpoint: process.env.S3_ENDPOINT,
-          forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-          region: process.env.S3_REGION,
-          credentials: {
-            accessKeyId: process.env.S3_ACCESS_KEY_ID,
-            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-          },
-        })
-
-        await createTestBucket()
-        await clearTestBucket()
-      })
-
-      afterEach(async () => {
-        await clearTestBucket()
-      })
-
-      it('can upload', async () => {
-        const upload = await payload.create({
-          collection: mediaSlug,
-          data: {},
-          filePath: path.resolve(dirname, '../uploads/image.png'),
-        })
-
-        expect(upload.id).toBeTruthy()
-
-        await verifyUploads({
-          collectionSlug: mediaSlug,
-          uploadId: upload.id,
-        })
-
-        expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
-      })
-
-      it('can upload with prefix', async () => {
-        const upload = await payload.create({
-          collection: mediaWithPrefixSlug,
-          data: {},
-          filePath: path.resolve(dirname, '../uploads/image.png'),
-        })
-
-        expect(upload.id).toBeTruthy()
-
-        await verifyUploads({
-          collectionSlug: mediaWithPrefixSlug,
-          uploadId: upload.id,
-          prefix,
-        })
-        expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
-      })
+  it('can upload', async () => {
+    const upload = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/image.png'),
     })
+
+    expect(upload.id).toBeTruthy()
+
+    await verifyUploads({
+      collectionSlug: mediaSlug,
+      uploadId: upload.id,
+    })
+
+    expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
   })
 
-  describe('Azure', () => {
-    it.todo('can upload')
-  })
+  it('can upload with prefix', async () => {
+    const upload = await payload.create({
+      collection: mediaWithPrefixSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+    })
 
-  describe('GCS', () => {
-    it.todo('can upload')
+    expect(upload.id).toBeTruthy()
+
+    await verifyUploads({
+      collectionSlug: mediaWithPrefixSlug,
+      uploadId: upload.id,
+      prefix,
+    })
+    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
   })
 
   describe('R2', () => {
