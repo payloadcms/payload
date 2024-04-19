@@ -192,6 +192,8 @@ export const ar: Language = {
       deleting: 'يتمّ الحذف...',
       descending: 'تنازلي',
       deselectAllRows: 'إلغاء تحديد جميع الصفوف',
+      document: 'وثيقة',
+      documents: 'وثائق',
       duplicate: 'استنساخ',
       duplicateWithoutSaving: 'استنساخ بدون حفظ التغييرات',
       edit: 'تعديل',

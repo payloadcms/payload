@@ -193,6 +193,8 @@ export const fa: Language = {
       deleting: 'در حال حذف...',
       descending: 'رو به پایین',
       deselectAllRows: 'تمام سطرها را از انتخاب خارج کنید',
+      document: 'سند',
+      documents: 'اسناد',
       duplicate: 'تکراری',
       duplicateWithoutSaving: 'رونوشت بدون ذخیره کردن تغییرات',
       edit: 'نگارش',

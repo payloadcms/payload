@@ -189,6 +189,8 @@ export const th: Language = {
       deleting: 'กำลังลบ...',
       descending: 'มากไปน้อย',
       deselectAllRows: 'ยกเลิกการเลือกทุกแถว',
+      document: 'เอกสาร',
+      documents: 'เอกสาร',
       duplicate: 'สำเนา',
       duplicateWithoutSaving: 'สำเนาโดยไม่บันทึกการแก้ไข',
       edit: 'แก้ไข',

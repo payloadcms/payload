@@ -193,6 +193,8 @@ export const cs: Language = {
       deleting: 'Odstraňování...',
       descending: 'Sestupně',
       deselectAllRows: 'Zrušte výběr všech řádků',
+      document: 'Dokument',
+      documents: 'Dokumenty',
       duplicate: 'Duplikovat',
       duplicateWithoutSaving: 'Duplikovat bez uložení změn',
       edit: 'Upravit',

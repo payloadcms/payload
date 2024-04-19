@@ -84,7 +84,7 @@ export const DocumentControls: React.FC<{
                     label:
                       typeof collectionConfig?.labels?.singular === 'string'
                         ? collectionConfig.labels.singular
-                        : 'document',
+                        : i18n.t('general:document'),
                   })}
                 </p>
               </li>

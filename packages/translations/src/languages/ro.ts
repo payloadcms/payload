@@ -196,6 +196,8 @@ export const ro: Language = {
       deleting: 'Deleting...',
       descending: 'Descendentă',
       deselectAllRows: 'Deselectează toate rândurile',
+      document: 'Document',
+      documents: 'Documente',
       duplicate: 'Duplicați',
       duplicateWithoutSaving: 'Duplicați fără salvarea modificărilor',
       edit: 'Editează',

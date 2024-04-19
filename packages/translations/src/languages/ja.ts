@@ -193,6 +193,8 @@ export const ja: Language = {
       deleting: '削除しています...',
       descending: '降順',
       deselectAllRows: 'すべての行の選択を解除します',
+      document: 'ドキュメント',
+      documents: 'ドキュメント',
       duplicate: '複製',
       duplicateWithoutSaving: '変更を保存せずに複製',
       edit: '編集',

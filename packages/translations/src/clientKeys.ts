@@ -120,6 +120,8 @@ export const clientTranslationKeys = [
   'general:deleting',
   'general:descending',
   'general:deselectAllRows',
+  'general:document',
+  'general:documents',
   'general:duplicate',
   'general:duplicateWithoutSaving',
   'general:edit',

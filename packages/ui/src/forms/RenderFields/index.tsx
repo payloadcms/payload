@@ -71,6 +71,7 @@ export const RenderFields: React.FC<Props> = (props) => {
             return (
               <RenderField
                 CustomField={CustomField}
+                custom={f.custom}
                 disabled={disabled}
                 fieldComponentProps={fieldComponentProps}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}

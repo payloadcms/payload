@@ -195,6 +195,8 @@ export const hu: Language = {
       deleting: 'Törlés...',
       descending: 'Csökkenő',
       deselectAllRows: 'Jelölje ki az összes sort',
+      document: 'Dokumentum',
+      documents: 'Dokumentumok',
       duplicate: 'Duplikálás',
       duplicateWithoutSaving: 'Duplikálás a módosítások mentése nélkül',
       edit: 'Szerkesztés',

@@ -195,6 +195,8 @@ export const es: Language = {
       deleting: 'Eliminando...',
       descending: 'Descendente',
       deselectAllRows: 'Deselecciona todas las filas',
+      document: 'Documento',
+      documents: 'Documentos',
       duplicate: 'Duplicar',
       duplicateWithoutSaving: 'Duplicar sin guardar cambios',
       edit: 'Editar',

@@ -199,6 +199,8 @@ export const fr: Language = {
       deleting: 'Suppression en cours...',
       descending: 'Descendant(e)',
       deselectAllRows: 'Désélectionner toutes les lignes',
+      document: 'Document',
+      documents: 'Documents',
       duplicate: 'Dupliquer',
       duplicateWithoutSaving: 'Dupliquer sans enregistrer les modifications',
       edit: 'Éditer',

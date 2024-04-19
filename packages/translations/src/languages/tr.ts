@@ -196,6 +196,8 @@ export const tr: Language = {
       deleting: 'Siliniyor...',
       descending: 'Azalan',
       deselectAllRows: 'Tüm satırların seçimini kaldır',
+      document: 'Belge',
+      documents: 'Belgeler',
       duplicate: 'Çoğalt',
       duplicateWithoutSaving: 'Ayarları kaydetmeden çoğalt',
       edit: 'Düzenle',
