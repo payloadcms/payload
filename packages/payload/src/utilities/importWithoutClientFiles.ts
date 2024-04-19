@@ -28,7 +28,7 @@ export const importConfig = async (configPath: string) => {
 
   const url = new URL(callerFilename)
 
-  const callerDir = path.dirname(url.pathname).replace(/^\/([A-Z])/i, '$1')
+  const callerDir = path.dirname(fileURLToPath(url))
 
   const fullConfigPath = path.resolve(callerDir, configPath)
 
