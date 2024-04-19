@@ -19,6 +19,9 @@ importers:
       '@sentry/react':
         specifier: ^7.77.0
         version: 7.88.0(react@18.2.0)
+      ajv:
+        specifier: ^8.12.0
+        version: 8.12.0
       react:
         specifier: 18.2.0
         version: 18.2.0
