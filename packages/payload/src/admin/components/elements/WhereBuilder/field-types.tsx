@@ -109,7 +109,7 @@ const fieldTypeConditions = {
   },
   number: {
     component: 'Number',
-    operators: [...base, ...numeric],
+    operators: (hasMany) => filterOperators([...base, ...numeric], hasMany),
   },
   point: {
     component: 'Point',
@@ -133,7 +133,7 @@ const fieldTypeConditions = {
   },
   text: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: (hasMany) => filterOperators([...base, like, contains], hasMany),
   },
   textarea: {
     component: 'Text',
