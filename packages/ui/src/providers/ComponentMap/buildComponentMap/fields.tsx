@@ -468,6 +468,7 @@ export const mapFields = (args: {
               className: field.admin?.className,
               disabled: field.admin?.disabled,
               editorOptions: field.admin?.editorOptions,
+              jsonSchema: field.jsonSchema,
               label: field.label,
               readOnly: field.admin?.readOnly,
               required: field.required,

@@ -196,6 +196,7 @@ export const json = baseField.keys({
     editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
   }),
   defaultValue: joi.alternatives().try(joi.array(), joi.object()),
+  jsonSchema: joi.object().unknown(),
 })
 
 export const select = baseField.keys({

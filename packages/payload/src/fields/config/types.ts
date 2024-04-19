@@ -489,6 +489,7 @@ type JSONAdmin = Admin & {
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
   admin?: JSONAdmin
+  jsonSchema?: Record<string, unknown>
   type: 'json'
 }
 
