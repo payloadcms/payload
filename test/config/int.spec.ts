@@ -55,8 +55,6 @@ describe('Config', () => {
       const [collection] = payload.config.collections
       const [field] = collection.fields
 
-      console.log({ custom: field.custom })
-
       expect(field.custom).toEqual({
         description: 'The title of this page',
       })
