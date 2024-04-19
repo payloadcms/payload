@@ -182,14 +182,10 @@ export interface FieldBase {
   /** Extension point to add your custom data. */
   custom?: {
     /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
      * Server only.
      */
     server?: Record<string, any>
-  }
+  } & Record<string, any>
   defaultValue?: any
   hidden?: boolean
   hooks?: {
@@ -437,14 +433,10 @@ export type UIField = {
   /** Extension point to add your custom data. */
   custom?: {
     /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
      * Server only.
      */
     server?: Record<string, any>
-  }
+  } & Record<string, any>
   label?: Record<string, string> | string
   name: string
   type: 'ui'
@@ -657,14 +649,10 @@ export type Block = {
   /** Extension point to add your custom data. */
   custom?: {
     /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
      * Server only.
      */
     server?: Record<string, any>
-  }
+  } & Record<string, any>
   /**
    * Customize the SQL table name
    */

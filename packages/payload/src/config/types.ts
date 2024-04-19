@@ -550,14 +550,10 @@ export type Config = {
   /** Extension point to add your custom data. */
   custom?: {
     /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
      * Server only.
      */
     server?: Record<string, any>
-  }
+  } & Record<string, any>
 
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult

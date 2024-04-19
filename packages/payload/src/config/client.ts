@@ -40,6 +40,7 @@ export type ClientConfig = Omit<
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   }
   collections: ClientCollectionConfig[]
+  custom?: Record<string, any>
   globals: ClientGlobalConfig[]
 }
 

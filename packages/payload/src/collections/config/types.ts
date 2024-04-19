@@ -316,14 +316,10 @@ export type CollectionConfig = {
   /** Extension point to add your custom data. */
   custom?: {
     /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
      * Server only.
      */
     server?: Record<string, any>
-  }
+  } & Record<string, any>
   /**
    * Default field to sort by in collection list view
    */
