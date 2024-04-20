@@ -205,7 +205,6 @@ export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 export type CountArgs = {
   collection: string
   locale?: string
-  /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   req: PayloadRequest
   where?: Where
 }
