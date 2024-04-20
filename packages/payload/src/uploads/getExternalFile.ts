@@ -55,7 +55,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
 
 function headersToObject(headers) {
   const headersObj = {}
-  headers.forEach((value, key) => {
+  Object.entries(headers).forEach(([key, value]) => {
     // If the header value is an array, join its elements into a single string
     if (Array.isArray(value)) {
       headersObj[key] = value.join(', ')
