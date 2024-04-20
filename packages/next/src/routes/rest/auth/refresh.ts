@@ -6,13 +6,13 @@ import { refreshOperation } from 'payload/operations'
 import type { CollectionRouteHandler } from '../types.js'
 
 export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
+  const { t } = req
   const token = typeof req.data?.token === 'string' ? req.data.token : extractJWT(req)
 
   if (!token) {
     return Response.json(
       {
-        // TODO(translate)
-        message: 'Token not provided.',
+        message: t('error:tokenNotProvided'),
       },
       {
         status: httpStatus.UNAUTHORIZED,
@@ -38,8 +38,7 @@ export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
 
   return Response.json(
     {
-      // TODO(translate)
-      message: 'Token refresh successful',
+      message: t('authentication:tokenRefreshSuccessful'),
       ...result,
     },
     {

@@ -5,7 +5,7 @@ import { resetPasswordOperation } from 'payload/operations'
 import type { CollectionRouteHandler } from '../types.js'
 
 export const resetPassword: CollectionRouteHandler = async ({ collection, req }) => {
-  const { searchParams } = req
+  const { searchParams, t } = req
   const depth = searchParams.get('depth')
 
   const result = await resetPasswordOperation({
@@ -30,8 +30,7 @@ export const resetPassword: CollectionRouteHandler = async ({ collection, req })
 
   return Response.json(
     {
-      // TODO(translate)
-      message: 'Password reset successfully.',
+      message: t('authentication:passwordResetSuccessfully'),
       ...result,
     },
     {

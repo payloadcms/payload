@@ -6,7 +6,7 @@ import { registerFirstUserOperation } from 'payload/operations'
 import type { CollectionRouteHandler } from '../types.js'
 
 export const registerFirstUser: CollectionRouteHandler = async ({ collection, req }) => {
-  const data = req.data
+  const { data, t } = req
 
   if (data?.password !== data['confirm-password']) {
     throw new ValidationError([
@@ -36,8 +36,7 @@ export const registerFirstUser: CollectionRouteHandler = async ({ collection, re
   return Response.json(
     {
       exp: result.exp,
-      // TODO(translate)
-      message: 'Successfully registered first user.',
+      message: t('authentication:successfullyRegisteredFirstUser'),
       token: result.token,
       user: result.user,
     },
