@@ -7,6 +7,7 @@ import { initPayloadTest } from '../helpers/configHelpers'
 import { requestHeaders } from './config'
 import {
   firstArrayText,
+  hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
   relyOnRequestHeadersSlug,
@@ -415,6 +416,30 @@ describe('Access Control', () => {
       })
 
       expect(docs).toHaveLength(1)
+    })
+
+    it('should respect query constraint using hidden field on count', async () => {
+      await payload.create({
+        collection: hiddenAccessCountSlug,
+        data: {
+          title: 'hello',
+        },
+      })
+
+      await payload.create({
+        collection: hiddenAccessCountSlug,
+        data: {
+          title: 'hello',
+          hidden: true,
+        },
+      })
+
+      const { totalDocs } = await payload.count({
+        collection: hiddenAccessCountSlug,
+        overrideAccess: false,
+      })
+
+      expect(totalDocs).toBe(1)
     })
 
     it('should respect query constraint using hidden field on versions', async () => {
