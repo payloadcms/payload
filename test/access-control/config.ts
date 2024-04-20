@@ -6,6 +6,7 @@ import { TestButton } from './TestButton.js'
 import {
   docLevelAccessSlug,
   firstArrayText,
+  hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
   noAdminAccessEmail,
@@ -404,6 +405,32 @@ export default buildConfigWithDefaults({
     },
     {
       slug: hiddenAccessSlug,
+      access: {
+        read: ({ req: { user } }) => {
+          if (user) return true
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          }
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+    },
+    {
+      slug: hiddenAccessCountSlug,
       access: {
         read: ({ req: { user } }) => {
           if (user) return true

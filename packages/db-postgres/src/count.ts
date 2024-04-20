@@ -1,0 +1,65 @@
+import type { Count } from 'payload/database'
+import type { SanitizedCollectionConfig } from 'payload/types'
+
+import { sql } from 'drizzle-orm'
+
+import type { ChainedMethods } from './find/chainMethods.js'
+import type { PostgresAdapter } from './types.js'
+
+import { chainMethods } from './find/chainMethods.js'
+import buildQuery from './queries/buildQuery.js'
+import { getTableName } from './schema/getTableName.js'
+
+export const count: Count = async function count(
+  this: PostgresAdapter,
+  { collection, locale, req, where: whereArg },
+) {
+  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
+
+  const tableName = getTableName({
+    adapter: this,
+    config: collectionConfig,
+  })
+
+  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const table = this.tables[tableName]
+
+  const { joinAliases, joins, where } = await buildQuery({
+    adapter: this,
+    fields: collectionConfig.fields,
+    locale,
+    tableName,
+    where: whereArg,
+  })
+
+  const selectCountMethods: ChainedMethods = []
+
+  joinAliases.forEach(({ condition, table }) => {
+    selectCountMethods.push({
+      args: [table, condition],
+      method: 'leftJoin',
+    })
+  })
+
+  Object.entries(joins).forEach(([joinTable, condition]) => {
+    if (joinTable) {
+      selectCountMethods.push({
+        args: [this.tables[joinTable], condition],
+        method: 'leftJoin',
+      })
+    }
+  })
+
+  const countResult = await chainMethods({
+    methods: selectCountMethods,
+    query: db
+      .select({
+        count: sql<number>`count
+            (DISTINCT ${this.tables[tableName].id})`,
+      })
+      .from(table)
+      .where(where),
+  })
+
+  return { totalDocs: Number(countResult[0].count) }
+}
