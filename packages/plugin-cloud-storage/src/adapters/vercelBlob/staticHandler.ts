@@ -17,7 +17,7 @@ export const getStaticHandler = (
 ): StaticHandler => {
   return async (req, { params: { filename } }) => {
     try {
-      const prefix = await getFilePrefix({ collection, req })
+      const prefix = await getFilePrefix({ collection, req, filename })
 
       const fileUrl = `${baseUrl}/${path.posix.join(prefix, filename)}`
 

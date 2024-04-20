@@ -14,10 +14,10 @@ interface Args {
 }
 
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { params }) => {
+  return async (req, { params: { filename } }) => {
     try {
-      const prefix = await getFilePrefix({ collection, req })
-      const file = getStorageClient().bucket(bucket).file(path.posix.join(prefix, params.filename))
+      const prefix = await getFilePrefix({ collection, filename, req })
+      const file = getStorageClient().bucket(bucket).file(path.posix.join(prefix, filename))
 
       const [metadata] = await file.getMetadata()
 

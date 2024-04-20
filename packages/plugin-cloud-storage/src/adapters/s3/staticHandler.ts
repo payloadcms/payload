@@ -23,13 +23,13 @@ const streamToBuffer = async (readableStream) => {
 }
 
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { params }) => {
+  return async (req, { params: { filename } }) => {
     try {
-      const prefix = await getFilePrefix({ collection, req })
+      const prefix = await getFilePrefix({ collection, filename, req })
 
       const object = await getStorageClient().getObject({
         Bucket: bucket,
-        Key: path.posix.join(prefix, params.filename),
+        Key: path.posix.join(prefix, filename),
       })
 
       if (!object.Body) {
