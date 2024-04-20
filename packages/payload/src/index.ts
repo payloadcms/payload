@@ -35,7 +35,7 @@ import type {
   Options as UpdateOptions,
 } from './collections/operations/local/update.js'
 import type { EmailOptions, InitOptions, SanitizedConfig } from './config/types.js'
-import type { BaseDatabaseAdapter, CountArgs, PaginatedDocs } from './database/types.js'
+import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
 import type { BuildEmailResult } from './email/types.js'
 import type { TypeWithID as GlobalTypeWithID, Globals } from './globals/config/types.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
