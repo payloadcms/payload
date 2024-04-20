@@ -16,7 +16,9 @@ export const richTextValidateHOC = ({
     options,
   ) => {
     const {
-      req: { t },
+      req: {
+        i18n: { t },
+      },
       required,
     } = options
 
