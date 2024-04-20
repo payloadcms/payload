@@ -21,6 +21,8 @@ export interface BaseDatabaseAdapter {
    */
   connect?: Connect
 
+  count: Count
+
   create: Create
 
   createGlobal: CreateGlobal
@@ -199,6 +201,16 @@ export type FindArgs = {
 }
 
 export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
+
+export type CountArgs = {
+  collection: string
+  locale?: string
+  /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
+  req: PayloadRequest
+  where?: Where
+}
+
+export type Count = (args: CountArgs) => Promise<{ totalDocs: number }>
 
 type BaseVersionArgs = {
   limit?: number

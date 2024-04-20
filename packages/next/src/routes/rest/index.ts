@@ -25,6 +25,7 @@ import { unlock } from './auth/unlock.js'
 import { verifyEmail } from './auth/verifyEmail.js'
 import { buildFormState } from './buildFormState.js'
 import { endpointsAreDisabled } from './checkEndpoints.js'
+import { count } from './collections/count.js'
 import { create } from './collections/create.js'
 import { deleteDoc } from './collections/delete.js'
 import { deleteByID } from './collections/deleteByID.js'
@@ -55,6 +56,7 @@ const endpoints = {
       deleteByID,
     },
     GET: {
+      count,
       'doc-access-by-id': docAccess,
       'doc-versions-by-id': findVersionByID,
       find,
@@ -204,6 +206,7 @@ export const GET =
               // /:collection/init
               // /:collection/me
               // /:collection/versions
+              // /:collection/count
               res = await (endpoints.collection.GET[slug2] as CollectionRouteHandler)({
                 collection,
                 req,

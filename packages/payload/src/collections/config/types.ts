@@ -30,6 +30,7 @@ import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.j
 
 export type HookOperationType =
   | 'autosave'
+  | 'count'
   | 'create'
   | 'delete'
   | 'forgotPassword'
@@ -421,6 +422,7 @@ export type Collection = {
   customIDType?: 'number' | 'text'
   graphQL?: {
     JWT: GraphQLObjectType
+    countType: GraphQLObjectType
     mutationInputType: GraphQLNonNull<any>
     paginatedType: GraphQLObjectType
     type: GraphQLObjectType

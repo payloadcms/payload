@@ -164,6 +164,22 @@ const result = await payload.findByID({
 })
 ```
 
+#### Count
+
+```js
+// Result will be an object with:
+// {
+//   totalDocs: 10, // count of the documents satisfies query
+// }
+const result = await payload.count({
+  collection: 'posts', // required
+  locale: 'en',
+  where: {}, // pass a `where` query here
+  user: dummyUser,
+  overrideAccess: false,
+})
+```
+
 #### Update by ID
 
 ```js

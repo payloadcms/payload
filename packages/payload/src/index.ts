@@ -16,6 +16,7 @@ import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy } from './auth/types.js'
 import type { BulkOperationResult, Collection, TypeWithID } from './collections/config/types.js'
+import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'
 import type {
   ByIDOptions as DeleteByIDOptions,
@@ -34,7 +35,7 @@ import type {
   Options as UpdateOptions,
 } from './collections/operations/local/update.js'
 import type { EmailOptions, InitOptions, SanitizedConfig } from './config/types.js'
-import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
+import type { BaseDatabaseAdapter, CountArgs, PaginatedDocs } from './database/types.js'
 import type { BuildEmailResult } from './email/types.js'
 import type { TypeWithID as GlobalTypeWithID, Globals } from './globals/config/types.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
@@ -82,6 +83,18 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   config: SanitizedConfig
 
   /**
+   * @description Performs count operation
+   * @param options
+   * @returns count of documents satisfying query
+   */
+  count = async <T extends keyof TGeneratedTypes['collections']>(
+    options: CountOptions<T>,
+  ): Promise<{ totalDocs: number }> => {
+    const { count } = localOperations
+    return count(this, options)
+  }
+
+  /**
    * @description Performs create operation
    * @param options
    * @returns created document
@@ -92,7 +105,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     const { create } = localOperations
     return create<T>(this, options)
   }
-
   db: DatabaseAdapter
 
   decrypt = decrypt
