@@ -87,7 +87,6 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
       const parsedUrl = parse(req.url, true)
       await handle(req, res, parsedUrl)
     }).listen(port, () => {
-      console.log(`> Ready on http://localhost:${port}`)
       resolveServer()
     })
   })
