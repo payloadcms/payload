@@ -36,7 +36,7 @@ const getFlattenedFieldNames = (
       return [
         ...fieldsToUse,
         ...field.tabs.reduce((tabFields, tab) => {
-          fieldPrefix = 'name' in tab ? `${prefix}.${tab.name}` : prefix
+          fieldPrefix = 'name' in tab ? `${prefix}_${tab.name}` : prefix
           return [
             ...tabFields,
             ...(tabHasName(tab)
@@ -51,7 +51,7 @@ const getFlattenedFieldNames = (
       return [
         ...fieldsToUse,
         {
-          name: `${fieldPrefix?.replace('.', '_') || ''}${field.name}`,
+          name: `${fieldPrefix}${field.name}`,
           localized: field.localized,
         },
       ]
