@@ -83,7 +83,6 @@ export const getTableColumnFromPath = ({
   let locale = incomingLocale
   const rootTableName = incomingRootTableName || tableName
   let constraintPath = incomingConstraintPath || ''
-
   const field = flattenTopLevelFields(fields as Field[]).find(
     (fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath,
   ) as Field | TabAsField

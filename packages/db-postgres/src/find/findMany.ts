@@ -26,6 +26,7 @@ export const findMany = async function find({
   page = 1,
   pagination,
   req = {} as PayloadRequest,
+  select,
   skip,
   sort,
   tableName,
@@ -66,6 +67,7 @@ export const findMany = async function find({
     adapter,
     depth: 0,
     fields,
+    select,
     tableName,
   })
 
@@ -157,6 +159,7 @@ export const findMany = async function find({
   }
 
   const rawDocs = await findPromise
+
   // sort rawDocs from selectQuery
   if (Object.keys(orderedIDMap).length > 0) {
     rawDocs.sort((a, b) => orderedIDMap[a.id] - orderedIDMap[b.id])

@@ -98,6 +98,10 @@ export type Where = {
   or?: Where[]
 }
 
+export type Select = {
+  [key: string]: Select | boolean
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any
 

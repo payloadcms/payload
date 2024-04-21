@@ -1,6 +1,12 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { GeneratedTypes, Payload } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
+import type {
+  Document,
+  PayloadRequest,
+  RequestContext,
+  Select,
+  Where,
+} from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -23,6 +29,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   page?: number
   pagination?: boolean
   req?: PayloadRequest
+  select?: Select
   showHiddenFields?: boolean
   sort?: string
   user?: Document
@@ -43,6 +50,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     overrideAccess = true,
     page,
     pagination = true,
+    select,
     showHiddenFields,
     sort,
     where,
@@ -67,6 +75,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     page,
     pagination,
     req: await createLocalReq(options, payload),
+    select,
     showHiddenFields,
     sort,
     where,

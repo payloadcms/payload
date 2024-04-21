@@ -1,6 +1,6 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest, Select, Where } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -26,6 +26,7 @@ export type Arguments = {
   page?: number
   pagination?: boolean
   req?: PayloadRequest
+  select?: Select
   showHiddenFields?: boolean
   sort?: string
   where?: Where
@@ -69,6 +70,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
       pagination = true,
       req: { fallbackLocale, locale, payload },
       req,
+      select,
       showHiddenFields,
       sort,
       where,
@@ -148,6 +150,7 @@ export const findOperation = async <T extends TypeWithID & Record<string, unknow
         page: sanitizedPage,
         pagination,
         req,
+        select,
         sort,
         where: fullWhere,
       })

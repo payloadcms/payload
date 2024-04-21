@@ -1,4 +1,4 @@
-import type { Where } from 'payload/types'
+import type { Select, Where } from 'payload/types'
 
 import httpStatus from 'http-status'
 import { findOperation } from 'payload/operations'
@@ -7,11 +7,12 @@ import { isNumber } from 'payload/utilities'
 import type { CollectionRouteHandler } from '../types.js'
 
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
-  const { depth, draft, limit, page, sort, where } = req.query as {
+  const { depth, draft, limit, page, select, sort, where } = req.query as {
     depth?: string
     draft?: string
     limit?: string
     page?: string
+    select?: Select
     sort?: string
     where?: Where
   }
@@ -23,6 +24,7 @@ export const find: CollectionRouteHandler = async ({ collection, req }) => {
     limit: isNumber(limit) ? Number(limit) : undefined,
     page: isNumber(page) ? Number(page) : undefined,
     req,
+    select,
     sort,
     where,
   })

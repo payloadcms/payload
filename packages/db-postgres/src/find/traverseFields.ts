@@ -1,23 +1,28 @@
 /* eslint-disable no-param-reassign */
-import type { Field } from 'payload/types'
+import type { Field, FieldAffectingData, NamedTab, Select } from 'payload/types'
 
+import APIError from 'packages/payload/src/errors/APIError.js'
 import { fieldAffectsData, tabHasName } from 'payload/types'
 
 import type { PostgresAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
 import { getTableName } from '../schema/getTableName.js'
+import { buildColumns } from './buildColumns.js'
+import { buildFieldSelect } from './buildFieldSelect.js'
 
 type TraverseFieldArgs = {
   _locales: Record<string, unknown>
   adapter: PostgresAdapter
-  currentArgs: Record<string, unknown>
+  currentArgs: Result
   currentTableName: string
   depth?: number
   fields: Field[]
   path: string
-  topLevelArgs: Record<string, unknown>
+  select?: Select | boolean
+  topLevelArgs: Result
   topLevelTableName: string
+  withSelection: boolean
 }
 
 export const traverseFields = ({
@@ -28,8 +33,10 @@ export const traverseFields = ({
   depth,
   fields,
   path,
+  select,
   topLevelArgs,
   topLevelTableName,
+  withSelection,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
     if (field.type === 'collapsible' || field.type === 'row') {
@@ -41,8 +48,10 @@ export const traverseFields = ({
         depth,
         fields: field.fields,
         path,
+        select,
         topLevelArgs,
         topLevelTableName,
+        withSelection,
       })
 
       return
@@ -50,7 +59,8 @@ export const traverseFields = ({
 
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
-        const tabPath = tabHasName(tab) ? `${path}${tab.name}_` : path
+        const hasName = tabHasName(tab)
+        const tabPath = hasName ? `${path}${tab.name}_` : path
 
         traverseFields({
           _locales,
@@ -60,8 +70,10 @@ export const traverseFields = ({
           depth,
           fields: tab.fields,
           path: tabPath,
+          select: hasName ? buildFieldSelect({ field: tab, select }) : select,
           topLevelArgs,
           topLevelTableName,
+          withSelection,
         })
       })
 
@@ -72,9 +84,11 @@ export const traverseFields = ({
       switch (field.type) {
         case 'array': {
           const withArray: Result = {
-            columns: {
-              _parentID: false,
-            },
+            columns: buildColumns({
+              exclude: ['_parentID'],
+              include: ['id', '_path', '_order'],
+              withSelection,
+            }),
             orderBy: ({ _order }, { asc }) => [asc(_order)],
             with: {},
           }
@@ -105,8 +119,10 @@ export const traverseFields = ({
             depth,
             fields: field.fields,
             path: '',
+            select: buildFieldSelect({ field, select }),
             topLevelArgs,
             topLevelTableName,
+            withSelection,
           })
 
           break
@@ -135,9 +151,11 @@ export const traverseFields = ({
 
             if (!topLevelArgs[blockKey]) {
               const withBlock: Result = {
-                columns: {
-                  _parentID: false,
-                },
+                columns: buildColumns({
+                  exclude: ['_parentID'],
+                  include: ['id', '_path', '_order'],
+                  withSelection,
+                }),
                 orderBy: ({ _order }, { asc }) => [asc(_order)],
                 with: {},
               }
@@ -154,6 +172,8 @@ export const traverseFields = ({
               }
               topLevelArgs.with[blockKey] = withBlock
 
+              const currentSelect = buildFieldSelect({ field, select })
+
               traverseFields({
                 _locales,
                 adapter,
@@ -162,8 +182,13 @@ export const traverseFields = ({
                 depth,
                 fields: block.fields,
                 path: '',
+                select:
+                  currentSelect && typeof currentSelect === 'object'
+                    ? currentSelect[block.slug]
+                    : currentSelect,
                 topLevelArgs,
                 topLevelTableName,
+                withSelection,
               })
             }
           })
@@ -179,15 +204,35 @@ export const traverseFields = ({
             depth,
             fields: field.fields,
             path: `${path}${field.name}_`,
+            select: buildFieldSelect({ field, select }),
             topLevelArgs,
             topLevelTableName,
+            withSelection,
           })
 
           break
 
-        default: {
+        case 'relationship':
+        case 'upload': {
+          if (typeof topLevelArgs.with._rels !== 'object') break
+
+          const { relationTo } = field
+          if (typeof relationTo === 'string')
+            topLevelArgs.with._rels.columns[`${relationTo}_id`] = true
+          else {
+            for (const collection of relationTo) {
+              topLevelArgs.with._rels.columns[`${collection}_id`] = true
+            }
+          }
+
           break
         }
+
+        default:
+          if (!select) break
+          currentArgs.columns[`${path}${field.name}`] =
+            typeof select === 'boolean' ? true : !!select[field.name]
+          break
       }
     }
   })
