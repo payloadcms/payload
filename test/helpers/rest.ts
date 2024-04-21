@@ -30,6 +30,12 @@ type CreateArgs<T = any> = {
   slug?: string
 }
 
+type CountArgs = {
+  auth?: boolean
+  query?: Where
+  slug?: string
+}
+
 type FindArgs = {
   auth?: boolean
   depth?: number
@@ -112,6 +118,13 @@ type QueryResponse<T> = {
   status: number
 }
 
+type CountResponse = {
+  result: {
+    totalDocs: number
+  }
+  status: number
+}
+
 export class RESTClient {
   private readonly config: Config
 
@@ -125,6 +138,32 @@ export class RESTClient {
     this.config = config
     this.serverURL = args.serverURL
     this.defaultSlug = args.defaultSlug
+  }
+
+  async count<T = any>(args?: CountArgs): Promise<CountResponse> {
+    const options = {
+      headers: { ...headers },
+    }
+
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const whereQuery = qs.stringify(
+      {
+        ...(args?.query ? { where: args.query } : {}),
+      },
+      {
+        addQueryPrefix: true,
+      },
+    )
+
+    const slug = args?.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/${slug}/count${whereQuery}`, options)
+    const { status } = response
+    const result = await response.json()
+    if (result.errors) throw new Error(result.errors[0].message)
+    return { result, status }
   }
 
   async create<T = any>(args: CreateArgs): Promise<DocResponse<T>> {
