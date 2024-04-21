@@ -1231,6 +1231,17 @@ describe('Fields', () => {
       ).rejects.toThrow('The following field is invalid: json')
     })
 
+    it('should validate json schema', async () => {
+      await expect(async () =>
+        payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { foo: 'bad' },
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: json')
+    })
+
     it('should save empty json objects', async () => {
       const jsonFieldsDoc = await payload.create({
         collection: 'json-fields',

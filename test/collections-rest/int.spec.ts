@@ -67,6 +67,15 @@ describe('collections-rest', () => {
       expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
     })
 
+    it('should count', async () => {
+      await createPost()
+      await createPost()
+      const { result, status } = await client.count()
+
+      expect(status).toEqual(200)
+      expect(result).toEqual({ totalDocs: 2 })
+    })
+
     it('should find where id', async () => {
       const post1 = await createPost()
       await createPost()

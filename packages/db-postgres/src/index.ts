@@ -7,6 +7,7 @@ import { createDatabaseAdapter } from 'payload/database'
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
 
 import { connect } from './connect'
+import { count } from './count'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
 import { createGlobalVersion } from './createGlobalVersion'
@@ -70,6 +71,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       beginTransaction,
       commitTransaction,
       connect,
+      count,
       create,
       createGlobal,
       createGlobalVersion,

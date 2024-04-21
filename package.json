@@ -128,6 +128,7 @@
     ]
   },
   "dependencies": {
-    "@sentry/react": "^7.77.0"
+    "@sentry/react": "^7.77.0",
+    "ajv": "^8.12.0"
   }
 }

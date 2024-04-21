@@ -1,3 +1,51 @@
+## [2.13.0](https://github.com/payloadcms/payload/compare/v2.12.1...v2.13.0) (2024-04-19)
+
+
+### Features
+
+* allow configuration for setting headers on external file fetch ([ec1ad0b](https://github.com/payloadcms/payload/commit/ec1ad0b6628d400d7435821c8a72b6746bf87577))
+* **db-\*:** custom db table and enum names ([#5045](https://github.com/payloadcms/payload/issues/5045)) ([9bbacc4](https://github.com/payloadcms/payload/commit/9bbacc4fb1ad247634f394e95c42ee3adade8048))
+* json field schemas ([#5726](https://github.com/payloadcms/payload/issues/5726)) ([2c402cc](https://github.com/payloadcms/payload/commit/2c402cc65c9e8f7f33e2fb0ce5e1a8ceff52af1b))
+* **plugin-seo:** add Chinese translation ([#5429](https://github.com/payloadcms/payload/issues/5429)) ([fcb29bb](https://github.com/payloadcms/payload/commit/fcb29bb1c637867301bbc1070b4a84383bf0e90a))
+* **richtext-lexical:** add HorizontalRuleFeature ([d8e9084](https://github.com/payloadcms/payload/commit/d8e9084db21828968046ab59775633e409ce5c2a))
+* **richtext-lexical:** improve floating handle y-positioning by positioning it in the center for smaller elements. ([0055a8e](https://github.com/payloadcms/payload/commit/0055a8eb36b95722cccdc5eb3101a79d3e764f8b))
+
+
+### Bug Fixes
+
+* adds type error validations for `email` and `password` in login operation ([#4852](https://github.com/payloadcms/payload/issues/4852)) ([1f00360](https://github.com/payloadcms/payload/commit/1f0036054a9461535b0992f2449e91e4eaf97d4e))
+* avoids getting and setting doc preferences when creating new ([#5757](https://github.com/payloadcms/payload/issues/5757)) ([e3c3dda](https://github.com/payloadcms/payload/commit/e3c3ddac34dff8fa085f5b702be2838d513be300))
+* block field type missing dbName ([#5695](https://github.com/payloadcms/payload/issues/5695)) ([e7608f5](https://github.com/payloadcms/payload/commit/e7608f5507d3b85ea3f44b5cb1f43edf67608b1b))
+* **db-mongodb:** failing `contains` query with special chars ([#5774](https://github.com/payloadcms/payload/issues/5774)) ([5fa99fb](https://github.com/payloadcms/payload/commit/5fa99fb060cabbb69b5d6688748260e562e6bea3))
+* **db-mongodb:** ignore end session errors ([#5904](https://github.com/payloadcms/payload/issues/5904)) ([cb8d562](https://github.com/payloadcms/payload/commit/cb8d562132bee437798880e1d7f64dbfdee36949))
+* **db-mongodb:** version fields indexSortableFields ([#5863](https://github.com/payloadcms/payload/issues/5863)) ([fe0028c](https://github.com/payloadcms/payload/commit/fe0028c89945303a431b48efdae7b6e22304c8a3))
+* **db-postgres:** hasMany relationship query contains operator ([#4212](https://github.com/payloadcms/payload/issues/4212)) ([608d6d0](https://github.com/payloadcms/payload/commit/608d6d0a872af224ea42c3e6c8a3b4f21678f550))
+* **db-postgres:** issue querying by localised relationship not respecting locale as constraint ([#5666](https://github.com/payloadcms/payload/issues/5666)) ([44599cb](https://github.com/payloadcms/payload/commit/44599cbc7b8f23d6d8c7a3e05466237406812a6d))
+* **db-postgres:** query hasMany fields with in ([#5881](https://github.com/payloadcms/payload/issues/5881)) ([6185f8a](https://github.com/payloadcms/payload/commit/6185f8a5d845d12651f5a3ee128eb43d3b9d2449))
+* **db-postgres:** relationship query pagination ([#5802](https://github.com/payloadcms/payload/issues/5802)) ([65690a6](https://github.com/payloadcms/payload/commit/65690a675c17cfacebe775a327a57741ac09416a))
+* **db-postgres:** validateExistingBlockIsIdentical localized ([#5839](https://github.com/payloadcms/payload/issues/5839)) ([4c4f924](https://github.com/payloadcms/payload/commit/4c4f924e90ee23a73c9a7cc7e69bbc2caf902b92))
+* duplicate document multiple times in quick succession ([#5642](https://github.com/payloadcms/payload/issues/5642)) ([373787d](https://github.com/payloadcms/payload/commit/373787de31cbbd33b587aa4be6344948f082f5bb))
+* missing date locales ([#5656](https://github.com/payloadcms/payload/issues/5656)) ([c1c8600](https://github.com/payloadcms/payload/commit/c1c86009a5e9aad401a05f7c63ad37bd3f88dc84))
+* number ids were not sanitized to number in rest api ([51f84a4](https://github.com/payloadcms/payload/commit/51f84a4fcfd437eb73c7d83205b66e3620085909))
+* passes parent id instead of incoming id to saveVersion ([#5831](https://github.com/payloadcms/payload/issues/5831)) ([25c9a14](https://github.com/payloadcms/payload/commit/25c9a145bec9e9566d2bbcba59d5b34394e10bbd))
+* **plugin-seo:** uses correct key for ukrainian translation ([#5873](https://github.com/payloadcms/payload/issues/5873)) ([e47e544](https://github.com/payloadcms/payload/commit/e47e544364031ac834565a4d86ef6ec9c04e63c0))
+* properly handle drafts in bulk update ([#5872](https://github.com/payloadcms/payload/issues/5872)) ([ad38f76](https://github.com/payloadcms/payload/commit/ad38f760111abf947c6b0ee4b983ee1224a9bf1b))
+* req.collection being lost when querying a global inside a collection ([#5727](https://github.com/payloadcms/payload/issues/5727)) ([cbd03ed](https://github.com/payloadcms/payload/commit/cbd03ed2f8819ee8ac20e8739cc03e88ff4caa25))
+* **richtext-lexical:** catch errors that may occur during HTML generation ([#5754](https://github.com/payloadcms/payload/issues/5754)) ([9b44296](https://github.com/payloadcms/payload/commit/9b442960929d00faa07f1383b1267f71e6f44efe))
+* **richtext-lexical:** do not allow omitting editor prop for sub-richtext fields within lexical defined in the payload config ([#5766](https://github.com/payloadcms/payload/issues/5766)) ([6186493](https://github.com/payloadcms/payload/commit/6186493246157b4d4b33c8c47378f08581315942))
+* **richtext-lexical:** incorrect floating handle y-position calculation next to certain kinds of HTML elements like HR ([de5d6cc](https://github.com/payloadcms/payload/commit/de5d6cc4bd591745156f0b8c56795b7bd2eaad7e))
+* **richtext-lexical:** limit unnecessary floating handle positioning updates ([a00439e](https://github.com/payloadcms/payload/commit/a00439ea893e074d64be83ee6af1e780178a7ee3))
+* **richtext-lexical:** pass through config for schema generation. Makes it more robust ([#5700](https://github.com/payloadcms/payload/issues/5700)) ([cf135fd](https://github.com/payloadcms/payload/commit/cf135fd1e4aeb30121281399e26be901393ada6d))
+* **richtext-lexical:** use correct nodeType on HorizontalRule feature HTML converter ([#5805](https://github.com/payloadcms/payload/issues/5805)) ([3b1d331](https://github.com/payloadcms/payload/commit/3b1d3313165499616673f6d363c90ef884994525))
+* updates type name of `CustomPublishButtonProps` to `CustomPublishButtonType` ([#5644](https://github.com/payloadcms/payload/issues/5644)) ([7df7bf4](https://github.com/payloadcms/payload/commit/7df7bf448bd26e870a1fde8aaa47430904d68366))
+* updates var ([9530d28](https://github.com/payloadcms/payload/commit/9530d28a6760a667b718027a49ea43ba1accd546))
+* use isolateObjectProperty function in createLocalReq ([#5748](https://github.com/payloadcms/payload/issues/5748)) ([c0ba6cc](https://github.com/payloadcms/payload/commit/c0ba6cc19a20c043a08ca77caacd47ef7cfb48f4))
+* uses find instead of fieldIndex for custom ID check ([509ec67](https://github.com/payloadcms/payload/commit/509ec677c42993d9c08facf6928a5ef1e9767508))
+
+### ⚠ BREAKING CHANGES
+
+* **richtext-lexical:** do not allow omitting editor prop for sub-richtext fields within lexical defined in the payload config ([#5766](https://github.com/payloadcms/payload/issues/5766))
+
 ## [2.12.1](https://github.com/payloadcms/payload/compare/v2.12.0...v2.12.1) (2024-04-03)
 
 

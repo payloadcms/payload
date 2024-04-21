@@ -12,5 +12,5 @@ export const siblingDataSlug = 'sibling-data'
 export const relyOnRequestHeadersSlug = 'rely-on-request-headers'
 export const docLevelAccessSlug = 'doc-level-access'
 export const hiddenFieldsSlug = 'hidden-fields'
-
+export const hiddenAccessCountSlug = 'hidden-access-count'
 export const hiddenAccessSlug = 'hidden-access'

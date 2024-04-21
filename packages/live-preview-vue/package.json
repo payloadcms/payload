@@ -1,54 +1,49 @@
 {
-  "name": "@payloadcms/db-postgres",
-  "version": "0.8.0",
-  "description": "The officially supported Postgres database adapter for Payload",
+  "name": "@payloadcms/live-preview-vue",
+  "version": "0.1.0",
+  "description": "The official live preview Vue SDK for Payload",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/db-postgres"
+    "directory": "packages/live-preview-vue"
   },
   "license": "MIT",
   "homepage": "https://payloadcms.com",
-  "author": {
-    "email": "info@payloadcms.com",
-    "name": "Payload",
-    "url": "https://payloadcms.com"
-  },
+  "author": "Payload CMS, Inc.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
-    "@libsql/client": "^0.3.1",
-    "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.20.14-1f2c838",
-    "drizzle-orm": "0.29.3",
-    "pg": "8.11.3",
-    "prompts": "2.4.2",
-    "to-snake-case": "1.0.0",
-    "uuid": "9.0.0"
+    "@payloadcms/live-preview": "workspace:^0.x"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/pg": "8.10.2",
-    "@types/to-snake-case": "1.0.0",
+    "vue": "^3.0.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.0.0"
+    "vue": "^3.0.0"
+  },
+  "exports": {
+    ".": {
+      "default": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
   },
   "publishConfig": {
+    "exports": null,
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
   "files": [
-    "dist",
-    "mock.js"
+    "dist"
   ]
 }
