@@ -1362,6 +1362,19 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/storage-vercel-blob:
+    dependencies:
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../plugin-cloud-storage
+    devDependencies:
+      '@vercel/blob':
+        specifier: ^0.22.3
+        version: 0.22.3
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/translations:
     devDependencies:
       '@payloadcms/eslint-config':
@@ -1572,6 +1585,9 @@ importers:
       '@payloadcms/storage-s3':
         specifier: workspace:*
         version: link:../packages/storage-s3
+      '@payloadcms/storage-vercel-blob':
+        specifier: workspace:*
+        version: link:../packages/storage-vercel-blob
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../packages/translations
