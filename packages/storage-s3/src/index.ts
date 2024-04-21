@@ -27,10 +27,10 @@ export type S3StorageOptions = {
    */
 
   bucket: string
+
   /**
    * Collection options to apply the S3 adapter to.
    */
-
   collections: Record<string, Omit<CollectionOptions, 'adapter'> | true>
   /**
    * AWS S3 client configuration. Highly dependent on your AWS setup.
@@ -57,17 +57,17 @@ export type S3StorageOptions = {
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 
 export const s3Storage: S3StoragePlugin =
-  (storageS3Args: S3StorageOptions) =>
+  (s3StorageOptions: S3StorageOptions) =>
   (incomingConfig: Config): Config => {
-    if (storageS3Args.enabled === false) {
+    if (s3StorageOptions.enabled === false) {
       return incomingConfig
     }
 
-    const adapter = s3StorageInternal(storageS3Args)
+    const adapter = s3StorageInternal(s3StorageOptions)
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
-      storageS3Args.collections,
+      s3StorageOptions.collections,
     ).reduce(
       (acc, [slug, collOptions]) => ({
         ...acc,
