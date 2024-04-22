@@ -1,1 +1,1 @@
-# Nodemailer Email Adapter
+# Resend REST Email Adapter
