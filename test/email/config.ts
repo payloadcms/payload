@@ -1,3 +1,4 @@
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import path from 'path'
 import { getFileByPath } from 'payload/uploads'
 import { fileURLToPath } from 'url'
@@ -15,6 +16,7 @@ export default buildConfigWithDefaults({
   // ...extend config here
   collections: [PostsCollection, MediaCollection],
   globals: [MenuGlobal],
+  email: nodemailerAdapter(),
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

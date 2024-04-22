@@ -1,8 +1,8 @@
 import { URL } from 'url'
 
 import type { Collection } from '../collections/config/types.js'
-import type { EmailOptions, SanitizedConfig } from '../config/types.js'
-import type { Payload } from '../index.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { InitializedEmailAdapter } from '../email/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { User, VerifyConfig } from './types.js'
 
@@ -10,22 +10,20 @@ type Args = {
   collection: Collection
   config: SanitizedConfig
   disableEmail: boolean
-  emailOptions: EmailOptions
+  email: InitializedEmailAdapter
   req: PayloadRequest
-  sendEmail: Payload['sendEmail']
   token: string
   user: User
 }
 
-async function sendVerificationEmail(args: Args): Promise<void> {
+export async function sendVerificationEmail(args: Args): Promise<void> {
   // Verify token from e-mail
   const {
     collection: { config: collectionConfig },
     config,
     disableEmail,
-    emailOptions,
+    email,
     req,
-    sendEmail,
     token,
     user,
   } = args
@@ -67,13 +65,11 @@ async function sendVerificationEmail(args: Args): Promise<void> {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    sendEmail({
-      from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
+    email.sendEmail({
+      from: `"${email.defaultFromName}" <${email.defaultFromName}>`,
       html,
       subject,
       to: user.email,
     })
   }
 }
-
-export default sendVerificationEmail
