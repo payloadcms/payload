@@ -8,6 +8,7 @@ import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import { clearTestBucket, createTestBucket } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +26,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     }
   })
 
-  const TEST_BUCKET = 'payload-bucket'
+  const TEST_BUCKET = process.env.S3_BUCKET
 
   let client: AWS.S3Client
   describeIfInCIOrHasLocalstack()('plugin-cloud-storage', () => {
@@ -42,11 +43,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
 
         await createTestBucket()
-        await clearTestBucket()
+        await clearTestBucket(client)
       })
 
       afterEach(async () => {
-        await clearTestBucket()
+        await clearTestBucket(client)
       })
 
       it('can upload', async () => {
@@ -63,7 +64,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           uploadId: upload.id,
         })
 
-        expect(upload.url).toEqual(`/api/${mediaSlug}/file/${upload.filename as string}`)
+        expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
       })
 
       it('can upload with prefix', async () => {
@@ -96,38 +97,6 @@ describe('@payloadcms/plugin-cloud-storage', () => {
   describe('R2', () => {
     it.todo('can upload')
   })
-
-  async function createTestBucket() {
-    const makeBucketRes = await client.send(new AWS.CreateBucketCommand({ Bucket: TEST_BUCKET }))
-
-    if (makeBucketRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(`Failed to create bucket. ${makeBucketRes.$metadata.httpStatusCode}`)
-    }
-  }
-
-  async function clearTestBucket() {
-    const listedObjects = await client.send(
-      new AWS.ListObjectsV2Command({
-        Bucket: TEST_BUCKET,
-      }),
-    )
-
-    if (!listedObjects?.Contents?.length) return
-
-    const deleteParams = {
-      Bucket: TEST_BUCKET,
-      Delete: { Objects: [] },
-    }
-
-    listedObjects.Contents.forEach(({ Key }) => {
-      deleteParams.Delete.Objects.push({ Key })
-    })
-
-    const deleteResult = await client.send(new AWS.DeleteObjectsCommand(deleteParams))
-    if (deleteResult.Errors?.length) {
-      throw new Error(JSON.stringify(deleteResult.Errors))
-    }
-  }
 
   async function verifyUploads({
     collectionSlug,

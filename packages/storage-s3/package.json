@@ -1,0 +1,59 @@
+{
+  "name": "@payloadcms/storage-s3",
+  "version": "0.0.0",
+  "description": "Payload storage adapter for Amazon S3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/storage-s3"
+  },
+  "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "author": "Payload CMS, Inc.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    }
+  },
+  "dependencies": {
+    "@payloadcms/plugin-cloud-storage": "workspace:*"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.525.0",
+    "@aws-sdk/lib-storage": "^3.525.0",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
+  },
+  "engines": {
+    "node": ">=18.20.2"
+  },
+  "files": [
+    "dist"
+  ]
+}
