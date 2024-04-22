@@ -276,6 +276,10 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
+      - name: Start LocalStack
+        run: pnpm docker:start
+        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+
       - name: Install Playwright
         run: pnpm exec playwright install --with-deps
 
