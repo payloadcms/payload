@@ -311,6 +311,7 @@ export const array = baseField.keys({
           RowLabel: componentSchema,
         })
         .default({}),
+      disableSortable: joi.boolean(),
     })
     .default({}),
   dbName: joi.alternatives().try(joi.string(), joi.func()),
@@ -408,6 +409,11 @@ export const relationship = baseField.keys({
 export const blocks = baseField.keys({
   name: joi.string().required(),
   type: joi.string().valid('blocks').required(),
+  admin: baseAdminFields
+    .keys({
+      disableSortable: joi.boolean(),
+    })
+    .default({}),
   blocks: joi
     .array()
     .items(
