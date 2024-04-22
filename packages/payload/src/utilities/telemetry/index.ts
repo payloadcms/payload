@@ -1,4 +1,5 @@
 import { execSync } from 'child_process'
+import ciInfo from 'ci-info'
 import ConfImport from 'conf'
 import { randomBytes } from 'crypto'
 import findUp from 'find-up'
@@ -15,9 +16,12 @@ import { oneWayHash } from './oneWayHash.js'
 const Conf = (ConfImport.default || ConfImport) as unknown as typeof ConfImport.default
 
 export type BaseEvent = {
+  ciName: null | string
   envID: string
+  isCI: boolean
   nodeEnv: string
   nodeVersion: string
+  payloadPackages: Record<string, string>
   payloadVersion: string
   projectID: string
 }
@@ -34,19 +38,35 @@ type Args = {
   payload: Payload
 }
 
-export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
-  if (payload.config.telemetry !== false) {
-    try {
-      const packageJSON = await getPackageJSON()
+let baseEvent: BaseEvent | null = null
 
-      const baseEvent: BaseEvent = {
+export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
+  try {
+    const packageJSON = await getPackageJSON()
+
+    // Only generate the base event once
+    if (!baseEvent) {
+      baseEvent = {
+        ciName: ciInfo.isCI ? ciInfo.name : null,
         envID: getEnvID(),
+        isCI: ciInfo.isCI,
         nodeEnv: process.env.NODE_ENV || 'development',
         nodeVersion: process.version,
+        payloadPackages: getPayloadPackages(packageJSON),
         payloadVersion: getPayloadVersion(packageJSON),
         projectID: getProjectID(payload, packageJSON),
       }
+    }
 
+    if (process.env.PAYLOAD_TELEMETRY_DEBUG) {
+      payload.logger.info({
+        event: { ...baseEvent, ...event },
+        msg: 'Telemetry Event',
+      })
+      return
+    }
+
+    if (payload.config.telemetry !== false) {
       await fetch('https://telemetry.payloadcms.com/events', {
         body: JSON.stringify({ ...baseEvent, ...event }),
         headers: {
@@ -54,9 +74,9 @@ export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
         },
         method: 'post',
       })
-    } catch (_) {
-      // Eat any errors in sending telemetry event
     }
+  } catch (_) {
+    // Eat any errors in sending telemetry event
   }
 }
 
@@ -98,6 +118,12 @@ const getGitID = (payload: Payload) => {
   } catch (_) {
     return null
   }
+}
+
+const getPayloadPackages = (packageJSON: PackageJSON): Record<string, string> => {
+  return Object.keys(packageJSON.dependencies || {}).reduce((acc, key) => {
+    return key.startsWith('@payloadcms/') ? { ...acc, [key]: packageJSON.dependencies[key] } : acc
+  }, {})
 }
 
 const getPackageJSON = async (): Promise<PackageJSON> => {
