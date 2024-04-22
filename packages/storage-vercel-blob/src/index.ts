@@ -70,7 +70,27 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       return incomingConfig
     }
 
-    const adapter = vercelBlobStorageInternal(options)
+    if (!options.token) {
+      throw new Error('The token argument is required for the Vercel Blob adapter.')
+    }
+
+    // Parse storeId from token
+    const storeId = options.token.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]?.toLowerCase()
+
+    if (!storeId) {
+      throw new Error(
+        'Invalid token format for Vercel Blob adapter. Should be vercel_blob_rw_<store_id>_<random_string>.',
+      )
+    }
+
+    const optionsWithDefaults = {
+      ...defaultUploadOptions,
+      ...options,
+    }
+
+    const baseUrl = `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
+
+    const adapter = vercelBlobStorageInternal({ ...optionsWithDefaults, baseUrl })
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -91,28 +111,11 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
     })(incomingConfig)
   }
 
-function vercelBlobStorageInternal(options: VercelBlobStorageOptions): Adapter {
+function vercelBlobStorageInternal(
+  options: VercelBlobStorageOptions & { baseUrl: string },
+): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    if (!options.token) {
-      throw new Error('The token argument is required for the Vercel Blob adapter.')
-    }
-
-    // Parse storeId from token
-    const storeId = options.token.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]?.toLowerCase()
-
-    if (!storeId) {
-      throw new Error(
-        'Invalid token format for Vercel Blob adapter. Should be vercel_blob_rw_<store_id>_<random_string>.',
-      )
-    }
-
-    const { access, addRandomSuffix, cacheControlMaxAge, token } = {
-      ...defaultUploadOptions,
-      ...options,
-    }
-
-    const baseUrl = `https://${storeId}.${access}.blob.vercel-storage.com`
-
+    const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, token } = options
     return {
       generateURL: getGenerateUrl({ baseUrl, prefix }),
       handleDelete: getHandleDelete({ baseUrl, prefix, token: options.token }),
