@@ -60,6 +60,7 @@ export const RenderFields: React.FC<Props> = (props) => {
             const {
               type,
               CustomField,
+              custom,
               disabled,
               fieldComponentProps,
               fieldComponentProps: { readOnly },
@@ -71,7 +72,7 @@ export const RenderFields: React.FC<Props> = (props) => {
             return (
               <RenderField
                 CustomField={CustomField}
-                custom={f.custom}
+                custom={custom}
                 disabled={disabled}
                 fieldComponentProps={fieldComponentProps}
                 indexPath={indexPath !== undefined ? `${indexPath}.${fieldIndex}` : `${fieldIndex}`}

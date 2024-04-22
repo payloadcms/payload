@@ -5,6 +5,7 @@ import { isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
 
 export const duplicate: CollectionRouteHandlerWithID = async ({
@@ -41,6 +42,10 @@ export const duplicate: CollectionRouteHandlerWithID = async ({
       message,
     },
     {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     },
   )

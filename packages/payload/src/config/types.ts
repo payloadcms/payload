@@ -1,9 +1,7 @@
 import type { I18nOptions, TFunction } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
-import type { Transporter } from 'nodemailer'
-import type SMTPConnection from 'nodemailer/lib/smtp-connection'
-import type { DestinationStream, LoggerOptions } from 'pino'
+import type { DestinationStream, LoggerOptions, P } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -18,6 +16,7 @@ import type {
   SanitizedCollectionConfig,
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
+import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
@@ -33,12 +32,6 @@ export type BinScript = (config: SanitizedConfig) => Promise<void> | void
 type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
-
-type Email = {
-  fromAddress: string
-  fromName: string
-  logMockCredentials?: boolean
-}
 
 // eslint-disable-next-line no-use-before-define
 export type Plugin = (config: Config) => Config | Promise<Config>
@@ -84,36 +77,6 @@ export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions,
 ) => Promise<null | string> | null | string
-
-export type EmailTransport = Email & {
-  transport: Transporter
-  transportOptions?: SMTPConnection.Options
-}
-
-export type EmailTransportOptions = Email & {
-  transport?: Transporter
-  transportOptions: SMTPConnection.Options
-}
-
-export type EmailOptions = Email | EmailTransport | EmailTransportOptions
-
-/**
- * type guard for EmailOptions
- * @param emailConfig
- */
-export function hasTransport(emailConfig: EmailOptions): emailConfig is EmailTransport {
-  return (emailConfig as EmailTransport).transport !== undefined
-}
-
-/**
- * type guard for EmailOptions
- * @param emailConfig
- */
-export function hasTransportOptions(
-  emailConfig: EmailOptions,
-): emailConfig is EmailTransportOptions {
-  return (emailConfig as EmailTransportOptions).transportOptions !== undefined
-}
 
 export type GraphQLInfo = {
   Mutation: {
@@ -161,13 +124,6 @@ export type InitOptions = {
    * Disable running of the `onInit` function
    */
   disableOnInit?: boolean
-
-  /**
-   * Configuration for Payload's email functionality
-   *
-   * @see https://payloadcms.com/docs/email/overview
-   */
-  email?: EmailOptions
 
   /**
    * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
@@ -417,9 +373,9 @@ export type Config = {
           prefillOnly?: boolean
         }
       | false
-
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?: 'default' | 'gravatar' | React.ComponentType<any>
+
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -489,6 +445,8 @@ export type Config = {
         Dashboard?: AdminView
       }
     }
+    /** Extension point to add your custom data. Available in server and client. */
+    custom?: Record<string, any>
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /** If set to true, the entire Admin panel will be disabled. */
@@ -547,17 +505,8 @@ export type Config = {
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
-  /** Extension point to add your custom data. */
-  custom?: {
-    /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
-     * Server only.
-     */
-    server?: Record<string, any>
-  }
+  /** Extension point to add your custom data. Server only. */
+  custom?: Record<string, any>
 
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
@@ -580,11 +529,11 @@ export type Config = {
   /** Default richtext editor to use for richText fields */
   editor: RichTextAdapter<any, any, any>
   /**
-   * Email configuration options. This value is overridden by `email` in Payload.init if passed.
+   * Email Adapter
    *
    * @see https://payloadcms.com/docs/email/overview
    */
-  email?: EmailOptions
+  email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
@@ -743,3 +692,5 @@ export type EntityDescription =
   | EntityDescriptionFunction
   | Record<string, string>
   | string
+
+export type { EmailAdapter, SendEmailOptions }

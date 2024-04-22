@@ -7,12 +7,14 @@ import { createHandler } from 'graphql-http/lib/use/fetch'
 import httpStatus from 'http-status'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 
 const handleError = async (
   payload: Payload,
   err: any,
   debug: boolean,
   afterErrorHook: CollectionAfterErrorHook,
+  // eslint-disable-next-line @typescript-eslint/require-await
 ): Promise<GraphQLFormattedError> => {
   const status = err.originalError.status || httpStatus.INTERNAL_SERVER_ERROR
   let errorMessage = err.message
@@ -37,7 +39,7 @@ const handleError = async (
   }
 
   if (afterErrorHook) {
-    ;({ response } = (await afterErrorHook(err, response, null, null)) || { response })
+    ;({ response } = afterErrorHook(err, response, null, null) || { response })
   }
 
   return response
@@ -60,6 +62,7 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
   }
 
   if (!cached.promise) {
+    // eslint-disable-next-line no-async-promise-executor
     cached.promise = new Promise(async (resolve) => {
       const resolvedConfig = await config
       const schema = await configToSchema(resolvedConfig)
@@ -118,13 +121,17 @@ export const POST =
       validationRules: (request, args, defaultRules) => defaultRules.concat(validationRules(args)),
     })(originalRequest)
 
-    const resHeaders = new Headers(apiResponse.headers)
+    const resHeaders = headersWithCors({
+      headers: new Headers(apiResponse.headers),
+      req,
+    })
+
     for (const key in headers) {
       resHeaders.append(key, headers[key])
     }
 
     return new Response(apiResponse.body, {
-      headers: new Headers(resHeaders),
+      headers: resHeaders,
       status: apiResponse.status,
     })
   }

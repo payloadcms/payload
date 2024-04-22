@@ -4,6 +4,7 @@ import { isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
 
 export const updateByID: CollectionRouteHandlerWithID = async ({
@@ -43,6 +44,10 @@ export const updateByID: CollectionRouteHandlerWithID = async ({
       message,
     },
     {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     },
   )

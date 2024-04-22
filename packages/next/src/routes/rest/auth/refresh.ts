@@ -5,16 +5,24 @@ import { refreshOperation } from 'payload/operations'
 
 import type { CollectionRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
+  const { t } = req
   const token = typeof req.data?.token === 'string' ? req.data.token : extractJWT(req)
+
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
+  })
 
   if (!token) {
     return Response.json(
       {
-        // TODO(translate)
-        message: 'Token not provided.',
+        message: t('error:tokenNotProvided'),
       },
       {
+        headers,
         status: httpStatus.UNAUTHORIZED,
       },
     )
@@ -36,16 +44,15 @@ export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
     delete result.refreshedToken
   }
 
+  headers.set('Set-Cookie', cookie)
+
   return Response.json(
     {
-      // TODO(translate)
-      message: 'Token refresh successful',
+      message: t('authentication:tokenRefreshSuccessful'),
       ...result,
     },
     {
-      headers: new Headers({
-        'Set-Cookie': cookie,
-      }),
+      headers,
       status: httpStatus.OK,
     },
   )

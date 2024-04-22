@@ -42,13 +42,22 @@ export interface PayloadCloudEmailOptions {
   apiKey: string
   config: Config
   defaultDomain: string
+  defaultFromAddress?: string
+  defaultFromName?: string
+  skipVerify?: boolean
 }
 
 export interface PluginOptions {
   /** Payload Cloud Email
    * @default true
    */
-  email?: false
+  email?:
+    | {
+        defaultFromAddress: string
+        defaultFromName: string
+        skipVerify?: boolean
+      }
+    | false
 
   /**
    * Payload Cloud API endpoint

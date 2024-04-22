@@ -39,6 +39,7 @@ const globalSchema = joi
           ),
         }),
       }),
+      custom: joi.object().pattern(joi.string(), joi.any()),
       description: joi.alternatives().try(joi.string(), componentSchema),
       group: joi
         .alternatives()
@@ -48,10 +49,7 @@ const globalSchema = joi
       livePreview: joi.object(livePreviewSchema),
       preview: joi.func(),
     }),
-    custom: joi.object().keys({
-      client: joi.object().pattern(joi.string(), joi.any()),
-      server: joi.object().pattern(joi.string(), joi.any()),
-    }),
+    custom: joi.object().pattern(joi.string(), joi.any()),
     dbName: joi.alternatives().try(joi.string(), joi.func()),
     endpoints: endpointsSchema,
     fields: joi.array(),

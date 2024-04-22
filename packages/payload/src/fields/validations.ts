@@ -1,3 +1,5 @@
+import Ajv from 'ajv'
+
 import type { RichTextAdapter } from '../admin/types.js'
 import type { Where } from '../types/index.js'
 import type {
@@ -161,10 +163,47 @@ export const code: Validate<string, unknown, unknown, CodeField> = (
   return true
 }
 
-export const json: Validate<string, unknown, unknown, JSONField & { jsonError?: string }> = (
+export const json: Validate<string, unknown, unknown, JSONField & { jsonError?: string }> = async (
   value,
-  { jsonError, req: { t }, required },
+  { jsonError, jsonSchema, req: { t }, required },
 ) => {
+  const isNotEmpty = (value) => {
+    if (value === undefined || value === null) {
+      return false
+    }
+
+    if (Array.isArray(value) && value.length === 0) {
+      return false
+    }
+
+    if (typeof value === 'object' && Object.keys(value).length === 0) {
+      return false
+    }
+
+    return true
+  }
+
+  const fetchSchema = ({ schema, uri }: Record<string, unknown>) => {
+    if (uri && schema) return schema
+    // @ts-expect-error
+    return fetch(uri)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        return response.json()
+      })
+      .then((json) => {
+        const jsonSchemaSanitizations = {
+          id: undefined,
+          $id: json.id,
+          $schema: 'http://json-schema.org/draft-07/schema#',
+        }
+
+        return Object.assign(json, jsonSchemaSanitizations)
+      })
+  }
+
   if (required && !value) {
     return t('validation:required')
   }
@@ -173,6 +212,20 @@ export const json: Validate<string, unknown, unknown, JSONField & { jsonError?: 
     return t('validation:invalidInput')
   }
 
+  if (jsonSchema && isNotEmpty(value)) {
+    try {
+      jsonSchema.schema = await fetchSchema(jsonSchema)
+      const { schema } = jsonSchema
+      // @ts-expect-error
+      const ajv = new Ajv()
+
+      if (!ajv.validate(schema, value)) {
+        return t(ajv.errorsText())
+      }
+    } catch (error) {
+      return t(error.message)
+    }
+  }
   return true
 }
 

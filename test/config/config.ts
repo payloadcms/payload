@@ -26,8 +26,7 @@ export default buildConfigWithDefaults({
           name: 'title',
           type: 'text',
           custom: {
-            client: { description: 'The title of this page' },
-            server: { description: 'The title of this page' },
+            description: 'The title of this page',
           },
         },
         {
@@ -47,20 +46,17 @@ export default buildConfigWithDefaults({
                 },
               ],
               custom: {
-                client: { description: 'The blockOne of this page' },
-                server: { description: 'The blockOne of this page' },
+                description: 'The blockOne of this page',
               },
             },
           ],
           custom: {
-            client: { description: 'The blocks of this page' },
-            server: { description: 'The blocks of this page' },
+            description: 'The blocks of this page',
           },
         },
       ],
       custom: {
-        client: { externalLink: 'https://foo.bar' },
-        server: { externalLink: 'https://foo.bar' },
+        externalLink: 'https://foo.bar',
       },
     },
   ],
@@ -83,12 +79,11 @@ export default buildConfigWithDefaults({
           name: 'title',
           type: 'text',
           custom: {
-            client: { description: 'The title of my global' },
-            server: { description: 'The title of my global' },
+            description: 'The title of my global',
           },
         },
       ],
-      custom: { client: { foo: 'bar' }, server: { foo: 'bar' } },
+      custom: { foo: 'bar' },
     },
   ],
   endpoints: [
@@ -101,7 +96,7 @@ export default buildConfigWithDefaults({
       custom: { description: 'Get the sanitized payload config' },
     },
   ],
-  custom: { client: { name: 'Customer portal' }, server: { name: 'Customer portal' } },
+  custom: { name: 'Customer portal' },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

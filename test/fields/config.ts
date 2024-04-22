@@ -82,6 +82,13 @@ export default buildConfigWithDefaults({
       'new-server-value': 'only available on server',
     },
   },
+  admin: {
+    custom: {
+      client: {
+        'new-value': 'client available',
+      },
+    },
+  },
   localization: {
     defaultLocale: 'en',
     fallback: true,

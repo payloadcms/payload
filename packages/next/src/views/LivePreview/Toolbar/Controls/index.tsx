@@ -6,6 +6,7 @@ import { Popup, PopupList } from '@payloadcms/ui/elements/Popup'
 import { Chevron } from '@payloadcms/ui/icons/Chevron'
 import { LinkIcon } from '@payloadcms/ui/icons/Link'
 import { X } from '@payloadcms/ui/icons/X'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import React from 'react'
 
 import { useLivePreviewContext } from '../../Context/context.js'
@@ -14,14 +15,16 @@ import './index.scss'
 
 const baseClass = 'live-preview-toolbar-controls'
 const zoomOptions = [50, 75, 100, 125, 150, 200]
-const customOption = {
-  label: 'Custom', // TODO: Add i18n to this string
-  value: 'custom',
-}
 
 export const ToolbarControls: React.FC<EditViewProps> = () => {
   const { breakpoint, breakpoints, setBreakpoint, setPreviewWindowType, setZoom, url, zoom } =
     useLivePreviewContext()
+  const { t } = useTranslation()
+
+  const customOption = {
+    label: t('general:custom'),
+    value: 'custom',
+  }
 
   return (
     <div className={baseClass}>

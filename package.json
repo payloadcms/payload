@@ -18,6 +18,7 @@
     "build:create-payload-app": "turbo build --filter create-payload-app",
     "build:db-mongodb": "turbo build --filter db-mongodb",
     "build:db-postgres": "turbo build --filter db-postgres",
+    "build:email-nodemailer": "turbo build --filter email-nodemailer",
     "build:eslint-config-payload": "turbo build --filter eslint-config-payload",
     "build:graphql": "turbo build --filter graphql",
     "build:live-preview": "turbo build --filter live-preview",
@@ -175,6 +176,7 @@
   },
   "dependencies": {
     "@sentry/react": "^7.77.0",
+    "ajv": "^8.12.0",
     "passport-strategy": "1.0.0"
   },
   "pnpm": {

@@ -4,7 +4,6 @@ import React from 'react'
 
 export const UICustomClient: React.FC = () => {
   const { custom, path } = useFieldProps()
-  const client = custom?.client
 
-  return <div id={path}>{client?.customValue}</div>
+  return <div id={path}>{custom?.customValue}</div>
 }

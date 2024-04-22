@@ -13,7 +13,7 @@ import { getStaticHandler } from './staticHandler.js'
 
 export const payloadCloud =
   (pluginOptions?: PluginOptions) =>
-  (incomingConfig: Config): Config => {
+  async (incomingConfig: Config): Promise<Config> => {
     let config = { ...incomingConfig }
 
     if (process.env.PAYLOAD_CLOUD !== 'true') {
@@ -83,10 +83,13 @@ export const payloadCloud =
     const apiKey = process.env.PAYLOAD_CLOUD_EMAIL_API_KEY
     const defaultDomain = process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN
     if (pluginOptions?.email !== false && apiKey && defaultDomain) {
-      config.email = payloadCloudEmail({
+      config.email = await payloadCloudEmail({
         apiKey,
         config,
         defaultDomain,
+        defaultFromAddress: pluginOptions?.email?.defaultFromAddress,
+        defaultFromName: pluginOptions?.email?.defaultFromName,
+        skipVerify: pluginOptions?.email?.skipVerify,
       })
     }
 

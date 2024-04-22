@@ -220,11 +220,11 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
                         {collection?.versions?.drafts ? (
                           <React.Fragment>
                             <Publish
-                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
+                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
                               disabled={selected.length === 0}
                             />
                             <SaveDraft
-                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}`}
+                              action={`${serverURL}${apiRoute}/${slug}${getQueryParams()}&draft=true`}
                               disabled={selected.length === 0}
                             />
                           </React.Fragment>

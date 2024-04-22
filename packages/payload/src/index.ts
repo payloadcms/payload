@@ -1,6 +1,5 @@
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http'
-import type { SendMailOptions } from 'nodemailer'
 import type pino from 'pino'
 
 import crypto from 'crypto'
@@ -16,6 +15,7 @@ import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy } from './auth/types.js'
 import type { BulkOperationResult, Collection, TypeWithID } from './collections/config/types.js'
+import type { Options as CountOptions } from './collections/operations/local/count.js'
 import type { Options as CreateOptions } from './collections/operations/local/create.js'
 import type {
   ByIDOptions as DeleteByIDOptions,
@@ -33,9 +33,9 @@ import type {
   ManyOptions as UpdateManyOptions,
   Options as UpdateOptions,
 } from './collections/operations/local/update.js'
-import type { EmailOptions, InitOptions, SanitizedConfig } from './config/types.js'
+import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
-import type { BuildEmailResult } from './email/types.js'
+import type { InitializedEmailAdapter } from './email/types.js'
 import type { TypeWithID as GlobalTypeWithID, Globals } from './globals/config/types.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js'
@@ -49,9 +49,7 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import localOperations from './collections/operations/local/index.js'
 import { validateSchema } from './config/validate.js'
-import buildEmail from './email/build.js'
-import { defaults as emailDefaults } from './email/defaults.js'
-import sendEmail from './email/sendEmail.js'
+import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './exports/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
@@ -82,6 +80,18 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   config: SanitizedConfig
 
   /**
+   * @description Performs count operation
+   * @param options
+   * @returns count of documents satisfying query
+   */
+  count = async <T extends keyof TGeneratedTypes['collections']>(
+    options: CountOptions<T>,
+  ): Promise<{ totalDocs: number }> => {
+    const { count } = localOperations
+    return count(this, options)
+  }
+
+  /**
    * @description Performs create operation
    * @param options
    * @returns created document
@@ -92,7 +102,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     const { create } = localOperations
     return create<T>(this, options)
   }
-
   db: DatabaseAdapter
 
   decrypt = decrypt
@@ -104,9 +113,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return duplicate<T>(this, options)
   }
 
-  email: BuildEmailResult
-
-  emailOptions: EmailOptions
+  email: InitializedEmailAdapter
 
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
@@ -255,7 +262,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   secret: string
 
-  sendEmail: (message: SendMailOptions) => Promise<unknown>
+  sendEmail: InitializedEmailAdapter['sendEmail']
 
   types: {
     arrayTypes: any
@@ -367,17 +374,21 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       await this.db.connect()
     }
 
-    // Configure email service
-    const emailOptions = options.email ? { ...options.email } : this.config.email
-    if (options.email && this.config.email) {
+    // Load email adapter
+    if (this.config.email instanceof Promise) {
+      const awaitedAdapter = await this.config.email
+      this.email = awaitedAdapter({ payload: this })
+    } else if (this.config.email) {
+      this.email = this.config.email({ payload: this })
+    } else {
       this.logger.warn(
-        'Email options provided in both init options and config. Using init options.',
+        `No email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.`,
       )
+
+      this.email = consoleEmailAdapter({ payload: this })
     }
 
-    this.emailOptions = emailOptions ?? emailDefaults
-    this.email = buildEmail(this.emailOptions, this.logger)
-    this.sendEmail = sendEmail.bind(this)
+    this.sendEmail = this.email['sendEmail']
 
     serverInitTelemetry(this)
 

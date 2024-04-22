@@ -13,6 +13,7 @@ import { Media } from './collections/Media.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { Users } from './collections/Users.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import { createTestBucket } from './utils.js'
 
 let adapter: Adapter
 let uploadOptions
@@ -21,10 +22,6 @@ let uploadOptions
 dotenv.config({
   path: path.resolve(process.cwd(), './test/plugin-cloud-storage/.env.emulated'),
 })
-
-console.log(
-  `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
-)
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'azure') {
   adapter = azureBlobStorageAdapter({
@@ -114,6 +111,12 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+
+    await createTestBucket()
+
+    payload.logger.info(
+      `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
+    )
   },
   plugins: [
     cloudStorage({
