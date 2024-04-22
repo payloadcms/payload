@@ -142,6 +142,21 @@ const TabsFields: CollectionConfig = {
               type: 'text',
               defaultValue: namedTabDefaultValue,
             },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'arrayInRow',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'textInArrayInRow',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
         {
