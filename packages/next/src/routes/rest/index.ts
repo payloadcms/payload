@@ -3,7 +3,6 @@ import type { Collection, GlobalConfig, PayloadRequest, SanitizedConfig } from '
 
 import httpStatus from 'http-status'
 import { match } from 'path-to-regexp'
-import { corsHeaders } from 'payload/utilities'
 
 import type {
   CollectionRouteHandler,
