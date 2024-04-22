@@ -47,7 +47,6 @@
   },
   "devDependencies": {
     "@types/range-parser": "^1.2.7",
-    "@vercel/blob": "^0.22.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {

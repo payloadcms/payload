@@ -86,10 +86,11 @@ export const s3Storage: S3StoragePlugin =
 
 function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    const storageClient: AWS.S3 | null = null
+    let storageClient: AWS.S3 | null = null
     const getStorageClient: () => AWS.S3 = () => {
       if (storageClient) return storageClient
-      return new AWS.S3(config)
+      storageClient = new AWS.S3(config)
+      return storageClient
     }
 
     return {
