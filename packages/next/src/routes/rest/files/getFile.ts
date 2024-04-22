@@ -10,6 +10,7 @@ import { streamFile } from '../../../next-stream-file/index.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { routeError } from '../routeError.js'
 import { checkFileAccess } from './checkFileAccess.js'
+import { getFileTypeFallback } from './getFileTypeFallback.js'
 
 // /:collectionSlug/file/:filename
 type Args = {
@@ -54,15 +55,15 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
     const data = streamFile(filePath)
 
     const headers = new Headers({
-      'content-length': stats.size + '',
+      'Content-Length': stats.size + '',
     })
 
-    const fileTypeResult = await getFileType.fromFile(filePath)
-    if (fileTypeResult?.mime) headers.set('content-type', fileTypeResult.mime)
+    const fileTypeResult = (await getFileType.fromFile(filePath)) || getFileTypeFallback(filePath)
+    headers.set('Content-Type', fileTypeResult.mime)
 
     return new Response(data, {
       headers: headersWithCors({
-        headers: new Headers(),
+        headers,
         req,
       }),
       status: httpStatus.OK,
