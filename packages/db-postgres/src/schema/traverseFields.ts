@@ -657,7 +657,7 @@ export const traverseFields = ({
           indexes,
           localesColumns,
           localesIndexes,
-          newTableName: parentTableName,
+          newTableName,
           parentTableName,
           relationsToBuild,
           relationships,
