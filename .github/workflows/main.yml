@@ -246,6 +246,7 @@ jobs:
           - fields__collections__Lexical
           - live-preview
           - localization
+          - plugin-cloud-storage
           - plugin-form-builder
           - plugin-nested-docs
           - plugin-seo
