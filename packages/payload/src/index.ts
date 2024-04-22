@@ -49,7 +49,7 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import localOperations from './collections/operations/local/index.js'
 import { validateSchema } from './config/validate.js'
-import { stdoutAdapter } from './email/stdoutAdapter.js'
+import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData } from './exports/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
@@ -382,10 +382,10 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       this.email = this.config.email({ payload: this })
     } else {
       this.logger.warn(
-        `No email adapter provided. Email will be written to stdout. More info at https://payloadcms.com/docs/email/overview.`,
+        `No email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.`,
       )
 
-      this.email = stdoutAdapter({ payload: this })
+      this.email = consoleEmailAdapter({ payload: this })
     }
 
     this.sendEmail = this.email['sendEmail']
