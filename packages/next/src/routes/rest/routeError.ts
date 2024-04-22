@@ -4,6 +4,7 @@ import httpStatus from 'http-status'
 import { APIError } from 'payload/errors'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 
 export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
 
@@ -81,6 +82,11 @@ export const routeError = async ({
 }) => {
   let payload = req?.payload
 
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
+  })
+
   if (!payload) {
     try {
       payload = await getPayloadHMR({ config: configArg })
@@ -89,7 +95,7 @@ export const routeError = async ({
         {
           message: 'There was an error initializing Payload',
         },
-        { status: httpStatus.INTERNAL_SERVER_ERROR },
+        { headers, status: httpStatus.INTERNAL_SERVER_ERROR },
       )
     }
   }
@@ -133,5 +139,5 @@ export const routeError = async ({
     })
   }
 
-  return Response.json(response, { status })
+  return Response.json(response, { headers, status })
 }
