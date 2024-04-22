@@ -2,8 +2,7 @@ import { URL } from 'url'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { EmailAdapter } from '../email/types.js'
-import type { Payload } from '../index.js'
+import type { InitializedEmailAdapter } from '../email/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { User, VerifyConfig } from './types.js'
 
@@ -11,13 +10,13 @@ type Args = {
   collection: Collection
   config: SanitizedConfig
   disableEmail: boolean
-  email: EmailAdapter<any, unknown>
+  email: InitializedEmailAdapter
   req: PayloadRequest
   token: string
   user: User
 }
 
-async function sendVerificationEmail(args: Args): Promise<void> {
+export async function sendVerificationEmail(args: Args): Promise<void> {
   // Verify token from e-mail
   const {
     collection: { config: collectionConfig },
@@ -74,5 +73,3 @@ async function sendVerificationEmail(args: Args): Promise<void> {
     })
   }
 }
-
-export default sendVerificationEmail

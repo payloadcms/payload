@@ -1,6 +1,5 @@
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http'
-import type { SendMailOptions } from 'nodemailer'
 import type pino from 'pino'
 
 import crypto from 'crypto'
@@ -35,7 +34,7 @@ import type {
 } from './collections/operations/local/update.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types.js'
-import type { EmailAdapter } from './email/types.js'
+import type { InitializedEmailAdapter } from './email/types.js'
 import type { TypeWithID as GlobalTypeWithID, Globals } from './globals/config/types.js'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js'
@@ -49,7 +48,7 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import localOperations from './collections/operations/local/index.js'
 import { validateSchema } from './config/validate.js'
-import { createStdoutAdapter } from './email/stdoutAdapter.js'
+import { stdoutAdapter } from './email/stdoutAdapter.js'
 import { fieldAffectsData } from './exports/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import flattenFields from './utilities/flattenTopLevelFields.js'
@@ -102,8 +101,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return duplicate<T>(this, options)
   }
 
-  // Do these types need to be injected via GeneratedTypes?
-  email: EmailAdapter<any, unknown>
+  email: InitializedEmailAdapter
 
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
@@ -252,7 +250,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   secret: string
 
-  sendEmail: (message: SendMailOptions) => Promise<unknown>
+  sendEmail: InitializedEmailAdapter['sendEmail']
 
   types: {
     arrayTypes: any
@@ -366,18 +364,19 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     // Load email adapter
     if (this.config.email instanceof Promise) {
-      this.email = await this.config.email
+      const awaitedAdapter = await this.config.email
+      this.email = awaitedAdapter({ payload: this })
     } else if (this.config.email) {
-      this.email = this.config.email
+      this.email = this.config.email({ payload: this })
     } else {
       this.logger.warn(
         `No email adapter provided. Email will be written to stdout. More info at https://payloadcms.com/docs/email/overview.`,
       )
 
-      this.email = createStdoutAdapter(this)
+      this.email = stdoutAdapter({ payload: this })
     }
 
-    this.sendEmail = this.email.sendEmail
+    this.sendEmail = this.email['sendEmail']
 
     serverInitTelemetry(this)
 

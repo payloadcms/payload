@@ -1,6 +1,6 @@
-import type { SendMailOptions } from 'nodemailer'
+import type { SendEmailOptions } from './types.js'
 
-export const getStringifiedToAddress = (message: SendMailOptions): string | undefined => {
+export const getStringifiedToAddress = (message: SendEmailOptions): string | undefined => {
   let stringifiedTo: string | undefined
 
   if (typeof message.to === 'string') {

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import type { Transporter } from 'nodemailer'
 import type SMTPConnection from 'nodemailer/lib/smtp-connection'
-import type { EmailAdapter, SendMailOptions } from 'payload/types'
+import type { EmailAdapter } from 'payload/config'
 
 import nodemailer from 'nodemailer'
 import { InvalidConfiguration } from 'payload/errors'
@@ -14,19 +14,19 @@ export type NodemailerAdapterArgs = {
   transportOptions?: SMTPConnection.Options
 }
 
-export type NodemailerAdapter = EmailAdapter<SendMailOptions, unknown>
+export type NodemailerAdapter = EmailAdapter<unknown>
 
 /**
  * Creates an email adapter using nodemailer
  *
  * If no email configuration is provided, an ethereal email test account is returned
  */
-export const createNodemailerAdapter = async (
+export const nodemailerAdapter = async (
   args?: NodemailerAdapterArgs,
 ): Promise<NodemailerAdapter> => {
   const { defaultFromAddress, defaultFromName, transport } = await buildEmail(args)
 
-  const adapter: NodemailerAdapter = {
+  const adapter: NodemailerAdapter = () => ({
     defaultFromAddress,
     defaultFromName,
     sendEmail: async (message) => {
@@ -35,14 +35,15 @@ export const createNodemailerAdapter = async (
         ...message,
       })
     },
-  }
-
+  })
   return adapter
 }
 
-async function buildEmail(
-  emailConfig?: NodemailerAdapterArgs,
-): Promise<{ defaultFromAddress: string; defaultFromName: string; transport: Transporter }> {
+async function buildEmail(emailConfig?: NodemailerAdapterArgs): Promise<{
+  defaultFromAddress: string
+  defaultFromName: string
+  transport: Transporter
+}> {
   if (!emailConfig) {
     const transport = await createMockAccount(emailConfig)
     if (!transport) throw new InvalidConfiguration('Unable to create Nodemailer test account.')

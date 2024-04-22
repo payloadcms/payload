@@ -1,4 +1,5 @@
 import type { Config } from 'payload/config'
+import type { Payload } from 'payload'
 import nodemailer from 'nodemailer'
 
 import { defaults } from 'payload/config'
@@ -11,6 +12,8 @@ describe('email', () => {
   const defaultDomain = 'test.com'
   const apiKey = 'test'
   let createTransportSpy: jest.SpyInstance
+
+  const mockedPayload: Payload = jest.fn() as unknown as Payload
 
   beforeEach(() => {
     defaultConfig = defaults as Config
@@ -71,8 +74,10 @@ describe('email', () => {
         defaultFromAddress,
       })
 
-      expect(email.defaultFromName).toEqual(defaultFromName)
-      expect(email.defaultFromAddress).toEqual(defaultFromAddress)
+      const initializedEmail = email({ payload: mockedPayload })
+
+      expect(initializedEmail.defaultFromName).toEqual(defaultFromName)
+      expect(initializedEmail.defaultFromAddress).toEqual(defaultFromAddress)
     })
   })
 })

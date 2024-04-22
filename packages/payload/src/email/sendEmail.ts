@@ -1,10 +1,9 @@
-import type { SendMailOptions } from 'nodemailer'
-
 import type { Payload } from '../types/index.js'
+import type { SendEmailOptions } from './types.js'
 
 import { getStringifiedToAddress } from './getStringifiedToAddress.js'
 
-export async function sendEmail(this: Payload, message: SendMailOptions): Promise<unknown> {
+export async function sendEmail(this: Payload, message: SendEmailOptions): Promise<unknown> {
   let result
 
   try {

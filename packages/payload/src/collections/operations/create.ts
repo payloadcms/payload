@@ -12,7 +12,7 @@ import type {
 } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
-import sendVerificationEmail from '../../auth/sendVerificationEmail.js'
+import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'

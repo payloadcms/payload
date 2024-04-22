@@ -1,6 +1,6 @@
 import type { NodemailerAdapter } from '@payloadcms/email-nodemailer'
 
-import { createNodemailerAdapter } from '@payloadcms/email-nodemailer'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
 
 import type { PayloadCloudEmailOptions } from './types.js'
@@ -12,7 +12,7 @@ export const payloadCloudEmail = async (
     return undefined
   }
 
-  if (!args.apiKey) throw new Error('apiKey must be provided to use Payload Cloud Email ')
+  if (!args.apiKey) throw new Error('apiKey must be provided to use Payload Cloud Email')
   if (!args.defaultDomain)
     throw new Error('defaultDomain must be provided to use Payload Cloud Email')
 
@@ -43,7 +43,7 @@ export const payloadCloudEmail = async (
   const defaultFromAddress =
     args.defaultFromAddress || `cms@${customDomains.length ? customDomains[0] : defaultDomain}`
 
-  const emailAdapter = await createNodemailerAdapter({
+  const emailAdapter = await nodemailerAdapter({
     defaultFromAddress,
     defaultFromName,
     skipVerify,

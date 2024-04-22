@@ -1,7 +1,7 @@
 import type { I18nOptions, TFunction } from '@payloadcms/translations'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
-import type { DestinationStream, LoggerOptions } from 'pino'
+import type { DestinationStream, LoggerOptions, P } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -16,7 +16,7 @@ import type {
   SanitizedCollectionConfig,
 } from '../collections/config/types.js'
 import type { DatabaseAdapterResult } from '../database/types.js'
-import type { EmailAdapter, SendMailOptions } from '../email/types.js'
+import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
@@ -531,7 +531,7 @@ export type Config = {
    *
    * @see https://payloadcms.com/docs/email/overview
    */
-  email?: EmailAdapter<any, unknown> | Promise<EmailAdapter<any, unknown>>
+  email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
@@ -690,3 +690,5 @@ export type EntityDescription =
   | EntityDescriptionFunction
   | Record<string, string>
   | string
+
+export type { EmailAdapter, SendEmailOptions }
