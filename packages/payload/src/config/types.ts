@@ -417,9 +417,9 @@ export type Config = {
           prefillOnly?: boolean
         }
       | false
-
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?: 'default' | 'gravatar' | React.ComponentType<any>
+
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -489,6 +489,8 @@ export type Config = {
         Dashboard?: AdminView
       }
     }
+    /** Extension point to add your custom data. Available in server and client. */
+    custom?: Record<string, any>
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /** If set to true, the entire Admin panel will be disabled. */
@@ -547,17 +549,8 @@ export type Config = {
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
-  /** Extension point to add your custom data. */
-  custom?: {
-    /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
-     * Server only.
-     */
-    server?: Record<string, any>
-  }
+  /** Extension point to add your custom data. Server only. */
+  custom?: Record<string, any>
 
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult

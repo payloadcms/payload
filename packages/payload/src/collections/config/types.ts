@@ -246,6 +246,8 @@ export type CollectionAdminOptions = {
         | React.ComponentType<any>
     }
   }
+  /** Extension point to add your custom data. Available in server and client. */
+  custom?: Record<string, any>
   /**
    * Default columns to show in list view
    */
@@ -314,17 +316,8 @@ export type CollectionConfig = {
    * Use `true` to enable with default options
    */
   auth?: IncomingAuthType | boolean
-  /** Extension point to add your custom data. */
-  custom?: {
-    /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
-     * Server only.
-     */
-    server?: Record<string, any>
-  }
+  /** Extension point to add your custom data. Server only. */
+  custom?: Record<string, any>
   /**
    * Default field to sort by in collection list view
    */

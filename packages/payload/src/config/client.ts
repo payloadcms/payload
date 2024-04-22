@@ -18,6 +18,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'bin'
   | 'cors'
   | 'csrf'
+  | 'custom'
   | 'db'
   | 'editor'
   | 'email'
@@ -40,6 +41,7 @@ export type ClientConfig = Omit<
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   }
   collections: ClientCollectionConfig[]
+  custom?: Record<string, any>
   globals: ClientGlobalConfig[]
 }
 
@@ -67,6 +69,7 @@ export const createClientConfig = async ({
     'cors',
     'csrf',
     'email',
+    'custom',
     // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
   ]
 
@@ -82,12 +85,6 @@ export const createClientConfig = async ({
     clientConfig.localization.locales.forEach((locale) => {
       delete locale.toString
     })
-  }
-
-  if ('custom' in clientConfig && clientConfig.custom) {
-    if ('server' in clientConfig.custom && clientConfig.custom.server) {
-      delete clientConfig.custom.server
-    }
   }
 
   if ('admin' in clientConfig) {

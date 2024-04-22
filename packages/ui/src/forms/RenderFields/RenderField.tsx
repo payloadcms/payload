@@ -17,9 +17,7 @@ import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.j
 
 type Props = {
   CustomField: MappedField['CustomField']
-  custom?: {
-    client?: Record<string, any>
-  }
+  custom?: Record<any, string>
   disabled: boolean
   fieldComponentProps?: FieldComponentProps
   indexPath?: string

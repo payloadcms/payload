@@ -21,8 +21,7 @@ describe('Config', () => {
     it('allows a custom field at the config root', () => {
       const { config } = payload
       expect(config.custom).toEqual({
-        client: { name: 'Customer portal' },
-        server: { name: 'Customer portal' },
+        name: 'Customer portal',
       })
     })
 
@@ -39,8 +38,7 @@ describe('Config', () => {
     it('allows a custom field in collections', () => {
       const [collection] = payload.config.collections
       expect(collection.custom).toEqual({
-        client: { externalLink: 'https://foo.bar' },
-        server: { externalLink: 'https://foo.bar' },
+        externalLink: 'https://foo.bar',
       })
     })
 
@@ -57,11 +55,8 @@ describe('Config', () => {
       const [collection] = payload.config.collections
       const [field] = collection.fields
 
-      console.log({ custom: field.custom })
-
       expect(field.custom).toEqual({
-        client: { description: 'The title of this page' },
-        server: { description: 'The title of this page' },
+        description: 'The title of this page',
       })
     })
 
@@ -70,8 +65,7 @@ describe('Config', () => {
       const [, blocksField] = collection.fields
 
       expect((blocksField as BlockField).blocks[0].custom).toEqual({
-        server: { description: 'The blockOne of this page' },
-        client: { description: 'The blockOne of this page' },
+        description: 'The blockOne of this page',
       })
     })
   })
@@ -79,7 +73,7 @@ describe('Config', () => {
   describe('global config', () => {
     it('allows a custom field in globals', () => {
       const [global] = payload.config.globals
-      expect(global.custom).toEqual({ client: { foo: 'bar' }, server: { foo: 'bar' } })
+      expect(global.custom).toEqual({ foo: 'bar' })
     })
 
     it('allows a custom field in global endpoints', () => {
@@ -94,8 +88,7 @@ describe('Config', () => {
       const [field] = global.fields
 
       expect(field.custom).toEqual({
-        client: { description: 'The title of my global' },
-        server: { description: 'The title of my global' },
+        description: 'The title of my global',
       })
     })
   })

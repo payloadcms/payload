@@ -7,6 +7,12 @@ const UIFields: CollectionConfig = {
   slug: uiFieldsSlug,
   admin: {
     useAsTitle: 'text',
+    custom: {
+      'new-value': 'client available',
+    },
+  },
+  custom: {
+    'new-server-value': 'only available on server',
   },
   defaultSort: 'id',
   fields: [
@@ -22,13 +28,13 @@ const UIFields: CollectionConfig = {
         components: {
           Field: UICustomClient,
         },
-      },
-      custom: {
-        client: {
+        custom: {
           customValue: `client-side-configuration`,
         },
+      },
+      custom: {
         server: {
-          'new-server-value': 'only available on server',
+          serverOnly: 'string',
         },
       },
     },

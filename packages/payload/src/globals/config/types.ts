@@ -106,6 +106,8 @@ export type GlobalAdminOptions = {
       Edit?: EditConfig
     }
   }
+  /** Extension point to add your custom data. Available in server and client. */
+  custom?: Record<string, any>
   /**
    * Custom description for collection
    */
@@ -140,17 +142,8 @@ export type GlobalConfig = {
     update?: Access
   }
   admin?: GlobalAdminOptions
-  /** Extension point to add your custom data. */
-  custom?: {
-    /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
-     * Server only.
-     */
-    server?: Record<string, any>
-  }
+  /** Extension point to add your custom data. Server only. */
+  custom?: Record<string, any>
   /**
    * Customize the SQL table name
    */
