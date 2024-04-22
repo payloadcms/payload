@@ -1,8 +1,9 @@
 import httpStatus from 'http-status'
 import { forgotPasswordOperation } from 'payload/operations'
-import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
+
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const forgotPassword: CollectionRouteHandler = async ({ collection, req }) => {
   await forgotPasswordOperation({
@@ -21,7 +22,10 @@ export const forgotPassword: CollectionRouteHandler = async ({ collection, req }
       message: 'Success',
     },
     {
-      headers: corsHeaders(req),
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     },
   )

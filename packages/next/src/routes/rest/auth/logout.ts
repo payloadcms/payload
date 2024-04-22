@@ -1,13 +1,19 @@
 import httpStatus from 'http-status'
 import { generateExpiredPayloadCookie } from 'payload/auth'
 import { logoutOperation } from 'payload/operations'
-import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
+
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const logout: CollectionRouteHandler = async ({ collection, req }) => {
   const result = await logoutOperation({
     collection,
+    req,
+  })
+
+  const headers = headersWithCors({
+    headers: new Headers(),
     req,
   })
 
@@ -17,6 +23,7 @@ export const logout: CollectionRouteHandler = async ({ collection, req }) => {
         message: 'Logout failed.',
       },
       {
+        headers,
         status: httpStatus.BAD_REQUEST,
       },
     )
@@ -27,13 +34,15 @@ export const logout: CollectionRouteHandler = async ({ collection, req }) => {
     payload: req.payload,
   })
 
+  headers.set('Set-Cookie', expiredCookie)
+
   return Response.json(
     {
       // TODO(translate)
       message: 'Logout successful.',
     },
     {
-      headers: { ...corsHeaders(req), 'Set-Cookie': expiredCookie },
+      headers,
       status: httpStatus.OK,
     },
   )

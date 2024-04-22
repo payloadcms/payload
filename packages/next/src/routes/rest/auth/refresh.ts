@@ -2,12 +2,18 @@ import httpStatus from 'http-status'
 import { extractJWT } from 'payload/auth'
 import { generatePayloadCookie } from 'payload/auth'
 import { refreshOperation } from 'payload/operations'
-import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
   const token = typeof req.data?.token === 'string' ? req.data.token : extractJWT(req)
+
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
+  })
 
   if (!token) {
     return Response.json(
@@ -16,6 +22,7 @@ export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
         message: 'Token not provided.',
       },
       {
+        headers,
         status: httpStatus.UNAUTHORIZED,
       },
     )
@@ -37,6 +44,8 @@ export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
     delete result.refreshedToken
   }
 
+  headers.set('Set-Cookie', cookie)
+
   return Response.json(
     {
       // TODO(translate)
@@ -44,7 +53,7 @@ export const refresh: CollectionRouteHandler = async ({ collection, req }) => {
       ...result,
     },
     {
-      headers: { ...corsHeaders(req), 'Set-Cookie': cookie },
+      headers,
       status: httpStatus.OK,
     },
   )

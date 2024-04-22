@@ -1,8 +1,9 @@
 import httpStatus from 'http-status'
 import { verifyEmailOperation } from 'payload/operations'
-import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
+
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const verifyEmail: CollectionRouteHandlerWithID = async ({ id, collection, req }) => {
   await verifyEmailOperation({
@@ -17,7 +18,10 @@ export const verifyEmail: CollectionRouteHandlerWithID = async ({ id, collection
       message: 'Email verified successfully.',
     },
     {
-      headers: corsHeaders(req),
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     },
   )

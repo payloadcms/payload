@@ -5,9 +5,9 @@ import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
 import httpStatus from 'http-status'
-import { corsHeaders } from 'payload/utilities'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 
 const handleError = async (
   payload: Payload,
@@ -121,14 +121,17 @@ export const POST =
       validationRules: (request, args, defaultRules) => defaultRules.concat(validationRules(args)),
     })(originalRequest)
 
-    const resHeaders = new Headers(apiResponse.headers)
+    const resHeaders = headersWithCors({
+      headers: new Headers(apiResponse.headers),
+      req,
+    })
 
     for (const key in headers) {
       resHeaders.append(key, headers[key])
     }
 
     return new Response(apiResponse.body, {
-      headers: { ...corsHeaders(req), ...Object.fromEntries(resHeaders) },
+      headers: resHeaders,
       status: apiResponse.status,
     })
   }

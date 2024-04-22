@@ -1,7 +1,8 @@
 import { initOperation } from 'payload/operations'
-import { corsHeaders } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
+
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const init: CollectionRouteHandler = async ({ collection, req }) => {
   const initialized = await initOperation({
@@ -12,7 +13,10 @@ export const init: CollectionRouteHandler = async ({ collection, req }) => {
   return Response.json(
     { initialized },
     {
-      headers: corsHeaders(req),
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
     },
   )
 }

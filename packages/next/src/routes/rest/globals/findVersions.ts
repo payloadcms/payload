@@ -2,9 +2,11 @@ import type { Where } from 'payload/types'
 
 import httpStatus from 'http-status'
 import { findVersionsOperationGlobal } from 'payload/operations'
-import { corsHeaders, isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/utilities'
 
 import type { GlobalRouteHandler } from '../types.js'
+
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const findVersions: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const { depth, limit, page, sort, where } = req.query as {
@@ -26,7 +28,10 @@ export const findVersions: GlobalRouteHandler = async ({ globalConfig, req }) =>
   })
 
   return Response.json(result, {
-    headers: corsHeaders(req),
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
     status: httpStatus.OK,
   })
 }

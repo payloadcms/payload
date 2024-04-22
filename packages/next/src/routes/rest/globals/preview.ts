@@ -1,10 +1,11 @@
 import httpStatus from 'http-status'
 import { extractJWT } from 'payload/auth'
 import { findOneOperation } from 'payload/operations'
-import { corsHeaders, isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/utilities'
 
 import type { GlobalRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { routeError } from '../routeError.js'
 
 export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
@@ -44,7 +45,10 @@ export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
   }
 
   return Response.json(previewURL, {
-    headers: corsHeaders(req),
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
     status: httpStatus.OK,
   })
 }

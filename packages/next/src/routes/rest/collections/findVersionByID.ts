@@ -1,9 +1,10 @@
 import httpStatus from 'http-status'
 import { findVersionByIDOperation } from 'payload/operations'
-import { corsHeaders, isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { sanitizeCollectionID } from '../utilities/sanitizeCollectionID.js'
 
 export const findVersionByID: CollectionRouteHandlerWithID = async ({
@@ -28,7 +29,10 @@ export const findVersionByID: CollectionRouteHandlerWithID = async ({
   })
 
   return Response.json(result, {
-    headers: corsHeaders(req),
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
     status: httpStatus.OK,
   })
 }

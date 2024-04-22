@@ -1,9 +1,11 @@
 import { getTranslation } from '@payloadcms/translations'
 import httpStatus from 'http-status'
 import { createOperation } from 'payload/operations'
-import { corsHeaders, isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
+
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const create: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
@@ -28,7 +30,10 @@ export const create: CollectionRouteHandler = async ({ collection, req }) => {
       }),
     },
     {
-      headers: corsHeaders(req),
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.CREATED,
     },
   )

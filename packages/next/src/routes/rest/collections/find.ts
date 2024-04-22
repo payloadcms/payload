@@ -2,9 +2,11 @@ import type { Where } from 'payload/types'
 
 import httpStatus from 'http-status'
 import { findOperation } from 'payload/operations'
-import { corsHeaders, isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
+
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 
 export const find: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, draft, limit, page, sort, where } = req.query as {
@@ -28,7 +30,10 @@ export const find: CollectionRouteHandler = async ({ collection, req }) => {
   })
 
   return Response.json(result, {
-    headers: corsHeaders(req),
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
     status: httpStatus.OK,
   })
 }
