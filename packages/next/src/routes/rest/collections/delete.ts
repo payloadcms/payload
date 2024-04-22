@@ -7,6 +7,8 @@ import { isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => {
   const { depth, where } = req.query as {
     depth?: string
@@ -18,6 +20,11 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
     depth: isNumber(depth) ? Number(depth) : undefined,
     req,
     where,
+  })
+
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
   })
 
   if (result.errors.length === 0) {
@@ -35,6 +42,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
         message,
       },
       {
+        headers,
         status: httpStatus.OK,
       },
     )
@@ -54,6 +62,7 @@ export const deleteDoc: CollectionRouteHandler = async ({ collection, req }) => 
       message,
     },
     {
+      headers,
       status: httpStatus.BAD_REQUEST,
     },
   )

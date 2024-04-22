@@ -7,6 +7,7 @@ import path from 'path'
 import { APIError } from 'payload/errors'
 
 import { streamFile } from '../../../next-stream-file/index.js'
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { routeError } from '../routeError.js'
 import { checkFileAccess } from './checkFileAccess.js'
 
@@ -60,7 +61,10 @@ export const getFile = async ({ collection, filename, req }: Args): Promise<Resp
     if (fileTypeResult?.mime) headers.set('content-type', fileTypeResult.mime)
 
     return new Response(data, {
-      headers,
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     })
   } catch (err) {

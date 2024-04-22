@@ -3,6 +3,8 @@ import { unlockOperation } from 'payload/operations'
 
 import type { CollectionRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const unlock: CollectionRouteHandler = async ({ collection, req }) => {
   const { t } = req
 
@@ -17,6 +19,10 @@ export const unlock: CollectionRouteHandler = async ({ collection, req }) => {
       message: t('general:success'),
     },
     {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     },
   )

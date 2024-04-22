@@ -5,6 +5,8 @@ import { registerFirstUserOperation } from 'payload/operations'
 
 import type { CollectionRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const registerFirstUser: CollectionRouteHandler = async ({ collection, req }) => {
   const { data, t } = req
 
@@ -41,8 +43,11 @@ export const registerFirstUser: CollectionRouteHandler = async ({ collection, re
       user: result.user,
     },
     {
-      headers: new Headers({
-        'Set-Cookie': cookie,
+      headers: headersWithCors({
+        headers: new Headers({
+          'Set-Cookie': cookie,
+        }),
+        req,
       }),
       status: httpStatus.OK,
     },
