@@ -18,7 +18,7 @@ export {
   fieldsToJSONSchema,
   withNullableJSONSchemaType,
 } from '../utilities/configToJSONSchema.js'
-export { corsHeaders } from '../utilities/corsHeaders.js'
+
 export { createArrayFromCommaDelineated } from '../utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from '../utilities/createLocalReq.js'
 export { deepCopyObject } from '../utilities/deepCopyObject.js'
