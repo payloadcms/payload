@@ -1,12 +1,16 @@
 import type { Endpoint } from 'payload/config'
 import type { PayloadRequest } from 'payload/types'
 
+import { addDataAndFileToRequest, addLocalesToRequest } from '@payloadcms/next/utilities'
 import httpStatus from 'http-status'
 
 import { seedDB } from './seed.js'
 
-const handler = async ({ data, payload }: PayloadRequest) => {
+const handler = async (req: PayloadRequest) => {
   process.env.SEED_IN_CONFIG_ONINIT = 'true'
+  await addDataAndFileToRequest({ request: req })
+  addLocalesToRequest({ request: req })
+  const { data, payload } = req
 
   try {
     await seedDB({
