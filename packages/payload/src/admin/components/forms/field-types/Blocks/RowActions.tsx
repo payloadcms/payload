@@ -11,6 +11,7 @@ export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void
   blockType: string
   blocks: Block[]
+  disableSortable?: boolean
   duplicateRow: (rowIndex: number, blockType: string) => void
   hasMaxRows?: boolean
   labels: Labels
@@ -23,6 +24,7 @@ export const RowActions: React.FC<{
     addRow,
     blockType,
     blocks,
+    disableSortable,
     duplicateRow,
     hasMaxRows,
     labels,
@@ -56,6 +58,7 @@ export const RowActions: React.FC<{
           setIndexToAdd(index)
           openModal(drawerSlug)
         }}
+        disableSortable={disableSortable}
         duplicateRow={() => duplicateRow(rowIndex, blockType)}
         hasMaxRows={hasMaxRows}
         index={rowIndex}
