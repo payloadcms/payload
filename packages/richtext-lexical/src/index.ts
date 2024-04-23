@@ -1,4 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
+import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
@@ -18,6 +19,7 @@ import {
 import { loadFeatures } from './field/lexical/config/server/loader.js'
 import { sanitizeServerFeatures } from './field/lexical/config/server/sanitize.js'
 import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
+import { recurseNodes, recurseNodesAsync } from './forEachNodeRecursively.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'
@@ -77,6 +79,97 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       beforeChange: finalSanitizedEditorConfig.features.hooks.beforeChange,
       beforeDuplicate: finalSanitizedEditorConfig.features.hooks.beforeDuplicate,
       beforeValidate: finalSanitizedEditorConfig.features.hooks.beforeValidate,
+    },*/
+    /* // TODO: Figure out docWithLocales / originalSiblingDoc => node matching. Can't use indexes, as the order of nodes could technically change between hooks.
+    hooks: {
+      afterChange: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
+              if (afterChangeHooks?.has(node.type)) {
+                for (const hook of afterChangeHooks.get(node.type)) {
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+      afterRead: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
+              if (afterReadHooks?.has(node.type)) {
+                for (const hook of afterReadHooks.get(node.type)) {
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+      beforeChange: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
+              if (beforeChangeHooks?.has(node.type)) {
+                for (const hook of beforeChangeHooks.get(node.type)) {
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+      beforeDuplicate: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const beforeDuplicateHooks = finalSanitizedEditorConfig.features.hooks.beforeDuplicate
+              if (beforeDuplicateHooks?.has(node.type)) {
+                for (const hook of beforeDuplicateHooks.get(node.type)) {
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+      beforeValidate: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
+              if (beforeValidateHooks?.has(node.type)) {
+                for (const hook of beforeValidateHooks.get(node.type)) {
+                  /**
+                   * We cannot pass the originalNode here, as there is no way to map one node to a previous one, as a previous originalNode might be in a different position
+                   */ /*
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
     },*/
     outputSchema: ({
       collectionIDFieldTypes,

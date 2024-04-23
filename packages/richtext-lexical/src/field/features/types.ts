@@ -190,6 +190,7 @@ export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
   node?: T
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
+  overrideAccess?: boolean
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
 }

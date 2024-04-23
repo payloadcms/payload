@@ -1,7 +1,10 @@
 export { getDataLoader } from '../collections/dataloader.js'
 export { default as getDefaultValue } from '../fields/getDefaultValue.js'
+export { traverseFields as afterChangeTraverseFields } from '../fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from '../fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from '../fields/hooks/afterRead/traverseFields.js'
+export { traverseFields as beforeChangeTraverseFields } from '../fields/hooks/beforeChange/traverseFields.js'
+export { traverseFields as beforeValidateTraverseFields } from '../fields/hooks/beforeValidate/traverseFields.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 

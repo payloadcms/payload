@@ -40,11 +40,12 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: T
+  overrideAccess?: boolean
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: T
   /** The sibling data of the document before changes being applied, only in `beforeChange` and `afterChange` hook. */
   previousSiblingDoc?: T
-  /** The previous value of the field, before changes, only in `beforeChange` and `afterChange` hooks. */
+  /** The previous value of the field, before changes, only in `beforeChange`, `afterChange` and `beforeValidate` hooks. */
   previousValue?: P
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
