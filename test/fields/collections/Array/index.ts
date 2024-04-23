@@ -18,6 +18,9 @@ const ArrayFields: CollectionConfig = {
     {
       name: 'items',
       defaultValue: arrayDefaultValue,
+      admin: {
+        disableSortable: true,
+      },
       fields: [
         {
           name: 'text',
