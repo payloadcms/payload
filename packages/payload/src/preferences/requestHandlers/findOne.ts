@@ -5,6 +5,7 @@ import type { PayloadHandler } from '../../config/types.js'
 import findOne from '../operations/findOne.js'
 
 export const findByIDHandler: PayloadHandler = async (req): Promise<Response> => {
+  req.data = await req.json()
   const result = await findOne({
     key: req.routeParams?.key as string,
     req,
