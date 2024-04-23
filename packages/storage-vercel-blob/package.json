@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-vercel-blob",
-  "version": "0.0.0",
+  "version": "3.0.0-beta.12",
   "description": "Payload storage adapter for Vercel Blob Storage",
   "repository": {
     "type": "git",
@@ -40,10 +40,10 @@
     }
   },
   "dependencies": {
-    "@payloadcms/plugin-cloud-storage": "workspace:*"
+    "@payloadcms/plugin-cloud-storage": "workspace:*",
+    "@vercel/blob": "^0.22.3"
   },
   "devDependencies": {
-    "@vercel/blob": "^0.22.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {

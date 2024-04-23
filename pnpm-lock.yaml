@@ -1406,16 +1406,16 @@ importers:
 
   packages/storage-s3:
     dependencies:
-      '@payloadcms/plugin-cloud-storage':
-        specifier: workspace:*
-        version: link:../plugin-cloud-storage
-    devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.525.0
         version: 3.556.0
       '@aws-sdk/lib-storage':
         specifier: ^3.525.0
         version: 3.556.0(@aws-sdk/client-s3@3.556.0)
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../plugin-cloud-storage
+    devDependencies:
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1425,10 +1425,10 @@ importers:
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
-    devDependencies:
       '@vercel/blob':
         specifier: ^0.22.3
         version: 0.22.3
+    devDependencies:
       payload:
         specifier: workspace:*
         version: link:../payload
