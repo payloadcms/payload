@@ -78,7 +78,7 @@ export const routeError = async ({
   collection?: Collection
   config: Promise<SanitizedConfig> | SanitizedConfig
   err: APIError
-  req: PayloadRequest
+  req: Partial<PayloadRequest>
 }) => {
   let payload = req?.payload
 
@@ -123,7 +123,7 @@ export const routeError = async ({
     ;({ response, status } = collection.config.hooks.afterError(
       err,
       response,
-      req.context,
+      req?.context,
       collection.config,
     ) || { response, status })
   }
@@ -132,7 +132,7 @@ export const routeError = async ({
     ;({ response, status } = config.hooks.afterError(
       err,
       response,
-      req.context,
+      req?.context,
       collection?.config,
     ) || {
       response,
