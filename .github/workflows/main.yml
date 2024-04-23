@@ -292,6 +292,7 @@ jobs:
         with:
           name: test-results-${{ matrix.suite }}
           path: test/test-results/
+          if-no-files-found: ignore
           retention-days: 1
 
   tests-type-generation:
