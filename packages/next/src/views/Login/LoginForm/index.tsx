@@ -68,6 +68,7 @@ export const LoginForm: React.FC<{
               name: 'email',
               type: 'email',
               data: {},
+              preferences: { fields: {} },
               req: { t } as PayloadRequest,
               required: true,
               siblingData: {},
@@ -84,6 +85,7 @@ export const LoginForm: React.FC<{
               name: 'password',
               type: 'text',
               data: {},
+              preferences: { fields: {} },
               req: {
                 payload: {
                   config,
