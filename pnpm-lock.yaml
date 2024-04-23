@@ -1418,16 +1418,16 @@ importers:
 
   packages/storage-s3:
     dependencies:
-      '@payloadcms/plugin-cloud-storage':
-        specifier: workspace:*
-        version: link:../plugin-cloud-storage
-    devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.525.0
         version: 3.550.0
       '@aws-sdk/lib-storage':
         specifier: ^3.525.0
         version: 3.550.0(@aws-sdk/client-s3@3.550.0)
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../plugin-cloud-storage
+    devDependencies:
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1437,10 +1437,10 @@ importers:
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
-    devDependencies:
       '@vercel/blob':
         specifier: ^0.22.3
         version: 0.22.3
+    devDependencies:
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -3863,7 +3863,6 @@ packages:
   /@fastify/busboy@2.1.1:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
-    dev: true
 
   /@floating-ui/core@1.6.0:
     resolution: {integrity: sha512-PcF++MykgmTj3CIyOQbKA/hDzOAiqI3mhuoN44WRCopIs1sgoDoU4oty4Jtqaj/y3oDU6fnVSm4QG0a3t5i0+g==}
@@ -6535,7 +6534,6 @@ packages:
       bytes: 3.1.2
       is-buffer: 2.0.5
       undici: 5.28.4
-    dev: true
 
   /@vue/compiler-core@3.4.23:
     resolution: {integrity: sha512-HAFmuVEwNqNdmk+w4VCQ2pkLk1Vw4XYiiyxEp3z/xvl14aLTUBw2OfVH3vBcx+FtGsynQLkkhK410Nah1N2yyQ==}
@@ -10733,7 +10731,6 @@ packages:
   /is-buffer@2.0.5:
     resolution: {integrity: sha512-i2R6zNFDwgEHJyQUtJEk0XFi1i0dPFn/oqjK3/vPCcDeJvW5NQ83V8QbicfF1SupOaB0h8ntgBC2YiE7dfyctQ==}
     engines: {node: '>=4'}
-    dev: true
 
   /is-callable@1.2.7:
     resolution: {integrity: sha512-1BC0BVFhS/p0qtw6enp8e+8OD0UrK0oFLztSjNzhcKA3WDuJxxAPXzPuPtKkjEY9UUoEWlX/8fgKeu2S8i9JTA==}
@@ -15973,7 +15970,6 @@ packages:
     engines: {node: '>=14.0'}
     dependencies:
       '@fastify/busboy': 2.1.1
-    dev: true
 
   /unfetch@4.2.0:
     resolution: {integrity: sha512-F9p7yYCn6cIW9El1zi0HI6vqpeIvBsr3dSuRO6Xuppb1u5rXpCPmMvLSyECLhybr9isec8Ohl0hPekMVrEinDA==}

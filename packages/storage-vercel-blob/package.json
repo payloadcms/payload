@@ -40,10 +40,10 @@
     }
   },
   "dependencies": {
-    "@payloadcms/plugin-cloud-storage": "workspace:*"
+    "@payloadcms/plugin-cloud-storage": "workspace:*",
+    "@vercel/blob": "^0.22.3"
   },
   "devDependencies": {
-    "@vercel/blob": "^0.22.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {
