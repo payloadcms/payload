@@ -241,6 +241,7 @@ const BlocksField: React.FC<Props> = (props) => {
                       addRow={addRow}
                       blockToRender={blockToRender}
                       blocks={blocks}
+                      disableSortable={disableSortable}
                       duplicateRow={duplicateRow}
                       fieldTypes={fieldTypes}
                       forceRender={forceRender}
