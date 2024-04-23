@@ -12,6 +12,7 @@ concurrency:
 
 env:
   NODE_VERSION: 18.20.2
+  PNPM_VERSION: 8.15.7
 
 jobs:
   changes:
@@ -68,7 +69,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Get pnpm store directory
@@ -113,7 +114,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Restore build
@@ -162,7 +163,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Restore build
@@ -246,6 +247,7 @@ jobs:
           - fields__collections__Lexical
           - live-preview
           - localization
+          - plugin-cloud-storage
           - plugin-form-builder
           - plugin-nested-docs
           - plugin-seo
@@ -265,7 +267,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Restore build
@@ -274,6 +276,10 @@ jobs:
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Start LocalStack
+        run: pnpm docker:start
+        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
 
       - name: Install Playwright
         run: pnpm exec playwright install --with-deps
@@ -286,6 +292,7 @@ jobs:
         with:
           name: test-results-${{ matrix.suite }}
           path: test/test-results/
+          if-no-files-found: ignore
           retention-days: 1
 
   tests-type-generation:
@@ -306,7 +313,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Restore build

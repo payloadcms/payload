@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-s3",
-  "version": "0.0.0",
+  "version": "3.0.0-beta.12",
   "description": "Payload storage adapter for Amazon S3",
   "repository": {
     "type": "git",

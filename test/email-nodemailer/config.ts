@@ -1,4 +1,4 @@
-import { createNodemailerAdapter } from '@payloadcms/email-nodemailer'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -6,7 +6,7 @@ import { devUser } from '../credentials.js'
 export default buildConfigWithDefaults({
   // ...extend config here
   collections: [],
-  email: createNodemailerAdapter(),
+  email: nodemailerAdapter(),
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

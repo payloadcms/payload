@@ -4,6 +4,7 @@ import httpStatus from 'http-status'
 import { APIError } from 'payload/errors'
 
 import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 
 export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
 
@@ -77,7 +78,7 @@ export const routeError = async ({
   collection?: Collection
   config: Promise<SanitizedConfig> | SanitizedConfig
   err: APIError
-  req: PayloadRequest
+  req: Partial<PayloadRequest>
 }) => {
   let payload = req?.payload
 
@@ -93,6 +94,12 @@ export const routeError = async ({
       )
     }
   }
+
+  req.payload = payload
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
+  })
 
   const { config, logger } = payload
 
@@ -116,7 +123,7 @@ export const routeError = async ({
     ;({ response, status } = collection.config.hooks.afterError(
       err,
       response,
-      req.context,
+      req?.context,
       collection.config,
     ) || { response, status })
   }
@@ -125,7 +132,7 @@ export const routeError = async ({
     ;({ response, status } = config.hooks.afterError(
       err,
       response,
-      req.context,
+      req?.context,
       collection?.config,
     ) || {
       response,
@@ -133,5 +140,5 @@ export const routeError = async ({
     })
   }
 
-  return Response.json(response, { status })
+  return Response.json(response, { headers, status })
 }

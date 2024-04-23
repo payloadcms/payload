@@ -14,7 +14,7 @@ export type NodemailerAdapterArgs = {
   transportOptions?: SMTPConnection.Options
 }
 
-export type NodemailerAdapter = EmailAdapter<unknown>
+type NodemailerAdapter = EmailAdapter<unknown>
 
 /**
  * Creates an email adapter using nodemailer
