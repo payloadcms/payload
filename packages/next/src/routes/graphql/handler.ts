@@ -90,7 +90,7 @@ export const POST =
       request,
     })
 
-    addLocalesToRequest({ config: req.payload.config, request: req })
+    addLocalesToRequest({ request: req })
 
     const { schema, validationRules } = await getGraphql(config)
 

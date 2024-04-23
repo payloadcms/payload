@@ -1,28 +1,18 @@
-import type {
-  Collection,
-  CustomPayloadRequest,
-  PayloadRequest,
-  SanitizedConfig,
-} from 'payload/types'
+import type { CustomPayloadRequest, PayloadRequest } from 'payload/types'
 
 import type { NextFileUploadOptions } from '../next-fileupload/index.js'
 
 import { nextFileUpload } from '../next-fileupload/index.js'
 
-type AddDataAndFileToRequest = (args: {
-  collection: Collection
-  config: SanitizedConfig
-  request: PayloadRequest
-}) => Promise<void>
+type AddDataAndFileToRequest = (args: { request: PayloadRequest }) => Promise<void>
 
 /**
  * Mutates the Request to contain 'data' and 'file' if present
  */
 export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
-  collection,
-  config,
   request: incomingRequest,
 }) => {
+  const config = incomingRequest.payload.config
   let data: Record<string, any> | undefined = undefined
   let file: CustomPayloadRequest['file'] = undefined
 
@@ -61,7 +51,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
           throw new Error(error.message)
         }
 
-        if (collection?.config?.upload && files?.file) {
+        if (files?.file) {
           file = files.file
         }
 

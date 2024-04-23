@@ -11,7 +11,7 @@ export const GET = (config: Promise<SanitizedConfig>) => async (request: Request
     request,
   })
 
-  addLocalesToRequest({ config: req.payload.config, request: req })
+  addLocalesToRequest({ request: req })
 
   if (
     (!req.payload.config.graphQL.disable &&
