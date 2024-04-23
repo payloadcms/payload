@@ -2,21 +2,21 @@
 
 The [Payload Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) demonstrates how to implement [Payload Authentication](https://payloadcms.com/docs/authentication/overview) in various headless capacities. Follow the [Quick Start](#quick-start) to get up and running quickly.
 
-This example includes an integrated Next.js App Router front-end that runs on the same instance as Payload. If you are working on an application running on a separate server or with a different framework, there are various fully working front-ends made explicitly for this example, including:
+This example includes a fully integrated Next.js App Router front-end that runs on the same instance as Payload. If you are working on an application running on a separate server, there are various fully working front-ends made explicitly for this example, including:
 
 - [Next.js App Router](../next-app)
 - [Next.js Pages Router](../next-pages)
 
 Follow the instructions in each respective README to get started. If you are setting up authentication for another front-end, please consider contributing to this repo with your own example!
 
-For more information on using Payload in the various headless capacities, [check out this blog post](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
+For more information on using Payload in its various headless capacities, [check out this blog post](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
 
 ## Quick Start
 
 To spin up this example locally, follow these steps:
 
 1. Clone this repo
-2. `cd` into this directory and run `pnpm i`\*, `yarn`, or `npm install`
+2. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
    > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
 3. `cp .env.example .env` to copy the example environment variables
 4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server, press `y` when prompted to seed the database
@@ -55,7 +55,7 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to create a user with email `demo@payloadcms.com`, password `demo`, the role `admin`.
+On boot, a seed migration performed to create a user with email `demo@payloadcms.com`, password `demo`, the role `admin`.
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 
