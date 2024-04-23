@@ -5,7 +5,7 @@ type CorsArgs = {
   req: PayloadRequest
 }
 export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
-  const cors = req.payload.config.cors
+  const cors = req?.payload.config.cors
   const requestOrigin = req.headers.get('Origin')
 
   if (cors) {

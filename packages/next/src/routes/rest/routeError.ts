@@ -82,11 +82,6 @@ export const routeError = async ({
 }) => {
   let payload = req?.payload
 
-  const headers = headersWithCors({
-    headers: new Headers(),
-    req,
-  })
-
   if (!payload) {
     try {
       payload = await getPayloadHMR({ config: configArg })
@@ -95,10 +90,16 @@ export const routeError = async ({
         {
           message: 'There was an error initializing Payload',
         },
-        { headers, status: httpStatus.INTERNAL_SERVER_ERROR },
+        { status: httpStatus.INTERNAL_SERVER_ERROR },
       )
     }
   }
+
+  req.payload = payload
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
+  })
 
   const { config, logger } = payload
 
