@@ -44,6 +44,7 @@
     "payload": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
+    "@payloadcms/next": "workspace:*",
     "react": "^18.0.0"
   },
   "exports": {
