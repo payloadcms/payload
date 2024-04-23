@@ -3,6 +3,8 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { Payload } from 'payload'
 import type { PaginatedDocs } from 'payload/database'
 
+import { reload } from '@payloadcms/next/utilities'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { GroupField, RichTextField } from './payload-types.js'
 
@@ -914,6 +916,22 @@ describe('Fields', () => {
         collection: tabsFieldsSlug,
         data: tabsDoc,
       })
+    })
+
+    it('should hot module reload and still be able to create', async () => {
+      const testDoc1 = await payload.findByID({
+        collection: tabsFieldsSlug,
+        id: document.id,
+      })
+
+      await reload(payload.config, payload)
+
+      const testDoc2 = await payload.findByID({
+        collection: tabsFieldsSlug,
+        id: document.id,
+      })
+
+      expect(testDoc1.id).toStrictEqual(testDoc2.id)
     })
 
     it('should create with fields inside a named tab', () => {
