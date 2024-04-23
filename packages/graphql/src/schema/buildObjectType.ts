@@ -46,7 +46,6 @@ import { toWords } from 'payload/utilities'
 
 import type { Context } from '../resolvers/types.js'
 
-/* eslint-disable no-use-before-define */
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'

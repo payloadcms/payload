@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import type { GraphQLInputFieldConfig, GraphQLScalarType, GraphQLType } from 'graphql'
 import type { GraphQLInfo } from 'payload/config'
 import type {
