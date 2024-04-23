@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-nodemailer",
-  "version": "0.0.0",
+  "version": "3.0.0-beta.12",
   "description": "Payload Nodemailer Email Adapter",
   "repository": {
     "type": "git",
