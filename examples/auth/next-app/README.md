@@ -1,8 +1,8 @@
 # Payload Auth Example Front-End
 
-This is a [Next.js](https://nextjs.org) App Router front-end made explicitly for the [Payload Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) to demonstrate how to authenticate your Next.js app using [Payload Authentication](https://payloadcms.com/docs/authentication/overview). This example runs on a different instance as Payload, meaning it connects to Payload from a separately running server over another domain or port. For an integrated Next.js setup, [check out the front-end that is included directly alongside ](https://github.com/payloadcms/payload/tree/main/examples/auth/payload).
+This is a [Next.js](https://nextjs.org) [App Router](https://nextjs.org/docs/app) front-end made explicitly for the [Payload Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) to demonstrate how to authenticate your Next.js app using [Payload Authentication](https://payloadcms.com/docs/authentication/overview).
 
-For more information on using Payload in its various headless capacities, [check out this blog post](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
+This example runs on a different instance as Payload, meaning it connects to Payload from a separately running server over another domain or port. For an integrated Next.js setup, [check out the front-end that is included directly alongside ](https://github.com/payloadcms/payload/tree/main/examples/auth/payload). For more information on using Payload in its various headless capacities, [check out this blog post](https://payloadcms.com/blog/the-ultimate-guide-to-using-nextjs-with-payload).
 
 > This example uses the App Router, the latest API of Next.js. If your app is using the legacy [Pages Router](https://nextjs.org/docs/pages), check out the official [Pages Router Example](https://github.com/payloadcms/payload/tree/main/examples/auth/next-pages).
 
