@@ -253,6 +253,7 @@ describe('fields - relationship', () => {
   })
 
   async function runFilterOptionsTest(fieldName: string) {
+    await page.reload()
     await page.goto(url.edit(docWithExistingRelations.id))
 
     // fill the first relation field
