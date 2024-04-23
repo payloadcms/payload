@@ -155,7 +155,6 @@ export default buildConfigWithDefaults({
   globals: [
     {
       slug: 'global',
-      // @ts-expect-error
       dbName: 'customGlobal',
       fields: [
         {

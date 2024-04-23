@@ -18,6 +18,7 @@ import type {
   LabelFunction,
   LivePreviewConfig,
 } from '../../config/types.js'
+import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type { GeneratedTypes } from '../../index.js'
 import type { PayloadRequest, RequestContext } from '../../types/index.js'
@@ -318,6 +319,11 @@ export type CollectionConfig = {
   auth?: IncomingAuthType | boolean
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+  /**
+   * Used to override the default naming of the database table or collection with your using a function or string
+   * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
+   */
+  dbName?: DBIdentifierName
   /**
    * Default field to sort by in collection list view
    */
