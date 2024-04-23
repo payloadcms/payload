@@ -5,6 +5,7 @@ import type { PayloadHandler } from '../../config/types.js'
 import update from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (req) => {
+  req.data = await req.json()
   const payloadRequest = req
 
   const doc = await update({
