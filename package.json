@@ -165,7 +165,7 @@
   },
   "engines": {
     "node": ">=18.20.2",
-    "pnpm": ">=8"
+    "pnpm": ">=8.15.7"
   },
   "lint-staged": {
     "*.{md,mdx,yml,json}": "prettier --write",
