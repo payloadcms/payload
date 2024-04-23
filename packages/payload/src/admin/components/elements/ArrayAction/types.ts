@@ -1,5 +1,6 @@
 export type Props = {
   addRow: (current: number, blockType?: string) => void
+  disableSortable: boolean
   duplicateRow: (current: number) => void
   hasMaxRows: boolean
   index: number
