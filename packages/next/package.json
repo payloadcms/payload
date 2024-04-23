@@ -47,7 +47,6 @@
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
     "file-type": "16.5.4",
-    "graphql-http": "^1.22.0",
     "mini-css-extract-plugin": "1.6.2",
     "payload": "workspace:*",
     "postcss-loader": "^8.1.1",
@@ -73,6 +72,7 @@
     "react-diff-viewer-continued": "3.2.6",
     "react-toastify": "8.2.0",
     "sass": "^1.71.1",
+    "graphql-http": "^1.22.0",
     "ws": "^8.16.0"
   },
   "peerDependencies": {
