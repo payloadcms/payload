@@ -1,5 +1,4 @@
-import type { GraphQLFormattedError } from 'graphql'
-import type { GraphQLError } from 'graphql'
+import type { GraphQLError, GraphQLFormattedError } from 'graphql'
 import type { CollectionAfterErrorHook, Payload, SanitizedConfig } from 'payload/types'
 
 import { configToSchema } from '@payloadcms/graphql'

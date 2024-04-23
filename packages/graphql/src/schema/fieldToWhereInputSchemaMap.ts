@@ -21,15 +21,12 @@ import type {
 } from 'payload/types'
 
 import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
-import GraphQLJSONImport from 'graphql-type-json'
 
+import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths.js'
 import { withOperators } from './withOperators.js'
-
-const GraphQLJSON = (GraphQLJSONImport ||
-  GraphQLJSONImport.default) as unknown as typeof GraphQLJSONImport.default
 
 type Args = {
   nestedFieldName?: string

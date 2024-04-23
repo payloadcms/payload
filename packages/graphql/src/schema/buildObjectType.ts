@@ -41,13 +41,13 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-/* eslint-disable no-use-before-define */
-import { GraphQLJSON } from 'graphql-type-json'
 import { tabHasName } from 'payload/types'
 import { toWords } from 'payload/utilities'
 
 import type { Context } from '../resolvers/types.js'
 
+/* eslint-disable no-use-before-define */
+import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import combineParentName from '../utilities/combineParentName.js'
 import formatName from '../utilities/formatName.js'
 import formatOptions from '../utilities/formatOptions.js'
@@ -301,7 +301,7 @@ function buildObjectType({
             value: {
               type: new GraphQLUnionType({
                 name: relationshipName,
-                async resolveType(data, { req }) {
+                resolveType(data, { req }) {
                   return graphqlResult.collections[data.collection].graphQL.type.name
                 },
                 types,
