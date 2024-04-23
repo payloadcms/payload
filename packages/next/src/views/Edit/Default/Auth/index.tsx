@@ -105,7 +105,7 @@ export const Auth: React.FC<Props> = (props) => {
                 name="password"
                 required
               />
-              <ConfirmPassword disabled={readOnly} />
+              <ConfirmPassword disabled={readOnly} name="confirm-password" />
             </div>
           )}
 
