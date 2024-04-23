@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../types/index.ts'
+import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
