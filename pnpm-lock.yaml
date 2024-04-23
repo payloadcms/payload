@@ -641,6 +641,9 @@ importers:
       graphql:
         specifier: ^16.8.1
         version: 16.8.1
+      graphql-http:
+        specifier: ^1.22.0
+        version: 1.22.0(graphql@16.8.1)
       graphql-playground-html:
         specifier: 1.6.30
         version: 1.6.30
@@ -693,9 +696,6 @@ importers:
       file-type:
         specifier: 16.5.4
         version: 16.5.4
-      graphql-http:
-        specifier: ^1.22.0
-        version: 1.22.0(graphql@16.8.1)
       mini-css-extract-plugin:
         specifier: 1.6.2
         version: 1.6.2(webpack@5.91.0)
@@ -10313,7 +10313,6 @@ packages:
       graphql: ^16.8.1
     dependencies:
       graphql: 16.8.1
-    dev: true
 
   /graphql-playground-html@1.6.30:
     resolution: {integrity: sha512-tpCujhsJMva4aqE8ULnF7/l3xw4sNRZcSHu+R00VV+W0mfp+Q20Plvcrp+5UXD+2yS6oyCXncA+zoQJQqhGCEw==}
