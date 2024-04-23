@@ -233,6 +233,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   {...draggableSortableItemProps}
                   CustomRowLabel={CustomRowLabel}
                   addRow={addRow}
+                  disableSortable={disableSortable}
                   duplicateRow={duplicateRow}
                   fieldTypes={fieldTypes}
                   fields={fields}
