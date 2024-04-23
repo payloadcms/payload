@@ -18,10 +18,10 @@ import initCollections from './schema/initCollections.js'
 import initGlobals from './schema/initGlobals.js'
 import { wrapCustomFields } from './utilities/wrapCustomResolver.js'
 
-export function configToSchema(config: SanitizedConfig): Promise<{
+export function configToSchema(config: SanitizedConfig): {
   schema: GraphQL.GraphQLSchema
   validationRules: (args: OperationArgs<any>) => GraphQL.ValidationRule[]
-}> {
+} {
   const collections = config.collections.reduce((acc, collection) => {
     acc[collection.slug] = {
       config: collection,
