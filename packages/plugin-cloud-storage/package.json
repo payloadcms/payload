@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/plugin-cloud-storage",
   "description": "The official cloud storage plugin for Payload CMS",
-  "version": "3.0.0-beta.13",
+  "version": "3.0.0-beta.14",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "type": "module",
