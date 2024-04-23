@@ -930,6 +930,22 @@ describe('fields', () => {
     })
   })
 
+  describe('ui', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'ui-fields')
+    })
+
+    test('should show custom: client configuration', async () => {
+      await page.goto(url.create)
+
+      const uiField = page.locator('#uiCustomClient')
+
+      await expect(uiField).toBeVisible()
+      await expect(uiField).toContainText('client-side-configuration')
+    })
+  })
+
   describe('conditional logic', () => {
     let url: AdminUrlUtil
     beforeAll(() => {

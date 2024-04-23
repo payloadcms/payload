@@ -15,6 +15,7 @@ export const baseAdminFields = joi.object().keys({
   className: joi.string(),
   components: baseAdminComponentFields,
   condition: joi.func(),
+  custom: joi.object().pattern(joi.string(), joi.any()),
   description: joi
     .alternatives()
     .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]), componentSchema),
@@ -193,6 +194,7 @@ export const json = baseField.keys({
     editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
   }),
   defaultValue: joi.alternatives().try(joi.array(), joi.object()),
+  jsonSchema: joi.object().unknown(),
 })
 
 export const select = baseField.keys({
@@ -418,6 +420,9 @@ export const blocks = baseField.keys({
     .items(
       joi.object({
         slug: joi.string().required(),
+        admin: joi.object().keys({
+          custom: joi.object().pattern(joi.string(), joi.any()),
+        }),
         custom: joi.object().pattern(joi.string(), joi.any()),
         dbName: joi.alternatives().try(joi.string(), joi.func()),
         fields: joi.array().items(joi.link('#field')),
@@ -515,6 +520,7 @@ export const ui = joi.object().keys({
         })
         .default({}),
       condition: joi.func(),
+      custom: joi.object().pattern(joi.string(), joi.any()),
       position: joi.string().valid('sidebar'),
       width: joi.string(),
     })

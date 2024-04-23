@@ -116,6 +116,20 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
     })
 
+    it('should count', async () => {
+      const query = `query {
+        countPosts {
+          totalDocs
+        }
+      }`
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { totalDocs } = data.countPosts
+
+      expect(typeof totalDocs).toBe('number')
+    })
+
     it('should read using multiple queries', async () => {
       const query = `query {
           postIDs: Posts {
@@ -846,6 +860,21 @@ describe('collections-graphql', () => {
 
         expect(totalDocs).toStrictEqual(1)
         expect(docs[0].relationToCustomID.id).toStrictEqual(1)
+      })
+
+      it('should query on relationships with custom IDs - count', async () => {
+        const query = `query {
+          countPosts(where: { title: { equals: "has custom ID relation" }}) {
+            totalDocs
+          }
+        }`
+
+        const { data } = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+        const { totalDocs } = data.countPosts
+
+        expect(totalDocs).toStrictEqual(1)
       })
 
       it('should query a document with a deleted relationship', async () => {

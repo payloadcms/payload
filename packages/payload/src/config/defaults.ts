@@ -4,6 +4,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   admin: {
     avatar: 'default',
     components: {},
+    custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
     disable: false,
     inactivityRoute: '/logout-inactivity',

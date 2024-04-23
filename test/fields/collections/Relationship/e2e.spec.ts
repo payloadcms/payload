@@ -388,7 +388,13 @@ describe('relationship', () => {
     await page.waitForURL(url.create)
 
     const field = page.locator('#field-relationHasManyPolymorphic')
+
+    // wait for relationship options to load
+    const textFieldPromise = page.waitForResponse(/api\/text-fields/)
+    const arrayFieldPromise = page.waitForResponse(/api\/array-fields/)
     await field.click()
+    await textFieldPromise
+    await arrayFieldPromise
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
     const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()

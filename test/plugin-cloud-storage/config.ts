@@ -5,6 +5,7 @@ import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage/azure'
 import { gcsAdapter } from '@payloadcms/plugin-cloud-storage/gcs'
 import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
 import dotenv from 'dotenv'
+import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -13,18 +14,17 @@ import { Media } from './collections/Media.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { Users } from './collections/Users.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import { createTestBucket } from './utils.js'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 let adapter: Adapter
 let uploadOptions
 
 // Load config to work with emulated services
 dotenv.config({
-  path: path.resolve(process.cwd(), './test/plugin-cloud-storage/.env.emulated'),
+  path: path.resolve(dirname, './.env.emulated'),
 })
-
-console.log(
-  `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
-)
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'azure') {
   adapter = azureBlobStorageAdapter({
@@ -114,6 +114,12 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+
+    await createTestBucket()
+
+    payload.logger.info(
+      `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
+    )
   },
   plugins: [
     cloudStorage({

@@ -8,6 +8,7 @@ import { createDatabaseAdapter } from 'payload/database'
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+import { count } from './count.js'
 import { create } from './create.js'
 import { createGlobal } from './createGlobal.js'
 import { createGlobalVersion } from './createGlobalVersion.js'
@@ -76,6 +77,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       beginTransaction,
       commitTransaction,
       connect,
+      count,
       create,
       createGlobal,
       createGlobalVersion,

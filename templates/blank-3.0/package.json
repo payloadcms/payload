@@ -22,7 +22,7 @@
     "@payloadcms/plugin-cloud": "beta",
     "@payloadcms/richtext-lexical": "beta",
     "cross-env": "^7.0.3",
-    "next": "14.2.0-canary.23",
+    "next": "^14.3.0-canary.7",
     "payload": "beta",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

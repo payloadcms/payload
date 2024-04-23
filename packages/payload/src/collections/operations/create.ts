@@ -12,7 +12,7 @@ import type {
 } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
-import sendVerificationEmail from '../../auth/sendVerificationEmail.js'
+import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -84,7 +84,7 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
         fallbackLocale,
         locale,
         payload,
-        payload: { config, emailOptions },
+        payload: { config, email },
       },
       req,
       showHiddenFields,
@@ -272,9 +272,8 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
         collection: { config: collectionConfig },
         config: payload.config,
         disableEmail: disableVerificationEmail,
-        emailOptions,
+        email: payload.email,
         req,
-        sendEmail: payload.sendEmail,
         token: verificationToken,
         user: result,
       })

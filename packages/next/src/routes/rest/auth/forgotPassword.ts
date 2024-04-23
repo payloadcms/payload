@@ -3,7 +3,10 @@ import { forgotPasswordOperation } from 'payload/operations'
 
 import type { CollectionRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const forgotPassword: CollectionRouteHandler = async ({ collection, req }) => {
+  const { t } = req
   await forgotPasswordOperation({
     collection,
     data: {
@@ -16,10 +19,13 @@ export const forgotPassword: CollectionRouteHandler = async ({ collection, req }
 
   return Response.json(
     {
-      // TODO(translate)
-      message: 'Success',
+      message: t('general:success'),
     },
     {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     },
   )

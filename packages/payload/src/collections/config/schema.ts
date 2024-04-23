@@ -57,6 +57,7 @@ const collectionSchema = joi.object().keys({
         ),
       }),
     }),
+    custom: joi.object().pattern(joi.string(), joi.any()),
     defaultColumns: joi.array().items(joi.string()),
     description: joi.alternatives().try(joi.string(), componentSchema),
     enableRichTextLink: joi.boolean(),

@@ -9,6 +9,7 @@ export { registerFirstUserOperation } from '../auth/operations/registerFirstUser
 export { resetPasswordOperation } from '../auth/operations/resetPassword.js'
 export { unlockOperation } from '../auth/operations/unlock.js'
 export { verifyEmailOperation } from '../auth/operations/verifyEmail.js'
+export { countOperation } from '../collections/operations/count.js'
 
 export { createOperation } from '../collections/operations/create.js'
 export { deleteOperation } from '../collections/operations/delete.js'

@@ -83,6 +83,8 @@ export const it: Language = {
       invalidFileTypeValue: 'Tipo di file non valido: {{value}}',
       loadingDocument:
         'Si è verificato un problema durante il caricamento del documento con ID {{id}}.',
+      localesNotSaved_one: 'Non è stato possibile salvare la seguente impostazione locale:',
+      localesNotSaved_other: 'Non è stato possibile salvare le seguenti impostazioni locali:',
       missingEmail: 'Email mancante.',
       missingIDOfDocument: 'ID del documento da aggiornare mancante.',
       missingIDOfVersion: 'ID della versione mancante.',
@@ -193,6 +195,8 @@ export const it: Language = {
       deleting: 'Sto eliminando...',
       descending: 'Decrescente',
       deselectAllRows: 'Deseleziona tutte le righe',
+      document: 'Documento',
+      documents: 'Documenti',
       duplicate: 'Duplica',
       duplicateWithoutSaving: 'Duplica senza salvare le modifiche',
       edit: 'Modificare',

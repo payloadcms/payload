@@ -2,7 +2,7 @@ import type { LivePreviewConfig, ServerOnlyLivePreviewProperties } from '../../c
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
-  'access' | 'endpoints' | 'hooks'
+  'access' | 'custom' | 'endpoints' | 'hooks'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
@@ -44,6 +44,7 @@ export const createClientCollectionConfig = ({
     'hooks',
     'access',
     'endpoints',
+    'custom',
     // `upload`
     // `admin`
     // are all handled separately
