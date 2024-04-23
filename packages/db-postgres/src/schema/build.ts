@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type {
+  ForeignKeyBuilder,
   IndexBuilder,
   PgColumnBuilder,
   PgTableWithColumns,
@@ -9,8 +10,17 @@ import type {
 import type { Field } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
-import { index, integer, numeric, serial, timestamp, unique, varchar } from 'drizzle-orm/pg-core'
-import { fieldAffectsData } from 'payload/types'
+import {
+  foreignKey,
+  index,
+  integer,
+  numeric,
+  serial,
+  timestamp,
+  unique,
+  varchar,
+} from 'drizzle-orm/pg-core'
+import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types.js'
 
@@ -19,10 +29,15 @@ import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { setColumnID } from './setColumnID.js'
 import { traverseFields } from './traverseFields.js'
 
+export type BaseExtraConfig = Record<
+  string,
+  (cols: GenericColumns) => ForeignKeyBuilder | IndexBuilder | UniqueConstraintBuilder
+>
+
 type Args = {
   adapter: PostgresAdapter
   baseColumns?: Record<string, PgColumnBuilder>
-  baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
+  baseExtraConfig?: BaseExtraConfig
   buildNumbers?: boolean
   buildRelationships?: boolean
   buildTexts?: boolean
@@ -134,10 +149,12 @@ export const buildTable = ({
       return config
     }, {})
 
-    return Object.entries(indexes).reduce((acc, [colName, func]) => {
+    const result = Object.entries(indexes).reduce((acc, [colName, func]) => {
       acc[colName] = func(cols)
       return acc
     }, extraConfig)
+
+    return result
   })
 
   adapter.tables[tableName] = table
@@ -146,9 +163,7 @@ export const buildTable = ({
     const localeTableName = `${tableName}${adapter.localesSuffix}`
     localesColumns.id = serial('id').primaryKey()
     localesColumns._locale = adapter.enums.enum__locales('_locale').notNull()
-    localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id')
-      .references(() => table.id, { onDelete: 'cascade' })
-      .notNull()
+    localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id').notNull()
 
     localesTable = adapter.pgSchema.table(localeTableName, localesColumns, (cols) => {
       return Object.entries(localesIndexes).reduce(
@@ -161,6 +176,11 @@ export const buildTable = ({
             cols._locale,
             cols._parentID,
           ),
+          _parentIdFk: foreignKey({
+            name: `${localeTableName}_parent_id_fk`,
+            columns: [cols._parentID],
+            foreignColumns: [table.id],
+          }).onDelete('cascade'),
         },
       )
     })
@@ -182,9 +202,7 @@ export const buildTable = ({
     const columns: Record<string, PgColumnBuilder> = {
       id: serial('id').primaryKey(),
       order: integer('order').notNull(),
-      parent: parentIDColumnMap[idColType]('parent_id')
-        .references(() => table.id, { onDelete: 'cascade' })
-        .notNull(),
+      parent: parentIDColumnMap[idColType]('parent_id').notNull(),
       path: varchar('path').notNull(),
       text: varchar('text'),
     }
@@ -194,19 +212,24 @@ export const buildTable = ({
     }
 
     textsTable = adapter.pgSchema.table(textsTableName, columns, (cols) => {
-      const indexes: Record<string, IndexBuilder> = {
+      const config: Record<string, ForeignKeyBuilder | IndexBuilder> = {
         orderParentIdx: index(`${textsTableName}_order_parent_idx`).on(cols.order, cols.parent),
+        parentFk: foreignKey({
+          name: `${textsTableName}_parent_fk`,
+          columns: [cols.parent],
+          foreignColumns: [table.id],
+        }).onDelete('cascade'),
       }
 
       if (hasManyTextField === 'index') {
-        indexes.text_idx = index(`${textsTableName}_text_idx`).on(cols.text)
+        config.text_idx = index(`${textsTableName}_text_idx`).on(cols.text)
       }
 
       if (hasLocalizedManyTextField) {
-        indexes.localeParent = index(`${textsTableName}_locale_parent`).on(cols.locale, cols.parent)
+        config.localeParent = index(`${textsTableName}_locale_parent`).on(cols.locale, cols.parent)
       }
 
-      return indexes
+      return config
     })
 
     adapter.tables[textsTableName] = textsTable
@@ -227,9 +250,7 @@ export const buildTable = ({
       id: serial('id').primaryKey(),
       number: numeric('number'),
       order: integer('order').notNull(),
-      parent: parentIDColumnMap[idColType]('parent_id')
-        .references(() => table.id, { onDelete: 'cascade' })
-        .notNull(),
+      parent: parentIDColumnMap[idColType]('parent_id').notNull(),
       path: varchar('path').notNull(),
     }
 
@@ -238,22 +259,27 @@ export const buildTable = ({
     }
 
     numbersTable = adapter.pgSchema.table(numbersTableName, columns, (cols) => {
-      const indexes: Record<string, IndexBuilder> = {
+      const config: Record<string, ForeignKeyBuilder | IndexBuilder> = {
         orderParentIdx: index(`${numbersTableName}_order_parent_idx`).on(cols.order, cols.parent),
+        parentFk: foreignKey({
+          name: `${numbersTableName}_parent_fk`,
+          columns: [cols.parent],
+          foreignColumns: [table.id],
+        }).onDelete('cascade'),
       }
 
       if (hasManyNumberField === 'index') {
-        indexes.numberIdx = index(`${numbersTableName}_number_idx`).on(cols.number)
+        config.numberIdx = index(`${numbersTableName}_number_idx`).on(cols.number)
       }
 
       if (hasLocalizedManyNumberField) {
-        indexes.localeParent = index(`${numbersTableName}_locale_parent`).on(
+        config.localeParent = index(`${numbersTableName}_locale_parent`).on(
           cols.locale,
           cols.parent,
         )
       }
 
-      return indexes
+      return config
     })
 
     adapter.tables[numbersTableName] = numbersTable
@@ -273,15 +299,17 @@ export const buildTable = ({
       const relationshipColumns: Record<string, PgColumnBuilder> = {
         id: serial('id').primaryKey(),
         order: integer('order'),
-        parent: parentIDColumnMap[idColType]('parent_id')
-          .references(() => table.id, { onDelete: 'cascade' })
-          .notNull(),
+        parent: parentIDColumnMap[idColType]('parent_id').notNull(),
         path: varchar('path').notNull(),
       }
 
       if (hasLocalizedRelationshipField) {
         relationshipColumns.locale = adapter.enums.enum__locales('locale')
       }
+
+      const relationExtraConfig: BaseExtraConfig = {}
+
+      const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
 
       relationships.forEach((relationTo) => {
         const relationshipConfig = adapter.payload.collections[relationTo].config
@@ -300,20 +328,38 @@ export const buildTable = ({
 
         relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
           `${formattedRelationTo}_id`,
-        ).references(() => adapter.tables[formattedRelationTo].id, { onDelete: 'cascade' })
-      })
+        )
 
-      const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
+        relationExtraConfig[`${relationTo}IdFk`] = (cols) =>
+          foreignKey({
+            name: `${relationshipsTableName}_${toSnakeCase(relationTo)}_fk`,
+            columns: [cols[`${relationTo}ID`]],
+            foreignColumns: [adapter.tables[formattedRelationTo].id],
+          }).onDelete('cascade')
+      })
 
       relationshipsTable = adapter.pgSchema.table(
         relationshipsTableName,
         relationshipColumns,
         (cols) => {
-          const result: Record<string, unknown> = {
-            order: index(`${relationshipsTableName}_order_idx`).on(cols.order),
-            parentIdx: index(`${relationshipsTableName}_parent_idx`).on(cols.parent),
-            pathIdx: index(`${relationshipsTableName}_path_idx`).on(cols.path),
-          }
+          const result: Record<string, ForeignKeyBuilder | IndexBuilder> = Object.entries(
+            relationExtraConfig,
+          ).reduce(
+            (config, [key, func]) => {
+              config[key] = func(cols)
+              return config
+            },
+            {
+              order: index(`${relationshipsTableName}_order_idx`).on(cols.order),
+              parentFk: foreignKey({
+                name: `${relationshipsTableName}_parent_fk`,
+                columns: [cols.parent],
+                foreignColumns: [table.id],
+              }).onDelete('cascade'),
+              parentIdx: index(`${relationshipsTableName}_parent_idx`).on(cols.parent),
+              pathIdx: index(`${relationshipsTableName}_path_idx`).on(cols.path),
+            },
+          )
 
           if (hasLocalizedRelationshipField) {
             result.localeIdx = index(`${relationshipsTableName}_locale_idx`).on(cols.locale)
