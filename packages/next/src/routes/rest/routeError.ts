@@ -78,14 +78,9 @@ export const routeError = async ({
   collection?: Collection
   config: Promise<SanitizedConfig> | SanitizedConfig
   err: APIError
-  req: PayloadRequest
+  req: Partial<PayloadRequest>
 }) => {
   let payload = req?.payload
-
-  const headers = headersWithCors({
-    headers: new Headers(),
-    req,
-  })
 
   if (!payload) {
     try {
@@ -95,10 +90,16 @@ export const routeError = async ({
         {
           message: 'There was an error initializing Payload',
         },
-        { headers, status: httpStatus.INTERNAL_SERVER_ERROR },
+        { status: httpStatus.INTERNAL_SERVER_ERROR },
       )
     }
   }
+
+  req.payload = payload
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
+  })
 
   const { config, logger } = payload
 
@@ -122,7 +123,7 @@ export const routeError = async ({
     ;({ response, status } = collection.config.hooks.afterError(
       err,
       response,
-      req.context,
+      req?.context,
       collection.config,
     ) || { response, status })
   }
@@ -131,7 +132,7 @@ export const routeError = async ({
     ;({ response, status } = config.hooks.afterError(
       err,
       response,
-      req.context,
+      req?.context,
       collection?.config,
     ) || {
       response,

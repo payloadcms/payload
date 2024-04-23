@@ -187,7 +187,7 @@ export const OPTIONS =
       return routeError({
         config,
         err: error,
-        req,
+        req: req || request,
       })
     }
   }
@@ -347,7 +347,7 @@ export const GET =
         collection,
         config,
         err: error,
-        req,
+        req: req || request,
       })
     }
   }
@@ -493,7 +493,7 @@ export const POST =
         collection,
         config,
         err: error,
-        req,
+        req: req || request,
       })
     }
   }
@@ -566,7 +566,7 @@ export const DELETE =
         collection,
         config,
         err: error,
-        req,
+        req: req || request,
       })
     }
   }
@@ -639,7 +639,7 @@ export const PATCH =
         collection,
         config,
         err: error,
-        req,
+        req: req || request,
       })
     }
   }
