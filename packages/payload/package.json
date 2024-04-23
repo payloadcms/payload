@@ -70,7 +70,7 @@
   },
   "peerDependencies": {
     "@swc/core": "^1.4.13",
-    "graphql": "16.8.1"
+    "graphql": "^16.8.1"
   },
   "peerDependenciesMeta": {
     "@swc/core": {
