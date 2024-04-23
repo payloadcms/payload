@@ -3,13 +3,13 @@ import type { CollectionConfig, PayloadRequest, UploadConfig } from 'payload/typ
 export async function getFilePrefix({
   collection,
   req,
+  filename,
 }: {
   collection: CollectionConfig
   req: PayloadRequest
+  filename: string
 }): Promise<string> {
   const imageSizes = (collection?.upload as UploadConfig)?.imageSizes || []
-  const { routeParams } = req
-  const filename = routeParams['filename']
 
   const files = await req.payload.find({
     collection: collection.slug,

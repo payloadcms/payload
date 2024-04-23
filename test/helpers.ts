@@ -13,6 +13,10 @@ type FirstRegisterArgs = {
 }
 
 type LoginArgs = {
+  data?: {
+    email: string
+    password: string
+  }
   page: Page
   serverURL: string
 }
@@ -91,14 +95,24 @@ export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
 }
 
 export async function login(args: LoginArgs): Promise<void> {
-  const { page, serverURL } = args
+  const { page, serverURL, data = devUser } = args
 
-  await page.goto(`${serverURL}/admin`)
-  await page.fill('#field-email', devUser.email)
-  await page.fill('#field-password', devUser.password)
+  await page.goto(`${serverURL}/admin/login`)
+  await page.waitForURL(`${serverURL}/admin/login`)
+  await wait(500)
+  await page.fill('#field-email', data.email)
+  await page.fill('#field-password', data.password)
   await wait(500)
   await page.click('[type=submit]')
   await page.waitForURL(`${serverURL}/admin`)
+
+  await expect(() => expect(page.url()).not.toContain(`/admin/login`)).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
+
+  await expect(() => expect(page.url()).not.toContain(`/admin/create-first-user`)).toPass({
+    timeout: POLL_TOPASS_TIMEOUT,
+  })
 }
 
 export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
@@ -131,8 +145,8 @@ export async function openNav(page: Page): Promise<void> {
 }
 
 export async function openDocDrawer(page: Page, selector: string): Promise<void> {
-  await wait(300) // wait for parent form state to initialize
-  await page.locator(selector).click({ delay: 100 })
+  await wait(500) // wait for parent form state to initialize
+  await page.locator(selector).click()
   await wait(500) // wait for drawer form state to initialize
 }
 

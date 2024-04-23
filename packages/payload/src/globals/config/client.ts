@@ -12,7 +12,7 @@ import { createClientFieldConfigs } from '../../fields/config/client.js'
 
 export type ServerOnlyGlobalProperties = keyof Pick<
   SanitizedGlobalConfig,
-  'access' | 'admin' | 'endpoints' | 'fields' | 'hooks'
+  'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'hooks'
 >
 export type ServerOnlyGlobalAdminProperties = keyof Pick<
   SanitizedGlobalConfig['admin'],
@@ -46,6 +46,7 @@ export const createClientGlobalConfig = ({
     'hooks',
     'access',
     'endpoints',
+    'custom',
     // `admin` is handled separately
   ]
 

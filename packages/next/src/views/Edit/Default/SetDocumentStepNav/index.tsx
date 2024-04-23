@@ -7,10 +7,11 @@ import { useStepNav } from '@payloadcms/ui/elements/StepNav'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
+import { useEntityVisibility } from '@payloadcms/ui/providers/EntityVisibility'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { useEffect } from 'react'
 
-export const SetStepNav: React.FC<{
+export const SetDocumentStepNav: React.FC<{
   collectionSlug?: SanitizedCollectionConfig['slug']
   globalLabel?: SanitizedGlobalConfig['label']
   globalSlug?: SanitizedGlobalConfig['slug']
@@ -24,6 +25,8 @@ export const SetStepNav: React.FC<{
   const view: string | undefined = props?.view || undefined
 
   const { isEditing, title } = useDocumentInfo()
+  const { isEntityVisible } = useEntityVisibility()
+  const isVisible = isEntityVisible({ collectionSlug, globalSlug })
 
   const { setStepNav } = useStepNav()
 
@@ -41,13 +44,13 @@ export const SetStepNav: React.FC<{
     if (collectionSlug) {
       nav.push({
         label: getTranslation(pluralLabel, i18n),
-        url: `${admin}/collections/${collectionSlug}`,
+        url: isVisible ? `${admin}/collections/${collectionSlug}` : undefined,
       })
 
       if (isEditing) {
         nav.push({
           label: (useAsTitle && useAsTitle !== 'id' && title) || `${id}`,
-          url: `${admin}/collections/${collectionSlug}/${id}`,
+          url: isVisible ? `${admin}/collections/${collectionSlug}/${id}` : undefined,
         })
       } else {
         nav.push({
@@ -57,7 +60,7 @@ export const SetStepNav: React.FC<{
     } else if (globalSlug) {
       nav.push({
         label: title,
-        url: `${admin}/globals/${globalSlug}`,
+        url: isVisible ? `${admin}/globals/${globalSlug}` : undefined,
       })
     }
 
@@ -82,6 +85,7 @@ export const SetStepNav: React.FC<{
     globalSlug,
     view,
     drawerDepth,
+    isVisible,
   ])
 
   return null

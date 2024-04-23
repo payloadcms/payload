@@ -11,7 +11,5 @@ export const generateFullTitle = (breadcrumbs: Array<{ label: string }>): string
   return undefined
 }
 
-const populateFullTitle: FieldHook = ({ data, originalDoc }) =>
+export const populateFullTitle: FieldHook = ({ data, originalDoc }) =>
   generateFullTitle(data?.breadcrumbs || originalDoc?.breadcrumbs)
-
-export default populateFullTitle

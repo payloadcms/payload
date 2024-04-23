@@ -69,6 +69,16 @@ describe('collections-rest', () => {
       expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
     })
 
+    it('should count', async () => {
+      await createPost()
+      await createPost()
+      const response = await restClient.GET(`/${slug}/count`)
+      const result = await response.json()
+
+      expect(response.status).toEqual(200)
+      expect(result).toEqual({ totalDocs: 2 })
+    })
+
     it('should find where id', async () => {
       const post1 = await createPost()
       await createPost()
@@ -508,6 +518,18 @@ describe('collections-rest', () => {
           expect(response.status).toEqual(200)
           expect(result.docs).toEqual([post])
           expect(result.totalDocs).toEqual(1)
+        })
+
+        it('should count query by property value', async () => {
+          const response = await restClient.GET(`/${slug}/count`, {
+            query: {
+              where: { relationField: { equals: relation.id } },
+            },
+          })
+          const result = await response.json()
+
+          expect(response.status).toEqual(200)
+          expect(result).toEqual({ totalDocs: 1 })
         })
 
         it('query by id', async () => {

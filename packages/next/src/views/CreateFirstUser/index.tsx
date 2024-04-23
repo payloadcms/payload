@@ -1,3 +1,4 @@
+import type { FieldTypes } from 'payload/config'
 import type { Field, WithServerSideProps as WithServerSidePropsType } from 'payload/types'
 import type { AdminViewProps } from 'payload/types'
 
@@ -61,6 +62,25 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     fieldSchema: fields,
     i18n,
     parentPath: userSlug,
+  }).map((field) => {
+    // Transform field types for the password and confirm-password fields
+    if (field.name === 'password') {
+      const type: keyof FieldTypes = 'password'
+
+      return {
+        ...field,
+        type,
+      }
+    }
+    if (field.name === 'confirm-password') {
+      const type: keyof FieldTypes = 'confirmPassword'
+
+      return {
+        ...field,
+        type,
+      }
+    }
+    return field
   })
 
   const formState = await buildStateFromSchema({

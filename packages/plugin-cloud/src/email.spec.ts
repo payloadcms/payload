@@ -1,4 +1,6 @@
 import type { Config } from 'payload/config'
+import type { Payload } from 'payload'
+import nodemailer from 'nodemailer'
 
 import { defaults } from 'payload/config'
 
@@ -6,18 +8,36 @@ import { payloadCloudEmail } from './email.js'
 
 describe('email', () => {
   let defaultConfig: Config
+  const skipVerify = true
+  const defaultDomain = 'test.com'
+  const apiKey = 'test'
+  let createTransportSpy: jest.SpyInstance
+
+  const mockedPayload: Payload = jest.fn() as unknown as Payload
 
   beforeEach(() => {
-    // @ts-expect-error No need for db or editor
-    defaultConfig = { ...defaults }
+    defaultConfig = defaults as Config
+
+    createTransportSpy = jest.spyOn(nodemailer, 'createTransport').mockImplementation(() => {
+      return {
+        verify: jest.fn(),
+      } as unknown as ReturnType<typeof nodemailer.createTransport>
+    })
+
+    const createTestAccountSpy = jest.spyOn(nodemailer, 'createTestAccount').mockResolvedValue({
+      pass: 'password',
+      user: 'user',
+      web: 'ethereal.email',
+    } as unknown as nodemailer.TestAccount)
   })
 
   describe('not in Payload Cloud', () => {
-    it('should return undefined', () => {
-      const email = payloadCloudEmail({
-        apiKey: 'test',
+    it('should return undefined', async () => {
+      const email = await payloadCloudEmail({
+        apiKey,
         config: defaultConfig,
-        defaultDomain: 'test',
+        defaultDomain,
+        skipVerify,
       })
 
       expect(email).toBeUndefined()
@@ -29,35 +49,35 @@ describe('email', () => {
       process.env.PAYLOAD_CLOUD = 'true'
     })
 
-    it('should respect PAYLOAD_CLOUD env var', () => {
-      const email = payloadCloudEmail({
-        apiKey: 'test',
+    it('should respect PAYLOAD_CLOUD env var', async () => {
+      const email = await payloadCloudEmail({
+        apiKey,
         config: defaultConfig,
-        defaultDomain: 'test',
+        defaultDomain,
+        skipVerify,
       })
-      expect(email?.fromName).toBeDefined()
-      expect(email?.fromAddress).toBeDefined()
-      expect(email?.transport?.transporter.name).toEqual('SMTP')
+      expect(email).toBeDefined()
     })
 
-    it('should allow setting fromName and fromAddress', () => {
-      const fromName = 'custom from name'
-      const fromAddress = 'custom@fromaddress.com'
+    it('should allow setting fromName and fromAddress', async () => {
+      const defaultFromName = 'custom from name'
+      const defaultFromAddress = 'custom@fromaddress.com'
       const configWithFrom: Config = {
         ...defaultConfig,
-        email: {
-          fromAddress,
-          fromName,
-        },
       }
-      const email = payloadCloudEmail({
-        apiKey: 'test',
+      const email = await payloadCloudEmail({
+        apiKey,
         config: configWithFrom,
-        defaultDomain: 'test',
+        defaultDomain,
+        skipVerify,
+        defaultFromName,
+        defaultFromAddress,
       })
 
-      expect(email?.fromName).toEqual(fromName)
-      expect(email?.fromAddress).toEqual(fromAddress)
+      const initializedEmail = email({ payload: mockedPayload })
+
+      expect(initializedEmail.defaultFromName).toEqual(defaultFromName)
+      expect(initializedEmail.defaultFromAddress).toEqual(defaultFromAddress)
     })
   })
 })

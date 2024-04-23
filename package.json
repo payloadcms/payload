@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.0.0-beta.10",
+  "version": "3.0.0-beta.13",
   "private": true,
   "type": "module",
   "workspaces:": [
@@ -18,6 +18,7 @@
     "build:create-payload-app": "turbo build --filter create-payload-app",
     "build:db-mongodb": "turbo build --filter db-mongodb",
     "build:db-postgres": "turbo build --filter db-postgres",
+    "build:email-nodemailer": "turbo build --filter email-nodemailer",
     "build:eslint-config-payload": "turbo build --filter eslint-config-payload",
     "build:graphql": "turbo build --filter graphql",
     "build:live-preview": "turbo build --filter live-preview",
@@ -35,7 +36,7 @@
     "build:plugin-stripe": "turbo build --filter plugin-stripe",
     "build:richtext-lexical": "turbo build --filter richtext-lexical",
     "build:richtext-slate": "turbo build --filter richtext-slate",
-    "build:tests": "pnpm --filter test run typecheck",
+    "build:tests": "pnpm --filter payload-test-suite run typecheck",
     "build:translations": "turbo build --filter translations",
     "build:ui": "turbo build --filter ui",
     "clean": "turbo clean",
@@ -127,7 +128,7 @@
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",
-    "next": "^14.2.0-canary.23",
+    "next": "^14.3.0-canary.7",
     "node-mocks-http": "^1.14.1",
     "nodemon": "3.0.3",
     "open": "^10.1.0",
@@ -164,7 +165,7 @@
   },
   "engines": {
     "node": ">=18.20.2",
-    "pnpm": ">=8"
+    "pnpm": "^8.15.7"
   },
   "lint-staged": {
     "*.{md,mdx,yml,json}": "prettier --write",
@@ -175,6 +176,7 @@
   },
   "dependencies": {
     "@sentry/react": "^7.77.0",
+    "ajv": "^8.12.0",
     "passport-strategy": "1.0.0"
   },
   "pnpm": {

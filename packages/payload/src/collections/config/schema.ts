@@ -57,6 +57,7 @@ const collectionSchema = joi.object().keys({
         ),
       }),
     }),
+    custom: joi.object().pattern(joi.string(), joi.any()),
     defaultColumns: joi.array().items(joi.string()),
     description: joi.alternatives().try(joi.string(), componentSchema),
     enableRichTextLink: joi.boolean(),
@@ -154,6 +155,7 @@ const collectionSchema = joi.object().keys({
       adminThumbnail: joi.alternatives().try(joi.string(), componentSchema),
       crop: joi.bool(),
       disableLocalStorage: joi.bool(),
+      externalFileHeaderFilter: joi.func(),
       filesRequiredOnCreate: joi.bool(),
       focalPoint: joi.bool(),
       formatOptions: joi.object().keys({

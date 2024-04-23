@@ -1,5 +1,9 @@
 import fse from 'fs-extra'
 import globby from 'globby'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 import type { DbDetails } from '../types.js'
 
@@ -13,6 +17,34 @@ export async function configurePayloadConfig(args: {
 }): Promise<void> {
   if (!args.dbDetails) {
     return
+  }
+
+  // Update package.json
+  const packageJsonPath =
+    'projectDir' in args.projectDirOrConfigPath &&
+    path.resolve(args.projectDirOrConfigPath.projectDir, 'package.json')
+
+  if (packageJsonPath && fse.existsSync(packageJsonPath)) {
+    try {
+      const packageObj = await fse.readJson(packageJsonPath)
+
+      const dbPackage = dbReplacements[args.dbDetails.type]
+
+      // Delete all other db adapters
+      Object.values(dbReplacements).forEach((p) => {
+        if (p.packageName !== dbPackage.packageName) {
+          delete packageObj.dependencies[p.packageName]
+        }
+      })
+
+      // Set version of db adapter to match payload version
+      packageObj.dependencies[dbPackage.packageName] = packageObj.dependencies['payload']
+
+      await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
+    } catch (err: unknown) {
+      warning(`Unable to configure Payload in package.json`)
+      warning(err instanceof Error ? err.message : '')
+    }
   }
 
   try {

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.0.0-beta.10",
+  "version": "3.0.0-beta.13",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./src/index.ts",
@@ -43,6 +43,7 @@
     "@swc-node/sourcemap-support": "^0.5.0",
     "@types/probe-image-size": "^7.2.4",
     "bson-objectid": "2.0.4",
+    "ci-info": "^4.0.0",
     "conf": "10.2.0",
     "console-table-printer": "2.11.2",
     "dataloader": "2.2.2",
@@ -52,23 +53,24 @@
     "find-up": "4.1.0",
     "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
+    "image-size": "^1.1.1",
     "joi": "^17.12.1",
     "json-schema-to-typescript": "11.0.3",
     "jsonwebtoken": "9.0.1",
     "minimist": "1.2.8",
     "mkdirp": "1.0.4",
     "monaco-editor": "0.38.0",
-    "nodemailer": "6.9.10",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
     "pluralize": "8.0.0",
-    "probe-image-size": "^7.2.3",
     "sanitize-filename": "1.6.3",
     "scheduler": "0.23.0",
-    "scmp": "2.1.0"
+    "scmp": "2.1.0",
+    "uuid": "^9.0.1"
   },
   "peerDependencies": {
-    "@swc/core": "^1.4.13"
+    "@swc/core": "^1.4.13",
+    "graphql": "^16.8.1"
   },
   "peerDependenciesMeta": {
     "@swc/core": {
@@ -108,7 +110,6 @@
     "file-loader": "6.2.0",
     "form-data": "3.0.1",
     "get-port": "5.1.1",
-    "graphql": "16.8.1",
     "graphql-http": "^1.22.0",
     "mini-css-extract-plugin": "1.6.2",
     "nodemon": "3.0.3",

@@ -9,12 +9,12 @@ export const richTextValidate: Validate<
   unknown,
   RichTextField<any[], AdapterArguments>,
   RichTextField<any[], AdapterArguments>
-> = (value, { required }) => {
+> = (value, { req, required }) => {
+  const { t } = req
   if (required) {
     const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue)
     if (value && JSON.stringify(value) !== stringifiedDefaultValue) return true
-    // TODO: translate this string
-    return 'This field is required.'
+    return t('validation:required')
   }
 
   return true

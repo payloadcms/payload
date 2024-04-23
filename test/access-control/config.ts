@@ -6,8 +6,10 @@ import { TestButton } from './TestButton.js'
 import {
   docLevelAccessSlug,
   firstArrayText,
+  hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  noAdminAccessEmail,
   readOnlySlug,
   relyOnRequestHeadersSlug,
   restrictedSlug,
@@ -41,6 +43,7 @@ const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
+    autoLogin: false,
   },
   globals: [
     {
@@ -76,12 +79,17 @@ export default buildConfigWithDefaults({
       slug: 'users',
       auth: true,
       access: {
-        // admin: () => true,
-        admin: async () =>
-          new Promise((resolve) => {
+        // admin:  () => true,
+        admin: async ({ req }) => {
+          if (req.user?.email === noAdminAccessEmail) {
+            return false
+          }
+
+          return new Promise((resolve) => {
             // Simulate a request to an external service to determine access, i.e. another instance of Payload
             setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
-          }),
+          })
+        },
       },
       fields: [
         {
@@ -421,6 +429,32 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: hiddenAccessCountSlug,
+      access: {
+        read: ({ req: { user } }) => {
+          if (user) return true
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          }
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -428,6 +462,14 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+      },
+    })
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: noAdminAccessEmail,
+        password: 'test',
       },
     })
 

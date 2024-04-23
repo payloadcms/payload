@@ -30,6 +30,7 @@ import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.j
 
 export type HookOperationType =
   | 'autosave'
+  | 'count'
   | 'create'
   | 'delete'
   | 'forgotPassword'
@@ -245,6 +246,8 @@ export type CollectionAdminOptions = {
         | React.ComponentType<any>
     }
   }
+  /** Extension point to add your custom data. Available in server and client. */
+  custom?: Record<string, any>
   /**
    * Default columns to show in list view
    */
@@ -313,7 +316,7 @@ export type CollectionConfig = {
    * Use `true` to enable with default options
    */
   auth?: IncomingAuthType | boolean
-  /** Extension point to add your custom data. */
+  /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
   /**
    * Default field to sort by in collection list view
@@ -412,6 +415,7 @@ export type Collection = {
   customIDType?: 'number' | 'text'
   graphQL?: {
     JWT: GraphQLObjectType
+    countType: GraphQLObjectType
     mutationInputType: GraphQLNonNull<any>
     paginatedType: GraphQLObjectType
     type: GraphQLObjectType

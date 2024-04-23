@@ -1,5 +1,5 @@
 import type { GeneratedTypes, Payload } from 'payload'
-import type { InitOptions } from 'payload/config'
+import type { InitOptions, SanitizedConfig } from 'payload/config'
 
 import { BasePayload } from 'payload'
 import WebSocket from 'ws'
@@ -15,6 +15,31 @@ if (!cached) {
   cached = global._payload = { payload: null, promise: null, reload: false }
 }
 
+export const reload = async (config: SanitizedConfig, payload: Payload): Promise<void> => {
+  if (typeof payload.db.destroy === 'function') {
+    await payload.db.destroy()
+  }
+
+  payload.config = config
+
+  payload.collections = config.collections.reduce((collections, collection) => {
+    collections[collection.slug] = {
+      config: collection,
+      customIDType: payload.collections[collection.slug]?.customIDType,
+    }
+    return collections
+  }, {})
+
+  payload.globals = {
+    config: config.globals,
+  }
+
+  // TODO: support HMR for other props in the future (see payload/src/index init()) hat may change on Payload singleton
+
+  await payload.db.init()
+  await payload.db.connect({ hotReload: true })
+}
+
 export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
@@ -28,28 +53,8 @@ export const getPayloadHMR = async (options: InitOptions): Promise<Payload> => {
 
       cached.reload = new Promise((res) => (resolve = res))
 
-      if (typeof cached.payload.db.destroy === 'function') {
-        await cached.payload.db.destroy()
-      }
+      await reload(config, cached.payload)
 
-      cached.payload.config = config
-
-      cached.payload.collections = config.collections.reduce((collections, collection) => {
-        collections[collection.slug] = {
-          config: collection,
-          customIDType: cached.payload.collections[collection.slug]?.customIDType,
-        }
-        return collections
-      }, {})
-
-      cached.payload.globals = {
-        config: config.globals,
-      }
-
-      // TODO: support HMR for other props in the future (see payload/src/index init()) hat may change on Payload singleton
-
-      await cached.payload.db.init()
-      await cached.payload.db.connect({ hotReload: true })
       resolve()
     }
 

@@ -12,6 +12,7 @@ import type {
 } from './types.js'
 
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { access } from './auth/access.js'
 import { forgotPassword } from './auth/forgotPassword.js'
 import { init } from './auth/init.js'
@@ -25,6 +26,7 @@ import { unlock } from './auth/unlock.js'
 import { verifyEmail } from './auth/verifyEmail.js'
 import { buildFormState } from './buildFormState.js'
 import { endpointsAreDisabled } from './checkEndpoints.js'
+import { count } from './collections/count.js'
 import { create } from './collections/create.js'
 import { deleteDoc } from './collections/delete.js'
 import { deleteByID } from './collections/deleteByID.js'
@@ -55,6 +57,7 @@ const endpoints = {
       deleteByID,
     },
     GET: {
+      count,
       'doc-access-by-id': docAccess,
       'doc-versions-by-id': findVersionByID,
       find,
@@ -146,13 +149,48 @@ const handleCustomEndpoints = ({
   return null
 }
 
-const RouteNotFoundResponse = (slug: string[]) =>
+const RouteNotFoundResponse = ({ slug, req }: { req: PayloadRequest; slug: string[] }) =>
   Response.json(
     {
       message: `Route Not Found: "${slug.join('/')}"`,
     },
-    { status: httpStatus.NOT_FOUND },
+    {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
+      status: httpStatus.NOT_FOUND,
+    },
   )
+
+export const OPTIONS =
+  (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
+    let req: PayloadRequest
+
+    try {
+      req = await createPayloadRequest({
+        config,
+        request,
+      })
+
+      return Response.json(
+        {},
+        {
+          headers: headersWithCors({
+            headers: new Headers(),
+            req,
+          }),
+          status: 200,
+        },
+      )
+    } catch (error) {
+      return routeError({
+        config,
+        err: error,
+        req: req || request,
+      })
+    }
+  }
 
 export const GET =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
@@ -204,6 +242,7 @@ export const GET =
               // /:collection/init
               // /:collection/me
               // /:collection/versions
+              // /:collection/count
               res = await (endpoints.collection.GET[slug2] as CollectionRouteHandler)({
                 collection,
                 req,
@@ -299,12 +338,16 @@ export const GET =
       })
       if (customEndpointResponse) return customEndpointResponse
 
-      return RouteNotFoundResponse(slug)
+      return RouteNotFoundResponse({
+        slug,
+        req,
+      })
     } catch (error) {
       return routeError({
         collection,
+        config,
         err: error,
-        req,
+        req: req || request,
       })
     }
   }
@@ -441,12 +484,16 @@ export const POST =
       })
       if (customEndpointResponse) return customEndpointResponse
 
-      return RouteNotFoundResponse(slug)
+      return RouteNotFoundResponse({
+        slug,
+        req,
+      })
     } catch (error) {
       return routeError({
         collection,
+        config,
         err: error,
-        req,
+        req: req || request,
       })
     }
   }
@@ -510,12 +557,16 @@ export const DELETE =
       })
       if (customEndpointResponse) return customEndpointResponse
 
-      return RouteNotFoundResponse(slug)
+      return RouteNotFoundResponse({
+        slug,
+        req,
+      })
     } catch (error) {
       return routeError({
         collection,
+        config,
         err: error,
-        req,
+        req: req || request,
       })
     }
   }
@@ -579,12 +630,16 @@ export const PATCH =
       })
       if (customEndpointResponse) return customEndpointResponse
 
-      return RouteNotFoundResponse(slug)
+      return RouteNotFoundResponse({
+        slug,
+        req,
+      })
     } catch (error) {
       return routeError({
         collection,
+        config,
         err: error,
-        req,
+        req: req || request,
       })
     }
   }

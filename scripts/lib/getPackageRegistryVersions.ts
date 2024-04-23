@@ -15,6 +15,13 @@ const packages = [
 
   'create-payload-app',
 
+  'email-nodemailer',
+
+  'storage-s3',
+  'storage-azure',
+  'storage-gcs',
+  'storage-vercel-blob',
+
   // Plugins
   'plugin-cloud',
   'plugin-cloud-storage',
@@ -34,8 +41,8 @@ export const getPackageRegistryVersions = async (): Promise<void> => {
     packageDetails.map(async (pkg) => {
       // Get published version from npm
       const json = await fetch(`https://registry.npmjs.org/${pkg.name}`).then((res) => res.json())
-      const { latest, beta } = json['dist-tags']
-      const msg = `${chalk.bold(pkg.name.padEnd(32))} latest: ${latest?.padEnd(16)} beta: ${beta?.padEnd(16)}`
+      const { latest = 'N/A', beta = 'N/A', alpha = 'N/A' } = json['dist-tags'] ?? {}
+      const msg = `${chalk.bold(pkg.name.padEnd(32))} latest: ${latest?.padEnd(16)} beta: ${beta?.padEnd(16)} alpha: ${alpha}`
       console.log(msg)
     }),
   )

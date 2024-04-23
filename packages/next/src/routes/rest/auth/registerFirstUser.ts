@@ -1,11 +1,23 @@
 import httpStatus from 'http-status'
 import { generatePayloadCookie } from 'payload/auth'
+import { ValidationError } from 'payload/errors'
 import { registerFirstUserOperation } from 'payload/operations'
 
 import type { CollectionRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const registerFirstUser: CollectionRouteHandler = async ({ collection, req }) => {
-  const data = req.data
+  const { data, t } = req
+
+  if (data?.password !== data['confirm-password']) {
+    throw new ValidationError([
+      {
+        field: 'confirm-password',
+        message: req.t('Password and confirm password fields do not match.'),
+      },
+    ])
+  }
 
   const result = await registerFirstUserOperation({
     collection,
@@ -26,14 +38,16 @@ export const registerFirstUser: CollectionRouteHandler = async ({ collection, re
   return Response.json(
     {
       exp: result.exp,
-      // TODO(translate)
-      message: 'Successfully registered first user.',
+      message: t('authentication:successfullyRegisteredFirstUser'),
       token: result.token,
       user: result.user,
     },
     {
-      headers: new Headers({
-        'Set-Cookie': cookie,
+      headers: headersWithCors({
+        headers: new Headers({
+          'Set-Cookie': cookie,
+        }),
+        req,
       }),
       status: httpStatus.OK,
     },

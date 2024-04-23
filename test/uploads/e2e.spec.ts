@@ -241,6 +241,18 @@ describe('uploads', () => {
     )
   })
 
+  test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
+    await expect(page.locator('.file-field__filename')).toHaveValue('2mb.jpg')
+
+    await page.click('#action-save', { delay: 100 })
+    await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
+      'File size limit has been reached',
+    )
+    await wait(500) // TODO: Fix this
+  })
+
   test('Should render adminThumbnail when using a function', async () => {
     await page.goto(adminThumbnailFunctionURL.list)
     await page.waitForURL(adminThumbnailFunctionURL.list)

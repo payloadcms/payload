@@ -41,12 +41,12 @@ export function getValidTemplates(): ProjectTemplate[] {
     //   description: 'E-commerce Template',
     //   url: 'https://github.com/payloadcms/payload/templates/ecommerce',
     // },
-    // {
-    //   name: 'plugin',
-    //   type: 'plugin',
-    //   description: 'Template for creating a Payload plugin',
-    //   url: 'https://github.com/payloadcms/payload-plugin-template',
-    // },
+    {
+      name: 'plugin',
+      type: 'plugin',
+      description: 'Template for creating a Payload plugin',
+      url: 'https://github.com/payloadcms/payload-plugin-template#beta',
+    },
     // {
     //   name: 'payload-demo',
     //   type: 'starter',

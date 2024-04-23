@@ -1,3 +1,5 @@
 export { traverseFields } from '../utilities/buildFieldSchemaMap/traverseFields.js'
+export { createPayloadRequest } from '../utilities/createPayloadRequest.js'
 export { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
-export { getPayloadHMR } from '../utilities/getPayloadHMR.js'
+export { getPayloadHMR, reload } from '../utilities/getPayloadHMR.js'
+export { headersWithCors } from '../utilities/headersWithCors.js'

@@ -1,7 +1,10 @@
-import type { Collection, PayloadRequest } from 'payload/types'
+import type { Collection, PayloadRequest, SanitizedConfig } from 'payload/types'
 
 import httpStatus from 'http-status'
 import { APIError } from 'payload/errors'
+
+import { getPayloadHMR } from '../../utilities/getPayloadHMR.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 
 export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
 
@@ -66,26 +69,39 @@ const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorRes
   }
 }
 
-export const routeError = ({
+export const routeError = async ({
   collection,
+  config: configArg,
   err,
   req,
 }: {
   collection?: Collection
+  config: Promise<SanitizedConfig> | SanitizedConfig
   err: APIError
-  req: PayloadRequest
+  req: Partial<PayloadRequest>
 }) => {
-  if (!req?.payload) {
-    return Response.json(
-      {
-        message: err.message,
-        stack: err.stack,
-      },
-      { status: httpStatus.INTERNAL_SERVER_ERROR },
-    )
+  let payload = req?.payload
+
+  if (!payload) {
+    try {
+      payload = await getPayloadHMR({ config: configArg })
+    } catch (e) {
+      return Response.json(
+        {
+          message: 'There was an error initializing Payload',
+        },
+        { status: httpStatus.INTERNAL_SERVER_ERROR },
+      )
+    }
   }
 
-  const { config, logger } = req.payload
+  req.payload = payload
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
+  })
+
+  const { config, logger } = payload
 
   let response = formatErrors(err)
 
@@ -107,7 +123,7 @@ export const routeError = ({
     ;({ response, status } = collection.config.hooks.afterError(
       err,
       response,
-      req.context,
+      req?.context,
       collection.config,
     ) || { response, status })
   }
@@ -116,7 +132,7 @@ export const routeError = ({
     ;({ response, status } = config.hooks.afterError(
       err,
       response,
-      req.context,
+      req?.context,
       collection?.config,
     ) || {
       response,
@@ -124,5 +140,5 @@ export const routeError = ({
     })
   }
 
-  return Response.json(response, { status })
+  return Response.json(response, { headers, status })
 }

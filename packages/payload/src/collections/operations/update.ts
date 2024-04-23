@@ -129,6 +129,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
       const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
         collection: collectionConfig.slug,
         locale,
+        pagination: false,
         req,
         where: versionsWhere,
       })
@@ -266,7 +267,8 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
           global: null,
           operation: 'update',
           req,
-          skipValidation: shouldSaveDraft || data._status === 'draft',
+          skipValidation:
+            Boolean(collectionConfig.versions?.drafts) && data._status !== 'published',
         })
 
         // /////////////////////////////////////
@@ -295,7 +297,6 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
               ...result,
               createdAt: doc.createdAt,
             },
-            draft: shouldSaveDraft,
             payload,
             req,
           })

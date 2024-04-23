@@ -17,6 +17,7 @@ export type FormFieldBase = {
   CustomError?: React.ReactNode
   CustomLabel?: React.ReactNode
   className?: string
+  custom?: Record<string, any>
   descriptionProps?: FieldDescriptionProps
   disabled?: boolean
   docPreferences?: DocumentPreferences

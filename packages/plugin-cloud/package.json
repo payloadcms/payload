@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/plugin-cloud",
   "description": "The official Payload Cloud plugin",
-  "version": "3.0.0-beta.10",
+  "version": "3.0.0-beta.13",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "license": "MIT",
@@ -28,6 +28,7 @@
     "@aws-sdk/client-s3": "^3.525.0",
     "@aws-sdk/credential-providers": "^3.525.0",
     "@aws-sdk/lib-storage": "^3.525.0",
+    "@payloadcms/email-nodemailer": "workspace:^",
     "amazon-cognito-identity-js": "^6.1.2",
     "nodemailer": "6.9.10",
     "resend": "^0.17.2"

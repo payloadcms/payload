@@ -1,0 +1,61 @@
+{
+  "name": "@payloadcms/storage-azure",
+  "version": "3.0.0-beta.13",
+  "description": "Payload storage adapter for Azure Blob Storage",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/storage-azure"
+  },
+  "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "author": "Payload CMS, Inc.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    }
+  },
+  "dependencies": {
+    "@azure/abort-controller": "^1.1.0",
+    "@azure/storage-blob": "^12.11.0",
+    "@payloadcms/plugin-cloud-storage": "workspace:*",
+    "range-parser": "^1.2.1"
+  },
+  "devDependencies": {
+    "@types/range-parser": "^1.2.7",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
+  },
+  "engines": {
+    "node": ">=18.20.2"
+  },
+  "files": [
+    "dist"
+  ]
+}

@@ -14,16 +14,16 @@ import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
 import { useFormQueryParams } from '@payloadcms/ui/providers/FormQueryParams'
 import { OperationProvider } from '@payloadcms/ui/providers/Operation'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import { useRouter } from 'next/navigation.js'
 import { useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback } from 'react'
 
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving/index.js'
-// import { getTranslation } from '@payloadcms/translations'
 import { Auth } from './Auth/index.js'
+import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import { SetStepNav } from './SetStepNav/index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'
@@ -63,6 +63,8 @@ export const DefaultEditView: React.FC = () => {
   const params = useSearchParams()
   const depth = useEditDepth()
   const { reportUpdate } = useDocumentEvents()
+
+  const { i18n } = useTranslation()
 
   const {
     admin: { user: userSlug },
@@ -196,13 +198,13 @@ export const DefaultEditView: React.FC = () => {
             name={`collection-edit--${
               typeof collectionConfig?.labels?.singular === 'string'
                 ? collectionConfig.labels.singular
-                : 'document'
+                : i18n.t('general:document')
             }`}
             type="withoutNav"
           />
           {BeforeDocument}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <SetStepNav
+          <SetDocumentStepNav
             collectionSlug={collectionConfig?.slug}
             globalSlug={globalConfig?.slug}
             id={id}
