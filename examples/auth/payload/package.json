@@ -16,13 +16,13 @@
     "seed": "npm run payload migrate:fresh"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "3.0.0-beta.9",
-    "@payloadcms/next": "3.0.0-beta.9",
-    "@payloadcms/richtext-slate": "3.0.0-beta.9",
-    "@payloadcms/ui": "3.0.0-beta.9",
+    "@payloadcms/db-mongodb": "3.0.0-beta.12",
+    "@payloadcms/next": "3.0.0-beta.12",
+    "@payloadcms/richtext-slate": "3.0.0-beta.12",
+    "@payloadcms/ui": "3.0.0-beta.12",
     "cross-env": "^7.0.3",
-    "next": "14.2.0-canary.33",
-    "payload": "3.0.0-beta.9",
+    "next": "14.3.0-canary.7",
+    "payload": "3.0.0-beta.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.3"
