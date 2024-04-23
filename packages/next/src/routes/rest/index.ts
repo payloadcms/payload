@@ -11,6 +11,8 @@ import type {
   GlobalRouteHandlerWithID,
 } from './types.js'
 
+import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
+import { addLocalesToRequest } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { access } from './auth/access.js'
@@ -232,6 +234,9 @@ export const GET =
         })
         if (customEndpointResponse) return customEndpointResponse
 
+        await addDataAndFileToRequest({ collection, config: req.payload.config, request: req })
+        addLocalesToRequest({ config: req.payload.config, request: req })
+
         switch (slug.length) {
           case 1:
             // /:collection
@@ -290,6 +295,9 @@ export const GET =
 
         if (customEndpointResponse) return customEndpointResponse
 
+        await addDataAndFileToRequest({ collection, config: await config, request: req })
+        addLocalesToRequest({ config: req.payload.config, request: req })
+
         switch (slug.length) {
           case 2:
             // /globals/:slug
@@ -326,6 +334,8 @@ export const GET =
             break
         }
       } else if (slug.length === 1 && slug1 in endpoints.root.GET) {
+        await addDataAndFileToRequest({ collection, config: await config, request: req })
+        addLocalesToRequest({ config: req.payload.config, request: req })
         res = await endpoints.root.GET[slug1]({ req })
       }
 
@@ -391,6 +401,9 @@ export const POST =
 
         if (customEndpointResponse) return customEndpointResponse
 
+        await addDataAndFileToRequest({ collection, config: await config, request: req })
+        addLocalesToRequest({ config: req.payload.config, request: req })
+
         switch (slug.length) {
           case 1:
             // /:collection
@@ -442,6 +455,9 @@ export const POST =
         })
         if (customEndpointResponse) return customEndpointResponse
 
+        await addDataAndFileToRequest({ collection, config: await config, request: req })
+        addLocalesToRequest({ config: req.payload.config, request: req })
+
         switch (slug.length) {
           case 2:
             // /globals/:slug
@@ -472,6 +488,8 @@ export const POST =
             res = new Response('Route Not Found', { status: 404 })
         }
       } else if (slug.length === 1 && slug1 in endpoints.root.POST) {
+        await addDataAndFileToRequest({ collection, config: await config, request: req })
+        addLocalesToRequest({ config: req.payload.config, request: req })
         res = await endpoints.root.POST[slug1]({ req })
       }
 
@@ -535,6 +553,9 @@ export const DELETE =
           payloadRequest: req,
         })
         if (customEndpointResponse) return customEndpointResponse
+
+        await addDataAndFileToRequest({ collection, config: await config, request: req })
+        addLocalesToRequest({ config: req.payload.config, request: req })
 
         switch (slug.length) {
           case 1:
@@ -608,6 +629,9 @@ export const PATCH =
           payloadRequest: req,
         })
         if (customEndpointResponse) return customEndpointResponse
+
+        await addDataAndFileToRequest({ collection, config: await config, request: req })
+        addLocalesToRequest({ config: req.payload.config, request: req })
 
         switch (slug.length) {
           case 1:
