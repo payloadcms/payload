@@ -69,7 +69,8 @@
     "uuid": "^9.0.1"
   },
   "peerDependencies": {
-    "@swc/core": "^1.4.13"
+    "@swc/core": "^1.4.13",
+    "graphql": "^16.8.1"
   },
   "peerDependenciesMeta": {
     "@swc/core": {
@@ -109,7 +110,6 @@
     "file-loader": "6.2.0",
     "form-data": "3.0.1",
     "get-port": "5.1.1",
-    "graphql": "16.8.1",
     "graphql-http": "^1.22.0",
     "mini-css-extract-plugin": "1.6.2",
     "nodemon": "3.0.3",

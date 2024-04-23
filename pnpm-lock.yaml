@@ -548,21 +548,9 @@ importers:
       graphql:
         specifier: ^16.8.1
         version: 16.8.1
-      graphql-http:
-        specifier: ^1.22.0
-        version: 1.22.0(graphql@16.8.1)
-      graphql-playground-html:
-        specifier: 1.6.30
-        version: 1.6.30
-      graphql-query-complexity:
-        specifier: 0.12.0
-        version: 0.12.0(graphql@16.8.1)
       graphql-scalars:
         specifier: 1.22.2
         version: 1.22.2(graphql@16.8.1)
-      graphql-type-json:
-        specifier: 0.3.2
-        version: 0.3.2(graphql@16.8.1)
       pluralize:
         specifier: 8.0.0
         version: 8.0.0
@@ -573,6 +561,9 @@ importers:
       '@types/pluralize':
         specifier: ^0.0.33
         version: 0.0.33
+      graphql-http:
+        specifier: ^1.22.0
+        version: 1.22.0(graphql@16.8.1)
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -650,9 +641,6 @@ importers:
       graphql:
         specifier: ^16.8.1
         version: 16.8.1
-      graphql-http:
-        specifier: ^1.22.0
-        version: 1.22.0(graphql@16.8.1)
       graphql-playground-html:
         specifier: 1.6.30
         version: 1.6.30
@@ -705,6 +693,9 @@ importers:
       file-type:
         specifier: 16.5.4
         version: 16.5.4
+      graphql-http:
+        specifier: ^1.22.0
+        version: 1.22.0(graphql@16.8.1)
       mini-css-extract-plugin:
         specifier: 1.6.2
         version: 1.6.2(webpack@5.91.0)
@@ -783,6 +774,9 @@ importers:
       get-tsconfig:
         specifier: ^4.7.2
         version: 4.7.3
+      graphql:
+        specifier: ^16.8.1
+        version: 16.8.1
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -925,9 +919,6 @@ importers:
       get-port:
         specifier: 5.1.1
         version: 5.1.1
-      graphql:
-        specifier: ^16.8.1
-        version: 16.8.1
       graphql-http:
         specifier: ^1.22.0
         version: 1.22.0(graphql@16.8.1)
@@ -10322,20 +10313,12 @@ packages:
       graphql: ^16.8.1
     dependencies:
       graphql: 16.8.1
+    dev: true
 
   /graphql-playground-html@1.6.30:
     resolution: {integrity: sha512-tpCujhsJMva4aqE8ULnF7/l3xw4sNRZcSHu+R00VV+W0mfp+Q20Plvcrp+5UXD+2yS6oyCXncA+zoQJQqhGCEw==}
     dependencies:
       xss: 1.0.15
-    dev: false
-
-  /graphql-query-complexity@0.12.0(graphql@16.8.1):
-    resolution: {integrity: sha512-fWEyuSL6g/+nSiIRgIipfI6UXTI7bAxrpPlCY1c0+V3pAEUo1ybaKmSBgNr1ed2r+agm1plJww8Loig9y6s2dw==}
-    peerDependencies:
-      graphql: ^16.8.1
-    dependencies:
-      graphql: 16.8.1
-      lodash.get: 4.4.2
     dev: false
 
   /graphql-scalars@1.22.2(graphql@16.8.1):
@@ -10346,14 +10329,6 @@ packages:
     dependencies:
       graphql: 16.8.1
       tslib: 2.6.2
-    dev: false
-
-  /graphql-type-json@0.3.2(graphql@16.8.1):
-    resolution: {integrity: sha512-J+vjof74oMlCWXSvt0DOf2APEdZOCdubEvGDUAlqH//VBYcOYsGgRW7Xzorr44LvkjiuvecWc8fChxuZZbChtg==}
-    peerDependencies:
-      graphql: ^16.8.1
-    dependencies:
-      graphql: 16.8.1
     dev: false
 
   /graphql@16.8.1:

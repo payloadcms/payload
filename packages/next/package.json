@@ -46,6 +46,8 @@
     "@types/ws": "^8.5.10",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
+    "file-type": "16.5.4",
+    "graphql-http": "^1.22.0",
     "mini-css-extract-plugin": "1.6.2",
     "payload": "workspace:*",
     "postcss-loader": "^8.1.1",
@@ -55,8 +57,7 @@
     "swc-plugin-transform-remove-imports": "^1.12.1",
     "terser-webpack-plugin": "^5.3.10",
     "webpack": "^5.78.0",
-    "webpack-cli": "^5.1.4",
-    "file-type": "16.5.4"
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "@dnd-kit/core": "6.0.8",
@@ -66,8 +67,6 @@
     "@types/busboy": "^1.5.3",
     "busboy": "^1.6.0",
     "deep-equal": "2.2.2",
-    "graphql": "16.8.1",
-    "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
     "path-to-regexp": "^6.2.1",
     "qs": "6.11.2",
@@ -77,10 +76,11 @@
     "ws": "^8.16.0"
   },
   "peerDependencies": {
+    "file-type": "16.5.4",
     "http-status": "1.6.2",
     "next": "^14.3.0-canary.7",
     "payload": "workspace:*",
-    "file-type": "16.5.4"
+    "graphql": "^16.8.1"
   },
   "publishConfig": {
     "main": "./dist/index.js",
