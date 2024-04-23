@@ -4,6 +4,7 @@ import type { PayloadRequest } from 'payload/types'
 import { addDataAndFileToRequest, addLocalesToRequest } from '@payloadcms/next/utilities'
 import httpStatus from 'http-status'
 
+import { path } from './reInitializeDB.js'
 import { seedDB } from './seed.js'
 
 const handler = async (req: PayloadRequest) => {
@@ -37,31 +38,8 @@ const handler = async (req: PayloadRequest) => {
   }
 }
 
-const path = '/re-initialize'
-
 export const reInitEndpoint: Endpoint = {
   path,
   method: 'post',
   handler,
-}
-
-export const reInitializeDB = async ({
-  serverURL,
-  snapshotKey,
-  uploadsDir,
-}: {
-  serverURL: string
-  snapshotKey: string
-  uploadsDir?: string
-}) => {
-  await fetch(`${serverURL}/api${path}`, {
-    method: 'post',
-    body: JSON.stringify({
-      snapshotKey,
-      uploadsDir,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
 }

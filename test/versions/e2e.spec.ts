@@ -43,7 +43,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInit.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { titleToDelete } from './shared.js'
 import {
