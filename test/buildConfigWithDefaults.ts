@@ -34,7 +34,7 @@ import sharp from 'sharp'
 
 import { reInitEndpoint } from './helpers/reInit.js'
 import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
-process.env.PAYLOAD_DATABASE = 'postgres'
+// process.env.PAYLOAD_DATABASE = 'postgres'
 
 export async function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
