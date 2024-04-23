@@ -61,7 +61,6 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     config,
     fieldSchema: fields,
     i18n,
-    parentPath: userSlug,
   }).map((field) => {
     // Transform field types for the password and confirm-password fields
     if (field.name === 'password') {
