@@ -5,7 +5,7 @@ import nodemailer from 'nodemailer'
 import { defaults } from 'payload/config'
 
 import { payloadCloud } from './plugin.js'
-import { NodemailerAdapter, nodemailerAdapter } from '@payloadcms/email-nodemailer'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 const mockedPayload: Payload = jest.fn() as unknown as Payload
 
