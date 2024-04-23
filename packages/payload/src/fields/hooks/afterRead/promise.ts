@@ -159,19 +159,6 @@ export const promise = async ({
           siblingDoc,
         })
       }
-      /*
-      // This is only run here, independent of depth
-      if (editor?.afterReadPromise) {
-        const afterReadPromise = editor?.afterReadPromise({
-          field,
-          incomingEditorState: siblingDoc[field.name] as object,
-          siblingDoc,
-        })
-
-        if (afterReadPromise) {
-          populationPromises.push(afterReadPromise)
-        }
-      }*/ //TODO: HOOKS!
 
       break
     }
@@ -236,6 +223,7 @@ export const promise = async ({
             global,
             operation: 'read',
             originalDoc: doc,
+            overrideAccess,
             req,
             siblingData: siblingDoc,
             value: siblingDoc[field.name],
