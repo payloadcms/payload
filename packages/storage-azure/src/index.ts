@@ -66,9 +66,27 @@ export const azureStorage: AzureStoragePlugin =
       {} as Record<string, CollectionOptions>,
     )
 
+    // Set disableLocalStorage: true for collections specified in the plugin options
+    const config = {
+      ...incomingConfig,
+      collections: (incomingConfig.collections || []).map((collection) => {
+        if (!collectionsWithAdapter[collection.slug]) {
+          return collection
+        }
+
+        return {
+          ...collection,
+          upload: {
+            ...(typeof collection.upload === 'object' ? collection.upload : {}),
+            disableLocalStorage: true,
+          },
+        }
+      }),
+    }
+
     return cloudStorage({
       collections: collectionsWithAdapter,
-    })(incomingConfig)
+    })(config)
   }
 
 function azureStorageInternal({
