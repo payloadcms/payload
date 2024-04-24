@@ -45,7 +45,7 @@ export { sql } from 'drizzle-orm'
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
-  const payloadIDType = postgresIDType ? 'number' : 'text'
+  const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
