@@ -109,6 +109,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, maxRows, minRows, required })
       }
+      return true
     },
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
