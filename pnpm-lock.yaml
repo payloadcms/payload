@@ -1588,10 +1588,6 @@ importers:
         version: 5.1.4(webpack@5.91.0)
 
   test:
-    dependencies:
-      graphql:
-        specifier: ^16.8.1
-        version: 16.8.1
     devDependencies:
       '@payloadcms/db-mongodb':
         specifier: workspace:*
