@@ -602,6 +602,10 @@ export type ArrayField = FieldBase & {
     components?: {
       RowLabel?: RowLabel
     } & Admin['components']
+    /**
+     * Disable drag and drop sorting
+     */
+    disableSortable?: boolean
     initCollapsed?: boolean
   }
   /**
@@ -673,6 +677,10 @@ export type Block = {
 
 export type BlockField = FieldBase & {
   admin?: Admin & {
+    /**
+     * Disable drag and drop sorting
+     */
+    disableSortable?: boolean
     initCollapsed?: boolean
   }
   blocks: Block[]
