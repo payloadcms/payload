@@ -250,10 +250,10 @@ describe('uploads', () => {
     await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
       'File size limit has been reached',
     )
-    await wait(500) // TODO: Fix this
   })
 
   test('Should render adminThumbnail when using a function', async () => {
+    await page.reload() // Flakey test, it likely has to do with the test that comes before it. Trace viewer is not helpful when it fails.
     await page.goto(adminThumbnailFunctionURL.list)
     await page.waitForURL(adminThumbnailFunctionURL.list)
 
