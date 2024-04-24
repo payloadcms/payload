@@ -7,14 +7,22 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { type BlockFields } from '../nodes/BlocksNode.js'
 const baseClass = 'lexical-block'
-
 import type { ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { FormState } from 'payload/types'
 
+import { getTranslation } from '@payloadcms/translations'
+import { Button } from '@payloadcms/ui/elements/Button'
+import { Collapsible } from '@payloadcms/ui/elements/Collapsible'
+import { ErrorPill } from '@payloadcms/ui/elements/ErrorPill'
+import { Pill } from '@payloadcms/ui/elements/Pill'
+import { ShimmerEffect } from '@payloadcms/ui/elements/ShimmerEffect'
+import { SectionTitle } from '@payloadcms/ui/fields/Blocks/SectionTitle'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useFormSubmitted } from '@payloadcms/ui/forms/Form'
+import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { getFormState } from '@payloadcms/ui/utilities/getFormState'
 import { v4 as uuid } from 'uuid'
 
@@ -118,38 +126,62 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
     [config.routes.api, config.serverURL, schemaFieldsPath, id, formData.blockName],
   )
+  const { i18n } = useTranslation()
+
+  const classNames = [`${baseClass}__row`, `${baseClass}__row--no-errors`].filter(Boolean).join(' ')
 
   // Memoized Form JSX
   const formContent = useMemo(() => {
-    return (
-      reducedBlock &&
-      initialState !== false && (
-        <Form
-          beforeSubmit={[onChange]}
-          // @ts-expect-error TODO: Fix this
-          fields={fieldMap}
-          initialState={initialState}
-          onChange={[onChange]}
-          submitted={submitted}
-          uuid={uuid()}
-        >
-          <BlockContent
-            baseClass={baseClass}
-            field={parentLexicalRichTextField}
-            formData={formData}
-            formSchema={Array.isArray(fieldMap) ? fieldMap : []}
-            nodeKey={nodeKey}
-            path={`${path}.feature.blocks.${formData.blockType}`}
-            reducedBlock={reducedBlock}
-            schemaPath={schemaFieldsPath}
-          />
-        </Form>
-      )
+    return reducedBlock && initialState !== false ? (
+      <Form
+        beforeSubmit={[onChange]}
+        // @ts-expect-error TODO: Fix this
+        fields={fieldMap}
+        initialState={initialState}
+        onChange={[onChange]}
+        submitted={submitted}
+        uuid={uuid()}
+      >
+        <BlockContent
+          baseClass={baseClass}
+          field={parentLexicalRichTextField}
+          formData={formData}
+          formSchema={Array.isArray(fieldMap) ? fieldMap : []}
+          nodeKey={nodeKey}
+          path={`${path}.feature.blocks.${formData.blockType}`}
+          reducedBlock={reducedBlock}
+          schemaPath={schemaFieldsPath}
+        />
+      </Form>
+    ) : (
+      <Collapsible
+        className={classNames}
+        collapsibleStyle="default"
+        header={
+          <div className={`${baseClass}__block-header`}>
+            <div>
+              <Pill
+                className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
+                pillStyle="white"
+              >
+                {typeof reducedBlock.labels.singular === 'string'
+                  ? getTranslation(reducedBlock.labels.singular, i18n)
+                  : '[Singular Label]'}
+              </Pill>
+              <SectionTitle path="blockName" readOnly={parentLexicalRichTextField?.readOnly} />
+            </div>
+          </div>
+        }
+        key={0}
+      >
+        <ShimmerEffect height="35vh" />
+      </Collapsible>
     )
   }, [
     fieldMap,
     parentLexicalRichTextField,
     nodeKey,
+    i18n,
     submitted,
     initialState,
     reducedBlock,
