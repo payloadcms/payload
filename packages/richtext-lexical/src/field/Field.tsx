@@ -52,6 +52,7 @@ const _RichText: React.FC<
       if (typeof validate === 'function') {
         return validate(value, { ...validationOptions, props, required })
       }
+      return true
     },
     // Important: do not add props to the dependencies array.
     // This would cause an infinite loop and endless re-rendering.
@@ -65,7 +66,7 @@ const _RichText: React.FC<
     validate: memoizedValidate,
   })
 
-  const { errorMessage, initialValue, path, schemaPath, setValue, showError, value } = fieldType
+  const { initialValue, path, setValue, showError, value } = fieldType
 
   const classes = [
     baseClass,

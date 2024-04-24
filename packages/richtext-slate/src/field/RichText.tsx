@@ -99,6 +99,7 @@ const RichTextField: React.FC<
           required,
         })
       }
+      return true
     },
     [validate, required, i18n],
   )

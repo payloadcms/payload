@@ -60,6 +60,7 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
       }
+      return true
     },
     [validate, required],
   )
