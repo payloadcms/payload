@@ -38,6 +38,7 @@ import type { FormFieldBase } from '../shared/index.js'
 
 export type BlocksFieldProps = FormFieldBase & {
   blocks?: ReducedBlock[]
+  disableSortable?: boolean
   forceRender?: boolean
   label?: FieldBase['label']
   labels?: BlockField['labels']
@@ -60,6 +61,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     blocks,
     className,
     descriptionProps,
+    disableSortable,
     errorProps,
     forceRender = false,
     label,
@@ -78,6 +80,8 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const readOnly = readOnlyFromProps || readOnlyFromContext
   const minRows = minRowsProp ?? required ? 1 : 0
 
+  // TODO: get property value (currently undefined)
+  console.log('disableSortable', disableSortable)
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
   const { code: locale } = useLocale()

@@ -35,6 +35,7 @@ const baseClass = 'array-field'
 
 export type ArrayFieldProps = FormFieldBase & {
   CustomRowLabel?: React.ReactNode
+  disableSortable?: boolean
   fieldMap: FieldMap
   forceRender?: boolean
   label?: FieldBase['label']
@@ -55,6 +56,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     CustomRowLabel,
     className,
     descriptionProps,
+    disableSortable,
     errorProps,
     fieldMap,
     forceRender = false,
@@ -74,6 +76,8 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const readOnly = readOnlyFromProps || readOnlyFromContext
   const minRows = minRowsProp ?? required ? 1 : 0
 
+  // TODO: get property value (currently undefined)
+  console.log('disableSortable', disableSortable)
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
   const submitted = useFormSubmitted()
