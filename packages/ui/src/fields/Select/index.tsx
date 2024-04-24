@@ -75,8 +75,10 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, validationOptions) => {
-      if (typeof validate === 'function')
+      if (typeof validate === 'function') {
         return validate(value, { ...validationOptions, hasMany, options, required })
+      }
+      return true
     },
     [validate, required, hasMany, options],
   )
