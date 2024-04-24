@@ -12,9 +12,6 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  admin: {
-    autoLogin: false,
-  },
   collections: [
     PostsCollection,
     // MediaCollection
