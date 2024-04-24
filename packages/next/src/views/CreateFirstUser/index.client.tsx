@@ -1,6 +1,5 @@
 'use client'
 import type { FormProps } from '@payloadcms/ui/forms/Form'
-import type { FieldMap } from '@payloadcms/ui/utilities/buildComponentMap'
 import type { FormState } from 'payload/types'
 
 import { ConfirmPassword } from '@payloadcms/ui/fields/ConfirmPassword'

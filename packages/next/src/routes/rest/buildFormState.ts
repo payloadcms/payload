@@ -216,6 +216,17 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       result.file = formState.file
     }
 
+    if (
+      collectionSlug &&
+      req.payload.collections[collectionSlug]?.config?.auth &&
+      !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy &&
+      formState
+    ) {
+      if (formState.password) result.password = formState.password
+      if (formState.email) result.email = formState.email
+      if (formState.password) result.password = formState.password
+    }
+
     return Response.json(result, {
       headers,
       status: httpStatus.OK,

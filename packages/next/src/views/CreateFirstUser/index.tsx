@@ -54,10 +54,10 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
   })
 
   return (
-    <React.Fragment>
+    <div className="create-first-user">
       <h1>{req.t('general:welcome')}</h1>
       <p>{req.t('authentication:beginCreateFirstUser')}</p>
       <CreateFirstUserClient initialState={formState} userSlug={userSlug} />
-    </React.Fragment>
+    </div>
   )
 }
