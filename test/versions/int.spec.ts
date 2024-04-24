@@ -440,6 +440,7 @@ describe('Versions', () => {
           collection,
           data: {
             title: patchedTitle,
+            _status: 'draft',
           },
           draft: true,
           locale: 'en',
@@ -453,6 +454,7 @@ describe('Versions', () => {
           collection,
           data: {
             title: spanishTitle,
+            _status: 'draft',
           },
           draft: true,
           locale: 'es',
@@ -532,9 +534,11 @@ describe('Versions', () => {
           },
         })
 
+        // bulk publish
         const updated = await payload.update({
           collection: draftCollectionSlug,
           data: {
+            _status: 'published',
             description: 'updated description',
           },
           draft: true,
@@ -547,8 +551,20 @@ describe('Versions', () => {
 
         const updatedDoc = updated.docs?.[0]
 
+        // get the published doc
+        const findResult = await payload.find({
+          collection: draftCollectionSlug,
+          where: {
+            id: { equals: doc.id },
+          },
+        })
+
+        const findDoc = findResult.docs?.[0]
+
         expect(updatedDoc.description).toStrictEqual('updated description')
-        expect(updatedDoc.title).toStrictEqual('updated title') // probably will fail
+        expect(updatedDoc.title).toStrictEqual('updated title')
+        expect(findDoc.title).toStrictEqual('updated title')
+        expect(findDoc.description).toStrictEqual('updated description')
       })
     })
 
@@ -1302,6 +1318,7 @@ describe('Versions', () => {
         await payload.updateGlobal({
           slug: globalSlug,
           data: {
+            _status: 'draft',
             title: updatedTitle2,
           },
           draft: true,
@@ -1311,6 +1328,7 @@ describe('Versions', () => {
         await payload.updateGlobal({
           slug: globalSlug,
           data: {
+            _status: 'draft',
             title: updatedTitle2,
           },
           draft: true,
