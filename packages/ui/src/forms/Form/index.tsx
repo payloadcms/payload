@@ -523,7 +523,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useThrottledEffect(
     () => {
-      refreshCookie()
+      // refreshCookie()
     },
     15000,
     [fields],

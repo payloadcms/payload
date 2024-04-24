@@ -5,6 +5,7 @@ import type { ClientConfig } from 'payload/types'
 import * as facelessUIImport from '@faceless-ui/modal'
 import * as facelessUIImport3 from '@faceless-ui/scroll-info'
 import * as facelessUIImport2 from '@faceless-ui/window-info'
+import { StayLoggedInModal } from '@payloadcms/ui/elements/StayLoggedIn'
 import React, { Fragment } from 'react'
 import { Slide, ToastContainer } from 'react-toastify'
 
@@ -104,6 +105,7 @@ export const RootProvider: React.FC<Props> = ({
                               </ThemeProvider>
                             </PreferencesProvider>
                             <ModalContainer />
+                            <StayLoggedInModal />
                           </AuthProvider>
                         </ModalProvider>
                       </SearchParamsProvider>

@@ -12,9 +12,25 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
+  admin: {
+    autoLogin: false,
+  },
   collections: [
     PostsCollection,
     // MediaCollection
+    {
+      slug: 'users',
+      auth: {
+        tokenExpiration: 60 * 5,
+      },
+      fields: [
+        {
+          type: 'checkbox',
+          name: 'roles',
+          label: 'Roles',
+        },
+      ],
+    },
   ],
   // globals: [
   //   MenuGlobal,

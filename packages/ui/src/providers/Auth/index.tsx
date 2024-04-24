@@ -262,7 +262,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // When location changes, refresh cookie
   useEffect(() => {
     if (id) {
-      refreshCookie()
+      // refreshCookie()
     }
   }, [debouncedLocationChange, refreshCookie, id])
 
