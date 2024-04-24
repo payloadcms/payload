@@ -155,6 +155,79 @@ export default buildConfigWithDefaults({
         // },
       ],
     },
+    {
+      slug: 'deep-nested',
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              name: 'group',
+              type: 'group',
+              fields: [
+                {
+                  type: 'array',
+                  name: 'array',
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                    },
+                  ],
+                },
+                {
+                  name: 'title',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'first',
+              fields: [
+                {
+                  name: 'array',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'group',
+                      type: 'group',
+                      fields: [
+                        {
+                          name: 'title',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              slug: 'second',
+              fields: [
+                {
+                  name: 'group',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     // await payload.create({

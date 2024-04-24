@@ -4,13 +4,16 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
+import { createDeepNested } from './deep-nested.js'
 import { createPost } from './post.js'
 
 let payload: Payload
 let restClient: NextRESTClient
 
-let id: number | string
-const collection = 'posts'
+let postId: number | string
+const postsSlug = 'posts'
+let deepNestedId: number | string
+const deepNestedSlug = 'deep-nested'
 
 const serializeObject = (obj: unknown) => JSON.parse(JSON.stringify(obj))
 
@@ -18,7 +21,9 @@ describe('Select Fields', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(configPromise))
     const post = await createPost(payload)
-    id = post.id
+    postId = post.id
+    const deepNested = await createDeepNested(payload)
+    deepNestedId = deepNested.id
   })
 
   afterAll(async () => {
@@ -27,13 +32,13 @@ describe('Select Fields', () => {
     }
   })
 
-  describe('local', () => {
+  describe('Local - Base fields', () => {
     // payload.find({})
 
     it('should select text only top level text field and ids', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           title: true,
         },
@@ -54,8 +59,8 @@ describe('Select Fields', () => {
 
     it('should select text and id inside of array', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           array: {
             title: true,
@@ -84,8 +89,8 @@ describe('Select Fields', () => {
 
     it('should all fields inside of array', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           arrayMultiple: true,
         },
@@ -113,8 +118,8 @@ describe('Select Fields', () => {
 
     it('should select text inside of group', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           group: {
             title: true,
@@ -140,8 +145,8 @@ describe('Select Fields', () => {
 
     it('should select all fields inside of group', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           groupMultiple: true,
         },
@@ -166,8 +171,8 @@ describe('Select Fields', () => {
 
     it('should select text inside of blocks that have slug section', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           blocks: {
             section: {
@@ -199,8 +204,8 @@ describe('Select Fields', () => {
 
     it('should select all fields inside of blocks 2 slugs', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           blocks: {
             cta: true,
@@ -239,8 +244,8 @@ describe('Select Fields', () => {
 
     it('should select all fields inside of blocks any slug', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           blocks: true,
         },
@@ -276,8 +281,8 @@ describe('Select Fields', () => {
 
     it('should select "select" field', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           select: true,
         },
@@ -298,8 +303,8 @@ describe('Select Fields', () => {
 
     it('should select title inside of tab field', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           tab: {
             title: true,
@@ -323,8 +328,8 @@ describe('Select Fields', () => {
 
     it('should select all fields inside of tab field', async () => {
       const post = await payload.findByID({
-        collection,
-        id,
+        collection: postsSlug,
+        id: postId,
         select: {
           tab: true,
         },
@@ -342,6 +347,120 @@ describe('Select Fields', () => {
         array: [],
         arrayMultiple: [],
         blocks: [],
+      })
+    })
+  })
+
+  describe('Local - deep nested fields', () => {
+    it('should select deep array-group nested text field', async () => {
+      const deepNested = await payload.findByID({
+        collection: deepNestedSlug,
+        id: deepNestedId,
+        select: {
+          array: {
+            group: {
+              array: {
+                title: true,
+              },
+            },
+          },
+        },
+      })
+
+      expect(serializeObject(deepNested)).toEqual({
+        id: expect.anything(),
+        blocks: [],
+        array: [
+          {
+            id: expect.any(String),
+            group: {
+              array: [
+                {
+                  id: expect.any(String),
+                  title: expect.any(String),
+                },
+              ],
+            },
+          },
+        ],
+      })
+    })
+
+    it('should select deep array-group nested from parent', async () => {
+      const deepNested = await payload.findByID({
+        collection: deepNestedSlug,
+        id: deepNestedId,
+        select: {
+          array: true,
+        },
+      })
+
+      expect(serializeObject(deepNested)).toEqual({
+        id: expect.anything(),
+        blocks: [],
+        array: [
+          {
+            id: expect.any(String),
+            group: {
+              title: expect.any(String),
+              array: [
+                {
+                  id: expect.any(String),
+                  title: expect.any(String),
+                },
+              ],
+            },
+          },
+        ],
+      })
+    })
+
+    it('should select nested from blocks', async () => {
+      const deepNested = await payload.findByID({
+        collection: deepNestedSlug,
+        id: deepNestedId,
+        select: {
+          blocks: {
+            first: {
+              array: {
+                group: {
+                  title: true,
+                },
+              },
+            },
+            second: {
+              group: {
+                title: true,
+              },
+            },
+          },
+        },
+      })
+
+      expect(serializeObject(deepNested)).toEqual({
+        id: expect.anything(),
+        array: [],
+        blocks: [
+          {
+            id: expect.any(String),
+            blockType: 'first',
+            array: [
+              {
+                id: expect.any(String),
+                group: {
+                  title: expect.any(String),
+                },
+              },
+            ],
+          },
+          {
+            id: expect.any(String),
+            blockType: 'second',
+            group: {
+              title: expect.any(String),
+            },
+          },
+        ],
       })
     })
   })
