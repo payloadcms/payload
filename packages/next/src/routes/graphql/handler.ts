@@ -5,7 +5,6 @@ import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
 import httpStatus from 'http-status'
 
-import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
 import { addLocalesToRequest } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'

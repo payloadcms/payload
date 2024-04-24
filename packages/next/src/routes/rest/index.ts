@@ -232,10 +232,12 @@ export const GET =
           entitySlug: slug1,
           payloadRequest: req,
         })
-        if (customEndpointResponse) return customEndpointResponse
-
-        await addDataAndFileToRequest({ request: req })
-        addLocalesToRequest({ request: req })
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 1:
@@ -293,10 +295,12 @@ export const GET =
           payloadRequest: req,
         })
 
-        if (customEndpointResponse) return customEndpointResponse
-
-        await addDataAndFileToRequest({ request: req })
-        addLocalesToRequest({ request: req })
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 2:
@@ -399,10 +403,12 @@ export const POST =
           payloadRequest: req,
         })
 
-        if (customEndpointResponse) return customEndpointResponse
-
-        await addDataAndFileToRequest({ request: req })
-        addLocalesToRequest({ request: req })
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 1:
@@ -453,10 +459,13 @@ export const POST =
           entitySlug: `${slug1}/${slug2}`,
           payloadRequest: req,
         })
-        if (customEndpointResponse) return customEndpointResponse
 
-        await addDataAndFileToRequest({ request: req })
-        addLocalesToRequest({ request: req })
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 2:
@@ -552,10 +561,12 @@ export const DELETE =
           entitySlug: slug1,
           payloadRequest: req,
         })
-        if (customEndpointResponse) return customEndpointResponse
-
-        await addDataAndFileToRequest({ request: req })
-        addLocalesToRequest({ request: req })
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 1:
@@ -628,10 +639,13 @@ export const PATCH =
           entitySlug: slug1,
           payloadRequest: req,
         })
-        if (customEndpointResponse) return customEndpointResponse
 
-        await addDataAndFileToRequest({ request: req })
-        addLocalesToRequest({ request: req })
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 1:
