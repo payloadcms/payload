@@ -440,6 +440,7 @@ describe('Versions', () => {
           collection,
           data: {
             title: patchedTitle,
+            _status: 'draft',
           },
           draft: true,
           locale: 'en',
@@ -453,6 +454,7 @@ describe('Versions', () => {
           collection,
           data: {
             title: spanishTitle,
+            _status: 'draft',
           },
           draft: true,
           locale: 'es',
@@ -1316,6 +1318,7 @@ describe('Versions', () => {
         await payload.updateGlobal({
           slug: globalSlug,
           data: {
+            _status: 'draft',
             title: updatedTitle2,
           },
           draft: true,
@@ -1325,6 +1328,7 @@ describe('Versions', () => {
         await payload.updateGlobal({
           slug: globalSlug,
           data: {
+            _status: 'draft',
             title: updatedTitle2,
           },
           draft: true,
