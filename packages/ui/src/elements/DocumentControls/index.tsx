@@ -3,6 +3,7 @@ import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
+import { getTranslation } from 'packages/translations/src/utilities/getTranslation.js'
 import React, { Fragment } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -72,6 +73,12 @@ export const DocumentControls: React.FC<{
     collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
   )
 
+  const collectionLabel = () => {
+    const label = collectionConfig?.labels?.singular
+    if (!label) return i18n.t('general:document')
+    return typeof label === 'string' ? label : getTranslation(label, i18n)
+  }
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
@@ -81,10 +88,7 @@ export const DocumentControls: React.FC<{
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
                   {i18n.t('general:creatingNewLabel', {
-                    label:
-                      typeof collectionConfig?.labels?.singular === 'string'
-                        ? collectionConfig.labels.singular
-                        : i18n.t('general:document'),
+                    label: collectionLabel(),
                   })}
                 </p>
               </li>
