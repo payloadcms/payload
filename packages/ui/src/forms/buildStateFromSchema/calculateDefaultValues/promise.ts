@@ -19,6 +19,7 @@ type Args<T> = {
   siblingData: Data
 }
 
+// TODO: Make this works for rich text subfields
 export const defaultValuePromise = async <T>({
   id,
   data,

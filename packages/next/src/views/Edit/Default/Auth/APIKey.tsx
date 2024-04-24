@@ -31,6 +31,7 @@ export const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
       data: {},
       maxLength: 48,
       minLength: 24,
+      preferences: { fields: {} },
       req: {
         payload: {
           config,

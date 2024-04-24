@@ -12,6 +12,9 @@ type Args = {
   depth: number
   doc: Record<string, unknown>
   fallbackLocale: null | string
+  /**
+   * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
+   */
   fieldPromises: Promise<void>[]
   fields: (Field | TabAsField)[]
   findMany: boolean

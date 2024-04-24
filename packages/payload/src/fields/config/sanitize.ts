@@ -51,15 +51,6 @@ export const sanitizeFields = ({
       throw new InvalidFieldName(field, field.name)
     }
 
-    // Make sure that the richText field has an editor
-    if (field.type === 'richText' && !field.editor) {
-      if (config.editor && !requireFieldLevelRichTextEditor) {
-        field.editor = config.editor
-      } else {
-        throw new MissingEditorProp(field)
-      }
-    }
-
     // Auto-label
     if (
       'name' in field &&
@@ -150,6 +141,42 @@ export const sanitizeFields = ({
       field.admin = {}
     }
 
+    // Make sure that the richText field has an editor
+    if (field.type === 'richText') {
+      if (!field.editor) {
+        if (config.editor && !requireFieldLevelRichTextEditor) {
+          field.editor = config.editor
+        } else {
+          throw new MissingEditorProp(field)
+        }
+      }
+
+      // Add editor adapter hooks to field hooks
+      if (!field.hooks) field.hooks = {}
+
+      if (field?.editor?.hooks?.afterRead?.length) {
+        field.hooks.afterRead = field.hooks.afterRead
+          ? field.hooks.afterRead.concat(field.editor.hooks.afterRead)
+          : field.editor.hooks.afterRead
+      }
+      if (field?.editor?.hooks?.beforeChange?.length) {
+        field.hooks.beforeChange = field.hooks.beforeChange
+          ? field.hooks.beforeChange.concat(field.editor.hooks.beforeChange)
+          : field.editor.hooks.beforeChange
+      }
+      if (field?.editor?.hooks?.beforeValidate?.length) {
+        field.hooks.beforeValidate = field.hooks.beforeValidate
+          ? field.hooks.beforeValidate.concat(field.editor.hooks.beforeValidate)
+          : field.editor.hooks.beforeValidate
+      }
+      if (field?.editor?.hooks?.beforeChange?.length) {
+        field.hooks.beforeChange = field.hooks.beforeChange
+          ? field.hooks.beforeChange.concat(field.editor.hooks.beforeChange)
+          : field.editor.hooks.beforeChange
+      }
+    }
+
+    // TODO: Handle sanitization for any lexical sub-fields here as well
     if ('fields' in field && field.fields) {
       field.fields = sanitizeFields({
         config,

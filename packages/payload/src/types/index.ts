@@ -109,3 +109,7 @@ export type AllOperations = AuthOperations | Operation | VersionOperations
 export function docHasTimestamps(doc: any): doc is TypeWithTimestamps {
   return doc?.createdAt && doc?.updatedAt
 }
+
+export type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N // This is a commonly used trick to detect 'any'
+export type IsAny<T> = IfAny<T, true, false>
+export type ReplaceAny<T, DefaultType> = IsAny<T> extends true ? DefaultType : T

@@ -14,6 +14,9 @@ type Args<T> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: T
+  /**
+   * The original data (not modified by any hooks)
+   */
   doc: T
   field: Field | TabAsField
   global: SanitizedGlobalConfig | null
@@ -22,6 +25,9 @@ type Args<T> = {
   overrideAccess: boolean
   req: PayloadRequest
   siblingData: Record<string, unknown>
+  /**
+   * The original siblingData (not modified by any hooks)
+   */
   siblingDoc: Record<string, unknown>
 }
 
@@ -222,6 +228,8 @@ export const promise = async <T>({
           global,
           operation,
           originalDoc: doc,
+          overrideAccess,
+          previousSiblingDoc: siblingDoc,
           req,
           siblingData,
           value: siblingData[field.name],

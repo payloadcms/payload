@@ -14,9 +14,7 @@ type Args = {
   fieldSchema: FieldSchema[] | undefined
   id?: number | string
   operation?: 'create' | 'update'
-  preferences: {
-    [key: string]: unknown
-  }
+  preferences: DocumentPreferences
   req: PayloadRequest
   siblingData?: Data
 }

@@ -33,9 +33,15 @@ let serverURL: string
 /**
  * Client-side navigation to the lexical editor from list view
  */
-async function navigateToLexicalFields(navigateToListView: boolean = true) {
+async function navigateToLexicalFields(
+  navigateToListView: boolean = true,
+  localized: boolean = false,
+) {
   if (navigateToListView) {
-    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
+    const url: AdminUrlUtil = new AdminUrlUtil(
+      serverURL,
+      localized ? 'lexical-localized-fields' : 'lexical-fields',
+    )
     await page.goto(url.list)
   }
 
@@ -1101,28 +1107,61 @@ describe('lexical', () => {
       )
     })
 
-    test.skip('should respect required error state in deeply nested text field', async () => {
+    test('should respect required error state in deeply nested text field', async () => {
       await navigateToLexicalFields()
+      await wait(300)
       const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await wait(300)
+
       await richTextField.scrollIntoViewIfNeeded()
+      await wait(300)
+
       await expect(richTextField).toBeVisible()
+      await wait(300)
 
       const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
+      await wait(300)
 
       await conditionalArrayBlock.scrollIntoViewIfNeeded()
-      await expect(conditionalArrayBlock).toBeVisible()
+      await wait(300)
 
-      await conditionalArrayBlock.locator('.btn__label:has-text("Add Sub Array")').first().click()
+      await expect(conditionalArrayBlock).toBeVisible()
+      await wait(300)
+
+      const addSubArrayButton = conditionalArrayBlock.locator(
+        '.btn__label:has-text("Add Sub Array")',
+      )
+      await addSubArrayButton.scrollIntoViewIfNeeded()
+      await wait(300)
+
+      await expect(addSubArrayButton).toBeVisible()
+      await wait(300)
+
+      await addSubArrayButton.first().click()
+      await wait(300)
 
       await page.click('#action-save', { delay: 100 })
-      await expect(page.locator('.Toastify')).toContainText('The following field is invalid')
+      await wait(300)
 
+      await expect(page.locator('.Toastify')).toContainText('The following field is invalid')
+      await wait(300)
+
+      const requiredTooltip = conditionalArrayBlock
+        .locator('.tooltip-content:has-text("This field is required.")')
+        .first()
+      await wait(300)
+
+      await requiredTooltip.scrollIntoViewIfNeeded()
       // Check if error is shown next to field
-      await expect(
-        conditionalArrayBlock
-          .locator('.tooltip-content:has-text("This field is required.")')
-          .first(),
-      ).toBeVisible()
+      await wait(300)
+
+      await expect(requiredTooltip).toBeInViewport() // toBeVisible() doesn't work for some reason
+    })
+  })
+
+  describe('localization', () => {
+    test.skip('ensure simple localized lexical field works', async () => {
+      await navigateToLexicalFields(true, true)
     })
   })
 })

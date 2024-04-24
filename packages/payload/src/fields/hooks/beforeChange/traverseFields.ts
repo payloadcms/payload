@@ -9,7 +9,13 @@ type Args = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: Record<string, unknown>
+  /**
+   * The original data (not modified by any hooks)
+   */
   doc: Record<string, unknown>
+  /**
+   * The original data with locales (not modified by any hooks)
+   */
   docWithLocales: Record<string, unknown>
   duplicate: boolean
   errors: { field: string; message: string }[]
@@ -21,7 +27,13 @@ type Args = {
   path: string
   req: PayloadRequest
   siblingData: Record<string, unknown>
+  /**
+   * The original siblingData (not modified by any hooks)
+   */
   siblingDoc: Record<string, unknown>
+  /**
+   * The original siblingData with locales (not modified by any hooks)
+   */
   siblingDocWithLocales: Record<string, unknown>
   skipValidation?: boolean
 }
