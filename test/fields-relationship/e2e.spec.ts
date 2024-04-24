@@ -383,11 +383,9 @@ describe('fields - relationship', () => {
     })
 
     await page.goto(url.create)
-    // wait for relationship options to load
-    const relationFilterOptionsReq = page.waitForResponse(/api\/relation-filter-true/)
+
     // select relationshipMany field that relies on siblingData field above
     await page.locator('#field-relationshipManyFiltered .rs__control').click()
-    await relationFilterOptionsReq
 
     const options = page.locator('#field-relationshipManyFiltered .rs__menu')
     await expect(options).toContainText('truth')

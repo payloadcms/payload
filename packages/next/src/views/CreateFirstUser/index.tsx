@@ -31,7 +31,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     },
   } = initPageResult
 
-  const baseAuthFields: Field[] = [
+  const fields: Field[] = [
     {
       name: 'email',
       type: 'email',
@@ -52,29 +52,16 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     },
   ]
 
-  const ssrAuthFields = [...baseAuthFields]
-
   const WithServerSideProps: WithServerSidePropsType = ({ Component, ...rest }) => {
     return <WithServerSidePropsGeneric Component={Component} payload={payload} {...rest} />
   }
 
-  const userFieldSchema = config.collections.find((c) => c.slug === userSlug)
-  ssrAuthFields.push(...userFieldSchema.fields)
-
-  const formState = await buildStateFromSchema({
-    fieldSchema: ssrAuthFields,
-    operation: 'create',
-    preferences: {
-      fields: undefined
-    },
-    req,
-  })
-
-  const baseAuthFieldMap = mapFields({
+  const createFirstUserFieldMap = mapFields({
     WithServerSideProps,
     config,
-    fieldSchema: baseAuthFields,
+    fieldSchema: fields,
     i18n,
+    parentPath: userSlug,
   }).map((field) => {
     // Transform field types for the password and confirm-password fields
     if (field.name === 'password') {
@@ -96,6 +83,13 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     return field
   })
 
+  const formState = await buildStateFromSchema({
+    fieldSchema: fields,
+    operation: 'create',
+    preferences: { fields: {} },
+    req,
+  })
+
   return (
     <React.Fragment>
       <h1>{req.t('general:welcome')}</h1>
@@ -107,7 +101,10 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
         redirect={adminRoute}
         validationOperation="create"
       >
-        <CreateFirstUserFields baseAuthFieldMap={baseAuthFieldMap} userSlug={userSlug} />
+        <CreateFirstUserFields
+          createFirstUserFieldMap={createFirstUserFieldMap}
+          userSlug={userSlug}
+        />
         <FormSubmit>{req.t('general:create')}</FormSubmit>
       </Form>
     </React.Fragment>
