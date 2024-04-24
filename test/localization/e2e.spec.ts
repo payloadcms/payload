@@ -179,6 +179,7 @@ describe('Localization', () => {
       // duplicate document
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(id)
 
       // check fields
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
@@ -231,8 +232,6 @@ describe('Localization', () => {
       await page.locator('button[title="Text"]').click()
       await page.fill('#field-layout__0__text', 'test')
       await expect(page.locator('#field-layout__0__text')).toHaveValue('test')
-
-      await wait(5000)
       await saveDocAndAssert(page)
 
       const originalID = await page.locator('.id-label').innerText()
@@ -240,6 +239,7 @@ describe('Localization', () => {
       // duplicate
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
+      await expect(page.locator('.id-label')).not.toContainText(originalID)
       await page.locator('#action-save').click()
 
       // verify that the locale did copy
