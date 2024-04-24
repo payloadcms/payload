@@ -21,7 +21,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({ request
     request.body
   ) {
     // @ts-expect-error todo: fix type
-    const request = new Request(mutableRequest)
+    const request = new Request(incomingRequest)
     const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
     if (contentType === 'application/json') {
@@ -63,10 +63,10 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({ request
 
   const mutableRequest = request as ReturnType
   if (data) {
-    mutableRequest['data'] = data
+    mutableRequest.data = data
     mutableRequest.json = () => Promise.resolve(data)
   }
-  if (file) mutableRequest['file'] = file
+  if (file) mutableRequest.file = file
 
   return mutableRequest
 }
