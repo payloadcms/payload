@@ -14,7 +14,7 @@ describe('Remove token from auth responses', () => {
     ;({ payload, restClient } = await initPayloadInt(config))
 
     await restClient.POST(`/${collectionSlug}/first-register`, {
-      body: JSON.stringify({ ...devUser, 'confirm-password': devUser.password }),
+      body: JSON.stringify(devUser),
     })
     await restClient.login({ slug: collectionSlug, credentials: devUser })
   })
