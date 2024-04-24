@@ -1,5 +1,4 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -120,6 +119,30 @@ export default buildConfigWithDefaults({
                 {
                   type: 'text',
                   name: 'title',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'select',
+          hasMany: true,
+          name: 'select',
+          options: ['hello', 'world'],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'tab',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                },
+                {
+                  name: 'label',
+                  type: 'text',
                 },
               ],
             },

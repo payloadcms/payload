@@ -43,6 +43,7 @@ describe('Select Fields', () => {
         id: expect.anything(),
         title: expect.any(String),
         group: {},
+        tab: {},
         groupMultiple: {},
         groupArray: { array: [] },
         array: [],
@@ -64,6 +65,7 @@ describe('Select Fields', () => {
 
       expect(serializeObject(post)).toEqual({
         id: expect.anything(),
+        tab: {},
         array: [
           {
             title: expect.any(String),
@@ -93,6 +95,7 @@ describe('Select Fields', () => {
         id: expect.anything(),
         array: [],
         group: {},
+        tab: {},
         groupMultiple: {},
         arrayMultiple: [
           {
@@ -122,6 +125,7 @@ describe('Select Fields', () => {
       expect(serializeObject(post)).toEqual({
         id: expect.anything(),
         array: [],
+        tab: {},
         group: {
           title: expect.any(String),
         },
@@ -146,6 +150,7 @@ describe('Select Fields', () => {
       expect(serializeObject(post)).toEqual({
         id: expect.anything(),
         array: [],
+        tab: {},
         group: {},
         groupMultiple: {
           titleFirst: expect.any(String),
@@ -175,6 +180,7 @@ describe('Select Fields', () => {
       expect(serializeObject(post)).toEqual({
         id: expect.anything(),
         array: [],
+        tab: {},
         group: {},
         groupMultiple: {},
         arrayMultiple: [],
@@ -206,6 +212,7 @@ describe('Select Fields', () => {
       expect(serializeObject(post)).toEqual({
         id: expect.anything(),
         array: [],
+        tab: {},
         group: {},
         groupMultiple: {},
         arrayMultiple: [],
@@ -243,6 +250,7 @@ describe('Select Fields', () => {
         id: expect.anything(),
         array: [],
         group: {},
+        tab: {},
         groupMultiple: {},
         arrayMultiple: [],
         blocks: [
@@ -266,88 +274,76 @@ describe('Select Fields', () => {
       })
     })
 
-    // it('should select all fields inside of block', async () => {
-    //   const post = await payload.findByID({
-    //     collection,
-    //     id,
-    //     select: {
-    //       blocks: {
-    //         section: true,
-    //       },
-    //     },
-    //   })
+    it('should select "select" field', async () => {
+      const post = await payload.findByID({
+        collection,
+        id,
+        select: {
+          select: true,
+        },
+      })
 
-    //   expect(post.title).toBeUndefined()
+      expect(serializeObject(post)).toEqual({
+        id: expect.anything(),
+        select: ['hello', 'world'],
+        group: {},
+        groupMultiple: {},
+        tab: {},
+        groupArray: { array: [] },
+        array: [],
+        arrayMultiple: [],
+        blocks: [],
+      })
+    })
 
-    //   expect(post.blocks[0].id).toBeDefined()
-    //   expect(post.blocks[0].title).toBeDefined()
-    //   expect(post.blocks[0].blockType).toBeDefined()
-    //   expect(post.blocks[0].secondTitle).toBeDefined()
-    // })
+    it('should select title inside of tab field', async () => {
+      const post = await payload.findByID({
+        collection,
+        id,
+        select: {
+          tab: {
+            title: true,
+          },
+        },
+      })
 
-    // it('should select top level field and array', async () => {
-    //   const post = await payload.findByID({
-    //     collection,
-    //     id,
-    //     select: {
-    //       title: true,
-    //       array: true,
-    //     },
-    //   })
+      expect(serializeObject(post)).toEqual({
+        id: expect.anything(),
+        group: {},
+        groupMultiple: {},
+        tab: {
+          title: expect.any(String),
+        },
+        groupArray: { array: [] },
+        array: [],
+        arrayMultiple: [],
+        blocks: [],
+      })
+    })
 
-    //   expect(post.title).toBeDefined()
+    it('should select all fields inside of tab field', async () => {
+      const post = await payload.findByID({
+        collection,
+        id,
+        select: {
+          tab: true,
+        },
+      })
 
-    //   expect(post.array[0].id).toBeDefined()
-    //   expect(post.array[0].title).toBeDefined()
-    // })
-
-    // it('should select array and field in group', async () => {
-    //   const post = await payload.findByID({
-    //     collection,
-    //     id,
-    //     select: {
-    //       array: true,
-    //       groupMultiple: {
-    //         titleFirst: true,
-    //       },
-    //     },
-    //   })
-
-    //   expect(post.title).toBeUndefined()
-
-    //   expect(post.array[0].id).toBeDefined()
-    //   expect(post.array[0].title).toBeDefined()
-
-    //   expect(post.groupMultiple.titleFirst).toBeDefined()
-    //   expect(post.groupMultiple.titleSecond).toBeUndefined()
-    // })
-
-    // it('should select text inside of nested to group array', async () => {
-    //   const post = await payload.findByID({
-    //     collection,
-    //     id,
-    //     select: {
-    //       groupArray: {
-    //         array: {
-    //           title: true,
-    //         },
-    //       },
-    //     },
-    //   })
-
-    //   expect(post.title).toBeUndefined()
-    //   expect(post.createdAt).toBeUndefined()
-    //   expect(post.updatedAt).toBeUndefined()
-
-    //   expect(post.array[0].id).toBeDefined()
-    //   expect(post.array[0].title).toBeUndefined()
-
-    //   expect(post.group.title).toBeUndefined()
-
-    //   expect(post.groupArray.title).toBeUndefined()
-    //   expect(post.groupArray.array[0].id).toBeDefined()
-    //   expect(post.groupArray.array[0].title).toBeDefined()
-    // })
+      expect(serializeObject(post)).toEqual({
+        id: expect.anything(),
+        group: {},
+        groupMultiple: {},
+        tab: {
+          title: expect.any(String),
+          label: expect.any(String),
+        },
+        groupArray: { array: [] },
+        array: [],
+        arrayMultiple: [],
+        blocks: [],
+      })
+    })
   })
 
   // TODO: REST tests.

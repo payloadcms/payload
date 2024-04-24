@@ -47,6 +47,11 @@ export const createPost = async (payload: Payload) => {
           title: 'some cta',
         },
       ],
+      select: ['hello', 'world'],
+      tab: {
+        title: 'some test',
+        label: 'label',
+      },
     },
   })
 }
