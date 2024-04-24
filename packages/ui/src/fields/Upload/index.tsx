@@ -41,22 +41,12 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
 
   const collection = collections.find((coll) => coll.slug === relationTo)
 
-  const memoizedValidate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...options, required })
-      }
-      return true
-    },
-    [validate, required],
-  )
-
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { filterOptions, path, setValue, showError, value } = useField<string>({
     path: pathFromContext || pathFromProps,
-    validate: memoizedValidate,
+    validate,
   })
 
   const onChange = useCallback(

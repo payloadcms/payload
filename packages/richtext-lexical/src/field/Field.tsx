@@ -9,7 +9,7 @@ import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { useField } from '@payloadcms/ui/forms/useField'
 import { withCondition } from '@payloadcms/ui/forms/withCondition'
-import React, { useCallback } from 'react'
+import React from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from './lexical/config/types.js'
@@ -47,23 +47,11 @@ const _RichText: React.FC<
     width,
   } = props
 
-  const memoizedValidate = useCallback(
-    (value, validationOptions) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...validationOptions, props, required })
-      }
-      return true
-    },
-    // Important: do not add props to the dependencies array.
-    // This would cause an infinite loop and endless re-rendering.
-    // Removing props from the dependencies array fixed this issue: https://github.com/payloadcms/payload/issues/3709
-    [validate, required],
-  )
   const { path: pathFromContext } = useFieldProps()
 
   const fieldType = useField<SerializedEditorState>({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   const { initialValue, path, setValue, showError, value } = fieldType

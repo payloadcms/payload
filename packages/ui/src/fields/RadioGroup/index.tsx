@@ -4,7 +4,7 @@
 import type { FieldBase, Option } from 'payload/types'
 
 import { optionIsObject } from 'payload/types'
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import { FieldLabel } from '../../forms/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
@@ -60,16 +60,6 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
 
   const { uuid } = useForm()
 
-  const memoizedValidate = useCallback(
-    (value, validationOptions) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...validationOptions, options, required })
-      }
-      return true
-    },
-    [validate, options, required],
-  )
-
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
@@ -80,7 +70,7 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
     value: valueFromContext,
   } = useField<string>({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   const value = valueFromContext || valueFromProps

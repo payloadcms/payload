@@ -1,9 +1,8 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
 import { FieldLabel } from '../../forms/FieldLabel/index.js'
@@ -58,21 +57,11 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const memoizedValidate: ClientValidate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...options, required })
-      }
-      return true
-    },
-    [validate, required],
-  )
-
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
 
   const { path, setValue, showError, value } = useField<Date>({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   const readOnly = readOnlyFromProps || readOnlyFromContext

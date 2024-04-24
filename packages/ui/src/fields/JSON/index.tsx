@@ -1,5 +1,4 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
 
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -53,25 +52,14 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
   } = props
 
   const [stringValue, setStringValue] = useState<string>()
-  const [jsonError, setJsonError] = useState<string>()
   const [hasLoadedValue, setHasLoadedValue] = useState(false)
-
-  const memoizedValidate: ClientValidate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...options, jsonError, required })
-      }
-      return true
-    },
-    [validate, required, jsonError],
-  )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { initialValue, path, setValue, showError, value } = useField<string>({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   const handleMount = useCallback(
@@ -100,10 +88,8 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
       try {
         setValue(val ? JSON.parse(val) : null)
-        setJsonError(undefined)
       } catch (e) {
         setValue(val ? val : null)
-        setJsonError(e)
       }
     },
     [readOnly, setValue, setStringValue],

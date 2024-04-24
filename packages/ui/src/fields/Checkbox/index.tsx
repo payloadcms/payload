@@ -48,23 +48,13 @@ const CheckboxField: React.FC<CheckboxFieldProps> = (props) => {
 
   const { uuid } = useForm()
 
-  const memoizedValidate: ClientValidate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...options, required })
-      }
-      return true
-    },
-    [validate, required],
-  )
-
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { path, setValue, showError, value } = useField({
     disableFormData,
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   const onToggle = useCallback(() => {

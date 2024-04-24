@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, FieldBase } from 'payload/types'
+import type { FieldBase } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
@@ -44,7 +44,6 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     path: pathFromProps,
     placeholder,
     readOnly: readOnlyFromProps,
-    required,
     step,
     style,
     validate,
@@ -52,16 +51,6 @@ const PointField: React.FC<PointFieldProps> = (props) => {
   } = props
 
   const { i18n, t } = useTranslation()
-
-  const memoizedValidate: ClientValidate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...options, required })
-      }
-      return true
-    },
-    [validate, required],
-  )
 
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
@@ -73,7 +62,7 @@ const PointField: React.FC<PointFieldProps> = (props) => {
     value = [null, null],
   } = useField<[number, number]>({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   const handleChange = useCallback(

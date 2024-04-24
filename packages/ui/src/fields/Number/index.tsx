@@ -64,22 +64,12 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
 
   const { i18n, t } = useTranslation()
 
-  const memoizedValidate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...options, max, min, required })
-      }
-      return true
-    },
-    [validate, min, max, required],
-  )
-
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { path, setValue, showError, value } = useField<number | number[]>({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   const handleChange = useCallback(

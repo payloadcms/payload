@@ -1,5 +1,4 @@
 'use client'
-import type { ClientValidate } from 'payload/types'
 import type {} from 'payload/types'
 
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
@@ -33,9 +32,7 @@ const TextField: React.FC<TextFieldProps> = (props) => {
     inputRef,
     labelProps,
     localized,
-    maxLength,
     maxRows,
-    minLength,
     minRows,
     path: pathFromProps,
     placeholder,
@@ -51,22 +48,12 @@ const TextField: React.FC<TextFieldProps> = (props) => {
 
   const { localization: localizationConfig } = useConfig()
 
-  const memoizedValidate: ClientValidate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...options, maxLength, minLength, required })
-      }
-      return true
-    },
-    [validate, minLength, maxLength, required],
-  )
-
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { formProcessing, path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   const renderRTL = isFieldRTL({

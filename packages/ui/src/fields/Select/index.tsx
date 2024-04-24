@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 'use client'
-import type { ClientValidate, FieldBase, Option, OptionObject } from 'payload/types'
+import type { FieldBase, Option, OptionObject } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
@@ -73,22 +73,12 @@ const SelectField: React.FC<SelectFieldProps> = (props) => {
 
   const [options] = useState(formatOptions(optionsFromProps))
 
-  const memoizedValidate: ClientValidate = useCallback(
-    (value, validationOptions) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...validationOptions, hasMany, options, required })
-      }
-      return true
-    },
-    [validate, required, hasMany, options],
-  )
-
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   let valueToRender

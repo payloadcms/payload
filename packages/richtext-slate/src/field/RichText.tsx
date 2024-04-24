@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
-import type { ClientValidate, FieldBase } from 'payload/types'
+import type { FieldBase } from 'payload/types'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
@@ -25,7 +25,6 @@ import type { ElementNode, RichTextPlugin, TextNode } from '../types.js'
 import type { EnabledFeatures } from './types.js'
 
 import { defaultRichTextValue } from '../data/defaultValue.js'
-import { richTextValidate } from '../data/validation.js'
 import { listTypes } from './elements/listTypes.js'
 import { hotkeys } from './hotkeys.js'
 import './index.scss'
@@ -77,7 +76,7 @@ const RichTextField: React.FC<
     readOnly,
     required,
     style,
-    validate = richTextValidate,
+    validate,
     width,
   } = props
 
@@ -88,27 +87,11 @@ const RichTextField: React.FC<
   const drawerDepth = useEditDepth()
   const drawerIsOpen = drawerDepth > 1
 
-  const memoizedValidate: ClientValidate = useCallback(
-    (value, validationOptions) => {
-      if (typeof validate === 'function') {
-        return validate(value, {
-          ...validationOptions,
-          req: {
-            t: i18n.t,
-          },
-          required,
-        })
-      }
-      return true
-    },
-    [validate, required, i18n],
-  )
-
   const { path: pathFromContext } = useFieldProps()
 
   const { initialValue, path, schemaPath, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   const editor = useMemo(() => {

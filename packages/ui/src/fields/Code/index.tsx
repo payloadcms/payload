@@ -6,7 +6,7 @@ import { FieldDescription } from '@payloadcms/ui/forms/FieldDescription'
 import { FieldError } from '@payloadcms/ui/forms/FieldError'
 import { FieldLabel } from '@payloadcms/ui/forms/FieldLabel'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import type { FormFieldBase } from '../shared/index.js'
 
@@ -55,22 +55,12 @@ const CodeField: React.FC<CodeFieldProps> = (props) => {
     width,
   } = props
 
-  const memoizedValidate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function') {
-        return validate(value, { ...options, required })
-      }
-      return true
-    },
-    [validate, required],
-  )
-
   const { path: pathFromContext, readOnly: readOnlyFromContext } = useFieldProps()
   const readOnly = readOnlyFromProps || readOnlyFromContext
 
   const { path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate,
   })
 
   return (
