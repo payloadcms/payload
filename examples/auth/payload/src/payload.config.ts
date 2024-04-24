@@ -9,6 +9,13 @@ import BeforeLogin from './components/BeforeLogin'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+console.log(
+  process.env.PAYLOAD_PUBLIC_SITE_URL,
+  [process.env.PAYLOAD_PUBLIC_SERVER_URL || '', process.env.PAYLOAD_PUBLIC_SITE_URL || ''].filter(
+    Boolean,
+  ),
+)
+
 export default buildConfig({
   admin: {
     components: {
