@@ -20,8 +20,6 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({ request
     ['PATCH', 'POST', 'PUT'].includes(request.method.toUpperCase()) &&
     request.body
   ) {
-    // @ts-expect-error todo: fix type
-    const request = new Request(incomingRequest)
     const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
     if (contentType === 'application/json') {
@@ -43,7 +41,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({ request
       if (request.headers.has('Content-Length') && request.headers.get('Content-Length') !== '0') {
         const { error, fields, files } = await nextFileUpload({
           options: config.upload as NextFileUploadOptions,
-          request,
+          request: request as Request,
         })
 
         if (error) {
