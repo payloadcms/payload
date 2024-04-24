@@ -32,9 +32,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
 
     const res = await fetch(fileURL, {
       credentials: 'include',
-      headers: {
-        headers,
-      },
+      headers,
       method: 'GET',
     })
 
