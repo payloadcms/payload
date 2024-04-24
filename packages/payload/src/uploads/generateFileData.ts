@@ -14,6 +14,7 @@ import type { PayloadRequest } from '../express/types'
 import type { FileData, FileToSave, ProbedImageSize } from './types'
 
 import { FileUploadError, MissingFile } from '../errors'
+import FileRetrievalError from '../errors/FileRetrievalError'
 import canResizeImage from './canResizeImage'
 import cropImage from './cropImage'
 import { getExternalFile } from './getExternalFile'
@@ -80,8 +81,10 @@ export const generateFileData = async <T>({
         })) as UploadedFile
         overwriteExistingFiles = true
       }
-    } catch (err) {
-      throw new FileUploadError(req.t)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        throw new FileRetrievalError(req.t, err.message)
+      }
     }
   }
 
