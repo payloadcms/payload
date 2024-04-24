@@ -167,7 +167,14 @@ describe('relationship', () => {
     await page.goto(url.create)
 
     const field = page.locator('#field-relationship')
+
+    // wait for relationship options to load
+    const textFieldPromise = page.waitForResponse(/api\/text-fields/)
+    const arrayFieldPromise = page.waitForResponse(/api\/array-fields/)
     await field.click()
+    await textFieldPromise
+    await arrayFieldPromise
+
     await page.locator('.rs__option:has-text("Seeded text document")').click()
     await field.locator('.clear-indicator').click()
     await expect(field.locator('.rs__placeholder')).toBeVisible()

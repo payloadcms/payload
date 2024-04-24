@@ -3,7 +3,7 @@ import merge from 'deepmerge'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
-import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
+import type { Field, FieldHookArgs, TabAsField, ValidateOptions } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { beforeDuplicate } from './beforeDuplicate.js'
@@ -104,7 +104,7 @@ export const promise = async ({
     // Validate
     if (!skipValidationFromHere && field.validate) {
       const valueToValidate = siblingData[field.name]
-      let jsonError
+      let jsonError: object
 
       if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
         try {
@@ -118,12 +118,12 @@ export const promise = async ({
         ...field,
         id,
         data: merge(doc, data, { arrayMerge: (_, source) => source }),
-        // @ts-expect-error-next-line
         jsonError,
         operation,
+        preferences: { fields: {} },
         req,
         siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
-      })
+      } as ValidateOptions<any, any, { jsonError: object }>)
 
       if (typeof validationResult === 'string') {
         errors.push({

@@ -1,19 +1,22 @@
+import { sanitizeFields } from 'payload/config'
+import { deepCopyObject } from 'payload/utilities'
+
 import type { PopulationPromise } from '../types.js'
 import type { LinkFeatureServerProps } from './feature.server.js'
 import type { SerializedLinkNode } from './nodes/types.js'
 
-import { populate } from '../../../populate/populate.js'
 import { recurseNestedFields } from '../../../populate/recurseNestedFields.js'
+import { transformExtraFields } from './plugins/floatingLinkEditor/utilities.js'
 
 export const linkPopulationPromiseHOC = (
   props: LinkFeatureServerProps,
 ): PopulationPromise<SerializedLinkNode> => {
-  const linkPopulationPromise: PopulationPromise<SerializedLinkNode> = ({
+  return ({
     context,
     currentDepth,
     depth,
     editorPopulationPromises,
-    field,
+    fieldPromises,
     findMany,
     flattenLocales,
     node,
@@ -21,53 +24,55 @@ export const linkPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
-    siblingDoc,
   }) => {
-    const promises: Promise<void>[] = []
+    // Sanitize link's fields here. This is done here and not in the feature, because the payload config is available here
+    const payloadConfig = req.payload.config
+    const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
 
-    if (node?.fields?.doc?.value && node?.fields?.doc?.relationTo) {
-      const collection = req.payload.collections[node?.fields?.doc?.relationTo]
+    const transformedFields = transformExtraFields(
+      deepCopyObject(props.fields),
+      payloadConfig,
+      req.i18n,
+      props.enabledCollections,
+      props.disabledCollections,
+    )
 
-      if (collection) {
-        promises.push(
-          populate({
-            id:
-              typeof node?.fields?.doc?.value === 'object'
-                ? node?.fields?.doc?.value?.id
-                : node?.fields?.doc?.value,
-            collection,
-            currentDepth,
-            data: node?.fields?.doc,
-            depth,
-            field,
-            key: 'value',
-            overrideAccess,
-            req,
-            showHiddenFields,
-          }),
-        )
-      }
+    // TODO: Sanitize & transform ahead of time! On startup!
+    const sanitizedFields = sanitizeFields({
+      config: payloadConfig,
+      fields: transformedFields,
+      requireFieldLevelRichTextEditor: true,
+      validRelationships,
+    })
+
+    if (!sanitizedFields?.length) {
+      return
     }
-    if (Array.isArray(props.fields)) {
+
+    /**
+     * Should populate all fields, including the doc field (for internal links), as it's treated like a normal field
+     */
+    if (Array.isArray(sanitizedFields)) {
       recurseNestedFields({
         context,
         currentDepth,
-        data: node.fields || {},
+        data: {
+          fields: node.fields,
+        },
         depth,
         editorPopulationPromises,
-        fields: props.fields,
+        fieldPromises,
+        fields: sanitizedFields,
         findMany,
         flattenLocales,
         overrideAccess,
         populationPromises,
-        promises,
         req,
         showHiddenFields,
-        siblingDoc: node.fields || {},
+        siblingDoc: {
+          fields: node.fields,
+        },
       })
     }
-    return promises
   }
-
-  return linkPopulationPromise
 }

@@ -3,13 +3,13 @@ import type { SanitizedConfig } from 'payload/config'
 import type { Field, FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
+import { deepCopyObject } from 'payload/utilities'
 
-import type { HTMLConverter } from '../converters/html/converter/types.js'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { ClientProps } from './feature.client.js'
-import type { SerializedAutoLinkNode, SerializedLinkNode } from './nodes/types.js'
 
 import { convertLexicalNodesToHTML } from '../converters/html/converter/index.js'
+import { createNode } from '../typeUtilities.js'
 import { LinkFeatureClientComponent } from './feature.client.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { LinkNode } from './nodes/LinkNode.js'
@@ -67,20 +67,25 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           enabledCollections: props.enabledCollections,
         } as ExclusiveLinkCollectionsProps,
         generateSchemaMap: ({ config, i18n, props }) => {
-          if (!props?.fields || !Array.isArray(props.fields) || props.fields.length === 0) {
-            return null
-          }
-          const schemaMap = new Map<string, Field[]>()
-
-          const validRelationships = config.collections.map((c) => c.slug) || []
-
           const transformedFields = transformExtraFields(
-            props.fields,
+            deepCopyObject(props.fields),
             config,
             i18n,
             props.enabledCollections,
             props.disabledCollections,
           )
+
+          if (
+            !transformedFields ||
+            !Array.isArray(transformedFields) ||
+            transformedFields.length === 0
+          ) {
+            return null
+          }
+
+          const schemaMap = new Map<string, Field[]>()
+
+          const validRelationships = config.collections.map((c) => c.slug) || []
 
           schemaMap.set('fields', transformedFields)
 
@@ -96,7 +101,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           return schemaMap
         },
         nodes: [
-          {
+          createNode({
             converters: {
               html: {
                 converter: async ({ converters, node, parent, payload }) => {
@@ -123,12 +128,19 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   return `<a href="${href}"${rel}>${childrenText}</a>`
                 },
                 nodeTypes: [AutoLinkNode.getType()],
-              } as HTMLConverter<SerializedAutoLinkNode>,
+              },
+            },
+            hooks: {
+              afterRead: [
+                ({ node }) => {
+                  return node
+                },
+              ],
             },
             node: AutoLinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-          },
-          {
+          }),
+          createNode({
             converters: {
               html: {
                 converter: async ({ converters, node, parent, payload }) => {
@@ -152,11 +164,11 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
                   return `<a href="${href}"${rel}>${childrenText}</a>`
                 },
                 nodeTypes: [LinkNode.getType()],
-              } as HTMLConverter<SerializedLinkNode>,
+              },
             },
             node: LinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-          },
+          }),
         ],
         serverFeatureProps: props,
       }

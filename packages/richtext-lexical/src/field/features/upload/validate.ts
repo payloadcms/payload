@@ -6,7 +6,7 @@ import type { SerializedUploadNode } from './nodes/UploadNode.js'
 import { CAN_USE_DOM } from '../../lexical/utils/canUseDOM.js'
 
 export const uploadValidation = (): NodeValidation<SerializedUploadNode> => {
-  const uploadValidation: NodeValidation<SerializedUploadNode> = ({
+  return ({
     node,
     validation: {
       options: {
@@ -16,8 +16,10 @@ export const uploadValidation = (): NodeValidation<SerializedUploadNode> => {
   }) => {
     if (!CAN_USE_DOM) {
       const idType = payload.collections[node.relationTo].customIDType || payload.db.defaultIDType
+      // @ts-expect-error
+      const id = node?.value?.id || node?.value // for backwards-compatibility
 
-      if (!isValidID(node.value?.id, idType)) {
+      if (!isValidID(id, idType)) {
         return t('validation:validUploadID')
       }
     }
@@ -26,6 +28,4 @@ export const uploadValidation = (): NodeValidation<SerializedUploadNode> => {
 
     return true
   }
-
-  return uploadValidation
 }

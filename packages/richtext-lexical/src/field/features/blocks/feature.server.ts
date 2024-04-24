@@ -2,12 +2,19 @@ import type { Block, BlockField, Field, FieldWithRichTextRequiredEditor } from '
 
 import { traverseFields } from '@payloadcms/next/utilities'
 import { baseBlockFields, sanitizeFields } from 'payload/config'
-import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
+import {
+  beforeChangeTraverseFields,
+  beforeValidateTraverseFields,
+  deepCopyObject,
+  fieldsToJSONSchema,
+  formatLabels,
+} from 'payload/utilities'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'
 
 import { cloneDeep } from '../../lexical/utils/cloneDeep.js'
+import { createNode } from '../typeUtilities.js'
 import { BlocksFeatureClientComponent } from './feature.client.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { blockPopulationPromiseHOC } from './populationPromise.js'
@@ -131,11 +138,98 @@ export const BlocksFeature: FeatureProviderProviderServer<
           },
         },
         nodes: [
-          {
+          createNode({
+            /* // TODO: Implement these hooks once docWithLocales / originalSiblingDoc => node matching has been figured out
+            hooks: {
+              beforeChange: [
+                async ({ context, findMany, node, operation, overrideAccess, req }) => {
+                  const blockType = node.fields.blockType
+
+                  const block = deepCopyObject(
+                    props.blocks.find((block) => block.slug === blockType),
+                  )
+
+                  // sanitize blocks
+                  const validRelationships = req.payload.config.collections.map((c) => c.slug) || []
+
+                  const sanitizedBlock = {
+                    ...block,
+                    fields: sanitizeFields({
+                      config: req.payload.config,
+                      fields: block.fields,
+                      requireFieldLevelRichTextEditor: true,
+                      validRelationships,
+                    }),
+                  }
+
+
+                  await beforeChangeTraverseFields({
+                    id: null,
+                    collection: null,
+                    context,
+                    data: node.fields,
+                    doc: node.fields,
+                    fields: sanitizedBlock.fields,
+                    global: null,
+                    mergeLocaleActions: [],
+                    operation:
+                      operation === 'create' || operation === 'update' ? operation : 'update',
+                    overrideAccess,
+                    path: '',
+                    req,
+                    siblingData: node.fields,
+                    siblingDoc: node.fields,
+                  })
+
+
+                  return node
+                },
+              ],
+              beforeValidate: [
+                async ({ context, findMany, node, operation, overrideAccess, req }) => {
+                  const blockType = node.fields.blockType
+
+                  const block = deepCopyObject(
+                    props.blocks.find((block) => block.slug === blockType),
+                  )
+
+                  // sanitize blocks
+                  const validRelationships = req.payload.config.collections.map((c) => c.slug) || []
+
+                  const sanitizedBlock = {
+                    ...block,
+                    fields: sanitizeFields({
+                      config: req.payload.config,
+                      fields: block.fields,
+                      requireFieldLevelRichTextEditor: true,
+                      validRelationships,
+                    }),
+                  }
+
+                  await beforeValidateTraverseFields({
+                    id: null,
+                    collection: null,
+                    context,
+                    data: node.fields,
+                    doc: node.fields,
+                    fields: sanitizedBlock.fields,
+                    global: null,
+                    operation:
+                      operation === 'create' || operation === 'update' ? operation : 'update',
+                    overrideAccess,
+                    req,
+                    siblingData: node.fields,
+                    siblingDoc: node.fields,
+                  })
+
+                  return node
+                },
+              ],
+            },*/
             node: BlockNode,
             populationPromises: [blockPopulationPromiseHOC(props)],
             validations: [blockValidationHOC(props)],
-          },
+          }),
         ],
         serverFeatureProps: props,
       }

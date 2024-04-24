@@ -17,21 +17,21 @@ import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './commands.js'
 const baseClass = 'lexical-upload-drawer'
 
 const insertUpload = ({
-  id,
   editor,
   relationTo,
   replaceNodeKey,
+  value,
 }: {
   editor: LexicalEditor
-  id: string
   relationTo: string
   replaceNodeKey: null | string
+  value: number | string
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_UPLOAD_COMMAND, {
-      id,
       fields: null,
       relationTo,
+      value,
     })
   } else {
     editor.update(() => {
@@ -42,9 +42,7 @@ const insertUpload = ({
             data: {
               fields: null,
               relationTo,
-              value: {
-                id,
-              },
+              value,
             },
           }),
         )
@@ -84,10 +82,10 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   const onSelect = useCallback(
     ({ collectionSlug, docID }) => {
       insertUpload({
-        id: docID,
         editor,
         relationTo: collectionSlug,
         replaceNodeKey,
+        value: docID,
       })
       closeDrawer()
     },

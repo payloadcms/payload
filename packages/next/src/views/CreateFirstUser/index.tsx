@@ -64,7 +64,9 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
   const formState = await buildStateFromSchema({
     fieldSchema: ssrAuthFields,
     operation: 'create',
-    preferences: {},
+    preferences: {
+      fields: undefined
+    },
     req,
   })
 
