@@ -158,9 +158,8 @@ export const traverseFields = ({
           if (withSelection && !currentSelect) break
 
           field.blocks.forEach((block) => {
-            if (withSelection) {
-              if (!currentSelect || !currentSelect?.[block.slug]) return
-            }
+            const blockSelect = buildFieldSelect({ field: block, select: currentSelect })
+            if (withSelection && !blockSelect) return
 
             const blockKey = `_blocks_${block.slug}`
 
@@ -187,8 +186,6 @@ export const traverseFields = ({
               }
               topLevelArgs.with[blockKey] = withBlock
 
-              const currentSelect = buildFieldSelect({ field, select })
-
               traverseFields({
                 _locales,
                 adapter,
@@ -197,10 +194,7 @@ export const traverseFields = ({
                 depth,
                 fields: block.fields,
                 path: '',
-                select:
-                  currentSelect && typeof currentSelect === 'object'
-                    ? currentSelect[block.slug]
-                    : currentSelect,
+                select: blockSelect,
                 topLevelArgs,
                 topLevelTableName,
                 withSelection,

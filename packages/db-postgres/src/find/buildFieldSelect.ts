@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
-import type { FieldAffectingData, NamedTab, Select } from 'packages/payload/src/exports/types.js'
+import type { Block, FieldAffectingData, NamedTab, Select } from 'payload/types'
 
 export const buildFieldSelect = ({
   field,
   select,
 }: {
-  field: FieldAffectingData | NamedTab
+  field: Block | FieldAffectingData | NamedTab
   select?: Select | boolean
 }) => {
   if (!select || typeof select === 'boolean') return select
-  return select[field.name]
+  return select['slug' in field ? field.slug : field.name]
 }
