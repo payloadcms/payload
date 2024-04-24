@@ -17,6 +17,7 @@ export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void
   blockType: string
   blocks: ReducedBlock[]
+  disableSortable?: boolean
   duplicateRow: (rowIndex: number, blockType: string) => void
   fieldMap: FieldMap
   hasMaxRows?: boolean
@@ -30,6 +31,7 @@ export const RowActions: React.FC<{
     addRow,
     blockType,
     blocks,
+    disableSortable,
     duplicateRow,
     hasMaxRows,
     labels,
@@ -64,6 +66,7 @@ export const RowActions: React.FC<{
           setIndexToAdd(index)
           openModal(drawerSlug)
         }}
+        disableSortable={disableSortable}
         duplicateRow={() => duplicateRow(rowIndex, blockType)}
         hasMaxRows={hasMaxRows}
         index={rowIndex}
