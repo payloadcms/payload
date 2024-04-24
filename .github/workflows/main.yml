@@ -138,8 +138,8 @@ jobs:
         database:
           - mongodb
           - postgres
-        #  - postgres-custom-schema
-        #  - postgres-uuid
+          #  - postgres-custom-schema
+          - postgres-uuid
         #  - supabase
     env:
       POSTGRES_USER: postgres
