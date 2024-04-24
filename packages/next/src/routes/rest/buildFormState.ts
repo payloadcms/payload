@@ -206,25 +206,20 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       req,
     })
 
-    // Maintain form state of file
-    if (
-      collectionSlug &&
-      req.payload.collections[collectionSlug]?.config?.upload &&
-      formState &&
-      formState.file
-    ) {
-      result.file = formState.file
-    }
+    // Maintain form state of auth / upload fields
+    if (collectionSlug && formState) {
+      if (req.payload.collections[collectionSlug]?.config?.upload && formState.file) {
+        result.file = formState.file
+      }
 
-    if (
-      collectionSlug &&
-      req.payload.collections[collectionSlug]?.config?.auth &&
-      !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy &&
-      formState
-    ) {
-      if (formState.password) result.password = formState.password
-      if (formState.email) result.email = formState.email
-      if (formState.password) result.password = formState.password
+      if (
+        req.payload.collections[collectionSlug]?.config?.auth &&
+        !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy
+      ) {
+        if (formState.password) result.password = formState.password
+        if (formState.email) result.email = formState.email
+        if (formState.password) result.password = formState.password
+      }
     }
 
     return Response.json(result, {

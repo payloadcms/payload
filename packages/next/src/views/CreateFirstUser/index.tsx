@@ -1,11 +1,6 @@
-import type {
-  AdminViewProps,
-  Field,
-  WithServerSideProps as WithServerSidePropsType,
-} from 'payload/types'
+import type { AdminViewProps, Field } from 'payload/types'
 
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
-import { WithServerSideProps as WithServerSidePropsGeneric } from '@payloadcms/ui/providers/ComponentMap'
 import React from 'react'
 
 import { CreateFirstUserClient } from './index.client.js'
