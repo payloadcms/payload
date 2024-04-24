@@ -15,7 +15,7 @@ export const CreateFirstUserFields: React.FC<{
 
   return (
     <RenderFields
-      fieldMap={[...(createFirstUserFieldMap || []), ...(fieldMap || [])]}
+      fieldMap={[...(fieldMap || []), ...(createFirstUserFieldMap || [])]}
       operation="create"
       path=""
       readOnly={false}
