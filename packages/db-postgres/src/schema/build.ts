@@ -24,7 +24,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types.js'
 
-import { getTableName } from './getTableName.js'
+import { createTableName } from './createTableName.js'
 import { parentIDColumnMap } from './parentIDColumnMap.js'
 import { setColumnID } from './setColumnID.js'
 import { traverseFields } from './traverseFields.js'
@@ -313,7 +313,7 @@ export const buildTable = ({
 
       relationships.forEach((relationTo) => {
         const relationshipConfig = adapter.payload.collections[relationTo].config
-        const formattedRelationTo = getTableName({
+        const formattedRelationTo = createTableName({
           adapter,
           config: relationshipConfig,
           throwValidationError: true,
@@ -381,7 +381,7 @@ export const buildTable = ({
         }
 
         relationships.forEach((relationTo) => {
-          const relatedTableName = getTableName({
+          const relatedTableName = createTableName({
             adapter,
             config: adapter.payload.collections[relationTo].config,
             throwValidationError: true,

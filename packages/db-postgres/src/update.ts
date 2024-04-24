@@ -4,7 +4,7 @@ import type { PostgresAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
-import { getTableName } from './schema/getTableName.js'
+import { createTableName } from './schema/createTableName.js'
 import { upsertRow } from './upsertRow/index.js'
 
 export const updateOne: UpdateOne = async function updateOne(
@@ -13,7 +13,7 @@ export const updateOne: UpdateOne = async function updateOne(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
-  const tableName = getTableName({
+  const tableName = createTableName({
     adapter: this,
     config: collection,
   })

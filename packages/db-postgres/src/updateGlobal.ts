@@ -3,7 +3,7 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import type { PostgresAdapter } from './types.js'
 
-import { getTableName } from './schema/getTableName.js'
+import { createTableName } from './schema/createTableName.js'
 import { upsertRow } from './upsertRow/index.js'
 
 export async function updateGlobal<T extends TypeWithID>(
@@ -12,7 +12,7 @@ export async function updateGlobal<T extends TypeWithID>(
 ): Promise<T> {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
-  const tableName = getTableName({
+  const tableName = createTableName({
     adapter: this,
     config: globalConfig,
   })

@@ -7,6 +7,7 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
 
+import { createTableName } from '../../schema/createTableName.js'
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { transformArray } from './array.js'
 import { transformBlocks } from './blocks.js'

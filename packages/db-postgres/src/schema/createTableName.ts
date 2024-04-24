@@ -33,7 +33,7 @@ type Args = {
  * Used to name database enums and tables
  * Returns the table or enum name for a given entity
  */
-export const getTableName = ({
+export const createTableName = ({
   adapter,
   config: { name, slug },
   config,

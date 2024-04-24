@@ -8,6 +8,7 @@ import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
 
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
+import { createTableName } from '../schema/createTableName.js'
 import { transform } from '../transform/read/index.js'
 import { transformForWrite } from '../transform/write/index.js'
 import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'

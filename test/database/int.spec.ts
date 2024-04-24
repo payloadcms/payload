@@ -214,6 +214,40 @@ describe('database', () => {
         expect(db.enums.radioEnum).toBeDefined()
       }
     })
+
+    it('should create a doc with custom db names', async () => {
+      const doc = await payload.create({
+        collection: 'custom-schema',
+        data: {
+          text: 'test',
+          localizedText: 'hello',
+          select: ['a', 'b'],
+          radio: 'a',
+          array: [
+            {
+              text: 'hello',
+              localizedText: 'goodbye',
+            },
+          ],
+          blocks: [
+            {
+              blockType: 'block',
+              text: 'hello',
+              localizedText: 'goodbye',
+            },
+          ],
+        },
+      })
+
+      expect(doc.text).toStrictEqual('text')
+      expect(doc.localizedText).toStrictEqual('hello')
+      expect(doc.select).toHaveLength(2)
+      expect(doc.radio).toStrictEqual('a')
+      expect(doc.array[0].text).toStrictEqual('hello')
+      expect(doc.array[0].localizedText).toStrictEqual('goodbye')
+      expect(doc.blocks[0].text).toStrictEqual('hello')
+      expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
+    })
   })
 
   describe('transactions', () => {

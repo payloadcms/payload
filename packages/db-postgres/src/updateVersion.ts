@@ -6,7 +6,7 @@ import { buildVersionCollectionFields } from 'payload/versions'
 import type { PostgresAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
-import { getTableName } from './schema/getTableName.js'
+import { createTableName } from './schema/createTableName.js'
 import { upsertRow } from './upsertRow/index.js'
 
 export async function updateVersion<T extends TypeWithID>(
@@ -23,7 +23,7 @@ export async function updateVersion<T extends TypeWithID>(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = getTableName({
+  const tableName = createTableName({
     adapter: this,
     config: collectionConfig,
     versions: true,

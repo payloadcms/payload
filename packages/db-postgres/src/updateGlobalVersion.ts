@@ -6,7 +6,7 @@ import { buildVersionGlobalFields } from 'payload/versions'
 import type { PostgresAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
-import { getTableName } from './schema/getTableName.js'
+import { createTableName } from './schema/createTableName.js'
 import { upsertRow } from './upsertRow/index.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
@@ -25,7 +25,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     ({ slug }) => slug === global,
   )
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = getTableName({
+  const tableName = createTableName({
     adapter: this,
     config: globalConfig,
     versions: true,

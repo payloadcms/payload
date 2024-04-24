@@ -4,11 +4,12 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 import { sql } from 'drizzle-orm'
 import { type CreateGlobalVersionArgs } from 'payload/database'
 import { buildVersionGlobalFields } from 'payload/versions'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
-import { getTableName } from './schema/getTableName.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getTableName } from './utilities/getTableName.js'
 
 export async function createGlobalVersion<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -16,10 +17,10 @@ export async function createGlobalVersion<T extends TypeWithID>(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
+
   const tableName = getTableName({
     adapter: this,
-    config: global,
-    versions: true,
+    defaultTableName: `_${toSnakeCase(global.slug)}${this.versionsSuffix}`,
   })
 
   const result = await upsertRow<TypeWithVersion<T>>({

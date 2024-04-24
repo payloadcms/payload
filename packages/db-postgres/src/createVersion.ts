@@ -3,11 +3,12 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
-import { getTableName } from './schema/getTableName.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getTableName } from './utilities/getTableName.js'
 
 export async function createVersion<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -21,10 +22,11 @@ export async function createVersion<T extends TypeWithID>(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
+  const defaultTableName = toSnakeCase(collection.slug)
+
   const tableName = getTableName({
     adapter: this,
-    config: collection,
-    versions: true,
+    defaultTableName: `_${defaultTableName}${this.versionsSuffix}`,
   })
 
   const result = await upsertRow<TypeWithVersion<T>>({
@@ -43,15 +45,13 @@ export async function createVersion<T extends TypeWithID>(
   })
 
   const table = this.tables[tableName]
-  const relationshipsTable =
-    this.tables[
-      getTableName({
-        adapter: this,
-        config: collection,
-        relationships: true,
-        versions: true,
-      })
-    ]
+
+  const relationshipsTableName = getTableName({
+    adapter: this,
+    defaultTableName: `_${defaultTableName}${this.versionsSuffix}${this.relationshipsSuffix}`,
+  })
+
+  const relationshipsTable = this.tables[relationshipsTableName]
 
   if (collection.versions.drafts) {
     await db.execute(sql`
