@@ -259,6 +259,7 @@ export const mapFields = (args: {
               name: field.name,
               CustomRowLabel,
               className: field.admin?.className,
+              disableSortable: field.admin?.disableSortable,
               disabled: field.admin?.disabled,
               fieldMap: mapFields({
                 WithServerSideProps,
@@ -311,6 +312,7 @@ export const mapFields = (args: {
               name: field.name,
               blocks,
               className: field.admin?.className,
+              disableSortable: field.admin?.disableSortable,
               disabled: field.admin?.disabled,
               label: field?.label,
               labels: field.labels,
