@@ -76,7 +76,6 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const readOnly = readOnlyFromProps || readOnlyFromContext
   const minRows = minRowsProp ?? required ? 1 : 0
 
-  console.log('ArrayField:disableSortable', disableSortable)
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
   const submitted = useFormSubmitted()
