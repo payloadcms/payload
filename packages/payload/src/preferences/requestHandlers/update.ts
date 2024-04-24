@@ -5,7 +5,19 @@ import type { PayloadHandler } from '../../config/types.js'
 import update from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (req) => {
-  req.data = await req.json()
+  let data
+
+  try {
+    data = await req.json()
+  } catch (error) {
+    data = {}
+  }
+
+  if (data) {
+    req.data = data
+    req.json = () => Promise.resolve(data)
+  }
+
   const payloadRequest = req
 
   const doc = await update({
