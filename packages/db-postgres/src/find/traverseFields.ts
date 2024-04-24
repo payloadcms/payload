@@ -83,6 +83,10 @@ export const traverseFields = ({
     if (fieldAffectsData(field)) {
       switch (field.type) {
         case 'array': {
+          const currentSelect = buildFieldSelect({ field, select })
+
+          if (withSelection && !currentSelect) break
+
           const withArray: Result = {
             columns: buildColumns({
               exclude: ['_parentID'],
@@ -130,6 +134,10 @@ export const traverseFields = ({
 
         case 'select': {
           if (field.hasMany) {
+            const currentSelect = buildFieldSelect({ field, select })
+
+            if (withSelection && !currentSelect) break
+
             const withSelect: Result = {
               columns: {
                 id: false,
@@ -145,8 +153,15 @@ export const traverseFields = ({
           break
         }
 
-        case 'blocks':
+        case 'blocks': {
+          const currentSelect = buildFieldSelect({ field, select })
+          if (withSelection && !currentSelect) break
+
           field.blocks.forEach((block) => {
+            if (withSelection) {
+              if (!currentSelect || !currentSelect?.[block.slug]) return
+            }
+
             const blockKey = `_blocks_${block.slug}`
 
             if (!topLevelArgs[blockKey]) {
@@ -194,6 +209,7 @@ export const traverseFields = ({
           })
 
           break
+        }
 
         case 'group':
           traverseFields({

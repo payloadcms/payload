@@ -114,13 +114,22 @@ export default buildConfigWithDefaults({
                 },
               ],
             },
+            {
+              slug: 'cta',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'title',
+                },
+              ],
+            },
           ],
         },
-        {
-          type: 'relationship',
-          relationTo: 'categories',
-          name: 'category',
-        },
+        // {
+        //   type: 'relationship',
+        //   relationTo: 'categories',
+        //   name: 'category',
+        // },
       ],
     },
   ],

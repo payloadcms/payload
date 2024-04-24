@@ -1,10 +1,10 @@
 import type { Payload } from 'payload'
 
 export const createPost = async (payload: Payload) => {
-  const category = await payload.create({
-    collection: 'categories',
-    data: { title: 'some category' },
-  })
+  // const category = await payload.create({
+  //   collection: 'categories',
+  //   data: { title: 'some category' },
+  // })
 
   return payload.create({
     collection: 'posts',
@@ -42,8 +42,11 @@ export const createPost = async (payload: Payload) => {
           title: 'some title',
           secondTitle: 'some title',
         },
+        {
+          blockType: 'cta',
+          title: 'some cta',
+        },
       ],
-      category: category.id,
     },
   })
 }
