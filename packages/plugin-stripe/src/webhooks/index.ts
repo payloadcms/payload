@@ -1,7 +1,7 @@
-import type { StripeWebhookHandler } from '../types'
+import type { StripeWebhookHandler } from '../types.js'
 
-import { handleCreatedOrUpdated } from './handleCreatedOrUpdated'
-import { handleDeleted } from './handleDeleted'
+import { handleCreatedOrUpdated } from './handleCreatedOrUpdated.js'
+import { handleDeleted } from './handleDeleted.js'
 
 export const handleWebhooks: StripeWebhookHandler = async (args) => {
   const { event, payload, stripeConfig } = args
@@ -21,6 +21,7 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
   if (syncConfig) {
     switch (method) {
       case 'created': {
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         await handleCreatedOrUpdated({
           ...args,
           resourceType,
@@ -30,6 +31,7 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
         break
       }
       case 'updated': {
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         await handleCreatedOrUpdated({
           ...args,
           resourceType,
@@ -39,6 +41,7 @@ export const handleWebhooks: StripeWebhookHandler = async (args) => {
         break
       }
       case 'deleted': {
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         await handleDeleted({
           ...args,
           resourceType,

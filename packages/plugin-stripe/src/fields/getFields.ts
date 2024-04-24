@@ -1,8 +1,8 @@
 import type { CollectionConfig, Field } from 'payload/types'
 
-import type { SanitizedStripeConfig } from '../types'
+import type { SanitizedStripeConfig } from '../types.js'
 
-import { LinkToDoc } from '../ui/LinkToDoc'
+import { LinkToDoc } from '../ui/LinkToDoc.js'
 
 interface Args {
   collection: CollectionConfig
@@ -39,13 +39,12 @@ export const getFields = ({ collection, stripeConfig, syncConfig }: Args): Field
     type: 'ui',
     admin: {
       components: {
-        Field: (args) =>
-          LinkToDoc({
-            ...args,
-            isTestKey: stripeConfig.isTestKey,
-            nameOfIDField: 'stripeID',
-            stripeResourceType: syncConfig.stripeResourceType,
-          }),
+        Field: LinkToDoc,
+      },
+      custom: {
+        isTestKey: stripeConfig.isTestKey,
+        nameOfIDField: 'stripeID',
+        stripeResourceType: syncConfig.stripeResourceType,
       },
       position: 'sidebar',
     },

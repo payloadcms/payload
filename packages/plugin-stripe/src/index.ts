@@ -9,7 +9,7 @@ import { syncExistingWithStripe } from './hooks/syncExistingWithStripe.js'
 import { stripeREST } from './routes/rest.js'
 import { stripeWebhooks } from './routes/webhooks.js'
 
-const stripePlugin =
+export const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
   (config: Config): Config => {
     const { collections } = config
@@ -112,5 +112,3 @@ const stripePlugin =
       endpoints,
     }
   }
-
-export default stripePlugin
