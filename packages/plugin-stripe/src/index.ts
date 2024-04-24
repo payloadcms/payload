@@ -9,6 +9,9 @@ import { syncExistingWithStripe } from './hooks/syncExistingWithStripe.js'
 import { stripeREST } from './routes/rest.js'
 import { stripeWebhooks } from './routes/webhooks.js'
 
+export { LinkToDoc } from './ui/LinkToDoc.jsx'
+export { stripeProxy } from './utilities/stripeProxy.js'
+
 export const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
   (config: Config): Config => {
