@@ -44,9 +44,6 @@ export const createPayloadRequest = async ({
   const isGraphQL =
     !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
 
-  let requestFallbackLocale
-  let requestLocale
-
   const language = getRequestLanguage({
     config,
     cookies,
@@ -61,12 +58,10 @@ export const createPayloadRequest = async ({
 
   const customRequest: CustomPayloadRequest = {
     context: {},
-    fallbackLocale: requestFallbackLocale,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
     i18n,
-    locale: requestLocale,
     origin: urlProperties.origin,
     pathname: urlProperties.pathname,
     payload,
