@@ -2,9 +2,14 @@ name: build
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types:
+      - opened
+      - synchronize
+      - reopened
   push:
-    branches: ['main', 'beta']
+    branches:
+      - main
+      - beta
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -138,9 +143,9 @@ jobs:
         database:
           - mongodb
           - postgres
-          #  - postgres-custom-schema
+          - postgres-custom-schema
           - postgres-uuid
-        #  - supabase
+          - supabase
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
