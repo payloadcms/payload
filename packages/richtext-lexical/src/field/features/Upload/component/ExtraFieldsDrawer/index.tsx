@@ -93,7 +93,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
         config,
-        data: deepCopyObject(fields || {}),
+        data: fields ? deepCopyObject(fields) : {},
         fieldSchema,
         locale,
         operation: 'update',
