@@ -17,7 +17,7 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { updateChangelog } from './utils/updateChangelog.js'
 
-const npmPublishLimit = pLimit(10)
+const npmPublishLimit = pLimit(5)
 
 // Update this list with any packages to publish
 const packageWhitelist = [
@@ -210,12 +210,9 @@ async function main() {
   packageDetails = packageDetails.filter((p) => p.name !== 'payload')
   runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
 
-  const results: { name: string; success: boolean; details?: string }[] = []
-  // Sequential publish
-  for (const pkg of packageDetails) {
-    const result = await publishPackageThrottled(pkg, { dryRun })
-    results.push(result)
-  }
+  const results = await Promise.all(
+    packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun })),
+  )
 
   console.log(chalk.bold.green(`\n\nResults:\n`))
 
