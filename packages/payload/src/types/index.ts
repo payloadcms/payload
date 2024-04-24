@@ -70,7 +70,7 @@ export type CustomPayloadRequestProperties<U = unknown> = {
   >
 export type PayloadRequestWithData = {
   /** Data from the request body */
-  data: Record<string, unknown>
+  data?: Record<string, unknown>
   /** The locale that should be used for a field when it is not translated to the requested locale */
   file?: {
     data: Buffer
