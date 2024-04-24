@@ -25,11 +25,12 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
   if (props?.blocks?.length) {
     props.blocks = props.blocks.map((block) => {
       const blockCopy = cloneDeep(block)
-      return {
-        ...blockCopy,
-        fields: blockCopy.fields.concat(baseBlockFields as FieldWithRichTextRequiredEditor[]),
-        labels: !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels,
-      }
+
+      blockCopy.fields = blockCopy.fields.concat(
+        baseBlockFields as FieldWithRichTextRequiredEditor[],
+      )
+      blockCopy.labels = !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels
+      return blockCopy
     })
     //  unsanitizedBlock.fields are sanitized in the React component and not here.
     // That's because we do not have access to the payload config here.
