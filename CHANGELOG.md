@@ -1,3 +1,20 @@
+## [2.14.0](https://github.com/payloadcms/payload/compare/v2.13.0...v2.14.0) (2024-04-24)
+
+
+### Features
+
+* add count operation to collections ([#5936](https://github.com/payloadcms/payload/issues/5936)) ([c380dee](https://github.com/payloadcms/payload/commit/c380deee4a1db82bce9fea264060000957a53eee))
+
+### Bug Fixes
+
+* bulk publish ([#6006](https://github.com/payloadcms/payload/issues/6006)) ([c11600a](https://github.com/payloadcms/payload/commit/c11600aac38cd67019765faf2a41e62df13e50cc))
+* **db-postgres:** extra version suffix added to table names ([#5939](https://github.com/payloadcms/payload/issues/5939)) ([bd8b512](https://github.com/payloadcms/payload/commit/bd8b5123b0991e53eb209315897dbca10d14d45e))
+* **db-postgres:** Fixes nested groups inside nested blocks ([#5882](https://github.com/payloadcms/payload/issues/5882)) ([e258866](https://github.com/payloadcms/payload/commit/e25886649fce414d5d47918f35ba2d4d2ba59174))
+* **db-postgres:** row table names were not being built properly - v2 ([#5961](https://github.com/payloadcms/payload/issues/5961)) ([9152a23](https://github.com/payloadcms/payload/commit/9152a238d2982503e7f509350651b0ba3f83b1ec))
+* header filters ([#5997](https://github.com/payloadcms/payload/issues/5997)) ([ad01c67](https://github.com/payloadcms/payload/commit/ad01c6784d283386dc819dfcd47455cad5accfaa))
+* min/max attributes missing from number input ([#5779](https://github.com/payloadcms/payload/issues/5779)) ([985796b](https://github.com/payloadcms/payload/commit/985796be54b593af0a4934685ab8621b9badda10))
+* removes `equals` & `not_equals` operators from fields with `hasMany` ([#5885](https://github.com/payloadcms/payload/issues/5885)) ([a8c9625](https://github.com/payloadcms/payload/commit/a8c9625cdec33476a5da87bcd9f010f9d7fb9a94))
+
 ## [2.13.0](https://github.com/payloadcms/payload/compare/v2.12.1...v2.13.0) (2024-04-19)
 
 
