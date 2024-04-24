@@ -18,19 +18,6 @@ export default buildConfigWithDefaults({
   collections: [
     PostsCollection,
     // MediaCollection
-    {
-      slug: 'users',
-      auth: {
-        tokenExpiration: 60 * 5,
-      },
-      fields: [
-        {
-          type: 'checkbox',
-          name: 'roles',
-          label: 'Roles',
-        },
-      ],
-    },
   ],
   // globals: [
   //   MenuGlobal,
