@@ -28,6 +28,11 @@ export const Pages: CollectionConfig = {
               required: true,
             },
             {
+              name: 'photo',
+              type: 'upload',
+              relationTo: 'media',
+            },
+            {
               name: 'excerpt',
               label: 'Excerpt',
               type: 'text',

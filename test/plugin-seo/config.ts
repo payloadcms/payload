@@ -57,6 +57,7 @@ export default buildConfigWithDefaults({
       ],
       generateDescription: ({ doc }: any) => doc?.excerpt?.value || 'generated description',
       generateTitle: (data: any) => `Website.com — ${data?.doc?.title?.value}`,
+      generateImage: (data: any) => data.doc?.photo?.value,
       generateURL: ({ doc, locale }: any) =>
         `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug?.value || ''}`,
       tabbedUI: true,
