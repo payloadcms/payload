@@ -56,7 +56,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
     CustomRowLabel,
     className,
     descriptionProps,
-    disableSortable,
+    disableSortable = false,
     errorProps,
     fieldMap,
     forceRender = false,
@@ -76,8 +76,7 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
   const readOnly = readOnlyFromProps || readOnlyFromContext
   const minRows = minRowsProp ?? required ? 1 : 0
 
-  // TODO: get property value (currently undefined)
-  console.log('disableSortable', disableSortable)
+  console.log('ArrayField:disableSortable', disableSortable)
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
   const submitted = useFormSubmitted()
@@ -265,12 +264,17 @@ export const _ArrayField: React.FC<ArrayFieldProps> = (props) => {
               errorPath.startsWith(`${path}.${i}.`),
             ).length
             return (
-              <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
+              <DraggableSortableItem
+                disabled={readOnly || disableSortable}
+                id={row.id}
+                key={row.id}
+              >
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
                     CustomRowLabel={CustomRowLabel}
                     addRow={addRow}
+                    disableSortable={disableSortable}
                     duplicateRow={duplicateRow}
                     errorCount={rowErrorCount}
                     fieldMap={fieldMap}

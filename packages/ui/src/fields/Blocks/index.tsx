@@ -61,7 +61,7 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
     blocks,
     className,
     descriptionProps,
-    disableSortable,
+    disableSortable = false,
     errorProps,
     forceRender = false,
     label,
@@ -80,8 +80,6 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
   const readOnly = readOnlyFromProps || readOnlyFromContext
   const minRows = minRowsProp ?? required ? 1 : 0
 
-  // TODO: get property value (currently undefined)
-  console.log('disableSortable', disableSortable)
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, setModified } = useForm()
   const { code: locale } = useLocale()
@@ -281,13 +279,18 @@ const _BlocksField: React.FC<BlocksFieldProps> = (props) => {
                 errorPath.startsWith(`${path}.${i}`),
               ).length
               return (
-                <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
+                <DraggableSortableItem
+                  disabled={readOnly || disableSortable}
+                  id={row.id}
+                  key={row.id}
+                >
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockToRender}
                       blocks={blocks}
+                      disableSortable={disableSortable}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       forceRender={forceRender}
