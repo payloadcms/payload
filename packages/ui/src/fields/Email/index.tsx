@@ -65,7 +65,7 @@ const EmailField: React.FC<EmailFieldProps> = (props) => {
 
   const { path, setValue, showError, value } = useField({
     path: pathFromContext || pathFromProps || name,
-    validate: memoizedValidate,
+    validate: typeof validate === 'function' ? memoizedValidate : undefined,
   })
 
   return (
