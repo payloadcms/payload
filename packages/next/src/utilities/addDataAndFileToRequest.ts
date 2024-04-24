@@ -1,28 +1,27 @@
-import type { CustomPayloadRequest, PayloadRequest } from 'payload/types'
+import type { BasePayloadRequest, PayloadRequestWithData } from 'payload/types'
 
 import type { NextFileUploadOptions } from '../next-fileupload/index.js'
 
 import { nextFileUpload } from '../next-fileupload/index.js'
 
-type AddDataAndFileToRequest = (args: { request: PayloadRequest }) => Promise<void>
+type ReturnType = BasePayloadRequest & PayloadRequestWithData
+type AddDataAndFileToRequest = (args: { request: BasePayloadRequest }) => Promise<ReturnType>
 
 /**
  * Mutates the Request to contain 'data' and 'file' if present
  */
-export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
-  request: incomingRequest,
-}) => {
-  const config = incomingRequest.payload.config
+export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({ request }) => {
+  const config = request.payload.config
   let data: Record<string, any> | undefined = undefined
-  let file: CustomPayloadRequest['file'] = undefined
+  let file: PayloadRequestWithData['file'] = undefined
 
   if (
-    incomingRequest.method &&
-    ['PATCH', 'POST', 'PUT'].includes(incomingRequest.method.toUpperCase()) &&
-    incomingRequest.body
+    request.method &&
+    ['PATCH', 'POST', 'PUT'].includes(request.method.toUpperCase()) &&
+    request.body
   ) {
     // @ts-expect-error todo: fix type
-    const request = new Request(incomingRequest)
+    const request = new Request(mutableRequest)
     const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
     if (contentType === 'application/json') {
@@ -62,9 +61,12 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
     }
   }
 
+  const mutableRequest = request as ReturnType
   if (data) {
-    incomingRequest.data = data
-    incomingRequest.json = () => Promise.resolve(data)
+    mutableRequest['data'] = data
+    mutableRequest.json = () => Promise.resolve(data)
   }
-  if (file) incomingRequest.file = file
+  if (file) mutableRequest['file'] = file
+
+  return mutableRequest
 }

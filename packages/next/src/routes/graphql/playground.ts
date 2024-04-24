@@ -2,16 +2,13 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { renderPlaygroundPage } from 'graphql-playground-html'
 
-import { addLocalesToRequest } from '../../utilities/addLocalesToRequest.js'
-import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
+import { createBasePayloadRequest } from '../../utilities/createBasePayloadRequest.js'
 
 export const GET = (config: Promise<SanitizedConfig>) => async (request: Request) => {
-  const req = await createPayloadRequest({
+  const req = await createBasePayloadRequest({
     config,
     request,
   })
-
-  addLocalesToRequest({ request: req })
 
   if (
     (!req.payload.config.graphQL.disable &&

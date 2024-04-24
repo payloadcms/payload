@@ -1,7 +1,6 @@
 import type {
-  Collection,
-  CustomPayloadRequest,
-  PayloadRequest,
+  BasePayloadRequest,
+  CustomPayloadRequestProperties,
   SanitizedConfig,
 } from 'payload/types'
 
@@ -12,6 +11,7 @@ import { getDataLoader } from 'payload/utilities'
 import qs from 'qs'
 import { URL } from 'url'
 
+import { sanitizeLocales } from './addLocalesToRequest.js'
 import { getPayloadHMR } from './getPayloadHMR.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 
@@ -23,23 +23,18 @@ type Args = {
   request: Request
 }
 
-export const createPayloadRequest = async ({
+export const createBasePayloadRequest = async ({
   config: configPromise,
   params,
   request,
-}: Args): Promise<PayloadRequest> => {
+}: Args): Promise<BasePayloadRequest> => {
   const cookies = parseCookies(request.headers)
   const payload = await getPayloadHMR({ config: configPromise })
 
-  const { collections, config } = payload
-
-  let collection: Collection = undefined
-  if (params?.collection && collections?.[params.collection]) {
-    collection = collections[params.collection]
-  }
+  const { config } = payload
 
   const urlProperties = new URL(request.url)
-  const { pathname } = urlProperties
+  const { pathname, searchParams } = urlProperties
 
   const isGraphQL =
     !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
@@ -56,12 +51,26 @@ export const createPayloadRequest = async ({
     language,
   })
 
-  const customRequest: CustomPayloadRequest = {
+  let locale
+  let fallbackLocale
+  if (config.localization) {
+    const locales = sanitizeLocales({
+      fallbackLocale: searchParams.get('fallback-locale'),
+      locale: searchParams.get('locale'),
+      localization: payload.config.localization,
+    })
+    locale = locales.locale
+    fallbackLocale = locales.fallbackLocale
+  }
+
+  const customRequest: CustomPayloadRequestProperties = {
     context: {},
+    fallbackLocale,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
     i18n,
+    locale,
     origin: urlProperties.origin,
     pathname: urlProperties.pathname,
     payload,
@@ -85,7 +94,7 @@ export const createPayloadRequest = async ({
     user: null,
   }
 
-  const req: PayloadRequest = Object.assign(request, customRequest)
+  const req: BasePayloadRequest = Object.assign(request, customRequest)
 
   req.payloadDataLoader = getDataLoader(req)
 

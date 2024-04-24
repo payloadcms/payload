@@ -19,7 +19,7 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { BasePayloadRequest, PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 export type BinScriptConfig = {
@@ -186,7 +186,7 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Web Request/Response model, but the the req has more payload specific properties added to it. */
-export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
+export type PayloadHandler = (req: BasePayloadRequest) => Promise<Response> | Response
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints

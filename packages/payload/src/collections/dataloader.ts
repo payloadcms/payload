@@ -2,7 +2,7 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { PayloadRequest } from '../types/index.js'
+import type { BasePayloadRequest, PayloadRequest } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 
 import { isValidID } from '../utilities/isValidID.js'
@@ -17,7 +17,7 @@ import { isValidID } from '../utilities/isValidID.js'
 // and also ensures complex GraphQL queries perform lightning-fast.
 
 const batchAndLoadDocs =
-  (req: PayloadRequest): BatchLoadFn<string, TypeWithID> =>
+  (req: BasePayloadRequest): BatchLoadFn<string, TypeWithID> =>
   async (keys: string[]): Promise<TypeWithID[]> => {
     const { payload } = req
 
@@ -111,7 +111,7 @@ const batchAndLoadDocs =
         locale,
         overrideAccess: Boolean(overrideAccess),
         pagination: false,
-        req,
+        req: req as PayloadRequest,
         showHiddenFields: Boolean(showHiddenFields),
         where: {
           id: {
@@ -149,4 +149,4 @@ const batchAndLoadDocs =
     return docs
   }
 
-export const getDataLoader = (req: PayloadRequest) => new DataLoader(batchAndLoadDocs(req))
+export const getDataLoader = (req: BasePayloadRequest) => new DataLoader(batchAndLoadDocs(req))

@@ -3,13 +3,13 @@ import fs from 'fs'
 import path from 'path'
 const { fromFile } = fileType
 
-import type { CustomPayloadRequest } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 const mimeTypeEstimate = {
   svg: 'image/svg+xml',
 }
 
-export const getFileByPath = async (filePath: string): Promise<CustomPayloadRequest['file']> => {
+export const getFileByPath = async (filePath: string): Promise<PayloadRequest['file']> => {
   if (typeof filePath === 'string') {
     const data = fs.readFileSync(filePath)
     const mimetype = fromFile(filePath)
