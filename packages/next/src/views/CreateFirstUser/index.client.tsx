@@ -6,16 +6,16 @@ import { useComponentMap } from '@payloadcms/ui/providers/ComponentMap'
 import React from 'react'
 
 export const CreateFirstUserFields: React.FC<{
-  createFirstUserFieldMap: FieldMap
+  baseAuthFieldMap: FieldMap
   userSlug: string
-}> = ({ createFirstUserFieldMap, userSlug }) => {
+}> = ({ baseAuthFieldMap, userSlug }) => {
   const { getFieldMap } = useComponentMap()
 
   const fieldMap = getFieldMap({ collectionSlug: userSlug })
 
   return (
     <RenderFields
-      fieldMap={[...(createFirstUserFieldMap || []), ...(fieldMap || [])]}
+      fieldMap={[...(baseAuthFieldMap || []), ...(fieldMap || [])]}
       operation="create"
       path=""
       readOnly={false}
