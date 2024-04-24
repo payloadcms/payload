@@ -1179,6 +1179,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@payloadcms/next':
+        specifier: workspace:*
+        version: link:../next
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations

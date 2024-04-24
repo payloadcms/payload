@@ -12,10 +12,8 @@ import { getDataLoader } from 'payload/utilities'
 import qs from 'qs'
 import { URL } from 'url'
 
-import { getDataAndFile } from './getDataAndFile.js'
 import { getPayloadHMR } from './getPayloadHMR.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
-import { getRequestLocales } from './getRequestLocales.js'
 
 type Args = {
   config: Promise<SanitizedConfig> | SanitizedConfig
@@ -41,29 +39,10 @@ export const createPayloadRequest = async ({
   }
 
   const urlProperties = new URL(request.url)
-  const { pathname, searchParams } = urlProperties
+  const { pathname } = urlProperties
 
   const isGraphQL =
     !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
-
-  const { data, file } = await getDataAndFile({
-    collection,
-    config,
-    request,
-  })
-
-  let requestFallbackLocale
-  let requestLocale
-
-  if (config.localization) {
-    const locales = getRequestLocales({
-      data,
-      localization: config.localization,
-      searchParams,
-    })
-    requestLocale = locales.locale
-    requestFallbackLocale = locales.fallbackLocale
-  }
 
   const language = getRequestLanguage({
     config,
@@ -79,14 +58,10 @@ export const createPayloadRequest = async ({
 
   const customRequest: CustomPayloadRequest = {
     context: {},
-    data,
-    fallbackLocale: requestFallbackLocale,
-    file,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
     i18n,
-    locale: requestLocale,
     origin: urlProperties.origin,
     pathname: urlProperties.pathname,
     payload,
@@ -112,7 +87,6 @@ export const createPayloadRequest = async ({
 
   const req: PayloadRequest = Object.assign(request, customRequest)
 
-  if (data) req.json = () => Promise.resolve(data)
   req.payloadDataLoader = getDataLoader(req)
 
   req.user = await executeAuthStrategies({

@@ -11,6 +11,8 @@ import type {
   GlobalRouteHandlerWithID,
 } from './types.js'
 
+import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
+import { addLocalesToRequest } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { access } from './auth/access.js'
@@ -230,7 +232,12 @@ export const GET =
           entitySlug: slug1,
           payloadRequest: req,
         })
-        if (customEndpointResponse) return customEndpointResponse
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 1:
@@ -288,7 +295,12 @@ export const GET =
           payloadRequest: req,
         })
 
-        if (customEndpointResponse) return customEndpointResponse
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 2:
@@ -326,6 +338,8 @@ export const GET =
             break
         }
       } else if (slug.length === 1 && slug1 in endpoints.root.GET) {
+        await addDataAndFileToRequest({ request: req })
+        addLocalesToRequest({ request: req })
         res = await endpoints.root.GET[slug1]({ req })
       }
 
@@ -389,7 +403,12 @@ export const POST =
           payloadRequest: req,
         })
 
-        if (customEndpointResponse) return customEndpointResponse
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 1:
@@ -440,7 +459,13 @@ export const POST =
           entitySlug: `${slug1}/${slug2}`,
           payloadRequest: req,
         })
-        if (customEndpointResponse) return customEndpointResponse
+
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 2:
@@ -472,6 +497,8 @@ export const POST =
             res = new Response('Route Not Found', { status: 404 })
         }
       } else if (slug.length === 1 && slug1 in endpoints.root.POST) {
+        await addDataAndFileToRequest({ request: req })
+        addLocalesToRequest({ request: req })
         res = await endpoints.root.POST[slug1]({ req })
       }
 
@@ -534,7 +561,12 @@ export const DELETE =
           entitySlug: slug1,
           payloadRequest: req,
         })
-        if (customEndpointResponse) return customEndpointResponse
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 1:
@@ -607,7 +639,13 @@ export const PATCH =
           entitySlug: slug1,
           payloadRequest: req,
         })
-        if (customEndpointResponse) return customEndpointResponse
+
+        if (customEndpointResponse) {
+          return customEndpointResponse
+        } else {
+          await addDataAndFileToRequest({ request: req })
+          addLocalesToRequest({ request: req })
+        }
 
         switch (slug.length) {
           case 1:

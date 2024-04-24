@@ -2,6 +2,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import { renderPlaygroundPage } from 'graphql-playground-html'
 
+import { addLocalesToRequest } from '../../utilities/addLocalesToRequest.js'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 
 export const GET = (config: Promise<SanitizedConfig>) => async (request: Request) => {
@@ -9,6 +10,8 @@ export const GET = (config: Promise<SanitizedConfig>) => async (request: Request
     config,
     request,
   })
+
+  addLocalesToRequest({ request: req })
 
   if (
     (!req.payload.config.graphQL.disable &&
