@@ -325,6 +325,7 @@ export { createClientComponent } from './field/features/createClientComponent.js
 export { TestRecorderFeature } from './field/features/debug/testrecorder/feature.server.js'
 export { TreeViewFeature } from './field/features/debug/treeview/feature.server.js'
 export { BoldFeature } from './field/features/format/bold/feature.server.js'
+
 export { SectionWithEntries as FormatSectionWithEntries } from './field/features/format/common/floatingSelectToolbarSection.js'
 export { InlineCodeFeature } from './field/features/format/inlinecode/feature.server.js'
 export { ItalicFeature } from './field/features/format/italic/feature.server.js'
@@ -332,8 +333,9 @@ export { StrikethroughFeature } from './field/features/format/strikethrough/feat
 export { SubscriptFeature } from './field/features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './field/features/format/superscript/feature.server.js'
 export { UnderlineFeature } from './field/features/format/underline/feature.server.js'
-
 export { HeadingFeature } from './field/features/heading/feature.server.js'
+
+export { HorizontalRuleFeature } from './field/features/horizontalrule/feature.server.js'
 export { IndentFeature } from './field/features/indent/feature.server.js'
 
 export { LinkFeature, type LinkFeatureServerProps } from './field/features/link/feature.server.js'
