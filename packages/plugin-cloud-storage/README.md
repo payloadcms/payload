@@ -2,13 +2,20 @@
 
 This repository contains the officially supported Payload Cloud Storage plugin. It extends Payload to allow you to store all uploaded media in third-party permanent storage.
 
-#### Requirements
+**NOTE:** If you are using Payload 3.0 and one of the following storage services, you can use the following packages instead of this one:
 
-- Payload version `1.0.19` or higher is required
+| Service              | Package                                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/beta/packages/storage-vercel-blob) |
+| AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/beta/packages/storage-s3)                   |
+| Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/beta/packages/storage-azure)             |
+| Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/beta/packages/storage-gcs)                 |
+
+This package is now best used for implementing custom storage solutions or third-party storage services that do not have `@payloadcms/storage-*` packages.
 
 ## Installation
 
-`yarn add @payloadcms/plugin-cloud-storage` or `npm install @payloadcms/plugin-cloud-storage`
+`pnpm add @payloadcms/plugin-cloud-storage`
 
 ## Usage
 

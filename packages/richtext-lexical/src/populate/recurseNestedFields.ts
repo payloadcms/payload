@@ -1,5 +1,5 @@
 import type { RequestContext } from 'payload'
-import type { Field, PayloadRequest } from 'payload/types'
+import type { Field, PayloadRequestWithData } from 'payload/types'
 
 import { afterReadTraverseFields } from 'payload/utilities'
 
@@ -23,7 +23,7 @@ type NestedRichTextFieldsArgs = {
   flattenLocales: boolean
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
 }

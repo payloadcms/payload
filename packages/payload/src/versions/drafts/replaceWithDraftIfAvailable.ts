@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/co
 import type { AccessResult } from '../../config/types.js'
 import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequestWithData, Where } from '../../types/index.js'
 
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -16,7 +16,7 @@ type Arguments<T> = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
   overrideAccess: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({

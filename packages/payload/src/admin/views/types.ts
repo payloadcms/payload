@@ -4,7 +4,7 @@ import type { Permissions } from '../../auth/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Locale } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -42,7 +42,7 @@ export type InitPageResult = {
   globalConfig?: SanitizedGlobalConfig
   locale: Locale
   permissions: Permissions
-  req: PayloadRequest
+  req: PayloadRequestWithData
   translations: SupportedLanguages
   visibleEntities: VisibleEntities
 }

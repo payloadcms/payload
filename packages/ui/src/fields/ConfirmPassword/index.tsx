@@ -1,9 +1,7 @@
 'use client'
-import type { Description, FormField, Validate } from 'payload/types'
+import type { FormField } from 'payload/types'
 
 import React, { useCallback } from 'react'
-
-import type { FormFieldBase } from '../shared/index.js'
 
 import { FieldError } from '../../forms/FieldError/index.js'
 import { FieldLabel } from '../../forms/FieldLabel/index.js'
@@ -12,36 +10,13 @@ import { useField } from '../../forms/useField/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
-export type ConfirmPasswordFieldProps = FormFieldBase & {
-  autoComplete?: string
-  className?: string
-  description?: Description
+
+export type ConfirmPasswordFieldProps = {
   disabled?: boolean
-  label?: string
-  name: string
-  path?: string
-  required?: boolean
-  style?: React.CSSProperties
-  validate?: Validate
-  width?: string
 }
 
 export const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
-  const {
-    name,
-    CustomError,
-    CustomLabel,
-    autoComplete,
-    className,
-    disabled,
-    errorProps,
-    label,
-    labelProps,
-    path: pathFromProps,
-    required,
-    style,
-    width,
-  } = props
+  const { disabled } = props
 
   const password = useFormFields<FormField>(([fields]) => fields.password)
   const { t } = useTranslation()
@@ -61,8 +36,11 @@ export const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
     [password, t],
   )
 
-  const { formProcessing, path, setValue, showError, value } = useField({
-    path: pathFromProps || name,
+  const path = 'confirm-password'
+
+  const { setValue, showError, value } = useField({
+    disableFormData: true,
+    path,
     validate,
   })
 
@@ -80,9 +58,9 @@ export const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
       />
       <input
         autoComplete="off"
-        disabled={formProcessing || disabled}
-        id={`field-${path.replace(/\./g, '__')}`}
-        name={path}
+        disabled={!!disabled}
+        id="field-confirm-password"
+        name="confirm-password"
         onChange={setValue}
         type="password"
         value={(value as string) || ''}

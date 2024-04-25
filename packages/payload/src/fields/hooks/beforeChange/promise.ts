@@ -2,7 +2,7 @@ import merge from 'deepmerge'
 
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { Operation, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { Operation, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Field, FieldHookArgs, TabAsField, ValidateOptions } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -24,7 +24,7 @@ type Args = {
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
   path: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
   siblingDocWithLocales?: Record<string, unknown>

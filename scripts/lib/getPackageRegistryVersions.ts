@@ -1,6 +1,9 @@
 import chalk from 'chalk'
+import pLimit from 'p-limit'
 
 import { getPackageDetails } from './getPackageDetails.js'
+
+const npmRequestLimit = pLimit(40)
 
 const packages = [
   'payload',
@@ -37,15 +40,21 @@ const packages = [
 export const getPackageRegistryVersions = async (): Promise<void> => {
   const packageDetails = await getPackageDetails(packages)
 
-  await Promise.all(
-    packageDetails.map(async (pkg) => {
-      // Get published version from npm
-      const json = await fetch(`https://registry.npmjs.org/${pkg.name}`).then((res) => res.json())
-      const { latest = 'N/A', beta = 'N/A', alpha = 'N/A' } = json['dist-tags'] ?? {}
-      const msg = `${chalk.bold(pkg.name.padEnd(32))} latest: ${latest?.padEnd(16)} beta: ${beta?.padEnd(16)} alpha: ${alpha}`
-      console.log(msg)
-    }),
+  const results = await Promise.all(
+    packageDetails.map(async (pkg) =>
+      npmRequestLimit(async () => {
+        // Get published version from npm
+        const json = await fetch(`https://registry.npmjs.org/${pkg.name}`).then((res) => res.json())
+        const { latest = 'N/A', beta = 'N/A', alpha = 'N/A' } = json['dist-tags'] ?? {}
+        const msg = `${chalk.bold(pkg.name.padEnd(32))} latest: ${latest?.padEnd(
+          16,
+        )} beta: ${beta?.padEnd(16)} alpha: ${alpha}`
+        return msg
+      }),
+    ),
   )
+
+  console.log(results.join('\n'))
 }
 
 if (import.meta.url === new URL(import.meta.url).href) {

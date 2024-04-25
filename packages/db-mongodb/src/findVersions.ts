@@ -1,6 +1,6 @@
 import type { PaginateOptions } from 'mongoose'
 import type { FindVersions } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { flattenWhereToOperators } from 'payload/database'
 
@@ -18,7 +18,7 @@ export const findVersions: FindVersions = async function findVersions(
     locale,
     page,
     pagination,
-    req = {} as PayloadRequest,
+    req = {} as PayloadRequestWithData,
     skip,
     sort: sortArg,
     where,

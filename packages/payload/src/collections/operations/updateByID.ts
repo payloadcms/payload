@@ -4,7 +4,7 @@ import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
 import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -37,7 +37,7 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
   id: number | string
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields?: boolean
 }
 
@@ -261,7 +261,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // Update
     // /////////////////////////////////////
 
-    if (!shouldSaveDraft) {
+    if (!shouldSaveDraft || data._status === 'published') {
       result = await req.payload.db.updateOne({
         id,
         collection: collectionConfig.slug,

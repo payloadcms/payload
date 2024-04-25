@@ -1,12 +1,12 @@
 import type { CreateVersionArgs, TypeWithVersion } from 'payload/database'
-import type { PayloadRequest, TypeWithID } from 'payload/types'
+import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
-import { getTableName } from './schema/getTableName.js'
 import { upsertRow } from './upsertRow/index.js'
 
 export async function createVersion<T extends TypeWithID>(
@@ -15,17 +15,18 @@ export async function createVersion<T extends TypeWithID>(
     autosave,
     collectionSlug,
     parent,
-    req = {} as PayloadRequest,
+    req = {} as PayloadRequestWithData,
     versionData,
   }: CreateVersionArgs<T>,
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
-  const tableName = getTableName({
-    adapter: this,
-    config: collection,
-    versions: true,
-  })
+  const defaultTableName = toSnakeCase(collection.slug)
+
+  const tableName = this.tableNameMap.get(`_${defaultTableName}${this.versionsSuffix}`)
+
+  const version = { ...versionData }
+  if (version.id) delete version.id
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
@@ -33,7 +34,7 @@ export async function createVersion<T extends TypeWithID>(
       autosave,
       latest: true,
       parent,
-      version: versionData,
+      version,
     },
     db,
     fields: buildVersionCollectionFields(collection),
@@ -43,15 +44,9 @@ export async function createVersion<T extends TypeWithID>(
   })
 
   const table = this.tables[tableName]
+
   const relationshipsTable =
-    this.tables[
-      getTableName({
-        adapter: this,
-        config: collection,
-        relationships: true,
-        versions: true,
-      })
-    ]
+    this.tables[`_${defaultTableName}${this.versionsSuffix}${this.relationshipsSuffix}`]
 
   if (collection.versions.drafts) {
     await db.execute(sql`

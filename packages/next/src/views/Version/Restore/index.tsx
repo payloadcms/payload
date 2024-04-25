@@ -6,6 +6,8 @@ import { Pill } from '@payloadcms/ui/elements/Pill'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { requests } from '@payloadcms/ui/utilities/api'
+import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
 import { toast } from 'react-toastify'
 
@@ -32,6 +34,7 @@ const Restore: React.FC<Props> = ({
   } = useConfig()
   const { toggleModal } = useModal()
   const [processing, setProcessing] = useState(false)
+  const router = useRouter()
   const { i18n, t } = useTranslation()
 
   const restoreMessage = t('version:aboutToRestoreGlobal', {
@@ -55,22 +58,20 @@ const Restore: React.FC<Props> = ({
   const handleRestore = useCallback(async () => {
     setProcessing(true)
 
-    const res: any = {}
-
-    // const res = await requests.post(fetchURL, {
-    //   headers: {
-    //     'Accept-Language': i18n.language,
-    //   },
-    // })
+    const res = await requests.post(fetchURL, {
+      headers: {
+        'Accept-Language': i18n.language,
+      },
+    })
 
     if (res.status === 200) {
       const json = await res.json()
       toast.success(json.message)
-      // history.push(redirectURL)
+      router.push(redirectURL)
     } else {
       toast.error(t('version:problemRestoringVersion'))
     }
-  }, [fetchURL, redirectURL, t, i18n])
+  }, [fetchURL, redirectURL, t, i18n, router])
 
   return (
     <Fragment>

@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from 'payload/database'
-import type { PayloadRequest, Where } from 'payload/types'
+import type { PayloadRequestWithData, Where } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { findOperation } from 'payload/operations'
@@ -20,7 +20,7 @@ export type Resolver = (
     where?: Where
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<PaginatedDocs<any>>

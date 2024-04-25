@@ -1,6 +1,6 @@
 import type { Payload, RequestContext } from '../../../index.js'
 import type { GeneratedTypes } from '../../../index.js'
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequestWithData } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -13,7 +13,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
     email
   }
   overrideAccess: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
 }
 
 async function localUnlock<T extends keyof GeneratedTypes['collections']>(

@@ -1,8 +1,8 @@
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 type CorsArgs = {
   headers: Headers
-  req: Partial<PayloadRequest>
+  req: Partial<PayloadRequestWithData>
 }
 export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
   const cors = req?.payload.config.cors

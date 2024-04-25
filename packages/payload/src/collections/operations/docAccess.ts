@@ -1,5 +1,5 @@
 import type { CollectionPermission } from '../../auth/index.js'
-import type { AllOperations, PayloadRequest } from '../../types/index.js'
+import type { AllOperations, PayloadRequestWithData } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -12,7 +12,7 @@ const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
 type Arguments = {
   collection: Collection
   id: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 export async function docAccessOperation(args: Arguments): Promise<CollectionPermission> {
