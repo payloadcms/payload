@@ -218,7 +218,6 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       ) {
         if (formState.password) result.password = formState.password
         if (formState.email) result.email = formState.email
-        if (formState.password) result.password = formState.password
       }
     }
 
