@@ -66,62 +66,64 @@ export default buildConfigWithDefaults({
   ],
   plugins: [relationshipsAsObjectID()],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: 'dev@payloadcms.com',
-        password: 'test',
-      },
-    })
+    if (payload.db.name === 'mongoose') {
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: 'dev@payloadcms.com',
+          password: 'test',
+        },
+      })
 
-    const page = await payload.create({
-      collection: 'pages',
-      data: {
-        title: 'page',
-      },
-    })
+      const page = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'page',
+        },
+      })
 
-    const post1 = await payload.create({
-      collection: 'posts',
-      data: {
-        title: 'post 1',
-      },
-    })
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'post 1',
+        },
+      })
 
-    const post2 = await payload.create({
-      collection: 'posts',
-      data: {
-        title: 'post 2',
-      },
-    })
+      const post2 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'post 2',
+        },
+      })
 
-    const upload = await payload.create({
-      collection: 'uploads',
-      data: {},
-      filePath: path.resolve(__dirname, './payload-logo.png'),
-    })
+      const upload = await payload.create({
+        collection: 'uploads',
+        data: {},
+        filePath: path.resolve(__dirname, './payload-logo.png'),
+      })
 
-    await payload.create({
-      collection: 'relations',
-      depth: 0,
-      data: {
-        hasOne: post1.id,
-        hasOnePoly: { relationTo: 'pages', value: page.id },
-        hasMany: [post1.id, post2.id],
-        hasManyPoly: [
-          { relationTo: 'posts', value: post1.id },
-          { relationTo: 'pages', value: page.id },
-        ],
-        upload: upload.id,
-      },
-    })
+      await payload.create({
+        collection: 'relations',
+        depth: 0,
+        data: {
+          hasOne: post1.id,
+          hasOnePoly: { relationTo: 'pages', value: page.id },
+          hasMany: [post1.id, post2.id],
+          hasManyPoly: [
+            { relationTo: 'posts', value: post1.id },
+            { relationTo: 'pages', value: page.id },
+          ],
+          upload: upload.id,
+        },
+      })
 
-    await payload.create({
-      collection: 'relations',
-      depth: 0,
-      data: {
-        hasOnePoly: { relationTo: 'pages', value: page.id },
-      },
-    })
+      await payload.create({
+        collection: 'relations',
+        depth: 0,
+        data: {
+          hasOnePoly: { relationTo: 'pages', value: page.id },
+        },
+      })
+    }
   },
 })
