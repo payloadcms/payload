@@ -17,7 +17,7 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { updateChangelog } from './utils/updateChangelog.js'
 
-const npmPublishLimit = pLimit(5)
+const npmPublishLimit = pLimit(10)
 
 // Update this list with any packages to publish
 const packageWhitelist = [
@@ -142,7 +142,9 @@ async function main() {
   console.log(chalk.bold.yellow(`  Tag: ${tag}\n`))
   console.log(chalk.bold.green(`  Changes (${packageDetails.length} packages):\n`))
   console.log(
-    `${packageDetails.map((p) => `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}`).join('\n')}\n`,
+    `${packageDetails
+      .map((p) => `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}`)
+      .join('\n')}\n`,
   )
 
   const confirmPublish = await confirm('Are you sure you want to create these versions?')
