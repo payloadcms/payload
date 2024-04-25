@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { v4 as uuid } from 'uuid'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
