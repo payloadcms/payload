@@ -18,7 +18,6 @@ type Args = {
   data: unknown
   field: ArrayField
   locale?: string
-  texts: Record<string, unknown>[]
   numbers: Record<string, unknown>[]
   path: string
   relationships: Record<string, unknown>[]
@@ -26,6 +25,7 @@ type Args = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
+  texts: Record<string, unknown>[]
 }
 
 export const transformArray = ({
@@ -37,14 +37,15 @@ export const transformArray = ({
   data,
   field,
   locale,
-  texts,
   numbers,
   path,
   relationships,
   relationshipsToDelete,
   selects,
+  texts,
 }: Args) => {
   const newRows: ArrayRowToInsert[] = []
+
   const hasUUID = adapter.tables[arrayTableName]._uuid
 
   if (isArrayOfRows(data)) {
@@ -88,7 +89,6 @@ export const transformArray = ({
         fieldPrefix: '',
         fields: field.fields,
         locales: newRow.locales,
-        texts,
         numbers,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,
@@ -96,6 +96,7 @@ export const transformArray = ({
         relationshipsToDelete,
         row: newRow.row,
         selects,
+        texts,
       })
 
       newRows.push(newRow)

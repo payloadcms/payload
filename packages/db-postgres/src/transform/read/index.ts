@@ -48,11 +48,11 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
     deletions,
     fieldPrefix: '',
     fields,
-    texts,
     numbers,
     path: '',
     relationships,
     table: data,
+    texts,
   })
 
   deletions.forEach((deletion) => deletion())

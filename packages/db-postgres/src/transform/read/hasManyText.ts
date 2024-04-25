@@ -4,11 +4,11 @@ import type { TextField } from 'payload/types'
 type Args = {
   field: TextField
   locale?: string
-  textRows: Record<string, unknown>[]
   ref: Record<string, unknown>
+  textRows: Record<string, unknown>[]
 }
 
-export const transformHasManyText = ({ field, locale, textRows, ref }: Args) => {
+export const transformHasManyText = ({ field, locale, ref, textRows }: Args) => {
   const result = textRows.map(({ text }) => text)
 
   if (locale) {

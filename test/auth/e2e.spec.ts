@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { v4 as uuid } from 'uuid'
 
 import payload from '../../packages/payload/src'
 import { initPageConsoleErrorCatch, login, saveDocAndAssert } from '../helpers'
@@ -82,6 +83,7 @@ describe('auth', () => {
       user = await payload.create({
         collection: apiKeysSlug,
         data: {
+          apiKey: uuid(),
           enableAPIKey: true,
         },
       })
@@ -117,7 +119,7 @@ describe('auth', () => {
       const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
         headers: {
           ...headers,
-          Authorization: `${slug} API-Key ${user.apiKey}`,
+          Authorization: `${apiKeysSlug} API-Key ${user.apiKey}`,
         },
       }).then((res) => res.json())
 

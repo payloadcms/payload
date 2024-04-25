@@ -1,9 +1,10 @@
 import type { UpdateGlobalArgs } from 'payload/database'
 import type { PayloadRequest, TypeWithID } from 'payload/types'
 
+import toSnakeCase from 'to-snake-case'
+
 import type { PostgresAdapter } from './types'
 
-import { getTableName } from './schema/getTableName'
 import { upsertRow } from './upsertRow'
 
 export async function updateGlobal<T extends TypeWithID>(
@@ -12,10 +13,7 @@ export async function updateGlobal<T extends TypeWithID>(
 ): Promise<T> {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
-  const tableName = getTableName({
-    adapter: this,
-    config: globalConfig,
-  })
+  const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
 
   const existingGlobal = await db.query[tableName].findFirst({})
 
