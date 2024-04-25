@@ -1,4 +1,5 @@
-import type { EmailAdapter, SendMailOptions } from 'payload/types'
+import type { EmailAdapter } from 'payload/config'
+import type { SendEmailOptions } from 'payload/types'
 
 export type ResendAdapterArgs = {
   defaultFromAddress: string
@@ -6,7 +7,7 @@ export type ResendAdapterArgs = {
   resendApiKey: string
 }
 
-type ResendAdapter = EmailAdapter<SendMailOptions, ResendResponse>
+type ResendAdapter = EmailAdapter<ResendResponse>
 
 type ResendResponse =
   | {
@@ -23,7 +24,8 @@ type ResendResponse =
  */
 export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
   const { defaultFromAddress, defaultFromName, resendApiKey } = args
-  const adapter: ResendAdapter = {
+
+  const adapter: ResendAdapter = () => ({
     defaultFromAddress,
     defaultFromName,
     sendEmail: async (message) => {
@@ -52,13 +54,13 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
         throw new Error(formattedError)
       }
     },
-  }
+  })
 
   return adapter
 }
 
 function mapPayloadEmailToResendEmail(
-  message: SendMailOptions,
+  message: SendEmailOptions,
   defaultFromAddress: string,
   defaultFromName: string,
 ): ResendSendEmailOptions {
@@ -76,11 +78,11 @@ function mapPayloadEmailToResendEmail(
     attachments: mapAttachments(message.attachments),
     html: message.html?.toString() || '',
     text: message.text?.toString() || '',
-  }
+  } as ResendSendEmailOptions
 }
 
 function mapFromAddress(
-  address: SendMailOptions['from'],
+  address: SendEmailOptions['from'],
   defaultFromName: string,
   defaultFromAddress: string,
 ): ResendSendEmailOptions['from'] {
@@ -95,7 +97,7 @@ function mapFromAddress(
   return `${address.name} <${address.address}>`
 }
 
-function mapAddresses(addresses: SendMailOptions['to']): ResendSendEmailOptions['to'] {
+function mapAddresses(addresses: SendEmailOptions['to']): ResendSendEmailOptions['to'] {
   if (!addresses) {
     return ''
   }
@@ -112,7 +114,7 @@ function mapAddresses(addresses: SendMailOptions['to']): ResendSendEmailOptions[
 }
 
 function mapAttachments(
-  attachments: SendMailOptions['attachments'],
+  attachments: SendEmailOptions['attachments'],
 ): ResendSendEmailOptions['attachments'] {
   if (!attachments) {
     return []

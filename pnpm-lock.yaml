@@ -454,9 +454,6 @@ importers:
 
   packages/email-resend-rest:
     devDependencies:
-      '@types/nodemailer':
-        specifier: 6.4.14
-        version: 6.4.14
       payload:
         specifier: workspace:*
         version: link:../payload
