@@ -1,3 +1,12 @@
+## [2.14.1](https://github.com/payloadcms/payload/compare/v2.14.0...v2.14.1) (2024-04-25)
+
+
+### Bug Fixes
+
+* **db-postgres:** cumulative updates ([#6033](https://github.com/payloadcms/payload/issues/6033)) ([c31b8dc](https://github.com/payloadcms/payload/commit/c31b8dcaa0c43132d8a01e0cc43094f466cc9168))
+* disable api key checkbox does not remove api key ([#6017](https://github.com/payloadcms/payload/issues/6017)) ([0ffdcc6](https://github.com/payloadcms/payload/commit/0ffdcc685f4e917a02e62dbaccec7cc8ebbf695d))
+* **richtext-lexical:** minimize the amount of times sanitizeFields is called ([#6018](https://github.com/payloadcms/payload/issues/6018)) ([60372fa](https://github.com/payloadcms/payload/commit/60372faf36b7f6d92a61ccbaee0f528e50f5a51a))
+
 ## [2.14.0](https://github.com/payloadcms/payload/compare/v2.13.0...v2.14.0) (2024-04-24)
 
 
