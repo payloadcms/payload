@@ -142,9 +142,7 @@ async function main() {
   console.log(chalk.bold.yellow(`  Tag: ${tag}\n`))
   console.log(chalk.bold.green(`  Changes (${packageDetails.length} packages):\n`))
   console.log(
-    `${packageDetails
-      .map((p) => `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}`)
-      .join('\n')}\n`,
+    `${packageDetails.map((p) => `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}`).join('\n')}\n`,
   )
 
   const confirmPublish = await confirm('Are you sure you want to create these versions?')
