@@ -6,7 +6,7 @@ export type ResendAdapterArgs = {
   resendApiKey: string
 }
 
-export type ResendAdapter = EmailAdapter<SendMailOptions, ResendResponse>
+type ResendAdapter = EmailAdapter<SendMailOptions, ResendResponse>
 
 type ResendResponse =
   | {
@@ -21,7 +21,7 @@ type ResendResponse =
  *
  * If no email configuration is provided, an ethereal email test account is returned
  */
-export const createResendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
+export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
   const { defaultFromAddress, defaultFromName, resendApiKey } = args
   const adapter: ResendAdapter = {
     defaultFromAddress,
@@ -45,7 +45,12 @@ export const createResendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
 
       const data = (await res.json()) as ResendResponse
 
-      return data
+      if ('id' in data) {
+        return data
+      } else {
+        const formattedError = `Error sending email: ${data.statusCode} ${data.name} - ${data.message}`
+        throw new Error(formattedError)
+      }
     },
   }
 
