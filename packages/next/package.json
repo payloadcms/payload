@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.18",
   "main": "./src/index.js",
   "types": "./src/index.js",
   "type": "module",
@@ -46,6 +46,7 @@
     "@types/ws": "^8.5.10",
     "css-loader": "^6.10.0",
     "css-minimizer-webpack-plugin": "^6.0.0",
+    "file-type": "16.5.4",
     "mini-css-extract-plugin": "1.6.2",
     "payload": "workspace:*",
     "postcss-loader": "^8.1.1",
@@ -65,20 +66,21 @@
     "@types/busboy": "^1.5.3",
     "busboy": "^1.6.0",
     "deep-equal": "2.2.2",
-    "graphql": "16.8.1",
-    "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
     "path-to-regexp": "^6.2.1",
     "qs": "6.11.2",
     "react-diff-viewer-continued": "3.2.6",
     "react-toastify": "8.2.0",
     "sass": "^1.71.1",
+    "graphql-http": "^1.22.0",
     "ws": "^8.16.0"
   },
   "peerDependencies": {
+    "file-type": "16.5.4",
     "http-status": "1.6.2",
-    "next": "14.2.0-canary.23",
-    "payload": "workspace:*"
+    "next": "^14.3.0-canary.7",
+    "payload": "workspace:*",
+    "graphql": "^16.8.1"
   },
   "publishConfig": {
     "main": "./dist/index.js",
@@ -102,7 +104,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=18.20.2"
   },
   "files": [
     "dist"

@@ -1,5 +1,7 @@
 import type { Payload } from 'payload'
 
+import { ValidationError } from 'payload/errors'
+
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
@@ -438,6 +440,7 @@ describe('Versions', () => {
           collection,
           data: {
             title: patchedTitle,
+            _status: 'draft',
           },
           draft: true,
           locale: 'en',
@@ -451,6 +454,7 @@ describe('Versions', () => {
           collection,
           data: {
             title: spanishTitle,
+            _status: 'draft',
           },
           draft: true,
           locale: 'es',
@@ -472,7 +476,98 @@ describe('Versions', () => {
         expect(draftPost.title.en).toBe(patchedTitle)
         expect(draftPost.title.es).toBe(spanishTitle)
       })
+
+      it('should validate when publishing with the draft arg', async () => {
+        // no title (not valid for publishing)
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'desc',
+          },
+          draft: true,
+        })
+
+        await expect(async () => {
+          // should not be able to publish a doc that fails validation
+          await payload.update({
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: { _status: 'published' },
+            draft: true,
+          })
+        }).rejects.toThrow(ValidationError)
+
+        // succeeds but returns zero docs updated, with an error
+        const updateManyResult = await payload.update({
+          collection: draftCollectionSlug,
+          data: { _status: 'published' },
+          draft: true,
+          where: {
+            id: { equals: doc.id },
+          },
+        })
+
+        expect(updateManyResult.docs).toHaveLength(0)
+        expect(updateManyResult.errors).toStrictEqual([
+          { id: doc.id, message: 'The following field is invalid: title' },
+        ])
+      })
     })
+
+    describe('Update Many', () => {
+      it('should update many using drafts', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'initial value',
+            description: 'description to bulk update',
+            _status: 'published',
+          },
+        })
+
+        await payload.update({
+          collection: draftCollectionSlug,
+          id: doc.id,
+          draft: true,
+          data: {
+            title: 'updated title',
+          },
+        })
+
+        // bulk publish
+        const updated = await payload.update({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'updated description',
+          },
+          draft: true,
+          where: {
+            id: {
+              in: [doc.id],
+            },
+          },
+        })
+
+        const updatedDoc = updated.docs?.[0]
+
+        // get the published doc
+        const findResult = await payload.find({
+          collection: draftCollectionSlug,
+          where: {
+            id: { equals: doc.id },
+          },
+        })
+
+        const findDoc = findResult.docs?.[0]
+
+        expect(updatedDoc.description).toStrictEqual('updated description')
+        expect(updatedDoc.title).toStrictEqual('updated title')
+        expect(findDoc.title).toStrictEqual('updated title')
+        expect(findDoc.description).toStrictEqual('updated description')
+      })
+    })
+
     describe('Delete', () => {
       let postToDelete
       beforeEach(async () => {
@@ -1223,6 +1318,7 @@ describe('Versions', () => {
         await payload.updateGlobal({
           slug: globalSlug,
           data: {
+            _status: 'draft',
             title: updatedTitle2,
           },
           draft: true,
@@ -1232,6 +1328,7 @@ describe('Versions', () => {
         await payload.updateGlobal({
           slug: globalSlug,
           data: {
+            _status: 'draft',
             title: updatedTitle2,
           },
           draft: true,

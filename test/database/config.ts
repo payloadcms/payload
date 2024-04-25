@@ -46,6 +46,10 @@ export default buildConfigWithDefaults({
       slug: 'relation-a',
       fields: [
         {
+          name: 'title',
+          type: 'text',
+        },
+        {
           name: 'relationship',
           type: 'relationship',
           relationTo: 'relation-b',
@@ -63,6 +67,10 @@ export default buildConfigWithDefaults({
     {
       slug: 'relation-b',
       fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
         {
           name: 'relationship',
           type: 'relationship',
@@ -155,7 +163,6 @@ export default buildConfigWithDefaults({
   globals: [
     {
       slug: 'global',
-      // @ts-expect-error
       dbName: 'customGlobal',
       fields: [
         {

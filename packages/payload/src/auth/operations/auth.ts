@@ -1,4 +1,5 @@
-import type { PayloadRequest } from '../../types/index.js'
+import type { GeneratedTypes } from '../../index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 import type { Permissions, User } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -10,18 +11,18 @@ import { getAccessResults } from '../getAccessResults.js'
 
 export type AuthArgs = {
   headers: Request['headers']
-  req?: Omit<PayloadRequest, 'user'>
+  req?: Omit<PayloadRequestWithData, 'user'>
 }
 
 export type AuthResult = {
   cookies: Map<string, string>
   permissions: Permissions
-  user: User | null
+  user: GeneratedTypes['user'] | null
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
   const { headers } = args
-  const req = args.req as PayloadRequest
+  const req = args.req as PayloadRequestWithData
   const { payload } = req
 
   const cookies = parseCookies(headers)

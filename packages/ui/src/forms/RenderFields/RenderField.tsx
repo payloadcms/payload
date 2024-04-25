@@ -17,6 +17,7 @@ import { FieldPropsProvider, useFieldProps } from '../FieldPropsProvider/index.j
 
 type Props = {
   CustomField: MappedField['CustomField']
+  custom?: Record<any, string>
   disabled: boolean
   fieldComponentProps?: FieldComponentProps
   indexPath?: string
@@ -36,6 +37,7 @@ export const RenderField: React.FC<Props> = ({
   name,
   type,
   CustomField,
+  custom,
   disabled,
   fieldComponentProps,
   indexPath,
@@ -78,6 +80,7 @@ export const RenderField: React.FC<Props> = ({
 
   return (
     <FieldPropsProvider
+      custom={custom}
       indexPath={indexPath}
       path={path}
       permissions={permissions}

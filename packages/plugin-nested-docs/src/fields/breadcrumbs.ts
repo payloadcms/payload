@@ -45,5 +45,3 @@ export const createBreadcrumbsField = (
     ...(overrides?.fields || []),
   ],
 })
-
-export default createBreadcrumbsField

@@ -1,13 +1,17 @@
 import type { Endpoint, PayloadHandler } from 'payload/config'
 
+import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 import httpStatus from 'http-status'
 
-export const handler: PayloadHandler = async ({ payload, data, user }) => {
-  const method = String(data.method)
+export const handler: PayloadHandler = async (incomingRequest) => {
+  const reqWithData = await addDataAndFileToRequest({ request: incomingRequest })
 
-  if (typeof payload[method] === 'function') {
+  const { data, payload, user } = reqWithData
+  const operation = data?.operation ? String(data.operation) : undefined
+
+  if (data?.operation && typeof payload[operation] === 'function') {
     try {
-      const result = await payload[method]({
+      const result = await payload[operation]({
         ...(typeof data.args === 'object' ? data.args : {}),
         user,
       })

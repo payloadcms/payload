@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import url from 'url'
 
 import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 import type { Document } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
@@ -20,7 +20,7 @@ export type Result = {
 
 export type Arguments = {
   collection: Collection
-  req: PayloadRequest
+  req: PayloadRequestWithData
   token: string
 }
 

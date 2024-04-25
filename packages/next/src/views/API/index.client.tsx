@@ -18,7 +18,7 @@ import qs from 'qs'
 import * as React from 'react'
 import { toast } from 'react-toastify'
 
-import { SetStepNav } from '../Edit/Default/SetStepNav/index.js'
+import { SetDocumentStepNav } from '../Edit/Default/SetDocumentStepNav/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
 import './index.scss'
 
@@ -113,7 +113,7 @@ export const APIViewClient: React.FC = () => {
       className={[baseClass, fullscreen && `${baseClass}--fullscreen`].filter(Boolean).join(' ')}
       right={false}
     >
-      <SetStepNav
+      <SetDocumentStepNav
         collectionSlug={collectionSlug}
         globalLabel={globalConfig?.label}
         globalSlug={globalSlug}

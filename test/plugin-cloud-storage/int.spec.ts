@@ -7,6 +7,8 @@ import { fileURLToPath } from 'url'
 import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
+import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import { clearTestBucket, createTestBucket } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +26,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     }
   })
 
-  const TEST_BUCKET = 'payload-bucket'
+  const TEST_BUCKET = process.env.S3_BUCKET
 
   let client: AWS.S3Client
   describeIfInCIOrHasLocalstack()('plugin-cloud-storage', () => {
@@ -41,22 +43,45 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
 
         await createTestBucket()
+        await clearTestBucket(client)
       })
 
       afterEach(async () => {
-        await clearTestBucket()
+        await clearTestBucket(client)
       })
 
       it('can upload', async () => {
         const upload = await payload.create({
-          collection: 'media',
+          collection: mediaSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),
         })
 
         expect(upload.id).toBeTruthy()
 
-        await verifyUploads(upload.id)
+        await verifyUploads({
+          collectionSlug: mediaSlug,
+          uploadId: upload.id,
+        })
+
+        expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
+      })
+
+      it('can upload with prefix', async () => {
+        const upload = await payload.create({
+          collection: mediaWithPrefixSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+
+        await verifyUploads({
+          collectionSlug: mediaWithPrefixSlug,
+          uploadId: upload.id,
+          prefix,
+        })
+        expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
       })
     })
   })
@@ -73,58 +98,42 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     it.todo('can upload')
   })
 
-  async function createTestBucket() {
-    const makeBucketRes = await client.send(new AWS.CreateBucketCommand({ Bucket: TEST_BUCKET }))
+  async function verifyUploads({
+    collectionSlug,
+    uploadId,
+    prefix = '',
+  }: {
+    collectionSlug: string
+    prefix?: string
+    uploadId: number | string
+  }) {
+    const uploadData = (await payload.findByID({
+      collection: collectionSlug,
+      id: uploadId,
+    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
-    if (makeBucketRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(`Failed to create bucket. ${makeBucketRes.$metadata.httpStatusCode}`)
-    }
-  }
-
-  async function clearTestBucket() {
-    const listedObjects = await client.send(
-      new AWS.ListObjectsV2Command({
-        Bucket: TEST_BUCKET,
-      }),
-    )
-
-    if (!listedObjects?.Contents?.length) return
-
-    const deleteParams = {
-      Bucket: TEST_BUCKET,
-      Delete: { Objects: [] },
-    }
-
-    listedObjects.Contents.forEach(({ Key }) => {
-      deleteParams.Delete.Objects.push({ Key })
+    const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
+      const rawFilename = uploadData.sizes[key].filename
+      return prefix ? `${prefix}/${rawFilename}` : rawFilename
     })
 
-    const deleteResult = await client.send(new AWS.DeleteObjectsCommand(deleteParams))
-    if (deleteResult.Errors?.length) {
-      throw new Error(JSON.stringify(deleteResult.Errors))
-    }
-  }
-
-  async function verifyUploads(uploadId: number | string) {
+    fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
     try {
-      const uploadData = (await payload.findByID({
-        collection: 'media',
-        id: uploadId,
-      })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
-
-      const fileKeys = Object.keys(uploadData.sizes).map((key) => uploadData.sizes[key].filename)
-      fileKeys.push(uploadData.filename)
-
       for (const key of fileKeys) {
         const { $metadata } = await client.send(
           new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
         )
 
+        if ($metadata.httpStatusCode !== 200) {
+          console.error('Error verifying uploads', key, $metadata)
+          throw new Error(`Error verifying uploads: ${key}, ${$metadata.httpStatusCode}`)
+        }
+
         // Verify each size was properly uploaded
         expect($metadata.httpStatusCode).toBe(200)
       }
     } catch (error: unknown) {
-      console.error('Error verifying uploads:', error)
+      console.error('Error verifying uploads:', fileKeys, error)
       throw error
     }
   }

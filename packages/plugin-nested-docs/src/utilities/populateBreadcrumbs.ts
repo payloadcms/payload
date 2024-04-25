@@ -2,10 +2,10 @@ import type { CollectionConfig } from 'payload/types'
 
 import type { PluginConfig } from '../types.js'
 
-import formatBreadcrumb from './formatBreadcrumb.js'
-import getParents from './getParents.js'
+import { formatBreadcrumb } from './formatBreadcrumb.js'
+import { getParents } from './getParents.js'
 
-const populateBreadcrumbs = async (
+export const populateBreadcrumbs = async (
   req: any,
   pluginConfig: PluginConfig,
   collection: CollectionConfig,
@@ -40,5 +40,3 @@ const populateBreadcrumbs = async (
     [pluginConfig?.breadcrumbsFieldSlug || 'breadcrumbs']: breadcrumbs,
   }
 }
-
-export default populateBreadcrumbs

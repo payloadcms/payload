@@ -18,7 +18,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInit.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { jsonDoc } from './collections/JSON/shared.js'
@@ -685,10 +685,7 @@ describe('fields', () => {
 
           // enter date in default date field
           await dateField.fill('02/07/2023')
-          await page.locator('#action-save').click()
-
-          // wait for navigation to update route
-          await expect.poll(() => page.url(), { timeout: 1000 }).not.toContain('create')
+          await saveDocAndAssert(page)
 
           // get the ID of the doc
           const routeSegments = page.url().split('/')
@@ -930,6 +927,22 @@ describe('fields', () => {
       const collapsibleDifference = Math.abs(fieldABox.width - fieldBBox.width)
 
       expect(collapsibleDifference).toBeLessThanOrEqual(tolerance)
+    })
+  })
+
+  describe('ui', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'ui-fields')
+    })
+
+    test('should show custom: client configuration', async () => {
+      await page.goto(url.create)
+
+      const uiField = page.locator('#uiCustomClient')
+
+      await expect(uiField).toBeVisible()
+      await expect(uiField).toContainText('client-side-configuration')
     })
   })
 

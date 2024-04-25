@@ -1,5 +1,5 @@
 import type { GeneratedTypes, Payload } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { Document, PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -13,11 +13,11 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   context?: RequestContext
   depth?: number
   draft?: boolean
-  fallbackLocale?: string
+  fallbackLocale?: GeneratedTypes['locale']
   id: string
-  locale?: string
+  locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   showHiddenFields?: boolean
   user?: Document
 }

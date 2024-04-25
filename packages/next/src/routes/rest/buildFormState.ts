@@ -1,5 +1,5 @@
 import type { BuildFormStateArgs } from '@payloadcms/ui/forms/buildStateFromSchema'
-import type { DocumentPreferences, Field, PayloadRequest, TypeWithID } from 'payload/types'
+import type { DocumentPreferences, Field, PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
@@ -8,6 +8,7 @@ import httpStatus from 'http-status'
 import type { FieldSchemaMap } from '../../utilities/buildFieldSchemaMap/types.js'
 
 import { buildFieldSchemaMap } from '../../utilities/buildFieldSchemaMap/index.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 
 let cached = global._payload_fieldSchemaMap
 
@@ -16,7 +17,7 @@ if (!cached) {
   cached = global._payload_fieldSchemaMap = null
 }
 
-export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
+export const getFieldSchemaMap = (req: PayloadRequestWithData): FieldSchemaMap => {
   if (cached && process.env.NODE_ENV !== 'development') {
     return cached
   }
@@ -26,7 +27,12 @@ export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
   return cached
 }
 
-export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
+export const buildFormState = async ({ req }: { req: PayloadRequestWithData }) => {
+  const headers = headersWithCors({
+    headers: new Headers(),
+    req,
+  })
+
   try {
     const reqData: BuildFormStateArgs = req.data as BuildFormStateArgs
     const { collectionSlug, formState, globalSlug, locale, operation, schemaPath } = reqData
@@ -44,19 +50,31 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
 
         if (!canAccessAdmin) {
           return Response.json(null, {
+            headers,
             status: httpStatus.UNAUTHORIZED,
           })
         }
         // Match the user collection to the global admin config
       } else if (adminUserSlug !== incomingUserSlug) {
         return Response.json(null, {
+          headers,
           status: httpStatus.UNAUTHORIZED,
         })
       }
     } else {
-      return Response.json(null, {
-        status: httpStatus.UNAUTHORIZED,
+      const hasUsers = await req.payload.find({
+        collection: adminUserSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
       })
+      // If there are users, we should not allow access because of /create-first-user
+      if (hasUsers.docs.length) {
+        return Response.json(null, {
+          headers,
+          status: httpStatus.UNAUTHORIZED,
+        })
+      }
     }
 
     const fieldSchemaMap = getFieldSchemaMap(req)
@@ -84,6 +102,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
           message: 'Could not find field schema for given path',
         },
         {
+          headers,
           status: httpStatus.BAD_REQUEST,
         },
       )
@@ -156,7 +175,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
           })
         }
 
-        if (globalSlug) {
+        if (globalSlug && schemaPath === globalSlug) {
           resolvedData = await req.payload.findGlobal({
             slug: globalSlug,
             depth: 0,
@@ -187,7 +206,23 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       req,
     })
 
+    // Maintain form state of auth / upload fields
+    if (collectionSlug && formState) {
+      if (req.payload.collections[collectionSlug]?.config?.upload && formState.file) {
+        result.file = formState.file
+      }
+
+      if (
+        req.payload.collections[collectionSlug]?.config?.auth &&
+        !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy
+      ) {
+        if (formState.password) result.password = formState.password
+        if (formState.email) result.email = formState.email
+      }
+    }
+
     return Response.json(result, {
+      headers,
       status: httpStatus.OK,
     })
   } catch (err) {
@@ -196,6 +231,7 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
         message: 'There was an error building form state',
       },
       {
+        headers,
         status: httpStatus.BAD_REQUEST,
       },
     )

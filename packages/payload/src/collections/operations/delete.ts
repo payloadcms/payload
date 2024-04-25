@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { GeneratedTypes } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequestWithData, Where } from '../../types/index.js'
 import type { BeforeOperationHook, Collection } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -22,7 +22,7 @@ export type Arguments = {
   collection: Collection
   depth?: number
   overrideAccess?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields?: boolean
   where: Where
 }

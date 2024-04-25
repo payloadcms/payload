@@ -5,6 +5,8 @@ import { isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const create: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams } = req
   const autosave = searchParams.get('autosave') === 'true'
@@ -28,6 +30,10 @@ export const create: CollectionRouteHandler = async ({ collection, req }) => {
       }),
     },
     {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.CREATED,
     },
   )

@@ -1,6 +1,6 @@
 import type { FileData, ImageSize } from 'payload/types'
 import type { TypeWithID } from 'payload/types'
-import type { CollectionConfig, PayloadRequest } from 'payload/types'
+import type { CollectionConfig, PayloadRequestWithData } from 'payload/types'
 
 export interface File {
   buffer: Buffer
@@ -14,7 +14,7 @@ export type HandleUpload = (args: {
   collection: CollectionConfig
   data: any
   file: File
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => Promise<void> | void
 
 export interface TypeWithPrefix {
@@ -25,7 +25,7 @@ export type HandleDelete = (args: {
   collection: CollectionConfig
   doc: TypeWithID & FileData & TypeWithPrefix
   filename: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {
@@ -35,7 +35,7 @@ export type GenerateURL = (args: {
 }) => Promise<string> | string
 
 export type StaticHandler = (
-  req: PayloadRequest,
+  req: PayloadRequestWithData,
   args: { params: { collection: string; filename: string } },
 ) => Promise<Response> | Response
 

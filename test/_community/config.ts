@@ -20,6 +20,7 @@ export default buildConfigWithDefaults({
   //   MenuGlobal,
   //   // ...add more globals here
   // ],
+  cors: ['http://localhost:3000', 'http://localhost:3001'],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

@@ -2,13 +2,14 @@ import type { Payload } from 'payload'
 import type { User } from 'payload/auth'
 
 import { jwtDecode } from 'jwt-decode'
+import { v4 as uuid } from 'uuid'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
-import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
+import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -74,6 +75,7 @@ describe('Auth', () => {
         body: JSON.stringify({
           email,
           password,
+          'confirm-password': password,
         }),
       })
 
@@ -620,6 +622,113 @@ describe('Auth', () => {
       })
 
       expect(fail.status).toStrictEqual(404)
+    })
+
+    it('should not remove an API key from a user when updating other fields', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: 'api-keys',
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: 'api-keys',
+        data: {
+          enableAPIKey: true,
+        },
+      })
+
+      const userResult = await payload.find({
+        collection: 'api-keys',
+        where: {
+          id: {
+            equals: user.id,
+          },
+        },
+      })
+
+      expect(updatedUser.apiKey).toStrictEqual(user.apiKey)
+      expect(userResult.docs[0].apiKey).toStrictEqual(user.apiKey)
+    })
+
+    it('should disable api key after updating apiKey: null', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          apiKey: null,
+        },
+      })
+
+      // use the api key in a fetch to assert that it is disabled
+      const response = await restClient
+        .GET(`/api-keys/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(updatedUser.apiKey).toBeNull()
+      expect(response.user).toBeNull()
+    })
+
+    it('should disable api key after updating with enableAPIKey:false', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          enableAPIKey: false,
+        },
+      })
+
+      // use the api key in a fetch to assert that it is disabled
+      const response = await restClient
+        .GET(`/api-keys/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(updatedUser.apiKey).toStrictEqual(apiKey)
+      expect(response.user).toBeNull()
+    })
+  })
+
+  describe('Local API', () => {
+    it('should login via the local API', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      expect(authenticated.token).toBeTruthy()
     })
   })
 })

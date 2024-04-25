@@ -1,11 +1,11 @@
-import type { AllOperations, PayloadRequest } from '../types/index.js'
+import type { AllOperations, PayloadRequestWithData } from '../types/index.js'
 import type { Permissions } from './types.js'
 
 import { getEntityPolicies } from '../utilities/getEntityPolicies.js'
 import isolateObjectProperty from '../utilities/isolateObjectProperty.js'
 
 type GetAccessResultsArgs = {
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<Permissions> {
   const results = {} as Permissions

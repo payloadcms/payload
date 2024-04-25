@@ -1,7 +1,7 @@
 import { createServer } from 'http'
 import nextImport from 'next'
 import { spawn } from 'node:child_process'
-import { dirname, resolve } from 'path'
+import path, { dirname, resolve } from 'path'
 import { wait } from 'payload/utilities'
 import { parse } from 'url'
 import { fileURLToPath } from 'url'
@@ -30,7 +30,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
   dirname,
   prebuild,
 }: Args): Promise<Result<T>> {
-  const testSuiteName = dirname.split('/').pop()
+  const testSuiteName = path.basename(dirname)
   const { beforeTest } = await createTestHooks(testSuiteName)
   await beforeTest()
 

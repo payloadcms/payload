@@ -5,7 +5,7 @@ import type { PluginConfig } from '../types.js'
 // This hook automatically re-saves a document after it is created
 // so that we can build its breadcrumbs with the newly created document's ID.
 
-const resaveSelfAfterCreate =
+export const resaveSelfAfterCreate =
   (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
   async ({ doc, operation, req }) => {
     const { locale, payload } = req
@@ -52,5 +52,3 @@ const resaveSelfAfterCreate =
 
     return undefined
   }
-
-export default resaveSelfAfterCreate

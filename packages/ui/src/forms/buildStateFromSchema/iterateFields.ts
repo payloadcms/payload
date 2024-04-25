@@ -1,4 +1,10 @@
-import type { Data, Field as FieldSchema, FormState, PayloadRequest } from 'payload/types'
+import type {
+  Data,
+  DocumentPreferences,
+  Field as FieldSchema,
+  FormState,
+  PayloadRequestWithData,
+} from 'payload/types'
 
 import { fieldIsPresentationalOnly } from 'payload/types'
 
@@ -38,10 +44,8 @@ type Args = {
    * The initial path of the field. @default ''
    */
   path?: string
-  preferences?: {
-    [key: string]: unknown
-  }
-  req: PayloadRequest
+  preferences?: DocumentPreferences
+  req: PayloadRequestWithData
   /**
    * Whether to skip checking the field's condition. @default false
    */

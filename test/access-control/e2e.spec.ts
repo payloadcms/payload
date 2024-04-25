@@ -1,26 +1,31 @@
 import type { Page } from '@playwright/test'
-import type { Payload, TypeWithID } from 'payload/types'
+import type { TypeWithID } from 'payload/types'
 
 import { expect, test } from '@playwright/test'
+import { devUser } from 'credentials.js'
 import path from 'path'
+import { wait } from 'payload/utilities'
 import { fileURLToPath } from 'url'
 
-import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
 import {
   closeNav,
   ensureAutoLoginAndCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  login,
   openDocControls,
   openNav,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2E } from '../helpers/initPayloadE2E.js'
+import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   docLevelAccessSlug,
+  noAdminAccessEmail,
   readOnlySlug,
   restrictedSlug,
   restrictedVersionsSlug,
@@ -40,7 +45,7 @@ const dirname = path.dirname(filename)
  */
 
 const { beforeAll, describe } = test
-let payload: Payload
+let payload: PayloadTestSDK<Config>
 describe('access control', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -50,7 +55,7 @@ describe('access control', () => {
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
-    ;({ payload, serverURL } = await initPayloadE2E({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug)
@@ -60,7 +65,8 @@ describe('access control', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
+
+    await login({ page, serverURL })
   })
 
   test('field without read access should not show', async () => {
@@ -326,6 +332,28 @@ describe('access control', () => {
 
     // ensure user is allowed to edit this document
     await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
+  })
+
+  test('should completely block admin access', async () => {
+    const adminURL = `${serverURL}/admin`
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
+
+    await expect(page.locator('.dashboard')).toBeVisible()
+
+    await page.goto(`${serverURL}/admin/logout`)
+    await page.waitForURL(`${serverURL}/admin/logout`)
+
+    await login({
+      page,
+      serverURL,
+      data: {
+        email: noAdminAccessEmail,
+        password: 'test',
+      },
+    })
+
+    await expect(page.locator('.next-error-h1')).toBeVisible()
   })
 })
 

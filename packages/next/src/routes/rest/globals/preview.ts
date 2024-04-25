@@ -1,9 +1,11 @@
 import httpStatus from 'http-status'
+import { extractJWT } from 'payload/auth'
 import { findOneOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
 import type { GlobalRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { routeError } from '../routeError.js'
 
 export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
@@ -24,14 +26,18 @@ export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
     (config) => config.slug === globalConfig.slug,
   )?.admin?.preview
 
+  const token = extractJWT(req)
+
   if (typeof generatePreviewURL === 'function') {
     try {
       previewURL = await generatePreviewURL(result, {
         locale: req.locale,
-        token: req.user?.token,
+        req,
+        token,
       })
     } catch (err) {
-      routeError({
+      return routeError({
+        config: req.payload.config,
         err,
         req,
       })
@@ -39,6 +45,10 @@ export const preview: GlobalRouteHandler = async ({ globalConfig, req }) => {
   }
 
   return Response.json(previewURL, {
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
     status: httpStatus.OK,
   })
 }

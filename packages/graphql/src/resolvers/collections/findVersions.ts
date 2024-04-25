@@ -1,5 +1,5 @@
 import type { PaginatedDocs } from 'payload/database'
-import type { PayloadRequest, Where } from 'payload/types'
+import type { PayloadRequestWithData, Where } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { findVersionsOperation } from 'payload/operations'
@@ -18,7 +18,7 @@ export type Resolver = (
     where: Where
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
 ) => Promise<PaginatedDocs<any>>
 

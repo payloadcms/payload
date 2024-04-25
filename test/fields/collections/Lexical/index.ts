@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload/types'
 
 import {
   BlocksFeature,
+  HeadingFeature,
   LinkFeature,
   TreeViewFeature,
   UploadFeature,
@@ -41,7 +42,6 @@ export const LexicalFields: CollectionConfig = {
       type: 'richText',
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
           //TestRecorderFeature(),
           TreeViewFeature(),
           BlocksFeature({
@@ -57,6 +57,7 @@ export const LexicalFields: CollectionConfig = {
               ConditionalLayoutBlock,
             ],
           }),
+          HeadingFeature({ enabledHeadingSizes: ['h2', 'h4'] }),
         ],
       }),
     },

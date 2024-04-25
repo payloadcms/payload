@@ -18,6 +18,21 @@ const JSON: CollectionConfig = {
     {
       name: 'json',
       type: 'json',
+      jsonSchema: {
+        fileMatch: ['a://b/foo.json'],
+        schema: {
+          type: 'object',
+          properties: {
+            foo: {
+              enum: ['bar', 'foobar'],
+            },
+            number: {
+              enum: [10, 5],
+            },
+          },
+        },
+        uri: 'a://b/foo.json',
+      },
     },
   ],
   versions: {

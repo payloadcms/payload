@@ -1,4 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
+import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
@@ -18,9 +19,10 @@ import {
 import { loadFeatures } from './field/lexical/config/server/loader.js'
 import { sanitizeServerFeatures } from './field/lexical/config/server/sanitize.js'
 import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
+import { recurseNodes, recurseNodesAsync } from './forEachNodeRecursively.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
-import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise.js'
+import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'
 import { richTextValidateHOC } from './validate/index.js'
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapter {
@@ -64,29 +66,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       Component: RichTextField,
       toMergeIntoProps: { lexicalEditorConfig: finalSanitizedEditorConfig.lexical },
     }),
-    afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
-      return new Promise<void>((resolve, reject) => {
-        const promises: Promise<void>[] = []
-
-        if (finalSanitizedEditorConfig?.features?.hooks?.afterReadPromises?.length) {
-          for (const afterReadPromise of finalSanitizedEditorConfig.features.hooks
-            .afterReadPromises) {
-            const promise = afterReadPromise({
-              field,
-              incomingEditorState,
-              siblingDoc,
-            })
-            if (promise) {
-              promises.push(promise)
-            }
-          }
-        }
-
-        Promise.all(promises)
-          .then(() => resolve())
-          .catch((error) => reject(error))
-      })
-    },
     editorConfig: finalSanitizedEditorConfig,
     generateComponentMap: getGenerateComponentMap({
       resolvedFeatureMap,
@@ -94,6 +73,104 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     generateSchemaMap: getGenerateSchemaMap({
       resolvedFeatureMap,
     }),
+    /* hooks: {
+      afterChange: finalSanitizedEditorConfig.features.hooks.afterChange,
+      afterRead: finalSanitizedEditorConfig.features.hooks.afterRead,
+      beforeChange: finalSanitizedEditorConfig.features.hooks.beforeChange,
+      beforeDuplicate: finalSanitizedEditorConfig.features.hooks.beforeDuplicate,
+      beforeValidate: finalSanitizedEditorConfig.features.hooks.beforeValidate,
+    },*/
+    /* // TODO: Figure out docWithLocales / originalSiblingDoc => node matching. Can't use indexes, as the order of nodes could technically change between hooks.
+    hooks: {
+      afterChange: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const afterChangeHooks = finalSanitizedEditorConfig.features.hooks.afterChange
+              if (afterChangeHooks?.has(node.type)) {
+                for (const hook of afterChangeHooks.get(node.type)) {
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+      afterRead: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const afterReadHooks = finalSanitizedEditorConfig.features.hooks.afterRead
+              if (afterReadHooks?.has(node.type)) {
+                for (const hook of afterReadHooks.get(node.type)) {
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+      beforeChange: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const beforeChangeHooks = finalSanitizedEditorConfig.features.hooks.beforeChange
+              if (beforeChangeHooks?.has(node.type)) {
+                for (const hook of beforeChangeHooks.get(node.type)) {
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+      beforeDuplicate: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const beforeDuplicateHooks = finalSanitizedEditorConfig.features.hooks.beforeDuplicate
+              if (beforeDuplicateHooks?.has(node.type)) {
+                for (const hook of beforeDuplicateHooks.get(node.type)) {
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+      beforeValidate: [
+        async ({ context, findMany, operation, overrideAccess, req, value }) => {
+          await recurseNodesAsync({
+            callback: async (node) => {
+              const beforeValidateHooks = finalSanitizedEditorConfig.features.hooks.beforeValidate
+              if (beforeValidateHooks?.has(node.type)) {
+                for (const hook of beforeValidateHooks.get(node.type)) {
+                  /**
+                   * We cannot pass the originalNode here, as there is no way to map one node to a previous one, as a previous originalNode might be in a different position
+                   */ /*
+                  node = await hook({ context, findMany, node, operation, overrideAccess, req })
+                }
+              }
+            },
+            nodes: (value as SerializedEditorState)?.root?.children ?? [],
+          })
+
+          return value
+        },
+      ],
+    },*/
     outputSchema: ({
       collectionIDFieldTypes,
       config,
@@ -171,11 +248,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       return outputSchema
     },
-    populationPromise({
+    populationPromises({
       context,
       currentDepth,
       depth,
       field,
+      fieldPromises,
       findMany,
       flattenLocales,
       overrideAccess,
@@ -186,12 +264,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     }) {
       // check if there are any features with nodes which have populationPromises for this field
       if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
-        return richTextRelationshipPromise({
+        populateLexicalPopulationPromises({
           context,
           currentDepth,
           depth,
           editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
           field,
+          fieldPromises,
           findMany,
           flattenLocales,
           overrideAccess,
@@ -201,8 +280,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           siblingDoc,
         })
       }
-
-      return null
     },
     validate: richTextValidateHOC({
       editorConfig: finalSanitizedEditorConfig,
@@ -248,6 +325,7 @@ export { createClientComponent } from './field/features/createClientComponent.js
 export { TestRecorderFeature } from './field/features/debug/testrecorder/feature.server.js'
 export { TreeViewFeature } from './field/features/debug/treeview/feature.server.js'
 export { BoldFeature } from './field/features/format/bold/feature.server.js'
+
 export { SectionWithEntries as FormatSectionWithEntries } from './field/features/format/common/floatingSelectToolbarSection.js'
 export { InlineCodeFeature } from './field/features/format/inlinecode/feature.server.js'
 export { ItalicFeature } from './field/features/format/italic/feature.server.js'
@@ -255,8 +333,9 @@ export { StrikethroughFeature } from './field/features/format/strikethrough/feat
 export { SubscriptFeature } from './field/features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './field/features/format/superscript/feature.server.js'
 export { UnderlineFeature } from './field/features/format/underline/feature.server.js'
-
 export { HeadingFeature } from './field/features/heading/feature.server.js'
+
+export { HorizontalRuleFeature } from './field/features/horizontalrule/feature.server.js'
 export { IndentFeature } from './field/features/indent/feature.server.js'
 
 export { LinkFeature, type LinkFeatureServerProps } from './field/features/link/feature.server.js'
@@ -311,14 +390,19 @@ export {
   RelationshipNode,
   type SerializedRelationshipNode,
 } from './field/features/relationship/nodes/RelationshipNode.js'
+export { createNode } from './field/features/typeUtilities.js'
 export type {
+  ClientComponentProps,
   ClientFeature,
   ClientFeatureProviderMap,
   FeatureProviderClient,
   FeatureProviderProviderClient,
   FeatureProviderProviderServer,
   FeatureProviderServer,
+  FieldNodeHook,
+  FieldNodeHookArgs,
   NodeValidation,
+  NodeWithHooks,
   PopulationPromise,
   ResolvedClientFeature,
   ResolvedClientFeatureMap,
@@ -333,8 +417,6 @@ export type {
 export { UploadFeature } from './field/features/upload/feature.server.js'
 
 export type { UploadFeatureProps } from './field/features/upload/feature.server.js'
-
-export type { RawUploadPayload } from './field/features/upload/nodes/UploadNode.js'
 
 export {
   $createUploadNode,

@@ -16,7 +16,11 @@ export const sanitizeServerFeatures = (
       modifyOutputSchemas: [],
     },
     hooks: {
-      afterReadPromises: [],
+      afterChange: new Map(),
+      afterRead: new Map(),
+      beforeChange: new Map(),
+      beforeDuplicate: new Map(),
+      beforeValidate: new Map(),
     },
     markdownTransformers: [],
     nodes: [],
@@ -33,13 +37,6 @@ export const sanitizeServerFeatures = (
     if (feature?.generatedTypes?.modifyOutputSchema) {
       sanitized.generatedTypes.modifyOutputSchemas.push(feature.generatedTypes.modifyOutputSchema)
     }
-    if (feature.hooks) {
-      if (feature.hooks.afterReadPromise) {
-        sanitized.hooks.afterReadPromises = sanitized.hooks.afterReadPromises.concat(
-          feature.hooks.afterReadPromise,
-        )
-      }
-    }
 
     if (feature.nodes?.length) {
       sanitized.nodes = sanitized.nodes.concat(feature.nodes)
@@ -53,6 +50,21 @@ export const sanitizeServerFeatures = (
         }
         if (node?.converters?.html) {
           sanitized.converters.html.push(node.converters.html)
+        }
+        if (node?.hooks?.afterChange) {
+          sanitized.hooks.afterChange.set(nodeType, node.hooks.afterChange)
+        }
+        if (node?.hooks?.afterRead) {
+          sanitized.hooks.afterRead.set(nodeType, node.hooks.afterRead)
+        }
+        if (node?.hooks?.beforeChange) {
+          sanitized.hooks.beforeChange.set(nodeType, node.hooks.beforeChange)
+        }
+        if (node?.hooks?.beforeDuplicate) {
+          sanitized.hooks.beforeDuplicate.set(nodeType, node.hooks.beforeDuplicate)
+        }
+        if (node?.hooks?.beforeValidate) {
+          sanitized.hooks.beforeValidate.set(nodeType, node.hooks.beforeValidate)
         }
       })
     }

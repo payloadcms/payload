@@ -8,7 +8,7 @@ import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize } from './types.js'
 
 import { FileUploadError, MissingFile } from '../errors/index.js'
@@ -26,7 +26,7 @@ type Args<T> = {
   config: SanitizedConfig
   data: T
   overwriteExistingFiles?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   throwOnMissingFile?: boolean
 }
 
@@ -70,7 +70,11 @@ export const generateFileData = async <T>({
         file = response
         overwriteExistingFiles = true
       } else if (filename && url) {
-        file = await getExternalFile({ data: data as FileData, req })
+        file = await getExternalFile({
+          data: data as FileData,
+          req,
+          uploadConfig: collectionConfig.upload,
+        })
         overwriteExistingFiles = true
       }
     } catch (err) {
@@ -133,7 +137,7 @@ export const generateFileData = async <T>({
     }
 
     if (fileSupportsResize || isImage(file.mimetype)) {
-      dimensions = getImageSize(file)
+      dimensions = await getImageSize(file)
       fileData.width = dimensions.width
       fileData.height = dimensions.height
     }

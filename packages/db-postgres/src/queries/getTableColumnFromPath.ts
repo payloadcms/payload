@@ -14,8 +14,6 @@ import { v4 as uuid } from 'uuid'
 import type { GenericColumn, GenericTable, PostgresAdapter } from '../types.js'
 import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery.js'
 
-import { getTableName } from '../schema/getTableName.js'
-
 type Constraint = {
   columnName: string
   table: GenericTable | PgTableWithColumns<any>
@@ -185,13 +183,7 @@ export const getTableColumnFromPath = ({
 
       case 'group': {
         if (locale && field.localized && adapter.payload.config.localization) {
-          newTableName = getTableName({
-            adapter,
-            config: field,
-            locales: true,
-            parentTableName: tableName,
-            prefix: `${tableName}_`,
-          })
+          newTableName = `${tableName}${adapter.localesSuffix}`
 
           joins[tableName] = eq(
             adapter.tables[tableName].id,
@@ -225,13 +217,87 @@ export const getTableColumnFromPath = ({
         })
       }
 
+      case 'select': {
+        if (field.hasMany) {
+          const newTableName = adapter.tableNameMap.get(
+            `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`,
+          )
+
+          if (locale && field.localized && adapter.payload.config.localization) {
+            joins[newTableName] = and(
+              eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+              eq(adapter.tables[newTableName]._locale, locale),
+            )
+            if (locale !== 'all') {
+              constraints.push({
+                columnName: '_locale',
+                table: adapter.tables[newTableName],
+                value: locale,
+              })
+            }
+          } else {
+            joins[newTableName] = eq(
+              adapter.tables[tableName].id,
+              adapter.tables[newTableName].parent,
+            )
+          }
+
+          return {
+            columnName: 'value',
+            constraints,
+            field,
+            table: adapter.tables[newTableName],
+          }
+        }
+        break
+      }
+
+      case 'text':
+      case 'number': {
+        if (field.hasMany) {
+          let tableType = 'texts'
+          let columnName = 'text'
+          if (field.type === 'number') {
+            tableType = 'numbers'
+            columnName = 'number'
+          }
+          newTableName = `${tableName}_${tableType}`
+          const joinConstraints = [
+            eq(adapter.tables[tableName].id, adapter.tables[newTableName].parent),
+            eq(adapter.tables[newTableName].path, `${constraintPath}${field.name}`),
+          ]
+
+          if (locale && field.localized && adapter.payload.config.localization) {
+            joins[newTableName] = and(
+              ...joinConstraints,
+              eq(adapter.tables[newTableName]._locale, locale),
+            )
+            if (locale !== 'all') {
+              constraints.push({
+                columnName: 'locale',
+                table: adapter.tables[newTableName],
+                value: locale,
+              })
+            }
+          } else {
+            joins[newTableName] = and(...joinConstraints)
+          }
+
+          return {
+            columnName,
+            constraints,
+            field,
+            table: adapter.tables[newTableName],
+          }
+        }
+        break
+      }
+
       case 'array': {
-        newTableName = getTableName({
-          adapter,
-          config: field,
-          parentTableName: `${tableName}_${tableNameSuffix}`,
-          prefix: `${tableName}_${tableNameSuffix}`,
-        })
+        newTableName = adapter.tableNameMap.get(
+          `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`,
+        )
+
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
@@ -278,12 +344,11 @@ export const getTableColumnFromPath = ({
           const blockTypes = Array.isArray(value) ? value : [value]
           blockTypes.forEach((blockType) => {
             const block = field.blocks.find((block) => block.slug === blockType)
-            newTableName = getTableName({
-              adapter,
-              config: block,
-              parentTableName: tableName,
-              prefix: `${tableName}_blocks_`,
-            })
+
+            newTableName = adapter.tableNameMap.get(
+              `${tableName}_blocks_${toSnakeCase(block.slug)}`,
+            )
+
             joins[newTableName] = eq(
               adapter.tables[tableName].id,
               adapter.tables[newTableName]._parentID,
@@ -303,13 +368,9 @@ export const getTableColumnFromPath = ({
         }
 
         const hasBlockField = field.blocks.some((block) => {
-          newTableName = getTableName({
-            adapter,
-            config: block,
-            parentTableName: tableName,
-            prefix: `${tableName}_blocks_`,
-          })
+          newTableName = adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`)
           constraintPath = `${constraintPath}${field.name}.%.`
+
           let result
           const blockConstraints = []
           const blockSelectFields = {}
@@ -416,10 +477,9 @@ export const getTableColumnFromPath = ({
 
         if (typeof field.relationTo === 'string') {
           const relationshipConfig = adapter.payload.collections[field.relationTo].config
-          newTableName = getTableName({
-            adapter,
-            config: relationshipConfig,
-          })
+
+          newTableName = adapter.tableNameMap.get(toSnakeCase(relationshipConfig.slug))
+
           // parent to relationship join table
           relationshipFields = relationshipConfig.fields
 
@@ -439,13 +499,13 @@ export const getTableColumnFromPath = ({
             }
           }
         } else if (newCollectionPath === 'value') {
-          const tableColumnsNames = field.relationTo.map(
-            (relationTo) =>
-              `"${aliasRelationshipTableName}"."${getTableName({
-                adapter,
-                config: adapter.payload.collections[relationTo].config,
-              })}_id"`,
-          )
+          const tableColumnsNames = field.relationTo.map((relationTo) => {
+            const relationTableName = adapter.tableNameMap.get(
+              toSnakeCase(adapter.payload.collections[relationTo].config.slug),
+            )
+
+            return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+          })
           return {
             constraints,
             field,
@@ -485,42 +545,40 @@ export const getTableColumnFromPath = ({
           value,
         })
       }
+    }
 
-      default: {
-        if (fieldAffectsData(field)) {
-          if (field.localized && adapter.payload.config.localization) {
-            // If localized, we go to localized table and set aliasTable to undefined
-            // so it is not picked up below to be used as targetTable
-            newTableName = `${tableName}${adapter.localesSuffix}`
+    if (fieldAffectsData(field)) {
+      if (field.localized && adapter.payload.config.localization) {
+        // If localized, we go to localized table and set aliasTable to undefined
+        // so it is not picked up below to be used as targetTable
+        newTableName = `${tableName}${adapter.localesSuffix}`
 
-            const parentTable = aliasTable || adapter.tables[tableName]
+        const parentTable = aliasTable || adapter.tables[tableName]
 
-            joins[newTableName] = eq(parentTable.id, adapter.tables[newTableName]._parentID)
+        joins[newTableName] = eq(parentTable.id, adapter.tables[newTableName]._parentID)
 
-            aliasTable = undefined
+        aliasTable = undefined
 
-            if (locale !== 'all') {
-              constraints.push({
-                columnName: '_locale',
-                table: adapter.tables[newTableName],
-                value: locale,
-              })
-            }
-          }
-
-          const targetTable = aliasTable || adapter.tables[newTableName]
-
-          selectFields[`${newTableName}.${columnPrefix}${field.name}`] =
-            targetTable[`${columnPrefix}${field.name}`]
-
-          return {
-            columnName: `${columnPrefix}${field.name}`,
-            constraints,
-            field,
-            pathSegments,
-            table: targetTable,
-          }
+        if (locale !== 'all') {
+          constraints.push({
+            columnName: '_locale',
+            table: adapter.tables[newTableName],
+            value: locale,
+          })
         }
+      }
+
+      const targetTable = aliasTable || adapter.tables[newTableName]
+
+      selectFields[`${newTableName}.${columnPrefix}${field.name}`] =
+        targetTable[`${columnPrefix}${field.name}`]
+
+      return {
+        columnName: `${columnPrefix}${field.name}`,
+        constraints,
+        field,
+        pathSegments,
+        table: targetTable,
       }
     }
   }

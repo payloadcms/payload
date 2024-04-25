@@ -25,7 +25,7 @@ export type GeneratedTypes<T extends BaseTypes> = {
 export type FetchOptions = {
   args?: Record<string, unknown>
   jwt?: string
-  method: 'create' | 'delete' | 'find' | 'sendEmail' | 'update'
+  operation: 'create' | 'delete' | 'find' | 'login' | 'sendEmail' | 'update' | 'updateGlobal'
   reduceJSON?: <R>(json: any) => R
 }
 
@@ -94,6 +94,14 @@ export type UpdateArgs<
   TSlug extends keyof TGeneratedTypes['collections'],
 > = UpdateByIDArgs<TGeneratedTypes, TSlug> | UpdateManyArgs<TGeneratedTypes, TSlug>
 
+export type UpdateGlobalArgs<
+  TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
+  TSlug extends keyof TGeneratedTypes['globals'],
+> = {
+  data: DeepPartial<TGeneratedTypes['globals'][TSlug]>
+  slug: TSlug
+} & BaseArgs
+
 export type FindArgs<
   TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
   TSlug extends keyof TGeneratedTypes['collections'],
@@ -112,6 +120,17 @@ export type FindArgs<
   sort?: string
   user?: TypeWithID
   where?: Where
+} & BaseArgs
+
+export type LoginArgs<
+  TGeneratedTypes extends GeneratedTypes<TGeneratedTypes>,
+  TSlug extends keyof TGeneratedTypes['collections'],
+> = {
+  collection: TSlug
+  data: {
+    email: string
+    password: string
+  }
 } & BaseArgs
 
 export type DeleteArgs<

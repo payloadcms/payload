@@ -57,6 +57,7 @@ export default joi.object({
         joi.object().pattern(joi.string(), component),
       ),
     }),
+    custom: joi.object().pattern(joi.string(), joi.any()),
     dateFormat: joi.string(),
     disable: joi.bool(),
     inactivityRoute: joi.string(),

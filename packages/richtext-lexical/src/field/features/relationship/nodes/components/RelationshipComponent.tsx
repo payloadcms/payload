@@ -38,10 +38,7 @@ type Props = {
 const Component: React.FC<Props> = (props) => {
   const {
     children,
-    data: {
-      relationTo,
-      value: { id },
-    },
+    data: { relationTo, value: id },
     nodeKey,
   } = props
 

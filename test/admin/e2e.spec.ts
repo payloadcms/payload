@@ -60,7 +60,7 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 
-import { reInitializeDB } from '../helpers/reInit.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -429,7 +429,10 @@ describe('admin', () => {
 
     test('collection — should render `id` as `useAsTitle` fallback', async () => {
       const { id } = await createPost()
-      await page.goto(postsUrl.edit(id))
+      const postURL = postsUrl.edit(id)
+      await page.goto(postURL)
+      await page.waitForURL(postURL)
+      await wait(500)
       await page.locator('#field-title')?.fill('')
       await expect(page.locator('.doc-header__title.render-title:has-text("ID:")')).toBeVisible()
       await saveDocAndAssert(page)
