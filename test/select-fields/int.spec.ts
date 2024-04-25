@@ -5,6 +5,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import { createDeepNested } from './deep-nested.js'
+import { createLocalizedPost } from './localizedPost.js'
 import { createPost } from './post.js'
 
 let payload: Payload
@@ -12,8 +13,12 @@ let restClient: NextRESTClient
 
 let postId: number | string
 const postsSlug = 'posts'
+
 let deepNestedId: number | string
 const deepNestedSlug = 'deep-nested'
+
+let localizedPostId: number | string
+const localizedPostsSlug = 'localized-posts'
 
 const serializeObject = (obj: unknown) => JSON.parse(JSON.stringify(obj))
 
@@ -22,8 +27,12 @@ describe('Select Fields', () => {
     ;({ payload, restClient } = await initPayloadInt(configPromise))
     const post = await createPost(payload)
     postId = post.id
+
     const deepNested = await createDeepNested(payload)
     deepNestedId = deepNested.id
+
+    const localizedPost = await createLocalizedPost(payload)
+    localizedPostId = localizedPost.id
   })
 
   afterAll(async () => {
@@ -33,8 +42,6 @@ describe('Select Fields', () => {
   })
 
   describe('Local - Base fields', () => {
-    // payload.find({})
-
     it('should select text only top level text field and ids', async () => {
       const post = await payload.findByID({
         collection: postsSlug,
@@ -415,7 +422,7 @@ describe('Select Fields', () => {
       })
     })
 
-    it('should select nested from blocks', async () => {
+    it('should select deep nested from blocks', async () => {
       const deepNested = await payload.findByID({
         collection: deepNestedSlug,
         id: deepNestedId,
@@ -459,6 +466,68 @@ describe('Select Fields', () => {
             group: {
               title: expect.any(String),
             },
+          },
+        ],
+      })
+    })
+  })
+
+  describe('Local - localized', () => {
+    it('should select localized title in en', async () => {
+      const localizedPost = await payload.findByID({
+        id: localizedPostId,
+        collection: localizedPostsSlug,
+        locale: 'en',
+        select: {
+          title: true,
+        },
+      })
+
+      expect(serializeObject(localizedPost)).toEqual({
+        title: 'title en',
+        id: expect.anything(),
+        array: [],
+        arrayLocalized: [],
+      })
+    })
+
+    it('should select localized title in de locale', async () => {
+      const localizedPost = await payload.findByID({
+        id: localizedPostId,
+        collection: localizedPostsSlug,
+        locale: 'de',
+        select: {
+          title: true,
+        },
+      })
+
+      expect(serializeObject(localizedPost)).toEqual({
+        title: 'title de',
+        id: expect.anything(),
+        array: [],
+        arrayLocalized: [],
+      })
+    })
+
+    it('should select localized array and title in en', async () => {
+      const localizedPost = await payload.findByID({
+        id: localizedPostId,
+        collection: localizedPostsSlug,
+        locale: 'en',
+        select: {
+          title: true,
+          arrayLocalized: true,
+        },
+      })
+
+      expect(serializeObject(localizedPost)).toEqual({
+        id: expect.anything(),
+        array: [],
+        title: 'title en',
+        arrayLocalized: [
+          {
+            id: expect.any(String),
+            title: 'title en',
           },
         ],
       })

@@ -3,6 +3,7 @@ import type { Field, Select } from 'payload/types'
 
 import type { PostgresAdapter } from '../types.js'
 
+import { buildColumns } from './buildColumns.js'
 import { traverseFields } from './traverseFields.js'
 
 type BuildFindQueryArgs = {
@@ -34,10 +35,11 @@ export const buildFindManyArgs = ({
     }
 
   const _locales: Result = {
-    columns: {
-      id: false,
-      _parentID: false,
-    },
+    columns: buildColumns({
+      exclude: ['id', '_parentID'],
+      include: ['_locale'],
+      withSelection: !!select,
+    }),
   }
 
   if (adapter.tables[`${tableName}_texts`]) {
@@ -87,6 +89,8 @@ export const buildFindManyArgs = ({
     topLevelTableName: tableName,
     withSelection: !!select,
   })
+
+  adapter.payload.logger.info(result)
 
   return result
 }

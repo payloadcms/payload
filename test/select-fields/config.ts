@@ -5,6 +5,10 @@ export default buildConfigWithDefaults({
     user: 'users',
     autoLogin: false,
   },
+  localization: {
+    locales: ['en', 'de'],
+    defaultLocale: 'en',
+  },
   globals: [],
   collections: [
     {
@@ -223,6 +227,38 @@ export default buildConfigWithDefaults({
                   ],
                 },
               ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'localized-posts',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+        {
+          name: 'arrayLocalized',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              localized: true,
+              name: 'title',
+              type: 'text',
             },
           ],
         },

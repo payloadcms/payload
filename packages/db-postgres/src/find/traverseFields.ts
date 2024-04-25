@@ -90,7 +90,8 @@ export const traverseFields = ({
           const withArray: Result = {
             columns: buildColumns({
               exclude: ['_parentID'],
-              include: ['id', '_path', '_order'],
+              include: ['id', '_order'],
+              localized: field.localized,
               withSelection,
             }),
             orderBy: ({ _order }, { asc }) => [asc(_order)],
@@ -238,11 +239,15 @@ export const traverseFields = ({
           break
         }
 
-        default:
+        default: {
           if (!select) break
-          currentArgs.columns[`${path}${field.name}`] =
-            typeof select === 'boolean' ? true : !!select[field.name]
+          const columns = field.localized ? _locales.columns : currentArgs.columns
+
+          if (typeof select === 'boolean') columns[`${path}${field.name}`] = true
+          if (select?.[field.name]) columns[`${path}${field.name}`] = true
+
           break
+        }
       }
     }
   })
