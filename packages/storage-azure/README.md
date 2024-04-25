@@ -1,1 +1,52 @@
-# Azure Storage
+# Azure Blob Storage for Payload
+
+This package provides a simple way to use [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs) with Payload.
+
+**NOTE:** This package removes the need to use `@payloadcms/plugin-cloud-storage` as was needed in Payload 2.x.
+
+## Installation
+
+```sh
+pnpm add @payloadcms/storage-s3
+```
+
+## Usage
+
+- Configure the `collections` object to specify which collections should use the Vercel Blob adapter. The slug _must_ match one of your existing collection slugs.
+- The `config` object can be any [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object (from [`@aws-sdk/client-s3`](https://github.com/aws/aws-sdk-js-v3)). _This is highly dependent on your AWS setup_. Check the AWS documentation for more information.
+- When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
+
+```ts
+import { azureStorage } from '@payloadcms/storage-azure'
+import { Media } from './collections/Media'
+import { MediaWithPrefix } from './collections/MediaWithPrefix'
+
+export default buildConfig({
+  collections: [Media, MediaWithPrefix],
+  plugins: [
+    azureStorage({
+      collections: {
+        [mediaSlug]: true,
+        [mediaWithPrefixSlug]: {
+          prefix,
+        },
+      },
+      allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
+      baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
+      connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
+      containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+    }),
+  ],
+})
+```
+
+### Configuration Options
+
+| Option                 | Description                                                              | Default |
+| ---------------------- | ------------------------------------------------------------------------ | ------- |
+| `enabled`              | Whether or not to enable the plugin                                      | `true`  |
+| `collections`          | Collections to apply the Azure Blob adapter to                           |         |
+| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist | `false` |
+| `baseURL`              | Base URL for the Azure Blob storage account                              |         |
+| `connectionString`     | Azure Blob storage connection string                                     |         |
+| `containerName`        | Azure Blob storage container name                                        |         |
