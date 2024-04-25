@@ -8,7 +8,7 @@ import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/
 import type { PostgresAdapter } from './types'
 
 import { buildTable } from './schema/build'
-import { createTableName } from './schema/createTableName.js'
+import { createTableName } from './schema/createTableName'
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.schemaName) {

@@ -28,7 +28,6 @@ import { createTableName } from './createTableName'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { setColumnID } from './setColumnID'
 import { traverseFields } from './traverseFields'
-import flattenFields from 'payload/dist/utilities/flattenTopLevelFields'
 
 export type BaseExtraConfig = Record<
   string,
