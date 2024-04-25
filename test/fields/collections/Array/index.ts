@@ -18,9 +18,6 @@ const ArrayFields: CollectionConfig = {
     {
       name: 'items',
       defaultValue: arrayDefaultValue,
-      admin: {
-        disableSortable: true,
-      },
       fields: [
         {
           name: 'text',
@@ -49,7 +46,6 @@ const ArrayFields: CollectionConfig = {
     {
       name: 'collapsedArray',
       admin: {
-        disableSortable: true,
         initCollapsed: true,
       },
       fields: [
@@ -63,9 +59,6 @@ const ArrayFields: CollectionConfig = {
     },
     {
       name: 'localized',
-      admin: {
-        disableSortable: true,
-      },
       defaultValue: arrayDefaultValue,
       fields: [
         {
@@ -137,9 +130,6 @@ const ArrayFields: CollectionConfig = {
     },
     {
       name: 'arrayWithMinRows',
-      admin: {
-        disableSortable: true,
-      },
       fields: [
         {
           name: 'text',
@@ -147,6 +137,21 @@ const ArrayFields: CollectionConfig = {
         },
       ],
       minRows: 2,
+      type: 'array',
+    },
+    {
+      name: 'disableSortItems',
+      defaultValue: arrayDefaultValue,
+      admin: {
+        disableSortable: true,
+      },
+      fields: [
+        {
+          name: 'text',
+          required: true,
+          type: 'text',
+        },
+      ],
       type: 'array',
     },
   ],

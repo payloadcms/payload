@@ -10,9 +10,6 @@ import { getBlocksFieldSeedData } from './shared.js'
 export const getBlocksField = (prefix?: string): BlockField => ({
   name: 'blocks',
   type: 'blocks',
-  admin: {
-    disableSortable: true,
-  },
   blocks: [
     {
       slug: prefix ? `${prefix}Content` : 'content',
@@ -48,9 +45,6 @@ export const getBlocksField = (prefix?: string): BlockField => ({
             {
               name: 'subBlocks',
               type: 'blocks',
-              admin: {
-                disableSortable: true,
-              },
               blocks: [
                 {
                   slug: 'text',
@@ -145,9 +139,6 @@ const BlockFields: CollectionConfig = {
     {
       name: 'i18nBlocks',
       type: 'blocks',
-      admin: {
-        disableSortable: true,
-      },
       blocks: [
         {
           slug: 'text',
@@ -190,9 +181,6 @@ const BlockFields: CollectionConfig = {
     {
       name: 'blocksWithSimilarConfigs',
       type: 'blocks',
-      admin: {
-        disableSortable: true,
-      },
       blocks: [
         {
           slug: 'block-a',
@@ -247,7 +235,6 @@ const BlockFields: CollectionConfig = {
       name: 'blocksWithSimilarGroup',
       type: 'blocks',
       admin: {
-        disableSortable: true,
         description:
           'The purpose of this field is to test validateExistingBlockIsIdentical works with similar blocks with group fields',
       },
@@ -288,9 +275,6 @@ const BlockFields: CollectionConfig = {
     {
       name: 'blocksWithMinRows',
       type: 'blocks',
-      admin: {
-        disableSortable: true,
-      },
       blocks: [
         {
           slug: 'block',
@@ -307,9 +291,6 @@ const BlockFields: CollectionConfig = {
     {
       name: 'customBlocks',
       type: 'blocks',
-      admin: {
-        disableSortable: true,
-      },
       blocks: [
         {
           slug: 'block-1',
@@ -343,9 +324,6 @@ const BlockFields: CollectionConfig = {
     {
       name: 'relationshipBlocks',
       type: 'blocks',
-      admin: {
-        disableSortable: true,
-      },
       blocks: [
         {
           slug: 'relationships',
