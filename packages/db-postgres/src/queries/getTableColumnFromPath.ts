@@ -478,7 +478,7 @@ export const getTableColumnFromPath = ({
         if (typeof field.relationTo === 'string') {
           const relationshipConfig = adapter.payload.collections[field.relationTo].config
 
-          newTableName = adapter.tableNameMap.get(`${rootTableName}${adapter.relationshipsSuffix}`)
+          newTableName = adapter.tableNameMap.get(toSnakeCase(relationshipConfig.slug))
 
           // parent to relationship join table
           relationshipFields = relationshipConfig.fields
