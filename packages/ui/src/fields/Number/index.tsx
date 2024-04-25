@@ -69,7 +69,6 @@ const NumberFieldComponent: React.FC<NumberFieldProps> = (props) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, max, min, required })
       }
-      return true
     },
     [validate, min, max, required],
   )

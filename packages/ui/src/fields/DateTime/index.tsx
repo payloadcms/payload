@@ -63,7 +63,6 @@ const DateTimeField: React.FC<DateFieldProps> = (props) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
       }
-      return true
     },
     [validate, required],
   )

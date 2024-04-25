@@ -46,7 +46,6 @@ const _Upload: React.FC<UploadFieldProps> = (props) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
       }
-      return true
     },
     [validate, required],
   )

@@ -89,7 +89,6 @@ const RelationshipField: React.FC<RelationshipFieldProps> = (props) => {
       if (typeof validate === 'function') {
         return validate(value, { ...validationOptions, required })
       }
-      return true
     },
     [validate, required],
   )
