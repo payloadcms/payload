@@ -14,10 +14,10 @@ export type Props = {
   }
 }
 
-export type CellComponentProps<Field = FieldAffectingData | UIField, Data = unknown> = Pick<
-  Props,
-  'collection' | 'rowData'
-> & {
+export type CellComponentProps<
+  Field = FieldAffectingData | UIField,
+  Data = unknown,
+> = Partial<Props> & {
   data: Data
   field: Field
 }
