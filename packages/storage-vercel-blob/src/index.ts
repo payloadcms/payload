@@ -14,14 +14,15 @@ import { getStaticHandler } from './staticHandler.js'
 
 export type VercelBlobStorageOptions = {
   /**
-   * Access control level
+   * Access control level. Currently, only 'public' is supported.
+   * Vercel plans on adding support for private blobs in the future.
    *
    * @default 'public'
    */
   access?: 'public'
 
   /**
-   * Add a random suffix to the uploaded file name
+   * Add a random suffix to the uploaded file name in Vercel Blob storage
    *
    * @default false
    */
@@ -30,7 +31,7 @@ export type VercelBlobStorageOptions = {
   /**
    * Cache-Control max-age in seconds
    *
-   * @default 31536000 (1 year)
+   * @defaultvalue 365 * 24 * 60 * 60 (1 Year)
    */
   cacheControlMaxAge?: number
 
