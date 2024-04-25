@@ -250,6 +250,10 @@ describe('uploads', () => {
     await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
       'File size limit has been reached',
     )
+
+    // Works around Playwright issue. Future `page.goto` calls hanging.
+    // Behavior has to do with a Next Layout stylesheet Request never responding.
+    await wait(5000) // do not remove
   })
 
   test('Should render adminThumbnail when using a function', async () => {
