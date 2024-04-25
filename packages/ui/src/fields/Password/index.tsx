@@ -49,6 +49,7 @@ const PasswordField: React.FC<PasswordFieldProps> = (props) => {
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
       }
+      return true
     },
     [validate, required],
   )

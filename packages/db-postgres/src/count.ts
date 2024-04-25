@@ -2,13 +2,13 @@ import type { Count } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
+import toSnakeCase from 'to-snake-case'
 
 import type { ChainedMethods } from './find/chainMethods.js'
 import type { PostgresAdapter } from './types.js'
 
 import { chainMethods } from './find/chainMethods.js'
 import buildQuery from './queries/buildQuery.js'
-import { getTableName } from './schema/getTableName.js'
 
 export const count: Count = async function count(
   this: PostgresAdapter,
@@ -16,10 +16,7 @@ export const count: Count = async function count(
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
-  const tableName = getTableName({
-    adapter: this,
-    config: collectionConfig,
-  })
+  const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const table = this.tables[tableName]

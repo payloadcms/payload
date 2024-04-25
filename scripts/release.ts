@@ -142,7 +142,9 @@ async function main() {
   console.log(chalk.bold.yellow(`  Tag: ${tag}\n`))
   console.log(chalk.bold.green(`  Changes (${packageDetails.length} packages):\n`))
   console.log(
-    `${packageDetails.map((p) => `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}`).join('\n')}\n`,
+    `${packageDetails
+      .map((p) => `  - ${p.name.padEnd(32)} ${p.version} => ${chalk.green(nextReleaseVersion)}`)
+      .join('\n')}\n`,
   )
 
   const confirmPublish = await confirm('Are you sure you want to create these versions?')
@@ -210,12 +212,9 @@ async function main() {
   packageDetails = packageDetails.filter((p) => p.name !== 'payload')
   runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
 
-  const results: { name: string; success: boolean; details?: string }[] = []
-  // Sequential publish
-  for (const pkg of packageDetails) {
-    const result = await publishPackageThrottled(pkg, { dryRun })
-    results.push(result)
-  }
+  const results = await Promise.all(
+    packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun })),
+  )
 
   console.log(chalk.bold.green(`\n\nResults:\n`))
 

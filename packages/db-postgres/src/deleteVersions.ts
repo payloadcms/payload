@@ -3,11 +3,11 @@ import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/
 
 import { inArray } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
-import { getTableName } from './schema/getTableName.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: PostgresAdapter,
@@ -16,11 +16,10 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
-  const tableName = getTableName({
-    adapter: this,
-    config: collectionConfig,
-    versions: true,
-  })
+  const tableName = this.tableNameMap.get(
+    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
+  )
+
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const { docs } = await findMany({

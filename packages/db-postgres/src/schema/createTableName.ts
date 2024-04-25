@@ -14,53 +14,59 @@ type Args = {
     name?: string
     slug?: string
   }
-  /** Localized tables need to be given the locales suffix */
-  locales?: boolean
   /** For nested tables passed for the user custom dbName functions to handle their own iterations */
   parentTableName?: string
   /** For sub tables (array for example) this needs to include the parentTableName */
   prefix?: string
-  /** Adds the relationships suffix */
-  relationships?: boolean
   /** For tables based on fields that could have both enumName and dbName (ie: select with hasMany), default: 'dbName' */
   target?: 'dbName' | 'enumName'
   throwValidationError?: boolean
-  /** Adds the versions suffix, should only be used on the base collection to duplicate suffixing */
+  /** Adds the versions suffix to the default table name - should only be used on the base collection to avoid duplicate suffixing */
   versions?: boolean
+  /** Adds the versions suffix to custom dbName only - this is used while creating blocks / selects / arrays / etc */
+  versionsCustomName?: boolean
 }
 
 /**
  * Used to name database enums and tables
  * Returns the table or enum name for a given entity
  */
-export const getTableName = ({
+export const createTableName = ({
   adapter,
   config: { name, slug },
   config,
-  locales = false,
   parentTableName,
   prefix = '',
-  relationships = false,
   target = 'dbName',
   throwValidationError = false,
   versions = false,
+  versionsCustomName = false,
 }: Args): string => {
-  let result: string
-  let custom = config[target]
+  let customNameDefinition = config[target]
 
-  if (!custom && target === 'enumName') {
-    custom = config['dbName']
+  let defaultTableName = `${prefix}${toSnakeCase(name ?? slug)}`
+
+  if (versions) defaultTableName = `_${defaultTableName}${adapter.versionsSuffix}`
+
+  let customTableNameResult: string
+
+  if (!customNameDefinition && target === 'enumName') {
+    customNameDefinition = config['dbName']
   }
 
-  if (custom) {
-    result = typeof custom === 'function' ? custom({ tableName: parentTableName }) : custom
-  } else {
-    result = `${prefix}${toSnakeCase(name ?? slug)}`
+  if (customNameDefinition) {
+    customTableNameResult =
+      typeof customNameDefinition === 'function'
+        ? customNameDefinition({ tableName: parentTableName })
+        : customNameDefinition
+
+    if (versionsCustomName)
+      customTableNameResult = `_${customTableNameResult}${adapter.versionsSuffix}`
   }
 
-  if (locales) result = `${result}${adapter.localesSuffix}`
-  if (versions) result = `_${result}${adapter.versionsSuffix}`
-  if (relationships) result = `${result}${adapter.relationshipsSuffix}`
+  const result = customTableNameResult || defaultTableName
+
+  adapter.tableNameMap.set(defaultTableName, result)
 
   if (!throwValidationError) {
     return result
@@ -71,5 +77,6 @@ export const getTableName = ({
       `Exceeded max identifier length for table or enum name of 63 characters. Invalid name: ${result}`,
     )
   }
+
   return result
 }
