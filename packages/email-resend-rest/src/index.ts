@@ -2,9 +2,9 @@ import type { EmailAdapter } from 'payload/config'
 import type { SendEmailOptions } from 'payload/types'
 
 export type ResendAdapterArgs = {
+  apiKey: string
   defaultFromAddress: string
   defaultFromName: string
-  resendApiKey: string
 }
 
 type ResendAdapter = EmailAdapter<ResendResponse>
@@ -23,7 +23,7 @@ type ResendResponse =
  * If no email configuration is provided, an ethereal email test account is returned
  */
 export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
-  const { defaultFromAddress, defaultFromName, resendApiKey } = args
+  const { apiKey, defaultFromAddress, defaultFromName } = args
 
   const adapter: ResendAdapter = () => ({
     defaultFromAddress,
@@ -39,7 +39,7 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
       const res = await fetch('https://api.resend.com/emails', {
         body: JSON.stringify(sendEmailOptions),
         headers: {
-          Authorization: `Bearer ${resendApiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         method: 'POST',
