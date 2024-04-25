@@ -1,9 +1,10 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
-    autoLogin: false,
+    autoLogin: { email: devUser.email, password: devUser.password },
   },
   localization: {
     locales: ['en', 'de'],
@@ -262,16 +263,54 @@ export default buildConfigWithDefaults({
             },
           ],
         },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          localized: true,
+          blocks: [
+            {
+              slug: 'some',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+        // {
+        //   name: 'groupLocalized',
+        //   type: 'group',
+        //   localized: true,
+        //   fields: [
+        //     {
+        //       name: 'title',
+        //       type: 'text',
+        //     },
+        //   ],
+        // },
+        // {
+        //   name: 'group',
+        //   type: 'group',
+        //   fields: [
+        //     {
+        //       localized: true,
+        //       name: 'title',
+        //       type: 'text',
+        //     },
+        //   ],
+        // },
       ],
     },
   ],
   onInit: async (payload) => {
-    // await payload.create({
-    //   collection: 'users',
-    //   data: {
-    //     email: devUser.email,
-    //     password: devUser.password,
-    //   },
-    // })
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
   },
 })

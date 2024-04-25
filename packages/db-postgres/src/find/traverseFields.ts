@@ -18,6 +18,7 @@ type TraverseFieldArgs = {
   currentTableName: string
   depth?: number
   fields: Field[]
+  localizedGroupOrTabParent?: boolean
   path: string
   select?: Select | boolean
   topLevelArgs: Result
@@ -32,6 +33,7 @@ export const traverseFields = ({
   currentTableName,
   depth,
   fields,
+  localizedGroupOrTabParent,
   path,
   select,
   topLevelArgs,
@@ -47,6 +49,7 @@ export const traverseFields = ({
         currentTableName,
         depth,
         fields: field.fields,
+        localizedGroupOrTabParent,
         path,
         select,
         topLevelArgs,
@@ -69,6 +72,7 @@ export const traverseFields = ({
           currentTableName,
           depth,
           fields: tab.fields,
+          localizedGroupOrTabParent: hasName ? tab.localized : false,
           path: tabPath,
           select: hasName ? buildFieldSelect({ field: tab, select }) : select,
           topLevelArgs,
@@ -123,6 +127,7 @@ export const traverseFields = ({
             currentTableName: arrayTableName,
             depth,
             fields: field.fields,
+            localizedGroupOrTabParent: false,
             path: '',
             select: buildFieldSelect({ field, select }),
             topLevelArgs,
@@ -169,6 +174,7 @@ export const traverseFields = ({
                 columns: buildColumns({
                   exclude: ['_parentID'],
                   include: ['id', '_path', '_order'],
+                  localized: field.localized,
                   withSelection,
                 }),
                 orderBy: ({ _order }, { asc }) => [asc(_order)],
@@ -194,6 +200,7 @@ export const traverseFields = ({
                 currentTableName: tableName,
                 depth,
                 fields: block.fields,
+                localizedGroupOrTabParent: false,
                 path: '',
                 select: blockSelect,
                 topLevelArgs,
@@ -214,6 +221,7 @@ export const traverseFields = ({
             currentTableName,
             depth,
             fields: field.fields,
+            localizedGroupOrTabParent: field.localized,
             path: `${path}${field.name}_`,
             select: buildFieldSelect({ field, select }),
             topLevelArgs,
@@ -241,7 +249,8 @@ export const traverseFields = ({
 
         default: {
           if (!select) break
-          const columns = field.localized ? _locales.columns : currentArgs.columns
+          const columns =
+            field.localized || localizedGroupOrTabParent ? _locales.columns : currentArgs.columns
 
           if (typeof select === 'boolean') columns[`${path}${field.name}`] = true
           if (select?.[field.name]) columns[`${path}${field.name}`] = true

@@ -488,6 +488,9 @@ describe('Select Fields', () => {
         id: expect.anything(),
         array: [],
         arrayLocalized: [],
+        blocks: [],
+        // group: {},
+        // groupLocalized: {},
       })
     })
 
@@ -505,7 +508,10 @@ describe('Select Fields', () => {
         title: 'title de',
         id: expect.anything(),
         array: [],
+        blocks: [],
         arrayLocalized: [],
+        // group: {},
+        // groupLocalized: {},
       })
     })
 
@@ -524,6 +530,9 @@ describe('Select Fields', () => {
         id: expect.anything(),
         array: [],
         title: 'title en',
+        blocks: [],
+        // group: {},
+        // groupLocalized: {},
         arrayLocalized: [
           {
             id: expect.any(String),
@@ -546,6 +555,9 @@ describe('Select Fields', () => {
       expect(serializeObject(localizedPost)).toEqual({
         id: expect.anything(),
         array: [],
+        blocks: [],
+        // group: {},
+        // groupLocalized: {},
         arrayLocalized: [
           {
             id: expect.any(String),
@@ -568,6 +580,9 @@ describe('Select Fields', () => {
       expect(serializeObject(localizedPost)).toEqual({
         title: 'title en',
         id: expect.anything(),
+        blocks: [],
+        // group: {},
+        // groupLocalized: {},
         array: [
           {
             id: expect.any(String),
@@ -577,6 +592,58 @@ describe('Select Fields', () => {
         arrayLocalized: [],
       })
     })
+
+    it('should select localized field inside of localized blocks', async () => {
+      const localizedPost = await payload.findByID({
+        id: localizedPostId,
+        collection: localizedPostsSlug,
+        locale: 'en',
+        select: {
+          blocks: {
+            some: {
+              title: true,
+            },
+          },
+        },
+      })
+
+      expect(serializeObject(localizedPost)).toEqual({
+        id: expect.anything(),
+        blocks: [
+          {
+            blockType: 'some',
+            id: expect.any(String),
+            title: 'title en',
+          },
+        ],
+        // group: {},
+        // groupLocalized: {},
+        array: [],
+        arrayLocalized: [],
+      })
+    })
+
+    // Bug with updating localized group in Postgres adapter.
+    // it('should select field inside of localized group', async () => {
+    //   const localizedPost = await payload.findByID({
+    //     id: localizedPostId,
+    //     collection: localizedPostsSlug,
+    //     locale: 'en',
+    //     select: {
+    //       groupLocalized: { title: true },
+    //     },
+    //   })
+
+    //   expect(serializeObject(localizedPost)).toEqual({
+    //     id: expect.anything(),
+    //     array: [],
+    //     group: {},
+    //     groupLocalized: {
+    //       title: 'title en',
+    //     },
+    //     arrayLocalized: [],
+    //   })
+    // })
   })
 
   // TODO: REST tests.

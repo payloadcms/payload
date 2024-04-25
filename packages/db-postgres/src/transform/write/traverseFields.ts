@@ -57,6 +57,7 @@ type Args = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
+
   texts: Record<string, unknown>[]
 }
 
