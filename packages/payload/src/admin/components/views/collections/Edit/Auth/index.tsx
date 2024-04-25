@@ -145,7 +145,7 @@ const Auth: React.FC<Props> = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox admin={{ readOnly }} label={t('enableAPIKey')} name="enableAPIKey" />
-          {enableAPIKey?.value && <APIKey readOnly={readOnly} />}
+          <APIKey enabled={!!enableAPIKey?.value} readOnly={readOnly} />
         </div>
       )}
       {verify && <Checkbox admin={{ readOnly }} label={t('verified')} name="_verified" />}
