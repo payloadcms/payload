@@ -265,6 +265,10 @@ export interface ArrayField {
         id?: string | null
       }[]
     | null
+  disableSortItems?: {
+    text: string
+    id?: string | null
+  }[]
   updatedAt: string
   createdAt: string
 }
