@@ -25,9 +25,9 @@ export const Entities: CollectionConfig = {
       hooks: {
         afterRead: [
           async ({ data, req }) => {
-            const { id } = data
+            if (!req.query.children || !data) return
 
-            if (!req.query.children) return
+            const { id } = data
 
             const people = await req.payload.find({
               collection: 'people',
