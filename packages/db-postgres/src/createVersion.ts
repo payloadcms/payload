@@ -42,11 +42,8 @@ export async function createVersion<T extends TypeWithID>(
 
   const table = this.tables[tableName]
 
-  const relationshipsTableName = this.tableNameMap.get(
-    `_${defaultTableName}${this.versionsSuffix}${this.relationshipsSuffix}`,
-  )
-
-  const relationshipsTable = this.tables[relationshipsTableName]
+  const relationshipsTable =
+    this.tables[`_${defaultTableName}${this.versionsSuffix}${this.relationshipsSuffix}`]
 
   if (collection.versions.drafts) {
     await db.execute(sql`
