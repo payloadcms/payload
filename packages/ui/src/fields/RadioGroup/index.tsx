@@ -62,10 +62,8 @@ const RadioGroupField: React.FC<RadioFieldProps> = (props) => {
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      if (typeof validate === 'function') {
+      if (typeof validate === 'function')
         return validate(value, { ...validationOptions, options, required })
-      }
-      return true
     },
     [validate, options, required],
   )

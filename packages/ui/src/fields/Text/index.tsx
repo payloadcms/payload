@@ -53,10 +53,8 @@ const TextField: React.FC<TextFieldProps> = (props) => {
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function') {
+      if (typeof validate === 'function')
         return validate(value, { ...options, maxLength, minLength, required })
-      }
-      return true
     },
     [validate, minLength, maxLength, required],
   )

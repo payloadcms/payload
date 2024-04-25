@@ -58,10 +58,8 @@ const JSONFieldComponent: React.FC<JSONFieldProps> = (props) => {
 
   const memoizedValidate: ClientValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function') {
+      if (typeof validate === 'function')
         return validate(value, { ...options, jsonError, required })
-      }
-      return true
     },
     [validate, required, jsonError],
   )
