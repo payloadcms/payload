@@ -1,7 +1,7 @@
 import { getPayload } from 'payload'
 import { importConfig } from 'payload/node'
 
-export default async () => {
+const redirects = async () => {
   const internetExplorerRedirect = {
     destination: '/ie-incompatible.html',
     has: [
@@ -21,8 +21,8 @@ export default async () => {
 
     const { docs } = await payload.find({
       collection: 'redirects',
-      limit: 1000,
       depth: 1,
+      limit: 1000,
     })
 
     let dynamicRedirects = []
@@ -79,3 +79,5 @@ export default async () => {
     return []
   }
 }
+
+export default redirects

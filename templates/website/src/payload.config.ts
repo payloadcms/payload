@@ -1,8 +1,7 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
-import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 
 import { payloadCloud } from '@payloadcms/plugin-cloud'
-import nestedDocs from '@payloadcms/plugin-nested-docs'
+import { nestedDocs } from '@payloadcms/plugin-nested-docs'
 import { redirects } from '@payloadcms/plugin-redirects'
 import { seo } from '@payloadcms/plugin-seo'
 import { slateEditor } from '@payloadcms/richtext-slate'
@@ -25,7 +24,7 @@ import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
 import { Settings } from './globals/Settings'
 
-const generateTitle: GenerateTitle = () => {
+const generateTitle = () => {
   return 'My Website'
 }
 
