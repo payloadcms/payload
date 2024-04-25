@@ -61,10 +61,6 @@ export type DrizzleTransaction = PgTransaction<
 >
 
 export type PostgresAdapter = BaseDatabaseAdapter & {
-  /**
-   * Used internally to map the block name to the table name
-   */
-  blockTableNames: Record<string, string>
   drizzle: DrizzleDB
   enums: Record<string, GenericEnum>
   /**
@@ -90,6 +86,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
       resolve: () => Promise<void>
     }
   }
+  tableNameMap: Map<string, string>
   tables: Record<string, GenericTable | PgTableWithColumns<any>>
   versionsSuffix?: string
 }
