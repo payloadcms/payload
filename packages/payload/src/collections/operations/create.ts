@@ -3,7 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 import crypto from 'crypto'
 
 import type { GeneratedTypes } from '../../index.js'
-import type { Document, PayloadRequest } from '../../types/index.js'
+import type { Document, PayloadRequestWithData } from '../../types/index.js'
 import type {
   AfterChangeHook,
   BeforeOperationHook,
@@ -39,7 +39,7 @@ export type Arguments<T extends CreateUpdateType> = {
   draft?: boolean
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields?: boolean
 }
 

@@ -1,6 +1,11 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { GeneratedTypes, Payload } from '../../../index.js'
-import type { Document, PayloadRequest, RequestContext, Where } from '../../../types/index.js'
+import type {
+  Document,
+  PayloadRequestWithData,
+  RequestContext,
+  Where,
+} from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -22,7 +27,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   showHiddenFields?: boolean
   sort?: string
   user?: Document

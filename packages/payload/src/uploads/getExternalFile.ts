@@ -1,11 +1,11 @@
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
 
 type Args = {
   data: FileData
-  req: PayloadRequest
+  req: PayloadRequestWithData
   uploadConfig: UploadConfig
 }
 export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {

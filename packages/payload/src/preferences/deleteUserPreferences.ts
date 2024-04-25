@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { Payload } from '../index.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -9,7 +9,7 @@ type Args = {
    */
   ids: (number | string)[]
   payload: Payload
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 export const deleteUserPreferences = async ({ collectionConfig, ids, payload, req }: Args) => {
   if (collectionConfig.auth) {

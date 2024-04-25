@@ -1,3 +1,3 @@
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 
-export default ({ req: { user } }: { req: PayloadRequest }): boolean => Boolean(user)
+export default ({ req: { user } }: { req: PayloadRequestWithData }): boolean => Boolean(user)

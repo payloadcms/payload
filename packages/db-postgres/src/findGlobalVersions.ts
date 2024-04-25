@@ -1,5 +1,5 @@
 import type { FindGlobalVersions } from 'payload/database'
-import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
+import type { PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
 
 import { buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
@@ -16,7 +16,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     locale,
     page,
     pagination,
-    req = {} as PayloadRequest,
+    req = {} as PayloadRequestWithData,
     skip,
     sort: sortArg,
     where,

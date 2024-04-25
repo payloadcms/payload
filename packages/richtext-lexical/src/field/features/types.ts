@@ -8,7 +8,7 @@ import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type {
   Field,
-  PayloadRequest,
+  PayloadRequestWithData,
   ReplaceAny,
   RichTextField,
   ValidateOptions,
@@ -54,7 +54,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   node: T
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
 }) => void
@@ -192,7 +192,7 @@ export type FieldNodeHookArgs<T extends SerializedLexicalNode> = {
   operation?: 'create' | 'delete' | 'read' | 'update'
   overrideAccess?: boolean
   /** The Express request object. It is mocked for Local API operations. */
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 export type FieldNodeHook<T extends SerializedLexicalNode> = (

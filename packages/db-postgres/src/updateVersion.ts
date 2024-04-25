@@ -1,5 +1,5 @@
 import type { TypeWithVersion, UpdateVersionArgs } from 'payload/database'
-import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
+import type { PayloadRequestWithData, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
 
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
@@ -15,7 +15,7 @@ export async function updateVersion<T extends TypeWithID>(
     id,
     collection,
     locale,
-    req = {} as PayloadRequest,
+    req = {} as PayloadRequestWithData,
     versionData,
     where: whereArg,
   }: UpdateVersionArgs<T>,

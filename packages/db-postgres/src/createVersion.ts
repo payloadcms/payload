@@ -1,5 +1,5 @@
 import type { CreateVersionArgs, TypeWithVersion } from 'payload/database'
-import type { PayloadRequest, TypeWithID } from 'payload/types'
+import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
@@ -15,7 +15,7 @@ export async function createVersion<T extends TypeWithID>(
     autosave,
     collectionSlug,
     parent,
-    req = {} as PayloadRequest,
+    req = {} as PayloadRequestWithData,
     versionData,
   }: CreateVersionArgs<T>,
 ) {

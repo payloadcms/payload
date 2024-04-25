@@ -1,5 +1,5 @@
 'use client'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { CopyToClipboard } from '@payloadcms/ui/elements/CopyToClipboard'
 import { GenerateConfirmation } from '@payloadcms/ui/elements/GenerateConfirmation'
@@ -40,7 +40,7 @@ export const APIKey: React.FC<{ enabled: boolean; readOnly?: boolean }> = ({
           config,
         },
         t,
-      } as PayloadRequest,
+      } as PayloadRequestWithData,
       siblingData: {},
     })
 

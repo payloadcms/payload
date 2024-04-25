@@ -1,5 +1,5 @@
 import type { DeleteOne } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
@@ -13,7 +13,7 @@ import { transform } from './transform/read/index.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: PostgresAdapter,
-  { collection: collectionSlug, req = {} as PayloadRequest, where: whereArg },
+  { collection: collectionSlug, req = {} as PayloadRequestWithData, where: whereArg },
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config

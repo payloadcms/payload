@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 import jwt from 'jsonwebtoken'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -25,7 +25,7 @@ export type Arguments = {
   }
   depth?: number
   overrideAccess?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 export const resetPasswordOperation = async (args: Arguments): Promise<Result> => {

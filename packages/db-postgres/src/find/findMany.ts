@@ -1,5 +1,5 @@
 import type { FindArgs } from 'payload/database'
-import type { Field, PayloadRequest, TypeWithID } from 'payload/types'
+import type { Field, PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import { inArray, sql } from 'drizzle-orm'
 
@@ -25,7 +25,7 @@ export const findMany = async function find({
   locale,
   page = 1,
   pagination,
-  req = {} as PayloadRequest,
+  req = {} as PayloadRequestWithData,
   skip,
   sort,
   tableName,

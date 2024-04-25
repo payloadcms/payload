@@ -1,8 +1,8 @@
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 export type Context = {
   headers: {
     [key: string]: string
   }
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }

@@ -1,5 +1,5 @@
 import type { UpdateVersion } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -7,7 +7,7 @@ import { withSession } from './withSession.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  { id, collection, locale, req = {} as PayloadRequest, versionData, where },
+  { id, collection, locale, req = {} as PayloadRequestWithData, versionData, where },
 ) {
   const VersionModel = this.versions[collection]
   const whereToUse = where || { id: { equals: id } }
