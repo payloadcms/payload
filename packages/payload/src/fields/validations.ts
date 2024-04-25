@@ -349,8 +349,7 @@ const validateFilterOptions: Validate = async (
             if (typeof val === 'object') {
               if (val?.value) {
                 valueIDs.push(val.value)
-              }
-              if (ObjectID.isValid(val)) {
+              } else if (ObjectID.isValid(val)) {
                 valueIDs.push(new ObjectID(val).toHexString())
               }
             }
@@ -405,7 +404,7 @@ const validateFilterOptions: Validate = async (
           requestedID = val
         }
 
-        if (ObjectID.isValid(val)) {
+        if (typeof val === 'object' && ObjectID.isValid(val)) {
           requestedID = new ObjectID(val).toHexString()
         }
       }
