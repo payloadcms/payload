@@ -52,9 +52,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
-
-      // Postgres-specific
-      blockTableNames: {},
       drizzle: undefined,
       enums: {},
       fieldConstraints: {},
@@ -70,6 +67,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       schema: {},
       schemaName: args.schemaName,
       sessions: {},
+      tableNameMap: new Map<string, string>(),
       tables: {},
       versionsSuffix: args.versionsSuffix || '_v',
 

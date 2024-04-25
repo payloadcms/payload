@@ -9,7 +9,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
-import { getTableName } from './utilities/getTableName.js'
 
 export async function createGlobalVersion<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -18,10 +17,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
 
-  const tableName = getTableName({
-    adapter: this,
-    defaultTableName: `_${toSnakeCase(global.slug)}${this.versionsSuffix}`,
-  })
+  const tableName = this.tableNameMap.get(`_${toSnakeCase(global.slug)}${this.versionsSuffix}`)
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,

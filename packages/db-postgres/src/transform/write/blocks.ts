@@ -6,7 +6,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from '../../types.js'
 import type { BlockRowToInsert, RelationshipToDelete } from './types.js'
 
-import { createTableName } from '../../schema/createTableName.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -62,7 +61,7 @@ export const transformBlocks = ({
 
     if (field.localized && locale) newRow.row._locale = locale
 
-    const blockTableName = `${baseTableName}_blocks_${blockType}`
+    const blockTableName = adapter.tableNameMap.get(`${baseTableName}_blocks_${blockType}`)
 
     const hasUUID = adapter.tables[blockTableName]._uuid
 

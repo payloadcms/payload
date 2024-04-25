@@ -8,7 +8,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
-import { getTableName } from './utilities/getTableName.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: PostgresAdapter,
@@ -17,10 +16,9 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
-  const tableName = getTableName({
-    adapter: this,
-    defaultTableName: `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
-  })
+  const tableName = this.tableNameMap.get(
+    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
+  )
 
   const fields = buildVersionCollectionFields(collectionConfig)
 

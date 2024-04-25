@@ -7,7 +7,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
-import { getTableName } from './utilities/getTableName.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: PostgresAdapter,
@@ -28,10 +27,9 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   )
   const sort = typeof sortArg === 'string' ? sortArg : '-createdAt'
 
-  const tableName = getTableName({
-    adapter: this,
-    defaultTableName: `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
-  })
+  const tableName = this.tableNameMap.get(
+    `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
+  )
 
   const fields = buildVersionGlobalFields(globalConfig)
 

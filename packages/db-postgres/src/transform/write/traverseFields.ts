@@ -7,7 +7,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
 
-import { createTableName } from '../../schema/createTableName.js'
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { transformArray } from './array.js'
 import { transformBlocks } from './blocks.js'
@@ -95,7 +94,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'array') {
-      const arrayTableName = `${parentTableName}_${columnName}`
+      const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
       if (!arrays[arrayTableName]) arrays[arrayTableName] = []
 
@@ -459,7 +458,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'select' && field.hasMany) {
-      const selectTableName = `${parentTableName}_${columnName}`
+      const selectTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
       if (!selects[selectTableName]) selects[selectTableName] = []
 
       if (field.localized) {

@@ -45,6 +45,7 @@ export const transformArray = ({
   texts,
 }: Args) => {
   const newRows: ArrayRowToInsert[] = []
+
   const hasUUID = adapter.tables[arrayTableName]._uuid
 
   if (isArrayOfRows(data)) {

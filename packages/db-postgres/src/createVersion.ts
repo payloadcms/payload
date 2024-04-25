@@ -8,7 +8,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
-import { getTableName } from './utilities/getTableName.js'
 
 export async function createVersion<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -24,10 +23,7 @@ export async function createVersion<T extends TypeWithID>(
   const collection = this.payload.collections[collectionSlug].config
   const defaultTableName = toSnakeCase(collection.slug)
 
-  const tableName = getTableName({
-    adapter: this,
-    defaultTableName: `_${defaultTableName}${this.versionsSuffix}`,
-  })
+  const tableName = this.tableNameMap.get(`_${defaultTableName}${this.versionsSuffix}`)
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
@@ -46,10 +42,9 @@ export async function createVersion<T extends TypeWithID>(
 
   const table = this.tables[tableName]
 
-  const relationshipsTableName = getTableName({
-    adapter: this,
-    defaultTableName: `_${defaultTableName}${this.versionsSuffix}${this.relationshipsSuffix}`,
-  })
+  const relationshipsTableName = this.tableNameMap.get(
+    `_${defaultTableName}${this.versionsSuffix}${this.relationshipsSuffix}`,
+  )
 
   const relationshipsTable = this.tables[relationshipsTableName]
 

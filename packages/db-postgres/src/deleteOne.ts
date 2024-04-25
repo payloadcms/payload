@@ -10,7 +10,6 @@ import { buildFindManyArgs } from './find/buildFindManyArgs.js'
 import buildQuery from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { transform } from './transform/read/index.js'
-import { getTableName } from './utilities/getTableName.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: PostgresAdapter,
@@ -19,10 +18,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
 
-  const tableName = getTableName({
-    adapter: this,
-    defaultTableName: toSnakeCase(collection.slug),
-  })
+  const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
   let docToDelete: Record<string, unknown>
 

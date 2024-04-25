@@ -183,7 +183,7 @@ export const getTableColumnFromPath = ({
 
       case 'group': {
         if (locale && field.localized && adapter.payload.config.localization) {
-          newTableName = `${tableName}${adapter.versionsSuffix}`
+          newTableName = `${tableName}${adapter.localesSuffix}`
 
           joins[tableName] = eq(
             adapter.tables[tableName].id,

@@ -250,6 +250,7 @@ export const traverseFields = ({
             parentTableName: newTableName,
             prefix: `${newTableName}_`,
             throwValidationError,
+            versionsCustomName: versions,
           })
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
@@ -323,6 +324,7 @@ export const traverseFields = ({
           parentTableName: newTableName,
           prefix: `${newTableName}_`,
           throwValidationError,
+          versionsCustomName: versions,
         })
 
         const baseColumns: Record<string, PgColumnBuilder> = {
@@ -411,6 +413,7 @@ export const traverseFields = ({
             parentTableName: rootTableName,
             prefix: `${rootTableName}_blocks_`,
             throwValidationError,
+            versionsCustomName: versions,
           })
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {
@@ -500,7 +503,6 @@ export const traverseFields = ({
               tableLocales: adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
             })
           }
-          adapter.blockTableNames[`${rootTableName}.${toSnakeCase(block.slug)}`] = blockTableName
           rootRelationsToBuild.set(`_blocks_${block.slug}`, blockTableName)
         })
 

@@ -9,7 +9,6 @@ import type { PostgresAdapter } from './types.js'
 
 import { chainMethods } from './find/chainMethods.js'
 import buildQuery from './queries/buildQuery.js'
-import { getTableName } from './utilities/getTableName.js'
 
 export const count: Count = async function count(
   this: PostgresAdapter,
@@ -17,10 +16,7 @@ export const count: Count = async function count(
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
-  const tableName = getTableName({
-    adapter: this,
-    defaultTableName: toSnakeCase(collectionConfig.slug),
-  })
+  const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const table = this.tables[tableName]

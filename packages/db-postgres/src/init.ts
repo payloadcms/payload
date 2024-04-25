@@ -48,6 +48,7 @@ export const init: Init = function init(this: PostgresAdapter) {
         adapter: this,
         config: collection,
         versions: true,
+        versionsCustomName: true,
       })
       const versionFields = buildVersionCollectionFields(collection)
 
@@ -83,7 +84,12 @@ export const init: Init = function init(this: PostgresAdapter) {
     })
 
     if (global.versions) {
-      const versionsTableName = createTableName({ adapter: this, config: global, versions: true })
+      const versionsTableName = createTableName({
+        adapter: this,
+        config: global,
+        versions: true,
+        versionsCustomName: true,
+      })
       const versionFields = buildVersionGlobalFields(global)
 
       buildTable({

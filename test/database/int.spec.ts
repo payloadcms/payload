@@ -215,11 +215,19 @@ describe('database', () => {
       }
     })
 
-    it('should create a doc with custom db names', async () => {
-      const doc = await payload.create({
+    it('should create and read doc with custom db names', async () => {
+      const relationA = await payload.create({
+        collection: 'relation-a',
+        data: {
+          title: 'hello',
+        },
+      })
+
+      const { id } = await payload.create({
         collection: 'custom-schema',
         data: {
           text: 'test',
+          relationship: [relationA.id],
           localizedText: 'hello',
           select: ['a', 'b'],
           radio: 'a',
@@ -239,7 +247,13 @@ describe('database', () => {
         },
       })
 
-      expect(doc.text).toStrictEqual('text')
+      const doc = await payload.findByID({
+        collection: 'custom-schema',
+        id,
+      })
+
+      expect(doc.relationship[0].title).toStrictEqual(relationA.title)
+      expect(doc.text).toStrictEqual('test')
       expect(doc.localizedText).toStrictEqual('hello')
       expect(doc.select).toHaveLength(2)
       expect(doc.radio).toStrictEqual('a')

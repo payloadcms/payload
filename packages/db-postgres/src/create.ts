@@ -5,7 +5,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
-import { getTableName } from './utilities/getTableName.js'
 
 export const create: Create = async function create(
   this: PostgresAdapter,
@@ -14,10 +13,7 @@ export const create: Create = async function create(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
 
-  const tableName = getTableName({
-    adapter: this,
-    defaultTableName: toSnakeCase(collection.slug),
-  })
+  const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
   const result = await upsertRow({
     adapter: this,

@@ -7,8 +7,6 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
-import { getTableName } from '../utilities/getTableName.js'
-
 type TraverseFieldArgs = {
   _locales: Record<string, unknown>
   adapter: PostgresAdapter
@@ -80,10 +78,9 @@ export const traverseFields = ({
             with: {},
           }
 
-          const arrayTableName = getTableName({
-            adapter: this,
-            defaultTableName: `${currentTableName}_${path}${toSnakeCase(field.name)}`,
-          })
+          const arrayTableName = adapter.tableNameMap.get(
+            `${currentTableName}_${path}${toSnakeCase(field.name)}`,
+          )
 
           const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
 
@@ -135,10 +132,9 @@ export const traverseFields = ({
                 with: {},
               }
 
-              const tableName = getTableName({
-                adapter,
-                defaultTableName: `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
-              })
+              const tableName = adapter.tableNameMap.get(
+                `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+              )
 
               if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
                 withBlock.with._locales = _locales

@@ -62,7 +62,6 @@ export type DrizzleTransaction = PgTransaction<
 
 export type PostgresAdapter = BaseDatabaseAdapter & {
   drizzle: DrizzleDB
-  enumNameMap: Map<string, string>
   enums: Record<string, GenericEnum>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
