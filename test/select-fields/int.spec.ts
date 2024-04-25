@@ -532,6 +532,51 @@ describe('Select Fields', () => {
         ],
       })
     })
+
+    it('should select field inside of localized array', async () => {
+      const localizedPost = await payload.findByID({
+        id: localizedPostId,
+        collection: localizedPostsSlug,
+        locale: 'en',
+        select: {
+          arrayLocalized: { title: true },
+        },
+      })
+
+      expect(serializeObject(localizedPost)).toEqual({
+        id: expect.anything(),
+        array: [],
+        arrayLocalized: [
+          {
+            id: expect.any(String),
+            title: 'title en',
+          },
+        ],
+      })
+    })
+
+    it('should select localized field inside of array', async () => {
+      const localizedPost = await payload.findByID({
+        id: localizedPostId,
+        collection: localizedPostsSlug,
+        locale: 'en',
+        select: {
+          array: { title: true },
+        },
+      })
+
+      expect(serializeObject(localizedPost)).toEqual({
+        title: 'title en',
+        id: expect.anything(),
+        array: [
+          {
+            id: expect.any(String),
+            title: 'title en',
+          },
+        ],
+        arrayLocalized: [],
+      })
+    })
   })
 
   // TODO: REST tests.

@@ -90,7 +90,5 @@ export const buildFindManyArgs = ({
     withSelection: !!select,
   })
 
-  adapter.payload.logger.info(result)
-
   return result
 }
