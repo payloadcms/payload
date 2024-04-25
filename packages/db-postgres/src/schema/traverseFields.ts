@@ -250,7 +250,6 @@ export const traverseFields = ({
             parentTableName: newTableName,
             prefix: `${newTableName}_`,
             throwValidationError,
-            versionsCustomName: versions,
           })
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
