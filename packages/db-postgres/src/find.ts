@@ -1,10 +1,11 @@
 import type { Find } from 'payload/database'
 import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 
+import toSnakeCase from 'to-snake-case'
+
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './schema/getTableName'
 
 export const find: Find = async function find(
   this: PostgresAdapter,
@@ -21,10 +22,8 @@ export const find: Find = async function find(
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
-  const tableName = getTableName({
-    adapter: this,
-    config: collectionConfig,
-  })
+
+  const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
   return findMany({
     adapter: this,

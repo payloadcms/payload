@@ -2,11 +2,11 @@ import type { DeleteMany } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
 import { inArray } from 'drizzle-orm'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './schema/getTableName'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: PostgresAdapter,
@@ -14,7 +14,8 @@ export const deleteMany: DeleteMany = async function deleteMany(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig = this.payload.collections[collection].config
-  const tableName = getTableName({ adapter: this, config: collectionConfig })
+
+  const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
 
   const result = await findMany({
     adapter: this,
