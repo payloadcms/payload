@@ -1,9 +1,9 @@
 import type { Endpoint } from 'payload/config'
 import type {
-  BasePayloadRequest,
   Collection,
   GlobalConfig,
-  PayloadRequestWithData,
+  PayloadRequest,
+  PayloadRequestData,
   SanitizedConfig,
 } from 'payload/types'
 
@@ -19,7 +19,7 @@ import type {
 
 import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
-import { createBasePayloadRequest } from '../../utilities/createBasePayloadRequest.js'
+import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { access } from './auth/access.js'
 import { forgotPassword } from './auth/forgotPassword.js'
@@ -127,7 +127,7 @@ const handleCustomEndpoints = ({
 }: {
   endpoints: Endpoint[] | GlobalConfig['endpoints']
   entitySlug?: string
-  payloadRequest: BasePayloadRequest
+  payloadRequest: PayloadRequest
 }): Promise<Response> | Response => {
   if (endpoints && endpoints.length > 0) {
     let handlerParams = {}
@@ -157,7 +157,7 @@ const handleCustomEndpoints = ({
   return null
 }
 
-const RouteNotFoundResponse = ({ slug, req }: { req: BasePayloadRequest; slug: string[] }) =>
+const RouteNotFoundResponse = ({ slug, req }: { req: PayloadRequest; slug: string[] }) =>
   Response.json(
     {
       message: `Route Not Found: "${slug.join('/')}"`,
@@ -173,10 +173,10 @@ const RouteNotFoundResponse = ({ slug, req }: { req: BasePayloadRequest; slug: s
 
 export const OPTIONS =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
-    let req: BasePayloadRequest
+    let req: PayloadRequest
 
     try {
-      req = await createBasePayloadRequest({
+      req = await createPayloadRequest({
         config,
         request,
       })
@@ -204,12 +204,12 @@ export const GET =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2, slug3, slug4] = slug
-    let req: BasePayloadRequest | (BasePayloadRequest & PayloadRequestWithData)
+    let req: PayloadRequest | (PayloadRequest & PayloadRequestData)
     let res: Response
     let collection: Collection
 
     try {
-      req = await createBasePayloadRequest({
+      req = await createPayloadRequest({
         config,
         params: {
           collection: slug1,
@@ -384,12 +384,12 @@ export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2, slug3, slug4] = slug
-    let req: BasePayloadRequest
+    let req: PayloadRequest
     let res: Response
     let collection: Collection
 
     try {
-      req = await createBasePayloadRequest({
+      req = await createPayloadRequest({
         config,
         params: { collection: slug1 },
         request,
@@ -546,12 +546,12 @@ export const DELETE =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2] = slug
-    let req: BasePayloadRequest
+    let req: PayloadRequest
     let res: Response
     let collection: Collection
 
     try {
-      req = await createBasePayloadRequest({
+      req = await createPayloadRequest({
         config,
         params: {
           collection: slug1,
@@ -628,12 +628,12 @@ export const PATCH =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
   async (request: Request, { params: { slug } }: { params: { slug: string[] } }) => {
     const [slug1, slug2] = slug
-    let req: BasePayloadRequest
+    let req: PayloadRequest
     let res: Response
     let collection: Collection
 
     try {
-      req = await createBasePayloadRequest({
+      req = await createPayloadRequest({
         config,
         params: {
           collection: slug1,

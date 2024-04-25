@@ -1,25 +1,30 @@
-import type { PayloadRequest, PayloadRequestData } from 'payload/types'
+import type { Collection, PayloadRequestWithData, SanitizedConfig } from 'payload/types'
 
 import type { NextFileUploadOptions } from '../next-fileupload/index.js'
 
 import { nextFileUpload } from '../next-fileupload/index.js'
 
-type ReturnType = PayloadRequest & PayloadRequestData
-type AddDataAndFileToRequest = (args: { request: PayloadRequest }) => Promise<ReturnType>
-
-/**
- * Mutates the Request to contain 'data' and 'file' if present
- */
-export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({ request }) => {
-  const config = request.payload.config
-  let data: Record<string, any> | undefined = undefined
-  let file: PayloadRequestData['file'] = undefined
+type GetDataAndFile = (args: {
+  collection: Collection
+  config: SanitizedConfig
+  request: Request
+}) => Promise<{
+  data: Record<string, any>
+  file: PayloadRequestWithData['file']
+}>
+export const getDataAndFile: GetDataAndFile = async ({
+  collection,
+  config,
+  request: incomingRequest,
+}) => {
+  let data: Record<string, any> = undefined
+  let file: PayloadRequestWithData['file'] = undefined
 
   if (
-    request.method &&
-    ['PATCH', 'POST', 'PUT'].includes(request.method.toUpperCase()) &&
-    request.body
+    ['PATCH', 'POST', 'PUT'].includes(incomingRequest.method.toUpperCase()) &&
+    incomingRequest.body
   ) {
+    const request = new Request(incomingRequest)
     const [contentType] = (request.headers.get('Content-Type') || '').split(';')
 
     if (contentType === 'application/json') {
@@ -28,7 +33,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({ request
         typeof config.upload?.limits?.fieldSize === 'number'
           ? config.upload.limits.fields
           : undefined
-      if ((upperByteLimit && bodyByteSize <= upperByteLimit) || upperByteLimit === undefined) {
+      if (bodyByteSize <= upperByteLimit || upperByteLimit === undefined) {
         try {
           data = await request.json()
         } catch (error) {
@@ -41,14 +46,14 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({ request
       if (request.headers.has('Content-Length') && request.headers.get('Content-Length') !== '0') {
         const { error, fields, files } = await nextFileUpload({
           options: config.upload as NextFileUploadOptions,
-          request: request as Request,
+          request,
         })
 
         if (error) {
           throw new Error(error.message)
         }
 
-        if (files?.file) {
+        if (collection?.config?.upload && files?.file) {
           file = files.file
         }
 
@@ -59,12 +64,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({ request
     }
   }
 
-  const mutableRequest = request as ReturnType
-  if (data) {
-    mutableRequest.data = data
-    mutableRequest.json = () => Promise.resolve(data)
+  return {
+    data,
+    file,
   }
-  if (file) mutableRequest.file = file
-
-  return mutableRequest
 }

@@ -1,6 +1,6 @@
 import type {
   InitPageResult,
-  PayloadRequest,
+  PayloadRequestWithData,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -63,7 +63,7 @@ export const initPage = async ({
           ignoreQueryPrefix: true,
         }),
         url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
-      } as PayloadRequest,
+      } as PayloadRequestWithData,
     },
     payload,
   )

@@ -1,7 +1,7 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload } from 'payload'
-import type { PayloadRequest, TypeWithID } from 'payload/types'
+import type { PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
 import fs from 'fs'
@@ -222,7 +222,7 @@ describe('database', () => {
         const req = {
           payload,
           user,
-        } as PayloadRequest
+        } as PayloadRequestWithData
 
         await initTransaction(req)
 
@@ -272,7 +272,7 @@ describe('database', () => {
         const req = {
           payload,
           user,
-        } as PayloadRequest
+        } as PayloadRequestWithData
 
         let first
         let second
@@ -325,7 +325,7 @@ describe('database', () => {
         const req = {
           payload,
           user,
-        } as PayloadRequest
+        } as PayloadRequestWithData
 
         await initTransaction(req)
 

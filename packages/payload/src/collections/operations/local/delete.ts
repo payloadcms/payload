@@ -1,6 +1,6 @@
 import type { Payload } from '../../../index.js'
 import type { GeneratedTypes } from '../../../index.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Document, Where } from '../../../types/index.js'
 import type { BulkOperationResult } from '../../config/types.js'
 
@@ -19,7 +19,7 @@ export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   fallbackLocale?: GeneratedTypes['locale']
   locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   showHiddenFields?: boolean
   user?: Document
 }

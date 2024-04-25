@@ -1,5 +1,5 @@
 import type { BuildFormStateArgs } from '@payloadcms/ui/forms/buildStateFromSchema'
-import type { DocumentPreferences, Field, PayloadRequest, TypeWithID } from 'payload/types'
+import type { DocumentPreferences, Field, PayloadRequestWithData, TypeWithID } from 'payload/types'
 
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
 import { reduceFieldsToValues } from '@payloadcms/ui/utilities/reduceFieldsToValues'
@@ -17,7 +17,7 @@ if (!cached) {
   cached = global._payload_fieldSchemaMap = null
 }
 
-export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
+export const getFieldSchemaMap = (req: PayloadRequestWithData): FieldSchemaMap => {
   if (cached && process.env.NODE_ENV !== 'development') {
     return cached
   }
@@ -27,7 +27,7 @@ export const getFieldSchemaMap = (req: PayloadRequest): FieldSchemaMap => {
   return cached
 }
 
-export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
+export const buildFormState = async ({ req }: { req: PayloadRequestWithData }) => {
   const headers = headersWithCors({
     headers: new Headers(),
     req,

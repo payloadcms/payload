@@ -3,7 +3,7 @@ import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FieldBase, RichTextField, Validate } from '../fields/config/types.js'
-import type { PayloadRequest, RequestContext } from '../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../types/index.js'
 import type { WithServerSideProps } from './elements/WithServerSideProps.js'
 
 export type RichTextFieldProps<
@@ -64,7 +64,7 @@ type RichTextAdapterBase<
     flattenLocales: boolean
     overrideAccess?: boolean
     populationPromises: Promise<void>[]
-    req: PayloadRequest
+    req: PayloadRequestWithData
     showHiddenFields: boolean
     siblingDoc: Record<string, unknown>
   }) => void

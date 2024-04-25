@@ -2,7 +2,7 @@ import type { Data } from 'payload/types'
 
 import {
   type Field,
-  type PayloadRequest,
+  type PayloadRequestWithData,
   type TabAsField,
   fieldAffectsData,
   tabHasName,
@@ -15,7 +15,7 @@ type Args<T> = {
   data: T
   field: Field | TabAsField
   id?: number | string
-  req: PayloadRequest
+  req: PayloadRequestWithData
   siblingData: Data
 }
 

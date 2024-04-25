@@ -1,5 +1,5 @@
 import type { GeneratedTypes } from 'payload'
-import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
+import type { PayloadRequestWithData, SanitizedGlobalConfig } from 'payload/types'
 import type { DeepPartial } from 'ts-essentials'
 
 import { updateOperationGlobal } from 'payload/operations'
@@ -16,7 +16,7 @@ type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
     locale?: string
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
 ) => Promise<GeneratedTypes['globals'][TSlug]>
 

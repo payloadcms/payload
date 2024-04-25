@@ -20,7 +20,7 @@ import type { CustomComponent, LabelFunction } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequest, RequestContext, Where } from '../../types/index.js'
+import type { Operation, PayloadRequestWithData, RequestContext, Where } from '../../types/index.js'
 import type { ClientFieldConfig } from './client.js'
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
@@ -47,7 +47,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The previous value of the field, before changes, only in `beforeChange`, `afterChange` and `beforeValidate` hooks. */
   previousValue?: P
   /** The Express request object. It is mocked for Local API operations. */
-  req: PayloadRequest
+  req: PayloadRequestWithData
   /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<S>
   /** The value of the field. */
@@ -72,7 +72,7 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
    */
   id?: number | string
   /** The `payload` object to interface with the payload API */
-  req: PayloadRequest<U>
+  req: PayloadRequestWithData<U>
   /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
@@ -82,7 +82,7 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
 export type Condition<T extends TypeWithID = any, P = any> = (
   data: Partial<T>,
   siblingData: Partial<P>,
-  { user }: { user: PayloadRequest['user'] },
+  { user }: { user: PayloadRequestWithData['user'] },
 ) => boolean
 
 export type FilterOptionsProps<T = any> = {
@@ -105,7 +105,7 @@ export type FilterOptionsProps<T = any> = {
   /**
    * An object containing the currently authenticated user.
    */
-  user: Partial<PayloadRequest['user']>
+  user: Partial<PayloadRequestWithData['user']>
 }
 
 export type FilterOptions<T = any> =
@@ -147,7 +147,7 @@ export type BaseValidateOptions<TData, TSiblingData> = {
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
-  req: PayloadRequest
+  req: PayloadRequestWithData
   siblingData: Partial<TSiblingData>
 }
 

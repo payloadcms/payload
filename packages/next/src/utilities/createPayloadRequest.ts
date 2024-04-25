@@ -1,8 +1,4 @@
-import type {
-  BasePayloadRequest,
-  CustomPayloadRequestProperties,
-  SanitizedConfig,
-} from 'payload/types'
+import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
 import { executeAuthStrategies } from 'payload/auth'
@@ -23,11 +19,11 @@ type Args = {
   request: Request
 }
 
-export const createBasePayloadRequest = async ({
+export const createPayloadRequest = async ({
   config: configPromise,
   params,
   request,
-}: Args): Promise<BasePayloadRequest> => {
+}: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
   const payload = await getPayloadHMR({ config: configPromise })
 
@@ -94,7 +90,7 @@ export const createBasePayloadRequest = async ({
     user: null,
   }
 
-  const req: BasePayloadRequest = Object.assign(request, customRequest)
+  const req: PayloadRequest = Object.assign(request, customRequest)
 
   req.payloadDataLoader = getDataLoader(req)
 

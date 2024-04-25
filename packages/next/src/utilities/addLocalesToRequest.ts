@@ -1,6 +1,6 @@
 import type {
-  BasePayloadRequest,
   PayloadRequest,
+  PayloadRequestData,
   PayloadRequestWithData,
   SanitizedConfig,
 } from 'payload/types'
@@ -9,9 +9,9 @@ import type {
  * Mutates the Request to contain 'locale' and 'fallbackLocale' based on data or searchParams
  */
 type Args = {
-  request: BasePayloadRequest & PayloadRequestWithData
+  request: PayloadRequest & PayloadRequestData
 }
-export function addLocalesToRequestFromData({ request }: Args): PayloadRequest {
+export function addLocalesToRequestFromData({ request }: Args): PayloadRequestWithData {
   const {
     data,
     payload: { config },

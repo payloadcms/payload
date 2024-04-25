@@ -1,10 +1,10 @@
 import type { ObjMap } from 'graphql/jsutils/ObjMap.js'
 import type { GraphQLFieldConfig, GraphQLFieldResolver } from 'graphql/type/definition.js'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
 
-type PayloadContext = { req: PayloadRequest }
+type PayloadContext = { req: PayloadRequestWithData }
 
 function wrapCustomResolver<TSource, TArgs, TResult>(
   resolver: GraphQLFieldResolver<TSource, PayloadContext, TArgs, TResult>,

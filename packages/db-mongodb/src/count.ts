@@ -1,6 +1,6 @@
 import type { QueryOptions } from 'mongoose'
 import type { Count } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 
 import { flattenWhereToOperators } from 'payload/database'
 
@@ -10,7 +10,7 @@ import { withSession } from './withSession.js'
 
 export const count: Count = async function count(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  { collection, locale, req = {} as PayloadRequestWithData, where },
 ) {
   const Model = this.collections[collection]
   const options: QueryOptions = withSession(this, req.transactionID)

@@ -8,7 +8,7 @@ import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize } from './types.js'
 
 import { FileUploadError, MissingFile } from '../errors/index.js'
@@ -26,7 +26,7 @@ type Args<T> = {
   config: SanitizedConfig
   data: T
   overwriteExistingFiles?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   throwOnMissingFile?: boolean
 }
 

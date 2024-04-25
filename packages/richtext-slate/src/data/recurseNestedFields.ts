@@ -1,4 +1,4 @@
-import type { Field, PayloadRequest } from 'payload/types'
+import type { Field, PayloadRequestWithData } from 'payload/types'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
 
@@ -12,7 +12,7 @@ type NestedRichTextFieldsArgs = {
   fields: Field[]
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
 }
 

@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { Field, FieldAffectingData } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 /* eslint-disable no-await-in-loop */
-import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
+import type { Operator, PayloadRequestWithData, Where, WhereField } from '../../types/index.js'
 import type { EntityPolicies } from './types.js'
 
 import QueryError from '../../errors/QueryError.js'
@@ -16,7 +16,7 @@ type Args = {
   errors?: { path: string }[]
   overrideAccess: boolean
   policies?: EntityPolicies
-  req: PayloadRequest
+  req: PayloadRequestWithData
   versionFields?: Field[]
   where: Where
 } & (

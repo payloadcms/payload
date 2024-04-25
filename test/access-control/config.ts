@@ -35,9 +35,9 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
   return false
 }
 
-export const requestHeaders = { authorization: 'Bearer testBearerToken' }
+export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
-  return !!headers && headers.authorization === requestHeaders.authorization
+  return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
 
 export default buildConfigWithDefaults({

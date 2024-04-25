@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Field, TabAsField } from '../fields/config/types.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 
@@ -105,7 +105,7 @@ const traverseFields = ({
 export const getFieldsToSign = (args: {
   collectionConfig: CollectionConfig
   email: string
-  user: PayloadRequest['user']
+  user: PayloadRequestWithData['user']
 }): Record<string, unknown> => {
   const { collectionConfig, email, user } = args
 

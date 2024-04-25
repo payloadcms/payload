@@ -1,5 +1,5 @@
 import type { Create } from 'payload/database'
-import type { Document, PayloadRequest } from 'payload/types'
+import type { Document, PayloadRequestWithData } from 'payload/types'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -8,7 +8,7 @@ import { withSession } from './withSession.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
-  { collection, data, req = {} as PayloadRequest },
+  { collection, data, req = {} as PayloadRequestWithData },
 ) {
   const Model = this.collections[collection]
   const options = withSession(this, req.transactionID)

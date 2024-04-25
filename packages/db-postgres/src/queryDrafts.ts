@@ -1,4 +1,4 @@
-import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
+import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/types'
 
 import { type QueryDrafts, combineQueries } from 'payload/database'
 import { buildVersionCollectionFields } from 'payload/versions'
@@ -12,7 +12,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
   locale,
   page = 1,
   pagination,
-  req = {} as PayloadRequest,
+  req = {} as PayloadRequestWithData,
   sort,
   where,
 }) {

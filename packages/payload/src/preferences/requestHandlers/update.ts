@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequestWithData } from '../../types/index.js'
 
 import update from '../operations/update.js'
 
@@ -16,7 +16,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
     data = {}
   }
 
-  const reqWithData: PayloadRequest = incomingReq
+  const reqWithData: PayloadRequestWithData = incomingReq
 
   if (data) {
     reqWithData.data = data

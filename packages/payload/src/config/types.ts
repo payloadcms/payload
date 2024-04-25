@@ -19,7 +19,7 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
-import type { BasePayloadRequest, PayloadRequest, Where } from '../types/index.js'
+import type { PayloadRequest, PayloadRequestWithData, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 export type BinScriptConfig = {
@@ -69,7 +69,7 @@ export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url
 
 type GeneratePreviewURLOptions = {
   locale: string
-  req: PayloadRequest
+  req: PayloadRequestWithData
   token: null | string
 }
 
@@ -172,7 +172,7 @@ export type AccessArgs<T = any, U = any> = {
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
-  req: PayloadRequest<U>
+  req: PayloadRequestWithData<U>
 }
 
 /**
@@ -186,7 +186,7 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Web Request/Response model, but the the req has more payload specific properties added to it. */
-export type PayloadHandler = (req: BasePayloadRequest) => Promise<Response> | Response
+export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Response
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints

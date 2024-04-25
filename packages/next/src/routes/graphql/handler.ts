@@ -7,7 +7,7 @@ import httpStatus from 'http-status'
 
 import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
 import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
-import { createBasePayloadRequest } from '../../utilities/createBasePayloadRequest.js'
+import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 
 const handleError = async (
@@ -84,7 +84,7 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
 export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
-    const basePayloadRequest = await createBasePayloadRequest({
+    const basePayloadRequest = await createPayloadRequest({
       config,
       request,
     })

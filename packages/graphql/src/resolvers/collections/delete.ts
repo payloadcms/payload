@@ -1,5 +1,5 @@
 import type { GeneratedTypes } from 'payload'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequestWithData } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import { deleteByIDOperation } from 'payload/operations'
@@ -14,7 +14,7 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
     locale?: string
   },
   context: {
-    req: PayloadRequest
+    req: PayloadRequestWithData
   },
 ) => Promise<GeneratedTypes['collections'][TSlug]>
 

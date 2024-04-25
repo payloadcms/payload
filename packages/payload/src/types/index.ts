@@ -22,7 +22,14 @@ export type UploadEdits = {
 
 export type CustomPayloadRequestProperties<U = unknown> = {
   context: RequestContext
+  /** The locale that should be used for a field when it is not translated to the requested locale */
+  fallbackLocale?: string
   i18n: I18n
+  /**
+   * The requested locale if specified
+   * Only available for localized collections
+   */
+  locale?: GeneratedTypes['locale']
   /**
    * The payload object
    */
@@ -55,20 +62,11 @@ export type CustomPayloadRequestProperties<U = unknown> = {
   transactionIDPromise?: Promise<void>
   /** The signed in user */
   user: (U & GeneratedTypes['user']) | null
-} & PayloadRequestWithLocales &
-  Pick<
-    URL,
-    | 'hash'
-    | 'host'
-    | 'href'
-    | 'origin'
-    | 'pathname'
-    | 'port'
-    | 'protocol'
-    | 'search'
-    | 'searchParams'
-  >
-export type PayloadRequestWithData = {
+} & Pick<
+  URL,
+  'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
+>
+export type PayloadRequestData = {
   /** Data from the request body */
   data?: Record<string, unknown>
   /** The locale that should be used for a field when it is not translated to the requested locale */
@@ -80,21 +78,10 @@ export type PayloadRequestWithData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequestWithLocales = {
-  /** The locale that should be used for a field when it is not translated to the requested locale */
-  fallbackLocale?: string
-  /**
-   * The requested locale if specified
-   * Only available for localized collections
-   */
-  locale?: GeneratedTypes['locale']
-}
-export type BasePayloadRequest<U = unknown> = Partial<Request> &
+export type PayloadRequest<U = unknown> = Partial<Request> &
   Required<Pick<Request, 'headers'>> &
   CustomPayloadRequestProperties<U>
-export type PayloadRequest<U = unknown> = BasePayloadRequest<U> &
-  PayloadRequestWithData &
-  PayloadRequestWithLocales
+export type PayloadRequestWithData<U = unknown> = PayloadRequest<U> & PayloadRequestData
 export interface RequestContext {
   [key: string]: unknown
 }
