@@ -499,13 +499,13 @@ export const getTableColumnFromPath = ({
             }
           }
         } else if (newCollectionPath === 'value') {
-          const tableColumnsNames = field.relationTo.map(
-            (relationTo) =>
-              `"${aliasRelationshipTableName}"."${createTableName({
-                adapter,
-                config: adapter.payload.collections[relationTo].config,
-              })}_id"`,
-          )
+          const tableColumnsNames = field.relationTo.map((relationTo) => {
+            const relationTableName = adapter.tableNameMap.get(
+              toSnakeCase(adapter.payload.collections[relationTo].config.slug),
+            )
+
+            return `"${aliasRelationshipTableName}"."${relationTableName}_id"`
+          })
           return {
             constraints,
             field,
