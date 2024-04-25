@@ -69,6 +69,7 @@ export const validateExistingBlockIsIdentical = ({
   tableLocales,
 }: Args): void => {
   const fieldNames = getFlattenedFieldNames(block.fields)
+
   const missingField =
     // ensure every field from the config is in the matching table
     fieldNames.find(({ name, localized }) => {
