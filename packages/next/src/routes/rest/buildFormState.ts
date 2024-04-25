@@ -62,10 +62,19 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
         })
       }
     } else {
-      return Response.json(null, {
-        headers,
-        status: httpStatus.UNAUTHORIZED,
+      const hasUsers = await req.payload.find({
+        collection: adminUserSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
       })
+      // If there are users, we should not allow access because of /create-first-user
+      if (hasUsers.docs.length) {
+        return Response.json(null, {
+          headers,
+          status: httpStatus.UNAUTHORIZED,
+        })
+      }
     }
 
     const fieldSchemaMap = getFieldSchemaMap(req)
@@ -197,14 +206,19 @@ export const buildFormState = async ({ req }: { req: PayloadRequest }) => {
       req,
     })
 
-    // Maintain form state of file
-    if (
-      collectionSlug &&
-      req.payload.collections[collectionSlug]?.config?.upload &&
-      formState &&
-      formState.file
-    ) {
-      result.file = formState.file
+    // Maintain form state of auth / upload fields
+    if (collectionSlug && formState) {
+      if (req.payload.collections[collectionSlug]?.config?.upload && formState.file) {
+        result.file = formState.file
+      }
+
+      if (
+        req.payload.collections[collectionSlug]?.config?.auth &&
+        !req.payload.collections[collectionSlug].config.auth.disableLocalStrategy
+      ) {
+        if (formState.password) result.password = formState.password
+        if (formState.email) result.email = formState.email
+      }
     }
 
     return Response.json(result, {
