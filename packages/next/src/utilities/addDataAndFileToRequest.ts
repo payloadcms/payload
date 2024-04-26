@@ -50,7 +50,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
 
         const formFile = formData.get('file')
         if (formFile instanceof Blob) {
-          const maxFileSizeLimit = config.upload.limits.fileSize
+          const maxFileSizeLimit = config.upload.limits?.fileSize ?? undefined
           if (
             maxFileSizeLimit === undefined ||
             (maxFileSizeLimit && formFile.size <= maxFileSizeLimit)
