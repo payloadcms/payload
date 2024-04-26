@@ -6,7 +6,7 @@ import httpStatus from 'http-status'
 import path from 'path'
 import { APIError } from 'payload/errors'
 
-import { streamFile } from '../../../next-stream-file/index.js'
+import { streamFile } from '../../../fetchAPI-stream-file/index.js'
 import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { routeError } from '../routeError.js'
 import { checkFileAccess } from './checkFileAccess.js'
