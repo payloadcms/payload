@@ -1,5 +1,7 @@
 import type { PayloadRequest, PayloadRequestData } from 'payload/types'
 
+import { APIError } from 'packages/payload/src/errors/APIError.js'
+
 import type { NextFileUploadOptions } from '../next-fileupload/index.js'
 
 import { nextFileUpload } from '../next-fileupload/index.js'
@@ -64,8 +66,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
               mimetype: formFile.type,
               size: formFile.size,
             }
-          } else if (config.upload.abortOnLimit) {
-            throw new Error('File size limit has been reached')
+          } else if (config.upload?.abortOnLimit) {
+            throw new APIError('File size limit has been reached', 413)
           }
         }
       } else {
