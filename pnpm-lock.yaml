@@ -579,7 +579,7 @@ importers:
   packages/live-preview-react:
     dependencies:
       '@payloadcms/live-preview':
-        specifier: workspace:^0.x
+        specifier: workspace:*
         version: link:../live-preview
       react:
         specifier: ^18.2.0
@@ -598,7 +598,7 @@ importers:
   packages/live-preview-vue:
     dependencies:
       '@payloadcms/live-preview':
-        specifier: workspace:^0.x
+        specifier: workspace:*
         version: link:../live-preview
     devDependencies:
       '@payloadcms/eslint-config':

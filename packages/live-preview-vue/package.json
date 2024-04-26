@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-vue",
-  "version": "0.1.0",
+  "version": "3.0.0-beta.18",
   "description": "The official live preview Vue SDK for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -31,7 +31,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@payloadcms/live-preview": "workspace:^0.x"
+    "@payloadcms/live-preview": "workspace:*"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
