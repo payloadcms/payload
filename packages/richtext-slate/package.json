@@ -2,17 +2,27 @@
   "name": "@payloadcms/richtext-slate",
   "version": "3.0.0-beta.18",
   "description": "The officially supported Slate richtext adapter for Payload",
+  "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/richtext-slate"
   },
   "license": "MIT",
-  "homepage": "https://payloadcms.com",
   "author": "Payload CMS, Inc.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.tsx",
+      "require": "./src/index.tsx",
+      "types": "./src/index.tsx"
+    }
+  },
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",
-  "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -31,23 +41,19 @@
     "slate-react": "0.92.0"
   },
   "devDependencies": {
-    "@payloadcms/ui": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "@types/node": "20.12.5",
     "@types/react": "18.2.74",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*",
     "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*"
   },
-  "exports": {
-    ".": {
-      "import": "./src/index.tsx",
-      "require": "./src/index.tsx",
-      "types": "./src/index.tsx"
-    }
+  "engines": {
+    "node": ">=18.20.2"
   },
   "publishConfig": {
     "exports": {
@@ -60,11 +66,5 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  },
-  "engines": {
-    "node": ">=18.20.2"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }
