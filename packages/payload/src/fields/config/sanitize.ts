@@ -1,7 +1,7 @@
 import type { Config } from '../../config/types.js'
 import type { Field } from './types.js'
 
-import MissingEditorProp from '../../errors/MissingEditorProp.js'
+import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import {
   DuplicateFieldName,
   InvalidFieldName,

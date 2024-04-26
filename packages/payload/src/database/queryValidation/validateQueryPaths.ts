@@ -6,7 +6,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Operator, PayloadRequestWithData, Where, WhereField } from '../../types/index.js'
 import type { EntityPolicies } from './types.js'
 
-import QueryError from '../../errors/QueryError.js'
+import { QueryError } from '../../errors/QueryError.js'
 import { validOperators } from '../../types/constants.js'
 import { deepCopyObject } from '../../utilities/deepCopyObject.js'
 import flattenFields from '../../utilities/flattenTopLevelFields.js'
