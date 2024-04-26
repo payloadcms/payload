@@ -10,7 +10,7 @@ const AutosavePosts: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'description', 'createdAt'],
+    defaultColumns: ['title', 'description', 'createdAt', '_status'],
     preview: () => 'https://payloadcms.com',
   },
   versions: {
