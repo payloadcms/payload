@@ -1,3 +1,10 @@
+## [2.14.2](https://github.com/payloadcms/payload/compare/v2.14.1...v2.14.2) (2024-04-26)
+
+
+### Bug Fixes
+
+* **deps:** dedupes react ([#6058](https://github.com/payloadcms/payload/issues/6058)) ([d0ba694](https://github.com/payloadcms/payload/commit/d0ba694c80a1b699c4f2cad98b1f0bde1f0d43ca))
+
 ## [2.14.1](https://github.com/payloadcms/payload/compare/v2.14.0...v2.14.1) (2024-04-25)
 
 
