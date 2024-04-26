@@ -82,11 +82,11 @@ export const DocumentInfoProvider: React.FC<
   }
 
   const isEditing = Boolean(id)
+  const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions?.permission)
 
   const getVersions = useCallback(async () => {
     let versionFetchURL
     let publishedFetchURL
-    const shouldFetchVersions = Boolean(versionsConfig)
     let unpublishedVersionJSON = null
     let versionJSON = null
     let shouldFetch = true
@@ -209,7 +209,7 @@ export const DocumentInfoProvider: React.FC<
       setVersions(versionJSON)
       setUnpublishedVersions(unpublishedVersionJSON)
     }
-  }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig])
+  }, [i18n, globalSlug, collectionSlug, id, baseURL, locale, versionsConfig, shouldFetchVersions])
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string
