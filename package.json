@@ -68,6 +68,7 @@
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "lint-staged": {
+    "**/package.json": "sort-package-json",
     "*.{md,mdx,yml,json}": "prettier --write",
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
