@@ -1,31 +1,38 @@
 {
   "name": "create-payload-app",
   "version": "3.0.0-beta.18",
-  "license": "MIT",
-  "type": "module",
   "homepage": "https://payloadcms.com",
-  "bin": {
-    "create-payload-app": "bin/cli.js"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/create-payload-app"
   },
-  "scripts": {
-    "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
-    "typecheck": "tsc",
-    "pack-template-files": "tsx src/scripts/pack-template-files.ts",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "test": "jest",
-    "prepublishOnly": "pnpm clean && pnpm build"
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./commands": {
+      "import": "./src/lib/init-next.ts",
+      "require": "./src/lib/init-next.ts",
+      "types": "./src/lib/init-next.ts"
+    }
+  },
+  "bin": {
+    "create-payload-app": "bin/cli.js"
   },
   "files": [
     "package.json",
     "dist",
     "bin"
   ],
+  "scripts": {
+    "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "pack-template-files": "tsx src/scripts/pack-template-files.ts",
+    "prepublishOnly": "pnpm clean && pnpm build",
+    "test": "jest",
+    "typecheck": "tsc"
+  },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "@sindresorhus/slugify": "^1.1.0",
@@ -49,12 +56,5 @@
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.3",
     "@types/node": "20.12.5"
-  },
-  "exports": {
-    "./commands": {
-      "import": "./src/lib/init-next.ts",
-      "require": "./src/lib/init-next.ts",
-      "types": "./src/lib/init-next.ts"
-    }
   }
 }

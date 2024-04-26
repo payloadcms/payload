@@ -1,26 +1,7 @@
 {
   "name": "@payloadcms/plugin-seo",
   "version": "3.0.0-beta.18",
-  "homepage:": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-seo"
-  },
   "description": "SEO plugin for Payload",
-  "main": "./src/index.tsx",
-  "types": "./src/index.tsx",
-  "type": "module",
-  "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint src",
-    "lint:fix": "eslint --fix --ext .ts,.tsx src",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
-  },
   "keywords": [
     "payload",
     "cms",
@@ -30,29 +11,52 @@
     "seo",
     "yoast"
   ],
-  "author": "dev@payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-seo"
+  },
   "license": "MIT",
-  "peerDependencies": {
-    "payload": "workspace:*",
-    "react": "^18.0.0",
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "18.2.74",
-    "payload": "workspace:*",
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
-    "@payloadcms/next": "workspace:*",
-    "react": "^18.0.0"
-  },
+  "author": "dev@payloadcms.com",
+  "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.tsx",
       "types": "./src/index.tsx",
       "default": "./src/index.tsx"
     }
+  },
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "files": [
+    "dist",
+    "types.js",
+    "types.d.ts"
+  ],
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "@types/react": "18.2.74",
+    "payload": "workspace:*",
+    "react": "^18.0.0"
+  },
+  "peerDependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*",
+    "react": "^18.0.0"
   },
   "publishConfig": {
     "exports": {
@@ -66,9 +70,5 @@
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
-  "files": [
-    "dist",
-    "types.js",
-    "types.d.ts"
-  ]
+  "homepage:": "https://payloadcms.com"
 }

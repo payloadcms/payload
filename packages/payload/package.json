@@ -2,13 +2,51 @@
   "name": "payload",
   "version": "3.0.0-beta.18",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
-  "license": "MIT",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "type": "module",
-  "bin": {
-    "payload": "bin.js"
+  "keywords": [
+    "payload",
+    "cms",
+    "content management",
+    "framework",
+    "typescript",
+    "javascript",
+    "node",
+    "express",
+    "headless",
+    "graphQL",
+    "restful",
+    "access control",
+    "dashboard",
+    "admin panel",
+    "api",
+    "MongoDB",
+    "self hosted",
+    "react",
+    "auth"
+  ],
+  "homepage": "https://payloadcms.com",
+  "bugs": {
+    "url": "https://github.com/payloadcms/payload"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/payload"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Payload",
+    "email": "info@payloadcms.com",
+    "url": "https://payloadcms.com"
+  },
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -21,6 +59,20 @@
       "types": "./src/exports/*.ts"
     }
   },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "bin": {
+    "payload": "bin.js"
+  },
+  "files": [
+    "bin.js",
+    "dist",
+    "docs",
+    "*.js",
+    "*.d.ts",
+    "!jest.config.js",
+    "!jest.components.config.js"
+  ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -69,15 +121,6 @@
     "scmp": "2.1.0",
     "uuid": "^9.0.1"
   },
-  "peerDependencies": {
-    "@swc/core": "^1.4.13",
-    "graphql": "^16.8.1"
-  },
-  "peerDependenciesMeta": {
-    "@swc/core": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "@monaco-editor/react": "4.5.1",
     "@payloadcms/eslint-config": "workspace:*",
@@ -122,39 +165,18 @@
     "sharp": "0.32.6",
     "ts-essentials": "7.0.3"
   },
+  "peerDependencies": {
+    "@swc/core": "^1.4.13",
+    "graphql": "^16.8.1"
+  },
+  "peerDependenciesMeta": {
+    "@swc/core": {
+      "optional": true
+    }
+  },
   "engines": {
     "node": ">=18.20.2"
   },
-  "files": [
-    "bin.js",
-    "dist",
-    "docs",
-    "*.js",
-    "*.d.ts",
-    "!jest.config.js",
-    "!jest.components.config.js"
-  ],
-  "keywords": [
-    "payload",
-    "cms",
-    "content management",
-    "framework",
-    "typescript",
-    "javascript",
-    "node",
-    "express",
-    "headless",
-    "graphQL",
-    "restful",
-    "access control",
-    "dashboard",
-    "admin panel",
-    "api",
-    "MongoDB",
-    "self hosted",
-    "react",
-    "auth"
-  ],
   "publishConfig": {
     "access": "public",
     "exports": {
@@ -172,27 +194,5 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  },
-  "homepage": "https://payloadcms.com",
-  "author": {
-    "email": "info@payloadcms.com",
-    "name": "Payload",
-    "url": "https://payloadcms.com"
-  },
-  "maintainers": [
-    {
-      "email": "info@payloadcms.com",
-      "name": "Payload",
-      "url": "https://payloadcms.com"
-    }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/payload"
-  },
-  "bugs": {
-    "url": "https://github.com/payloadcms/payload"
-  },
-  "sideEffects": false
+  }
 }

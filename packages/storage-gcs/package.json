@@ -2,25 +2,15 @@
   "name": "@payloadcms/storage-gcs",
   "version": "3.0.0-beta.18",
   "description": "Payload storage adapter for Google Cloud Storage",
+  "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/storage-gcs"
   },
   "license": "MIT",
-  "homepage": "https://payloadcms.com",
   "author": "Payload CMS, Inc.",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
   "type": "module",
-  "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
-  },
   "exports": {
     ".": {
       "import": "./src/index.ts",
@@ -28,20 +18,22 @@
       "types": "./src/index.ts"
     }
   },
-  "publishConfig": {
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
-      }
-    }
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "@payloadcms/plugin-cloud-storage": "workspace:*",
-    "@google-cloud/storage": "^7.7.0"
+    "@google-cloud/storage": "^7.7.0",
+    "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
     "payload": "workspace:*"
@@ -52,7 +44,15 @@
   "engines": {
     "node": ">=18.20.2"
   },
-  "files": [
-    "dist"
-  ]
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  }
 }

@@ -1,23 +1,7 @@
 {
   "name": "@payloadcms/plugin-sentry",
   "version": "0.0.6",
-  "homepage:": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-sentry"
-  },
   "description": "Sentry plugin for Payload",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "type": "module",
-  "scripts": {
-    "build": "echo \"Build temporarily disabled.\" && exit 0",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
-  },
   "keywords": [
     "payload",
     "cms",
@@ -26,14 +10,32 @@
     "sentry",
     "error handling"
   ],
-  "author": "dev@payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-sentry"
+  },
   "license": "MIT",
+  "author": "dev@payloadcms.com",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist"
   ],
-  "peerDependencies": {
-    "payload": "workspace:*",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  "scripts": {
+    "build": "echo \"Build temporarily disabled.\" && exit 0",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
     "@sentry/node": "^7.55.2",
@@ -55,22 +57,20 @@
     "ts-jest": "^29.1.0",
     "webpack": "^5.78.0"
   },
-  "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
-    }
+  "peerDependencies": {
+    "payload": "workspace:*",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "publishConfig": {
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
     "exports": {
       ".": {
         "import": "./dist/index.js",
         "require": "./dist/index.js",
         "types": "./dist/index.d.ts"
       }
-    }
-  }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "homepage:": "https://payloadcms.com"
 }

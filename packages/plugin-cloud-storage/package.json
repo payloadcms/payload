@@ -1,17 +1,39 @@
 {
   "name": "@payloadcms/plugin-cloud-storage",
-  "description": "The official cloud storage plugin for Payload CMS",
   "version": "3.0.0-beta.18",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "type": "module",
-  "license": "MIT",
+  "description": "The official cloud storage plugin for Payload CMS",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",
     "directory": "packages/plugin-cloud-storage"
   },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./src/types.ts",
+      "require": "./src/types.ts",
+      "types": "./src/types.ts"
+    },
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist",
+    "*.js",
+    "*.d.ts"
+  ],
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -19,6 +41,19 @@
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "echo \"No tests available.\""
+  },
+  "dependencies": {
+    "find-node-modules": "^2.1.3",
+    "range-parser": "^1.2.1"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.525.0",
+    "@aws-sdk/lib-storage": "^3.525.0",
+    "@azure/storage-blob": "^12.11.0",
+    "@google-cloud/storage": "^7.7.0",
+    "@types/find-node-modules": "^2.1.2",
+    "@vercel/blob": "^0.22.3",
+    "payload": "workspace:*"
   },
   "peerDependencies": {
     "@aws-sdk/client-s3": "^3.525.0",
@@ -47,41 +82,6 @@
     },
     "@vercel/blob": {
       "optional": true
-    }
-  },
-  "files": [
-    "dist",
-    "*.js",
-    "*.d.ts"
-  ],
-  "devDependencies": {
-    "@aws-sdk/client-s3": "^3.525.0",
-    "@aws-sdk/lib-storage": "^3.525.0",
-    "@azure/storage-blob": "^12.11.0",
-    "@google-cloud/storage": "^7.7.0",
-    "@types/find-node-modules": "^2.1.2",
-    "@vercel/blob": "^0.22.3",
-    "payload": "workspace:*"
-  },
-  "dependencies": {
-    "find-node-modules": "^2.1.3",
-    "range-parser": "^1.2.1"
-  },
-  "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
-    },
-    "./types": {
-      "import": "./src/types.ts",
-      "require": "./src/types.ts",
-      "types": "./src/types.ts"
-    },
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
     }
   },
   "publishConfig": {

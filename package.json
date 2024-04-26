@@ -3,18 +3,12 @@
   "version": "3.0.0-beta.18",
   "private": true,
   "type": "module",
-  "workspaces:": [
-    "packages/*",
-    "test/*"
-  ],
   "scripts": {
     "build": "pnpm run build:core",
-    "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
     "build:all": "turbo build",
-    "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
-    "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\"",
     "build:app": "next build",
     "build:app:analyze": "cross-env ANALYZE=true next build",
+    "build:core": "turbo build --filter \"!@payloadcms/plugin-*\"",
     "build:create-payload-app": "turbo build --filter create-payload-app",
     "build:db-mongodb": "turbo build --filter db-mongodb",
     "build:db-postgres": "turbo build --filter db-postgres",
@@ -34,20 +28,21 @@
     "build:plugin-sentry": "turbo build --filter plugin-sentry",
     "build:plugin-seo": "turbo build --filter plugin-seo",
     "build:plugin-stripe": "turbo build --filter plugin-stripe",
+    "build:plugins": "turbo build --filter \"@payloadcms/plugin-*\"",
     "build:richtext-lexical": "turbo build --filter richtext-lexical",
     "build:richtext-slate": "turbo build --filter richtext-slate",
     "build:tests": "pnpm --filter payload-test-suite run typecheck",
     "build:translations": "turbo build --filter translations",
     "build:ui": "turbo build --filter ui",
     "clean": "turbo clean",
-    "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache && rimraf .next",
-    "clean:build": "find . \\( -type d \\( -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -not -path '*/node_modules/*' -exec rm -rf {} +",
     "clean:all": "find . \\( -type d \\( -name node_modules -o -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} +",
+    "clean:build": "find . \\( -type d \\( -name dist -o -name .cache -o -name .next -o -name .turbo \\) -o -type f -name tsconfig.tsbuildinfo \\) -not -path '*/node_modules/*' -exec rm -rf {} +",
+    "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache && rimraf .next",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation node ./test/dev.js",
-    "devsafe": "rimraf .next && pnpm dev",
     "dev:generate-graphql-schema": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/generateGraphQLSchema.ts",
     "dev:generate-types": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/generateTypes.ts",
     "dev:postgres": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_DATABASE=postgres node ./test/dev.js",
+    "devsafe": "rimraf .next && pnpm dev",
     "docker:restart": "pnpm docker:stop --remove-orphans && pnpm docker:start",
     "docker:start": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml up -d",
     "docker:stop": "docker compose -f packages/plugin-cloud-storage/docker-compose.yml down",
@@ -55,21 +50,29 @@
     "generate:types": "PAYLOAD_CONFIG_PATH=./test/_community/config.ts node --no-deprecation ./packages/payload/bin.js generate:types",
     "lint": "eslint \"packages/**/*.ts\"",
     "lint-staged": "lint-staged",
+    "obliterate-playwright-cache": "rm -rf ~/Library/Caches/ms-playwright && find /System/Volumes/Data/private/var/folders -type d -name 'playwright*' -exec rm -rf {} +",
     "prepare": "husky install",
-    "pretest": "pnpm build",
     "reinstall": "pnpm clean:all && pnpm install",
-    "script:pack": "tsx scripts/pack-all-to-dest.ts",
     "release:alpha": "tsx ./scripts/release.ts --bump prerelease --tag alpha",
     "release:beta": "tsx ./scripts/release.ts --bump prerelease --tag beta",
+    "script:pack": "tsx scripts/pack-all-to-dest.ts",
+    "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env NODE_OPTIONS=--no-deprecation jest --config=jest.components.config.js",
     "test:e2e": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 tsx ./test/runE2E.ts",
     "test:e2e:debug": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PWDEBUG=1 DISABLE_LOGGING=true playwright test",
     "test:e2e:headed": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true playwright test --headed",
-    "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
+    "test:int:postgres": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles --config=test/jest.config.js --runInBand",
     "test:unit": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 DISABLE_LOGGING=true jest --forceExit --detectOpenHandles  --config=jest.config.js --runInBand",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
+  },
+  "lint-staged": {
+    "*.{md,mdx,yml,json}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.525.0",
@@ -151,6 +154,7 @@
     "simple-git": "^3.24.0",
     "slash": "3.0.0",
     "slate": "0.91.4",
+    "sort-package-json": "^2.10.0",
     "swc-plugin-transform-remove-imports": "^1.12.1",
     "tempfile": "^3.0.0",
     "tempy": "^1.0.1",
@@ -168,14 +172,12 @@
     "node": ">=18.20.2",
     "pnpm": "^8.15.7"
   },
-  "lint-staged": {
-    "*.{md,mdx,yml,json}": "prettier --write",
-    "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --cache --fix"
-    ]
-  },
   "pnpm": {
+    "allowedDeprecatedVersions": {
+      "abab": "2",
+      "domexception": "4",
+      "uuid": "3.4.0"
+    },
     "overrides": {
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
@@ -187,13 +189,12 @@
       "react-dom": "$react-dom",
       "typescript": "$typescript"
     },
-    "allowedDeprecatedVersions": {
-      "uuid": "3.4.0",
-      "abab": "2",
-      "domexception": "4"
-    },
     "patchedDependencies": {
       "playwright@1.43.0": "patches/playwright@1.43.0.patch"
     }
-  }
+  },
+  "workspaces:": [
+    "packages/*",
+    "test/*"
+  ]
 }

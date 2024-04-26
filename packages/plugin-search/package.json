@@ -1,24 +1,7 @@
 {
   "name": "@payloadcms/plugin-search",
   "version": "3.0.0-beta.18",
-  "homepage:": "https://payloadcms.com",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git",
-    "directory": "packages/plugin-search"
-  },
   "description": "Search plugin for Payload",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "type": "module",
-  "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "test": "echo \"Error: no tests specified\""
-  },
   "keywords": [
     "payload",
     "cms",
@@ -28,11 +11,34 @@
     "search",
     "algolia"
   ],
-  "author": "dev@trbl.design",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-search"
+  },
   "license": "MIT",
-  "peerDependencies": {
-    "payload": "workspace:*",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  "author": "dev@trbl.design",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist",
+    "types.js",
+    "types.d.ts"
+  ],
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm turbo build",
+    "test": "echo \"Error: no tests specified\""
   },
   "dependencies": {
     "@payloadcms/ui": "workspace:*",
@@ -45,11 +51,9 @@
     "payload": "workspace:*",
     "react": "^18.0.0"
   },
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    }
+  "peerDependencies": {
+    "payload": "workspace:*",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "publishConfig": {
     "exports": {
@@ -63,9 +67,5 @@
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
-  "files": [
-    "dist",
-    "types.js",
-    "types.d.ts"
-  ]
+  "homepage:": "https://payloadcms.com"
 }
