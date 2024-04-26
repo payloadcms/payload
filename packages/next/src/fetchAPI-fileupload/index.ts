@@ -34,7 +34,7 @@ export type FileShape = {
   truncated: boolean
 }
 
-export type NextFileUploadOptions = {
+export type FetchAPIFileUploadOptions = {
   /**
    * Returns a HTTP 413 when the file is bigger than the size limit if `true`.
    * Otherwise, it will add a `truncated = true` to the resulting file structure.
@@ -132,7 +132,7 @@ export type NextFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
-type NextFileUploadResponseFile = {
+type FetchAPIFileUploadResponseFile = {
   data: Buffer
   mimetype: string
   name: string
@@ -140,20 +140,20 @@ type NextFileUploadResponseFile = {
   tempFilePath?: string
 }
 
-export type NextFileUploadResponse = {
+export type FetchAPIFileUploadResponse = {
   error?: {
     code: number
     message: string
   }
   fields: Record<string, string>
-  files: Record<string, NextFileUploadResponseFile>
+  files: Record<string, FetchAPIFileUploadResponseFile>
 }
 
-type NextFileUpload = (args: {
-  options?: NextFileUploadOptions
+type FetchAPIFileUpload = (args: {
+  options?: FetchAPIFileUploadOptions
   request: Request
-}) => Promise<NextFileUploadResponse>
-export const nextFileUpload: NextFileUpload = async ({ options, request }) => {
+}) => Promise<FetchAPIFileUploadResponse>
+export const fetchAPIFileUpload: FetchAPIFileUpload = async ({ options, request }) => {
   const uploadOptions = { ...DEFAULT_OPTIONS, ...options }
   if (!isEligibleRequest(request)) {
     debugLog(uploadOptions, 'Request is not eligible for file upload!')

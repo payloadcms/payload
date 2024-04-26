@@ -2,12 +2,12 @@ import crypto from 'crypto'
 import fs, { WriteStream } from 'fs'
 import path from 'path'
 
-import type { NextFileUploadOptions } from './index.js'
+import type { FetchAPIFileUploadOptions } from './index.js'
 
 import { checkAndMakeDir, debugLog, deleteFile, getTempFilename } from './utilities.js'
 
 type Handler = (
-  options: NextFileUploadOptions,
+  options: FetchAPIFileUploadOptions,
   fieldname: string,
   filename: string,
 ) => {

@@ -2,9 +2,9 @@ import type { PayloadRequest, PayloadRequestData } from 'payload/types'
 
 import { APIError } from 'packages/payload/src/errors/APIError.js'
 
-import type { NextFileUploadOptions } from '../next-fileupload/index.js'
+import type { FetchAPIFileUploadOptions } from '../fetchAPI-fileupload/index.js'
 
-import { nextFileUpload } from '../next-fileupload/index.js'
+import { fetchAPIFileUpload } from '../fetchAPI-fileupload/index.js'
 
 const KB = 1024
 const MB = KB * KB
@@ -72,8 +72,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
         }
       } else {
         // body is > 4MB
-        const { error, fields, files } = await nextFileUpload({
-          options: config.upload as NextFileUploadOptions,
+        const { error, fields, files } = await fetchAPIFileUpload({
+          options: config.upload as FetchAPIFileUploadOptions,
           request: mutableRequest as Request,
         })
 
