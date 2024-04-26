@@ -817,7 +817,7 @@ importers:
         specifier: 1.0.3
         version: 1.0.3
       react:
-        specifier: 18.2.0
+        specifier: ^18.0.0
         version: 18.2.0
       react-animate-height:
         specifier: 2.1.2
@@ -1424,7 +1424,7 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
       react:
-        specifier: 18.2.0
+        specifier: ^18.0.0
         version: 18.2.0
       react-dom:
         specifier: 18.2.0
@@ -1467,7 +1467,7 @@ importers:
         specifier: 0.2.0
         version: 0.2.0
       react:
-        specifier: 18.2.0
+        specifier: ^18.0.0
         version: 18.2.0
       react-i18next:
         specifier: 11.18.6
