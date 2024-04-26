@@ -37,9 +37,9 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async ({
         mutableRequest.data = data
         mutableRequest.json = () => Promise.resolve(data)
       }
-    } else if (contentType.includes('multipart/')) {
+    } else if (bodyByteSize && contentType.includes('multipart/')) {
       // body is <= 4MB
-      if (bodyByteSize && bodyByteSize <= 4 * MB) {
+      if (bodyByteSize <= 4 * MB) {
         const formData = await mutableRequest.formData()
         mutableRequest.formData = async () => Promise.resolve(formData)
 
