@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
 
-import type { NextFileUploadOptions } from './index.js'
+import type { FetchAPIFileUploadOptions } from './index.js'
 
 // Parameters for safe file name parsing.
 const SAFE_FILE_NAME_REGEX = /[^\w-]/g
@@ -16,7 +16,7 @@ let tempCounter = 0
 /**
  * Logs message to console if options.debug option set to true.
  */
-export const debugLog = (options: NextFileUploadOptions, msg: string) => {
+export const debugLog = (options: FetchAPIFileUploadOptions, msg: string) => {
   const opts = options || {}
   if (!opts.debug) return false
   console.log(`Next-file-upload: ${msg}`) // eslint-disable-line
@@ -108,7 +108,7 @@ export const buildFields: BuildFields = (instance, field, value) => {
  * Creates a folder if it does not exist
  * for file specified in the path variable
  */
-type CheckAndMakeDir = (fileUploadOptions: NextFileUploadOptions, filePath: string) => boolean
+type CheckAndMakeDir = (fileUploadOptions: FetchAPIFileUploadOptions, filePath: string) => boolean
 export const checkAndMakeDir: CheckAndMakeDir = (fileUploadOptions, filePath) => {
   if (!fileUploadOptions.createParentPath) return false
   // Check whether folder for the file exists.
@@ -271,7 +271,7 @@ export const parseFileNameExtension: ParseFileNameExtension = (preserveExtension
 /**
  * Parse file name and extension.
  */
-type ParseFileName = (opts: NextFileUploadOptions, fileName: string) => string
+type ParseFileName = (opts: FetchAPIFileUploadOptions, fileName: string) => string
 export const parseFileName: ParseFileName = (opts, fileName) => {
   // Check fileName argument
   if (!fileName || typeof fileName !== 'string') return getTempFilename()

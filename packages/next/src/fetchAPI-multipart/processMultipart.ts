@@ -2,7 +2,7 @@ import Busboy from 'busboy'
 import httpStatus from 'http-status'
 import { APIError } from 'payload/errors'
 
-import type { NextFileUploadOptions, NextFileUploadResponse } from './index.js'
+import type { FetchAPIFileUploadOptions, FetchAPIFileUploadResponse } from './index.js'
 
 import { fileFactory } from './fileFactory.js'
 import { memHandler, tempFileHandler } from './handlers.js'
@@ -13,9 +13,9 @@ import { buildFields, debugLog, isFunc, parseFileName } from './utilities.js'
 const waitFlushProperty = Symbol('wait flush property symbol')
 
 type ProcessMultipart = (args: {
-  options: NextFileUploadOptions
+  options: FetchAPIFileUploadOptions
   request: Request
-}) => Promise<NextFileUploadResponse>
+}) => Promise<FetchAPIFileUploadResponse>
 export const processMultipart: ProcessMultipart = async ({ options, request }) => {
   let parsingRequest = true
 
@@ -29,7 +29,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     failedResolvingFiles = rej
   })
 
-  const result: NextFileUploadResponse = {
+  const result: FetchAPIFileUploadResponse = {
     fields: undefined,
     files: undefined,
   }

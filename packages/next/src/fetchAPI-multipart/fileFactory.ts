@@ -1,4 +1,4 @@
-import type { FileShape, NextFileUploadOptions } from './index.js'
+import type { FetchAPIFileUploadOptions, FileShape } from './index.js'
 
 import {
   checkAndMakeDir,
@@ -12,7 +12,7 @@ import {
 type MoveFile = (
   filePath: string,
   options: FileFactoryOptions,
-  fileUploadOptions: NextFileUploadOptions,
+  fileUploadOptions: FetchAPIFileUploadOptions,
 ) => (resolve: () => void, reject: () => void) => void
 
 /**
@@ -45,7 +45,7 @@ type FileFactoryOptions = {
 }
 type FileFactory = (
   options: FileFactoryOptions,
-  fileUploadOptions: NextFileUploadOptions,
+  fileUploadOptions: FetchAPIFileUploadOptions,
 ) => FileShape
 export const fileFactory: FileFactory = (options, fileUploadOptions) => {
   // see: https://github.com/richardgirges/express-fileupload/issues/14
