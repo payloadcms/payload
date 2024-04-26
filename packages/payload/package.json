@@ -206,7 +206,7 @@
     "terser": "5.19.2",
     "terser-webpack-plugin": "^5.3.6",
     "url-loader": "4.1.1",
-    "vite": "^4.4.9",
+    "vite": "^4.5.3",
     "webpack": "^5.78.0"
   },
   "engines": {
