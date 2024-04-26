@@ -1291,6 +1291,9 @@ importers:
       react:
         specifier: ^18.0.0
         version: 18.2.0
+      react-dom:
+        specifier: ^18.0.0
+        version: 18.2.0(react@18.2.0)
       react-error-boundary:
         specifier: 4.0.12
         version: 4.0.12(react@18.2.0)
@@ -1337,6 +1340,9 @@ importers:
       is-hotkey:
         specifier: 0.2.0
         version: 0.2.0
+      react:
+        specifier: ^18.0.0
+        version: 18.2.0
       slate:
         specifier: 0.91.4
         version: 0.91.4
@@ -1365,9 +1371,6 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
-      react:
-        specifier: ^18.0.0
-        version: 18.2.0
 
   packages/storage-azure:
     dependencies:
@@ -1510,6 +1513,9 @@ importers:
       react-datepicker:
         specifier: 6.2.0
         version: 6.2.0(react-dom@18.2.0)(react@18.2.0)
+      react-dom:
+        specifier: ^18.0.0
+        version: 18.2.0(react@18.2.0)
       react-image-crop:
         specifier: 10.1.8
         version: 10.1.8(react@18.2.0)
