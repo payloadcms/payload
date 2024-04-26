@@ -22,7 +22,7 @@
     "@payloadcms/plugin-form-builder": "^1.0.12",
     "@payloadcms/plugin-seo": "^1.0.8",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "express": "^4.19.2",
     "payload": "latest"
   },
   "devDependencies": {

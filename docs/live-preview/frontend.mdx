@@ -8,7 +8,7 @@ keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, us
 
 While using Live Preview, the Admin panel emits a new `window.postMessage` event every time a change is made to the document. Your front-end application can listen for these events and re-render accordingly.
 
-Wiring your front-end into Live Preview is easy. If your front-end application is built with React or Next.js, use the [`useLivePreview`](#react) React hook that Payload provides. In the future, all other major frameworks like Vue, Svelte, etc will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own hook](#building-your-own-hook) for more information.
+Wiring your front-end into Live Preview is easy. If your front-end application is built with React, Next.js, Vue or Nuxt.js, use the `useLivePreview` hook that Payload provides. In the future, all other major frameworks like Svelte will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own hook](#building-your-own-hook) for more information.
 
 By default, all hooks accept the following args:
 
@@ -30,6 +30,10 @@ And return the following values:
 
 <Banner type="info">
   If your front-end is tightly coupled to required fields, you should ensure that your UI does not break when these fields are removed. For example, if you are rendering something like `data.relatedPosts[0].title`, your page will break once you remove the first related post. To get around this, use conditional logic, optional chaining, or default values in your UI where needed. For example, `data?.relatedPosts?.[0]?.title`.
+</Banner>
+
+<Banner type="info">
+  If is important that the `depth` argument matches exactly with the depth of your initial page request. The depth property is used to populated relationships and uploads beyond their IDs. See [Depth](../getting-started/concepts#depth) for more information.
 </Banner>
 
 ### React
@@ -69,9 +73,40 @@ export const PageClient: React.FC<{
 }
 ```
 
-<Banner type="info">
-  If is important that the `depth` argument matches exactly with the depth of your initial page request. The depth property is used to populated relationships and uploads beyond their IDs. See [Depth](../getting-started/concepts#depth) for more information.
-</Banner>
+### Vue
+
+If your front-end application is built with Vue 3 or Nuxt 3, you can use the `useLivePreview` composable that Payload provides.
+
+First, install the `@payloadcms/live-preview-vue` package:
+
+```bash
+npm install @payloadcms/live-preview-vue
+```
+
+Then, use the `useLivePreview` hook in your Vue component:
+
+```vue
+<script setup lang="ts">
+import type { PageData } from '~/types';
+import { defineProps } from 'vue';
+import { useLivePreview } from '@payloadcms/live-preview-vue';
+
+// Fetch the initial data on the parent component or using async state
+const props = defineProps<{ initialData: PageData }>();
+
+// The hook will take over from here and keep the preview in sync with the changes you make.
+// The `data` property will contain the live data of the document only when viewed from the Preview view of the Admin UI.
+const { data } = useLivePreview<PageData>({
+  initialData: props.initialData,
+  serverURL: "<PAYLOAD_SERVER_URL>",
+  depth: 2,
+});
+</script>
+
+<template>
+  <h1>{{ data.title }}</h1>
+</template>
+```
 
 ## Building your own hook
 

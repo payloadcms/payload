@@ -69,6 +69,7 @@ export type Feature = {
   generatedTypes?: {
     modifyOutputSchema: ({
       collectionIDFieldTypes,
+      config,
       currentSchema,
       field,
       interfaceNameDefinitions,
@@ -76,6 +77,7 @@ export type Feature = {
       payload,
     }: {
       collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+      config?: SanitizedConfig
       /**
        * Current schema which will be modified by this function.
        */
@@ -228,6 +230,7 @@ export type SanitizedFeatures = Required<
     modifyOutputSchemas: Array<
       ({
         collectionIDFieldTypes,
+        config,
         currentSchema,
         field,
         interfaceNameDefinitions,
@@ -235,6 +238,7 @@ export type SanitizedFeatures = Required<
         payload,
       }: {
         collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+        config?: SanitizedConfig
         /**
          * Current schema which will be modified by this function.
          */

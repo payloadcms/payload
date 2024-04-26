@@ -8,6 +8,7 @@ import {
   InvalidFieldRelationship,
   MissingFieldType,
 } from '../../errors'
+import MissingEditorProp from '../../errors/MissingEditorProps'
 import { formatLabels, toWords } from '../../utilities/formatLabels'
 import { baseBlockFields } from '../baseFields/baseBlockFields'
 import { baseIDField } from '../baseFields/baseIDField'
@@ -19,6 +20,12 @@ type Args = {
   existingFieldNames?: Set<string>
   fields: Field[]
   /**
+   * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
+   *
+   * @default false
+   */
+  requireFieldLevelRichTextEditor?: boolean
+  /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
    */
@@ -29,6 +36,7 @@ export const sanitizeFields = ({
   config,
   existingFieldNames = new Set(),
   fields,
+  requireFieldLevelRichTextEditor = false,
   validRelationships,
 }: Args): Field[] => {
   if (!fields) return []
@@ -44,8 +52,12 @@ export const sanitizeFields = ({
     }
 
     // Make sure that the richText field has an editor
-    if (field.type === 'richText' && !field.editor && config.editor) {
-      field.editor = config.editor
+    if (field.type === 'richText' && !field.editor) {
+      if (config.editor && !requireFieldLevelRichTextEditor) {
+        field.editor = config.editor
+      } else {
+        throw new MissingEditorProp(field)
+      }
     }
 
     // Auto-label
@@ -113,7 +125,7 @@ export const sanitizeFields = ({
     if (fieldAffectsData(field)) {
       if (existingFieldNames.has(field.name)) {
         throw new DuplicateFieldName(field.name)
-      } else if (!['id', 'blockName'].includes(field.name)) {
+      } else if (!['blockName', 'id'].includes(field.name)) {
         existingFieldNames.add(field.name)
       }
 
@@ -145,6 +157,7 @@ export const sanitizeFields = ({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
+        requireFieldLevelRichTextEditor,
         validRelationships,
       })
     }
@@ -160,6 +173,7 @@ export const sanitizeFields = ({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
+          requireFieldLevelRichTextEditor,
           validRelationships,
         })
 
@@ -176,9 +190,10 @@ export const sanitizeFields = ({
 
         unsanitizedBlock.fields = sanitizeFields({
           config,
-          fields: block.fields,
-          validRelationships,
           existingFieldNames: new Set(),
+          fields: block.fields,
+          requireFieldLevelRichTextEditor,
+          validRelationships,
         })
 
         return unsanitizedBlock

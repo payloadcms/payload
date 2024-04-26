@@ -1,6 +1,6 @@
 import type { i18n } from 'i18next'
 import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
@@ -46,8 +46,12 @@ export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
    * displayed in the link editor drawer.
    */
   fields?:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
-    | Field[]
+    | ((args: {
+        config: SanitizedConfig
+        defaultFields: FieldWithRichTextRequiredEditor[]
+        i18n: i18n
+      }) => FieldWithRichTextRequiredEditor[])
+    | FieldWithRichTextRequiredEditor[]
 }
 
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
@@ -99,6 +103,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         },
         nodes: [
           {
+            type: LinkNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -125,10 +130,10 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             },
             node: LinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-            type: LinkNode.getType(),
             // TODO: Add validation similar to upload for internal links and fields
           },
           {
+            type: AutoLinkNode.getType(),
             converters: {
               html: {
                 converter: async ({ converters, node, parent }) => {
@@ -158,7 +163,6 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             },
             node: AutoLinkNode,
             populationPromises: [linkPopulationPromiseHOC(props)],
-            type: AutoLinkNode.getType(),
           },
         ],
         plugins: [

@@ -19,7 +19,6 @@
  *    - tabs
  *    - text
  *    - richtext
- *  - restore version
  *  - specify locales to show
  */
 

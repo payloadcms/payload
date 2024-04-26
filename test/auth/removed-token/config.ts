@@ -19,7 +19,7 @@ export default buildConfigWithDefaults({
           label: 'Role',
           type: 'select',
           options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
-          defaultValue: 'user',
+          defaultValue: ['user'],
           required: true,
           saveToJWT: true,
           hasMany: true,
