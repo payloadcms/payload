@@ -4,11 +4,11 @@ import type { NextFileUploadOptions } from '../next-fileupload/index.js'
 
 import { nextFileUpload } from '../next-fileupload/index.js'
 
-type ReturnType = PayloadRequest & PayloadRequestData
-type AddDataAndFileToRequest = (args: { request: PayloadRequest }) => Promise<ReturnType>
-
 const KB = 1024
 const MB = KB * KB
+
+type ReturnType = PayloadRequest & PayloadRequestData
+type AddDataAndFileToRequest = (args: { request: PayloadRequest }) => Promise<ReturnType>
 
 /**
  * Mutates the Request to contain 'data' and 'file' if present
