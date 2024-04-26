@@ -681,6 +681,12 @@
         "deselectAllRows": {
           "type": "string"
         },
+        "document": {
+          "type": "string"
+        },
+        "documents": {
+          "type": "string"
+        },
         "duplicate": {
           "type": "string"
         },
@@ -962,6 +968,8 @@
         "deletedSuccessfully",
         "deleting",
         "descending",
+        "document",
+        "documents",
         "duplicate",
         "duplicateWithoutSaving",
         "edit",

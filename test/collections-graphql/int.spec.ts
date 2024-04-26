@@ -102,6 +102,18 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
     })
 
+    it('should count', async () => {
+      const query = `query {
+        countPosts {
+          totalDocs
+        }
+      }`
+      const response = await client.request<{ countPosts: { totalDocs: number } }>(query)
+      const { totalDocs } = response.countPosts
+
+      expect(typeof totalDocs).toBe('number')
+    })
+
     it('should read using multiple queries', async () => {
       const query = `query {
           postIDs: Posts {

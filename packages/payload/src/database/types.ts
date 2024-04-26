@@ -22,6 +22,8 @@ export interface BaseDatabaseAdapter {
    */
   connect?: Connect
 
+  count: Count
+
   create: Create
 
   createGlobal: CreateGlobal
@@ -196,6 +198,15 @@ export type FindArgs = {
 }
 
 export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
+
+export type CountArgs = {
+  collection: string
+  locale?: string
+  req: PayloadRequest
+  where?: Where
+}
+
+export type Count = (args: CountArgs) => Promise<{ totalDocs: number }>
 
 type BaseVersionArgs = {
   limit?: number
@@ -403,3 +414,10 @@ export type PaginatedDocs<T = any> = {
   totalDocs: number
   totalPages: number
 }
+
+export type DBIdentifierName =
+  | ((Args: {
+      /** The name of the parent table when using relational DBs */
+      tableName?: string
+    }) => string)
+  | string

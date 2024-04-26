@@ -93,6 +93,7 @@ export function fieldsToJSONSchema(
    */
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   payload?: Payload,
+  config?: SanitizedConfig,
 ): {
   properties: {
     [k: string]: JSONSchema4
@@ -155,6 +156,7 @@ export function fieldsToJSONSchema(
             if (field.editor.outputSchema) {
               fieldSchema = field.editor.outputSchema({
                 collectionIDFieldTypes,
+                config: config || payload?.config,
                 field,
                 interfaceNameDefinitions,
                 isRequired,
@@ -334,6 +336,7 @@ export function fieldsToJSONSchema(
                     block.fields,
                     interfaceNameDefinitions,
                     payload,
+                    config,
                   )
 
                   const blockSchema: JSONSchema4 = {
@@ -374,6 +377,7 @@ export function fieldsToJSONSchema(
                   field.fields,
                   interfaceNameDefinitions,
                   payload,
+                  config,
                 ),
               },
             }
@@ -395,6 +399,7 @@ export function fieldsToJSONSchema(
               field.fields,
               interfaceNameDefinitions,
               payload,
+              config,
             )
             Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
               fieldSchemas.set(propName, propSchema)
@@ -412,6 +417,7 @@ export function fieldsToJSONSchema(
                 tab.fields,
                 interfaceNameDefinitions,
                 payload,
+                config,
               )
               if (tabHasName(tab)) {
                 // could have interface
@@ -442,6 +448,7 @@ export function fieldsToJSONSchema(
                 field.fields,
                 interfaceNameDefinitions,
                 payload,
+                config,
               ),
             }
 
@@ -522,7 +529,13 @@ export function entityToJSONSchema(
     type: 'object',
     additionalProperties: false,
     title,
-    ...fieldsToJSONSchema(collectionIDFieldTypes, entity.fields, interfaceNameDefinitions, payload),
+    ...fieldsToJSONSchema(
+      collectionIDFieldTypes,
+      entity.fields,
+      interfaceNameDefinitions,
+      payload,
+      config,
+    ),
   }
 }
 

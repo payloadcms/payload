@@ -1,0 +1,22 @@
+{
+  "$schema": "./translation-schema.json",
+  "plugin-seo": {
+    "autoGenerate": "自动生成",
+    "imageAutoGenerationTip": "自动生成将提取所选的主页图片。",
+    "bestPractices": "最佳实践",
+    "lengthTipTitle": "网站标题应介于 {{minLength}} 到 {{maxLength}} 字之间。关于如何撰写良好的网站标题，请参阅 ",
+    "lengthTipDescription": "网站描述应介于 {{minLength}} 到 {{maxLength}} 字元之间。关于如何撰写良好的网站描述，请参阅 ",
+    "good": "良好",
+    "tooLong": "过长",
+    "tooShort": "过短",
+    "almostThere": "快将完成",
+    "characterCount": "{{current}}/{{minLength}}-{{maxLength}} 字，",
+    "charactersToGo": "还差 {{characters}} 字",
+    "charactersLeftOver": "剩下 {{characters}} 字",
+    "charactersTooMany": "超过 {{characters}} 字",
+    "noImage": "没有图片",
+    "checksPassing": "通过 {{current}}/{{max}} 项检查",
+    "preview": "预览",
+    "previewDescription": "实际结果可能因内容和搜索相关性而不同。"
+  }
+}

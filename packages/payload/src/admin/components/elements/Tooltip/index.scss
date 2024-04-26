@@ -85,15 +85,15 @@
 
 html[data-theme='light'] {
   .tooltip {
-    background-color: var(--theme-error-250);
-    color: var(--theme-error-750);
+    background-color: var(--theme-elevation-100);
+    color: var(--theme-elevation-1000);
 
     &--position-top:after {
-      border-top-color: var(--theme-error-250);
+      border-top-color: var(--theme-elevation-100);
     }
 
     &--position-bottom:after {
-      border-bottom-color: var(--theme-error-250);
+      border-bottom-color: var(--theme-elevation-100);
     }
   }
 }

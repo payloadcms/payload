@@ -149,6 +149,17 @@ describe('uploads', () => {
     await expect(iconMeta).toContainText('16x16')
   })
 
+  test('should resize and show tiff images', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './test-image.tiff'))
+
+    await expect(page.locator('.file-field__upload .thumbnail svg')).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-details img')).toBeVisible()
+  })
+
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
 

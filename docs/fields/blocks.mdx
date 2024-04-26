@@ -14,22 +14,23 @@ keywords: blocks, fields, config, configuration, documentation, Content Manageme
 </Banner>
 
 <LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/blocks.png"
-  srcDark="https://payloadcms.com/images/docs/fields/blocks-dark.png"
-  alt="Admin panel screenshot of add Blocks drawer view"
-  caption="Admin panel screenshot of add Blocks drawer view"
+srcLight="https://payloadcms.com/images/docs/fields/blocks.png"
+srcDark="https://payloadcms.com/images/docs/fields/blocks-dark.png"
+alt="Admin panel screenshot of add Blocks drawer view"
+caption="Admin panel screenshot of add Blocks drawer view"
 />
 
 **Example uses:**
 
-- A layout builder tool that grants editors to design highly customizable page or post layouts. Blocks could include configs such as `Quote`, `CallToAction`, `Slider`, `Content`, `Gallery`, or others.
+- A layout builder tool that grants editors to design highly customizable page or post layouts. Blocks could include
+  configs such as `Quote`, `CallToAction`, `Slider`, `Content`, `Gallery`, or others.
 - A form builder tool where available block configs might be `Text`, `Select`, or `Checkbox`.
 - Virtual event agenda "timeslots" where a timeslot could either be a `Break`, a `Presentation`, or a `BreakoutSession`.
 
 ### Field config
 
 | Option             | Description                                                                                                                                                                                                                                                                        |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
 | **`label`**        | Text used as the heading in the Admin panel or an object with keys for each language. Auto-generated from name if not defined.                                                                                                                                                     |
 | **`blocks`** \*    | Array of [block configs](/docs/fields/blocks#block-configs) to be made available to this field.                                                                                                                                                                                    |
@@ -51,10 +52,11 @@ _\* An asterisk denotes that a property is required._
 
 ### Admin Config
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
+In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following
+properties:
 
 | Option              | Description                     |
-| ------------------- | ------------------------------- |
+|---------------------|---------------------------------|
 | **`initCollapsed`** | Set the initial collapsed state |
 
 ### Block configs
@@ -72,7 +74,7 @@ Blocks are defined as separate configs of their own.
 </Banner>
 
 | Option                     | Description                                                                                                                                                                         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                            |
 | **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                         |
 | **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined.                                                                             |
@@ -80,7 +82,8 @@ Blocks are defined as separate configs of their own.
 | **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                    |
 | **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
 | **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                        |
-| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                   |
+| **`dbName`**               | Custom table name for this block type when using SQL database adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.
+| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                           |
 
 #### Auto-generated data per block
 
@@ -92,7 +95,8 @@ The `blockType` is saved as the slug of the block that has been selected.
 
 **`blockName`**
 
-The Admin panel provides each block with a `blockName` field which optionally allows editors to label their blocks for better editability and readability.
+The Admin panel provides each block with a `blockName` field which optionally allows editors to label their blocks for
+better editability and readability.
 
 ### Example
 
@@ -139,7 +143,8 @@ export const ExampleCollection: CollectionConfig = {
 
 ### TypeScript
 
-As you build your own Block configs, you might want to store them in separate files but retain typing accordingly. To do so, you can import and use Payload's `Block` type:
+As you build your own Block configs, you might want to store them in separate files but retain typing accordingly. To do
+so, you can import and use Payload's `Block` type:
 
 ```ts
 import type { Block } from 'payload/types'
