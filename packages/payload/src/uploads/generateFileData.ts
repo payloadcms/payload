@@ -11,7 +11,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequestWithData } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize } from './types.js'
 
-import { FileUploadError, MissingFile } from '../errors/index.js'
+import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
 import canResizeImage from './canResizeImage.js'
 import cropImage from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
@@ -77,8 +77,8 @@ export const generateFileData = async <T>({
         })
         overwriteExistingFiles = true
       }
-    } catch (err) {
-      throw new FileUploadError(req.t)
+    } catch (err: unknown) {
+      throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
     }
   }
 
