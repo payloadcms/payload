@@ -10,6 +10,7 @@ import { fetchDoc } from '../../../../_api/fetchDoc'
 import { fetchDocs } from '../../../../_api/fetchDocs'
 import { RelatedPosts } from '../../../../_blocks/RelatedPosts'
 import { Blocks } from '../../../../_components/Blocks'
+import { PayloadRedirects } from '../../../../_components/PayloadRedirects'
 import { ProjectHero } from '../../../../_heros/ProjectHero'
 import { generateMeta } from '../../../../_utilities/generateMeta'
 
@@ -18,6 +19,7 @@ import { generateMeta } from '../../../../_utilities/generateMeta'
 export const dynamic = 'force-dynamic'
 
 export default async function Project({ params: { slug } }) {
+  const url = '/projects/' + slug.join('/')
   const { isEnabled: isDraftMode } = draftMode()
 
   let project: Project | null = null
@@ -40,6 +42,7 @@ export default async function Project({ params: { slug } }) {
 
   return (
     <React.Fragment>
+      <PayloadRedirects url={url} />
       <ProjectHero project={project} />
       <Blocks
         blocks={[
@@ -106,7 +109,10 @@ export async function generateMetadata({ params: { slug } }): Promise<Metadata> 
       collection: 'projects',
       draft: isDraftMode,
     })
-  } catch (error) {}
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.log(error)
+  }
 
   return generateMeta({ doc: project })
 }

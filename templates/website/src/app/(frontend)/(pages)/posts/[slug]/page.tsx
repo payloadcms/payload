@@ -11,6 +11,7 @@ import { fetchComments } from '../../../../_api/fetchComments'
 import { fetchDoc } from '../../../../_api/fetchDoc'
 import { fetchDocs } from '../../../../_api/fetchDocs'
 import { Blocks } from '../../../../_components/Blocks'
+import { PayloadRedirects } from '../../../../_components/PayloadRedirects'
 import { PremiumContent } from '../../../../_components/PremiumContent'
 import { PostHero } from '../../../../_heros/PostHero'
 import { generateMeta } from '../../../../_utilities/generateMeta'
@@ -20,6 +21,7 @@ import { generateMeta } from '../../../../_utilities/generateMeta'
 export const dynamic = 'force-dynamic'
 
 export default async function Post({ params: { slug } }) {
+  const url = '/posts/' + slug.join('/')
   const { isEnabled: isDraftMode } = draftMode()
 
   let post: Post | null = null
@@ -46,6 +48,7 @@ export default async function Post({ params: { slug } }) {
 
   return (
     <React.Fragment>
+      <PayloadRedirects url={url} />
       <PostHero post={post} />
       <Blocks blocks={layout} />
       {enablePremiumContent && <PremiumContent disableTopPadding postSlug={slug as string} />}
@@ -151,7 +154,10 @@ export async function generateMetadata({ params: { slug } }): Promise<Metadata> 
       collection: 'posts',
       draft: isDraftMode,
     })
-  } catch (error) {}
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.log(error)
+  }
 
   return generateMeta({ doc: post })
 }
