@@ -327,7 +327,7 @@ jobs:
           cp .env.example .env
           ls -la
           pnpm add ./*.tgz
-          pnpm install
+          pnpm install --ignore-workspace
           cat package.json
           pnpm run build
 
