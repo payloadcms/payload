@@ -78,6 +78,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@playwright/test": "1.43.0",
+    "@sentry/react": "^7.77.0",
     "@swc/cli": "^0.1.62",
     "@swc/jest": "0.2.36",
     "@testing-library/jest-dom": "6.4.2",
@@ -173,11 +174,6 @@
       "prettier --write",
       "eslint --cache --fix"
     ]
-  },
-  "dependencies": {
-    "@sentry/react": "^7.77.0",
-    "ajv": "^8.12.0",
-    "passport-strategy": "1.0.0"
   },
   "pnpm": {
     "overrides": {
