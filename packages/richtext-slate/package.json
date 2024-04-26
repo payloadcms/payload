@@ -34,7 +34,6 @@
   "dependencies": {
     "@faceless-ui/modal": "2.0.2",
     "is-hotkey": "0.2.0",
-    "react": "18.2.0",
     "slate": "0.91.4",
     "slate-history": "0.86.0",
     "slate-hyperscript": "0.81.3",
@@ -50,7 +49,8 @@
   "peerDependencies": {
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "engines": {
     "node": ">=18.20.2"

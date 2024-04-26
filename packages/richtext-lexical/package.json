@@ -56,8 +56,6 @@
     "json-schema": "^0.4.0",
     "lexical": "0.13.1",
     "lodash": "4.17.21",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
     "react-error-boundary": "4.0.12",
     "ts-essentials": "7.0.3"
   },
@@ -76,7 +74,9 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "engines": {
     "node": ">=18.20.2"

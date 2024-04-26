@@ -139,7 +139,8 @@
   "peerDependencies": {
     "next": "^14.3.0-canary.7",
     "payload": "workspace:*",
-    "react": "^18.0.0"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "engines": {
     "node": ">=18.20.2"

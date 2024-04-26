@@ -45,8 +45,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/express": "^4.17.9",
     "@types/react": "18.2.74",
-    "payload": "workspace:*",
-    "react": "^18.0.0"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"
