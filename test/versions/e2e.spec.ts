@@ -28,12 +28,14 @@ import { expect, test } from '@playwright/test'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
+import { POLL_TOPASS_TIMEOUT } from '../../playwright.config'
 import { globalSlug } from '../admin/slugs'
 import {
   changeLocale,
   exactText,
   findTableCell,
   initPageConsoleErrorCatch,
+  saveDocAndAssert,
   selectTableRow,
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
@@ -238,6 +240,38 @@ describe('versions', () => {
       await page.locator('tbody tr .cell-title a').first().click()
       await page.goto(`${page.url()}/versions`)
       await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
+    })
+
+    test('should restore version with correct data', async () => {
+      await page.goto(url.create)
+      await page.waitForURL(url.create)
+
+      // publish a doc
+      await page.locator('#field-title').fill('v1')
+      await page.locator('#field-description').fill('hello')
+      await saveDocAndAssert(page)
+
+      // save a draft
+      await page.locator('#field-title').fill('v2')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // go to versions list view
+      const savedDocURL = page.url()
+      await page.goto(`${savedDocURL}/versions`)
+      await page.waitForURL(`${savedDocURL}/versions`)
+
+      // select the first version (row 2)
+      const row2 = page.locator('tbody .row-2')
+      const versionID = await row2.locator('.cell-id').textContent()
+      await page.goto(`${savedDocURL}/versions/${versionID}`)
+      await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
+
+      // restore doc
+      await page.locator('.pill.restore-version').click()
+      await page.locator('button:has-text("Confirm")').click()
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(versionID)
+
+      await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
     test('should show global versions view level action in globals versions view', async () => {
