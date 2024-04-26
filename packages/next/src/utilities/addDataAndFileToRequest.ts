@@ -2,9 +2,9 @@ import type { PayloadRequest, PayloadRequestData } from 'payload/types'
 
 import { APIError } from 'packages/payload/src/errors/APIError.js'
 
-import type { FetchAPIFileUploadOptions } from '../fetchAPI-fileupload/index.js'
+import type { FetchAPIFileUploadOptions } from '../fetchAPI-multipart/index.js'
 
-import { fetchAPIFileUpload } from '../fetchAPI-fileupload/index.js'
+import { fetchAPIFileUpload } from '../fetchAPI-multipart/index.js'
 
 const KB = 1024
 const MB = KB * KB

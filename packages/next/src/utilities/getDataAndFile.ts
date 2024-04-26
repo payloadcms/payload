@@ -1,8 +1,8 @@
 import type { Collection, PayloadRequestWithData, SanitizedConfig } from 'payload/types'
 
-import type { FetchAPIFileUploadOptions } from '../fetchAPI-fileupload/index.js'
+import type { FetchAPIFileUploadOptions } from '../fetchAPI-multipart/index.js'
 
-import { fetchAPIFileUpload } from '../fetchAPI-fileupload/index.js'
+import { fetchAPIFileUpload } from '../fetchAPI-multipart/index.js'
 
 type GetDataAndFile = (args: {
   collection: Collection
