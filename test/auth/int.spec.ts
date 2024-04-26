@@ -513,7 +513,7 @@ describe('Auth', () => {
           await payload.update({
             collection: slug,
             data: {
-              lockUntil: Date.now() - 605 * 1000,
+              lockUntil: new Date(Date.now() - 605 * 1000),
             },
             where: {
               email: {
