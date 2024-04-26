@@ -40,22 +40,27 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const { editorConfig, field: parentLexicalRichTextField } = useEditorConfigContext()
 
-  const block = (
-    editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps
-  )?.blocks?.find((block) => block.slug === formData?.blockType)
-
-  const unsanitizedFormSchema = block?.fields || []
-
-  // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
-  const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
-  const formSchema = transformInputFormSchema(
-    sanitizeFields({
-      config: payloadConfig,
-      fields: unsanitizedFormSchema,
-      validRelationships,
-    }),
-    blockFieldWrapperName,
+  const block = useMemo(
+    () =>
+      (editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps)?.blocks?.find(
+        (block) => block.slug === formData?.blockType,
+      ),
+    [editorConfig, formData],
   )
+
+  const formSchema = useMemo(() => {
+    const unSanitizedFormSchema = block?.fields || []
+    // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
+
+    const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
+    const sanitizedSchema = sanitizeFields({
+      config: payloadConfig,
+      fields: unSanitizedFormSchema,
+      requireFieldLevelRichTextEditor: true,
+      validRelationships,
+    })
+    return transformInputFormSchema(sanitizedSchema, blockFieldWrapperName)
+  }, [block, blockFieldWrapperName, payloadConfig])
 
   const initialStateRef = React.useRef<Data>(null) // Store initial value in a ref, so it doesn't change on re-render and only gets initialized once
 

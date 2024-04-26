@@ -23,7 +23,7 @@ import {
 } from 'payload/components/utilities'
 import { sanitizeFields } from 'payload/config'
 import { getTranslation } from 'payload/utilities'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { LinkFeatureProps } from '../../..'
@@ -64,8 +64,8 @@ export function LinkEditor({
 
   const [initialState, setInitialState] = useState<Fields>({})
 
-  const [fieldSchema] = useState(() => {
-    const fieldsUnsanitized = transformExtraFields(
+  const fieldSchema = useMemo(() => {
+    const fieldsUnSanitized = transformExtraFields(
       customFieldSchema,
       config,
       i18n,
@@ -74,14 +74,13 @@ export function LinkEditor({
     )
     // Sanitize custom fields here
     const validRelationships = config.collections.map((c) => c.slug) || []
-    const fields = sanitizeFields({
+    return sanitizeFields({
       config,
-      fields: fieldsUnsanitized,
+      fields: fieldsUnSanitized,
+      requireFieldLevelRichTextEditor: true,
       validRelationships,
     })
-
-    return fields
-  })
+  }, [config, customFieldSchema, disabledCollections, enabledCollections, i18n])
 
   const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()

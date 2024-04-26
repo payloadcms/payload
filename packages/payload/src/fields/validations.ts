@@ -1,3 +1,4 @@
+import Ajv from 'ajv'
 import type { RichTextAdapter } from '../exports/types'
 import type {
   ArrayField,
@@ -130,9 +131,9 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { req
   return true
 }
 
-export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (
+export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = async (
   value: string,
-  { jsonError, required, t },
+  { jsonError, jsonSchema, required, t },
 ) => {
   if (required && !value) {
     return t('validation:required')
@@ -140,6 +141,55 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
 
   if (jsonError !== undefined) {
     return t('validation:invalidInput')
+  }
+
+  const isNotEmpty = (value) => {
+    if (value === undefined || value === null) {
+      return false
+    }
+
+    if (Array.isArray(value) && value.length === 0) {
+      return false
+    }
+
+    if (typeof value === 'object' && Object.keys(value).length === 0) {
+      return false
+    }
+
+    return true
+  }
+
+  const fetchSchema = ({ uri, schema }) => {
+    if (uri && schema) return schema
+    return fetch(uri)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        return response.json()
+      })
+      .then((json) => {
+        const jsonSchemaSanitizations = {
+          id: undefined,
+          $id: json.id,
+          $schema: 'http://json-schema.org/draft-07/schema#',
+        }
+        return Object.assign(json, jsonSchemaSanitizations)
+      })
+  }
+
+  if (!canUseDOM && jsonSchema && isNotEmpty(value)) {
+    try {
+      jsonSchema.schema = await fetchSchema(jsonSchema)
+      const { schema } = jsonSchema
+      const ajv = new Ajv()
+
+      if (!ajv.validate(schema, value)) {
+        return t(ajv.errorsText())
+      }
+    } catch (error) {
+      return t(error.message)
+    }
   }
 
   return true
@@ -314,12 +364,12 @@ const validateFilterOptions: Validate = async (
               falseCollections.push(optionFilter)
             }
 
-            // `req` omitted to prevent transaction errors from aborting the entire transaction
             const result = await payload.find({
               collection,
               depth: 0,
               limit: 0,
               pagination: false,
+              req,
               where: findWhere,
             })
 

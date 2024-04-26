@@ -1,4 +1,5 @@
-import type { ArrayField, Block } from '../../../../packages/payload/src/fields/config/types'
+import type { ArrayField } from '../../../../packages/payload/src/fields/config/types'
+import type { LexicalBlock } from '../../../../packages/richtext-lexical/src'
 
 import { lexicalEditor } from '../../../../packages/richtext-lexical/src'
 import { textFieldsSlug } from '../Text/shared'
@@ -17,7 +18,7 @@ export const BlockColumns = ({ name }: { name: string }): ArrayField => ({
     },
   ],
 })
-export const ConditionalLayoutBlock: Block = {
+export const ConditionalLayoutBlock: LexicalBlock = {
   fields: [
     {
       label: 'Layout',
@@ -61,7 +62,7 @@ export const ConditionalLayoutBlock: Block = {
   slug: 'conditionalLayout',
 }
 
-export const TextBlock: Block = {
+export const TextBlock: LexicalBlock = {
   fields: [
     {
       name: 'text',
@@ -72,7 +73,7 @@ export const TextBlock: Block = {
   slug: 'text',
 }
 
-export const RadioButtonsBlock: Block = {
+export const RadioButtonsBlock: LexicalBlock = {
   interfaceName: 'LexicalBlocksRadioButtonsBlock',
   fields: [
     {
@@ -97,7 +98,7 @@ export const RadioButtonsBlock: Block = {
   slug: 'radioButtons',
 }
 
-export const RichTextBlock: Block = {
+export const RichTextBlock: LexicalBlock = {
   fields: [
     {
       name: 'richText',
@@ -108,7 +109,7 @@ export const RichTextBlock: Block = {
   slug: 'richText',
 }
 
-export const UploadAndRichTextBlock: Block = {
+export const UploadAndRichTextBlock: LexicalBlock = {
   fields: [
     {
       name: 'upload',
@@ -125,7 +126,7 @@ export const UploadAndRichTextBlock: Block = {
   slug: 'uploadAndRichText',
 }
 
-export const RelationshipHasManyBlock: Block = {
+export const RelationshipHasManyBlock: LexicalBlock = {
   fields: [
     {
       name: 'rel',
@@ -137,7 +138,7 @@ export const RelationshipHasManyBlock: Block = {
   ],
   slug: 'relationshipHasManyBlock',
 }
-export const RelationshipBlock: Block = {
+export const RelationshipBlock: LexicalBlock = {
   fields: [
     {
       name: 'rel',
@@ -149,7 +150,7 @@ export const RelationshipBlock: Block = {
   slug: 'relationshipBlock',
 }
 
-export const SelectFieldBlock: Block = {
+export const SelectFieldBlock: LexicalBlock = {
   fields: [
     {
       name: 'select',
@@ -181,7 +182,7 @@ export const SelectFieldBlock: Block = {
   slug: 'select',
 }
 
-export const SubBlockBlock: Block = {
+export const SubBlockBlock: LexicalBlock = {
   slug: 'subBlock',
   fields: [
     {

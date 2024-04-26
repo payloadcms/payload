@@ -3,7 +3,11 @@
   "description": "Form builder plugin for Payload CMS",
   "version": "1.2.1",
   "homepage:": "https://payloadcms.com",
-  "repository": "git@github.com:payloadcms/plugin-form-builder.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-form-builder"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
