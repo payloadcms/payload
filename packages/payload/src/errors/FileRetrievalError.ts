@@ -2,7 +2,7 @@ import type { TFunction } from '@payloadcms/translations'
 
 import httpStatus from 'http-status'
 
-import APIError from './APIError.js'
+import { APIError } from './APIError.js'
 
 export class FileRetrievalError extends APIError {
   constructor(t?: TFunction, message?: string) {
