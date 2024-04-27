@@ -43,6 +43,7 @@ export interface GeneratedAdapter {
   generateURL: GenerateURL
   handleDelete: HandleDelete
   handleUpload: HandleUpload
+  name: string
   onInit?: () => void
   staticHandler: StaticHandler
 }

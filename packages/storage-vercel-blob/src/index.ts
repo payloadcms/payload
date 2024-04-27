@@ -136,6 +136,7 @@ function vercelBlobStorageInternal(
   return ({ collection, prefix }): GeneratedAdapter => {
     const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, token } = options
     return {
+      name: 'vercel-blob',
       generateURL: getGenerateUrl({ baseUrl, prefix }),
       handleDelete: getHandleDelete({ baseUrl, prefix, token: options.token }),
       handleUpload: getHandleUpload({

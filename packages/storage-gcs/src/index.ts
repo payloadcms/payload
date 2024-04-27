@@ -100,6 +100,7 @@ function gcsStorageInternal({ acl, bucket, options }: GcsStorageOptions): Adapte
     }
 
     return {
+      name: 'gcs',
       generateURL: getGenerateURL({ bucket, getStorageClient }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({

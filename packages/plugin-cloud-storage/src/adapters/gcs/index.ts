@@ -48,6 +48,7 @@ export const gcsAdapter =
     }
 
     return {
+      name: 'gcs',
       generateURL: getGenerateURL({ bucket, getStorageClient }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({

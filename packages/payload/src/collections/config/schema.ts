@@ -152,6 +152,7 @@ const collectionSchema = joi.object().keys({
   }),
   upload: joi.alternatives().try(
     joi.object({
+      adapter: joi.string(),
       adminThumbnail: joi.alternatives().try(joi.string(), componentSchema),
       crop: joi.bool(),
       disableLocalStorage: joi.bool(),

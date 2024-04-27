@@ -640,7 +640,7 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'endpoint' | 'globals' | 'i18n' | 'localization'
+  'collections' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 > & {
   collections: SanitizedCollectionConfig[]
   endpoints: Endpoint[]
@@ -651,6 +651,12 @@ export type SanitizedConfig = Omit<
     config: string
     configDir: string
     rawConfig: string
+  }
+  upload: ExpressFileUploadOptions & {
+    /**
+     * Deduped list of adapters used in the project
+     */
+    adapters: string[]
   }
 }
 

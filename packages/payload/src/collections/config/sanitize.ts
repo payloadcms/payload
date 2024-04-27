@@ -17,7 +17,7 @@ import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { authDefaults, defaults } from './defaults.js'
 
-const sanitizeCollection = (
+export const sanitizeCollection = (
   config: Config,
   collection: CollectionConfig,
 ): SanitizedCollectionConfig => {
@@ -159,5 +159,3 @@ const sanitizeCollection = (
 
   return sanitized as SanitizedCollectionConfig
 }
-
-export default sanitizeCollection
