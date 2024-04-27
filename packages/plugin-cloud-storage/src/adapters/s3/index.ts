@@ -23,6 +23,11 @@ export interface Args {
   config: AWS.S3ClientConfig
 }
 
+/**
+ * @deprecated Use [`@payloadcms/storage-s3`](https://www.npmjs.com/package/@payloadcms/storage-s3) instead.
+ *
+ * This adapter has been superceded by `@payloadcms/storage-s3` and will be removed in Payload 3.0.
+ */
 export const s3Adapter =
   ({ acl, bucket, config = {} }: Args): Adapter =>
   ({ collection, prefix }): GeneratedAdapter => {
