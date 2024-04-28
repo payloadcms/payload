@@ -29,11 +29,11 @@ export async function sendVerificationEmail(args: Args): Promise<void> {
   } = args
 
   if (!disableEmail) {
-    const protocol = new URL(req.url).protocol
+    const protocol = new URL(req.url).protocol // includes the final :
     const serverURL =
       config.serverURL !== null && config.serverURL !== ''
         ? config.serverURL
-        : `${protocol}://${req.headers.get('host')}`
+        : `${protocol}//${req.headers.get('host')}`
 
     const verificationURL = `${serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`
 

@@ -101,11 +101,11 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
     })
 
     if (!disableEmail) {
-      const protocol = new URL(req.url).protocol
+      const protocol = new URL(req.url).protocol // includes the final :
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
-          : `${protocol}://${req.headers.get('host')}`
+          : `${protocol}//${req.headers.get('host')}`
 
       let html = `${req.t('authentication:youAreReceivingResetPassword')}
     <a href="${serverURL}${config.routes.admin}/reset/${token}">
