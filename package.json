@@ -162,7 +162,7 @@
     "ts-node": "10.9.1",
     "tsx": "^4.7.1",
     "turbo": "^1.13.2",
-    "typescript": "5.4.4",
+    "typescript": "5.4.5",
     "uuid": "^9.0.1",
     "yocto-queue": "^1.0.0"
   },

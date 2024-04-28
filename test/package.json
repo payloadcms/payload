@@ -1,8 +1,9 @@
 {
   "name": "payload-test-suite",
   "version": "0.0.1",
-  "description": "Payload test suite",
   "private": true,
+  "description": "Payload test suite",
+  "type": "module",
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--no-deprecation node ./dev.js",
     "test": "pnpm -C \"../\" run test",
@@ -10,12 +11,11 @@
     "test:int": "pnpm -C \"../\" run test:int",
     "typecheck": "pnpm turbo build --filter test && tsc --project tsconfig.typecheck.json"
   },
-  "type": "module",
   "devDependencies": {
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
-    "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/email-nodemailer": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/live-preview": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
@@ -46,6 +46,6 @@
     "payload": "workspace:*",
     "tempy": "^1.0.1",
     "ts-essentials": "7.0.3",
-    "typescript": "5.4.4"
+    "typescript": "5.4.5"
   }
 }
