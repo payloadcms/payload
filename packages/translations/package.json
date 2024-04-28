@@ -38,7 +38,7 @@
     "@swc/core": "^1.3.102",
     "@types/react": "18.2.74",
     "date-fns": "3.3.1",
-    "typescript": "5.4.4"
+    "typescript": "5.4.5"
   },
   "publishConfig": {
     "access": "public",
