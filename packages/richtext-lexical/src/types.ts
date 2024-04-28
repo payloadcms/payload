@@ -13,9 +13,9 @@ export type LexicalEditorProps = {
     | (({
         defaultFeatures,
       }: {
-        defaultFeatures: FeatureProviderServer<unknown, unknown>[]
-      }) => FeatureProviderServer<unknown, unknown>[])
-    | FeatureProviderServer<unknown, unknown>[]
+        defaultFeatures: FeatureProviderServer<any, any>[]
+      }) => FeatureProviderServer<any, any>[])
+    | FeatureProviderServer<any, any>[]
   lexical?: LexicalEditorConfig
 }
 
