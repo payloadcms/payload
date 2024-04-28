@@ -69,6 +69,11 @@ describe('versions', () => {
     serverURL = config.serverURL
     const context = await browser.newContext()
     page = await context.newPage()
+    url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+    autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+    disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
+    customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
+    postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
 
     initPageConsoleErrorCatch(page)
   })
@@ -78,13 +83,6 @@ describe('versions', () => {
   })
 
   describe('draft collections', () => {
-    beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
-      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
-      disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
-      customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
-    })
-
     // This test has to run before bulk updates that will rename the title
     test('should delete', async () => {
       await page.goto(url.list)
@@ -120,6 +118,38 @@ describe('versions', () => {
       )
 
       await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
+    })
+
+    test('bulk publish with autosave documents', async () => {
+      const title = 'autosave title'
+      const description = 'autosave description'
+      await page.goto(autosaveURL.create)
+
+      // fill the fields
+      await page.locator('#field-title').fill(title)
+      await page.locator('#field-description').fill(description)
+
+      // wait for autosave
+      await wait(2000)
+
+      // go to list
+      await page.goto(autosaveURL.list)
+
+      // expect the status to be draft
+      await expect(await findTableCell(page, '_status', title)).toContainText('Draft')
+
+      // select the row
+      // await page.locator('.row-1 .select-row__checkbox').click()
+      await selectTableRow(page, title)
+
+      // click the publish many
+      await page.locator('.publish-many__toggle').click()
+
+      // confirm the dialog
+      await page.locator('#confirm-publish').click()
+
+      // expect the status to be published
+      await expect(await findTableCell(page, '_status', title)).toContainText('Published')
     })
 
     test('bulk update - should unpublish many', async () => {
@@ -442,15 +472,6 @@ describe('versions', () => {
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
 
       await expect(page.locator('#action-save')).not.toBeAttached()
-    })
-  })
-  describe('posts collection', () => {
-    beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
-      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
-      disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
-      customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
-      postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
     })
 
     test('should show documents title in relationship even if draft document', async () => {
