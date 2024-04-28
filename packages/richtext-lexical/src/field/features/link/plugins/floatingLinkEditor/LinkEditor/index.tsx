@@ -73,13 +73,17 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       selectedNodeDomRect = editor.getElementByKey(focusNode.getKey())?.getBoundingClientRect()
       const focusLinkParent: LinkNode = $findMatchingParent(focusNode, $isLinkNode)
 
-      const badNode = selection.getNodes().find((node) => {
-        // Prevent link modal from showing if selection spans further than the link: https://github.com/facebook/lexical/issues/4064
-        const linkNode = $findMatchingParent(node, $isLinkNode)
-        if (!linkNode?.is(focusLinkParent) && !linkNode && !$isLineBreakNode(node)) {
-          return node
-        }
-      })
+      // Prevent link modal from showing if selection spans further than the link: https://github.com/facebook/lexical/issues/4064
+      const badNode = selection
+        .getNodes()
+        .filter((node) => !$isLineBreakNode(node))
+        .find((node) => {
+          const linkNode = $findMatchingParent(node, $isLinkNode)
+          return (
+            (focusLinkParent && !focusLinkParent.is(linkNode)) ||
+            (linkNode && !linkNode.is(focusLinkParent))
+          )
+        })
 
       if (focusLinkParent == null || badNode) {
         setIsLink(false)
