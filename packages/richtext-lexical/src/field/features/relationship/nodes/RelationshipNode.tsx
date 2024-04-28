@@ -1,3 +1,4 @@
+import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -10,11 +11,7 @@ import type {
   Spread,
 } from 'lexical'
 
-import lexicalDecoratorBlockNodeImport from '@lexical/react/LexicalDecoratorBlockNode.js'
-const { DecoratorBlockNode } = lexicalDecoratorBlockNodeImport
-
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-
+import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import * as React from 'react'
 
 const RelationshipComponent = React.lazy(() =>

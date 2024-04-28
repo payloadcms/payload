@@ -1,6 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
-import type { SerializedEditorState } from 'lexical'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
 import { withNullableJSONSchemaType } from 'payload/utilities'
@@ -19,7 +18,6 @@ import {
 import { loadFeatures } from './field/lexical/config/server/loader.js'
 import { sanitizeServerFeatures } from './field/lexical/config/server/sanitize.js'
 import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
-import { recurseNodes, recurseNodesAsync } from './forEachNodeRecursively.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'

@@ -1,30 +1,24 @@
 'use client'
+import type { LexicalNode } from 'lexical'
 import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-
-import lexicalUtilsImport from '@lexical/utils'
-const { $findMatchingParent, mergeRegister } = lexicalUtilsImport
-import type { LexicalNode } from 'lexical'
-
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import lexicalImport from 'lexical'
-const {
+import { formatDrawerSlug } from '@payloadcms/ui/elements/Drawer'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
-} = lexicalImport
-
-import { formatDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+} from 'lexical'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../nodes/LinkNode.js'

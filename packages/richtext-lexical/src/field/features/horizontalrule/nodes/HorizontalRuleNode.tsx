@@ -7,8 +7,7 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 
-import lexicalImport from 'lexical'
-const { $applyNodeReplacement, DecoratorNode, createCommand } = lexicalImport
+import { $applyNodeReplacement, DecoratorNode, createCommand } from 'lexical'
 import * as React from 'react'
 
 const HorizontalRuleComponent = React.lazy(() =>

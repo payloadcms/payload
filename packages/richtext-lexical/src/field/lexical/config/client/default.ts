@@ -1,5 +1,5 @@
 'use client'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import { LexicalEditorTheme } from '../../theme/EditorTheme.js'
 

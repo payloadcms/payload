@@ -1,16 +1,11 @@
-import type { FormState } from 'payload/types'
-import type { Data } from 'payload/types'
-
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-import { getTranslation } from '@payloadcms/translations'
-import isDeepEqual from 'deep-equal'
-import lexicalImport from 'lexical'
-const { $getNodeByKey } = lexicalImport
 import type { FormFieldBase } from '@payloadcms/ui/fields/shared'
 import type { FieldMap, ReducedBlock } from '@payloadcms/ui/utilities/buildComponentMap'
+import type { FormState } from 'payload/types'
+import type { Data } from 'payload/types'
 import type { CollapsedPreferences } from 'payload/types'
 
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { getTranslation } from '@payloadcms/translations'
 import { Button } from '@payloadcms/ui/elements/Button'
 import { Collapsible } from '@payloadcms/ui/elements/Collapsible'
 import { ErrorPill } from '@payloadcms/ui/elements/ErrorPill'
@@ -20,6 +15,8 @@ import { useFormSubmitted } from '@payloadcms/ui/forms/Form'
 import { RenderFields } from '@payloadcms/ui/forms/RenderFields'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import isDeepEqual from 'deep-equal'
+import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
 import type { SanitizedClientEditorConfig } from '../../../lexical/config/types.js'

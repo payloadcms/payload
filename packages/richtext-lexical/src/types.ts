@@ -1,5 +1,4 @@
-import type { SerializedEditorState } from 'lexical'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor.js'
+import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
 import type { FieldPermissions } from 'payload/auth'
 import type { FieldTypes } from 'payload/config'
 import type { RichTextAdapter, RichTextFieldProps } from 'payload/types'
