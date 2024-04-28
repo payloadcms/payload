@@ -37,7 +37,7 @@
     "loginWithAnotherUser": "Abyste se mohli přihlásit s jiným uživatelem, nejdříve se <0>odhlaste</0>.",
     "logout": "Odhlásit se",
     "logoutUser": "Odhlásit uživatele",
-    "newAPIKeyGenerated": "Byl vygenerován nový klíč API.",
+    "newAPIKeyGenerated": "Byl vygenerován nový API klíč.",
     "newAccountCreated": "Pro přístup k <a href=\"{{serverURL}}\">{{serverURL}}</a> byl pro vás vytvořen nový účet. Klepněte na následující odkaz nebo zkopírujte URL do svého prohlížeče pro ověření vašeho emailu: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Po ověření vašeho emailu se budete moci úspěšně přihlásit.",
     "newPassword": "Nové heslo",
     "resetPassword": "Resetovat heslo",
