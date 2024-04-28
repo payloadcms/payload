@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { CustomComponent } from 'packages/payload/src/config/types.js'
+import type { CustomComponent } from 'payload/config'
 import type {
   CellComponentProps,
   DescriptionComponent,
