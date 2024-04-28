@@ -1270,6 +1270,9 @@ importers:
       '@lexical/utils':
         specifier: 0.14.5
         version: 0.14.5
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
@@ -1297,6 +1300,9 @@ importers:
       react-error-boundary:
         specifier: 4.0.13
         version: 4.0.13(react@18.2.0)
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -6242,7 +6248,6 @@ packages:
 
   /@types/uuid@9.0.8:
     resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
-    dev: true
 
   /@types/webidl-conversions@7.0.3:
     resolution: {integrity: sha512-CiJJvcRtIgzadHCYXw7dqEnMNRjhGZlYK05Mj9OyktqV8uVT8fD2BFOB7S1uwBE3Kj2Z+4UyPmFw/Ixgw/LAlA==}

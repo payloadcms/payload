@@ -50,13 +50,15 @@
     "@lexical/rich-text": "0.14.5",
     "@lexical/selection": "0.14.5",
     "@lexical/utils": "0.14.5",
+    "@types/uuid": "^9.0.8",
     "bson-objectid": "2.0.4",
     "classnames": "^2.3.2",
     "deep-equal": "2.2.3",
     "json-schema": "^0.4.0",
     "lexical": "0.14.5",
     "lodash": "4.17.21",
-    "react-error-boundary": "4.0.13"
+    "react-error-boundary": "4.0.13",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
