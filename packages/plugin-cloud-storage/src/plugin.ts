@@ -76,6 +76,7 @@ export const cloudStorage =
             },
             upload: {
               ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
+              adapter: adapter.name,
               disableLocalStorage:
                 typeof options.disableLocalStorage === 'boolean'
                   ? options.disableLocalStorage

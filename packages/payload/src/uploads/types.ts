@@ -71,6 +71,10 @@ export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => fals
 
 export type UploadConfig = {
   /**
+   * The adapter to use for uploads.
+   */
+  adapter?: string
+  /**
    * Represents an admin thumbnail, which can be either a React component or a string.
    * - If a string, it should be one of the image size names.
    * - If a React component, register a function that generates the thumbnail URL using the `useAdminThumbnail` hook.

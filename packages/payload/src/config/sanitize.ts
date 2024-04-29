@@ -9,7 +9,7 @@ import type {
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
-import sanitizeCollection from '../collections/config/sanitize.js'
+import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { InvalidConfiguration } from '../errors/index.js'
 import sanitizeGlobals from '../globals/config/sanitize.js'
@@ -109,6 +109,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL)
   }
+
+  // Get deduped list of upload adapters
+  if (!config.upload) config.upload = { adapters: [] }
+  config.upload.adapters = Array.from(
+    new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
+  )
 
   return config as SanitizedConfig
 }

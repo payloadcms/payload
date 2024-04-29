@@ -54,6 +54,7 @@ export const s3Adapter =
     }
 
     return {
+      name: 's3',
       generateURL: getGenerateURL({ bucket, config }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({
