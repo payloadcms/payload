@@ -4,6 +4,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
@@ -25,10 +26,22 @@ export const init: Init = function init(this: PostgresAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const tableName = createTableName({
+    createTableName({
       adapter: this,
       config: collection,
     })
+
+    if (collection.versions) {
+      createTableName({
+        adapter: this,
+        config: collection,
+        versions: true,
+        versionsCustomName: true,
+      })
+    }
+  })
+  this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
     buildTable({
       adapter: this,
@@ -41,12 +54,7 @@ export const init: Init = function init(this: PostgresAdapter) {
     })
 
     if (collection.versions) {
-      const versionsTableName = createTableName({
-        adapter: this,
-        config: collection,
-        versions: true,
-        versionsCustomName: true,
-      })
+      const versionsTableName = this.tableNameMap.get(`_${tableName}${this.versionsSuffix}`)
       const versionFields = buildVersionCollectionFields(collection)
 
       buildTable({
