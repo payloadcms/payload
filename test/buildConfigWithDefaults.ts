@@ -204,5 +204,5 @@ export async function buildConfigWithDefaults(
     config.admin.disable = true
   }
 
-  return buildConfig(config)
+  return await buildConfig(config)
 }

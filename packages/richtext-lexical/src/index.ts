@@ -2,7 +2,7 @@ import type { JSONSchema4 } from 'json-schema'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
-import { getLocalI18n } from 'payload/dist/translations/getLocalI18n.js'
+import { getLocalI18n } from 'payload/i18n'
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'
@@ -44,6 +44,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       const lexical: LexicalEditorConfig = props.lexical
 
       const i18n = await getLocalI18n({ config })
+
+      console.log('Config1:', config)
 
       resolvedFeatureMap = await loadFeatures({
         config,

@@ -41,9 +41,7 @@ export const sanitizeFields = async ({
 }: Args): Promise<Field[]> => {
   if (!fields) return []
 
-  for (let unsanitizedField of fields) {
-    const field: Field = { ...unsanitizedField }
-
+  for (const field of fields) {
     if (!field.type) throw new MissingFieldType(field)
 
     // assert that field names do not contain forbidden characters
@@ -220,7 +218,7 @@ export const sanitizeFields = async ({
         })
       }
     }
-
-    unsanitizedField = field
   }
+
+  return fields
 }

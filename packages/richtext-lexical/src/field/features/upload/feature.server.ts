@@ -53,6 +53,7 @@ export const UploadFeature: FeatureProviderProviderServer<
 
   return {
     feature: async ({ config: _config }) => {
+      console.log('Config2:', _config)
       const validRelationships = _config.collections.map((c) => c.slug) || []
 
       for (const collection in props.collections) {
