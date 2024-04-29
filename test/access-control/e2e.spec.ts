@@ -26,6 +26,7 @@ import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   docLevelAccessSlug,
   noAdminAccessEmail,
+  readOnlyGlobalSlug,
   readOnlySlug,
   restrictedSlug,
   restrictedVersionsSlug,
@@ -50,7 +51,8 @@ describe('access control', () => {
   let page: Page
   let url: AdminUrlUtil
   let restrictedUrl: AdminUrlUtil
-  let readOnlyUrl: AdminUrlUtil
+  let readOnlyCollectionUrl: AdminUrlUtil
+  let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
   let serverURL: string
 
@@ -59,7 +61,8 @@ describe('access control', () => {
 
     url = new AdminUrlUtil(serverURL, slug)
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug)
-    readOnlyUrl = new AdminUrlUtil(serverURL, readOnlySlug)
+    readOnlyCollectionUrl = new AdminUrlUtil(serverURL, readOnlySlug)
+    readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
 
     const context = await browser.newContext()
@@ -175,12 +178,12 @@ describe('access control', () => {
     })
 
     test('should have collection url', async () => {
-      await page.goto(readOnlyUrl.list)
-      await expect(page).toHaveURL(new RegExp(`${readOnlyUrl.list}.*`)) // will redirect to ?limit=10 at the end, so we have to use a wildcard at the end
+      await page.goto(readOnlyCollectionUrl.list)
+      await expect(page).toHaveURL(new RegExp(`${readOnlyCollectionUrl.list}.*`)) // will redirect to ?limit=10 at the end, so we have to use a wildcard at the end
     })
 
     test('should not have "Create New" button', async () => {
-      await page.goto(readOnlyUrl.create)
+      await page.goto(readOnlyCollectionUrl.create)
       await expect(page.locator('.collection-list__header a')).toHaveCount(0)
     })
 
@@ -190,17 +193,20 @@ describe('access control', () => {
     })
 
     test('edit view should not have actions buttons', async () => {
-      await page.goto(readOnlyUrl.edit(existingDoc.id))
+      await page.goto(readOnlyCollectionUrl.edit(existingDoc.id))
       await expect(page.locator('.collection-edit__collection-actions li')).toHaveCount(0)
     })
 
     test('fields should be read-only', async () => {
-      await page.goto(readOnlyUrl.edit(existingDoc.id))
+      await page.goto(readOnlyCollectionUrl.edit(existingDoc.id))
+      await expect(page.locator('#field-name')).toBeDisabled()
+
+      await page.goto(readOnlyGlobalUrl.global(readOnlyGlobalSlug))
       await expect(page.locator('#field-name')).toBeDisabled()
     })
 
     test('should not render dot menu popup when `create` and `delete` access control is set to false', async () => {
-      await page.goto(readOnlyUrl.edit(existingDoc.id))
+      await page.goto(readOnlyCollectionUrl.edit(existingDoc.id))
       await expect(page.locator('.collection-edit .doc-controls .doc-controls__popup')).toBeHidden()
     })
   })

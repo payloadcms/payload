@@ -10,6 +10,7 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   noAdminAccessEmail,
+  readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
   restrictedSlug,
@@ -71,6 +72,19 @@ export default buildConfigWithDefaults({
           const access = await payload.findGlobal({ slug: 'settings' })
           return Boolean(access.test)
         },
+      },
+    },
+    {
+      slug: readOnlyGlobalSlug,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      access: {
+        read: () => true,
+        update: () => false,
       },
     },
   ],

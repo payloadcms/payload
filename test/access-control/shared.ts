@@ -4,6 +4,7 @@ export const secondArrayText = 'second-array-text'
 export const slug = 'posts'
 export const unrestrictedSlug = 'unrestricted'
 export const readOnlySlug = 'read-only-collection'
+export const readOnlyGlobalSlug = 'read-only-global'
 
 export const userRestrictedSlug = 'user-restricted'
 export const restrictedSlug = 'restricted'
