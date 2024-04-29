@@ -9,6 +9,7 @@ import type { FieldSchemaMap } from '../../utilities/buildFieldSchemaMap/types.j
 
 import { buildFieldSchemaMap } from '../../utilities/buildFieldSchemaMap/index.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { routeError } from './routeError.js'
 
 let cached = global._payload_fieldSchemaMap
 
@@ -226,14 +227,10 @@ export const buildFormState = async ({ req }: { req: PayloadRequestWithData }) =
       status: httpStatus.OK,
     })
   } catch (err) {
-    return Response.json(
-      {
-        message: 'There was an error building form state',
-      },
-      {
-        headers,
-        status: httpStatus.BAD_REQUEST,
-      },
-    )
+    return routeError({
+      config: req.payload.config,
+      err,
+      req,
+    })
   }
 }
