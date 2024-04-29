@@ -363,11 +363,19 @@ describe('access control', () => {
     })
 
     await expect(page.locator('.next-error-h1')).toBeVisible()
+
+    // Log back in for the next test
+    await login({
+      page,
+      serverURL,
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
   })
 
   test('should block admin access to non-admin user', async () => {
-    // TODO: Need to authenticate the user outside of the login form and use _that_ token in the Playwright browser
-    // This is bc the logic form is specific to the `users` collection, and this test is for non-admin users
     const adminURL = `${serverURL}/admin`
     await page.goto(adminURL)
     await page.waitForURL(adminURL)
