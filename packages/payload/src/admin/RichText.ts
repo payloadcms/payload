@@ -93,4 +93,6 @@ export type RichTextAdapterProvider<
   config,
 }: {
   config: Config
-}) => Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
+}) =>
+  | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
+  | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload/config'
+import type { Config, SanitizedConfig } from 'payload/config'
 import type { Field, FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
@@ -46,9 +46,8 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
    */
   fields?:
     | ((args: {
-        config: SanitizedConfig
+        config: Config
         defaultFields: FieldWithRichTextRequiredEditor[]
-        i18n: I18n
       }) => FieldWithRichTextRequiredEditor[])
     | FieldWithRichTextRequiredEditor[]
 }
@@ -60,13 +59,12 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
     props = {}
   }
   return {
-    feature: async ({ config: _config, i18n: _i18n }) => {
+    feature: async ({ config: _config }) => {
       const validRelationships = _config.collections.map((c) => c.slug) || []
 
       const _transformedFields = transformExtraFields(
         deepCopyObject(props.fields),
         _config,
-        _i18n,
         props.enabledCollections,
         props.disabledCollections,
       )
@@ -85,7 +83,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
           disabledCollections: props.disabledCollections,
           enabledCollections: props.enabledCollections,
         } as ExclusiveLinkCollectionsProps,
-        generateSchemaMap: ({ config, i18n, props }) => {
+        generateSchemaMap: ({ config, i18n }) => {
           if (!sanitizedFields || !Array.isArray(sanitizedFields) || sanitizedFields.length === 0) {
             return null
           }

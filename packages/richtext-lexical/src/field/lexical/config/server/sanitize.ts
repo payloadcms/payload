@@ -1,3 +1,5 @@
+import type { Config } from 'payload/config'
+
 import type { ResolvedServerFeatureMap, SanitizedServerFeatures } from '../../../features/types.js'
 import type { SanitizedServerEditorConfig, ServerEditorConfig } from '../types.js'
 
@@ -81,10 +83,12 @@ export const sanitizeServerFeatures = (
   return sanitized
 }
 
-export function sanitizeServerEditorConfig(
+export async function sanitizeServerEditorConfig(
   editorConfig: ServerEditorConfig,
-): SanitizedServerEditorConfig {
-  const resolvedFeatureMap = loadFeatures({
+  config: Config,
+): Promise<SanitizedServerEditorConfig> {
+  const resolvedFeatureMap = await loadFeatures({
+    config,
     unSanitizedEditorConfig: editorConfig,
   })
 

@@ -11,7 +11,8 @@ import baseVersionFields from '../../versions/baseFields.js'
 export const sanitizeGlobals = async (config: Config): Promise<SanitizedGlobalConfig[]> => {
   const { collections, globals } = config
 
-  for (const global of globals) {
+  for (let i = 0; i < globals.length; i++) {
+    const global = globals[i]
     global.label = global.label || toWords(global.slug)
 
     // /////////////////////////////////
@@ -95,6 +96,8 @@ export const sanitizeGlobals = async (config: Config): Promise<SanitizedGlobalCo
       fields: global.fields,
       validRelationships,
     })
+
+    globals[i] = global
   }
 
   return globals as SanitizedGlobalConfig[]

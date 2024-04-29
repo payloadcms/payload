@@ -41,7 +41,9 @@ export const sanitizeFields = async ({
 }: Args): Promise<Field[]> => {
   if (!fields) return []
 
-  for (const field of fields) {
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i]
+
     if (!field.type) throw new MissingFieldType(field)
 
     // assert that field names do not contain forbidden characters
@@ -190,7 +192,8 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'tabs') {
-      for (const tab of field.tabs) {
+      for (let j = 0; j < field.tabs.length; j++) {
+        const tab = field.tabs[j]
         if (tabHasName(tab) && typeof tab.label === 'undefined') {
           tab.label = toWords(tab.name)
         }
@@ -202,11 +205,13 @@ export const sanitizeFields = async ({
           requireFieldLevelRichTextEditor,
           validRelationships,
         })
+        field.tabs[j] = tab
       }
     }
 
     if ('blocks' in field && field.blocks) {
-      for (const block of field.blocks) {
+      for (let j = 0; j < field.blocks.length; j++) {
+        const block = field.blocks[j]
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
 
         block.fields = await sanitizeFields({
@@ -216,8 +221,11 @@ export const sanitizeFields = async ({
           requireFieldLevelRichTextEditor,
           validRelationships,
         })
+        field.blocks[j] = block
       }
     }
+
+    fields[i] = field
   }
 
   return fields

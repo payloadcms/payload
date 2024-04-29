@@ -1,4 +1,3 @@
-import type { I18n } from '@payloadcms/translations/dist/types.js'
 import type { Config } from 'payload/config'
 
 import type {
@@ -108,11 +107,9 @@ export function sortFeaturesForOptimalLoading(
 
 export async function loadFeatures({
   config,
-  i18n,
   unSanitizedEditorConfig,
 }: {
   config: Config
-  i18n: I18n
   unSanitizedEditorConfig: ServerEditorConfig
 }): Promise<ResolvedServerFeatureMap> {
   // First remove all duplicate features. The LAST feature with a given key wins.
@@ -177,7 +174,6 @@ export async function loadFeatures({
     const feature = await featureProvider.feature({
       config,
       featureProviderMap,
-      i18n,
       resolvedFeatures,
       unSanitizedEditorConfig,
     })

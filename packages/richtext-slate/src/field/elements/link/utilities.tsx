@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload/config'
+import type { Config, SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 import type { Editor } from 'slate'
 
@@ -34,17 +34,14 @@ export const wrapLink = (editor: Editor): void => {
  * This function is run to enrich the basefields which every link has with potential, custom user-added fields.
  */
 export function transformExtraFields(
-  customFieldSchema:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
-    | Field[],
-  config: SanitizedConfig,
-  i18n: I18n,
+  customFieldSchema: ((args: { config: Config; defaultFields: Field[] }) => Field[]) | Field[],
+  config: Config,
 ): Field[] {
   const baseFields: Field[] = getBaseFields(config)
 
   const fields =
     typeof customFieldSchema === 'function'
-      ? customFieldSchema({ config, defaultFields: baseFields, i18n })
+      ? customFieldSchema({ config, defaultFields: baseFields })
       : baseFields
 
   // Wrap fields which are not part of the base schema in a group named 'fields' - otherwise they will be rendered but not saved

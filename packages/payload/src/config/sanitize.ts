@@ -42,6 +42,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
+  console.log('Running sanitizeConfig...')
   const configWithDefaults: Config = merge(defaults, incomingConfig, {
     isMergeableObject: isPlainObject,
   }) as Config
@@ -98,11 +99,14 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config: config as unknown as Config,
   })
 
-  configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults))
+  configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
 
-  for (let collection of configWithDefaults.collections) {
-    collection = await sanitizeCollection(configWithDefaults, collection)
+  for (let i = 0; i < config.collections.length; i++) {
+    config.collections[i] = await sanitizeCollection(
+      config as unknown as Config,
+      config.collections[i],
+    )
   }
 
   checkDuplicateCollections(config.collections)

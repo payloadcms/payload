@@ -2,7 +2,6 @@ import type { JSONSchema4 } from 'json-schema'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
 import { withMergedProps } from '@payloadcms/ui/elements/withMergedProps'
-import { getLocalI18n } from 'payload/i18n'
 import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './field/features/types.js'
@@ -14,15 +13,19 @@ import { RichTextField } from './field/index.js'
 import {
   defaultEditorConfig,
   defaultEditorFeatures,
-  defaultSanitizedServerEditorConfig,
 } from './field/lexical/config/server/default.js'
 import { loadFeatures } from './field/lexical/config/server/loader.js'
-import { sanitizeServerFeatures } from './field/lexical/config/server/sanitize.js'
+import {
+  sanitizeServerEditorConfig,
+  sanitizeServerFeatures,
+} from './field/lexical/config/server/sanitize.js'
 import { cloneDeep } from './field/lexical/utils/cloneDeep.js'
 import { getGenerateComponentMap } from './generateComponentMap.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 import { populateLexicalPopulationPromises } from './populate/populateLexicalPopulationPromises.js'
 import { richTextValidateHOC } from './validate/index.js'
+
+let defaultSanitizedServerEditorConfig: SanitizedServerEditorConfig = null
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   return async ({ config }) => {
@@ -30,7 +33,15 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
     if (!props || (!props.features && !props.lexical)) {
+      if (!defaultSanitizedServerEditorConfig) {
+        defaultSanitizedServerEditorConfig = await sanitizeServerEditorConfig(
+          defaultEditorConfig,
+          config,
+        )
+      }
+
       finalSanitizedEditorConfig = cloneDeep(defaultSanitizedServerEditorConfig)
+
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
       let features: FeatureProviderServer<unknown, unknown>[] =
@@ -43,13 +54,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       const lexical: LexicalEditorConfig = props.lexical
 
-      const i18n = await getLocalI18n({ config })
-
-      console.log('Config1:', config)
-
       resolvedFeatureMap = await loadFeatures({
         config,
-        i18n,
         unSanitizedEditorConfig: {
           features,
           lexical: lexical ? lexical : defaultEditorConfig.lexical,
@@ -444,7 +450,6 @@ export {
   defaultEditorConfig,
   defaultEditorFeatures,
   defaultEditorLexicalConfig,
-  defaultSanitizedServerEditorConfig,
 } from './field/lexical/config/server/default.js'
 export {
   loadFeatures,
