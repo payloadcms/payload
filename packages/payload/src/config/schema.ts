@@ -101,7 +101,7 @@ export default joi.object({
       validate: joi.func().required(),
     })
     .unknown(),
-  email: joi.object(),
+  email: joi.alternatives().try(joi.object(), joi.func()),
   endpoints: endpointsSchema,
   globals: joi.array(),
   graphQL: joi.object().keys({
