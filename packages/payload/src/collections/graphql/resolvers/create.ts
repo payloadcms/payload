@@ -33,6 +33,7 @@ export default function createResolver<TSlug extends keyof GeneratedTypes['colle
     const locale = req.locale
     req = isolateObjectProperty(req, 'locale')
     req.locale = args.locale || locale
+    context.req = req
 
     const options = {
       collection,

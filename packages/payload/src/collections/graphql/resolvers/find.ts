@@ -35,6 +35,7 @@ export default function findResolver(collection: Collection): Resolver {
     req = isolateObjectProperty(req, 'fallbackLocale')
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    context.req = req
 
     const options = {
       collection,
