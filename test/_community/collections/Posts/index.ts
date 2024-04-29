@@ -31,35 +31,6 @@ export const PostsCollection: CollectionConfig = {
     //   },
     //   relationTo: mediaSlug,
     // },
-
-    {
-      name: 'optionsAvailable',
-      type: 'select',
-      hasMany: true,
-      options: ['size', 'color'],
-    },
-    {
-      type: 'array',
-      name: 'variants',
-      admin: {
-        condition: (data) => {
-          return data?.optionsAvailable?.length > 0
-        },
-      },
-      fields: [
-        {
-          name: 'color',
-          type: 'select',
-          admin: {
-            condition: (data) => {
-              // broken condition
-              return data?.optionsAvailable.includes('color')
-            },
-          },
-          options: [{ value: 'piece', label: 'Piece' }],
-        },
-      ],
-    },
   ],
   versions: {
     drafts: true,
