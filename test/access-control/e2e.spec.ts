@@ -200,7 +200,7 @@ describe('access control', () => {
       await page.goto(readOnlyCollectionUrl.edit(existingDoc.id))
       await expect(page.locator('#field-name')).toBeDisabled()
 
-      await page.goto(readOnlyGlobalUrl.global(readOnlySlug))
+      await page.goto(readOnlyGlobalUrl.global(readOnlyGlobalSlug))
       await expect(page.locator('#field-name')).toBeDisabled()
     })
 
