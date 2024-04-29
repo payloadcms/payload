@@ -17,10 +17,10 @@ import { isPlainObject } from '../../utilities/isPlainObject.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { authDefaults, defaults } from './defaults.js'
 
-export const sanitizeCollection = (
+export const sanitizeCollection = async (
   config: Config,
   collection: CollectionConfig,
-): SanitizedCollectionConfig => {
+): Promise<SanitizedCollectionConfig> => {
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
@@ -151,7 +151,7 @@ export const sanitizeCollection = (
   // /////////////////////////////////
 
   const validRelationships = config.collections.map((c) => c.slug) || []
-  sanitized.fields = sanitizeFields({
+  sanitized.fields = await sanitizeFields({
     config,
     fields: sanitized.fields,
     validRelationships,

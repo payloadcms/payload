@@ -32,16 +32,16 @@ type Args = {
   validRelationships: null | string[]
 }
 
-export const sanitizeFields = ({
+export const sanitizeFields = async ({
   config,
   existingFieldNames = new Set(),
   fields,
   requireFieldLevelRichTextEditor = false,
   validRelationships,
-}: Args): Field[] => {
+}: Args): Promise<Field[]> => {
   if (!fields) return []
 
-  return fields.map((unsanitizedField) => {
+  for (let unsanitizedField of fields) {
     const field: Field = { ...unsanitizedField }
 
     if (!field.type) throw new MissingFieldType(field)
@@ -145,10 +145,15 @@ export const sanitizeFields = ({
     if (field.type === 'richText') {
       if (!field.editor) {
         if (config.editor && !requireFieldLevelRichTextEditor) {
+          // config.editor should be sanitized at this point
           field.editor = config.editor
         } else {
           throw new MissingEditorProp(field)
         }
+      }
+
+      if (typeof field.editor === 'function') {
+        field.editor = await field.editor({ config })
       }
 
       // Add editor adapter hooks to field hooks
@@ -176,9 +181,8 @@ export const sanitizeFields = ({
       }
     }
 
-    // TODO: Handle sanitization for any lexical sub-fields here as well
     if ('fields' in field && field.fields) {
-      field.fields = sanitizeFields({
+      field.fields = await sanitizeFields({
         config,
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
@@ -188,43 +192,35 @@ export const sanitizeFields = ({
     }
 
     if (field.type === 'tabs') {
-      field.tabs = field.tabs.map((tab) => {
-        const unsanitizedTab = { ...tab }
+      for (const tab of field.tabs) {
         if (tabHasName(tab) && typeof tab.label === 'undefined') {
-          unsanitizedTab.label = toWords(tab.name)
+          tab.label = toWords(tab.name)
         }
 
-        unsanitizedTab.fields = sanitizeFields({
+        tab.fields = await sanitizeFields({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
           requireFieldLevelRichTextEditor,
           validRelationships,
         })
-
-        return unsanitizedTab
-      })
+      }
     }
 
     if ('blocks' in field && field.blocks) {
-      field.blocks = field.blocks.map((block) => {
-        const unsanitizedBlock = { ...block }
-        unsanitizedBlock.labels = !unsanitizedBlock.labels
-          ? formatLabels(unsanitizedBlock.slug)
-          : unsanitizedBlock.labels
+      for (const block of field.blocks) {
+        block.labels = !block.labels ? formatLabels(block.slug) : block.labels
 
-        unsanitizedBlock.fields = sanitizeFields({
+        block.fields = await sanitizeFields({
           config,
           existingFieldNames: new Set(),
           fields: block.fields,
           requireFieldLevelRichTextEditor,
           validRelationships,
         })
-
-        return unsanitizedBlock
-      })
+      }
     }
 
-    return field
-  })
+    unsanitizedField = field
+  }
 }

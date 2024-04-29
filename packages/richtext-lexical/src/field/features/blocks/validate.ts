@@ -1,7 +1,4 @@
-import type { Block } from 'payload/types'
-
 import { buildStateFromSchema } from '@payloadcms/ui/forms/buildStateFromSchema'
-import { sanitizeFields } from 'payload/config'
 
 import type { NodeValidation } from '../types.js'
 import type { BlocksFeatureProps } from './feature.server.js'
@@ -12,30 +9,10 @@ export const blockValidationHOC = (
 ): NodeValidation<SerializedBlockNode> => {
   return async ({ node, validation }) => {
     const blockFieldData = node.fields
-    const blocks: Block[] = props.blocks
 
     const {
-      options: {
-        id,
-        operation,
-        preferences,
-        req,
-        req: {
-          payload: { config },
-        },
-      },
+      options: { id, operation, preferences, req },
     } = validation
-
-    // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
-    const validRelationships = config.collections.map((c) => c.slug) || []
-    blocks.forEach((block) => {
-      block.fields = sanitizeFields({
-        config,
-        fields: block.fields,
-        requireFieldLevelRichTextEditor: true,
-        validRelationships,
-      })
-    })
 
     // find block
     const block = props.blocks.find((block) => block.slug === blockFieldData.blockType)

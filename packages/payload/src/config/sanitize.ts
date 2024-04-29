@@ -12,7 +12,7 @@ import { defaultUserCollection } from '../auth/defaultUser.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { InvalidConfiguration } from '../errors/index.js'
-import sanitizeGlobals from '../globals/config/sanitize.js'
+import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { isPlainObject } from '../utilities/isPlainObject.js'
@@ -38,10 +38,10 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     )
   }
 
-  return sanitizedConfig as Partial<SanitizedConfig>
+  return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }
 
-export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
+export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
   const configWithDefaults: Config = merge(defaults, incomingConfig, {
     isMergeableObject: isPlainObject,
   }) as Config
@@ -94,16 +94,21 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     ...(incomingConfig?.i18n ?? {}),
   }
 
+  config.editor = await incomingConfig.editor({
+    config: config as unknown as Config,
+  })
+
   configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults))
   configWithDefaults.collections.push(migrationsCollection)
 
-  config.collections = config.collections.map((collection) =>
-    sanitizeCollection(configWithDefaults, collection),
-  )
+  for (let collection of configWithDefaults.collections) {
+    collection = await sanitizeCollection(configWithDefaults, collection)
+  }
+
   checkDuplicateCollections(config.collections)
 
   if (config.globals.length > 0) {
-    config.globals = sanitizeGlobals(config as SanitizedConfig)
+    config.globals = await sanitizeGlobals(config as unknown as Config)
   }
 
   if (config.serverURL !== '') {

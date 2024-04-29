@@ -5,7 +5,7 @@ import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'l
 import type { SerializedLexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
 import type { RequestContext } from 'payload'
-import type { SanitizedConfig } from 'payload/config'
+import type { Config, SanitizedConfig } from 'payload/config'
 import type {
   Field,
   PayloadRequestWithData,
@@ -84,14 +84,21 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
   /** Keys of soft-dependencies needed for this feature. The FeatureProviders dependencies are optional, but are considered as last-priority in the loading process */
   dependenciesSoft?: string[]
 
+  /**
+   * This is being called during the payload sanitization process
+   */
   feature: (props: {
+    config: Config
     /** unSanitizedEditorConfig.features, but mapped */
     featureProviderMap: ServerFeatureProviderMap
+    i18n: I18n
     // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
     resolvedFeatures: ResolvedServerFeatureMap
     // unSanitized EditorConfig,
     unSanitizedEditorConfig: ServerEditorConfig
-  }) => ServerFeature<ServerFeatureProps, ClientFeatureProps>
+  }) =>
+    | Promise<ServerFeature<ServerFeatureProps, ClientFeatureProps>>
+    | ServerFeature<ServerFeatureProps, ClientFeatureProps>
   key: string
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
   serverFeatureProps: ServerFeatureProps

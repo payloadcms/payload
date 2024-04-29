@@ -1,12 +1,8 @@
-import { sanitizeFields } from 'payload/config'
-import { deepCopyObject } from 'payload/utilities'
-
 import type { PopulationPromise } from '../types.js'
 import type { LinkFeatureServerProps } from './feature.server.js'
 import type { SerializedLinkNode } from './nodes/types.js'
 
 import { recurseNestedFields } from '../../../populate/recurseNestedFields.js'
-import { transformExtraFields } from './plugins/floatingLinkEditor/utilities.js'
 
 export const linkPopulationPromiseHOC = (
   props: LinkFeatureServerProps,
@@ -25,34 +21,14 @@ export const linkPopulationPromiseHOC = (
     req,
     showHiddenFields,
   }) => {
-    // Sanitize link's fields here. This is done here and not in the feature, because the payload config is available here
-    const payloadConfig = req.payload.config
-    const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
-
-    const transformedFields = transformExtraFields(
-      deepCopyObject(props.fields),
-      payloadConfig,
-      req.i18n,
-      props.enabledCollections,
-      props.disabledCollections,
-    )
-
-    // TODO: Sanitize & transform ahead of time! On startup!
-    const sanitizedFields = sanitizeFields({
-      config: payloadConfig,
-      fields: transformedFields,
-      requireFieldLevelRichTextEditor: true,
-      validRelationships,
-    })
-
-    if (!sanitizedFields?.length) {
+    if (!props.fields?.length) {
       return
     }
 
     /**
      * Should populate all fields, including the doc field (for internal links), as it's treated like a normal field
      */
-    if (Array.isArray(sanitizedFields)) {
+    if (Array.isArray(props.fields)) {
       recurseNestedFields({
         context,
         currentDepth,
@@ -62,7 +38,7 @@ export const linkPopulationPromiseHOC = (
         depth,
         editorPopulationPromises,
         fieldPromises,
-        fields: sanitizedFields,
+        fields: props.fields,
         findMany,
         flattenLocales,
         overrideAccess,

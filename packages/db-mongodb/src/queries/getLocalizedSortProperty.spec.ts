@@ -2,13 +2,13 @@ import { SanitizedConfig, sanitizeConfig } from 'payload/config'
 import { Config } from 'payload/config'
 import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 
-const config = sanitizeConfig({
+const config = (await sanitizeConfig({
   localization: {
     locales: ['en', 'es'],
     defaultLocale: 'en',
     fallback: true,
   },
-} as Config) as SanitizedConfig
+} as Config)) as SanitizedConfig
 
 describe('get localized sort property', () => {
   it('passes through a non-localized sort property', () => {
