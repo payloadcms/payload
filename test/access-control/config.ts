@@ -10,6 +10,7 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   noAdminAccessEmail,
+  nonAdminUserSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
@@ -121,6 +122,11 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+    },
+    {
+      slug: nonAdminUserSlug,
+      auth: true,
+      fields: [],
     },
     {
       slug,
@@ -483,6 +489,14 @@ export default buildConfigWithDefaults({
       collection: 'users',
       data: {
         email: noAdminAccessEmail,
+        password: 'test',
+      },
+    })
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: nonAdminUserSlug,
         password: 'test',
       },
     })

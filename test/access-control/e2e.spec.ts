@@ -26,6 +26,7 @@ import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   docLevelAccessSlug,
   noAdminAccessEmail,
+  nonAdminUserEmail,
   readOnlyGlobalSlug,
   readOnlySlug,
   restrictedSlug,
@@ -340,7 +341,7 @@ describe('access control', () => {
     await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
   })
 
-  test('should completely block admin access', async () => {
+  test('should block admin access to admin user', async () => {
     const adminURL = `${serverURL}/admin`
     await page.goto(adminURL)
     await page.waitForURL(adminURL)
@@ -355,6 +356,28 @@ describe('access control', () => {
       serverURL,
       data: {
         email: noAdminAccessEmail,
+        password: 'test',
+      },
+    })
+
+    await expect(page.locator('.next-error-h1')).toBeVisible()
+  })
+
+  test('should block admin access to non-admin user', async () => {
+    const adminURL = `${serverURL}/admin`
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
+
+    await expect(page.locator('.dashboard')).toBeVisible()
+
+    await page.goto(`${serverURL}/admin/logout`)
+    await page.waitForURL(`${serverURL}/admin/logout`)
+
+    await login({
+      page,
+      serverURL,
+      data: {
+        email: nonAdminUserEmail,
         password: 'test',
       },
     })

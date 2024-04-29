@@ -17,3 +17,7 @@ export const hiddenAccessSlug = 'hidden-access'
 export const hiddenAccessCountSlug = 'hidden-access-count'
 
 export const noAdminAccessEmail = 'no-admin-access@payloadcms.com'
+
+export const nonAdminUserEmail = 'non-admin-user@payloadcms.com'
+
+export const nonAdminUserSlug = 'non-admin-user'
