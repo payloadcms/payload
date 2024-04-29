@@ -85,7 +85,7 @@ export const createLocalReq: CreateLocalReq = async (
   }
 
   // @ts-expect-error
-  req.headers = req?.headers || new Headers()
+  if (!req.headers) req.headers = new Headers()
   req.context = getRequestContext(req, context)
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload
