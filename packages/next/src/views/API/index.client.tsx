@@ -187,7 +187,7 @@ export const APIViewClient: React.FC = () => {
               max={10}
               min={0}
               name="depth"
-              onChange={(value) => setDepth(value.toString())}
+              onChange={(value) => setDepth(value?.toString())}
               path="depth"
               step={1}
             />
