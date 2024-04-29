@@ -32,7 +32,10 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     }
   }
 
-  if (!sanitizedConfig.collections.find(({ slug }) => slug === sanitizedConfig.admin.user)) {
+  const userCollection = sanitizedConfig.collections.find(
+    ({ slug }) => slug === sanitizedConfig.admin.user,
+  )
+  if (!userCollection || !userCollection.auth) {
     throw new InvalidConfiguration(
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,
     )
