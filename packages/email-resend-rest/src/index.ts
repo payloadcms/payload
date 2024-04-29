@@ -18,7 +18,7 @@ type ResendResponse =
   | { id: string }
 
 /**
- * Creates an email adapter using nodemailer
+ * Creates an email adapter using Resend REST API
  *
  * If no email configuration is provided, an ethereal email test account is returned
  */
@@ -26,6 +26,7 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
   const { apiKey, defaultFromAddress, defaultFromName } = args
 
   const adapter: ResendAdapter = () => ({
+    name: 'resend-rest',
     defaultFromAddress,
     defaultFromName,
     sendEmail: async (message) => {
