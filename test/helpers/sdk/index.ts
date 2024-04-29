@@ -75,7 +75,6 @@ export class PayloadTestSDK<TGeneratedTypes extends GeneratedTypes<TGeneratedTyp
     jwt,
     ...args
   }: LoginArgs<TGeneratedTypes, T>) => {
-    console.log('login', args)
     return this.fetch<TGeneratedTypes['collections'][T]>({
       operation: 'login',
       args,
