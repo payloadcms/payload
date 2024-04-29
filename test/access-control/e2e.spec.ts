@@ -26,6 +26,8 @@ import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   docLevelAccessSlug,
   noAdminAccessEmail,
+  nonAdminUserEmail,
+  nonAdminUserSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
   restrictedSlug,
@@ -55,6 +57,7 @@ describe('access control', () => {
   let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
   let serverURL: string
+  let context: BrowserContext
 
   beforeAll(async ({ browser }) => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
@@ -65,7 +68,7 @@ describe('access control', () => {
     readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -340,7 +343,7 @@ describe('access control', () => {
     await expect(documentDrawer2.locator('#field-name')).toBeEnabled()
   })
 
-  test('should completely block admin access', async () => {
+  test('should block admin access to admin user', async () => {
     const adminURL = `${serverURL}/admin`
     await page.goto(adminURL)
     await page.waitForURL(adminURL)
@@ -358,6 +361,51 @@ describe('access control', () => {
         password: 'test',
       },
     })
+
+    await expect(page.locator('.next-error-h1')).toBeVisible()
+
+    await page.goto(`${serverURL}/admin/logout`)
+    await page.waitForURL(`${serverURL}/admin/logout`)
+
+    // Log back in for the next test
+    await login({
+      page,
+      serverURL,
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+  })
+
+  test('should block admin access to non-admin user', async () => {
+    const adminURL = `${serverURL}/admin`
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
+
+    await expect(page.locator('.dashboard')).toBeVisible()
+
+    await page.goto(`${serverURL}/admin/logout`)
+    await page.waitForURL(`${serverURL}/admin/logout`)
+
+    const nonAdminUser = await payload.login({
+      collection: nonAdminUserSlug,
+      data: {
+        email: nonAdminUserEmail,
+        password: devUser.password,
+      },
+    })
+
+    context.addCookies([
+      {
+        name: 'payload-token',
+        value: nonAdminUser.token,
+        url: serverURL,
+      },
+    ])
+
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
 
     await expect(page.locator('.next-error-h1')).toBeVisible()
   })
