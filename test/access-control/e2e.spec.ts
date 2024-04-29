@@ -364,6 +364,9 @@ describe('access control', () => {
 
     await expect(page.locator('.next-error-h1')).toBeVisible()
 
+    await page.goto(`${serverURL}/admin/logout`)
+    await page.waitForURL(`${serverURL}/admin/logout`)
+
     // Log back in for the next test
     await login({
       page,
