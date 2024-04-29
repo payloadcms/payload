@@ -51,7 +51,7 @@ const attachFakeURLProperties = (req: PayloadRequestWithData) => {
   // @ts-expect-error
   if (!req.origin) req.origin = getURLObject().origin
   // @ts-expect-error
-  if (!req?.url) req.url = getURLObject().url
+  if (!req?.url) req.url = getURLObject().href
 }
 
 type CreateLocalReq = (
@@ -84,6 +84,8 @@ export const createLocalReq: CreateLocalReq = async (
     }
   }
 
+  // @ts-expect-error
+  if (!req.headers) req.headers = new Headers()
   req.context = getRequestContext(req, context)
   req.payloadAPI = req?.payloadAPI || 'local'
   req.payload = payload
