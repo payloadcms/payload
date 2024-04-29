@@ -1,10 +1,7 @@
 'use client'
 
-import lexicalUtilsImport from '@lexical/utils'
-const { $findMatchingParent } = lexicalUtilsImport
-
-import lexicalImport from 'lexical'
-const { $getSelection, $isRangeSelection } = lexicalImport
+import { $findMatchingParent } from '@lexical/utils'
+import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 import type { ExclusiveLinkCollectionsProps } from './feature.server.js'

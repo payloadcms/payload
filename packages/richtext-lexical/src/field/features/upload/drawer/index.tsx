@@ -1,12 +1,9 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-import lexicalImport from 'lexical'
-const { $getNodeByKey, COMMAND_PRIORITY_EDITOR } = lexicalImport
-
 import type { LexicalEditor } from 'lexical'
 
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useListDrawer } from '@payloadcms/ui/elements/ListDrawer'
+import { $getNodeByKey, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { EnabledRelationshipsCondition } from '../../relationship/utils/EnabledRelationshipsCondition.js'

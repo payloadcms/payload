@@ -1,12 +1,8 @@
 'use client'
 
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-import lexicalUtilsImport from '@lexical/utils'
-const { $insertNodeToNearestRoot } = lexicalUtilsImport
-
-import lexicalImport from 'lexical'
-const { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR } = lexicalImport
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { $insertNodeToNearestRoot } from '@lexical/utils'
+import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import { useEffect } from 'react'
 
 import {

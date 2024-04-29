@@ -1,7 +1,6 @@
 import type { LexicalEditor, LexicalNode } from 'lexical'
 
-import lexicalImport from 'lexical'
-const { $getNodeByKey } = lexicalImport
+import { $getNodeByKey } from 'lexical'
 
 import { Point } from '../../../utils/point.js'
 import { Rect } from '../../../utils/rect.js'

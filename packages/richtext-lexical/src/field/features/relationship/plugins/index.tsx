@@ -1,21 +1,17 @@
 'use client'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-import lexicalUtilsImport from '@lexical/utils'
-const { $insertNodeToNearestRoot } = lexicalUtilsImport
-import lexicalImport from 'lexical'
-const {
+import type { LexicalCommand } from 'lexical'
+
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { $insertNodeToNearestRoot } from '@lexical/utils'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import {
   $getPreviousSelection,
   $getSelection,
   $isParagraphNode,
   $isRangeSelection,
   COMMAND_PRIORITY_EDITOR,
   createCommand,
-} = lexicalImport
-
-import type { LexicalCommand } from 'lexical'
-
-import { useConfig } from '@payloadcms/ui/providers/Config'
+} from 'lexical'
 import { useEffect } from 'react'
 import React from 'react'
 

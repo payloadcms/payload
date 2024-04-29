@@ -1,10 +1,7 @@
 'use client'
 
-import lexicalSelectionImport from '@lexical/selection'
-const { $setBlocksType } = lexicalSelectionImport
-
-import lexicalImport from 'lexical'
-const { $createParagraphNode, $getSelection } = lexicalImport
+import { $setBlocksType } from '@lexical/selection'
+import { $createParagraphNode, $getSelection } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 

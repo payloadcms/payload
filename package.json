@@ -129,7 +129,7 @@
     "jest-environment-jsdom": "29.7.0",
     "json5": "^2.2.3",
     "jwt-decode": "4.0.0",
-    "lexical": "0.13.1",
+    "lexical": "0.14.5",
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^9.0",

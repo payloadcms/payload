@@ -1,13 +1,11 @@
 'use client'
+import type { BaseSelection } from 'lexical'
 import type { ClientCollectionConfig } from 'payload/types'
 
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
+import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import lexicalImport from 'lexical'
-const { $getNodeByKey } = lexicalImport
-
 import { Button } from '@payloadcms/ui/elements/Button'
 import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
 import { DrawerToggler } from '@payloadcms/ui/elements/Drawer'
@@ -16,7 +14,16 @@ import { File } from '@payloadcms/ui/graphics/File'
 import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
-import React, { useCallback, useReducer, useState } from 'react'
+import {
+  $getNodeByKey,
+  $getSelection,
+  $isNodeSelection,
+  CLICK_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+} from 'lexical'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { ClientComponentProps } from '../../types.js'
 import type { UploadFeaturePropsClient } from '../feature.client.js'
@@ -25,6 +32,7 @@ import type { UploadData } from '../nodes/UploadNode.js'
 import { useEditorConfigContext } from '../../../lexical/config/client/EditorConfigProvider.js'
 import { EnabledRelationshipsCondition } from '../../relationship/utils/EnabledRelationshipsCondition.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
+import { $isUploadNode } from '../nodes/UploadNode.js'
 import { ExtraFieldsUploadDrawer } from './ExtraFieldsDrawer/index.js'
 import './index.scss'
 
@@ -37,7 +45,6 @@ const initialParams = {
 export type ElementProps = {
   data: UploadData
   nodeKey: string
-  //uploadProps: UploadFeatureProps
 }
 
 const Component: React.FC<ElementProps> = (props) => {
@@ -51,9 +58,11 @@ const Component: React.FC<ElementProps> = (props) => {
     routes: { api },
     serverURL,
   } = useConfig()
+  const uploadRef = useRef<HTMLDivElement | null>(null)
 
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
+
   const { editorConfig, field } = useEditorConfigContext()
 
   const { i18n, t } = useTranslation()
@@ -96,6 +105,49 @@ const Component: React.FC<ElementProps> = (props) => {
     [setParams, cacheBust, closeDrawer],
   )
 
+  const onDelete = useCallback(
+    (payload: KeyboardEvent) => {
+      if (isSelected && $isNodeSelection($getSelection())) {
+        const event: KeyboardEvent = payload
+        event.preventDefault()
+        const node = $getNodeByKey(nodeKey)
+        if ($isUploadNode(node)) {
+          node.remove()
+          return true
+        }
+      }
+      return false
+    },
+    [isSelected, nodeKey],
+  )
+  const onClick = useCallback(
+    (payload: MouseEvent) => {
+      const event = payload
+      // Check if uploadRef.target or anything WITHIN uploadRef.target was clicked
+      if (event.target === uploadRef.current || uploadRef.current?.contains(event.target as Node)) {
+        if (event.shiftKey) {
+          setSelected(!isSelected)
+        } else {
+          clearSelection()
+          setSelected(true)
+        }
+        return true
+      }
+
+      return false
+    },
+    [isSelected, setSelected, clearSelection],
+  )
+
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
+
+      editor.registerCommand(KEY_DELETE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_BACKSPACE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+    )
+  }, [clearSelection, editor, isSelected, nodeKey, onDelete, setSelected, onClick])
+
   const hasExtraFields = (
     editorConfig?.resolvedFeatureMap?.get('upload')
       ?.clientFeatureProps as ClientComponentProps<UploadFeaturePropsClient>
@@ -105,6 +157,7 @@ const Component: React.FC<ElementProps> = (props) => {
     <div
       className={[baseClass, isSelected && `${baseClass}--selected`].filter(Boolean).join(' ')}
       contentEditable={false}
+      ref={uploadRef}
     >
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__topRow`}>

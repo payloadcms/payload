@@ -20,6 +20,7 @@ export const defaultRichTextValue: SerializedEditorState = {
         direction: null,
         format: '',
         indent: 0,
+        textFormat: 0,
         version: 1,
       } as SerializedParagraphNode,
     ],

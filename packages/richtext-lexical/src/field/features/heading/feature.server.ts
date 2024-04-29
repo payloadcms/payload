@@ -1,7 +1,6 @@
 import type { HeadingTagType } from '@lexical/rich-text'
 
-import lexicalRichTextImport from '@lexical/rich-text'
-const { HeadingNode } = lexicalRichTextImport
+import { HeadingNode } from '@lexical/rich-text'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 

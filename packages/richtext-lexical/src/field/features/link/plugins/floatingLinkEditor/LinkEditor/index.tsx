@@ -1,30 +1,25 @@
 'use client'
+import type { LexicalNode } from 'lexical'
 import type { FormState } from 'payload/types'
 import type { Data } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
-
-import lexicalUtilsImport from '@lexical/utils'
-const { $findMatchingParent, mergeRegister } = lexicalUtilsImport
-import type { LexicalNode } from 'lexical'
-
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
-import lexicalImport from 'lexical'
-const {
+import { formatDrawerSlug } from '@payloadcms/ui/elements/Drawer'
+import { useConfig } from '@payloadcms/ui/providers/Config'
+import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
+import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import { $isLineBreakNode } from 'lexical'
+import {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
-} = lexicalImport
-
-import { formatDrawerSlug } from '@payloadcms/ui/elements/Drawer'
-import { useConfig } from '@payloadcms/ui/providers/Config'
-import { useEditDepth } from '@payloadcms/ui/providers/EditDepth'
-import { useTranslation } from '@payloadcms/ui/providers/Translation'
+} from 'lexical'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../nodes/LinkNode.js'
@@ -74,10 +69,23 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
     // Handle the data displayed in the floating link editor & drawer when you click on a link node
     if ($isRangeSelection(selection)) {
-      const node = getSelectedNode(selection)
-      selectedNodeDomRect = editor.getElementByKey(node.getKey())?.getBoundingClientRect()
-      const linkParent: LinkNode = $findMatchingParent(node, $isLinkNode)
-      if (linkParent == null) {
+      const focusNode = getSelectedNode(selection)
+      selectedNodeDomRect = editor.getElementByKey(focusNode.getKey())?.getBoundingClientRect()
+      const focusLinkParent: LinkNode = $findMatchingParent(focusNode, $isLinkNode)
+
+      // Prevent link modal from showing if selection spans further than the link: https://github.com/facebook/lexical/issues/4064
+      const badNode = selection
+        .getNodes()
+        .filter((node) => !$isLineBreakNode(node))
+        .find((node) => {
+          const linkNode = $findMatchingParent(node, $isLinkNode)
+          return (
+            (focusLinkParent && !focusLinkParent.is(linkNode)) ||
+            (linkNode && !linkNode.is(focusLinkParent))
+          )
+        })
+
+      if (focusLinkParent == null || badNode) {
         setIsLink(false)
         setIsAutoLink(false)
         setLinkUrl('')
@@ -93,24 +101,24 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           linkType: undefined,
           newTab: undefined,
           url: '',
-          ...linkParent.getFields(),
+          ...focusLinkParent.getFields(),
         },
-        text: linkParent.getTextContent(),
+        text: focusLinkParent.getTextContent(),
       }
 
-      if (linkParent.getFields()?.linkType === 'custom') {
-        setLinkUrl(linkParent.getFields()?.url ?? '')
+      if (focusLinkParent.getFields()?.linkType === 'custom') {
+        setLinkUrl(focusLinkParent.getFields()?.url ?? '')
         setLinkLabel('')
       } else {
         // internal link
         setLinkUrl(
-          `/admin/collections/${linkParent.getFields()?.doc?.relationTo}/${
-            linkParent.getFields()?.doc?.value
+          `/admin/collections/${focusLinkParent.getFields()?.doc?.relationTo}/${
+            focusLinkParent.getFields()?.doc?.value
           }`,
         )
 
         const relatedField = config.collections.find(
-          (coll) => coll.slug === linkParent.getFields()?.doc?.relationTo,
+          (coll) => coll.slug === focusLinkParent.getFields()?.doc?.relationTo,
         )
         const label = t('fields:linkedTo', {
           label: getTranslation(relatedField.labels.singular, i18n),
@@ -122,7 +130,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       setIsLink(true)
       setSelectedNodes(selection ? selection?.getNodes() : [])
 
-      if ($isAutoLinkNode(linkParent)) {
+      if ($isAutoLinkNode(focusLinkParent)) {
         setIsAutoLink(true)
       } else {
         setIsAutoLink(false)
