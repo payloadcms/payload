@@ -22,7 +22,9 @@ export { generateResetPasswordMetadata } from './meta.js'
 export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params }) => {
   const { req } = initPageResult
 
-  const { token } = params
+  const {
+    segments: [_, token],
+  } = params
 
   const {
     i18n,

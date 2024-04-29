@@ -18,7 +18,12 @@ export type ConfirmPasswordFieldProps = {
 export const ConfirmPassword: React.FC<ConfirmPasswordFieldProps> = (props) => {
   const { disabled } = props
 
-  const password = useFormFields<FormField>(([fields]) => fields.password)
+  console.log({ props })
+
+  const password = useFormFields<FormField>(([fields]) => {
+    console.log({ fields })
+    return fields.password
+  })
   const { t } = useTranslation()
 
   const validate = useCallback(
