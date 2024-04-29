@@ -26,6 +26,7 @@ import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import {
   docLevelAccessSlug,
   noAdminAccessEmail,
+  readOnlyGlobalSlug,
   readOnlySlug,
   restrictedSlug,
   restrictedVersionsSlug,
