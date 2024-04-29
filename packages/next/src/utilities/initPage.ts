@@ -25,7 +25,15 @@ type Args = {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-const authRoutes = ['/login', '/logout', '/create-first-user', '/forgot', '/reset', '/verify']
+const authRoutes = [
+  '/login',
+  '/logout',
+  '/create-first-user',
+  '/forgot',
+  '/reset',
+  '/verify',
+  '/logout-inactivity',
+]
 
 export const initPage = async ({
   config: configPromise,
