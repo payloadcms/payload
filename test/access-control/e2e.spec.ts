@@ -27,6 +27,7 @@ import {
   docLevelAccessSlug,
   noAdminAccessEmail,
   nonAdminUserEmail,
+  nonAdminUserSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
   restrictedSlug,
@@ -56,6 +57,7 @@ describe('access control', () => {
   let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
   let serverURL: string
+  let context: BrowserContext
 
   beforeAll(async ({ browser }) => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
@@ -66,7 +68,7 @@ describe('access control', () => {
     readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -364,6 +366,8 @@ describe('access control', () => {
   })
 
   test('should block admin access to non-admin user', async () => {
+    // TODO: Need to authenticate the user outside of the login form and use _that_ token in the Playwright browser
+    // This is bc the logic form is specific to the `users` collection, and this test is for non-admin users
     const adminURL = `${serverURL}/admin`
     await page.goto(adminURL)
     await page.waitForURL(adminURL)
@@ -373,14 +377,24 @@ describe('access control', () => {
     await page.goto(`${serverURL}/admin/logout`)
     await page.waitForURL(`${serverURL}/admin/logout`)
 
-    await login({
-      page,
-      serverURL,
+    const nonAdminUser = await payload.login({
+      collection: nonAdminUserSlug,
       data: {
         email: nonAdminUserEmail,
-        password: 'test',
+        password: devUser.password,
       },
     })
+
+    context.addCookies([
+      {
+        name: 'payload-token',
+        value: nonAdminUser.token,
+        url: serverURL,
+      },
+    ])
+
+    await page.goto(adminURL)
+    await page.waitForURL(adminURL)
 
     await expect(page.locator('.next-error-h1')).toBeVisible()
   })
