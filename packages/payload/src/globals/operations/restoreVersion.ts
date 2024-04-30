@@ -105,6 +105,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
       context: req.context,
       depth,
       doc: result,
+      draft: undefined,
       fallbackLocale,
       global: globalConfig,
       locale,
