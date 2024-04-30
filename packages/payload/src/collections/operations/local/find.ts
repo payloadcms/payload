@@ -3,6 +3,7 @@ import type { GeneratedTypes, Payload } from '../../../index.js'
 import type {
   Document,
   PayloadRequestWithData,
+  Populate,
   RequestContext,
   Select,
   Where,
@@ -28,6 +29,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   overrideAccess?: boolean
   page?: number
   pagination?: boolean
+  populate?: Populate
   req?: PayloadRequestWithData
   select?: Select
   showHiddenFields?: boolean
@@ -50,6 +52,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     overrideAccess = true,
     page,
     pagination = true,
+    populate,
     select,
     showHiddenFields,
     sort,
@@ -74,6 +77,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     overrideAccess,
     page,
     pagination,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,

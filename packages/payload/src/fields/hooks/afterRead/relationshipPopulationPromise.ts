@@ -1,4 +1,4 @@
-import type { PayloadRequestWithData } from '../../../types/index.js'
+import type { PayloadRequestWithData, Populate, Select } from '../../../types/index.js'
 import type { RelationshipField, UploadField } from '../../config/types.js'
 
 import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types.js'
@@ -10,10 +10,12 @@ type PopulateArgs = {
   depth: number
   fallbackLocale: null | string
   field: RelationshipField | UploadField
+  fieldPathSegments: string[]
   index?: number
   key?: string
   locale: null | string
   overrideAccess: boolean
+  populateArg?: Populate
   req: PayloadRequestWithData
   showHiddenFields: boolean
 }
@@ -25,10 +27,12 @@ const populate = async ({
   depth,
   fallbackLocale,
   field,
+  fieldPathSegments,
   index,
   key,
   locale,
   overrideAccess,
+  populateArg,
   req,
   showHiddenFields,
 }: PopulateArgs) => {
@@ -38,8 +42,32 @@ const populate = async ({
 
   if (relatedCollection) {
     let id = Array.isArray(field.relationTo) ? data.value : data
+    let fieldDepth = depth
+    let fieldPopulateValue:
+      | {
+          populate?: Populate
+          select?: Select
+        }
+      | undefined
+
+    if (populateArg && typeof populateArg === 'object') {
+      const fieldPath = fieldPathSegments.join('.')
+      const populateValue = populateArg[fieldPath]
+
+      const isOmitting = Object.values(populateArg)
+        .filter((populateValue) => typeof populateValue === 'boolean')
+        .some((shouldPopulate) => !shouldPopulate)
+
+      if (isOmitting && typeof populateValue === 'boolean') fieldDepth = 0
+      else if (!populateValue) fieldDepth = 0
+
+      if (populateValue && typeof populateValue !== 'boolean') {
+        fieldPopulateValue = populateValue
+      }
+    }
+
     let relationshipValue
-    const shouldPopulate = depth && currentDepth <= depth
+    const shouldPopulate = fieldDepth && currentDepth <= depth
 
     if (
       typeof id !== 'string' &&
@@ -62,6 +90,8 @@ const populate = async ({
           fallbackLocale,
           overrideAccess,
           showHiddenFields,
+          fieldPopulateValue?.select,
+          fieldPopulateValue?.populate,
         ]),
       )
     }
@@ -96,8 +126,10 @@ type PromiseArgs = {
   depth: number
   fallbackLocale: null | string
   field: RelationshipField | UploadField
+  fieldPathSegments: string[]
   locale: null | string
   overrideAccess: boolean
+  populateArg?: Populate
   req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, any>
@@ -108,8 +140,10 @@ export const relationshipPopulationPromise = async ({
   depth,
   fallbackLocale,
   field,
+  fieldPathSegments,
   locale,
   overrideAccess,
+  populateArg,
   req,
   showHiddenFields,
   siblingDoc,
@@ -135,10 +169,12 @@ export const relationshipPopulationPromise = async ({
                 depth: populateDepth,
                 fallbackLocale,
                 field,
+                fieldPathSegments,
                 index,
                 key,
                 locale,
                 overrideAccess,
+                populateArg,
                 req,
                 showHiddenFields,
               })
@@ -158,9 +194,11 @@ export const relationshipPopulationPromise = async ({
               depth: populateDepth,
               fallbackLocale,
               field,
+              fieldPathSegments,
               index,
               locale,
               overrideAccess,
+              populateArg,
               req,
               showHiddenFields,
             })
@@ -184,9 +222,11 @@ export const relationshipPopulationPromise = async ({
           depth: populateDepth,
           fallbackLocale,
           field,
+          fieldPathSegments,
           key,
           locale,
           overrideAccess,
+          populateArg,
           req,
           showHiddenFields,
         })
@@ -203,8 +243,10 @@ export const relationshipPopulationPromise = async ({
       depth: populateDepth,
       fallbackLocale,
       field,
+      fieldPathSegments,
       locale,
       overrideAccess,
+      populateArg,
       req,
       showHiddenFields,
     })

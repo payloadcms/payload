@@ -54,6 +54,8 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
+        select,
+        populate,
       ] = JSON.parse(key)
 
       const batchKeyArray = [
@@ -65,6 +67,8 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
+        select,
+        populate,
       ]
 
       const batchKey = JSON.stringify(batchKeyArray)
@@ -98,6 +102,8 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
+        select,
+        populate,
       ] = JSON.parse(batchKey)
 
       req.transactionID = transactionID
@@ -111,7 +117,9 @@ const batchAndLoadDocs =
         locale,
         overrideAccess: Boolean(overrideAccess),
         pagination: false,
+        populate,
         req: req as PayloadRequestWithData,
+        select,
         showHiddenFields: Boolean(showHiddenFields),
         where: {
           id: {
@@ -134,6 +142,8 @@ const batchAndLoadDocs =
           fallbackLocale,
           overrideAccess,
           showHiddenFields,
+          select,
+          populate,
         ])
         const docsIndex = keys.findIndex((key) => key === docKey)
 

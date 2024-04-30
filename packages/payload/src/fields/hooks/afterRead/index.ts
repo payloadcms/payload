@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, Populate, RequestContext } from '../../../types/index.js'
 
 import { deepCopyObject } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
@@ -17,6 +17,7 @@ type Args = {
   global: SanitizedGlobalConfig | null
   locale: string
   overrideAccess: boolean
+  populateArg: Populate
   req: PayloadRequestWithData
   showHiddenFields: boolean
 }
@@ -44,6 +45,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     global,
     locale,
     overrideAccess,
+    populateArg,
     req,
     showHiddenFields,
   } = args
@@ -74,6 +76,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     global,
     locale,
     overrideAccess,
+    populateArg,
     populationPromises,
     req,
     showHiddenFields,

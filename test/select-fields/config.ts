@@ -303,6 +303,64 @@ export default buildConfigWithDefaults({
         // },
       ],
     },
+
+    {
+      slug: 'relationships-items-nested',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'subtitle',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'relationships-items',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'subtitle',
+          type: 'text',
+        },
+        {
+          type: 'relationship',
+          name: 'nested',
+          relationTo: 'relationships-items-nested',
+        },
+      ],
+    },
+    {
+      slug: 'relationships',
+      fields: [
+        {
+          name: 'item',
+          type: 'relationship',
+          relationTo: 'relationships-items',
+        },
+        {
+          name: 'other',
+          type: 'relationship',
+          relationTo: 'relationships-items',
+        },
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              name: 'item',
+              type: 'relationship',
+              relationTo: 'relationships-items',
+            },
+          ],
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

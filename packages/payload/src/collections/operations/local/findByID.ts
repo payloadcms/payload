@@ -2,6 +2,7 @@ import type { GeneratedTypes, Payload } from '../../../index.js'
 import type {
   Document,
   PayloadRequestWithData,
+  Populate,
   RequestContext,
   Select,
 } from '../../../types/index.js'
@@ -24,6 +25,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   id: number | string
   locale?: 'all' | GeneratedTypes['locale']
   overrideAccess?: boolean
+  populate?: Populate
   req?: PayloadRequestWithData
   select?: Select
   showHiddenFields?: boolean
@@ -42,6 +44,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     disableErrors = false,
     draft = false,
     overrideAccess = true,
+    populate,
     select,
     showHiddenFields,
   } = options
@@ -62,6 +65,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     disableErrors,
     draft,
     overrideAccess,
+    populate,
     req: await createLocalReq(options, payload),
     select,
     showHiddenFields,

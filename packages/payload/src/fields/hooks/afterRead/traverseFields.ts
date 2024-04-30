@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, Populate, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
@@ -12,6 +12,7 @@ type Args = {
   depth: number
   doc: Record<string, unknown>
   fallbackLocale: null | string
+  fieldPathSegments?: string[]
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -22,6 +23,7 @@ type Args = {
   global: SanitizedGlobalConfig | null
   locale: null | string
   overrideAccess: boolean
+  populateArg?: Populate
   populationPromises: Promise<void>[]
   req: PayloadRequestWithData
   showHiddenFields: boolean
@@ -37,6 +39,7 @@ export const traverseFields = ({
   depth,
   doc,
   fallbackLocale,
+  fieldPathSegments = [],
   fieldPromises,
   fields,
   findMany,
@@ -44,6 +47,7 @@ export const traverseFields = ({
   global,
   locale,
   overrideAccess,
+  populateArg,
   populationPromises,
   req,
   showHiddenFields,
@@ -61,12 +65,14 @@ export const traverseFields = ({
         doc,
         fallbackLocale,
         field,
+        fieldPathSegments,
         fieldPromises,
         findMany,
         flattenLocales,
         global,
         locale,
         overrideAccess,
+        populateArg,
         populationPromises,
         req,
         showHiddenFields,

@@ -102,6 +102,15 @@ export type Select = {
   [key: string]: Select | boolean
 }
 
+export type Populate = {
+  [key: string]:
+    | {
+        populate?: Populate
+        select?: Select
+      }
+    | boolean
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any
 

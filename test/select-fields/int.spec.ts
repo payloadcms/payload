@@ -5,6 +5,7 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import configPromise from './config.js'
 import { createDeepNested } from './deep-nested.js'
+import { createDocWithRelation } from './doc-with-relation.js'
 import { createLocalizedPost } from './localizedPost.js'
 import { createPost } from './post.js'
 
@@ -20,6 +21,9 @@ const deepNestedSlug = 'deep-nested'
 let localizedPostId: number | string
 const localizedPostsSlug = 'localized-posts'
 
+let docWithRelationId: number | string
+const docWithRelationSlug = 'relationships'
+
 const serializeObject = (obj: unknown) => JSON.parse(JSON.stringify(obj))
 
 describe('Select Fields', () => {
@@ -33,6 +37,9 @@ describe('Select Fields', () => {
 
     const localizedPost = await createLocalizedPost(payload)
     localizedPostId = localizedPost.id
+
+    const docWithRelation = await createDocWithRelation(payload)
+    docWithRelationId = docWithRelation.id
   })
 
   afterAll(async () => {
@@ -644,6 +651,116 @@ describe('Select Fields', () => {
     //     arrayLocalized: [],
     //   })
     // })
+  })
+
+  describe('Relationships population', () => {
+    it('should populate relationship and exclude another one', async () => {
+      const doc = await payload.findByID({
+        collection: docWithRelationSlug,
+        id: docWithRelationId,
+        depth: 1,
+        populate: {
+          item: true,
+        },
+      })
+
+      expect(doc.item.title).toBeTruthy()
+      expect(doc.item.subtitle).toBeTruthy()
+      expect(doc.other.title).toBeUndefined()
+    })
+
+    it('should populate relationship with the selected fields', async () => {
+      const doc = await payload.findByID({
+        collection: docWithRelationSlug,
+        id: docWithRelationId,
+        depth: 1,
+        populate: {
+          item: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      })
+
+      expect(doc.item.title).toBeTruthy()
+      expect(doc.item.subtitle).toBeUndefined()
+      expect(doc.other.title).toBeUndefined()
+    })
+
+    it('should automatically populate nested relationship as result of depth', async () => {
+      const doc = await payload.findByID({
+        collection: docWithRelationSlug,
+        id: docWithRelationId,
+        depth: 2,
+        populate: {
+          item: true,
+        },
+      })
+
+      expect(doc.item.title).toBeTruthy()
+      expect(doc.item.subtitle).toBeTruthy()
+      expect(doc.item.nested.title).toBeTruthy()
+      expect(doc.item.nested.subtitle).toBeTruthy()
+    })
+
+    it('should populate nested relationship doc', async () => {
+      const doc = await payload.findByID({
+        collection: docWithRelationSlug,
+        id: docWithRelationId,
+        depth: 2,
+        populate: {
+          item: {
+            populate: {
+              nested: true,
+            },
+          },
+        },
+      })
+
+      expect(doc.item.title).toBeTruthy()
+      expect(doc.item.subtitle).toBeTruthy()
+      expect(doc.item.nested.title).toBeTruthy()
+      expect(doc.item.nested.subtitle).toBeTruthy()
+    })
+
+    it('should populate nested relationship doc with the selected fields', async () => {
+      const doc = await payload.findByID({
+        collection: docWithRelationSlug,
+        id: docWithRelationId,
+        depth: 2,
+        populate: {
+          item: {
+            populate: {
+              nested: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
+        },
+      })
+
+      expect(doc.item.title).toBeTruthy()
+      expect(doc.item.subtitle).toBeTruthy()
+      expect(doc.item.nested.title).toBeTruthy()
+      expect(doc.item.nested.subtitle).toBeUndefined()
+    })
+
+    it('should populate nested relationship within array and exclude other', async () => {
+      const doc = await payload.findByID({
+        collection: docWithRelationSlug,
+        id: docWithRelationId,
+        depth: 1,
+        populate: {
+          'array.item': true,
+        },
+      })
+
+      expect(doc.item.title).toBeUndefined()
+      expect(doc.array[0].item.title).toBeTruthy()
+    })
   })
 
   // TODO: REST tests.

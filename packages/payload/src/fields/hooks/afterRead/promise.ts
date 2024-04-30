@@ -2,7 +2,7 @@
 import type { RichTextAdapter } from '../../../admin/types.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, Populate, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -18,6 +18,7 @@ type Args = {
   doc: Record<string, unknown>
   fallbackLocale: null | string
   field: Field | TabAsField
+  fieldPathSegments: string[]
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -27,6 +28,7 @@ type Args = {
   global: SanitizedGlobalConfig | null
   locale: null | string
   overrideAccess: boolean
+  populateArg?: Populate
   populationPromises: Promise<void>[]
   req: PayloadRequestWithData
   showHiddenFields: boolean
@@ -51,12 +53,14 @@ export const promise = async ({
   doc,
   fallbackLocale,
   field,
+  fieldPathSegments,
   fieldPromises,
   findMany,
   flattenLocales,
   global,
   locale,
   overrideAccess,
+  populateArg,
   populationPromises,
   req,
   showHiddenFields,
@@ -281,8 +285,10 @@ export const promise = async ({
           depth,
           fallbackLocale,
           field,
+          fieldPathSegments: [...fieldPathSegments, field.name],
           locale,
           overrideAccess,
+          populateArg,
           req,
           showHiddenFields,
           siblingDoc,
@@ -303,6 +309,7 @@ export const promise = async ({
         depth,
         doc,
         fallbackLocale,
+        fieldPathSegments: [...fieldPathSegments, field.name],
         fieldPromises,
         fields: field.fields,
         findMany,
@@ -333,6 +340,7 @@ export const promise = async ({
             depth,
             doc,
             fallbackLocale,
+            fieldPathSegments: [...fieldPathSegments, field.name],
             fieldPromises,
             fields: field.fields,
             findMany,
@@ -359,6 +367,7 @@ export const promise = async ({
                 depth,
                 doc,
                 fallbackLocale,
+                fieldPathSegments: [...fieldPathSegments, field.name],
                 fieldPromises,
                 fields: field.fields,
                 findMany,
@@ -397,6 +406,7 @@ export const promise = async ({
               depth,
               doc,
               fallbackLocale,
+              fieldPathSegments: [...fieldPathSegments, field.name, block.slug],
               fieldPromises,
               fields: block.fields,
               findMany,
@@ -427,6 +437,7 @@ export const promise = async ({
                   depth,
                   doc,
                   fallbackLocale,
+                  fieldPathSegments: [...fieldPathSegments, field.name, block.slug],
                   fieldPromises,
                   fields: block.fields,
                   findMany,
@@ -461,6 +472,7 @@ export const promise = async ({
         depth,
         doc,
         fallbackLocale,
+        fieldPathSegments,
         fieldPromises,
         fields: field.fields,
         findMany,
@@ -481,8 +493,10 @@ export const promise = async ({
 
     case 'tab': {
       let tabDoc = siblingDoc
+      let tabPathSegments = fieldPathSegments
       if (tabHasName(field)) {
         tabDoc = siblingDoc[field.name] as Record<string, unknown>
+        tabPathSegments = [...fieldPathSegments, field.name]
         if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
       }
 
@@ -493,6 +507,7 @@ export const promise = async ({
         depth,
         doc,
         fallbackLocale,
+        fieldPathSegments: tabPathSegments,
         fieldPromises,
         fields: field.fields,
         findMany,
