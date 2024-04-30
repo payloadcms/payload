@@ -1,11 +1,12 @@
-import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
+import { HydrateClientUser } from '@payloadcms/ui/elements/HydrateClientUser'
 import LinkImport from 'next/link.js'
 import { redirect } from 'next/navigation.js'
+import { type AdminViewProps } from 'payload/types'
 import React from 'react'
 
-import type { AdminViewProps } from '../../../../../packages/payload/types.js'
-
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+
+import type { InitPageResult } from 'payload/types'
 
 import { Button } from '@payloadcms/ui/elements/Button'
 import { SetStepNav } from '@payloadcms/ui/elements/StepNav'
@@ -14,13 +15,15 @@ import { customViewPath } from '../../../shared.js'
 import './index.scss'
 const baseClass = 'custom-default-view'
 
-export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export const CustomDefaultView: React.FC<AdminViewProps> = ({
+  initPageResult,
+}: {
+  initPageResult: InitPageResult
+}) => {
   const {
     permissions,
     req: {
-      i18n,
       payload: {
-        config,
         config: {
           routes: { admin: adminRoute },
         },
@@ -36,41 +39,44 @@ export const CustomDefaultView: React.FC<AdminViewProps> = ({ initPageResult }) 
   }
 
   return (
-    <DefaultTemplate config={config} i18n={i18n} permissions={permissions} user={user}>
-      <SetStepNav
-        nav={[
-          {
-            label: 'Custom Admin View with Default Template',
-          },
-        ]}
-      />
-      <div
-        className={`${baseClass}__content`}
-        style={{
-          paddingLeft: 'var(--gutter-h)',
-          paddingRight: 'var(--gutter-h)',
-        }}
-      >
-        <h1>Custom Admin View</h1>
-        <p>
-          Here is a custom admin view that was added in the Payload config. It uses the Default
-          Template, so the sidebar is rendered.
-        </p>
-        <div className="custom-view__controls">
-          <Button Link={Link} buttonStyle="secondary" el="link" to={`${adminRoute}`}>
-            Go to Dashboard
-          </Button>
-          &nbsp; &nbsp; &nbsp;
-          <Button
-            Link={Link}
-            buttonStyle="secondary"
-            el="link"
-            to={`${adminRoute}/${customViewPath}`}
-          >
-            Go to Custom View
-          </Button>
+    <div>
+      <HydrateClientUser permissions={permissions} user={user} />
+      <div>
+        <SetStepNav
+          nav={[
+            {
+              label: 'Custom Admin View with Default Template',
+            },
+          ]}
+        />
+        <div
+          className={`${baseClass}__content`}
+          style={{
+            paddingLeft: 'var(--gutter-h)',
+            paddingRight: 'var(--gutter-h)',
+          }}
+        >
+          <h1>Custom Admin View</h1>
+          <p>
+            Here is a custom admin view that was added in the Payload config. It uses the Default
+            Template, so the sidebar is rendered.
+          </p>
+          <div className="custom-view__controls">
+            <Button Link={Link} buttonStyle="secondary" el="link" to={`${adminRoute}`}>
+              Go to Dashboard
+            </Button>
+            &nbsp; &nbsp; &nbsp;
+            <Button
+              Link={Link}
+              buttonStyle="secondary"
+              el="link"
+              to={`${adminRoute}/${customViewPath}`}
+            >
+              Go to Custom View
+            </Button>
+          </div>
         </div>
       </div>
-    </DefaultTemplate>
+    </div>
   )
 }

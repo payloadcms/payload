@@ -33,7 +33,15 @@ import { GlobalGroup1B } from './globals/Group1B.js'
 import { GlobalHidden } from './globals/Hidden.js'
 import { GlobalNoApiView } from './globals/NoApiView.js'
 import { seed } from './seed.js'
-import { customNestedViewPath, customParamViewPath, customViewPath } from './shared.js'
+import {
+  customDefaultViewClass,
+  customDefaultViewPath,
+  customMinimalViewClass,
+  customMinimalViewPath,
+  customNestedViewPath,
+  customParamViewPath,
+  customViewPath,
+} from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -51,11 +59,15 @@ export default buildConfigWithDefaults({
         // Account: CustomAccountView,
         CustomDefaultView: {
           Component: CustomDefaultView,
-          path: '/custom-default-view',
+          path: customDefaultViewPath,
+          templateType: 'default',
+          templateClass: customDefaultViewClass,
         },
         CustomMinimalView: {
           Component: CustomMinimalView,
-          path: '/custom-minimal-view',
+          path: customMinimalViewPath,
+          templateType: 'minimal',
+          templateClass: customMinimalViewClass,
         },
         CustomNestedView: {
           Component: CustomNestedView,

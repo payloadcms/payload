@@ -41,6 +41,13 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     )
   }
 
+  if (sanitizedConfig?.admin?.components?.views)
+    Object.entries(sanitizedConfig.admin.components.views).forEach(([_key, view]) => {
+      if (typeof view === 'function' || view.templateType) return
+
+      view.templateType = 'none'
+    })
+
   return sanitizedConfig as Partial<SanitizedConfig>
 }
 

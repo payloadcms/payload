@@ -50,11 +50,11 @@ export const getViewFromConfig = ({
   DefaultView: AdminViewComponent
   initPageOptions: Parameters<typeof initPage>[0]
   templateClassName: string
-  templateType: 'default' | 'minimal'
+  templateType: 'default' | 'minimal' | 'none'
 } => {
   let ViewToRender: AdminViewComponent = null
   let templateClassName: string
-  let templateType: 'default' | 'minimal' = 'minimal'
+  let templateType: 'default' | 'minimal' | 'none' = 'minimal'
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
@@ -152,7 +152,10 @@ export const getViewFromConfig = ({
   }
 
   if (!ViewToRender) {
-    ViewToRender = getCustomViewByRoute({ config, currentRoute })
+    const result = getCustomViewByRoute({ config, currentRoute })
+    templateType = result?.templateType
+    templateClassName = result?.templateClassname
+    ViewToRender = result?.ViewToRender
   }
 
   return {

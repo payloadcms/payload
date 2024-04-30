@@ -83,11 +83,16 @@ export const RootPage = async ({
 
   return (
     <Fragment>
+      {templateType === 'none' && RenderedView}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}
       {templateType === 'default' && (
-        <DefaultTemplate config={config} visibleEntities={initPageResult.visibleEntities}>
+        <DefaultTemplate
+          className={templateClassName}
+          config={config}
+          visibleEntities={initPageResult.visibleEntities}
+        >
           {RenderedView}
         </DefaultTemplate>
       )}

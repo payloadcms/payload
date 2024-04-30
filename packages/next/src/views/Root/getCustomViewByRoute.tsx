@@ -8,7 +8,11 @@ export const getCustomViewByRoute = ({
 }: {
   config: SanitizedConfig
   currentRoute: string
-}): AdminViewComponent => {
+}): {
+  ViewToRender: AdminViewComponent
+  templateClassname?: string
+  templateType: 'default' | 'minimal' | 'none'
+} | null => {
   const {
     admin: {
       components: { views },
@@ -33,5 +37,11 @@ export const getCustomViewByRoute = ({
       }
     })?.[1]
 
-  return typeof foundViewConfig === 'object' ? foundViewConfig.Component : null
+  return typeof foundViewConfig === 'object'
+    ? {
+        ViewToRender: foundViewConfig.Component,
+        templateClassname: foundViewConfig.templateClass,
+        templateType: foundViewConfig.templateType,
+      }
+    : null
 }

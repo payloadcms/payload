@@ -11,7 +11,6 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 // import { useConfig } from 'payload/components/utilities';
 
 import { Button } from '@payloadcms/ui/elements/Button'
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 
 import type { AdminViewProps } from '../../../../../packages/payload/types.js'
 
@@ -32,7 +31,7 @@ export const CustomMinimalView: React.FC<AdminViewProps> = ({ initPageResult }) 
   } = initPageResult
 
   return (
-    <MinimalTemplate className={baseClass}>
+    <div className={baseClass}>
       <div className={`${baseClass}__content`}>
         <h1>Custom Admin View</h1>
         <p>Here is a custom admin view that was added in the Payload config.</p>
@@ -53,6 +52,6 @@ export const CustomMinimalView: React.FC<AdminViewProps> = ({ initPageResult }) 
           </div>
         </div>
       </div>
-    </MinimalTemplate>
+    </div>
   )
 }

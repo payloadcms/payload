@@ -13,6 +13,9 @@ export type AdminViewConfig = {
   path: string
   sensitive?: boolean
   strict?: boolean
+  templateClass?: string
+  /** @default 'none' */
+  templateType?: 'default' | 'minimal' | 'none'
 }
 
 export type AdminViewProps = {

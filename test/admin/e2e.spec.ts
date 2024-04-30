@@ -23,7 +23,11 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import {
+  customDefaultViewClass,
+  customDefaultViewPath,
   customEditLabel,
+  customMinimalViewClass,
+  customMinimalViewPath,
   customNestedTabViewPath,
   customNestedTabViewTitle,
   customNestedViewPath,
@@ -218,10 +222,12 @@ describe('admin', () => {
   })
 
   describe('custom views', () => {
-    test('root — should render custom view', async () => {
+    test('root — should render custom view without template', async () => {
       await page.goto(`${serverURL}/admin${customViewPath}`)
       await page.waitForURL(`**/admin${customViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
+      await expect(page.locator('.template-default')).toBeHidden()
+      await expect(page.locator('.template-minimal')).toBeHidden()
     })
 
     test('root — should render custom nested view', async () => {
@@ -230,6 +236,18 @@ describe('admin', () => {
       const pathname = new URL(pageURL).pathname
       expect(pathname).toEqual(`/admin${customNestedViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
+    })
+
+    test('root - should render custom view with default template and custom class', async () => {
+      await page.goto(`${serverURL}/admin${customDefaultViewPath}`)
+      await expect(page.locator(`.template-default.${customDefaultViewClass}`)).toBeVisible()
+      await expect(page.locator('.template-minimal')).toBeHidden()
+    })
+
+    test('root - should render custom view with minimal template and custom class', async () => {
+      await page.goto(`${serverURL}/admin${customMinimalViewPath}`)
+      await expect(page.locator(`.template-minimal.${customMinimalViewClass}`)).toBeVisible()
+      await expect(page.locator('.template-default')).toBeHidden()
     })
 
     test('collection - should render custom tab view', async () => {
