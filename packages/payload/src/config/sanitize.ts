@@ -42,7 +42,6 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
-  console.log('Running sanitizeConfig...')
   const configWithDefaults: Config = merge(defaults, incomingConfig, {
     isMergeableObject: isPlainObject,
   }) as Config
