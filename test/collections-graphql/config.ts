@@ -353,7 +353,15 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'cyclical-relationship',
         },
+        {
+          name: 'relationToSelfPoly',
+          type: 'relationship',
+          relationTo: ['cyclical-relationship'],
+        },
       ],
+      versions: {
+        drafts: true,
+      },
     },
   ],
   graphQL: {
