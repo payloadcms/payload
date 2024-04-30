@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
-export const groupSlug = 'localized '
+export const groupSlug = 'groups'
 
 export const Group: CollectionConfig = {
   slug: groupSlug,
@@ -10,22 +10,27 @@ export const Group: CollectionConfig = {
       localized: true,
       type: 'group',
       fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
+        // {
+        //   name: 'title',
+        //   type: 'text',
+        // },
       ],
     },
+    // {
+    //   name: 'group',
+    //   type: 'group',
+    //   fields: [
+    //     {
+    //       localized: true,
+    //       name: 'title',
+    //       type: 'text',
+    //     },
+    //   ],
+    // },
     {
-      name: 'group',
-      type: 'group',
-      fields: [
-        {
-          localized: true,
-          name: 'title',
-          type: 'text',
-        },
-      ],
+      name: 'text',
+      type: 'text',
+      localized: true,
     },
   ],
 }

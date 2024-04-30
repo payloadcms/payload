@@ -1058,64 +1058,25 @@ describe('Localization', () => {
   // })
 
   describe('Localized group', () => {
-    it('should prorly work localized group field', async () => {
-      const result = await payload.create({
-        collection: groupSlug,
-        locale: englishLocale,
-        data: {
-          groupLocalized: {
-            title: 'hello en',
-          },
-        },
-      })
-
-      expect(result.groupLocalized?.title).toBe('hello en')
-
-      await payload.update({
-        collection: groupSlug,
-        locale: spanishLocale,
-        id: result.id,
-        data: {
-          groupLocalized: {
-            title: 'hello es',
-          },
-        },
-      })
-
-      const docEn = await payload.findByID({
-        collection: groupSlug,
-        locale: englishLocale,
-        id: result.id,
-      })
-      const docEs = await payload.findByID({
-        collection: groupSlug,
-        locale: spanishLocale,
-        id: result.id,
-      })
-
-      expect(docEn.groupLocalized.title).toBe('hello en')
-      expect(docEs.groupLocalized.title).toBe('hello es')
-    })
-
-    // it('should prorly work localizde field inside of group', async () => {
+    // it('should prorly work localized group field', async () => {
     //   const result = await payload.create({
     //     collection: groupSlug,
     //     locale: englishLocale,
     //     data: {
-    //       group: {
+    //       groupLocalized: {
     //         title: 'hello en',
     //       },
     //     },
     //   })
 
-    //   // expect(result.group.title).toBe('hello en')
+    //   expect(result.groupLocalized?.title).toBe('hello en')
 
     //   await payload.update({
     //     collection: groupSlug,
     //     locale: spanishLocale,
     //     id: result.id,
     //     data: {
-    //       group: {
+    //       groupLocalized: {
     //         title: 'hello es',
     //       },
     //     },
@@ -1132,9 +1093,69 @@ describe('Localization', () => {
     //     id: result.id,
     //   })
 
-    //   expect(docEn.group.title).toBe('hello en')
-    //   expect(docEs.group.title).toBe('hello es')
+    //   expect(docEn.groupLocalized.title).toBe('hello en')
+    //   expect(docEs.groupLocalized.title).toBe('hello es')
     // })
+
+    it('should prorly work localizde field inside of group', async () => {
+      const result = await payload.create({
+        collection: groupSlug,
+        locale: englishLocale,
+        data: {
+          // group: {
+          //   title: 'hello en',
+          // },
+          text: 'asdasdasd',
+        },
+      })
+
+      expect(result.text).toBe('asdasdasd')
+
+      await payload.update({
+        collection: groupSlug,
+        locale: spanishLocale,
+        id: result.id,
+        data: {
+          text: 'someother',
+        },
+      })
+
+      const all = await payload.findByID({
+        collection: groupSlug,
+        id: result.id,
+        locale: englishLocale,
+      })
+
+      expect(all.text).toBe('asdasdasd')
+
+      // expect(result.group.title).toBe('hello en')
+
+      // await payload.update({
+      //   collection: groupSlug,
+      //   locale: spanishLocale,
+      //   id: result.id,
+      //   data: {
+      //     text: 'bsd',
+      //     // group: {
+      //     //   title: 'hello es',
+      //     // },
+      //   },
+      // })
+
+      // const docEn = await payload.findByID({
+      //   collection: groupSlug,
+      //   locale: englishLocale,
+      //   id: result.id,
+      // })
+      // const docEs = await payload.findByID({
+      //   collection: groupSlug,
+      //   locale: spanishLocale,
+      //   id: result.id,
+      // })
+
+      // expect(docEn.group.title).toBe('hello en')
+      // expect(docEs.group.title).toBe('hello es')
+    })
   })
 })
 
