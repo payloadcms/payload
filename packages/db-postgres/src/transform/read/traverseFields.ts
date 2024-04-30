@@ -267,7 +267,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (field.type === 'relationship' || field.type === 'upload') {
         const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
-        if (!relationPathMatch) {
+        if (!relationPathMatch && !fieldData) {
           if (('hasMany' in field && !field.hasMany) || typeof field.relationTo === 'string') {
             if ('hasMany' in field && field.hasMany) {
               if (field.localized && config.localization && config.localization.locales) {
