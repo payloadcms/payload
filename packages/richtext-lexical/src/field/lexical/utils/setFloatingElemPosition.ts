@@ -2,6 +2,9 @@ const VERTICAL_GAP = 10
 const HORIZONTAL_OFFSET = 5
 
 // TODO: needs refactoring
+// This is supposed to position the floatingElem based on the parent (anchorElem) and the target (targetRect) which is usually the selected text.
+// So basically, it positions the floatingElem either below or above the target (targetRect) and aligns it to the left or center of the target (targetRect).
+// This is used for positioning the floating toolbar (anchor: richtext editor) and its caret (anchor: floating toolbar)
 export function setFloatingElemPosition(
   targetRect: ClientRect | null,
   floatingElem: HTMLElement,
