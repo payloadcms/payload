@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 const css = `
   html[data-theme="dark"] .text {
@@ -13,27 +13,25 @@ const css = `
     width: 50px;
     height: 50px;
   }
-`;
+`
 
 export const Icon = () => {
   return (
     <svg
       className="graphic-icon"
-      width="430"
+      fill="none"
       height="435"
       viewBox="0 0 430 435"
-      fill="none"
+      width="430"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <style>
-        {css}
-      </style>
+      <style>{css}</style>
       <rect
         className="bg"
-        width="430"
+        fill="#0C0C0C"
         height="434"
         transform="translate(0 0.154785)"
-        fill="#0C0C0C"
+        width="430"
       />
       <path
         className="text"
@@ -41,5 +39,5 @@ export const Icon = () => {
         fill="white"
       />
     </svg>
-  );
-};
+  )
+}

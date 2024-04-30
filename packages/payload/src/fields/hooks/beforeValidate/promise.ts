@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
@@ -14,14 +14,20 @@ type Args<T> = {
   collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: T
+  /**
+   * The original data (not modified by any hooks)
+   */
   doc: T
   field: Field | TabAsField
   global: SanitizedGlobalConfig | null
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   siblingData: Record<string, unknown>
+  /**
+   * The original siblingData (not modified by any hooks)
+   */
   siblingDoc: Record<string, unknown>
 }
 
@@ -222,6 +228,8 @@ export const promise = async <T>({
           global,
           operation,
           originalDoc: doc,
+          overrideAccess,
+          previousSiblingDoc: siblingDoc,
           req,
           siblingData,
           value: siblingData[field.name],

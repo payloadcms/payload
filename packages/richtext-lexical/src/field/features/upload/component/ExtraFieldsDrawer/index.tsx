@@ -1,14 +1,10 @@
 'use client'
+import type { FormProps } from '@payloadcms/ui/forms/Form'
 import type { ClientCollectionConfig, FormState } from 'payload/types'
 
 import * as facelessUIImport from '@faceless-ui/modal'
-import lexicalComposerContextImport from '@lexical/react/LexicalComposerContext.js'
-const { useLexicalComposerContext } = lexicalComposerContextImport
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { getTranslation } from '@payloadcms/translations'
-import lexicalImport from 'lexical'
-const { $getNodeByKey } = lexicalImport
-import type { FormProps } from '@payloadcms/ui/forms/Form'
-
 import { Drawer } from '@payloadcms/ui/elements/Drawer'
 import { useFieldProps } from '@payloadcms/ui/forms/FieldPropsProvider'
 import { Form } from '@payloadcms/ui/forms/Form'
@@ -18,6 +14,7 @@ import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useDocumentInfo } from '@payloadcms/ui/providers/DocumentInfo'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
 import { getFormState } from '@payloadcms/ui/utilities/getFormState'
+import { $getNodeByKey } from 'lexical'
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { v4 as uuid } from 'uuid'

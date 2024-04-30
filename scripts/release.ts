@@ -6,6 +6,7 @@ import execa from 'execa'
 import fse from 'fs-extra'
 import minimist from 'minimist'
 import { fileURLToPath } from 'node:url'
+import pLimit from 'p-limit'
 import path from 'path'
 import prompts from 'prompts'
 import semver from 'semver'
@@ -15,6 +16,8 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { updateChangelog } from './utils/updateChangelog.js'
+
+const npmPublishLimit = pLimit(6)
 
 // Update this list with any packages to publish
 const packageWhitelist = [
@@ -29,6 +32,15 @@ const packageWhitelist = [
   'richtext-lexical',
 
   'create-payload-app',
+
+  // Adapters
+  'email-nodemailer',
+  'email-resend-rest',
+
+  'storage-s3',
+  'storage-azure',
+  'storage-gcs',
+  'storage-vercel-blob',
 
   // Plugins
   'plugin-cloud',
@@ -58,6 +70,7 @@ const {
   changelog = false, // Whether to update the changelog. WARNING: This gets throttled on too many commits
   'dry-run': dryRun,
   'git-tag': gitTag = true, // Whether to run git tag and commit operations
+  'git-commit': gitCommit = true, // Whether to run git commit operations
   tag = 'latest',
 } = args
 
@@ -185,7 +198,10 @@ async function main() {
 
   // Commit all staged changes
   runCmd(`git add CHANGELOG.md packages/**/package.json package.json`, execOpts)
-  runCmd(`git commit -m "chore(release): v${nextReleaseVersion} [skip ci]"`, execOpts)
+
+  if (gitCommit) {
+    runCmd(`git commit -m "chore(release): v${nextReleaseVersion} [skip ci]"`, execOpts)
+  }
 
   // Tag
   header(`🏷️  Tagging release v${nextReleaseVersion}`, { enable: gitTag })
@@ -195,12 +211,9 @@ async function main() {
   packageDetails = packageDetails.filter((p) => p.name !== 'payload')
   runCmd(`pnpm publish -C packages/payload --no-git-checks --json --tag ${tag}`, execOpts)
 
-  const results: { name: string; success: boolean; details?: string }[] = []
-  // Sequential publish
-  for (const pkg of packageDetails) {
-    const result = await publishSinglePackage(pkg, { dryRun })
-    results.push(result)
-  }
+  const results = await Promise.all(
+    packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun })),
+  )
 
   console.log(chalk.bold.green(`\n\nResults:\n`))
 
@@ -231,6 +244,12 @@ main().catch((error) => {
   console.error(error)
   process.exit(1)
 })
+
+/** Publish with promise concurrency throttling */
+async function publishPackageThrottled(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
+  const { dryRun = false } = opts ?? {}
+  return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun }))
+}
 
 async function publishSinglePackage(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
   const { dryRun = false } = opts ?? {}

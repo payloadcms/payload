@@ -1,7 +1,6 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 
-import type { User } from '../auth/types.js'
 import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types.js'
 import type payload from '../index.js'
 import type { GeneratedTypes } from '../index.js'
@@ -21,22 +20,10 @@ export type UploadEdits = {
   }
 }
 
-export type CustomPayloadRequest<U = unknown> = {
+export type CustomPayloadRequestProperties<U = unknown> = {
   context: RequestContext
-  /** Data from the request body */
-  data?: Record<string, unknown>
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: string
-  /**
-   * The files that were uploaded during this request
-   */
-  file?: {
-    data: Buffer
-    mimetype: string
-    name: string
-    size: number
-    tempFilePath?: string
-  }
   i18n: I18n
   /**
    * The requested locale if specified
@@ -79,9 +66,22 @@ export type CustomPayloadRequest<U = unknown> = {
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
 >
+export type PayloadRequestData = {
+  /** Data from the request body */
+  data?: Record<string, unknown>
+  /** The locale that should be used for a field when it is not translated to the requested locale */
+  file?: {
+    data: Buffer
+    mimetype: string
+    name: string
+    size: number
+    tempFilePath?: string
+  }
+}
 export type PayloadRequest<U = unknown> = Partial<Request> &
   Required<Pick<Request, 'headers'>> &
-  CustomPayloadRequest<U>
+  CustomPayloadRequestProperties<U>
+export type PayloadRequestWithData<U = unknown> = PayloadRequest<U> & PayloadRequestData
 export interface RequestContext {
   [key: string]: unknown
 }
@@ -113,3 +113,7 @@ export type AllOperations = AuthOperations | Operation | VersionOperations
 export function docHasTimestamps(doc: any): doc is TypeWithTimestamps {
   return doc?.createdAt && doc?.updatedAt
 }
+
+export type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N // This is a commonly used trick to detect 'any'
+export type IsAny<T> = IfAny<T, true, false>
+export type ReplaceAny<T, DefaultType> = IsAny<T> extends true ? DefaultType : T

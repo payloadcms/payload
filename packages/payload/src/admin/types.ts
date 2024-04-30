@@ -1,4 +1,4 @@
-export type { RichTextAdapter, RichTextFieldProps } from './RichText.js'
+export type { RichTextAdapter, RichTextAdapterProvider, RichTextFieldProps } from './RichText.js'
 export type { CellComponentProps, DefaultCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'

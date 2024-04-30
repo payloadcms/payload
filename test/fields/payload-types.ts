@@ -1084,6 +1084,10 @@ export interface TabsField {
     }[]
     text?: string | null
     defaultValue?: string | null
+    arrayInRow?: {
+      text: string
+      id?: string | null
+    }[]
   }
   namedTabWithDefaultValue: {
     defaultValue?: string | null

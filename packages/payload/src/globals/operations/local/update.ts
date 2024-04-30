@@ -1,7 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes, Payload, RequestContext } from '../../../index.js'
-import type { Document, PayloadRequest } from '../../../types/index.js'
+import type { Document, PayloadRequestWithData } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -15,7 +15,7 @@ export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   fallbackLocale?: GeneratedTypes['locale']
   locale?: GeneratedTypes['locale']
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   showHiddenFields?: boolean
   slug: TSlug
   user?: Document

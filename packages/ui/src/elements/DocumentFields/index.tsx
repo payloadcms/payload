@@ -63,7 +63,7 @@ export const DocumentFields: React.FC<Args> = ({
               className={`${baseClass}__fields`}
               fieldMap={mainFields}
               path=""
-              permissions={docPermissions?.['fields']}
+              permissions={docPermissions?.fields}
               readOnly={readOnly}
               schemaPath={schemaPath}
             />

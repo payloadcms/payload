@@ -8,9 +8,9 @@ import type {
 } from 'payload/types'
 
 import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import { GraphQLJSONObject } from 'graphql-type-json'
 import { toWords } from 'payload/utilities'
 
+import { GraphQLJSONObject } from '../packages/graphql-type-json/index.js'
 import formatName from '../utilities/formatName.js'
 
 type OperationType = 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update'

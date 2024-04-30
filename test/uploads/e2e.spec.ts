@@ -244,8 +244,8 @@ describe('uploads', () => {
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
+    await expect(page.locator('.file-field__filename')).toHaveValue('2mb.jpg')
 
-    await wait(500) // TODO: Fix this
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.Toastify .Toastify__toast--error')).toContainText(
       'File size limit has been reached',
@@ -253,6 +253,7 @@ describe('uploads', () => {
   })
 
   test('Should render adminThumbnail when using a function', async () => {
+    await page.reload() // Flakey test, it likely has to do with the test that comes before it. Trace viewer is not helpful when it fails.
     await page.goto(adminThumbnailFunctionURL.list)
     await page.waitForURL(adminThumbnailFunctionURL.list)
 

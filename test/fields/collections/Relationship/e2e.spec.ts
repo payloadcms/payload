@@ -18,7 +18,7 @@ import {
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInit.js'
+import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
@@ -167,7 +167,14 @@ describe('relationship', () => {
     await page.goto(url.create)
 
     const field = page.locator('#field-relationship')
+
+    // wait for relationship options to load
+    const textFieldPromise = page.waitForResponse(/api\/text-fields/)
+    const arrayFieldPromise = page.waitForResponse(/api\/array-fields/)
     await field.click()
+    await textFieldPromise
+    await arrayFieldPromise
+
     await page.locator('.rs__option:has-text("Seeded text document")').click()
     await field.locator('.clear-indicator').click()
     await expect(field.locator('.rs__placeholder')).toBeVisible()

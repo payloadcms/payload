@@ -1,6 +1,6 @@
 import type { Payload, RequestContext } from '../../../index.js'
 import type { GeneratedTypes } from '../../../index.js'
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequestWithData } from '../../../types/index.js'
 import type { Result } from '../login.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -18,7 +18,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   fallbackLocale?: string
   locale?: string
   overrideAccess?: boolean
-  req?: PayloadRequest
+  req?: PayloadRequestWithData
   showHiddenFields?: boolean
 }
 

@@ -3,7 +3,7 @@ import { promisify } from 'util'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { PayloadRequestWithData } from '../types/index.js'
 
 import { mapAsync } from '../utilities/mapAsync.js'
 
@@ -12,7 +12,7 @@ const unlinkFile = promisify(fs.unlink)
 type Args = {
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 /**
  * Cleanup temp files after operation lifecycle

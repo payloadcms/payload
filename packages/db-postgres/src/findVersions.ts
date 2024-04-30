@@ -1,12 +1,12 @@
 import type { FindVersions } from 'payload/database'
-import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
+import type { PayloadRequestWithData, SanitizedCollectionConfig } from 'payload/types'
 
 import { buildVersionCollectionFields } from 'payload/versions'
+import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
-import { getTableName } from './schema/getTableName.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: PostgresAdapter,
@@ -16,7 +16,7 @@ export const findVersions: FindVersions = async function findVersions(
     locale,
     page,
     pagination,
-    req = {} as PayloadRequest,
+    req = {} as PayloadRequestWithData,
     skip,
     sort: sortArg,
     where,
@@ -25,11 +25,10 @@ export const findVersions: FindVersions = async function findVersions(
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
 
-  const tableName = getTableName({
-    adapter: this,
-    config: collectionConfig,
-    versions: true,
-  })
+  const tableName = this.tableNameMap.get(
+    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
+  )
+
   const fields = buildVersionCollectionFields(collectionConfig)
 
   return findMany({

@@ -5,6 +5,7 @@ import { isNumber } from 'payload/utilities'
 
 import type { CollectionRouteHandlerWithID } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
 import { routeError } from '../routeError.js'
 
 export const preview: CollectionRouteHandlerWithID = async ({ id, collection, req }) => {
@@ -45,6 +46,10 @@ export const preview: CollectionRouteHandlerWithID = async ({ id, collection, re
   }
 
   return Response.json(previewURL, {
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
     status: httpStatus.OK,
   })
 }

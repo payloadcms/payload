@@ -57,6 +57,7 @@ export default joi.object({
         joi.object().pattern(joi.string(), component),
       ),
     }),
+    custom: joi.object().pattern(joi.string(), joi.any()),
     dateFormat: joi.string(),
     disable: joi.bool(),
     inactivityRoute: joi.string(),
@@ -83,10 +84,7 @@ export default joi.object({
   cookiePrefix: joi.string(),
   cors: [joi.string().valid('*'), joi.array().items(joi.string())],
   csrf: joi.array().items(joi.string().allow('')).sparse(),
-  custom: joi.object().keys({
-    client: joi.object().pattern(joi.string(), joi.any()),
-    server: joi.object().pattern(joi.string(), joi.any()),
-  }),
+  custom: joi.object().pattern(joi.string(), joi.any()),
   db: joi.any(),
   debug: joi.boolean(),
   defaultDepth: joi.number().min(0).max(30),
@@ -103,7 +101,7 @@ export default joi.object({
       validate: joi.func().required(),
     })
     .unknown(),
-  email: joi.object(),
+  email: joi.alternatives().try(joi.object(), joi.func()),
   endpoints: endpointsSchema,
   globals: joi.array(),
   graphQL: joi.object().keys({

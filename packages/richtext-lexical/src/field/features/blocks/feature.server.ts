@@ -1,3 +1,4 @@
+import type { Config } from 'payload/config'
 import type { Block, BlockField, Field, FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
@@ -7,7 +8,7 @@ import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'
 
-import { cloneDeep } from '../../lexical/utils/cloneDeep.js'
+import { createNode } from '../typeUtilities.js'
 import { BlocksFeatureClientComponent } from './feature.client.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { blockPopulationPromiseHOC } from './populationPromise.js'
@@ -25,39 +26,38 @@ export const BlocksFeature: FeatureProviderProviderServer<
   BlocksFeatureProps,
   BlocksFeatureClientProps
 > = (props) => {
-  // Sanitization taken from payload/src/fields/config/sanitize.ts
-
-  if (props?.blocks?.length) {
-    props.blocks = props.blocks.map((block) => {
-      const blockCopy = cloneDeep(block)
-
-      return {
-        ...blockCopy,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        fields: blockCopy.fields.concat(baseBlockFields as FieldWithRichTextRequiredEditor[]),
-        labels: !blockCopy.labels ? formatLabels(blockCopy.slug) : blockCopy.labels,
-      }
-    })
-    //  unSanitizedBlock.fields are sanitized in the React component and not here.
-    // That's because we do not have access to the payload config here.
-  }
-
-  // Build clientProps
-  const clientProps: BlocksFeatureClientProps = {
-    reducedBlocks: [],
-  }
-  for (const block of props.blocks) {
-    clientProps.reducedBlocks.push({
-      slug: block.slug,
-      fieldMap: [],
-      imageAltText: block.imageAltText,
-      imageURL: block.imageURL,
-      labels: block.labels,
-    })
-  }
-
   return {
-    feature: () => {
+    feature: async ({ config: _config }) => {
+      if (props?.blocks?.length) {
+        const validRelationships = _config.collections.map((c) => c.slug) || []
+
+        for (const block of props.blocks) {
+          block.fields = block.fields.concat(baseBlockFields as FieldWithRichTextRequiredEditor[])
+          block.labels = !block.labels ? formatLabels(block.slug) : block.labels
+
+          block.fields = (await sanitizeFields({
+            config: _config as unknown as Config,
+            fields: block.fields,
+            requireFieldLevelRichTextEditor: true,
+            validRelationships,
+          })) as FieldWithRichTextRequiredEditor[]
+        }
+      }
+
+      // Build clientProps
+      const clientProps: BlocksFeatureClientProps = {
+        reducedBlocks: [],
+      }
+      for (const block of props.blocks) {
+        clientProps.reducedBlocks.push({
+          slug: block.slug,
+          fieldMap: [],
+          imageAltText: block.imageAltText,
+          imageURL: block.imageURL,
+          labels: block.labels,
+        })
+      }
+
       return {
         ClientComponent: BlocksFeatureClientComponent,
         clientFeatureProps: clientProps,
@@ -97,26 +97,10 @@ export const BlocksFeature: FeatureProviderProviderServer<
               return currentSchema
             }
 
-            // sanitize blocks
-            const validRelationships = config.collections.map((c) => c.slug) || []
-
-            const sanitizedBlocks = props.blocks.map((block) => {
-              const blockCopy = cloneDeep(block)
-              return {
-                ...blockCopy,
-                fields: sanitizeFields({
-                  config,
-                  fields: blockCopy.fields,
-                  requireFieldLevelRichTextEditor: true,
-                  validRelationships,
-                }),
-              }
-            })
-
             const blocksField: BlockField = {
               name: field?.name + '_lexical_blocks',
               type: 'blocks',
-              blocks: sanitizedBlocks,
+              blocks: props.blocks,
             }
             // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
             // we don't actually use the JSON Schema itself in the generated types yet.
@@ -131,11 +115,74 @@ export const BlocksFeature: FeatureProviderProviderServer<
           },
         },
         nodes: [
-          {
+          createNode({
+            /* // TODO: Implement these hooks once docWithLocales / originalSiblingDoc => node matching has been figured out
+            hooks: {
+              beforeChange: [
+                async ({ context, findMany, node, operation, overrideAccess, req }) => {
+                  const blockType = node.fields.blockType
+
+                  const block = deepCopyObject(
+                    props.blocks.find((block) => block.slug === blockType),
+                  )
+
+
+                  await beforeChangeTraverseFields({
+                    id: null,
+                    collection: null,
+                    context,
+                    data: node.fields,
+                    doc: node.fields,
+                    fields: sanitizedBlock.fields,
+                    global: null,
+                    mergeLocaleActions: [],
+                    operation:
+                      operation === 'create' || operation === 'update' ? operation : 'update',
+                    overrideAccess,
+                    path: '',
+                    req,
+                    siblingData: node.fields,
+                    siblingDoc: node.fields,
+                  })
+
+
+                  return node
+                },
+              ],
+              beforeValidate: [
+                async ({ context, findMany, node, operation, overrideAccess, req }) => {
+                  const blockType = node.fields.blockType
+
+                  const block = deepCopyObject(
+                    props.blocks.find((block) => block.slug === blockType),
+                  )
+
+
+
+                  await beforeValidateTraverseFields({
+                    id: null,
+                    collection: null,
+                    context,
+                    data: node.fields,
+                    doc: node.fields,
+                    fields: sanitizedBlock.fields,
+                    global: null,
+                    operation:
+                      operation === 'create' || operation === 'update' ? operation : 'update',
+                    overrideAccess,
+                    req,
+                    siblingData: node.fields,
+                    siblingDoc: node.fields,
+                  })
+
+                  return node
+                },
+              ],
+            },*/
             node: BlockNode,
             populationPromises: [blockPopulationPromiseHOC(props)],
             validations: [blockValidationHOC(props)],
-          },
+          }),
         ],
         serverFeatureProps: props,
       }

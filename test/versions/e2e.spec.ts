@@ -43,7 +43,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInit.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 import { titleToDelete } from './shared.js'
 import {
@@ -118,6 +118,7 @@ describe('versions', () => {
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
+      postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
     })
 
     // This test has to run before bulk updates that will rename the title
@@ -153,6 +154,38 @@ describe('versions', () => {
       await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
 
       await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
+    })
+
+    test('bulk publish with autosave documents', async () => {
+      const title = 'autosave title'
+      const description = 'autosave description'
+      await page.goto(autosaveURL.create)
+
+      // fill the fields
+      await page.locator('#field-title').fill(title)
+      await page.locator('#field-description').fill(description)
+
+      // wait for autosave
+      await waitForAutoSaveToRunAndComplete(page)
+
+      // go to list
+      await page.goto(autosaveURL.list)
+
+      // expect the status to be draft
+      await expect(findTableCell(page, '_status', title)).toContainText('Draft')
+
+      // select the row
+      // await page.locator('.row-1 .select-row__checkbox').click()
+      await selectTableRow(page, title)
+
+      // click the publish many
+      await page.locator('.publish-many__toggle').click()
+
+      // confirm the dialog
+      await page.locator('#confirm-publish').click()
+
+      // expect the status to be published
+      await expect(findTableCell(page, '_status', title)).toContainText('Published')
     })
 
     test('bulk update - should unpublish many', async () => {
@@ -284,6 +317,38 @@ describe('versions', () => {
 
       await page.goto(`${page.url()}/versions`)
       await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
+    })
+
+    test('should restore version with correct data', async () => {
+      await page.goto(url.create)
+      await page.waitForURL(url.create)
+
+      // publish a doc
+      await page.locator('#field-title').fill('v1')
+      await page.locator('#field-description').fill('hello')
+      await saveDocAndAssert(page)
+
+      // save a draft
+      await page.locator('#field-title').fill('v2')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // go to versions list view
+      const savedDocURL = page.url()
+      await page.goto(`${savedDocURL}/versions`)
+      await page.waitForURL(`${savedDocURL}/versions`)
+
+      // select the first version (row 2)
+      const row2 = page.locator('tbody .row-2')
+      const versionID = await row2.locator('.cell-id').textContent()
+      await page.goto(`${savedDocURL}/versions/${versionID}`)
+      await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
+
+      // restore doc
+      await page.locator('.pill.restore-version').click()
+      await page.locator('button:has-text("Confirm")').click()
+      await page.waitForURL(savedDocURL)
+
+      await expect(page.locator('#field-title')).toHaveValue('v1')
     })
 
     test('should show global versions view level action in globals versions view', async () => {
@@ -506,15 +571,6 @@ describe('versions', () => {
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
 
       await expect(page.locator('#action-save')).not.toBeAttached()
-    })
-  })
-  describe('posts collection', () => {
-    beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
-      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
-      disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
-      customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
-      postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
     })
 
     test('should show documents title in relationship even if draft document', async () => {

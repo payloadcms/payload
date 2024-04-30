@@ -1,9 +1,4 @@
-import type {
-  Collection,
-  CustomPayloadRequest,
-  PayloadRequest,
-  SanitizedConfig,
-} from 'payload/types'
+import type { CustomPayloadRequestProperties, PayloadRequest, SanitizedConfig } from 'payload/types'
 
 import { initI18n } from '@payloadcms/translations'
 import { executeAuthStrategies } from 'payload/auth'
@@ -12,10 +7,9 @@ import { getDataLoader } from 'payload/utilities'
 import qs from 'qs'
 import { URL } from 'url'
 
-import { getDataAndFile } from './getDataAndFile.js'
+import { sanitizeLocales } from './addLocalesToRequest.js'
 import { getPayloadHMR } from './getPayloadHMR.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
-import { getRequestLocales } from './getRequestLocales.js'
 
 type Args = {
   config: Promise<SanitizedConfig> | SanitizedConfig
@@ -33,37 +27,13 @@ export const createPayloadRequest = async ({
   const cookies = parseCookies(request.headers)
   const payload = await getPayloadHMR({ config: configPromise })
 
-  const { collections, config } = payload
-
-  let collection: Collection = undefined
-  if (params?.collection && collections?.[params.collection]) {
-    collection = collections[params.collection]
-  }
+  const { config } = payload
 
   const urlProperties = new URL(request.url)
   const { pathname, searchParams } = urlProperties
 
   const isGraphQL =
     !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
-
-  const { data, file } = await getDataAndFile({
-    collection,
-    config,
-    request,
-  })
-
-  let requestFallbackLocale
-  let requestLocale
-
-  if (config.localization) {
-    const locales = getRequestLocales({
-      data,
-      localization: config.localization,
-      searchParams,
-    })
-    requestLocale = locales.locale
-    requestFallbackLocale = locales.fallbackLocale
-  }
 
   const language = getRequestLanguage({
     config,
@@ -77,16 +47,26 @@ export const createPayloadRequest = async ({
     language,
   })
 
-  const customRequest: CustomPayloadRequest = {
+  let locale
+  let fallbackLocale
+  if (config.localization) {
+    const locales = sanitizeLocales({
+      fallbackLocale: searchParams.get('fallback-locale'),
+      locale: searchParams.get('locale'),
+      localization: payload.config.localization,
+    })
+    locale = locales.locale
+    fallbackLocale = locales.fallbackLocale
+  }
+
+  const customRequest: CustomPayloadRequestProperties = {
     context: {},
-    data,
-    fallbackLocale: requestFallbackLocale,
-    file,
+    fallbackLocale,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
     i18n,
-    locale: requestLocale,
+    locale,
     origin: urlProperties.origin,
     pathname: urlProperties.pathname,
     payload,
@@ -112,7 +92,6 @@ export const createPayloadRequest = async ({
 
   const req: PayloadRequest = Object.assign(request, customRequest)
 
-  if (data) req.json = () => Promise.resolve(data)
   req.payloadDataLoader = getDataLoader(req)
 
   req.user = await executeAuthStrategies({

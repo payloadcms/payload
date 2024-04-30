@@ -1,7 +1,6 @@
 'use client'
 
-import lexicalImport from 'lexical'
-const { FORMAT_ELEMENT_COMMAND } = lexicalImport
+import { FORMAT_ELEMENT_COMMAND } from 'lexical'
 
 import type { FeatureProviderProviderClient } from '../types.js'
 

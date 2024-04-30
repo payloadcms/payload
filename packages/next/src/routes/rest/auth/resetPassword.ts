@@ -4,6 +4,8 @@ import { resetPasswordOperation } from 'payload/operations'
 
 import type { CollectionRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const resetPassword: CollectionRouteHandler = async ({ collection, req }) => {
   const { searchParams, t } = req
   const depth = searchParams.get('depth')
@@ -34,8 +36,11 @@ export const resetPassword: CollectionRouteHandler = async ({ collection, req })
       ...result,
     },
     {
-      headers: new Headers({
-        'Set-Cookie': cookie,
+      headers: headersWithCors({
+        headers: new Headers({
+          'Set-Cookie': cookie,
+        }),
+        req,
       }),
       status: httpStatus.OK,
     },

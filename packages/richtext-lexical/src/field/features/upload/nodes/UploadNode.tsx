@@ -1,12 +1,5 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type { ElementFormatType, NodeKey } from 'lexical'
-
-import lexicalDecoratorBlockNodeImport from '@lexical/react/LexicalDecoratorBlockNode.js'
-const { DecoratorBlockNode } = lexicalDecoratorBlockNodeImport
-
-import lexicalImport from 'lexical'
-const { $applyNodeReplacement } = lexicalImport
-
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -15,20 +8,13 @@ import type {
   Spread,
 } from 'lexical'
 
+import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
 const RawUploadComponent = React.lazy(() =>
   import('../component/index.js').then((module) => ({ default: module.UploadComponent })),
 )
-
-export type RawUploadPayload = {
-  fields: {
-    // unknown, custom fields:
-    [key: string]: unknown
-  }
-  id: string
-  relationTo: string
-}
 
 export type UploadData = {
   fields: {
@@ -36,18 +22,10 @@ export type UploadData = {
     [key: string]: unknown
   }
   relationTo: string
-  value: {
-    // Actual upload data, populated in afterRead hook
-    [key: string]: unknown
-    id: string
-  }
+  value: number | string
 }
 
 function convertUploadElement(domNode: Node): DOMConversionOutput | null {
-  //if (domNode instanceof HTMLImageElement) {
-  // const { alt: altText, src } = domNode;
-  // const node = $createImageNode({ altText, src });
-  // return { node };
   // TODO: Auto-upload functionality here!
   //}
   return null
@@ -93,6 +71,10 @@ export class UploadNode extends DecoratorBlockNode {
   }
 
   static importJSON(serializedNode: SerializedUploadNode): UploadNode {
+    if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
+      serializedNode.value = (serializedNode.value as unknown as { id: string }).id
+    }
+
     const importedData: UploadData = {
       fields: serializedNode.fields,
       relationTo: serializedNode.relationTo,
@@ -126,7 +108,7 @@ export class UploadNode extends DecoratorBlockNode {
       ...super.exportJSON(),
       ...this.getData(),
       type: this.getType(),
-      version: 1,
+      version: 2,
     }
   }
 

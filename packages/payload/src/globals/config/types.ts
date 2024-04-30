@@ -18,7 +18,7 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../types/index.js'
 import type { Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
@@ -32,7 +32,7 @@ export type BeforeValidateHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type BeforeChangeHook = (args: {
@@ -41,7 +41,7 @@ export type BeforeChangeHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type AfterChangeHook = (args: {
@@ -50,7 +50,7 @@ export type AfterChangeHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   previousDoc: any
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type BeforeReadHook = (args: {
@@ -58,7 +58,7 @@ export type BeforeReadHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type AfterReadHook = (args: {
@@ -68,7 +68,7 @@ export type AfterReadHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   query?: Where
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }) => any
 
 export type GlobalAdminOptions = {
@@ -106,6 +106,8 @@ export type GlobalAdminOptions = {
       Edit?: EditConfig
     }
   }
+  /** Extension point to add your custom data. Available in server and client. */
+  custom?: Record<string, any>
   /**
    * Custom description for collection
    */
@@ -117,7 +119,7 @@ export type GlobalAdminOptions = {
   /**
    * Exclude the global from the admin nav and routes
    */
-  hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
+  hidden?: ((args: { user: PayloadRequestWithData['user'] }) => boolean) | boolean
   /**
    * Hide the API URL within the Edit view
    */
@@ -140,17 +142,8 @@ export type GlobalConfig = {
     update?: Access
   }
   admin?: GlobalAdminOptions
-  /** Extension point to add your custom data. */
-  custom?: {
-    /**
-     * Available in client bundle.
-     */
-    client?: Record<string, any>
-    /**
-     * Server only.
-     */
-    server?: Record<string, any>
-  }
+  /** Extension point to add your custom data. Server only. */
+  custom?: Record<string, any>
   /**
    * Customize the SQL table name
    */

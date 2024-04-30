@@ -7,10 +7,8 @@ export const _SlateRelationshipConverter: SlateNodeConverter = {
       type: 'relationship',
       format: '',
       relationTo: slateNode.relationTo,
-      value: {
-        id: slateNode?.value?.id || '',
-      },
-      version: 1,
+      value: slateNode?.value?.id || '',
+      version: 2,
     } as const as SerializedRelationshipNode
   },
   nodeTypes: ['relationship'],

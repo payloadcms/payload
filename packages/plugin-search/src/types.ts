@@ -1,5 +1,9 @@
 import type { Payload } from 'payload'
-import type { CollectionAfterChangeHook, CollectionConfig, PayloadRequest } from 'payload/types'
+import type {
+  CollectionAfterChangeHook,
+  CollectionConfig,
+  PayloadRequestWithData,
+} from 'payload/types'
 
 export interface DocToSync {
   [key: string]: any
@@ -15,7 +19,7 @@ export type BeforeSync = (args: {
     [key: string]: any
   }
   payload: Payload
-  req: PayloadRequest
+  req: PayloadRequestWithData
   searchDoc: DocToSync
 }) => DocToSync | Promise<DocToSync>
 

@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import type { FindOneArgs } from '../../database/types.js'
-import type { PayloadRequest, Select } from '../../types/index.js'
+import type { PayloadRequestWithData, Select } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
@@ -21,7 +21,7 @@ export type Arguments = {
   draft?: boolean
   id: number | string
   overrideAccess?: boolean
-  req: PayloadRequest
+  req: PayloadRequestWithData
   select?: Select
   showHiddenFields?: boolean
 }
@@ -81,7 +81,7 @@ export const findByIDOperation = async <T extends TypeWithID>(
       locale,
       req: {
         transactionID: req.transactionID,
-      } as PayloadRequest,
+      } as PayloadRequestWithData,
       select,
       where: combineQueries({ id: { equals: id } }, accessResult),
     }

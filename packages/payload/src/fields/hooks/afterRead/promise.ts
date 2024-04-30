@@ -2,7 +2,7 @@
 import type { RichTextAdapter } from '../../../admin/types.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { PayloadRequest, RequestContext } from '../../../types/index.js'
+import type { PayloadRequestWithData, RequestContext } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -18,6 +18,9 @@ type Args = {
   doc: Record<string, unknown>
   fallbackLocale: null | string
   field: Field | TabAsField
+  /**
+   * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
+   */
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
@@ -25,7 +28,7 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   populationPromises: Promise<void>[]
-  req: PayloadRequest
+  req: PayloadRequestWithData
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
   triggerAccessControl?: boolean
@@ -138,14 +141,19 @@ export const promise = async ({
     }
 
     case 'richText': {
+      if (typeof field?.editor === 'function') {
+        throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
       const editor: RichTextAdapter = field?.editor
       // This is run here AND in the GraphQL Resolver
-      if (editor?.populationPromise) {
-        const populationPromise = editor.populationPromise({
+      if (editor?.populationPromises) {
+        editor.populationPromises({
           context,
           currentDepth,
           depth,
           field,
+          fieldPromises,
           findMany,
           flattenLocales,
           overrideAccess,
@@ -154,23 +162,6 @@ export const promise = async ({
           showHiddenFields,
           siblingDoc,
         })
-
-        if (populationPromise) {
-          populationPromises.push(populationPromise)
-        }
-      }
-
-      // This is only run here, independent of depth
-      if (editor?.afterReadPromise) {
-        const afterReadPromise = editor?.afterReadPromise({
-          field,
-          incomingEditorState: siblingDoc[field.name] as object,
-          siblingDoc,
-        })
-
-        if (afterReadPromise) {
-          populationPromises.push(afterReadPromise)
-        }
       }
 
       break
@@ -236,6 +227,7 @@ export const promise = async ({
             global,
             operation: 'read',
             originalDoc: doc,
+            overrideAccess,
             req,
             siblingData: siblingDoc,
             value: siblingDoc[field.name],

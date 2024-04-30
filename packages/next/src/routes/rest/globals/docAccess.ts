@@ -3,6 +3,8 @@ import { docAccessOperationGlobal } from 'payload/operations'
 
 import type { GlobalRouteHandler } from '../types.js'
 
+import { headersWithCors } from '../../../utilities/headersWithCors.js'
+
 export const docAccess: GlobalRouteHandler = async ({ globalConfig, req }) => {
   const result = await docAccessOperationGlobal({
     globalConfig,
@@ -10,6 +12,10 @@ export const docAccess: GlobalRouteHandler = async ({ globalConfig, req }) => {
   })
 
   return Response.json(result, {
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
     status: httpStatus.OK,
   })
 }

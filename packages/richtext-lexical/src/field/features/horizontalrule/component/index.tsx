@@ -4,11 +4,8 @@ import type { NodeKey } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
-import lexicalUtilsImport from '@lexical/utils'
-const { mergeRegister } = lexicalUtilsImport
-
-import lexicalImport from 'lexical'
-const {
+import { mergeRegister } from '@lexical/utils'
+import {
   $getNodeByKey,
   $getSelection,
   $isNodeSelection,
@@ -16,7 +13,7 @@ const {
   COMMAND_PRIORITY_LOW,
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
-} = lexicalImport
+} from 'lexical'
 import { useCallback, useEffect } from 'react'
 
 import { $isHorizontalRuleNode } from '../nodes/HorizontalRuleNode.js'

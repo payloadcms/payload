@@ -14,11 +14,11 @@ interface Args {
 }
 
 export const getHandler = ({ collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { params }) => {
+  return async (req, { params: { filename } }) => {
     try {
-      const prefix = await getFilePrefix({ collection, req })
+      const prefix = await getFilePrefix({ collection, filename, req })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
-        path.posix.join(prefix, params.filename),
+        path.posix.join(prefix, filename),
       )
 
       const { end, start } = await getRangeFromHeader(blockBlobClient, req.headers.get('range'))

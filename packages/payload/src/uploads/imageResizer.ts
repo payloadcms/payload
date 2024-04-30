@@ -8,7 +8,7 @@ import sanitize from 'sanitize-filename'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SharpDependency } from '../config/types.js'
-import type { CustomPayloadRequest, PayloadRequest, UploadEdits } from '../types/index.js'
+import type { PayloadRequestWithData, UploadEdits } from '../types/index.js'
 import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
@@ -17,9 +17,9 @@ import fileExists from './fileExists.js'
 type ResizeArgs = {
   config: SanitizedCollectionConfig
   dimensions: ProbedImageSize
-  file: CustomPayloadRequest['file']
+  file: PayloadRequestWithData['file']
   mimeType: string
-  req: PayloadRequest & {
+  req: PayloadRequestWithData & {
     query?: {
       uploadEdits?: UploadEdits
     }

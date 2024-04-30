@@ -62,7 +62,7 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}_rels`]) {
+  if (adapter.tables[`${tableName}${adapter.relationshipsSuffix}`]) {
     result.with._rels = {
       columns: {
         id: false,
@@ -72,7 +72,7 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}_locales`]) {
+  if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
     result.with._locales = _locales
   }
 

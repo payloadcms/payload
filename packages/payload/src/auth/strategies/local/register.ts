@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { Payload } from '../../../index.js'
-import type { PayloadRequest } from '../../../types/index.js'
+import type { PayloadRequestWithData } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
 import { generatePasswordSaltHash } from './generatePasswordSaltHash.js'
@@ -10,7 +10,7 @@ type Args = {
   doc: Record<string, unknown>
   password: string
   payload: Payload
-  req: PayloadRequest
+  req: PayloadRequestWithData
 }
 
 export const registerLocalStrategy = async ({
