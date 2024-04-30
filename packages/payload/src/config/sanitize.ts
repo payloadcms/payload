@@ -12,7 +12,7 @@ import { defaultUserCollection } from '../auth/defaultUser.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { InvalidConfiguration } from '../errors/index.js'
-import sanitizeGlobals from '../globals/config/sanitize.js'
+import { sanitizeGlobals } from '../globals/config/sanitize.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
 import { isPlainObject } from '../utilities/isPlainObject.js'
@@ -41,10 +41,10 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     )
   }
 
-  return sanitizedConfig as Partial<SanitizedConfig>
+  return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }
 
-export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
+export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
   const configWithDefaults: Config = merge(defaults, incomingConfig, {
     isMergeableObject: isPlainObject,
   }) as Config
@@ -97,16 +97,25 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     ...(incomingConfig?.i18n ?? {}),
   }
 
-  configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults))
+  configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
 
-  config.collections = config.collections.map((collection) =>
-    sanitizeCollection(configWithDefaults, collection),
-  )
+  const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
+  for (let i = 0; i < config.collections.length; i++) {
+    config.collections[i] = await sanitizeCollection(
+      config as unknown as Config,
+      config.collections[i],
+      richTextSanitizationPromises,
+    )
+  }
+
   checkDuplicateCollections(config.collections)
 
   if (config.globals.length > 0) {
-    config.globals = sanitizeGlobals(config as SanitizedConfig)
+    config.globals = await sanitizeGlobals(
+      config as unknown as Config,
+      richTextSanitizationPromises,
+    )
   }
 
   if (config.serverURL !== '') {
@@ -118,6 +127,21 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   config.upload.adapters = Array.from(
     new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
   )
+
+  /*
+    Execute richText sanitization
+   */
+  if (typeof incomingConfig.editor === 'function') {
+    config.editor = await incomingConfig.editor({
+      config: config as SanitizedConfig,
+    })
+  }
+
+  const promises: Promise<void>[] = []
+  for (const sanitizeFunction of richTextSanitizationPromises) {
+    promises.push(sanitizeFunction(config as SanitizedConfig))
+  }
+  await Promise.all(promises)
 
   return config as SanitizedConfig
 }

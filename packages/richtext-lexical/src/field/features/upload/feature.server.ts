@@ -1,3 +1,4 @@
+import type { Config } from 'payload/config'
 import type {
   Field,
   FieldWithRichTextRequiredEditor,
@@ -8,6 +9,7 @@ import type {
 } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
+import { sanitizeFields } from 'payload/config'
 
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { UploadFeaturePropsClient } from './feature.client.js'
@@ -51,7 +53,20 @@ export const UploadFeature: FeatureProviderProviderServer<
   }
 
   return {
-    feature: () => {
+    feature: async ({ config: _config }) => {
+      const validRelationships = _config.collections.map((c) => c.slug) || []
+
+      for (const collection in props.collections) {
+        if (props.collections[collection].fields?.length) {
+          props.collections[collection].fields = (await sanitizeFields({
+            config: _config as unknown as Config,
+            fields: props.collections[collection].fields,
+            requireFieldLevelRichTextEditor: true,
+            validRelationships,
+          })) as FieldWithRichTextRequiredEditor[]
+        }
+      }
+
       return {
         ClientComponent: UploadFeatureClientComponent,
         clientFeatureProps: clientProps,

@@ -1,19 +1,14 @@
-import type { RichTextAdapter } from 'payload/types'
-
-import { sanitizeFields } from 'payload/config'
+import type { Field, RichTextAdapter } from 'payload/types'
 
 import type { AdapterArguments, RichTextCustomElement } from './types.js'
 
 import { elements as elementTypes } from './field/elements/index.js'
 import { linkFieldsSchemaPath } from './field/elements/link/shared.js'
-import { transformExtraFields } from './field/elements/link/utilities.js'
 import { uploadFieldsSchemaPath } from './field/elements/upload/shared.js'
 
 export const getGenerateSchemaMap =
   (args: AdapterArguments): RichTextAdapter['generateSchemaMap'] =>
-  ({ config, i18n, schemaMap, schemaPath }) => {
-    const validRelationships = config.collections.map((c) => c.slug) || []
-
+  ({ config, schemaMap, schemaPath }) => {
     ;(args?.admin?.elements || Object.values(elementTypes)).forEach((el) => {
       let element: RichTextCustomElement
 
@@ -26,13 +21,10 @@ export const getGenerateSchemaMap =
       if (element) {
         switch (element.name) {
           case 'link': {
-            const linkFields = sanitizeFields({
-              config,
-              fields: transformExtraFields(args.admin?.link?.fields, config, i18n),
-              validRelationships,
-            })
-
-            schemaMap.set(`${schemaPath}.${linkFieldsSchemaPath}`, linkFields)
+            schemaMap.set(
+              `${schemaPath}.${linkFieldsSchemaPath}`,
+              args.admin?.link?.fields as Field[],
+            )
 
             break
           }
@@ -50,15 +42,9 @@ export const getGenerateSchemaMap =
 
             uploadEnabledCollections.forEach((collection) => {
               if (args?.admin?.upload?.collections[collection.slug]?.fields) {
-                const uploadFields = sanitizeFields({
-                  config,
-                  fields: args?.admin?.upload?.collections[collection.slug]?.fields,
-                  validRelationships,
-                })
-
                 schemaMap.set(
                   `${schemaPath}.${uploadFieldsSchemaPath}.${collection.slug}`,
-                  uploadFields,
+                  args?.admin?.upload?.collections[collection.slug]?.fields,
                 )
               }
             })

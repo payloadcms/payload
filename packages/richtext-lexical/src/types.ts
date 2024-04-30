@@ -1,6 +1,6 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
 import type { FieldPermissions } from 'payload/auth'
-import type { FieldTypes } from 'payload/config'
+import type { FieldTypes, SanitizedConfig } from 'payload/config'
 import type { RichTextAdapter, RichTextFieldProps } from 'payload/types'
 import type React from 'react'
 
@@ -18,10 +18,15 @@ export type LexicalEditorProps = {
   lexical?: LexicalEditorConfig
 }
 
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps, any> & {
   editorConfig: SanitizedServerEditorConfig
 }
+
+export type LexicalRichTextAdapterProvider =
+  /**
+   * This is being called during the payload sanitization process
+   */
+  ({ config }: { config: SanitizedConfig }) => Promise<LexicalRichTextAdapter>
 
 export type FieldProps = RichTextFieldProps<SerializedEditorState, AdapterProps, AdapterProps> & {
   fieldTypes: FieldTypes

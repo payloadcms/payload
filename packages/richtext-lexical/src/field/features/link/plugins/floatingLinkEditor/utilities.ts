@@ -1,6 +1,5 @@
-import type { I18n } from '@payloadcms/translations'
 import type { SanitizedConfig } from 'payload/config'
-import type { Field, GroupField } from 'payload/types'
+import type { Field, FieldWithRichTextRequiredEditor, GroupField } from 'payload/types'
 
 import { getBaseFields } from '../../drawer/baseFields.js'
 
@@ -10,18 +9,24 @@ import { getBaseFields } from '../../drawer/baseFields.js'
 // eslint-disable-next-line @typescript-eslint/require-await
 export function transformExtraFields(
   customFieldSchema:
-    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: I18n }) => Field[])
-    | Field[],
+    | ((args: {
+        config: SanitizedConfig
+        defaultFields: FieldWithRichTextRequiredEditor[]
+      }) => FieldWithRichTextRequiredEditor[])
+    | FieldWithRichTextRequiredEditor[],
   config: SanitizedConfig,
-  i18n: I18n,
   enabledCollections?: false | string[],
   disabledCollections?: false | string[],
 ): Field[] {
-  const baseFields: Field[] = getBaseFields(config, enabledCollections, disabledCollections)
+  const baseFields: FieldWithRichTextRequiredEditor[] = getBaseFields(
+    config,
+    enabledCollections,
+    disabledCollections,
+  )
 
   const fields =
     typeof customFieldSchema === 'function'
-      ? customFieldSchema({ config, defaultFields: baseFields, i18n })
+      ? customFieldSchema({ config, defaultFields: baseFields })
       : baseFields
 
   // Wrap fields which are not part of the base schema in a group named 'fields' - otherwise they will be rendered but not saved
