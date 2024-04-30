@@ -479,6 +479,7 @@ function buildObjectType({
             await editor?.populationPromise({
               context,
               depth,
+              draft: args.draft,
               field,
               findMany: false,
               flattenLocales: false,

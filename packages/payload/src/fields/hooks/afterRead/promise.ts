@@ -147,6 +147,7 @@ export const promise = async ({
           context,
           currentDepth,
           depth,
+          draft,
           field,
           findMany,
           flattenLocales,
