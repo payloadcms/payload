@@ -452,6 +452,18 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/email-resend-rest:
+    devDependencies:
+      '@types/jest':
+        specifier: 29.5.12
+        version: 29.5.12
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.12.5)(ts-node@10.9.1)
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/eslint-config-payload:
     dependencies:
       '@types/eslint':
@@ -1604,6 +1616,9 @@ importers:
       '@payloadcms/email-nodemailer':
         specifier: workspace:*
         version: link:../packages/email-nodemailer
+      '@payloadcms/email-resend-rest':
+        specifier: workspace:*
+        version: link:../packages/email-resend-rest
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../packages/eslint-config-payload
