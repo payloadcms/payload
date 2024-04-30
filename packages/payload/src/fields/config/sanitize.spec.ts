@@ -1,3 +1,6 @@
+import { Config } from '../../config/types.js'
+import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors/index.js'
+import { sanitizeFields } from './sanitize.js'
 import type {
   ArrayField,
   Block,
@@ -7,22 +10,10 @@ import type {
   NumberField,
   TextField,
 } from './types.js'
-import { Config } from '../../config/types.js'
-import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors/index.js'
-import { sanitizeFields } from './sanitize.js'
-import type { BaseDatabaseAdapter } from '../../database/types.js'
-
-const dummyConfig: Config = {
-  collections: [],
-  db: {
-    defaultIDType: 'text',
-    init: () => ({}) as BaseDatabaseAdapter['init'],
-  } as BaseDatabaseAdapter,
-}
 
 describe('sanitizeFields', () => {
+  const config = {} as Config
   it('should throw on missing type field', async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     const fields: Field[] = [
       // @ts-expect-error
       {
@@ -31,10 +22,8 @@ describe('sanitizeFields', () => {
       },
     ]
     await expect(async () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       await sanitizeFields({
-        config: dummyConfig,
+        config,
         fields,
         validRelationships: [],
       })
@@ -50,7 +39,7 @@ describe('sanitizeFields', () => {
     ]
     await expect(async () => {
       await sanitizeFields({
-        config: dummyConfig,
+        config,
         fields,
         validRelationships: [],
       })
@@ -67,7 +56,7 @@ describe('sanitizeFields', () => {
       ]
       const sanitizedField = (
         await sanitizeFields({
-          config: dummyConfig,
+          config,
           fields,
           validRelationships: [],
         })
@@ -86,7 +75,7 @@ describe('sanitizeFields', () => {
       ]
       const sanitizedField = (
         await sanitizeFields({
-          config: dummyConfig,
+          config,
           fields,
           validRelationships: [],
         })
@@ -107,7 +96,7 @@ describe('sanitizeFields', () => {
         ]
         const sanitizedField = (
           await sanitizeFields({
-            config: dummyConfig,
+            config,
             fields,
             validRelationships: [],
           })
@@ -131,7 +120,7 @@ describe('sanitizeFields', () => {
         }
         const sanitizedField = (
           await sanitizeFields({
-            config: dummyConfig,
+            config,
             fields: [arrayField],
             validRelationships: [],
           })
@@ -162,7 +151,7 @@ describe('sanitizeFields', () => {
         ]
         const sanitizedField = (
           await sanitizeFields({
-            config: dummyConfig,
+            config,
             fields,
             validRelationships: [],
           })
@@ -189,7 +178,7 @@ describe('sanitizeFields', () => {
       ]
       const sanitizedField = (
         await sanitizeFields({
-          config: dummyConfig,
+          config,
           fields,
           validRelationships: [],
         })
@@ -215,7 +204,7 @@ describe('sanitizeFields', () => {
       ]
       const sanitizedField = (
         await sanitizeFields({
-          config: dummyConfig,
+          config,
           fields,
           validRelationships: [],
         })
@@ -243,7 +232,7 @@ describe('sanitizeFields', () => {
         },
       ]
       await expect(async () => {
-        await sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        await sanitizeFields({ config, fields, validRelationships })
       }).not.toThrow()
     })
 
@@ -258,7 +247,7 @@ describe('sanitizeFields', () => {
         },
       ]
       await expect(async () => {
-        await sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        await sanitizeFields({ config, fields, validRelationships })
       }).not.toThrow()
     })
 
@@ -284,7 +273,7 @@ describe('sanitizeFields', () => {
         },
       ]
       await expect(async () => {
-        await sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        await sanitizeFields({ config, fields, validRelationships })
       }).not.toThrow()
     })
 
@@ -299,7 +288,7 @@ describe('sanitizeFields', () => {
         },
       ]
       await expect(async () => {
-        await sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        await sanitizeFields({ config, fields, validRelationships })
       }).rejects.toThrow(InvalidFieldRelationship)
     })
 
@@ -314,7 +303,7 @@ describe('sanitizeFields', () => {
         },
       ]
       await expect(async () => {
-        await sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        await sanitizeFields({ config, fields, validRelationships })
       }).rejects.toThrow(InvalidFieldRelationship)
     })
 
@@ -340,7 +329,7 @@ describe('sanitizeFields', () => {
         },
       ]
       await expect(async () => {
-        await sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        await sanitizeFields({ config, fields, validRelationships })
       }).rejects.toThrow(InvalidFieldRelationship)
     })
 
@@ -355,7 +344,7 @@ describe('sanitizeFields', () => {
 
       const sanitizedField = (
         await sanitizeFields({
-          config: dummyConfig,
+          config,
           fields,
           validRelationships: [],
         })
@@ -365,7 +354,7 @@ describe('sanitizeFields', () => {
 
     it('should return empty field array if no fields', async () => {
       const sanitizedFields = await sanitizeFields({
-        config: dummyConfig,
+        config,
         fields: [],
         validRelationships: [],
       })
