@@ -1,14 +1,12 @@
 /* eslint-disable no-param-reassign */
-import type { Field, FieldAffectingData, NamedTab, Select } from 'payload/types'
+import type { Field, Select } from 'payload/types'
 
-import APIError from 'packages/payload/src/errors/APIError.js'
 import { fieldAffectsData, tabHasName } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types.js'
 import type { Result } from './buildFindManyArgs.js'
 
-import { getTableName } from '../schema/getTableName.js'
 import { buildColumns } from './buildColumns.js'
 import { buildFieldSelect } from './buildFieldSelect.js'
 
