@@ -26,7 +26,7 @@ const attachFakeURLProperties = (req: PayloadRequestWithData) => {
    * *NOTE*
    * If no URL is provided, the local API was called directly outside
    * the context of a request. Therefore we create a fake URL object.
-   * `ts-ignore` is used below for properties that are 'read-only'
+   * `ts-expect-error` is used below for properties that are 'read-only'
    * since they do not exist yet we can safely ignore the error.
    */
   let urlObject
