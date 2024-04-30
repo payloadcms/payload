@@ -1,9 +1,11 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 import { arrayFieldsSlug } from '../../slugs'
+import { jestFn } from '../jestFn'
 import { ArrayRowLabel } from './LabelComponent'
 
 export const arrayDefaultValue = [{ text: 'row one' }, { text: 'row two' }]
+export const arrayAfterChangeMock = jestFn()
 
 const ArrayFields: CollectionConfig = {
   admin: {
@@ -154,6 +156,26 @@ const ArrayFields: CollectionConfig = {
       ],
       minRows: 2,
       type: 'array',
+    },
+    {
+      name: 'arrayWithNestedAfterChange',
+      type: 'array',
+      defaultValue: [{ text: 'defaultNestedValue' }],
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          hooks: {
+            afterChange: [
+              ({ value, previousValue }) => {
+                if (value !== previousValue) {
+                  arrayAfterChangeMock({ value, previousValue })
+                }
+              },
+            ],
+          },
+        },
+      ],
     },
   ],
   slug: arrayFieldsSlug,

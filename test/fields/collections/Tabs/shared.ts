@@ -53,6 +53,9 @@ export const tabsDoc: Partial<TabsField> = {
     afterChange: false,
     afterRead: false,
   },
+  tabWithNestedAfterChange: {
+    text: 'initialNestedValue',
+  },
   textarea: 'Here is some text that goes in a textarea',
   anotherText: 'Super tired of writing this text',
   textInRow: 'hello',

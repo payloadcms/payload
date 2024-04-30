@@ -3,8 +3,11 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 
 import { tabsFieldsSlug } from '../../slugs'
 import { getBlocksField } from '../Blocks'
+import { jestFn } from '../jestFn'
 import { UIField } from './UIField'
 import { namedTabDefaultValue } from './constants'
+
+export const tabAfterChangeMock = jestFn()
 
 const TabsFields: CollectionConfig = {
   slug: tabsFieldsSlug,
@@ -244,6 +247,24 @@ const TabsFields: CollectionConfig = {
             {
               name: 'afterRead',
               type: 'checkbox',
+            },
+          ],
+        },
+        {
+          name: 'tabWithNestedAfterChange',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              hooks: {
+                afterChange: [
+                  ({ value, previousValue }) => {
+                    if (value !== previousValue) {
+                      tabAfterChangeMock({ value, previousValue })
+                    }
+                  },
+                ],
+              },
             },
           ],
         },

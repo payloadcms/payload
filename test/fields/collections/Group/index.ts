@@ -1,9 +1,11 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 import { groupFieldsSlug } from '../../slugs'
+import { jestFn } from '../jestFn'
 
 export const groupDefaultValue = 'set from parent'
 export const groupDefaultChild = 'child takes priority'
+export const groupAfterChangeMock = jestFn()
 
 const GroupFields: CollectionConfig = {
   slug: groupFieldsSlug,
@@ -183,6 +185,26 @@ const GroupFields: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'groupWithNestedAfterChange',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          defaultValue: 'defaultNestedValue',
+          hooks: {
+            afterChange: [
+              ({ value, previousValue }) => {
+                if (value !== previousValue) {
+                  groupAfterChangeMock({ value, previousValue })
+                }
+              },
+            ],
+          },
+        },
+      ],
+      type: 'group',
     },
   ],
 }
