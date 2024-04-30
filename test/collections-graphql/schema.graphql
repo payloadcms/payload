@@ -1,45 +1,45 @@
 type Query {
-  User(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): User
-  Users(draft: Boolean, where: User_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Users
-  countUsers(draft: Boolean, where: User_where, locale: LocaleInputType): countUsers
+  User(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): User
+  Users(where: User_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Users
+  countUsers(where: User_where, locale: LocaleInputType): countUsers
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
-  Point(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Point
-  Points(draft: Boolean, where: Point_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Points
-  countPoints(draft: Boolean, where: Point_where, locale: LocaleInputType): countPoints
+  Point(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Point
+  Points(where: Point_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Points
+  countPoints(where: Point_where, locale: LocaleInputType): countPoints
   docAccessPoint(id: String!): pointDocAccess
-  Post(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Post
-  Posts(draft: Boolean, where: Post_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Posts
-  countPosts(draft: Boolean, where: Post_where, locale: LocaleInputType): countPosts
+  Post(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Post
+  Posts(where: Post_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Posts
+  countPosts(where: Post_where, locale: LocaleInputType): countPosts
   docAccessPost(id: String!): postsDocAccess
-  CustomId(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): CustomId
-  CustomIds(draft: Boolean, where: CustomId_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): CustomIds
-  countCustomIds(draft: Boolean, where: CustomId_where, locale: LocaleInputType): countCustomIds
+  CustomId(id: Int!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): CustomId
+  CustomIds(where: CustomId_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): CustomIds
+  countCustomIds(where: CustomId_where, locale: LocaleInputType): countCustomIds
   docAccessCustomId(id: Int!): custom_idsDocAccess
-  Relation(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Relation
-  Relations(draft: Boolean, where: Relation_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Relations
-  countRelations(draft: Boolean, where: Relation_where, locale: LocaleInputType): countRelations
+  Relation(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Relation
+  Relations(where: Relation_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Relations
+  countRelations(where: Relation_where, locale: LocaleInputType): countRelations
   docAccessRelation(id: String!): relationDocAccess
-  Dummy(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Dummy
-  Dummies(draft: Boolean, where: Dummy_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Dummies
-  countDummies(draft: Boolean, where: Dummy_where, locale: LocaleInputType): countDummies
+  Dummy(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): Dummy
+  Dummies(where: Dummy_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): Dummies
+  countDummies(where: Dummy_where, locale: LocaleInputType): countDummies
   docAccessDummy(id: String!): dummyDocAccess
-  ErrorOnHook(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): ErrorOnHook
-  ErrorOnHooks(draft: Boolean, where: ErrorOnHook_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): ErrorOnHooks
-  countErrorOnHooks(draft: Boolean, where: ErrorOnHook_where, locale: LocaleInputType): countErrorOnHooks
+  ErrorOnHook(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): ErrorOnHook
+  ErrorOnHooks(where: ErrorOnHook_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): ErrorOnHooks
+  countErrorOnHooks(where: ErrorOnHook_where, locale: LocaleInputType): countErrorOnHooks
   docAccessErrorOnHook(id: String!): error_on_hooksDocAccess
-  PayloadApiTestOne(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadApiTestOne
-  PayloadApiTestOnes(draft: Boolean, where: PayloadApiTestOne_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadApiTestOnes
-  countPayloadApiTestOnes(draft: Boolean, where: PayloadApiTestOne_where, locale: LocaleInputType): countPayloadApiTestOnes
+  PayloadApiTestOne(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadApiTestOne
+  PayloadApiTestOnes(where: PayloadApiTestOne_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadApiTestOnes
+  countPayloadApiTestOnes(where: PayloadApiTestOne_where, locale: LocaleInputType): countPayloadApiTestOnes
   docAccessPayloadApiTestOne(id: String!): payload_api_test_onesDocAccess
-  PayloadApiTestTwo(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadApiTestTwo
-  PayloadApiTestTwos(draft: Boolean, where: PayloadApiTestTwo_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadApiTestTwos
-  countPayloadApiTestTwos(draft: Boolean, where: PayloadApiTestTwo_where, locale: LocaleInputType): countPayloadApiTestTwos
+  PayloadApiTestTwo(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadApiTestTwo
+  PayloadApiTestTwos(where: PayloadApiTestTwo_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadApiTestTwos
+  countPayloadApiTestTwos(where: PayloadApiTestTwo_where, locale: LocaleInputType): countPayloadApiTestTwos
   docAccessPayloadApiTestTwo(id: String!): payload_api_test_twosDocAccess
-  ContentType(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): ContentType
-  ContentTypes(draft: Boolean, where: ContentType_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): ContentTypes
-  countContentTypes(draft: Boolean, where: ContentType_where, locale: LocaleInputType): countContentTypes
+  ContentType(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): ContentType
+  ContentTypes(where: ContentType_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): ContentTypes
+  countContentTypes(where: ContentType_where, locale: LocaleInputType): countContentTypes
   docAccessContentType(id: String!): content_typeDocAccess
   CyclicalRelationship(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): CyclicalRelationship
   CyclicalRelationships(draft: Boolean, where: CyclicalRelationship_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): CyclicalRelationships
@@ -47,9 +47,9 @@ type Query {
   docAccessCyclicalRelationship(id: String!): cyclical_relationshipDocAccess
   versionCyclicalRelationship(id: String, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): CyclicalRelationshipVersion
   versionsCyclicalRelationships(where: versionsCyclicalRelationship_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): versionsCyclicalRelationships
-  PayloadPreference(id: String!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadPreferences
-  countPayloadPreferences(draft: Boolean, where: PayloadPreference_where, locale: LocaleInputType): countPayloadPreferences
+  PayloadPreference(id: String!, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType): PayloadPreference
+  PayloadPreferences(where: PayloadPreference_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, sort: String): PayloadPreferences
+  countPayloadPreferences(where: PayloadPreference_where, locale: LocaleInputType): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
   QueryWithInternalError: QueryWithInternalError
@@ -540,11 +540,11 @@ type Post {
   description: String
   number: Float
   min: Float
-  relationField(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
-  relationToCustomID(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CustomId
-  relationHasManyField(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Relation!]
-  relationMultiRelationTo(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Post_RelationMultiRelationTo_Relationship
-  relationMultiRelationToHasMany(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Post_RelationMultiRelationToHasMany_Relationship!]
+  relationField(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
+  relationToCustomID(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CustomId
+  relationHasManyField(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Relation!]
+  relationMultiRelationTo(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Post_RelationMultiRelationTo_Relationship
+  relationMultiRelationToHasMany(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Post_RelationMultiRelationToHasMany_Relationship!]
   A1: Post_A1
   B1: Post_B1
   C1: Post_C1
@@ -2505,7 +2505,7 @@ type PayloadApiTestOnesDeleteDocAccess {
 type PayloadApiTestTwo {
   id: String
   payloadAPI: String
-  relation(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadApiTestOne
+  relation(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadApiTestOne
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -3485,7 +3485,7 @@ input versionsCyclicalRelationship_where_or {
 
 type PayloadPreference {
   id: String
-  user(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadPreference_User_Relationship!
+  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadPreference_User_Relationship!
   key: String
   value: JSON
   updatedAt: DateTime
@@ -5733,8 +5733,8 @@ type QueryWithInternalError {
 }
 
 type Mutation {
-  createUser(data: mutationUserInput!, draft: Boolean, locale: LocaleInputType): User
-  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean, locale: LocaleInputType): User
+  createUser(data: mutationUserInput!, locale: LocaleInputType): User
+  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, locale: LocaleInputType): User
   deleteUser(id: String!): User
   refreshTokenUser(token: String): usersRefreshedUser
   logoutUser: String
@@ -5743,39 +5743,39 @@ type Mutation {
   forgotPasswordUser(disableEmail: Boolean, email: String!, expiration: Int): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
-  createPoint(data: mutationPointInput!, draft: Boolean, locale: LocaleInputType): Point
-  updatePoint(id: String!, autosave: Boolean, data: mutationPointUpdateInput!, draft: Boolean, locale: LocaleInputType): Point
+  createPoint(data: mutationPointInput!, locale: LocaleInputType): Point
+  updatePoint(id: String!, autosave: Boolean, data: mutationPointUpdateInput!, locale: LocaleInputType): Point
   deletePoint(id: String!): Point
-  createPost(data: mutationPostInput!, draft: Boolean, locale: LocaleInputType): Post
-  updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, draft: Boolean, locale: LocaleInputType): Post
+  createPost(data: mutationPostInput!, locale: LocaleInputType): Post
+  updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, locale: LocaleInputType): Post
   deletePost(id: String!): Post
-  createCustomId(data: mutationCustomIdInput!, draft: Boolean, locale: LocaleInputType): CustomId
-  updateCustomId(id: Int!, autosave: Boolean, data: mutationCustomIdUpdateInput!, draft: Boolean, locale: LocaleInputType): CustomId
+  createCustomId(data: mutationCustomIdInput!, locale: LocaleInputType): CustomId
+  updateCustomId(id: Int!, autosave: Boolean, data: mutationCustomIdUpdateInput!, locale: LocaleInputType): CustomId
   deleteCustomId(id: Int!): CustomId
-  createRelation(data: mutationRelationInput!, draft: Boolean, locale: LocaleInputType): Relation
-  updateRelation(id: String!, autosave: Boolean, data: mutationRelationUpdateInput!, draft: Boolean, locale: LocaleInputType): Relation
+  createRelation(data: mutationRelationInput!, locale: LocaleInputType): Relation
+  updateRelation(id: String!, autosave: Boolean, data: mutationRelationUpdateInput!, locale: LocaleInputType): Relation
   deleteRelation(id: String!): Relation
-  createDummy(data: mutationDummyInput!, draft: Boolean, locale: LocaleInputType): Dummy
-  updateDummy(id: String!, autosave: Boolean, data: mutationDummyUpdateInput!, draft: Boolean, locale: LocaleInputType): Dummy
+  createDummy(data: mutationDummyInput!, locale: LocaleInputType): Dummy
+  updateDummy(id: String!, autosave: Boolean, data: mutationDummyUpdateInput!, locale: LocaleInputType): Dummy
   deleteDummy(id: String!): Dummy
-  createErrorOnHook(data: mutationErrorOnHookInput!, draft: Boolean, locale: LocaleInputType): ErrorOnHook
-  updateErrorOnHook(id: String!, autosave: Boolean, data: mutationErrorOnHookUpdateInput!, draft: Boolean, locale: LocaleInputType): ErrorOnHook
+  createErrorOnHook(data: mutationErrorOnHookInput!, locale: LocaleInputType): ErrorOnHook
+  updateErrorOnHook(id: String!, autosave: Boolean, data: mutationErrorOnHookUpdateInput!, locale: LocaleInputType): ErrorOnHook
   deleteErrorOnHook(id: String!): ErrorOnHook
-  createPayloadApiTestOne(data: mutationPayloadApiTestOneInput!, draft: Boolean, locale: LocaleInputType): PayloadApiTestOne
-  updatePayloadApiTestOne(id: String!, autosave: Boolean, data: mutationPayloadApiTestOneUpdateInput!, draft: Boolean, locale: LocaleInputType): PayloadApiTestOne
+  createPayloadApiTestOne(data: mutationPayloadApiTestOneInput!, locale: LocaleInputType): PayloadApiTestOne
+  updatePayloadApiTestOne(id: String!, autosave: Boolean, data: mutationPayloadApiTestOneUpdateInput!, locale: LocaleInputType): PayloadApiTestOne
   deletePayloadApiTestOne(id: String!): PayloadApiTestOne
-  createPayloadApiTestTwo(data: mutationPayloadApiTestTwoInput!, draft: Boolean, locale: LocaleInputType): PayloadApiTestTwo
-  updatePayloadApiTestTwo(id: String!, autosave: Boolean, data: mutationPayloadApiTestTwoUpdateInput!, draft: Boolean, locale: LocaleInputType): PayloadApiTestTwo
+  createPayloadApiTestTwo(data: mutationPayloadApiTestTwoInput!, locale: LocaleInputType): PayloadApiTestTwo
+  updatePayloadApiTestTwo(id: String!, autosave: Boolean, data: mutationPayloadApiTestTwoUpdateInput!, locale: LocaleInputType): PayloadApiTestTwo
   deletePayloadApiTestTwo(id: String!): PayloadApiTestTwo
-  createContentType(data: mutationContentTypeInput!, draft: Boolean, locale: LocaleInputType): ContentType
-  updateContentType(id: String!, autosave: Boolean, data: mutationContentTypeUpdateInput!, draft: Boolean, locale: LocaleInputType): ContentType
+  createContentType(data: mutationContentTypeInput!, locale: LocaleInputType): ContentType
+  updateContentType(id: String!, autosave: Boolean, data: mutationContentTypeUpdateInput!, locale: LocaleInputType): ContentType
   deleteContentType(id: String!): ContentType
   createCyclicalRelationship(data: mutationCyclicalRelationshipInput!, draft: Boolean, locale: LocaleInputType): CyclicalRelationship
   updateCyclicalRelationship(id: String!, autosave: Boolean, data: mutationCyclicalRelationshipUpdateInput!, draft: Boolean, locale: LocaleInputType): CyclicalRelationship
   deleteCyclicalRelationship(id: String!): CyclicalRelationship
   restoreVersionCyclicalRelationship(id: String): CyclicalRelationship
-  createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean, locale: LocaleInputType): PayloadPreference
-  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean, locale: LocaleInputType): PayloadPreference
+  createPayloadPreference(data: mutationPayloadPreferenceInput!, locale: LocaleInputType): PayloadPreference
+  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, locale: LocaleInputType): PayloadPreference
   deletePayloadPreference(id: String!): PayloadPreference
 }
 
