@@ -1,3 +1,4 @@
+import type { Config } from 'payload/config'
 import type { Block, BlockField, Field, FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
@@ -7,7 +8,6 @@ import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
 import type { FeatureProviderProviderServer } from '../types.js'
 import type { BlocksFeatureClientProps } from './feature.client.js'
 
-import { cloneDeep } from '../../lexical/utils/cloneDeep.js'
 import { createNode } from '../typeUtilities.js'
 import { BlocksFeatureClientComponent } from './feature.client.js'
 import { BlockNode } from './nodes/BlocksNode.js'
@@ -36,7 +36,7 @@ export const BlocksFeature: FeatureProviderProviderServer<
           block.labels = !block.labels ? formatLabels(block.slug) : block.labels
 
           block.fields = (await sanitizeFields({
-            config: _config,
+            config: _config as unknown as Config,
             fields: block.fields,
             requireFieldLevelRichTextEditor: true,
             validRelationships,

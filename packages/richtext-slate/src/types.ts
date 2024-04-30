@@ -1,4 +1,4 @@
-import type { Config } from 'payload/config'
+import type { Config, SanitizedConfig } from 'payload/config'
 import type { Field, RichTextFieldProps } from 'payload/types'
 import type { Editor } from 'slate'
 
@@ -57,7 +57,7 @@ export type AdapterArguments = {
     hideGutter?: boolean
     leaves?: RichTextLeaf[]
     link?: {
-      fields?: ((args: { config: Config; defaultFields: Field[] }) => Field[]) | Field[]
+      fields?: ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[]) | Field[]
     }
     placeholder?: Record<string, string> | string
     rtl?: boolean

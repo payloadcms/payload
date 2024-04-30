@@ -1,4 +1,3 @@
-import type { I18n } from '@payloadcms/translations'
 import type { Config, SanitizedConfig } from 'payload/config'
 import type { Field, FieldWithRichTextRequiredEditor } from 'payload/types'
 
@@ -46,7 +45,7 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
    */
   fields?:
     | ((args: {
-        config: Config
+        config: SanitizedConfig
         defaultFields: FieldWithRichTextRequiredEditor[]
       }) => FieldWithRichTextRequiredEditor[])
     | FieldWithRichTextRequiredEditor[]
@@ -70,7 +69,7 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
       )
 
       const sanitizedFields = (await sanitizeFields({
-        config: _config,
+        config: _config as unknown as Config,
         fields: _transformedFields,
         requireFieldLevelRichTextEditor: true,
         validRelationships,

@@ -1,6 +1,6 @@
 import merge from 'deepmerge'
 
-import type { Config } from '../../config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import baseAccountLockFields from '../../auth/baseFields/accountLock.js'
@@ -20,6 +20,11 @@ import { authDefaults, defaults } from './defaults.js'
 export const sanitizeCollection = async (
   config: Config,
   collection: CollectionConfig,
+  /**
+   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
+   * so that you can sanitize them together, after the config has been sanitized.
+   */
+  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
 ): Promise<SanitizedCollectionConfig> => {
   // /////////////////////////////////
   // Make copy of collection config
@@ -154,6 +159,7 @@ export const sanitizeCollection = async (
   sanitized.fields = await sanitizeFields({
     config,
     fields: sanitized.fields,
+    richTextSanitizationPromises,
     validRelationships,
   })
 

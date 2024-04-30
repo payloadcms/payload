@@ -34,8 +34,10 @@ export const wrapLink = (editor: Editor): void => {
  * This function is run to enrich the basefields which every link has with potential, custom user-added fields.
  */
 export function transformExtraFields(
-  customFieldSchema: ((args: { config: Config; defaultFields: Field[] }) => Field[]) | Field[],
-  config: Config,
+  customFieldSchema:
+    | ((args: { config: SanitizedConfig; defaultFields: Field[] }) => Field[])
+    | Field[],
+  config: SanitizedConfig,
 ): Field[] {
   const baseFields: Field[] = getBaseFields(config)
 

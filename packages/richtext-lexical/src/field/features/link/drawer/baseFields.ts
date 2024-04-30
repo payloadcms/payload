@@ -1,11 +1,11 @@
 import type { User } from 'payload/auth'
-import type { Config } from 'payload/config'
+import type { SanitizedConfig } from 'payload/config'
 import type { Field, FieldWithRichTextRequiredEditor, RadioField, TextField } from 'payload/types'
 
 import { validateUrl } from '../../../lexical/utils/url.js'
 
 export const getBaseFields = (
-  config: Config,
+  config: SanitizedConfig,
   enabledCollections: false | string[],
   disabledCollections: false | string[],
 ): FieldWithRichTextRequiredEditor[] => {

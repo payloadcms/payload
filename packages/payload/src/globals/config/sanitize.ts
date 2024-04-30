@@ -1,4 +1,4 @@
-import type { Config } from '../../config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from './types.js'
 
 import defaultAccess from '../../auth/defaultAccess.js'
@@ -8,7 +8,14 @@ import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 
-export const sanitizeGlobals = async (config: Config): Promise<SanitizedGlobalConfig[]> => {
+export const sanitizeGlobals = async (
+  config: Config,
+  /**
+   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
+   * so that you can sanitize them together, after the config has been sanitized.
+   */
+  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+): Promise<SanitizedGlobalConfig[]> => {
   const { collections, globals } = config
 
   for (let i = 0; i < globals.length; i++) {
@@ -94,6 +101,7 @@ export const sanitizeGlobals = async (config: Config): Promise<SanitizedGlobalCo
     global.fields = await sanitizeFields({
       config,
       fields: global.fields,
+      richTextSanitizationPromises,
       validRelationships,
     })
 

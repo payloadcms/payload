@@ -1,3 +1,4 @@
+import type { Config } from 'payload/config'
 import type {
   Field,
   FieldWithRichTextRequiredEditor,
@@ -58,7 +59,7 @@ export const UploadFeature: FeatureProviderProviderServer<
       for (const collection in props.collections) {
         if (props.collections[collection].fields?.length) {
           props.collections[collection].fields = (await sanitizeFields({
-            config: _config,
+            config: _config as unknown as Config,
             fields: props.collections[collection].fields,
             requireFieldLevelRichTextEditor: true,
             validRelationships,

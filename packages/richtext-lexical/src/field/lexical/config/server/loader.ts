@@ -1,4 +1,4 @@
-import type { Config } from 'payload/config'
+import type { Config, SanitizedConfig } from 'payload/config'
 
 import type {
   FeatureProviderServer,
@@ -109,7 +109,7 @@ export async function loadFeatures({
   config,
   unSanitizedEditorConfig,
 }: {
-  config: Config
+  config: SanitizedConfig
   unSanitizedEditorConfig: ServerEditorConfig
 }): Promise<ResolvedServerFeatureMap> {
   // First remove all duplicate features. The LAST feature with a given key wins.

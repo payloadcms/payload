@@ -95,24 +95,25 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     ...(incomingConfig?.i18n ?? {}),
   }
 
-  config.editor = await incomingConfig.editor({
-    config: config as unknown as Config,
-  })
-
   configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
   configWithDefaults.collections.push(migrationsCollection)
 
+  const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
   for (let i = 0; i < config.collections.length; i++) {
     config.collections[i] = await sanitizeCollection(
       config as unknown as Config,
       config.collections[i],
+      richTextSanitizationPromises,
     )
   }
 
   checkDuplicateCollections(config.collections)
 
   if (config.globals.length > 0) {
-    config.globals = await sanitizeGlobals(config as unknown as Config)
+    config.globals = await sanitizeGlobals(
+      config as unknown as Config,
+      richTextSanitizationPromises,
+    )
   }
 
   if (config.serverURL !== '') {
@@ -124,6 +125,18 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   config.upload.adapters = Array.from(
     new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
   )
+
+  /*
+    Execute richText sanitization
+   */
+  config.editor = await incomingConfig.editor({
+    config: config as SanitizedConfig,
+  })
+  const promises: Promise<void>[] = []
+  for (const sanitizeFunction of richTextSanitizationPromises) {
+    promises.push(sanitizeFunction(config as SanitizedConfig))
+  }
+  await Promise.all(promises)
 
   return config as SanitizedConfig
 }

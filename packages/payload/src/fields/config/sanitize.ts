@@ -1,4 +1,4 @@
-import type { Config } from '../../config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
@@ -26,6 +26,12 @@ type Args = {
    */
   requireFieldLevelRichTextEditor?: boolean
   /**
+   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
+   * so that you can sanitize them together, after the config has been sanitized.
+   */
+  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
+
+  /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
    */
@@ -37,6 +43,7 @@ export const sanitizeFields = async ({
   existingFieldNames = new Set(),
   fields,
   requireFieldLevelRichTextEditor = false,
+  richTextSanitizationPromises,
   validRelationships,
 }: Args): Promise<Field[]> => {
   if (!fields) return []
@@ -143,41 +150,43 @@ export const sanitizeFields = async ({
 
     // Make sure that the richText field has an editor
     if (field.type === 'richText') {
-      if (!field.editor) {
-        if (config.editor && !requireFieldLevelRichTextEditor) {
-          // config.editor should be sanitized at this point
-          field.editor = config.editor
-        } else {
-          throw new MissingEditorProp(field)
+      const sanitizeRichText = async (_config: SanitizedConfig) => {
+        if (!field.editor) {
+          if (_config.editor && !requireFieldLevelRichTextEditor) {
+            // config.editor should be sanitized at this point
+            field.editor = _config.editor
+          } else {
+            throw new MissingEditorProp(field)
+          }
         }
-      }
 
-      if (typeof field.editor === 'function') {
-        field.editor = await field.editor({ config })
-      }
+        if (typeof field.editor === 'function') {
+          field.editor = await field.editor({ config: _config })
+        }
 
-      // Add editor adapter hooks to field hooks
-      if (!field.hooks) field.hooks = {}
+        // Add editor adapter hooks to field hooks
+        if (!field.hooks) field.hooks = {}
 
-      if (field?.editor?.hooks?.afterRead?.length) {
-        field.hooks.afterRead = field.hooks.afterRead
-          ? field.hooks.afterRead.concat(field.editor.hooks.afterRead)
-          : field.editor.hooks.afterRead
+        const mergeHooks = (hookName: keyof typeof field.editor.hooks) => {
+          if (typeof field.editor === 'function') return
+
+          if (field.editor?.hooks?.[hookName]?.length) {
+            field.hooks[hookName] = field.hooks[hookName]
+              ? field.hooks[hookName].concat(field.editor.hooks[hookName])
+              : [...field.editor.hooks[hookName]]
+          }
+        }
+
+        mergeHooks('afterRead')
+        mergeHooks('afterChange')
+        mergeHooks('beforeChange')
+        mergeHooks('beforeValidate')
+        mergeHooks('beforeDuplicate')
       }
-      if (field?.editor?.hooks?.beforeChange?.length) {
-        field.hooks.beforeChange = field.hooks.beforeChange
-          ? field.hooks.beforeChange.concat(field.editor.hooks.beforeChange)
-          : field.editor.hooks.beforeChange
-      }
-      if (field?.editor?.hooks?.beforeValidate?.length) {
-        field.hooks.beforeValidate = field.hooks.beforeValidate
-          ? field.hooks.beforeValidate.concat(field.editor.hooks.beforeValidate)
-          : field.editor.hooks.beforeValidate
-      }
-      if (field?.editor?.hooks?.beforeChange?.length) {
-        field.hooks.beforeChange = field.hooks.beforeChange
-          ? field.hooks.beforeChange.concat(field.editor.hooks.beforeChange)
-          : field.editor.hooks.beforeChange
+      if (richTextSanitizationPromises) {
+        richTextSanitizationPromises.push(sanitizeRichText)
+      } else {
+        await sanitizeRichText(config as unknown as SanitizedConfig)
       }
     }
 
@@ -187,6 +196,7 @@ export const sanitizeFields = async ({
         existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
         requireFieldLevelRichTextEditor,
+        richTextSanitizationPromises,
         validRelationships,
       })
     }
@@ -203,6 +213,7 @@ export const sanitizeFields = async ({
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
           requireFieldLevelRichTextEditor,
+          richTextSanitizationPromises,
           validRelationships,
         })
         field.tabs[j] = tab
@@ -219,6 +230,7 @@ export const sanitizeFields = async ({
           existingFieldNames: new Set(),
           fields: block.fields,
           requireFieldLevelRichTextEditor,
+          richTextSanitizationPromises,
           validRelationships,
         })
         field.blocks[j] = block

@@ -92,7 +92,7 @@ export type RichTextAdapterProvider<
 > = ({
   config,
 }: {
-  config: Config
+  config: SanitizedConfig
 }) =>
   | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
   | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

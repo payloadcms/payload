@@ -5,7 +5,7 @@ import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'l
 import type { SerializedLexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
 import type { RequestContext } from 'payload'
-import type { Config, SanitizedConfig } from 'payload/config'
+import type { SanitizedConfig } from 'payload/config'
 import type {
   Field,
   PayloadRequestWithData,
@@ -88,7 +88,7 @@ export type FeatureProviderServer<ServerFeatureProps, ClientFeatureProps> = {
    * This is being called during the payload sanitization process
    */
   feature: (props: {
-    config: Config
+    config: SanitizedConfig
     /** unSanitizedEditorConfig.features, but mapped */
     featureProviderMap: ServerFeatureProviderMap
     // other resolved features, which have been loaded before this one. All features declared in 'dependencies' should be available here
