@@ -907,6 +907,44 @@ describe('collections-graphql', () => {
         const queriedDoc = response.CyclicalRelationships.docs[0]
         expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
       })
+
+      it('should query correctly with draft argument', async () => {
+        // publish doc
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          draft: false,
+          data: {
+            title: '1',
+          },
+        })
+
+        // save new version
+        await payload.update({
+          collection: 'cyclical-relationship',
+          id: newDoc.id,
+          draft: true,
+          data: {
+            title: '2',
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `{
+          CyclicalRelationships(draft: true) {
+            docs {
+              title
+              relationToSelf(draft: false) {
+                title
+              }
+            }
+          }
+        }`
+        const response = (await client.request(query)) as any
+
+        const queriedDoc = response.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual('2')
+        expect(queriedDoc.relationToSelf.title).toEqual('1')
+      })
     })
   })
 
