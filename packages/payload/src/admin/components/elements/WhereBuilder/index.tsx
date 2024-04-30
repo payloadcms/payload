@@ -32,34 +32,34 @@ const reduceFields = (fields, i18n) =>
       } else {
         operators = fieldTypes[field.type].operators
       }
-    }
 
-    const operatorKeys = new Set()
-    const filteredOperators = operators.reduce((acc, operator) => {
-      if (!operatorKeys.has(operator.value)) {
-        operatorKeys.add(operator.value)
-        return [
-          ...acc,
-          {
-            ...operator,
-            label: i18n.t(`operators:${operator.label}`),
-          },
-        ]
+      const operatorKeys = new Set()
+      const filteredOperators = operators.reduce((acc, operator) => {
+        if (!operatorKeys.has(operator.value)) {
+          operatorKeys.add(operator.value)
+          return [
+            ...acc,
+            {
+              ...operator,
+              label: i18n.t(`operators:${operator.label}`),
+            },
+          ]
+        }
+        return acc
+      }, [])
+
+      const formattedField = {
+        label: getTranslation(field.label || field.name, i18n),
+        value: field.name,
+        ...fieldTypes[field.type],
+        operators: filteredOperators,
+        props: {
+          ...field,
+        },
       }
-      return acc
-    }, [])
-
-    const formattedField = {
-      label: getTranslation(field.label || field.name, i18n),
-      value: field.name,
-      ...fieldTypes[field.type],
-      operators: filteredOperators,
-      props: {
-        ...field,
-      },
+      return [...reduced, formattedField]
     }
-
-    return [...reduced, formattedField]
+    return reduced
   }, [])
 
 /**
