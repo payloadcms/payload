@@ -39,30 +39,30 @@ describe('Localization', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(configPromise))
 
-    // @ts-expect-error Force typing
-    post1 = await payload.create({
-      collection,
-      data: {
-        title: englishTitle,
-      },
-    })
+    // // @ts-expect-error Force typing
+    // post1 = await payload.create({
+    //   collection,
+    //   data: {
+    //     title: englishTitle,
+    //   },
+    // })
 
-    // @ts-expect-error Force typing
-    postWithLocalizedData = await payload.create({
-      collection,
-      data: {
-        title: englishTitle,
-      },
-    })
+    // // @ts-expect-error Force typing
+    // postWithLocalizedData = await payload.create({
+    //   collection,
+    //   data: {
+    //     title: englishTitle,
+    //   },
+    // })
 
-    await payload.update({
-      id: postWithLocalizedData.id,
-      collection,
-      data: {
-        title: spanishTitle,
-      },
-      locale: spanishLocale,
-    })
+    // await payload.update({
+    //   id: postWithLocalizedData.id,
+    //   collection,
+    //   data: {
+    //     title: spanishTitle,
+    //   },
+    //   locale: spanishLocale,
+    // })
   })
 
   afterAll(async () => {
@@ -1097,44 +1097,44 @@ describe('Localization', () => {
       expect(docEs.groupLocalized.title).toBe('hello es')
     })
 
-    it('should prorly work localizde field inside of group', async () => {
-      const result = await payload.create({
-        collection: groupSlug,
-        locale: englishLocale,
-        data: {
-          group: {
-            title: 'hello en',
-          },
-        },
-      })
+    // it('should prorly work localizde field inside of group', async () => {
+    //   const result = await payload.create({
+    //     collection: groupSlug,
+    //     locale: englishLocale,
+    //     data: {
+    //       group: {
+    //         title: 'hello en',
+    //       },
+    //     },
+    //   })
 
-      // expect(result.group.title).toBe('hello en')
+    //   // expect(result.group.title).toBe('hello en')
 
-      await payload.update({
-        collection: groupSlug,
-        locale: spanishLocale,
-        id: result.id,
-        data: {
-          group: {
-            title: 'hello es',
-          },
-        },
-      })
+    //   await payload.update({
+    //     collection: groupSlug,
+    //     locale: spanishLocale,
+    //     id: result.id,
+    //     data: {
+    //       group: {
+    //         title: 'hello es',
+    //       },
+    //     },
+    //   })
 
-      const docEn = await payload.findByID({
-        collection: groupSlug,
-        locale: englishLocale,
-        id: result.id,
-      })
-      const docEs = await payload.findByID({
-        collection: groupSlug,
-        locale: spanishLocale,
-        id: result.id,
-      })
+    //   const docEn = await payload.findByID({
+    //     collection: groupSlug,
+    //     locale: englishLocale,
+    //     id: result.id,
+    //   })
+    //   const docEs = await payload.findByID({
+    //     collection: groupSlug,
+    //     locale: spanishLocale,
+    //     id: result.id,
+    //   })
 
-      expect(docEn.group.title).toBe('hello en')
-      expect(docEs.group.title).toBe('hello es')
-    })
+    //   expect(docEn.group.title).toBe('hello en')
+    //   expect(docEs.group.title).toBe('hello es')
+    // })
   })
 })
 

@@ -310,151 +310,151 @@ export default buildConfigWithDefaults({
       },
     ],
   },
-  onInit: async (payload) => {
-    const collection = localizedPostsSlug
+  // onInit: async (payload) => {
+  //   const collection = localizedPostsSlug
 
-    console.log('SEED BEGIN')
+  //   console.log('SEED BEGIN')
 
-    if (payload.db.name === 'mongoose') {
-      await new Promise((resolve, reject) => {
-        payload.db?.collections[localizedPostsSlug]?.ensureIndexes(function (err) {
-          if (err) reject(err)
-          resolve(true)
-        })
-      })
-    }
+  //   if (payload.db.name === 'mongoose') {
+  //     await new Promise((resolve, reject) => {
+  //       payload.db?.collections[localizedPostsSlug]?.ensureIndexes(function (err) {
+  //         if (err) reject(err)
+  //         resolve(true)
+  //       })
+  //     })
+  //   }
 
-    console.log('INDEXES CREATED')
+  //   console.log('INDEXES CREATED')
 
-    await payload.create({
-      collection,
-      data: {
-        title: englishTitle,
-      },
-    })
+  //   await payload.create({
+  //     collection,
+  //     data: {
+  //       title: englishTitle,
+  //     },
+  //   })
 
-    const localizedPost = await payload.create({
-      collection,
-      data: {
-        title: englishTitle,
-      },
-    })
+  //   const localizedPost = await payload.create({
+  //     collection,
+  //     data: {
+  //       title: englishTitle,
+  //     },
+  //   })
 
-    console.log('SEED 1')
+  //   console.log('SEED 1')
 
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-        relation: localizedPost.id,
-      },
-    })
+  //   await payload.create({
+  //     collection: 'users',
+  //     data: {
+  //       email: devUser.email,
+  //       password: devUser.password,
+  //       relation: localizedPost.id,
+  //     },
+  //   })
 
-    await payload.update({
-      id: localizedPost.id,
-      collection,
-      data: {
-        title: spanishTitle,
-      },
-      locale: spanishLocale,
-    })
+  //   await payload.update({
+  //     id: localizedPost.id,
+  //     collection,
+  //     data: {
+  //       title: spanishTitle,
+  //     },
+  //     locale: spanishLocale,
+  //   })
 
-    console.log('SEED 2')
+  //   console.log('SEED 2')
 
-    const localizedRelation = await payload.create({
-      collection,
-      data: {
-        title: relationEnglishTitle,
-      },
-    })
+  //   const localizedRelation = await payload.create({
+  //     collection,
+  //     data: {
+  //       title: relationEnglishTitle,
+  //     },
+  //   })
 
-    await payload.update({
-      id: localizedPost.id,
-      collection,
-      data: {
-        title: relationSpanishTitle,
-      },
-      locale: spanishLocale,
-    })
+  //   await payload.update({
+  //     id: localizedPost.id,
+  //     collection,
+  //     data: {
+  //       title: relationSpanishTitle,
+  //     },
+  //     locale: spanishLocale,
+  //   })
 
-    console.log('SEED 3')
+  //   console.log('SEED 3')
 
-    const localizedRelation2 = await payload.create({
-      collection,
-      data: {
-        title: relationEnglishTitle2,
-      },
-    })
-    await payload.update({
-      id: localizedPost.id,
-      collection,
-      data: {
-        title: relationSpanishTitle2,
-      },
-      locale: spanishLocale,
-    })
+  //   const localizedRelation2 = await payload.create({
+  //     collection,
+  //     data: {
+  //       title: relationEnglishTitle2,
+  //     },
+  //   })
+  //   await payload.update({
+  //     id: localizedPost.id,
+  //     collection,
+  //     data: {
+  //       title: relationSpanishTitle2,
+  //     },
+  //     locale: spanishLocale,
+  //   })
 
-    console.log('SEED 4')
+  //   console.log('SEED 4')
 
-    await payload.create({
-      collection: withLocalizedRelSlug,
-      data: {
-        localizedRelationHasManyField: [localizedRelation.id, localizedRelation2.id],
-        localizedRelationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
-        localizedRelationMultiRelationToHasMany: [
-          { relationTo: localizedPostsSlug, value: localizedRelation.id },
-          { relationTo: localizedPostsSlug, value: localizedRelation2.id },
-        ],
-        relationship: localizedRelation.id,
-      },
-    })
-    await payload.create({
-      collection: relationshipLocalizedSlug,
-      data: {
-        arrayField: [
-          {
-            nestedRelation: localizedRelation.id,
-          },
-        ],
-        relationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
-        relationMultiRelationToHasMany: [
-          { relationTo: localizedPostsSlug, value: localizedRelation.id },
-          { relationTo: localizedPostsSlug, value: localizedRelation2.id },
-        ],
-        relationship: localizedRelation.id,
-        relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
-      },
-      locale: 'en',
-    })
+  //   await payload.create({
+  //     collection: withLocalizedRelSlug,
+  //     data: {
+  //       localizedRelationHasManyField: [localizedRelation.id, localizedRelation2.id],
+  //       localizedRelationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
+  //       localizedRelationMultiRelationToHasMany: [
+  //         { relationTo: localizedPostsSlug, value: localizedRelation.id },
+  //         { relationTo: localizedPostsSlug, value: localizedRelation2.id },
+  //       ],
+  //       relationship: localizedRelation.id,
+  //     },
+  //   })
+  //   await payload.create({
+  //     collection: relationshipLocalizedSlug,
+  //     data: {
+  //       arrayField: [
+  //         {
+  //           nestedRelation: localizedRelation.id,
+  //         },
+  //       ],
+  //       relationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
+  //       relationMultiRelationToHasMany: [
+  //         { relationTo: localizedPostsSlug, value: localizedRelation.id },
+  //         { relationTo: localizedPostsSlug, value: localizedRelation2.id },
+  //       ],
+  //       relationship: localizedRelation.id,
+  //       relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
+  //     },
+  //     locale: 'en',
+  //   })
 
-    console.log('SEED 5')
+  //   console.log('SEED 5')
 
-    const globalArray = await payload.updateGlobal({
-      data: {
-        array: [
-          {
-            text: 'test en 1',
-          },
-          {
-            text: 'test en 2',
-          },
-        ],
-      },
-      slug: 'global-array',
-    })
+  //   const globalArray = await payload.updateGlobal({
+  //     data: {
+  //       array: [
+  //         {
+  //           text: 'test en 1',
+  //         },
+  //         {
+  //           text: 'test en 2',
+  //         },
+  //       ],
+  //     },
+  //     slug: 'global-array',
+  //   })
 
-    await payload.updateGlobal({
-      data: {
-        array: globalArray.array.map((row, i) => ({
-          ...row,
-          text: `test es ${i + 1}`,
-        })),
-      },
-      locale: 'es',
-      slug: 'global-array',
-    })
+  //   await payload.updateGlobal({
+  //     data: {
+  //       array: globalArray.array.map((row, i) => ({
+  //         ...row,
+  //         text: `test es ${i + 1}`,
+  //       })),
+  //     },
+  //     locale: 'es',
+  //     slug: 'global-array',
+  //   })
 
-    console.log('SEED COMPLETE')
-  },
+  //   console.log('SEED COMPLETE')
+  // },
 })
