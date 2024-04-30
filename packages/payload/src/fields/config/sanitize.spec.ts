@@ -1,3 +1,6 @@
+import { Config } from '../../config/types'
+import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors'
+import { sanitizeFields } from './sanitize'
 import type {
   ArrayField,
   Block,
@@ -7,34 +10,20 @@ import type {
   NumberField,
   TextField,
 } from './types'
-import { Config } from '../../config/types'
-import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors'
-import { sanitizeFields } from './sanitize'
-import type { BaseDatabaseAdapter } from '../../database/types.js'
-
-const dummyConfig: Config = {
-  collections: [],
-  db: {
-    defaultIDType: 'text',
-    init: () => ({}) as BaseDatabaseAdapter['init'],
-  } as BaseDatabaseAdapter,
-}
 
 describe('sanitizeFields', () => {
+  const config = {} as Config
   it('should throw on missing type field', () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const fields: Field[] = [
+      // @ts-expect-error
       {
         label: 'some-collection',
         name: 'Some Collection',
       },
     ]
     expect(() => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       sanitizeFields({
-        config: dummyConfig,
+        config,
         fields,
         validRelationships: [],
       })
@@ -50,7 +39,7 @@ describe('sanitizeFields', () => {
     ]
     expect(() => {
       sanitizeFields({
-        config: dummyConfig,
+        config,
         fields,
         validRelationships: [],
       })
@@ -66,7 +55,7 @@ describe('sanitizeFields', () => {
         },
       ]
       const sanitizedField = sanitizeFields({
-        config: dummyConfig,
+        config,
         fields,
         validRelationships: [],
       })[0] as TextField
@@ -83,7 +72,7 @@ describe('sanitizeFields', () => {
         },
       ]
       const sanitizedField = sanitizeFields({
-        config: dummyConfig,
+        config,
         fields,
         validRelationships: [],
       })[0] as TextField
@@ -102,7 +91,7 @@ describe('sanitizeFields', () => {
           },
         ]
         const sanitizedField = sanitizeFields({
-          config: dummyConfig,
+          config,
           fields,
           validRelationships: [],
         })[0] as TextField
@@ -124,7 +113,7 @@ describe('sanitizeFields', () => {
           type: 'array',
         }
         const sanitizedField = sanitizeFields({
-          config: dummyConfig,
+          config,
           fields: [arrayField],
           validRelationships: [],
         })[0] as ArrayField
@@ -153,7 +142,7 @@ describe('sanitizeFields', () => {
           },
         ]
         const sanitizedField = sanitizeFields({
-          config: dummyConfig,
+          config,
           fields,
           validRelationships: [],
         })[0] as BlockField
@@ -178,7 +167,7 @@ describe('sanitizeFields', () => {
         },
       ]
       const sanitizedField = sanitizeFields({
-        config: dummyConfig,
+        config,
         fields,
         validRelationships: [],
       })[0] as ArrayField
@@ -202,7 +191,7 @@ describe('sanitizeFields', () => {
         },
       ]
       const sanitizedField = sanitizeFields({
-        config: dummyConfig,
+        config,
         fields,
         validRelationships: [],
       })[0] as BlockField
@@ -229,7 +218,7 @@ describe('sanitizeFields', () => {
         },
       ]
       expect(() => {
-        sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        sanitizeFields({ config, fields, validRelationships })
       }).not.toThrow()
     })
 
@@ -244,7 +233,7 @@ describe('sanitizeFields', () => {
         },
       ]
       expect(() => {
-        sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        sanitizeFields({ config, fields, validRelationships })
       }).not.toThrow()
     })
 
@@ -270,7 +259,7 @@ describe('sanitizeFields', () => {
         },
       ]
       expect(() => {
-        sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        sanitizeFields({ config, fields, validRelationships })
       }).not.toThrow()
     })
 
@@ -285,7 +274,7 @@ describe('sanitizeFields', () => {
         },
       ]
       expect(() => {
-        sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        sanitizeFields({ config, fields, validRelationships })
       }).toThrow(InvalidFieldRelationship)
     })
 
@@ -300,7 +289,7 @@ describe('sanitizeFields', () => {
         },
       ]
       expect(() => {
-        sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        sanitizeFields({ config, fields, validRelationships })
       }).toThrow(InvalidFieldRelationship)
     })
 
@@ -326,7 +315,7 @@ describe('sanitizeFields', () => {
         },
       ]
       expect(() => {
-        sanitizeFields({ config: dummyConfig, fields, validRelationships })
+        sanitizeFields({ config, fields, validRelationships })
       }).toThrow(InvalidFieldRelationship)
     })
 
@@ -340,7 +329,7 @@ describe('sanitizeFields', () => {
       ]
 
       const sanitizedField = sanitizeFields({
-        config: dummyConfig,
+        config,
         fields,
         validRelationships: [],
       })[0] as CheckboxField
@@ -349,7 +338,7 @@ describe('sanitizeFields', () => {
 
     it('should return empty field array if no fields', () => {
       const sanitizedFields = sanitizeFields({
-        config: dummyConfig,
+        config,
         fields: [],
         validRelationships: [],
       })
