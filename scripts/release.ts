@@ -17,7 +17,7 @@ import type { PackageDetails } from './lib/getPackageDetails.js'
 import { getPackageDetails } from './lib/getPackageDetails.js'
 import { updateChangelog } from './utils/updateChangelog.js'
 
-const npmPublishLimit = pLimit(10)
+const npmPublishLimit = pLimit(6)
 
 // Update this list with any packages to publish
 const packageWhitelist = [
@@ -35,6 +35,7 @@ const packageWhitelist = [
 
   // Adapters
   'email-nodemailer',
+  'email-resend-rest',
 
   'storage-s3',
   'storage-azure',
