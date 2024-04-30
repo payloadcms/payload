@@ -267,17 +267,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (field.type === 'relationship' || field.type === 'upload') {
         const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
-        if (
-          (!relationPathMatch && 'hasMany' in field && !field.hasMany) ||
-          typeof field.relationTo === 'string'
-        ) {
-          if ('hasMany' in field && field.hasMany) {
-            if (field.localized && config.localization && config.localization.locales) {
-              result[field.name] = {
-                [config.localization.defaultLocale]: [],
+        if (!relationPathMatch) {
+          if (('hasMany' in field && !field.hasMany) || typeof field.relationTo === 'string') {
+            if ('hasMany' in field && field.hasMany) {
+              if (field.localized && config.localization && config.localization.locales) {
+                result[field.name] = {
+                  [config.localization.defaultLocale]: [],
+                }
+              } else {
+                result[field.name] = []
               }
-            } else {
-              result[field.name] = []
             }
             return result
           }
