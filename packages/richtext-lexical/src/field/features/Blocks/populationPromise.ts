@@ -59,6 +59,7 @@ export const blockPopulationPromiseHOC = (
       currentDepth,
       data: blockFieldData,
       depth,
+      draft: false,
       editorPopulationPromises,
       fields: block.fields,
       findMany,

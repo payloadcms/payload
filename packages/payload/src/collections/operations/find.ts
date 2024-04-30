@@ -196,6 +196,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
             currentDepth,
             depth,
             doc,
+            draft: draftsEnabled,
             fallbackLocale,
             findMany: true,
             global: null,
