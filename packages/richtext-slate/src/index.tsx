@@ -20,13 +20,21 @@ export function slateEditor(
   return async ({ config }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
 
-    if (args.admin?.link?.fields) {
-      args.admin.link.fields = await sanitizeFields({
-        config: config as unknown as Config,
-        fields: transformExtraFields(args.admin?.link?.fields, config),
-        validRelationships,
-      })
+    if (!args.admin) {
+      args.admin = {}
     }
+    if (!args.admin.link) {
+      args.admin.link = {}
+    }
+    if (!args.admin.link.fields) {
+      args.admin.link.fields = []
+    }
+    args.admin.link.fields = await sanitizeFields({
+      config: config as unknown as Config,
+      fields: transformExtraFields(args.admin?.link?.fields, config),
+      validRelationships,
+    })
+
     if (args?.admin?.upload?.collections) {
       for (const collection of Object.keys(args.admin.upload.collections)) {
         if (args?.admin?.upload?.collections[collection]?.fields) {

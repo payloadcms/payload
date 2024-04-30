@@ -21,7 +21,7 @@ const dummyConfig: Config = {
 }
 
 describe('sanitizeFields', () => {
-  it('should throw on missing type field', () => {
+  it('should throw on missing type field', async () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     const fields: Field[] = [
       // @ts-expect-error
@@ -30,7 +30,7 @@ describe('sanitizeFields', () => {
         name: 'Some Collection',
       },
     ]
-    expect(async () => {
+    await expect(async () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       await sanitizeFields({
@@ -38,9 +38,9 @@ describe('sanitizeFields', () => {
         fields,
         validRelationships: [],
       })
-    }).toThrow(MissingFieldType)
+    }).rejects.toThrow(MissingFieldType)
   })
-  it('should throw on invalid field name', () => {
+  it('should throw on invalid field name', async () => {
     const fields: Field[] = [
       {
         label: 'some.collection',
@@ -48,13 +48,13 @@ describe('sanitizeFields', () => {
         type: 'text',
       },
     ]
-    expect(async () => {
+    await expect(async () => {
       await sanitizeFields({
         config: dummyConfig,
         fields,
         validRelationships: [],
       })
-    }).toThrow(InvalidFieldName)
+    }).rejects.toThrow(InvalidFieldName)
   })
 
   describe('auto-labeling', () => {
@@ -65,11 +65,13 @@ describe('sanitizeFields', () => {
           type: 'text',
         },
       ]
-      const sanitizedField = (await sanitizeFields({
-        config: dummyConfig,
-        fields,
-        validRelationships: [],
-      })[0]) as TextField
+      const sanitizedField = (
+        await sanitizeFields({
+          config: dummyConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
       expect(sanitizedField.name).toStrictEqual('someField')
       expect(sanitizedField.label).toStrictEqual('Some Field')
       expect(sanitizedField.type).toStrictEqual('text')
@@ -82,11 +84,13 @@ describe('sanitizeFields', () => {
           type: 'text',
         },
       ]
-      const sanitizedField = (await sanitizeFields({
-        config: dummyConfig,
-        fields,
-        validRelationships: [],
-      })[0]) as TextField
+      const sanitizedField = (
+        await sanitizeFields({
+          config: dummyConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
       expect(sanitizedField.name).toStrictEqual('someField')
       expect(sanitizedField.label).toStrictEqual('Do not label')
       expect(sanitizedField.type).toStrictEqual('text')
@@ -101,11 +105,13 @@ describe('sanitizeFields', () => {
             type: 'text',
           },
         ]
-        const sanitizedField = (await sanitizeFields({
-          config: dummyConfig,
-          fields,
-          validRelationships: [],
-        })[0]) as TextField
+        const sanitizedField = (
+          await sanitizeFields({
+            config: dummyConfig,
+            fields,
+            validRelationships: [],
+          })
+        )[0] as TextField
         expect(sanitizedField.name).toStrictEqual('someField')
         expect(sanitizedField.label).toStrictEqual(false)
         expect(sanitizedField.type).toStrictEqual('text')
@@ -123,11 +129,13 @@ describe('sanitizeFields', () => {
           name: 'items',
           type: 'array',
         }
-        const sanitizedField = (await sanitizeFields({
-          config: dummyConfig,
-          fields: [arrayField],
-          validRelationships: [],
-        })[0]) as ArrayField
+        const sanitizedField = (
+          await sanitizeFields({
+            config: dummyConfig,
+            fields: [arrayField],
+            validRelationships: [],
+          })
+        )[0] as ArrayField
         expect(sanitizedField.name).toStrictEqual('items')
         expect(sanitizedField.label).toStrictEqual(false)
         expect(sanitizedField.type).toStrictEqual('array')
@@ -152,11 +160,13 @@ describe('sanitizeFields', () => {
             type: 'blocks',
           },
         ]
-        const sanitizedField = (await sanitizeFields({
-          config: dummyConfig,
-          fields,
-          validRelationships: [],
-        })[0]) as BlockField
+        const sanitizedField = (
+          await sanitizeFields({
+            config: dummyConfig,
+            fields,
+            validRelationships: [],
+          })
+        )[0] as BlockField
         expect(sanitizedField.name).toStrictEqual('noLabelBlock')
         expect(sanitizedField.label).toStrictEqual(false)
         expect(sanitizedField.type).toStrictEqual('blocks')
@@ -177,11 +187,13 @@ describe('sanitizeFields', () => {
           type: 'array',
         },
       ]
-      const sanitizedField = (await sanitizeFields({
-        config: dummyConfig,
-        fields,
-        validRelationships: [],
-      })[0]) as ArrayField
+      const sanitizedField = (
+        await sanitizeFields({
+          config: dummyConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as ArrayField
       expect(sanitizedField.name).toStrictEqual('items')
       expect(sanitizedField.label).toStrictEqual('Items')
       expect(sanitizedField.type).toStrictEqual('array')
@@ -201,11 +213,13 @@ describe('sanitizeFields', () => {
           type: 'blocks',
         },
       ]
-      const sanitizedField = (await sanitizeFields({
-        config: dummyConfig,
-        fields,
-        validRelationships: [],
-      })[0]) as BlockField
+      const sanitizedField = (
+        await sanitizeFields({
+          config: dummyConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as BlockField
       expect(sanitizedField.name).toStrictEqual('specialBlock')
       expect(sanitizedField.label).toStrictEqual('Special Block')
       expect(sanitizedField.type).toStrictEqual('blocks')
@@ -218,7 +232,7 @@ describe('sanitizeFields', () => {
   })
 
   describe('relationships', () => {
-    it('should not throw on valid relationship', () => {
+    it('should not throw on valid relationship', async () => {
       const validRelationships = ['some-collection']
       const fields: Field[] = [
         {
@@ -228,12 +242,12 @@ describe('sanitizeFields', () => {
           type: 'relationship',
         },
       ]
-      expect(async () => {
+      await expect(async () => {
         await sanitizeFields({ config: dummyConfig, fields, validRelationships })
       }).not.toThrow()
     })
 
-    it('should not throw on valid relationship - multiple', () => {
+    it('should not throw on valid relationship - multiple', async () => {
       const validRelationships = ['some-collection', 'another-collection']
       const fields: Field[] = [
         {
@@ -243,12 +257,12 @@ describe('sanitizeFields', () => {
           type: 'relationship',
         },
       ]
-      expect(async () => {
+      await expect(async () => {
         await sanitizeFields({ config: dummyConfig, fields, validRelationships })
       }).not.toThrow()
     })
 
-    it('should not throw on valid relationship inside blocks', () => {
+    it('should not throw on valid relationship inside blocks', async () => {
       const validRelationships = ['some-collection']
       const relationshipBlock: Block = {
         fields: [
@@ -269,12 +283,12 @@ describe('sanitizeFields', () => {
           type: 'blocks',
         },
       ]
-      expect(async () => {
+      await expect(async () => {
         await sanitizeFields({ config: dummyConfig, fields, validRelationships })
       }).not.toThrow()
     })
 
-    it('should throw on invalid relationship', () => {
+    it('should throw on invalid relationship', async () => {
       const validRelationships = ['some-collection']
       const fields: Field[] = [
         {
@@ -284,12 +298,12 @@ describe('sanitizeFields', () => {
           type: 'relationship',
         },
       ]
-      expect(async () => {
+      await expect(async () => {
         await sanitizeFields({ config: dummyConfig, fields, validRelationships })
-      }).toThrow(InvalidFieldRelationship)
+      }).rejects.toThrow(InvalidFieldRelationship)
     })
 
-    it('should throw on invalid relationship - multiple', () => {
+    it('should throw on invalid relationship - multiple', async () => {
       const validRelationships = ['some-collection', 'another-collection']
       const fields: Field[] = [
         {
@@ -299,12 +313,12 @@ describe('sanitizeFields', () => {
           type: 'relationship',
         },
       ]
-      expect(async () => {
+      await expect(async () => {
         await sanitizeFields({ config: dummyConfig, fields, validRelationships })
-      }).toThrow(InvalidFieldRelationship)
+      }).rejects.toThrow(InvalidFieldRelationship)
     })
 
-    it('should throw on invalid relationship inside blocks', () => {
+    it('should throw on invalid relationship inside blocks', async () => {
       const validRelationships = ['some-collection']
       const relationshipBlock: Block = {
         fields: [
@@ -325,9 +339,9 @@ describe('sanitizeFields', () => {
           type: 'blocks',
         },
       ]
-      expect(async () => {
+      await expect(async () => {
         await sanitizeFields({ config: dummyConfig, fields, validRelationships })
-      }).toThrow(InvalidFieldRelationship)
+      }).rejects.toThrow(InvalidFieldRelationship)
     })
 
     it('should defaultValue of checkbox to false if required and undefined', async () => {
@@ -339,11 +353,13 @@ describe('sanitizeFields', () => {
         },
       ]
 
-      const sanitizedField = (await sanitizeFields({
-        config: dummyConfig,
-        fields,
-        validRelationships: [],
-      })[0]) as CheckboxField
+      const sanitizedField = (
+        await sanitizeFields({
+          config: dummyConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as CheckboxField
       expect(sanitizedField.defaultValue).toStrictEqual(false)
     })
 

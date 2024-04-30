@@ -128,9 +128,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   /*
     Execute richText sanitization
    */
-  config.editor = await incomingConfig.editor({
-    config: config as SanitizedConfig,
-  })
+  if (typeof incomingConfig.editor === 'function') {
+    config.editor = await incomingConfig.editor({
+      config: config as SanitizedConfig,
+    })
+  }
+
   const promises: Promise<void>[] = []
   for (const sanitizeFunction of richTextSanitizationPromises) {
     promises.push(sanitizeFunction(config as SanitizedConfig))
