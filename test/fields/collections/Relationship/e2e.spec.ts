@@ -380,9 +380,12 @@ describe('relationship', () => {
   test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
     await page.goto(url.create)
     await page.waitForURL(url.create)
+    await wait(400)
 
     const field = page.locator('#field-relationship')
+    await wait(400)
     await field.click()
+    await wait(400)
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
     const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
