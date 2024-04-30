@@ -10,27 +10,55 @@ export const Group: CollectionConfig = {
       localized: true,
       type: 'group',
       fields: [
-        // {
-        //   name: 'title',
-        //   type: 'text',
-        // },
+        {
+          name: 'title',
+          type: 'text',
+        },
       ],
     },
-    // {
-    //   name: 'group',
-    //   type: 'group',
-    //   fields: [
-    //     {
-    //       localized: true,
-    //       name: 'title',
-    //       type: 'text',
-    //     },
-    //   ],
-    // },
     {
-      name: 'text',
-      type: 'text',
-      localized: true,
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          localized: true,
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'deep',
+      type: 'group',
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              localized: true,
+              type: 'text',
+              name: 'title',
+            },
+          ],
+        },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'first',
+              fields: [
+                {
+                  localized: true,
+                  type: 'text',
+                  name: 'title',
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
   ],
 }

@@ -405,7 +405,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (field.localized && Array.isArray(table._locales)) {
         table._locales.forEach((localeRow) => {
-          valuesToTransform.push({ ref: localizedFieldData, table: localeRow })
+          valuesToTransform.push({
+            ref: localizedFieldData,
+            table: {
+              ...localeRow,
+            },
+          })
         })
       } else {
         valuesToTransform.push({ ref: result, table })
@@ -426,9 +431,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
             if (field.localized && locale) delete table._locale
 
-            ref[field.localized && locale ? locale : field.name] = traverseFields<
-              Record<string, unknown>
-            >({
+            const refKey = field.localized && locale ? locale : field.name
+
+            ref[refKey] = traverseFields<Record<string, unknown>>({
               blocks,
               config,
               dataRef: groupData as Record<string, unknown>,
