@@ -11,6 +11,7 @@
   "exclude": [
     "dist",
     "node_modules",
+    "src/**/*.spec.ts",
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
   "references": [

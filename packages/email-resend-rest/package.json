@@ -25,13 +25,15 @@
   ],
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
-    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc-build",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "prepublishOnly": "pnpm clean && pnpm turbo build",
+    "test": "jest"
   },
   "devDependencies": {
+    "@types/jest": "29.5.12",
+    "jest": "^29.7.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

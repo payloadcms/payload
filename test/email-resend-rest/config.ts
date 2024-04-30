@@ -9,7 +9,7 @@ export default buildConfigWithDefaults({
   email: resendAdapter({
     defaultFromAddress: 'dev@payloadcms.com',
     defaultFromName: 'Payload CMS',
-    apiKey: String(process.env.RESEND_API_KEY),
+    apiKey: process.env.RESEND_API_KEY || '',
   }),
   onInit: async (payload) => {
     await payload.create({
@@ -21,7 +21,7 @@ export default buildConfigWithDefaults({
     })
 
     const email = await payload.sendEmail({
-      to: 'elliot@payloadcms.com',
+      to: 'dev@payloadcms.com',
       subject: 'This was sent on init',
       text: 'This is my message body',
     })

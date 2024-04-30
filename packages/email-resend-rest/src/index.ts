@@ -1,6 +1,8 @@
 import type { EmailAdapter } from 'payload/config'
 import type { SendEmailOptions } from 'payload/types'
 
+import { APIError } from 'payload/errors'
+
 export type ResendAdapterArgs = {
   apiKey: string
   defaultFromAddress: string
@@ -9,18 +11,16 @@ export type ResendAdapterArgs = {
 
 type ResendAdapter = EmailAdapter<ResendResponse>
 
-type ResendResponse =
-  | {
-      message: string
-      name: string
-      statusCode: number
-    }
-  | { id: string }
+type ResendError = {
+  message: string
+  name: string
+  statusCode: number
+}
+
+type ResendResponse = { id: string } | ResendError
 
 /**
- * Creates an email adapter using Resend REST API
- *
- * If no email configuration is provided, an ethereal email test account is returned
+ * Email adapter for [Resend](https://resend.com) REST API
  */
 export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
   const { apiKey, defaultFromAddress, defaultFromName } = args
@@ -51,8 +51,13 @@ export const resendAdapter = (args: ResendAdapterArgs): ResendAdapter => {
       if ('id' in data) {
         return data
       } else {
-        const formattedError = `Error sending email: ${data.statusCode} ${data.name} - ${data.message}`
-        throw new Error(formattedError)
+        const statusCode = data.statusCode || res.status
+        let formattedError = `Error sending email: ${statusCode}`
+        if (data.name && data.message) {
+          formattedError += ` ${data.name} - ${data.message}`
+        }
+
+        throw new APIError(formattedError, statusCode)
       }
     },
   })
@@ -123,7 +128,7 @@ function mapAttachments(
 
   return attachments.map((attachment) => {
     if (!attachment.filename || !attachment.content) {
-      throw new Error('Attachment is missing filename or content')
+      throw new APIError('Attachment is missing filename or content', 400)
     }
 
     if (typeof attachment.content === 'string') {
@@ -140,7 +145,7 @@ function mapAttachments(
       }
     }
 
-    throw new Error('Attachment content must be a string or a buffer')
+    throw new APIError('Attachment content must be a string or a buffer', 400)
   })
 }
 
