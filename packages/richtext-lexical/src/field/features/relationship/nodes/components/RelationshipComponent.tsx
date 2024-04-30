@@ -3,19 +3,29 @@ import type { ElementFormatType } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
+import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import { Button } from '@payloadcms/ui/elements/Button'
 import { useDocumentDrawer } from '@payloadcms/ui/elements/DocumentDrawer'
 import usePayloadAPI from '@payloadcms/ui/hooks/usePayloadAPI'
 import { useConfig } from '@payloadcms/ui/providers/Config'
 import { useTranslation } from '@payloadcms/ui/providers/Translation'
+import {
+  $getSelection,
+  $isNodeSelection,
+  CLICK_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+} from 'lexical'
 import { $getNodeByKey } from 'lexical'
-import React, { useCallback, useReducer, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { RelationshipData } from '../RelationshipNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../../drawer/commands.js'
+import { $isRelationshipNode } from '../RelationshipNode.js'
 import './index.scss'
 
 const baseClass = 'lexical-relationship'
@@ -38,6 +48,8 @@ const Component: React.FC<Props> = (props) => {
     data: { relationTo, value: id },
     nodeKey,
   } = props
+
+  const relationshipElemRef = useRef<HTMLDivElement | null>(null)
 
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
@@ -83,10 +95,57 @@ const Component: React.FC<Props> = (props) => {
     [cacheBust, setParams, closeDrawer],
   )
 
+  const onDelete = useCallback(
+    (payload: KeyboardEvent) => {
+      if (isSelected && $isNodeSelection($getSelection())) {
+        const event: KeyboardEvent = payload
+        event.preventDefault()
+        const node = $getNodeByKey(nodeKey)
+        if ($isRelationshipNode(node)) {
+          node.remove()
+          return true
+        }
+      }
+      return false
+    },
+    [isSelected, nodeKey],
+  )
+  const onClick = useCallback(
+    (payload: MouseEvent) => {
+      const event = payload
+      // Check if relationshipElemRef.target or anything WITHIN relationshipElemRef.target was clicked
+      if (
+        event.target === relationshipElemRef.current ||
+        relationshipElemRef.current?.contains(event.target as Node)
+      ) {
+        if (event.shiftKey) {
+          setSelected(!isSelected)
+        } else {
+          clearSelection()
+          setSelected(true)
+        }
+        return true
+      }
+
+      return false
+    },
+    [isSelected, setSelected, clearSelection],
+  )
+
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
+
+      editor.registerCommand(KEY_DELETE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(KEY_BACKSPACE_COMMAND, onDelete, COMMAND_PRIORITY_LOW),
+    )
+  }, [clearSelection, editor, isSelected, nodeKey, onDelete, setSelected, onClick])
+
   return (
     <div
       className={[baseClass, isSelected && `${baseClass}--selected`].filter(Boolean).join(' ')}
       contentEditable={false}
+      ref={relationshipElemRef}
     >
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
