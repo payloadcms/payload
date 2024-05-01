@@ -295,9 +295,13 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
 
-      - name: Setup Playwright
+      - name: Setup Playwright - Browsers and Dependencies
         if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
         run: pnpm test:e2e ${{ matrix.suite }}
