@@ -1,5 +1,5 @@
 import type { SerializedBlockNode, SerializedLinkNode } from '@payloadcms/richtext-lexical'
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 
@@ -16,6 +16,7 @@ import {
   ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { RESTClient } from '../../../helpers/rest.js'
@@ -32,6 +33,7 @@ const { beforeAll, beforeEach, describe } = test
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let page: Page
+let context: BrowserContext
 let serverURL: string
 
 /**
@@ -64,7 +66,7 @@ describe('lexical', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     initPageConsoleErrorCatch(page)
@@ -76,6 +78,11 @@ describe('lexical', () => {
     await ensureAutoLoginAndCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
+    /*await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    })*/
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsLexicalTest',

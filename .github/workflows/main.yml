@@ -309,12 +309,7 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        uses: nick-fields/retry@v3
-        with:
-          retry_on: error
-          max_attempts: 3
-          timeout_minutes: 60
-          command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e ${{ matrix.suite }}
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e ${{ matrix.suite }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
           NEXT_TELEMETRY_DISABLED: 1

@@ -17,12 +17,12 @@ import type {
 } from './payload-types.js'
 
 import {
-  delayNetwork,
   ensureAutoLoginAndCompilationIsDone,
   initPageConsoleErrorCatch,
   openDocControls,
   openDocDrawer,
   saveDocAndAssert,
+  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
