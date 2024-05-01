@@ -346,7 +346,10 @@ export { StrikethroughFeature } from './field/features/format/strikethrough/feat
 export { SubscriptFeature } from './field/features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './field/features/format/superscript/feature.server.js'
 export { UnderlineFeature } from './field/features/format/underline/feature.server.js'
-export { HeadingFeature } from './field/features/heading/feature.server.js'
+export {
+  HeadingFeature,
+  type HeadingFeatureProps,
+} from './field/features/heading/feature.server.js'
 
 export { HorizontalRuleFeature } from './field/features/horizontalrule/feature.server.js'
 export { IndentFeature } from './field/features/indent/feature.server.js'
@@ -395,7 +398,10 @@ export type {
 } from './field/features/migrations/slateToLexical/converter/types.js'
 export { SlateToLexicalFeature } from './field/features/migrations/slateToLexical/feature.server.js'
 export { ParagraphFeature } from './field/features/paragraph/feature.server.js'
-export { RelationshipFeature } from './field/features/relationship/feature.server.js'
+export {
+  RelationshipFeature,
+  type RelationshipFeatureProps,
+} from './field/features/relationship/feature.server.js'
 export {
   $createRelationshipNode,
   $isRelationshipNode,
