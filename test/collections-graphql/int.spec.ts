@@ -981,8 +981,8 @@ describe('collections-graphql', () => {
           },
         })
 
-        const query = `query($locale: LocaleInputType) {
-          CyclicalRelationships(locale: $locale) {
+        const query = `query {
+          CyclicalRelationships(locale: es) {
             docs {
               title
               relationToSelf {
@@ -991,9 +991,11 @@ describe('collections-graphql', () => {
             }
           }
         }`
-        const response = (await client.request(query, { locale: 'es' })) as any
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
 
-        const queriedDoc = response.CyclicalRelationships.docs[0]
+        const queriedDoc = res.data.CyclicalRelationships.docs[0]
         expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
       })
     })
