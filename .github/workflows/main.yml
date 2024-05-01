@@ -284,7 +284,7 @@ jobs:
       - name: Store Playwright's Version
         run: |
           # Extract the version number using a more targeted regex pattern with awk
-          PLAYWRIGHT_VERSION=$(npm ls @playwright/test --depth=0 | awk '/@playwright\/test@/ {print $2}' | sed 's/@//')
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
