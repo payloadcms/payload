@@ -1,8 +1,8 @@
-import type { I18n } from '@payloadcms/translations'
-import type { SanitizedConfig } from 'payload/config'
+import type { Config, SanitizedConfig } from 'payload/config'
 import type { Field, FieldWithRichTextRequiredEditor } from 'payload/types'
 
 import { traverseFields } from '@payloadcms/next/utilities'
+import { sanitizeFields } from 'payload/config'
 import { deepCopyObject } from 'payload/utilities'
 
 import type { FeatureProviderProviderServer } from '../types.js'
@@ -47,7 +47,6 @@ export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
     | ((args: {
         config: SanitizedConfig
         defaultFields: FieldWithRichTextRequiredEditor[]
-        i18n: I18n
       }) => FieldWithRichTextRequiredEditor[])
     | FieldWithRichTextRequiredEditor[]
 }
@@ -59,27 +58,32 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
     props = {}
   }
   return {
-    feature: () => {
+    feature: async ({ config: _config }) => {
+      const validRelationships = _config.collections.map((c) => c.slug) || []
+
+      const _transformedFields = transformExtraFields(
+        deepCopyObject(props.fields),
+        _config,
+        props.enabledCollections,
+        props.disabledCollections,
+      )
+
+      const sanitizedFields = (await sanitizeFields({
+        config: _config as unknown as Config,
+        fields: _transformedFields,
+        requireFieldLevelRichTextEditor: true,
+        validRelationships,
+      })) as FieldWithRichTextRequiredEditor[]
+      props.fields = sanitizedFields
+
       return {
         ClientComponent: LinkFeatureClientComponent,
         clientFeatureProps: {
           disabledCollections: props.disabledCollections,
           enabledCollections: props.enabledCollections,
         } as ExclusiveLinkCollectionsProps,
-        generateSchemaMap: ({ config, i18n, props }) => {
-          const transformedFields = transformExtraFields(
-            deepCopyObject(props.fields),
-            config,
-            i18n,
-            props.enabledCollections,
-            props.disabledCollections,
-          )
-
-          if (
-            !transformedFields ||
-            !Array.isArray(transformedFields) ||
-            transformedFields.length === 0
-          ) {
+        generateSchemaMap: ({ config, i18n }) => {
+          if (!sanitizedFields || !Array.isArray(sanitizedFields) || sanitizedFields.length === 0) {
             return null
           }
 
@@ -87,11 +91,11 @@ export const LinkFeature: FeatureProviderProviderServer<LinkFeatureServerProps, 
 
           const validRelationships = config.collections.map((c) => c.slug) || []
 
-          schemaMap.set('fields', transformedFields)
+          schemaMap.set('fields', sanitizedFields)
 
           traverseFields({
             config,
-            fields: transformedFields,
+            fields: sanitizedFields,
             i18n,
             schemaMap,
             schemaPath: 'fields',

@@ -462,6 +462,10 @@ function buildObjectType({
         async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
+          if (typeof field?.editor === 'function') {
+            throw new Error('Attempted to access unsanitized rich text editor.')
+          }
+
           const editor: RichTextAdapter = field?.editor
 
           // RichText fields have their own depth argument in GraphQL.
