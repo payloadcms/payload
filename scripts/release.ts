@@ -1,6 +1,7 @@
 import type { ExecSyncOptions } from 'child_process'
 
 import chalk from 'chalk'
+import { loadChangelogConfig } from 'changelogen'
 import { execSync } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
@@ -15,6 +16,7 @@ import { simpleGit } from 'simple-git'
 import type { PackageDetails } from './lib/getPackageDetails.js'
 
 import { getPackageDetails } from './lib/getPackageDetails.js'
+import { getRecommendedBump } from './utils/getRecommendedBump.js'
 import { updateChangelog } from './utils/updateChangelog.js'
 
 const npmPublishLimit = pLimit(6)
@@ -97,18 +99,42 @@ const cmdRunnerAsync =
   }
 
 async function main() {
+  if (!process.env.GITHUB_TOKEN) {
+    throw new Error('GITHUB_TOKEN env var is required')
+  }
+
   if (dryRun) {
     console.log(chalk.bold.yellow(chalk.bold.magenta('\n  👀 Dry run mode enabled')))
   }
 
   console.log({ args })
 
-  const runCmd = cmdRunner(dryRun, gitTag)
-  const runCmdAsync = cmdRunnerAsync(dryRun)
+  const fromVersion = execSync('git describe --tags --abbrev=0').toString().trim()
+
+  const config = await loadChangelogConfig(process.cwd(), {
+    repo: 'payloadcms/payload',
+  })
 
   if (!semver.RELEASE_TYPES.includes(bump)) {
     abort(`Invalid bump type: ${bump}.\n\nMust be one of: ${semver.RELEASE_TYPES.join(', ')}`)
   }
+
+  const recommendedBump = (await getRecommendedBump(fromVersion, 'HEAD', config)) || 'patch'
+
+  if (bump !== recommendedBump) {
+    console.log(
+      chalk.bold.yellow(
+        `Recommended bump type is ${recommendedBump} based on commits since last release`,
+      ),
+    )
+    const confirmBump = await confirm(`Do you want to continue with ${bump}?`)
+    if (!confirmBump) {
+      abort()
+    }
+  }
+
+  const runCmd = cmdRunner(dryRun, gitTag)
+  const runCmdAsync = cmdRunnerAsync(dryRun)
 
   if (bump.startsWith('pre') && tag === 'latest') {
     abort(`Prerelease bumps must have tag: beta or canary`)
@@ -119,8 +145,6 @@ async function main() {
   if (!monorepoVersion) {
     throw new Error('Could not find version in package.json')
   }
-
-  const lastTag = (await git.tags()).all.reverse().filter((t) => t.startsWith('v'))?.[0]
 
   // TODO: Re-enable this check once we start tagging releases again
   // if (monorepoVersion !== lastTag.replace('v', '')) {
@@ -135,6 +159,17 @@ async function main() {
     abort(`Invalid nextReleaseVersion: ${nextReleaseVersion}`)
     return // For TS type checking
   }
+
+  // Preview/Update changelog
+  header(`${logPrefix}📝 Updating changelog...`)
+  await updateChangelog({
+    bump,
+    dryRun,
+    toVersion: 'HEAD',
+    fromVersion,
+    openReleaseUrl: true,
+    writeChangelog: changelog,
+  })
 
   let packageDetails = await getPackageDetails(packageWhitelist)
 
@@ -162,14 +197,6 @@ async function main() {
     console.error(chalk.bold.red('Build failed'))
     console.log(buildResult.stderr)
     abort('Build failed')
-  }
-
-  // Update changelog
-  if (changelog) {
-    header(`${logPrefix}📝 Updating changelog...`)
-    await updateChangelog({ dryRun, newVersion: nextReleaseVersion })
-  } else {
-    console.log(chalk.bold.yellow('📝 Skipping changelog update'))
   }
 
   // Increment all package versions
