@@ -1,4 +1,4 @@
-import type { ClientValidate, Field } from '../../fields/config/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type { Where } from '../../types/index.js'
 
 export type Data = {
